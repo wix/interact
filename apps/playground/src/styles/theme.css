@@ -1,0 +1,77 @@
+@layer theme {
+  :root {
+    /* -- Colors -- */
+    --pg-color-bg-primary: #0f0f11;
+    --pg-color-bg-secondary: #1a1a1f;
+    --pg-color-bg-tertiary: #242429;
+    --pg-color-bg-surface: #2a2a30;
+    --pg-color-bg-hover: #32323a;
+    --pg-color-bg-active: #3a3a44;
+
+    --pg-color-text-primary: #e8e8ec;
+    --pg-color-text-secondary: #a0a0aa;
+    --pg-color-text-muted: #6a6a74;
+    --pg-color-text-inverse: #0f0f11;
+
+    --pg-color-accent: #6366f1;
+    --pg-color-accent-hover: #818cf8;
+    --pg-color-accent-muted: #6366f133;
+    --pg-color-border: #2e2e36;
+    --pg-color-border-focus: #6366f1;
+    --pg-color-danger: #ef4444;
+    --pg-color-success: #22c55e;
+
+    /* -- Spacing scale -- */
+    --pg-space-1: 4px;
+    --pg-space-2: 8px;
+    --pg-space-3: 12px;
+    --pg-space-4: 16px;
+    --pg-space-5: 20px;
+    --pg-space-6: 24px;
+    --pg-space-8: 32px;
+    --pg-space-10: 40px;
+
+    /* -- Typography -- */
+    --pg-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --pg-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --pg-font-size-xs: 11px;
+    --pg-font-size-sm: 12px;
+    --pg-font-size-md: 13px;
+    --pg-font-size-lg: 15px;
+    --pg-font-size-xl: 18px;
+    --pg-font-weight-normal: 400;
+    --pg-font-weight-medium: 500;
+    --pg-font-weight-bold: 600;
+    --pg-line-height: 1.5;
+
+    /* -- Layout -- */
+    --pg-toolbar-height: 48px;
+    --pg-sidebar-width: 260px;
+    --pg-inspector-width: 320px;
+    --pg-json-panel-height: 240px;
+    --pg-panel-padding: var(--pg-space-4);
+
+    /* -- Borders & Radii -- */
+    --pg-radius-sm: 4px;
+    --pg-radius-md: 6px;
+    --pg-radius-lg: 8px;
+    --pg-radius-xl: 12px;
+    --pg-border-width: 1px;
+
+    /* -- Shadows -- */
+    --pg-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --pg-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --pg-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+    /* -- Transitions -- */
+    --pg-transition-fast: 100ms ease;
+    --pg-transition-normal: 200ms ease;
+    --pg-transition-slow: 300ms ease;
+
+    /* -- Z-index scale -- */
+    --pg-z-panel: 10;
+    --pg-z-dropdown: 20;
+    --pg-z-tooltip: 30;
+    --pg-z-modal: 40;
+  }
+}

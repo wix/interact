@@ -1,0 +1,78 @@
+.carousel {
+  width: 100%;
+  max-width: 680px;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  position: relative;
+  height: 320px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.carousel-slide:nth-child(1) {
+  background: linear-gradient(135deg, #1e1b4b, #3730a3);
+}
+.carousel-slide:nth-child(2) {
+  background: linear-gradient(135deg, #831843, #be185d);
+}
+.carousel-slide:nth-child(3) {
+  background: linear-gradient(135deg, #064e3b, #059669);
+}
+.carousel-slide:nth-child(4) {
+  background: linear-gradient(135deg, #78350f, #d97706);
+}
+
+.carousel-slide-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 60%);
+}
+
+.carousel-title {
+  position: relative;
+  z-index: 1;
+  padding: 24px 28px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: #1e1e24;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4a4a54;
+}
+
+.carousel-dot.active {
+  background: #6366f1;
+}

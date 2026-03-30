@@ -1,0 +1,32 @@
+@layer states {
+  [aria-selected='true'] {
+    background: var(--pg-color-accent-muted);
+    border-color: var(--pg-color-accent);
+  }
+
+  [aria-disabled='true'],
+  [disabled] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .pg-interactive {
+    transition: background var(--pg-transition-fast);
+  }
+
+  .pg-interactive:hover {
+    background: var(--pg-color-bg-hover);
+  }
+
+  .pg-interactive:active {
+    background: var(--pg-color-bg-active);
+  }
+
+  .pg-interactive[aria-selected='true'] {
+    background: var(--pg-color-accent-muted);
+  }
+
+  .pg-interactive[aria-selected='true']:hover {
+    background: var(--pg-color-accent-muted);
+  }
+}
