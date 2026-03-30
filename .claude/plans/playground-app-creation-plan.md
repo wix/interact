@@ -165,6 +165,8 @@ PlaygroundStore (extends EventTarget)
 
 `InteractManager` wraps `Interact.create()` / `.destroy()`. On every config change (debounced ~100ms), it destroys the old instance and creates a new one. This is the canonical consumption pattern and guarantees correctness.
 
+**Stale animation cleanup**: After `Interact.destroy()`, `InteractManager` cancels all Web Animations API animations on stage `interact-element` nodes (via `Element.getAnimations({ subtree: true })`). This is necessary because `Interact.destroy()` removes event listeners and CSS stylesheets but does not cancel in-progress or finished animations. Without this cleanup, animations with `fill: 'both'` would persist their styles on DOM elements and override subsequent CSS transitions (e.g., switching from a Time effect to a Transition effect on the same element).
+
 ---
 
 ## CSS Architecture
@@ -746,6 +748,7 @@ apps/playground/
    - `viewEnter`: type, threshold (0-1 slider), inset
    - `viewProgress`: no trigger params (only scroll preview controls)
    - `pointerMove`: hitArea (root/self), axis (x/y)
+   - Number/text inputs use `change` events; range sliders use `input` for real-time feedback (they don't lose focus on re-render)
 
 6. **Scroll stage behavior** — when a `viewProgress` (or `viewEnter`) trigger is selected, the stage adapts for scroll preview:
 
@@ -786,12 +789,14 @@ apps/playground/
 2. **`src/components/inspector/pg-time-effect-editor.ts`**
    - Fields: duration, easing (picker), iterations, alternate, fill, reversed, delay
    - Effect property: namedEffect (picker) | keyframeEffect (name + keyframes JSON) | raw keyframes editor
+   - All number/text inputs use `change` events (not `input`) to avoid focus-loss from store-triggered re-renders
 
 3. **`src/components/inspector/pg-scrub-effect-editor.ts`**
    - Fields: easing, iterations, alternate, fill, reversed
    - Range: rangeStart/rangeEnd with name (entry/exit/contain/cover) + offset (value + unit) — **only shown when the trigger is `viewProgress`** (not applicable to `pointerMove` scrub effects)
    - Transition: transitionDuration, transitionDelay, transitionEasing, centeredToTarget — **only shown when the trigger is `pointerMove`** (not applicable to `viewProgress` scroll-driven scrub effects)
    - Same effect property union as TimeEffect
+   - All number/text inputs use `change` events (not `input`) to avoid focus-loss from store-triggered re-renders
 
 4. **`src/components/inspector/pg-transition-effect-editor.ts`**
    - **Timing section** (top): shared duration (default 300ms), delay (default 0ms), easing (`pg-easing-picker` select, same as Time effect) — propagated to every entry in `transitionProperties` so the runtime generates correct CSS transitions

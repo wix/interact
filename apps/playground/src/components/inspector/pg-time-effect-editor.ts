@@ -167,11 +167,11 @@ export class PgTimeEffectEditor extends BaseComponent {
       this.store.dispatch(updateEffect(effectId, { ...effect, ...patch } as Effect));
     };
 
-    shadow.getElementById('duration')?.addEventListener('input', (e) => {
+    shadow.getElementById('duration')?.addEventListener('change', (e) => {
       update({ duration: parseInt((e.target as HTMLInputElement).value, 10) || 0 });
     });
 
-    shadow.getElementById('delay')?.addEventListener('input', (e) => {
+    shadow.getElementById('delay')?.addEventListener('change', (e) => {
       update({ delay: parseInt((e.target as HTMLInputElement).value, 10) || 0 });
     });
 
@@ -179,7 +179,7 @@ export class PgTimeEffectEditor extends BaseComponent {
       update({ easing: (e as CustomEvent).detail });
     });
 
-    shadow.getElementById('iterations')?.addEventListener('input', (e) => {
+    shadow.getElementById('iterations')?.addEventListener('change', (e) => {
       update({ iterations: parseInt((e.target as HTMLInputElement).value, 10) || 1 });
     });
 

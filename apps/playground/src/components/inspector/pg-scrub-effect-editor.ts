@@ -274,7 +274,7 @@ export class PgScrubEffectEditor extends BaseComponent {
       update({ easing: (e as CustomEvent).detail });
     });
 
-    shadow.getElementById('iterations')?.addEventListener('input', (e) => {
+    shadow.getElementById('iterations')?.addEventListener('change', (e) => {
       update({ iterations: parseInt((e.target as HTMLInputElement).value, 10) || 1 });
     });
 
@@ -305,20 +305,20 @@ export class PgScrubEffectEditor extends BaseComponent {
     shadow.getElementById('range-start-name')?.addEventListener('change', (e) => {
       updateRange('rangeStart', 'name', (e.target as HTMLSelectElement).value);
     });
-    shadow.getElementById('range-start-offset')?.addEventListener('input', (e) => {
+    shadow.getElementById('range-start-offset')?.addEventListener('change', (e) => {
       updateRange('rangeStart', 'offset', (e.target as HTMLInputElement).value);
     });
     shadow.getElementById('range-end-name')?.addEventListener('change', (e) => {
       updateRange('rangeEnd', 'name', (e.target as HTMLSelectElement).value);
     });
-    shadow.getElementById('range-end-offset')?.addEventListener('input', (e) => {
+    shadow.getElementById('range-end-offset')?.addEventListener('change', (e) => {
       updateRange('rangeEnd', 'offset', (e.target as HTMLInputElement).value);
     });
 
-    shadow.getElementById('trans-duration')?.addEventListener('input', (e) => {
+    shadow.getElementById('trans-duration')?.addEventListener('change', (e) => {
       update({ transitionDuration: parseInt((e.target as HTMLInputElement).value, 10) || 0 });
     });
-    shadow.getElementById('trans-delay')?.addEventListener('input', (e) => {
+    shadow.getElementById('trans-delay')?.addEventListener('change', (e) => {
       update({ transitionDelay: parseInt((e.target as HTMLInputElement).value, 10) || 0 });
     });
     shadow.getElementById('trans-easing')?.addEventListener('change', (e) => {

@@ -300,13 +300,13 @@ export class PgTriggerEditor extends BaseComponent {
       if (thresholdNum) thresholdNum.value = thresholdRange.value;
       update({ threshold: parseFloat(thresholdRange.value) });
     });
-    thresholdNum?.addEventListener('input', () => {
+    thresholdNum?.addEventListener('change', () => {
       if (thresholdRange) thresholdRange.value = thresholdNum.value;
       update({ threshold: parseFloat(thresholdNum.value) });
     });
 
     // Inset
-    shadow.getElementById('param-inset')?.addEventListener('input', (e) => {
+    shadow.getElementById('param-inset')?.addEventListener('change', (e) => {
       update({ inset: (e.target as HTMLInputElement).value || undefined });
     });
 
@@ -333,7 +333,7 @@ export class PgTriggerEditor extends BaseComponent {
         stage?.setScrollMode(enabled, state.scrollPreview.stageHeight);
       });
 
-      shadow.getElementById('sticky-top')?.addEventListener('input', (e) => {
+      shadow.getElementById('sticky-top')?.addEventListener('change', (e) => {
         const val = (e.target as HTMLInputElement).value;
         const top = val ? parseInt(val, 10) : undefined;
         this.store.dispatch(setScrollPreview({ stickyTop: top, stickyBottom: undefined }));
@@ -341,7 +341,7 @@ export class PgTriggerEditor extends BaseComponent {
         stage?.setStickyPosition(top, undefined);
       });
 
-      shadow.getElementById('sticky-bottom')?.addEventListener('input', (e) => {
+      shadow.getElementById('sticky-bottom')?.addEventListener('change', (e) => {
         const val = (e.target as HTMLInputElement).value;
         const bottom = val ? parseInt(val, 10) : undefined;
         this.store.dispatch(setScrollPreview({ stickyBottom: bottom, stickyTop: undefined }));

@@ -31,11 +31,19 @@ function reconnectShadowElements(): void {
   });
 }
 
+function cancelStaleAnimations(): void {
+  if (!stageElement?.shadowRoot) return;
+  stageElement.shadowRoot.querySelectorAll('interact-element').forEach((el) => {
+    el.getAnimations({ subtree: true }).forEach((anim) => anim.cancel());
+  });
+}
+
 function apply(config: InteractConfig): void {
   // Destroy previous instance
   if (currentInstance) {
     currentInstance.destroy();
     currentInstance = null;
+    cancelStaleAnimations();
   }
 
   // Don't create if no interactions
