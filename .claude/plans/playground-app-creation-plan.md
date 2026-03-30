@@ -57,9 +57,9 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 - [x] pg-named-effect-picker.ts (preset browser by category with comprehensive per-preset param controls)
 - [x] pg-easing-picker.ts (initial: preset dropdown outputting cubic-bezier string)
 
-### Phase 5: Conditions, Sequences & Advanced
-- [ ] pg-condition-editor.ts (media/container/selector conditions)
-- [ ] pg-sequence-editor.ts (effect list, delay, offset, offsetEasing)
+### Phase 5: Conditions, Sequences & Advanced — DONE
+- [x] pg-condition-editor.ts (media/container/selector conditions)
+- [x] pg-sequence-editor.ts (effect list, delay, offset, offsetEasing)
 
 ### Phase 6: Easing Picker SVG Editor
 - [ ] src/utils/bezier.ts (parse, format, preset lookup, curve sampling)
@@ -142,7 +142,9 @@ The Interact runtime distinguishes between **source** (trigger) and **target** (
 2. `config.effects[effectId].key` (top-level effect — fallback)
 3. `interaction.key` (final fallback)
 
-Because inline refs are checked first, the playground stores target selection properties (`key`, `listContainer`, `listItemSelector`) on the inline ref in `interaction.effects[i]`, updating them via `updateInteraction()`. The top-level `config.effects[id]` objects only contain animation properties (duration, easing, namedEffect, etc.) and `conditions`. This ensures the target element setting is not accidentally overridden or lost when the top-level effect is replaced (e.g., when switching effect type tabs).
+Because inline refs are checked first, the playground stores target selection properties (`key`, `listContainer`, `listItemSelector`) on the inline ref in `interaction.effects[i]` or `sequence.effects[i]`, updating them via `updateInteraction()` or `updateSequence()` respectively. The top-level `config.effects[id]` objects only contain animation properties (duration, easing, namedEffect, etc.) and `conditions`. This ensures the target element setting is not accidentally overridden or lost when the top-level effect is replaced (e.g., when switching effect type tabs).
+
+**Effect context tracking**: When a user selects an effect to edit, `state.selectedEffectContext` tracks whether the inline ref lives in `interaction.effects[]` (`source: 'interaction'`) or `sequence.effects[]` (`source: 'sequence'`, with `sequenceId` and `effectIndex`). The `pg-effect-editor`'s "Target Element" dropdown reads and writes the inline ref from the correct location based on this context. Effect rows in `pg-sequence-editor` are clickable and dispatch `selectEffect(id, { source: 'sequence', sequenceId, effectIndex })` to set the context, reusing the same target dropdown in `pg-effect-editor`.
 
 ### State Management
 
@@ -152,6 +154,9 @@ PlaygroundStore (extends EventTarget)
   ├── state.activeComponentId: string        ← which pre-made component is on stage
   ├── state.selectedInteractionIndex: number | null
   ├── state.selectedEffectId: string | null
+  ├── state.selectedEffectContext: EffectContext | null  ← where the selected effect's inline ref lives
+  │     EffectContext = { source: 'interaction' }
+  │                   | { source: 'sequence', sequenceId: string, effectIndex: number }
   ├── state.jsonPanelOpen: boolean
   └── state.scrollPreview: {                 ← UI-only, not in InteractConfig
         enabled: boolean                       (stage is in scroll mode)

@@ -1,7 +1,7 @@
 import { BaseComponent } from '../base/BaseComponent';
 import type { PlaygroundState } from '../../types';
-import type { Effect, TriggerType } from '@wix/interact';
-import { addEffect, removeEffect, selectEffect, updateEffect, updateInteraction } from '../../store/actions';
+import type { Effect, TriggerType, SequenceConfig } from '@wix/interact';
+import { addEffect, removeEffect, selectEffect, updateEffect, updateInteraction, updateSequence } from '../../store/actions';
 import { generateId } from '../../utils/id';
 import { getComponent } from '../../library';
 import type { ComponentKey } from '../../library/types';
@@ -241,6 +241,26 @@ export class PgEffectEditor extends BaseComponent {
     `;
   }
 
+  private _resolveInlineRef(
+    state: PlaygroundState,
+    interaction: { effects?: unknown[]; sequences?: unknown[] },
+  ): Record<string, unknown> | undefined {
+    const selectedEffectId = state.selectedEffectId;
+    if (!selectedEffectId) return undefined;
+
+    const ctx = state.selectedEffectContext;
+    if (ctx?.source === 'sequence') {
+      const seq = (state.config.sequences ?? {})[ctx.sequenceId];
+      if (!seq) return undefined;
+      const ref = seq.effects[ctx.effectIndex] as { effectId?: string } | undefined;
+      if (ref?.effectId === selectedEffectId) return ref as Record<string, unknown>;
+      return undefined;
+    }
+
+    const effectRefs = (interaction.effects ?? []) as { effectId?: string }[];
+    return effectRefs.find((r) => r.effectId === selectedEffectId) as Record<string, unknown> | undefined;
+  }
+
   protected render(state: PlaygroundState): void {
     const idx = state.selectedInteractionIndex;
     if (idx == null) {
@@ -260,6 +280,8 @@ export class PgEffectEditor extends BaseComponent {
     const effectRefs = (interaction.effects ?? []) as { effectId?: string }[];
     const selectedEffectId = state.selectedEffectId;
     const selectedEffect = selectedEffectId ? state.config.effects[selectedEffectId] : null;
+    const ctx = state.selectedEffectContext;
+    const isInteractionCtx = !ctx || ctx.source === 'interaction';
     let effectType = selectedEffect ? detectEffectType(selectedEffect) : null;
 
     if (effectType && !allowed.includes(effectType)) {
@@ -273,7 +295,7 @@ export class PgEffectEditor extends BaseComponent {
       if (!eff) return '';
       const type = detectEffectType(eff);
       const label = this._getEffectLabel(eff, type);
-      const selected = eid === selectedEffectId;
+      const selected = eid === selectedEffectId && isInteractionCtx;
       return `
         <div class="effect-item ${selected ? 'selected' : ''}" data-effect-id="${eid}">
           <span class="effect-badge">${type}</span>
@@ -286,9 +308,7 @@ export class PgEffectEditor extends BaseComponent {
     const component = getComponent(state.activeComponentId);
     const keys: ComponentKey[] = component?.keys ?? [];
 
-    const selectedInlineRef = selectedEffectId
-      ? effectRefs.find((r) => r.effectId === selectedEffectId) as Record<string, unknown> | undefined
-      : undefined;
+    const selectedInlineRef = this._resolveInlineRef(state, interaction);
 
     let editorHtml = '';
     if (selectedEffect && effectType) {
@@ -365,6 +385,32 @@ export class PgEffectEditor extends BaseComponent {
     return type;
   }
 
+  private _applyTargetToRef(
+    ref: Record<string, unknown>,
+    selectedKey: string,
+    componentKeys: ComponentKey[],
+  ): Record<string, unknown> {
+    const updated = { ...ref };
+    if (selectedKey) {
+      const keyDef = componentKeys.find((k) => k.key === selectedKey);
+      if (keyDef?.isList && keyDef.parentKey) {
+        updated.key = keyDef.parentKey;
+        updated.listContainer = keyDef.listContainer;
+        updated.listItemSelector = keyDef.listItemSelector;
+      } else {
+        updated.key = selectedKey;
+        delete updated.listContainer;
+        delete updated.listItemSelector;
+      }
+    } else {
+      delete updated.key;
+      delete updated.listContainer;
+      delete updated.listItemSelector;
+    }
+    delete updated.selector;
+    return updated;
+  }
+
   private _attachListeners(state: PlaygroundState, interactionIdx: number): void {
     const shadow = this.shadowRoot!;
     const interaction = state.config.interactions[interactionIdx];
@@ -372,36 +418,33 @@ export class PgEffectEditor extends BaseComponent {
     const componentKeys: ComponentKey[] = component?.keys ?? [];
 
     const trigger = interaction.trigger ?? 'hover';
+    const ctx = state.selectedEffectContext;
 
     const targetKeySelect = shadow.getElementById('target-key-select') as HTMLSelectElement | null;
     if (targetKeySelect && state.selectedEffectId) {
       const effectId = state.selectedEffectId;
       targetKeySelect.addEventListener('change', () => {
         const selectedKey = targetKeySelect.value;
-        const currentEffects = (interaction.effects ?? []) as Record<string, unknown>[];
-        const updatedEffects = currentEffects.map((ref) => {
-          if (ref.effectId !== effectId) return ref;
-          const updated = { ...ref };
-          if (selectedKey) {
-            const keyDef = componentKeys.find((k) => k.key === selectedKey);
-            if (keyDef?.isList && keyDef.parentKey) {
-              updated.key = keyDef.parentKey;
-              updated.listContainer = keyDef.listContainer;
-              updated.listItemSelector = keyDef.listItemSelector;
-            } else {
-              updated.key = selectedKey;
-              delete updated.listContainer;
-              delete updated.listItemSelector;
-            }
-          } else {
-            delete updated.key;
-            delete updated.listContainer;
-            delete updated.listItemSelector;
-          }
-          delete updated.selector;
-          return updated;
-        });
-        this.store.dispatch(updateInteraction(interactionIdx, { effects: updatedEffects } as never));
+
+        if (ctx?.source === 'sequence') {
+          const seq = (state.config.sequences ?? {})[ctx.sequenceId];
+          if (!seq) return;
+          const updatedEffects = seq.effects.map((ref, i) => {
+            if (i !== ctx.effectIndex) return ref;
+            return this._applyTargetToRef(ref as Record<string, unknown>, selectedKey, componentKeys);
+          });
+          this.store.dispatch(updateSequence(ctx.sequenceId, {
+            ...seq,
+            effects: updatedEffects as SequenceConfig['effects'],
+          }));
+        } else {
+          const currentEffects = (interaction.effects ?? []) as Record<string, unknown>[];
+          const updatedEffects = currentEffects.map((ref) => {
+            if (ref.effectId !== effectId) return ref;
+            return this._applyTargetToRef(ref, selectedKey, componentKeys);
+          });
+          this.store.dispatch(updateInteraction(interactionIdx, { effects: updatedEffects } as never));
+        }
       });
     }
 
@@ -432,7 +475,7 @@ export class PgEffectEditor extends BaseComponent {
 
       item.addEventListener('click', (e) => {
         if ((e.target as HTMLElement).classList.contains('remove-effect')) return;
-        this.store.dispatch(selectEffect(eid));
+        this.store.dispatch(selectEffect(eid, { source: 'interaction' }));
       });
     });
 

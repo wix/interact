@@ -1,5 +1,5 @@
-import type { InteractConfig } from '@wix/interact';
-import type { Action, ScrollPreviewState } from '../types';
+import type { InteractConfig, Condition, SequenceConfig } from '@wix/interact';
+import type { Action, EffectContext, ScrollPreviewState } from '../types';
 
 export const selectComponent = (id: string): Action => ({
   type: 'SELECT_COMPONENT',
@@ -45,9 +45,9 @@ export const removeEffect = (id: string): Action => ({
   payload: id,
 });
 
-export const selectEffect = (id: string | null): Action => ({
+export const selectEffect = (id: string | null, context?: EffectContext): Action => ({
   type: 'SELECT_EFFECT',
-  payload: id,
+  payload: { id, context },
 });
 
 export const toggleJsonPanel = (): Action => ({
@@ -61,4 +61,34 @@ export const setScrollPreview = (preview: Partial<ScrollPreviewState>): Action =
 
 export const resetConfig = (): Action => ({
   type: 'RESET_CONFIG',
+});
+
+export const addCondition = (id: string, condition: Condition): Action => ({
+  type: 'ADD_CONDITION',
+  payload: { id, condition },
+});
+
+export const updateCondition = (id: string, condition: Condition): Action => ({
+  type: 'UPDATE_CONDITION',
+  payload: { id, condition },
+});
+
+export const removeCondition = (id: string): Action => ({
+  type: 'REMOVE_CONDITION',
+  payload: id,
+});
+
+export const addSequence = (id: string, sequence: SequenceConfig): Action => ({
+  type: 'ADD_SEQUENCE',
+  payload: { id, sequence },
+});
+
+export const updateSequence = (id: string, sequence: SequenceConfig): Action => ({
+  type: 'UPDATE_SEQUENCE',
+  payload: { id, sequence },
+});
+
+export const removeSequence = (id: string): Action => ({
+  type: 'REMOVE_SEQUENCE',
+  payload: id,
 });

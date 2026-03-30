@@ -29,6 +29,8 @@ import './components/inspector/pg-time-effect-editor';
 import './components/inspector/pg-scrub-effect-editor';
 import './components/inspector/pg-transition-effect-editor';
 import './components/inspector/pg-named-effect-picker';
+import './components/inspector/pg-sequence-editor';
+import './components/inspector/pg-condition-editor';
 import './components/json-panel/pg-json-panel';
 
 // Interact integration
@@ -47,6 +49,8 @@ app.innerHTML = `
   <pg-inspector>
     <pg-interaction-editor></pg-interaction-editor>
     <pg-effect-editor></pg-effect-editor>
+    <pg-sequence-editor></pg-sequence-editor>
+    <pg-condition-editor></pg-condition-editor>
   </pg-inspector>
   <pg-json-panel></pg-json-panel>
 `;

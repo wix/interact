@@ -332,13 +332,10 @@ export class PgScrubEffectEditor extends BaseComponent {
     shadow.getElementById('named-picker')?.addEventListener('change', (e) => {
       const namedEffect = (e as CustomEvent).detail;
       if (namedEffect) {
-        const { keyframeEffect: _kf, customEffect: _ce, ...rest } = effect as Record<string, unknown>;
-        void _kf;
-        void _ce;
-        update({ ...rest, namedEffect });
+        const { keyframeEffect: _kf, customEffect: _ce, namedEffect: _ne, ...rest } = effect as Record<string, unknown>;
+        this.store.dispatch(updateEffect(effectId, { ...rest, namedEffect } as Effect));
       } else {
-        const { namedEffect: _ne, ...rest } = effect as Record<string, unknown>;
-        void _ne;
+        const { namedEffect: _ne, keyframeEffect: _kf, customEffect: _ce, ...rest } = effect as Record<string, unknown>;
         this.store.dispatch(updateEffect(effectId, rest as Effect));
       }
     });
