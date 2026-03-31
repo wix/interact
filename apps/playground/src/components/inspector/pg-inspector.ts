@@ -27,6 +27,8 @@ export class PgInspector extends BaseComponent {
         flex: 1;
         padding: var(--pg-panel-padding);
         overflow-y: auto;
+        overflow-x: hidden;
+        min-width: 0;
       }
 
       .empty {

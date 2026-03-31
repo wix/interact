@@ -39,10 +39,12 @@ export class PgScrubEffectEditor extends BaseComponent {
       .field-row {
         display: flex;
         gap: var(--pg-space-2);
+        min-width: 0;
       }
 
       .field-row > .field {
         flex: 1;
+        min-width: 0;
       }
 
       .section-title {
@@ -80,6 +82,7 @@ export class PgScrubEffectEditor extends BaseComponent {
         background: var(--pg-color-bg-tertiary);
         border-radius: var(--pg-radius-md);
         margin-bottom: var(--pg-space-3);
+        overflow: hidden;
       }
 
       .range-label {
@@ -93,6 +96,7 @@ export class PgScrubEffectEditor extends BaseComponent {
         padding: var(--pg-space-2);
         background: var(--pg-color-bg-tertiary);
         border-radius: var(--pg-radius-md);
+        overflow: hidden;
       }
     `;
   }

@@ -1,6 +1,6 @@
 import { BaseComponent } from '../base/BaseComponent';
 import type { PlaygroundState } from '../../types';
-import { toggleJsonPanel, resetConfig } from '../../store/actions';
+import { toggleJsonPanel, resetConfig, setConfig } from '../../store/actions';
 
 export class PgToolbar extends BaseComponent {
   protected get componentStyles(): string {
@@ -44,6 +44,8 @@ export class PgToolbar extends BaseComponent {
         <div class="title"><span>Interact</span> Playground</div>
         <slot name="component-selector"></slot>
         <div class="actions">
+          <button class="pg-button pg-button--secondary" id="import-btn">Import</button>
+          <button class="pg-button pg-button--secondary" id="export-btn">Export</button>
           <button class="pg-button pg-button--secondary" id="json-toggle">JSON</button>
           <button class="pg-button pg-button--secondary" id="clear-btn">Clear</button>
         </div>
@@ -57,6 +59,47 @@ export class PgToolbar extends BaseComponent {
     this.shadowRoot!.getElementById('clear-btn')!.addEventListener('click', () => {
       this.store.dispatch(resetConfig());
     });
+
+    this.shadowRoot!.getElementById('export-btn')!.addEventListener('click', () => {
+      this._exportConfig();
+    });
+
+    this.shadowRoot!.getElementById('import-btn')!.addEventListener('click', () => {
+      this._importConfig();
+    });
+  }
+
+  private _exportConfig(): void {
+    const config = this.store.getState().config;
+    const json = JSON.stringify(config, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'interact-config.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private _importConfig(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.addEventListener('change', () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      file.text().then((text) => {
+        try {
+          const config = JSON.parse(text);
+          if (config && typeof config === 'object' && config.interactions && config.effects) {
+            this.store.dispatch(setConfig(config));
+          }
+        } catch {
+          // Invalid JSON — ignore
+        }
+      });
+    });
+    input.click();
   }
 }
 

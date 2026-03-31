@@ -71,12 +71,12 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 - [x] src/utils/bezier.ts (parse, format, preset lookup, curve sampling)
 - [x] Upgrade pg-easing-picker.ts (SVG bezier editor, draggable handles, bidirectional sync)
 
-### Phase 7: Polish & UX
+### Phase 7: Polish & UX — DONE
 
-- [ ] Import/Export (file download + file picker)
-- [ ] Keyboard shortcuts (Delete, Ctrl+Z undo)
-- [ ] Visual polish (transitions, panel resize handles)
-- [ ] Component preview thumbnails in selector
+- [x] Import/Export (file download + file picker)
+- [x] Keyboard shortcuts (Delete, Ctrl+Z undo)
+- [x] Visual polish (transitions, panel resize handles)
+- [x] Component descriptions in selector
 
 ---
 

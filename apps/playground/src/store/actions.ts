@@ -95,3 +95,7 @@ export const removeSequence = (id: string): Action => ({
   type: 'REMOVE_SEQUENCE',
   payload: id,
 });
+
+export const undo = (): Action => ({
+  type: 'UNDO',
+});

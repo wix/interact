@@ -64,6 +64,7 @@ export class PgSequenceEditor extends BaseComponent {
         background: var(--pg-color-bg-tertiary);
         border-radius: var(--pg-radius-md);
         margin-bottom: var(--pg-space-2);
+        overflow: hidden;
       }
 
       .sequence-header {
@@ -115,10 +116,12 @@ export class PgSequenceEditor extends BaseComponent {
       .field-row {
         display: flex;
         gap: var(--pg-space-2);
+        min-width: 0;
       }
 
       .field-row > .field {
         flex: 1;
+        min-width: 0;
       }
 
       .effects-label {

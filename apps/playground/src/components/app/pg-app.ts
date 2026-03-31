@@ -1,7 +1,17 @@
 import { BaseComponent } from '../base/BaseComponent';
-import type { PlaygroundState } from '../../types';
+import type { PlaygroundState, Action } from '../../types';
+import { removeInteraction, undo } from '../../store/actions';
+
+const SIDEBAR_MIN = 180;
+const SIDEBAR_MAX = 400;
+const INSPECTOR_MIN = 240;
+const INSPECTOR_MAX = 500;
+const JSON_PANEL_MIN = 80;
+const JSON_PANEL_MAX = 500;
 
 export class PgApp extends BaseComponent {
+  private _keyHandler: ((e: KeyboardEvent) => void) | null = null;
+
   protected get componentStyles(): string {
     return /* css */ `
       :host {
@@ -19,6 +29,7 @@ export class PgApp extends BaseComponent {
           'sidebar  stage     inspector'
           'json     json      json';
         height: 100%;
+        position: relative;
       }
 
       ::slotted(pg-toolbar) { grid-area: toolbar; }
@@ -26,7 +37,64 @@ export class PgApp extends BaseComponent {
       ::slotted(pg-stage) { grid-area: stage; }
       ::slotted(pg-inspector) { grid-area: inspector; }
       ::slotted(pg-json-panel) { grid-area: json; }
+
+      .resize-handle {
+        position: absolute;
+        z-index: var(--pg-z-panel);
+        background: transparent;
+        transition: background var(--pg-transition-fast);
+      }
+
+      .resize-handle:hover,
+      .resize-handle.active {
+        background: var(--pg-color-accent-muted);
+      }
+
+      .resize-handle--col {
+        top: var(--pg-toolbar-height);
+        bottom: 0;
+        width: 6px;
+        cursor: col-resize;
+      }
+
+      .resize-handle--left {
+        left: calc(var(--pg-sidebar-width) - 3px);
+      }
+
+      .resize-handle--right {
+        right: calc(var(--pg-inspector-width) - 3px);
+      }
+
+      .resize-handle--row {
+        left: 0;
+        right: 0;
+        height: 6px;
+        cursor: row-resize;
+      }
+
+      .resize-handle--bottom {
+        bottom: calc(var(--pg-json-panel-height) - 3px);
+        display: none;
+      }
+
+      .resize-handle--bottom.visible {
+        display: block;
+      }
     `;
+  }
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    this._keyHandler = (e: KeyboardEvent) => this._handleKeydown(e);
+    document.addEventListener('keydown', this._keyHandler);
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    if (this._keyHandler) {
+      document.removeEventListener('keydown', this._keyHandler);
+      this._keyHandler = null;
+    }
   }
 
   protected render(_state: PlaygroundState): void {
@@ -34,8 +102,141 @@ export class PgApp extends BaseComponent {
     this.shadowRoot!.innerHTML = `
       <div class="app-grid">
         <slot></slot>
+        <div class="resize-handle resize-handle--col resize-handle--left" id="resize-left"></div>
+        <div class="resize-handle resize-handle--col resize-handle--right" id="resize-right"></div>
+        <div class="resize-handle resize-handle--row resize-handle--bottom" id="resize-bottom"></div>
       </div>
     `;
+
+    this._initColResize('resize-left', '--pg-sidebar-width', SIDEBAR_MIN, SIDEBAR_MAX, false);
+    this._initColResize('resize-right', '--pg-inspector-width', INSPECTOR_MIN, INSPECTOR_MAX, true);
+    this._initRowResize('resize-bottom', '--pg-json-panel-height', JSON_PANEL_MIN, JSON_PANEL_MAX);
+
+    this._updateJsonHandle(_state.jsonPanelOpen);
+  }
+
+  protected onStateChange(state: PlaygroundState, action: Action): void {
+    if (action.type === 'TOGGLE_JSON_PANEL' || action.type === 'UNDO') {
+      this._updateJsonHandle(state.jsonPanelOpen);
+    }
+  }
+
+  private _updateJsonHandle(open: boolean): void {
+    const handle = this.shadowRoot?.getElementById('resize-bottom');
+    if (handle) {
+      handle.classList.toggle('visible', open);
+    }
+  }
+
+  private _initColResize(
+    handleId: string,
+    cssVar: string,
+    min: number,
+    max: number,
+    invert: boolean,
+  ): void {
+    const handle = this.shadowRoot!.getElementById(handleId)!;
+
+    handle.addEventListener('pointerdown', (e: PointerEvent) => {
+      e.preventDefault();
+      handle.setPointerCapture(e.pointerId);
+      handle.classList.add('active');
+
+      const startX = e.clientX;
+      const startWidth = parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue(cssVar),
+        10,
+      );
+
+      const onMove = (me: PointerEvent) => {
+        const delta = me.clientX - startX;
+        const newWidth = Math.max(min, Math.min(max, startWidth + (invert ? -delta : delta)));
+        document.documentElement.style.setProperty(cssVar, `${newWidth}px`);
+      };
+
+      const onUp = () => {
+        handle.classList.remove('active');
+        handle.removeEventListener('pointermove', onMove);
+        handle.removeEventListener('pointerup', onUp);
+        handle.removeEventListener('pointercancel', onUp);
+      };
+
+      handle.addEventListener('pointermove', onMove);
+      handle.addEventListener('pointerup', onUp);
+      handle.addEventListener('pointercancel', onUp);
+    });
+  }
+
+  private _initRowResize(handleId: string, cssVar: string, min: number, max: number): void {
+    const handle = this.shadowRoot!.getElementById(handleId)!;
+
+    handle.addEventListener('pointerdown', (e: PointerEvent) => {
+      e.preventDefault();
+      handle.setPointerCapture(e.pointerId);
+      handle.classList.add('active');
+
+      const startY = e.clientY;
+      const startHeight = parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue(cssVar),
+        10,
+      );
+
+      const onMove = (me: PointerEvent) => {
+        const delta = startY - me.clientY; // dragging up = taller
+        const newHeight = Math.max(min, Math.min(max, startHeight + delta));
+        document.documentElement.style.setProperty(cssVar, `${newHeight}px`);
+      };
+
+      const onUp = () => {
+        handle.classList.remove('active');
+        handle.removeEventListener('pointermove', onMove);
+        handle.removeEventListener('pointerup', onUp);
+        handle.removeEventListener('pointercancel', onUp);
+      };
+
+      handle.addEventListener('pointermove', onMove);
+      handle.addEventListener('pointerup', onUp);
+      handle.addEventListener('pointercancel', onUp);
+    });
+  }
+
+  private _handleKeydown(e: KeyboardEvent): void {
+    // Don't capture when user is typing in inputs
+    const target = e.target as HTMLElement;
+    const tag = target.tagName.toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable) {
+      return;
+    }
+
+    // Also check shadow DOM active element
+    const active = target.shadowRoot?.activeElement as HTMLElement | null;
+    if (active) {
+      const activeTag = active.tagName.toLowerCase();
+      if (
+        activeTag === 'input' ||
+        activeTag === 'textarea' ||
+        activeTag === 'select' ||
+        active.isContentEditable
+      ) {
+        return;
+      }
+    }
+
+    // Ctrl+Z / Cmd+Z → Undo
+    if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      this.store.dispatch(undo());
+      return;
+    }
+
+    // Delete / Backspace → Remove selected interaction
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      const state = this.store.getState();
+      if (state.selectedInteractionIndex != null) {
+        e.preventDefault();
+        this.store.dispatch(removeInteraction(state.selectedInteractionIndex));
+      }
+    }
   }
 }
 

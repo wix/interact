@@ -1,4 +1,10 @@
 @layer components {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
   .pg-input {
     height: 28px;
     padding: 0 var(--pg-space-2);
@@ -38,6 +44,11 @@
     display: flex;
     gap: var(--pg-space-2);
     align-items: flex-end;
+    min-width: 0;
+  }
+
+  .pg-field-row > * {
+    min-width: 0;
   }
 
   .pg-button {
@@ -56,6 +67,15 @@
 
   .pg-button:hover {
     background: var(--pg-color-accent-hover);
+  }
+
+  .pg-button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--pg-color-accent-muted);
+  }
+
+  .pg-button:active {
+    transform: scale(0.97);
   }
 
   .pg-button--secondary {

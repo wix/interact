@@ -1085,6 +1085,7 @@ export class PgNamedEffectPicker extends BaseComponent {
         padding: var(--pg-space-2);
         background: var(--pg-color-bg-tertiary);
         border-radius: var(--pg-radius-md);
+        overflow: hidden;
       }
 
       .options-title {

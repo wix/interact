@@ -25,7 +25,7 @@ export class PgComponentSelector extends BaseComponent {
 
       select {
         height: 30px;
-        min-width: 160px;
+        min-width: 200px;
         padding: 0 var(--pg-space-6) 0 var(--pg-space-2);
         background: var(--pg-color-bg-tertiary);
         border: var(--pg-border-width) solid var(--pg-color-border);
@@ -58,7 +58,12 @@ export class PgComponentSelector extends BaseComponent {
     this.shadowRoot!.innerHTML = `
       <label for="comp-select">Component</label>
       <select id="comp-select">
-        ${components.map((c) => `<option value="${c.id}">${c.name}</option>`).join('')}
+        ${components
+          .map(
+            (c) =>
+              `<option value="${c.id}">${c.name} \u2014 ${c.description}</option>`,
+          )
+          .join('')}
       </select>
     `;
 

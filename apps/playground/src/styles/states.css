@@ -11,7 +11,10 @@
   }
 
   .pg-interactive {
-    transition: background var(--pg-transition-fast);
+    transition:
+      background var(--pg-transition-fast),
+      border-color var(--pg-transition-fast),
+      box-shadow var(--pg-transition-fast);
   }
 
   .pg-interactive:hover {
@@ -22,11 +25,25 @@
     background: var(--pg-color-bg-active);
   }
 
+  .pg-interactive:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--pg-color-accent-muted);
+  }
+
   .pg-interactive[aria-selected='true'] {
     background: var(--pg-color-accent-muted);
   }
 
   .pg-interactive[aria-selected='true']:hover {
     background: var(--pg-color-accent-muted);
+  }
+
+  .pg-fade-in {
+    animation: pg-fade-in var(--pg-transition-normal) ease both;
+  }
+
+  @keyframes pg-fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }

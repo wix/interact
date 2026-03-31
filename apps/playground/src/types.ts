@@ -43,4 +43,5 @@ export type Action =
   | { type: 'REMOVE_CONDITION'; payload: string }
   | { type: 'ADD_SEQUENCE'; payload: { id: string; sequence: SequenceConfig } }
   | { type: 'UPDATE_SEQUENCE'; payload: { id: string; sequence: SequenceConfig } }
-  | { type: 'REMOVE_SEQUENCE'; payload: string };
+  | { type: 'REMOVE_SEQUENCE'; payload: string }
+  | { type: 'UNDO' };

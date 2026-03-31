@@ -37,10 +37,12 @@ export class PgTimeEffectEditor extends BaseComponent {
       .field-row {
         display: flex;
         gap: var(--pg-space-2);
+        min-width: 0;
       }
 
       .field-row > .field {
         flex: 1;
+        min-width: 0;
       }
 
       .section-title {

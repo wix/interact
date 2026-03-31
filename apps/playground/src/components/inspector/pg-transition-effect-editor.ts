@@ -83,10 +83,12 @@ export class PgTransitionEffectEditor extends BaseComponent {
       .field-row {
         display: flex;
         gap: var(--pg-space-2);
+        min-width: 0;
       }
 
       .field-row > .field {
         flex: 1;
+        min-width: 0;
       }
 
       .property-row {
@@ -95,6 +97,7 @@ export class PgTransitionEffectEditor extends BaseComponent {
         border-radius: var(--pg-radius-md);
         margin-bottom: var(--pg-space-2);
         position: relative;
+        overflow: hidden;
       }
 
       .property-row .field {
