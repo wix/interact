@@ -52,7 +52,9 @@ export class PgSelect extends BaseComponent {
 
     select.addEventListener('change', () => {
       this.setAttribute('value', select.value);
-      this.dispatchEvent(new CustomEvent('change', { detail: select.value, bubbles: true, composed: true }));
+      this.dispatchEvent(
+        new CustomEvent('change', { detail: select.value, bubbles: true, composed: true }),
+      );
     });
   }
 

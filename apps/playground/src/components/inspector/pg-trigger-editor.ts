@@ -115,7 +115,7 @@ export class PgTriggerEditor extends BaseComponent {
     }
 
     const form = getTriggerForm(interaction.trigger);
-    const params = interaction.params as Record<string, unknown> ?? {};
+    const params = (interaction.params as Record<string, unknown>) ?? {};
 
     let html = '<div class="section-title">Trigger Params</div>';
 
@@ -204,7 +204,10 @@ export class PgTriggerEditor extends BaseComponent {
     `;
   }
 
-  private _renderViewProgressParams(_params: Record<string, unknown>, state: PlaygroundState): string {
+  private _renderViewProgressParams(
+    _params: Record<string, unknown>,
+    state: PlaygroundState,
+  ): string {
     const { scrollPreview } = state;
 
     return `
@@ -257,12 +260,15 @@ export class PgTriggerEditor extends BaseComponent {
     `;
   }
 
-  private _renderAnimationEndParams(params: Record<string, unknown>, state: PlaygroundState): string {
+  private _renderAnimationEndParams(
+    params: Record<string, unknown>,
+    state: PlaygroundState,
+  ): string {
     const effectId = (params.effectId as string) ?? '';
     const effectIds = Object.keys(state.config.effects);
-    const options = effectIds.map((id) =>
-      `<option value="${id}" ${id === effectId ? 'selected' : ''}>${id}</option>`,
-    ).join('');
+    const options = effectIds
+      .map((id) => `<option value="${id}" ${id === effectId ? 'selected' : ''}>${id}</option>`)
+      .join('');
 
     return `
       <div class="field">
@@ -279,7 +285,7 @@ export class PgTriggerEditor extends BaseComponent {
     const shadow = this.shadowRoot!;
 
     const update = (params: Record<string, unknown>) => {
-      const current = state.config.interactions[idx]?.params as Record<string, unknown> ?? {};
+      const current = (state.config.interactions[idx]?.params as Record<string, unknown>) ?? {};
       this.store.dispatch(updateInteraction(idx, { params: { ...current, ...params } }));
     };
 
@@ -329,7 +335,9 @@ export class PgTriggerEditor extends BaseComponent {
       shadow.getElementById('scroll-enable')?.addEventListener('change', (e) => {
         const enabled = (e.target as HTMLInputElement).checked;
         this.store.dispatch(setScrollPreview({ enabled }));
-        const stage = document.querySelector('pg-stage') as HTMLElement & { setScrollMode: (e: boolean, h?: number) => void } | null;
+        const stage = document.querySelector('pg-stage') as
+          | (HTMLElement & { setScrollMode: (e: boolean, h?: number) => void })
+          | null;
         stage?.setScrollMode(enabled, state.scrollPreview.stageHeight);
       });
 
@@ -337,7 +345,9 @@ export class PgTriggerEditor extends BaseComponent {
         const val = (e.target as HTMLInputElement).value;
         const top = val ? parseInt(val, 10) : undefined;
         this.store.dispatch(setScrollPreview({ stickyTop: top, stickyBottom: undefined }));
-        const stage = document.querySelector('pg-stage') as HTMLElement & { setStickyPosition: (t?: number, b?: number) => void } | null;
+        const stage = document.querySelector('pg-stage') as
+          | (HTMLElement & { setStickyPosition: (t?: number, b?: number) => void })
+          | null;
         stage?.setStickyPosition(top, undefined);
       });
 
@@ -345,14 +355,18 @@ export class PgTriggerEditor extends BaseComponent {
         const val = (e.target as HTMLInputElement).value;
         const bottom = val ? parseInt(val, 10) : undefined;
         this.store.dispatch(setScrollPreview({ stickyBottom: bottom, stickyTop: undefined }));
-        const stage = document.querySelector('pg-stage') as HTMLElement & { setStickyPosition: (t?: number, b?: number) => void } | null;
+        const stage = document.querySelector('pg-stage') as
+          | (HTMLElement & { setStickyPosition: (t?: number, b?: number) => void })
+          | null;
         stage?.setStickyPosition(undefined, bottom);
       });
 
       shadow.getElementById('stage-height')?.addEventListener('input', (e) => {
         const multiplier = parseFloat((e.target as HTMLInputElement).value);
         this.store.dispatch(setScrollPreview({ stageHeight: multiplier }));
-        const stage = document.querySelector('pg-stage') as HTMLElement & { setScrollMode: (e: boolean, h?: number) => void } | null;
+        const stage = document.querySelector('pg-stage') as
+          | (HTMLElement & { setScrollMode: (e: boolean, h?: number) => void })
+          | null;
         if (state.scrollPreview.enabled) {
           stage?.setScrollMode(true, multiplier);
         }
@@ -366,7 +380,9 @@ export class PgTriggerEditor extends BaseComponent {
     if (idx != null) {
       const interaction = state.config.interactions[idx];
       const isScroll = interaction?.trigger === 'viewProgress';
-      const stage = document.querySelector('pg-stage') as HTMLElement & { setScrollMode: (e: boolean, h?: number) => void } | null;
+      const stage = document.querySelector('pg-stage') as
+        | (HTMLElement & { setScrollMode: (e: boolean, h?: number) => void })
+        | null;
       if (!isScroll && state.scrollPreview.enabled) {
         this.store.dispatch(setScrollPreview({ enabled: false }));
         stage?.setScrollMode(false);

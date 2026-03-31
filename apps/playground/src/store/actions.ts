@@ -20,7 +20,10 @@ export const removeInteraction = (index: number): Action => ({
   payload: index,
 });
 
-export const updateInteraction = (index: number, data: Partial<InteractConfig['interactions'][number]>): Action => ({
+export const updateInteraction = (
+  index: number,
+  data: Partial<InteractConfig['interactions'][number]>,
+): Action => ({
   type: 'UPDATE_INTERACTION',
   payload: { index, data },
 });

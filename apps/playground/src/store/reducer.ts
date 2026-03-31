@@ -230,8 +230,9 @@ export function reduce(state: PlaygroundState, action: Action): PlaygroundState 
           (s) => !('sequenceId' in s && s.sequenceId === seqId),
         ),
       }));
-      const ctxCleared = state.selectedEffectContext?.source === 'sequence'
-        && state.selectedEffectContext.sequenceId === seqId;
+      const ctxCleared =
+        state.selectedEffectContext?.source === 'sequence' &&
+        state.selectedEffectContext.sequenceId === seqId;
       return {
         ...state,
         config: {

@@ -68,9 +68,9 @@ export class PgEasingPicker extends BaseComponent {
     const presetKey = findPresetKey(value);
 
     const optgroups = GROUPS.map((g) => {
-      const opts = g.keys.map((k) =>
-        `<option value="${k}" ${k === presetKey ? 'selected' : ''}>${k}</option>`,
-      ).join('');
+      const opts = g.keys
+        .map((k) => `<option value="${k}" ${k === presetKey ? 'selected' : ''}>${k}</option>`)
+        .join('');
       return `<optgroup label="${g.label}">${opts}</optgroup>`;
     }).join('');
 

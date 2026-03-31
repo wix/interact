@@ -26,7 +26,10 @@ export type Action =
   | { type: 'SET_CONFIG'; payload: InteractConfig }
   | { type: 'ADD_INTERACTION' }
   | { type: 'REMOVE_INTERACTION'; payload: number }
-  | { type: 'UPDATE_INTERACTION'; payload: { index: number; data: Partial<InteractConfig['interactions'][number]> } }
+  | {
+      type: 'UPDATE_INTERACTION';
+      payload: { index: number; data: Partial<InteractConfig['interactions'][number]> };
+    }
   | { type: 'SELECT_INTERACTION'; payload: number | null }
   | { type: 'ADD_EFFECT'; payload: { id: string; effect: InteractConfig['effects'][string] } }
   | { type: 'UPDATE_EFFECT'; payload: { id: string; effect: InteractConfig['effects'][string] } }

@@ -1,7 +1,14 @@
 import { BaseComponent } from '../base/BaseComponent';
 import type { PlaygroundState } from '../../types';
 import type { Effect, TriggerType, SequenceConfig } from '@wix/interact';
-import { addEffect, removeEffect, selectEffect, updateEffect, updateInteraction, updateSequence } from '../../store/actions';
+import {
+  addEffect,
+  removeEffect,
+  selectEffect,
+  updateEffect,
+  updateInteraction,
+  updateSequence,
+} from '../../store/actions';
 import { generateId } from '../../utils/id';
 import { getComponent } from '../../library';
 import type { ComponentKey } from '../../library/types';
@@ -258,7 +265,9 @@ export class PgEffectEditor extends BaseComponent {
     }
 
     const effectRefs = (interaction.effects ?? []) as { effectId?: string }[];
-    return effectRefs.find((r) => r.effectId === selectedEffectId) as Record<string, unknown> | undefined;
+    return effectRefs.find((r) => r.effectId === selectedEffectId) as
+      | Record<string, unknown>
+      | undefined;
   }
 
   protected render(state: PlaygroundState): void {
@@ -288,22 +297,24 @@ export class PgEffectEditor extends BaseComponent {
       effectType = allowed[0];
     }
 
-    const effectItems = effectRefs.map((ref) => {
-      const eid = ref.effectId;
-      if (!eid) return '';
-      const eff = state.config.effects[eid];
-      if (!eff) return '';
-      const type = detectEffectType(eff);
-      const label = this._getEffectLabel(eff, type);
-      const selected = eid === selectedEffectId && isInteractionCtx;
-      return `
+    const effectItems = effectRefs
+      .map((ref) => {
+        const eid = ref.effectId;
+        if (!eid) return '';
+        const eff = state.config.effects[eid];
+        if (!eff) return '';
+        const type = detectEffectType(eff);
+        const label = this._getEffectLabel(eff, type);
+        const selected = eid === selectedEffectId && isInteractionCtx;
+        return `
         <div class="effect-item ${selected ? 'selected' : ''}" data-effect-id="${eid}">
           <span class="effect-badge">${type}</span>
           <span class="effect-name">${label}</span>
           <button class="remove-effect" data-remove-id="${eid}">&times;</button>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     const component = getComponent(state.activeComponentId);
     const keys: ComponentKey[] = component?.keys ?? [];
@@ -312,27 +323,32 @@ export class PgEffectEditor extends BaseComponent {
 
     let editorHtml = '';
     if (selectedEffect && effectType) {
-      const tabsHtml = allowed.length > 1
-        ? `<div class="tabs">
-            ${allowed.map((t) =>
-              `<button class="tab ${effectType === t ? 'active' : ''}" data-tab="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`,
-            ).join('')}
+      const tabsHtml =
+        allowed.length > 1
+          ? `<div class="tabs">
+            ${allowed
+              .map(
+                (t) =>
+                  `<button class="tab ${effectType === t ? 'active' : ''}" data-tab="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`,
+              )
+              .join('')}
           </div>`
-        : '';
+          : '';
 
       const inlineKey = selectedInlineRef?.key as string | undefined;
       const inlineListContainer = selectedInlineRef?.listContainer as string | undefined;
 
-      const targetKeyOptions = keys.map((k) => {
-        let isSelected: boolean;
-        if (k.isList && k.parentKey) {
-          isSelected = inlineKey === k.parentKey
-            && inlineListContainer === k.listContainer;
-        } else {
-          isSelected = k.key === inlineKey && !inlineListContainer;
-        }
-        return `<option value="${k.key}" ${isSelected ? 'selected' : ''}>${k.label}</option>`;
-      }).join('');
+      const targetKeyOptions = keys
+        .map((k) => {
+          let isSelected: boolean;
+          if (k.isList && k.parentKey) {
+            isSelected = inlineKey === k.parentKey && inlineListContainer === k.listContainer;
+          } else {
+            isSelected = k.key === inlineKey && !inlineListContainer;
+          }
+          return `<option value="${k.key}" ${isSelected ? 'selected' : ''}>${k.label}</option>`;
+        })
+        .join('');
 
       const targetFieldHtml = `
         <div class="field">
@@ -379,7 +395,12 @@ export class PgEffectEditor extends BaseComponent {
     if (type === 'transition') {
       const props = e.transitionProperties as { name: string }[] | undefined;
       if (props && props.length > 0) {
-        return props.map((p) => p.name).filter(Boolean).join(', ') || 'transition';
+        return (
+          props
+            .map((p) => p.name)
+            .filter(Boolean)
+            .join(', ') || 'transition'
+        );
       }
     }
     return type;
@@ -431,19 +452,27 @@ export class PgEffectEditor extends BaseComponent {
           if (!seq) return;
           const updatedEffects = seq.effects.map((ref, i) => {
             if (i !== ctx.effectIndex) return ref;
-            return this._applyTargetToRef(ref as Record<string, unknown>, selectedKey, componentKeys);
+            return this._applyTargetToRef(
+              ref as Record<string, unknown>,
+              selectedKey,
+              componentKeys,
+            );
           });
-          this.store.dispatch(updateSequence(ctx.sequenceId, {
-            ...seq,
-            effects: updatedEffects as SequenceConfig['effects'],
-          }));
+          this.store.dispatch(
+            updateSequence(ctx.sequenceId, {
+              ...seq,
+              effects: updatedEffects as SequenceConfig['effects'],
+            }),
+          );
         } else {
           const currentEffects = (interaction.effects ?? []) as Record<string, unknown>[];
           const updatedEffects = currentEffects.map((ref) => {
             if (ref.effectId !== effectId) return ref;
             return this._applyTargetToRef(ref, selectedKey, componentKeys);
           });
-          this.store.dispatch(updateInteraction(interactionIdx, { effects: updatedEffects } as never));
+          this.store.dispatch(
+            updateInteraction(interactionIdx, { effects: updatedEffects } as never),
+          );
         }
       });
     }
@@ -455,17 +484,21 @@ export class PgEffectEditor extends BaseComponent {
       const currentEffects = interaction.effects ?? [];
 
       this.store.dispatch(addEffect(effectId, effect));
-      this.store.dispatch(updateInteraction(interactionIdx, {
-        effects: [...currentEffects, { effectId }],
-      }));
+      this.store.dispatch(
+        updateInteraction(interactionIdx, {
+          effects: [...currentEffects, { effectId }],
+        }),
+      );
 
       if (defaultType === 'transition') {
         const params = (interaction.params ?? {}) as Record<string, unknown>;
         if (!params.method) {
           const { type: _type, ...rest } = params;
-          this.store.dispatch(updateInteraction(interactionIdx, {
-            params: { ...rest, method: 'toggle' },
-          }));
+          this.store.dispatch(
+            updateInteraction(interactionIdx, {
+              params: { ...rest, method: 'toggle' },
+            }),
+          );
         }
       }
     });
@@ -485,9 +518,11 @@ export class PgEffectEditor extends BaseComponent {
         const eid = (btn as HTMLElement).dataset.removeId!;
         const currentEffects = (interaction.effects ?? []) as { effectId?: string }[];
         this.store.dispatch(removeEffect(eid));
-        this.store.dispatch(updateInteraction(interactionIdx, {
-          effects: currentEffects.filter((ref) => ref.effectId !== eid),
-        }));
+        this.store.dispatch(
+          updateInteraction(interactionIdx, {
+            effects: currentEffects.filter((ref) => ref.effectId !== eid),
+          }),
+        );
       });
     });
 
@@ -512,14 +547,18 @@ export class PgEffectEditor extends BaseComponent {
           const params = (interaction.params ?? {}) as Record<string, unknown>;
           if (targetType === 'transition') {
             const { type: _type, ...rest } = params;
-            this.store.dispatch(updateInteraction(interactionIdx, {
-              params: { ...rest, method: 'toggle' },
-            }));
+            this.store.dispatch(
+              updateInteraction(interactionIdx, {
+                params: { ...rest, method: 'toggle' },
+              }),
+            );
           } else if (currentType === 'transition') {
             const { method: _method, ...rest } = params;
-            this.store.dispatch(updateInteraction(interactionIdx, {
-              params: { ...rest, type: 'alternate' },
-            }));
+            this.store.dispatch(
+              updateInteraction(interactionIdx, {
+                params: { ...rest, type: 'alternate' },
+              }),
+            );
           }
         }
       });

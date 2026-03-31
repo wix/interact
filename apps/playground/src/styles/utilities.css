@@ -29,8 +29,16 @@
     justify-content: space-between;
   }
 
-  .gap-1 { gap: var(--pg-space-1); }
-  .gap-2 { gap: var(--pg-space-2); }
-  .gap-3 { gap: var(--pg-space-3); }
-  .gap-4 { gap: var(--pg-space-4); }
+  .gap-1 {
+    gap: var(--pg-space-1);
+  }
+  .gap-2 {
+    gap: var(--pg-space-2);
+  }
+  .gap-3 {
+    gap: var(--pg-space-3);
+  }
+  .gap-4 {
+    gap: var(--pg-space-4);
+  }
 }

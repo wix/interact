@@ -88,13 +88,13 @@ export class PgTimeEffectEditor extends BaseComponent {
       return;
     }
 
-    const duration = (effect as Record<string, unknown>).duration as number ?? 500;
-    const easing = (effect as Record<string, unknown>).easing as string ?? 'ease';
-    const iterations = (effect as Record<string, unknown>).iterations as number ?? 1;
-    const alternate = (effect as Record<string, unknown>).alternate as boolean ?? false;
-    const fill = (effect as Record<string, unknown>).fill as string ?? 'both';
-    const reversed = (effect as Record<string, unknown>).reversed as boolean ?? false;
-    const delay = (effect as Record<string, unknown>).delay as number ?? 0;
+    const duration = ((effect as Record<string, unknown>).duration as number) ?? 500;
+    const easing = ((effect as Record<string, unknown>).easing as string) ?? 'ease';
+    const iterations = ((effect as Record<string, unknown>).iterations as number) ?? 1;
+    const alternate = ((effect as Record<string, unknown>).alternate as boolean) ?? false;
+    const fill = ((effect as Record<string, unknown>).fill as string) ?? 'both';
+    const reversed = ((effect as Record<string, unknown>).reversed as boolean) ?? false;
+    const delay = ((effect as Record<string, unknown>).delay as number) ?? 0;
 
     const named = getNamedEffect(effect);
 
@@ -198,10 +198,20 @@ export class PgTimeEffectEditor extends BaseComponent {
     shadow.getElementById('named-picker')?.addEventListener('change', (e) => {
       const namedEffect = (e as CustomEvent).detail;
       if (namedEffect) {
-        const { keyframeEffect: _kf, customEffect: _ce, namedEffect: _ne, ...rest } = effect as Record<string, unknown>;
+        const {
+          keyframeEffect: _kf,
+          customEffect: _ce,
+          namedEffect: _ne,
+          ...rest
+        } = effect as Record<string, unknown>;
         this.store.dispatch(updateEffect(effectId, { ...rest, namedEffect } as Effect));
       } else {
-        const { namedEffect: _ne, keyframeEffect: _kf, customEffect: _ce, ...rest } = effect as Record<string, unknown>;
+        const {
+          namedEffect: _ne,
+          keyframeEffect: _kf,
+          customEffect: _ce,
+          ...rest
+        } = effect as Record<string, unknown>;
         this.store.dispatch(updateEffect(effectId, rest as Effect));
       }
     });

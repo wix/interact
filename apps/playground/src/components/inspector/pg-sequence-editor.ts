@@ -1,7 +1,15 @@
 import { BaseComponent } from '../base/BaseComponent';
 import type { PlaygroundState } from '../../types';
 import type { Effect, SequenceConfig } from '@wix/interact';
-import { addEffect, addSequence, removeEffect, removeSequence, selectEffect, updateInteraction, updateSequence } from '../../store/actions';
+import {
+  addEffect,
+  addSequence,
+  removeEffect,
+  removeSequence,
+  selectEffect,
+  updateInteraction,
+  updateSequence,
+} from '../../store/actions';
 import { generateId } from '../../utils/id';
 
 const OFFSET_EASING_PRESETS = [
@@ -257,12 +265,14 @@ export class PgSequenceEditor extends BaseComponent {
     const sequenceRefs = (interaction.sequences ?? []) as { sequenceId?: string }[];
     const sequences = state.config.sequences ?? {};
 
-    const sequenceItems = sequenceRefs.map((ref, seqIdx) => {
-      if (!ref.sequenceId) return '';
-      const seq = sequences[ref.sequenceId];
-      if (!seq) return '';
-      return this._renderSequenceItem(ref.sequenceId, seq, seqIdx, state);
-    }).join('');
+    const sequenceItems = sequenceRefs
+      .map((ref, seqIdx) => {
+        if (!ref.sequenceId) return '';
+        const seq = sequences[ref.sequenceId];
+        if (!seq) return '';
+        return this._renderSequenceItem(ref.sequenceId, seq, seqIdx, state);
+      })
+      .join('');
 
     this.shadowRoot!.innerHTML = `
       <div class="divider"></div>
@@ -288,20 +298,22 @@ export class PgSequenceEditor extends BaseComponent {
     const selectedEffectId = state.selectedEffectId;
 
     const effectRefs = sequence.effects as { effectId?: string }[];
-    const effectRows = effectRefs.map((ref, effIdx) => {
-      if (!ref.effectId) return '';
-      const eff = state.config.effects[ref.effectId];
-      if (!eff) return '';
-      const label = getEffectLabel(eff as Record<string, unknown>);
-      const isFirst = effIdx === 0;
-      const isLast = effIdx === effectRefs.length - 1;
+    const effectRows = effectRefs
+      .map((ref, effIdx) => {
+        if (!ref.effectId) return '';
+        const eff = state.config.effects[ref.effectId];
+        if (!eff) return '';
+        const label = getEffectLabel(eff as Record<string, unknown>);
+        const isFirst = effIdx === 0;
+        const isLast = effIdx === effectRefs.length - 1;
 
-      const isSelected = selectedEffectId === ref.effectId
-        && ctx?.source === 'sequence'
-        && ctx.sequenceId === seqId
-        && ctx.effectIndex === effIdx;
+        const isSelected =
+          selectedEffectId === ref.effectId &&
+          ctx?.source === 'sequence' &&
+          ctx.sequenceId === seqId &&
+          ctx.effectIndex === effIdx;
 
-      return `
+        return `
         <div class="effect-row ${isSelected ? 'selected' : ''}" data-seq-id="${seqId}" data-eff-idx="${effIdx}" data-eff-id="${ref.effectId}">
           <span class="index">${effIdx + 1}</span>
           <span class="name" title="${ref.effectId}">${label}</span>
@@ -310,10 +322,12 @@ export class PgSequenceEditor extends BaseComponent {
           <button class="remove-effect-btn" data-remove-eff-idx="${effIdx}" data-remove-eff-seq="${seqId}">&times;</button>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
-    const easingOptions = OFFSET_EASING_PRESETS.map((p) =>
-      `<option value="${p.value}" ${p.value === offsetEasing ? 'selected' : ''}>${p.label}</option>`,
+    const easingOptions = OFFSET_EASING_PRESETS.map(
+      (p) =>
+        `<option value="${p.value}" ${p.value === offsetEasing ? 'selected' : ''}>${p.label}</option>`,
     ).join('');
 
     return `
@@ -361,9 +375,11 @@ export class PgSequenceEditor extends BaseComponent {
       this.store.dispatch(addSequence(seqId, newSeq));
 
       const currentSeqs = interaction.sequences ?? [];
-      this.store.dispatch(updateInteraction(interactionIdx, {
-        sequences: [...currentSeqs, { sequenceId: seqId }],
-      }));
+      this.store.dispatch(
+        updateInteraction(interactionIdx, {
+          sequences: [...currentSeqs, { sequenceId: seqId }],
+        }),
+      );
     });
 
     shadow.querySelectorAll<HTMLButtonElement>('[data-remove-seq]').forEach((btn) => {
@@ -389,10 +405,12 @@ export class PgSequenceEditor extends BaseComponent {
       input.addEventListener('change', () => {
         const seq = sequences[seqId];
         if (!seq) return;
-        this.store.dispatch(updateSequence(seqId, {
-          ...seq,
-          delay: parseInt(input.value, 10) || 0,
-        }));
+        this.store.dispatch(
+          updateSequence(seqId, {
+            ...seq,
+            delay: parseInt(input.value, 10) || 0,
+          }),
+        );
       });
     });
 
@@ -401,10 +419,12 @@ export class PgSequenceEditor extends BaseComponent {
       input.addEventListener('change', () => {
         const seq = sequences[seqId];
         if (!seq) return;
-        this.store.dispatch(updateSequence(seqId, {
-          ...seq,
-          offset: parseInt(input.value, 10) || 0,
-        }));
+        this.store.dispatch(
+          updateSequence(seqId, {
+            ...seq,
+            offset: parseInt(input.value, 10) || 0,
+          }),
+        );
       });
     });
 
@@ -413,10 +433,12 @@ export class PgSequenceEditor extends BaseComponent {
       select.addEventListener('change', () => {
         const seq = sequences[seqId];
         if (!seq) return;
-        this.store.dispatch(updateSequence(seqId, {
-          ...seq,
-          offsetEasing: select.value || undefined,
-        }));
+        this.store.dispatch(
+          updateSequence(seqId, {
+            ...seq,
+            offsetEasing: select.value || undefined,
+          }),
+        );
       });
     });
 
@@ -426,11 +448,13 @@ export class PgSequenceEditor extends BaseComponent {
         const seqId = row.dataset.seqId!;
         const effIdx = parseInt(row.dataset.effIdx!, 10);
         const effId = row.dataset.effId!;
-        this.store.dispatch(selectEffect(effId, {
-          source: 'sequence',
-          sequenceId: seqId,
-          effectIndex: effIdx,
-        }));
+        this.store.dispatch(
+          selectEffect(effId, {
+            source: 'sequence',
+            sequenceId: seqId,
+            effectIndex: effIdx,
+          }),
+        );
       });
     });
 
@@ -445,16 +469,20 @@ export class PgSequenceEditor extends BaseComponent {
         const newEffect = this._createDefaultSequenceEffect(trigger);
         this.store.dispatch(addEffect(effectId, newEffect));
 
-        this.store.dispatch(updateSequence(seqId, {
-          ...seq,
-          effects: [...seq.effects, { effectId } as SequenceConfig['effects'][number]],
-        }));
+        this.store.dispatch(
+          updateSequence(seqId, {
+            ...seq,
+            effects: [...seq.effects, { effectId } as SequenceConfig['effects'][number]],
+          }),
+        );
 
-        this.store.dispatch(selectEffect(effectId, {
-          source: 'sequence',
-          sequenceId: seqId,
-          effectIndex: seq.effects.length,
-        }));
+        this.store.dispatch(
+          selectEffect(effectId, {
+            source: 'sequence',
+            sequenceId: seqId,
+            effectIndex: seq.effects.length,
+          }),
+        );
       });
     });
 
@@ -471,10 +499,12 @@ export class PgSequenceEditor extends BaseComponent {
           this.store.dispatch(removeEffect(ref.effectId));
         }
 
-        this.store.dispatch(updateSequence(seqId, {
-          ...seq,
-          effects: seq.effects.filter((_, i) => i !== effIdx),
-        }));
+        this.store.dispatch(
+          updateSequence(seqId, {
+            ...seq,
+            effects: seq.effects.filter((_, i) => i !== effIdx),
+          }),
+        );
       });
     });
 

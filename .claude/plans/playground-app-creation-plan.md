@@ -9,6 +9,7 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 ## Todo List
 
 ### Phase 1: Scaffolding & Infra — DONE
+
 - [x] package.json, tsconfig.json, vite.config.ts, index.html
 - [x] CSS architecture: layers.css, base.css, theme.css, layout.css, controls.css, utilities.css, states.css
 - [x] Store: PlaygroundStore, reducer, actions, types
@@ -24,6 +25,7 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 - [x] vite-env.d.ts (CSS inline module declarations)
 
 ### Phase 2: Component Library — DONE
+
 - [x] library/types.ts (ComponentDefinition interface)
 - [x] library/index.ts (registry of all 8 components)
 - [x] card (template + CSS, keys: card, card-image, card-title, card-cta)
@@ -38,6 +40,7 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 - [x] pg-stage wired to render selected component with CSS isolation
 
 ### Phase 3: Interact Integration & Interaction Editing — DONE
+
 - [x] src/interact/InteractManager.ts (Interact.create/destroy lifecycle, debounced, store-subscribed)
 - [x] src/interact/preset-registry.ts (flat catalog from @wix/motion-presets)
 - [x] pg-interaction-editor.ts (trigger type dropdown, source element key selector from active component)
@@ -50,6 +53,7 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 - [x] src/components/shared/pg-toggle.ts (boolean toggle)
 
 ### Phase 4: Effect Editors & Live Preview — DONE
+
 - [x] pg-effect-editor.ts (target element key selector, tabs: TimeEffect | ScrubEffect | TransitionEffect)
 - [x] pg-time-effect-editor.ts (duration, easing, iterations, alternate, fill, reversed, delay)
 - [x] pg-scrub-effect-editor.ts (range offsets, transition params)
@@ -58,14 +62,17 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 - [x] pg-easing-picker.ts (initial: preset dropdown outputting cubic-bezier string)
 
 ### Phase 5: Conditions, Sequences & Advanced — DONE
+
 - [x] pg-condition-editor.ts (media/container/selector conditions)
 - [x] pg-sequence-editor.ts (effect list, delay, offset, offsetEasing)
 
 ### Phase 6: Easing Picker SVG Editor
+
 - [ ] src/utils/bezier.ts (parse, format, preset lookup, curve sampling)
 - [ ] Upgrade pg-easing-picker.ts (SVG bezier editor, draggable handles, bidirectional sync)
 
 ### Phase 7: Polish & UX
+
 - [ ] Import/Export (file download + file picker)
 - [ ] Keyboard shortcuts (Delete, Ctrl+Z undo)
 - [ ] Visual polish (transitions, panel resize handles)
@@ -106,16 +113,16 @@ Users pick a pre-made component from a dropdown in the toolbar. The stage render
 
 Each component is a self-contained module exporting HTML template, CSS, and metadata (name, description, available `data-interact-key` targets). Components:
 
-| Component | Description | Interact Keys |
-|-----------|-------------|---------------|
-| `card` | Image, title, text, CTA button | `card`, `card-image`, `card-title`, `card-cta` |
-| `card-list` | Vertical list of cards | `card-list`, `card-list-item` (list) |
-| `card-grid` | 2-3 column grid of cards | `card-grid`, `card-grid-item` (list) |
-| `hero-section` | Full-width section with image, title, text | `hero`, `hero-image`, `hero-title`, `hero-text` |
-| `figure` | Image with caption | `figure`, `figure-image`, `figure-caption` |
-| `header` | Heading text with subtitle | `header`, `header-title`, `header-subtitle` |
-| `nav-menu` | Horizontal list of text anchors | `nav-menu`, `nav-menu-item` (list) |
-| `carousel` | Horizontal image carousel with title overlay | `carousel`, `carousel-slide` (list), `carousel-title` |
+| Component      | Description                                  | Interact Keys                                         |
+| -------------- | -------------------------------------------- | ----------------------------------------------------- |
+| `card`         | Image, title, text, CTA button               | `card`, `card-image`, `card-title`, `card-cta`        |
+| `card-list`    | Vertical list of cards                       | `card-list`, `card-list-item` (list)                  |
+| `card-grid`    | 2-3 column grid of cards                     | `card-grid`, `card-grid-item` (list)                  |
+| `hero-section` | Full-width section with image, title, text   | `hero`, `hero-image`, `hero-title`, `hero-text`       |
+| `figure`       | Image with caption                           | `figure`, `figure-image`, `figure-caption`            |
+| `header`       | Heading text with subtitle                   | `header`, `header-title`, `header-subtitle`           |
+| `nav-menu`     | Horizontal list of text anchors              | `nav-menu`, `nav-menu-item` (list)                    |
+| `carousel`     | Horizontal image carousel with title overlay | `carousel`, `carousel-slide` (list), `carousel-title` |
 
 Each key is a valid `data-interact-key` that can be used as `interaction.key` or `effect.key` in the config.
 
@@ -138,6 +145,7 @@ The Interact runtime distinguishes between **source** (trigger) and **target** (
 - **Inline effect ref's `key`** (`interaction.effects[i].key`) — the **target** element: the element that gets animated. Set via the "Target Element" dropdown in `pg-effect-editor`. When left empty ("Same as source"), the runtime cascades to the interaction's key, so the same element is both source and target.
 
 **Important: target selection properties live on the inline effect ref, not the top-level effect.** The runtime's target cascade order is:
+
 1. `interaction.effects[i].key` (inline ref — checked first)
 2. `config.effects[effectId].key` (top-level effect — fallback)
 3. `interaction.key` (final fallback)
@@ -185,14 +193,14 @@ All styles are organized into CSS `@layer` declarations, ordered by specificity 
 @layer base, layout, theme, components, utilities, states;
 ```
 
-| Layer | Purpose | Files |
-|-------|---------|-------|
-| `base` | CSS reset, box-sizing, typography defaults | `styles/base.css` |
-| `layout` | App grid, panel sizing, responsive breakpoints | `styles/layout.css` |
-| `theme` | All CSS custom properties (colors, spacing, radii, shadows, fonts) | `styles/theme.css` |
-| `components` | Styles for each Web Component (via shadow DOM adoptedStyleSheets or `<style>` in shadow root) | Per-component CSS |
-| `utilities` | Helper classes: `.sr-only`, `.truncate`, `.flex-center`, `.gap-*` | `styles/utilities.css` |
-| `states` | Interactive states: `:hover`, `:focus-visible`, `[aria-selected]`, `.active`, `.disabled` | `styles/states.css` |
+| Layer        | Purpose                                                                                       | Files                  |
+| ------------ | --------------------------------------------------------------------------------------------- | ---------------------- |
+| `base`       | CSS reset, box-sizing, typography defaults                                                    | `styles/base.css`      |
+| `layout`     | App grid, panel sizing, responsive breakpoints                                                | `styles/layout.css`    |
+| `theme`      | All CSS custom properties (colors, spacing, radii, shadows, fonts)                            | `styles/theme.css`     |
+| `components` | Styles for each Web Component (via shadow DOM adoptedStyleSheets or `<style>` in shadow root) | Per-component CSS      |
+| `utilities`  | Helper classes: `.sr-only`, `.truncate`, `.flex-center`, `.gap-*`                             | `styles/utilities.css` |
+| `states`     | Interactive states: `:hover`, `:focus-visible`, `[aria-selected]`, `.active`, `.disabled`     | `styles/states.css`    |
 
 ### CSS Custom Properties (Theme Layer)
 
@@ -289,9 +297,9 @@ All styles are organized into CSS `@layer` declarations, ordered by specificity 
     grid-template-columns: var(--pg-sidebar-width) 1fr var(--pg-inspector-width);
     grid-template-rows: var(--pg-toolbar-height) 1fr auto;
     grid-template-areas:
-      "toolbar  toolbar   toolbar"
-      "sidebar  stage     inspector"
-      "json     json      json";
+      'toolbar  toolbar   toolbar'
+      'sidebar  stage     inspector'
+      'json     json      json';
     height: 100vh;
     overflow: hidden;
   }
@@ -305,7 +313,7 @@ Each Web Component adopts styles from the theme layer plus its own component-lay
 ```typescript
 // In BaseComponent.ts
 const themeSheet = new CSSStyleSheet();
-themeSheet.replaceSync(themeCSS);   // imported from styles/theme.css
+themeSheet.replaceSync(themeCSS); // imported from styles/theme.css
 
 // Each component creates its own sheet
 const componentSheet = new CSSStyleSheet();
@@ -412,6 +420,7 @@ src/styles/
 ```
 
 Import order in `main.ts`:
+
 ```ts
 import './styles/layers.css';
 import './styles/base.css';
@@ -434,38 +443,38 @@ A `<pg-select>` populated from `@wix/motion`'s `cssEasings` export (`packages/mo
 
 **Complete preset list from `cssEasings`:**
 
-| Preset | Value |
-|--------|-------|
-| linear | `linear` |
-| ease | `ease` |
-| easeIn | `ease-in` |
-| easeOut | `ease-out` |
-| easeInOut | `ease-in-out` |
-| sineIn | `cubic-bezier(0.47, 0, 0.745, 0.715)` |
-| sineOut | `cubic-bezier(0.39, 0.575, 0.565, 1)` |
-| sineInOut | `cubic-bezier(0.445, 0.05, 0.55, 0.95)` |
-| quadIn | `cubic-bezier(0.55, 0.085, 0.68, 0.53)` |
-| quadOut | `cubic-bezier(0.25, 0.46, 0.45, 0.94)` |
-| quadInOut | `cubic-bezier(0.455, 0.03, 0.515, 0.955)` |
-| cubicIn | `cubic-bezier(0.55, 0.055, 0.675, 0.19)` |
-| cubicOut | `cubic-bezier(0.215, 0.61, 0.355, 1)` |
-| cubicInOut | `cubic-bezier(0.645, 0.045, 0.355, 1)` |
-| quartIn | `cubic-bezier(0.895, 0.03, 0.685, 0.22)` |
-| quartOut | `cubic-bezier(0.165, 0.84, 0.44, 1)` |
-| quartInOut | `cubic-bezier(0.77, 0, 0.175, 1)` |
-| quintIn | `cubic-bezier(0.755, 0.05, 0.855, 0.06)` |
-| quintOut | `cubic-bezier(0.23, 1, 0.32, 1)` |
-| quintInOut | `cubic-bezier(0.86, 0, 0.07, 1)` |
-| expoIn | `cubic-bezier(0.95, 0.05, 0.795, 0.035)` |
-| expoOut | `cubic-bezier(0.19, 1, 0.22, 1)` |
-| expoInOut | `cubic-bezier(1, 0, 0, 1)` |
-| circIn | `cubic-bezier(0.6, 0.04, 0.98, 0.335)` |
-| circOut | `cubic-bezier(0.075, 0.82, 0.165, 1)` |
-| circInOut | `cubic-bezier(0.785, 0.135, 0.15, 0.86)` |
-| backIn | `cubic-bezier(0.6, -0.28, 0.735, 0.045)` |
-| backOut | `cubic-bezier(0.175, 0.885, 0.32, 1.275)` |
-| backInOut | `cubic-bezier(0.68, -0.55, 0.265, 1.55)` |
-| custom | User-defined via the SVG editor below |
+| Preset     | Value                                     |
+| ---------- | ----------------------------------------- |
+| linear     | `linear`                                  |
+| ease       | `ease`                                    |
+| easeIn     | `ease-in`                                 |
+| easeOut    | `ease-out`                                |
+| easeInOut  | `ease-in-out`                             |
+| sineIn     | `cubic-bezier(0.47, 0, 0.745, 0.715)`     |
+| sineOut    | `cubic-bezier(0.39, 0.575, 0.565, 1)`     |
+| sineInOut  | `cubic-bezier(0.445, 0.05, 0.55, 0.95)`   |
+| quadIn     | `cubic-bezier(0.55, 0.085, 0.68, 0.53)`   |
+| quadOut    | `cubic-bezier(0.25, 0.46, 0.45, 0.94)`    |
+| quadInOut  | `cubic-bezier(0.455, 0.03, 0.515, 0.955)` |
+| cubicIn    | `cubic-bezier(0.55, 0.055, 0.675, 0.19)`  |
+| cubicOut   | `cubic-bezier(0.215, 0.61, 0.355, 1)`     |
+| cubicInOut | `cubic-bezier(0.645, 0.045, 0.355, 1)`    |
+| quartIn    | `cubic-bezier(0.895, 0.03, 0.685, 0.22)`  |
+| quartOut   | `cubic-bezier(0.165, 0.84, 0.44, 1)`      |
+| quartInOut | `cubic-bezier(0.77, 0, 0.175, 1)`         |
+| quintIn    | `cubic-bezier(0.755, 0.05, 0.855, 0.06)`  |
+| quintOut   | `cubic-bezier(0.23, 1, 0.32, 1)`          |
+| quintInOut | `cubic-bezier(0.86, 0, 0.07, 1)`          |
+| expoIn     | `cubic-bezier(0.95, 0.05, 0.795, 0.035)`  |
+| expoOut    | `cubic-bezier(0.19, 1, 0.22, 1)`          |
+| expoInOut  | `cubic-bezier(1, 0, 0, 1)`                |
+| circIn     | `cubic-bezier(0.6, 0.04, 0.98, 0.335)`    |
+| circOut    | `cubic-bezier(0.075, 0.82, 0.165, 1)`     |
+| circInOut  | `cubic-bezier(0.785, 0.135, 0.15, 0.86)`  |
+| backIn     | `cubic-bezier(0.6, -0.28, 0.735, 0.045)`  |
+| backOut    | `cubic-bezier(0.175, 0.885, 0.32, 1.275)` |
+| backInOut  | `cubic-bezier(0.68, -0.55, 0.265, 1.55)`  |
+| custom     | User-defined via the SVG editor below     |
 
 The presets are grouped in the dropdown by category (Standard, Sine, Quad, Cubic, Quart, Quint, Expo, Circ, Back) using `<optgroup>` labels. Selecting a preset updates the SVG visualization. Selecting "custom" enables manual drag editing.
 
@@ -474,6 +483,7 @@ The presets are grouped in the dropdown by category (Standard, Sine, Quad, Cubic
 An inline SVG (200x200 viewBox) that visualizes the cubic-bezier curve and provides draggable control point handles.
 
 **SVG structure:**
+
 ```
 <svg viewBox="-20 -20 240 240">
   <!-- Grid background -->
@@ -496,11 +506,13 @@ An inline SVG (200x200 viewBox) that visualizes the cubic-bezier curve and provi
 ```
 
 **Coordinate mapping** (bezier values 0-1 to SVG viewBox):
+
 - `x` maps to SVG `x`: `bezierX * 200`
 - `y` maps to SVG `y`: `200 - (bezierY * 200)` (inverted, since SVG y goes down)
 - Control points can go outside 0-1 on y-axis (for overshoot), the viewBox has -20 padding
 
 **Drag behavior:**
+
 - `pointerdown` on a handle → capture pointer, track `pointermove`
 - Convert pointer position to SVG coordinates via `SVGSVGElement.getScreenCTM().inverse()`
 - Clamp x to 0-1 range (CSS spec requirement), y unclamped (allows overshoot)
@@ -664,14 +676,15 @@ apps/playground/
 **Files to create**:
 
 1. **`src/library/types.ts`** — `ComponentKey` and `ComponentDefinition` interfaces:
+
    ```ts
    interface ComponentKey {
      key: string;
      label: string;
      isList?: boolean;
-     parentKey?: string;           // For list items: the parent's interact key
-     listContainer?: string;       // CSS selector for the list container within the parent
-     listItemSelector?: string;    // CSS selector for items within the container
+     parentKey?: string; // For list items: the parent's interact key
+     listContainer?: string; // CSS selector for the list container within the parent
+     listItemSelector?: string; // CSS selector for items within the container
    }
 
    interface ComponentDefinition {
@@ -679,8 +692,8 @@ apps/playground/
      name: string;
      description: string;
      keys: ComponentKey[];
-     html: string;     // HTML template string
-     css: string;      // Scoped CSS
+     html: string; // HTML template string
+     css: string; // Scoped CSS
    }
    ```
 
@@ -771,9 +784,9 @@ apps/playground/
 
 7. **`src/components/sidebar/pg-interaction-list.ts`** — lists interactions, add/delete buttons. Each row shows trigger type badge and source element key.
 
-7. **`src/components/json-panel/pg-json-panel.ts`** — `<textarea>` showing `JSON.stringify(config, null, 2)`, editable (parse on blur, update store). Toggle open/closed.
+8. **`src/components/json-panel/pg-json-panel.ts`** — `<textarea>` showing `JSON.stringify(config, null, 2)`, editable (parse on blur, update store). Toggle open/closed.
 
-8. **`src/components/shared/pg-select.ts`**, **`pg-number-input.ts`**, **`pg-text-input.ts`**, **`pg-toggle.ts`** — reusable form controls, styled via `controls.css` theme variables
+9. **`src/components/shared/pg-select.ts`**, **`pg-number-input.ts`**, **`pg-text-input.ts`**, **`pg-toggle.ts`** — reusable form controls, styled via `controls.css` theme variables
 
 **Verification**: Pick "Card" component → "Add Interaction" → pick key `card`, trigger "hover" → JSON panel shows valid `InteractConfig`. Change trigger to "viewEnter" → params form shows threshold slider. The key dropdown only shows keys available for the active component.
 
@@ -871,6 +884,7 @@ apps/playground/
 2. **Upgrade `src/components/shared/pg-easing-picker.ts`** — full composite component:
 
    **Layout** (vertical stack within the component):
+
    ```
    ┌─────────────────────────┐
    │ [Preset dropdown ▼]     │  ← pg-select with named easings
@@ -926,14 +940,14 @@ apps/playground/
 
 ## Critical Files Reference
 
-| File | Purpose |
-|------|---------|
-| `packages/interact/src/types.ts` | All InteractConfig, Effect, Trigger types |
+| File                                     | Purpose                                                 |
+| ---------------------------------------- | ------------------------------------------------------- |
+| `packages/interact/src/types.ts`         | All InteractConfig, Effect, Trigger types               |
 | `packages/interact/src/core/Interact.ts` | `Interact.create()`, `.destroy()`, `.registerEffects()` |
-| `packages/interact/src/web/index.ts` | Web entry point, `defineInteractElement` |
-| `packages/motion-presets/src/index.ts` | All preset exports by category |
-| `apps/demo/vite.config.ts` | Reference for Vite alias pattern |
-| `apps/demo/tsconfig.json` | Reference for tsconfig paths pattern |
+| `packages/interact/src/web/index.ts`     | Web entry point, `defineInteractElement`                |
+| `packages/motion-presets/src/index.ts`   | All preset exports by category                          |
+| `apps/demo/vite.config.ts`               | Reference for Vite alias pattern                        |
+| `apps/demo/tsconfig.json`                | Reference for tsconfig paths pattern                    |
 
 ## Verification (End-to-End)
 

@@ -101,18 +101,20 @@ export class PgInteractionList extends BaseComponent {
     const { interactions } = state.config;
     const selected = state.selectedInteractionIndex;
 
-    const items = interactions.map((interaction, i) => {
-      const triggerLabel = TRIGGER_LABELS[interaction.trigger] || interaction.trigger;
-      const keyLabel = interaction.key || 'no key';
-      const keyClass = interaction.key ? 'key' : 'key empty';
-      return `
+    const items = interactions
+      .map((interaction, i) => {
+        const triggerLabel = TRIGGER_LABELS[interaction.trigger] || interaction.trigger;
+        const keyLabel = interaction.key || 'no key';
+        const keyClass = interaction.key ? 'key' : 'key empty';
+        return `
         <div class="item" aria-selected="${i === selected}" data-index="${i}">
           <span class="badge">${triggerLabel}</span>
           <span class="${keyClass}">${keyLabel}</span>
           <button class="delete-btn" data-delete="${i}">&times;</button>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     this.shadowRoot!.innerHTML = `
       <div class="list">

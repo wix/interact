@@ -59,11 +59,14 @@ export class InteractionController {
 
     if (this.sheet) {
       const rootNode = this.element?.getRootNode() as ShadowRoot | Document;
-      const adoptTarget: { adoptedStyleSheets: CSSStyleSheet[] } =
-        ((rootNode as ShadowRoot).host ? rootNode as ShadowRoot : document) as unknown as { adoptedStyleSheets: CSSStyleSheet[] };
+      const adoptTarget: { adoptedStyleSheets: CSSStyleSheet[] } = ((rootNode as ShadowRoot).host
+        ? (rootNode as ShadowRoot)
+        : document) as unknown as { adoptedStyleSheets: CSSStyleSheet[] };
       const index = adoptTarget.adoptedStyleSheets.indexOf(this.sheet);
       if (index !== -1) {
-        adoptTarget.adoptedStyleSheets = adoptTarget.adoptedStyleSheets.filter((s) => s !== this.sheet);
+        adoptTarget.adoptedStyleSheets = adoptTarget.adoptedStyleSheets.filter(
+          (s) => s !== this.sheet,
+        );
       }
     }
 
@@ -79,8 +82,9 @@ export class InteractionController {
 
   renderStyle(cssRules: string[]) {
     const rootNode = this.element?.getRootNode() as ShadowRoot | Document;
-    const adoptTarget: { adoptedStyleSheets: CSSStyleSheet[] } =
-      ((rootNode as ShadowRoot).host ? rootNode as ShadowRoot : document) as unknown as { adoptedStyleSheets: CSSStyleSheet[] };
+    const adoptTarget: { adoptedStyleSheets: CSSStyleSheet[] } = ((rootNode as ShadowRoot).host
+      ? (rootNode as ShadowRoot)
+      : document) as unknown as { adoptedStyleSheets: CSSStyleSheet[] };
     if (!this.sheet) {
       this.sheet = new CSSStyleSheet();
       void this.sheet.replaceSync(cssRules.join('\n'));

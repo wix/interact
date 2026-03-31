@@ -30,7 +30,12 @@ function detectEffectType(effect: Effect): EffectType {
 function createDefaultEffect(type: EffectType): Effect {
   switch (type) {
     case 'time':
-      return { duration: 500, easing: 'ease', fill: 'both', namedEffect: { type: 'FadeIn' } } as Effect;
+      return {
+        duration: 500,
+        easing: 'ease',
+        fill: 'both',
+        namedEffect: { type: 'FadeIn' },
+      } as Effect;
     case 'scrub':
       return { easing: 'ease', fill: 'both', namedEffect: { type: 'FadeScroll' } } as Effect;
     case 'transition':
@@ -114,19 +119,22 @@ export class PgInteractionEditor extends BaseComponent {
     const keys = component?.keys ?? [];
 
     const interactionRecord = interaction as Record<string, unknown>;
-    const keyOptions = keys.map((k) => {
-      let isSelected: boolean;
-      if (k.isList && k.parentKey) {
-        isSelected = interaction.key === k.parentKey
-          && interactionRecord.listContainer === k.listContainer;
-      } else {
-        isSelected = k.key === interaction.key && !interactionRecord.listContainer;
-      }
-      return `<option value="${k.key}" ${isSelected ? 'selected' : ''}>${k.label}</option>`;
-    }).join('');
+    const keyOptions = keys
+      .map((k) => {
+        let isSelected: boolean;
+        if (k.isList && k.parentKey) {
+          isSelected =
+            interaction.key === k.parentKey && interactionRecord.listContainer === k.listContainer;
+        } else {
+          isSelected = k.key === interaction.key && !interactionRecord.listContainer;
+        }
+        return `<option value="${k.key}" ${isSelected ? 'selected' : ''}>${k.label}</option>`;
+      })
+      .join('');
 
-    const triggerOptions = TRIGGER_TYPES.map((t) =>
-      `<option value="${t.value}" ${t.value === interaction.trigger ? 'selected' : ''}>${t.label}</option>`,
+    const triggerOptions = TRIGGER_TYPES.map(
+      (t) =>
+        `<option value="${t.value}" ${t.value === interaction.trigger ? 'selected' : ''}>${t.label}</option>`,
     ).join('');
 
     this.shadowRoot!.innerHTML = `
@@ -179,10 +187,12 @@ export class PgInteractionEditor extends BaseComponent {
 
     triggerSelect.addEventListener('change', () => {
       const newTrigger = triggerSelect.value as TriggerType;
-      this.store.dispatch(updateInteraction(idx, {
-        trigger: newTrigger,
-        params: undefined,
-      }));
+      this.store.dispatch(
+        updateInteraction(idx, {
+          trigger: newTrigger,
+          params: undefined,
+        }),
+      );
 
       const allowed = getAllowedEffectTypes(newTrigger);
       const effectRefs = (interaction.effects ?? []) as { effectId?: string }[];

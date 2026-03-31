@@ -4,16 +4,32 @@ import type { Effect, TransitionProperty } from '@wix/interact';
 import { updateEffect } from '../../store/actions';
 
 const COMMON_CSS_PROPERTIES = [
-  'opacity', 'transform', 'background-color', 'color', 'border-color',
-  'box-shadow', 'filter', 'clip-path', 'width', 'height',
-  'padding', 'margin', 'border-radius', 'font-size', 'letter-spacing',
+  'opacity',
+  'transform',
+  'background-color',
+  'color',
+  'border-color',
+  'box-shadow',
+  'filter',
+  'clip-path',
+  'width',
+  'height',
+  'padding',
+  'margin',
+  'border-radius',
+  'font-size',
+  'letter-spacing',
 ];
 
 const DEFAULT_DURATION = 300;
 const DEFAULT_DELAY = 0;
 const DEFAULT_EASING = 'ease';
 
-function getSharedTiming(properties: TransitionProperty[]): { duration: number; delay: number; easing: string } {
+function getSharedTiming(properties: TransitionProperty[]): {
+  duration: number;
+  delay: number;
+  easing: string;
+} {
   const first = properties[0];
   return {
     duration: first?.duration ?? DEFAULT_DURATION,
@@ -155,16 +171,17 @@ export class PgTransitionEffectEditor extends BaseComponent {
     }
 
     const properties: TransitionProperty[] =
-      (effect as Record<string, unknown>).transitionProperties as TransitionProperty[] ?? [];
+      ((effect as Record<string, unknown>).transitionProperties as TransitionProperty[]) ?? [];
 
     const { duration, delay, easing } = getSharedTiming(properties);
 
-    const propertyRows = properties.length > 0
-      ? properties.map((prop, i) => this._renderPropertyRow(prop, i)).join('')
-      : '<div class="empty">No properties added yet</div>';
+    const propertyRows =
+      properties.length > 0
+        ? properties.map((prop, i) => this._renderPropertyRow(prop, i)).join('')
+        : '<div class="empty">No properties added yet</div>';
 
-    const propertyOptions = COMMON_CSS_PROPERTIES.map((p) =>
-      `<option value="${p}">${p}</option>`,
+    const propertyOptions = COMMON_CSS_PROPERTIES.map(
+      (p) => `<option value="${p}">${p}</option>`,
     ).join('');
 
     this.shadowRoot!.innerHTML = `
@@ -222,20 +239,29 @@ export class PgTransitionEffectEditor extends BaseComponent {
     return str.replace(/"/g, '&quot;').replace(/</g, '&lt;');
   }
 
-  private _applyTimingToAll(properties: TransitionProperty[], patch: Partial<TransitionProperty>): TransitionProperty[] {
+  private _applyTimingToAll(
+    properties: TransitionProperty[],
+    patch: Partial<TransitionProperty>,
+  ): TransitionProperty[] {
     return properties.map((p) => ({ ...p, ...patch }));
   }
 
-  private _attachListeners(effectId: string, effect: Effect, properties: TransitionProperty[]): void {
+  private _attachListeners(
+    effectId: string,
+    effect: Effect,
+    properties: TransitionProperty[],
+  ): void {
     const shadow = this.shadowRoot!;
 
     const dispatchProps = (updated: TransitionProperty[]) => {
       const { transition: _t, ...rest } = effect as Record<string, unknown>;
       void _t;
-      this.store.dispatch(updateEffect(effectId, {
-        ...rest,
-        transitionProperties: updated,
-      } as Effect));
+      this.store.dispatch(
+        updateEffect(effectId, {
+          ...rest,
+          transitionProperties: updated,
+        } as Effect),
+      );
     };
 
     shadow.getElementById('duration')?.addEventListener('change', (ev) => {
@@ -255,10 +281,16 @@ export class PgTransitionEffectEditor extends BaseComponent {
 
     shadow.getElementById('add-property')?.addEventListener('click', () => {
       const { duration, delay, easing } = getSharedTiming(properties);
-      dispatchProps([...properties, {
-        name: 'transform', value: 'scale(1.05)',
-        duration, delay, easing,
-      }]);
+      dispatchProps([
+        ...properties,
+        {
+          name: 'transform',
+          value: 'scale(1.05)',
+          duration,
+          delay,
+          easing,
+        },
+      ]);
     });
 
     shadow.querySelectorAll('.remove-btn').forEach((btn) => {

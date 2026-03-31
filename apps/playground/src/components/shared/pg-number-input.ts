@@ -72,7 +72,9 @@ export class PgNumberInput extends BaseComponent {
     `;
 
     const numberInput = this.shadowRoot!.querySelector('input[type="number"]') as HTMLInputElement;
-    const rangeInput = this.shadowRoot!.querySelector('input[type="range"]') as HTMLInputElement | null;
+    const rangeInput = this.shadowRoot!.querySelector(
+      'input[type="range"]',
+    ) as HTMLInputElement | null;
 
     numberInput.addEventListener('input', () => {
       if (rangeInput) rangeInput.value = numberInput.value;
@@ -93,8 +95,12 @@ export class PgNumberInput extends BaseComponent {
 
   attributeChangedCallback(name: string, _old: string | null, newVal: string | null): void {
     if (name === 'value' && newVal != null) {
-      const numberInput = this.shadowRoot?.querySelector('input[type="number"]') as HTMLInputElement | null;
-      const rangeInput = this.shadowRoot?.querySelector('input[type="range"]') as HTMLInputElement | null;
+      const numberInput = this.shadowRoot?.querySelector(
+        'input[type="number"]',
+      ) as HTMLInputElement | null;
+      const rangeInput = this.shadowRoot?.querySelector(
+        'input[type="range"]',
+      ) as HTMLInputElement | null;
       if (numberInput && numberInput.value !== newVal) numberInput.value = newVal;
       if (rangeInput && rangeInput.value !== newVal) rangeInput.value = newVal;
     }

@@ -1,7 +1,13 @@
 import { BaseComponent } from '../base/BaseComponent';
 import type { PlaygroundState } from '../../types';
 import type { Condition } from '@wix/interact';
-import { addCondition, updateCondition, removeCondition, updateInteraction, updateEffect } from '../../store/actions';
+import {
+  addCondition,
+  updateCondition,
+  removeCondition,
+  updateInteraction,
+  updateEffect,
+} from '../../store/actions';
 import { generateId } from '../../utils/id';
 
 const CONDITION_TYPES: { value: Condition['type']; label: string }[] = [
@@ -185,13 +191,15 @@ export class PgConditionEditor extends BaseComponent {
       })
       .filter(Boolean) as { id: string; effect: Record<string, unknown> }[];
 
-    const conditionItemsHtml = conditionEntries.length > 0
-      ? conditionEntries.map(([id, cond]) => this._renderConditionItem(id, cond)).join('')
-      : '<div class="empty">No conditions defined</div>';
+    const conditionItemsHtml =
+      conditionEntries.length > 0
+        ? conditionEntries.map(([id, cond]) => this._renderConditionItem(id, cond)).join('')
+        : '<div class="empty">No conditions defined</div>';
 
-    const assignmentHtml = conditionEntries.length > 0 && interaction
-      ? this._renderAssignment(conditionEntries, interactionConditions, effectEntries, state)
-      : '';
+    const assignmentHtml =
+      conditionEntries.length > 0 && interaction
+        ? this._renderAssignment(conditionEntries, interactionConditions, effectEntries, state)
+        : '';
 
     this.shadowRoot!.innerHTML = `
       <div class="divider"></div>
@@ -205,8 +213,9 @@ export class PgConditionEditor extends BaseComponent {
   }
 
   private _renderConditionItem(id: string, condition: Condition): string {
-    const typeOptions = CONDITION_TYPES.map((t) =>
-      `<option value="${t.value}" ${t.value === condition.type ? 'selected' : ''}>${t.label}</option>`,
+    const typeOptions = CONDITION_TYPES.map(
+      (t) =>
+        `<option value="${t.value}" ${t.value === condition.type ? 'selected' : ''}>${t.label}</option>`,
     ).join('');
 
     const placeholder = PREDICATE_PLACEHOLDERS[condition.type] ?? '';
@@ -241,35 +250,41 @@ export class PgConditionEditor extends BaseComponent {
     effectEntries: { id: string; effect: Record<string, unknown> }[],
     _state: PlaygroundState,
   ): string {
-    const interactionChecks = conditionEntries.map(([id]) => {
-      const checked = interactionConditions.includes(id);
-      return `
+    const interactionChecks = conditionEntries
+      .map(([id]) => {
+        const checked = interactionConditions.includes(id);
+        return `
         <div class="assign-row">
           <input type="checkbox" id="assign-int-${id}" data-assign-interaction="${id}" ${checked ? 'checked' : ''}>
           <label for="assign-int-${id}">${id}</label>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
-    const effectChecks = effectEntries.map(({ id: eid, effect }) => {
-      const effConditions = (effect.conditions as string[]) ?? [];
-      const label = this._getEffectLabel(effect);
-      const rows = conditionEntries.map(([cid]) => {
-        const checked = effConditions.includes(cid);
-        return `
+    const effectChecks = effectEntries
+      .map(({ id: eid, effect }) => {
+        const effConditions = (effect.conditions as string[]) ?? [];
+        const label = this._getEffectLabel(effect);
+        const rows = conditionEntries
+          .map(([cid]) => {
+            const checked = effConditions.includes(cid);
+            return `
           <div class="assign-row">
             <input type="checkbox" id="assign-eff-${eid}-${cid}"
               data-assign-effect="${eid}" data-assign-cond="${cid}" ${checked ? 'checked' : ''}>
             <label for="assign-eff-${eid}-${cid}">${cid}</label>
           </div>
         `;
-      }).join('');
+          })
+          .join('');
 
-      return `
+        return `
         <div class="assign-target">Effect: ${label} (${eid})</div>
         ${rows}
       `;
-    }).join('');
+      })
+      .join('');
 
     return `
       <div class="assign-title">Apply to Interaction</div>
@@ -317,10 +332,12 @@ export class PgConditionEditor extends BaseComponent {
       select.addEventListener('change', () => {
         const current = (state.config.conditions ?? {})[condId];
         if (current) {
-          this.store.dispatch(updateCondition(condId, {
-            ...current,
-            type: select.value as Condition['type'],
-          }));
+          this.store.dispatch(
+            updateCondition(condId, {
+              ...current,
+              type: select.value as Condition['type'],
+            }),
+          );
         }
       });
     });
@@ -330,10 +347,12 @@ export class PgConditionEditor extends BaseComponent {
       input.addEventListener('change', () => {
         const current = (state.config.conditions ?? {})[condId];
         if (current) {
-          this.store.dispatch(updateCondition(condId, {
-            ...current,
-            predicate: input.value || undefined,
-          }));
+          this.store.dispatch(
+            updateCondition(condId, {
+              ...current,
+              predicate: input.value || undefined,
+            }),
+          );
         }
       });
     });
@@ -346,9 +365,11 @@ export class PgConditionEditor extends BaseComponent {
           const updated = checkbox.checked
             ? [...current, condId]
             : current.filter((c) => c !== condId);
-          this.store.dispatch(updateInteraction(idx, {
-            conditions: updated.length > 0 ? updated : undefined,
-          }));
+          this.store.dispatch(
+            updateInteraction(idx, {
+              conditions: updated.length > 0 ? updated : undefined,
+            }),
+          );
         });
       });
 
@@ -362,10 +383,12 @@ export class PgConditionEditor extends BaseComponent {
           const updated = checkbox.checked
             ? [...current, condId]
             : current.filter((c) => c !== condId);
-          this.store.dispatch(updateEffect(effectId, {
-            ...effect,
-            conditions: updated.length > 0 ? updated : undefined,
-          }));
+          this.store.dispatch(
+            updateEffect(effectId, {
+              ...effect,
+              conditions: updated.length > 0 ? updated : undefined,
+            }),
+          );
         });
       });
     }

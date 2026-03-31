@@ -16,7 +16,9 @@
   font-weight: 500;
   text-decoration: none;
   border-radius: 6px;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
   cursor: pointer;
   white-space: nowrap;
 }

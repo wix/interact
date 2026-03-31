@@ -128,13 +128,16 @@ export class PgScrubEffectEditor extends BaseComponent {
     const named = getNamedEffect(effect);
 
     const interactionIdx = state.selectedInteractionIndex;
-    const trigger = interactionIdx != null
-      ? (state.config.interactions[interactionIdx]?.trigger ?? 'hover')
-      : 'hover';
+    const trigger =
+      interactionIdx != null
+        ? (state.config.interactions[interactionIdx]?.trigger ?? 'hover')
+        : 'hover';
     const isPointerMove = trigger === 'pointerMove';
 
     const rangeNameOptions = (selected: string) =>
-      RANGE_NAMES.map((n) => `<option value="${n}" ${n === selected ? 'selected' : ''}>${n}</option>`).join('');
+      RANGE_NAMES.map(
+        (n) => `<option value="${n}" ${n === selected ? 'selected' : ''}>${n}</option>`,
+      ).join('');
 
     this.shadowRoot!.innerHTML = `
       <div class="section-title">Animation</div>
@@ -172,7 +175,9 @@ export class PgScrubEffectEditor extends BaseComponent {
         <label for="reversed">Reversed</label>
       </div>
 
-      ${!isPointerMove ? `
+      ${
+        !isPointerMove
+          ? `
       <div class="divider"></div>
       <div class="section-title">Range</div>
 
@@ -211,9 +216,13 @@ export class PgScrubEffectEditor extends BaseComponent {
           </div>
         </div>
       </div>
-      ` : ''}
+      `
+          : ''
+      }
 
-      ${isPointerMove ? `
+      ${
+        isPointerMove
+          ? `
       <div class="divider"></div>
       <div class="section-title">Transition</div>
 
@@ -244,7 +253,9 @@ export class PgScrubEffectEditor extends BaseComponent {
           <label for="centered">Centered to Target</label>
         </div>
       </div>
-      ` : ''}
+      `
+          : ''
+      }
     `;
 
     const picker = this.shadowRoot!.getElementById('named-picker') as HTMLElement & {
@@ -290,7 +301,11 @@ export class PgScrubEffectEditor extends BaseComponent {
       update({ reversed: (e.target as HTMLInputElement).checked });
     });
 
-    const updateRange = (which: 'rangeStart' | 'rangeEnd', field: 'name' | 'offset', value: string) => {
+    const updateRange = (
+      which: 'rangeStart' | 'rangeEnd',
+      field: 'name' | 'offset',
+      value: string,
+    ) => {
       const current = ((effect as Record<string, unknown>)[which] as Record<string, unknown>) ?? {};
       const updated = { ...current, [field]: value || undefined };
       if (!updated.name && !updated.offset) {
@@ -332,10 +347,20 @@ export class PgScrubEffectEditor extends BaseComponent {
     shadow.getElementById('named-picker')?.addEventListener('change', (e) => {
       const namedEffect = (e as CustomEvent).detail;
       if (namedEffect) {
-        const { keyframeEffect: _kf, customEffect: _ce, namedEffect: _ne, ...rest } = effect as Record<string, unknown>;
+        const {
+          keyframeEffect: _kf,
+          customEffect: _ce,
+          namedEffect: _ne,
+          ...rest
+        } = effect as Record<string, unknown>;
         this.store.dispatch(updateEffect(effectId, { ...rest, namedEffect } as Effect));
       } else {
-        const { namedEffect: _ne, keyframeEffect: _kf, customEffect: _ce, ...rest } = effect as Record<string, unknown>;
+        const {
+          namedEffect: _ne,
+          keyframeEffect: _kf,
+          customEffect: _ce,
+          ...rest
+        } = effect as Record<string, unknown>;
         this.store.dispatch(updateEffect(effectId, rest as Effect));
       }
     });
