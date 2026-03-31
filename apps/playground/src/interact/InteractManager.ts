@@ -11,7 +11,6 @@ let presetsRegistered = false;
 
 function ensurePresets(): void {
   if (presetsRegistered) return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Interact.registerEffects(getAllPresets() as any);
   presetsRegistered = true;
 }
