@@ -66,10 +66,10 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 - [x] pg-condition-editor.ts (media/container/selector conditions)
 - [x] pg-sequence-editor.ts (effect list, delay, offset, offsetEasing)
 
-### Phase 6: Easing Picker SVG Editor
+### Phase 6: Easing Picker SVG Editor — DONE
 
-- [ ] src/utils/bezier.ts (parse, format, preset lookup, curve sampling)
-- [ ] Upgrade pg-easing-picker.ts (SVG bezier editor, draggable handles, bidirectional sync)
+- [x] src/utils/bezier.ts (parse, format, preset lookup, curve sampling)
+- [x] Upgrade pg-easing-picker.ts (SVG bezier editor, draggable handles, bidirectional sync)
 
 ### Phase 7: Polish & UX
 
