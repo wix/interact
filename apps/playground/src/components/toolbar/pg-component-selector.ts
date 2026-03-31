@@ -59,10 +59,7 @@ export class PgComponentSelector extends BaseComponent {
       <label for="comp-select">Component</label>
       <select id="comp-select">
         ${components
-          .map(
-            (c) =>
-              `<option value="${c.id}">${c.name} \u2014 ${c.description}</option>`,
-          )
+          .map((c) => `<option value="${c.id}">${c.name} \u2014 ${c.description}</option>`)
           .join('')}
       </select>
     `;
