@@ -200,24 +200,15 @@ export class PgApp extends BaseComponent {
     });
   }
 
-  private _handleKeydown(e: KeyboardEvent): void {
-    // Don't capture when user is typing in inputs
-    const target = e.target as HTMLElement;
-    const tag = target.tagName.toLowerCase();
-    if (tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable) {
-      return;
-    }
+  private _isInputElement(el: HTMLElement): boolean {
+    const tag = el.tagName.toLowerCase();
+    return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable;
+  }
 
-    // Also check shadow DOM active element
-    const active = target.shadowRoot?.activeElement as HTMLElement | null;
-    if (active) {
-      const activeTag = active.tagName.toLowerCase();
-      if (
-        activeTag === 'input' ||
-        activeTag === 'textarea' ||
-        activeTag === 'select' ||
-        active.isContentEditable
-      ) {
+  private _handleKeydown(e: KeyboardEvent): void {
+    // Walk composedPath to detect inputs inside nested shadow DOMs
+    for (const node of e.composedPath()) {
+      if (node instanceof HTMLElement && this._isInputElement(node)) {
         return;
       }
     }

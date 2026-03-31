@@ -29,8 +29,6 @@ export class PgStage extends BaseComponent {
 
       :host(.scroll-mode) .stage-canvas {
         min-height: calc(var(--stage-height-multiplier, 3) * 100%);
-        align-items: flex-start;
-        padding-top: 50%;
       }
 
       .stage-content {
@@ -69,12 +67,14 @@ export class PgStage extends BaseComponent {
     }
 
     this._renderComponent(state.activeComponentId);
+    this._syncScrollPreview(state);
   }
 
   protected onStateChange(state: PlaygroundState, action: Action): void {
     if (action.type === 'SELECT_COMPONENT') {
       this._renderComponent(state.activeComponentId);
     }
+    this._syncScrollPreview(state);
   }
 
   private _renderComponent(componentId: string): void {
@@ -118,6 +118,19 @@ export class PgStage extends BaseComponent {
         (s) => s !== this._librarySheet,
       );
       this._librarySheet = null;
+    }
+  }
+
+  private _syncScrollPreview(state: PlaygroundState): void {
+    this.setScrollMode(state.scrollPreview.enabled, state.scrollPreview.stageHeight);
+
+    const { stickyTop, stickyBottom } = state.scrollPreview;
+    if (stickyTop != null) {
+      this.setStickyPosition(stickyTop, undefined);
+    } else if (stickyBottom != null) {
+      this.setStickyPosition(undefined, stickyBottom);
+    } else {
+      this.setStickyPosition(undefined, undefined);
     }
   }
 

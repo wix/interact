@@ -45,7 +45,7 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 - [x] src/interact/preset-registry.ts (flat catalog from @wix/motion-presets)
 - [x] pg-interaction-editor.ts (trigger type dropdown, source element key selector from active component)
 - [x] pg-trigger-editor.ts (dynamic param forms per trigger type)
-- [x] Scroll stage behavior (stage height expansion for viewProgress, sticky controls)
+- [x] Scroll stage behavior (auto scroll mode for viewEnter/viewProgress, sticky mode toggle, stage height)
 - [x] pg-interaction-list.ts (sidebar list with add/delete, trigger badge + key)
 - [x] src/components/shared/pg-select.ts (reusable dropdown control)
 - [x] src/components/shared/pg-number-input.ts (number input with optional range)
@@ -77,6 +77,21 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 - [x] Keyboard shortcuts (Delete, Ctrl+Z undo)
 - [x] Visual polish (transitions, panel resize handles)
 - [x] Component descriptions in selector
+
+### Phase 8: Keyframe Effect Editor
+
+- [ ] pg-keyframe-editor.ts (keyframe list editor with CSS property/value rows, add/remove/reorder keyframes)
+- [ ] Upgrade pg-time-effect-editor.ts (animation source toggle: Named Effect vs Keyframe Effect, bidirectional switch)
+- [ ] Upgrade pg-scrub-effect-editor.ts (same animation source toggle for scrub effects)
+- [ ] Upgrade pg-effect-editor.ts (detect keyframeEffect in type detection, preserve keyframeEffect in default creation)
+
+### Phase 9: Timeline Panel
+
+- [ ] Refactor bottom panel to tabbed area (replace jsonPanelOpen with bottomPanel: 'none' | 'json' | 'timeline')
+- [ ] pg-timeline-panel.ts (transport controls, effect tracks, time ruler, draggable playhead)
+- [ ] src/timeline/TimelineEngine.ts (creates preview WAAPI animations, coordinates playback, scrubbing, RAF loop)
+- [ ] Wire into InteractManager (expose stage element reference, pause Interact preview during timeline playback)
+- [ ] Update pg-toolbar, pg-app, pg-json-panel for bottom panel tab switching
 
 ---
 
@@ -167,9 +182,9 @@ PlaygroundStore (extends EventTarget)
   │                   | { source: 'sequence', sequenceId: string, effectIndex: number }
   ├── state.jsonPanelOpen: boolean
   └── state.scrollPreview: {                 ← UI-only, not in InteractConfig
-        enabled: boolean                       (stage is in scroll mode)
-        stickyTop?: number                     (sticky top offset px)
-        stickyBottom?: number                  (sticky bottom offset px)
+        enabled: boolean                       (auto-managed: true when trigger is viewEnter/viewProgress)
+        stickyTop?: number                     (sticky top offset px — enables position:sticky)
+        stickyBottom?: number                  (sticky bottom offset px — enables position:sticky)
         stageHeight: number                    (expanded stage height multiplier)
       }
 ```
@@ -588,9 +603,12 @@ apps/playground/
         pg-scrub-effect-editor.ts
         pg-transition-effect-editor.ts
         pg-named-effect-picker.ts
+        pg-keyframe-editor.ts              ← keyframe list editor (CSS property/value rows)
         pg-sequence-editor.ts
         pg-condition-editor.ts
       json-panel/pg-json-panel.ts
+      timeline/
+        pg-timeline-panel.ts         ← timeline UI: transport, tracks, ruler, playhead
       shared/
         pg-select.ts
         pg-number-input.ts
@@ -600,6 +618,8 @@ apps/playground/
     interact/
       InteractManager.ts
       preset-registry.ts
+    timeline/
+      TimelineEngine.ts              ← WAAPI animation creation, playback, scrubbing
     utils/
       dom.ts
       id.ts
@@ -768,19 +788,22 @@ apps/playground/
    - `pointerMove`: hitArea (root/self), axis (x/y)
    - Number/text inputs use `change` events; range sliders use `input` for real-time feedback (they don't lose focus on re-render)
 
-6. **Scroll stage behavior** — when a `viewProgress` (or `viewEnter`) trigger is selected, the stage adapts for scroll preview:
+6. **Scroll stage behavior** — when a `viewProgress` or `viewEnter` trigger is selected, the stage **automatically** enters scroll mode:
 
-   **Stage height expansion**: `pg-stage` switches from `overflow: hidden` to `overflow-y: auto`. The inner content area expands to ~3x the container height (configurable), with the component placed in the vertical center. This creates enough scroll distance to preview scroll-driven animations.
+   **Auto scroll mode**: Selecting a `viewProgress` or `viewEnter` trigger automatically enables scroll mode on the stage. Switching to any other trigger automatically disables it. There is no manual toggle for scroll mode — it is driven entirely by the selected trigger type.
 
-   **Sticky position controls**: A `pg-sticky-controls` sub-component appears in the inspector when `viewProgress` is the active trigger. It provides:
-   - **Enable sticky** toggle — applies `position: sticky` to the component's wrapper on stage
-   - **Sticky top** — number input (px) for `top` offset (how far from the top of the scroll container the element sticks)
-   - **Sticky bottom** — number input (px) for `bottom` offset (for bottom-sticky behavior, implemented via a wrapper with `display: flex; flex-direction: column-reverse`)
-   - These values are stored in `PlaygroundState` as `scrollPreview: { enabled: boolean; stickyTop?: number; stickyBottom?: number; stageHeight: number }` — they're UI-only state, not part of InteractConfig
+   **Stage height expansion**: `pg-stage` switches from `overflow: hidden` to `overflow-y: auto`. The inner content area expands to ~3x the container height (configurable via a slider), with the component placed in the vertical center. This creates enough scroll distance to preview scroll-driven animations.
 
-   **Behavior**: When the user scrolls the stage, the `viewProgress` scrub effect animates the component in real-time based on scroll position. The sticky controls allow previewing parallax-style effects where the element remains in view during scroll.
+   **Sticky mode toggle**: A "Scroll Preview" section appears in the trigger params area for both `viewProgress` and `viewEnter` triggers. It provides:
+   - **Stage height multiplier** — range slider (2-10x) controlling how tall the scrollable area is
+   - **Enable sticky mode** checkbox — when checked, applies `position: sticky` to the component's `.stage-content` wrapper on stage and shows the top/bottom offset fields. Defaults to `top: 0px` when first enabled.
+   - **Sticky top** — number input (px) for `top` offset (how far from the top of the scroll container the element sticks). Setting top clears bottom.
+   - **Sticky bottom** — number input (px) for `bottom` offset (simple `bottom: <length>` on the sticky element). Setting bottom clears top.
+   - These values are stored in `PlaygroundState` as `scrollPreview: { enabled: boolean; stickyTop?: number; stickyBottom?: number; stageHeight: number }` — they're UI-only state, not part of InteractConfig. `enabled` tracks whether the stage is in scroll mode (auto-managed by trigger type), while `stickyTop`/`stickyBottom` control the optional sticky positioning.
 
-   **Reset**: When the trigger is changed away from `viewProgress`/`viewEnter`, the stage reverts to its normal non-scrollable layout.
+   **Behavior**: When the user scrolls the stage, scroll-driven effects animate in real-time. The sticky controls allow previewing parallax-style effects where the element remains in view during scroll.
+
+   **Reset**: When the trigger is changed away from `viewProgress`/`viewEnter`, the stage reverts to its normal non-scrollable layout and sticky positioning is cleared.
 
 7. **`src/components/sidebar/pg-interaction-list.ts`** — lists interactions, add/delete buttons. Each row shows trigger type badge and source element key.
 
@@ -935,6 +958,392 @@ apps/playground/
 4. **Component preview thumbnails** in the selector dropdown
 
 **Verification**: Full round-trip: pick component, add interactions, export JSON, clear, import JSON → identical state restored.
+
+---
+
+### Phase 8: Keyframe Effect Editor
+
+**Goal**: Let users author custom `keyframeEffect` animations as an alternative to named presets. The `keyframeEffect` property (`{ name: string; keyframes: Keyframe[] }`) is the primary way to define custom CSS-property animations in Interact. It works with both Time effects (all event-based triggers) and Scrub effects (viewProgress, pointerMove). This phase adds a visual keyframe list editor and wires it into the existing effect editors alongside the existing named-effect picker.
+
+**Background — `keyframeEffect` vs `namedEffect`:**
+
+Both are members of the `EffectEffectProperty` union on every effect:
+
+```ts
+type EffectEffectProperty =
+  | { keyframeEffect: MotionKeyframeEffect }   // custom keyframes (this phase)
+  | { namedEffect: NamedEffect }               // preset from @wix/motion-presets (existing)
+  | { customEffect: ... }                      // JS callback (not GUI-authorable)
+```
+
+A `keyframeEffect` has the shape `{ name: string; keyframes: Keyframe[] }` where each `Keyframe` is a plain object of CSS properties in camelCase (the standard Web Animations API `Keyframe` type). Examples:
+
+```ts
+// Simple fade
+keyframeEffect: {
+  name: 'fade',
+  keyframes: [{ opacity: 0 }, { opacity: 1 }]
+}
+
+// Multi-property with explicit offsets
+keyframeEffect: {
+  name: 'slide-rotate',
+  keyframes: [
+    { offset: 0, transform: 'translateX(-100px) rotate(-10deg)', opacity: 0 },
+    { offset: 0.6, opacity: 1 },
+    { offset: 1, transform: 'translateX(0) rotate(0deg)', opacity: 1 }
+  ]
+}
+```
+
+Timing properties (`duration`, `easing`, `fill`, `delay`, `iterations`, `alternate`, `reversed`) live on the effect alongside `keyframeEffect` — exactly the same as when using `namedEffect`. The only change is which animation source property is present.
+
+**Files to create/modify:**
+
+1. **`src/components/inspector/pg-keyframe-editor.ts`** — new component: the keyframe list editor
+
+   **Layout** (vertical stack):
+
+   ```
+   ┌─────────────────────────────────────┐
+   │ Effect Name: [___________________]  │  ← text input for keyframeEffect.name
+   ├─────────────────────────────────────┤
+   │ Keyframe 1                    [×]   │  ← header with remove button
+   │  offset: [0__]                      │  ← optional offset (0-1, step 0.01)
+   │  ┌──────────────┬─────────────┐     │
+   │  │ Property     │ Value       │     │  ← CSS property name + value
+   │  │ [opacity   ] │ [0        ] │     │
+   │  │ [transform ] │ [scale(0) ] │     │
+   │  │ + add property              │     │
+   │  └──────────────┴─────────────┘     │
+   ├─────────────────────────────────────┤
+   │ Keyframe 2                    [×]   │
+   │  offset: [1__]                      │
+   │  ┌──────────────┬─────────────┐     │
+   │  │ [opacity   ] │ [1        ] │     │
+   │  │ [transform ] │ [scale(1) ] │     │
+   │  │ + add property              │     │
+   │  └──────────────┴─────────────┘     │
+   ├─────────────────────────────────────┤
+   │         [+ Add Keyframe]            │
+   └─────────────────────────────────────┘
+   ```
+
+   **Data model**: The component manages a `MotionKeyframeEffect` object:
+   ```ts
+   {
+     name: string;               // user-chosen identifier
+     keyframes: Keyframe[];      // array of keyframe objects
+   }
+   ```
+
+   Each `Keyframe` is a plain `Record<string, string | number>` plus an optional `offset` (0-1). The editor represents each keyframe as a list of CSS property/value rows.
+
+   **Behavior:**
+   - `setKeyframeEffect(effect: { name: string; keyframes: Keyframe[] } | null)` — called by parent to populate
+   - On any change (name, keyframe property/value, offset, add/remove), emit a `change` CustomEvent with `detail: { name, keyframes }` (the full `keyframeEffect` object)
+   - "Add Keyframe" button appends `{}` (empty keyframe) to the array
+   - Each keyframe card has:
+     - Optional `offset` number input (0-1, step 0.01). Omitted by default; show only when user explicitly sets it or when there are 3+ keyframes
+     - Property rows: each has a text input for CSS property name (with `datalist` autocomplete of common CSS properties: `opacity`, `transform`, `background-color`, `color`, `clip-path`, `filter`, `border-radius`, `box-shadow`, `width`, `height`, `padding`, `margin`, `font-size`, `letter-spacing`) and a text input for value
+     - "+ add property" button appends a new empty property row
+     - "×" button removes the property row (min 1 property per keyframe)
+   - "×" button on keyframe header removes that keyframe (min 2 keyframes enforced — button hidden when at 2)
+   - Property names use camelCase in the data model but the input accepts both `background-color` and `backgroundColor` — convert kebab-case to camelCase on blur (the Web Animations API requires camelCase)
+   - All inputs use `change` events (not `input`) to avoid focus loss from store-triggered re-renders
+   - Default new keyframe effect: `{ name: 'custom', keyframes: [{ opacity: 0 }, { opacity: 1 }] }`
+
+   **Styles**: Follows the same visual patterns as `pg-sequence-editor` — keyframe cards use `.pg-color-bg-tertiary` background with padding, property rows are compact field-rows inside them. Uses shared controls.css classes.
+
+2. **Upgrade `src/components/inspector/pg-time-effect-editor.ts`** — add animation source toggle
+
+   Currently the "Animation" section renders only `<pg-named-effect-picker>`. Change it to:
+
+   **Layout change:**
+   ```
+   ┌─────────────────────────────────────┐
+   │ Animation Source                     │
+   │ ( ) Named Effect  ( ) Keyframes    │  ← radio toggle
+   ├─────────────────────────────────────┤
+   │ [pg-named-effect-picker]            │  ← shown when "Named Effect" selected
+   │         — OR —                      │
+   │ [pg-keyframe-editor]                │  ← shown when "Keyframes" selected
+   └─────────────────────────────────────┘
+   ```
+
+   **Behavior:**
+   - Detect current source from the effect object: if `namedEffect` is present → "Named Effect"; if `keyframeEffect` is present → "Keyframes". Default to "Named Effect" for new effects.
+   - When switching from Named Effect → Keyframes:
+     - Strip `namedEffect` property from the effect
+     - Add a default `keyframeEffect: { name: 'custom', keyframes: [{ opacity: 0 }, { opacity: 1 }] }`
+     - Dispatch `updateEffect`
+   - When switching from Keyframes → Named Effect:
+     - Strip `keyframeEffect` property from the effect
+     - Add a default `namedEffect: { type: 'FadeIn' }` (or the trigger-appropriate default)
+     - Dispatch `updateEffect`
+   - The timing properties below (duration, easing, fill, etc.) remain unchanged — they apply identically to both sources
+   - Wire `pg-keyframe-editor`'s `change` event to update the effect's `keyframeEffect` property
+
+3. **Upgrade `src/components/inspector/pg-scrub-effect-editor.ts`** — same animation source toggle
+
+   Same radio toggle pattern as the time effect editor. When "Keyframes" is selected, show `<pg-keyframe-editor>` instead of `<pg-named-effect-picker>`.
+
+   - Default keyframe effect for scrub: `{ name: 'custom-scroll', keyframes: [{ opacity: 0 }, { opacity: 1 }] }`
+   - When switching from Named Effect → Keyframes: strip `namedEffect`, add default `keyframeEffect`
+   - When switching from Keyframes → Named Effect: strip `keyframeEffect`, add default `namedEffect: { type: 'FadeScroll' }` (or `TrackMouse` for pointerMove trigger)
+   - Allowed named effect categories remain unchanged (Scroll for viewProgress, Mouse for pointerMove)
+
+4. **Upgrade `src/components/inspector/pg-effect-editor.ts`** — minor changes
+
+   - `detectEffectType`: already handles `keyframeEffect` correctly (a TimeEffect with `keyframeEffect` still has `duration`, a ScrubEffect with `keyframeEffect` still lacks `duration`). No change needed to detection logic.
+   - `createDefaultEffect`: no change — defaults still use `namedEffect`. The user switches to keyframes via the radio toggle in the sub-editor.
+
+5. **Register in `src/main.ts`** — add import for the new component:
+   ```ts
+   import './components/inspector/pg-keyframe-editor';
+   ```
+
+**File structure addition:**
+```
+      inspector/
+        ...
+        pg-keyframe-editor.ts              ← keyframe list editor (CSS property/value rows)
+```
+
+**Verification**: Pick "Card" → add a hover interaction on `card` → add a Time effect → switch "Animation Source" to "Keyframes" → editor shows two keyframes with `opacity: 0` and `opacity: 1` → change name to `scale-fade` → add `transform` property to keyframe 1 with value `scale(0.5)` → add `transform` property to keyframe 2 with value `scale(1)` → hover over card on stage → it fades and scales in. Switch to "Named Effect" → effect resets to FadeIn preset → hover still works. Open JSON panel → `keyframeEffect` / `namedEffect` property reflects the active source. Switch component to "Hero Section" → add viewProgress interaction → add Scrub effect → switch to "Keyframes" → add scroll-driven keyframes → scroll stage → animation plays on scroll progress. Export JSON → re-import → keyframeEffect preserved correctly.
+
+---
+
+### Phase 9: Timeline Panel
+
+**Goal**: Add a togglable bottom panel with a visual timeline that shows each effect as a horizontal track, a time ruler, transport controls (play/pause/stop), and a draggable playhead that tracks and controls animation progress. The timeline creates its own preview animations on the stage elements using the Web Animations API, independent of Interact's trigger-based system.
+
+**Background — why independent animations:**
+
+Interact's animations are trigger-driven (hover, click, scroll, etc.) — they start when a trigger fires, not when a "Play" button is pressed. The timeline needs to play all effects simultaneously from a single global playhead. To achieve this, the `TimelineEngine` creates its own WAAPI `Animation` objects directly on the stage's target elements, pauses them immediately, and controls them via `animation.currentTime`. This avoids fighting with Interact's internal lifecycle and gives full scrubbing control.
+
+**Bottom panel architecture — tabbed approach:**
+
+Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' | 'json' | 'timeline'` enum. Both the JSON panel and the timeline panel share the same `json` grid area and the same resize handle. Only one is visible at a time. The toolbar shows "JSON" and "Timeline" buttons — clicking one opens it (or toggles it if already active). The existing `pg-json-panel` component is updated to check `bottomPanel === 'json'` instead of `jsonPanelOpen`.
+
+```
+┌───────────────────────────────────────────────────────────────────┐
+│ Toolbar:  [Component ▼]           [Import] [Export] [JSON] [Timeline] [Clear] │
+├───────────┬────────────────────────────────────┬──────────────────┤
+│ Sidebar   │            Stage                   │    Inspector     │
+│           │                                    │                  │
+├───────────┴─── resize handle ──────────────────┴──────────────────┤
+│ Bottom Panel (JSON or Timeline)                                   │
+│                                                                   │
+└───────────────────────────────────────────────────────────────────┘
+```
+
+**Files to create:**
+
+1. **`src/timeline/TimelineEngine.ts`** — animation creation and playback controller
+
+   Manages preview animations independently of Interact. Stateless class that operates on a set of `TrackInfo` descriptors.
+
+   ```ts
+   interface TrackInfo {
+     effectId: string;
+     label: string;            // display name (e.g., "FadeIn", "opacity → 1", effect ID)
+     targetElement: Element | null; // resolved from stage shadow DOM
+     delay: number;            // ms (from effect.delay or sequence offset)
+     duration: number;         // ms (from effect.duration; scrub effects use a default of 1000ms)
+     keyframes: Keyframe[];    // resolved keyframes (or placeholder for namedEffect)
+     easing: string;
+     iterations: number;
+     fill: FillMode;
+     isScrub: boolean;         // true if no duration (viewProgress/pointerMove effect)
+   }
+   ```
+
+   **Effect → TrackInfo resolution:**
+   - For each effect in `config.effects`:
+     - If `keyframeEffect` present: use its keyframes directly
+     - If `namedEffect` present: use a placeholder fade keyframes `[{ opacity: 0.3 }, { opacity: 1 }]` and label with the preset name (resolving real preset keyframes is complex and out of scope for this phase)
+     - If `transitionProperties` present: convert to equivalent keyframes (property name → `[{ [name]: 'initial' }, { [name]: value }]`)
+   - Timing: `delay` from effect + any sequence stagger offset, `duration` from effect (or 1000ms default for scrub effects)
+   - `targetElement`: resolved by finding `[data-interact-key="<key>"]` in the stage's shadow DOM. Falls back to the interaction's key if the effect doesn't specify one.
+
+   **Public API:**
+
+   ```ts
+   class TimelineEngine {
+     constructor(stageRoot: ShadowRoot)
+
+     // Build tracks from current config
+     buildTracks(config: InteractConfig): TrackInfo[]
+
+     // Create paused WAAPI animations for all tracks. Call after buildTracks.
+     createAnimations(tracks: TrackInfo[]): void
+
+     // Destroy all preview animations (cancel + remove)
+     destroyAnimations(): void
+
+     // Transport
+     play(): void         // resume from current time
+     pause(): void        // freeze at current time
+     stop(): void         // pause + seek to 0
+
+     // Scrubbing
+     seekTo(timeMs: number): void   // set currentTime on all animations
+     get currentTime(): number      // current playhead position in ms
+     get totalDuration(): number    // max(delay + duration * iterations) across all tracks
+     get isPlaying(): boolean       // true if RAF loop is active
+
+     // Progress observation — calls back on every frame while playing
+     onTick(callback: (timeMs: number) => void): void
+   }
+   ```
+
+   **Playback loop**: When `play()` is called, a `requestAnimationFrame` loop starts. On each frame, it reads the first animation's `currentTime`, calls the `onTick` callback (so the panel can update the playhead position), and checks if all animations are finished. When all finish or `currentTime >= totalDuration`, auto-pause.
+
+   **Interaction with InteractManager**: When `createAnimations()` is called, it dispatches a custom event (or calls a setter) to tell InteractManager to **pause** — `Interact.destroy()` the current instance so trigger-based animations don't conflict with timeline-controlled ones. When `destroyAnimations()` is called (panel closes or tab switches away), InteractManager re-applies the config.
+
+2. **`src/components/timeline/pg-timeline-panel.ts`** — the timeline UI component
+
+   **Layout:**
+
+   ```
+   ┌──────────────────────────────────────────────────────────────────────┐
+   │ [▶] [⏸] [⏹]  00:00.000 / 02:00.000                               │ ← transport bar
+   ├───────────┬──────────────────────────────────────────────────────────┤
+   │           │  0ms    250ms   500ms   750ms   1000ms  1250ms  1500ms │ ← time ruler
+   │  TRACKS   ├──────────────────────────────────────────────────────────┤
+   │           │  ┃ (playhead — vertical line, draggable)               │
+   ├───────────┼──────────────────────────────────────────────────────────┤
+   │  FadeIn   │  ░░░░████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░ │ ← track bar
+   │  ScaleUp  │  ░░░░░░░░░░██████████████████████████░░░░░░░░░░░░░░░░ │
+   │  SlideIn  │  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │
+   └───────────┴──────────────────────────────────────────────────────────┘
+   ```
+
+   **Structure** (HTML within shadow DOM):
+   - **Transport bar** (top): flexbox row with play/pause/stop icon buttons + time display (`current / total`). Buttons use `--pg-color-accent` styling.
+   - **Track area** (below): two-column layout — fixed-width **label column** (120px, shows effect name/type) and a flexible **timeline column** (scroll horizontally if content exceeds width).
+   - **Time ruler**: a thin strip at the top of the timeline column with tick marks at regular intervals. Interval is auto-calculated: pick a round number (100ms, 250ms, 500ms, 1s, 2s) so roughly 8-12 ticks fit.
+   - **Track lanes**: each effect gets a horizontal row. Inside the timeline column, a colored bar is positioned at `left: (delay / totalDuration) * 100%` with `width: (duration / totalDuration) * 100%`. The bar uses `--pg-color-accent` with opacity. A progress fill overlay inside the bar shows how much of that effect has played (driven by `onTick`).
+   - **Playhead**: an absolutely-positioned vertical line (2px wide, `--pg-color-danger` or a bright accent) spanning the full track area height. Its `left` position is `(currentTime / totalDuration) * 100%` of the timeline column.
+   - **Empty state**: when no effects exist, show "Add effects to see the timeline".
+
+   **Track bar colors:**
+   - Time effects: `--pg-color-accent` (indigo)
+   - Scrub effects: `--pg-color-success` (green)
+   - Transition effects: `--pg-color-accent-hover` (lighter indigo)
+
+   **Playhead drag interaction:**
+   - `pointerdown` on playhead → `setPointerCapture`, track `pointermove`
+   - Convert pointer X to time via the timeline column's bounding rect: `time = (clientX - rect.left) / rect.width * totalDuration`
+   - Clamp to `[0, totalDuration]`
+   - Call `engine.seekTo(time)` on each move
+   - Also: clicking anywhere on the timeline column (not on playhead) jumps the playhead to that time
+
+   **Clicking a track**: selects that effect in the inspector (dispatches `selectEffect(effectId, { source: 'interaction' })`), allowing the user to edit it while seeing its timeline position.
+
+   **Lifecycle:**
+   - On `render()` / `onStateChange()`: if `bottomPanel === 'timeline'`, build tracks from `state.config` via `TimelineEngine.buildTracks()`, create animations, render the track layout. If switching away from timeline, destroy animations.
+   - On config change while timeline is open: rebuild tracks and recreate animations (debounced, same as InteractManager).
+   - On component disconnect: destroy animations.
+
+   **Styles**: follows the same dark-theme patterns as other panels — `--pg-color-bg-secondary` background, `--pg-color-border` dividers, `--pg-font-mono` for time display.
+
+**Files to modify:**
+
+3. **`src/types.ts`** — replace `jsonPanelOpen` with `bottomPanel`
+
+   ```ts
+   export type BottomPanel = 'none' | 'json' | 'timeline';
+
+   export interface PlaygroundState {
+     // ... existing properties ...
+     bottomPanel: BottomPanel;          // replaces jsonPanelOpen: boolean
+     // ... rest ...
+   }
+   ```
+
+   Add new action types:
+   ```ts
+   | { type: 'SET_BOTTOM_PANEL'; payload: BottomPanel }
+   ```
+
+   Remove `TOGGLE_JSON_PANEL` action type (replaced by `SET_BOTTOM_PANEL`).
+
+4. **`src/store/actions.ts`** — replace `toggleJsonPanel` with `setBottomPanel`
+
+   ```ts
+   export const setBottomPanel = (panel: BottomPanel): Action => ({
+     type: 'SET_BOTTOM_PANEL',
+     payload: panel,
+   });
+   ```
+
+   For toolbar button behavior: clicking "JSON" dispatches `setBottomPanel(current === 'json' ? 'none' : 'json')`. Same toggle pattern for "Timeline".
+
+5. **`src/store/reducer.ts`** — handle `SET_BOTTOM_PANEL`
+
+   ```ts
+   case 'SET_BOTTOM_PANEL':
+     return { ...state, bottomPanel: action.payload };
+   ```
+
+   Update `createInitialState()`: replace `jsonPanelOpen: false` with `bottomPanel: 'none'`.
+
+6. **`src/components/toolbar/pg-toolbar.ts`** — add Timeline button, update JSON button
+
+   Add a "Timeline" button next to "JSON". Both use toggle behavior:
+   - JSON button: `setBottomPanel(state.bottomPanel === 'json' ? 'none' : 'json')`
+   - Timeline button: `setBottomPanel(state.bottomPanel === 'timeline' ? 'none' : 'timeline')`
+   - Active button gets a visual highlight (e.g., `--pg-color-accent-muted` background)
+
+   Toolbar needs to subscribe to state changes to update button active states (override `onStateChange`).
+
+7. **`src/components/json-panel/pg-json-panel.ts`** — use `bottomPanel` instead of `jsonPanelOpen`
+
+   Change `state.jsonPanelOpen` references to `state.bottomPanel === 'json'`. The panel visibility logic remains the same (`:host(.open)` CSS class).
+
+8. **`src/components/app/pg-app.ts`** — update resize handle visibility
+
+   The bottom resize handle should be visible when `bottomPanel !== 'none'` (regardless of which tab). Update `_updateJsonHandle` → `_updateBottomHandle`:
+   ```ts
+   private _updateBottomHandle(panel: BottomPanel): void {
+     const handle = this.shadowRoot?.getElementById('resize-bottom');
+     if (handle) handle.classList.toggle('visible', panel !== 'none');
+   }
+   ```
+
+   Update `onStateChange` to react to `SET_BOTTOM_PANEL` action (instead of `TOGGLE_JSON_PANEL`).
+
+9. **`src/interact/InteractManager.ts`** — expose stage element, add pause/resume
+
+   Add:
+   ```ts
+   export function getStageElement(): HTMLElement | null { return stageEl; }
+   export function pauseInteract(): void { /* destroy current instance, set paused flag */ }
+   export function resumeInteract(): void { /* clear paused flag, re-apply config */ }
+   ```
+
+   When `paused`, the state-change listener skips `apply()`. This prevents Interact from recreating animations while the timeline has control.
+
+10. **`src/main.ts`** — register timeline panel, add to DOM
+
+    ```ts
+    import './components/timeline/pg-timeline-panel';
+    ```
+
+    Add `<pg-timeline-panel></pg-timeline-panel>` as a child of `<pg-app>`, after `<pg-json-panel>`. Both share the `json` grid area.
+
+**File structure additions:**
+```
+    timeline/
+      TimelineEngine.ts              ← WAAPI animation creation, playback, scrubbing
+    components/
+      timeline/
+        pg-timeline-panel.ts         ← timeline UI: transport, tracks, ruler, playhead
+```
+
+**Verification**: Pick "Card" → add a hover interaction on `card` with a Time effect (FadeIn, 500ms, 200ms delay) → add a second Time effect (scale keyframes, 800ms, no delay) → click "Timeline" button in toolbar → bottom panel opens showing timeline tab → two track lanes visible: "FadeIn" bar starts at 200ms and spans to 700ms, "scale" bar starts at 0ms and spans to 800ms → time ruler shows ticks from 0ms to 800ms → click Play → playhead moves left to right, track bars fill with progress color as playhead crosses them, card on stage animates (fades in after 200ms, scales over 800ms) → click Pause → playhead stops, animations freeze mid-progress → drag playhead to 400ms → card shows its state at that moment → click Stop → playhead jumps to 0, animations reset → click a track label → that effect is selected in the inspector → switch to "JSON" tab → JSON panel shows, timeline hidden → switch back to "Timeline" → tracks rebuild from current config → close bottom panel → Interact resumes normal trigger-based preview.
 
 ---
 

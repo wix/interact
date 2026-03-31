@@ -102,6 +102,8 @@ export class PgTriggerEditor extends BaseComponent {
   }
 
   protected render(state: PlaygroundState): void {
+    this._autoSyncScrollEnabled(state);
+
     const idx = state.selectedInteractionIndex;
     if (idx == null) {
       this.shadowRoot!.innerHTML = '';
@@ -126,7 +128,7 @@ export class PgTriggerEditor extends BaseComponent {
         html += this._renderEventParams(params, isTransition);
         break;
       case 'viewEnter':
-        html += this._renderViewEnterParams(params);
+        html += this._renderViewEnterParams(params, state);
         break;
       case 'viewProgress':
         html += this._renderViewProgressParams(params, state);
@@ -173,7 +175,7 @@ export class PgTriggerEditor extends BaseComponent {
     `;
   }
 
-  private _renderViewEnterParams(params: Record<string, unknown>): string {
+  private _renderViewEnterParams(params: Record<string, unknown>, state: PlaygroundState): string {
     const type = (params.type as string) ?? 'once';
     const threshold = (params.threshold as number) ?? 0.2;
     const inset = (params.inset as string) ?? '';
@@ -201,6 +203,7 @@ export class PgTriggerEditor extends BaseComponent {
         <label>Inset</label>
         <input type="text" class="pg-input" id="param-inset" value="${inset}" placeholder="e.g. 20% 10%">
       </div>
+      ${this._renderScrollPreviewControls(state)}
     `;
   }
 
@@ -208,19 +211,32 @@ export class PgTriggerEditor extends BaseComponent {
     _params: Record<string, unknown>,
     state: PlaygroundState,
   ): string {
-    const { scrollPreview } = state;
-
     return `
       <span class="empty">No trigger params for viewProgress.</span>
+      ${this._renderScrollPreviewControls(state)}
+    `;
+  }
+
+  private _renderScrollPreviewControls(state: PlaygroundState): string {
+    const { scrollPreview } = state;
+    const hasStickyTop = scrollPreview.stickyTop != null;
+    const hasStickyBottom = scrollPreview.stickyBottom != null;
+    const stickyEnabled = hasStickyTop || hasStickyBottom;
+
+    return `
       <div class="sticky-section">
-        <div class="sticky-title">Stage Scroll Preview</div>
+        <div class="sticky-title">Scroll Preview</div>
+        <div class="field">
+          <label>Stage Height (multiplier)</label>
+          <input type="range" id="stage-height" min="2" max="10" step="0.5" value="${scrollPreview.stageHeight}">
+        </div>
         <div class="field">
           <label>
-            <input type="checkbox" id="scroll-enable" ${scrollPreview.enabled ? 'checked' : ''}>
-            Enable scroll mode
+            <input type="checkbox" id="sticky-enable" ${stickyEnabled ? 'checked' : ''}>
+            Enable sticky mode
           </label>
         </div>
-        <div class="field-row">
+        <div class="field-row" ${!stickyEnabled ? 'style="display:none"' : ''} id="sticky-fields">
           <div class="field">
             <label>Sticky Top (px)</label>
             <input type="number" class="pg-input" id="sticky-top" value="${scrollPreview.stickyTop ?? ''}" placeholder="none">
@@ -229,10 +245,6 @@ export class PgTriggerEditor extends BaseComponent {
             <label>Sticky Bottom (px)</label>
             <input type="number" class="pg-input" id="sticky-bottom" value="${scrollPreview.stickyBottom ?? ''}" placeholder="none">
           </div>
-        </div>
-        <div class="field">
-          <label>Stage Height (multiplier)</label>
-          <input type="range" id="stage-height" min="2" max="10" step="0.5" value="${scrollPreview.stageHeight}">
         </div>
       </div>
     `;
@@ -330,66 +342,54 @@ export class PgTriggerEditor extends BaseComponent {
       update({ effectId: (e.target as HTMLSelectElement).value });
     });
 
-    // Scroll preview controls
-    if (form === 'viewProgress') {
-      shadow.getElementById('scroll-enable')?.addEventListener('change', (e) => {
-        const enabled = (e.target as HTMLInputElement).checked;
-        this.store.dispatch(setScrollPreview({ enabled }));
-        const stage = document.querySelector('pg-stage') as
-          | (HTMLElement & { setScrollMode: (e: boolean, h?: number) => void })
-          | null;
-        stage?.setScrollMode(enabled, state.scrollPreview.stageHeight);
+    // Scroll preview controls (shown for both viewEnter and viewProgress)
+    if (form === 'viewProgress' || form === 'viewEnter') {
+      shadow.getElementById('stage-height')?.addEventListener('input', (e) => {
+        const multiplier = parseFloat((e.target as HTMLInputElement).value);
+        this.store.dispatch(setScrollPreview({ stageHeight: multiplier }));
+      });
+
+      shadow.getElementById('sticky-enable')?.addEventListener('change', (e) => {
+        const checked = (e.target as HTMLInputElement).checked;
+        if (checked) {
+          this.store.dispatch(setScrollPreview({ stickyTop: 0 }));
+        } else {
+          this.store.dispatch(setScrollPreview({ stickyTop: undefined, stickyBottom: undefined }));
+        }
       });
 
       shadow.getElementById('sticky-top')?.addEventListener('change', (e) => {
         const val = (e.target as HTMLInputElement).value;
         const top = val ? parseInt(val, 10) : undefined;
         this.store.dispatch(setScrollPreview({ stickyTop: top, stickyBottom: undefined }));
-        const stage = document.querySelector('pg-stage') as
-          | (HTMLElement & { setStickyPosition: (t?: number, b?: number) => void })
-          | null;
-        stage?.setStickyPosition(top, undefined);
       });
 
       shadow.getElementById('sticky-bottom')?.addEventListener('change', (e) => {
         const val = (e.target as HTMLInputElement).value;
         const bottom = val ? parseInt(val, 10) : undefined;
         this.store.dispatch(setScrollPreview({ stickyBottom: bottom, stickyTop: undefined }));
-        const stage = document.querySelector('pg-stage') as
-          | (HTMLElement & { setStickyPosition: (t?: number, b?: number) => void })
-          | null;
-        stage?.setStickyPosition(undefined, bottom);
-      });
-
-      shadow.getElementById('stage-height')?.addEventListener('input', (e) => {
-        const multiplier = parseFloat((e.target as HTMLInputElement).value);
-        this.store.dispatch(setScrollPreview({ stageHeight: multiplier }));
-        const stage = document.querySelector('pg-stage') as
-          | (HTMLElement & { setScrollMode: (e: boolean, h?: number) => void })
-          | null;
-        if (state.scrollPreview.enabled) {
-          stage?.setScrollMode(true, multiplier);
-        }
       });
     }
   }
 
-  protected onStateChange(state: PlaygroundState): void {
-    // Check if we need to auto-enable/disable scroll mode based on trigger
+  private _autoSyncScrollEnabled(state: PlaygroundState): void {
     const idx = state.selectedInteractionIndex;
-    if (idx != null) {
-      const interaction = state.config.interactions[idx];
-      const isScroll = interaction?.trigger === 'viewProgress';
-      const stage = document.querySelector('pg-stage') as
-        | (HTMLElement & { setScrollMode: (e: boolean, h?: number) => void })
-        | null;
-      if (!isScroll && state.scrollPreview.enabled) {
-        this.store.dispatch(setScrollPreview({ enabled: false }));
-        stage?.setScrollMode(false);
-      }
-    }
+    if (idx == null) return;
 
-    this.render(state);
+    const interaction = state.config.interactions[idx];
+    if (!interaction) return;
+
+    const isScrollTrigger =
+      interaction.trigger === 'viewProgress' || interaction.trigger === 'viewEnter';
+
+    if (isScrollTrigger !== state.scrollPreview.enabled) {
+      const preview: Parameters<typeof setScrollPreview>[0] = { enabled: isScrollTrigger };
+      if (!isScrollTrigger) {
+        preview.stickyTop = undefined;
+        preview.stickyBottom = undefined;
+      }
+      this.store.dispatch(setScrollPreview(preview));
+    }
   }
 }
 

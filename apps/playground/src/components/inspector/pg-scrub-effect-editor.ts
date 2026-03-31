@@ -1,11 +1,46 @@
 import { BaseComponent } from '../base/BaseComponent';
 import type { PlaygroundState } from '../../types';
-import type { Effect } from '@wix/interact';
+import type { Effect, RangeOffset } from '@wix/interact';
+import type { LengthPercentage } from '@wix/motion';
 import { updateEffect } from '../../store/actions';
 
 type NamedEffectObj = { type: string } & Record<string, unknown>;
 
 const RANGE_NAMES = ['entry', 'exit', 'contain', 'cover', 'entry-crossing', 'exit-crossing'];
+
+const LENGTH_UNITS = ['px', 'em', 'rem', 'vh', 'vw', 'vmin', 'vmax'] as const;
+
+function parseLengthPercentage(input: string): LengthPercentage | undefined {
+  const trimmed = input.trim();
+  if (!trimmed) return undefined;
+
+  if (trimmed.endsWith('%')) {
+    const value = parseFloat(trimmed.slice(0, -1));
+    if (isNaN(value)) return undefined;
+    return { value, unit: 'percentage' };
+  }
+
+  for (const unit of LENGTH_UNITS) {
+    if (trimmed.endsWith(unit)) {
+      const value = parseFloat(trimmed.slice(0, -unit.length));
+      if (isNaN(value)) return undefined;
+      return { value, unit };
+    }
+  }
+
+  const value = parseFloat(trimmed);
+  if (!isNaN(value)) {
+    return { value, unit: 'percentage' };
+  }
+
+  return undefined;
+}
+
+function formatLengthPercentage(lp: LengthPercentage | undefined): string {
+  if (!lp) return '';
+  if (lp.unit === 'percentage') return `${lp.value}%`;
+  return `${lp.value}${lp.unit}`;
+}
 
 function getNamedEffect(effect: Effect): NamedEffectObj | null {
   if ('namedEffect' in effect && effect.namedEffect) {
@@ -121,8 +156,8 @@ export class PgScrubEffectEditor extends BaseComponent {
     const fill = (e.fill as string) ?? 'both';
     const reversed = (e.reversed as boolean) ?? false;
 
-    const rangeStart = (e.rangeStart as { name?: string; offset?: string }) ?? {};
-    const rangeEnd = (e.rangeEnd as { name?: string; offset?: string }) ?? {};
+    const rangeStart = (e.rangeStart as RangeOffset) ?? {};
+    const rangeEnd = (e.rangeEnd as RangeOffset) ?? {};
 
     const transitionDuration = (e.transitionDuration as number) ?? 0;
     const transitionDelay = (e.transitionDelay as number) ?? 0;
@@ -198,7 +233,7 @@ export class PgScrubEffectEditor extends BaseComponent {
           <div class="field">
             <label>Offset</label>
             <input type="text" class="pg-input" id="range-start-offset"
-              value="${rangeStart.offset ?? ''}" placeholder="e.g. 20%">
+              value="${formatLengthPercentage(rangeStart.offset as LengthPercentage | undefined)}" placeholder="e.g. 20%">
           </div>
         </div>
       </div>
@@ -216,7 +251,7 @@ export class PgScrubEffectEditor extends BaseComponent {
           <div class="field">
             <label>Offset</label>
             <input type="text" class="pg-input" id="range-end-offset"
-              value="${rangeEnd.offset ?? ''}" placeholder="e.g. 80%">
+              value="${formatLengthPercentage(rangeEnd.offset as LengthPercentage | undefined)}" placeholder="e.g. 80%">
           </div>
         </div>
       </div>
@@ -305,13 +340,22 @@ export class PgScrubEffectEditor extends BaseComponent {
       update({ reversed: (e.target as HTMLInputElement).checked });
     });
 
-    const updateRange = (
-      which: 'rangeStart' | 'rangeEnd',
-      field: 'name' | 'offset',
-      value: string,
-    ) => {
-      const current = ((effect as Record<string, unknown>)[which] as Record<string, unknown>) ?? {};
-      const updated = { ...current, [field]: value || undefined };
+    const updateRangeName = (which: 'rangeStart' | 'rangeEnd', name: string) => {
+      const current = ((effect as Record<string, unknown>)[which] as RangeOffset) ?? {};
+      const updated: RangeOffset = { ...current, name: (name || undefined) as RangeOffset['name'] };
+      if (!updated.name && !updated.offset) {
+        const { [which]: _removed, ...rest } = effect as Record<string, unknown>;
+        void _removed;
+        this.store.dispatch(updateEffect(effectId, rest as Effect));
+      } else {
+        update({ [which]: updated });
+      }
+    };
+
+    const updateRangeOffset = (which: 'rangeStart' | 'rangeEnd', raw: string) => {
+      const current = ((effect as Record<string, unknown>)[which] as RangeOffset) ?? {};
+      const offset = parseLengthPercentage(raw);
+      const updated: RangeOffset = { ...current, offset };
       if (!updated.name && !updated.offset) {
         const { [which]: _removed, ...rest } = effect as Record<string, unknown>;
         void _removed;
@@ -322,16 +366,16 @@ export class PgScrubEffectEditor extends BaseComponent {
     };
 
     shadow.getElementById('range-start-name')?.addEventListener('change', (e) => {
-      updateRange('rangeStart', 'name', (e.target as HTMLSelectElement).value);
+      updateRangeName('rangeStart', (e.target as HTMLSelectElement).value);
     });
     shadow.getElementById('range-start-offset')?.addEventListener('change', (e) => {
-      updateRange('rangeStart', 'offset', (e.target as HTMLInputElement).value);
+      updateRangeOffset('rangeStart', (e.target as HTMLInputElement).value);
     });
     shadow.getElementById('range-end-name')?.addEventListener('change', (e) => {
-      updateRange('rangeEnd', 'name', (e.target as HTMLSelectElement).value);
+      updateRangeName('rangeEnd', (e.target as HTMLSelectElement).value);
     });
     shadow.getElementById('range-end-offset')?.addEventListener('change', (e) => {
-      updateRange('rangeEnd', 'offset', (e.target as HTMLInputElement).value);
+      updateRangeOffset('rangeEnd', (e.target as HTMLInputElement).value);
     });
 
     shadow.getElementById('trans-duration')?.addEventListener('change', (e) => {
