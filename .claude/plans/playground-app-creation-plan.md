@@ -1030,6 +1030,7 @@ Timing properties (`duration`, `easing`, `fill`, `delay`, `iterations`, `alterna
    ```
 
    **Data model**: The component manages a `MotionKeyframeEffect` object:
+
    ```ts
    {
      name: string;               // user-chosen identifier
@@ -1060,6 +1061,7 @@ Timing properties (`duration`, `easing`, `fill`, `delay`, `iterations`, `alterna
    Currently the "Animation" section renders only `<pg-named-effect-picker>`. Change it to:
 
    **Layout change:**
+
    ```
    ┌─────────────────────────────────────┐
    │ Animation Source                     │
@@ -1087,14 +1089,12 @@ Timing properties (`duration`, `easing`, `fill`, `delay`, `iterations`, `alterna
 3. **Upgrade `src/components/inspector/pg-scrub-effect-editor.ts`** — same animation source toggle
 
    Same radio toggle pattern as the time effect editor. When "Keyframes" is selected, show `<pg-keyframe-editor>` instead of `<pg-named-effect-picker>`.
-
    - Default keyframe effect for scrub: `{ name: 'custom-scroll', keyframes: [{ opacity: 0 }, { opacity: 1 }] }`
    - When switching from Named Effect → Keyframes: strip `namedEffect`, add default `keyframeEffect`
    - When switching from Keyframes → Named Effect: strip `keyframeEffect`, add default `namedEffect: { type: 'FadeScroll' }` (or `TrackMouse` for pointerMove trigger)
    - Allowed named effect categories remain unchanged (Scroll for viewProgress, Mouse for pointerMove)
 
 4. **Upgrade `src/components/inspector/pg-effect-editor.ts`** — minor changes
-
    - `detectEffectType`: already handles `keyframeEffect` correctly (a TimeEffect with `keyframeEffect` still has `duration`, a ScrubEffect with `keyframeEffect` still lacks `duration`). No change needed to detection logic.
    - `createDefaultEffect`: no change — defaults still use `namedEffect`. The user switches to keyframes via the radio toggle in the sub-editor.
 
@@ -1104,6 +1104,7 @@ Timing properties (`duration`, `easing`, `fill`, `delay`, `iterations`, `alterna
    ```
 
 **File structure addition:**
+
 ```
       inspector/
         ...
@@ -1147,15 +1148,15 @@ Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' |
    ```ts
    interface TrackInfo {
      effectId: string;
-     label: string;            // display name (e.g., "FadeIn", "opacity → 1", effect ID)
+     label: string; // display name (e.g., "FadeIn", "opacity → 1", effect ID)
      targetElement: Element | null; // resolved from stage shadow DOM
-     delay: number;            // ms (from effect.delay or sequence offset)
-     duration: number;         // ms (from effect.duration; scrub effects use a default of 1000ms)
-     keyframes: Keyframe[];    // resolved keyframes (or placeholder for namedEffect)
+     delay: number; // ms (from effect.delay or sequence offset)
+     duration: number; // ms (from effect.duration; scrub effects use a default of 1000ms)
+     keyframes: Keyframe[]; // resolved keyframes (or placeholder for namedEffect)
      easing: string;
      iterations: number;
      fill: FillMode;
-     isScrub: boolean;         // true if no duration (viewProgress/pointerMove effect)
+     isScrub: boolean; // true if no duration (viewProgress/pointerMove effect)
    }
    ```
 
@@ -1171,30 +1172,30 @@ Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' |
 
    ```ts
    class TimelineEngine {
-     constructor(stageRoot: ShadowRoot)
+     constructor(stageRoot: ShadowRoot);
 
      // Build tracks from current config
-     buildTracks(config: InteractConfig): TrackInfo[]
+     buildTracks(config: InteractConfig): TrackInfo[];
 
      // Create paused WAAPI animations for all tracks. Call after buildTracks.
-     createAnimations(tracks: TrackInfo[]): void
+     createAnimations(tracks: TrackInfo[]): void;
 
      // Destroy all preview animations (cancel + remove)
-     destroyAnimations(): void
+     destroyAnimations(): void;
 
      // Transport
-     play(): void         // resume from current time
-     pause(): void        // freeze at current time
-     stop(): void         // pause + seek to 0
+     play(): void; // resume from current time
+     pause(): void; // freeze at current time
+     stop(): void; // pause + seek to 0
 
      // Scrubbing
-     seekTo(timeMs: number): void   // set currentTime on all animations
-     get currentTime(): number      // current playhead position in ms
-     get totalDuration(): number    // max(delay + duration * iterations) across all tracks
-     get isPlaying(): boolean       // true if RAF loop is active
+     seekTo(timeMs: number): void; // set currentTime on all animations
+     get currentTime(): number; // current playhead position in ms
+     get totalDuration(): number; // max(delay + duration * iterations) across all tracks
+     get isPlaying(): boolean; // true if RAF loop is active
 
      // Progress observation — calls back on every frame while playing
-     onTick(callback: (timeMs: number) => void): void
+     onTick(callback: (timeMs: number) => void): void;
    }
    ```
 
@@ -1258,12 +1259,13 @@ Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' |
 
    export interface PlaygroundState {
      // ... existing properties ...
-     bottomPanel: BottomPanel;          // replaces jsonPanelOpen: boolean
+     bottomPanel: BottomPanel; // replaces jsonPanelOpen: boolean
      // ... rest ...
    }
    ```
 
    Add new action types:
+
    ```ts
    | { type: 'SET_BOTTOM_PANEL'; payload: BottomPanel }
    ```
@@ -1306,6 +1308,7 @@ Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' |
 8. **`src/components/app/pg-app.ts`** — update resize handle visibility
 
    The bottom resize handle should be visible when `bottomPanel !== 'none'` (regardless of which tab). Update `_updateJsonHandle` → `_updateBottomHandle`:
+
    ```ts
    private _updateBottomHandle(panel: BottomPanel): void {
      const handle = this.shadowRoot?.getElementById('resize-bottom');
@@ -1318,10 +1321,17 @@ Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' |
 9. **`src/interact/InteractManager.ts`** — expose stage element, add pause/resume
 
    Add:
+
    ```ts
-   export function getStageElement(): HTMLElement | null { return stageEl; }
-   export function pauseInteract(): void { /* destroy current instance, set paused flag */ }
-   export function resumeInteract(): void { /* clear paused flag, re-apply config */ }
+   export function getStageElement(): HTMLElement | null {
+     return stageEl;
+   }
+   export function pauseInteract(): void {
+     /* destroy current instance, set paused flag */
+   }
+   export function resumeInteract(): void {
+     /* clear paused flag, re-apply config */
+   }
    ```
 
    When `paused`, the state-change listener skips `apply()`. This prevents Interact from recreating animations while the timeline has control.
@@ -1335,6 +1345,7 @@ Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' |
     Add `<pg-timeline-panel></pg-timeline-panel>` as a child of `<pg-app>`, after `<pg-json-panel>`. Both share the `json` grid area.
 
 **File structure additions:**
+
 ```
     timeline/
       TimelineEngine.ts              ← WAAPI animation creation, playback, scrubbing
