@@ -10,7 +10,7 @@ export function createInitialState(componentId = 'card'): PlaygroundState {
     selectedInteractionIndex: null,
     selectedEffectId: null,
     selectedEffectContext: null,
-    jsonPanelOpen: false,
+    bottomPanel: 'none',
     scrollPreview: {
       enabled: false,
       stageHeight: 3,
@@ -125,8 +125,8 @@ export function reduce(state: PlaygroundState, action: Action): PlaygroundState 
           : null,
       };
 
-    case 'TOGGLE_JSON_PANEL':
-      return { ...state, jsonPanelOpen: !state.jsonPanelOpen };
+    case 'SET_BOTTOM_PANEL':
+      return { ...state, bottomPanel: action.payload };
 
     case 'SET_SCROLL_PREVIEW':
       return {

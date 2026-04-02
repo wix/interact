@@ -1,5 +1,5 @@
 import type { InteractConfig, Condition, SequenceConfig } from '@wix/interact';
-import type { Action, EffectContext, ScrollPreviewState } from '../types';
+import type { Action, BottomPanel, EffectContext, ScrollPreviewState } from '../types';
 
 export const selectComponent = (id: string): Action => ({
   type: 'SELECT_COMPONENT',
@@ -53,8 +53,9 @@ export const selectEffect = (id: string | null, context?: EffectContext): Action
   payload: { id, context },
 });
 
-export const toggleJsonPanel = (): Action => ({
-  type: 'TOGGLE_JSON_PANEL',
+export const setBottomPanel = (panel: BottomPanel): Action => ({
+  type: 'SET_BOTTOM_PANEL',
+  payload: panel,
 });
 
 export const setScrollPreview = (preview: Partial<ScrollPreviewState>): Action => ({

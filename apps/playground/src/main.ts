@@ -33,6 +33,7 @@ import './components/inspector/pg-keyframe-editor';
 import './components/inspector/pg-sequence-editor';
 import './components/inspector/pg-condition-editor';
 import './components/json-panel/pg-json-panel';
+import './components/timeline/pg-timeline-panel';
 
 // Interact integration
 import { initInteractManager, setStageElement } from './interact/InteractManager';
@@ -54,6 +55,7 @@ app.innerHTML = `
     <pg-condition-editor></pg-condition-editor>
   </pg-inspector>
   <pg-json-panel></pg-json-panel>
+  <pg-timeline-panel></pg-timeline-panel>
 `;
 document.body.appendChild(app);
 

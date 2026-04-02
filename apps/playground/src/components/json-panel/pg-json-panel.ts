@@ -46,7 +46,7 @@ export class PgJsonPanel extends BaseComponent {
   }
 
   protected render(state: PlaygroundState): void {
-    this.classList.toggle('open', state.jsonPanelOpen);
+    this.classList.toggle('open', state.bottomPanel === 'json');
 
     if (!this.shadowRoot!.querySelector('.json-panel')) {
       this.shadowRoot!.innerHTML = `
@@ -65,7 +65,7 @@ export class PgJsonPanel extends BaseComponent {
   }
 
   protected onStateChange(state: PlaygroundState, _action: Action): void {
-    this.classList.toggle('open', state.jsonPanelOpen);
+    this.classList.toggle('open', state.bottomPanel === 'json');
     if (this._textarea && this.shadowRoot!.activeElement !== this._textarea) {
       this._textarea.value = JSON.stringify(state.config, null, 2);
     }

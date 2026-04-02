@@ -37,6 +37,7 @@ export class PgApp extends BaseComponent {
       ::slotted(pg-stage) { grid-area: stage; }
       ::slotted(pg-inspector) { grid-area: inspector; }
       ::slotted(pg-json-panel) { grid-area: json; }
+      ::slotted(pg-timeline-panel) { grid-area: json; }
 
       .resize-handle {
         position: absolute;
@@ -97,7 +98,7 @@ export class PgApp extends BaseComponent {
     }
   }
 
-  protected render(_state: PlaygroundState): void {
+  protected render(state: PlaygroundState): void {
     if (this.shadowRoot!.querySelector('.app-grid')) return;
     this.shadowRoot!.innerHTML = `
       <div class="app-grid">
@@ -112,19 +113,19 @@ export class PgApp extends BaseComponent {
     this._initColResize('resize-right', '--pg-inspector-width', INSPECTOR_MIN, INSPECTOR_MAX, true);
     this._initRowResize('resize-bottom', '--pg-json-panel-height', JSON_PANEL_MIN, JSON_PANEL_MAX);
 
-    this._updateJsonHandle(_state.jsonPanelOpen);
+    this._updateBottomHandle(state.bottomPanel);
   }
 
   protected onStateChange(state: PlaygroundState, action: Action): void {
-    if (action.type === 'TOGGLE_JSON_PANEL' || action.type === 'UNDO') {
-      this._updateJsonHandle(state.jsonPanelOpen);
+    if (action.type === 'SET_BOTTOM_PANEL' || action.type === 'UNDO') {
+      this._updateBottomHandle(state.bottomPanel);
     }
   }
 
-  private _updateJsonHandle(open: boolean): void {
+  private _updateBottomHandle(panel: string): void {
     const handle = this.shadowRoot?.getElementById('resize-bottom');
     if (handle) {
-      handle.classList.toggle('visible', open);
+      handle.classList.toggle('visible', panel !== 'none');
     }
   }
 

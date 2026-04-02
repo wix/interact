@@ -85,13 +85,15 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 - [x] Upgrade pg-scrub-effect-editor.ts (same animation source toggle for scrub effects)
 - [x] Upgrade pg-effect-editor.ts (detect keyframeEffect in type detection, preserve keyframeEffect in default creation)
 
-### Phase 9: Timeline Panel
+### Phase 9: Timeline Panel — DONE
 
-- [ ] Refactor bottom panel to tabbed area (replace jsonPanelOpen with bottomPanel: 'none' | 'json' | 'timeline')
-- [ ] pg-timeline-panel.ts (transport controls, effect tracks, time ruler, draggable playhead)
-- [ ] src/timeline/TimelineEngine.ts (creates preview WAAPI animations, coordinates playback, scrubbing, RAF loop)
-- [ ] Wire into InteractManager (expose stage element reference, pause Interact preview during timeline playback)
-- [ ] Update pg-toolbar, pg-app, pg-json-panel for bottom panel tab switching
+- [x] Refactor bottom panel to tabbed area (replace jsonPanelOpen with bottomPanel: 'none' | 'json' | 'timeline')
+- [x] pg-timeline-panel.ts (transport controls, effect tracks, time ruler, draggable playhead, scoped to selected interaction)
+- [x] src/timeline/TimelineEngine.ts (builds tracks from selected interaction's effects + sequences, creates preview WAAPI animations, playback, scrubbing, RAF loop)
+- [x] Sequence support with stagger timing (delay + offset × index per sequence)
+- [x] Wire into InteractManager (expose stage element reference, pause Interact preview during timeline playback)
+- [x] Update pg-toolbar, pg-app, pg-json-panel for bottom panel tab switching
+- [x] Rebuild timeline on SELECT_INTERACTION, config changes, and sequence mutations
 
 ---
 
@@ -1117,7 +1119,7 @@ Timing properties (`duration`, `easing`, `fill`, `delay`, `iterations`, `alterna
 
 ### Phase 9: Timeline Panel
 
-**Goal**: Add a togglable bottom panel with a visual timeline that shows each effect as a horizontal track, a time ruler, transport controls (play/pause/stop), and a draggable playhead that tracks and controls animation progress. The timeline creates its own preview animations on the stage elements using the Web Animations API, independent of Interact's trigger-based system.
+**Goal**: Add a togglable bottom panel with a visual timeline scoped to the currently selected interaction, showing each of its effects (both direct and sequence) as horizontal tracks, a time ruler, transport controls (play/pause/stop), and a draggable playhead. The timeline creates its own preview animations on the stage elements using the Web Animations API, independent of Interact's trigger-based system.
 
 **Background — why independent animations:**
 
@@ -1147,26 +1149,34 @@ Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' |
 
    ```ts
    interface TrackInfo {
+     trackId: string; // unique per track (e.g., "track-0", "track-1") for DOM lookups
      effectId: string;
-     label: string; // display name (e.g., "FadeIn", "opacity → 1", effect ID)
+     label: string; // display name (e.g., "FadeIn", "Seq #abc: ScaleUp")
      targetElement: Element | null; // resolved from stage shadow DOM
-     delay: number; // ms (from effect.delay or sequence offset)
+     delay: number; // ms (effect.delay + sequence stagger offset)
      duration: number; // ms (from effect.duration; scrub effects use a default of 1000ms)
-     keyframes: Keyframe[]; // resolved keyframes (or placeholder for namedEffect)
+     keyframes: Keyframe[]; // resolved keyframes
      easing: string;
      iterations: number;
      fill: FillMode;
      isScrub: boolean; // true if no duration (viewProgress/pointerMove effect)
+     type: 'time' | 'scrub' | 'transition';
+     group?: string; // set for sequence effects (e.g., "Seq #abc")
    }
    ```
 
    **Effect → TrackInfo resolution:**
-   - For each effect in `config.effects`:
+   - `buildTracks(config, interactionIndex)` scopes to the selected interaction only. If no interaction is selected, returns empty tracks.
+   - For each **direct effect** in `interaction.effects`:
+     - If `namedEffect` present: resolve real keyframes from the preset registry via its factory function; label with the preset name
      - If `keyframeEffect` present: use its keyframes directly
-     - If `namedEffect` present: use a placeholder fade keyframes `[{ opacity: 0.3 }, { opacity: 1 }]` and label with the preset name (resolving real preset keyframes is complex and out of scope for this phase)
      - If `transitionProperties` present: convert to equivalent keyframes (property name → `[{ [name]: 'initial' }, { [name]: value }]`)
+   - For each **sequence** in `interaction.sequences`:
+     - Resolve the `SequenceConfig` via `sequenceId` from `config.sequences`
+     - For each effect in the sequence, build tracks with stagger timing: `delay = seqDelay + (effectIndex × seqOffset) + effect.delay`
+     - Labels are prefixed with the sequence identifier (e.g., "Seq #abc: FadeIn")
    - Timing: `delay` from effect + any sequence stagger offset, `duration` from effect (or 1000ms default for scrub effects)
-   - `targetElement`: resolved by finding `[data-interact-key="<key>"]` in the stage's shadow DOM. Falls back to the interaction's key if the effect doesn't specify one.
+   - `targetElement`: resolved from the effect ref's `key`, falling back to the effect's own `key`, then the interaction's `key`. Looks up `[data-interact-key="<key>"]` in the stage's shadow DOM.
 
    **Public API:**
 
@@ -1174,8 +1184,8 @@ Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' |
    class TimelineEngine {
      constructor(stageRoot: ShadowRoot);
 
-     // Build tracks from current config
-     buildTracks(config: InteractConfig): TrackInfo[];
+     // Build tracks from selected interaction's effects + sequences
+     buildTracks(config: InteractConfig, interactionIndex: number | null): TrackInfo[];
 
      // Create paused WAAPI animations for all tracks. Call after buildTracks.
      createAnimations(tracks: TrackInfo[]): void;
@@ -1227,12 +1237,6 @@ Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' |
    - **Time ruler**: a thin strip at the top of the timeline column with tick marks at regular intervals. Interval is auto-calculated: pick a round number (100ms, 250ms, 500ms, 1s, 2s) so roughly 8-12 ticks fit.
    - **Track lanes**: each effect gets a horizontal row. Inside the timeline column, a colored bar is positioned at `left: (delay / totalDuration) * 100%` with `width: (duration / totalDuration) * 100%`. The bar uses `--pg-color-accent` with opacity. A progress fill overlay inside the bar shows how much of that effect has played (driven by `onTick`).
    - **Playhead**: an absolutely-positioned vertical line (2px wide, `--pg-color-danger` or a bright accent) spanning the full track area height. Its `left` position is `(currentTime / totalDuration) * 100%` of the timeline column.
-   - **Empty state**: when no effects exist, show "Add effects to see the timeline".
-
-   **Track bar colors:**
-   - Time effects: `--pg-color-accent` (indigo)
-   - Scrub effects: `--pg-color-success` (green)
-   - Transition effects: `--pg-color-accent-hover` (lighter indigo)
 
    **Playhead drag interaction:**
    - `pointerdown` on playhead → `setPointerCapture`, track `pointermove`
@@ -1243,9 +1247,19 @@ Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' |
 
    **Clicking a track**: selects that effect in the inspector (dispatches `selectEffect(effectId, { source: 'interaction' })`), allowing the user to edit it while seeing its timeline position.
 
+   **Empty states:**
+   - No interaction selected: "Select an interaction to preview its timeline"
+   - Interaction selected but no effects/sequences: "Add effects or sequences to see the timeline"
+
+   **Track bar colors:**
+   - Direct time effects: `--pg-color-accent` (indigo)
+   - Scrub effects: `--pg-color-success` (green)
+   - Transition effects: `--pg-color-accent-hover` (lighter indigo)
+   - Sequence effects: `--pg-color-success` (green, to visually distinguish from direct effects)
+
    **Lifecycle:**
-   - On `render()` / `onStateChange()`: if `bottomPanel === 'timeline'`, build tracks from `state.config` via `TimelineEngine.buildTracks()`, create animations, render the track layout. If switching away from timeline, destroy animations.
-   - On config change while timeline is open: rebuild tracks and recreate animations (debounced, same as InteractManager).
+   - On `render()` / `onStateChange()`: if `bottomPanel === 'timeline'`, build tracks from `state.config` and `state.selectedInteractionIndex` via `TimelineEngine.buildTracks()`, create animations, render the track layout. If switching away from timeline, destroy animations.
+   - On config change or interaction selection change while timeline is open: rebuild tracks and recreate animations (debounced). Reacts to `ADD_EFFECT`, `UPDATE_EFFECT`, `REMOVE_EFFECT`, `ADD_SEQUENCE`, `UPDATE_SEQUENCE`, `REMOVE_SEQUENCE`, `SELECT_INTERACTION`, `UPDATE_INTERACTION`, and other config-modifying actions.
    - On component disconnect: destroy animations.
 
    **Styles**: follows the same dark-theme patterns as other panels — `--pg-color-bg-secondary` background, `--pg-color-border` dividers, `--pg-font-mono` for time display.

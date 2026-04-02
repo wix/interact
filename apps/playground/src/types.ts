@@ -11,13 +11,15 @@ export type EffectContext =
   | { source: 'interaction' }
   | { source: 'sequence'; sequenceId: string; effectIndex: number };
 
+export type BottomPanel = 'none' | 'json' | 'timeline';
+
 export interface PlaygroundState {
   config: InteractConfig;
   activeComponentId: string;
   selectedInteractionIndex: number | null;
   selectedEffectId: string | null;
   selectedEffectContext: EffectContext | null;
-  jsonPanelOpen: boolean;
+  bottomPanel: BottomPanel;
   scrollPreview: ScrollPreviewState;
 }
 
@@ -35,7 +37,7 @@ export type Action =
   | { type: 'UPDATE_EFFECT'; payload: { id: string; effect: InteractConfig['effects'][string] } }
   | { type: 'REMOVE_EFFECT'; payload: string }
   | { type: 'SELECT_EFFECT'; payload: { id: string | null; context?: EffectContext } }
-  | { type: 'TOGGLE_JSON_PANEL' }
+  | { type: 'SET_BOTTOM_PANEL'; payload: BottomPanel }
   | { type: 'SET_SCROLL_PREVIEW'; payload: Partial<ScrollPreviewState> }
   | { type: 'RESET_CONFIG' }
   | { type: 'ADD_CONDITION'; payload: { id: string; condition: Condition } }

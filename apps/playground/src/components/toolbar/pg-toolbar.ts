@@ -1,6 +1,6 @@
 import { BaseComponent } from '../base/BaseComponent';
-import type { PlaygroundState } from '../../types';
-import { toggleJsonPanel, resetConfig, setConfig } from '../../store/actions';
+import type { PlaygroundState, Action } from '../../types';
+import { setBottomPanel, resetConfig, setConfig } from '../../store/actions';
 
 export class PgToolbar extends BaseComponent {
   protected get componentStyles(): string {
@@ -34,10 +34,15 @@ export class PgToolbar extends BaseComponent {
         gap: var(--pg-space-2);
         margin-left: auto;
       }
+
+      .pg-button--active {
+        background: var(--pg-color-accent-muted);
+        border-color: var(--pg-color-accent);
+      }
     `;
   }
 
-  protected render(_state: PlaygroundState): void {
+  protected render(state: PlaygroundState): void {
     if (this.shadowRoot!.querySelector('.toolbar')) return;
     this.shadowRoot!.innerHTML = `
       <div class="toolbar" style="display:contents">
@@ -47,13 +52,20 @@ export class PgToolbar extends BaseComponent {
           <button class="pg-button pg-button--secondary" id="import-btn">Import</button>
           <button class="pg-button pg-button--secondary" id="export-btn">Export</button>
           <button class="pg-button pg-button--secondary" id="json-toggle">JSON</button>
+          <button class="pg-button pg-button--secondary" id="timeline-toggle">Timeline</button>
           <button class="pg-button pg-button--secondary" id="clear-btn">Clear</button>
         </div>
       </div>
     `;
 
     this.shadowRoot!.getElementById('json-toggle')!.addEventListener('click', () => {
-      this.store.dispatch(toggleJsonPanel());
+      const current = this.store.getState().bottomPanel;
+      this.store.dispatch(setBottomPanel(current === 'json' ? 'none' : 'json'));
+    });
+
+    this.shadowRoot!.getElementById('timeline-toggle')!.addEventListener('click', () => {
+      const current = this.store.getState().bottomPanel;
+      this.store.dispatch(setBottomPanel(current === 'timeline' ? 'none' : 'timeline'));
     });
 
     this.shadowRoot!.getElementById('clear-btn')!.addEventListener('click', () => {
@@ -67,6 +79,21 @@ export class PgToolbar extends BaseComponent {
     this.shadowRoot!.getElementById('import-btn')!.addEventListener('click', () => {
       this._importConfig();
     });
+
+    this._syncButtonStates(state.bottomPanel);
+  }
+
+  protected onStateChange(state: PlaygroundState, action: Action): void {
+    if (action.type === 'SET_BOTTOM_PANEL' || action.type === 'UNDO') {
+      this._syncButtonStates(state.bottomPanel);
+    }
+  }
+
+  private _syncButtonStates(panel: string): void {
+    const jsonBtn = this.shadowRoot?.getElementById('json-toggle');
+    const timelineBtn = this.shadowRoot?.getElementById('timeline-toggle');
+    jsonBtn?.classList.toggle('pg-button--active', panel === 'json');
+    timelineBtn?.classList.toggle('pg-button--active', panel === 'timeline');
   }
 
   private _exportConfig(): void {

@@ -18,9 +18,29 @@ function ensurePresets(): void {
 let currentInstance: Interact | null = null;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let stageElement: HTMLElement | null = null;
+let paused = false;
 
 export function setStageElement(el: HTMLElement): void {
   stageElement = el;
+}
+
+export function getStageElement(): HTMLElement | null {
+  return stageElement;
+}
+
+export function pauseInteract(): void {
+  paused = true;
+  if (debounceTimer) clearTimeout(debounceTimer);
+  if (currentInstance) {
+    currentInstance.destroy();
+    currentInstance = null;
+    cancelStaleAnimations();
+  }
+}
+
+export function resumeInteract(): void {
+  paused = false;
+  debouncedApply(store.getState().config);
 }
 
 function reconnectShadowElements(): void {
@@ -38,19 +58,18 @@ function cancelStaleAnimations(): void {
 }
 
 function apply(config: InteractConfig): void {
-  // Destroy previous instance
+  if (paused) return;
+
   if (currentInstance) {
     currentInstance.destroy();
     currentInstance = null;
     cancelStaleAnimations();
   }
 
-  // Don't create if no interactions
   if (config.interactions.length === 0) return;
 
   ensurePresets();
 
-  // Filter out incomplete interactions (no key set)
   const validConfig: InteractConfig = {
     ...config,
     interactions: config.interactions.filter((i) => i.key),
@@ -74,7 +93,6 @@ export function initInteractManager(): void {
     debouncedApply(state.config);
   });
 
-  // Apply initial state
   debouncedApply(store.getState().config);
 }
 
