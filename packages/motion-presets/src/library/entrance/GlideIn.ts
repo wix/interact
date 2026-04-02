@@ -78,7 +78,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ...options,
       name: fadeIn,
       custom: {},
-      keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+      keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
     },
   ];
 }
