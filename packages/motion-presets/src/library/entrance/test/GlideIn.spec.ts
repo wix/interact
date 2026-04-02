@@ -24,7 +24,7 @@ describe('GlideIn', () => {
         ],
       },
       {
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -53,7 +53,7 @@ describe('GlideIn', () => {
         ],
       },
       {
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -89,7 +89,7 @@ describe('GlideIn', () => {
       {
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -126,7 +126,7 @@ describe('GlideIn', () => {
       {
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
