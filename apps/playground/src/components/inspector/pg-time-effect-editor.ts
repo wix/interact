@@ -4,12 +4,28 @@ import type { Effect } from '@wix/interact';
 import { updateEffect } from '../../store/actions';
 
 type NamedEffectObj = { type: string } & Record<string, unknown>;
+type KeyframeEffectObj = { name: string; keyframes: Record<string, unknown>[] };
+type AnimationSource = 'named' | 'keyframes';
 
 function getNamedEffect(effect: Effect): NamedEffectObj | null {
   if ('namedEffect' in effect && effect.namedEffect) {
     return effect.namedEffect as NamedEffectObj;
   }
   return null;
+}
+
+function getKeyframeEffect(effect: Effect): KeyframeEffectObj | null {
+  if ('keyframeEffect' in effect && effect.keyframeEffect) {
+    return effect.keyframeEffect as KeyframeEffectObj;
+  }
+  return null;
+}
+
+function detectSource(effect: Effect): AnimationSource {
+  if ('keyframeEffect' in effect && (effect as Record<string, unknown>).keyframeEffect) {
+    return 'keyframes';
+  }
+  return 'named';
 }
 
 export class PgTimeEffectEditor extends BaseComponent {
@@ -74,6 +90,43 @@ export class PgTimeEffectEditor extends BaseComponent {
         color: var(--pg-color-text-secondary);
         cursor: pointer;
       }
+
+      .source-toggle {
+        display: flex;
+        gap: 0;
+        margin-bottom: var(--pg-space-3);
+        border-radius: var(--pg-radius-md);
+        overflow: hidden;
+        border: var(--pg-border-width) solid var(--pg-color-border);
+      }
+
+      .source-option {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 28px;
+        background: var(--pg-color-bg-tertiary);
+        border: none;
+        color: var(--pg-color-text-secondary);
+        font-size: var(--pg-font-size-xs);
+        font-weight: var(--pg-font-weight-medium);
+        cursor: pointer;
+        transition: background var(--pg-transition-fast), color var(--pg-transition-fast);
+      }
+
+      .source-option:first-child {
+        border-right: var(--pg-border-width) solid var(--pg-color-border);
+      }
+
+      .source-option:hover {
+        background: var(--pg-color-bg-hover);
+      }
+
+      .source-option.active {
+        background: var(--pg-color-accent);
+        color: var(--pg-color-text-primary);
+      }
     `;
   }
 
@@ -98,11 +151,18 @@ export class PgTimeEffectEditor extends BaseComponent {
     const reversed = ((effect as Record<string, unknown>).reversed as boolean) ?? false;
     const delay = ((effect as Record<string, unknown>).delay as number) ?? 0;
 
-    const named = getNamedEffect(effect);
+    const source = detectSource(effect);
 
     this.shadowRoot!.innerHTML = `
-      <div class="section-title">Animation</div>
-      <pg-named-effect-picker id="named-picker"></pg-named-effect-picker>
+      <div class="section-title">Animation Source</div>
+      <div class="source-toggle">
+        <button class="source-option ${source === 'named' ? 'active' : ''}" data-source="named">Named Effect</button>
+        <button class="source-option ${source === 'keyframes' ? 'active' : ''}" data-source="keyframes">Keyframes</button>
+      </div>
+
+      <div id="animation-source">
+        ${source === 'named' ? '<pg-named-effect-picker id="named-picker"></pg-named-effect-picker>' : '<pg-keyframe-editor id="keyframe-editor"></pg-keyframe-editor>'}
+      </div>
 
       <div class="divider"></div>
       <div class="section-title">Timing</div>
@@ -148,15 +208,23 @@ export class PgTimeEffectEditor extends BaseComponent {
       </div>
     `;
 
-    const picker = this.shadowRoot!.getElementById('named-picker') as HTMLElement & {
-      setPreset: (n: string, o: Record<string, unknown>) => void;
-      setAllowedCategories: (c: string[] | undefined) => void;
-    };
-    picker?.setAllowedCategories(['Entrance', 'Ongoing']);
+    if (source === 'named') {
+      const picker = this.shadowRoot!.getElementById('named-picker') as HTMLElement & {
+        setPreset: (n: string, o: Record<string, unknown>) => void;
+        setAllowedCategories: (c: string[] | undefined) => void;
+      };
+      picker?.setAllowedCategories(['Entrance', 'Ongoing']);
 
-    if (named) {
-      const { type, ...rest } = named;
-      picker?.setPreset(type, rest);
+      const named = getNamedEffect(effect);
+      if (named) {
+        const { type, ...rest } = named;
+        picker?.setPreset(type, rest);
+      }
+    } else {
+      const editor = this.shadowRoot!.getElementById('keyframe-editor') as HTMLElement & {
+        setKeyframeEffect: (e: KeyframeEffectObj | null) => void;
+      };
+      editor?.setKeyframeEffect(getKeyframeEffect(effect));
     }
 
     this._attachListeners(effectId, effect);
@@ -168,6 +236,37 @@ export class PgTimeEffectEditor extends BaseComponent {
     const update = (patch: Record<string, unknown>) => {
       this.store.dispatch(updateEffect(effectId, { ...effect, ...patch } as Effect));
     };
+
+    shadow.querySelectorAll<HTMLButtonElement>('[data-source]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.source as AnimationSource;
+        const current = detectSource(effect);
+        if (target === current) return;
+
+        const {
+          namedEffect: _ne,
+          keyframeEffect: _kf,
+          customEffect: _ce,
+          ...rest
+        } = effect as Record<string, unknown>;
+
+        if (target === 'keyframes') {
+          this.store.dispatch(
+            updateEffect(effectId, {
+              ...rest,
+              keyframeEffect: { name: 'custom', keyframes: [{ opacity: 0, offset: 0 }] },
+            } as Effect),
+          );
+        } else {
+          this.store.dispatch(
+            updateEffect(effectId, {
+              ...rest,
+              namedEffect: { type: 'FadeIn' },
+            } as Effect),
+          );
+        }
+      });
+    });
 
     shadow.getElementById('duration')?.addEventListener('change', (e) => {
       update({ duration: parseInt((e.target as HTMLInputElement).value, 10) || 0 });
@@ -215,6 +314,19 @@ export class PgTimeEffectEditor extends BaseComponent {
           ...rest
         } = effect as Record<string, unknown>;
         this.store.dispatch(updateEffect(effectId, rest as Effect));
+      }
+    });
+
+    shadow.getElementById('keyframe-editor')?.addEventListener('change', (e) => {
+      const keyframeEffect = (e as CustomEvent).detail;
+      if (keyframeEffect) {
+        const {
+          namedEffect: _ne,
+          keyframeEffect: _kf,
+          customEffect: _ce,
+          ...rest
+        } = effect as Record<string, unknown>;
+        this.store.dispatch(updateEffect(effectId, { ...rest, keyframeEffect } as Effect));
       }
     });
   }

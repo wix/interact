@@ -78,12 +78,12 @@ The monorepo currently has `demo` and `docs` apps but lacks a dedicated visual e
 - [x] Visual polish (transitions, panel resize handles)
 - [x] Component descriptions in selector
 
-### Phase 8: Keyframe Effect Editor
+### Phase 8: Keyframe Effect Editor — DONE
 
-- [ ] pg-keyframe-editor.ts (keyframe list editor with CSS property/value rows, add/remove/reorder keyframes)
-- [ ] Upgrade pg-time-effect-editor.ts (animation source toggle: Named Effect vs Keyframe Effect, bidirectional switch)
-- [ ] Upgrade pg-scrub-effect-editor.ts (same animation source toggle for scrub effects)
-- [ ] Upgrade pg-effect-editor.ts (detect keyframeEffect in type detection, preserve keyframeEffect in default creation)
+- [x] pg-keyframe-editor.ts (keyframe list editor with CSS property/value rows, add/remove/reorder keyframes)
+- [x] Upgrade pg-time-effect-editor.ts (animation source toggle: Named Effect vs Keyframe Effect, bidirectional switch)
+- [x] Upgrade pg-scrub-effect-editor.ts (same animation source toggle for scrub effects)
+- [x] Upgrade pg-effect-editor.ts (detect keyframeEffect in type detection, preserve keyframeEffect in default creation)
 
 ### Phase 9: Timeline Panel
 
@@ -1049,10 +1049,10 @@ Timing properties (`duration`, `easing`, `fill`, `delay`, `iterations`, `alterna
      - Property rows: each has a text input for CSS property name (with `datalist` autocomplete of common CSS properties: `opacity`, `transform`, `background-color`, `color`, `clip-path`, `filter`, `border-radius`, `box-shadow`, `width`, `height`, `padding`, `margin`, `font-size`, `letter-spacing`) and a text input for value
      - "+ add property" button appends a new empty property row
      - "×" button removes the property row (min 1 property per keyframe)
-   - "×" button on keyframe header removes that keyframe (min 2 keyframes enforced — button hidden when at 2)
+   - "×" button on keyframe header removes that keyframe (min 1 keyframe enforced — button hidden when at 1)
    - Property names use camelCase in the data model but the input accepts both `background-color` and `backgroundColor` — convert kebab-case to camelCase on blur (the Web Animations API requires camelCase)
    - All inputs use `change` events (not `input`) to avoid focus loss from store-triggered re-renders
-   - Default new keyframe effect: `{ name: 'custom', keyframes: [{ opacity: 0 }, { opacity: 1 }] }`
+   - Default new keyframe effect: `{ name: 'custom', keyframes: [{ opacity: 0, offset: 0 }] }`
 
    **Styles**: Follows the same visual patterns as `pg-sequence-editor` — keyframe cards use `.pg-color-bg-tertiary` background with padding, property rows are compact field-rows inside them. Uses shared controls.css classes.
 
@@ -1077,7 +1077,7 @@ Timing properties (`duration`, `easing`, `fill`, `delay`, `iterations`, `alterna
    - Detect current source from the effect object: if `namedEffect` is present → "Named Effect"; if `keyframeEffect` is present → "Keyframes". Default to "Named Effect" for new effects.
    - When switching from Named Effect → Keyframes:
      - Strip `namedEffect` property from the effect
-     - Add a default `keyframeEffect: { name: 'custom', keyframes: [{ opacity: 0 }, { opacity: 1 }] }`
+     - Add a default `keyframeEffect: { name: 'custom', keyframes: [{ opacity: 0, offset: 0 }] }`
      - Dispatch `updateEffect`
    - When switching from Keyframes → Named Effect:
      - Strip `keyframeEffect` property from the effect
@@ -1089,7 +1089,7 @@ Timing properties (`duration`, `easing`, `fill`, `delay`, `iterations`, `alterna
 3. **Upgrade `src/components/inspector/pg-scrub-effect-editor.ts`** — same animation source toggle
 
    Same radio toggle pattern as the time effect editor. When "Keyframes" is selected, show `<pg-keyframe-editor>` instead of `<pg-named-effect-picker>`.
-   - Default keyframe effect for scrub: `{ name: 'custom-scroll', keyframes: [{ opacity: 0 }, { opacity: 1 }] }`
+   - Default keyframe effect for scrub: `{ name: 'custom-scroll', keyframes: [{ opacity: 0, offset: 0 }] }`
    - When switching from Named Effect → Keyframes: strip `namedEffect`, add default `keyframeEffect`
    - When switching from Keyframes → Named Effect: strip `keyframeEffect`, add default `namedEffect: { type: 'FadeScroll' }` (or `TrackMouse` for pointerMove trigger)
    - Allowed named effect categories remain unchanged (Scroll for viewProgress, Mouse for pointerMove)
