@@ -3,13 +3,13 @@ name: iterationDelay preset refactor
 overview: Refactor all 13 ongoing presets so that `delay` (from `TimeAnimationOptions`) is passed through as actual WAAPI start delay, and a new `iterationDelay` preset parameter (on each namedEffect type) takes over the current "bake delay into keyframe offsets" behavior.
 todos:
   - id: types
-    content: "Add `iterationDelay?: number` to all 13 ongoing namedEffect types in types.ts"
+    content: 'Add `iterationDelay?: number` to all 13 ongoing namedEffect types in types.ts'
     status: completed
   - id: presets
     content: Refactor all 13 ongoing preset files to use namedEffect.iterationDelay for keyframe-offset compression and pass through options.delay as actual start delay
     status: completed
   - id: tests
-    content: "Update all 13 ongoing preset test files: move delay to iterationDelay in options, update assertions, add new tests for actual delay passthrough"
+    content: 'Update all 13 ongoing preset test files: move delay to iterationDelay in options, update assertions, add new tests for actual delay passthrough'
     status: completed
   - id: docs
     content: Update docs in motion-presets/docs, motion/docs, and interact/docs to reflect new iterationDelay parameter and corrected delay semantics
@@ -34,8 +34,8 @@ This means there is **no way** to set an actual WAAPI start delay on these prese
 
 ## Solution
 
-- `**delay`** (from `TimeAnimationOptions`): pass through as actual WAAPI start delay
-- `**iterationDelay`** (new param on each `namedEffect` type): takes over the current keyframe-offset-compression behavior
+- `**delay`\*\* (from `TimeAnimationOptions`): pass through as actual WAAPI start delay
+- `**iterationDelay`\*\* (new param on each `namedEffect` type): takes over the current keyframe-offset-compression behavior
 
 DVD is **excluded** -- it already uses `delay` as actual start delay and does not use `getTimingFactor`.
 
@@ -55,7 +55,7 @@ Example:
 export type Spin = {
   type: 'Spin';
   direction?: 'clockwise' | 'counter-clockwise';
-  iterationDelay?: number;  // new
+  iterationDelay?: number; // new
 };
 ```
 
@@ -76,15 +76,14 @@ const duration = options.duration || 1;
 const delay = options.delay || 0;
 const timingFactor = getTimingFactor(duration, delay) as number;
 // ...
-return [{
-  ...options,
-  delay: 0,
-  duration: duration + delay,
-  keyframes: [
-    { offset: 0, /* ... */ },
-    { offset: timingFactor, /* ... */ },
-  ],
-}];
+return [
+  {
+    ...options,
+    delay: 0,
+    duration: duration + delay,
+    keyframes: [{ offset: 0 /* ... */ }, { offset: timingFactor /* ... */ }],
+  },
+];
 ```
 
 **After:**
@@ -94,14 +93,13 @@ const duration = options.duration || 1;
 const iterationDelay = namedEffect?.iterationDelay || 0;
 const timingFactor = getTimingFactor(duration, iterationDelay) as number;
 // ...
-return [{
-  ...options,
-  duration: duration + iterationDelay,
-  keyframes: [
-    { offset: 0, /* ... */ },
-    { offset: timingFactor, /* ... */ },
-  ],
-}];
+return [
+  {
+    ...options,
+    duration: duration + iterationDelay,
+    keyframes: [{ offset: 0 /* ... */ }, { offset: timingFactor /* ... */ }],
+  },
+];
 ```
 
 Key changes per file:
@@ -174,12 +172,12 @@ Also check `packages/motion-presets/src/test/utils.spec.ts` -- `getTimingFactor`
 
 ### motion-presets docs
 
-- `**[packages/motion-presets/docs/presets/ongoing/pulse.md](packages/motion-presets/docs/presets/ongoing/pulse.md)`** -- Add `iterationDelay` parameter documentation and usage examples
-- `**[packages/motion-presets/docs/presets/_template.md](packages/motion-presets/docs/presets/_template.md)`** -- Add `iterationDelay` to ongoing preset template if applicable
+- `**[packages/motion-presets/docs/presets/ongoing/pulse.md](packages/motion-presets/docs/presets/ongoing/pulse.md)`\*\* -- Add `iterationDelay` parameter documentation and usage examples
+- `**[packages/motion-presets/docs/presets/_template.md](packages/motion-presets/docs/presets/_template.md)`\*\* -- Add `iterationDelay` to ongoing preset template if applicable
 
 ### motion docs
 
-- `**[packages/motion/docs/categories/ongoing-animations.md](packages/motion/docs/categories/ongoing-animations.md)`** -- If it documents the delay-as-iteration-delay behavior, update to reflect the new `iterationDelay` param
+- `**[packages/motion/docs/categories/ongoing-animations.md](packages/motion/docs/categories/ongoing-animations.md)`\*\* -- If it documents the delay-as-iteration-delay behavior, update to reflect the new `iterationDelay` param
 - `**[packages/motion/docs/api/types.md](packages/motion/docs/api/types.md)**` -- If it documents `TimeAnimationOptions.delay` behavior for ongoing presets, update
 - `**[packages/motion/docs/core-concepts.md](packages/motion/docs/core-concepts.md)**` -- If it documents delay semantics, verify accuracy
 
@@ -207,12 +205,11 @@ Docs that do NOT reference the ongoing delay pattern do not need changes.
 
 ## 6. Utility function
 
-`**[packages/motion-presets/src/utils.ts](packages/motion-presets/src/utils.ts)`** -- `getTimingFactor(duration, delay)` does not need changes. Its interface is generic (two numbers). Callers will now pass `iterationDelay` instead of `delay`.
+`**[packages/motion-presets/src/utils.ts](packages/motion-presets/src/utils.ts)`\*\* -- `getTimingFactor(duration, delay)` does not need changes. Its interface is generic (two numbers). Callers will now pass `iterationDelay` instead of `delay`.
 
 ---
 
 ## Summary of scope
-
 
 | Area    | Files | Changes                                       |
 | ------- | ----- | --------------------------------------------- |
@@ -222,5 +219,3 @@ Docs that do NOT reference the ongoing delay pattern do not need changes.
 | Docs    | 5-7   | Update delay semantics and add iterationDelay |
 | Rules   | 2-3   | Add iterationDelay to parameter tables        |
 | Utility | 0     | No changes                                    |
-
-
