@@ -522,12 +522,8 @@ describe('interact sequences', () => {
         : [animationGroupArgs];
 
       expect(groupArgs).toHaveLength(2);
-      expect(groupArgs[0].options).toEqual(
-        expect.objectContaining({ delay: 200, duration: 300 }),
-      );
-      expect(groupArgs[1].options).toEqual(
-        expect.objectContaining({ delay: 150, duration: 500 }),
-      );
+      expect(groupArgs[0].options).toEqual(expect.objectContaining({ delay: 200, duration: 300 }));
+      expect(groupArgs[1].options).toEqual(expect.objectContaining({ delay: 150, duration: 500 }));
     });
 
     test('resolves effectId references from config.effects', () => {

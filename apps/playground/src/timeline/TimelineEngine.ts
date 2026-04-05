@@ -168,8 +168,12 @@ export class TimelineEngine {
       if (!effect) continue;
 
       const subTracks = this._buildEffectTracks(
-        effectId, effect as Record<string, any>, ref,
-        interaction.key, 0, trackCounter,
+        effectId,
+        effect as Record<string, any>,
+        ref,
+        interaction.key,
+        0,
+        trackCounter,
       );
       tracks.push(...subTracks);
       trackCounter += subTracks.length;
@@ -197,8 +201,13 @@ export class TimelineEngine {
         const seqLabel = `Seq #${seqId.replace(/^seq-/, '')}`;
 
         const subTracks = this._buildEffectTracks(
-          effectId, effect as Record<string, any>, effRef,
-          interaction.key, staggerDelay, trackCounter, seqLabel,
+          effectId,
+          effect as Record<string, any>,
+          effRef,
+          interaction.key,
+          staggerDelay,
+          trackCounter,
+          seqLabel,
         );
         tracks.push(...subTracks);
         trackCounter += subTracks.length;
@@ -223,8 +232,8 @@ export class TimelineEngine {
     const isScrub = type === 'scrub';
     const baseDuration = isScrub
       ? SCRUB_DEFAULT_DURATION
-      : (effect.duration ?? (type === 'transition'
-        ? (effect.transitionProperties?.[0]?.duration ?? 300) : 300));
+      : (effect.duration ??
+        (type === 'transition' ? (effect.transitionProperties?.[0]?.duration ?? 300) : 300));
 
     const targetKey = resolveRefTargetKey(ref, effect, interactionKey);
     let targetElement: Element | null = null;
@@ -304,7 +313,11 @@ export class TimelineEngine {
   destroyAnimations(): void {
     this._stopLoop();
     for (const anim of this._animations) {
-      try { anim.cancel(); } catch { /* already cancelled */ }
+      try {
+        anim.cancel();
+      } catch {
+        /* already cancelled */
+      }
     }
     this._animations = [];
     this._playing = false;
@@ -355,9 +368,7 @@ export class TimelineEngine {
 
   get totalDuration(): number {
     if (this._tracks.length === 0) return 0;
-    return Math.max(
-      ...this._tracks.map((t) => t.delay + t.duration * t.iterations),
-    );
+    return Math.max(...this._tracks.map((t) => t.delay + t.duration * t.iterations));
   }
 
   get isPlaying(): boolean {
@@ -376,9 +387,7 @@ export class TimelineEngine {
       const time = this.currentTime;
       this._tickCallback?.(time);
 
-      const allFinished = this._animations.every(
-        (a) => a.playState === 'finished',
-      );
+      const allFinished = this._animations.every((a) => a.playState === 'finished');
       if (allFinished || time >= this.totalDuration) {
         this._playing = false;
         this._tickCallback?.(this.totalDuration);

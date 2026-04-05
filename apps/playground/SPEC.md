@@ -47,14 +47,14 @@ The output is always a valid `InteractConfig` object that can be consumed by `@w
 
 ## Technology Stack
 
-| Concern           | Choice                                                                 |
-| ----------------- | ---------------------------------------------------------------------- |
-| Language          | TypeScript                                                             |
-| UI framework      | Native Web Components (Custom Elements + Shadow DOM)                   |
-| Build tool        | Vite 7                                                                 |
+| Concern           | Choice                                                                    |
+| ----------------- | ------------------------------------------------------------------------- |
+| Language          | TypeScript                                                                |
+| UI framework      | Native Web Components (Custom Elements + Shadow DOM)                      |
+| Build tool        | Vite 7                                                                    |
 | Animation runtime | `@wix/interact/web` (custom elements entry point) + `@wix/motion-presets` |
-| State             | Custom Redux-style store (`EventTarget` + pure reducer)                |
-| Styling           | CSS Layers + CSS Custom Properties, per-component `adoptedStyleSheets` |
+| State             | Custom Redux-style store (`EventTarget` + pure reducer)                   |
+| Styling           | CSS Layers + CSS Custom Properties, per-component `adoptedStyleSheets`    |
 
 No framework dependencies (React, Vue, etc.). All UI is built with native custom elements extending an abstract `BaseComponent` class.
 
@@ -111,16 +111,16 @@ Panel widths (sidebar, inspector) and the bottom panel height are resizable via 
 
 Eight pre-made HTML/CSS website components are available for selection. Each is a self-contained module exporting an HTML template, scoped CSS, and metadata describing its animatable elements via `data-interact-key` targets.
 
-| Component      | Description                                  | Interact Keys                                                |
-| -------------- | -------------------------------------------- | ------------------------------------------------------------ |
-| `card`         | Image, title, text, CTA button               | `card`, `card-image`, `card-title`, `card-cta`               |
-| `card-list`    | Vertical list of cards                       | `card-list`, `card-list-item` (list)                         |
-| `card-grid`    | 2–3 column responsive grid of cards          | `card-grid`, `card-grid-item` (list)                         |
-| `hero-section` | Full-width section with image, title, text   | `hero`, `hero-image`, `hero-title`, `hero-text`              |
-| `figure`       | Image with caption                           | `figure`, `figure-image`, `figure-caption`                   |
-| `header`       | Heading text with subtitle                   | `header`, `header-title`, `header-subtitle`                  |
-| `nav-menu`     | Horizontal list of text anchors              | `nav-menu`, `nav-menu-item` (list)                           |
-| `carousel`     | Horizontal image carousel with title overlay | `carousel`, `carousel-slide` (list), `carousel-title`        |
+| Component      | Description                                  | Interact Keys                                         |
+| -------------- | -------------------------------------------- | ----------------------------------------------------- |
+| `card`         | Image, title, text, CTA button               | `card`, `card-image`, `card-title`, `card-cta`        |
+| `card-list`    | Vertical list of cards                       | `card-list`, `card-list-item` (list)                  |
+| `card-grid`    | 2–3 column responsive grid of cards          | `card-grid`, `card-grid-item` (list)                  |
+| `hero-section` | Full-width section with image, title, text   | `hero`, `hero-image`, `hero-title`, `hero-text`       |
+| `figure`       | Image with caption                           | `figure`, `figure-image`, `figure-caption`            |
+| `header`       | Heading text with subtitle                   | `header`, `header-title`, `header-subtitle`           |
+| `nav-menu`     | Horizontal list of text anchors              | `nav-menu`, `nav-menu-item` (list)                    |
+| `carousel`     | Horizontal image carousel with title overlay | `carousel`, `carousel-slide` (list), `carousel-title` |
 
 ### Key Types
 
@@ -128,12 +128,12 @@ Each component declares its keys as `ComponentKey` objects:
 
 ```ts
 interface ComponentKey {
-  key: string;        // data-interact-key value
-  label: string;      // Display name in the UI
-  isList?: boolean;   // True for repeated/list elements
+  key: string; // data-interact-key value
+  label: string; // Display name in the UI
+  isList?: boolean; // True for repeated/list elements
   parentKey?: string; // For list items: the parent's interact key
-  listContainer?: string;     // CSS selector for the list container
-  listItemSelector?: string;  // CSS selector for items within it
+  listContainer?: string; // CSS selector for the list container
+  listItemSelector?: string; // CSS selector for items within it
 }
 ```
 
@@ -164,13 +164,13 @@ Changing the selected component replaces the stage content entirely, resets all 
 
 ```ts
 interface PlaygroundState {
-  config: InteractConfig;                           // The serializable output
-  activeComponentId: string;                        // Which library component is on stage
-  selectedInteractionIndex: number | null;          // Currently selected interaction
-  selectedEffectId: string | null;                  // Currently selected effect
-  selectedEffectContext: EffectContext | null;       // Where the selected effect's inline ref lives
-  bottomPanel: 'none' | 'json' | 'timeline';       // Which bottom panel is open
-  scrollPreview: ScrollPreviewState;                // Scroll preview UI state (not in config)
+  config: InteractConfig; // The serializable output
+  activeComponentId: string; // Which library component is on stage
+  selectedInteractionIndex: number | null; // Currently selected interaction
+  selectedEffectId: string | null; // Currently selected effect
+  selectedEffectContext: EffectContext | null; // Where the selected effect's inline ref lives
+  bottomPanel: 'none' | 'json' | 'timeline'; // Which bottom panel is open
+  scrollPreview: ScrollPreviewState; // Scroll preview UI state (not in config)
 }
 ```
 
@@ -184,28 +184,28 @@ type EffectContext =
 
 ### Actions
 
-| Action                | Payload                                     | Purpose                                                         |
-| --------------------- | ------------------------------------------- | --------------------------------------------------------------- |
-| `SELECT_COMPONENT`    | `string` (component ID)                     | Switch the stage component, reset config                        |
-| `SET_CONFIG`          | `InteractConfig`                            | Replace entire config (import, JSON edit)                       |
-| `RESET_CONFIG`        | —                                           | Clear all interactions/effects                                  |
-| `ADD_INTERACTION`     | —                                           | Append a new interaction with default hover trigger             |
-| `REMOVE_INTERACTION`  | `number` (index)                            | Delete an interaction                                           |
-| `UPDATE_INTERACTION`  | `{ index, data }`                           | Patch an interaction's properties                               |
-| `SELECT_INTERACTION`  | `number \| null`                            | Set the active interaction for the inspector                    |
-| `ADD_EFFECT`          | `{ id, effect }`                            | Add a new effect to the config                                  |
-| `UPDATE_EFFECT`       | `{ id, effect }`                            | Update an effect's properties                                   |
-| `REMOVE_EFFECT`       | `string` (effect ID)                        | Delete an effect and all references                             |
-| `SELECT_EFFECT`       | `{ id, context? }`                          | Set the active effect and its context                           |
-| `ADD_CONDITION`       | `{ id, condition }`                         | Add a condition to the config                                   |
-| `UPDATE_CONDITION`    | `{ id, condition }`                         | Update a condition                                              |
-| `REMOVE_CONDITION`    | `string` (condition ID)                     | Delete a condition and strip references                         |
-| `ADD_SEQUENCE`        | `{ id, sequence }`                          | Add a sequence to the config                                    |
-| `UPDATE_SEQUENCE`     | `{ id, sequence }`                          | Update a sequence                                               |
-| `REMOVE_SEQUENCE`     | `string` (sequence ID)                      | Delete a sequence                                               |
-| `SET_BOTTOM_PANEL`    | `'none' \| 'json' \| 'timeline'`            | Toggle bottom panel visibility/tab                              |
-| `SET_SCROLL_PREVIEW`  | `Partial<ScrollPreviewState>`               | Update scroll preview UI state                                  |
-| `UNDO`                | —                                           | Revert to the previous state                                    |
+| Action               | Payload                          | Purpose                                             |
+| -------------------- | -------------------------------- | --------------------------------------------------- |
+| `SELECT_COMPONENT`   | `string` (component ID)          | Switch the stage component, reset config            |
+| `SET_CONFIG`         | `InteractConfig`                 | Replace entire config (import, JSON edit)           |
+| `RESET_CONFIG`       | —                                | Clear all interactions/effects                      |
+| `ADD_INTERACTION`    | —                                | Append a new interaction with default hover trigger |
+| `REMOVE_INTERACTION` | `number` (index)                 | Delete an interaction                               |
+| `UPDATE_INTERACTION` | `{ index, data }`                | Patch an interaction's properties                   |
+| `SELECT_INTERACTION` | `number \| null`                 | Set the active interaction for the inspector        |
+| `ADD_EFFECT`         | `{ id, effect }`                 | Add a new effect to the config                      |
+| `UPDATE_EFFECT`      | `{ id, effect }`                 | Update an effect's properties                       |
+| `REMOVE_EFFECT`      | `string` (effect ID)             | Delete an effect and all references                 |
+| `SELECT_EFFECT`      | `{ id, context? }`               | Set the active effect and its context               |
+| `ADD_CONDITION`      | `{ id, condition }`              | Add a condition to the config                       |
+| `UPDATE_CONDITION`   | `{ id, condition }`              | Update a condition                                  |
+| `REMOVE_CONDITION`   | `string` (condition ID)          | Delete a condition and strip references             |
+| `ADD_SEQUENCE`       | `{ id, sequence }`               | Add a sequence to the config                        |
+| `UPDATE_SEQUENCE`    | `{ id, sequence }`               | Update a sequence                                   |
+| `REMOVE_SEQUENCE`    | `string` (sequence ID)           | Delete a sequence                                   |
+| `SET_BOTTOM_PANEL`   | `'none' \| 'json' \| 'timeline'` | Toggle bottom panel visibility/tab                  |
+| `SET_SCROLL_PREVIEW` | `Partial<ScrollPreviewState>`    | Update scroll preview UI state                      |
+| `UNDO`               | —                                | Revert to the previous state                        |
 
 ### Undo System
 
@@ -224,17 +224,17 @@ Shown in the inspector when an interaction is selected. Provides:
 
 ### Supported Trigger Types
 
-| Trigger         | Description                                         | Configurable Params                                                           |
-| --------------- | --------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `hover`         | Mouse enter/leave                                   | Behavior: `type` (once/repeat/alternate/state) or `method` (add/remove/toggle/clear) depending on effect type |
-| `click`         | Mouse click                                         | Same behavior toggle as hover                                                 |
-| `activate`      | Focus + click combined                              | Same behavior toggle as hover                                                 |
-| `interest`      | Hover + focus combined                              | Same behavior toggle as hover                                                 |
-| `viewEnter`     | Element enters the viewport                         | `type` (once/repeat/alternate/state), `threshold` (0–1 slider), `inset`       |
-| `viewProgress`  | Scroll progress through viewport                    | No trigger params (scroll preview controls shown instead)                     |
-| `pointerMove`   | Mouse movement tracking                             | `hitArea` (root/self), `axis` (x/y)                                           |
-| `pageVisible`   | Page visibility change                              | —                                                                             |
-| `animationEnd`  | After another animation completes                   | —                                                                             |
+| Trigger        | Description                       | Configurable Params                                                                                           |
+| -------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `hover`        | Mouse enter/leave                 | Behavior: `type` (once/repeat/alternate/state) or `method` (add/remove/toggle/clear) depending on effect type |
+| `click`        | Mouse click                       | Same behavior toggle as hover                                                                                 |
+| `activate`     | Focus + click combined            | Same behavior toggle as hover                                                                                 |
+| `interest`     | Hover + focus combined            | Same behavior toggle as hover                                                                                 |
+| `viewEnter`    | Element enters the viewport       | `type` (once/repeat/alternate/state), `threshold` (0–1 slider), `inset`                                       |
+| `viewProgress` | Scroll progress through viewport  | No trigger params (scroll preview controls shown instead)                                                     |
+| `pointerMove`  | Mouse movement tracking           | `hitArea` (root/self), `axis` (x/y)                                                                           |
+| `pageVisible`  | Page visibility change            | —                                                                                                             |
+| `animationEnd` | After another animation completes | —                                                                                                             |
 
 ### Trigger Editor (`<pg-trigger-editor>`)
 
@@ -261,11 +261,11 @@ Manages the effects for the selected interaction. Provides:
 
 ### Effect Type Constraints by Trigger
 
-| Trigger                                      | Allowed Effect Types   |
-| -------------------------------------------- | ---------------------- |
-| `hover` / `click` / `activate` / `interest`  | Time, Transition       |
-| `viewEnter`                                  | Time only              |
-| `viewProgress` / `pointerMove`               | Scrub only             |
+| Trigger                                     | Allowed Effect Types |
+| ------------------------------------------- | -------------------- |
+| `hover` / `click` / `activate` / `interest` | Time, Transition     |
+| `viewEnter`                                 | Time only            |
+| `viewProgress` / `pointerMove`              | Scrub only           |
 
 When the trigger changes, incompatible effects are auto-converted to the trigger's default type.
 
@@ -383,18 +383,18 @@ A composite control for selecting and editing CSS easing curves. Three synchroni
 
 Grouped by category using `<optgroup>`:
 
-| Category | Presets                                                 |
-| -------- | ------------------------------------------------------- |
-| Standard | linear, ease, easeIn, easeOut, easeInOut                |
-| Sine     | sineIn, sineOut, sineInOut                              |
-| Quad     | quadIn, quadOut, quadInOut                               |
-| Cubic    | cubicIn, cubicOut, cubicInOut                             |
-| Quart    | quartIn, quartOut, quartInOut                             |
-| Quint    | quintIn, quintOut, quintInOut                             |
-| Expo     | expoIn, expoOut, expoInOut                               |
-| Circ     | circIn, circOut, circInOut                               |
-| Back     | backIn, backOut, backInOut                               |
-| Custom   | User-defined via the SVG editor                         |
+| Category | Presets                                  |
+| -------- | ---------------------------------------- |
+| Standard | linear, ease, easeIn, easeOut, easeInOut |
+| Sine     | sineIn, sineOut, sineInOut               |
+| Quad     | quadIn, quadOut, quadInOut               |
+| Cubic    | cubicIn, cubicOut, cubicInOut            |
+| Quart    | quartIn, quartOut, quartInOut            |
+| Quint    | quintIn, quintOut, quintInOut            |
+| Expo     | expoIn, expoOut, expoInOut               |
+| Circ     | circIn, circOut, circInOut               |
+| Back     | backIn, backOut, backInOut               |
+| Custom   | User-defined via the SVG editor          |
 
 #### 2. SVG Bezier Curve Editor
 
@@ -407,6 +407,7 @@ Inline SVG (viewBox: `-20 -20 240 240`) visualizing the cubic-bezier curve:
 - **Two draggable circle handles** at (x1, y1) and (x2, y2)
 
 **Drag behavior**:
+
 - `pointerdown` → capture pointer, track `pointermove`
 - Convert screen coords to SVG coords via `getScreenCTM().inverse()`
 - X clamped to [0, 1] (CSS spec); Y unclamped [-0.5, 1.5] (allows overshoot for back/bounce easings)
@@ -437,10 +438,10 @@ Scroll preview state is stored in `PlaygroundState.scrollPreview` (UI-only, not 
 
 ```ts
 interface ScrollPreviewState {
-  enabled: boolean;       // Auto-managed by trigger type
-  stickyTop?: number;     // Sticky top offset (px)
-  stickyBottom?: number;  // Sticky bottom offset (px)
-  stageHeight: number;    // Height multiplier
+  enabled: boolean; // Auto-managed by trigger type
+  stickyTop?: number; // Sticky top offset (px)
+  stickyBottom?: number; // Sticky bottom offset (px)
+  stageHeight: number; // Height multiplier
 }
 ```
 
@@ -513,6 +514,7 @@ Creates its own Web Animations API animations, independent of Interact's trigger
 - **`currentTime` / `totalDuration` / `isPlaying`** — read-only properties
 
 **Track resolution**:
+
 - Named effects → resolved to keyframes via preset factory functions
 - Keyframe effects → used directly
 - Transition effects → converted to equivalent keyframes
@@ -553,10 +555,10 @@ Toolbar "Import" button opens a file picker. Selected `.json` file is read, pars
 
 ## Keyboard Shortcuts
 
-| Shortcut               | Action                                  |
-| ---------------------- | --------------------------------------- |
+| Shortcut               | Action                                    |
+| ---------------------- | ----------------------------------------- |
 | `Delete` / `Backspace` | Remove the currently selected interaction |
-| `Ctrl/Cmd + Z`         | Undo last config-modifying action       |
+| `Ctrl/Cmd + Z`         | Undo last config-modifying action         |
 
 Handled at the `<pg-app>` level via `keydown` listeners.
 
@@ -599,14 +601,14 @@ All styles are organized into CSS `@layer` declarations, imported in strict orde
 @layer base, layout, theme, components, utilities, states;
 ```
 
-| Layer        | Purpose                                                           | File               |
-| ------------ | ----------------------------------------------------------------- | ------------------- |
-| `base`       | CSS reset, box-sizing, typography defaults                        | `styles/base.css`   |
-| `layout`     | App grid, panel sizing                                            | `styles/layout.css` |
-| `theme`      | All CSS custom properties (colors, spacing, radii, shadows, etc.) | `styles/theme.css`  |
-| `components` | Per-component styles (via Shadow DOM `adoptedStyleSheets`)        | Per-component CSS   |
+| Layer        | Purpose                                                            | File                   |
+| ------------ | ------------------------------------------------------------------ | ---------------------- |
+| `base`       | CSS reset, box-sizing, typography defaults                         | `styles/base.css`      |
+| `layout`     | App grid, panel sizing                                             | `styles/layout.css`    |
+| `theme`      | All CSS custom properties (colors, spacing, radii, shadows, etc.)  | `styles/theme.css`     |
+| `components` | Per-component styles (via Shadow DOM `adoptedStyleSheets`)         | Per-component CSS      |
 | `utilities`  | Helper classes (`.sr-only`, `.truncate`, `.flex-center`, `.gap-*`) | `styles/utilities.css` |
-| `states`     | Interactive states (`:hover`, `:focus-visible`, `[aria-selected]`) | `styles/states.css` |
+| `states`     | Interactive states (`:hover`, `:focus-visible`, `[aria-selected]`) | `styles/states.css`    |
 
 ### Design Tokens (theme.css)
 

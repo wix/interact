@@ -256,10 +256,18 @@ export class PgTimelinePanel extends BaseComponent {
 
     if (isOpen && this._active) {
       const configActions = new Set([
-        'ADD_EFFECT', 'UPDATE_EFFECT', 'REMOVE_EFFECT',
-        'ADD_INTERACTION', 'UPDATE_INTERACTION', 'REMOVE_INTERACTION',
-        'SET_CONFIG', 'RESET_CONFIG', 'SELECT_COMPONENT',
-        'ADD_SEQUENCE', 'UPDATE_SEQUENCE', 'REMOVE_SEQUENCE',
+        'ADD_EFFECT',
+        'UPDATE_EFFECT',
+        'REMOVE_EFFECT',
+        'ADD_INTERACTION',
+        'UPDATE_INTERACTION',
+        'REMOVE_INTERACTION',
+        'SET_CONFIG',
+        'RESET_CONFIG',
+        'SELECT_COMPONENT',
+        'ADD_SEQUENCE',
+        'UPDATE_SEQUENCE',
+        'REMOVE_SEQUENCE',
         'SELECT_INTERACTION',
         'UNDO',
       ]);
@@ -493,9 +501,7 @@ export class PgTimelinePanel extends BaseComponent {
     }
 
     this._tracks.forEach((track) => {
-      const bar = this.shadowRoot?.querySelector(
-        `.track-bar[data-track-id="${track.trackId}"]`,
-      );
+      const bar = this.shadowRoot?.querySelector(`.track-bar[data-track-id="${track.trackId}"]`);
       if (!bar) return;
       const fillEl = bar.querySelector('.track-bar-fill') as HTMLElement | null;
       if (!fillEl) return;
