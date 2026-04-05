@@ -252,7 +252,7 @@ export class PgTriggerEditor extends BaseComponent {
 
   private _renderPointerMoveParams(params: Record<string, unknown>): string {
     const hitArea = (params.hitArea as string) ?? 'self';
-    const axis = (params.axis as string) ?? '';
+    const axis = (params.axis as string) || 'x';
     return `
       <div class="field">
         <label>Hit Area</label>
@@ -264,7 +264,6 @@ export class PgTriggerEditor extends BaseComponent {
       <div class="field">
         <label>Axis</label>
         <select class="pg-select" id="param-axis">
-          <option value="" ${!axis ? 'selected' : ''}>Both</option>
           <option value="x" ${axis === 'x' ? 'selected' : ''}>X</option>
           <option value="y" ${axis === 'y' ? 'selected' : ''}>Y</option>
         </select>
@@ -333,8 +332,7 @@ export class PgTriggerEditor extends BaseComponent {
       update({ hitArea: (e.target as HTMLSelectElement).value });
     });
     shadow.getElementById('param-axis')?.addEventListener('change', (e) => {
-      const val = (e.target as HTMLSelectElement).value;
-      update({ axis: val || undefined });
+      update({ axis: (e.target as HTMLSelectElement).value });
     });
 
     // Animation end

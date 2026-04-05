@@ -472,6 +472,64 @@ describe('interact sequences', () => {
       );
     });
 
+    test('passes per-effect delay from config.effects into AnimationGroupArgs', () => {
+      const getSequenceMock = vi.mocked(getSequence);
+      const config: InteractConfig = {
+        effects: {
+          'fade-effect': {
+            keyframeEffect: {
+              name: 'fade',
+              keyframes: [{ opacity: 0 }, { opacity: 1 }],
+            },
+            duration: 300,
+            delay: 200,
+          },
+          'slide-effect': {
+            keyframeEffect: {
+              name: 'slide',
+              keyframes: [{ transform: 'translateX(-20px)' }, { transform: 'translateX(0)' }],
+            },
+            duration: 500,
+            delay: 150,
+          },
+        },
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'source-key',
+            sequences: [
+              {
+                sequenceId: 'delay-seq',
+                offset: 100,
+                effects: [
+                  { effectId: 'fade-effect', key: 'source-key' },
+                  { effectId: 'slide-effect', key: 'source-key' },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      Interact.create(config, { useCustomElement: false });
+      const source = createInteractElement();
+      addElement(source.element, 'source-key');
+
+      expect(getSequenceMock).toHaveBeenCalledTimes(1);
+      const [, animationGroupArgs] = getSequenceMock.mock.calls[0];
+      const groupArgs = Array.isArray(animationGroupArgs)
+        ? animationGroupArgs
+        : [animationGroupArgs];
+
+      expect(groupArgs).toHaveLength(2);
+      expect(groupArgs[0].options).toEqual(
+        expect.objectContaining({ delay: 200, duration: 300 }),
+      );
+      expect(groupArgs[1].options).toEqual(
+        expect.objectContaining({ delay: 150, duration: 500 }),
+      );
+    });
+
     test('resolves effectId references from config.effects', () => {
       const getSequenceMock = vi.mocked(getSequence);
       const config: InteractConfig = {
