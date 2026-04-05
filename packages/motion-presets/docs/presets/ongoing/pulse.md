@@ -36,9 +36,10 @@ export type Pulse = BaseDataItemLike<'Pulse'> & {
 
 ### Parameters
 
-| Parameter   | Type     | Default | Description                 | Examples                   |
-| ----------- | -------- | ------- | --------------------------- | -------------------------- |
-| `intensity` | `number` | `1.0`   | Multiplier for scale amount | `0.5`, `1.0`, `1.5`, `2.0` |
+| Parameter        | Type     | Default | Description                                  | Examples                    |
+| ---------------- | -------- | ------- | -------------------------------------------- | --------------------------- |
+| `intensity`      | `number` | `1.0`   | Multiplier for scale amount                  | `0.5`, `1.0`, `1.5`, `2.0` |
+| `iterationDelay` | `number` | `0`     | Idle time (ms) appended after each iteration | `0`, `500`, `1000`          |
 
 ### Intensity Control
 

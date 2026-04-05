@@ -17,12 +17,13 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { intensity = 0.25 } = options.namedEffect as Jello;
+  const namedEffect = options.namedEffect as Jello;
+  const { intensity = 0.25 } = namedEffect;
 
   const duration = options.duration || 1;
-  const delay = options.delay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || 0;
   const [name] = getNames(options);
-  const timingFactor = getTimingFactor(duration, delay) as number;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
 
   const jelloFactor = mapRange(0, 1, JELLO_FACTOR_SOFT, JELLO_FACTOR_HARD, intensity);
 
@@ -48,9 +49,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     {
       ...options,
       name,
-      delay: 0,
       easing: 'linear',
-      duration: duration + delay,
+      duration: duration + iterationDelay,
       custom,
       keyframes,
     },
@@ -58,7 +58,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const timingFactor = getTimingFactor(options.duration!, options.delay!, true);
+  const iterationDelay = (options.namedEffect as Jello)?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
   return [`motion-jello-${timingFactor}`];
 }

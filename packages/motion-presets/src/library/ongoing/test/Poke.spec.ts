@@ -17,7 +17,6 @@ describe('Poke', () => {
       const expectedResult: Partial<AnimationData>[] = [
         {
           name: 'motion-poke-1',
-          delay: 0,
           duration: 1000,
           custom: {
             '--motion-translate-x': 2.5,
@@ -63,18 +62,15 @@ describe('Poke', () => {
 
     test('Poke animation with custom duration and delay', () => {
       const duration = 1000;
-      const delay = 500;
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration,
-        delay,
-        namedEffect: {} as Poke,
+        namedEffect: { iterationDelay: 500 } as Poke,
       };
 
       const result = PokeAnimation.web(mockOptions);
 
       expect(result[0].name).toBe('motion-poke-067');
-      expect(result[0].delay).toBe(0);
       expect(result[0].duration).toBe(1500);
       expect(result[0].custom).toEqual({
         '--motion-translate-x': 2.5,
@@ -271,7 +267,6 @@ describe('Poke', () => {
       const expectedResult: Partial<AnimationData>[] = [
         {
           name: 'motion-poke-1',
-          delay: 0,
           duration: 1000,
           custom: {
             '--motion-translate-x': 2.5,
@@ -324,18 +319,15 @@ describe('Poke', () => {
 
     test('Poke.style animation with custom duration and delay', () => {
       const duration = 800;
-      const delay = 200;
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration,
-        delay,
-        namedEffect: {} as Poke,
+        namedEffect: { iterationDelay: 200 } as Poke,
       };
 
       const result = PokeAnimation.style(mockOptions);
 
       expect(result[0].name).toBe('motion-poke-08');
-      expect(result[0].delay).toBe(0);
       expect(result[0].duration).toBe(1000);
       expect(result[0].custom).toEqual({
         '--motion-translate-x': 2.5,
@@ -425,8 +417,7 @@ describe('Poke', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 800,
-        delay: 200,
-        namedEffect: {} as Poke,
+        namedEffect: { iterationDelay: 200 } as Poke,
       };
 
       const result = PokeAnimation.getNames(mockOptions);

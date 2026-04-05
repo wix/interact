@@ -18,8 +18,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const direction = parseDirection(namedEffect?.direction, SPIN_DIRECTIONS, DEFAULT_DIRECTION);
 
   const duration = options.duration || 1;
-  const delay = options.delay || 0;
-  const timingFactor = getTimingFactor(duration, delay) as number;
+  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
   const easing = options.easing || 'linear';
@@ -35,8 +35,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ...options,
       name,
       easing: 'linear',
-      delay: 0,
-      duration: duration + delay,
+      duration: duration + iterationDelay,
       custom,
       keyframes: [
         {
@@ -54,7 +53,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const timingFactor = getTimingFactor(options.duration!, options.delay!, true);
+  const iterationDelay = (options.namedEffect as Spin)?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
   return [`motion-spin-${timingFactor}`];
 }
