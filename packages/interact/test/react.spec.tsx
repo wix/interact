@@ -72,26 +72,22 @@ describe('interact (react)', () => {
       {
         trigger: 'click',
         key: 'logo-click',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-click',
             effectId: 'logo-bounce',
+            triggerType: 'alternate',
           },
         ],
       },
       {
         trigger: 'hover',
         key: 'logo-hover',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-hover',
             effectId: 'logo-arc-in',
+            triggerType: 'alternate',
           },
         ],
       },

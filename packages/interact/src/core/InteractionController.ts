@@ -1,4 +1,4 @@
-import type { IInteractElement, StateParams } from '../types';
+import type { IInteractElement, StateAction } from '../types';
 import { add, addListItems } from './add';
 import { remove, removeListItems } from './remove';
 
@@ -94,7 +94,7 @@ export class InteractionController {
 
   toggleEffect(
     effectId: string,
-    method: StateParams['method'],
+    stateAction: StateAction,
     item?: HTMLElement | null,
     isLegacy?: boolean,
   ) {
@@ -103,7 +103,7 @@ export class InteractionController {
     }
 
     if (!isLegacy && (this.element as IInteractElement).toggleEffect) {
-      (this.element as IInteractElement).toggleEffect(effectId, method, item);
+      (this.element as IInteractElement).toggleEffect(effectId, stateAction, item);
       return;
     }
 
@@ -111,17 +111,17 @@ export class InteractionController {
       this.element.dataset[INTERACT_EFFECT_DATA_ATTR]?.split(' ') || [],
     );
 
-    if (method === 'toggle') {
+    if (stateAction === 'toggle') {
       if (currentEffects.has(effectId)) {
         currentEffects.delete(effectId);
       } else {
         currentEffects.add(effectId);
       }
-    } else if (method === 'add') {
+    } else if (stateAction === 'add') {
       currentEffects.add(effectId);
-    } else if (method === 'remove') {
+    } else if (stateAction === 'remove') {
       currentEffects.delete(effectId);
-    } else if (method === 'clear') {
+    } else if (stateAction === 'clear') {
       currentEffects.clear();
     }
 

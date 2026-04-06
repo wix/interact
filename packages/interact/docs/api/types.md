@@ -172,7 +172,7 @@ interface IInteractionController {
   update(): void;
   toggleEffect(
     effectId: string,
-    method: StateParams['method'],
+    stateAction: StateAction,
     item?: HTMLElement | null,
     isLegacy?: boolean,
   ): void;
@@ -230,7 +230,7 @@ interface IInteractElement extends HTMLElement {
   disconnectedCallback(): void;
   connect(key?: string): void;
   disconnect(options?: { removeFromCache?: boolean }): void;
-  toggleEffect(effectId: string, method: StateParams['method'], item?: HTMLElement | null): void;
+  toggleEffect(effectId: string, stateAction: StateAction, item?: HTMLElement | null): void;
   getActiveEffects(): string[];
 }
 ```
@@ -342,7 +342,6 @@ type TriggerType =
   | 'interest'
   | 'activate'
   | 'viewEnter'
-  | 'pageVisible'
   | 'animationEnd'
   | 'viewProgress'
   | 'pointerMove';
@@ -352,22 +351,18 @@ type TriggerType =
 
 #### `ViewEnterParams`
 
-Parameters for viewport entry triggers (`viewEnter`, `pageVisible`, `viewProgress`).
+Parameters for viewport entry trigger (`viewEnter`).
 
 ```typescript
 type ViewEnterParams = {
-  type?: ViewEnterType;
   threshold?: number;
   inset?: string;
   useSafeViewEnter?: boolean;
 };
-
-type ViewEnterType = 'once' | 'repeat' | 'alternate' | 'state';
 ```
 
 **Properties:**
 
-- `type` - How the trigger behaves: `'once'` (default), `'repeat'`, `'alternate'`, `'state'` (play on enter, pause on exit)
 - `threshold` - Percentage of element that must be visible (0-1)
 - `inset` - CSS-style inset to shrink the root intersection area
 - `useSafeViewEnter` - When true, handles elements taller than viewport
@@ -375,57 +370,15 @@ type ViewEnterType = 'once' | 'repeat' | 'alternate' | 'state';
 **Examples:**
 
 ```typescript
-// Trigger once when 50% visible
+// Trigger when 50% visible
 const onceParams: ViewEnterParams = {
-  type: 'once',
   threshold: 0.5,
 };
 
-// Trigger repeatedly with margin
+// Trigger when 10% visible with 100px inset
 const repeatParams: ViewEnterParams = {
-  type: 'repeat',
   threshold: 0.1,
   inset: '100px',
-};
-
-// Alternate effects on enter/exit
-const alternateParams: ViewEnterParams = {
-  type: 'alternate',
-  threshold: 0.3,
-};
-```
-
-#### `StateParams`
-
-Parameters for state-based triggers (`hover`, `click`, `interest`, `activate`).
-
-```typescript
-type StateParams = {
-  method: TransitionMethod;
-};
-
-type TransitionMethod = 'add' | 'remove' | 'toggle' | 'clear';
-```
-
-**Properties:**
-
-- `method` - How to modify the element's state
-  - `'add'` - Add the effect state
-  - `'remove'` - Remove the effect state
-  - `'toggle'` - Toggle the effect state
-  - `'clear'` - Clear all effect states
-
-**Examples:**
-
-```typescript
-// Toggle effect on click
-const toggleClick: StateParams = {
-  method: 'toggle',
-};
-
-// Add effect on hover enter, remove on hover exit
-const hoverState: StateParams = {
-  method: 'add', // hover exit automatically uses 'remove'
 };
 ```
 
@@ -485,7 +438,7 @@ const chainedAnimation: AnimationEndParams = {
 Union type of all effect types.
 
 ```typescript
-type Effect = (TimeEffect | ScrubEffect | TransitionEffect) & {
+type Effect = (TimeEffect | ScrubEffect | StateEffect) & {
   conditions?: string[];
 };
 ```
@@ -507,6 +460,7 @@ type TimeEffect = {
   reversed?: boolean;
   delay?: number;
   effectId?: string;
+  triggerType?: ViewEnterType;
 } & EffectProperty;
 
 type Fill = 'none' | 'forwards' | 'backwards' | 'both';
@@ -524,6 +478,11 @@ type Fill = 'none' | 'forwards' | 'backwards' | 'both';
 - `fill` - How to apply styles before/after animation
 - `reversed` - Whether to play animation in reverse
 - `delay` - Delay before animation starts in milliseconds
+- `triggerType` - Controls play behavior for event triggers (`hover`, `click`, `activate`, `interest`, `viewEnter`):
+  - `'alternate'` (default) - Hover & viewEnter: play on enter, reverse on leave. Click: alternate play/reverse on successive clicks.
+  - `'repeat'` - Restart from progress 0 on each event; on hover & viewEnter leave the animation is canceled.
+  - `'once'` - Play once and remove the listener (hover & viewEnter attach only the enter listener; no leave).
+  - `'state'` - Hover & viewEnter: play on enter if idle/paused, pause on leave if running. Click: toggle play/pause on successive clicks until finished.
 
 **Examples:**
 
@@ -623,19 +582,22 @@ const progressFade: ScrubEffect = {
 };
 ```
 
-### `TransitionEffect`
+### `StateEffect`
 
 CSS transition-based effects for style property changes.
 
 ```typescript
-type TransitionEffect = {
+type StateEffect = {
   key?: string;
   effectId?: string;
+  stateAction?: StateAction;
   transition?: TransitionOptions & {
     styleProperties: StyleProperty[];
   };
   transitionProperties?: TransitionProperty[];
 };
+
+type StateAction = 'add' | 'remove' | 'toggle' | 'clear';
 
 type TransitionOptions = {
   duration?: number;
@@ -651,11 +613,19 @@ type StyleProperty = {
 type TransitionProperty = StyleProperty & TransitionOptions;
 ```
 
+**Properties:**
+
+- `stateAction` - How to modify the element's CSS state on event triggers (`hover`, `click`, `activate`, `interest`):
+  - `'toggle'` (default) - Hover: adds on enter, removes on leave. Click: toggles on each click.
+  - `'add'` - Add the effect state; hover leave will NOT auto-remove.
+  - `'remove'` - Remove the effect state.
+  - `'clear'` - Clear all effect states for the element (or list item when list context is used).
+
 **Examples:**
 
 ```typescript
 // Simple color transition
-const colorTransition: TransitionEffect = {
+const colorTransition: StateEffect = {
   transition: {
     duration: 300,
     easing: 'ease-out',
@@ -667,7 +637,7 @@ const colorTransition: TransitionEffect = {
 };
 
 // Individual property transitions
-const complexTransition: TransitionEffect = {
+const complexTransition: StateEffect = {
   transitionProperties: [
     {
       name: 'transform',
@@ -944,10 +914,10 @@ Map of trigger types to their parameter types.
 
 ```typescript
 type InteractionParamsTypes = {
-  hover: StateParams | PointerTriggerParams;
-  click: StateParams | PointerTriggerParams;
-  interest: StateParams | PointerTriggerParams;
-  activate: StateParams | PointerTriggerParams;
+  hover: Record<string, never>;
+  click: Record<string, never>;
+  interest: Record<string, never>;
+  activate: Record<string, never>;
   viewEnter: ViewEnterParams;
   pageVisible: ViewEnterParams;
   animationEnd: AnimationEndParams;
@@ -956,17 +926,14 @@ type InteractionParamsTypes = {
 };
 ```
 
+> **Note:** `hover`, `click`, `interest`, and `activate` triggers no longer require params. Animation behavior (`triggerType`) is now configured on `TimeEffect`, and state behavior (`stateAction`) is now configured on `StateEffect`.
+
 ### `TriggerParams`
 
 Union type of all trigger parameter types.
 
 ```typescript
-type TriggerParams =
-  | StateParams
-  | PointerTriggerParams
-  | ViewEnterParams
-  | PointerMoveParams
-  | AnimationEndParams;
+type TriggerParams = ViewEnterParams | PointerMoveParams | AnimationEndParams;
 ```
 
 ## See Also

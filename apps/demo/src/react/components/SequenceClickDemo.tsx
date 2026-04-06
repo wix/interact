@@ -7,9 +7,9 @@ const config: InteractConfig = {
     {
       key: 'click-seq-trigger',
       trigger: 'click',
-      params: { type: 'alternate' },
       sequences: [
         {
+          triggerType: 'alternate',
           offset: 150,
           offsetEasing: 'sineOut',
           effects: [

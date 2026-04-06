@@ -46,17 +46,9 @@ export type EventTriggerConfig = string | EventTriggerConfigToggle | EventTrigge
 
 export type ViewEnterType = 'once' | 'repeat' | 'alternate' | 'state';
 
-export type TransitionMethod = 'add' | 'remove' | 'toggle' | 'clear';
+export type StateAction = 'add' | 'remove' | 'toggle' | 'clear';
 
-export type StateParams = {
-  method: TransitionMethod;
-};
-
-export type PointerTriggerParams = {
-  type?: ViewEnterType | 'state';
-};
-
-export type EventTriggerParams = (StateParams | PointerTriggerParams) & {
+export type EventTriggerParams = {
   eventConfig: EventTriggerConfig;
 };
 
@@ -76,12 +68,7 @@ export type AnimationEndParams = {
   effectId: string;
 };
 
-export type TriggerParams =
-  | StateParams
-  | PointerTriggerParams
-  | ViewEnterParams
-  | PointerMoveParams
-  | AnimationEndParams;
+export type TriggerParams = ViewEnterParams | PointerMoveParams | AnimationEndParams;
 
 type Fill = 'none' | 'forwards' | 'backwards' | 'both';
 
@@ -109,6 +96,7 @@ export type TimeEffect = {
   fill?: Fill;
   reversed?: boolean;
   delay?: number;
+  triggerType?: ViewEnterType;
 } & EffectEffectProperty;
 
 export type ScrubEffect = {
@@ -138,9 +126,10 @@ export type StyleProperty = {
 
 export type TransitionProperty = StyleProperty & TransitionOptions;
 
-export type TransitionEffect = {
+export type StateEffect = {
   key?: string;
   effectId?: string;
+  stateAction?: StateAction;
 } & {
   transition?: TransitionOptions & {
     styleProperties: StyleProperty[];
@@ -159,7 +148,7 @@ export type EffectBase = {
 
 export type EffectRef = EffectBase & { effectId: string };
 
-export type Effect = EffectBase & (TimeEffect | ScrubEffect | TransitionEffect);
+export type Effect = EffectBase & (TimeEffect | ScrubEffect | StateEffect);
 
 export type Condition = {
   type: 'media' | 'container' | 'selector';
@@ -172,6 +161,7 @@ export type SequenceOptionsConfig = {
   offsetEasing?: string | ((p: number) => number);
   sequenceId?: string;
   conditions?: string[];
+  triggerType?: ViewEnterType | 'state';
 };
 
 export type SequenceConfig = SequenceOptionsConfig & {
@@ -228,7 +218,7 @@ export interface IInteractionController {
   update(): void;
   toggleEffect(
     effectId: string,
-    method: StateParams['method'],
+    stateAction: StateAction,
     item?: HTMLElement | null,
     isLegacy?: boolean,
   ): void;
@@ -245,20 +235,20 @@ export interface IInteractElement extends HTMLElement {
   disconnectedCallback(): void;
   connect(key?: string): void;
   disconnect(options?: { removeFromCache?: boolean }): void;
-  toggleEffect(effectId: string, method: StateParams['method'], item?: HTMLElement | null): void;
+  toggleEffect(effectId: string, stateAction: StateAction, item?: HTMLElement | null): void;
   getActiveEffects(): string[];
 }
 
 export type InteractionParamsTypes = {
-  hover: StateParams | PointerTriggerParams;
-  click: StateParams | PointerTriggerParams;
+  hover: Record<string, never>;
+  click: Record<string, never>;
   viewEnter: ViewEnterParams;
   pageVisible: ViewEnterParams;
   animationEnd: AnimationEndParams;
   viewProgress: ViewEnterParams;
   pointerMove: PointerMoveParams;
-  activate: StateParams | PointerTriggerParams;
-  interest: StateParams | PointerTriggerParams;
+  activate: Record<string, never>;
+  interest: Record<string, never>;
 };
 
 export type InteractOptions = {
@@ -322,7 +312,7 @@ export type InteractCache = {
 export type CreateTransitionCSSParams = {
   key: string;
   effectId: string;
-  transition?: TransitionEffect['transition'];
+  transition?: StateEffect['transition'];
   properties?: TransitionProperty[];
   childSelector?: string;
   selectorCondition?: string;

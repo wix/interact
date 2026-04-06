@@ -162,21 +162,18 @@ This configuration declares what user/system triggers occur on which source elem
         - `'pointerMove'`: Continuous pointer motion over an area.
     - **params?: TriggerParams**
       - OPTIONAL. Parameter object that MUST match the trigger:
-        - hover/click/activate/interest: `StateParams | PointerTriggerParams` (activate uses same params as click; interest uses same params as hover).
-          - `StateParams.method`: `'add' | 'remove' | 'toggle' | 'clear'`
-          - `PointerTriggerParams.type?`: `'once' | 'repeat' | 'alternate' | 'state'`
-          - Usage:
-            - When the effect is a `TransitionEffect`, use `StateParams.method` to control the state toggle invoked on interaction:
-              - `'toggle'` (default): Hover — adds on enter and removes on leave. Click — toggles on each click.
-              - `'add'`: Apply the state on the event; hover leave will NOT auto‑remove.
-              - `'remove'`: Remove the state on the event.
-              - `'clear'`: Clear/reset the effect’s state for the element (or list item when list context is used).
-              - With lists (`listContainer`/`listItemSelector`), the state is set on the matching item only.
-            - When the effect is a time animation (`namedEffect`/`keyframeEffect`), use `PointerTriggerParams.type`:
-              - `'alternate'` (default): Hover — play on enter, reverse on leave. Click — alternate play/reverse on successive clicks.
-              - `'repeat'`: Restart from progress 0 on each event; on hover leave the animation is canceled.
-              - `'once'`: Play once and remove the listener (hover attaches only the enter listener; no leave).
-              - `'state'`: Hover — play on enter if idle/paused, pause on leave if running. Click — toggle play/pause on successive clicks until finished.
+        - hover/click/activate/interest: No params needed. Behavior is configured on the effect itself:
+          - For `StateEffect`, use `stateAction?: StateAction` on the effect:
+            - `'toggle'` (default): Hover — adds on enter and removes on leave. Click — toggles on each click.
+            - `'add'`: Apply the state on the event; hover leave will NOT auto‑remove.
+            - `'remove'`: Remove the state on the event.
+            - `'clear'`: Clear/reset the effect’s state for the element (or list item when list context is used).
+            - With lists (`listContainer`/`listItemSelector`), the state is set on the matching item only.
+          - For `TimeEffect` (time animation with `namedEffect`/`keyframeEffect`), use `triggerType?` on the effect:
+            - `'alternate'` (default): Hover — play on enter, reverse on leave. Click — alternate play/reverse on successive clicks.
+            - `'repeat'`: Restart from progress 0 on each event; on hover leave the animation is canceled.
+            - `'once'`: Play once and remove the listener (hover attaches only the enter listener; no leave).
+            - `'state'`: Hover — play on enter if idle/paused, pause on leave if running. Click — toggle play/pause on successive clicks until finished.
         - viewEnter/pageVisible/viewProgress: `ViewEnterParams`
           - `type?`: `'once' | 'repeat' | 'alternate' | 'state'`
           - `threshold?`: number in [0,1] describing intersection threshold
@@ -466,7 +463,7 @@ The config remains the same for both integrations—only the HTML/JSX setup diff
          - Start when the element is 20% inside the viewport: `rangeStart: { name: 'entry', offset: { value: 20, unit: 'percentage' } }`
          - End when the element is leaving: `rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } }`
 
-  3. **TransitionEffect** (CSS transition-style state toggles)
+  3. **StateEffect** (CSS transition-style state toggles)
      - `key?`: string (target override; see TARGET CASCADE)
      - `effectId?`: string (when used as a reference identity)
      - One of:

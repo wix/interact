@@ -219,7 +219,7 @@ Reusable sequences can be defined in `InteractConfig.sequences` and referenced b
 
 ## 6. Named Effects & `registerEffects`
 
-To use `namedEffect` presets from `@wix/motion-presets`, register them before calling `Interact.create`. For full effect type syntax (`keyframeEffect`, `customEffect`, `TransitionEffect`, `ScrubEffect`), see `full-lean.md`.
+To use `namedEffect` presets from `@wix/motion-presets`, register them before calling `Interact.create`. For full effect type syntax (`keyframeEffect`, `customEffect`, `StateEffect`, `ScrubEffect`), see `full-lean.md`.
 
 **Install:**
 

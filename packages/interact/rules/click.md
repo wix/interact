@@ -289,7 +289,7 @@ These rules help generate click-based interactions using the `@wix/interact` lib
 
 ---
 
-## Rule 4: Click with State Toggles and TransitionEffects
+## Rule 4: Click with State Toggles and StateEffects
 
 **Use Case**: CSS property changes that toggle between states (e.g., theme switching, style variations, color changes)
 
@@ -306,12 +306,10 @@ These rules help generate click-based interactions using the `@wix/interact` lib
 {
     key: '[SOURCE_KEY]',
     trigger: 'click',
-    params: {
-        method: 'toggle'  // also: 'add', 'remove', 'clear' — see full-lean.md StateParams
-    },
     effects: [
         {
             key: '[TARGET_KEY]',
+            stateAction: 'toggle',  // also: 'add', 'remove', 'clear' — see full-lean.md StateEffect
             transition: {
                 duration: [DURATION_MS],
                 delay: [DELAY_MS],
