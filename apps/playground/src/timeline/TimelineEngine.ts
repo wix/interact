@@ -187,7 +187,7 @@ export class TimelineEngine {
       if (!seq) continue;
 
       const seqDelay = seq.delay ?? 0;
-      const seqOffset = seq.offset ?? 100;
+      const seqOffset = seq.offset ?? 0;
       const seqEffects = seq.effects as Record<string, any>[];
 
       for (let i = 0; i < seqEffects.length; i++) {

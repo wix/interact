@@ -294,7 +294,7 @@ export class PgSequenceEditor extends BaseComponent {
     state: PlaygroundState,
   ): string {
     const delay = sequence.delay ?? 0;
-    const offset = sequence.offset ?? 100;
+    const offset = sequence.offset ?? 0;
     const offsetEasing = (sequence.offsetEasing as string) ?? '';
 
     const ctx = state.selectedEffectContext;
@@ -374,7 +374,7 @@ export class PgSequenceEditor extends BaseComponent {
 
     shadow.getElementById('add-sequence')?.addEventListener('click', () => {
       const seqId = generateId('seq');
-      const newSeq: SequenceConfig = { effects: [], offset: 100 };
+      const newSeq: SequenceConfig = { effects: [] };
       this.store.dispatch(addSequence(seqId, newSeq));
 
       const currentSeqs = interaction.sequences ?? [];

@@ -367,7 +367,7 @@ Manages `config.sequences` — orchestrated groups of effects with stagger timin
 - **Sequence list** — shows all sequences with add/remove controls
 - **Per-sequence configuration**:
   - `delay` (ms) — initial delay before the sequence starts
-  - `offset` (ms) — stagger offset between consecutive effects
+  - `offset` (ms) — stagger offset between consecutive effects (defaults to **0** for new sequences and when omitted; the sequence editor and timeline both use this default)
   - `offsetEasing` — easing for the stagger offset
 - **Effect list within sequence** — add/remove/reorder effects
 - Effect rows are clickable — dispatches `selectEffect(id, { source: 'sequence', sequenceId, effectIndex })` to enable editing the effect's target and properties in the inspector
@@ -519,7 +519,7 @@ Creates its own Web Animations API animations, independent of Interact's trigger
 - Named effects → resolved to keyframes via preset factory functions
 - Keyframe effects → used directly
 - Transition effects → converted to equivalent keyframes
-- Sequence effects → stagger timing: `delay = seqDelay + (effectIndex × seqOffset) + effect.delay`
+- Sequence effects → stagger timing: `delay = seqDelay + (effectIndex × seqOffset) + effect.delay`, where `seqOffset` is the sequence’s `offset` or **0** if unset
 
 **InteractManager coordination**: When timeline opens, `pauseInteract()` destroys the Interact instance to prevent trigger conflicts. When it closes, `resumeInteract()` re-applies the config.
 

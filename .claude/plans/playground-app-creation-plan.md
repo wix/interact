@@ -886,7 +886,7 @@ apps/playground/
 2. **`src/components/inspector/pg-sequence-editor.ts`**
    - Create/edit sequences in `config.sequences`
    - Reorderable effect list (drag or up/down buttons)
-   - Fields: delay, offset, offsetEasing
+   - Fields: delay, offset, offsetEasing (playground default stagger `offset` for new sequences and when omitted: **0** ms; `TimelineEngine` uses the same fallback)
    - Reference existing effects by ID or create inline
 
 **Verification**: Pick "Card Grid" → create a `viewEnter` interaction on `card-grid-item` (list) with a sequence of 3 staggered FadeIn effects, add a media condition `(min-width: 768px)` → scroll stage → grid items animate in with stagger. Resize browser below 768px → animation doesn't trigger.
@@ -1173,7 +1173,7 @@ Replace the current `jsonPanelOpen: boolean` state with a `bottomPanel: 'none' |
      - If `transitionProperties` present: convert to equivalent keyframes (property name → `[{ [name]: 'initial' }, { [name]: value }]`)
    - For each **sequence** in `interaction.sequences`:
      - Resolve the `SequenceConfig` via `sequenceId` from `config.sequences`
-     - For each effect in the sequence, build tracks with stagger timing: `delay = seqDelay + (effectIndex × seqOffset) + effect.delay`
+     - For each effect in the sequence, build tracks with stagger timing: `delay = seqDelay + (effectIndex × seqOffset) + effect.delay` where `seqOffset` is `sequence.offset` or **0** if omitted (playground default)
      - Labels are prefixed with the sequence identifier (e.g., "Seq #abc: FadeIn")
    - Timing: `delay` from effect + any sequence stagger offset, `duration` from effect (or 1000ms default for scrub effects)
    - `targetElement`: resolved from the effect ref's `key`, falling back to the effect's own `key`, then the interaction's `key`. Looks up `[data-interact-key="<key>"]` in the stage's shadow DOM.
