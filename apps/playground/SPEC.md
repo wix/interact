@@ -233,8 +233,9 @@ Shown in the inspector when an interaction is selected. Provides:
 | `viewEnter`    | Element enters the viewport       | `type` (once/repeat/alternate/state), `threshold` (0–1 slider), `inset`                                       |
 | `viewProgress` | Scroll progress through viewport  | No trigger params (scroll preview controls shown instead)                                                     |
 | `pointerMove`  | Mouse movement tracking           | `hitArea` (root/self), `axis` (x/y)                                                                           |
-| `pageVisible`  | Page visibility change            | —                                                                                                             |
-| `animationEnd` | After another animation completes | —                                                                                                             |
+| `animationEnd` | After another animation completes | `effectId` — which effect to wait for (`<pg-trigger-editor>` “After Effect” dropdown)                         |
+
+The playground does not expose the `pageVisible` trigger. When a config is applied via import or the JSON panel, any interaction using `pageVisible` is normalized to `viewEnter` (params cleared).
 
 ### Trigger Editor (`<pg-trigger-editor>`)
 
@@ -264,7 +265,7 @@ Manages the effects for the selected interaction. Provides:
 | Trigger                                     | Allowed Effect Types |
 | ------------------------------------------- | -------------------- |
 | `hover` / `click` / `activate` / `interest` | Time, Transition     |
-| `viewEnter`                                 | Time only            |
+| `viewEnter` / `animationEnd`                | Time only            |
 | `viewProgress` / `pointerMove`              | Scrub only           |
 
 When the trigger changes, incompatible effects are auto-converted to the trigger's default type.

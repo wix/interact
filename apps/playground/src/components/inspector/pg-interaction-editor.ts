@@ -14,6 +14,7 @@ const ALLOWED_EFFECT_TYPES: Record<string, EffectType[]> = {
   viewProgress: ['scrub'],
   pointerMove: ['scrub'],
   viewEnter: ['time'],
+  animationEnd: ['time'],
 };
 
 function detectEffectType(effect: Effect): EffectType {
@@ -55,7 +56,6 @@ const TRIGGER_TYPES: { value: TriggerType; label: string }[] = [
   { value: 'pointerMove', label: 'Pointer Move' },
   { value: 'activate', label: 'Activate (a11y click)' },
   { value: 'interest', label: 'Interest (a11y hover)' },
-  { value: 'pageVisible', label: 'Page Visible' },
   { value: 'animationEnd', label: 'Animation End' },
 ];
 

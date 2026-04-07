@@ -778,7 +778,7 @@ apps/playground/
 
 3. **`src/components/inspector/pg-inspector.ts`** — shell that shows the right sub-editor based on selection state
 
-4. **`src/components/inspector/pg-interaction-editor.ts`** — trigger type dropdown (9 types), **source element** key selector (populated from active component's keys, sets `interaction.key` — the trigger element), delegates to `pg-trigger-editor`
+4. **`src/components/inspector/pg-interaction-editor.ts`** — trigger type dropdown (8 supported types: hover, click, activate, interest, viewEnter, viewProgress, pointerMove, animationEnd; `pageVisible` is not exposed — imported configs normalize `pageVisible` → `viewEnter` via `normalizePlaygroundConfig` in the reducer), **source element** key selector (populated from active component's keys, sets `interaction.key` — the trigger element), delegates to `pg-trigger-editor`
 
 5. **`src/components/inspector/pg-trigger-editor.ts`** — dynamic parameter form per trigger type:
    - `hover`/`click`/`activate`/`interest`: **Behavior dropdown adapts based on effect type:**

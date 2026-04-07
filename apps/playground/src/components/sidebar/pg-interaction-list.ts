@@ -6,12 +6,11 @@ const TRIGGER_LABELS: Record<string, string> = {
   hover: 'Hover',
   click: 'Click',
   viewEnter: 'View Enter',
-  pageVisible: 'Page Visible',
-  animationEnd: 'Anim End',
   viewProgress: 'Scroll',
   pointerMove: 'Pointer',
   activate: 'Activate',
   interest: 'Interest',
+  animationEnd: 'Anim End',
 };
 
 export class PgInteractionList extends BaseComponent {

@@ -24,7 +24,6 @@ function getTriggerForm(trigger: string): TriggerForm {
     case 'interest':
       return 'event';
     case 'viewEnter':
-    case 'pageVisible':
       return 'viewEnter';
     case 'viewProgress':
       return 'viewProgress';

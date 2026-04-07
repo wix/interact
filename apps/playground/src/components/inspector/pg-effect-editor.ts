@@ -23,6 +23,7 @@ const ALLOWED_EFFECT_TYPES: Record<string, EffectType[]> = {
   viewProgress: ['scrub'],
   pointerMove: ['scrub'],
   viewEnter: ['time'],
+  animationEnd: ['time'],
 };
 
 const DEFAULT_EFFECT_TYPE: Record<string, EffectType> = {
@@ -33,6 +34,7 @@ const DEFAULT_EFFECT_TYPE: Record<string, EffectType> = {
   viewProgress: 'scrub',
   pointerMove: 'scrub',
   viewEnter: 'time',
+  animationEnd: 'time',
 };
 
 function getAllowedEffectTypes(trigger: TriggerType | string): EffectType[] {
