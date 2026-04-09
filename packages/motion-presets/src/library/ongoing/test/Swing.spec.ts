@@ -61,9 +61,8 @@ describe('Swing', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
         easing: 'linear',
-        namedEffect: { swing: 30 } as SwingType,
+        namedEffect: { swing: 30, iterationDelay: 500 } as SwingType,
       };
 
       const result = Swing.style(mockOptions);
@@ -90,8 +89,7 @@ describe('Swing', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: {} as SwingType,
+        namedEffect: { iterationDelay: 500 } as SwingType,
       };
 
       const result = Swing.style(mockOptions);
@@ -216,9 +214,8 @@ describe('Swing', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
         easing: 'linear',
-        namedEffect: { swing: 30 } as SwingType,
+        namedEffect: { swing: 30, iterationDelay: 500 } as SwingType,
       };
 
       const result = Swing.web(mockOptions);
@@ -260,8 +257,7 @@ describe('Swing', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: {} as SwingType,
+        namedEffect: { iterationDelay: 500 } as SwingType,
       };
 
       const result = Swing.web(mockOptions);
