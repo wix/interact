@@ -1,4 +1,4 @@
-import type { TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
+import type { TimeAnimationOptions, DomApi, AnimationExtraOptions, Flash } from '../../types';
 import { getEasing, getTimingFactor } from '../../utils';
 
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
@@ -6,10 +6,11 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, _asWeb = false) {
+  const namedEffect = options.namedEffect as Flash;
   const duration = options.duration || 1;
-  const delay = options.delay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || 0;
   const easing = getEasing(options.easing || 'cubicInOut');
-  const timingFactor = getTimingFactor(duration, delay) as number;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
   const keyframes = [
@@ -38,15 +39,15 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, _as
       ...options,
       name,
       easing: 'linear',
-      delay: 0,
-      duration: duration + delay,
+      duration: duration + iterationDelay,
       keyframes,
     },
   ];
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const timingFactor = getTimingFactor(options.duration!, options.delay!, true);
+  const iterationDelay = (options.namedEffect as Flash)?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
   return [`motion-flash-${timingFactor}`];
 }

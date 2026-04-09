@@ -49,8 +49,7 @@ describe('Pulse', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: { intensity: 0.8 } as Pulse,
+        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Pulse,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -135,8 +134,7 @@ describe('Pulse', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: { intensity: 0.8 } as Pulse,
+        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Pulse,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
