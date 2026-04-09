@@ -19,7 +19,6 @@ describe('Rubber', () => {
         easing: 'linear',
         namedEffect: {},
         name: 'motion-rubber-1',
-        delay: 0,
         custom: {
           '--motion-scale-x-45': 1.08,
           '--motion-scale-y-45': 0.88,
@@ -88,7 +87,6 @@ describe('Rubber', () => {
         easing: 'linear',
         namedEffect: {},
         name: 'motion-rubber-1',
-        delay: 0,
         custom: {
           '--motion-scale-x-45': 1.08,
           '--motion-scale-y-45': 0.88,
@@ -141,8 +139,7 @@ describe('Rubber', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       duration: 1000,
-      delay: 1000,
-      namedEffect: { intensity: 0.8 } as RubberType,
+      namedEffect: { intensity: 0.8, iterationDelay: 1000 } as RubberType,
     };
 
     const expectedResult = [
@@ -208,8 +205,7 @@ describe('Rubber', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       duration: 1000,
-      delay: 1000,
-      namedEffect: { intensity: 0.8 } as RubberType,
+      namedEffect: { intensity: 0.8, iterationDelay: 1000 } as RubberType,
     };
 
     const expectedResult = [

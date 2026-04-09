@@ -52,7 +52,6 @@ describe('Flip', () => {
         {
           name: 'motion-flip-1',
           easing: 'linear',
-          delay: 0,
           duration: 1,
           keyframes: [
             {
@@ -84,16 +83,15 @@ describe('Flip', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 1000,
         easing: 'ease-in-out',
-        namedEffect: {} as Flip,
+        namedEffect: { iterationDelay: 1000 } as Flip,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
         {
           name: 'motion-flip-05',
           easing: 'linear',
-          delay: 0,
+          namedEffect: { iterationDelay: 1000 } as Flip,
           duration: 2000,
           keyframes: [
             {
@@ -173,7 +171,6 @@ describe('Flip', () => {
         {
           name: 'motion-flip-1',
           easing: 'linear',
-          delay: 0,
           custom: {
             '--motion-perspective': '800px',
             '--motion-rotate-x': '1',
@@ -209,16 +206,15 @@ describe('Flip', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 1000,
         easing: 'ease-in-out',
-        namedEffect: {} as Flip,
+        namedEffect: { iterationDelay: 1000 } as Flip,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
         {
           name: 'motion-flip-05',
           easing: 'linear',
-          delay: 0,
+          namedEffect: { iterationDelay: 1000 } as Flip,
           duration: 2000,
           custom: {
             '--motion-perspective': '800px',

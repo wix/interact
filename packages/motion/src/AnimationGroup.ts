@@ -14,16 +14,26 @@ export class AnimationGroup {
   options?: AnimationGroupOptions;
   ready: Promise<void>;
   isCSS: boolean;
+  longestAnimation: Animation;
 
   constructor(animations: Animation[], options?: AnimationGroupOptions) {
     this.animations = animations;
     this.options = options;
     this.ready = options?.measured || Promise.resolve();
     this.isCSS = animations[0] instanceof CSSAnimation;
+    this.longestAnimation = this._getAnimationWithLongestEndTime();
+  }
+
+  _getAnimationWithLongestEndTime() {
+    return this.animations.reduce((longest, current) => {
+      const longestEndTime = longest.effect?.getComputedTiming().endTime ?? 0;
+      const currentEndTime = current.effect?.getComputedTiming().endTime ?? 0;
+      return longestEndTime > currentEndTime ? longest : current;
+    }, this.animations[0]);
   }
 
   getProgress() {
-    return this.animations[0]?.effect?.getComputedTiming().progress || 0;
+    return this.longestAnimation?.effect?.getComputedTiming().progress || 0;
   }
 
   async play(callback?: () => void): Promise<void> {

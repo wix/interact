@@ -60,9 +60,8 @@ describe('Fold', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
         easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
-        namedEffect: {} as Fold,
+        namedEffect: { iterationDelay: 500 } as Fold,
       };
 
       const dynamicName = `motion-fold-067`;
@@ -442,9 +441,8 @@ describe('Fold', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
         easing: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
-        namedEffect: {} as Fold,
+        namedEffect: { iterationDelay: 500 } as Fold,
       };
 
       const dynamicName = `motion-fold-067`;
