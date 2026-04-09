@@ -18,11 +18,12 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { intensity = 0.5 } = options.namedEffect as Rubber;
+  const namedEffect = options.namedEffect as Rubber;
+  const { intensity = 0.5 } = namedEffect;
 
   const duration = options.duration || 1;
-  const delay = options.delay || 0;
-  const timingFactor = getTimingFactor(duration, delay) as number;
+  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
   const rubberOffset = mapRange(0, 1, RUBBER_OFFSET_SOFT, RUBBER_OFFSET_HARD, intensity);
@@ -61,8 +62,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ...options,
       name,
       easing: 'linear',
-      delay: 0,
-      duration: duration + delay,
+      duration: duration + iterationDelay,
       custom,
       keyframes,
     },
@@ -70,7 +70,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const timingFactor = getTimingFactor(options.duration!, options.delay!, true);
+  const iterationDelay = (options.namedEffect as Rubber)?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
   return [`motion-rubber-${timingFactor}`];
 }

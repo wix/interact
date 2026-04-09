@@ -40,9 +40,9 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   const easing = options.easing || 'sineInOut';
   const duration = options.duration || 1;
-  const delay = options.delay || 0;
-  const totalDurationWithDelay = duration + delay;
-  const timingFactor = getTimingFactor(duration, delay) as number;
+  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const totalDuration = duration + iterationDelay;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
   const { x, y, z } = DIRECTION_MAP[direction];
@@ -69,8 +69,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   )}`;
   const breatheDistance = `${toKeyframeValue(custom, '--motion-breathe-distance', asWeb)}`;
 
-  // in case a delay is applied, animate a different sequence which decays to a stop
-  const keyframes = delay
+  const keyframes = iterationDelay
     ? FACTORS_SEQUENCE.map(({ translateFactor, timeFactor }) => {
         const keyframeOffset = timeFactor * timingFactor;
         const distancePart = `${breatheDistance} * ${translateFactor}`;
@@ -99,8 +98,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ...options,
       name,
       easing: 'linear',
-      delay: 0,
-      duration: totalDurationWithDelay,
+      duration: totalDuration,
       custom,
       keyframes: [
         {
@@ -119,7 +117,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const timingFactor = getTimingFactor(options.duration!, options.delay!, true);
+  const iterationDelay = (options.namedEffect as Breathe)?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
   return [`motion-breathe-${timingFactor}`];
 }
