@@ -15,7 +15,6 @@ describe('Jello.web()', () => {
       {
         name: 'motion-jello-1',
         duration: 1,
-        delay: 0,
         easing: 'linear',
         custom: {
           '--motion-skew-y': 1.75,
@@ -54,15 +53,13 @@ describe('Jello.web()', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       duration: 1000,
-      delay: 500,
-      namedEffect: { intensity: 0.8 } as Jello,
+      namedEffect: { intensity: 0.8, iterationDelay: 500 } as Jello,
     };
 
     const expectedResult = [
       {
         name: 'motion-jello-067',
         duration: 1500,
-        delay: 0,
         easing: 'linear',
         custom: {
           '--motion-skew-y': 3.4000000000000004,
@@ -111,7 +108,6 @@ describe('Jello.style()', () => {
       {
         name: 'motion-jello-1',
         duration: 1,
-        delay: 0,
         easing: 'linear',
         custom: {
           '--motion-skew-y': 1.75,
@@ -155,15 +151,13 @@ describe('Jello.style()', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       duration: 1000,
-      delay: 500,
-      namedEffect: { intensity: 0.8 } as Jello,
+      namedEffect: { intensity: 0.8, iterationDelay: 500 } as Jello,
     };
 
     const expectedResult = [
       {
         name: 'motion-jello-067',
         duration: 1500,
-        delay: 0,
         easing: 'linear',
         custom: {
           '--motion-skew-y': 3.4000000000000004,

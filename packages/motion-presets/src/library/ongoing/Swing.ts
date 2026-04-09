@@ -45,14 +45,14 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const { swing = 20 } = namedEffect;
 
   const duration = options.duration || 1;
-  const delay = options.delay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || 0;
   const easing = options.easing || 'sineInOut';
   const ease = getEasingFamily(easing);
   const [name] = getNames(options);
 
   const { x, y } = DIRECTION_MAP[direction];
-  const totalDuration = duration + delay;
-  const timingFactor = getTimingFactor(duration, delay) as number;
+  const totalDuration = duration + iterationDelay;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
 
   // Create CSS custom properties for the swing configuration
   const custom: Record<string, string | number> = {
@@ -76,8 +76,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     asWeb,
   )} * -1), calc(${toKeyframeValue(custom, '--motion-trans-y', asWeb)} * -1))`;
 
-  // in case a delay is applied, animate a different sequence which decays to a stop
-  const keyframes = delay
+  const keyframes = iterationDelay
     ? FACTORS_SEQUENCE.map(({ factor, timeFactor }) => {
         const keyframeOffset = timeFactor * timingFactor;
 
@@ -117,7 +116,6 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ...options,
       name,
       easing: 'linear',
-      delay: 0,
       duration: totalDuration,
       custom,
       keyframes: [
@@ -137,7 +135,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const timingFactor = getTimingFactor(options.duration!, options.delay!, true);
+  const iterationDelay = (options.namedEffect as Swing)?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
   return [`motion-swing-${timingFactor}`];
 }
