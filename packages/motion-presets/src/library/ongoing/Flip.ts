@@ -19,8 +19,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const { perspective = 800 } = namedEffect;
 
   const duration = options.duration || 1;
-  const delay = options.delay || 0;
-  const offset = getTimingFactor(duration, delay) as number;
+  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const offset = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
   const rotationAxes = DIRECTION_MAP[direction];
@@ -48,9 +48,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     {
       ...options,
       name,
-      delay: 0,
       easing: 'linear',
-      duration: duration + delay,
+      duration: duration + iterationDelay,
       custom,
       keyframes: [
         {
@@ -72,7 +71,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const timingFactor = getTimingFactor(options.duration!, options.delay!, true);
+  const iterationDelay = (options.namedEffect as Flip)?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
   return [`motion-flip-${timingFactor}`];
 }

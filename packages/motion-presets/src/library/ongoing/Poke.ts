@@ -40,9 +40,9 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const { intensity = 0.5 } = namedEffect;
 
   const duration = options.duration || 1;
-  const delay = +(options.delay || 0);
+  const iterationDelay = +(namedEffect?.iterationDelay || 0);
   const { x, y } = DIRECTION_MAP[direction];
-  const timingFactor = getTimingFactor(duration, delay) as number;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
   const pokeFactor = mapRange(0, 1, POKE_FACTOR_SOFT, POKE_FACTOR_HARD, intensity);
@@ -75,8 +75,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ...options,
       name,
       easing: 'linear',
-      delay: 0,
-      duration: duration + delay,
+      duration: duration + iterationDelay,
       custom,
       keyframes,
     },
@@ -84,7 +83,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const timingFactor = getTimingFactor(options.duration!, options.delay!, true) as string;
+  const iterationDelay = (options.namedEffect as Poke)?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true) as string;
 
   return [`motion-poke-${timingFactor}`];
 }

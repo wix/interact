@@ -168,8 +168,8 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?:
   const namedEffect = options.namedEffect as Cross;
   const direction = parseDirection(namedEffect?.direction, EIGHT_DIRECTIONS, DEFAULT_DIRECTION);
   const duration = options.duration || 1;
-  const delay = options.delay || 0;
-  const timingFactor = getTimingFactor(duration, delay) as number;
+  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
   // Create CSS custom properties for the Cross configuration
@@ -225,9 +225,8 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?:
     {
       ...options,
       name,
-      delay: 0,
       easing: 'linear',
-      duration: duration + delay,
+      duration: duration + iterationDelay,
       custom,
       get keyframes() {
         // Calculate the timing offset for keyframes

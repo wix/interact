@@ -42,8 +42,7 @@ describe('Flash', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: {} as Flash,
+        namedEffect: { iterationDelay: 500 } as Flash,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -139,8 +138,7 @@ describe('Flash', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: {} as Flash,
+        namedEffect: { iterationDelay: 500 } as Flash,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -202,8 +200,7 @@ describe('Flash', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 500,
-        delay: 250,
-        namedEffect: {} as Flash,
+        namedEffect: { iterationDelay: 250 } as Flash,
       };
 
       const styleResult = FlashAnimation.style(mockOptions);
@@ -217,15 +214,13 @@ describe('Flash', () => {
       const mockOptions1: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 500,
-        delay: 250,
-        namedEffect: {} as Flash,
+        namedEffect: { iterationDelay: 250 } as Flash,
       };
 
       const mockOptions2: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 500,
-        delay: 250,
-        namedEffect: {} as Flash,
+        namedEffect: { iterationDelay: 250 } as Flash,
       };
 
       const result1 = FlashAnimation.style?.(mockOptions1);
