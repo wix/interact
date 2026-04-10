@@ -4,40 +4,40 @@ overview: Split the monolithic `types.ts` in `@wix/interact` into concern-based 
 todos:
   - id: create-triggers
     content: Create `types/triggers.ts` with trigger-related types and the `RangeOffset` re-export
-    status: pending
+    status: completed
   - id: create-effects
     content: Create `types/effects.ts` with effect shapes, animation options, and `@wix/motion` imports
-    status: pending
+    status: completed
   - id: create-config
     content: Create `types/config.ts` with config, sequence, condition, and interaction types
-    status: pending
+    status: completed
   - id: create-controller
     content: Create `types/controller.ts` with `IInteractionController` and `IInteractElement`
-    status: pending
+    status: completed
   - id: create-handlers
     content: Create `types/handlers.ts` with handler module interfaces, state types, and `InteractOptions`
-    status: pending
+    status: completed
   - id: create-internal
     content: Create `types/internal.ts` with `InteractCache` and `CreateTransitionCSSParams`
-    status: pending
+    status: completed
   - id: create-global
     content: Create `types/global.ts` with the JSX global augmentation
-    status: pending
+    status: completed
   - id: create-internal-barrel
     content: Create `types/index.ts` (internal barrel) re-exporting everything
-    status: pending
+    status: completed
   - id: create-external-barrel
     content: Create `types/external.ts` (external barrel) with explicit public API re-exports
-    status: pending
+    status: completed
   - id: update-entry-points
     content: Update `src/index.ts`, `src/react/index.ts`, `src/web/index.ts` to use `types/external`
-    status: pending
+    status: completed
   - id: delete-old-types
     content: Delete the original `src/types.ts` file
-    status: pending
+    status: completed
   - id: verify-build
     content: Run build and tests to verify nothing is broken
-    status: pending
+    status: completed
 isProject: false
 ---
 
