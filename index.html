@@ -393,31 +393,31 @@ Interact comes with a rich and diverse set of named effects, each designed to br
 
             <!-- 3. ENTRANCE -->
             <div class="w-full h-auto lg:h-[500px] overflow-hidden flex flex-col lg:flex-row rounded-3xl">
-                <div class="w-full lg:w-5/12 h-[400px] lg:h-full flex items-center justify-center p-6 lg:p-8 bg-white">
+                <interact-element data-interact-key="entrance-card" class="w-full lg:w-5/12 h-[400px] lg:h-full flex items-center justify-center p-6 lg:p-8 bg-white">
                     <div class="h-full aspect-square bg-[#000] relative overflow-hidden rounded-2xl">
                         
                         <!-- Top Circle -->
-                        <interact-element data-interact-key="circle-top" data-interact-initial="true" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+                        <interact-element data-interact-key="circle-top" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
                             <div class="circle"><div class="fill-circle bg-transparent"></div></div>
                         </interact-element>
 
                         <!-- Right Circle -->
-                        <interact-element data-interact-key="circle-right" data-interact-initial="true" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                        <interact-element data-interact-key="circle-right" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
                             <div class="circle"><div class="fill-circle bg-transparent"></div></div>
                         </interact-element>
 
                         <!-- Bottom Circle -->
-                        <interact-element data-interact-key="circle-bottom" data-interact-initial="true" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30">
+                        <interact-element data-interact-key="circle-bottom" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30">
                             <div class="circle"><div class="fill-circle bg-transparent"></div></div>
                         </interact-element>
 
                           <!-- Left Circle -->
-                          <interact-element data-interact-key="circle-left" data-interact-initial="true" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40">
+                          <interact-element data-interact-key="circle-left" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40">
                             <div class="circle"><div class="fill-circle bg-transparent"></div></div>
                         </interact-element>
 
                     </div>
-                </div>
+                </interact-element>
                 <div class="w-full lg:w-7/12 flex flex-col p-6 lg:p-10 h-auto lg:h-full">
                     <div class="mb-5 shrink-0">
                         <h1 class="text-xl md:text-3xl font-light text-gray-600 leading-tight tracking-tight">View Enter (AKA Scroll Triggered Animations and Entrance Animations)</h1>
@@ -769,6 +769,13 @@ Interact comes with a rich and diverse set of named effects, each designed to br
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="assets/modal.js"></script>
     <script src="assets/snippets.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "@wix/motion": "./assets/lib/motion/motion.js"
+        }
+    }
+    </script>
     <script type="module" src="assets/main.mjs"></script>
 </body>
 </html>

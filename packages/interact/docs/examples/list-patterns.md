@@ -12,6 +12,7 @@ Comprehensive examples of list and grid animations using `@wix/interact`. All ex
 - [Filtering & Sorting](#filtering--sorting)
 - [Grid Layouts](#grid-layouts)
 - [Real-World Examples](#real-world-examples)
+- [Sequence-Based Staggering](#sequence-based-staggering)
 
 ## Entrance Animations
 
@@ -799,8 +800,155 @@ const config = {
 </interact-element>
 ```
 
+## Sequence-Based Staggering
+
+The `sequences` config provides built-in stagger support with easing-driven delay distribution — no CSS `animation-delay` hacks needed.
+
+### 17. Staggered List Entrance with Sequences
+
+```typescript
+const config = {
+  interactions: [
+    {
+      key: 'cards',
+      trigger: 'viewEnter',
+      listContainer: '.card-grid',
+      params: { type: 'once', threshold: 0.1 },
+      sequences: [
+        {
+          offset: 80,
+          offsetEasing: 'quadIn',
+          effects: [
+            {
+              key: 'cards',
+              listContainer: '.card-grid',
+              effectId: 'card-entrance',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  effects: {
+    'card-entrance': {
+      duration: 600,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      keyframeEffect: {
+        name: 'card-entrance',
+        keyframes: [
+          { opacity: '0', transform: 'translateY(40px) scale(0.95)' },
+          { opacity: '1', transform: 'translateY(0) scale(1)' },
+        ],
+      },
+    },
+  },
+};
+
+Interact.create(config);
+```
+
+### 18. Dynamic List Items with Sequences
+
+New items added to the DOM automatically join the Sequence with recalculated stagger offsets:
+
+```typescript
+const config = {
+  interactions: [
+    {
+      key: 'feed',
+      trigger: 'viewEnter',
+      listContainer: '.feed-items',
+      params: { type: 'repeat' },
+      sequences: [
+        {
+          offset: 60,
+          offsetEasing: 'sineOut',
+          effects: [
+            {
+              key: 'feed',
+              listContainer: '.feed-items',
+              keyframeEffect: {
+                name: 'feed-entrance',
+                keyframes: [
+                  { opacity: '0', transform: 'translateY(20px)' },
+                  { opacity: '1', transform: 'translateY(0)' },
+                ],
+              },
+              duration: 400,
+              easing: 'ease-out',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  effects: {},
+};
+
+Interact.create(config);
+```
+
+### 19. Easing Comparison for List Stagger
+
+Different `offsetEasing` values produce distinct stagger patterns:
+
+```typescript
+// Linear: even spacing (0, 80, 160, 240, 320ms)
+{ offset: 80, offsetEasing: 'linear' }
+
+// quadIn: slow start then rapid (0, 20, 80, 180, 320ms)
+{ offset: 80, offsetEasing: 'quadIn' }
+
+// sineOut: fast start then gradual (0, 125, 227, 302, 320ms)
+{ offset: 80, offsetEasing: 'sineOut' }
+```
+
+### 20. Reusable Sequences with `sequenceId`
+
+Define a sequence once, reference it from multiple interactions:
+
+```typescript
+const config = {
+  sequences: {
+    'list-stagger': {
+      offset: 100,
+      offsetEasing: 'quadIn',
+      effects: [{ effectId: 'fade-up' }],
+    },
+  },
+  interactions: [
+    {
+      key: 'section-a',
+      trigger: 'viewEnter',
+      listContainer: '.list-a',
+      sequences: [{ sequenceId: 'list-stagger' }],
+    },
+    {
+      key: 'section-b',
+      trigger: 'viewEnter',
+      listContainer: '.list-b',
+      sequences: [{ sequenceId: 'list-stagger', offset: 150 }], // Override offset
+    },
+  ],
+  effects: {
+    'fade-up': {
+      duration: 500,
+      easing: 'ease-out',
+      keyframeEffect: {
+        name: 'fade-up',
+        keyframes: [
+          { opacity: '0', transform: 'translateY(20px)' },
+          { opacity: '1', transform: 'translateY(0)' },
+        ],
+      },
+    },
+  },
+};
+```
+
 ## See Also
 
+- [Sequences & Staggering Guide](../guides/sequences.md)
 - [Lists and Dynamic Content Guide](../guides/lists-and-dynamic-content.md)
 - [Element Selection](../api/element-selection.md)
 - [Performance Guide](../guides/performance.md)

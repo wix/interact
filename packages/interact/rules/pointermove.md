@@ -1142,6 +1142,16 @@ This example shows a pointer-driven slider where the X position controls both a 
             },
             fill: 'both',
         },
+        'indicator-effect': {
+            keyframeEffect: {
+                name: 'indicator-fade-scale',
+                keyframes: [
+                    { opacity: '0.3', transform: 'scale(0.8)' },
+                    { opacity: '1', transform: 'scale(1)' },
+                ],
+            },
+            fill: 'both',
+        },
     },
 }
 ```
@@ -1223,44 +1233,29 @@ X axis controls `scaleX`, Y axis controls `scaleY`.
 
 ### Responsive Pointer Effects
 
-Adjusting pointer sensitivity based on device capabilities:
+`pointerMove` only fires on pointer-capable devices, but touch users still visit the page. Use the `conditions` config map to define device/motion guards — condition IDs are arbitrary strings you define, matched against the media query predicates you provide.
 
 ```typescript
 {
-    key: 'responsive-element',
-    trigger: 'pointerMove',
-    conditions: ['supports-hover', 'desktop-only'],
-    params: {
-        hitArea: 'self'
+    conditions: {
+        // Only run pointer effects on devices that support hover (non-touch)
+        'supports-hover': { type: 'media', predicate: '(hover: hover)' },
+        // Suppress animations for users who prefer reduced motion
+        'prefers-motion': { type: 'media', predicate: '(prefers-reduced-motion: no-preference)' },
     },
-    effects: [
+    interactions: [
         {
             key: 'responsive-element',
-            namedEffect: {
-                type: 'Tilt3DMouse',
-                angle: 20,
-                perspective: 800
-            },
-            centeredToTarget: true
-        }
-    ]
-},
-// Simplified version for touch devices
-{
-    key: 'responsive-element',
-    trigger: 'pointerMove',
-    conditions: ['touch-device'],
-    params: {
-        hitArea: 'self'
-    },
-    effects: [
-        {
-            key: 'responsive-element',
-            namedEffect: {
-                type: 'ScaleMouse',
-                scale: 1.02
-            },
-            centeredToTarget: true
+            trigger: 'pointerMove',
+            conditions: ['supports-hover', 'prefers-motion'],
+            params: { hitArea: 'self' },
+            effects: [
+                {
+                    key: 'responsive-element',
+                    namedEffect: { type: 'Tilt3DMouse', angle: 20, perspective: 800 },
+                    centeredToTarget: true
+                }
+            ]
         }
     ]
 }
@@ -1374,12 +1369,11 @@ Controlling movement direction for specific design needs:
 
 ### Performance Guidelines
 
-1. **Use hardware-accelerated properties** - prefer transforms over position changes
-2. **Limit simultaneous pointer effects** - too many can cause performance issues
-3. **Test on various devices** - pointer sensitivity varies across hardware
-4. **Cache DOM queries in customEffect** - avoid repeated `querySelector` calls
-5. **Use `requestAnimationFrame` sparingly** - the library already handles frame timing
-6. **Prefer `namedEffect` over `customEffect`** - named effects are optimized for GPU acceleration
+1. **Limit simultaneous pointer effects** - too many can cause performance issues
+2. **Test on various devices** - pointer sensitivity varies across hardware
+3. **Cache DOM queries outside `customEffect` callbacks** - avoid repeated `querySelector` calls inside the callback
+4. **Use `requestAnimationFrame` sparingly** - the library already handles frame timing
+5. **Prefer `namedEffect` over `customEffect`** - named effects are optimized for GPU acceleration
 
 ### Hit Area Guidelines
 
@@ -1396,20 +1390,6 @@ Controlling movement direction for specific design needs:
 3. **Test centering behavior** with different element sizes
 4. **Consider responsive design** when setting centering
 5. **Centering affects how progress.x/y map to element position**
-
-### User Experience Guidelines
-
-1. **Keep pointer effects subtle** to avoid overwhelming users
-2. **Ensure effects enhance rather than distract** from content
-3. **Provide visual feedback** that feels natural and responsive
-4. **Test with actual users** to validate interaction quality
-
-### Accessibility Considerations
-
-1. **Respect `prefers-reduced-motion`** for all pointer animations
-2. **Ensure touch device compatibility** with appropriate alternatives
-3. **Don't rely solely on pointer effects** for important interactions
-4. **Provide keyboard alternatives** for interactive elements
 
 ### Common Use Cases by Pattern
 
@@ -1512,7 +1492,6 @@ Controlling movement direction for specific design needs:
 **customEffect not updating smoothly**:
 
 - Add `transitionDuration` and `transitionEasing` for smoother transitions
-- Ensure style changes use transform/opacity for GPU acceleration
 - Avoid expensive calculations inside the callback
 - Consider debouncing complex logic
 
@@ -1551,7 +1530,3 @@ Controlling movement direction for specific design needs:
 | Custom physics              | `customEffect`                             | Full control over calculations                         |
 | Velocity-based effects      | `customEffect`                             | Access to `progress.v`                                 |
 | Grid/particle systems       | `customEffect`                             | Can manipulate many elements                           |
-
----
-
-These rules provide comprehensive coverage for PointerMove trigger interactions in `@wix/interact`, supporting all hit area configurations, centering options, named effect types, keyframe effects, composite animations, and custom effect patterns.

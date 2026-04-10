@@ -17,14 +17,14 @@ These rules help generate click-based interactions using the `@wix/interact` lib
 
 ```typescript
 {
-    key: '[SOURCE_IDENTIFIER]',
+    key: '[SOURCE_KEY]',
     trigger: 'click',
     params: {
         type: 'alternate'
     },
     effects: [
         {
-            key: '[TARGET_IDENTIFIER]',
+            key: '[TARGET_KEY]',
             [EFFECT_TYPE]: [EFFECT_DEFINITION],
             fill: 'both',
             reversed: [INITIAL_REVERSED_BOOL],
@@ -38,8 +38,8 @@ These rules help generate click-based interactions using the `@wix/interact` lib
 
 **Variables**:
 
-- `[SOURCE_IDENTIFIER]`: Unique identifier for clickable element (e.g., 'menu-button', 'accordion-header'). Should equal the value of the data-interact-key attribute on the wrapping interact-element.
-- `[TARGET_IDENTIFIER]`: Unique identifier for animated element (can be same as trigger or different). Should equal the value of the data-interact-key attribute on the wrapping interact-element.
+- `[SOURCE_KEY]`: Unique identifier for clickable element. Should equal the value of the `data-interact-key` attribute on the wrapping `<interact-element>`.
+- `[TARGET_KEY]`: Unique identifier for animated element (can be same as `[SOURCE_KEY]` for self-targeting, or different for cross-targeting).
 - `[EFFECT_TYPE]`: Either `namedEffect` or `keyframeEffect`
 - `[EFFECT_DEFINITION]`: Named effect object (e.g., { type: 'SlideIn', ...params }, { type: 'FadeIn', ...params }) or keyframe object (e.g., { name: 'custom-fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, { name: 'custom-slide', keyframes: [{ transform: 'translateX(-100%)' }, { transform: 'translateX(0)' }] })
 - `[INITIAL_REVERSED_BOOL]`: Optional boolean value indicating whether the first toggle should play the reversed animation.
@@ -118,14 +118,14 @@ These rules help generate click-based interactions using the `@wix/interact` lib
 
 ```typescript
 {
-    key: '[SOURCE_IDENTIFIER]',
+    key: '[SOURCE_KEY]',
     trigger: 'click',
     params: {
         type: 'state'
     },
     effects: [
         {
-            key: '[TARGET_IDENTIFIER]',
+            key: '[TARGET_KEY]',
             [EFFECT_TYPE]: [EFFECT_DEFINITION],
             fill: 'both',
             reversed: [INITIAL_REVERSED_BOOL],
@@ -212,14 +212,14 @@ These rules help generate click-based interactions using the `@wix/interact` lib
 
 ```typescript
 {
-    key: '[SOURCE_IDENTIFIER]',
+    key: '[SOURCE_KEY]',
     trigger: 'click',
     params: {
         type: 'repeat'
     },
     effects: [
         {
-            key: '[TARGET_IDENTIFIER]',
+            key: '[TARGET_KEY]',
             [EFFECT_TYPE]: [EFFECT_DEFINITION],
             duration: [DURATION_MS],
             easing: '[EASING_FUNCTION]',
@@ -304,14 +304,14 @@ These rules help generate click-based interactions using the `@wix/interact` lib
 
 ```typescript
 {
-    key: '[SOURCE_IDENTIFIER]',
+    key: '[SOURCE_KEY]',
     trigger: 'click',
     params: {
-        method: 'toggle'
+        method: 'toggle'  // also: 'add', 'remove', 'clear' — see full-lean.md StateParams
     },
     effects: [
         {
-            key: '[TARGET_IDENTIFIER]',
+            key: '[TARGET_KEY]',
             transition: {
                 duration: [DURATION_MS],
                 delay: [DELAY_MS],
@@ -416,11 +416,122 @@ These rules help generate click-based interactions using the `@wix/interact` lib
 
 ---
 
+## Rule 5: Click with Sequence (Staggered Multi-Element Orchestration)
+
+**Use Case**: Click-triggered coordinated animations across multiple elements with staggered timing (e.g., page section reveals, multi-element toggles, orchestrated content entrances)
+
+**When to Apply**:
+
+- When a click should animate multiple elements with staggered timing
+- For orchestrated content reveals (heading, body, image in sequence)
+- When you want easing-controlled stagger instead of manual delays
+- For toggle-able multi-element sequences
+
+**Pattern**:
+
+```typescript
+{
+    key: '[SOURCE_KEY]',
+    trigger: 'click',
+    params: {
+        type: 'alternate'
+    },
+    sequences: [
+        {
+            offset: [OFFSET_MS],
+            offsetEasing: '[OFFSET_EASING]',
+            effects: [
+                { effectId: '[EFFECT_ID_1]', key: '[TARGET_KEY_1]' },
+                { effectId: '[EFFECT_ID_2]', key: '[TARGET_KEY_2]' },
+                { effectId: '[EFFECT_ID_3]', key: '[TARGET_KEY_3]' }
+            ]
+        }
+    ]
+}
+```
+
+**Variables**:
+
+- `[OFFSET_MS]`: Stagger offset in ms between consecutive effects (typically 100-200ms)
+- `[OFFSET_EASING]`: Easing for stagger distribution — `'linear'`, `'quadIn'`, `'sineOut'`, etc.
+- `[EFFECT_ID_N]`: Effect id from the effects registry for each element
+- `[TARGET_KEY_N]`: Element key for each target
+- Other variables same as Rule 1
+
+**Example - Orchestrated Content Reveal**:
+
+```typescript
+{
+    key: 'reveal-button',
+    trigger: 'click',
+    params: {
+        type: 'alternate'
+    },
+    sequences: [
+        {
+            offset: 150,
+            offsetEasing: 'sineOut',
+            effects: [
+                { effectId: 'heading-entrance', key: 'content-heading' },
+                { effectId: 'body-entrance', key: 'content-body' },
+                { effectId: 'image-entrance', key: 'content-image' }
+            ]
+        }
+    ]
+}
+```
+
+```typescript
+effects: {
+    'heading-entrance': {
+        key: 'content-heading',
+        duration: 600,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        keyframeEffect: {
+            name: 'heading-in',
+            keyframes: [
+                { transform: 'translateX(-40px)', opacity: 0 },
+                { transform: 'translateX(0)', opacity: 1 }
+            ]
+        },
+        fill: 'both'
+    },
+    'body-entrance': {
+        key: 'content-body',
+        duration: 500,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        keyframeEffect: {
+            name: 'body-in',
+            keyframes: [
+                { transform: 'translateY(20px)', opacity: 0 },
+                { transform: 'translateY(0)', opacity: 1 }
+            ]
+        },
+        fill: 'both'
+    },
+    'image-entrance': {
+        key: 'content-image',
+        duration: 700,
+        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        keyframeEffect: {
+            name: 'image-in',
+            keyframes: [
+                { transform: 'scale(0.8) rotate(-5deg)', opacity: 0 },
+                { transform: 'scale(1) rotate(0deg)', opacity: 1 }
+            ]
+        },
+        fill: 'both'
+    }
+}
+```
+
+---
+
 ## Advanced Patterns and Combinations
 
 ### Multi-Target Click Effects
 
-When one click should animate multiple elements:
+When one click should animate multiple elements (without stagger, use `effects`; with stagger, prefer `sequences` above):
 
 ```typescript
 {
@@ -501,27 +612,12 @@ Using effectId for sequential animations:
 
 ## Best Practices for Click Interactions
 
-### Performance Guidelines
+### Timing and Pattern Guidelines
 
 1. **Keep click animations short** (100-500ms) for immediate feedback
-2. **Use `transform` and `opacity`** for smooth animations
-3. **Avoid animating layout properties** like width/height in clicks
-4. **Consider using `will-change`** for complex click animations
-
-### User Experience Guidelines
-
-1. **Provide immediate visual feedback** (within 100ms)
 2. **Use alternate pattern** for toggle states
 3. **Use repeat pattern** for confirmation actions
 4. **Use state pattern** for media controls
-5. **Ensure click targets are accessible** (minimum 44px touch target)
-
-### Accessibility Considerations
-
-1. **Respect `prefers-reduced-motion`** setting
-2. **Provide alternative interaction methods** (keyboard support)
-3. **Ensure sufficient color contrast** during transitions
-4. **Don't rely solely on animation** to convey state changes
 
 ### Common Use Cases by Pattern
 
@@ -555,7 +651,3 @@ Using effectId for sequential animations:
 - Color changes
 - Simple state toggles
 - CSS custom property updates
-
----
-
-These rules provide comprehensive coverage for click trigger interactions in `@wix/interact`, supporting the four main behavior patterns and two primary effect types as outlined in the development plan.

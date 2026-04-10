@@ -100,6 +100,7 @@ The `InteractConfig` object defines the behavior.
 type InteractConfig = {
   interactions: Interaction[]; // Required: Array of interaction definitions
   effects?: Record<string, Effect>; // Optional: Reusable named effects
+  sequences?: Record<string, SequenceConfig>; // Optional: Reusable sequence definitions
   conditions?: Record<string, Condition>; // Optional: Reusable conditions (media queries)
 };
 ```
@@ -108,22 +109,24 @@ type InteractConfig = {
 
 ```typescript
 {
-  key: 'element-key',       // Matches data-interact-key
-  trigger: 'trigger-type',  // e.g., 'hover', 'click'
-  selector?: '.child-cls',  // Optional: Targets specific child inside the interact-element
-  listContainer?: '.list',  // Optional: A selector for the element containing a list, for interactions on lists
-  params?: { ... },         // Trigger-specific parameters
-  conditions?: ['cond-id'], // Array of condition IDs
-  effects: [ ... ]          // Array of effects to apply
+  key: 'element-key',              // Matches data-interact-key
+  trigger: 'trigger-type',         // e.g., 'hover', 'click'
+  selector?: '.child-cls',         // Optional: CSS selector to refine target within the element
+  listContainer?: '.list',         // Optional: CSS selector for a list container (enables list context)
+  listItemSelector?: '.item',      // Optional: CSS selector for items within listContainer
+  params?: { ... },                // Trigger-specific parameters
+  conditions?: ['cond-id'],        // Array of condition IDs
+  effects?: [ ... ],               // Array of effects to apply
+  sequences?: [ ... ]              // Array of sequences (coordinated staggered effects)
 }
 ```
 
 ### Element Selection Hierarchy
 
-1. **`listContainer` + `selector`**: If both are present, uses `querySelectorAll(selector)` within the container to find all matching elements as list items.
-2. **`listContainer` only**: If present without `selector`, targets the immediate children of the container as list items.
-3. **`selector` only**: If present without `listContainer`, matches all elements within the root element (using `querySelectorAll`).
-4. **Fallback**: If neither is provided, targets the **first child** of `<interact-element>` in `web` or the root element in `react`.
+1. **`listContainer` + `listItemSelector`**: Selects matching items within the container as list items.
+2. **`listContainer` only**: Targets immediate children of the container as list items.
+3. **`selector` only**: Matches all elements within the root element (using `querySelectorAll`).
+4. **Fallback**: If none are provided, targets the **first child** of `<interact-element>` in `web` or the root element in `react`.
 
 ## 4. Generating Critical CSS for Entrance Animations
 
@@ -134,7 +137,9 @@ Generates critical CSS styles that prevent flash-of-unstyled-content (FOUC) for 
 **Rules:**
 
 - MUST be called server-side or at build time to generate static CSS.
-- MUST set `data-interact-initial="true"` on elements that have an entrance effect.
+- MUST set `data-interact-initial="true"` on the `<interact-element>` whose first child should be hidden until the animation plays.
+- Only valid when: trigger is `viewEnter` + `params.type` is `'once'` + source element and target element are the same.
+- Do NOT use for `hover`, `click`, or `viewEnter` with `repeat`/`alternate`/`state` types.
 
 **Usage:**
 
@@ -167,12 +172,6 @@ const html = `
 `;
 ```
 
-**When to Use:**
-
-- For elements with an entrance effect that is triggered with `viewEnter`
-- To prevent elements from being visible before their entrance animation plays
-- For server-side rendering (SSR) or static site generation (SSG) scenarios
-
 ## 5. Triggers & Behaviors
 
 | Trigger        | Description                                     | Key Parameters                                                                                                            | Rules File          |
@@ -186,15 +185,41 @@ const html = `
 | `pointerMove`  | Mouse movement                                  | `hitArea`: 'self' (default) or 'root'; `axis`: 'x' or 'y' for keyframeEffect                                              | `./pointermove.md`  |
 | `animationEnd` | Chaining animations                             | `effectId`: ID of the previous effect                                                                                     | --                  |
 
-## 6. Effects & Animations
+## 5b. Sequences (Coordinated Stagger)
 
-Effects define _what_ happens. They can be inline or referenced by ID.
+Sequences group multiple effects into a coordinated timeline with staggered timing. Instead of setting `delay` on each effect manually, define `offset` (ms between items) and `offsetEasing` (how offset is distributed).
 
-### Effect Types
+### Sequence Config
 
-#### 1. Named Effects (Pre-built effect library)>
+```typescript
+{
+  offset: 100,            // ms between consecutive effects
+  offsetEasing: 'quadIn', // easing for stagger distribution (linear, quadIn, sineOut, etc.)
+  delay: 0,               // base delay before the sequence starts
+  effects: [              // effects in the sequence, applied in order
+    { effectId: 'card-entrance', listContainer: '.card-grid' },
+  ],
+}
+```
 
-Use the @wix/motion-presets library for consistency.
+Effects in a sequence can target different elements via `key`, use `listContainer` to target list children, or reference the effects registry via `effectId`.
+
+Reusable sequences can be defined in `InteractConfig.sequences` and referenced by `sequenceId`:
+
+```typescript
+{
+  sequences: {
+    'stagger-entrance': { offset: 80, offsetEasing: 'quadIn', effects: [{ effectId: 'fade-up', listContainer: '.items' }] },
+  },
+  interactions: [
+    { key: 'section', trigger: 'viewEnter', params: { type: 'once' }, sequences: [{ sequenceId: 'stagger-entrance' }] },
+  ],
+}
+```
+
+## 6. Named Effects & `registerEffects`
+
+To use `namedEffect` presets from `@wix/motion-presets`, register them before calling `Interact.create`. For full effect type syntax (`keyframeEffect`, `customEffect`, `TransitionEffect`, `ScrubEffect`), see `full-lean.md`.
 
 **Install:**
 
@@ -227,65 +252,6 @@ Interact.registerEffects({ FadeIn, ParallaxScroll });
   easing: 'ease-out'
 }
 ```
-
-#### 2. Keyframe Effects (Custom)
-
-Define explicit Web Animations API-like keyframes.
-
-```typescript
-{
-  keyframeEffect: {
-    name: 'custom-slide',
-    keyframes: [
-      { transform: 'translateY(20px)', opacity: 0 },
-      { transform: 'translateY(0)', opacity: 1 }
-    ]
-  },
-  duration: 500
-}
-```
-
-#### 3. Transition Effects
-
-Smoothly transition CSS properties.
-
-```typescript
-{
-  transition: {
-    duration: 300,
-    styleProperties: [{ name: 'backgroundColor', value: 'red' }]
-  }
-}
-```
-
-#### 4. Scroll Effects
-
-Used with `viewProgress`, linked to scroll progress while element is inside viewport.
-
-```typescript
-{
-  keyframeEffect: { ... },
-  rangeStart: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
-  rangeEnd: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
-  fill: 'both'
-}
-```
-
-#### 5. Mouse Effects
-
-Used with `pointerMove`, linked to mouse progress while moving over an element.
-
-```typescript
-{
-  namedEffect: { type: 'Track3DMouse' },
-  centeredToTarget: true
-}
-```
-
-### Targeting
-
-- **Self**: Omit `key` in the effect to target the trigger element. If using `selector` for trigger, also specify it again for the effect target.
-- **Cross-Targeting**: Specify a different `key` and/or `selector` in the effect to animate a different element.
 
 ## 7. Examples
 
@@ -337,6 +303,41 @@ const config = {
       ],
     },
   ],
+};
+```
+
+### Staggered List Entrance (Sequence)
+
+```typescript
+const config = {
+  interactions: [
+    {
+      key: 'card-grid',
+      trigger: 'viewEnter',
+      params: { type: 'once', threshold: 0.3 },
+      sequences: [
+        {
+          offset: 100,
+          offsetEasing: 'quadIn',
+          effects: [{ effectId: 'card-entrance', listContainer: '.card-grid' }],
+        },
+      ],
+    },
+  ],
+  effects: {
+    'card-entrance': {
+      duration: 500,
+      easing: 'ease-out',
+      keyframeEffect: {
+        name: 'card-fade-up',
+        keyframes: [
+          { transform: 'translateY(40px)', opacity: 0 },
+          { transform: 'translateY(0)', opacity: 1 },
+        ],
+      },
+      fill: 'both',
+    },
+  },
 };
 ```
 

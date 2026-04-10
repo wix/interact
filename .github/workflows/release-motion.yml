@@ -3,6 +3,11 @@ name: Motion - Bump Version and Publish
 on:
   workflow_dispatch:
     inputs:
+      source_branch:
+        description: 'Source branch for deploy preview (leave empty for regular release from master)'
+        required: false
+        default: ''
+        type: string
       version_strategy:
         type: choice
         description: Version strategy
@@ -25,6 +30,9 @@ permissions:
   contents: write
   pull-requests: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -35,14 +43,22 @@ jobs:
         with:
           fetch-depth: 0 # full history for yarn version
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.inputs.source_branch || github.ref }}
 
       - name: Create and checkout release branch
         if: ${{ github.event.inputs.dry_run == 'false' }}
+        id: release_branch
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          git checkout -b release
-          git push -u origin release
+          if [ -n "${{ github.event.inputs.source_branch }}" ]; then
+            BRANCH_NAME="release-dp"
+          else
+            BRANCH_NAME="release"
+          fi
+          echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          git checkout -b "$BRANCH_NAME"
+          git push -u origin "$BRANCH_NAME"
 
       - name: Setup Node with trusted publishing
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -69,8 +85,18 @@ jobs:
 
       # ---- BUMP VERSION ----
 
+      - name: Set deploy preview version
+        if: ${{ github.event.inputs.dry_run == 'false' && github.event.inputs.source_branch != '' }}
+        working-directory: packages/motion
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          BASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/-.*//')
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          DP_VERSION="${BASE_VERSION}-dp.${TIMESTAMP}"
+          yarn version "$DP_VERSION"
+
       - name: Bump version
-        if: ${{ github.event.inputs.dry_run == 'false' }}
+        if: ${{ github.event.inputs.dry_run == 'false' && github.event.inputs.source_branch == '' }}
         working-directory: packages/motion
         run: yarn version ${{ github.event.inputs.version_strategy }}
 
@@ -90,7 +116,7 @@ jobs:
           git add .
           git commit -m "chore: bump @wix/motion to ${{ steps.get_version.outputs.version }}"
           git tag "motion@${{ steps.get_version.outputs.version }}"
-          git push --follow-tags origin release
+          git push --follow-tags origin ${{ steps.release_branch.outputs.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -107,8 +133,8 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `chore: bump @wix/motion to ${{ steps.get_version.outputs.version }}`,
-              head: 'release',
-              base: 'master',
+              head: '${{ steps.release_branch.outputs.name }}',
+              base: '${{ github.event.inputs.source_branch || 'master' }}',
               body: 'Automated version bump and release PR',
               maintainer_can_modify: true
             });
@@ -117,8 +143,16 @@ jobs:
 
       # ---- PUBLISH WITH TRUSTED PUBLISHING ----
 
+      - name: npm publish @wix/motion deploy preview (trusted)
+        if: ${{ github.event.inputs.dry_run == 'false' && github.event.inputs.source_branch != '' }}
+        run: |
+          cd packages/motion
+          npm publish --tag dp --provenance --access=public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.RELEASE_MOTION_NPM_TOKEN }}
+
       - name: npm publish @wix/motion RC (trusted)
-        if: ${{ github.event.inputs.dry_run == 'false' && (github.event.inputs.version_strategy == 'prerelease' || github.event.inputs.version_strategy == 'premajor' || github.event.inputs.version_strategy == 'preminor' || github.event.inputs.version_strategy == 'prepatch') }}
+        if: ${{ github.event.inputs.dry_run == 'false' && github.event.inputs.source_branch == '' && (github.event.inputs.version_strategy == 'prerelease' || github.event.inputs.version_strategy == 'premajor' || github.event.inputs.version_strategy == 'preminor' || github.event.inputs.version_strategy == 'prepatch') }}
         run: |
           cd packages/motion
           npm publish --tag next --provenance --access=public
@@ -126,7 +160,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.RELEASE_MOTION_NPM_TOKEN }}
 
       - name: npm publish @wix/motion Stable (trusted)
-        if: ${{ github.event.inputs.dry_run == 'false' && (github.event.inputs.version_strategy == 'major' || github.event.inputs.version_strategy == 'minor' || github.event.inputs.version_strategy == 'patch') }}
+        if: ${{ github.event.inputs.dry_run == 'false' && github.event.inputs.source_branch == '' && (github.event.inputs.version_strategy == 'major' || github.event.inputs.version_strategy == 'minor' || github.event.inputs.version_strategy == 'patch') }}
         run: |
           cd packages/motion
           npm publish --tag latest --provenance --access=public

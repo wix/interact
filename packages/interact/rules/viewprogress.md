@@ -1,77 +1,78 @@
 # ViewProgress Trigger Rules for @wix/interact
 
-These rules help generate scroll-driven interactions using the `@wix/interact` library. `viewProgress` triggers create scroll-based animations that update continuously as elements move through the viewport, leveraging native CSS ViewTimelines.
+## Core Concept
 
-## Rule 1: Range-Based Parallax/Continuous Animation Control with Named Effects
+`viewProgress` triggers create scroll-driven animations that update continuously as elements move through the viewport, leveraging native CSS ViewTimelines. Use when animation progress should be tied to the element's scroll position.
 
-**Use Case**: Continuous scroll-driven animations using pre-built named effects that respond to scroll position (e.g., parallax backgrounds, floating elements, scroll-responsive decorations)
-
-**When to Apply**:
-
-- For smooth parallax background movements
-- When creating scroll-responsive floating elements
-- For continuous scroll-driven decorative animations
-- When using pre-built motion effects for scroll interactions
-
-**KeyframeEffect Pattern**:
+## Config Template
 
 ```typescript
 {
     key: '[SOURCE_KEY]',
     trigger: 'viewProgress',
+    conditions: ['[CONDITION_NAME]'],  // optional: e.g. 'prefers-motion', 'desktop-only'
     effects: [
         {
             key: '[TARGET_KEY]',
-            keyframeEffect: {
-              name: '[EFFECT_NAME]',
-              keyframes: [EFFECT_KEYFRAMES]
-            },
+            // Effect block — use exactly one of: namedEffect | keyframeEffect | customEffect
+            namedEffect: { type: '[NAMED_EFFECT]', /* preset-specific options only if documented */ },  // OR
+            keyframeEffect: { name: '[EFFECT_NAME]', keyframes: [EFFECT_KEYFRAMES] },  // OR
+            customEffect: (element, progress) => { [CUSTOM_LOGIC] },
             rangeStart: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [START_PERCENTAGE] } },
             rangeEnd: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [END_PERCENTAGE] } },
             easing: '[EASING_FUNCTION]',
-            fill: 'both',
+            fill: '[FILL_MODE]',
             effectId: '[UNIQUE_EFFECT_ID]'
         }
     ]
 }
 ```
 
-**Variables**:
+## Variable Key
 
-- `[SOURCE_KEY]`: Unique identifier for element that tracks scroll progress
-- `[TARGET_KEY]`: Unique identifier for element to animate (can be same as source or different)
-- `[EFFECT_NAME]`: Optional unique name for the effec
-- `[EFFECT_KEYFRAMES]`: Keyframes for the effect
-- `[RANGE_NAME]`: 'cover', 'contain', 'entry', 'exit', 'entry-crossing', or 'exit-crossing'
-- `[START_PERCENTAGE]`: Start point as percentage (0-100)
-- `[END_PERCENTAGE]`: End point as percentage (0-100)
-- `[EASING_FUNCTION]`: Timing function (typically 'linear' for smooth scroll effects)
-- `[UNIQUE_EFFECT_ID]`: Optional unique identifier
+| Placeholder          | Valid Values / Notes                                                                                                                                                                                |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[SOURCE_KEY]`       | Unique identifier for element that tracks scroll progress                                                                                                                                           |
+| `[TARGET_KEY]`       | Unique identifier for element to animate (can equal source)                                                                                                                                         |
+| `[NAMED_EFFECT]`     | Preset from @wix/motion-presets (see Named Scroll Effects below). Some presets accept options (e.g. `direction`) — only use options you have documentation for; omit and rely on defaults otherwise |
+| `[EFFECT_NAME]`      | Unique name for keyframe effect                                                                                                                                                                     |
+| `[EFFECT_KEYFRAMES]` | Array of keyframe objects, e.g. `[{ opacity: '0' }, { opacity: '1' }]`                                                                                                                              |
+| `[CUSTOM_LOGIC]`     | JS: `progress` is 0–1 within range; mutate `element.style` or DOM                                                                                                                                   |
+| `[RANGE_NAME]`       | 'cover', 'contain', 'entry', 'exit', 'entry-crossing', 'exit-crossing'                                                                                                                              |
+| `[START_PERCENTAGE]` | 0–100                                                                                                                                                                                               |
+| `[END_PERCENTAGE]`   | 0–100                                                                                                                                                                                               |
+| `[EASING_FUNCTION]`  | 'linear', 'ease-in', 'ease-out', 'ease-in-out', or cubic-bezier string                                                                                                                              |
+| `[FILL_MODE]`        | 'both', 'backwards', 'forwards', 'none'                                                                                                                                                             |
+| `[UNIQUE_EFFECT_ID]` | Optional unique identifier                                                                                                                                                                          |
+| `[CONDITION_NAME]`   | User-defined condition ID declared in the top-level `conditions` map (e.g. `'prefers-motion'`, `'desktop-only'`)                                                                                    |
 
-**NamedEffect Pattern**:
+**Offset semantics:** Positive offset values move the effective range forward along the scroll axis. 0 = start of range, 100 = end.
 
-```typescript
-{
-    key: '[SOURCE_KEY]',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: '[TARGET_KEY]',
-            namedEffect: {
-              type: '[NAMED_EFFECT]'
-            },
-            rangeStart: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [START_PERCENTAGE] } },
-            rangeEnd: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [END_PERCENTAGE] } },
-            easing: '[EASING_FUNCTION]',
-            effectId: '[UNIQUE_EFFECT_ID]'
-        }
-    ]
-}
-```
+## Effect Type Selection
 
-- `[NAMED_EFFECT]`: Pre-built scroll effect name from @wix/motion-presets (e.g., 'ParallaxScroll', 'MoveScroll', 'FadeScroll', 'RevealScroll', 'GrowScroll', 'SlideScroll', 'SpinScroll', 'PanScroll', 'BlurScroll', 'ArcScroll', 'FlipScroll', 'Spin3dScroll', 'TiltScroll', 'TurnScroll', 'ShapeScroll', 'ShuttersScroll', 'ShrinkScroll', 'SkewPanScroll', 'StretchScroll')
+| Scenario                                                      | Effect Type      | Notes                             |
+| ------------------------------------------------------------- | ---------------- | --------------------------------- |
+| Parallax, scroll-responsive decorations, floating elements    | `namedEffect`    | Use presets; fastest to implement |
+| Custom multi-property animations, brand-specific reveals      | `keyframeEffect` | Full control over CSS keyframes   |
+| Dynamic content (counters, text reveal, canvas, calculations) | `customEffect`   | JS callback; `progress` 0–1       |
 
-**Example - Background Parallax**:
+## Range Reference
+
+| Intent                                  | rangeStart.name | rangeEnd.name | Typical Offsets        |
+| --------------------------------------- | --------------- | ------------- | ---------------------- |
+| Parallax / continuous while visible     | cover           | cover         | 0–100                  |
+| Entry animation (element entering view) | entry           | entry         | 0–30 start, 70–100 end |
+| Exit animation (element leaving view)   | exit            | exit          | 0–30 start, 70–100 end |
+| Cross-range (entry to exit)             | entry           | exit          | 0–100                  |
+| Contained phase                         | contain         | contain       | 0–100                  |
+
+## Named Scroll Effects
+
+From `@wix/motion-presets` scroll animations: ParallaxScroll, MoveScroll, FadeScroll, RevealScroll, GrowScroll, SlideScroll, SpinScroll, PanScroll, BlurScroll, ArcScroll, FlipScroll, Spin3dScroll, TiltScroll, TurnScroll, ShapeScroll, ShuttersScroll, ShrinkScroll, SkewPanScroll, StretchScroll.
+
+## Examples
+
+### Example 1: Named Effect (Parallax)
 
 ```typescript
 {
@@ -91,297 +92,7 @@ These rules help generate scroll-driven interactions using the `@wix/interact` l
 }
 ```
 
----
-
-## Rule 2: Range-Based Entry Animation Control with Named Effects
-
-**Use Case**: Scroll-driven entrance animations using named effects that start when elements enter the viewport (e.g., content reveals, scroll-driven introductions)
-
-**When to Apply**:
-
-- For scroll-controlled entrance animations
-- When elements should reveal gradually as they come into view
-- For progressive content disclosure based on scroll
-- When using pre-built entrance effects with scroll control
-
-**Pattern**:
-
-```typescript
-{
-    key: '[SOURCE_KEY]',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: '[TARGET_KEY]',
-            namedEffect: {
-                type: '[ENTRANCE_EFFECT]'
-            },
-            rangeStart: { name: 'entry', offset: { unit: 'percentage', value: [ENTRY_START] } },
-            rangeEnd: { name: 'entry', offset: { unit: 'percentage', value: [ENTRY_END] } },
-            easing: '[EASING_FUNCTION]',
-            effectId: '[UNIQUE_EFFECT_ID]'
-        }
-    ]
-}
-```
-
-**Variables**:
-
-- `[ENTRANCE_EFFECT]`: Named entrance effect from @wix/motion-presets scroll animations (e.g., 'FadeScroll', 'SlideScroll', 'RevealScroll', 'ShapeScroll', 'GrowScroll', 'MoveScroll', 'BlurScroll')
-- `[ENTRY_START]`: Entry animation start percentage (typically 0-30)
-- `[ENTRY_END]`: Entry animation end percentage (typically 70-100)
-- Other variables same as Rule 1
-
-**Example - Content Reveal on Entry**:
-
-```typescript
-{
-    key: 'content-block',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'content-block',
-            namedEffect: {
-                type: 'RevealScroll',
-                direction: 'left'
-            },
-            rangeStart: { name: 'entry', offset: { unit: 'percentage', value: 0 } },
-            rangeEnd: { name: 'entry', offset: { unit: 'percentage', value: 60 } },
-            easing: 'ease-out'
-        }
-    ]
-}
-```
-
-**Example - Progressive Image Reveal**:
-
-```typescript
-{
-    key: 'image-container',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'feature-image',
-            namedEffect: {
-                type: 'FadeScroll'
-            },
-            rangeStart: { name: 'entry', offset: { unit: 'percentage', value: 20 } },
-            rangeEnd: { name: 'entry', offset: { unit: 'percentage', value: 80 } },
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            effectId: 'image-reveal'
-        }
-    ]
-}
-```
-
----
-
-## Rule 3: Range-Based Exit Animation Control with Named Effects
-
-**Use Case**: Scroll-driven exit animations using named effects that trigger when elements leave the viewport (e.g., content hiding, scroll-out effects, element dismissals)
-
-**When to Apply**:
-
-- For scroll-controlled exit animations
-- When elements should hide gradually as they leave view
-- For creating scroll-responsive content dismissals
-- When using pre-built exit effects with scroll control
-
-**Pattern**:
-
-```typescript
-{
-    key: '[SOURCE_KEY]',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: '[TARGET_KEY]',
-            keyframeEffect: {
-                name: '[EFFECT_NAME]',
-                keyframes: [EFFECT_KEYFRAMES]
-            },
-            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: [EXIT_START] } },
-            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: [EXIT_END] } },
-            easing: '[EASING_FUNCTION]',
-            fill: 'both',
-            effectId: '[UNIQUE_EFFECT_ID]'
-        }
-    ]
-}
-```
-
-**Variables**:
-
-- `[EXIT_START]`: Exit animation start percentage (typically 0-30)
-- `[EXIT_END]`: Exit animation end percentage (typically 70-100)
-- `[EFFECT_KEYFRAMES]`:
-
-**Example - Content Fade Out on Exit**:
-
-```typescript
-{
-    key: 'hero-content',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'hero-text',
-            keyframeEffect: {
-                name: 'fade-out',
-                keyframes: [{
-                    opacity: 0
-                }]
-            },
-            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: 0 } },
-            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 100 } },
-            easing: 'ease-in',
-            fill: 'both'
-        }
-    ]
-}
-```
-
----
-
-## Rule 4: Range-Based Parallax/Continuous Animation Control with Keyframe Effects
-
-**Use Case**: Custom scroll-driven animations using keyframe effects for precise control over continuous scroll-responsive animations (e.g., custom parallax movements, complex scroll transformations, multi-property scroll effects)
-
-**When to Apply**:
-
-- For custom parallax effects not available in named effects
-- When combining multiple CSS properties in scroll animations
-- For precise control over scroll-driven transformations
-- When creating unique scroll-responsive visual effects
-
-**Pattern**:
-
-```typescript
-{
-    key: '[SOURCE_KEY]',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: '[TARGET_KEY]',
-            keyframeEffect: {
-                name: '[UNIQUE_KEYFRAME_EFFECT_NAME]',
-                keyframes: [
-                    { [CSS_PROPERTY_1]: '[START_VALUE_1]', [CSS_PROPERTY_2]: '[START_VALUE_2]', [CSS_PROPERTY_3]: '[START_VALUE_3]' },
-                    { [CSS_PROPERTY_1]: '[END_VALUE_1]', [CSS_PROPERTY_2]: '[END_VALUE_2]', [CSS_PROPERTY_3]: '[END_VALUE_3]' }
-                ]
-            },
-            rangeStart: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [START_PERCENTAGE] } },
-            rangeEnd: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [END_PERCENTAGE] } },
-            easing: '[EASING_FUNCTION]',
-            fill: 'both',
-            effectId: '[UNIQUE_EFFECT_ID]'
-        }
-    ]
-}
-```
-
-**Variables**:
-
-- `[UNIQUE_KEYFRAME_EFFECT_NAME]`: unique name for the CSS keyframe effect (can equal `[UNIQUE_EFFECT_ID]` if provided)
-- `[CSS_PROPERTY_N]`: CSS property names (e.g., 'transform', 'opacity', 'filter')
-- `[START_VALUE_N]`: Starting value for the property
-- `[END_VALUE_N]`: Ending value for the property
-- Other variables same as Rule 1
-
-**Example - Custom Background Parallax**:
-
-```typescript
-{
-    key: 'parallax-section',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'parallax-bg',
-            keyframeEffect: {
-                name: 'parallax-bg',
-                keyframes: [
-                    { transform: 'translateY(0)', filter: 'brightness(1)', opacity: '0.9' },
-                    { opacity: '1' },
-                    { transform: 'translateY(-200px)', filter: 'brightness(0.8)', opacity: '0.9' }
-                ]
-            },
-            rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
-            rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
-            easing: 'linear',
-            fill: 'both'
-        }
-    ]
-}
-```
-
-**Example - Multi-Layer Scroll Effect**:
-
-```typescript
-{
-    key: 'complex-section',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'background-layer',
-            keyframeEffect: {
-                name: 'bg-scroll',
-                keyframes: [
-                    { transform: 'scale(1.1) translateY(0)', filter: 'blur(0)' },
-                    { transform: 'scale(1) translateY(-100px)', filter: 'blur(2px)' }
-                ]
-            },
-            rangeStart: { name: 'entry', offset: { unit: 'percentage', value: 0 } },
-            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 100 } },
-            easing: 'linear',
-            fill: 'both',
-            effectId: 'bg-scroll'
-        }
-    ]
-}
-```
-
----
-
-## Rule 5: Range-Based Entry Animation Control with Keyframe Effects
-
-**Use Case**: Custom scroll-driven entrance animations using keyframe effects for precise control over how elements appear as they enter the viewport (e.g., custom reveal effects, multi-property entrances, unique scroll-in animations)
-
-**When to Apply**:
-
-- For custom entrance effects not available in named effects
-- When combining multiple properties in entrance animations
-- For brand-specific or unique entry animations
-- When creating complex reveal sequences
-
-**Pattern**:
-
-```typescript
-{
-    key: '[SOURCE_KEY]',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: '[TARGET_KEY]',
-            keyframeEffect: {
-                name: '[UNIQUE_KEYFRAME_EFFECT_NAME]',
-                keyframes: [
-                    { [CSS_PROPERTY_1]: '[START_VALUE_1]', [CSS_PROPERTY_2]: '[START_VALUE_2]' },
-                    { [CSS_PROPERTY_1]: '[END_VALUE_1]', [CSS_PROPERTY_2]: '[END_VALUE_2]' }
-                ]
-            },
-            rangeStart: { name: 'entry', offset: { unit: 'percentage', value: [ENTRY_START] } },
-            rangeEnd: { name: 'entry', offset: { unit: 'percentage', value: [ENTRY_END] } },
-            easing: '[EASING_FUNCTION]',
-            fill: 'both',
-            effectId: '[UNIQUE_EFFECT_ID]'
-        }
-    ]
-}
-```
-
-**Variables**:
-Same as Rule 4, with focus on entry range
-
-**Example - Custom Card Entrance**:
+### Example 2: Keyframe Effect (Custom Animation)
 
 ```typescript
 {
@@ -406,264 +117,7 @@ Same as Rule 4, with focus on entry range
 }
 ```
 
-**Example - Text Progressive Reveal**:
-
-```typescript
-{
-    key: 'text-container',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'main-heading',
-            keyframeEffect: {
-                name: 'heading-reveal',
-                keyframes: [
-                    { opacity: '0', transform: 'translateX(-50px)', color: 'rgba(0,0,0,0.3)' },
-                    { opacity: '1', transform: 'translateX(0)', color: 'rgba(0,0,0,1)' }
-                ]
-            },
-            rangeStart: { name: 'entry', offset: { unit: 'percentage', value: 10 } },
-            rangeEnd: { name: 'entry', offset: { unit: 'percentage', value: 60 } },
-            easing: 'ease-out',
-            fill: 'both',
-            effectId: 'heading-reveal'
-        }
-    ]
-}
-```
-
----
-
-## Rule 6: Range-Based Exit Animation Control with Keyframe Effects
-
-**Use Case**: Custom scroll-driven exit animations using keyframe effects for precise control over how elements disappear as they leave the viewport (e.g., custom hide effects, multi-property exits, unique scroll-out animations)
-
-**When to Apply**:
-
-- For custom exit effects not available in named effects
-- When combining multiple properties in exit animations
-- For creating smooth content transitions on scroll out
-- When elements need complex hiding sequences
-
-**Pattern**:
-
-```typescript
-{
-    key: '[SOURCE_KEY]',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: '[TARGET_KEY]',
-            keyframeEffect: {
-                name: '[UNIQUE_KEYFRAME_EFFECT_NAME]',
-                keyframes: [
-                    { [CSS_PROPERTY_1]: '[START_VALUE_1]', [CSS_PROPERTY_2]: '[START_VALUE_2]' },
-                    { [CSS_PROPERTY_1]: '[END_VALUE_1]', [CSS_PROPERTY_2]: '[END_VALUE_2]' }
-                ]
-            },
-            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: [EXIT_START] } },
-            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: [EXIT_END] } },
-            easing: '[EASING_FUNCTION]',
-            fill: 'both',
-            effectId: '[UNIQUE_EFFECT_ID]'
-        }
-    ]
-}
-```
-
-**Variables**:
-Same as Rule 4, with focus on exit range
-
-**Example - Hero Content Exit**:
-
-```typescript
-{
-    key: 'hero-section',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'hero-content',
-            keyframeEffect: {
-                name: 'hero-content-animation',
-                keyframes: [
-                    { opacity: '1', transform: 'translateY(0) scale(1)', filter: 'blur(0)' },
-                    { opacity: '0', transform: 'translateY(-50px) scale(0.95)', filter: 'blur(3px)' }
-                ]
-            },
-            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: 0 } },
-            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 60 } },
-            easing: 'ease-in',
-            fill: 'both'
-        }
-    ]
-}
-```
-
-**Example - Navigation Scroll Hide**:
-
-```typescript
-{
-    key: 'main-header',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'sticky-nav',
-            keyframeEffect: {
-                name: 'nav-hide',
-                keyframes: [
-                    { transform: 'translateY(0)', opacity: '1', backdropFilter: 'blur(10px)' },
-                    { transform: 'translateY(-100%)', opacity: '0.7', backdropFilter: 'blur(0)' }
-                ]
-            },
-            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: 20 } },
-            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 80 } },
-            easing: 'ease-in-out',
-            fill: 'both',
-            effectId: 'nav-hide'
-        }
-    ]
-}
-```
-
----
-
-## Rule 7: Range-Based Parallax/Continuous Animation Control with Custom Effects
-
-**Use Case**: JavaScript-powered scroll-driven animations with full programmatic control for complex interactions (e.g., canvas animations, complex calculations, dynamic content updates, interactive scroll effects)
-
-**When to Apply**:
-
-- For animations requiring complex calculations
-- When integrating with canvas or WebGL
-- For dynamic content updates based on scroll
-- When CSS keyframes are insufficient
-
-**Pattern**:
-
-```typescript
-{
-    key: '[SOURCE_KEY]',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: '[TARGET_KEY]',
-            customEffect: (element, progress) => {
-                // progress is 0-1 representing scroll position within range
-                [CUSTOM_ANIMATION_LOGIC]
-            },
-            rangeStart: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [START_PERCENTAGE] } },
-            rangeEnd: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [END_PERCENTAGE] } },
-            fill: 'both',
-            effectId: '[UNIQUE_EFFECT_ID]'
-        }
-    ]
-}
-```
-
-**Variables**:
-
-- `[CUSTOM_ANIMATION_LOGIC]`: JavaScript code for custom animation
-- Other variables same as Rule 1
-
-**Example - Scroll Counter Update**:
-
-```typescript
-{
-    key: 'stats-section',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'progress-counter',
-            customEffect: (element, progress) => {
-                const currentValue = Math.floor(progress * 100);
-                element.textContent = `${currentValue}%`;
-                element.style.color = `hsl(${progress * 120}, 70%, 50%)`;
-            },
-            rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
-            rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
-            fill: 'both',
-            effectId: 'progress-counter'
-        }
-    ]
-}
-```
-
-**Example - Complex Particle Animation**:
-
-```typescript
-{
-    key: 'particle-container',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'particle-canvas',
-            customEffect: (element, progress) => {
-                const particles = element.querySelectorAll('.particle');
-                particles.forEach((particle, index) => {
-                    const delay = index * 0.1;
-                    const adjustedProgress = Math.max(0, Math.min(1, (progress - delay) / (1 - delay)));
-                    const rotation = adjustedProgress * 360;
-                    const scale = 0.5 + (adjustedProgress * 0.5);
-                    const translateY = (1 - adjustedProgress) * 200;
-
-                    particle.style.transform = `
-                        translateY(${translateY}px)
-                        rotate(${rotation}deg)
-                        scale(${scale})
-                    `;
-                    particle.style.opacity = adjustedProgress;
-                });
-            },
-            rangeStart: { name: 'entry', offset: { unit: 'percentage', value: 0 } },
-            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 100 } },
-            fill: 'both',
-            effectId: 'particle-scroll'
-        }
-    ]
-}
-```
-
----
-
-## Rule 8: Range-Based Entry Animation Control with Custom Effects
-
-**Use Case**: JavaScript-powered entrance animations with programmatic control for complex entry sequences (e.g., dynamic counters, interactive reveals, calculated animations, progressive loading effects)
-
-**When to Apply**:
-
-- For entrance animations requiring calculations
-- When creating dynamic content reveals
-- For interactive entrance sequences
-- When standard keyframes cannot achieve the desired effect
-
-**Pattern**:
-
-```typescript
-{
-    key: '[SOURCE_KEY]',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: '[TARGET_KEY]',
-            customEffect: (element, progress) => {
-                // progress is 0-1 representing entry progress
-                [ENTRY_ANIMATION_LOGIC]
-            },
-            rangeStart: { name: 'entry', offset: { unit: 'percentage', value: [ENTRY_START] } },
-            rangeEnd: { name: 'entry', offset: { unit: 'percentage', value: [ENTRY_END] } },
-            fill: 'both',
-            effectId: '[UNIQUE_EFFECT_ID]'
-        }
-    ]
-}
-```
-
-**Variables**:
-
-- `[ENTRY_ANIMATION_LOGIC]`: JavaScript code for custom entry animation
-- Other variables same as previous rules
-
-**Example - Dynamic Text Reveal**:
+### Example 3: Custom Effect (Dynamic Content)
 
 ```typescript
 {
@@ -690,145 +144,50 @@ Same as Rule 4, with focus on exit range
 }
 ```
 
-**Example - Progressive Chart Fill**:
+### Example 4: Multi-Range (Entry + Exit on the same element)
+
+Animating the same element in on scroll entry and out on scroll exit requires two separate effects within the same interaction — one scoped to the `entry` range, one to `exit`. This pattern is non-obvious because both effects share the same `key` but have different ranges.
 
 ```typescript
 {
-    key: 'chart-container',
+    key: 'feature-card',
     trigger: 'viewProgress',
     effects: [
+        // Animate IN as element enters viewport
         {
-            key: 'chart-bar',
-            customEffect: (element, progress) => {
-                const targetHeight = element.dataset.targetHeight || 100;
-                const currentHeight = targetHeight * progress;
-                const colorIntensity = Math.floor(255 * progress);
-
-                element.style.height = `${currentHeight}px`;
-                element.style.backgroundColor = `rgb(${255 - colorIntensity}, ${colorIntensity}, 100)`;
-                element.style.boxShadow = `0 0 ${progress * 20}px rgba(0, ${colorIntensity}, 255, 0.5)`;
+            key: 'feature-card',
+            keyframeEffect: {
+                name: 'card-in',
+                keyframes: [
+                    { opacity: '0', transform: 'translateY(40px)' },
+                    { opacity: '1', transform: 'translateY(0)' }
+                ]
             },
-            rangeStart: { name: 'entry', offset: { unit: 'percentage', value: 20 } },
-            rangeEnd: { name: 'entry', offset: { unit: 'percentage', value: 90 } },
-            fill: 'both',
-            effectId: 'chart-fill'
+            rangeStart: { name: 'entry', offset: { unit: 'percentage', value: 0 } },
+            rangeEnd: { name: 'entry', offset: { unit: 'percentage', value: 60 } },
+            easing: 'ease-out',
+            fill: 'both'
+        },
+        // Animate OUT as element exits viewport
+        {
+            key: 'feature-card',
+            keyframeEffect: {
+                name: 'card-out',
+                keyframes: [
+                    { opacity: '1', transform: 'translateY(0)' },
+                    { opacity: '0', transform: 'translateY(-40px)' }
+                ]
+            },
+            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: 40 } },
+            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 100 } },
+            easing: 'ease-in',
+            fill: 'both'
         }
     ]
 }
 ```
 
----
-
-## Rule 9: Range-Based Exit Animation Control with Custom Effects
-
-**Use Case**: JavaScript-powered exit animations with programmatic control for complex exit sequences (e.g., dynamic hiding effects, calculated dismissals, interactive fade-outs, progressive unloading effects)
-
-**When to Apply**:
-
-- For exit animations requiring calculations
-- When creating dynamic content hiding
-- For interactive exit sequences
-- When standard keyframes cannot achieve the desired exit effect
-
-**Pattern**:
-
-```typescript
-{
-    key: '[SOURCE_KEY]',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: '[TARGET_KEY]',
-            customEffect: (element, progress) => {
-                // progress is 0-1 representing exit progress
-                [EXIT_ANIMATION_LOGIC]
-            },
-            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: [EXIT_START] } },
-            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: [EXIT_END] } },
-            fill: 'both',
-            effectId: '[UNIQUE_EFFECT_ID]'
-        }
-    ]
-}
-```
-
-**Variables**:
-
-- `[EXIT_ANIMATION_LOGIC]`: JavaScript code for custom exit animation
-- Other variables same as previous rules
-
-**Example - Dissolve Effect Exit**:
-
-```typescript
-{
-    key: 'content-section',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'dissolving-content',
-            customEffect: (element, progress) => {
-                const particles = element.querySelectorAll('.content-particle');
-                const dissolveProgress = progress;
-
-                particles.forEach((particle, index) => {
-                    const delay = (index / particles.length) * 0.5;
-                    const particleProgress = Math.max(0, (dissolveProgress - delay) / (1 - delay));
-
-                    particle.style.opacity = 1 - particleProgress;
-                    particle.style.transform = `
-                        translateY(${particleProgress * -100}px)
-                        rotate(${particleProgress * 180}deg)
-                        scale(${1 - particleProgress * 0.5})
-                    `;
-                });
-            },
-            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: 10 } },
-            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 90 } },
-            fill: 'both',
-            effectId: 'dissolve-exit'
-        }
-    ]
-}
-```
-
-**Example - Data Visualization Exit**:
-
-```typescript
-{
-    key: 'data-visualization',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'data-point',
-            customEffect: (element, progress) => {
-                const dataPoints = element.closest('interact-element')?.querySelectorAll('.data-point') || [];
-                const totalPoints = dataPoints.length;
-                const elementIndex = Array.from(dataPoints).indexOf(element);
-
-                // Staggered exit based on data point position
-                const staggerDelay = (elementIndex / totalPoints) * 0.3;
-                const adjustedProgress = Math.max(0, (progress - staggerDelay) / (1 - staggerDelay));
-
-                const scale = 1 - (adjustedProgress * 0.8);
-                const rotation = adjustedProgress * 720; // Two full rotations
-                const opacity = 1 - adjustedProgress;
-
-                element.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
-                element.style.opacity = opacity;
-                element.style.filter = `blur(${adjustedProgress * 10}px)`;
-            },
-            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: 0 } },
-            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 80 } },
-            fill: 'both',
-            effectId: 'data-exit'
-        }
-    ]
-}
-```
-
----
-
-## Advanced Patterns and Combinations
+## Advanced Patterns
 
 ### Multi-Range ViewProgress Effects
 
@@ -890,49 +249,58 @@ Combining different ranges for complex scroll animations:
 
 ### ViewProgress with Conditional Behavior
 
-Responsive scroll animations:
+Use interact `conditions` for responsive scroll animations and `prefers-reduced-motion`. Condition IDs are user-defined strings — they must be declared in the top-level `conditions` map before being referenced in an interaction.
 
 ```typescript
 {
-    key: 'responsive-parallax',
-    trigger: 'viewProgress',
-    conditions: ['desktop-only', 'prefers-motion'],
-    effects: [
+    conditions: {
+        'desktop-only':   { type: 'media', predicate: '(min-width: 768px)' },
+        'prefers-motion': { type: 'media', predicate: '(prefers-reduced-motion: no-preference)' },
+        'mobile-only':    { type: 'media', predicate: '(max-width: 767px)' },
+    },
+    interactions: [
         {
-            key: 'parallax-bg',
-            keyframeEffect: {
-                name: 'parallax-bg',
-                keyframes: [
-                    { transform: 'translateY(0)' },
-                    { transform: 'translateY(-300px)' }
-                ]
-            },
-            rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
-            rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
-            easing: 'linear',
-            fill: 'both'
-        }
-    ]
-},
-// Simplified version for mobile
-{
-    key: 'responsive-parallax',
-    trigger: 'viewProgress',
-    conditions: ['mobile-only'],
-    effects: [
+            key: 'responsive-parallax',
+            trigger: 'viewProgress',
+            conditions: ['desktop-only', 'prefers-motion'],
+            effects: [
+                {
+                    key: 'parallax-bg',
+                    keyframeEffect: {
+                        name: 'parallax-bg',
+                        keyframes: [
+                            { transform: 'translateY(0)' },
+                            { transform: 'translateY(-300px)' }
+                        ]
+                    },
+                    rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+                    rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+                    easing: 'linear',
+                    fill: 'both'
+                }
+            ]
+        },
+        // Simplified fallback for mobile
         {
-            key: 'parallax-bg',
-            keyframeEffect: {
-                name: 'fade-out-bg',
-                keyframes: [
-                    { opacity: '1' },
-                    { opacity: '0.7' }
-                ]
-            },
-            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: 0 } },
-            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 100 } },
-            easing: 'linear',
-            fill: 'both'
+            key: 'responsive-parallax',
+            trigger: 'viewProgress',
+            conditions: ['mobile-only'],
+            effects: [
+                {
+                    key: 'parallax-bg',
+                    keyframeEffect: {
+                        name: 'fade-out-bg',
+                        keyframes: [
+                            { opacity: '1' },
+                            { opacity: '0.7' }
+                        ]
+                    },
+                    rangeStart: { name: 'exit', offset: { unit: 'percentage', value: 0 } },
+                    rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 100 } },
+                    easing: 'linear',
+                    fill: 'both'
+                }
+            ]
         }
     ]
 }
@@ -993,92 +361,18 @@ Orchestrating multiple elements with viewProgress:
 }
 ```
 
----
+## Best Practices
 
-## Best Practices for ViewProgress Interactions
+### Interact-Specific
 
-### Performance Guidelines
+1. **Respect `prefers-reduced-motion`** via interact `conditions`: use `'prefers-motion'` so scroll animations run only when the user has not requested reduced motion.
+2. **Use `linear` easing** for most scroll effects; non-linear easing can feel jarring as scroll position changes.
+3. **Range configuration:** Verify source element remains visible throughout the scroll range. If the source is hidden or in a frozen stacking context, the ViewTimeline constraint may not update correctly.
+4. **Avoid overlapping ranges** on the same target to prevent conflicting animations.
+5. **Entry/exit timing:** Use 0–50% cover or 0–100% entry for entrances; 50–100% cover or 0–100% exit for exits. Start with broad ranges (0–100) then refine.
+6. **customEffect:** Use `element.closest('interact-element')` when querying related DOM within the callback; target elements must exist when the effect runs.
 
-1. **Use `linear` easing** for most scroll effects to avoid jarring transitions
-2. **Prefer `transform`, `filter`, and `opacity`** properties for hardware acceleration
+### Troubleshooting
 
-### Range Configuration Guidelines
-
-1. **Use appropriate range names**:
-   - `entry`: For animations that happen as element enters viewport
-   - `cover`: For animations while element is intersecting viewport
-   - `exit`: For animations as element leaves viewport
-   - `contain`: For animations while element is contained within viewport
-
-2. **Offset Guidelines**:
-   - **0-100 values**: Represent percentage of the range
-   - **Start with broad ranges** (0-100) then refine
-   - **Use smaller ranges** (20-80) for more controlled animations
-   - **Avoid overlapping ranges** to prevent conflicting animations
-   - **Use 0-50% cover range or 0-100% entry range** for entry animations
-   - **Use 50-100% cover range or 0-100% exit range** for exit animations
-
-### User Experience Guidelines
-
-1. **Keep scroll animations subtle** to avoid motion sickness
-2. **Ensure content remains readable** during animations
-3. **Use progressive enhancement** - ensure content works without animations
-4. **Test on various devices** for performance and smoothness
-
-### Accessibility Considerations
-
-1. **Respect `prefers-reduced-motion`** for all scroll animations
-2. **Provide alternatives** for motion-sensitive users
-3. **Don't rely solely on scroll animations** for important content
-4. **Ensure keyboard navigation** still works with scroll effects
-
-### Common Use Cases by Pattern
-
-**Parallax/Continuous (Rules 1, 4, 7)**:
-
-- Background image parallax
-- Floating decorative elements
-- Continuous progress indicators
-- Multi-layer depth effects
-- Scroll-responsive backgrounds
-
-**Entry Animation (Rules 2, 5, 8)**:
-
-- Content reveals on scroll
-- Progressive image loading
-- Element introductions
-- Staggered content appearance
-
-**Exit Animation (Rules 3, 6, 9)**:
-
-- Hero content fade-out
-- Navigation hiding
-- Content dismissals
-- Scroll-out transitions
-- Element cleanup effects
-
-### Troubleshooting Common Issues
-
-**Janky scroll performance**:
-
-- Use hardware-accelerated properties only
-- Simplify custom effect calculations
-- Test on lower-end devices
-
-**Unexpected animation behavior**:
-
-- Check range configurations match intended behavior
-- Verify source element visibility throughout scroll
-- Ensure target elements exist and are selectable
-- Test range offset values
-
-**Poor visual results**:
-
-- Adjust easing functions for scroll context
-- Fine-tune range start/end percentages
-- Consider element positioning and layering
-- Test across different content heights
-
----
-
-These rules provide comprehensive coverage for ViewProgress trigger interactions in `@wix/interact`, supporting all range types (entry, cover, contain, exit) and effect types (named, keyframe, custom) as outlined in the development plan Stage 1.4.
+- **Unexpected behavior:** Check range names match intent; verify source visibility; ensure target elements exist.
+- **Janky custom effects:** Simplify calculations; avoid layout-triggering reads in the callback.

@@ -299,10 +299,43 @@ describe('interact (mini)', () => {
   beforeEach(() => {
     element = document.createElement('div');
 
-    // Mock Web Animations API
+    // Mock Web Animations API (enough for real @wix/motion when vi.doUnmock('@wix/motion') is used)
     (window as any).KeyframeEffect = class KeyframeEffect {
-      constructor(element: Element | null, keyframes: any[], options: any) {
-        return { element, keyframes, options, setKeyframes: vi.fn() };
+      constructor(element: Element | null, keyframes: any[], options: any = {}) {
+        const timing = {
+          delay: options?.delay ?? 0,
+          duration: typeof options?.duration === 'number' ? options.duration : 100,
+          iterations: options?.iterations ?? 1,
+          easing: options?.easing ?? 'linear',
+          fill: options?.fill ?? 'none',
+          direction: options?.direction ?? 'normal',
+        };
+        const effect = {
+          target: element,
+          element,
+          keyframes,
+          options,
+          setKeyframes: vi.fn(function (this: any, k: any) {
+            this.keyframes = k;
+          }),
+          updateTiming: vi.fn(function (this: any, updates: any) {
+            Object.assign(timing, updates);
+          }),
+          getTiming: vi.fn(() => ({ ...timing })),
+          getComputedTiming: vi.fn(() => {
+            const delay = Number(timing.delay) || 0;
+            const duration = Number(timing.duration) || 0;
+            const iterations = Number(timing.iterations) || 1;
+            const activeDuration = duration * iterations;
+            return {
+              progress: 0,
+              currentIteration: 0,
+              activeDuration,
+              endTime: delay + activeDuration,
+            };
+          }),
+        };
+        return effect;
       }
     };
 
@@ -316,7 +349,18 @@ describe('interact (mini)', () => {
     // Mock Animation
     (window as any).Animation = class Animation {
       constructor(effect: any, timeline: any) {
-        return { effect, timeline, play: vi.fn() };
+        return {
+          effect,
+          timeline,
+          play: vi.fn(),
+          pause: vi.fn(),
+          reverse: vi.fn(),
+          cancel: vi.fn(),
+          playState: 'idle',
+          currentTime: null as number | null,
+          ready: Promise.resolve(),
+          finished: Promise.resolve(),
+        };
       }
     };
 
@@ -1076,7 +1120,7 @@ describe('interact (mini)', () => {
 
           add(element, 'logo-scroll');
 
-          expect((global as any).ViewTimeline).toBeUndefined();
+          expect((globalThis as any).ViewTimeline).toBeUndefined();
 
           expect(getScrubScene).toHaveBeenCalledTimes(1);
           expect(getScrubScene).toHaveBeenCalledWith(
@@ -1276,13 +1320,20 @@ describe('interact (mini)', () => {
       element = document.createElement('div');
       element.dataset.interactKey = key;
 
-      const removeEventListenerSpy = vi.spyOn(element, 'removeEventListener');
+      const addEventListenerSpy = vi.spyOn(element, 'addEventListener');
 
       add(element, key);
+
+      const signals = addEventListenerSpy.mock.calls
+        .map((call) => (call[2] as AddEventListenerOptions)?.signal)
+        .filter(Boolean) as AbortSignal[];
+
+      expect(signals.length).toBe(2);
+      expect(signals.filter((signal) => signal.aborted)).toHaveLength(0);
+
       remove(key);
 
-      expect(removeEventListenerSpy).toHaveBeenCalledTimes(2);
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+      expect(signals.filter((signal) => signal.aborted)).toHaveLength(2);
     });
 
     it('should do nothing if key does not exist', () => {
@@ -2292,15 +2343,18 @@ describe('interact (mini)', () => {
         Interact.create(config);
 
         const triggerButton = sourceElement.querySelector('.trigger-button') as HTMLElement;
-        const removeEventListenerSpy = vi.spyOn(triggerButton, 'removeEventListener');
+        const addEventListenerSpy = vi.spyOn(triggerButton, 'addEventListener');
 
         add(sourceElement, 'cleanup-source');
         add(targetElement, 'cleanup-target');
 
         remove('cleanup-source');
 
-        // Should remove event listeners from the selected element
-        expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+        expect(
+          addEventListenerSpy.mock.calls
+            .map((call) => (call[2] as AddEventListenerOptions)?.signal)
+            .filter((signal): signal is AbortSignal => !!signal?.aborted),
+        ).toHaveLength(1);
       });
     });
   });
@@ -2762,7 +2816,6 @@ describe('interact (mini)', () => {
       });
 
       const addEventListenerSpy = vi.spyOn(testElement, 'addEventListener');
-      const removeEventListenerSpy = vi.spyOn(testElement, 'removeEventListener');
 
       add(testElement, 'responsive-element');
 
@@ -2778,9 +2831,12 @@ describe('interact (mini)', () => {
         expect.any(Object),
       );
 
-      // Clear spies for next assertions
+      const clickSignals = addEventListenerSpy.mock.calls
+        .map((call) => (call[2] as AddEventListenerOptions)?.signal)
+        .filter(Boolean) as AbortSignal[];
+
+      // Clear spy for next assertions
       addEventListenerSpy.mockClear();
-      removeEventListenerSpy.mockClear();
 
       // Now simulate media query change to mobile
       const desktopMql = mockMQLs.get('(min-width: 1024px)');
@@ -2798,8 +2854,8 @@ describe('interact (mini)', () => {
       const mockEvent = { matches: false, media: '(min-width: 1024px)' } as MediaQueryListEvent;
       listenerEntry!.handler(mockEvent);
 
-      // The old click handler should be removed (this will fail due to isConnected check)
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+      // The old click signals should be aborted
+      expect(clickSignals.filter((signal) => signal.aborted)).toHaveLength(1);
 
       // The new hover handler should be added
       expect(addEventListenerSpy).toHaveBeenCalledWith(

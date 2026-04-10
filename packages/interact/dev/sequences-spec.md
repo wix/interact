@@ -48,11 +48,9 @@ type SequenceOptions = {
 /**
  * The SequenceConfig type
  */
-type SequenceConfig = SequenceOptions & ({
-  effect: Effect;
-} | {
+type SequenceConfig = SequenceOptions & {
   effects: Effect[];
-});
+};
 ```
 
 ## The `Sequence.delay`
@@ -118,12 +116,6 @@ const sinOut = (t) => Math.sin((t * Math.PI) / 2);
 - A `Sequence` instance manages its own playback, similar to `AnimationGroup`, only difference is its `animations` property holds `AnimationGroup` instances. Therefor, it should extend `AnimationGroup` and have a similar API.
 - Note that `Sequence` does not have a `target`, so all of its API endpoints that involve an element target should be written accordingly, or not exist if not relevant.
 - In the `@eix/interact` package `Sequence`s will be created from an `InteractConfig` for every declaration inside `Interaction.sequences`.
-
-## Add `Sequence.effect` property
-
-Another option for creating/declaring a `Sequence` from a single Effect on multiple elements is to use a new `effect` property as follows:
-
-If `effect` is specified, a `Sequence` is created from the list of generated effects of the specified `Effect` on each of the matching target elements.
 
 # Appendix
 

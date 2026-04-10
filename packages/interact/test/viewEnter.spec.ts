@@ -5,6 +5,7 @@ vi.mock('@wix/motion', () => ({
     play: vi.fn(),
     cancel: vi.fn(),
     onFinish: vi.fn(),
+    onAbort: vi.fn(),
     pause: vi.fn(),
     reverse: vi.fn(),
     progress: vi.fn(),
@@ -29,7 +30,6 @@ describe('viewEnter handler', () => {
   let element: HTMLElement;
   let target: HTMLElement;
   let observerCallbacks: Array<(entries: Partial<IntersectionObserverEntry>[]) => void>;
-  let observerMock: any;
   let observeSpy: MockInstance;
   let unobserveSpy: MockInstance;
   let IntersectionObserverMock: MockInstance;
@@ -56,11 +56,6 @@ describe('viewEnter handler', () => {
     observeSpy = vi.fn();
     unobserveSpy = vi.fn();
     observerCallbacks = [];
-    observerMock = {
-      observe: observeSpy,
-      unobserve: unobserveSpy,
-      disconnect: vi.fn(),
-    };
 
     IntersectionObserverMock = vi.fn(function (this: any, cb: any, _options: any) {
       observerCallbacks.push(cb);
@@ -575,6 +570,129 @@ describe('viewEnter handler', () => {
     });
   });
 
+  describe('Observer configuration', () => {
+    describe('inset to rootMargin mapping', () => {
+      it('should negate a single inset value for both top and bottom', () => {
+        viewEnterHandler.add(
+          element,
+          target,
+          { duration: 1000, namedEffect: { type: 'FadeIn' } },
+          { inset: '20%' },
+          {},
+        );
+
+        const config = IntersectionObserverMock.mock.calls[0][1];
+        expect(config.rootMargin).toBe('-20% 0px -20%');
+      });
+
+      it('should negate two inset values independently for top and bottom', () => {
+        viewEnterHandler.add(
+          element,
+          target,
+          { duration: 1000, namedEffect: { type: 'FadeIn' } },
+          { inset: '10% 30%' },
+          {},
+        );
+
+        const config = IntersectionObserverMock.mock.calls[0][1];
+        expect(config.rootMargin).toBe('-10% 0px -30%');
+      });
+
+      it('should handle pixel inset values', () => {
+        viewEnterHandler.add(
+          element,
+          target,
+          { duration: 1000, namedEffect: { type: 'FadeIn' } },
+          { inset: '50px' },
+          {},
+        );
+
+        const config = IntersectionObserverMock.mock.calls[0][1];
+        expect(config.rootMargin).toBe('-50px 0px -50px');
+      });
+
+      it('should handle a mix of pixel and percent inset values', () => {
+        viewEnterHandler.add(
+          element,
+          target,
+          { duration: 1000, namedEffect: { type: 'FadeIn' } },
+          { inset: '50px 10%' },
+          {},
+        );
+
+        const config = IntersectionObserverMock.mock.calls[0][1];
+        expect(config.rootMargin).toBe('-50px 0px -10%');
+      });
+
+      it('should handle a negative inset value by removing the minus sign', () => {
+        viewEnterHandler.add(
+          element,
+          target,
+          { duration: 1000, namedEffect: { type: 'FadeIn' } },
+          { inset: '-20%' },
+          {},
+        );
+
+        const config = IntersectionObserverMock.mock.calls[0][1];
+        expect(config.rootMargin).toBe('20% 0px 20%');
+      });
+
+      it('should use "0px" rootMargin when no inset is provided', () => {
+        viewEnterHandler.add(
+          element,
+          target,
+          { duration: 1000, namedEffect: { type: 'FadeIn' } },
+          {},
+          {},
+        );
+
+        const config = IntersectionObserverMock.mock.calls[0][1];
+        expect(config.rootMargin).toBe('0px');
+      });
+    });
+
+    describe('default threshold', () => {
+      it('should use 0.2 as the default threshold when not explicitly set', () => {
+        viewEnterHandler.add(
+          element,
+          target,
+          { duration: 1000, namedEffect: { type: 'FadeIn' } },
+          {},
+          {},
+        );
+
+        const config = IntersectionObserverMock.mock.calls[0][1];
+        expect(config.threshold).toBe(0.2);
+      });
+
+      it('should use the explicitly provided threshold when set', () => {
+        viewEnterHandler.add(
+          element,
+          target,
+          { duration: 1000, namedEffect: { type: 'FadeIn' } },
+          { threshold: 0.5 },
+          {},
+        );
+
+        const config = IntersectionObserverMock.mock.calls[0][1];
+        expect(config.threshold).toBe(0.5);
+      });
+
+      it('should respect threshold of 0 when explicitly set', () => {
+        viewEnterHandler.add(
+          element,
+          target,
+          { duration: 1000, namedEffect: { type: 'FadeIn' } },
+          { threshold: 0 },
+          {},
+        );
+
+        const config = IntersectionObserverMock.mock.calls[0][1];
+        expect(config.threshold).toBe(0);
+      });
+    });
+  });
+
   describe('Null animation handling', () => {
     it('should not create IntersectionObserver when animation is null', async () => {
       const { getAnimation } = await import('@wix/motion');
@@ -590,6 +708,82 @@ describe('viewEnter handler', () => {
 
       // IntersectionObserver should not be created when animation is null
       expect(observeSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('CSS animation abort handling', () => {
+    it('should set interactEnter to done when CSS animation is aborted', async () => {
+      let rejectFinished: (error: DOMException) => void;
+      const finishedPromise = new Promise((_resolve, reject) => {
+        rejectFinished = reject;
+      });
+
+      const cssAnimation = {
+        play: vi.fn(),
+        ready: Promise.resolve(),
+        finished: finishedPromise,
+        cancel: vi.fn(() => {
+          rejectFinished(new DOMException('The animation was aborted.', 'AbortError'));
+        }),
+      };
+
+      const mockAnimationGroup = {
+        animations: [cssAnimation],
+        isCSS: true,
+        ready: Promise.resolve(),
+        async play(callback?: () => void) {
+          for (const a of this.animations) {
+            a.play();
+          }
+          await Promise.all(this.animations.map((a: any) => a.ready));
+          callback?.();
+        },
+        async onFinish(callback: () => void) {
+          try {
+            await Promise.all(this.animations.map((a: any) => a.finished));
+            callback();
+          } catch (_error) {
+            /* empty */
+          }
+        },
+        async onAbort(callback: () => void) {
+          try {
+            await Promise.all(this.animations.map((a: any) => a.finished));
+          } catch (error: any) {
+            if (error.name === 'AbortError') {
+              callback();
+            }
+          }
+        },
+        cancel: vi.fn(),
+        pause: vi.fn(),
+        reverse: vi.fn(),
+        progress: vi.fn(),
+        persist: vi.fn(),
+        playState: 'idle',
+      };
+
+      viewEnterHandler.add(
+        element,
+        target,
+        { duration: 1000, namedEffect: { type: 'FadeIn' } },
+        { type: 'once' },
+        { animation: mockAnimationGroup as any },
+      );
+
+      const entry = createEntry({ isIntersecting: true });
+      getMainObserverCallback()([entry]);
+
+      // Wait for play's async callback to be invoked
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Cancel the CSSAnimation directly, simulating the browser aborting the animation
+      cssAnimation.cancel();
+
+      // Wait for onAbort to process the AbortError and set interactEnter
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(target.dataset.interactEnter).toBe('done');
     });
   });
 });

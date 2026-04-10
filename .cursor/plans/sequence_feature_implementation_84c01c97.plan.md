@@ -4,64 +4,64 @@ overview: implement a new Sequence class that allows controling playback of muti
 todos:
   - id: motion-sequence-class
     content: Create Sequence class in packages/motion/src/Sequence.ts
-    status: pending
+    status: completed
   - id: motion-sequence-types
     content: Add SequenceOptions type to packages/motion/src/types.ts
-    status: pending
+    status: completed
     dependencies:
       - motion-sequence-class
   - id: motion-sequence-export
     content: Export Sequence and SequenceOptions from packages/motion/src/index.ts
-    status: pending
+    status: completed
     dependencies:
       - motion-sequence-class
       - motion-sequence-types
   - id: motion-get-sequence
     content: Implement getSequence() function in packages/motion/src/motion.ts and export it
-    status: pending
+    status: completed
     dependencies:
       - motion-sequence-class
       - motion-sequence-types
   - id: interact-types
     content: Update types in packages/interact/src/types.ts (SequenceOptionsConfig, SequenceConfig, SequenceConfigRef, InteractConfig, Interaction)
-    status: pending
+    status: completed
     dependencies:
       - motion-sequence-types
   - id: interact-cache-types
     content: Update InteractCache type to include sequences field
-    status: pending
+    status: completed
     dependencies:
       - interact-types
   - id: interact-parse-config
     content: Update parseConfig in packages/interact/src/core/Interact.ts to handle sequences
-    status: pending
+    status: completed
     dependencies:
       - interact-types
       - interact-cache-types
   - id: interact-add
     content: Update effect processing in packages/interact/src/core/add.ts to create Sequence instances
-    status: pending
+    status: completed
     dependencies:
       - motion-get-sequence
       - interact-parse-config
   - id: interact-sequence-cache
     content: Implement Sequence caching on Interact class (sequenceCache static property and getEffect() endpoint)
-    status: pending
+    status: completed
     dependencies:
       - interact-add
   - id: interact-handlers
     content: Update trigger handlers (viewEnter.ts, click.ts, etc.) to support Sequence instances
-    status: pending
+    status: completed
     dependencies:
       - interact-add
   - id: tests-unit
     content: Write unit tests for Sequence class offset calculations and easing integration
-    status: pending
+    status: completed
     dependencies:
       - motion-sequence-class
   - id: tests-integration
     content: Write integration tests for sequence parsing in Interact
-    status: pending
+    status: completed
     dependencies:
       - interact-parse-config
   - id: tests-e2e
@@ -165,10 +165,8 @@ type getSequence = (
 ) => Sequence;
 ```
 
-The `getSequence()` funciton has 2 flows:
-
-- If passed `animations: AnimationGroupArgs` it creates a `Sequence` from a single effect definition applied to multiple targets.
-- If passed `animations: AnimationGroupArgs[]` it creates a `Sequence` from a each effect definition in the array.
+The `getSequence()` funciton is passed `animations: AnimationGroupArgs[]` it creates a `Sequence` from a each effect definition in the array.
+If an `Effect` in the array resolves to multiple elements, each resulting instance becomes an effect in the array.
 
 ## Part 2: @wix/interact Package Changes
 
@@ -186,15 +184,9 @@ export type SequenceOptionsConfig = {
 };
 
 // New SequenceConfig type
-export type SequenceConfig = SequenceOptionsConfig &
-  (
-    | {
-        effect: Effect | EffectRef;
-      }
-    | {
-        effects: (Effect | EffectRef)[];
-      }
-  );
+export type SequenceConfig = SequenceOptionsConfig & {
+  effects: (Effect | EffectRef)[];
+};
 
 // New SequenceConfigRef type
 export type SequenceConfigRef = {
@@ -260,12 +252,10 @@ Modify `packages/interact/src/core/Interact.ts`:
 2. Process `interaction.sequences` array:
 
 - Resolve `sequenceId` references from `config.sequences`
-- Process each effect within the sequence:
-  - Either as list of multiple effects as `effects: Effect[]`
-  - Or a single `effect: Effect` declaration, generating a list of effects on multiple target elements
+- Process each effect within the sequence
 - Generate unique IDs for sequence effects
 
-3. Track sequence membership for effects (needed for delay calculation)
+1. Track sequence membership for effects (needed for delay calculation)
 
 ### 2.4 Update Effect Processing in `add.ts`
 

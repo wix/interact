@@ -4,15 +4,20 @@ import type {
   EffectRef,
   InteractionParamsTypes,
   TransitionEffect,
+  TimeEffect,
   Interaction,
   InteractionTrigger,
+  SequenceConfig,
+  SequenceConfigRef,
   CreateTransitionCSSParams,
   IInteractionController,
 } from '../types';
-import { createTransitionCSS, getMediaQuery, getSelectorCondition } from '../utils';
+import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
 import { getInterpolatedKey } from './utilities';
+import { effectToAnimationOptions } from '../handlers/utilities';
 import { Interact, getSelector } from './Interact';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
+import type { AnimationGroupArgs } from '@wix/motion';
 
 type InteractionsToApply = Array<
   [
@@ -25,6 +30,12 @@ type InteractionsToApply = Array<
     boolean,
   ]
 >;
+
+type ListElements = {
+  controllerKey: string;
+  listContainer: string;
+  elements: HTMLElement[];
+};
 
 function _getElementsFromData(
   data: Interaction | Effect,
@@ -147,7 +158,7 @@ function _addInteraction(
 
   const interactionsToApply: InteractionsToApply = [];
 
-  interaction.effects.forEach((effect) => {
+  (interaction.effects || []).forEach((effect) => {
     const effectId = (effect as EffectRef).effectId;
 
     const effectOptions = {
@@ -237,6 +248,307 @@ function _addInteraction(
   interactionsToApply.reverse().forEach((interaction) => {
     _applyInteraction(...interaction);
   });
+
+  _processSequences(sourceKey, sourceController, instance, interaction, elements);
+}
+
+function _isSequenceConfigRef(
+  config: SequenceConfig | SequenceConfigRef,
+): config is SequenceConfigRef {
+  return 'sequenceId' in config && !('effects' in config);
+}
+
+/**
+ * Shared logic for building animation group args from a sequence config.
+ * Handles sequence-level and effect-level media conditions, target resolution, and element lookup.
+ * Returns null when the sequence should be skipped (conditions not met, missing targets, etc.).
+ *
+ * When `listElements` is provided (from addListItems), effects matching the specified controller
+ * and listContainer will resolve targets from the provided elements instead of querying the DOM.
+ * Returns null if listElements was provided but no effects matched it (avoids duplicate sequences).
+ */
+function _buildAnimationGroupArgsFromSequence(
+  sequenceConfig: SequenceConfig,
+  cacheKey: string,
+  sourceKey: string,
+  sourceController: IInteractionController,
+  instance: Interact,
+  options: { updateKey: string; onUpdate: () => void },
+  listElements?: ListElements,
+): AnimationGroupArgs[] | null {
+  const seqMql = getMediaQuery(sequenceConfig.conditions || [], instance.dataCache.conditions);
+
+  if (seqMql) {
+    instance.setupMediaQueryListener(cacheKey, seqMql, options.updateKey, options.onUpdate);
+  }
+
+  if (seqMql && !seqMql.matches) return null;
+
+  const seqEffects: (Effect | EffectRef)[] = sequenceConfig.effects || [];
+  const animationGroupArgs: AnimationGroupArgs[] = [];
+  let usedListElements = false;
+
+  for (const effect of seqEffects) {
+    const effectId = (effect as EffectRef).effectId;
+    const resolvedEffect = effectId ? instance.dataCache.effects[effectId] || {} : {};
+    const effectOptions = {
+      ...resolvedEffect,
+      ...effect,
+    };
+
+    const effectMql = getMediaQuery(effectOptions.conditions || [], instance.dataCache.conditions);
+
+    if (effectMql) {
+      const effectCacheKey = `${cacheKey}::${effectId || 'eff'}`;
+      instance.setupMediaQueryListener(
+        effectCacheKey,
+        effectMql,
+        options.updateKey,
+        options.onUpdate,
+      );
+    }
+
+    if (effectMql && !effectMql.matches) continue;
+
+    const targetKey_ = effectOptions.key;
+    const target = targetKey_ && getInterpolatedKey(targetKey_, sourceKey);
+
+    let targetController;
+    if (target) {
+      targetController = Interact.getController(target);
+      if (!targetController) return null;
+    } else {
+      targetController = sourceController;
+    }
+
+    const resolvedTargetKey = target || sourceKey;
+    let targetElement: HTMLElement | HTMLElement[] | null;
+
+    if (
+      listElements &&
+      resolvedTargetKey === listElements.controllerKey &&
+      effectOptions.listContainer === listElements.listContainer
+    ) {
+      targetElement = _queryItemElement(effectOptions, listElements.elements);
+      if ((targetElement as HTMLElement[]).length > 0) {
+        usedListElements = true;
+      }
+    } else {
+      targetElement = _getElementsFromData(
+        effectOptions,
+        targetController.element,
+        targetController.useFirstChild,
+      );
+    }
+
+    if (!targetElement || (Array.isArray(targetElement) && targetElement.length === 0)) return null;
+
+    const animOptions = effectToAnimationOptions(effectOptions as TimeEffect);
+    animationGroupArgs.push({ target: targetElement, options: animOptions });
+  }
+
+  if (listElements && !usedListElements) return null;
+
+  return animationGroupArgs.length > 0 ? animationGroupArgs : null;
+}
+
+function _resolveListItemIndices(
+  controller: IInteractionController,
+  listContainer: string,
+  elements: HTMLElement[],
+): number[] {
+  const useFirstChild = controller.useFirstChild;
+  const root = useFirstChild
+    ? (controller.element.firstElementChild as HTMLElement)
+    : controller.element;
+  const container = root?.querySelector(listContainer);
+
+  if (!container) return elements.map((_, i) => i);
+
+  const allChildren = Array.from(container.children);
+
+  return elements.map((el) => {
+    const idx = allChildren.indexOf(el);
+    return idx >= 0 ? idx : allChildren.length;
+  });
+}
+
+function _processSequences(
+  sourceKey: string,
+  sourceController: IInteractionController,
+  instance: Interact,
+  interaction: Interaction,
+  elements?: HTMLElement[],
+) {
+  interaction.sequences?.forEach((seqOrRef) => {
+    let sequenceConfig: SequenceConfig;
+
+    if (_isSequenceConfigRef(seqOrRef)) {
+      const resolved = instance.dataCache.sequences[seqOrRef.sequenceId];
+
+      if (!resolved) {
+        console.warn(`Interact: Sequence "${seqOrRef.sequenceId}" not found in cache`);
+        return;
+      }
+
+      sequenceConfig = { ...resolved, ...seqOrRef };
+    } else {
+      sequenceConfig = seqOrRef as SequenceConfig;
+    }
+
+    const sequenceId = sequenceConfig.sequenceId || generateId();
+    const cacheKey = getInterpolatedKey(`${sourceKey}::seq::${sequenceId}`, sourceKey);
+
+    if (instance.addedInteractions[cacheKey] && !elements) return;
+
+    const listElements: ListElements | undefined =
+      elements && interaction.listContainer
+        ? { controllerKey: sourceKey, listContainer: interaction.listContainer, elements }
+        : undefined;
+
+    const animationGroupArgs = _buildAnimationGroupArgsFromSequence(
+      sequenceConfig,
+      cacheKey,
+      sourceKey,
+      sourceController,
+      instance,
+      { updateKey: sourceKey, onUpdate: () => sourceController.update() },
+      listElements,
+    );
+
+    if (!animationGroupArgs) return;
+
+    if (elements && instance.addedInteractions[cacheKey]) {
+      const indices = _resolveListItemIndices(
+        sourceController,
+        interaction.listContainer!,
+        elements,
+      );
+
+      Interact.addToSequence(cacheKey, animationGroupArgs, indices, {
+        reducedMotion: Interact.forceReducedMotion,
+      });
+
+      return;
+    }
+
+    const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
+      reducedMotion: Interact.forceReducedMotion,
+    });
+
+    instance.addedInteractions[cacheKey] = true;
+
+    const selectorCondition = getSelectorCondition(
+      interaction.conditions || [],
+      instance.dataCache.conditions,
+    );
+
+    (TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as any)?.add(
+      sourceController.element,
+      sourceController.element,
+      {} as Effect,
+      interaction.params || {},
+      {
+        reducedMotion: Interact.forceReducedMotion,
+        selectorCondition,
+        animation: sequence,
+        allowA11yTriggers: Interact.allowA11yTriggers,
+      },
+    );
+  });
+}
+
+function _processSequencesForTarget(
+  targetKey: string,
+  targetController: IInteractionController,
+  instance: Interact,
+  listContainer?: string,
+  elements?: HTMLElement[],
+) {
+  const sequences = instance.get(targetKey)?.sequences || {};
+  const seqInteractionIds = Object.keys(sequences);
+
+  seqInteractionIds.forEach((seqInteractionId_) => {
+    const seqVariations = sequences[seqInteractionId_];
+
+    seqVariations.some(({ sequence: sequenceConfig, ...interaction }) => {
+      const interactionMql = getMediaQuery(
+        interaction.conditions || [],
+        instance.dataCache.conditions,
+      );
+
+      if (interactionMql && !interactionMql.matches) {
+        return false;
+      }
+
+      const sourceKey = interaction.key && getInterpolatedKey(interaction.key, targetKey);
+      const sourceController = Interact.getController(sourceKey);
+
+      if (!sourceController) {
+        return true;
+      }
+
+      const sequenceId = sequenceConfig.sequenceId || generateId();
+      const cacheKey = getInterpolatedKey(`${sourceKey}::seq::${sequenceId}`, sourceKey!);
+
+      if (instance.addedInteractions[cacheKey] && !elements) {
+        return true;
+      }
+
+      const listElements: ListElements | undefined =
+        elements && listContainer
+          ? { controllerKey: targetKey, listContainer, elements }
+          : undefined;
+
+      const animationGroupArgs = _buildAnimationGroupArgsFromSequence(
+        sequenceConfig,
+        cacheKey,
+        sourceKey!,
+        sourceController,
+        instance,
+        { updateKey: targetKey, onUpdate: () => targetController.update() },
+        listElements,
+      );
+
+      if (!animationGroupArgs) return true;
+
+      if (elements && instance.addedInteractions[cacheKey]) {
+        const indices = _resolveListItemIndices(targetController, listContainer!, elements);
+
+        Interact.addToSequence(cacheKey, animationGroupArgs, indices, {
+          reducedMotion: Interact.forceReducedMotion,
+        });
+
+        return true;
+      }
+
+      const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
+        reducedMotion: Interact.forceReducedMotion,
+      });
+
+      instance.addedInteractions[cacheKey] = true;
+
+      const selectorCondition = getSelectorCondition(
+        interaction.conditions || [],
+        instance.dataCache.conditions,
+      );
+
+      (TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as any)?.add(
+        sourceController.element,
+        sourceController.element,
+        {} as Effect,
+        interaction.params || {},
+        {
+          reducedMotion: Interact.forceReducedMotion,
+          selectorCondition,
+          animation: sequence,
+          allowA11yTriggers: Interact.allowA11yTriggers,
+        },
+      );
+
+      return true;
+    });
+  });
 }
 
 function addEffectsForTarget(
@@ -246,7 +558,8 @@ function addEffectsForTarget(
   listContainer?: string,
   elements?: HTMLElement[],
 ) {
-  const effects = instance.get(targetKey)?.effects || {};
+  const targetData = instance.get(targetKey);
+  const effects = targetData?.effects || {};
   const interactionIds = Object.keys(effects);
   const interactionsToApply: InteractionsToApply = [];
 
@@ -353,7 +666,10 @@ function addEffectsForTarget(
     _applyInteraction(...interaction);
   });
 
-  return interactionIds.length > 0;
+  _processSequencesForTarget(targetKey, targetController, instance, listContainer, elements);
+
+  const hasSequences = Object.keys(targetData?.sequences || {}).length > 0;
+  return interactionIds.length > 0 || hasSequences;
 }
 
 /**

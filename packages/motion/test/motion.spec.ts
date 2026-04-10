@@ -426,14 +426,14 @@ describe('motion.ts', () => {
         });
 
         // Mock global constructors
-        (global as any).ViewTimeline = vi.fn(function (options = {}) {
+        (globalThis as any).ViewTimeline = vi.fn(function (options = {}) {
           Object.assign(mockViewTimeline, options);
           return mockViewTimeline;
         });
-        (global as any).KeyframeEffect = vi.fn(function () {
+        (globalThis as any).KeyframeEffect = vi.fn(function () {
           return mockKeyframeEffect;
         });
-        (global as any).Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
+        (globalThis as any).Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
           return {
             ready: Promise.resolve(),
             play: vi.fn(),
@@ -554,7 +554,7 @@ describe('motion.ts', () => {
           trigger: 'view-progress',
         });
 
-        expect((global as any).ViewTimeline).toHaveBeenCalledWith({
+        expect((globalThis as any).ViewTimeline).toHaveBeenCalledWith({
           subject: mockElement,
         });
         expect(AnimationGroup).toHaveBeenCalledWith(
@@ -569,7 +569,7 @@ describe('motion.ts', () => {
 
       test('should handle view-progress trigger without ViewTimeline support', async () => {
         // Remove ViewTimeline support
-        delete (global as any).ViewTimeline;
+        delete (globalThis as any).ViewTimeline;
 
         const animationOptions: AnimationOptions = {
           namedEffect: {
@@ -596,7 +596,7 @@ describe('motion.ts', () => {
         expect(mockAnimationGroup.animations[0].timeline).toBeUndefined();
 
         // Restore for other tests
-        (global as any).ViewTimeline = vi.fn(function () {
+        (globalThis as any).ViewTimeline = vi.fn(function () {
           return mockViewTimeline;
         });
       });
@@ -1350,7 +1350,7 @@ describe('motion.ts', () => {
         vi.clearAllMocks();
 
         // Mock global constructors
-        global.KeyframeEffect = vi.fn(function () {
+        (globalThis as any).KeyframeEffect = vi.fn(function () {
           return {
             target: mockElement,
             setKeyframes: vi.fn(),
@@ -1369,7 +1369,7 @@ describe('motion.ts', () => {
             }),
           };
         }) as any;
-        global.Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
+        (globalThis as any).Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
           return {
             ready: Promise.resolve(),
             play: vi.fn(),
@@ -1436,7 +1436,7 @@ describe('motion.ts', () => {
         };
 
         // Mock getElement
-        (global as any).getElement = vi.fn((id) => {
+        (globalThis as any).getElement = vi.fn((id) => {
           if (id === 'test-element') {
             return mockElement;
           }
@@ -1447,7 +1447,7 @@ describe('motion.ts', () => {
         });
 
         // Mock window.ViewTimeline
-        delete (window as any).ViewTimeline;
+        delete (globalThis as any).ViewTimeline;
 
         // Mock document.getElementById
         Object.defineProperty(document, 'getElementById', {
@@ -2168,11 +2168,11 @@ describe('motion.ts', () => {
         });
 
         // Mock global constructors
-        (global as any).ViewTimeline = vi.fn(function (options = {}) {
+        (globalThis as any).ViewTimeline = vi.fn(function (options = {}) {
           Object.assign(mockViewTimeline, options);
           return mockViewTimeline;
         });
-        (global as any).KeyframeEffect = vi.fn(function (
+        (globalThis as any).KeyframeEffect = vi.fn(function (
           _target: Element | null,
           _keyframes: Keyframe[] | PropertyIndexedKeyframes | null,
           options: KeyframeEffectOptions | number | undefined,
@@ -2180,7 +2180,7 @@ describe('motion.ts', () => {
           mockKeyframeEffectOptions = options;
           return mockKeyframeEffect;
         }) as any;
-        (global as any).Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
+        (globalThis as any).Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
           return {
             ready: Promise.resolve(),
             play: vi.fn(),

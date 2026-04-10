@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pointer-Driven Animations</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      body {
+        padding-top: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 48px;
+        padding-bottom: 48px;
+      }
+
+      h2 {
+        font-size: 14px;
+        color: #444;
+        margin-bottom: 12px;
+        text-align: center;
+      }
+
+      /* Bounded pointer area */
+      #pointer-area {
+        width: 400px;
+        height: 300px;
+        background: #f0f4f8;
+        border: 2px solid #cbd5e0;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .axis-target {
+        position: absolute;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 11px;
+        font-weight: bold;
+      }
+
+      #x-axis-target {
+        width: 80px;
+        height: 80px;
+        background: #e74c3c;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      #y-axis-target {
+        width: 80px;
+        height: 80px;
+        background: #3498db;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.7;
+      }
+
+      #composite-target {
+        width: 80px;
+        height: 80px;
+        background: #2ecc71;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.7;
+      }
+
+      #named-target {
+        width: 80px;
+        height: 80px;
+        background: #8e44ad;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.6;
+      }
+
+      #custom-target {
+        width: 80px;
+        height: 80px;
+        background: #f39c12;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.6;
+      }
+
+      .progress-readout {
+        font-family: monospace;
+        font-size: 12px;
+        color: #555;
+        text-align: center;
+      }
+
+      .section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="fixture-nav">
+      <strong>Pointer Fixture</strong>
+      <a href="./index.html">← Back</a>
+    </nav>
+
+    <div class="section">
+      <h2>Pointer Area (move mouse inside)</h2>
+      <div id="pointer-area" data-testid="pointer-area">
+        <div id="x-axis-target" class="axis-target" data-testid="x-axis-target">X</div>
+      </div>
+      <p class="progress-readout" data-testid="pointer-progress-display">x: 0.000 y: 0.000</p>
+    </div>
+
+    <div class="section">
+      <h2>Y-Axis Target</h2>
+      <div
+        id="y-axis-area"
+        data-testid="y-axis-area"
+        style="
+          width: 400px;
+          height: 200px;
+          background: #f0f4f8;
+          border: 2px solid #cbd5e0;
+          border-radius: 12px;
+          position: relative;
+          overflow: hidden;
+        "
+      >
+        <div id="y-axis-target" class="axis-target" data-testid="y-axis-target">Y</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Composite Transform (scaleX + scaleY)</h2>
+      <div
+        id="composite-area"
+        data-testid="composite-area"
+        style="
+          width: 400px;
+          height: 200px;
+          background: #f0f4f8;
+          border: 2px solid #cbd5e0;
+          border-radius: 12px;
+          position: relative;
+          overflow: hidden;
+        "
+      >
+        <div id="composite-target" class="axis-target" data-testid="composite-target">XY</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Named Effect via getScrubScene (x-axis)</h2>
+      <div
+        id="named-area"
+        data-testid="named-area"
+        style="
+          width: 400px;
+          height: 200px;
+          background: #f0f4f8;
+          border: 2px solid #cbd5e0;
+          border-radius: 12px;
+          position: relative;
+          overflow: hidden;
+        "
+      >
+        <div id="named-target" class="axis-target" data-testid="named-target">N</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Custom Effect via getScrubScene (y-axis)</h2>
+      <div
+        id="custom-area"
+        data-testid="custom-area"
+        style="
+          width: 400px;
+          height: 200px;
+          background: #f0f4f8;
+          border: 2px solid #cbd5e0;
+          border-radius: 12px;
+          position: relative;
+          overflow: hidden;
+        "
+      >
+        <div id="custom-target" class="axis-target" data-testid="custom-target">C</div>
+      </div>
+    </div>
+
+    <script type="module" src="./pointer.ts"></script>
+  </body>
+</html>

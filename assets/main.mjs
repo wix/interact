@@ -1,8 +1,6 @@
 // WIX INTERACT RUNTIME
-import { Interact } from 'https://esm.sh/@wix/interact@2.0.0/dist/es/web.js';
-// import { Interact } from '../packages/interact/dist/es/web.js';
-import * as presets from 'https://esm.sh/@wix/motion-presets@latest/dist/es/motion-presets.js';
-// import * as presets from './packages/motion-presets/dist/es/motion-presets.js';
+import { Interact } from './lib/interact/es/web.js';
+import * as presets from './lib/motion-presets/motion-presets.js';
 
 // =============================================================================
 // FUNCTIONS & METHODS
@@ -723,7 +721,6 @@ const config = {
     {
       key: 'hitbox',
       trigger: 'viewEnter',
-
       params: { type: 'alternate' },
       effects: [
         {
@@ -827,10 +824,12 @@ const config = {
 
     // Entrance Interactions (Swirling Plus)
     {
-      key: 'circle-top',
+      key: 'entrance-card',
       trigger: 'viewEnter',
+      params: { type: 'alternate', threshold: 0.8 },
       effects: [
         {
+          key: 'circle-top',
           fill: 'both',
           keyframeEffect: {
             name: 'slideFromLeftToTop',
@@ -842,13 +841,8 @@ const config = {
           duration: ENTRANCE_DURATION,
           easing: ENTRANCE_EASING,
         },
-      ],
-    },
-    {
-      key: 'circle-right',
-      trigger: 'viewEnter',
-      effects: [
         {
+          key: 'circle-right',
           fill: 'both',
           keyframeEffect: {
             name: 'slideFromTopToRight',
@@ -861,13 +855,8 @@ const config = {
           easing: ENTRANCE_EASING,
           delay: 100,
         },
-      ],
-    },
-    {
-      key: 'circle-bottom',
-      trigger: 'viewEnter',
-      effects: [
         {
+          key: 'circle-bottom',
           fill: 'both',
           keyframeEffect: {
             name: 'slideFromRightToBottom',
@@ -880,13 +869,8 @@ const config = {
           easing: ENTRANCE_EASING,
           delay: 200,
         },
-      ],
-    },
-    {
-      key: 'circle-left',
-      trigger: 'viewEnter',
-      effects: [
         {
+          key: 'circle-left',
           fill: 'both',
           keyframeEffect: {
             name: 'slideFromBottomToLeft',

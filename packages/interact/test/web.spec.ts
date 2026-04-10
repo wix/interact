@@ -350,7 +350,7 @@ describe('interact (web)', () => {
 
     // Mock PointerEvent if not available (jsdom doesn't have it)
     if (typeof PointerEvent === 'undefined') {
-      (global as any).PointerEvent = class PointerEvent extends MouseEvent {
+      (globalThis as any).PointerEvent = class PointerEvent extends MouseEvent {
         pointerType: string;
         constructor(type: string, eventInit?: PointerEventInit) {
           super(type, eventInit);
@@ -477,7 +477,7 @@ describe('interact (web)', () => {
 
   describe('init Interact instance', () => {
     it('should initialize with valid config and register custom element', () => {
-      Interact.create({} as InteractConfig, { useCutsomElement: true });
+      Interact.create({} as InteractConfig, { useCustomElement: true });
       expect(customElements.get('interact-element')).toBeDefined();
     });
   });
@@ -507,8 +507,8 @@ describe('interact (web)', () => {
 
   describe('destroy Interact', () => {
     it('should clear all instances', () => {
-      Interact.create(getMockConfig(), { useCutsomElement: true });
-      Interact.create(getMockConfig(), { useCutsomElement: true });
+      Interact.create(getMockConfig(), { useCustomElement: true });
+      Interact.create(getMockConfig(), { useCustomElement: true });
 
       expect(Interact.instances.length).toBe(2);
 
@@ -518,7 +518,7 @@ describe('interact (web)', () => {
     });
 
     it('should clear all elements from cache', () => {
-      Interact.create(getMockConfig(), { useCutsomElement: true });
+      Interact.create(getMockConfig(), { useCustomElement: true });
 
       element = document.createElement('interact-element') as IInteractElement;
       const div = document.createElement('div');
@@ -534,7 +534,7 @@ describe('interact (web)', () => {
     });
 
     it('should call disconnect on all cached elements', () => {
-      Interact.create(getMockConfig(), { useCutsomElement: true });
+      Interact.create(getMockConfig(), { useCustomElement: true });
 
       const key1 = 'logo-hover';
       const element1 = document.createElement('interact-element') as IInteractElement;
@@ -563,7 +563,7 @@ describe('interact (web)', () => {
     });
 
     it('should clean up interactions after destroy', () => {
-      Interact.create(getMockConfig(), { useCutsomElement: true });
+      Interact.create(getMockConfig(), { useCustomElement: true });
 
       element = document.createElement('interact-element') as IInteractElement;
       const div = document.createElement('div');
@@ -577,7 +577,7 @@ describe('interact (web)', () => {
       expect(Interact.getInstance('logo-click')).toBeUndefined();
 
       // Re-create instance and verify it works independently
-      Interact.create(getMockConfig(), { useCutsomElement: true });
+      Interact.create(getMockConfig(), { useCustomElement: true });
       const newElement = document.createElement('interact-element') as IInteractElement;
       const newDiv = document.createElement('div');
       newElement.append(newDiv);
@@ -619,7 +619,7 @@ describe('interact (web)', () => {
             },
           },
         },
-        { useCutsomElement: true },
+        { useCustomElement: true },
       );
 
       element = document.createElement('interact-element') as IInteractElement;
@@ -641,7 +641,7 @@ describe('interact (web)', () => {
   describe('add interaction', () => {
     beforeEach(() => {
       mockConfig = getMockConfig();
-      Interact.create(mockConfig, { useCutsomElement: true });
+      Interact.create(mockConfig, { useCustomElement: true });
     });
     afterEach(() => {
       Interact.destroy();
@@ -690,6 +690,104 @@ describe('interact (web)', () => {
           }),
           undefined,
           { reducedMotion: false },
+        );
+      });
+
+      it('should add mouseleave listener for hover trigger with transition effect and no explicit method', () => {
+        Interact.destroy();
+        Interact.create(
+          {
+            interactions: [
+              {
+                trigger: 'hover',
+                key: 'hover-transition-default',
+                effects: [{ key: 'hover-transition-default', effectId: 'hover-transition-fx' }],
+              },
+            ],
+            effects: {
+              'hover-transition-fx': {
+                transition: {
+                  duration: 300,
+                  styleProperties: [{ name: 'opacity', value: '0' }],
+                },
+              },
+            },
+          },
+          { useCustomElement: true },
+        );
+
+        const el = document.createElement('interact-element') as IInteractElement;
+        const div = document.createElement('div');
+        el.append(div);
+        const addEventListenerSpy = vi.spyOn(div, 'addEventListener');
+
+        add(el, 'hover-transition-default');
+
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          'mouseenter',
+          expect.any(Function),
+          expect.objectContaining({ passive: true }),
+        );
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          'mouseleave',
+          expect.any(Function),
+          expect.objectContaining({ passive: true }),
+        );
+      });
+    });
+
+    describe('interest', () => {
+      it('should add leave listeners for interest trigger with transition effect and no explicit method', () => {
+        Interact.destroy();
+        Interact.create(
+          {
+            interactions: [
+              {
+                trigger: 'interest',
+                key: 'interest-transition-default',
+                effects: [
+                  { key: 'interest-transition-default', effectId: 'interest-transition-fx' },
+                ],
+              },
+            ],
+            effects: {
+              'interest-transition-fx': {
+                transition: {
+                  duration: 300,
+                  styleProperties: [{ name: 'opacity', value: '0' }],
+                },
+              },
+            },
+          },
+          { useCustomElement: true },
+        );
+
+        const el = document.createElement('interact-element') as IInteractElement;
+        const div = document.createElement('div');
+        el.append(div);
+        const addEventListenerSpy = vi.spyOn(div, 'addEventListener');
+
+        add(el, 'interest-transition-default');
+
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          'mouseenter',
+          expect.any(Function),
+          expect.objectContaining({ passive: true }),
+        );
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          'mouseleave',
+          expect.any(Function),
+          expect.objectContaining({ passive: true }),
+        );
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          'focusin',
+          expect.any(Function),
+          expect.any(Object),
+        );
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          'focusout',
+          expect.any(Function),
+          expect.any(Object),
         );
       });
     });
@@ -1067,7 +1165,7 @@ describe('interact (web)', () => {
 
           add(element, 'logo-scroll');
 
-          expect((global as any).ViewTimeline).toBeUndefined();
+          expect((globalThis as any).ViewTimeline).toBeUndefined();
 
           expect(getScrubScene).toHaveBeenCalledTimes(1);
           expect(getScrubScene).toHaveBeenCalledWith(
@@ -1263,9 +1361,205 @@ describe('interact (web)', () => {
     });
   });
 
+  describe('interpolated keys', () => {
+    afterEach(() => {
+      Interact.destroy();
+      vi.clearAllMocks();
+    });
+
+    describe('multiple template triggers to single target', () => {
+      it('should add click handlers for all repeater items targeting a single non-template element', async () => {
+        const { getWebAnimation: getWebAnimationFn } = await import('@wix/motion');
+        const getWebAnimation = getWebAnimationFn as unknown as MockInstance;
+
+        const config: InteractConfig = {
+          interactions: [
+            {
+              trigger: 'click',
+              key: 'repeater-item[]',
+              effects: [
+                {
+                  key: 'svg-target',
+                  effectId: 'spin-effect',
+                },
+              ],
+            },
+          ],
+          effects: {
+            'spin-effect': {
+              namedEffect: {
+                type: 'Spin',
+                direction: 'cw',
+                power: 'medium',
+              } as NamedEffect,
+              duration: 500,
+            },
+          },
+        };
+
+        Interact.create(config, { useCustomElement: true });
+
+        // Create target element (non-template, single)
+        const targetElement = document.createElement('interact-element') as IInteractElement;
+        const targetDiv = document.createElement('div');
+        targetElement.append(targetDiv);
+
+        // Create 3 source elements (repeater items with template keys)
+        const sourceDivs: HTMLDivElement[] = [];
+        const addEventListenerSpies: MockInstance[] = [];
+
+        for (let i = 0; i < 3; i++) {
+          const el = document.createElement('interact-element') as IInteractElement;
+          const div = document.createElement('div');
+          el.append(div);
+          sourceDivs.push(div);
+          addEventListenerSpies.push(vi.spyOn(div, 'addEventListener'));
+        }
+
+        // Add target first, then all source elements
+        add(targetElement, 'svg-target');
+        add(sourceDivs[0].parentElement as IInteractElement, 'repeater-item[0]');
+        add(sourceDivs[1].parentElement as IInteractElement, 'repeater-item[1]');
+        add(sourceDivs[2].parentElement as IInteractElement, 'repeater-item[2]');
+
+        // All 3 source elements should have click listeners
+        addEventListenerSpies.forEach((spy, index) => {
+          expect(spy, `source[${index}] should have a click listener`).toHaveBeenCalledWith(
+            'click',
+            expect.any(Function),
+            expect.objectContaining({ passive: true }),
+          );
+        });
+
+        // getWebAnimation should be called 3 times — once per source-target pair
+        expect(getWebAnimation).toHaveBeenCalledTimes(3);
+        getWebAnimation.mock.calls.forEach((call: any[]) => {
+          expect(call[0]).toBe(targetDiv);
+        });
+      });
+
+      it('should work when source elements are added before the target', async () => {
+        const { getWebAnimation: getWebAnimationFn } = await import('@wix/motion');
+        const getWebAnimation = getWebAnimationFn as unknown as MockInstance;
+
+        const config: InteractConfig = {
+          interactions: [
+            {
+              trigger: 'click',
+              key: 'item[]',
+              effects: [
+                {
+                  key: 'target-anim',
+                  effectId: 'bounce-effect',
+                },
+              ],
+            },
+          ],
+          effects: {
+            'bounce-effect': {
+              namedEffect: {
+                type: 'BounceIn',
+                direction: 'center',
+                power: 'hard',
+              } as NamedEffect,
+              duration: 500,
+            },
+          },
+        };
+
+        Interact.create(config, { useCustomElement: true });
+
+        const sourceDivs: HTMLDivElement[] = [];
+        for (let i = 0; i < 3; i++) {
+          const el = document.createElement('interact-element') as IInteractElement;
+          const div = document.createElement('div');
+          el.append(div);
+          sourceDivs.push(div);
+        }
+
+        const targetElement = document.createElement('interact-element') as IInteractElement;
+        const targetDiv = document.createElement('div');
+        targetElement.append(targetDiv);
+
+        // Add sources first (they will bail because target isn't in cache yet)
+        add(sourceDivs[0].parentElement as IInteractElement, 'item[0]');
+        add(sourceDivs[1].parentElement as IInteractElement, 'item[1]');
+        add(sourceDivs[2].parentElement as IInteractElement, 'item[2]');
+
+        expect(getWebAnimation).toHaveBeenCalledTimes(0);
+
+        // Now add the target — addEffectsForTarget should wire things up
+        // Note: the current architecture can't resolve template sources from the target side,
+        // so these interactions require the target to be present when sources are added.
+        // Adding all source elements after the target should work:
+        Interact.destroy();
+        Interact.create(config, { useCustomElement: true });
+
+        add(targetElement, 'target-anim');
+        add(sourceDivs[0].parentElement as IInteractElement, 'item[0]');
+        add(sourceDivs[1].parentElement as IInteractElement, 'item[1]');
+        add(sourceDivs[2].parentElement as IInteractElement, 'item[2]');
+
+        expect(getWebAnimation).toHaveBeenCalledTimes(3);
+      });
+
+      it('should not break one-to-one template interactions', async () => {
+        const { getWebAnimation: getWebAnimationFn } = await import('@wix/motion');
+        const getWebAnimation = getWebAnimationFn as unknown as MockInstance;
+
+        const config: InteractConfig = {
+          interactions: [
+            {
+              trigger: 'click',
+              key: 'card[]',
+              effects: [
+                {
+                  key: 'card[]',
+                  effectId: 'flip-effect',
+                },
+              ],
+            },
+          ],
+          effects: {
+            'flip-effect': {
+              namedEffect: {
+                type: 'Spin',
+                direction: 'cw',
+                power: 'medium',
+              } as NamedEffect,
+              duration: 300,
+            },
+          },
+        };
+
+        Interact.create(config, { useCustomElement: true });
+
+        const elements: IInteractElement[] = [];
+        const divs: HTMLDivElement[] = [];
+        for (let i = 0; i < 3; i++) {
+          const el = document.createElement('interact-element') as IInteractElement;
+          const div = document.createElement('div');
+          el.append(div);
+          elements.push(el);
+          divs.push(div);
+        }
+
+        add(elements[0], 'card[0]');
+        add(elements[1], 'card[1]');
+        add(elements[2], 'card[2]');
+
+        // Each self-targeting element should get its own animation
+        expect(getWebAnimation).toHaveBeenCalledTimes(3);
+        expect(getWebAnimation.mock.calls[0][0]).toBe(divs[0]);
+        expect(getWebAnimation.mock.calls[1][0]).toBe(divs[1]);
+        expect(getWebAnimation.mock.calls[2][0]).toBe(divs[2]);
+      });
+    });
+  });
+
   describe('remove interaction', () => {
     beforeEach(() => {
-      Interact.create(getMockConfig(), { useCutsomElement: true });
+      Interact.create(getMockConfig(), { useCustomElement: true });
     });
     afterEach(() => {
       Interact.destroy();
@@ -1278,13 +1572,20 @@ describe('interact (web)', () => {
       const div = document.createElement('div');
       element.append(div);
 
-      const removeEventListenerSpy = vi.spyOn(div, 'removeEventListener');
+      const addEventListenerSpy = vi.spyOn(div, 'addEventListener');
 
       add(element, key);
+
+      const signals = addEventListenerSpy.mock.calls
+        .map((call) => (call[2] as AddEventListenerOptions)?.signal)
+        .filter(Boolean) as AbortSignal[];
+
+      expect(signals.length).toBe(2);
+      expect(signals.filter((signal) => signal.aborted)).toHaveLength(0);
+
       remove(key);
 
-      expect(removeEventListenerSpy).toHaveBeenCalledTimes(2);
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+      expect(signals.filter((signal) => signal.aborted)).toHaveLength(2);
     });
 
     it('should do nothing if key does not exist', () => {
@@ -1320,7 +1621,7 @@ describe('interact (web)', () => {
         const { getWebAnimation } = await import('@wix/motion');
         const config = createCascadingTestConfig({}, ['min-width: 1024px']);
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         const sourceElement = document.createElement('interact-element') as IInteractElement;
         const sourceDiv = document.createElement('div');
@@ -1363,7 +1664,7 @@ describe('interact (web)', () => {
         const { getWebAnimation } = await import('@wix/motion');
         const config = createCascadingTestConfig({}, []); // No matching conditions
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         const sourceElement = document.createElement('interact-element') as IInteractElement;
         const sourceDiv = document.createElement('div');
@@ -1395,7 +1696,7 @@ describe('interact (web)', () => {
         const { getWebAnimation } = await import('@wix/motion');
         const config = createCascadingTestConfig({}, ['max-width: 767px']);
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         const sourceElement = document.createElement('interact-element') as IInteractElement;
         const sourceDiv = document.createElement('div');
@@ -1429,7 +1730,7 @@ describe('interact (web)', () => {
         const { getWebAnimation } = await import('@wix/motion');
         const config = createCascadingTestConfig({}, ['min-width: 1024px']);
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         const sourceElement = document.createElement('interact-element') as IInteractElement;
         const sourceDiv = document.createElement('div');
@@ -1461,7 +1762,7 @@ describe('interact (web)', () => {
         const { getWebAnimation } = await import('@wix/motion');
         const config = createCascadingTestConfig({}, ['min-width: 1024px']);
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         const sourceElement = document.createElement('interact-element') as IInteractElement;
         const sourceDiv = document.createElement('div');
@@ -1544,7 +1845,7 @@ describe('interact (web)', () => {
         };
 
         mockMatchMedia(['min-width: 1024px']); // Only desktop matches
-        Interact.create(complexConfig, { useCutsomElement: true });
+        Interact.create(complexConfig, { useCustomElement: true });
 
         const sourceElement = document.createElement('interact-element') as IInteractElement;
         const sourceDiv = document.createElement('div');
@@ -1633,7 +1934,7 @@ describe('interact (web)', () => {
 
         // Both conditions match
         mockMatchMedia(['min-width: 1024px', 'min-resolution: 2dppx']);
-        Interact.create(multiConditionConfig, { useCutsomElement: true });
+        Interact.create(multiConditionConfig, { useCustomElement: true });
 
         const sourceElement = document.createElement('interact-element') as IInteractElement;
         const sourceDiv = document.createElement('div');
@@ -1701,7 +2002,7 @@ describe('interact (web)', () => {
         };
 
         mockMatchMedia(['min-width: 1024px']);
-        Interact.create(configWithMissingCondition, { useCutsomElement: true });
+        Interact.create(configWithMissingCondition, { useCustomElement: true });
 
         const sourceElement = document.createElement('interact-element') as IInteractElement;
         const sourceDiv = document.createElement('div');
@@ -1759,7 +2060,7 @@ describe('interact (web)', () => {
         };
 
         mockMatchMedia([]);
-        Interact.create(configWithEmptyConditions, { useCutsomElement: true });
+        Interact.create(configWithEmptyConditions, { useCustomElement: true });
 
         const sourceElement = document.createElement('interact-element') as IInteractElement;
         const sourceDiv = document.createElement('div');
@@ -1845,7 +2146,7 @@ describe('interact (web)', () => {
           ],
         };
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         const triggerButton = sourceElement.querySelector('.trigger-button') as HTMLElement;
         const firstChild = sourceElement.querySelector('.first-child') as HTMLElement;
@@ -1889,7 +2190,7 @@ describe('interact (web)', () => {
           ],
         };
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         add(sourceElement, 'selector-source');
         add(targetElement, 'selector-target');
@@ -1930,7 +2231,7 @@ describe('interact (web)', () => {
           ],
         };
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         const firstChild = sourceElement.querySelector('.first-child') as HTMLElement;
         const firstChildSpy = vi.spyOn(firstChild, 'addEventListener');
@@ -2017,7 +2318,7 @@ describe('interact (web)', () => {
           ],
         };
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         // Set up spies before adding interactions
         const containerChildren = Array.from(
@@ -2074,7 +2375,7 @@ describe('interact (web)', () => {
           ],
         };
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         add(sourceElement, 'invalid-source');
         add(targetElement, 'invalid-target');
@@ -2110,7 +2411,7 @@ describe('interact (web)', () => {
           ],
         };
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         add(sourceElement, 'invalid-container-source');
         add(targetElement, 'invalid-container-target');
@@ -2157,7 +2458,7 @@ describe('interact (web)', () => {
           ],
         };
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         // Set up spy before adding interactions
         const triggerButton = sourceElement.querySelector('.trigger-button') as HTMLElement;
@@ -2206,7 +2507,7 @@ describe('interact (web)', () => {
           ],
         };
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         const addEventListenerSpy = vi.spyOn(
           sourceElement.querySelector('.other-element') as HTMLElement,
@@ -2261,7 +2562,7 @@ describe('interact (web)', () => {
           ],
         };
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         // Set up spy before adding interactions
         const spy = vi.spyOn(buttonWithData, 'addEventListener');
@@ -2303,7 +2604,7 @@ describe('interact (web)', () => {
           ],
         };
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         add(sourceElement, 'inherit-source');
         add(targetElement, 'inherit-target');
@@ -2348,18 +2649,21 @@ describe('interact (web)', () => {
           ],
         };
 
-        Interact.create(config, { useCutsomElement: true });
+        Interact.create(config, { useCustomElement: true });
 
         const triggerButton = sourceElement.querySelector('.trigger-button') as HTMLElement;
-        const removeEventListenerSpy = vi.spyOn(triggerButton, 'removeEventListener');
+        const addEventListenerSpy = vi.spyOn(triggerButton, 'addEventListener');
 
         add(sourceElement, 'cleanup-source');
         add(targetElement, 'cleanup-target');
 
         remove('cleanup-source');
 
-        // Should remove event listeners from the selected element
-        expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+        expect(
+          addEventListenerSpy.mock.calls
+            .map((call) => (call[2] as AddEventListenerOptions)?.signal)
+            .filter((signal): signal is AbortSignal => !!signal?.aborted),
+        ).toHaveLength(1);
       });
     });
   });
@@ -2404,7 +2708,7 @@ describe('interact (web)', () => {
         ],
       };
 
-      Interact.create(config, { useCutsomElement: true });
+      Interact.create(config, { useCustomElement: true });
 
       // Create an InteractElement (which has toggleEffect method)
       const interactElement = document.createElement('interact-element') as IInteractElement;
@@ -2473,7 +2777,7 @@ describe('interact (web)', () => {
 
     it('should set up a media query listener when interaction has conditions', () => {
       const config = createResponsiveConfig();
-      instance = Interact.create(config, { useCutsomElement: true });
+      instance = Interact.create(config, { useCustomElement: true });
 
       testElement = document.createElement('interact-element') as IInteractElement;
       testElement.append(document.createElement('div'));
@@ -2493,7 +2797,7 @@ describe('interact (web)', () => {
 
     it('should call reconcile (re-add) when media query changes', () => {
       const config = createResponsiveConfig();
-      instance = Interact.create(config, { useCutsomElement: true });
+      instance = Interact.create(config, { useCustomElement: true });
 
       testElement = document.createElement('interact-element') as IInteractElement;
       testElement.append(document.createElement('div'));
@@ -2516,7 +2820,7 @@ describe('interact (web)', () => {
 
     it('should properly remove event listeners when instance is destroyed', () => {
       const config = createResponsiveConfig();
-      instance = Interact.create(config, { useCutsomElement: true });
+      instance = Interact.create(config, { useCustomElement: true });
 
       testElement = document.createElement('interact-element') as IInteractElement;
       testElement.append(document.createElement('div'));
@@ -2540,7 +2844,7 @@ describe('interact (web)', () => {
 
     it('should not create duplicate listeners when add() is called twice', () => {
       const config = createResponsiveConfig();
-      instance = Interact.create(config, { useCutsomElement: true });
+      instance = Interact.create(config, { useCustomElement: true });
 
       testElement = document.createElement('interact-element') as IInteractElement;
       testElement.append(document.createElement('div'));
@@ -2559,7 +2863,7 @@ describe('interact (web)', () => {
 
     it('should remove listeners when element is deleted', () => {
       const config = createResponsiveConfig();
-      instance = Interact.create(config, { useCutsomElement: true });
+      instance = Interact.create(config, { useCustomElement: true });
 
       testElement = document.createElement('interact-element') as IInteractElement;
       testElement.append(document.createElement('div'));
@@ -2634,7 +2938,7 @@ describe('interact (web)', () => {
 
       // Initially desktop matches
       mockMatchMedia(['min-width: 1024px']);
-      instance = Interact.create(config, { useCutsomElement: true });
+      instance = Interact.create(config, { useCustomElement: true });
 
       testElement = document.createElement('interact-element') as IInteractElement;
       const div = document.createElement('div');
@@ -2647,7 +2951,6 @@ describe('interact (web)', () => {
       });
 
       const addEventListenerSpy = vi.spyOn(div, 'addEventListener');
-      const removeEventListenerSpy = vi.spyOn(div, 'removeEventListener');
 
       add(testElement, 'responsive-element');
 
@@ -2663,9 +2966,13 @@ describe('interact (web)', () => {
         expect.any(Object),
       );
 
-      // Clear spies for next assertions
+      // Capture signals from the initial (desktop/click) listeners
+      const clickSignals = addEventListenerSpy.mock.calls
+        .map((call) => (call[2] as AddEventListenerOptions)?.signal)
+        .filter(Boolean) as AbortSignal[];
+
+      // Clear spy for next assertions
       addEventListenerSpy.mockClear();
-      removeEventListenerSpy.mockClear();
 
       // Now simulate media query change to mobile
       const desktopMql = mockMQLs.get('(min-width: 1024px)');
@@ -2683,8 +2990,8 @@ describe('interact (web)', () => {
       const mockEvent = { matches: false, media: '(min-width: 1024px)' } as MediaQueryListEvent;
       listenerEntry!.handler(mockEvent);
 
-      // The old click handler should be removed (this will fail due to isConnected check)
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+      // The old click signals should be aborted
+      expect(clickSignals.filter((signal) => signal.aborted)).toHaveLength(1);
 
       // The new hover handler should be added
       expect(addEventListenerSpy).toHaveBeenCalledWith(
@@ -2722,7 +3029,7 @@ describe('interact (web)', () => {
 
     describe('activate trigger', () => {
       it('should add both click and keydown listeners', () => {
-        Interact.create(getA11yConfig('activate', 'activate-div'), { useCutsomElement: true });
+        Interact.create(getA11yConfig('activate', 'activate-div'), { useCustomElement: true });
         a11yElement = document.createElement('interact-element') as IInteractElement;
 
         const div = document.createElement('div');
@@ -2750,7 +3057,7 @@ describe('interact (web)', () => {
         mockPlay.mockClear();
 
         Interact.create(getA11yConfig('activate', 'activate-handler-test'), {
-          useCutsomElement: true,
+          useCustomElement: true,
         });
         a11yElement = document.createElement('interact-element') as IInteractElement;
 
@@ -2769,7 +3076,7 @@ describe('interact (web)', () => {
 
     describe('interest trigger', () => {
       it('should add focusin listener alongside mouseenter', () => {
-        Interact.create(getA11yConfig('interest', 'interest-test'), { useCutsomElement: true });
+        Interact.create(getA11yConfig('interest', 'interest-test'), { useCustomElement: true });
         a11yElement = document.createElement('interact-element') as IInteractElement;
 
         const div = document.createElement('div');
@@ -2794,7 +3101,7 @@ describe('interact (web)', () => {
 
     describe('click trigger with allowA11yTriggers flag', () => {
       it('should NOT add keydown listener when flag is false', () => {
-        Interact.create(getA11yConfig('click', 'click-no-flag'), { useCutsomElement: true });
+        Interact.create(getA11yConfig('click', 'click-no-flag'), { useCustomElement: true });
         Interact.setup({ allowA11yTriggers: false });
         a11yElement = document.createElement('interact-element') as IInteractElement;
 
@@ -2819,7 +3126,7 @@ describe('interact (web)', () => {
 
       it('should add keydown listener when flag is true', () => {
         Interact.setup({ allowA11yTriggers: true });
-        Interact.create(getA11yConfig('click', 'click-with-flag'), { useCutsomElement: true });
+        Interact.create(getA11yConfig('click', 'click-with-flag'), { useCustomElement: true });
         a11yElement = document.createElement('interact-element') as IInteractElement;
 
         const div = document.createElement('div');
@@ -2845,7 +3152,7 @@ describe('interact (web)', () => {
     describe('hover trigger with allowA11yTriggers flag', () => {
       it('should NOT add focusin listener when flag is false', () => {
         Interact.setup({ allowA11yTriggers: false });
-        Interact.create(getA11yConfig('hover', 'hover-no-flag'), { useCutsomElement: true });
+        Interact.create(getA11yConfig('hover', 'hover-no-flag'), { useCustomElement: true });
         a11yElement = document.createElement('interact-element') as IInteractElement;
 
         const div = document.createElement('div');
@@ -2869,7 +3176,7 @@ describe('interact (web)', () => {
 
       it('should add focusin listener when flag is true', () => {
         Interact.setup({ allowA11yTriggers: true });
-        Interact.create(getA11yConfig('hover', 'hover-with-flag'), { useCutsomElement: true });
+        Interact.create(getA11yConfig('hover', 'hover-with-flag'), { useCustomElement: true });
         a11yElement = document.createElement('interact-element') as IInteractElement;
 
         const div = document.createElement('div');

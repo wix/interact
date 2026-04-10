@@ -17,7 +17,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: {} as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 1,
           custom: {
@@ -63,8 +62,7 @@ describe('Cross', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: {} as CrossType,
+        namedEffect: { iterationDelay: 500 } as CrossType,
       };
 
       const expectedResult = [
@@ -72,7 +70,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: {} as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 1500,
           custom: {
@@ -125,7 +122,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: { direction: 'top' } as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 1,
           custom: {
@@ -178,7 +174,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: { direction: 'bottom' } as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 1,
           custom: {
@@ -231,7 +226,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: { direction: 'left' } as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 1,
           custom: {
@@ -284,7 +278,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: { direction: 'top-left' } as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 1,
           custom: {
@@ -339,7 +332,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: { direction: 'top-right' } as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 1,
           custom: {
@@ -394,7 +386,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: { direction: 'bottom-left' } as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 1,
           custom: {
@@ -449,7 +440,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: { direction: 'bottom-right' } as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 1,
           custom: {
@@ -505,7 +495,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: {} as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 1,
           custom: {
@@ -528,8 +517,7 @@ describe('Cross', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 1000,
-        namedEffect: {} as CrossType,
+        namedEffect: { iterationDelay: 1000 } as CrossType,
       };
 
       const expectedResult = [
@@ -537,7 +525,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: {} as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 2000,
           custom: {
@@ -583,8 +570,7 @@ describe('Cross', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 500,
-        delay: 1500,
-        namedEffect: {} as CrossType,
+        namedEffect: { iterationDelay: 1500 } as CrossType,
       };
 
       const expectedResult = [
@@ -592,7 +578,6 @@ describe('Cross', () => {
           ...baseMockOptions,
           namedEffect: {} as CrossType,
           name: 'motion-cross',
-          delay: 0,
           easing: 'linear',
           duration: 2000,
           custom: {

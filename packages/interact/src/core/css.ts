@@ -46,7 +46,7 @@ export function generate(_config: InteractConfig, useFirstChild: boolean = false
         const isOnce = !interactionParams?.type || interactionParams.type === 'once';
 
         if (isOnce) {
-          effects.forEach((effect) => {
+          effects?.forEach((effect) => {
             const effectData = effect?.effectId
               ? _config.effects[effect.effectId] || effect
               : effect;

@@ -837,6 +837,76 @@ function handleAnimation(options: AnimationOptions) {
 }
 ```
 
+## Sequence Types
+
+### `SequenceOptions`
+
+Configuration for stagger timing when creating a `Sequence`.
+
+```typescript
+type SequenceOptions = {
+  delay?: number; // Base delay (ms) for all groups. Default: 0
+  offset?: number; // Stagger interval (ms) between groups. Default: 0
+  offsetEasing?: string | ((p: number) => number); // Easing for offset distribution. Default: linear
+};
+```
+
+Named easing strings (`'quadIn'`, `'sineOut'`, `'cubicBezier(0.4, 0, 0.2, 1)'`, etc.) are resolved to JS functions via `getJsEasing()`. Invalid strings fall back to `linear`.
+
+#### Examples
+
+```typescript
+// Linear 200ms stagger
+const linearOpts: SequenceOptions = { offset: 200 };
+
+// Quadratic-in stagger with base delay
+const quadOpts: SequenceOptions = {
+  delay: 100,
+  offset: 200,
+  offsetEasing: 'quadIn',
+};
+
+// Custom cubic easing function
+const customOpts: SequenceOptions = {
+  offset: 300,
+  offsetEasing: (p) => p * p * p,
+};
+```
+
+### `AnimationGroupArgs`
+
+Declarative target/options pair used by `getSequence()` and `createAnimationGroups()` to build `AnimationGroup` instances.
+
+```typescript
+type AnimationGroupArgs = {
+  target: HTMLElement | HTMLElement[] | string | null;
+  options: AnimationOptions;
+  context?: Record<string, any>;
+};
+```
+
+**Properties:**
+
+- `target` — Element(s) to animate. `HTMLElement[]` and `string` selectors expand to one group per element.
+- `options` — Animation configuration (`TimeAnimationOptions` or `ScrubAnimationOptions`).
+- `context` — Optional context forwarded to animation creation (e.g. `{ reducedMotion: true }`).
+
+### `IndexedGroup`
+
+Specifies a group and its insertion position for `Sequence.addGroups()`.
+
+```typescript
+type IndexedGroup = {
+  index: number;
+  group: AnimationGroup;
+};
+```
+
+**Properties:**
+
+- `index` — Position in the `animationGroups` array where the group should be inserted.
+- `group` — The `AnimationGroup` instance to insert.
+
 ## Advanced Type Patterns
 
 ### Generic Animation Factory

@@ -1,6 +1,6 @@
 {
   "name": "@wix/motion",
-  "version": "2.0.0",
+  "version": "2.1.3",
   "description": "High-performance animation toolkit for the web, powering Wix motion presets and tooling.",
   "license": "MIT",
   "main": "dist/cjs/motion.js",
@@ -24,7 +24,12 @@
     "build:types": "tsc -p tsconfig.build.json",
     "lint": "tsc -p tsconfig.build.json --noEmit",
     "test": "vitest run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --headed",
+    "test:e2e:report": "playwright test --reporter=html",
+    "test:e2e:fixtures": "vite --config e2e/fixtures/vite.config.ts"
   },
   "keywords": [
     "animation",
@@ -53,6 +58,7 @@
     "fastdom": "^1.0.11"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitest/coverage-v8": "^4.0.14",

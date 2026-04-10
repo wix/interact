@@ -21,6 +21,35 @@ const EXIT_OBSERVER_CONFIG: IntersectionObserverInit = {
   threshold: [0],
 };
 
+const DEFAULT_THRESHOLD = 0.2;
+
+/**
+ * Converts an `inset` value to a CSS `rootMargin` string.
+ *
+ * `inset` is one-dimensional: a single value applies to both top and bottom,
+ * two space-separated values set top and bottom independently.
+ * The inset direction is the inverse of rootMargin: a positive inset shrinks
+ * the intersection root (triggers later), so values are negated.
+ *
+ * Examples:
+ *   "20%"      → "-20% 0px -20%"
+ *   "10% 30%"  → "-10% 0px -30%"
+ */
+function insetToRootMargin(inset: string): string {
+  const parts = inset.trim().split(/\s+/);
+  const top = parts[0];
+  const bottom = parts.length > 1 ? parts[1] : parts[0];
+
+  const negate = (value: string): string => {
+    if (value.startsWith('-')) {
+      return value.slice(1);
+    }
+    return parseFloat(value) ? `-${value}` : value;
+  };
+
+  return `${negate(top)} 0px ${negate(bottom)}`;
+}
+
 const observers: Record<string, IntersectionObserver> = {};
 const handlerMap = new WeakMap() as HandlerObjectMap;
 const elementFirstRun = new WeakSet<HTMLElement>();
@@ -67,12 +96,14 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
     return observers[key];
   }
 
+  const threshold = options.threshold ?? DEFAULT_THRESHOLD;
+
   const config: IntersectionObserverInit = isSafeMode
     ? SAFE_OBSERVER_CONFIG
     : {
         root: null,
-        rootMargin: options.inset ? `${options.inset} 0px ${options.inset}` : '0px',
-        threshold: options.threshold,
+        rootMargin: options.inset ? insetToRootMargin(options.inset) : '0px',
+        threshold,
       };
 
   const observer = new IntersectionObserver((entries) => {
@@ -137,16 +168,17 @@ function addViewEnterHandler(
   target: HTMLElement,
   effect: TimeEffect,
   options: ViewEnterParams = {},
-  { reducedMotion, selectorCondition }: InteractOptions = {},
+  { reducedMotion, selectorCondition, animation: preCreatedAnimation }: InteractOptions = {},
 ) {
   const mergedOptions = { ...viewEnterOptions, ...options };
   const type = mergedOptions.type || 'once';
-  const animation = getAnimation(
-    target,
-    effectToAnimationOptions(effect),
-    undefined,
-    reducedMotion,
-  ) as AnimationGroup | null;
+  const animation = (preCreatedAnimation ||
+    getAnimation(
+      target,
+      effectToAnimationOptions(effect),
+      undefined,
+      reducedMotion,
+    )) as AnimationGroup | null;
 
   // Early return if animation is null, no observer created
   if (!animation) {
@@ -180,11 +212,14 @@ function addViewEnterHandler(
               requestAnimationFrame(setEnterStart);
             });
 
-            animation.onFinish(() => {
+            const setEnterDone = () => {
               fastdom.mutate(() => {
                 target.dataset.interactEnter = 'done';
               });
-            });
+            };
+
+            animation.onFinish(setEnterDone);
+            animation.onAbort(setEnterDone);
           } else {
             fastdom.mutate(setEnterStart);
           }

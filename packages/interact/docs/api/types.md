@@ -779,6 +779,119 @@ const customEffect = {
 };
 ```
 
+## Sequence Types
+
+### `SequenceOptionsConfig`
+
+Shared options for sequence timing, identity, and conditional gating.
+
+```typescript
+type SequenceOptionsConfig = {
+  delay?: number;
+  offset?: number;
+  offsetEasing?: string | ((p: number) => number);
+  sequenceId?: string;
+  conditions?: string[];
+};
+```
+
+**Properties:**
+
+- `delay` - Base delay (ms) applied to all effects in the sequence. Default: `0`.
+- `offset` - Stagger interval (ms) between consecutive effects. Default: `0`.
+- `offsetEasing` - Easing function or named string for offset distribution (`'linear'`, `'quadIn'`, `'sineOut'`, etc.). Default: `linear`.
+- `sequenceId` - Optional ID for referencing a reusable sequence from `InteractConfig.sequences`.
+- `conditions` - Optional array of condition IDs. When set, the sequence is only active when all conditions match.
+
+### `SequenceConfig`
+
+Inline sequence definition with an effects array.
+
+```typescript
+type SequenceConfig = SequenceOptionsConfig & {
+  effects: (Effect | EffectRef)[];
+};
+```
+
+**Properties:**
+
+- All properties from `SequenceOptionsConfig`
+- `effects` - Array of effects that participate in the sequence. Each effect becomes an `AnimationGroup` in the underlying `Sequence` instance.
+
+**Example:**
+
+```typescript
+const inlineSequence: SequenceConfig = {
+  offset: 150,
+  offsetEasing: 'quadIn',
+  effects: [
+    { effectId: 'card-entrance' },
+    {
+      duration: 500,
+      keyframeEffect: {
+        name: 'fade-in',
+        keyframes: [{ opacity: 0 }, { opacity: 1 }],
+      },
+    },
+  ],
+};
+```
+
+### `SequenceConfigRef`
+
+Reference to a reusable sequence by ID, with optional timing overrides.
+
+```typescript
+type SequenceConfigRef = {
+  sequenceId: string;
+  delay?: number;
+  offset?: number;
+  offsetEasing?: string | ((p: number) => number);
+  conditions?: string[];
+};
+```
+
+**Properties:**
+
+- `sequenceId` - ID of the sequence in `InteractConfig.sequences` (required)
+- `delay`, `offset`, `offsetEasing`, `conditions` - Override values that merge on top of the referenced sequence
+
+**Example:**
+
+```typescript
+// Reference a reusable sequence with override
+const sequenceRef: SequenceConfigRef = {
+  sequenceId: 'card-stagger',
+  offset: 200, // Override the default offset
+};
+```
+
+### Updated `InteractConfig`
+
+The `InteractConfig` type includes an optional `sequences` map for reusable sequence definitions:
+
+```typescript
+type InteractConfig = {
+  effects: Record<string, Effect>;
+  sequences?: Record<string, SequenceConfig>;
+  conditions?: Record<string, Condition>;
+  interactions: Interaction[];
+};
+```
+
+### Updated `Interaction`
+
+Interactions can include a `sequences` array alongside or instead of `effects`:
+
+```typescript
+type Interaction = InteractionTrigger & {
+  effects?: ((Effect | EffectRef) & { interactionId?: string })[];
+  sequences?: (SequenceConfig | SequenceConfigRef)[];
+};
+```
+
+An interaction can have `effects` only, `sequences` only, or both.
+
 ## Condition Types
 
 ### `Condition`
@@ -858,6 +971,7 @@ type TriggerParams =
 
 ## See Also
 
+- [Sequences & Staggering Guide](../guides/sequences.md) - Comprehensive sequences guide
 - [Interact Class](interact-class.md) - Main API class
 - [InteractionController](interaction-controller.md) - Controller API
 - [Functions](functions.md) - Standalone functions

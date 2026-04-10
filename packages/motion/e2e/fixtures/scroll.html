@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scroll-Driven Animations</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      body {
+        overflow-y: scroll;
+      }
+
+      .scroll-container {
+        padding-top: 60px;
+      }
+
+      .scroll-section {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .scroll-section--tall {
+        min-height: 200vh;
+      }
+
+      #view-progress-target {
+        width: 200px;
+        height: 200px;
+        background: #4a90d9;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: bold;
+      }
+
+      #scrub-scene-target,
+      #native-custom-target {
+        width: 220px;
+        height: 80px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      #scrub-scene-target {
+        background: #f39c12;
+      }
+
+      #native-custom-target {
+        background: #16a085;
+        transform: translateX(var(--native-custom-shift, 0px));
+        opacity: var(--native-custom-progress, 0.35);
+      }
+
+      .scrub-card {
+        width: 160px;
+        height: 100px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      #scrub-card-1 {
+        background: #e74c3c;
+      }
+      #scrub-card-2 {
+        background: #2ecc71;
+      }
+      #scrub-card-3 {
+        background: #9b59b6;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="fixture-nav">
+      <strong>Scroll Fixture</strong>
+      <a href="./index.html">← Back</a>
+    </nav>
+
+    <div class="scroll-container">
+      <!-- Push content below fold so elements start out of view -->
+      <div class="scroll-section">
+        <p style="color: #666">Scroll down to see animations</p>
+      </div>
+
+      <!-- View-progress target: fades + slides in as it enters the viewport -->
+      <div class="scroll-section">
+        <div id="view-progress-target" data-testid="view-progress-target">View Progress</div>
+        <div id="scrub-scene-target" data-testid="scrub-scene-target">getScrubScene Target</div>
+        <div id="native-custom-target" data-testid="native-custom-target">Native Custom Effect</div>
+        <span class="fixture-label" data-testid="progress-display">progress: 0</span>
+      </div>
+
+      <!-- Scrub cards for staggered testing -->
+      <div class="scroll-section scroll-section--tall" style="gap: 32px">
+        <div id="scrub-card-1" class="scrub-card" data-testid="scrub-card-1">Card 1</div>
+        <div id="scrub-card-2" class="scrub-card" data-testid="scrub-card-2">Card 2</div>
+        <div id="scrub-card-3" class="scrub-card" data-testid="scrub-card-3">Card 3</div>
+      </div>
+    </div>
+
+    <script type="module" src="./scroll.ts"></script>
+  </body>
+</html>

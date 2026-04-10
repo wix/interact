@@ -1,4 +1,4 @@
-# Hover Trigger Rules
+# Hover Trigger Rules for @wix/interact
 
 This document contains rules for generating hover trigger interactions in `@wix/interact`. These rules cover all hover behavior patterns and common use cases.
 
@@ -10,11 +10,11 @@ This document contains rules for generating hover trigger interactions in `@wix/
 
 ```typescript
 {
-    key: '[SOURCE_IDENTIFIER]',
+    key: '[SOURCE_KEY]',
     trigger: 'hover',
     effects: [
         {
-            key: '[TARGET_IDENTIFIER]',
+            key: '[TARGET_KEY]',
             [EFFECT_TYPE]: [EFFECT_DEFINITION],
             fill: 'both',
             duration: [DURATION_MS],
@@ -26,8 +26,8 @@ This document contains rules for generating hover trigger interactions in `@wix/
 
 **Variables**:
 
-- `[SOURCE_IDENTIFIER]`: Unique identifier for hoverable element (e.g., '#menu-button', '#accordion-header'). Should equal the value of the data-interact-key attribute on the wrapping interact-element.
-- `[TARGET_IDENTIFIER]`: Unique identifier for animated element (can be same as trigger or different). Should equal the value of the data-interact-key attribute on the wrapping interact-element.
+- `[SOURCE_KEY]`: Unique identifier for hoverable element. Should equal the value of the `data-interact-key` attribute on the wrapping `<interact-element>`.
+- `[TARGET_KEY]`: Unique identifier for animated element (can be same as `[SOURCE_KEY]` for self-targeting, or different for cross-targeting).
 - `[EFFECT_TYPE]`: Either `namedEffect` or `keyframeEffect`
 - `[EFFECT_DEFINITION]`: Named effect object (e.g., { type: 'SlideIn', ...params }, { type: 'FadeIn', ...params }) or keyframe object (e.g., { name: 'custom-fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, { name: 'custom-slide', keyframes: [{ transform: 'translateX(-100%)' }, { transform: 'translateX(0)' }] })
 - `[DURATION_MS]`: Animation duration in milliseconds (typically 200-500ms for micro-interactions)
@@ -38,7 +38,7 @@ This document contains rules for generating hover trigger interactions in `@wix/
 
 - `DURATION_MS`: 300 (for micro-interactions)
 - `EASING_FUNCTION`: 'ease-out' (for smooth feel)
-- `TARGET_IDENTIFIER`: Same as source key (self-targeting)
+- `[TARGET_KEY]`: Same as `[SOURCE_KEY]` for self-targeting
 
 **Common Use Cases**:
 
@@ -93,26 +93,25 @@ This document contains rules for generating hover trigger interactions in `@wix/
 }
 ```
 
-## Rule 2: Hover Enter/Leave Animations with Named Effects
+## Rule 2: Hover Alternate Animations (namedEffect / keyframeEffect)
 
-**Purpose**: Generate hover interactions using pre-built named effects from @wix/motion-presets
+**Purpose**: Hover interactions that play forward on mouse enter and reverse on mouse leave (`type: 'alternate'`).
 
 **Pattern**:
 
 ```typescript
 {
-    key: '[SOURCE_IDENTIFIER]',
+    key: '[SOURCE_KEY]',
     trigger: 'hover',
     params: {
         type: 'alternate'
     },
     effects: [
         {
-            key: '[TARGET_IDENTIFIER]',
-            namedEffect: {
-                type: '[NAMED_EFFECT_TYPE]',
-                [EFFECT_PROPERTIES]
-            },
+            key: '[TARGET_KEY]',
+            // Use namedEffect OR keyframeEffect:
+            namedEffect: { type: '[NAMED_EFFECT_TYPE]' },
+            // keyframeEffect: { name: '[EFFECT_NAME]', keyframes: [{ ... }, { ... }] },
             fill: 'both',
             reversed: [REVERSED_BOOL],
             duration: [DURATION_MS],
@@ -124,143 +123,56 @@ This document contains rules for generating hover trigger interactions in `@wix/
 
 **Variables**:
 
-- `[REVERSED_BOOL]`: Optional boolean value indicating whether the mouse enter animation is reversed (and mouse leave is forwards).
-- `[NAMED_EFFECT_TYPE]`: Name of the pre-built named effect from @wix/motion-presets to use.
-- `[EFFECT_PROPERTIES]`: Named effect specific properties (distance, angle, perspective, etc.)
+- `[REVERSED_BOOL]`: Optional. `true` to reverse the enter direction (mouse enter plays backwards, leave plays forwards).
+- `[NAMED_EFFECT_TYPE]`: Pre-built effect from `@wix/motion-presets`. Available hover presets:
+  - Size: `ExpandIn`, `Pulse`, `GrowIn`
+  - Fade/Blur: `FadeIn`, `Flash`, `BlurIn`
+  - Translate: `SlideIn`, `GlideIn`, `FloatIn`, `BounceIn`, `GlitchIn`
+  - Rotate: `SpinIn`, `TiltIn`, `ArcIn`, `TurnIn`, `FlipIn`, `Spin`, `Swing`
+  - Attention: `Bounce`, `DropIn`, `Rubber`, `Jello`, `Cross`, `Wiggle`, `Poke`
 - Other variables same as Rule 1
 
-**Available Named Effects for Hover**:
-
-- **Size Changes**: `ExpandIn`, `Pulse`, `GrowIn`
-- **Opacity/Blur Changes**: `FadeIn`, `Flash`, `BlurIn`
-- **Translation Effects**: `SlideIn`, `GlideIn`, `FloatIn`, `BounceIn`, `GlitchIn`
-- **Rotation Effects**: `SpinIn`, `TiltIn`, `ArcIn`, `TurnIn`, `FlipIn`, `Spin`, `Swing`
-- **Special Attention Effects**: `Bounce`, `DropIn`, `Rubber`, `Jello`, `Cross`, `Wiggle`, `Poke`
-
-**Important**: Spatial effects that change the hit-area considerably (translation, rotation) should use different source and target keys to avoid unwanted flickering on hover enter/leave.
+**Important**: Spatial effects (translation, rotation) that change the hit-area considerably should use different source and target keys to avoid flickering on enter/leave.
 
 **Default Values**:
 
-- `type`: 'alternate' (plays forward on enter, reverses on leave)
-- `DURATION_MS`: 250
+- `DURATION_MS`: 250–300
 - `EASING_FUNCTION`: 'ease-out'
 
-**Example Generations**:
+**Example — namedEffect (card scale)**:
 
 ```typescript
-// Card scale effect
 {
     key: 'feature-card',
     trigger: 'hover',
-    params: {
-        type: 'alternate'
-    },
+    params: { type: 'alternate' },
     effects: [
         {
             key: 'feature-card',
-            namedEffect: {
-                type: 'Pulse'
-            },
+            namedEffect: { type: 'Pulse' },
             fill: 'both',
             duration: 250,
             easing: 'ease-out'
         }
     ]
 }
-
-// Icon rotation effect (different source/target to avoid flickering)
-{
-    key: 'button',
-    trigger: 'hover',
-    params: {
-        type: 'alternate'
-    },
-    effects: [
-        {
-            key: 'button-icon',
-            namedEffect: {
-                type: 'SpinIn',
-                direction: 'clockwise'
-            },
-            fill: 'both',
-            duration: 200,
-            easing: 'ease-out'
-        }
-    ]
-}
 ```
 
-## Rule 3: Hover Interactions with Alternate Pattern
-
-**Purpose**: Generate hover interactions that play forward on mouse enter and reverse on mouse leave
-
-**Pattern**:
+**Example — keyframeEffect (card lift)**:
 
 ```typescript
-{
-    key: '[SOURCE_IDENTIFIER]',
-    trigger: 'hover',
-    params: {
-        type: 'alternate'
-    },
-    effects: [
-        {
-            key: '[TARGET_IDENTIFIER]',
-            keyframeEffect: {
-                name: '[UNIQUE_KEYFRAME_EFFECT_NAME]',
-                keyframes: [
-                    { [PROPERTY_1]: '[START_VALUE]', [PROPERTY_2]: '[START_VALUE]' },
-                    { [PROPERTY_1]: '[END_VALUE]', [PROPERTY_2]: '[END_VALUE]' }
-                ]
-            },
-            fill: 'both',
-            duration: [DURATION_MS],
-            easing: '[EASING_FUNCTION]'
-        }
-    ]
-}
-```
-
-**Variables**:
-
-- `[UNIQUE_KEYFRAME_EFFECT_NAME]`: unique name for the keyframeEffect.
-- `[PROPERTY_N]`: animatable CSS property.
-- `[START/END_VALUE]`: values for the animated CSS properties in the start/end frame.
-- Other variables same as Rule 1
-
-**Best Properties for Hover Effects**:
-
-- `transform`: scale, translate, rotate transformations
-- `opacity`: fade effects
-- `box-shadow`: elevation changes
-- `filter`: blur, brightness, hue-rotate
-- `background-color`: color transitions
-- Spatial effects that change the hit-area of the animated element considerably (e.g. Translation effects, Rotation effects, etc.) should have different source and target to avoid unwanted flickering.
-
-**Default Values**:
-
-- `type`: 'alternate'
-- `DURATION_MS`: 300
-- `EASING_FUNCTION`: 'ease-out'
-
-**Example Generations**:
-
-```typescript
-// Card hover with multiple properties
 {
     key: 'portfolio-item',
     trigger: 'hover',
-    params: {
-        type: 'alternate'
-    },
+    params: { type: 'alternate' },
     effects: [
         {
             key: 'portfolio-item',
             keyframeEffect: {
-                name: 'portfolio',
+                name: 'portfolio-lift',
                 keyframes: [
-                    { transform: 'translateY(0)', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', filter: 'brightness(1)' },
-                    { transform: 'translateY(-8px)', boxShadow: '0 20px 25px rgba(0,0,0,0.15)', filter: 'brightness(1.1)' }
+                    { transform: 'translateY(0)', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' },
+                    { transform: 'translateY(-8px)', boxShadow: '0 20px 25px rgba(0,0,0,0.15)' }
                 ]
             },
             fill: 'both',
@@ -269,33 +181,9 @@ This document contains rules for generating hover trigger interactions in `@wix/
         }
     ]
 }
-
-// Image overlay reveal
-{
-    key: 'gallery-image',
-    trigger: 'hover',
-    params: {
-        type: 'alternate'
-    },
-    effects: [
-        {
-            key: 'image-overlay',
-            keyframeEffect: {
-                name: 'image-overlay-slide',
-                keyframes: [
-                    { opacity: '0', transform: 'translateY(100%)' },
-                    { opacity: '1', transform: 'translateY(0)' }
-                ]
-            },
-            fill: 'both',
-            duration: 250,
-            easing: 'ease-out'
-        }
-    ]
-}
 ```
 
-## Rule 4: Hover Interactions with Repeat Pattern
+## Rule 3: Hover Interactions with Repeat Pattern
 
 **Purpose**: Generate hover interactions that restart animation each time mouse enters
 
@@ -303,14 +191,14 @@ This document contains rules for generating hover trigger interactions in `@wix/
 
 ```typescript
 {
-    key: '[SOURCE_IDENTIFIER]',
+    key: '[SOURCE_KEY]',
     trigger: 'hover',
     params: {
         type: 'repeat'
     },
     effects: [
         {
-            key: '[TARGET_IDENTIFIER]',
+            key: '[TARGET_KEY]',
             [EFFECT_TYPE]: [EFFECT_DEFINITION],
             duration: [DURATION_MS],
             easing: '[EASING_FUNCTION]'
@@ -384,7 +272,7 @@ This document contains rules for generating hover trigger interactions in `@wix/
 }
 ```
 
-## Rule 5: Hover Interactions with Play/Pause Pattern
+## Rule 4: Hover Interactions with Play/Pause Pattern
 
 **Purpose**: Generate hover interactions that pause/resume on hover (state-based control)
 
@@ -392,14 +280,14 @@ This document contains rules for generating hover trigger interactions in `@wix/
 
 ```typescript
 {
-    key: '[SOURCE_IDENTIFIER]',
+    key: '[SOURCE_KEY]',
     trigger: 'hover',
     params: {
         type: 'state'
     },
     effects: [
         {
-            key: '[TARGET_IDENTIFIER]',
+            key: '[TARGET_KEY]',
             [EFFECT_TYPE]: [EFFECT_DEFINITION],
             duration: [DURATION_MS],
             iterations: Infinity,
@@ -475,7 +363,7 @@ This document contains rules for generating hover trigger interactions in `@wix/
 }
 ```
 
-## Rule 6: Multi-Target Hover Effects
+## Rule 5: Multi-Target Hover Effects
 
 **Purpose**: Generate hover interactions that affect multiple elements from a single source
 
@@ -483,7 +371,7 @@ This document contains rules for generating hover trigger interactions in `@wix/
 
 ```typescript
 {
-    key: '[SOURCE_IDENTIFIER]',
+    key: '[SOURCE_KEY]',
     trigger: 'hover',
     params: {
         type: '[BEHAVIOR_TYPE]'
@@ -512,7 +400,7 @@ This document contains rules for generating hover trigger interactions in `@wix/
 **Variables**:
 
 - `[BEHAVIOR_TYPE]`: type of behavior for the effect. use `alternate`, `repeat`, or `state` according to the previous rules.
-- `[FILL_N]`: Optional fill value for the Nth effect - same ass CSS animation-fill-mode (e.g. 'both', 'forwards', 'backwards').
+- `[FILL_N]`: Optional fill value for the Nth effect - same as CSS animation-fill-mode (e.g. 'both', 'forwards', 'backwards').
 - `[REVERSED_BOOL_N]`: Same as `[REVERSED_BOOL]` from Rule 2 only for the Nth effect.
 - `[DURATION_N]`: Same as `[DURATION_MS]` from Rule 1 only for the Nth effect.
 - `[DELAY_N]`: Delay in milliseconds of the Nth effect.
@@ -596,12 +484,85 @@ This document contains rules for generating hover trigger interactions in `@wix/
 }
 ```
 
+## Rule 6: Hover with Sequence (Staggered Multi-Target)
+
+**Purpose**: Hover interactions that stagger animations across multiple targets using a sequence instead of manual delays.
+
+**When to Apply**:
+
+- When hovering a container should stagger-animate its children
+- For list item hover effects with coordinated timing
+- When you want easing-controlled stagger on hover
+
+**Pattern**:
+
+```typescript
+{
+    key: '[SOURCE_KEY]',
+    trigger: 'hover',
+    params: {
+        type: 'repeat'
+    },
+    sequences: [
+        {
+            offset: [OFFSET_MS],
+            offsetEasing: '[OFFSET_EASING]',
+            effects: [
+                {
+                    effectId: '[EFFECT_ID]',
+                    listContainer: '[LIST_CONTAINER_SELECTOR]'
+                }
+            ]
+        }
+    ]
+}
+```
+
+**Example - Hover Card Grid Stagger**:
+
+```typescript
+{
+    key: 'card-grid',
+    trigger: 'hover',
+    params: { type: 'repeat' },
+    sequences: [
+        {
+            offset: 80,
+            offsetEasing: 'sineOut',
+            effects: [
+                {
+                    effectId: 'item-pop',
+                    listContainer: '.card-grid-items'
+                }
+            ]
+        }
+    ]
+}
+```
+
+```typescript
+effects: {
+    'item-pop': {
+        duration: 400,
+        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        keyframeEffect: {
+            name: 'item-pop',
+            keyframes: [
+                { transform: 'translateY(16px) scale(0.95)', opacity: 0 },
+                { transform: 'translateY(0) scale(1)', opacity: 1 }
+            ]
+        }
+    }
+}
+```
+
+---
+
 ## Best Practices for Hover Rules
 
-### Performance Guidelines
+### Timing and Pattern Guidelines
 
 1. **Keep durations short** (100-400ms) for responsiveness
-2. **Avoid animating layout properties**: width, height, margin, padding
 
 ### User Experience Guidelines
 
@@ -623,3 +584,31 @@ This document contains rules for generating hover trigger interactions in `@wix/
 - **Interactive elements**: 'ease-in-out' (smooth both ways)
 - **Attention effects**: 'ease-in-out' (natural feel)
 - **Continuous motion**: 'linear' (consistent speed)
+
+## Accessibility
+
+Use `@wix/interact`'s `conditions` API to skip hover animations for users who prefer reduced motion. Define a `prefers-motion` condition and reference it on any interaction that should be suppressed:
+
+```typescript
+{
+  conditions: {
+    'prefers-motion': { type: 'media', predicate: '(prefers-reduced-motion: no-preference)' }
+  },
+  interactions: [
+    {
+      key: 'card',
+      trigger: 'hover',
+      conditions: ['prefers-motion'],  // skipped when reduced-motion is preferred
+      effects: [/* ... */]
+    }
+  ]
+}
+```
+
+For pointer-primary devices only, also consider adding a `hover-capable` condition:
+
+```typescript
+'hover-capable': { type: 'media', predicate: '(hover: hover)' }
+```
+
+Use `trigger: 'interest'` instead of `'hover'` to also handle keyboard focus, which is the accessible equivalent of hover.
