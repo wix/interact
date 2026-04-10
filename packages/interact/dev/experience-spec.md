@@ -227,14 +227,14 @@ type SerializableSequenceConfigRef = {
 };
 ```
 
-| Field           | Purpose                                                                                              |
-| --------------- | ---------------------------------------------------------------------------------------------------- |
-| `delay`         | Fixed millisecond delay before the sequence starts playing. Defaults to `0`.                         |
-| `offset`        | Millisecond multiplier applied to the easing-based stagger offset per effect. Defaults to `0`.       |
-| `offsetEasing`  | Named easing string (e.g. `"ease-out"`, `"quadIn"`) for stagger distribution. Function form is not allowed in serializable configs. |
-| `sequenceId`    | Identifier for the sequence, used by `SerializableSequenceConfigRef` to reference a top-level declaration. |
-| `conditions`    | Condition keys that must be met for the sequence to be active.                                       |
-| `effects`       | Ordered list of effects in the sequence. Each effect targets its own element via `key`.              |
+| Field          | Purpose                                                                                                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `delay`        | Fixed millisecond delay before the sequence starts playing. Defaults to `0`.                                                        |
+| `offset`       | Millisecond multiplier applied to the easing-based stagger offset per effect. Defaults to `0`.                                      |
+| `offsetEasing` | Named easing string (e.g. `"ease-out"`, `"quadIn"`) for stagger distribution. Function form is not allowed in serializable configs. |
+| `sequenceId`   | Identifier for the sequence, used by `SerializableSequenceConfigRef` to reference a top-level declaration.                          |
+| `conditions`   | Condition keys that must be met for the sequence to be active.                                                                      |
+| `effects`      | Ordered list of effects in the sequence. Each effect targets its own element via `key`.                                             |
 
 Sequences can be defined inline on an interaction or declared in `interact.sequences` and referenced by `sequenceId`.
 
@@ -276,17 +276,17 @@ type TriggerType =
   | 'interest';
 ```
 
-| Trigger          | Description                                                                      |
-| ---------------- | -------------------------------------------------------------------------------- |
-| `hover`          | Fires on mouse enter/leave.                                                      |
-| `click`          | Fires on element click.                                                          |
-| `viewEnter`      | Fires when the element enters the viewport (configurable threshold and type).    |
-| `pageVisible`    | Fires when the page becomes visible (similar to `viewEnter` but page-level).     |
-| `animationEnd`   | Fires when a specified effect's animation ends (requires `effectId` in params).  |
-| `viewProgress`   | Scrub-driven: maps scroll progress to animation progress.                        |
-| `pointerMove`    | Scrub-driven: maps pointer position to animation progress.                       |
-| `activate`       | Programmatic activation trigger.                                                 |
-| `interest`       | Fires on user interest signals (e.g. focus, hover intent).                       |
+| Trigger        | Description                                                                     |
+| -------------- | ------------------------------------------------------------------------------- |
+| `hover`        | Fires on mouse enter/leave.                                                     |
+| `click`        | Fires on element click.                                                         |
+| `viewEnter`    | Fires when the element enters the viewport (configurable threshold and type).   |
+| `pageVisible`  | Fires when the page becomes visible (similar to `viewEnter` but page-level).    |
+| `animationEnd` | Fires when a specified effect's animation ends (requires `effectId` in params). |
+| `viewProgress` | Scrub-driven: maps scroll progress to animation progress.                       |
+| `pointerMove`  | Scrub-driven: maps pointer position to animation progress.                      |
+| `activate`     | Programmatic activation trigger.                                                |
+| `interest`     | Fires on user interest signals (e.g. focus, hover intent).                      |
 
 #### Conditions
 
@@ -299,11 +299,11 @@ type Condition = {
 };
 ```
 
-| Type        | Description                                                                               |
-| ----------- | ----------------------------------------------------------------------------------------- |
-| `media`     | Matches a CSS media query (e.g. `"(hover: hover)"`, `"(min-width: 768px)"`).              |
-| `container` | Matches a CSS container query.                                                            |
-| `selector`  | Matches when a CSS selector applies (e.g. a class is present on an ancestor).             |
+| Type        | Description                                                                   |
+| ----------- | ----------------------------------------------------------------------------- |
+| `media`     | Matches a CSS media query (e.g. `"(hover: hover)"`, `"(min-width: 768px)"`).  |
+| `container` | Matches a CSS container query.                                                |
+| `selector`  | Matches when a CSS selector applies (e.g. a class is present on an ancestor). |
 
 #### Named Effect Types
 
@@ -1850,13 +1850,13 @@ An experience must pass the following checks before it is considered valid:
 
 ### Structural Validation
 
-| Rule                    | Check                                                                     |
-| ----------------------- | ------------------------------------------------------------------------- |
-| Schema                  | `$schema` is `'interact-experience/1.0'`.                                 |
-| Required fields         | `id`, `name`, `elements`, `interact`, `controls` are present.             |
-| Unique element keys     | No duplicate keys in the `elements` map.                                  |
-| Selectors present       | Every `ElementEntry` has a non-empty `selector`.                          |
-| No `customEffect`       | No effect uses the `customEffect` property.                               |
+| Rule                     | Check                                                                      |
+| ------------------------ | -------------------------------------------------------------------------- |
+| Schema                   | `$schema` is `'interact-experience/1.0'`.                                  |
+| Required fields          | `id`, `name`, `elements`, `interact`, `controls` are present.              |
+| Unique element keys      | No duplicate keys in the `elements` map.                                   |
+| Selectors present        | Every `ElementEntry` has a non-empty `selector`.                           |
+| No `customEffect`        | No effect uses the `customEffect` property.                                |
 | No function offsetEasing | No sequence uses a function for `offsetEasing` (only string easing names). |
 
 ### Referential Integrity
