@@ -143,11 +143,12 @@ CSS custom properties (`--experience-*`) can be used within style rules and refe
 
 ### Interact Config
 
-The experience embeds a **serializable subset** of `InteractConfig`. The key restriction is that `customEffect` (which requires a function reference) is **not allowed**. Only `namedEffect` and `keyframeEffect` are permitted as effect sources.
+The experience embeds a **serializable subset** of `InteractConfig`. The key restriction is that `customEffect` (which requires a function reference) is **not allowed**. Only `namedEffect` and `keyframeEffect` are permitted as effect sources. Similarly, `offsetEasing` as a function is not allowed in sequences — only string-based easing names.
 
 ```ts
 type ExperienceInteractConfig = {
   effects: Record<string, SerializableEffect>;
+  sequences?: Record<string, SerializableSequenceConfig>;
   conditions?: Record<string, Condition>;
   interactions: ExperienceInteraction[];
 };
@@ -179,6 +180,7 @@ type SerializableScrubEffect = SerializableEffectSource & {
   rangeStart?: RangeOffset;
   rangeEnd?: RangeOffset;
   transitionDuration?: number;
+  transitionDelay?: number;
   transitionEasing?: ScrubTransitionEasing;
   centeredToTarget?: boolean;
 };
@@ -186,6 +188,55 @@ type SerializableScrubEffect = SerializableEffectSource & {
 type SerializableEffect = EffectBase &
   (SerializableTimeEffect | SerializableScrubEffect | TransitionEffect);
 ```
+
+#### Range Offset
+
+`RangeOffset` is imported from `@wix/motion` and defines scroll timeline range boundaries:
+
+```ts
+type RangeOffset = {
+  name?: 'entry' | 'exit' | 'contain' | 'cover' | 'entry-crossing' | 'exit-crossing';
+  offset?: LengthPercentage;
+};
+
+type LengthPercentage =
+  | { value: number; unit: 'px' | 'em' | 'rem' | 'vh' | 'vw' | 'vmin' | 'vmax' }
+  | { value: number; unit: 'percentage' };
+```
+
+#### Sequences
+
+Sequences allow grouping effects into ordered timelines with staggered delays. They are declared at the top level for reuse and referenced from interactions.
+
+```ts
+type SerializableSequenceConfig = {
+  delay?: number;
+  offset?: number;
+  offsetEasing?: string;
+  sequenceId?: string;
+  conditions?: string[];
+  effects: (SerializableEffect | { effectId: string })[];
+};
+
+type SerializableSequenceConfigRef = {
+  sequenceId: string;
+  delay?: number;
+  offset?: number;
+  offsetEasing?: string;
+  conditions?: string[];
+};
+```
+
+| Field           | Purpose                                                                                              |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| `delay`         | Fixed millisecond delay before the sequence starts playing. Defaults to `0`.                         |
+| `offset`        | Millisecond multiplier applied to the easing-based stagger offset per effect. Defaults to `0`.       |
+| `offsetEasing`  | Named easing string (e.g. `"ease-out"`, `"quadIn"`) for stagger distribution. Function form is not allowed in serializable configs. |
+| `sequenceId`    | Identifier for the sequence, used by `SerializableSequenceConfigRef` to reference a top-level declaration. |
+| `conditions`    | Condition keys that must be met for the sequence to be active.                                       |
+| `effects`       | Ordered list of effects in the sequence. Each effect targets its own element via `key`.              |
+
+Sequences can be defined inline on an interaction or declared in `interact.sequences` and referenced by `sequenceId`.
 
 #### Interactions
 
@@ -201,9 +252,58 @@ type ExperienceInteraction = {
   selector?: string;
   listContainer?: string;
   listItemSelector?: string;
-  effects: (SerializableEffect | { effectId: string })[];
+  effects?: (SerializableEffect | { effectId: string })[];
+  sequences?: (SerializableSequenceConfig | SerializableSequenceConfigRef)[];
 };
 ```
+
+An interaction must have at least one of `effects` or `sequences`. Both are optional because an interaction may use only sequences or only effects.
+
+#### Trigger Types
+
+The full set of trigger types available in Interact:
+
+```ts
+type TriggerType =
+  | 'hover'
+  | 'click'
+  | 'viewEnter'
+  | 'pageVisible'
+  | 'animationEnd'
+  | 'viewProgress'
+  | 'pointerMove'
+  | 'activate'
+  | 'interest';
+```
+
+| Trigger          | Description                                                                      |
+| ---------------- | -------------------------------------------------------------------------------- |
+| `hover`          | Fires on mouse enter/leave.                                                      |
+| `click`          | Fires on element click.                                                          |
+| `viewEnter`      | Fires when the element enters the viewport (configurable threshold and type).    |
+| `pageVisible`    | Fires when the page becomes visible (similar to `viewEnter` but page-level).     |
+| `animationEnd`   | Fires when a specified effect's animation ends (requires `effectId` in params).  |
+| `viewProgress`   | Scrub-driven: maps scroll progress to animation progress.                        |
+| `pointerMove`    | Scrub-driven: maps pointer position to animation progress.                       |
+| `activate`       | Programmatic activation trigger.                                                 |
+| `interest`       | Fires on user interest signals (e.g. focus, hover intent).                       |
+
+#### Conditions
+
+Conditions control when interactions or effects are active. They are declared in `interact.conditions` and referenced by key.
+
+```ts
+type Condition = {
+  type: 'media' | 'container' | 'selector';
+  predicate?: string;
+};
+```
+
+| Type        | Description                                                                               |
+| ----------- | ----------------------------------------------------------------------------------------- |
+| `media`     | Matches a CSS media query (e.g. `"(hover: hover)"`, `"(min-width: 768px)"`).              |
+| `container` | Matches a CSS container query.                                                            |
+| `selector`  | Matches when a CSS selector applies (e.g. a class is present on an ancestor).             |
 
 #### Named Effect Types
 
@@ -212,12 +312,14 @@ All existing named effect types from `@wix/motion-presets` are available:
 | Category              | Types                                                                                                                                                                                                                                                                                        |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Entrance**          | `FadeIn`, `SlideIn`, `GlideIn`, `FloatIn`, `FlipIn`, `FoldIn`, `SpinIn`, `BounceIn`, `DropIn`, `ArcIn`, `CurveIn`, `TurnIn`, `WinkIn`, `TiltIn`, `ShapeIn`, `ShuttersIn`, `RevealIn`, `BlurIn`, `ExpandIn`                                                                                   |
-| **Ongoing**           | `Pulse`, `Spin`, `Breathe`, `Poke`, `Flash`, `Swing`, `Flip`, `Rubber`, `Fold`, `Jello`, `Wiggle`, `Bounce`, `Cross`, `DVD`, `Blink`                                                                                                                                                         |
+| **Ongoing**           | `Pulse`, `Spin`, `Breathe`, `Poke`, `Flash`, `Swing`, `Flip`, `Rubber`, `Fold`, `Jello`, `Wiggle`, `Bounce`, `Cross`, `DVD`                                                                                                                                                                  |
 | **Scroll**            | `ParallaxScroll`, `FadeScroll`, `BlurScroll`, `GrowScroll`, `ShrinkScroll`, `MoveScroll`, `PanScroll`, `SlideScroll`, `SpinScroll`, `Spin3dScroll`, `FlipScroll`, `ArcScroll`, `RevealScroll`, `ShapeScroll`, `ShuttersScroll`, `SkewPanScroll`, `StretchScroll`, `TiltScroll`, `TurnScroll` |
 | **Mouse**             | `TrackMouse`, `AiryMouse`, `BlobMouse`, `BlurMouse`, `BounceMouse`, `ScaleMouse`, `SkewMouse`, `SpinMouse`, `SwivelMouse`, `Tilt3DMouse`, `Track3DMouse`                                                                                                                                     |
 | **Background Scroll** | `BgParallax`, `BgZoom`, `BgPan`, `BgFade`, `BgRotate`, `BgSkew`, `BgCloseUp`, `BgFadeBack`, `BgFake3D`, `BgPullBack`, `BgReveal`, `ImageParallax`                                                                                                                                            |
 
 Each named effect type has its own set of parameters (direction, speed, intensity, etc.) that can be driven by controls.
+
+> **Note:** `CustomMouse` also exists in `@wix/motion-presets` but is excluded from experience configs because its behavior is driven by runtime `customEffect` functions, which are not serializable. `DVD` is defined in the type system but is not exported from the published package bundle.
 
 ---
 
@@ -605,18 +707,21 @@ This section defines the rules that LLMs must follow when generating experiences
 4. **No `customEffect`** — only `namedEffect` or `keyframeEffect` as effect sources.
 5. **Every `key` used in an interaction must exist** in the `elements` map.
 6. **Every `effectId` referenced in an interaction must exist** in the `interact.effects` map.
-7. **Every condition referenced must be defined** in the `interact.conditions` map.
-8. **Selectors must be specific** — avoid bare tag selectors like `div` or `span`. Use class-based or structural selectors.
+7. **Every `sequenceId` referenced in an interaction must exist** in the `interact.sequences` map.
+8. **Every condition referenced must be defined** in the `interact.conditions` map.
+9. **No function-form `offsetEasing`** in sequences — only string-based easing names.
+10. **Selectors must be specific** — avoid bare tag selectors like `div` or `span`. Use class-based or structural selectors.
 
 ### Naming Conventions
 
-| Item           | Convention | Example                          |
-| -------------- | ---------- | -------------------------------- |
-| Experience ID  | kebab-case | `floating-card-gallery`          |
-| Element keys   | kebab-case | `hero-title`, `bg-image`         |
-| Effect keys    | kebab-case | `entrance-fade`, `hover-zoom`    |
-| Control IDs    | kebab-case | `entrance-speed`, `bg-intensity` |
-| Condition keys | kebab-case | `desktop`, `reduced-motion`      |
+| Item           | Convention | Example                             |
+| -------------- | ---------- | ----------------------------------- |
+| Experience ID  | kebab-case | `floating-card-gallery`             |
+| Element keys   | kebab-case | `hero-title`, `bg-image`            |
+| Effect keys    | kebab-case | `entrance-fade`, `hover-zoom`       |
+| Sequence keys  | kebab-case | `stagger-entrance`, `card-sequence` |
+| Control IDs    | kebab-case | `entrance-speed`, `bg-intensity`    |
+| Condition keys | kebab-case | `desktop`, `reduced-motion`         |
 
 ### Effect Selection Guidelines
 
@@ -648,7 +753,7 @@ LLMs should generate the experience in this order:
 
 1. **Elements** — map logical names to selectors and base styles.
 2. **Styles** — add responsive overrides and complex selectors.
-3. **Interact config** — define effects, conditions, and wire up interactions using element keys.
+3. **Interact config** — define effects, sequences, conditions, and wire up interactions using element keys.
 4. **Controls** — extract high-level editing knobs from the properties above.
 5. **disableWhen** — declare media conditions that disable the experience.
 6. **Metadata** — add category and tags last.
@@ -1745,21 +1850,24 @@ An experience must pass the following checks before it is considered valid:
 
 ### Structural Validation
 
-| Rule                | Check                                                         |
-| ------------------- | ------------------------------------------------------------- |
-| Schema              | `$schema` is `'interact-experience/1.0'`.                     |
-| Required fields     | `id`, `name`, `elements`, `interact`, `controls` are present. |
-| Unique element keys | No duplicate keys in the `elements` map.                      |
-| Selectors present   | Every `ElementEntry` has a non-empty `selector`.              |
-| No `customEffect`   | No effect uses the `customEffect` property.                   |
+| Rule                    | Check                                                                     |
+| ----------------------- | ------------------------------------------------------------------------- |
+| Schema                  | `$schema` is `'interact-experience/1.0'`.                                 |
+| Required fields         | `id`, `name`, `elements`, `interact`, `controls` are present.             |
+| Unique element keys     | No duplicate keys in the `elements` map.                                  |
+| Selectors present       | Every `ElementEntry` has a non-empty `selector`.                          |
+| No `customEffect`       | No effect uses the `customEffect` property.                               |
+| No function offsetEasing | No sequence uses a function for `offsetEasing` (only string easing names). |
 
 ### Referential Integrity
 
 | Rule              | Check                                                                                                                                                                     |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Interaction keys  | Every `key` in an interaction exists in the `elements` map.                                                                                                               |
-| Effect IDs        | Every `effectId` referenced in an interaction exists in `interact.effects`.                                                                                               |
-| Conditions        | Every condition name referenced exists in `interact.conditions`.                                                                                                          |
+| Effect IDs        | Every `effectId` referenced in an interaction or sequence exists in `interact.effects`.                                                                                   |
+| Sequence IDs      | Every `sequenceId` referenced in an interaction exists in `interact.sequences`.                                                                                           |
+| Conditions        | Every condition name referenced (in interactions, effects, or sequences) exists in `interact.conditions`.                                                                 |
+| Effects or seqs   | Every interaction has at least one of `effects` or `sequences`.                                                                                                           |
 | Control targets   | Every `targetId` in a control binding resolves to an existing target (element key, effect key, style selector, or interaction id). Does not apply to `variable` bindings. |
 | Style selectors   | Every `targetId` with `target: 'style'` matches a `selector` in the `styles` array.                                                                                       |
 | Variable names    | Every `targetId` with `target: 'variable'` is a valid CSS custom property name (starts with `--`).                                                                        |
@@ -1804,7 +1912,8 @@ This section sketches how a renderer would consume an experience. It is not norm
                        Element styles and style rules may reference CSS
                        custom properties set in step 2 via var() / calc().
 5. Init Interact    → Register required named effects from @wix/motion-presets.
-                       Call Interact.create(config).
+                       Build InteractConfig from effects, sequences, conditions,
+                       and interactions. Call Interact.create(config).
                        Call add() for each element that was found.
 6. Controls UI      → Render the controls panel from the controls array.
                        On change, re-apply step 2 and update the live
@@ -1819,11 +1928,10 @@ This section sketches how a renderer would consume an experience. It is not norm
 ## Open Questions
 
 | #   | Question                                                                                                                    | Options                                                                                                       |
-| --- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ---------- |
+| --- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | 1   | Should experiences support **nested composition** (embedding one experience inside another)?                                | Could add a `children` field that references other experience IDs.                                            |
 | 2   | Should controls support **conditional visibility** (show control B only when control A is set to X)?                        | Could add a `visibleWhen` field to controls.                                                                  |
 | 3   | Should the `styles` array support **CSS animations and transitions** directly, or should all animation go through Interact? | Keeping all motion in Interact is cleaner, but CSS transitions for simple hover states may be more practical. |
-| 4   | How should **sequences/staggering** (per the existing sequences-spec) integrate with this model?                            | Could be expressed through the existing `sequences` proposal on `InteractConfig`.                             |
-| 5   | Should there be a **compact binary format** for storage/transfer alongside the JSON format?                                 | JSON is fine for v1; binary can be added later if size becomes an issue.                                      |
-| 6   | Should `disableWhen` support non-media conditions (e.g. feature detection, user preference flags)?                          | Could extend `MediaCondition` to a union with other condition types.                                          |
-| 7   | Should element entries support **multiple selectors** (e.g. for selecting the same logical element across layout variants)? | Could allow `selector` to be `string                                                                          | string[]`. |
+| 4   | Should there be a **compact binary format** for storage/transfer alongside the JSON format?                                 | JSON is fine for v1; binary can be added later if size becomes an issue.                                      |
+| 5   | Should `disableWhen` support non-media conditions (e.g. feature detection, user preference flags)?                          | Could extend `MediaCondition` to a union with other condition types.                                          |
+| 6   | Should element entries support **multiple selectors** (e.g. for selecting the same logical element across layout variants)? | Could allow `selector` to be `string \| string[]`.                                                            |
