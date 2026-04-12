@@ -63,7 +63,7 @@ Use `keyframeEffect` or `namedEffect` when the click should play an animation (C
   - `'state'` — resumes/pauses the animation on each click. Useful for continuous loops (`iterations: Infinity`).
 - `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
 - `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
-- `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built, timeb-based animation effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.
+- `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built, time-based animation effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.
 - `[FILL_MODE]` - optional. Always `'both'` with `type: 'alternate'` or `'repeat'`, otherwise depends on the effect.
 - `[INITIAL_REVERSED_BOOL]` — optional. `true` to start in the finished state so the entire effect is reversed.
 - `[DURATION_MS]` — animation duration in milliseconds.
@@ -194,4 +194,4 @@ Use sequences when a click should sync/stagger animations across multiple elemen
 - `[SOURCE_KEY]` / `[EVENT_TRIGGER_TYPE]` — same as Rule 1.
 - `[OFFSET_MS]` — time offset for staggering each child's animation start, in milliseconds.
 - `[OFFSET_EASING]` — easing curve for the offset staggering distribution. Defaults to `'linear'`.
-- `[EFFECT_DEFINTION]` — a definition of or a reference to a time-based animation effect.
+- `[EFFECT_DEFINTION]` — a definition of, or a reference to a time-based animation effect.

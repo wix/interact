@@ -602,7 +602,7 @@ The target element is what the effect animates. Resolved in priority order:
 
 1. **`Effect.key`** — the `<interact-element>` with matching `data-interact-key`.
 2. **Registry Effect's `key`** — if the effect is an `EffectRef`, the `key` from the referenced registry entry is used.
-3. **Fallback to `Interaction.key`** — the source element acts as the target.
+3. **Fallback to `Interaction.key`** — the same `key` is used for the source will be used for the target.
 4. After resolving the root target, `selector`, `listContainer`, and `listItemSelector` on the effect further refine which child elements within that target are animated (same priority order as source resolution).
 
 ---
