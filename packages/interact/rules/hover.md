@@ -198,5 +198,5 @@ Use sequences when a hover should sync/stagger animations across multiple elemen
 
 - `[SOURCE_KEY]` / `[EVENT_TRIGGER_TYPE]` — same as Rule 1.
 - `[OFFSET_MS]` — time offset for staggering each child's animation start, in milliseconds.
-- `[OFFSET_EASING]` — easing curve for the offset staggering distribution. Defaults to `'linear'`.
+- `[OFFSET_EASING]` — easing curve for the offset staggering distribution. CSS easing string, or named easing from `@wix/motion`. Defaults to `'linear'`.
 - `[EFFECT_DEFINTION]` — a definition of or a reference to a time-based animation effect.

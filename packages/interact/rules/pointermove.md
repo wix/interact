@@ -132,16 +132,7 @@ Use pre-built mouse presets from `@wix/motion-presets` that handle 2D mouse trac
 - `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for web, `interactKey` for React). The element that tracks pointer movement.
 - `[TARGET_KEY]` — identifier matching the element's key on the element to animate (can be same as source or different).
 - `[HIT_AREA]` — `'self'` (track pointer within source element) or `'root'` (track pointer anywhere in viewport).
-- `[NAMED_EFFECT_TYPE]` — preset name from `@wix/motion-presets` mouse category:
-  - `'TrackMouse'` — follows the cursor with direct translation.
-  - `'Tilt3DMouse'` — tilts in 3D based on cursor position.
-  - `'Track3DMouse'` — translates and tilts in 3D following the cursor.
-  - `'SwivelMouse'` — tilts in 3D around a chosen pivot axis.
-  - `'AiryMouse'` — floats and rotates gently following the cursor.
-  - `'ScaleMouse'` — translates and scales uniformly following the cursor.
-  - `'BlurMouse'` — translates, tilts, scales, and blurs based on cursor distance.
-  - `'SkewMouse'` — translates and skews following the cursor.
-  - `'BlobMouse'` — translates and scales non-uniformly, creating a liquid-like deformation.
+- `[NAMED_EFFECT_TYPE]` — a registered effect name, or a preset from `@wix/motion-presets` `mouse` library.
 - `[EFFECT_PROPERTIES]` — preset-specific options. Refer to motion-presets rules for each preset's available options and their value types. Do NOT guess preset option names or types; omit unknown options and rely on defaults.
 - `[CENTERED_TO_TARGET]` — `true` or `false`. See **Centering with `centeredToTarget`** above.
 - `[TRANSITION_DURATION_MS]` — optional number. Milliseconds for smoothing (interpolating) between progress updates. The animation does not jump to the new progress value instantly; instead it transitions over this duration. Use to add inertia/lag to the effect, making it feel more physical (e.g. `200`–`600`).
