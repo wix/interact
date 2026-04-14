@@ -13,11 +13,14 @@ import type {
   SequenceConfigRef
 } from '../types';
 import {
+  isTemplatedKey,
+  kebabCustomProp,
   createStateRuleAndCSSTransitions,
   generateId,
   getFullPredicateByType,
   getSelectorCondition,
   applySelectorCondition,
+  calculateSequenceEffectsOffsets
 } from '../utils';
 import { getSelector } from './Interact';
 import { keyframesToCSS } from './utilities';
@@ -88,30 +91,6 @@ type ListCustomProps = {
   childSelector?: string;
   statePropsToInvalidate: Set<string>;
 } & Record <ListPropName, string>;
-
-function isTemplatedKey(key: string) {
-  return /\[]/g.test(key);
-}
-
-function kebabCustomProp(args: (string | number)[]) {
-  return `--${args.join('-')}`;
-}
-
-function calculateSequenceEffectsOffsets(
-  effects: ((ResolvedEffect & { delay?: number }) | null)[],
-  delay: number,
-  offset: number,
-  offsetEasing: (p: number) => number,
-) : void {
-  const maxIndex = effects.length - 1;
-
-  effects.forEach((effect, index) => {
-    if (effect) {
-      const safeOffset = index ? (offsetEasing(index / maxIndex) * maxIndex * offset) | 0 : 0;
-      effect.delay = delay + safeOffset + (effect.delay || 0);
-    }
-  });
-}
 
 function resolveEffectForCSS(
   effect: Effect | EffectRef,

@@ -5,6 +5,30 @@ export function roundNumber(num: number, precision = 2): number {
   return parseFloat(num.toFixed(precision));
 }
 
+export function isTemplatedKey(key: string) {
+  return /\[]/g.test(key);
+}
+
+export function kebabCustomProp(args: (string | number)[]) {
+  return `--${args.join('-')}`;
+}
+
+export function calculateSequenceEffectsOffsets(
+  effects: ((any & { delay?: number }) | null)[],
+  delay: number,
+  offset: number,
+  offsetEasing: (p: number) => number,
+) : void {
+  const maxIndex = effects.length - 1;
+
+  effects.forEach((effect, index) => {
+    if (effect) {
+      const safeOffset = index ? (offsetEasing(index / maxIndex) * maxIndex * offset) | 0 : 0;
+      effect.delay = delay + safeOffset + (effect.delay || 0);
+    }
+  });
+}
+
 /**
  * Applies a selector condition predicate to a base selector.
  * - If `&` is in the predicate, replace `&` with the base selector

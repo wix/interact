@@ -13,4 +13,3 @@ test/e2e/screenshots
 .yo-rc.json
 .env*.local
 storybook-static
-.vscode
