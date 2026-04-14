@@ -1,5 +1,5 @@
 import { getEasing } from '@wix/motion';
-import type { Condition, CreateTransitionCSSParams } from './types';
+import type { EffectBase, Condition, TransitionEffect } from './types';
 
 export function roundNumber(num: number, precision = 2): number {
   return parseFloat(num.toFixed(precision));
@@ -51,16 +51,8 @@ export function generateId() {
   );
 }
 
-export function createStateRuleAndCSSTransitions({
-  effectId,
-  transition,
-  properties,
-  childSelector = '> :first-child',
-  selectorCondition,
-}: CreateTransitionCSSParams): {
-  stateRule: string;
-  transitions: string[];
-} {
+export function transitionEffectToTransitionsList(transitionEffect: TransitionEffect) {
+  let { transition, transitionProperties } = transitionEffect;
   let transitions: string[] = [];
 
   if (transition?.styleProperties) {
@@ -87,10 +79,10 @@ export function createStateRuleAndCSSTransitions({
       }
     }
 
-    properties = transition.styleProperties;
+    transitionProperties = transition.styleProperties;
   } else {
     transitions =
-      properties
+      transitionProperties
         ?.filter((property) => property.duration)
         .map(
           (property) =>
@@ -100,8 +92,23 @@ export function createStateRuleAndCSSTransitions({
         ) || [];
   }
 
-  const styleProperties =
-    properties?.map((property) => `${property.name}: ${property.value};`) || [];
+  return transitions;
+}
+
+export function createTransitionCSS({
+  key,
+  effectId,
+  transition,
+  transitionProperties,
+  childSelector = '> :first-child',
+  selectorCondition,
+}: EffectBase & TransitionEffect & {key: string; effectId: string; childSelector?: string; selectorCondition?: string}): string[] {
+  const transitions: string[] = transitionEffectToTransitionsList({ transition, transitionProperties });
+
+  const styleProperties = (transition?.styleProperties || transitionProperties)?.map(
+    (property) => `${property.name}: ${property.value};`
+  ) || [];
+  const escapedKey = key.replace(/"/g, "'");
 
   // Build selectors, applying condition if present
   const stateSelector = `:where(:state(${effectId}), :--${effectId}) ${childSelector}`;
@@ -114,34 +121,14 @@ export function createStateRuleAndCSSTransitions({
     ? applySelectorCondition(dataAttrSelector, selectorCondition)
     : dataAttrSelector;
 
-  const stateRule = `${finalStateSelector},
+  const result = [
+    `${finalStateSelector},
     ${finalDataAttrSelector} {
       ${styleProperties.join(`
       `)}
-    }`;
+    }`,
+  ];
 
-  return { stateRule, transitions };
-}
-
-export function createTransitionCSS({
-  key,
-  effectId,
-  transition,
-  properties,
-  childSelector = '> :first-child',
-  selectorCondition,
-}: CreateTransitionCSSParams): string[] {
-  const { stateRule, transitions } = createStateRuleAndCSSTransitions({
-    key,
-    effectId,
-    transition,
-    properties,
-    childSelector,
-    selectorCondition,
-  });
-  const result = [stateRule];
-
-  const escapedKey = key.replace(/"/g, "'");
   if (transitions.length) {
     const transitionSelector = `[data-interact-key="${escapedKey}"] ${childSelector}`;
     const finalTransitionSelector = selectorCondition

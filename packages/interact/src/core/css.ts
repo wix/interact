@@ -15,7 +15,7 @@ import type {
 import {
   isTemplatedKey,
   kebabCustomProp,
-  createStateRuleAndCSSTransitions,
+  transitionEffectToTransitionsList,
   generateId,
   getFullPredicateByType,
   getSelectorCondition,
@@ -345,7 +345,7 @@ function effectToCSS(
     });
   } else if (transition || transitionProperties) {
     const properties = (transition?.styleProperties || transitionProperties || []);
-    const { transitions } = createStateRuleAndCSSTransitions(effect);
+    const transitions = transitionEffectToTransitionsList(effect);
 
     // accumulating props affected by transition
     const stateProps = properties.map(({name}) => `--${name}-${elementHashToCustomPropSuffix(targetHash)}`);
