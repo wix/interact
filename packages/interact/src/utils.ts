@@ -1,26 +1,8 @@
 import { getEasing } from '@wix/motion';
-import type { TriggerType, Condition, CreateTransitionCSSParams } from './types';
-
-export function isTimeTrigger(trigger: TriggerType): boolean {
-  return !['viewProgress', 'pointerMove'].includes(trigger);
-}
+import type { Condition, CreateTransitionCSSParams } from './types';
 
 export function roundNumber(num: number, precision = 2): number {
   return parseFloat(num.toFixed(precision));
-}
-
-export function shortestRepeatingPatternLength(values: string[] | number[]): number {
-  let patternLength = 1;
-  let index = 1;
-  while (index < values.length) {
-    if (values[index] === values[index % patternLength]) {
-      index++;
-    } else {
-      patternLength = Math.max(index - patternLength, patternLength) + 1;
-      index = patternLength;
-    }
-  }
-  return patternLength;
 }
 
 /**
@@ -98,7 +80,7 @@ export function createStateRuleAndCSSTransitions({
     properties?.map((property) => `${property.name}: ${property.value};`) || [];
 
   // Build selectors, applying condition if present
-  const stateSelector = `:is(:state(${effectId}), :--${effectId}) ${childSelector}`;
+  const stateSelector = `:where(:state(${effectId}), :--${effectId}) ${childSelector}`;
   const dataAttrSelector = `[data-interact-effect~="${effectId}"] ${childSelector}`;
 
   const finalStateSelector = selectorCondition
@@ -185,7 +167,7 @@ export function getSelectorCondition(
       return conditions[conditionName]?.type === 'selector' && conditions[conditionName].predicate;
     })
     .map((conditionName) => {
-      return `:is(${conditions[conditionName].predicate})`;
+      return `:where(${conditions[conditionName].predicate})`;
     })
     .join('');
 }
