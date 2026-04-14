@@ -42,7 +42,7 @@ type PointerMoveParams = {
 - `axis` — restricts pointer tracking to a single axis. Used with `keyframeEffect` to map one axis to 0–1 progress; ignored by `namedEffect` and `customEffect` which receive the full 2D progress:
   - `'x'` — maps horizontal pointer position to 0–1 progress for keyframe interpolation.
   - `'y'` — maps vertical pointer position to 0–1 progress for keyframe interpolation. **Default** when `keyframeEffect` is used.
-  - When omitted with `namedEffect` or `customEffect`, both axes are available via the 2D progress object.
+  - For `namedEffect` or `customEffect` both axes are available via the 2D progress object, and will be ignored.
 
 ---
 

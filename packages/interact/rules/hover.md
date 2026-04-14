@@ -4,10 +4,7 @@ This document contains rules for generating hover-triggered interactions in `@wi
 
 **CRITICAL — Accessible hover**: Use `trigger: 'interest'` instead of `trigger: 'hover'` to also respond to keyboard focus.
 
-**CRITICAL — Hit-area shift**: To avoid flickering, use a **separate source and target elements** when the effect changes size or position:
-
-- source element: the element that triggering event is attached to.
-- target element: — the inner element that actually animates.
+- **CRITICAL**: MUST AVOID using the same element as both trigger source and effect target with effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
 
 ## Table of Contents
 

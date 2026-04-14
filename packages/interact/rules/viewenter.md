@@ -88,8 +88,8 @@ const css = generate(config);
 ### Rules
 
 - `generate()` should be called server-side or at build time. Can also be called on the client if the page content is initially hidden (e.g. behind a loader/splash screen).
-- Only valid for `viewEnter` + `params.type: 'once'` where source and target are the same element.
-- Do NOT use for `viewEnter` with `repeat`/`alternate`/`state` types. For those, manually apply the initial keyframe as inline styles on the target element and use `fill: 'both'`.
+- `initial` is only valid for `viewEnter` + `params.type: 'once'` where source and target are the same element.
+- Do NOT use `initial` for `viewEnter` with `repeat`/`alternate`/`state` types. For those, manually apply the initial keyframe as inline styles on the target element and use `fill: 'both'`.
 - If other interactions in the config also need FOUC prevention, `generate(config)` covers them all — set `initial` only on the relevant `viewEnter` + `type: 'once'` elements.
 
 ## Rule 1: keyframeEffect / namedEffect with ViewEnterParams
@@ -186,7 +186,7 @@ Use `customEffect` when you need imperative control over the animation (e.g. cou
 ### Variables
 
 - `[SOURCE_KEY]` / `[TARGET_KEY]` / `[VIEW_ENTER_TYPE]` / `[VISIBILITY_THRESHOLD]` / `[VIEWPORT_INSETS]` / `[DURATION_MS]` / `[EASING_FUNCTION]` / `[UNIQUE_EFFECT_ID]` — same as Rule 1.
-- `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with `progress` from 0 to 1.
+- `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with `element` being the target element, and `progress` from 0 to 1.
 
 ---
 

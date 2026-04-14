@@ -1,6 +1,6 @@
 # ViewProgress Trigger Rules for @wix/interact
 
-These rules help generate scroll-driven interactions using `@wix/interact`. ViewProgress triggers create animations that update continuously as elements move through the viewport, leveraging native CSS ViewTimelines. Use when animation progress should be tied to the element's scroll position.
+These rules help generate scroll-driven interactions using `@wix/interact`. ViewProgress triggers create animations that update continuously as elements move through the viewport, leveraging native CSS ViewTimelines where supported, and using a polyfill library where unsupported. Use when animation progress should be tied to the element's scroll position.
 
 > **CRITICAL:** You MUST replace all usage of `overflow: hidden` with `overflow: clip` on every element between the trigger source element and the scroll container. `overflow: hidden` creates a new scroll context that breaks the ViewTimeline; `overflow: clip` clips overflow visually without affecting scroll ancestry. If using Tailwind, replace all `overflow-hidden` classes with `overflow-clip`.
 
@@ -48,7 +48,7 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 ### Variables
 
 - `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for web, `interactKey` for React). The element whose scroll position drives the animation.
-- `[TARGET_KEY]` — identifier matching the element's key on the element to animate (can be same as source or different).
+- `[TARGET_KEY]` — identifier matching the element's key (`data-interact-key` for web, `interactKey` for React) on the element to animate (can be same as source or different).
 - `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built effect from `@wix/motion-presets`. **CRITICAL:** Scroll presets (`*Scroll`) MUST include `range: 'in' | 'out' | 'continuous'` in their options. `'in'` ends at the idle state, `'out'` starts from the idle state, `'continuous'` passes through it.
 - `[EFFECT_NAME]` — unique name for custom keyframe effect.
 - `[EFFECT_KEYFRAMES]` — array of keyframe objects defining CSS property values (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.

@@ -220,7 +220,7 @@ params: {
 
 ### viewProgress
 
-Scroll-driven animations using native `ViewTimeline`. Progress is driven by scroll position. Control the range via `rangeStart`/`rangeEnd` on the effect (see [Scroll / Pointer-driven Effect](#scroll--pointer-driven-effect)).
+Scroll-driven animations using native `ViewTimeline`, with polyfill where not supported. Progress is driven by scroll position. Control the range via `rangeStart`/`rangeEnd` on the effect (see [Scroll / Pointer-driven Effect](#scroll--pointer-driven-effect)).
 
 `viewProgress` has no trigger params. Range configuration (`rangeStart`/`rangeEnd`) is on the effect, not on the trigger.
 
@@ -277,8 +277,8 @@ Each effect applies a visual change to a target element. An effect is either inl
   key?: string;              // target element key; omit to target the source
   effectId?: string;         // reference to effects registry (EffectRef)
   conditions?: string[];     // ids referencing the top-level conditions map; all must pass
-  selector?: string;         // CSS selector to refine target
-  listContainer?: string;
+  selector?: string;         // optional — CSS selector to refine target element
+  listContainer?: string;    // optional — CSS selector for list container
   listItemSelector?: string; // optional — filter which children of listContainer are selected
   composite?: 'replace' | 'add' | 'accumulate';
   fill?: 'none' | 'forwards' | 'backwards' | 'both';
@@ -295,6 +295,10 @@ Each effect applies a visual change to a target element. An effect is either inl
 - `'replace'` (default): fully replaces prior values.
 - `'add'`: concatenates transform/filter functions after any existing ones (e.g. existing `translateX(10px)` + added `translateY(20px)` → both apply).
 - `'accumulate'`: merges arguments of matching functions (e.g. `translateX(10px)` + `translateX(20px)` → `translateX(30px)`); non-matching functions concatenate like `'add'`.
+
+**`easing` guidance:** from `@wix/motion` (in addition to standard CSS easings):
+
+`'linear'`, `'ease'`, `'ease-in'`, `'ease-out'`, `'ease-in-out'`, `'sineIn'`, `'sineOut'`, `'sineInOut'`, `'quadIn'`, `'quadOut'`, `'quadInOut'`, `'cubicIn'`, `'cubicOut'`, `'cubicInOut'`, `'quartIn'`, `'quartOut'`, `'quartInOut'`, `'quintIn'`, `'quintOut'`, `'quintInOut'`, `'expoIn'`, `'expoOut'`, `'expoInOut'`, `'circIn'`, `'circOut'`, `'circInOut'`, `'backIn'`, `'backOut'`, `'backInOut'`, or any `'cubic-bezier(...)'` / `'linear(...)'` string.
 
 ### Time-based Effect
 
@@ -313,10 +317,6 @@ Used with `hover`, `click`, `viewEnter`, `animationEnd` triggers.
   // + exactly one animation payload (see below)
 }
 ```
-
-**Named easings** from `@wix/motion` (in addition to standard CSS easings):
-
-`'linear'`, `'ease'`, `'ease-in'`, `'ease-out'`, `'ease-in-out'`, `'sineIn'`, `'sineOut'`, `'sineInOut'`, `'quadIn'`, `'quadOut'`, `'quadInOut'`, `'cubicIn'`, `'cubicOut'`, `'cubicInOut'`, `'quartIn'`, `'quartOut'`, `'quartInOut'`, `'quintIn'`, `'quintOut'`, `'quintInOut'`, `'expoIn'`, `'expoOut'`, `'expoInOut'`, `'circIn'`, `'circOut'`, `'circInOut'`, `'backIn'`, `'backOut'`, `'backInOut'`, or any `'cubic-bezier(...)'` / `'linear(...)'` string.
 
 ### Scroll / Pointer-driven Effect
 
@@ -490,10 +490,10 @@ Coordinate multiple effects with staggered timing. Prefer sequences over manual 
 - `[TRIGGER]` — any trigger for time-based animation effects (e.g., `'viewEnter'`, `'activate'`, `'interest'`).
 - `[TRIGGER_PARAMS]` — trigger-specific parameters (e.g., `{ type: 'once', threshold: 0.3 }`).
 - `[OFFSET_MS]` — ms between each child's animation start.
-- `[OFFSET_EASING]` — easing curve for staggering offsets. One of: `'linear'`, `'quadIn'`, `'quadOut'`, `'sineOut'`, `'cubicIn'`, `'cubicOut'`, `'cubicInOut'`, `'cubic-bezier(...)'`, or `'linear(...)'`.
+- `[OFFSET_EASING]` — CSS easing string or named easing from `@wix/motion`.
 - `[DELAY_MS]` — optional. Base delay (ms) before the entire sequence starts.
 - `[EFFECT_ID]` — string key referencing an entry in the top-level `effects` map.
-- `[LIST_CONTAINER_SELECTOR]` — CSS selector for the container whose children will be staggered.
+- `[LIST_CONTAINER_SELECTOR]` — optional. CSS selector for the container whose children will be staggered.
 
 Reusable sequences can be defined in `InteractConfig.sequences` and referenced by `sequenceId`.
 
