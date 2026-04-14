@@ -57,18 +57,18 @@ export class Interact {
     this.controllers = new Set();
   }
 
-  init(config: InteractConfig, options?: { useCutsomElement?: boolean }): void {
+  init(config: InteractConfig, options?: { useCustomElement?: boolean }): void {
     if (typeof window === 'undefined' || !window.customElements) {
       return;
     }
 
-    const useCutsomElement = options?.useCutsomElement ?? !!Interact.defineInteractElement;
+    const useCustomElement = options?.useCustomElement ?? !!Interact.defineInteractElement;
 
-    this.dataCache = parseConfig(config, useCutsomElement);
+    this.dataCache = parseConfig(config, useCustomElement);
 
     const defined = Interact.defineInteractElement?.();
 
-    if (useCutsomElement && defined === false) {
+    if (useCustomElement && defined === false) {
       // mostly to recover from React's <StrictMode>, blah...
       document.querySelectorAll('interact-element').forEach((element) => {
         (element as IInteractElement).connect();
@@ -171,7 +171,7 @@ export class Interact {
     });
   }
 
-  static create(config: InteractConfig, options?: { useCutsomElement?: boolean }): Interact {
+  static create(config: InteractConfig, options?: { useCustomElement?: boolean }): Interact {
     const instance = new Interact();
     Interact.instances.push(instance);
 
@@ -370,7 +370,7 @@ function _ensureInteractionEntry(
   return interactions[key];
 }
 
-function parseConfig(config: InteractConfig, useCutsomElement: boolean = false): InteractCache {
+function parseConfig(config: InteractConfig, useCustomElement: boolean = false): InteractCache {
   const conditions = config.conditions || {};
   const interactions: InteractCache['interactions'] = {};
 
@@ -418,7 +418,7 @@ function parseConfig(config: InteractConfig, useCutsomElement: boolean = false):
 
     interactions[source].triggers.push(interaction);
     interactions[source].selectors.add(
-      getSelector(interaction, { useFirstChild: useCutsomElement }),
+      getSelector(interaction, { useFirstChild: useCustomElement }),
     );
 
     const listContainer = interaction.listContainer;
@@ -475,7 +475,7 @@ function parseConfig(config: InteractConfig, useCutsomElement: boolean = false):
       }
 
       targetEntry.effects[interactionId].push({ ...rest, effect });
-      targetEntry.selectors.add(getSelector(effect, { useFirstChild: useCutsomElement }));
+      targetEntry.selectors.add(getSelector(effect, { useFirstChild: useCustomElement }));
     });
 
     // Process sequence effects for selector tracking and cross-element referencing
@@ -513,7 +513,7 @@ function parseConfig(config: InteractConfig, useCutsomElement: boolean = false):
             ...rest,
             sequence: sequenceConfig,
           });
-          targetEntry.selectors.add(getSelector(effect, { useFirstChild: useCutsomElement }));
+          targetEntry.selectors.add(getSelector(effect, { useFirstChild: useCustomElement }));
         }
       }
     });

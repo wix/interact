@@ -18,7 +18,6 @@ describe('Spin', () => {
         {
           name: 'motion-spin-1',
           easing: 'linear',
-          delay: 0,
           duration: 1000,
           custom: {
             '--motion-rotate-start': 'calc(var(--motion-rotate, 0deg) + -360deg)',
@@ -44,20 +43,18 @@ describe('Spin', () => {
 
     test('Spin animation with custom duration, delay, and easing', () => {
       const duration = 1000;
-      const delay = 500;
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration,
-        delay,
         easing: 'quintInOut',
-        namedEffect: {} as Spin,
+        namedEffect: { iterationDelay: 500 } as Spin,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
         {
           name: 'motion-spin-067',
           easing: 'linear',
-          delay: 0,
+          namedEffect: { iterationDelay: 500 } as Spin,
           duration: 1500,
           custom: {
             '--motion-rotate-start': 'calc(var(--motion-rotate, 0deg) + -360deg)',
@@ -127,7 +124,6 @@ describe('Spin', () => {
         {
           name: 'motion-spin-1',
           easing: 'linear',
-          delay: 0,
           duration: 1000,
           custom: {
             '--motion-rotate-start': 'calc(var(--motion-rotate, 0deg) + -360deg)',
@@ -153,19 +149,17 @@ describe('Spin', () => {
 
     test('Spin.style animation with custom duration and delay', () => {
       const duration = 800;
-      const delay = 200;
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration,
-        delay,
-        namedEffect: {} as Spin,
+        namedEffect: { iterationDelay: 200 } as Spin,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
         {
           name: 'motion-spin-08',
           easing: 'linear',
-          delay: 0,
+          namedEffect: { iterationDelay: 200 } as Spin,
           duration: 1000,
           custom: {
             '--motion-rotate-start': 'calc(var(--motion-rotate, 0deg) + -360deg)',

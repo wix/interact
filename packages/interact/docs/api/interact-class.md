@@ -20,7 +20,7 @@ import { Interact } from '@wix/interact';
 ```typescript
 class Interact {
   // Static methods
-  static create(config: InteractConfig, options?: { useCutsomElement?: boolean }): Interact;
+  static create(config: InteractConfig, options?: { useCustomElement?: boolean }): Interact;
   static getInstance(key: string): Interact | undefined;
   static destroy(): void;
   static setup(options: {
@@ -33,7 +33,7 @@ class Interact {
   static getController(key: string | undefined): IInteractionController | undefined;
 
   // Instance methods
-  init(config: InteractConfig, options?: { useCutsomElement?: boolean }): void;
+  init(config: InteractConfig, options?: { useCustomElement?: boolean }): void;
   destroy(): void;
   has(key: string): boolean;
   get(key: string): InteractCache['interactions'][string] | undefined;
