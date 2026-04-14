@@ -1,233 +1,98 @@
 # @wix/interact Integration Rules
 
-This document outlines the rules and best practices for generating code that integrates `@wix/interact` into a webpage.
+Rules for integrating `@wix/interact` into a webpage — binding animations and effects to user-driven triggers via declarative configuration.
 
-## 1. Overview
+## Table of Contents
 
-`@wix/interact` is a library for creating interactive animations and effects triggered by user actions (click, hover, scroll, etc.). It works by binding **Triggers** and **Effects** to specific **Elements**.
+- [Entry Points](#entry-points)
+  - [Web (Custom Elements)](#web-custom-elements)
+  - [React](#react)
+  - [Vanilla JS](#vanilla-js)
+- [Named Effects & registerEffects](#named-effects--registereffects)
+- [Configuration Schema](#configuration-schema)
+  - [InteractConfig](#interactconfig)
+  - [Interaction](#interaction)
+  - [Element Selection](#element-selection)
+- [Triggers](#triggers)
+- [Sequences](#sequences)
+- [Critical CSS (FOUC Prevention)](#critical-css-fouc-prevention)
+- [Static API](#static-api)
 
-## 2. Integrations
+---
 
-### `web` :: using Custom Elements
+## Entry Points
 
-#### 1. Basic Setup
+Install with your package manager:
 
-**Usage:**
+```bash
+npm install @wix/interact @wix/motion-presets
+```
+
+### Web (Custom Elements)
 
 ```typescript
 import { Interact } from '@wix/interact/web';
 
-// Define your interaction configuration
-const config = {
-  interactions: [
-    // ...
-  ],
-  effects: {
-    // ...
-  },
-};
-
-// Initialize the interact instance
-const interact = Interact.create(config);
+Interact.create(config);
 ```
 
-#### 2. HTML Setup
+The `config` object contains `interactions` (trigger-effect bindings), and optionally `effects`, `sequences`, and `conditions`. See [Configuration Schema](#configuration-schema) for full details.
 
-**Rules:**
-
-- MUST have a `data-interact-key` attribute with a value that is unique within the scope.
-- MUST contain at least one child element.
-
-**Usage:**
+Wrap target elements with `<interact-element>`:
 
 ```html
-<!-- Wrap your target element with interact-element -->
-<interact-element data-interact-key="my-element">
-  <div>This will fade in when it enters the viewport!</div>
+<interact-element data-interact-key="hero">
+  <section class="hero">...</section>
 </interact-element>
 ```
 
-### `react` :: using React
+**Rules:**
 
-#### 1. Basic Setup
+- MUST set `data-interact-key` to a unique string within the page.
+- MUST contain at least one child element (the library targets `.firstElementChild` by default).
 
-**Usage:**
+### React
 
 ```typescript
 import { Interact } from '@wix/interact/react';
 
-// Define your interaction configuration
-const config = {
-  interactions: [
-    // ...
-  ],
-  effects: {
-    // ...
-  },
-};
-
-// Initialize the interact instance
-const interact = Interact.create(config);
+Interact.create(config);
 ```
 
-#### 2. HTML Setup
-
-**Rules:**
-
-- MUST replace the element itself with the `<Interaction/>` component.
-- MUST set the `tagName` prop with the tag of the replaced element.
-- MUST set the `interactKey` prop to a unique string within the scope.
-
-**Usage:**
+Replace target elements with `<Interaction>`:
 
 ```tsx
 import { Interaction } from '@wix/interact/react';
 
-function MyComponent() {
-  return (
-    <Interaction tagName="div" interactKey="my-element" className="animated-content">
-      Hello, animated world!
-    </Interaction>
-  );
-}
+<Interaction tagName="div" interactKey="hero" className="hero">
+  ...
+</Interaction>;
 ```
-
-## 3. Configuration Schema
-
-The `InteractConfig` object defines the behavior.
-
-```typescript
-type InteractConfig = {
-  interactions: Interaction[]; // Required: Array of interaction definitions
-  effects?: Record<string, Effect>; // Optional: Reusable named effects
-  sequences?: Record<string, SequenceConfig>; // Optional: Reusable sequence definitions
-  conditions?: Record<string, Condition>; // Optional: Reusable conditions (media queries)
-};
-```
-
-### Interaction Definition
-
-```typescript
-{
-  key: 'element-key',              // Matches data-interact-key
-  trigger: 'trigger-type',         // e.g., 'hover', 'click'
-  selector?: '.child-cls',         // Optional: CSS selector to refine target within the element
-  listContainer?: '.list',         // Optional: CSS selector for a list container (enables list context)
-  listItemSelector?: '.item',      // Optional: CSS selector for items within listContainer
-  params?: { ... },                // Trigger-specific parameters
-  conditions?: ['cond-id'],        // Array of condition IDs
-  effects?: [ ... ],               // Array of effects to apply
-  sequences?: [ ... ]              // Array of sequences (coordinated staggered effects)
-}
-```
-
-### Element Selection Hierarchy
-
-1. **`listContainer` + `listItemSelector`**: Selects matching items within the container as list items.
-2. **`listContainer` only**: Targets immediate children of the container as list items.
-3. **`selector` only**: Matches all elements within the root element (using `querySelectorAll`).
-4. **Fallback**: If none are provided, targets the **first child** of `<interact-element>` in `web` or the root element in `react`.
-
-## 4. Generating Critical CSS for Entrance Animations
-
-### `generate(config)`
-
-Generates critical CSS styles that prevent flash-of-unstyled-content (FOUC) for elements with `viewEnter` entrance animations.
 
 **Rules:**
 
-- MUST be called server-side or at build time to generate static CSS.
-- MUST set `data-interact-initial="true"` on the `<interact-element>` whose first child should be hidden until the animation plays.
-- Only valid when: trigger is `viewEnter` + `params.type` is `'once'` + source element and target element are the same.
-- Do NOT use for `hover`, `click`, or `viewEnter` with `repeat`/`alternate`/`state` types.
+- MUST set `tagName` to a valid HTML tag string for the element being replaced.
+- MUST set `interactKey` to a unique string within the page.
 
-**Usage:**
-
-```javascript
-import { generate } from '@wix/interact/web';
-
-const config = {
-  /*...*/
-};
-
-// Generate CSS at build time or on server
-const css = generate(config);
-
-// Include in your HTML template
-const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <style>${css}</style>
-</head>
-<body>
-    <interact-element data-interact-key="hero" data-interact-initial="true">
-        <section class="hero">
-            ...
-        </section>
-    </interact-element>
-    <script type="module" src="./main.js"></script>
-</body>
-</html>
-`;
-```
-
-## 5. Triggers & Behaviors
-
-| Trigger        | Description                                     | Key Parameters                                                                                                            | Rules File          |
-| :------------- | :---------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ | :------------------ |
-| `hover`        | Mouse enter/leave                               | `type`: 'once', 'alternate', 'repeat', 'state' for animations, or `method`: 'add', 'remove', 'toggle', 'clear' for states | `./hover.md`        |
-| `click`        | Mouse click                                     | `type`: 'once', 'alternate', 'repeat', 'state' for animations, or `method`: 'add', 'remove', 'toggle', 'clear' for states | `./click.md`        |
-| `activate`     | Accessible click (click + keyboard Space/Enter) | Same as `click` with keyboard support                                                                                     | `./click.md`        |
-| `interest`     | Accessible hover (hover + focus)                | Same as `hover` with focus support                                                                                        | `./hover.md`        |
-| `viewEnter`    | Element enters viewport                         | `type`: 'once', 'alternate', 'repeat', 'state'; `threshold` (0-1)                                                         | `./viewenter.md`    |
-| `viewProgress` | Scroll-driven using ViewTimeline                | (No specific params, uses effect ranges)                                                                                  | `./viewprogress.md` |
-| `pointerMove`  | Mouse movement                                  | `hitArea`: 'self' (default) or 'root'; `axis`: 'x' or 'y' for keyframeEffect                                              | `./pointermove.md`  |
-| `animationEnd` | Chaining animations                             | `effectId`: ID of the previous effect                                                                                     | --                  |
-
-## 5b. Sequences (Coordinated Stagger)
-
-Sequences group multiple effects into a coordinated timeline with staggered timing. Instead of setting `delay` on each effect manually, define `offset` (ms between items) and `offsetEasing` (how offset is distributed).
-
-### Sequence Config
+### Vanilla JS
 
 ```typescript
-{
-  offset: 100,            // ms between consecutive effects
-  offsetEasing: 'quadIn', // easing for stagger distribution (linear, quadIn, sineOut, etc.)
-  delay: 0,               // base delay before the sequence starts
-  effects: [              // effects in the sequence, applied in order
-    { effectId: 'card-entrance', listContainer: '.card-grid' },
-  ],
-}
+import { Interact } from '@wix/interact';
+
+const interact = Interact.create(config);
+interact.add(element, 'hero');
 ```
 
-Effects in a sequence can target different elements via `key`, use `listContainer` to target list children, or reference the effects registry via `effectId`.
+**Rules:**
 
-Reusable sequences can be defined in `InteractConfig.sequences` and referenced by `sequenceId`:
+- Call `add(element, key)` after elements exist in the DOM.
+- Call `remove(key)` to unregister all interactions for a key.
 
-```typescript
-{
-  sequences: {
-    'stagger-entrance': { offset: 80, offsetEasing: 'quadIn', effects: [{ effectId: 'fade-up', listContainer: '.items' }] },
-  },
-  interactions: [
-    { key: 'section', trigger: 'viewEnter', params: { type: 'once' }, sequences: [{ sequenceId: 'stagger-entrance' }] },
-  ],
-}
-```
+---
 
-## 6. Named Effects & `registerEffects`
+## Named Effects & registerEffects
 
-To use `namedEffect` presets from `@wix/motion-presets`, register them before calling `Interact.create`. For full effect type syntax (`keyframeEffect`, `customEffect`, `TransitionEffect`, `ScrubEffect`), see `full-lean.md`.
-
-**Install:**
-
-```bash
-> npm install @wix/motion-presets
-```
-
-**Import and register:**
+Register `@wix/motion-presets` before calling `Interact.create` — required for using `namedEffect` in any effect definition:
 
 ```typescript
 import { Interact } from '@wix/interact/web';
@@ -236,132 +101,210 @@ import * as presets from '@wix/motion-presets';
 Interact.registerEffects(presets);
 ```
 
-**Or register only required presets:**
+Or register selectively:
 
 ```typescript
-import { Interact } from '@wix/interact/web';
 import { FadeIn, ParallaxScroll } from '@wix/motion-presets';
-
 Interact.registerEffects({ FadeIn, ParallaxScroll });
 ```
 
+Then use in effects:
+
+```typescript
+{ namedEffect: { type: 'FadeIn' }, duration: 800, easing: 'ease-out' }
+```
+
+For full effect type syntax (`keyframeEffect`, `namedEffect`, `customEffect`, `transition`/`transitionProperties`), see [full-lean.md](./full-lean.md) and the trigger-specific rule files.
+
+---
+
+## Configuration Schema
+
+### InteractConfig
+
+```typescript
+type InteractConfig = {
+  interactions: Interaction[];
+  effects?: Record<string, Effect>;
+  sequences?: Record<string, SequenceConfig>;
+  conditions?: Record<string, Condition>;
+};
+```
+
+| Field          | Description                                                             |
+| :------------- | :---------------------------------------------------------------------- |
+| `interactions` | Required. Array of interaction definitions binding triggers to effects. |
+| `effects?`     | Reusable effects referenced by `effectId` from interactions.            |
+| `sequences?`   | Reusable sequence definitions, referenced by `sequenceId`.              |
+| `conditions?`  | Named conditions (media/container/selector queries), referenced by ID.  |
+
+Each call to `Interact.create(config)` creates a new `Interact` instance. A single config can define multiple interactions.
+
+### Interaction
+
 ```typescript
 {
-  namedEffect: { type: 'FadeIn' },
-  duration: 800,
-  easing: 'ease-out'
+  key: string;                     // REQUIRED — matches data-interact-key / interactKey
+  trigger: TriggerType;            // REQUIRED — trigger type
+  params?: TriggerParams;          // trigger-specific parameters
+  selector?: string;               // CSS selector to refine target within the element
+  listContainer?: string;          // CSS selector for a list container
+  listItemSelector?: string;       // optional — CSS selector to filter which children of listContainer are selected
+  conditions?: string[];           // array of condition IDs; all must pass
+  effects?: Effect[];              // effects to apply
+  sequences?: SequenceConfig[];    // sequences to apply
 }
 ```
 
-## 7. Examples
+At least one of `effects` or `sequences` MUST be provided.
 
-### Basic Hover (Scale)
+**Multiple effects per interaction:** A single interaction can contain multiple effects in its `effects` array. All effects share the same trigger — they fire together when the trigger activates. Use this to animate different targets from the same trigger event instead of duplicating interactions.
+
+### Element Selection
+
+**Most common**: Omit `selector`/`listContainer`/`listItemSelector` entirely — the element with the matching key is used as both source and target. Use `selector` to target a child element within the keyed element. Use `listContainer` for staggered sequences across list items.
+
+`listItemSelector` is **optional** — only use it when you need to **filter** which children of `listContainer` participate (e.g. select only `.active` items). When omitted, all immediate children of the `listContainer` are selected.
+
+#### Source element resolution (Interaction level)
+
+The source element is what the trigger attaches to. Resolved in priority order:
+
+1. **`listContainer` + `listItemSelector`** — matches only the elements matching `listItemSelector` within the the `listContainer`.
+2. **`listContainer` only** — trigger attaches to all immediate children of the container (common case).
+3. **`listContainer` + `selector`** — matches via `querySelector` within each immediate child of the container.
+4. **`selector` only** — matches via `querySelectorAll` within the root element.
+5. **Fallback** — first child of `<interact-element>` (web) or the root element (react/vanilla).
+
+#### Target element resolution (Effect level)
+
+The target element is what the effect animates. Resolved in priority order:
+
+1. **`Effect.key`** — the root with matching `data-interact-key`.
+2. **Registry Effect's `key`** — if the effect is an `EffectRef`, the `key` from the referenced registry entry is used.
+3. **Fallback to `Interaction.key`** — the source element acts as the target's root.
+4. After resolving the target's root, `selector`, `listContainer`, and `listItemSelector` on the effect further refine which child elements within that target are animated (same priority order as source resolution).
+
+---
+
+## Triggers
+
+| Trigger        | Description                            | Trigger `params`                                                                                                               | Rules                                |
+| :------------- | :------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :----------------------------------- |
+| `hover`        | Mouse enter/leave                      | `type?`: `'once'` \| `'alternate'` \| `'repeat'` \| `'state'` — or `method?`: `'add'` \| `'remove'` \| `'toggle'` \| `'clear'` | [hover.md](./hover.md)               |
+| `click`        | Mouse click                            | Same as `hover`                                                                                                                | [click.md](./click.md)               |
+| `interest`     | Accessible hover (hover + focus)       | Same as `hover`                                                                                                                | [hover.md](./hover.md)               |
+| `activate`     | Accessible click (click + Enter/Space) | Same as `click`                                                                                                                | [click.md](./click.md)               |
+| `viewEnter`    | Element enters viewport                | `type?`: same values as hover; `threshold?`: 0–1; `inset?`: CSS length as string for viewport inset                            | [viewenter.md](./viewenter.md)       |
+| `viewProgress` | Scroll-driven (ViewTimeline)           | No trigger params. Configure `rangeStart`/`rangeEnd` on the **effect**, not on `params`.                                       | [viewprogress.md](./viewprogress.md) |
+| `pointerMove`  | Mouse movement                         | `hitArea?`: `'self'` \| `'root'`; `axis?`: `'x'` \| `'y'`                                                                      | [pointermove.md](./pointermove.md)   |
+| `animationEnd` | Chain after another effect             | `effectId`: ID of the preceding effect                                                                                         | —                                    |
+
+For `hover`/`click` (and their accessible variants `interest`/`activate`): use `type` (via `PointerTriggerParams`) for keyframe/named effects, or `method` (via `StateParams`) for transition effects. Do not use both `type` and `method` together.
+
+---
+
+## Sequences
+
+Sequences coordinate multiple effects with staggered timing.
 
 ```typescript
-const config = {
-  effects: {
-    scaleUp: {
-      transitionProperties: [
-        {
-          name: 'transform',
-          value: 'scale(1.1)',
-          duration: 300,
-          delay: 100,
-          easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-        },
-      ],
+{
+  offset: number,           // ms between consecutive items
+  offsetEasing: string,     // Any valid easing string for stagger distribution curve
+  delay: number,            // ms base delay before the sequence starts
+  effects: [
+    /* ... effect definitions */,
+  ],
+}
+```
+
+Define reusable sequences in `InteractConfig.sequences` and reference by `sequenceId`:
+
+```typescript
+{
+  sequences: {
+    'stagger-fade': {
+      /* ... sequence definition */
     },
   },
   interactions: [
     {
-      key: 'btn',
-      trigger: 'hover',
-      effects: [
-        {
-          effectId: 'scaleUp',
-        },
-      ],
+      key: `'[SOURCE_KEY]'`,
+      trigger: `'[TRIGGER]'`,
+      params: `[TRIGGER_PARAMS]`,
+      sequences: [{ sequenceId: 'stagger-fade' }],
     },
   ],
-};
+}
 ```
 
-### Viewport Entrance
+---
 
-```typescript
-const config = {
-  interactions: [
-    {
-      key: 'hero',
-      trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
-      effects: [
-        {
-          namedEffect: { type: 'FadeIn' },
-          duration: 800,
-        },
-      ],
-    },
-  ],
-};
+## Critical CSS (FOUC Prevention)
+
+**Problem:** Elements with entrance animations (e.g. `FadeIn` on `viewEnter`) are initially visible in their final state. Before the animation framework applies the starting keyframe, the content flashes visibly — a flash of un-animated content (FOUC).
+
+**Solution:** Two things are required — both MUST be present:
+
+1. **Generate critical CSS** with `generate(config)` — produces CSS that hides entrance-animated elements until the animation plays.
+2. **Mark elements with `initial`** — `data-interact-initial="true"` on `<interact-element>`, or `initial={true}` on `<Interaction>` in React.
+
+Using only one of these has no effect — both are required.
+
+See [viewenter.md](./viewenter.md) for full details.
+
+**Rules:**
+
+- `generate()` should be called server-side or at build time. Can also be called on the client if page content is initially hidden (e.g. behind a loader).
+- Only valid for `viewEnter` + `type: 'once'` where source and target are the same element.
+
+```javascript
+import { generate } from '@wix/interact/web';
+const css = generate(config);
 ```
 
-### Staggered List Entrance (Sequence)
+**Append to `<head>` or beginning of `<body>`:**
 
-```typescript
-const config = {
-  interactions: [
-    {
-      key: 'card-grid',
-      trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.3 },
-      sequences: [
-        {
-          offset: 100,
-          offsetEasing: 'quadIn',
-          effects: [{ effectId: 'card-entrance', listContainer: '.card-grid' }],
-        },
-      ],
-    },
-  ],
-  effects: {
-    'card-entrance': {
-      duration: 500,
-      easing: 'ease-out',
-      keyframeEffect: {
-        name: 'card-fade-up',
-        keyframes: [
-          { transform: 'translateY(40px)', opacity: 0 },
-          { transform: 'translateY(0)', opacity: 1 },
-        ],
-      },
-      fill: 'both',
-    },
-  },
-};
+```html
+<style>
+  ${css}
+</style>
 ```
 
-### Interactive Toggle (Click)
+**Web:**
 
-```typescript
-const config = {
-  interactions: [
-    {
-      key: 'menu-btn',
-      trigger: 'click',
-      params: { type: 'alternate' },
-      effects: [
-        {
-          key: 'menu-content',
-          effectId: 'menu-open', // Creates state 'menu-open'
-          keyframeEffect: {
-            name: 'slide',
-            keyframes: [{ transform: 'translateX(-100%)' }, { transform: 'translateX(0)' }],
-          },
-          duration: 300,
-        },
-      ],
-    },
-  ],
-};
+```html
+<interact-element data-interact-key="hero" data-interact-initial="true">
+  <section id="hero">...</section>
+</interact-element>
 ```
+
+**React:**
+
+```tsx
+<Interaction tagName="section" interactKey="hero" initial={true} className="hero">
+  ...
+</Interaction>
+```
+
+**Vanilla:**
+
+```html
+<section data-interact-key="hero" data-interact-initial="true" class="hero">...</section>
+```
+
+---
+
+## Static API
+
+Each `Interact.create(config)` call returns an instance. Keep a reference if you need to add/remove elements dynamically (vanilla JS) or to destroy a specific instance. Call `Interact.destroy()` to tear down all instances at once (e.g. on page navigation).
+
+| Method / Property                   | Description                                                                                  |
+| :---------------------------------- | :------------------------------------------------------------------------------------------- |
+| `Interact.create(config)`           | Initialize with a config. Returns the instance. Multiple configs create separate instances.  |
+| `Interact.registerEffects(presets)` | Register named effect presets before `create`. Required for `namedEffect` usage.             |
+| `Interact.destroy()`                | Tear down all instances.                                                                     |
+| `Interact.forceReducedMotion`       | `boolean` — force reduced-motion behavior regardless of OS setting. Default: `false`.        |
+| `Interact.allowA11yTriggers`        | `boolean` — enable accessibility triggers (`interest`, `activate`). Default: `false`.        |
+| `Interact.setup(options)`           | Configure global defaults for scroll/pointer/viewEnter trigger params. Call before `create`. |

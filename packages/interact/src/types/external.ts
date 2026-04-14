@@ -6,7 +6,7 @@ export type {
   EventTriggerConfigToggle,
   EventTriggerConfigEnterLeave,
   EventTriggerConfig,
-  ViewEnterType,
+  TimeAnimationTriggerType,
   TransitionMethod,
   StateParams,
   PointerTriggerParams,

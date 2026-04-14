@@ -31,6 +31,7 @@ export type TimeEffect = {
   fill?: Fill;
   reversed?: boolean;
   delay?: number;
+  composite?: CompositeOperation;
 } & EffectEffectProperty;
 
 export type ScrubEffect = {
@@ -39,6 +40,7 @@ export type ScrubEffect = {
   alternate?: boolean;
   fill?: Fill;
   reversed?: boolean;
+  composite?: CompositeOperation;
   rangeStart?: RangeOffset;
   rangeEnd?: RangeOffset;
   centeredToTarget?: boolean;
