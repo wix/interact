@@ -1,4 +1,9 @@
-import type { Interaction, ElementIdentifier, ViewEnterParams } from '../types';
+import type {
+  Interaction,
+  ElementIdentifier,
+  TimeAnimationTriggerType,
+  TimeEffect,
+} from '../types';
 
 export function _processKeysForInterpolation(key: string) {
   return [...key.matchAll(/\[([-\w]+)]/g)].map(([_, _instanceKey]) => _instanceKey);
@@ -16,10 +21,13 @@ export function getInterpolatedKey(template: string, key: string) {
     : template;
 }
 
-export function shouldUseInitial(interaction: Interaction, effect: ElementIdentifier) {
+export function shouldUseInitial(
+  interaction: Interaction,
+  effect: ElementIdentifier & { triggerType: TimeAnimationTriggerType },
+) {
   return (
     interaction.trigger === 'viewEnter' &&
-    (interaction.params as ViewEnterParams)?.type === 'once' &&
+    effect.triggerType === 'once' &&
     getElementHash(interaction) === getElementHash(effect)
   );
 }

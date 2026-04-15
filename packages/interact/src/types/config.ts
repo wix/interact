@@ -61,6 +61,7 @@ export type ResolvedEffect = ElementIdentifier &
   EffectProperty & {
     effectId: string;
     conditions: string[];
+    triggerType: TimeAnimationTriggerType;
     initial: boolean;
   };
 

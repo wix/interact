@@ -14,6 +14,7 @@ import type {
   ListCustomProps,
   CoordLists,
   RuleObj,
+  TimeAnimationTriggerType,
 } from '../types';
 import {
   roundNumber,
@@ -137,12 +138,13 @@ function resolveEffectForCSS(
 
   const fullEffect: EffectBase &
     StateEffect & {
+      triggerType?: TimeAnimationTriggerType;
       namedEffect?: NamedEffect;
       customEffect?: (element: Element, progress: any) => void;
       keyframeEffect?: MotionKeyframeEffect;
     } = { ...(effects[effectId] || {}), ...effect };
 
-  let { key, conditions } = fullEffect;
+  let { key, conditions, triggerType } = fullEffect;
 
   if (!key) {
     if (!interactionKey) {
@@ -160,31 +162,38 @@ function resolveEffectForCSS(
     ...new Set(...(conditions || []).filter((condition: string) => configConditions[condition])),
   ];
 
+  // TODO: is this always the default?
+  if (!triggerType) {
+    triggerType = 'once';
+  }
+
   const { namedEffect, customEffect, keyframeEffect, transition, transitionProperties, ...rest } = {
     ...fullEffect,
     key,
     conditions,
     effectId,
-    initial: shouldUseInitial(interaction, { key, ...fullEffect }),
+    triggerType,
   };
+
+  const initial = shouldUseInitial(interaction, rest);
 
   if (namedEffect) {
     // With the 2D nature of pointerMove namedEffects, there is no easy way to mimic the
     // behavior with CSSAnimations.
-    return isPointerMove || !namedEffect.type ? null : { namedEffect, ...rest };
+    return isPointerMove || !namedEffect.type ? null : { namedEffect, initial, ...rest };
   } else if (keyframeEffect) {
     // Need to verify validity of name for CSS?
     if (!keyframeEffect.name) {
       const canUseEffectId = effectId && !(effects[effectId] && 'keyframeEffect' in effect);
       keyframeEffect.name = canUseEffectId ? effectId : generateId();
     }
-    return { keyframeEffect, ...rest };
+    return { keyframeEffect, initial, ...rest };
   } else if (customEffect) {
-    return isPointerMove ? null : { keyframeEffect: EMPTY_KEYFRAMES_EFFECT, ...rest };
+    return isPointerMove ? null : { keyframeEffect: EMPTY_KEYFRAMES_EFFECT, initial, ...rest };
   } else if (transition) {
-    return { transition, ...rest };
+    return { transition, initial, ...rest };
   } else {
-    return transitionProperties ? { transitionProperties, ...rest } : rest;
+    return transitionProperties ? { transitionProperties, initial, ...rest } : { initial, ...rest };
   }
 }
 
