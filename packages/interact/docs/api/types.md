@@ -351,7 +351,7 @@ type TriggerType =
 
 #### `ViewEnterParams`
 
-Parameters for viewport entry trigger (`viewEnter`).
+Parameters for viewport entry triggers (`viewEnter`). Controls IntersectionObserver configuration only. Playback behavior (`'once'`, `'repeat'`, `'alternate'`, `'state'`) is configured via `triggerType` on the effect (see [TimeEffect](#timeeffect)) or on the sequence config (see [SequenceOptionsConfig](#sequenceoptionsconfig)).
 
 ```typescript
 type ViewEnterParams = {
@@ -371,12 +371,12 @@ type ViewEnterParams = {
 
 ```typescript
 // Trigger when 50% visible
-const onceParams: ViewEnterParams = {
+const params: ViewEnterParams = {
   threshold: 0.5,
 };
 
-// Trigger when 10% visible with 100px inset
-const repeatParams: ViewEnterParams = {
+// Trigger with margin
+const paramsWithMargin: ViewEnterParams = {
   threshold: 0.1,
   inset: '100px',
 };
@@ -460,7 +460,7 @@ type TimeEffect = {
   reversed?: boolean;
   delay?: number;
   effectId?: string;
-  triggerType?: ViewEnterType;
+  triggerType?: TimeAnimationTriggerType;
 } & EffectProperty;
 
 type Fill = 'none' | 'forwards' | 'backwards' | 'both';
@@ -479,9 +479,9 @@ type Fill = 'none' | 'forwards' | 'backwards' | 'both';
 - `reversed` - Whether to play animation in reverse
 - `delay` - Delay before animation starts in milliseconds
 - `triggerType` - Controls play behavior for event triggers (`hover`, `click`, `activate`, `interest`, `viewEnter`):
-  - `'alternate'` (default) - Hover & viewEnter: play on enter, reverse on leave. Click: alternate play/reverse on successive clicks.
-  - `'repeat'` - Restart from progress 0 on each event; on hover & viewEnter leave the animation is canceled.
-  - `'once'` - Play once and remove the listener (hover & viewEnter attach only the enter listener; no leave).
+  - `'alternate'` (default for hover/click) - Hover & viewEnter: play on enter, reverse on leave. Click: alternate play/reverse on successive clicks.
+  - `'repeat'` - Restart from progress 0 on each event; on hover leave the animation is canceled; on viewEnter full exit, pause and reset.
+  - `'once'` (default for viewEnter) - Play once and remove the listener (hover & viewEnter attach only the enter listener; no leave).
   - `'state'` - Hover & viewEnter: play on enter if idle/paused, pause on leave if running. Click: toggle play/pause on successive clicks until finished.
 
 **Examples:**
@@ -762,6 +762,7 @@ type SequenceOptionsConfig = {
   offsetEasing?: string | ((p: number) => number);
   sequenceId?: string;
   conditions?: string[];
+  triggerType?: TimeAnimationTriggerType;
 };
 ```
 
@@ -772,6 +773,7 @@ type SequenceOptionsConfig = {
 - `offsetEasing` - Easing function or named string for offset distribution (`'linear'`, `'quadIn'`, `'sineOut'`, etc.). Default: `linear`.
 - `sequenceId` - Optional ID for referencing a reusable sequence from `InteractConfig.sequences`.
 - `conditions` - Optional array of condition IDs. When set, the sequence is only active when all conditions match.
+- `triggerType` - Controls play behavior for event trigger sequences (`hover`, `click`, `activate`, `interest`, `viewEnter`). Same values as `TimeEffect.triggerType`: `'once'` (default for viewEnter), `'alternate'` (default for hover/click), `'repeat'`, `'state'`.
 
 ### `SequenceConfig`
 
@@ -926,7 +928,7 @@ type InteractionParamsTypes = {
 };
 ```
 
-> **Note:** `hover`, `click`, `interest`, and `activate` triggers no longer require params. Animation behavior (`triggerType`) is now configured on `TimeEffect`, and state behavior (`stateAction`) is now configured on `StateEffect`.
+> **Note:** `hover`, `click`, `interest`, `activate`, and `viewEnter` triggers no longer use params for playback behavior. Animation behavior (`triggerType`) is now configured on `TimeEffect` (or `SequenceOptionsConfig` for sequences), and state behavior (`stateAction`) is now configured on `StateEffect`. `viewEnter`/`pageVisible` params only contain observer configuration (`threshold`, `inset`, `useSafeViewEnter`).
 
 ### `TriggerParams`
 

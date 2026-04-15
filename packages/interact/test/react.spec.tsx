@@ -520,7 +520,6 @@ describe('interact (react)', () => {
           {
             trigger: 'viewEnter',
             key: 'logo-alternate',
-            params: { type: 'alternate' },
             effects: [{ key: 'logo-alternate', effectId: 'logo-arc-in' }],
           },
         ],
@@ -528,6 +527,7 @@ describe('interact (react)', () => {
           'logo-arc-in': {
             namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
             duration: 1200,
+            triggerType: 'alternate',
           },
         },
       };
@@ -585,7 +585,6 @@ describe('interact (react)', () => {
           {
             trigger: 'viewEnter',
             key: 'logo-repeat',
-            params: { type: 'repeat' },
             effects: [{ key: 'logo-repeat', effectId: 'logo-arc-in' }],
           },
         ],
@@ -593,6 +592,7 @@ describe('interact (react)', () => {
           'logo-arc-in': {
             namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
             duration: 1200,
+            triggerType: 'repeat',
           },
         },
       };
@@ -647,7 +647,6 @@ describe('interact (react)', () => {
           {
             trigger: 'viewEnter',
             key: 'logo-state',
-            params: { type: 'state' },
             effects: [{ key: 'logo-state', effectId: 'logo-arc-in' }],
           },
         ],
@@ -655,6 +654,7 @@ describe('interact (react)', () => {
           'logo-arc-in': {
             namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
             duration: 1200,
+            triggerType: 'state',
           },
         },
       };

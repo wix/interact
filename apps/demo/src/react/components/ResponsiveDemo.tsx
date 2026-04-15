@@ -24,9 +24,6 @@ const complexConfig: InteractConfig = {
   interactions: [
     {
       trigger: 'click',
-      params: {
-        type: 'repeat',
-      },
       key: 'multi-source-1',
       effects: [
         {
@@ -54,6 +51,7 @@ const complexConfig: InteractConfig = {
         type: 'SlideIn',
       },
       duration: 1800,
+      triggerType: 'repeat',
     },
     'mobile-effect': {
       namedEffect: {
@@ -61,6 +59,7 @@ const complexConfig: InteractConfig = {
         direction: 'center',
       },
       duration: 1800,
+      triggerType: 'repeat',
     },
     'tablet-effect': {
       namedEffect: {
@@ -68,6 +67,7 @@ const complexConfig: InteractConfig = {
         direction: 'left',
       },
       duration: 1800,
+      triggerType: 'repeat',
     },
   },
 };

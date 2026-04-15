@@ -45,9 +45,6 @@ The `hover` trigger responds to mouse enter and leave events.
 {
     key: 'my-card',
     trigger: 'hover',
-    params: {
-        type: 'alternate'
-    },
     effects: [
         {
             keyframeEffect: {
@@ -66,6 +63,8 @@ The `hover` trigger responds to mouse enter and leave events.
 
 ### Hover Behavior Types
 
+Set `triggerType` on each time-based effect (defaults shown below):
+
 - **`alternate`** (default): Plays forward on enter, reverses on leave
 - **`repeat`**: Restarts animation each time
 - **`once`**: Only plays once, then stops
@@ -77,7 +76,6 @@ The `hover` trigger responds to mouse enter and leave events.
 {
     key: 'image-card',
     trigger: 'hover',
-    params: { type: 'alternate' },
     effects: [
         {
             key: 'image-overlay',
@@ -127,9 +125,6 @@ The `click` trigger responds to mouse click events and supports multiple behavio
 {
     key: 'accordion-header',
     trigger: 'click',
-    params: {
-        type: 'alternate'
-    },
     effects: [
         {
             key: 'accordion-content',
@@ -151,13 +146,14 @@ The `click` trigger responds to mouse click events and supports multiple behavio
 - **`once`**: Only responds to the first click
 - **`state`**: First click plays, subsequent clicks pause/resume
 
+Configure these via `triggerType` on each time-based effect.
+
 ### Real-World Example: Menu Toggle
 
 ```typescript
 {
     key: 'menu-button',
     trigger: 'click',
-    params: { type: 'alternate' },
     effects: [
         {
             key: 'menu-icon',
@@ -276,7 +272,6 @@ The `viewEnter` trigger uses Intersection Observer to detect when elements enter
     key: 'hero-image',
     trigger: 'viewEnter',
     params: {
-        type: 'once',        // 'once' | 'repeat' | 'alternate'
         threshold: 0.5,      // 0-1, how much of element must be visible
         inset: '-50px'        // Margin around viewport
     },
@@ -299,7 +294,9 @@ The `viewEnter` trigger uses Intersection Observer to detect when elements enter
 
 ### ViewEnter Behavior Types
 
-- **`once`** (recommended): Triggers only when element first enters viewport
+Set `triggerType` on each time-based effect (defaults shown below). `params` only holds Intersection Observer options (`threshold`, `inset`, etc.).
+
+- **`once`** (default, recommended): Triggers only when element first enters viewport
 - **`repeat`**: Triggers every time element enters viewport
 - **`alternate`**: Plays forward on enter, reverses on exit
 - **`state`**: Plays on enter, pauses on exit
@@ -312,7 +309,7 @@ const cardAnimations = [
   {
     key: 'card-1',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.3 },
+    params: { threshold: 0.3 },
     effects: [
       {
         key: 'card-1',
@@ -332,7 +329,7 @@ const cardAnimations = [
   {
     key: 'card-2',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.3 },
+    params: { threshold: 0.3 },
     effects: [
       {
         key: 'card-2',
@@ -618,7 +615,6 @@ You can combine multiple triggers on the same element for complex interactions:
     {
       key: 'interactive-card',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       effects: [
         {
           key: 'interactive-card',

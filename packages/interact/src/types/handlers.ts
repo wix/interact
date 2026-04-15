@@ -52,7 +52,7 @@ export type HandlerObject = {
   source: HTMLElement;
   target: HTMLElement;
   cleanup: () => void;
-  handler?: (isIntersecting?: boolean) => void;
+  handler?: (isIntersecting?: boolean, isFullExit?: boolean) => void;
 };
 
 export type HandlerObjectMap = WeakMap<HTMLElement, Set<HandlerObject>>;

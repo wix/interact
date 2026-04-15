@@ -18,7 +18,7 @@ Declarative configuration-driven interaction library. Binds animations to trigge
 - [Effects](#effects)
   - [Time-based Effect](#time-based-effect)
   - [Scroll / Pointer-driven Effect](#scroll--pointer-driven-effect)
-  - [Transition Effect](#transitioneffect-css-style-toggle)
+  - [State Effect](#stateeffect-css-style-toggle)
   - [Animation Payloads](#animation-payloads)
 - [Sequences](#sequences)
 - [Conditions](#conditions)
@@ -187,35 +187,16 @@ For most use cases, `key` alone is sufficient for both source and target resolut
     - **trigger: TriggerType**
       - REQUIRED. One of:
         - `'hover' | 'click' | 'activate' | 'interest'`: Pointer interactions (`activate` = click with keyboard Space/Enter; `interest` = hover with focus).
-        - `'viewEnter' | 'pageVisible' | 'viewProgress'`: Viewport visibility/progress triggers.
+        - `'viewEnter' | 'viewProgress'`: Viewport visibility/progress triggers.
         - `'animationEnd'`: Fires when a specific effect completes on the source element.
         - `'pointerMove'`: Continuous pointer motion over an area.
     - **params?: TriggerParams**
       - OPTIONAL. Parameter object that MUST match the trigger:
-        - hover/click/activate/interest: No params needed. Behavior is configured on the effect itself:
-          - For `StateEffect`, use `stateAction?: StateAction` on the effect:
-            - `'toggle'` (default): Hover — adds on enter and removes on leave. Click — toggles on each click.
-            - `'add'`: Apply the state on the event; hover leave will NOT auto‑remove.
-            - `'remove'`: Remove the state on the event.
-            - `'clear'`: Clear/reset the effect’s state for the element (or list item when list context is used).
-            - With lists (`listContainer`/`listItemSelector`), the state is set on the matching item only.
-          - For `TimeEffect` (time animation with `namedEffect`/`keyframeEffect`), use `triggerType?` on the effect:
-            - `'alternate'` (default): Hover — play on enter, reverse on leave. Click — alternate play/reverse on successive clicks.
-            - `'repeat'`: Restart from progress 0 on each event; on hover leave the animation is canceled.
-            - `'once'`: Play once and remove the listener (hover attaches only the enter listener; no leave).
-            - `'state'`: Hover — play on enter if idle/paused, pause on leave if running. Click — toggle play/pause on successive clicks until finished.
-        - viewEnter/pageVisible/viewProgress: `ViewEnterParams`
-          - `type?`: `'once' | 'repeat' | 'alternate' | 'state'`
+        - hover/click/activate/interest: No params needed. Behavior is configured on the effect itself.
+        - viewEnter: `ViewEnterParams`
           - `threshold?`: number in [0,1] describing intersection threshold
           - `inset?`: string CSS-style inset for rootMargin/observer geometry
-          - Usage:
-            - `'once'`: Play on first visibility and unobserve the element.
-            - `'repeat'`: Play each time the element re‑enters visibility according to `threshold`/`inset`.
-            - `'alternate'`: Triggers on re‑entries; if you need alternating direction, set it on the effect (e.g., `alternate: true`) rather than relying on the trigger.
-            - `'state'`: Play on entry, pause on exit (for looping/continuous animations).
-            - `threshold`: Passed to `IntersectionObserver.threshold` — typical values are 0.1–0.6 for entrances.
-            - `inset`: Applied as vertical `rootMargin` (`top/bottom`), e.g., `'-100px'` to trigger earlier/later; left/right remain 0.
-            - Note: For `viewProgress`, `threshold` and `inset` are ignored; progress is driven by ViewTimeline/scroll scenes. Control the range via `ScrubEffect.rangeStart/rangeEnd` and `namedEffect.range`.
+        - viewProgress: No trigger params. Progress is driven by ViewTimeline/scroll scenes. Control the range via `ScrubEffect.rangeStart/rangeEnd` and `namedEffect.range`.
         - animationEnd: `AnimationEndParams`
           - `effectId`: string of the effect to wait for completion
           - Usage: Fire when the specified effect (by `effectId`) on the source element finishes, useful for chaining sequences.
@@ -242,9 +223,9 @@ For most use cases, `key` alone is sufficient for both source and target resolut
 
 ### hover / click
 
-Use `type` (via `PointerTriggerParams`) for keyframe/named effects, `method` (via `StateParams`) for transitions. Do NOT use both `type` and `method` together.
+For `TimeEffect` (keyframe/named/custom effects), set `triggerType` on the effect. For `StateEffect` (transitions), set `stateAction` on the effect. Do NOT mix `triggerType` and `stateAction` on the same effect.
 
-**PointerTriggerParams** (`triggerType`):
+**`triggerType`** — on `TimeEffect`:
 
 | Type                    | hover behavior                          | click behavior                   |
 | :---------------------- | :-------------------------------------- | :------------------------------- |
@@ -253,9 +234,9 @@ Use `type` (via `PointerTriggerParams`) for keyframe/named effects, `method` (vi
 | `'once'`                | Play once on first enter only           | Play once on first click only    |
 | `'state'`               | Play on enter, pause on leave           | Toggle play/pause per click      |
 
-**StateParams** (`stateAction`) — for `TransitionEffect`:
+**`stateAction`** — on `StateEffect`:
 
-| Method               | hover behavior                                  | click behavior               |
+| Action               | hover behavior                                  | click behavior               |
 | :------------------- | :---------------------------------------------- | :--------------------------- |
 | `'toggle'` (default) | Add style state on enter, remove on leave       | Toggle style state per click |
 | `'add'`              | Add style state on enter; leave does NOT remove | Add style state on click     |
@@ -266,13 +247,14 @@ Use `type` (via `PointerTriggerParams`) for keyframe/named effects, `method` (vi
 
 ```ts
 params: {
-  type: 'once' | 'repeat' | 'alternate' | 'state';
   threshold?: number;  // 0–1, IntersectionObserver threshold
   inset?: string;      // like view-timeline-inset, e.g. '-100px' or '-50px 0px'
 }
+// Playback behavior is set on each effect:
+effect.triggerType: 'once' | 'repeat' | 'alternate' | 'state';  // default: 'once'
 ```
 
-**CRITICAL:** When source and target are the **same element**, MUST use `type: 'once'`. For `repeat` / `alternate` / `state`, ALWAYS use **separate** source and target elements — animating the observed element can cause it to leave/re-enter the viewport, causing rapid re-triggers.
+**CRITICAL:** When source and target are the **same element**, MUST use `triggerType: 'once'`. For `'repeat'` / `'alternate'` / `'state'`, ALWAYS use **separate** source and target elements — animating the observed element can cause it to leave/re-enter the viewport, causing rapid re-triggers.
 
 ### viewProgress
 
@@ -420,9 +402,9 @@ Used with `viewProgress` and `pointerMove` triggers.
 - Sticky child (`key`) with `position: sticky; top: 0; height: 100vh`: stays fixed while the wrapper scrolls. This is the ViewTimeline source.
 - Use `rangeStart/rangeEnd` with `name: 'contain'` to animate only during the stuck phase.
 
-### TransitionEffect (CSS style toggle)
+### StateEffect (CSS style toggle)
 
-Used with `hover` / `click` triggers. Pair with `StateParams` (`stateAction`).
+Used with `hover` / `click` triggers. Set `stateAction` on the effect to control state behavior.
 
 **StateEffect** (CSS transition-style state toggles):
 

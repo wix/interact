@@ -197,18 +197,18 @@ The target element is what the effect animates. Resolved in priority order:
 
 ## Triggers
 
-| Trigger        | Description                            | Trigger `params`                                                                                                               | Rules                                |
-| :------------- | :------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :----------------------------------- |
-| `hover`        | Mouse enter/leave                      | `type?`: `'once'` \| `'alternate'` \| `'repeat'` \| `'state'` — or `method?`: `'add'` \| `'remove'` \| `'toggle'` \| `'clear'` | [hover.md](./hover.md)               |
-| `click`        | Mouse click                            | Same as `hover`                                                                                                                | [click.md](./click.md)               |
-| `interest`     | Accessible hover (hover + focus)       | Same as `hover`                                                                                                                | [hover.md](./hover.md)               |
-| `activate`     | Accessible click (click + Enter/Space) | Same as `click`                                                                                                                | [click.md](./click.md)               |
-| `viewEnter`    | Element enters viewport                | `type?`: same values as hover; `threshold?`: 0–1; `inset?`: CSS length as string for viewport inset                            | [viewenter.md](./viewenter.md)       |
-| `viewProgress` | Scroll-driven (ViewTimeline)           | No trigger params. Configure `rangeStart`/`rangeEnd` on the **effect**, not on `params`.                                       | [viewprogress.md](./viewprogress.md) |
-| `pointerMove`  | Mouse movement                         | `hitArea?`: `'self'` \| `'root'`; `axis?`: `'x'` \| `'y'`                                                                      | [pointermove.md](./pointermove.md)   |
-| `animationEnd` | Chain after another effect             | `effectId`: ID of the preceding effect                                                                                         | —                                    |
+| Trigger        | Description                            | Trigger `params`                                                                        | Rules                                |
+| :------------- | :------------------------------------- | :-------------------------------------------------------------------------------------- | :----------------------------------- |
+| `hover`        | Mouse enter/leave                      | No params. Set `triggerType` on TimeEffect or `stateAction` on StateEffect.             | [hover.md](./hover.md)               |
+| `click`        | Mouse click                            | Same as `hover`                                                                         | [click.md](./click.md)               |
+| `interest`     | Accessible hover (hover + focus)       | Same as `hover`                                                                         | [hover.md](./hover.md)               |
+| `activate`     | Accessible click (click + Enter/Space) | Same as `click`                                                                         | [click.md](./click.md)               |
+| `viewEnter`    | Element enters viewport                | `threshold?`; `inset?`. Set `triggerType` on TimeEffect or sequence config.             | [viewenter.md](./viewenter.md)       |
+| `viewProgress` | Scroll-driven (ViewTimeline)           | No trigger params. Configure `rangeStart`/`rangeEnd` on the **effect**, not on `params` | [viewprogress.md](./viewprogress.md) |
+| `pointerMove`  | Mouse movement                         | `hitArea?`: `'self'` \| `'root'`; `axis?`: `'x'` \| `'y'`                               | [pointermove.md](./pointermove.md)   |
+| `animationEnd` | Chain after another effect             | `effectId`: ID of the preceding effect                                                  | —                                    |
 
-For `hover`/`click` (and their accessible variants `interest`/`activate`): use `type` (via `PointerTriggerParams`) for keyframe/named effects, or `method` (via `StateParams`) for transition effects. Do not use both `type` and `method` together.
+For `hover`/`click` (and their accessible variants `interest`/`activate`): set `triggerType` on the effect for keyframe/named/custom effects (TimeEffect), or `stateAction` on the effect for transitions (StateEffect). Do not mix both on the same effect.
 
 ---
 
@@ -265,7 +265,7 @@ See [viewenter.md](./viewenter.md) for full details.
 **Rules:**
 
 - `generate()` should be called server-side or at build time. Can also be called on the client if page content is initially hidden (e.g. behind a loader).
-- Only valid for `viewEnter` + `type: 'once'` where source and target are the same element.
+- Only valid for `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
 
 ```javascript
 import { generate } from '@wix/interact/web';

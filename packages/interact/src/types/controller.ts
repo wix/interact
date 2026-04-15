@@ -1,4 +1,4 @@
-import type { StateAction } from './triggers';
+import type { StateAction } from './effects';
 
 export interface IInteractionController {
   element: HTMLElement;

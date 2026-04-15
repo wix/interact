@@ -29,7 +29,7 @@ const config = {
       key: 'item-list',
       listContainer: '.items',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'item-list',
@@ -70,7 +70,7 @@ const config = {
       key: 'features',
       listContainer: '.feature-list',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'features',
@@ -121,7 +121,7 @@ const config = {
       key: 'cards',
       listContainer: '.card-grid',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.15 },
+      params: { threshold: 0.15 },
       effects: [
         {
           key: 'cards',
@@ -153,7 +153,7 @@ const config = {
       key: 'photos',
       listContainer: '.photo-grid',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'photos',
@@ -185,7 +185,7 @@ const config = {
       key: 'timeline',
       listContainer: '.timeline-items',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'timeline',
@@ -228,7 +228,7 @@ const config = {
       key: 'stagger-list',
       listContainer: '.items',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'stagger-list',
@@ -279,7 +279,7 @@ const config = {
       key: 'wave',
       listContainer: '.wave-list',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.15 },
+      params: { threshold: 0.15 },
       effects: [
         {
           key: 'wave',
@@ -317,7 +317,7 @@ const config = {
       key: 'ripple',
       listContainer: '.grid',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'ripple',
@@ -495,11 +495,11 @@ const config = {
       key: 'todo-list',
       listContainer: '.todos',
       trigger: 'viewEnter',
-      params: { type: 'repeat' }, // Trigger for each new item
       effects: [
         {
           key: 'todo-list',
           listContainer: '.todos',
+          triggerType: 'repeat',
           keyframeEffect: {
             name: 'add-item',
             keyframes: [
@@ -545,11 +545,11 @@ const config = {
       key: 'cart',
       listContainer: '.cart-items',
       trigger: 'viewEnter',
-      params: { type: 'repeat' },
       effects: [
         {
           key: 'cart',
           listContainer: '.cart-items',
+          triggerType: 'repeat',
           keyframeEffect: {
             name: 'cart-add',
             keyframes: [
@@ -583,11 +583,12 @@ const config = {
       key: 'infinite',
       listContainer: '.infinite-list',
       trigger: 'viewEnter',
-      params: { type: 'repeat', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'infinite',
           listContainer: '.infinite-list',
+          triggerType: 'repeat',
           keyframeEffect: {
             name: 'scroll-fade',
             keyframes: [
@@ -660,7 +661,7 @@ const config = {
       listContainer: '.responsive-grid',
       trigger: 'viewEnter',
       conditions: ['mobile'],
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'grid',
@@ -679,7 +680,7 @@ const config = {
       listContainer: '.responsive-grid',
       trigger: 'viewEnter',
       conditions: ['desktop'],
-      params: { type: 'once', threshold: 0.15 },
+      params: { threshold: 0.15 },
       effects: [
         {
           key: 'grid',
@@ -714,7 +715,7 @@ const config = {
       key: 'products',
       listContainer: '.product-grid',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'products',
@@ -813,7 +814,7 @@ const config = {
       key: 'cards',
       trigger: 'viewEnter',
       listContainer: '.card-grid',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       sequences: [
         {
           offset: 80,
@@ -858,7 +859,6 @@ const config = {
       key: 'feed',
       trigger: 'viewEnter',
       listContainer: '.feed-items',
-      params: { type: 'repeat' },
       sequences: [
         {
           offset: 60,
@@ -867,6 +867,7 @@ const config = {
             {
               key: 'feed',
               listContainer: '.feed-items',
+              triggerType: 'repeat',
               keyframeEffect: {
                 name: 'feed-entrance',
                 keyframes: [
