@@ -5,14 +5,16 @@ import type {
   MotionAnimationOptions,
 } from '@wix/motion';
 
-import type { ViewEnterType, StateAction } from './triggers';
-
 type Fill = 'none' | 'forwards' | 'backwards' | 'both';
 
 type MotionKeyframeEffect = {
   name: string;
   keyframes: Keyframe[];
 };
+
+export type TimeAnimationTriggerType = 'once' | 'repeat' | 'alternate' | 'state';
+
+export type StateAction = 'add' | 'remove' | 'toggle' | 'clear';
 
 type EffectEffectProperty =
   | {
@@ -33,7 +35,8 @@ export type TimeEffect = {
   fill?: Fill;
   reversed?: boolean;
   delay?: number;
-  triggerType?: ViewEnterType;
+  triggerType?: TimeAnimationTriggerType;
+  composite?: CompositeOperation;
 } & EffectEffectProperty;
 
 export type ScrubEffect = {
@@ -42,6 +45,7 @@ export type ScrubEffect = {
   alternate?: boolean;
   fill?: Fill;
   reversed?: boolean;
+  composite?: CompositeOperation;
   rangeStart?: RangeOffset;
   rangeEnd?: RangeOffset;
   centeredToTarget?: boolean;

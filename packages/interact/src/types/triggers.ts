@@ -24,16 +24,11 @@ export type EventTriggerConfigEnterLeave = {
 
 export type EventTriggerConfig = string | EventTriggerConfigToggle | EventTriggerConfigEnterLeave;
 
-export type ViewEnterType = 'once' | 'repeat' | 'alternate' | 'state';
-
-export type StateAction = 'add' | 'remove' | 'toggle' | 'clear';
-
 export type EventTriggerParams = {
   eventConfig: EventTriggerConfig;
 };
 
 export type ViewEnterParams = {
-  type?: ViewEnterType;
   threshold?: number;
   inset?: string;
   useSafeViewEnter?: boolean;
