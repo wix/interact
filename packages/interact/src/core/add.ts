@@ -9,6 +9,7 @@ import type {
   InteractionTrigger,
   SequenceConfig,
   SequenceConfigRef,
+  CreateTransitionCSSParams,
   IInteractionController,
 } from '../types';
 import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
@@ -690,10 +691,11 @@ function addInteraction<T extends TriggerType>(
     (effect as TransitionEffect).transition ||
     (effect as TransitionEffect).transitionProperties
   ) {
-    const args = {
-      ...effect, 
+    const args: CreateTransitionCSSParams = {
       key: targetKey,
       effectId: (effect as Effect).effectId!,
+      transition: (effect as TransitionEffect).transition,
+      transitionProperties: (effect as TransitionEffect).transitionProperties,
       childSelector: getSelector(effect, {
         asCombinator: true,
         addItemFilter: true,

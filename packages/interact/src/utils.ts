@@ -1,5 +1,5 @@
 import { getEasing } from '@wix/motion';
-import type { EffectBase, Condition, TransitionEffect } from './types';
+import type { CreateTransitionCSSParams, Condition, TransitionEffect } from './types';
 
 export function roundNumber(num: number, precision = 2): number {
   return parseFloat(num.toFixed(precision));
@@ -102,7 +102,7 @@ export function createTransitionCSS({
   transitionProperties,
   childSelector = '> :first-child',
   selectorCondition,
-}: EffectBase & TransitionEffect & {key: string; effectId: string; childSelector?: string; selectorCondition?: string}): string[] {
+}: CreateTransitionCSSParams) : string[] {
   const transitions: string[] = transitionEffectToTransitionsList({ transition, transitionProperties });
 
   const styleProperties = (transition?.styleProperties || transitionProperties)?.map(

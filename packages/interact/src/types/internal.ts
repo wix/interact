@@ -26,7 +26,7 @@ export type CreateTransitionCSSParams = {
   key: string;
   effectId: string;
   transition?: TransitionEffect['transition'];
-  properties?: TransitionProperty[];
+  transitionProperties?: TransitionProperty[];
   childSelector?: string;
   selectorCondition?: string;
   useFirstChild?: boolean;
