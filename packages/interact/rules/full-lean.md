@@ -627,7 +627,7 @@ const css = generate(config);
 
 **React:**
 
- ```tsx
+```tsx
 <Interaction tagName="section" interactKey="hero" initial={true} className="hero">
   ...
 </Interaction>
