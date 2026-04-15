@@ -9,13 +9,6 @@ const cardIndices = Array.from({ length: CARD_COUNT }, (_, i) => i);
 const easingOptions = ['linear', 'quadIn', 'quadOut', 'sineOut', 'cubicIn', 'cubicOut'];
 const triggerOptions: TriggerType[] = ['click', 'viewEnter'];
 
-const getTriggerParams = (trigger: TriggerType) => {
-  if (trigger === 'viewEnter') {
-    return { type: 'alternate', threshold: 0.9 } as const;
-  }
-  return { type: 'alternate' } as const;
-};
-
 const formatMs = (value: number) => `${value}ms`;
 
 export const SequencePlayground = () => {
@@ -31,9 +24,10 @@ export const SequencePlayground = () => {
         {
           key: 'seq-playground',
           trigger,
-          params: getTriggerParams(trigger),
+          ...(trigger === 'viewEnter' ? { params: { threshold: 0.9 } } : {}),
           sequences: [
             {
+              triggerType: 'alternate',
               delay,
               offset,
               offsetEasing,

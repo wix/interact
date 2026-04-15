@@ -1,4 +1,4 @@
-import type { StateParams } from './triggers';
+import type { StateAction } from './effects';
 
 export interface IInteractionController {
   element: HTMLElement;
@@ -12,7 +12,7 @@ export interface IInteractionController {
   update(): void;
   toggleEffect(
     effectId: string,
-    method: StateParams['method'],
+    stateAction: StateAction,
     item?: HTMLElement | null,
     isLegacy?: boolean,
   ): void;
@@ -29,6 +29,6 @@ export interface IInteractElement extends HTMLElement {
   disconnectedCallback(): void;
   connect(key?: string): void;
   disconnect(options?: { removeFromCache?: boolean }): void;
-  toggleEffect(effectId: string, method: StateParams['method'], item?: HTMLElement | null): void;
+  toggleEffect(effectId: string, stateAction: StateAction, item?: HTMLElement | null): void;
   getActiveEffects(): string[];
 }

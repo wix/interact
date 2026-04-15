@@ -1,8 +1,6 @@
 import type { AnimationGroup } from '@wix/motion';
 import type {
   TriggerType,
-  StateParams,
-  PointerTriggerParams,
   ViewEnterParams,
   PointerMoveParams,
   AnimationEndParams,
@@ -11,15 +9,15 @@ import type { Effect } from './effects';
 import type { IInteractionController } from './controller';
 
 export type InteractionParamsTypes = {
-  hover: StateParams | PointerTriggerParams;
-  click: StateParams | PointerTriggerParams;
+  hover: Record<string, never>;
+  click: Record<string, never>;
   viewEnter: ViewEnterParams;
   pageVisible: ViewEnterParams;
   animationEnd: AnimationEndParams;
   viewProgress: ViewEnterParams;
   pointerMove: PointerMoveParams;
-  activate: StateParams | PointerTriggerParams;
-  interest: StateParams | PointerTriggerParams;
+  activate: Record<string, never>;
+  interest: Record<string, never>;
 };
 
 export type InteractOptions = {
@@ -54,7 +52,7 @@ export type HandlerObject = {
   source: HTMLElement;
   target: HTMLElement;
   cleanup: () => void;
-  handler?: (isIntersecting?: boolean) => void;
+  handler?: (isIntersecting?: boolean, isFullExit?: boolean) => void;
 };
 
 export type HandlerObjectMap = WeakMap<HTMLElement, Set<HandlerObject>>;

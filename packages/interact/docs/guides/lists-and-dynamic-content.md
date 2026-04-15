@@ -36,7 +36,7 @@ const config = {
       key: 'product-grid',
       listContainer: '.grid', // Container selector
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'product-grid',
@@ -123,7 +123,7 @@ Create sequential entrance animations for list items using delays:
     key: 'feature-list',
     listContainer: '.features',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'feature-list',
         listContainer: '.features',
@@ -306,7 +306,7 @@ element.watchChildList('.dynamic-list');
     key: 'cards',
     listContainer: '.card-grid',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.1 },
+    params: { threshold: 0.1 },
     effects: [{
         key: 'cards',
         listContainer: '.card-grid',
@@ -330,7 +330,7 @@ element.watchChildList('.dynamic-list');
     key: 'features',
     listContainer: '.feature-list',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'features',
         listContainer: '.feature-list',
@@ -354,7 +354,7 @@ element.watchChildList('.dynamic-list');
     key: 'photos',
     listContainer: '.photo-grid',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.15 },
+    params: { threshold: 0.15 },
     effects: [{
         key: 'photos',
         listContainer: '.photo-grid',
@@ -417,10 +417,11 @@ element.watchChildList('.dynamic-list');
     key: 'infinite-list',
     listContainer: '.items',
     trigger: 'viewEnter',
-    params: { type: 'repeat', threshold: 0.1 },
+    params: { threshold: 0.1 },
     effects: [{
         key: 'infinite-list',
         listContainer: '.items',
+        triggerType: 'repeat',
         keyframeEffect: {
             name: 'fade-slide',
             keyframes: [
@@ -586,7 +587,7 @@ const productGridConfig = {
       key: 'products',
       listContainer: '.product-grid',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'products',
@@ -649,11 +650,11 @@ const todoConfig = {
       key: 'todos',
       listContainer: '.todo-list',
       trigger: 'viewEnter',
-      params: { type: 'repeat' },
       effects: [
         {
           key: 'todos',
           listContainer: '.todo-list',
+          triggerType: 'repeat',
           keyframeEffect: {
             name: 'todo-add',
             keyframes: [
@@ -701,7 +702,7 @@ const galleryConfig = {
       key: 'gallery',
       listContainer: '.gallery-grid',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'gallery',

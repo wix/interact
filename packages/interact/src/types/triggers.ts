@@ -24,24 +24,11 @@ export type EventTriggerConfigEnterLeave = {
 
 export type EventTriggerConfig = string | EventTriggerConfigToggle | EventTriggerConfigEnterLeave;
 
-export type TimeAnimationTriggerType = 'once' | 'repeat' | 'alternate' | 'state';
-
-export type TransitionMethod = 'add' | 'remove' | 'toggle' | 'clear';
-
-export type StateParams = {
-  method: TransitionMethod;
-};
-
-export type PointerTriggerParams = {
-  type?: TimeAnimationTriggerType;
-};
-
-export type EventTriggerParams = (StateParams | PointerTriggerParams) & {
+export type EventTriggerParams = {
   eventConfig: EventTriggerConfig;
 };
 
 export type ViewEnterParams = {
-  type?: TimeAnimationTriggerType;
   threshold?: number;
   inset?: string;
   useSafeViewEnter?: boolean;
@@ -56,9 +43,4 @@ export type AnimationEndParams = {
   effectId: string;
 };
 
-export type TriggerParams =
-  | StateParams
-  | PointerTriggerParams
-  | ViewEnterParams
-  | PointerMoveParams
-  | AnimationEndParams;
+export type TriggerParams = ViewEnterParams | PointerMoveParams | AnimationEndParams;

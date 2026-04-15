@@ -12,6 +12,10 @@ type MotionKeyframeEffect = {
   keyframes: Keyframe[];
 };
 
+export type TimeAnimationTriggerType = 'once' | 'repeat' | 'alternate' | 'state';
+
+export type StateAction = 'add' | 'remove' | 'toggle' | 'clear';
+
 type EffectEffectProperty =
   | {
       keyframeEffect: MotionKeyframeEffect;
@@ -31,6 +35,7 @@ export type TimeEffect = {
   fill?: Fill;
   reversed?: boolean;
   delay?: number;
+  triggerType?: TimeAnimationTriggerType;
   composite?: CompositeOperation;
 } & EffectEffectProperty;
 
@@ -62,9 +67,10 @@ export type StyleProperty = {
 
 export type TransitionProperty = StyleProperty & TransitionOptions;
 
-export type TransitionEffect = {
+export type StateEffect = {
   key?: string;
   effectId?: string;
+  stateAction?: StateAction;
 } & {
   transition?: TransitionOptions & {
     styleProperties: StyleProperty[];
@@ -83,7 +89,7 @@ export type EffectBase = {
 
 export type EffectRef = EffectBase & { effectId: string };
 
-export type Effect = EffectBase & (TimeEffect | ScrubEffect | TransitionEffect);
+export type Effect = EffectBase & (TimeEffect | ScrubEffect | StateEffect);
 
 export type AnimationOptions<T extends 'time' | 'scrub'> = MotionAnimationOptions<T> &
   EffectEffectProperty;

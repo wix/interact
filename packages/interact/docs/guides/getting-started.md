@@ -277,7 +277,6 @@ Each effect defines:
 {
     key: 'my-button',
     trigger: 'click',
-    params: { method: 'toggle' },
     effects: [
         {
             key: 'my-content',

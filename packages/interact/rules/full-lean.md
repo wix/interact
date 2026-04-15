@@ -18,7 +18,7 @@ Declarative configuration-driven interaction library. Binds animations to trigge
 - [Effects](#effects)
   - [Time-based Effect](#time-based-effect)
   - [Scroll / Pointer-driven Effect](#scroll--pointer-driven-effect)
-  - [Transition Effect](#transitioneffect-css-style-toggle)
+  - [State Effect](#stateeffect-css-style-toggle)
   - [Animation Payloads](#animation-payloads)
 - [Sequences](#sequences)
 - [Conditions](#conditions)
@@ -175,20 +175,57 @@ For most use cases, `key` alone is sufficient for both source and target resolut
 
 ## Triggers
 
-| Trigger        | Description                     | Accessible variant                          |
-| :------------- | :------------------------------ | :------------------------------------------ |
-| `hover`        | Mouse enter/leave               | `interest` (hover + focusin/out)            |
-| `click`        | Mouse click                     | `activate` (click + keydown on Enter/Space) |
-| `viewEnter`    | Element enters viewport         | —                                           |
-| `viewProgress` | Scroll-driven (ViewTimeline)    | —                                           |
-| `pointerMove`  | Continuous pointer motion       | —                                           |
-| `animationEnd` | Fires after an effect completes | —                                           |
+- **interactions: Interaction[]**
+  - **Purpose**: Declarative mapping from a source element and trigger to one or more target effects.
+  - Each `Interaction` contains:
+    - **key: string**
+      - REQUIRED. The source element path. The trigger attaches to this element.
+    - **listContainer?: string**
+      - OPTIONAL. A CSS selector for a list container context. When present, the trigger is scoped to items within this list.
+    - **listItemSelector?: string**
+      - OPTIONAL. A CSS selector used to select items within `listContainer`.
+    - **trigger: TriggerType**
+      - REQUIRED. One of:
+        - `'hover' | 'click' | 'activate' | 'interest'`: Pointer interactions (`activate` = click with keyboard Space/Enter; `interest` = hover with focus).
+        - `'viewEnter' | 'viewProgress'`: Viewport visibility/progress triggers.
+        - `'animationEnd'`: Fires when a specific effect completes on the source element.
+        - `'pointerMove'`: Continuous pointer motion over an area.
+    - **params?: TriggerParams**
+      - OPTIONAL. Parameter object that MUST match the trigger:
+        - hover/click/activate/interest: No params needed. Behavior is configured on the effect itself.
+        - viewEnter: `ViewEnterParams`
+          - `threshold?`: number in [0,1] describing intersection threshold
+          - `inset?`: string CSS-style inset for rootMargin/observer geometry
+        - viewProgress: No trigger params. Progress is driven by ViewTimeline/scroll scenes. Control the range via `ScrubEffect.rangeStart/rangeEnd` and `namedEffect.range`.
+        - animationEnd: `AnimationEndParams`
+          - `effectId`: string of the effect to wait for completion
+          - Usage: Fire when the specified effect (by `effectId`) on the source element finishes, useful for chaining sequences.
+        - pointerMove: `PointerMoveParams`
+          - `hitArea?`: `'root' | 'self'` (default `'self'`)
+          - `axis?`: `'x' | 'y'` - when using `keyframeEffect` with `pointerMove`, selects which pointer coordinate maps to linear 0-1 progress; defaults to `'y'`. Ignored for `namedEffect` and `customEffect`.
+          - Usage:
+            - `'self'`: Track pointer within the source element’s bounds.
+            - `'root'`: Track pointer anywhere in the viewport (document root).
+            - Only use with `ScrubEffect` mouse presets (`namedEffect`) or `customEffect` that consumes pointer progress; avoid `keyframeEffect` with `pointerMove` unless mapping a single axis via `axis`.
+          - When using `customEffect` with `pointerMove`, the progress parameter is an object:
+            - ```typescript
+              type Progress = {
+                x: number; // 0-1: horizontal position (0 = left edge, 1 = right edge)
+                y: number; // 0-1: vertical position (0 = top edge, 1 = bottom edge)
+                v?: {
+                  // Velocity (optional)
+                  x: number; // Horizontal velocity
+                  y: number; // Vertical velocity
+                };
+                active?: boolean; // Whether mouse is currently in the hit area
+              };
+              ```
 
 ### hover / click
 
-Use `type` (via `PointerTriggerParams`) for keyframe/named effects, `method` (via `StateParams`) for transitions. Do NOT use both `type` and `method` together.
+For `TimeEffect` (keyframe/named/custom effects), set `triggerType` on the effect. For `StateEffect` (transitions), set `stateAction` on the effect. Do NOT mix `triggerType` and `stateAction` on the same effect.
 
-**PointerTriggerParams** (`type`):
+**`triggerType`** — on `TimeEffect`:
 
 | Type                    | hover behavior                          | click behavior                   |
 | :---------------------- | :-------------------------------------- | :------------------------------- |
@@ -197,9 +234,9 @@ Use `type` (via `PointerTriggerParams`) for keyframe/named effects, `method` (vi
 | `'once'`                | Play once on first enter only           | Play once on first click only    |
 | `'state'`               | Play on enter, pause on leave           | Toggle play/pause per click      |
 
-**StateParams** (`method`) — for `TransitionEffect`:
+**`stateAction`** — on `StateEffect`:
 
-| Method               | hover behavior                                  | click behavior               |
+| Action               | hover behavior                                  | click behavior               |
 | :------------------- | :---------------------------------------------- | :--------------------------- |
 | `'toggle'` (default) | Add style state on enter, remove on leave       | Toggle style state per click |
 | `'add'`              | Add style state on enter; leave does NOT remove | Add style state on click     |
@@ -210,13 +247,14 @@ Use `type` (via `PointerTriggerParams`) for keyframe/named effects, `method` (vi
 
 ```ts
 params: {
-  type: 'once' | 'repeat' | 'alternate' | 'state';
   threshold?: number;  // 0–1, IntersectionObserver threshold
   inset?: string;      // like view-timeline-inset, e.g. '-100px' or '-50px 0px'
 }
+// Playback behavior is set on each effect:
+effect.triggerType: 'once' | 'repeat' | 'alternate' | 'state';  // default: 'once'
 ```
 
-**CRITICAL:** When source and target are the **same element**, MUST use `type: 'once'`. For `repeat` / `alternate` / `state`, ALWAYS use **separate** source and target elements — animating the observed element can cause it to leave/re-enter the viewport, causing rapid re-triggers.
+**CRITICAL:** When source and target are the **same element**, MUST use `triggerType: 'once'`. For `'repeat'` / `'alternate'` / `'state'`, ALWAYS use **separate** source and target elements — animating the observed element can cause it to leave/re-enter the viewport, causing rapid re-triggers.
 
 ### viewProgress
 
@@ -364,9 +402,19 @@ Used with `viewProgress` and `pointerMove` triggers.
 - Sticky child (`key`) with `position: sticky; top: 0; height: 100vh`: stays fixed while the wrapper scrolls. This is the ViewTimeline source.
 - Use `rangeStart/rangeEnd` with `name: 'contain'` to animate only during the stuck phase.
 
-### TransitionEffect (CSS style toggle)
+### StateEffect (CSS style toggle)
 
-Used with `hover` / `click` triggers. Pair with `StateParams` (`method`).
+Used with `hover` / `click` triggers. Set `stateAction` on the effect to control state behavior.
+
+**StateEffect** (CSS transition-style state toggles):
+
+- `key?`: string (target override; see TARGET CASCADE)
+- `effectId?`: string (when used as a reference identity)
+- One of:
+  - `transition?`: `{ duration?: number; delay?: number; easing?: string; styleProperties: { name: string; value: string }[] }`
+    - Applies a single transition options block to all listed style properties.
+  - `transitionProperties?`: `Array<{ name: string; value: string; duration?: number; delay?: number; easing?: string }>`
+    - Allows per-property transition options. If both `transition` and `transitionProperties` are provided, the system SHOULD apply both with per-property entries taking precedence for overlapping properties.
 
 ```ts
 // Shared timing for all properties:

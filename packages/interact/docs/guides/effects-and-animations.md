@@ -72,7 +72,7 @@ For custom animations, use keyframe effects:
 {
     key: 'product-card',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.3 },
+    params: { threshold: 0.3 },
     effects: [
         {
             keyframeEffect: {
@@ -227,7 +227,6 @@ For different timing per property:
 {
     key: 'theme-toggle',
     trigger: 'click',
-    params: { type: 'alternate' },
     effects: [
         {
             key: 'page-body',
@@ -514,7 +513,6 @@ Avoid animating:
 {
     key: 'app-loader',
     trigger: 'viewEnter',
-    params: { type: 'once' },
     effects: [
         {
             key: 'logo',
@@ -554,7 +552,7 @@ Avoid animating:
 {
     key: 'stats-section',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.5 },
+    params: { threshold: 0.5 },
     effects: [
         {
             key: 'counter-1',
