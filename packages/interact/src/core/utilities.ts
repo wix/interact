@@ -1,4 +1,4 @@
-import { roundNumber } from '../utils';
+import type { Interaction, ElementIdentifier, ViewEnterParams } from '../types';
 
 export function _processKeysForInterpolation(key: string) {
   return [...key.matchAll(/\[([-\w]+)]/g)].map(([_, _instanceKey]) => _instanceKey);
@@ -16,11 +16,34 @@ export function getInterpolatedKey(template: string, key: string) {
     : template;
 }
 
-function interpolateKeyframesOffsets(
-  keyframes: Keyframe[],
-  firstFrameOnEpsilon?: boolean,
-): Keyframe[] {
-  if (!keyframes || keyframes.length === 0) return [];
+export function shouldUseInitial(interaction: Interaction, effect: ElementIdentifier) {
+  return (
+    interaction.trigger === 'viewEnter' &&
+    (interaction.params as ViewEnterParams)?.type === 'once' &&
+    getElementHash(interaction) === getElementHash(effect)
+  );
+}
+
+export function keyframePropertyToCSS(key: string): string {
+  if (key === 'cssFloat') {
+    return 'float';
+  }
+  if (key === 'easing') {
+    return 'animation-timing-function';
+  }
+  if (key === 'cssOffset') {
+    return 'offset';
+  }
+  if (key === 'composite') {
+    return 'animation-composition';
+  }
+  return key.replace(/([A-Z])/g, '-$1').toLowerCase();
+}
+
+export function interpolateKeyframesOffsets(keyframes: Keyframe[]): Keyframe[] {
+  if (!keyframes.length) {
+    return [];
+  }
 
   const result = keyframes.map((kf) => ({ ...kf }));
 
@@ -34,7 +57,7 @@ function interpolateKeyframesOffsets(
 
   // Find segments between defined offsets and interpolate
   let lastDefinedIndex = 0,
-    currentOffset = result[lastDefinedIndex].offset as number;
+    currentOffset = result[0].offset as number;
   for (let i = 1; i < result.length; i++) {
     if (result[i].offset !== undefined) {
       const endOffset = result[i].offset as number;
@@ -58,57 +81,21 @@ function interpolateKeyframesOffsets(
     }
   }
 
-  if (firstFrameOnEpsilon) {
-    result[0].offset = 0.0001;
-  }
-
   return result;
 }
 
-function keyframePropertyToCSS(key: string): string {
-  if (key === 'cssFloat') {
-    return 'float';
-  }
-  if (key === 'easing') {
-    return 'animation-timing-function';
-  }
-  if (key === 'cssOffset') {
-    return 'offset';
-  }
-  if (key === 'composite') {
-    return 'animation-composition';
-  }
-  return key.replace(/([A-Z])/g, '-$1').toLowerCase();
+export function getElementHash(elementIdentifier: ElementIdentifier): string {
+  const { key, listContainer, listItemSelector, selector } = elementIdentifier;
+  return `${key}\0${listContainer || ''}\0${listItemSelector || ''}\0${selector || ''}`;
 }
 
-export function keyframeObjectToKeyframeCSS(keyframeObj: Keyframe, offsetString: string): string {
-  const props = Object.entries(keyframeObj)
-    .filter(([key, value]) => key !== 'offset' && value !== undefined && value !== null)
-    .map(([key, value]) => {
-      const cssKey = keyframePropertyToCSS(key);
-      return `${cssKey}: ${value};`;
-    })
-    .join('\n');
-  return `${offsetString} {\n${props}\n}`;
-}
-
-export function keyframesToCSS(name: string, keyframes: Keyframe[], initial?: any): string {
-  if (!keyframes || keyframes.length === 0) return '';
-  const interpolated = interpolateKeyframesOffsets(keyframes, !!initial);
-
-  let keyframeBlocks = interpolated
-    .map((kf) => {
-      const offset = kf.offset as number;
-      const percentage = roundNumber(offset * 100);
-
-      return keyframeObjectToKeyframeCSS(kf, `${percentage}%`);
-    })
-    .join('\n');
-
-  if (initial) {
-    const fromFrame = keyframeObjectToKeyframeCSS(initial, 'from');
-    keyframeBlocks = `${fromFrame}\n${keyframeBlocks}`;
+export function getUniqueEncodedHash(hash: string): string {
+  let h1 = 0;
+  let h2 = 0;
+  for (let i = 0; i < hash.length; i++) {
+    const ch = hash.charCodeAt(i);
+    h1 = ((h1 << 5) - h1 + ch) | 0;
+    h2 = ((h2 << 3) ^ (h2 >>> 2) ^ ch) | 0;
   }
-
-  return `@keyframes ${name} {\n${keyframeBlocks}\n}`;
+  return ((h1 >>> 0) * 0x100000 + ((h2 >>> 0) % 0x100000)).toString(36);
 }

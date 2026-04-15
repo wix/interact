@@ -1,5 +1,5 @@
 import type { TriggerType, TriggerParams } from './triggers';
-import type { Effect, EffectRef } from './effects';
+import type { Effect, EffectRef, EffectProperty } from './effects';
 
 export type Condition = {
   type: 'media' | 'container' | 'selector';
@@ -47,4 +47,27 @@ export type InteractConfig = {
   sequences?: Record<string, SequenceConfig>;
   conditions?: Record<string, Condition>;
   interactions: Interaction[];
+};
+
+export type ElementIdentifier = {
+  key: string;
+  listContainer?: string;
+  listItemSelector?: string;
+  selector?: string;
+};
+
+export type ResolvedEffect = ElementIdentifier &
+  EffectProperty & {
+    effectId: string;
+    conditions: string[];
+    initial: boolean;
+  };
+
+export type ResolvedSequence = {
+  sequenceId: string;
+  delay: number;
+  offset: number;
+  offsetEasing: (p: number) => number;
+  conditions: string[];
+  effects: ResolvedEffect[];
 };

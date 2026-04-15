@@ -5,14 +5,18 @@ import type {
   EffectBase,
   TransitionEffect,
   Interaction,
-  TransitionOptions,
-  StyleProperty,
-  TransitionProperty,
+  ResolvedEffect,
+  ResolvedSequence,
   Condition,
   SequenceConfig,
   SequenceConfigRef,
+  ListPropName,
+  ListCustomProps,
+  CoordLists,
+  RuleObj,
 } from '../types';
 import {
+  roundNumber,
   isTemplatedKey,
   kebabCustomProp,
   transitionEffectToTransitionsList,
@@ -23,77 +27,98 @@ import {
   calculateSequenceEffectsOffsets,
 } from '../utils';
 import { getSelector } from './Interact';
-import { keyframesToCSS } from './utilities';
+import {
+  getElementHash,
+  getUniqueEncodedHash,
+  shouldUseInitial,
+  keyframePropertyToCSS,
+  interpolateKeyframesOffsets,
+} from './utilities';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { getCSSAnimation, MotionKeyframeEffect, NamedEffect, getJsEasing } from '@wix/motion';
 
-const DEFAULT_INITIAL = {
-  visibility: 'hidden',
-  transform: 'none',
-  translate: 'none',
-  scale: 'none',
-  rotate: 'none',
-};
+const DEFAULT_INITIAL = [
+  { name: 'visibility', value: 'hidden' },
+  { name: 'transform', value: 'none' },
+  { name: 'translate', value: 'none' },
+  { name: 'scale', value: 'none' },
+  { name: 'rotate', value: 'none' },
+];
 
 const EMPTY_KEYFRAMES_EFFECT = { name: 'interact-empty-kf-effect', keyframes: [{}, {}] };
 
-type OneOf<T extends Record<string, unknown>> =
-  | {
-      [K in keyof T]: Pick<T, K> & Partial<Record<Exclude<keyof T, K>, never>>;
-    }[keyof T]
-  | Partial<Record<keyof T, never>>;
+// ----- Helpers -----
 
-type EffectProperty = OneOf<{
-  namedEffect: NamedEffect;
-  keyframeEffect: MotionKeyframeEffect;
-  transition: TransitionOptions & { styleProperties: StyleProperty[] };
-  transitionProperties: TransitionProperty[];
-}>;
+function CSSRuleToString(rule: RuleObj): string {
+  const { key, childSelector, declarations, media, states, selectorCondition, addInitialSelector } =
+    rule;
+  if (!declarations.length) {
+    return '';
+  }
 
-type ElementIdentifier = {
-  key: string;
-  listContainer?: string;
-  listItemSelector?: string;
-  selector?: string;
-};
+  let selector = `[data-interact-key="${key}"]${
+    addInitialSelector ? ':where(:not([data-interact-enter]))' : ''
+  }`;
 
-type ResolvedEffect = ElementIdentifier &
-  EffectProperty & {
-    effectId: string;
-    conditions: string[];
-  };
+  // maybe nesting is simpler? - no need for `:where` only adding `&` before every option
+  if (states && states.length) {
+    const statesSelector = states
+      .map((state) => `:state(${state}), :--${state}, [data-interact-effect~="${state}"]`)
+      .join(', ');
+    // :where to add no specificity and allow following stateless rules on same target
+    // to be as specific and override
+    selector = `${selector}:where(${statesSelector})`;
+  }
 
-type ResolvedSequence = {
-  sequenceId: string;
-  delay: number;
-  offset: number;
-  offsetEasing: (p: number) => number;
-  conditions: string[];
-  effects: ResolvedEffect[];
-};
+  // here nesting might be confusing due to spaces already being handled?
+  if (childSelector) {
+    selector = `${selector} ${childSelector}`;
+  }
 
-type RuleObj = {
-  key: string;
-  childSelector?: string;
-  declarations: { name: string; value: string | number }[];
-  media?: string;
-  states?: string[];
-  selectorCondition?: string;
-};
+  // maybe nesting is simpler? -
+  // equivalent to `baseSelector { ${applySelectorCondition('&', selectorCondition)} { ... } }`
+  if (selectorCondition) {
+    selector = applySelectorCondition(selector, selectorCondition);
+  }
 
-type ListPropName = 'animation' | 'transition' | 'animation-composition';
+  const declarationsStr = declarations.map(({ name, value }) => `${name}: ${value};`).join('\n');
+  const cssRule = `${selector} {\n${declarationsStr}\n}`;
 
-type CoordLists = {
-  key: string;
-  childSelector?: string;
-  props: Record<ListPropName, { fallback: string; customProps: string[] }>;
-};
+  return media ? `@media ${media} {\n${cssRule}\n}` : cssRule;
+}
 
-type ListCustomProps = {
-  key: string;
-  childSelector?: string;
-  statePropsToInvalidate: Set<string>;
-} & Record<ListPropName, string>;
+function buildListsRule(
+  lists: CoordLists,
+  customProps?: ListCustomProps,
+  conditions?: string[],
+  configConditions?: Record<string, Condition>,
+): RuleObj {
+  const { key, childSelector, props } = lists;
+
+  const declarations = Object.entries(props).map(([name, { fallback, customProps }]) => ({
+    name,
+    value: customProps.map((n) => `var(${n}, ${fallback})`).join(', '),
+  }));
+
+  const rule: RuleObj = { key, childSelector, declarations };
+
+  // option to assign into custom-props instead of directly into the actual css properties
+  if (customProps) {
+    rule.declarations.forEach((declaration) => {
+      declaration.name = customProps[declaration.name as ListPropName];
+    });
+  }
+
+  // option to add conditions to the rules
+  if (conditions) {
+    rule.media = getFullPredicateByType(conditions, configConditions || {}, 'media');
+    rule.selectorCondition = getSelectorCondition(conditions, configConditions || {});
+  }
+
+  return rule;
+}
+
+// ----- Resolvers -----
 
 function resolveEffectForCSS(
   effect: Effect | EffectRef,
@@ -140,6 +165,7 @@ function resolveEffectForCSS(
     key,
     conditions,
     effectId,
+    initial: shouldUseInitial(interaction, { key, ...fullEffect }),
   };
 
   if (namedEffect) {
@@ -168,8 +194,6 @@ function resolveSequenceForCSS(
   config: InteractConfig,
 ): ResolvedSequence | null {
   const { sequences = {}, conditions: configConditions = {} } = config;
-  // const { key: interactionKey, trigger } = interaction;
-  // const isPointerMove = trigger === 'pointerMove';
 
   // required?
   if (!sequence.sequenceId) {
@@ -216,56 +240,132 @@ function resolveSequenceForCSS(
   };
 }
 
-function getElementHash(elementIdentifier: ElementIdentifier): string {
-  const { key, listContainer, listItemSelector, selector } = elementIdentifier;
-  return `${key}\0${listContainer || ''}\0${listItemSelector || ''}\0${selector || ''}`;
+// ----- Keyframes CSS -----
+
+function keyframeObjectToKeyframeCSS(keyframeObj: Keyframe, percentage: number): string {
+  const props = Object.entries(keyframeObj)
+    .filter(([key, value]) => key !== 'offset' && value !== undefined && value !== null)
+    .map(([key, value]) => {
+      const cssKey = keyframePropertyToCSS(key);
+      return `${cssKey}: ${value};`;
+    })
+    .join('\n');
+  return `${percentage}% {\n${props}\n}`;
 }
 
-function elementHashToCustomPropSuffix(hash: string): string {
-  let h1 = 0;
-  let h2 = 0;
-  for (let i = 0; i < hash.length; i++) {
-    const ch = hash.charCodeAt(i);
-    h1 = ((h1 << 5) - h1 + ch) | 0;
-    h2 = ((h2 << 3) ^ (h2 >>> 2) ^ ch) | 0;
-  }
-  return ((h1 >>> 0) * 0x100000 + ((h2 >>> 0) % 0x100000)).toString(36);
-}
-
-function CSSRuleToString(rule: RuleObj): string {
-  const { key, childSelector, declarations, media, states, selectorCondition } = rule;
-  if (!declarations.length) {
+function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
+  const interpolated = interpolateKeyframesOffsets(keyframes);
+  if (!interpolated.length) {
     return '';
   }
 
-  let selector = `[data-interact-key="${key}"]`;
+  let keyframeBlocks = interpolated
+    .map((kf) => {
+      const offset = kf.offset as number;
+      const percentage = roundNumber(offset * 100);
 
-  // maybe nesting is simpler? - no need for `:where` only adding `&` before every option
-  if (states && states.length) {
-    const statesSelector = states
-      .map((state) => `:state(${state}), :--${state}, [data-interact-effect~="${state}"]`)
-      .join(', ');
-    // :where to add no specificity and allow following stateless rules on same target
-    // to be as specific and override
-    selector = `${selector}:where(${statesSelector})`;
-  }
+      return keyframeObjectToKeyframeCSS(kf, percentage);
+    })
+    .join('\n');
 
-  // here nesting might be confusing due to spaces already being handled?
-  if (childSelector) {
-    selector = `${selector} ${childSelector}`;
-  }
-
-  // maybe nesting is simpler? -
-  // equivalent to `baseSelector { ${applySelectorCondition('&', selectorCondition)} { ... } }`
-  if (selectorCondition) {
-    selector = applySelectorCondition(selector, selectorCondition);
-  }
-
-  const declarationsStr = declarations.map(({ name, value }) => `${name}: ${value};`).join('\n');
-  const cssRule = `${selector} {\n${declarationsStr}\n}`;
-
-  return media ? `@media ${media} {\n${cssRule}\n}` : cssRule;
+  return `@keyframes ${name} {\n${keyframeBlocks}\n}`;
 }
+
+// ----- Map Updaters -----
+
+function pushToTargetCustomPropsLists(
+  targetToLists: Map<string, CoordLists>,
+  targetHash: string,
+  customProps: Omit<ListCustomProps, 'statePropsToInvalidate'>,
+): void {
+  const {
+    key,
+    childSelector,
+    animation,
+    transition,
+    'animation-composition': animationComposition,
+  } = customProps;
+
+  if (!targetToLists.has(targetHash)) {
+    targetToLists.set(targetHash, {
+      key,
+      childSelector,
+      props: {
+        animation: {
+          fallback: 'none',
+          customProps: [animation],
+        },
+        'animation-composition': {
+          fallback: 'replace',
+          customProps: [animationComposition],
+        },
+        transition: {
+          fallback: '_',
+          customProps: [transition],
+        },
+      },
+    });
+  } else {
+    const { props } = targetToLists.get(targetHash)!;
+    (Object.keys(props) as ListPropName[]).forEach((name) =>
+      props[name].customProps.push(customProps[name]),
+    );
+  }
+}
+
+function getInteractionCustomPropsForTarget(
+  targetHash: string,
+  key: string,
+  interactionIdx: number,
+  targetToCustomProps: Map<string, ListCustomProps>,
+  childSelector?: string,
+): ListCustomProps {
+  if (!targetToCustomProps.has(targetHash)) {
+    const props = (['animation', 'animation-composition', 'transition'] as ListPropName[]).reduce(
+      (acc, name) => {
+        acc[name] = kebabCustomProp([name, interactionIdx, getUniqueEncodedHash(targetHash)]);
+        return acc;
+      },
+      {} as Record<ListPropName, string>,
+    );
+    targetToCustomProps.set(targetHash, {
+      key,
+      childSelector,
+      statePropsToInvalidate: new Set<string>(),
+      ...props,
+    });
+  }
+
+  return targetToCustomProps.get(targetHash)!;
+}
+
+function getSequenceCustomPropsForTarget(
+  targetHash: string,
+  key: string,
+  interactionIdx: number,
+  targetToSequenceLists: Map<string, CoordLists & { statePropsToInvalidate: Set<string> }>,
+  childSelector?: string,
+): Record<ListPropName, string> {
+  const index = targetToSequenceLists.get(targetHash)?.props?.animation.customProps.length || 0;
+  const props = (['animation', 'animation-composition', 'transition'] as ListPropName[]).reduce(
+    (acc, name) => {
+      acc[name] = kebabCustomProp([name, interactionIdx, index, getUniqueEncodedHash(targetHash)]);
+      return acc;
+    },
+    {} as Record<ListPropName, string>,
+  );
+
+  pushToTargetCustomPropsLists(targetToSequenceLists, targetHash, { key, childSelector, ...props });
+
+  const sequenceList = targetToSequenceLists.get(targetHash)!;
+  if (!sequenceList.statePropsToInvalidate) {
+    sequenceList.statePropsToInvalidate = new Set<string>();
+  }
+
+  return props;
+}
+
+// ----- Parsers -----
 
 function effectToCSS(
   effect: ResolvedEffect,
@@ -286,6 +386,7 @@ function effectToCSS(
     keyframeEffect,
     transition,
     transitionProperties,
+    initial,
   } = effect;
 
   const media = getFullPredicateByType(conditions, configConditions, 'media');
@@ -332,8 +433,7 @@ function effectToCSS(
       ),
     );
 
-    // declare animation and composition custom properties
-    declarations.push(
+    const animationDeclarations = [
       {
         name: customProps.animation,
         value: cssAnimations.map(({ animation }) => animation).join(', '),
@@ -342,14 +442,28 @@ function effectToCSS(
         name: customProps['animation-composition'],
         value: cssAnimations.map(({ composition }) => composition || 'replace').join(', '),
       },
-    );
+    ];
+
+    if (initial) {
+      rules.push({
+        key,
+        media,
+        selectorCondition,
+        childSelector,
+        declarations: animationDeclarations.concat(DEFAULT_INITIAL),
+        addInitialSelector: true,
+      });
+    } else {
+      // declare animation and composition custom properties
+      declarations.push(...animationDeclarations);
+    }
   } else if (transition || transitionProperties) {
     const properties = transition?.styleProperties || transitionProperties || [];
     const transitions = transitionEffectToTransitionsList(effect);
 
     // accumulating props affected by transition
     const stateProps = properties.map(
-      ({ name }) => `--${name}-${elementHashToCustomPropSuffix(targetHash)}`,
+      ({ name }) => `--${name}-${getUniqueEncodedHash(targetHash)}`,
     );
     statePropsToInvalidate = new Set(stateProps);
 
@@ -403,129 +517,6 @@ function effectToCSS(
   }
 
   return { rules, keyframes, statePropsToInvalidate };
-}
-
-function buildListsRule(
-  lists: CoordLists,
-  customProps?: ListCustomProps,
-  conditions?: string[],
-  configConditions?: Record<string, Condition>,
-): RuleObj {
-  const { key, childSelector, props } = lists;
-
-  const declarations = Object.entries(props).map(([name, { fallback, customProps }]) => ({
-    name,
-    value: customProps.map((n) => `var(${n}, ${fallback})`).join(', '),
-  }));
-
-  const rule: RuleObj = { key, childSelector, declarations };
-
-  // option to assign into custom-props instead of directly into the actual css properties
-  if (customProps) {
-    rule.declarations.forEach((declaration) => {
-      declaration.name = customProps[declaration.name as ListPropName];
-    });
-  }
-
-  // option to add conditions to the rules
-  if (conditions) {
-    rule.media = getFullPredicateByType(conditions, configConditions || {}, 'media');
-    rule.selectorCondition = getSelectorCondition(conditions, configConditions || {});
-  }
-
-  return rule;
-}
-
-function pushToTargetCustomPropsLists(
-  targetToLists: Map<string, CoordLists>,
-  targetHash: string,
-  customProps: Omit<ListCustomProps, 'statePropsToInvalidate'>,
-): void {
-  const {
-    key,
-    childSelector,
-    animation,
-    transition,
-    'animation-composition': animationComposition,
-  } = customProps;
-
-  if (!targetToLists.has(targetHash)) {
-    targetToLists.set(targetHash, {
-      key,
-      childSelector,
-      props: {
-        animation: {
-          fallback: 'none',
-          customProps: [animation],
-        },
-        'animation-composition': {
-          fallback: 'replace',
-          customProps: [animationComposition],
-        },
-        transition: {
-          fallback: '_',
-          customProps: [transition],
-        },
-      },
-    });
-  } else {
-    const { props } = targetToLists.get(targetHash)!;
-    (Object.keys(props) as ListPropName[]).forEach((name) =>
-      props[name].customProps.push(customProps[name]),
-    );
-  }
-}
-
-function getInteractionCustomPropsForTarget(
-  targetHash: string,
-  key: string,
-  interactionIdx: number,
-  targetToCustomProps: Map<string, ListCustomProps>,
-  childSelector?: string,
-): ListCustomProps {
-  if (!targetToCustomProps.has(targetHash)) {
-    const props = (['animation', 'animation-composition', 'transition'] as ListPropName[]).reduce(
-      (acc, name) => {
-        acc[name] = kebabCustomProp([name, interactionIdx, targetHash]);
-        return acc;
-      },
-      {} as Record<ListPropName, string>,
-    );
-    targetToCustomProps.set(targetHash, {
-      key,
-      childSelector,
-      statePropsToInvalidate: new Set<string>(),
-      ...props,
-    });
-  }
-
-  return targetToCustomProps.get(targetHash)!;
-}
-
-function getSequenceCustomPropsForTarget(
-  targetHash: string,
-  key: string,
-  interactionIdx: number,
-  targetToSequenceLists: Map<string, CoordLists & { statePropsToInvalidate: Set<string> }>,
-  childSelector?: string,
-): Record<ListPropName, string> {
-  const index = targetToSequenceLists.get(targetHash)?.props?.animation.customProps.length || 0;
-  const props = (['animation', 'animation-composition', 'transition'] as ListPropName[]).reduce(
-    (acc, name) => {
-      acc[name] = kebabCustomProp([name, interactionIdx, index, targetHash]);
-      return acc;
-    },
-    {} as Record<ListPropName, string>,
-  );
-
-  pushToTargetCustomPropsLists(targetToSequenceLists, targetHash, { key, childSelector, ...props });
-
-  const sequenceList = targetToSequenceLists.get(targetHash)!;
-  if (!sequenceList.statePropsToInvalidate) {
-    sequenceList.statePropsToInvalidate = new Set<string>();
-  }
-
-  return props;
 }
 
 function parseEffect(
@@ -695,6 +686,8 @@ function parseInteraction(
 
   return cssRules;
 }
+
+// ----- EndPoints -----
 
 export function _generate(
   config: InteractConfig,
