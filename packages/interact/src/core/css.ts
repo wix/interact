@@ -3,7 +3,7 @@ import type {
   Effect,
   EffectRef,
   EffectBase,
-  TransitionEffect,
+  StateEffect,
   Interaction,
   ResolvedEffect,
   ResolvedSequence,
@@ -136,7 +136,7 @@ function resolveEffectForCSS(
   const { effectId } = effect;
 
   const fullEffect: EffectBase &
-    TransitionEffect & {
+    StateEffect & {
       namedEffect?: NamedEffect;
       customEffect?: (element: Element, progress: any) => void;
       keyframeEffect?: MotionKeyframeEffect;

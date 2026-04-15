@@ -3,7 +3,7 @@ import type {
   TriggerType,
   EffectRef,
   InteractionParamsTypes,
-  TransitionEffect,
+  StateEffect,
   TimeEffect,
   Interaction,
   InteractionTrigger,
@@ -446,7 +446,7 @@ function _processSequences(
     (TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as any)?.add(
       sourceController.element,
       sourceController.element,
-      {} as Effect,
+      { triggerType: sequenceConfig.triggerType } as Effect,
       interaction.params || {},
       {
         reducedMotion: Interact.forceReducedMotion,
@@ -536,7 +536,7 @@ function _processSequencesForTarget(
       (TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as any)?.add(
         sourceController.element,
         sourceController.element,
-        {} as Effect,
+        { triggerType: sequenceConfig.triggerType } as Effect,
         interaction.params || {},
         {
           reducedMotion: Interact.forceReducedMotion,
@@ -687,15 +687,12 @@ function addInteraction<T extends TriggerType>(
 ): void {
   let targetController;
 
-  if (
-    (effect as TransitionEffect).transition ||
-    (effect as TransitionEffect).transitionProperties
-  ) {
+  if ((effect as StateEffect).transition || (effect as StateEffect).transitionProperties) {
     const args: CreateTransitionCSSParams = {
       key: targetKey,
       effectId: (effect as Effect).effectId!,
-      transition: (effect as TransitionEffect).transition,
-      transitionProperties: (effect as TransitionEffect).transitionProperties,
+      transition: (effect as StateEffect).transition,
+      transitionProperties: (effect as StateEffect).transitionProperties,
       childSelector: getSelector(effect, {
         asCombinator: true,
         addItemFilter: true,

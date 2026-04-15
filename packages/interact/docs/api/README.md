@@ -54,7 +54,6 @@ Complete reference documentation for all public APIs in `@wix/interact`.
 
 - [**TriggerType**](types.md#triggertype) - Union of all supported triggers
 - [**ViewEnterParams**](types.md#viewenterparams) - Viewport entry configuration
-- [**StateParams**](types.md#stateparams) - State transition parameters
 - [**PointerMoveParams**](types.md#pointermoveparams) - Pointer movement configuration
 - [**AnimationEndParams**](types.md#animationendparams) - Animation completion triggers
 
@@ -62,7 +61,7 @@ Complete reference documentation for all public APIs in `@wix/interact`.
 
 - [**TimeEffect**](types.md#timeeffect) - Time-based animations with examples
 - [**ScrubEffect**](types.md#scrubeffect) - Progress-based animations with named ranges
-- [**TransitionEffect**](types.md#transitioneffect) - CSS transition effects
+- [**StateEffect**](types.md#stateeffect) - CSS transition effects
 - [**EffectRef**](types.md#effectref) - Effect reference by ID
 
 ### Advanced Types
@@ -126,7 +125,7 @@ InteractConfig
 ├── effects?: Record<string, Effect>
 │   ├── TimeEffect (duration-based)
 │   ├── ScrubEffect (progress-based)
-│   └── TransitionEffect (CSS transitions)
+│   └── StateEffect (CSS transitions)
 └── conditions?: Record<string, Condition>
     ├── Media queries
     ├── Container queries

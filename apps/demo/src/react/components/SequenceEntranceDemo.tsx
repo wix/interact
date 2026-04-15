@@ -52,9 +52,10 @@ const config: InteractConfig = {
     {
       key: 'entrance-container',
       trigger: 'viewEnter',
-      params: { type: 'repeat', threshold: 0.3 },
+      params: { threshold: 0.3 },
       sequences: [
         {
+          triggerType: 'repeat',
           offset: 120,
           offsetEasing: 'quadIn',
           effects: [

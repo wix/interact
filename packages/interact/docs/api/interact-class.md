@@ -61,7 +61,6 @@ const config = {
   interactions: [
     {
       trigger: 'viewEnter',
-      params: { type: 'once' },
       key: 'hero',
       effects: [{ effectId: 'fade-in' }],
     },

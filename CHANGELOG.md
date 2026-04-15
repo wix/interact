@@ -10,6 +10,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.2.0] - 2026-04-15
+
+#### Changed
+
+- Replace `type` and `method` in `Interaction.params` with `triggerType` and `stateAction` on `TimeEffect` and `StateEffect` (#180)
+- Split public types into focused modules for clearer API docs and maintenance (#181)
+- Completely revamped and refreshed interaction rules (#159)
+
+#### Fixed
+
+- Fix typo: `useCutsomElement` → `useCustomElement` in types/options (#172)
+
+### [2.1.4] - 2026-03-23
+
+#### Changed
+
+- Bump `@wix/motion` dependency to `^2.1.3` (#169)
+
 ### [2.1.3] - 2026-03-23
 
 #### Added
@@ -65,8 +83,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Move to wix org on GH (#126)
 
-## @wix/interact
-
 ### [2.0.1] - 2026-02-16
 
 #### Fixed
@@ -85,6 +101,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion
+
+### [2.1.4] - 2026-04-15
+
+#### Fixed
+
+- Implement `AnimationGroup.getProgress()` correctly (#179)
+
+### [2.1.3] - 2026-03-23
+
+#### Changed
+
+- Bump package version for publish (#168)
 
 ### [2.1.2] - 2026-03-23
 
@@ -127,6 +155,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion-presets
+
+### [1.0.1] - 2026-04-15
+
+#### Added
+
+- Add `iterationDelay` to ongoing presets (replaces former `delay` usage) (#178)
+
+#### Fixed
+
+- Fix `fadeIn` for ShuttersIn and GlideIn presets (#177)
 
 ### [Unreleased]
 

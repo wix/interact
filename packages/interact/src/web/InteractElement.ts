@@ -1,4 +1,4 @@
-import type { IInteractionController, StateParams } from '../types';
+import type { IInteractionController, StateAction } from '../types';
 import { InteractionController } from '../core/InteractionController';
 
 export const INTERACT_EFFECT_DATA_ATTR = 'interactEffect';
@@ -54,7 +54,7 @@ export function getInteractElement() {
       this.controller.disconnect(options);
     }
 
-    toggleEffect(effectId: string, method: StateParams['method'], item?: HTMLElement | null) {
+    toggleEffect(effectId: string, stateAction: StateAction, item?: HTMLElement | null) {
       if (item === null) {
         return;
       }
@@ -64,21 +64,21 @@ export function getInteractElement() {
       }
 
       if (this._internals && !item) {
-        if (method === 'toggle') {
+        if (stateAction === 'toggle') {
           if (this._internals.states.has(effectId)) {
             this._internals.states.delete(effectId);
           } else {
             this._internals.states.add(effectId);
           }
-        } else if (method === 'add') {
+        } else if (stateAction === 'add') {
           this._internals.states.add(effectId);
-        } else if (method === 'remove') {
+        } else if (stateAction === 'remove') {
           this._internals.states.delete(effectId);
-        } else if (method === 'clear') {
+        } else if (stateAction === 'clear') {
           this._internals.states.clear();
         }
       } else {
-        this.controller?.toggleEffect(effectId, method, item, true);
+        this.controller?.toggleEffect(effectId, stateAction, item, true);
       }
     }
 

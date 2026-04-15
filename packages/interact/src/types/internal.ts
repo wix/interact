@@ -1,4 +1,4 @@
-import type { Effect, EffectRef, TransitionEffect, TransitionProperty } from './effects';
+import type { Effect, EffectRef, StateEffect, TransitionProperty } from './effects';
 import type { Condition, SequenceConfig, Interaction, InteractionTrigger } from './config';
 
 export type InteractCache = {
@@ -25,7 +25,7 @@ export type InteractCache = {
 export type CreateTransitionCSSParams = {
   key: string;
   effectId: string;
-  transition?: TransitionEffect['transition'];
+  transition?: StateEffect['transition'];
   transitionProperties?: TransitionProperty[];
   childSelector?: string;
   selectorCondition?: string;

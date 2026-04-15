@@ -198,7 +198,7 @@ console.log('Interactions removed for hero');
 
 ## `generate(config, useFirstChild?)`
 
-Generates CSS styles needed to hide elements that have entrance animations with a `viewEnter` trigger and `type: 'once'`. This prevents a flash of unstyled content (FOUC) where elements briefly appear before their entrance animation starts.
+Generates CSS styles needed to hide elements that have entrance animations with a `viewEnter` trigger and the default (or explicit) `triggerType: 'once'` on effects. This prevents a flash of unstyled content (FOUC) where elements briefly appear before their entrance animation starts.
 
 ### Signature
 
@@ -208,7 +208,7 @@ function generate(config: InteractConfig, useFirstChild?: boolean): string;
 
 ### Parameters
 
-**`config: InteractConfig`** - The interaction configuration; used to find `viewEnter`/`once` interactions and build selectors.
+**`config: InteractConfig`** - The interaction configuration; used to find `viewEnter` interactions whose time effects use `triggerType: 'once'` (the default) and build selectors.
 
 **`useFirstChild?: boolean`** - When `true`, targets the first child of each key (e.g. for `<interact-element>`). Default `false`.
 
@@ -221,7 +221,7 @@ function generate(config: InteractConfig, useFirstChild?: boolean): string;
 The function generates CSS that:
 
 1. **Respects reduced motion**: Wrapped in `@media (prefers-reduced-motion: no-preference)`.
-2. **Targets elements by key**: Selectors use `[data-interact-key="..."]` for each interaction key that has a `viewEnter`/`once` entrance.
+2. **Targets elements by key**: Selectors use `[data-interact-key="..."]` for each interaction key that has a `viewEnter` entrance with `triggerType: 'once'` (including the default).
 3. **Excludes completed animations**: Uses `:not([data-interact-enter])` so elements are shown after the animation runs.
 
 **With `useFirstChild: false` (vanilla/React, element is the target)**:
@@ -264,7 +264,7 @@ const config = {
     {
       key: 'hero',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           keyframeEffect: {

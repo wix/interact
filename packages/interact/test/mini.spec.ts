@@ -115,43 +115,38 @@ describe('interact (mini)', () => {
       {
         trigger: 'click',
         key: 'logo-click',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-click',
             effectId: 'logo-bounce',
+            triggerType: 'alternate',
           },
         ],
       },
       {
         trigger: 'click',
         key: 'logo-click',
-        params: {
-          method: 'toggle',
-        },
         effects: [
           {
             key: 'logo-click',
             effectId: 'logo-transition-hover',
+            stateAction: 'toggle',
           },
         ],
       },
       {
         trigger: 'hover',
         key: 'logo-hover',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-hover',
             effectId: 'logo-arc-in',
+            triggerType: 'alternate',
           },
           {
             key: 'logo-hover',
             effectId: 'logo-arc-in',
+            triggerType: 'alternate',
             namedEffect: {
               type: 'ArcIn',
               direction: 'left',
@@ -163,13 +158,11 @@ describe('interact (mini)', () => {
       {
         trigger: 'hover',
         key: 'logo-hover',
-        params: {
-          method: 'toggle',
-        },
         effects: [
           {
             key: 'logo-hover',
             effectId: 'logo-transition-hover',
+            stateAction: 'toggle',
           },
         ],
       },
@@ -788,7 +781,6 @@ describe('interact (mini)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-alternate',
-              params: { type: 'alternate' },
               effects: [{ key: 'logo-alternate', effectId: 'logo-arc-in' }],
             },
           ],
@@ -796,6 +788,7 @@ describe('interact (mini)', () => {
             'logo-arc-in': {
               namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'alternate',
             },
           },
         };
@@ -850,7 +843,6 @@ describe('interact (mini)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-repeat',
-              params: { type: 'repeat' },
               effects: [{ key: 'logo-repeat', effectId: 'logo-arc-in' }],
             },
           ],
@@ -858,6 +850,7 @@ describe('interact (mini)', () => {
             'logo-arc-in': {
               namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'repeat',
             },
           },
         };
@@ -909,7 +902,6 @@ describe('interact (mini)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-state',
-              params: { type: 'state' },
               effects: [{ key: 'logo-state', effectId: 'logo-arc-in' }],
             },
           ],
@@ -917,6 +909,7 @@ describe('interact (mini)', () => {
             'logo-arc-in': {
               namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'state',
             },
           },
         };

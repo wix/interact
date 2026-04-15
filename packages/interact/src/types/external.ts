@@ -6,10 +6,6 @@ export type {
   EventTriggerConfigToggle,
   EventTriggerConfigEnterLeave,
   EventTriggerConfig,
-  ViewEnterType,
-  TransitionMethod,
-  StateParams,
-  PointerTriggerParams,
   EventTriggerParams,
   ViewEnterParams,
   PointerMoveParams,
@@ -20,12 +16,14 @@ export type {
 
 // Effects
 export type {
+  TimeAnimationTriggerType,
+  StateAction,
   TimeEffect,
   ScrubEffect,
   TransitionOptions,
   StyleProperty,
   TransitionProperty,
-  TransitionEffect,
+  StateEffect,
   EffectRef,
   Effect,
   AnimationOptions,

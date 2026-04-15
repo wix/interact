@@ -108,12 +108,12 @@ describe('viewEnter handler', () => {
       expect(observeSpy).toHaveBeenCalledWith(element);
     });
 
-    it('should unobserve after first intersection if type is "once"', () => {
+    it('should unobserve after first intersection if triggerType is "once"', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'once' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'once' },
+        {},
         {},
       );
 
@@ -235,8 +235,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'alternate' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'alternate' },
+        {},
         {},
       );
 
@@ -253,8 +253,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'alternate' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'alternate' },
+        {},
         {},
       );
 
@@ -278,8 +278,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'alternate' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'alternate' },
+        {},
         {},
       );
 
@@ -303,8 +303,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'alternate' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'alternate' },
+        {},
         {},
       );
 
@@ -321,8 +321,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'alternate' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'alternate' },
+        {},
         {},
       );
 
@@ -338,8 +338,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'repeat' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'repeat' },
+        {},
         {},
       );
 
@@ -357,8 +357,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'repeat' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'repeat' },
+        {},
         {},
       );
 
@@ -384,8 +384,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'repeat' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'repeat' },
+        {},
         {},
       );
 
@@ -411,8 +411,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'repeat' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'repeat' },
+        {},
         {},
       );
 
@@ -429,8 +429,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'repeat' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'repeat' },
+        {},
         {},
       );
 
@@ -446,8 +446,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'state' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'state' },
+        {},
         {},
       );
 
@@ -464,8 +464,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'state' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'state' },
+        {},
         {},
       );
 
@@ -489,8 +489,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'state' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'state' },
+        {},
         {},
       );
 
@@ -517,8 +517,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'state' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'state' },
+        {},
         {},
       );
 
@@ -543,8 +543,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'state' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'state' },
+        {},
         {},
       );
 
@@ -561,8 +561,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'state' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'state' },
+        {},
         {},
       );
 
@@ -766,8 +766,8 @@ describe('viewEnter handler', () => {
       viewEnterHandler.add(
         element,
         target,
-        { duration: 1000, namedEffect: { type: 'FadeIn' } },
-        { type: 'once' },
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'once' },
+        {},
         { animation: mockAnimationGroup as any },
       );
 

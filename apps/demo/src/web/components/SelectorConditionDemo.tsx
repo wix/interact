@@ -17,7 +17,6 @@ const selectorConditionConfig: InteractConfig = {
       trigger: 'viewEnter',
       key: 'selector-demo-container',
       params: {
-        type: 'repeat',
         threshold: 0.5,
       },
       effects: [
@@ -39,6 +38,7 @@ const selectorConditionConfig: InteractConfig = {
       duration: 1500,
       iterations: Infinity,
       easing: 'ease-in-out',
+      triggerType: 'repeat',
       keyframeEffect: {
         name: 'pulse-glow',
         keyframes: [
@@ -52,6 +52,7 @@ const selectorConditionConfig: InteractConfig = {
       duration: 2000,
       iterations: Infinity,
       easing: 'linear',
+      triggerType: 'repeat',
       keyframeEffect: {
         name: 'gentle-spin',
         keyframes: [
