@@ -166,23 +166,15 @@ jobs:
         run: |
           cd packages/interact
           npm publish --tag dp --provenance --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.INTERACT_NPM_TOKEN }}
 
       - name: npm publish @wix/interact RC (trusted)
         if: ${{ github.event.inputs.dry_run == 'false' && github.event.inputs.source_branch == '' && (github.event.inputs.version_strategy == 'prerelease' || github.event.inputs.version_strategy == 'premajor' || github.event.inputs.version_strategy == 'preminor' || github.event.inputs.version_strategy == 'prepatch') }}
         run: |
           cd packages/interact
           npm publish --tag next --provenance --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.INTERACT_NPM_TOKEN }}
 
       - name: npm publish @wix/interact Stable (trusted)
         if: ${{ github.event.inputs.dry_run == 'false' && github.event.inputs.source_branch == '' && (github.event.inputs.version_strategy == 'major' || github.event.inputs.version_strategy == 'minor' || github.event.inputs.version_strategy == 'patch') }}
         run: |
           cd packages/interact
           npm publish --tag latest --provenance --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.INTERACT_NPM_TOKEN }}
-
-      # Merging back to master currently doesn't work, will be done manually
