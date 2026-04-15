@@ -1,5 +1,5 @@
 import { getEasing } from '@wix/motion';
-import type { CreateTransitionCSSParams, Condition, TransitionEffect } from './types';
+import type { Condition, CreateTransitionCSSParams, TransitionEffect } from './types';
 
 export function roundNumber(num: number, precision = 2): number {
   return parseFloat(num.toFixed(precision));
@@ -18,7 +18,7 @@ export function calculateSequenceEffectsOffsets(
   delay: number,
   offset: number,
   offsetEasing: (p: number) => number,
-) : void {
+): void {
   const maxIndex = effects.length - 1;
 
   effects.forEach((effect, index) => {
@@ -102,12 +102,16 @@ export function createTransitionCSS({
   transitionProperties,
   childSelector = '> :first-child',
   selectorCondition,
-}: CreateTransitionCSSParams) : string[] {
-  const transitions: string[] = transitionEffectToTransitionsList({ transition, transitionProperties });
+}: CreateTransitionCSSParams): string[] {
+  const transitions: string[] = transitionEffectToTransitionsList({
+    transition,
+    transitionProperties,
+  });
 
-  const styleProperties = (transition?.styleProperties || transitionProperties)?.map(
-    (property) => `${property.name}: ${property.value};`
-  ) || [];
+  const styleProperties =
+    (transition?.styleProperties || transitionProperties)?.map(
+      (property) => `${property.name}: ${property.value};`,
+    ) || [];
   const escapedKey = key.replace(/"/g, "'");
 
   // Build selectors, applying condition if present
