@@ -12,11 +12,7 @@ import type {
   SequenceConfigRef,
   TimeAnimationTriggerType,
 } from '../types';
-import {
-  isTemplatedKey,
-  generateId,
-  calculateSequenceEffectsOffsets,
-} from '../utils';
+import { isTemplatedKey, generateId, calculateSequenceEffectsOffsets } from '../utils';
 import { shouldUseInitial } from './utilities';
 
 export const EMPTY_KEYFRAMES_EFFECT = { name: 'interact-empty-kf-effect', keyframes: [{}, {}] };

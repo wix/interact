@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { resolveEffectForCSS, resolveSequenceForCSS } from '../src/core/resolvers';
-import type {
-  TriggerType,
-  Effect,
-  EffectRef,
-} from '../src/types';
+import type { TriggerType, Effect, EffectRef } from '../src/types';
 
 const EMPTY_CONFIG = {
   effects: {},
@@ -15,7 +11,8 @@ const BASE_INTERACTION = {
   trigger: 'viewEnter' as const,
 };
 const BASE_CONDITION = {
-  type: 'media' as const, predicate: '(min-width: 100px)'
+  type: 'media' as const,
+  predicate: '(min-width: 100px)',
 };
 const BASE_SEQUENCE = { effects: [{}] };
 
@@ -27,18 +24,14 @@ describe('css resolvers', () => {
         expect(result?.key).toBe('effectKey');
       });
       it('should return null if key is a template', () => {
-        expect(
-          resolveEffectForCSS({ key: 'key[]' }, BASE_INTERACTION, EMPTY_CONFIG),
-        ).toBeNull();
+        expect(resolveEffectForCSS({ key: 'key[]' }, BASE_INTERACTION, EMPTY_CONFIG)).toBeNull();
       });
       it('should inherit key from interaction if does not exist on effect', () => {
         const result = resolveEffectForCSS({}, BASE_INTERACTION, EMPTY_CONFIG);
         expect(result?.key).toBe(BASE_INTERACTION.key);
       });
       it('should return null if both interaction and effect have no key', () => {
-        expect(
-          resolveEffectForCSS({}, { ...BASE_INTERACTION, key: '' }, EMPTY_CONFIG),
-        ).toBeNull();
+        expect(resolveEffectForCSS({}, { ...BASE_INTERACTION, key: '' }, EMPTY_CONFIG)).toBeNull();
       });
     });
 
@@ -64,28 +57,21 @@ describe('css resolvers', () => {
 
     describe('effectId', () => {
       it('should use data from referenced effect if effectId exists', () => {
-        const result = resolveEffectForCSS(
-          { effectId: 'effectId' }, BASE_INTERACTION,
-          {
-            interactions: [],
-            effects: { effectId: { namedEffect: { type: 'FadeIn' } } },
-          },
-        );
+        const result = resolveEffectForCSS({ effectId: 'effectId' }, BASE_INTERACTION, {
+          interactions: [],
+          effects: { effectId: { namedEffect: { type: 'FadeIn' } } },
+        });
         expect(result).toMatchObject({ effectId: 'effectId' });
         expect(result).toHaveProperty('namedEffect');
       });
       it('should generate id if effectId does not exist', () => {
-        expect(
-          resolveEffectForCSS({}, BASE_INTERACTION, EMPTY_CONFIG)?.effectId
-        ).toBeTruthy();
+        expect(resolveEffectForCSS({}, BASE_INTERACTION, EMPTY_CONFIG)?.effectId).toBeTruthy();
       });
     });
 
     describe('conditions', () => {
       it('should create empty array if conditions is undefined', () => {
-        expect(
-          resolveEffectForCSS({}, BASE_INTERACTION, EMPTY_CONFIG)?.conditions,
-        ).toEqual([]);
+        expect(resolveEffectForCSS({}, BASE_INTERACTION, EMPTY_CONFIG)?.conditions).toEqual([]);
       });
       it('should filter duplications from conditions', () => {
         const result = resolveEffectForCSS(
@@ -107,9 +93,7 @@ describe('css resolvers', () => {
 
     describe('triggerType', () => {
       it('should default to once if does not exist', () => {
-        expect(
-          resolveEffectForCSS({}, BASE_INTERACTION, EMPTY_CONFIG)?.triggerType,
-        ).toBe('once');
+        expect(resolveEffectForCSS({}, BASE_INTERACTION, EMPTY_CONFIG)?.triggerType).toBe('once');
       });
     });
 
@@ -125,19 +109,23 @@ describe('css resolvers', () => {
       it('should be false when trigger is viewEnter and type is different than once', () => {
         expect(
           resolveEffectForCSS(
-            { triggerType: 'repeat' } as unknown as Effect, BASE_INTERACTION, EMPTY_CONFIG)?.initial,
+            { triggerType: 'repeat' } as unknown as Effect,
+            BASE_INTERACTION,
+            EMPTY_CONFIG,
+          )?.initial,
         ).toBe(false);
       });
       it('should be true when trigger is viewEnter and type is once', () => {
         expect(
           resolveEffectForCSS(
-            { triggerType: 'once' } as unknown as Effect, BASE_INTERACTION, EMPTY_CONFIG)?.initial,
+            { triggerType: 'once' } as unknown as Effect,
+            BASE_INTERACTION,
+            EMPTY_CONFIG,
+          )?.initial,
         ).toBe(true);
       });
       it('should be true when trigger is viewEnter and type is undefined (default to once)', () => {
-        expect(
-          resolveEffectForCSS({}, BASE_INTERACTION, EMPTY_CONFIG)?.initial,
-        ).toBe(true);
+        expect(resolveEffectForCSS({}, BASE_INTERACTION, EMPTY_CONFIG)?.initial).toBe(true);
       });
     });
 
@@ -171,7 +159,10 @@ describe('css resolvers', () => {
       it('should return null for namedEffect with no type', () => {
         expect(
           resolveEffectForCSS(
-            { namedEffect: {} } as unknown as Effect, BASE_INTERACTION, EMPTY_CONFIG),
+            { namedEffect: {} } as unknown as Effect,
+            BASE_INTERACTION,
+            EMPTY_CONFIG,
+          ),
         ).toBeNull();
       });
       it('should return null for pointerMove with namedEffect', () => {
@@ -179,7 +170,7 @@ describe('css resolvers', () => {
           resolveEffectForCSS(
             { namedEffect: { type: 'BlurMouse' } },
             { ...BASE_INTERACTION, trigger: 'pointerMove' },
-            EMPTY_CONFIG
+            EMPTY_CONFIG,
           ),
         ).toBeNull();
       });
@@ -188,21 +179,17 @@ describe('css resolvers', () => {
           resolveEffectForCSS(
             { customEffect: () => {} },
             { ...BASE_INTERACTION, trigger: 'pointerMove' },
-            EMPTY_CONFIG
+            EMPTY_CONFIG,
           ),
         ).toBeNull();
       });
       it('should use effectId as keyframes name if name does not exist and has reference', () => {
-        const result = resolveEffectForCSS(
-          { effectId: 'effectId' },
-          BASE_INTERACTION,
-          { 
-            interactions: [],
-            effects: {
-              effectId: { keyframeEffect: { name: '', keyframes: [{}] } }
-            }
-          }
-        );
+        const result = resolveEffectForCSS({ effectId: 'effectId' }, BASE_INTERACTION, {
+          interactions: [],
+          effects: {
+            effectId: { keyframeEffect: { name: '', keyframes: [{}] } },
+          },
+        });
         expect(result).toMatchObject({ keyframeEffect: { name: 'effectId' } });
       });
       it('should use effectId as keyframes name if name does not exist and has no reference', () => {
@@ -217,11 +204,11 @@ describe('css resolvers', () => {
         const result = resolveEffectForCSS(
           { effectId: 'effectId', keyframeEffect: { name: '', keyframes: [{}] } },
           BASE_INTERACTION,
-          { 
+          {
             interactions: [],
             effects: {
-              effectId: { keyframeEffect: { name: 'orig', keyframes: [{}] } }
-            }
+              effectId: { keyframeEffect: { name: 'orig', keyframes: [{}] } },
+            },
           },
         );
         expect(result?.keyframeEffect?.name).toBeTruthy();
@@ -233,22 +220,18 @@ describe('css resolvers', () => {
   describe('sequence', () => {
     describe('sequenceId', () => {
       it('should use data from referenced sequence if sequenceId exists', () => {
-        const result = resolveSequenceForCSS(
-          { sequenceId: 'sequenceId' },
-          BASE_INTERACTION,
-          {
-            interactions: [],
-            effects: {},
-            sequences: {
-              sequenceId: { sequenceId: 'sequenceId', effects: [{}], delay: 100 },
-            },
+        const result = resolveSequenceForCSS({ sequenceId: 'sequenceId' }, BASE_INTERACTION, {
+          interactions: [],
+          effects: {},
+          sequences: {
+            sequenceId: { sequenceId: 'sequenceId', effects: [{}], delay: 100 },
           },
-        );
+        });
         expect(result).toMatchObject({ sequenceId: 'sequenceId', effects: [{}], delay: 100 });
       });
       it('should generate id if sequenceId does not exist', () => {
         expect(
-          resolveSequenceForCSS(BASE_SEQUENCE, BASE_INTERACTION, EMPTY_CONFIG)?.sequenceId
+          resolveSequenceForCSS(BASE_SEQUENCE, BASE_INTERACTION, EMPTY_CONFIG)?.sequenceId,
         ).toBeTruthy();
       });
     });

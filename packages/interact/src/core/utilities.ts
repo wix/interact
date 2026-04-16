@@ -1,8 +1,4 @@
-import type {
-  Interaction,
-  ElementIdentifier,
-  TimeAnimationTriggerType,
-} from '../types';
+import type { Interaction, ElementIdentifier, TimeAnimationTriggerType } from '../types';
 
 export function _processKeysForInterpolation(key: string) {
   return [...key.matchAll(/\[([-\w]+)]/g)].map(([_, _instanceKey]) => _instanceKey);
