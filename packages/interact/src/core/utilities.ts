@@ -2,7 +2,6 @@ import type {
   Interaction,
   ElementIdentifier,
   TimeAnimationTriggerType,
-  TimeEffect,
 } from '../types';
 
 export function _processKeysForInterpolation(key: string) {
