@@ -226,11 +226,11 @@ Shown in the inspector when an interaction is selected. Provides:
 
 | Trigger        | Description                       | Configurable Params                                                                                           |
 | -------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `hover`        | Mouse enter/leave                 | Behavior: `type` (once/repeat/alternate/state) or `method` (add/remove/toggle/clear) depending on effect type |
-| `click`        | Mouse click                       | Same behavior toggle as hover                                                                                 |
-| `activate`     | Focus + click combined            | Same behavior toggle as hover                                                                                 |
-| `interest`     | Hover + focus combined            | Same behavior toggle as hover                                                                                 |
-| `viewEnter`    | Element enters the viewport       | `type` (once/repeat/alternate/state), `threshold` (0–1 slider), `inset`                                       |
+| `hover`        | Mouse enter/leave                 | No trigger params — behavior is set per-effect (`triggerType` or `stateAction`)       |
+| `click`        | Mouse click                       | Same as hover                                                                         |
+| `activate`     | Focus + click combined            | Same as hover                                                                         |
+| `interest`     | Hover + focus combined            | Same as hover                                                                         |
+| `viewEnter`    | Element enters the viewport       | `threshold` (0–1 slider), `inset`                                                     |
 | `viewProgress` | Scroll progress through viewport  | No trigger params (scroll preview controls shown instead)                                                     |
 | `pointerMove`  | Mouse movement tracking           | `hitArea` (root/self), `axis` (x/y)                                                                           |
 | `animationEnd` | After another animation completes | `effectId` — which effect to wait for (`<pg-trigger-editor>` “After Effect” dropdown)                         |
@@ -241,10 +241,8 @@ The playground does not expose the `pageVisible` trigger. When a config is appli
 
 Renders dynamic parameter forms based on the selected trigger type. Key behavior:
 
-- **Pointer triggers** (`hover`/`click`/`activate`/`interest`) — behavior dropdown adapts to effect type:
-  - Time effects: shows `PointerTriggerParams.type` values (`once` / `repeat` / `alternate` / `state`)
-  - Transition effects: shows `StateParams.method` values (`add` / `remove` / `toggle` / `clear`)
-  - Switching effect types auto-migrates params between `type` and `method`
+- **Pointer triggers** (`hover`/`click`/`activate`/`interest`) — no trigger params. Behavior is configured per-effect: playback behavior (`triggerType`) is set on `TimeEffect`, and state behavior (`stateAction`) is set on `StateEffect`, via their respective effect editors.
+- **`viewEnter`** — `threshold` and `inset` inputs. Behavior (`triggerType`) is set per-effect, not on the trigger.
 - **Scroll triggers** (`viewEnter`/`viewProgress`) — auto-enable scroll preview mode on the stage
 - Number/text inputs use `change` events; range sliders use `input` for real-time feedback
 
@@ -258,15 +256,15 @@ Manages the effects for the selected interaction. Provides:
 
 1. **Effect list** — shows all effects on the interaction with add/remove controls
 2. **Target Element** dropdown — selects which element gets animated. Sets the inline ref's `key`/`listContainer`/`listItemSelector` on `interaction.effects[i]`. Defaults to "Same as source" (cascades to `interaction.key`).
-3. **Effect type tabs** — Time, Scrub, or Transition (filtered by trigger compatibility)
+3. **Effect type tabs** — Time, Scrub, or Transition/State (filtered by trigger compatibility)
 
 ### Effect Type Constraints by Trigger
 
-| Trigger                                     | Allowed Effect Types |
-| ------------------------------------------- | -------------------- |
-| `hover` / `click` / `activate` / `interest` | Time, Transition     |
-| `viewEnter` / `animationEnd`                | Time only            |
-| `viewProgress` / `pointerMove`              | Scrub only           |
+| Trigger                                     | Allowed Effect Types        |
+| ------------------------------------------- | --------------------------- |
+| `hover` / `click` / `activate` / `interest` | Time, Transition (State)   |
+| `viewEnter` / `animationEnd`                | Time only                   |
+| `viewProgress` / `pointerMove`              | Scrub only                  |
 
 When the trigger changes, incompatible effects are auto-converted to the trigger's default type.
 
@@ -287,6 +285,11 @@ For event-triggered animations (hover, click, viewEnter, etc.):
 - **Animation Source** toggle: `Named Effect` or `Keyframes` (radio buttons)
   - Named Effect → shows `<pg-named-effect-picker>`
   - Keyframes → shows `<pg-keyframe-editor>`
+- **Trigger Behavior** (`triggerType`) dropdown — controls playback behavior per-effect:
+  - `alternate` — plays forward on first trigger, reverses on next (default)
+  - `once` — plays once and never again
+  - `repeat` — restarts from the beginning each time
+  - `state` — plays forward on trigger start, reverses on trigger end
 - **Timing properties**: duration (ms), delay (ms), easing (`<pg-easing-picker>`), iterations, alternate (boolean), fill mode, reversed (boolean)
 
 Switching animation source strips the old property and adds a default for the new one.
@@ -302,15 +305,20 @@ For scroll/pointer-driven animations:
 
 ### Transition Effect Editor (`<pg-transition-effect-editor>`)
 
-For CSS transition-based state changes:
+For CSS transition-based state changes (the Interact library type is `StateEffect`):
 
+- **State Action** (`stateAction`) dropdown — controls how the style state is applied:
+  - `toggle` — applies the style state, removes it on next trigger (default)
+  - `add` — applies the style state permanently
+  - `remove` — removes a previously applied style state
+  - `clear` — removes all style states on the element
 - **Timing section**: shared duration (default 300ms), delay, easing — propagated to all `transitionProperties` entries
 - **Properties section**: list of CSS property name + value pairs (e.g., `transform: scale(1.05)`)
 - Add/remove property rows; new properties inherit shared timing
 
 ### Named Effect Picker (`<pg-named-effect-picker>`)
 
-Browses the `@wix/motion-presets` catalog (~66 presets across 5 categories). Features:
+Browses the `@wix/motion-presets` catalog (~67 presets across 5 categories). Features:
 
 - **Category filtering by trigger + effect type**:
   - Pointer triggers + Time → Entrance, Ongoing
@@ -319,7 +327,7 @@ Browses the `@wix/motion-presets` catalog (~66 presets across 5 categories). Fea
   - Background scroll → Background Scroll
 - **Per-preset parameter controls**: Each preset exposes its configurable parameters with appropriate control types:
   - `select` — direction, shape, range, axis, pivotAxis, spin
-  - `number` — perspective, blur, intensity, scale, spins, angle, rotate
+  - `number` — perspective, blur, intensity, scale, spins, angle, rotate, iterationDelay
   - `boolean` — inverted, staggered, startFromOffScreen
   - `unit-value` — distance, depth (compound: number + unit dropdown)
 - Changing the selected preset resets all parameter values
@@ -366,6 +374,7 @@ Manages `config.sequences` — orchestrated groups of effects with stagger timin
 
 - **Sequence list** — shows all sequences with add/remove controls
 - **Per-sequence configuration**:
+  - `triggerType` — playback behavior for the sequence (`alternate` / `once` / `repeat` / `state`). Set on the `SequenceConfig`, not on individual effects within the sequence. Defaults to `alternate`.
   - `delay` (ms) — initial delay before the sequence starts
   - `offset` (ms) — stagger offset between consecutive effects (defaults to **0** for new sequences and when omitted; the sequence editor and timeline both use this default)
   - `offsetEasing` — easing for the stagger offset
@@ -484,7 +493,7 @@ A togglable bottom panel (`<pg-timeline-panel>`) scoped to the currently selecte
 - **Track bar colors**:
   - Time effects: `--pg-color-accent` (indigo)
   - Scrub effects: `--pg-color-success` (green)
-  - Transition effects: `--pg-color-accent-hover` (lighter indigo)
+  - State/Transition effects: `--pg-color-accent-hover` (lighter indigo)
   - Sequence effects: `--pg-color-success` (green)
 - **Progress overlay** inside each bar shows how much has played
 
@@ -518,7 +527,7 @@ Creates its own Web Animations API animations, independent of Interact's trigger
 
 - Named effects → resolved to keyframes via preset factory functions
 - Keyframe effects → used directly
-- Transition effects → converted to equivalent keyframes
+- State/Transition effects → converted to equivalent keyframes
 - Sequence effects → stagger timing: `delay = seqDelay + (effectIndex × seqOffset) + effect.delay`, where `seqOffset` is the sequence’s `offset` or **0** if unset
 
 **InteractManager coordination**: When timeline opens, `pauseInteract()` destroys the Interact instance to prevent trigger conflicts. When it closes, `resumeInteract()` re-applies the config.
@@ -584,11 +593,11 @@ Bridges the playground's config state to the Interact runtime:
 
 Imports all preset categories from `@wix/motion-presets` and exposes:
 
-- **`presetCatalog`** — flat array of `{ name, category }` for all ~66 presets
+- **`presetCatalog`** — flat array of `{ name, category }` for all ~75 presets
 - **`getPresetsByCategory(allowedCategories?)`** — filtered map for the picker UI
 - **`getAllPresets()`** — the full preset module for `Interact.registerEffects()`
 
-Categories: Entrance (19), Ongoing (14), Scroll (19), Mouse (9), Background Scroll (5).
+Categories: Entrance (19), Ongoing (14), Scroll (19), Mouse (11), Background Scroll (12).
 
 ---
 

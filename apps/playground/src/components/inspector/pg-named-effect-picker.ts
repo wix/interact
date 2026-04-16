@@ -356,6 +356,14 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       step: 0.05,
       defaultValue: 0,
     },
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
+    },
   ],
   Breathe: [
     {
@@ -381,6 +389,14 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       step: 50,
       defaultValue: 800,
     },
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
+    },
   ],
   Cross: [
     {
@@ -390,7 +406,16 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       options: EIGHT_DIRECTIONS,
       defaultValue: 'right',
     },
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
+    },
   ],
+  DVD: [],
   Flip: [
     {
       name: 'direction',
@@ -407,6 +432,24 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       max: 2000,
       step: 50,
       defaultValue: 800,
+    },
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
+    },
+  ],
+  Flash: [
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
     },
   ],
   Fold: [
@@ -426,6 +469,14 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       step: 1,
       defaultValue: 15,
     },
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
+    },
   ],
   Jello: [
     {
@@ -436,6 +487,14 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       max: 1,
       step: 0.05,
       defaultValue: 0.25,
+    },
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
     },
   ],
   Poke: [
@@ -455,6 +514,14 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       step: 0.05,
       defaultValue: 0.5,
     },
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
+    },
   ],
   Pulse: [
     {
@@ -465,6 +532,14 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       max: 1,
       step: 0.05,
       defaultValue: 0,
+    },
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
     },
   ],
   Rubber: [
@@ -477,6 +552,14 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       step: 0.05,
       defaultValue: 0.5,
     },
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
+    },
   ],
   Spin: [
     {
@@ -485,6 +568,14 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       type: 'select',
       options: ROTATE_DIRS,
       defaultValue: 'clockwise',
+    },
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
     },
   ],
   Swing: [
@@ -503,6 +594,14 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       max: 90,
       step: 1,
       defaultValue: 20,
+    },
+    {
+      name: 'iterationDelay',
+      label: 'Iteration Delay (ms)',
+      type: 'number',
+      min: 0,
+      max: 10000,
+      step: 50,
     },
   ],
   Wiggle: [

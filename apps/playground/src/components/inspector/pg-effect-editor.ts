@@ -63,6 +63,7 @@ function createDefaultEffect(type: EffectType): Effect {
         duration: 500,
         easing: 'ease',
         fill: 'both',
+        triggerType: 'alternate',
         namedEffect: { type: 'FadeIn' },
       } as Effect;
     case 'scrub':
@@ -73,6 +74,7 @@ function createDefaultEffect(type: EffectType): Effect {
       } as Effect;
     case 'transition':
       return {
+        stateAction: 'toggle',
         transitionProperties: [
           { name: 'transform', value: 'scale(1.05)', duration: 300, delay: 0, easing: 'ease' },
         ],
@@ -491,18 +493,6 @@ export class PgEffectEditor extends BaseComponent {
           effects: [...currentEffects, { effectId }],
         }),
       );
-
-      if (defaultType === 'transition') {
-        const params = (interaction.params ?? {}) as Record<string, unknown>;
-        if (!params.method) {
-          const { type: _type, ...rest } = params;
-          this.store.dispatch(
-            updateInteraction(interactionIdx, {
-              params: { ...rest, method: 'toggle' },
-            }),
-          );
-        }
-      }
     });
 
     shadow.querySelectorAll('.effect-item').forEach((item) => {
@@ -537,7 +527,6 @@ export class PgEffectEditor extends BaseComponent {
         if (!selectedId) return;
 
         const currentEffect = state.config.effects[selectedId];
-        const currentType = currentEffect ? detectEffectType(currentEffect) : null;
         const newEffect = createDefaultEffect(targetType);
         if (currentEffect) {
           const base: Record<string, unknown> = {};
@@ -545,24 +534,6 @@ export class PgEffectEditor extends BaseComponent {
           this.store.dispatch(updateEffect(selectedId, { ...newEffect, ...base } as Effect));
         }
 
-        if (currentType !== targetType) {
-          const params = (interaction.params ?? {}) as Record<string, unknown>;
-          if (targetType === 'transition') {
-            const { type: _type, ...rest } = params;
-            this.store.dispatch(
-              updateInteraction(interactionIdx, {
-                params: { ...rest, method: 'toggle' },
-              }),
-            );
-          } else if (currentType === 'transition') {
-            const { method: _method, ...rest } = params;
-            this.store.dispatch(
-              updateInteraction(interactionIdx, {
-                params: { ...rest, type: 'alternate' },
-              }),
-            );
-          }
-        }
       });
     });
   }

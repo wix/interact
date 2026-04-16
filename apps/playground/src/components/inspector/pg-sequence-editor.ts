@@ -296,6 +296,7 @@ export class PgSequenceEditor extends BaseComponent {
     const delay = sequence.delay ?? 0;
     const offset = sequence.offset ?? 0;
     const offsetEasing = (sequence.offsetEasing as string) ?? '';
+    const triggerType = ((sequence as Record<string, unknown>).triggerType as string) ?? 'alternate';
 
     const ctx = state.selectedEffectContext;
     const selectedEffectId = state.selectedEffectId;
@@ -338,6 +339,16 @@ export class PgSequenceEditor extends BaseComponent {
         <div class="sequence-header">
           <span class="sequence-label">Sequence #${seqIdx + 1}</span>
           <button class="remove-btn" data-remove-seq="${seqId}">&times;</button>
+        </div>
+
+        <div class="field">
+          <label>Trigger Behavior</label>
+          <select class="pg-select" data-seq-trigger-type="${seqId}">
+            <option value="alternate" ${triggerType === 'alternate' ? 'selected' : ''}>Alternate</option>
+            <option value="once" ${triggerType === 'once' ? 'selected' : ''}>Once</option>
+            <option value="repeat" ${triggerType === 'repeat' ? 'selected' : ''}>Repeat</option>
+            <option value="state" ${triggerType === 'state' ? 'selected' : ''}>State</option>
+          </select>
         </div>
 
         <div class="field-row">
@@ -440,6 +451,20 @@ export class PgSequenceEditor extends BaseComponent {
           updateSequence(seqId, {
             ...seq,
             offsetEasing: select.value || undefined,
+          }),
+        );
+      });
+    });
+
+    shadow.querySelectorAll<HTMLSelectElement>('[data-seq-trigger-type]').forEach((select) => {
+      const seqId = select.dataset.seqTriggerType!;
+      select.addEventListener('change', () => {
+        const seq = sequences[seqId];
+        if (!seq) return;
+        this.store.dispatch(
+          updateSequence(seqId, {
+            ...seq,
+            triggerType: select.value as SequenceConfig['triggerType'],
           }),
         );
       });

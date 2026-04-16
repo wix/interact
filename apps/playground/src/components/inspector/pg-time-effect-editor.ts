@@ -143,13 +143,15 @@ export class PgTimeEffectEditor extends BaseComponent {
       return;
     }
 
-    const duration = ((effect as Record<string, unknown>).duration as number) ?? 500;
-    const easing = ((effect as Record<string, unknown>).easing as string) ?? 'ease';
-    const iterations = ((effect as Record<string, unknown>).iterations as number) ?? 1;
-    const alternate = ((effect as Record<string, unknown>).alternate as boolean) ?? false;
-    const fill = ((effect as Record<string, unknown>).fill as string) ?? 'both';
-    const reversed = ((effect as Record<string, unknown>).reversed as boolean) ?? false;
-    const delay = ((effect as Record<string, unknown>).delay as number) ?? 0;
+    const e = effect as Record<string, unknown>;
+    const duration = (e.duration as number) ?? 500;
+    const easing = (e.easing as string) ?? 'ease';
+    const iterations = (e.iterations as number) ?? 1;
+    const alternate = (e.alternate as boolean) ?? false;
+    const fill = (e.fill as string) ?? 'both';
+    const reversed = (e.reversed as boolean) ?? false;
+    const delay = (e.delay as number) ?? 0;
+    const triggerType = (e.triggerType as string) ?? 'alternate';
 
     const source = detectSource(effect);
 
@@ -166,6 +168,16 @@ export class PgTimeEffectEditor extends BaseComponent {
 
       <div class="divider"></div>
       <div class="section-title">Timing</div>
+
+      <div class="field">
+        <label>Trigger Behavior</label>
+        <select class="pg-select" id="trigger-type">
+          <option value="alternate" ${triggerType === 'alternate' ? 'selected' : ''}>Alternate</option>
+          <option value="once" ${triggerType === 'once' ? 'selected' : ''}>Once</option>
+          <option value="repeat" ${triggerType === 'repeat' ? 'selected' : ''}>Repeat</option>
+          <option value="state" ${triggerType === 'state' ? 'selected' : ''}>State</option>
+        </select>
+      </div>
 
       <div class="field-row">
         <div class="field">
@@ -266,6 +278,10 @@ export class PgTimeEffectEditor extends BaseComponent {
           );
         }
       });
+    });
+
+    shadow.getElementById('trigger-type')?.addEventListener('change', (e) => {
+      update({ triggerType: (e.target as HTMLSelectElement).value });
     });
 
     shadow.getElementById('duration')?.addEventListener('change', (e) => {

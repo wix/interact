@@ -173,8 +173,9 @@ export class PgTransitionEffectEditor extends BaseComponent {
       return;
     }
 
-    const properties: TransitionProperty[] =
-      ((effect as Record<string, unknown>).transitionProperties as TransitionProperty[]) ?? [];
+    const e = effect as Record<string, unknown>;
+    const stateAction = (e.stateAction as string) ?? 'toggle';
+    const properties: TransitionProperty[] = (e.transitionProperties as TransitionProperty[]) ?? [];
 
     const { duration, delay, easing } = getSharedTiming(properties);
 
@@ -188,6 +189,19 @@ export class PgTransitionEffectEditor extends BaseComponent {
     ).join('');
 
     this.shadowRoot!.innerHTML = `
+      <div class="section-title">Behavior</div>
+
+      <div class="field">
+        <label>State Action</label>
+        <select class="pg-select" id="state-action">
+          <option value="toggle" ${stateAction === 'toggle' ? 'selected' : ''}>Toggle</option>
+          <option value="add" ${stateAction === 'add' ? 'selected' : ''}>Add</option>
+          <option value="remove" ${stateAction === 'remove' ? 'selected' : ''}>Remove</option>
+          <option value="clear" ${stateAction === 'clear' ? 'selected' : ''}>Clear</option>
+        </select>
+      </div>
+
+      <div class="divider"></div>
       <div class="section-title">Timing</div>
 
       <div class="field-row">
@@ -266,6 +280,13 @@ export class PgTransitionEffectEditor extends BaseComponent {
         } as Effect),
       );
     };
+
+    shadow.getElementById('state-action')?.addEventListener('change', (ev) => {
+      const val = (ev.target as HTMLSelectElement).value;
+      this.store.dispatch(
+        updateEffect(effectId, { ...effect, stateAction: val } as Effect),
+      );
+    });
 
     shadow.getElementById('duration')?.addEventListener('change', (ev) => {
       const val = parseInt((ev.target as HTMLInputElement).value, 10) || 0;

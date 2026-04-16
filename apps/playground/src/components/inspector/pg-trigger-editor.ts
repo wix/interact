@@ -4,18 +4,6 @@ import { updateInteraction, setScrollPreview } from '../../store/actions';
 
 type TriggerForm = 'event' | 'viewEnter' | 'viewProgress' | 'pointerMove' | 'animationEnd';
 
-function hasTransitionEffect(state: PlaygroundState, interactionIdx: number): boolean {
-  const interaction = state.config.interactions[interactionIdx];
-  if (!interaction?.effects) return false;
-  const effectRefs = interaction.effects as { effectId?: string }[];
-  return effectRefs.some((ref) => {
-    if (!ref.effectId) return false;
-    const eff = state.config.effects[ref.effectId] as Record<string, unknown> | undefined;
-    if (!eff) return false;
-    return eff.transitionProperties || (eff.transition && !eff.namedEffect && !eff.keyframeEffect);
-  });
-}
-
 function getTriggerForm(trigger: string): TriggerForm {
   switch (trigger) {
     case 'hover':
@@ -120,11 +108,9 @@ export class PgTriggerEditor extends BaseComponent {
 
     let html = '<div class="section-title">Trigger Params</div>';
 
-    const isTransition = hasTransitionEffect(state, idx);
-
     switch (form) {
       case 'event':
-        html += this._renderEventParams(params, isTransition);
+        html += '<span class="empty">No trigger params — behavior is set per-effect.</span>';
         break;
       case 'viewEnter':
         html += this._renderViewEnterParams(params, state);
@@ -144,50 +130,10 @@ export class PgTriggerEditor extends BaseComponent {
     this._attachListeners(form, idx, state);
   }
 
-  private _renderEventParams(params: Record<string, unknown>, isTransition: boolean): string {
-    if (isTransition) {
-      const method = (params.method as string) ?? 'toggle';
-      return `
-        <div class="field">
-          <label>Behavior</label>
-          <select class="pg-select" id="param-method">
-            <option value="add" ${method === 'add' ? 'selected' : ''}>Add</option>
-            <option value="remove" ${method === 'remove' ? 'selected' : ''}>Remove</option>
-            <option value="toggle" ${method === 'toggle' ? 'selected' : ''}>Toggle</option>
-            <option value="clear" ${method === 'clear' ? 'selected' : ''}>Clear</option>
-          </select>
-        </div>
-      `;
-    }
-
-    const type = (params.type as string) ?? 'alternate';
-    return `
-      <div class="field">
-        <label>Behavior</label>
-        <select class="pg-select" id="param-type">
-          <option value="once" ${type === 'once' ? 'selected' : ''}>Once</option>
-          <option value="repeat" ${type === 'repeat' ? 'selected' : ''}>Repeat</option>
-          <option value="alternate" ${type === 'alternate' ? 'selected' : ''}>Alternate</option>
-          <option value="state" ${type === 'state' ? 'selected' : ''}>State</option>
-        </select>
-      </div>
-    `;
-  }
-
   private _renderViewEnterParams(params: Record<string, unknown>, state: PlaygroundState): string {
-    const type = (params.type as string) ?? 'once';
     const threshold = (params.threshold as number) ?? 0.2;
     const inset = (params.inset as string) ?? '';
     return `
-      <div class="field">
-        <label>Behavior</label>
-        <select class="pg-select" id="param-type">
-          <option value="once" ${type === 'once' ? 'selected' : ''}>Once</option>
-          <option value="repeat" ${type === 'repeat' ? 'selected' : ''}>Repeat</option>
-          <option value="alternate" ${type === 'alternate' ? 'selected' : ''}>Alternate</option>
-          <option value="state" ${type === 'state' ? 'selected' : ''}>State</option>
-        </select>
-      </div>
       <div class="field-row">
         <div class="field">
           <label>Threshold</label>
@@ -298,16 +244,6 @@ export class PgTriggerEditor extends BaseComponent {
       const current = (state.config.interactions[idx]?.params as Record<string, unknown>) ?? {};
       this.store.dispatch(updateInteraction(idx, { params: { ...current, ...params } }));
     };
-
-    // Event params: PointerTriggerParams (time effects)
-    shadow.getElementById('param-type')?.addEventListener('change', (e) => {
-      update({ type: (e.target as HTMLSelectElement).value });
-    });
-
-    // Event params: StateParams (transition effects)
-    shadow.getElementById('param-method')?.addEventListener('change', (e) => {
-      update({ method: (e.target as HTMLSelectElement).value });
-    });
 
     // Threshold range + number sync
     const thresholdRange = shadow.getElementById('param-threshold') as HTMLInputElement | null;
