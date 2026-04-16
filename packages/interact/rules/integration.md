@@ -53,10 +53,20 @@ Wrap target elements with `<interact-element>`:
 
 ### React
 
+- Wrap the `Interact.create()` call in a `useEffect` hook to prevent it from running on server-side.
+- Store the returned instance, and call its `.destroy()` method on the effect's cleanup function.
+
 ```typescript
+import { useEffect } from 'react';
 import { Interact } from '@wix/interact/react';
 
-Interact.create(config);
+useEffect(() => {
+  const instance = Interact.create(config);
+
+  return () => {
+    instance.destroy();
+  };
+}, [config]);
 ```
 
 Replace target elements with `<Interaction>`:
