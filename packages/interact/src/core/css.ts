@@ -339,7 +339,7 @@ function parseEffect(
     localCustomProps.statePropsToInvalidate =
       targetToSequenceLists.get(targetHash)!.statePropsToInvalidate;
   }
-  statePropsToInvalidate.forEach(localCustomProps.statePropsToInvalidate.add);
+  statePropsToInvalidate.forEach((prop) => localCustomProps.statePropsToInvalidate.add(prop));
 
   // update keyframes map
   keyframes.forEach(({ name, keyframes }) => keyframesMap.set(name, keyframes));
@@ -383,7 +383,7 @@ function parseSequence(
   targetToSequenceLists.forEach((lists, targetHash) => {
     const customProps = targetToCustomProps.get(targetHash)!;
     // updating set of props affected by transitionEffects on that target to invalidate on preceeding sequences
-    lists.statePropsToInvalidate.forEach(customProps.statePropsToInvalidate.add);
+    lists.statePropsToInvalidate.forEach((prop) => customProps.statePropsToInvalidate.add(prop));
 
     // for each target add rule with sequence-conditions for the coordinated lists from interactions targeting it
     // here we use the interaction's custom-properties to set the lists as values for them instead of
