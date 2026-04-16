@@ -10,21 +10,15 @@ import type {
   RuleObj,
 } from '../types';
 import {
-  roundNumber,
   kebabCustomProp,
   transitionEffectToTransitionsList,
   getFullPredicateByType,
   getSelectorCondition,
-  applySelectorCondition,
 } from '../utils';
 import { getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
-import {
-  getElementHash,
-  getUniqueEncodedHash,
-  keyframePropertyToCSS,
-  interpolateKeyframesOffsets,
-} from './utilities';
+import { getElementHash, getUniqueEncodedHash } from './utilities';
+import { keyframesToCSS, CSSRuleToString, buildListsRule } from './cssUtils';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { getCSSAnimation, MotionKeyframeEffect } from '@wix/motion';
 
@@ -35,108 +29,6 @@ export const DEFAULT_INITIAL = [
   { name: 'scale', value: 'none' },
   { name: 'rotate', value: 'none' },
 ];
-
-// ----- Helpers -----
-
-function CSSRuleToString(rule: RuleObj): string {
-  const { key, childSelector, declarations, media, states, selectorCondition, addInitialSelector } =
-    rule;
-  if (!declarations.length) {
-    return '';
-  }
-
-  let selector = `[data-interact-key="${key}"]${
-    addInitialSelector ? ':where(:not([data-interact-enter]))' : ''
-  }`;
-
-  // maybe nesting is simpler? - no need for `:where` only adding `&` before every option
-  if (states && states.length) {
-    const statesSelector = states
-      .map((state) => `:state(${state}), :--${state}, [data-interact-effect~="${state}"]`)
-      .join(', ');
-    // :where to add no specificity and allow following stateless rules on same target
-    // to be as specific and override
-    selector = `${selector}:where(${statesSelector})`;
-  }
-
-  // here nesting might be confusing due to spaces already being handled?
-  if (childSelector) {
-    selector = `${selector} ${childSelector}`;
-  }
-
-  // maybe nesting is simpler? -
-  // equivalent to `baseSelector { ${applySelectorCondition('&', selectorCondition)} { ... } }`
-  if (selectorCondition) {
-    selector = applySelectorCondition(selector, selectorCondition);
-  }
-
-  const declarationsStr = declarations.map(({ name, value }) => `${name}: ${value};`).join('\n');
-  const cssRule = `${selector} {\n${declarationsStr}\n}`;
-
-  return media ? `@media ${media} {\n${cssRule}\n}` : cssRule;
-}
-
-function buildListsRule(
-  lists: CoordLists,
-  customProps?: ListCustomProps,
-  conditions?: string[],
-  configConditions?: Record<string, Condition>,
-): RuleObj {
-  const { key, childSelector, props } = lists;
-
-  const declarations = Object.entries(props).map(([name, { fallback, customProps }]) => ({
-    name,
-    value: customProps.map((n) => `var(${n}, ${fallback})`).join(', '),
-  }));
-
-  const rule: RuleObj = { key, childSelector, declarations };
-
-  // option to assign into custom-props instead of directly into the actual css properties
-  if (customProps) {
-    rule.declarations.forEach((declaration) => {
-      declaration.name = customProps[declaration.name as ListPropName];
-    });
-  }
-
-  // option to add conditions to the rules
-  if (conditions) {
-    rule.media = getFullPredicateByType(conditions, configConditions || {}, 'media');
-    rule.selectorCondition = getSelectorCondition(conditions, configConditions || {});
-  }
-
-  return rule;
-}
-
-// ----- Keyframes CSS -----
-
-function keyframeObjectToKeyframeCSS(keyframeObj: Keyframe, percentage: number): string {
-  const props = Object.entries(keyframeObj)
-    .filter(([key, value]) => key !== 'offset' && value !== undefined && value !== null)
-    .map(([key, value]) => {
-      const cssKey = keyframePropertyToCSS(key);
-      return `${cssKey}: ${value};`;
-    })
-    .join('\n');
-  return `${percentage}% {\n${props}\n}`;
-}
-
-function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
-  const interpolated = interpolateKeyframesOffsets(keyframes);
-  if (!interpolated.length) {
-    return '';
-  }
-
-  let keyframeBlocks = interpolated
-    .map((kf) => {
-      const offset = kf.offset as number;
-      const percentage = roundNumber(offset * 100);
-
-      return keyframeObjectToKeyframeCSS(kf, percentage);
-    })
-    .join('\n');
-
-  return `@keyframes ${name} {\n${keyframeBlocks}\n}`;
-}
 
 // ----- Map Updaters -----
 
