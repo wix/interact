@@ -148,14 +148,14 @@ const element = document.querySelector('interact-element') as IInteractElement;
 element.disconnect();
 ```
 
-### `toggleEffect(effectId, method, item?)`
+### `toggleEffect(effectId, stateAction, item?)`
 
 Toggles a CSS state effect on the element.
 
 **Parameters:**
 
 - `effectId: string` - The effect identifier
-- `method: 'add' | 'remove' | 'toggle' | 'clear'` - How to change the state
+- `stateAction: StateAction` - How to change the state (`'add' | 'remove' | 'toggle' | 'clear'`)
 - `item?: HTMLElement | null` - Optional specific element for list items
 
 **Example:**

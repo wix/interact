@@ -32,7 +32,7 @@ describe('ShuttersIn.web()', () => {
         ],
       },
       {
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -61,7 +61,7 @@ describe('ShuttersIn.web()', () => {
         ],
       },
       {
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -94,7 +94,7 @@ describe('ShuttersIn.web()', () => {
         ],
       },
       {
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -127,7 +127,7 @@ describe('ShuttersIn.web()', () => {
         ],
       },
       {
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -159,7 +159,7 @@ describe('ShuttersIn.web()', () => {
       },
       {
         easing: 'easeInOutQuad',
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -198,7 +198,7 @@ describe('ShuttersIn.style()', () => {
       {
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -234,7 +234,7 @@ describe('ShuttersIn.style()', () => {
       {
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -274,7 +274,7 @@ describe('ShuttersIn.style()', () => {
       {
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -314,7 +314,7 @@ describe('ShuttersIn.style()', () => {
       {
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 
@@ -353,7 +353,7 @@ describe('ShuttersIn.style()', () => {
         easing: 'easeInOutQuad',
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, easing: 'step-end' }, {}],
+        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
     ];
 

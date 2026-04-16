@@ -115,43 +115,38 @@ describe('interact (mini)', () => {
       {
         trigger: 'click',
         key: 'logo-click',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-click',
             effectId: 'logo-bounce',
+            triggerType: 'alternate',
           },
         ],
       },
       {
         trigger: 'click',
         key: 'logo-click',
-        params: {
-          method: 'toggle',
-        },
         effects: [
           {
             key: 'logo-click',
             effectId: 'logo-transition-hover',
+            stateAction: 'toggle',
           },
         ],
       },
       {
         trigger: 'hover',
         key: 'logo-hover',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-hover',
             effectId: 'logo-arc-in',
+            triggerType: 'alternate',
           },
           {
             key: 'logo-hover',
             effectId: 'logo-arc-in',
+            triggerType: 'alternate',
             namedEffect: {
               type: 'ArcIn',
               direction: 'left',
@@ -163,13 +158,11 @@ describe('interact (mini)', () => {
       {
         trigger: 'hover',
         key: 'logo-hover',
-        params: {
-          method: 'toggle',
-        },
         effects: [
           {
             key: 'logo-hover',
             effectId: 'logo-transition-hover',
+            stateAction: 'toggle',
           },
         ],
       },
@@ -299,10 +292,43 @@ describe('interact (mini)', () => {
   beforeEach(() => {
     element = document.createElement('div');
 
-    // Mock Web Animations API
+    // Mock Web Animations API (enough for real @wix/motion when vi.doUnmock('@wix/motion') is used)
     (window as any).KeyframeEffect = class KeyframeEffect {
-      constructor(element: Element | null, keyframes: any[], options: any) {
-        return { element, keyframes, options, setKeyframes: vi.fn() };
+      constructor(element: Element | null, keyframes: any[], options: any = {}) {
+        const timing = {
+          delay: options?.delay ?? 0,
+          duration: typeof options?.duration === 'number' ? options.duration : 100,
+          iterations: options?.iterations ?? 1,
+          easing: options?.easing ?? 'linear',
+          fill: options?.fill ?? 'none',
+          direction: options?.direction ?? 'normal',
+        };
+        const effect = {
+          target: element,
+          element,
+          keyframes,
+          options,
+          setKeyframes: vi.fn(function (this: any, k: any) {
+            this.keyframes = k;
+          }),
+          updateTiming: vi.fn(function (this: any, updates: any) {
+            Object.assign(timing, updates);
+          }),
+          getTiming: vi.fn(() => ({ ...timing })),
+          getComputedTiming: vi.fn(() => {
+            const delay = Number(timing.delay) || 0;
+            const duration = Number(timing.duration) || 0;
+            const iterations = Number(timing.iterations) || 1;
+            const activeDuration = duration * iterations;
+            return {
+              progress: 0,
+              currentIteration: 0,
+              activeDuration,
+              endTime: delay + activeDuration,
+            };
+          }),
+        };
+        return effect;
       }
     };
 
@@ -316,7 +342,18 @@ describe('interact (mini)', () => {
     // Mock Animation
     (window as any).Animation = class Animation {
       constructor(effect: any, timeline: any) {
-        return { effect, timeline, play: vi.fn() };
+        return {
+          effect,
+          timeline,
+          play: vi.fn(),
+          pause: vi.fn(),
+          reverse: vi.fn(),
+          cancel: vi.fn(),
+          playState: 'idle',
+          currentTime: null as number | null,
+          ready: Promise.resolve(),
+          finished: Promise.resolve(),
+        };
       }
     };
 
@@ -744,7 +781,6 @@ describe('interact (mini)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-alternate',
-              params: { type: 'alternate' },
               effects: [{ key: 'logo-alternate', effectId: 'logo-arc-in' }],
             },
           ],
@@ -752,6 +788,7 @@ describe('interact (mini)', () => {
             'logo-arc-in': {
               namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'alternate',
             },
           },
         };
@@ -806,7 +843,6 @@ describe('interact (mini)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-repeat',
-              params: { type: 'repeat' },
               effects: [{ key: 'logo-repeat', effectId: 'logo-arc-in' }],
             },
           ],
@@ -814,6 +850,7 @@ describe('interact (mini)', () => {
             'logo-arc-in': {
               namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'repeat',
             },
           },
         };
@@ -865,7 +902,6 @@ describe('interact (mini)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-state',
-              params: { type: 'state' },
               effects: [{ key: 'logo-state', effectId: 'logo-arc-in' }],
             },
           ],
@@ -873,6 +909,7 @@ describe('interact (mini)', () => {
             'logo-arc-in': {
               namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'state',
             },
           },
         };

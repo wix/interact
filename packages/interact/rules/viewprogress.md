@@ -1,6 +1,6 @@
 # ViewProgress Trigger Rules for @wix/interact
 
-These rules help generate scroll-driven interactions using `@wix/interact`. ViewProgress triggers create animations that update continuously as elements move through the viewport, leveraging native CSS ViewTimelines. Use when animation progress should be tied to the element's scroll position.
+These rules help generate scroll-driven interactions using `@wix/interact`. ViewProgress triggers create animations that update continuously as elements move through the viewport, leveraging native CSS ViewTimelines where supported, and using a polyfill library where unsupported. Use when animation progress should be tied to the element's scroll position.
 
 > **CRITICAL:** You MUST replace all usage of `overflow: hidden` with `overflow: clip` on every element between the trigger source element and the scroll container. `overflow: hidden` creates a new scroll context that breaks the ViewTimeline; `overflow: clip` clips overflow visually without affecting scroll ancestry. If using Tailwind, replace all `overflow-hidden` classes with `overflow-clip`.
 
@@ -48,7 +48,7 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 ### Variables
 
 - `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for web, `interactKey` for React). The element whose scroll position drives the animation.
-- `[TARGET_KEY]` — identifier matching the element's key on the element to animate (can be same as source or different).
+- `[TARGET_KEY]` — identifier matching the element's key (`data-interact-key` for web, `interactKey` for React) on the element to animate (can be same as source or different).
 - `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built effect from `@wix/motion-presets`. **CRITICAL:** Scroll presets (`*Scroll`) MUST include `range: 'in' | 'out' | 'continuous'` in their options. `'in'` ends at the idle state, `'out'` starts from the idle state, `'continuous'` passes through it.
 - `[EFFECT_NAME]` — unique name for custom keyframe effect.
 - `[EFFECT_KEYFRAMES]` — array of keyframe objects defining CSS property values (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
@@ -61,7 +61,7 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
   - `'exit-crossing'` — from the element's trailing edge reaching the start to its trailing edge leaving.
 - `[START_PERCENTAGE]` — 0–100, starting point within the named range.
 - `[END_PERCENTAGE]` — 0–100, end point within the named range.
-- `[EASING_FUNCTION]` - typically `'linear'` for scrolling effects.
+- `[EASING_FUNCTION]` - CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.
 - `[UNIQUE_EFFECT_ID]` — optional identifier for referencing the effect externally.
 
 ---
@@ -79,13 +79,10 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
     effects: [
         {
             key: '[TARGET_KEY]',
-            customEffect: (element: Element, progress: number) => {
-                // progress is 0–1 within the specified range
-                [CUSTOM_LOGIC]
-            },
+            customEffect: [CUSTOM_EFFECT_CALLBACK],
             rangeStart: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [START_PERCENTAGE] } },
             rangeEnd: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [END_PERCENTAGE] } },
-            easing: `'[]'`,
+            easing: `'[EASING_FUNCTION]'`, // usually 'linear'
             fill: 'both',
             effectId: '[UNIQUE_EFFECT_ID]'
         },
@@ -97,8 +94,9 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 ### Variables
 
 - `[SOURCE_KEY]` / `[TARGET_KEY]` — same as Rule 1.
-- `[CUSTOM_LOGIC]` — JavaScript that uses `progress` (0–1) and the target `element` to apply the effect. Avoid layout/style reads inside the callback for smooth performance.
+- `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with `progress` from 0 to 1.
 - `[RANGE_NAME]` / `[START_PERCENTAGE]` / `[END_PERCENTAGE]` — same as Rule 1.
+- `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.
 - `[UNIQUE_EFFECT_ID]` — optional identifier for referencing the effect externally.
 
 ---
@@ -143,3 +141,4 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 - `[START_PERCENTAGE]` — 0–100, starting point within the `contain` range (the stuck phase).
 - `[END_PERCENTAGE]` — 0–100, end point within the `contain` range.
 - `[UNIQUE_EFFECT_ID]` — same as Rule 1.
+- `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.

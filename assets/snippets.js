@@ -2,8 +2,7 @@
 // Define specific snippets for each interaction
 const snippets = {
   hover: `trigger: 'hover',
-params: { type: 'alternate' },
-effects: [{
+ֿeffects: [{
   keyframeEffect: {
     keyframes: [
       { transform: 'scale(1)', offset: 0 },

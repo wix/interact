@@ -4,25 +4,22 @@ This document contains rules for generating hover-triggered interactions in `@wi
 
 **CRITICAL — Accessible hover**: Use `trigger: 'interest'` instead of `trigger: 'hover'` to also respond to keyboard focus.
 
-**CRITICAL — Hit-area shift**: To avoid flickering, use a **separate source and target elements** when the effect changes size or position:
-
-- source element: the element that triggering event is attached to.
-- target element: — the inner element that actually animates.
+- **CRITICAL**: MUST AVOID using the same element as both trigger source and effect target with effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
 
 ## Table of Contents
 
-- [Rule 1: keyframeEffect / namedEffect with PointerTriggerParams](#rule-1-keyframeeffect--namedeffect-with-pointertriggerparams)
-- [Rule 2: transition / transitionProperties with StateParams](#rule-2-transition--transitionproperties-with-stateparams)
-- [Rule 3: customEffect with PointerTriggerParams](#rule-3-customeffect-with-pointertriggerparams)
+- [Rule 1: keyframeEffect / namedEffect (TimeEffect)](#rule-1-keyframeeffect--namedeffect-timeeffect)
+- [Rule 2: transition / transitionProperties (StateEffect)](#rule-2-transition--transitionproperties-stateeffect)
+- [Rule 3: customEffect (TimeEffect)](#rule-3-customeffect-timeeffect)
 - [Rule 4: Sequences](#rule-4-sequences)
 
 ---
 
-## Rule 1: keyframeEffect / namedEffect with PointerTriggerParams
+## Rule 1: keyframeEffect / namedEffect (TimeEffect)
 
-Use `keyframeEffect` or `namedEffect` when the hover should play an animation (CSS or WAAPI). Pair with `PointerTriggerParams` to control playback behavior.
+Use `keyframeEffect` or `namedEffect` when the hover should play an animation (CSS or WAAPI). Set `triggerType` on each effect to control playback behavior.
 
-**CRITICAL:** Always include `fill: 'both'` for `type: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `type: 'once'` use `fill: 'backwards'`.
+**CRITICAL:** Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`.
 
 **Multiple effects:** The `effects` array can contain multiple effects — all share the same hover trigger and fire together. Use this to animate different targets from a single hover event.
 
@@ -30,12 +27,10 @@ Use `keyframeEffect` or `namedEffect` when the hover should play an animation (C
 {
     key: '[SOURCE_KEY]',
     trigger: 'hover',
-    params: {
-        type: '[EVENT_TRIGGER_TYPE]'
-    },
     effects: [
         {
             key: '[TARGET_KEY]',
+            triggerType: '[TRIGGER_TYPE]',
 
             // --- pick ONE of the two effect types ---
             keyframeEffect: {
@@ -61,7 +56,7 @@ Use `keyframeEffect` or `namedEffect` when the hover should play an animation (C
 
 - `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for web, `interactKey` for React). The element that listens for hover.
 - `[TARGET_KEY]` — identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).
-- `[EVENT_TRIGGER_TYPE]` — `PointerTriggerParams.type`. One of:
+- `[TRIGGER_TYPE]` — `triggerType` on the effect. One of:
   - `'alternate'` — plays forward on enter, reverses on leave. Default. Most common for hover.
   - `'repeat'` — restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses.
   - `'once'` — plays once on the first enter and never again.
@@ -72,15 +67,15 @@ Use `keyframeEffect` or `namedEffect` when the hover should play an animation (C
 - `[DURATION_MS]` — animation duration in milliseconds.
 - `[EASING_FUNCTION]` — CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`.
 - `[DELAY_MS]` — optional delay before the effect starts, in milliseconds.
-- `[ITERATIONS]` — optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `type: 'state'`.
+- `[ITERATIONS]` — optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.
 - `[ALTERNATE_BOOL]` — optional. `true` to alternate direction on every other iteration (within a single playback).
 - `[FILL_MODE]` — usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished.
 
 ---
 
-## Rule 2: transition / transitionProperties with StateParams
+## Rule 2: transition / transitionProperties (StateEffect)
 
-Use `transition` or `transitionProperties` when the hover should toggle styles via DOM attribute change and CSS transitions rather than keyframe animations. Pair with `StateParams` to control how the style is applied.
+Use `transition` or `transitionProperties` when the hover should toggle styles via DOM attribute change and CSS transitions rather than keyframe animations. Set `stateAction` on the effect to control how the style is applied.
 
 Use `transition` when all properties share timing. Use `transitionProperties` when each property needs independent `duration`, `delay`, or `easing`.
 
@@ -88,12 +83,10 @@ Use `transition` when all properties share timing. Use `transitionProperties` wh
 {
     key: '[SOURCE_KEY]',
     trigger: 'hover',
-    params: {
-        method: '[TRANSITION_METHOD]'
-    },
     effects: [
         {
             key: '[TARGET_KEY]',
+            stateAction: '[STATE_ACTION]',
 
             // --- pick ONE of the two transition forms ---
             transition: {
@@ -125,7 +118,7 @@ Use `transition` when all properties share timing. Use `transitionProperties` wh
 ### Variables
 
 - `[SOURCE_KEY]` / `[TARGET_KEY]` — same as Rule 1.
-- `[TRANSITION_METHOD]` — `StateParams.method`. One of:
+- `[STATE_ACTION]` — `stateAction` on the effect. One of:
   - `'toggle'` — applies the style state on enter, removes on leave. Default.
   - `'add'` — applies the style state on enter. Leave does NOT remove it.
   - `'remove'` — removes a previously applied style state on enter. Use with provided `effectId` to map to a matching interaction with `add` and effect with same `effectId`.
@@ -138,7 +131,7 @@ Use `transition` when all properties share timing. Use `transitionProperties` wh
 
 ---
 
-## Rule 3: customEffect with PointerTriggerParams
+## Rule 3: customEffect (TimeEffect)
 
 Use `customEffect` when you need imperative control over the animation (e.g. counters, canvas drawing, custom DOM manipulation). The callback receives the target element and a `progress` value (0–1) driven by the animation timeline.
 
@@ -146,12 +139,10 @@ Use `customEffect` when you need imperative control over the animation (e.g. cou
 {
     key: '[SOURCE_KEY]',
     trigger: 'hover',
-    params: {
-        type: '[EVENT_TRIGGER_TYPE]'
-    },
     effects: [
         {
             key: '[TARGET_KEY]',
+            triggerType: '[TRIGGER_TYPE]',
             customEffect: [CUSTOM_EFFECT_CALLBACK],
             duration: [DURATION_MS],
             easing: '[EASING_FUNCTION]'
@@ -163,7 +154,7 @@ Use `customEffect` when you need imperative control over the animation (e.g. cou
 
 ### Variables
 
-- `[SOURCE_KEY]` / `[TARGET_KEY]` / `[EVENT_TRIGGER_TYPE]` — same as Rule 1.
+- `[SOURCE_KEY]` / `[TARGET_KEY]` / `[TRIGGER_TYPE]` — same as Rule 1.
 - `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(target: HTMLElement, progress: number) => void`. Called on each animation frame with the target element and `progress` from 0 to 1.
 - `[DURATION_MS]` — animation duration in milliseconds.
 - `[EASING_FUNCTION]` — CSS easing string, or named easing from `@wix/motion`.
@@ -172,17 +163,15 @@ Use `customEffect` when you need imperative control over the animation (e.g. cou
 
 ## Rule 4: Sequences
 
-Use sequences when a hover should sync/stagger animations across multiple elements.
+Use sequences when a hover should sync/stagger animations across multiple elements. Set `triggerType` on the sequence config to control playback behavior.
 
 ```typescript
 {
     key: '[SOURCE_KEY]',
     trigger: 'hover',
-    params: {
-        type: '[EVENT_TRIGGER_TYPE]'
-    },
     sequences: [
         {
+            triggerType: '[TRIGGER_TYPE]',
             offset: [OFFSET_MS],
             offsetEasing: '[OFFSET_EASING]',
             effects: [
@@ -196,7 +185,7 @@ Use sequences when a hover should sync/stagger animations across multiple elemen
 
 ### Variables
 
-- `[SOURCE_KEY]` / `[EVENT_TRIGGER_TYPE]` — same as Rule 1.
+- `[SOURCE_KEY]` / `[TRIGGER_TYPE]` — same as Rule 1. `triggerType` is set on the sequence config, not on individual effects within the sequence.
 - `[OFFSET_MS]` — time offset for staggering each child's animation start, in milliseconds.
-- `[OFFSET_EASING]` — easing curve for the offset staggering distribution. Defaults to `'linear'`.
+- `[OFFSET_EASING]` — easing curve for the offset staggering distribution. CSS easing string, or named easing from `@wix/motion`. Defaults to `'linear'`.
 - `[EFFECT_DEFINTION]` — a definition of or a reference to a time-based animation effect.

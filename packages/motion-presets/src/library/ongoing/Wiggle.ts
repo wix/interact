@@ -17,10 +17,11 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { intensity = 0.5 } = options.namedEffect as Wiggle;
+  const namedEffect = options.namedEffect as Wiggle;
+  const { intensity = 0.5 } = namedEffect;
   const duration = options.duration || 1;
-  const delay = options.delay || 0;
-  const timingFactor = getTimingFactor(duration, delay) as number;
+  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
   const wiggleFactor = mapRange(0, 1, WIGGLE_FACTOR_SOFT, WIGGLE_FACTOR_HARD, intensity);
@@ -63,8 +64,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ...options,
       name,
       easing: 'linear',
-      delay: 0,
-      duration: duration + delay,
+      duration: duration + iterationDelay,
       custom,
       keyframes,
     },
@@ -72,7 +72,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const timingFactor = getTimingFactor(options.duration!, options.delay!, true);
+  const iterationDelay = (options.namedEffect as Wiggle)?.iterationDelay || 0;
+  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
   return [`motion-wiggle-${timingFactor}`];
 }

@@ -50,8 +50,7 @@ describe('Wiggle', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: { intensity: 0.8 } as Wiggle,
+        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Wiggle,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -147,8 +146,7 @@ describe('Wiggle', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: { intensity: 0.8 } as Wiggle,
+        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Wiggle,
       };
 
       const expectedResult: Partial<AnimationData>[] = [

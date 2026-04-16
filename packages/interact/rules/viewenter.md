@@ -4,14 +4,14 @@ This document contains rules for generating interactions that respond to element
 
 ---
 
-> **CRITICAL:** When the source (trigger) and target (effect) elements are the **same element**, use ONLY `type: 'once'`. For all other types (`'repeat'`, `'alternate'`, `'state'`), MUST use **separate** source and target elements — animating the observed element itself can cause it to leave/re-enter the viewport, leading to rapid re-triggers or the animation never firing.
+> **CRITICAL:** When the source (trigger) and target (effect) elements are the **same element**, use ONLY `triggerType: 'once'`. For all other types (`'repeat'`, `'alternate'`, `'state'`), MUST use **separate** source and target elements — animating the observed element itself can cause it to leave/re-enter the viewport, leading to rapid re-triggers or the animation never firing.
 
 ## Table of Contents
 
 - [Preventing Flash of Unstyled Content (FOUC)](#preventing-flash-of-unstyled-content-fouc)
-- [Rule 1: keyframeEffect / namedEffect with ViewEnterParams](#rule-1-keyframeeffect--namedeffect-with-viewenterparams)
-- [Rule 2: customEffect with ViewEnterParams](#rule-2-customeffect-with-viewenterparams)
-- [Rule 3: Sequences with ViewEnterParams](#rule-3-sequences-with-viewenterparams)
+- [Rule 1: keyframeEffect / namedEffect (TimeEffect)](#rule-1-keyframeeffect--namedeffect-timeeffect)
+- [Rule 2: customEffect (TimeEffect)](#rule-2-customeffect-timeeffect)
+- [Rule 3: Sequences](#rule-3-sequences)
 
 ---
 
@@ -39,7 +39,6 @@ const config: InteractConfig = {
       key: '[SOURCE_KEY]',
       trigger: 'viewEnter',
       params: {
-        type: [VIEW_TRIGGER_TYPE],
         threshold: [VIEW_TRIGGER_THRESHOLD],
         inset: [VIEW_TRIGGER_INSET],
       },
@@ -88,22 +87,21 @@ const css = generate(config);
 ### Rules
 
 - `generate()` should be called server-side or at build time. Can also be called on the client if the page content is initially hidden (e.g. behind a loader/splash screen).
-- Only valid for `viewEnter` + `params.type: 'once'` where source and target are the same element.
-- Do NOT use for `viewEnter` with `repeat`/`alternate`/`state` types. For those, manually apply the initial keyframe as inline styles on the target element and use `fill: 'both'`.
-- If other interactions in the config also need FOUC prevention, `generate(config)` covers them all — set `initial` only on the relevant `viewEnter` + `type: 'once'` elements.
+- `initial` is only valid for `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
+- Do NOT use `initial` for `viewEnter` with `triggerType: 'repeat'`/`'alternate'`/`'state'`. For those, manually apply the initial keyframe as inline styles on the target element and use `fill: 'both'`.
+- If other interactions in the config also need FOUC prevention, `generate(config)` covers them all — set `initial` only on the relevant `viewEnter` + `triggerType: 'once'` elements.
 
-## Rule 1: keyframeEffect / namedEffect with ViewEnterParams
+## Rule 1: keyframeEffect / namedEffect (TimeEffect)
 
-Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animation (CSS or WAAPI). Pair with `params: ViewEnterParams` to configure the IntersectionObserver trigger.
+Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animation (CSS or WAAPI). Set `triggerType` on each effect to control playback behavior. Use `params` only for observer configuration (`threshold`, `inset`).
 
-**Multiple effects:** The `effects` array can contain multiple effects — all share the same viewEnter trigger and fire together when the element enters the viewport. Use this to animate different targets from a single viewport entry event.
+**Multiple effects:** The `effects` array can contain multiple effects — all share the same viewEnter trigger and fire together when the element enters the viewport. Each effect can have its own `triggerType`. Use this to animate different targets from a single viewport entry event.
 
 ```typescript
 {
     key: '[SOURCE_KEY]',
     trigger: 'viewEnter',
     params: {
-        type: '[VIEW_ENTER_TYPE]',
         threshold: [VISIBILITY_THRESHOLD],
         inset: '[VIEWPORT_INSETS]'
     },
@@ -111,6 +109,7 @@ Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animatio
         {
             key: '[TARGET_KEY]',
             selector: '[TARGET_SELECTOR]',
+            triggerType: '[TRIGGER_TYPE]',
 
             // --- pick ONE of the two effect types ---
             keyframeEffect: {
@@ -137,9 +136,9 @@ Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animatio
 
 - `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for web/vanilla, `interactKey` for React). The **source element** is observed for viewport intersection. This is the element the IntersectionObserver watches.
 - `[TARGET_KEY]` — identifier matching the element's key on the element that animates.
-- `[TARGET_SELECTOR]` - optional. Selector for the child element to select inside the root element. For `type` of `'alternate'`/`'repeat'`/`'state'` MUST either use a separate `[TARGET_KEY]` from `[SOURCE_KEY]` or `selector` for selecting a child element as target.
-- `[VIEW_ENTER_TYPE]` — `ViewEnterParams.type`. One of:
-  - `'once'` — plays once when the source element first enters the viewport and never again. Source and target may be the same element.
+- `[TARGET_SELECTOR]` - optional. Selector for the child element to select inside the root element. For `triggerType` of `'alternate'`/`'repeat'`/`'state'` MUST either use a separate `[TARGET_KEY]` from `[SOURCE_KEY]` or `selector` for selecting a child element as target.
+- `[TRIGGER_TYPE]` — `triggerType` on the effect. One of:
+  - `'once'` (default) — plays once when the source element first enters the viewport and never again. Source and target may be the same element.
   - `'repeat'` — restarts the animation every time the source element enters the viewport. Use separate source and target.
   - `'alternate'` — plays forward when the source element enters the viewport, reverses when it leaves. Use separate source and target.
   - `'state'` — resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`). Use separate source and target.
@@ -148,17 +147,17 @@ Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animatio
 - `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
 - `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
 - `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.
-- `[FILL_MODE]` — `'both'` for `'alternate'`, `'repeat'`, or `'state'` types. For `type: 'once'`: use `'backwards'` when the animation's final keyframe has no additional effect (over element's base style); use `'both'` otherwise.
+- `[FILL_MODE]` — `'both'` for `triggerType: 'alternate'`, `'repeat'`, or `'state'`. For `triggerType: 'once'`: use `'backwards'` when the animation's final keyframe has no additional effect (over element's base style); use `'both'` otherwise.
 - `[DURATION_MS]` — animation duration in milliseconds.
 - `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`.
 - `[DELAY_MS]` — optional delay before the effect starts, in milliseconds.
-- `[ITERATIONS]` — optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `type: 'state'`.
+- `[ITERATIONS]` — optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.
 - `[ALTERNATE_BOOL]` — optional. `true` to alternate direction on every other iteration (within a single playback).
 - `[UNIQUE_EFFECT_ID]` — optional. String identifier used by `animationEnd` triggers for chaining, and by sequences for referencing effects.
 
 ---
 
-## Rule 2: customEffect with ViewEnterParams
+## Rule 2: customEffect (TimeEffect)
 
 Use `customEffect` when you need imperative control over the animation (e.g. counters, canvas drawing, custom DOM manipulation). The callback receives the target element and a `progress` value (0–1) driven by the animation timeline.
 
@@ -167,13 +166,13 @@ Use `customEffect` when you need imperative control over the animation (e.g. cou
     key: '[SOURCE_KEY]',
     trigger: 'viewEnter',
     params: {
-        type: '[VIEW_ENTER_TYPE]',
         threshold: [VISIBILITY_THRESHOLD],
         inset: '[VIEWPORT_INSETS]'
     },
     effects: [
         {
             key: '[TARGET_KEY]',
+            triggerType: '[TRIGGER_TYPE]',
             customEffect: [CUSTOM_EFFECT_CALLBACK],
             duration: [DURATION_MS],
             easing: '[EASING_FUNCTION]',
@@ -185,26 +184,26 @@ Use `customEffect` when you need imperative control over the animation (e.g. cou
 
 ### Variables
 
-- `[SOURCE_KEY]` / `[TARGET_KEY]` / `[VIEW_ENTER_TYPE]` / `[VISIBILITY_THRESHOLD]` / `[VIEWPORT_INSETS]` / `[DURATION_MS]` / `[EASING_FUNCTION]` / `[UNIQUE_EFFECT_ID]` — same as Rule 1.
-- `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with `progress` from 0 to 1.
+- `[SOURCE_KEY]` / `[TARGET_KEY]` / `[TRIGGER_TYPE]` / `[VISIBILITY_THRESHOLD]` / `[VIEWPORT_INSETS]` / `[DURATION_MS]` / `[EASING_FUNCTION]` / `[UNIQUE_EFFECT_ID]` — same as Rule 1.
+- `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with `element` being the target element, and `progress` from 0 to 1.
 
 ---
 
-## Rule 3: Sequences with ViewEnterParams
+## Rule 3: Sequences
 
-Use sequences when a viewEnter should sync/stagger animations across multiple elements.
+Use sequences when a viewEnter should sync/stagger animations across multiple elements. Set `triggerType` on the sequence config to control playback behavior.
 
 ```typescript
 {
     key: '[SOURCE_KEY]',
     trigger: 'viewEnter',
     params: {
-        type: '[VIEW_ENTER_TYPE]',
         threshold: [VISIBILITY_THRESHOLD],
         inset: '[VIEWPORT_INSETS]'
     },
     sequences: [
         {
+            triggerType: '[TRIGGER_TYPE]',
             offset: [OFFSET_MS],
             offsetEasing: '[OFFSET_EASING]',
             effects: [
@@ -218,7 +217,8 @@ Use sequences when a viewEnter should sync/stagger animations across multiple el
 
 ### Variables
 
-- `[SOURCE_KEY]` / `[VIEW_ENTER_TYPE]` / `[VISIBILITY_THRESHOLD]` / `[VIEWPORT_INSETS]` — same as Rule 1.
+- `[SOURCE_KEY]` / `[VISIBILITY_THRESHOLD]` / `[VIEWPORT_INSETS]` — same as Rule 1.
+- `[TRIGGER_TYPE]` — same as Rule 1. `triggerType` is set on the sequence config, not on individual effects within the sequence.
 - `[OFFSET_MS]` — time offset between each child's animation start, in milliseconds.
 - `[OFFSET_EASING]` — CSS easing or named easing from `@wix/motion`, for the stagger distribution. Defaults to `'linear'`.
 - `[EFFECT_DEFINTION]` — a definition of or a reference to a time-based animation effect.

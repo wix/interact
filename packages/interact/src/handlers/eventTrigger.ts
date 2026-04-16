@@ -1,9 +1,7 @@
 import type {
   TimeEffect,
-  TransitionEffect,
-  StateParams,
+  StateEffect,
   HandlerObjectMap,
-  PointerTriggerParams,
   EffectBase,
   InteractOptions,
   EventTriggerConfig,
@@ -109,7 +107,7 @@ function getEnterLeaveConfig(
 function addEventTriggerHandler(
   source: HTMLElement,
   target: HTMLElement,
-  effect: (TimeEffect | TransitionEffect) & EffectBase,
+  effect: (TimeEffect | StateEffect) & EffectBase,
   options: EventTriggerParams,
   {
     reducedMotion,
@@ -120,7 +118,7 @@ function addEventTriggerHandler(
 ) {
   const genericConfig = createGenericEventConfig(options.eventConfig);
   const isTransition =
-    (effect as TransitionEffect).transition || (effect as TransitionEffect).transitionProperties;
+    (effect as StateEffect).transition || (effect as StateEffect).transitionProperties;
 
   const enterLeave = getEnterLeaveConfig(genericConfig);
 
@@ -131,8 +129,7 @@ function addEventTriggerHandler(
     handler = createTransitionHandler(
       target,
       targetController!,
-      effect as TransitionEffect & EffectBase & { effectId: string },
-      options as StateParams,
+      effect as StateEffect & EffectBase & { effectId: string },
       selectorCondition,
       enterLeave,
     );
@@ -140,13 +137,12 @@ function addEventTriggerHandler(
     handler = createTimeEffectHandler(
       target,
       effect as TimeEffect & EffectBase,
-      options as PointerTriggerParams,
       reducedMotion,
       selectorCondition,
       enterLeave,
       preCreatedAnimation,
     );
-    once = (options as PointerTriggerParams).type === 'once';
+    once = (effect as TimeEffect).triggerType === 'once';
   }
 
   if (!handler) {
@@ -181,10 +177,10 @@ function addEventTriggerHandler(
     });
 
     const isToggle =
-      !(options as StateParams).method || (options as StateParams).method === 'toggle';
+      !(effect as StateEffect).stateAction || (effect as StateEffect).stateAction === 'toggle';
     const addLeaveListeners = isTransition
       ? isToggle
-      : (options as PointerTriggerParams).type !== 'once';
+      : (effect as TimeEffect).triggerType !== 'once';
 
     if (addLeaveListeners) {
       leaveEvents.forEach((eventType) => {

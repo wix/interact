@@ -220,11 +220,19 @@ export class Interact {
   }
 
   static getInstance(key: string): Interact | undefined {
-    return Interact.instances.find((instance) => instance.has(key));
+    const instance = Interact.instances.find((instance) => instance.has(key));
+    if (!instance) {
+      console.warn(`Interact: Instance for key "${key}" not found`);
+    }
+    return instance;
   }
 
   static getController(key: string | undefined): IInteractionController | undefined {
-    return key ? Interact.controllerCache.get(key) : undefined;
+    const controller = key ? Interact.controllerCache.get(key) : undefined;
+    if (!controller) {
+      console.warn(`Interact: Controller for key "${key}" not found`);
+    }
+    return controller;
   }
 
   static setController(key: string, controller: IInteractionController): void {

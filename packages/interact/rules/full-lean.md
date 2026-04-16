@@ -18,7 +18,7 @@ Declarative configuration-driven interaction library. Binds animations to trigge
 - [Effects](#effects)
   - [Time-based Effect](#time-based-effect)
   - [Scroll / Pointer-driven Effect](#scroll--pointer-driven-effect)
-  - [Transition Effect](#transitioneffect-css-style-toggle)
+  - [State Effect](#stateeffect-css-style-toggle)
   - [Animation Payloads](#animation-payloads)
 - [Sequences](#sequences)
 - [Conditions](#conditions)
@@ -62,9 +62,20 @@ The `config` object is an `InteractConfig` containing `interactions` (required),
 
 **React:**
 
+- Wrap the `Interact.create()` call in a `useEffect` hook to prevent it from running on server-side.
+- Store the returned instance, and call its `.destroy()` method on the effect's cleanup function.
+
 ```ts
+import { useEffect } from 'react';
 import { Interact } from '@wix/interact/react';
-const instance = Interact.create(config);
+
+useEffect(() => {
+  const instance = Interact.create(config);
+
+  return () => {
+    instance.destroy();
+  };
+}, [config]);
 ```
 
 **Vanilla JS:**
@@ -175,20 +186,57 @@ For most use cases, `key` alone is sufficient for both source and target resolut
 
 ## Triggers
 
-| Trigger        | Description                     | Accessible variant                          |
-| :------------- | :------------------------------ | :------------------------------------------ |
-| `hover`        | Mouse enter/leave               | `interest` (hover + focusin/out)            |
-| `click`        | Mouse click                     | `activate` (click + keydown on Enter/Space) |
-| `viewEnter`    | Element enters viewport         | —                                           |
-| `viewProgress` | Scroll-driven (ViewTimeline)    | —                                           |
-| `pointerMove`  | Continuous pointer motion       | —                                           |
-| `animationEnd` | Fires after an effect completes | —                                           |
+- **interactions: Interaction[]**
+  - **Purpose**: Declarative mapping from a source element and trigger to one or more target effects.
+  - Each `Interaction` contains:
+    - **key: string**
+      - REQUIRED. The source element path. The trigger attaches to this element.
+    - **listContainer?: string**
+      - OPTIONAL. A CSS selector for a list container context. When present, the trigger is scoped to items within this list.
+    - **listItemSelector?: string**
+      - OPTIONAL. A CSS selector used to select items within `listContainer`.
+    - **trigger: TriggerType**
+      - REQUIRED. One of:
+        - `'hover' | 'click' | 'activate' | 'interest'`: Pointer interactions (`activate` = click with keyboard Space/Enter; `interest` = hover with focus).
+        - `'viewEnter' | 'viewProgress'`: Viewport visibility/progress triggers.
+        - `'animationEnd'`: Fires when a specific effect completes on the source element.
+        - `'pointerMove'`: Continuous pointer motion over an area.
+    - **params?: TriggerParams**
+      - OPTIONAL. Parameter object that MUST match the trigger:
+        - hover/click/activate/interest: No params needed. Behavior is configured on the effect itself.
+        - viewEnter: `ViewEnterParams`
+          - `threshold?`: number in [0,1] describing intersection threshold
+          - `inset?`: string CSS-style inset for rootMargin/observer geometry
+        - viewProgress: No trigger params. Progress is driven by ViewTimeline/scroll scenes. Control the range via `ScrubEffect.rangeStart/rangeEnd` and `namedEffect.range`.
+        - animationEnd: `AnimationEndParams`
+          - `effectId`: string of the effect to wait for completion
+          - Usage: Fire when the specified effect (by `effectId`) on the source element finishes, useful for chaining sequences.
+        - pointerMove: `PointerMoveParams`
+          - `hitArea?`: `'root' | 'self'` (default `'self'`)
+          - `axis?`: `'x' | 'y'` - when using `keyframeEffect` with `pointerMove`, selects which pointer coordinate maps to linear 0-1 progress; defaults to `'y'`. Ignored for `namedEffect` and `customEffect`.
+          - Usage:
+            - `'self'`: Track pointer within the source element’s bounds.
+            - `'root'`: Track pointer anywhere in the viewport (document root).
+            - Only use with `ScrubEffect` mouse presets (`namedEffect`) or `customEffect` that consumes pointer progress; avoid `keyframeEffect` with `pointerMove` unless mapping a single axis via `axis`.
+          - When using `customEffect` with `pointerMove`, the progress parameter is an object:
+            - ```typescript
+              type Progress = {
+                x: number; // 0-1: horizontal position (0 = left edge, 1 = right edge)
+                y: number; // 0-1: vertical position (0 = top edge, 1 = bottom edge)
+                v?: {
+                  // Velocity (optional)
+                  x: number; // Horizontal velocity
+                  y: number; // Vertical velocity
+                };
+                active?: boolean; // Whether mouse is currently in the hit area
+              };
+              ```
 
 ### hover / click
 
-Use `type` (via `PointerTriggerParams`) for keyframe/named effects, `method` (via `StateParams`) for transitions. Do NOT use both `type` and `method` together.
+For `TimeEffect` (keyframe/named/custom effects), set `triggerType` on the effect. For `StateEffect` (transitions), set `stateAction` on the effect. Do NOT mix `triggerType` and `stateAction` on the same effect.
 
-**PointerTriggerParams** (`type`):
+**`triggerType`** — on `TimeEffect`:
 
 | Type                    | hover behavior                          | click behavior                   |
 | :---------------------- | :-------------------------------------- | :------------------------------- |
@@ -197,9 +245,9 @@ Use `type` (via `PointerTriggerParams`) for keyframe/named effects, `method` (vi
 | `'once'`                | Play once on first enter only           | Play once on first click only    |
 | `'state'`               | Play on enter, pause on leave           | Toggle play/pause per click      |
 
-**StateParams** (`method`) — for `TransitionEffect`:
+**`stateAction`** — on `StateEffect`:
 
-| Method               | hover behavior                                  | click behavior               |
+| Action               | hover behavior                                  | click behavior               |
 | :------------------- | :---------------------------------------------- | :--------------------------- |
 | `'toggle'` (default) | Add style state on enter, remove on leave       | Toggle style state per click |
 | `'add'`              | Add style state on enter; leave does NOT remove | Add style state on click     |
@@ -210,17 +258,18 @@ Use `type` (via `PointerTriggerParams`) for keyframe/named effects, `method` (vi
 
 ```ts
 params: {
-  type: 'once' | 'repeat' | 'alternate' | 'state';
   threshold?: number;  // 0–1, IntersectionObserver threshold
   inset?: string;      // like view-timeline-inset, e.g. '-100px' or '-50px 0px'
 }
+// Playback behavior is set on each effect:
+effect.triggerType: 'once' | 'repeat' | 'alternate' | 'state';  // default: 'once'
 ```
 
-**CRITICAL:** When source and target are the **same element**, MUST use `type: 'once'`. For `repeat` / `alternate` / `state`, ALWAYS use **separate** source and target elements — animating the observed element can cause it to leave/re-enter the viewport, causing rapid re-triggers.
+**CRITICAL:** When source and target are the **same element**, MUST use `triggerType: 'once'`. For `'repeat'` / `'alternate'` / `'state'`, ALWAYS use **separate** source and target elements — animating the observed element can cause it to leave/re-enter the viewport, causing rapid re-triggers.
 
 ### viewProgress
 
-Scroll-driven animations using native `ViewTimeline`. Progress is driven by scroll position. Control the range via `rangeStart`/`rangeEnd` on the effect (see [Scroll / Pointer-driven Effect](#scroll--pointer-driven-effect)).
+Scroll-driven animations using native `ViewTimeline`, with polyfill where not supported. Progress is driven by scroll position. Control the range via `rangeStart`/`rangeEnd` on the effect (see [Scroll / Pointer-driven Effect](#scroll--pointer-driven-effect)).
 
 `viewProgress` has no trigger params. Range configuration (`rangeStart`/`rangeEnd`) is on the effect, not on the trigger.
 
@@ -277,8 +326,8 @@ Each effect applies a visual change to a target element. An effect is either inl
   key?: string;              // target element key; omit to target the source
   effectId?: string;         // reference to effects registry (EffectRef)
   conditions?: string[];     // ids referencing the top-level conditions map; all must pass
-  selector?: string;         // CSS selector to refine target
-  listContainer?: string;
+  selector?: string;         // optional — CSS selector to refine target element
+  listContainer?: string;    // optional — CSS selector for list container
   listItemSelector?: string; // optional — filter which children of listContainer are selected
   composite?: 'replace' | 'add' | 'accumulate';
   fill?: 'none' | 'forwards' | 'backwards' | 'both';
@@ -295,6 +344,10 @@ Each effect applies a visual change to a target element. An effect is either inl
 - `'replace'` (default): fully replaces prior values.
 - `'add'`: concatenates transform/filter functions after any existing ones (e.g. existing `translateX(10px)` + added `translateY(20px)` → both apply).
 - `'accumulate'`: merges arguments of matching functions (e.g. `translateX(10px)` + `translateX(20px)` → `translateX(30px)`); non-matching functions concatenate like `'add'`.
+
+**`easing` guidance:** from `@wix/motion` (in addition to standard CSS easings):
+
+`'linear'`, `'ease'`, `'ease-in'`, `'ease-out'`, `'ease-in-out'`, `'sineIn'`, `'sineOut'`, `'sineInOut'`, `'quadIn'`, `'quadOut'`, `'quadInOut'`, `'cubicIn'`, `'cubicOut'`, `'cubicInOut'`, `'quartIn'`, `'quartOut'`, `'quartInOut'`, `'quintIn'`, `'quintOut'`, `'quintInOut'`, `'expoIn'`, `'expoOut'`, `'expoInOut'`, `'circIn'`, `'circOut'`, `'circInOut'`, `'backIn'`, `'backOut'`, `'backInOut'`, or any `'cubic-bezier(...)'` / `'linear(...)'` string.
 
 ### Time-based Effect
 
@@ -313,10 +366,6 @@ Used with `hover`, `click`, `viewEnter`, `animationEnd` triggers.
   // + exactly one animation payload (see below)
 }
 ```
-
-**Named easings** from `@wix/motion` (in addition to standard CSS easings):
-
-`'linear'`, `'ease'`, `'ease-in'`, `'ease-out'`, `'ease-in-out'`, `'sineIn'`, `'sineOut'`, `'sineInOut'`, `'quadIn'`, `'quadOut'`, `'quadInOut'`, `'cubicIn'`, `'cubicOut'`, `'cubicInOut'`, `'quartIn'`, `'quartOut'`, `'quartInOut'`, `'quintIn'`, `'quintOut'`, `'quintInOut'`, `'expoIn'`, `'expoOut'`, `'expoInOut'`, `'circIn'`, `'circOut'`, `'circInOut'`, `'backIn'`, `'backOut'`, `'backInOut'`, or any `'cubic-bezier(...)'` / `'linear(...)'` string.
 
 ### Scroll / Pointer-driven Effect
 
@@ -364,9 +413,19 @@ Used with `viewProgress` and `pointerMove` triggers.
 - Sticky child (`key`) with `position: sticky; top: 0; height: 100vh`: stays fixed while the wrapper scrolls. This is the ViewTimeline source.
 - Use `rangeStart/rangeEnd` with `name: 'contain'` to animate only during the stuck phase.
 
-### TransitionEffect (CSS style toggle)
+### StateEffect (CSS style toggle)
 
-Used with `hover` / `click` triggers. Pair with `StateParams` (`method`).
+Used with `hover` / `click` triggers. Set `stateAction` on the effect to control state behavior.
+
+**StateEffect** (CSS transition-style state toggles):
+
+- `key?`: string (target override; see TARGET CASCADE)
+- `effectId?`: string (when used as a reference identity)
+- One of:
+  - `transition?`: `{ duration?: number; delay?: number; easing?: string; styleProperties: { name: string; value: string }[] }`
+    - Applies a single transition options block to all listed style properties.
+  - `transitionProperties?`: `Array<{ name: string; value: string; duration?: number; delay?: number; easing?: string }>`
+    - Allows per-property transition options. If both `transition` and `transitionProperties` are provided, the system SHOULD apply both with per-property entries taking precedence for overlapping properties.
 
 ```ts
 // Shared timing for all properties:
@@ -490,10 +549,10 @@ Coordinate multiple effects with staggered timing. Prefer sequences over manual 
 - `[TRIGGER]` — any trigger for time-based animation effects (e.g., `'viewEnter'`, `'activate'`, `'interest'`).
 - `[TRIGGER_PARAMS]` — trigger-specific parameters (e.g., `{ type: 'once', threshold: 0.3 }`).
 - `[OFFSET_MS]` — ms between each child's animation start.
-- `[OFFSET_EASING]` — easing curve for staggering offsets. One of: `'linear'`, `'quadIn'`, `'quadOut'`, `'sineOut'`, `'cubicIn'`, `'cubicOut'`, `'cubicInOut'`, `'cubic-bezier(...)'`, or `'linear(...)'`.
+- `[OFFSET_EASING]` — CSS easing string or named easing from `@wix/motion`.
 - `[DELAY_MS]` — optional. Base delay (ms) before the entire sequence starts.
 - `[EFFECT_ID]` — string key referencing an entry in the top-level `effects` map.
-- `[LIST_CONTAINER_SELECTOR]` — CSS selector for the container whose children will be staggered.
+- `[LIST_CONTAINER_SELECTOR]` — optional. CSS selector for the container whose children will be staggered.
 
 Reusable sequences can be defined in `InteractConfig.sequences` and referenced by `sequenceId`.
 
@@ -602,7 +661,7 @@ The target element is what the effect animates. Resolved in priority order:
 
 1. **`Effect.key`** — the `<interact-element>` with matching `data-interact-key`.
 2. **Registry Effect's `key`** — if the effect is an `EffectRef`, the `key` from the referenced registry entry is used.
-3. **Fallback to `Interaction.key`** — the source element acts as the target.
+3. **Fallback to `Interaction.key`** — the same `key` is used for the source will be used for the target.
 4. After resolving the root target, `selector`, `listContainer`, and `listItemSelector` on the effect further refine which child elements within that target are animated (same priority order as source resolution).
 
 ---

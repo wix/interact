@@ -122,43 +122,38 @@ describe('interact (web)', () => {
       {
         trigger: 'click',
         key: 'logo-click',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-click',
             effectId: 'logo-bounce',
+            triggerType: 'alternate',
           },
         ],
       },
       {
         trigger: 'click',
         key: 'logo-click',
-        params: {
-          method: 'toggle',
-        },
         effects: [
           {
             key: 'logo-click',
             effectId: 'logo-transition-hover',
+            stateAction: 'toggle',
           },
         ],
       },
       {
         trigger: 'hover',
         key: 'logo-hover',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-hover',
             effectId: 'logo-arc-in',
+            triggerType: 'alternate',
           },
           {
             key: 'logo-hover',
             effectId: 'logo-arc-in',
+            triggerType: 'alternate',
             namedEffect: {
               type: 'ArcIn',
               direction: 'left',
@@ -170,13 +165,11 @@ describe('interact (web)', () => {
       {
         trigger: 'hover',
         key: 'logo-hover',
-        params: {
-          method: 'toggle',
-        },
         effects: [
           {
             key: 'logo-hover',
             effectId: 'logo-transition-hover',
+            stateAction: 'toggle',
           },
         ],
       },
@@ -884,7 +877,6 @@ describe('interact (web)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-alternate',
-              params: { type: 'alternate' },
               effects: [{ key: 'logo-alternate', effectId: 'logo-arc-in' }],
             },
           ],
@@ -892,6 +884,7 @@ describe('interact (web)', () => {
             'logo-arc-in': {
               namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'alternate',
             },
           },
         };
@@ -948,7 +941,6 @@ describe('interact (web)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-repeat',
-              params: { type: 'repeat' },
               effects: [{ key: 'logo-repeat', effectId: 'logo-arc-in' }],
             },
           ],
@@ -956,6 +948,7 @@ describe('interact (web)', () => {
             'logo-arc-in': {
               namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'repeat',
             },
           },
         };
@@ -1009,7 +1002,6 @@ describe('interact (web)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-state',
-              params: { type: 'state' },
               effects: [{ key: 'logo-state', effectId: 'logo-swing' }],
             },
           ],
@@ -1017,6 +1009,7 @@ describe('interact (web)', () => {
             'logo-swing': {
               namedEffect: { type: 'Swing', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'state',
             },
           },
         };
@@ -2695,13 +2688,11 @@ describe('interact (web)', () => {
           {
             key: 'toggle-source',
             trigger: 'click',
-            params: {
-              method: 'toggle',
-            },
             effects: [
               {
                 key: 'toggle-source',
                 effectId: 'toggle-effect',
+                stateAction: 'toggle',
               },
             ],
           },
