@@ -1368,7 +1368,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/interact@npm:^2.2.0, @wix/interact@workspace:packages/interact":
+"@wix/interact-playground@workspace:apps/playground":
+  version: 0.0.0-use.local
+  resolution: "@wix/interact-playground@workspace:apps/playground"
+  dependencies:
+    "@wix/interact": "npm:^2.1.4"
+    "@wix/motion-presets": "npm:^1.0.0"
+    typescript: "npm:^5.9.3"
+    vite: "npm:^7.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@wix/interact@npm:^2.1.4, @wix/interact@npm:^2.2.0, @wix/interact@workspace:packages/interact":
   version: 0.0.0-use.local
   resolution: "@wix/interact@workspace:packages/interact"
   dependencies:
@@ -1400,7 +1411,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/motion-presets@workspace:packages/motion-presets":
+"@wix/motion-presets@npm:^1.0.0, @wix/motion-presets@workspace:packages/motion-presets":
   version: 0.0.0-use.local
   resolution: "@wix/motion-presets@workspace:packages/motion-presets"
   dependencies:
