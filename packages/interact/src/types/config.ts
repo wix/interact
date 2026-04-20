@@ -1,5 +1,5 @@
 import type { TriggerType, TriggerParams } from './triggers';
-import type { Effect, EffectRef } from './effects';
+import type { Effect, EffectRef, TimeAnimationTriggerType } from './effects';
 
 export type Condition = {
   type: 'media' | 'container' | 'selector';
@@ -12,6 +12,7 @@ export type SequenceOptionsConfig = {
   offsetEasing?: string | ((p: number) => number);
   sequenceId?: string;
   conditions?: string[];
+  triggerType?: TimeAnimationTriggerType;
 };
 
 export type SequenceConfig = SequenceOptionsConfig & {

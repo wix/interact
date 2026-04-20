@@ -183,7 +183,6 @@ Create toggle behaviors using alternating states:
 {
     key: 'menu-button',
     trigger: 'click',
-    params: { type: 'alternate' },
     effects: [
         {
             key: 'mobile-menu',
@@ -315,7 +314,6 @@ Some states should persist across interactions:
 {
     key: 'theme-toggle',
     trigger: 'click',
-    params: { type: 'alternate' },
     effects: [
         {
             key: 'page-body',

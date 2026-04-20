@@ -163,8 +163,8 @@ Effects within a sequence can target different elements using the `key` property
 {
   key: 'trigger-element',
   trigger: 'click',
-  params: { type: 'alternate' },
   sequences: [{
+    triggerType: 'alternate',
     offset: 150,
     offsetEasing: 'sineOut',
     effects: [
@@ -191,7 +191,6 @@ When the source element connects, all existing list items are gathered and a Seq
   key: 'product-grid',
   trigger: 'viewEnter',
   listContainer: '.products',
-  params: { type: 'once' },
   sequences: [{
     offset: 80,
     offsetEasing: 'quadIn',
@@ -286,7 +285,7 @@ const config: InteractConfig = {
       key: 'cards',
       trigger: 'viewEnter',
       listContainer: '.card-grid',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       sequences: [
         {
           offset: 80,
@@ -326,9 +325,9 @@ const config: InteractConfig = {
     {
       key: 'reveal-btn',
       trigger: 'click',
-      params: { type: 'alternate' },
       sequences: [
         {
+          triggerType: 'alternate',
           offset: 150,
           offsetEasing: 'sineOut',
           effects: [

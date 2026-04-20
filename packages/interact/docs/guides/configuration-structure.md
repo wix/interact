@@ -29,9 +29,6 @@ Each interaction defines a complete cause-and-effect relationship:
     key: 'trigger-element',           // What element triggers the interaction
     selector: '.clickable-area',          // Optional: Custom selector within source
     trigger: 'hover',                     // What user action starts it
-    params: {                             // Optional trigger parameters
-        type: 'alternate'
-    },
     conditions: ['desktop-only'],         // Optional conditions to check
     effects: [                            // Array of effects to apply
         {
@@ -43,6 +40,8 @@ Each interaction defines a complete cause-and-effect relationship:
     ]
 }
 ```
+
+Time-based playback (`once`, `repeat`, `alternate`, `state`) is set with `triggerType` on each time effect, or with `triggerType` on a sequence object when using `sequences`. Optional `params` on the interaction are for observer options (`viewEnter` / `pageVisible`), pointer/`animationEnd` settings, and other non-playback trigger configuration.
 
 ## Element Selection with Selectors
 
@@ -210,7 +209,7 @@ const complexConfig: InteractConfig = {
     {
       key: 'product-card',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.3 },
+      params: { threshold: 0.3 },
       effects: [
         {
           key: 'product-card',
@@ -343,7 +342,6 @@ export const cardInteractions = [
   {
     key: 'card',
     trigger: 'viewEnter',
-    params: { type: 'once' },
     effects: [{ key: 'card', effectId: 'card-entrance' }],
   },
 ];
@@ -500,7 +498,7 @@ const productPageConfig: InteractConfig = {
     {
       key: 'review-1',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'review-1',
@@ -512,7 +510,7 @@ const productPageConfig: InteractConfig = {
     {
       key: 'review-2',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'review-2',

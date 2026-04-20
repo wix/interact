@@ -15,12 +15,11 @@ const easingCatalog = [
 
 const triggerOptions: TriggerType[] = ['hover', 'click', 'viewEnter'];
 
-const getTriggerParams = (trigger: TriggerType) => {
+const getViewEnterParams = (trigger: TriggerType) => {
   if (trigger === 'viewEnter') {
-    return { type: 'repeat', threshold: 0.6 } as const;
+    return { threshold: 0.6 } as const;
   }
-
-  return { method: 'toggle' } as const;
+  return undefined;
 };
 
 const createEffectConfig = (
@@ -104,12 +103,15 @@ export const Playground = () => {
         {
           key: 'demo-card',
           trigger,
-          params: getTriggerParams(trigger),
+          ...(getViewEnterParams(trigger) ? { params: getViewEnterParams(trigger) } : {}),
           effects: [{ effectId }],
         },
       ],
       effects: {
-        [effectId]: effectConfig,
+        [effectId]: {
+          ...effectConfig,
+          ...(trigger === 'viewEnter' ? { triggerType: 'repeat' as const } : {}),
+        },
       },
     };
   }, [effectConfig, trigger]);

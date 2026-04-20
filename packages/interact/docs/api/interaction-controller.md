@@ -36,7 +36,7 @@ interface IInteractionController {
   update(): void;
   toggleEffect(
     effectId: string,
-    method: StateParams['method'],
+    stateAction: StateAction,
     item?: HTMLElement | null,
     isLegacy?: boolean,
   ): void;
@@ -189,7 +189,7 @@ if (controller) {
 - To reset all interaction state
 - After modifying the element's structure
 
-### `toggleEffect(effectId, method, item?, isLegacy?)`
+### `toggleEffect(effectId, stateAction, item?, isLegacy?)`
 
 Toggles a CSS state effect on the element or a specific list item.
 
@@ -198,7 +198,7 @@ Toggles a CSS state effect on the element or a specific list item.
 ```typescript
 toggleEffect(
   effectId: string,
-  method: 'add' | 'remove' | 'toggle' | 'clear',
+  stateAction: StateAction,
   item?: HTMLElement | null,
   isLegacy?: boolean
 ): void
@@ -207,7 +207,7 @@ toggleEffect(
 **Parameters:**
 
 - `effectId: string` - The effect identifier
-- `method` - How to change the state:
+- `stateAction` - How to change the state:
   - `'add'` - Add the effect
   - `'remove'` - Remove the effect
   - `'toggle'` - Toggle the effect on/off

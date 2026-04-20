@@ -179,7 +179,7 @@ const entranceConfig = {
     {
       trigger: 'viewEnter',
       key: 'element',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [{ effectId: 'entrance-effect' }],
     },
   ],
