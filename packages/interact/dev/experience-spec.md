@@ -143,18 +143,44 @@ CSS custom properties (`--experience-*`) can be used within style rules and refe
 
 ### Interact Config
 
-The experience embeds a **serializable subset** of `InteractConfig`. The key restriction is that `customEffect` (which requires a function reference) is **not allowed**. Only `namedEffect` and `keyframeEffect` are permitted as effect sources. Similarly, `offsetEasing` as a function is not allowed in sequences — only string-based easing names.
+The experience embeds a **serializable subset** of `InteractConfig`. The key restriction is that `customEffect` (which requires a function reference) is **not allowed**. Only `namedEffect`, `keyframeEffect`, and `transition`/`transitionProperties` (state effects) are permitted as animation payloads. Similarly, `offsetEasing` as a function is not allowed in sequences — only string-based easing names.
 
 ```ts
 type ExperienceInteractConfig = {
-  effects: Record<string, SerializableEffect>;
+  effects: Record<string, SerializableEffect>; // REQUIRED; may be {} if unused
   sequences?: Record<string, SerializableSequenceConfig>;
   conditions?: Record<string, Condition>;
   interactions: ExperienceInteraction[];
 };
 ```
 
+| Field          | Purpose                                                                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `effects`      | Map of effect-id → effect definition. Always present. Entries are referenced from interactions and sequences via `effectId`. May be empty if unused.          |
+| `sequences`    | Map of sequence-id → sequence definition. Used when multiple effects should fire in a coordinated stagger. Referenced from interactions via `sequenceId`.     |
+| `conditions`   | Map of condition-id → condition. Referenced from interactions, effects, and sequences via `conditions: string[]`. All listed conditions must pass to apply.   |
+| `interactions` | Array of interactions binding triggers on source elements to one or more effects/sequences.                                                                   |
+
+#### Effect Base
+
+All serializable effects share a common base that refines the target element and gates the effect:
+
+```ts
+type EffectBase = {
+  key?: string; // target element key; omit to target the source
+  effectId?: string; // effect identifier (required when used as a ref)
+  selector?: string; // refine target within the keyed element
+  listContainer?: string; // CSS selector for list container
+  listItemSelector?: string; // filter which children of listContainer are targeted
+  conditions?: string[]; // condition-ids; all must pass
+};
+
+type SerializableEffectRef = EffectBase & { effectId: string };
+```
+
 #### Serializable Effects
+
+Every inline effect is a `EffectBase` combined with **exactly one** of three effect shapes: time-based, scroll/pointer-driven (scrub), or state (CSS transition toggle).
 
 ```ts
 type SerializableEffectSource =
@@ -166,28 +192,74 @@ type SerializableTimeEffect = SerializableEffectSource & {
   easing?: string;
   iterations?: number;
   alternate?: boolean;
-  fill?: 'none' | 'forwards' | 'backwards' | 'both';
   reversed?: boolean;
   delay?: number;
+  fill?: 'none' | 'forwards' | 'backwards' | 'both';
+  composite?: 'replace' | 'add' | 'accumulate';
+  triggerType?: 'once' | 'repeat' | 'alternate' | 'state';
 };
 
 type SerializableScrubEffect = SerializableEffectSource & {
+  rangeStart?: RangeOffset;
+  rangeEnd?: RangeOffset;
   easing?: string;
   iterations?: number;
   alternate?: boolean;
-  fill?: 'none' | 'forwards' | 'backwards' | 'both';
   reversed?: boolean;
-  rangeStart?: RangeOffset;
-  rangeEnd?: RangeOffset;
+  fill?: 'none' | 'forwards' | 'backwards' | 'both';
+  composite?: 'replace' | 'add' | 'accumulate';
+  centeredToTarget?: boolean;
   transitionDuration?: number;
   transitionDelay?: number;
-  transitionEasing?: ScrubTransitionEasing;
-  centeredToTarget?: boolean;
+  transitionEasing?: 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce';
+};
+
+type SerializableStateEffect = {
+  stateAction?: 'add' | 'remove' | 'toggle' | 'clear';
+  transition?: {
+    duration?: number;
+    delay?: number;
+    easing?: string;
+    styleProperties: { name: string; value: string }[];
+  };
+  transitionProperties?: Array<{
+    name: string;
+    value: string;
+    duration?: number;
+    delay?: number;
+    easing?: string;
+  }>;
 };
 
 type SerializableEffect = EffectBase &
-  (SerializableTimeEffect | SerializableScrubEffect | TransitionEffect);
+  (SerializableTimeEffect | SerializableScrubEffect | SerializableStateEffect);
 ```
+
+| Effect shape            | Trigger compatibility                                            | Payload fields                                                                |
+| ----------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `SerializableTimeEffect`  | `hover`, `click`, `activate`, `interest`, `viewEnter`, `pageVisible`, `animationEnd` | `duration` required, `triggerType` controls playback on repeated triggers |
+| `SerializableScrubEffect` | `viewProgress`, `pointerMove`                                    | `rangeStart`/`rangeEnd` for `viewProgress`; `transition*` for pointer smoothing |
+| `SerializableStateEffect` | `hover`, `click`, `activate`, `interest`                         | `transition` (shared timing) or `transitionProperties` (per-property timing)  |
+
+**`triggerType`** (on `SerializableTimeEffect`) controls how repeated trigger events replay the effect:
+
+| Value         | hover / interest                  | click / activate                   | viewEnter / pageVisible                        |
+| ------------- | --------------------------------- | ---------------------------------- | ---------------------------------------------- |
+| `'once'`      | Play once on first enter          | Play once on first click           | Play once when source first enters viewport    |
+| `'repeat'`    | Restart on each enter             | Restart on each click              | Restart every time source enters viewport      |
+| `'alternate'` | Play on enter, reverse on leave (default for hover/click) | Alternate play/reverse per click   | Play on enter, reverse on leave                |
+| `'state'`     | Resume on enter, pause on leave   | Toggle play/pause per click        | Resume on enter, pause on leave                |
+
+**`stateAction`** (on `SerializableStateEffect`) controls how the style state is applied:
+
+| Value       | Behavior                                                                                |
+| ----------- | --------------------------------------------------------------------------------------- |
+| `'toggle'`  | (default) Apply on enter/click, remove on leave/next click.                             |
+| `'add'`     | Apply on enter/click. Does not remove automatically.                                    |
+| `'remove'`  | Remove a previously applied state on enter/click. Pair with a matching `add` effectId.  |
+| `'clear'`   | Clear all previously applied state styles on the target.                                |
+
+**`composite`** mirrors CSS `animation-composition`: how this effect combines with others on the same property (primarily transforms and filters): `'replace'` (default), `'add'` (concatenate functions), `'accumulate'` (sum matching function arguments).
 
 #### Range Offset
 
@@ -204,60 +276,85 @@ type LengthPercentage =
   | { value: number; unit: 'percentage' };
 ```
 
+| Range name       | Meaning                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| `entry`          | While the element is entering the viewport.                                              |
+| `exit`           | While the element is exiting the viewport.                                               |
+| `contain`        | While the element is fully contained in the viewport (typical for `position: sticky`).   |
+| `cover`          | Full range from first pixel entering to last pixel leaving.                              |
+| `entry-crossing` | From the leading edge entering to the leading edge reaching the opposite viewport side.  |
+| `exit-crossing`  | From the trailing edge reaching the leading viewport side to the trailing edge leaving.  |
+
 #### Sequences
 
 Sequences allow grouping effects into ordered timelines with staggered delays. They are declared at the top level for reuse and referenced from interactions.
 
 ```ts
 type SerializableSequenceConfig = {
+  effects: (SerializableEffect | SerializableEffectRef)[]; // REQUIRED
   delay?: number;
   offset?: number;
   offsetEasing?: string;
+  triggerType?: 'once' | 'repeat' | 'alternate' | 'state';
   sequenceId?: string;
   conditions?: string[];
-  effects: (SerializableEffect | { effectId: string })[];
 };
 
 type SerializableSequenceConfigRef = {
-  sequenceId: string;
+  sequenceId: string; // REQUIRED — must match a key in interact.sequences
   delay?: number;
   offset?: number;
   offsetEasing?: string;
+  triggerType?: 'once' | 'repeat' | 'alternate' | 'state';
   conditions?: string[];
 };
 ```
 
-| Field          | Purpose                                                                                                                             |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `delay`        | Fixed millisecond delay before the sequence starts playing. Defaults to `0`.                                                        |
-| `offset`       | Millisecond multiplier applied to the easing-based stagger offset per effect. Defaults to `0`.                                      |
-| `offsetEasing` | Named easing string (e.g. `"ease-out"`, `"quadIn"`) for stagger distribution. Function form is not allowed in serializable configs. |
-| `sequenceId`   | Identifier for the sequence, used by `SerializableSequenceConfigRef` to reference a top-level declaration.                          |
-| `conditions`   | Condition keys that must be met for the sequence to be active.                                                                      |
-| `effects`      | Ordered list of effects in the sequence. Each effect targets its own element via `key`.                                             |
+| Field          | Purpose                                                                                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `effects`      | Ordered list of effects in the sequence. Each effect targets its own element via `key` (or `listContainer` / `listItemSelector`).                         |
+| `delay`        | Fixed millisecond delay before the sequence starts playing. Defaults to `0`.                                                                              |
+| `offset`       | Millisecond offset between consecutive children's animation starts (stagger interval). Defaults to `0`.                                                   |
+| `offsetEasing` | Named easing string (e.g. `"ease-out"`, `"quadIn"`) shaping stagger distribution. Function form is not allowed in serializable configs. Defaults to `'linear'`. |
+| `triggerType`  | Playback behavior for repeated trigger events. Set on the sequence (not on individual child effects). Same semantics as `triggerType` on a `TimeEffect`.  |
+| `sequenceId`   | Identifier for a reusable sequence stored in `interact.sequences`, referenced via `SerializableSequenceConfigRef`.                                        |
+| `conditions`   | Condition-ids that must all pass for the sequence to be active.                                                                                           |
 
-Sequences can be defined inline on an interaction or declared in `interact.sequences` and referenced by `sequenceId`.
+Sequences can be defined inline on an interaction's `sequences` array or declared once in `interact.sequences` and referenced by `sequenceId` elsewhere.
 
 #### Interactions
 
-Interactions follow the existing `Interaction` type. The `key` field references an element key from the `elements` map.
+Each interaction binds a trigger on a source element to one or more effects or sequences. The `key` field references an element key from the `elements` map, and the same element is used as both source and target by default unless an effect overrides the target via its own `key`.
 
 ```ts
 type ExperienceInteraction = {
-  id?: string;
-  key: string;
-  trigger: TriggerType;
-  params?: TriggerParams;
-  conditions?: string[];
-  selector?: string;
-  listContainer?: string;
-  listItemSelector?: string;
-  effects?: (SerializableEffect | { effectId: string })[];
+  id?: string; // experience-layer identifier, used as `targetId` for 'interaction' bindings
+  key: string; // REQUIRED — matches a key in elements
+  trigger: TriggerType; // REQUIRED
+  params?: TriggerParams; // trigger-specific parameters (see Trigger Params)
+  selector?: string; // refine the source element within the keyed element
+  listContainer?: string; // attach the trigger to items in a list
+  listItemSelector?: string; // filter which children of listContainer act as sources
+  conditions?: string[]; // condition-ids; all must pass to activate
+  effects?: (SerializableEffect | SerializableEffectRef)[];
   sequences?: (SerializableSequenceConfig | SerializableSequenceConfigRef)[];
 };
 ```
 
-An interaction must have at least one of `effects` or `sequences`. Both are optional because an interaction may use only sequences or only effects.
+| Field              | Purpose                                                                                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`               | Optional experience-layer identifier. Not part of `@wix/interact`'s own `Interaction` type — used only to resolve `target: 'interaction'` control bindings.   |
+| `key`              | Required. Element key in `elements` whose matched element is the trigger source (and default target).                                                         |
+| `trigger`          | Required. Trigger type (see [Trigger Types](#trigger-types)).                                                                                                 |
+| `params`           | Trigger-specific parameters. Shape depends on `trigger` (see [Trigger Params](#trigger-params)).                                                              |
+| `selector`         | CSS selector refining the source element within the keyed element.                                                                                            |
+| `listContainer`    | CSS selector for a list container whose children become the trigger sources.                                                                                  |
+| `listItemSelector` | CSS selector filtering which immediate children of `listContainer` participate.                                                                               |
+| `conditions`       | Condition-ids gating the entire interaction. All listed conditions must pass.                                                                                 |
+| `effects`          | Effects to apply when the trigger activates. Each effect may be inline or an `effectId`-based reference.                                                      |
+| `sequences`        | Sequences to apply when the trigger activates. Each sequence may be inline or a `sequenceId`-based reference.                                                 |
+
+An interaction MUST provide at least one of `effects` or `sequences`.
 
 #### Trigger Types
 
@@ -267,30 +364,61 @@ The full set of trigger types available in Interact:
 type TriggerType =
   | 'hover'
   | 'click'
+  | 'interest'
+  | 'activate'
   | 'viewEnter'
-  | 'pageVisible'
-  | 'animationEnd'
   | 'viewProgress'
   | 'pointerMove'
-  | 'activate'
-  | 'interest';
+  | 'animationEnd';
 ```
 
-| Trigger        | Description                                                                     |
-| -------------- | ------------------------------------------------------------------------------- |
-| `hover`        | Fires on mouse enter/leave.                                                     |
-| `click`        | Fires on element click.                                                         |
-| `viewEnter`    | Fires when the element enters the viewport (configurable threshold and type).   |
-| `pageVisible`  | Fires when the page becomes visible (similar to `viewEnter` but page-level).    |
-| `animationEnd` | Fires when a specified effect's animation ends (requires `effectId` in params). |
-| `viewProgress` | Scrub-driven: maps scroll progress to animation progress.                       |
-| `pointerMove`  | Scrub-driven: maps pointer position to animation progress.                      |
-| `activate`     | Programmatic activation trigger.                                                |
-| `interest`     | Fires on user interest signals (e.g. focus, hover intent).                      |
+| Trigger        | Description                                                                                                        |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `hover`        | Fires on mouse enter/leave.                                                                                        |
+| `click`        | Fires on element click.                                                                                            |
+| `interest`     | Accessible hover — fires on hover **or** keyboard focus. Prefer over `hover` for keyboard-reachable targets.       |
+| `activate`     | Accessible click — fires on click **or** keyboard activation (Enter/Space). Prefer over `click` for keyboard users. |
+| `viewEnter`    | Fires when the source element enters the viewport (configurable via `threshold`, `inset`).                         |
+| `viewProgress` | Scrub-driven: maps scroll progress through the element's ViewTimeline to the effect's progress.                    |
+| `pointerMove`  | Scrub-driven: maps pointer position over a hit area to the effect's progress.                                      |
+| `animationEnd` | Chains when another effect (referenced by `effectId` in `params`) finishes.                                        |
+
+> **Accessibility:** `interest` and `activate` require `Interact.allowA11yTriggers = true` (or `allowA11yTriggers: true` via `Interact.setup`) to be enabled globally.
+
+#### Trigger Params
+
+Each trigger type accepts a specific `params` shape — or no params at all. **Playback behavior (once/repeat/alternate/state)** is NOT a trigger param — it lives on each effect as `triggerType` (or on a sequence as `triggerType`).
+
+```ts
+type TriggerParams = ViewEnterParams | PointerMoveParams | AnimationEndParams;
+
+type ViewEnterParams = {
+  threshold?: number; // 0–1, IntersectionObserver threshold
+  inset?: string; // CSS-style inset (rootMargin), e.g. '-100px' or '-50px 0px'
+  useSafeViewEnter?: boolean; // opt-in to the safe viewEnter implementation
+};
+
+type PointerMoveParams = {
+  hitArea?: 'root' | 'self'; // where pointer motion is tracked
+  axis?: 'x' | 'y'; // single-axis keyframeEffect mapping; default 'y' when keyframeEffect is used
+};
+
+type AnimationEndParams = {
+  effectId: string; // REQUIRED — the effect to chain from
+};
+```
+
+| Trigger                                     | Params shape                 | Notes                                                                                                    |
+| ------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `hover` / `click` / `interest` / `activate` | _none_                       | No params. Set `triggerType` on each `TimeEffect` or `stateAction` on each `StateEffect`.                |
+| `viewEnter`                                 | `ViewEnterParams`            | Set `triggerType` on each effect (or on a sequence) — not on params.                                     |
+| `viewProgress`                              | _none_                       | Configure scroll range via `rangeStart` / `rangeEnd` on each `ScrubEffect`.                              |
+| `pointerMove`                               | `PointerMoveParams`          | `axis` only applies to `keyframeEffect`. For 2D effects prefer a `namedEffect` from the `Mouse` preset set. |
+| `animationEnd`                              | `AnimationEndParams`         | `effectId` identifies the preceding effect whose completion chains into this trigger.                    |
 
 #### Conditions
 
-Conditions control when interactions or effects are active. They are declared in `interact.conditions` and referenced by key.
+Conditions control when interactions, effects, or sequences are active. They are declared in `interact.conditions` and referenced by key from `conditions: string[]` on any of those levels. All listed conditions must pass for the gated item to activate.
 
 ```ts
 type Condition = {
@@ -299,27 +427,31 @@ type Condition = {
 };
 ```
 
-| Type        | Description                                                                   |
-| ----------- | ----------------------------------------------------------------------------- |
-| `media`     | Matches a CSS media query (e.g. `"(hover: hover)"`, `"(min-width: 768px)"`).  |
-| `container` | Matches a CSS container query.                                                |
-| `selector`  | Matches when a CSS selector applies (e.g. a class is present on an ancestor). |
+| Type        | `predicate` example                                    | Description                                                                                                                     |
+| ----------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `media`     | `'(hover: hover)'`, `'(min-width: 768px)'`             | CSS media query (omit the `@media` prefix). Matched via `window.matchMedia()`.                                                  |
+| `container` | `'(min-width: 480px)'`                                 | CSS container query evaluated against the nearest container context of the element.                                             |
+| `selector`  | `':nth-of-type(odd)'`, `'&.featured'`, `'body.dark &'` | CSS selector evaluated against the element. The `&` token is substituted with the base element selector (nesting-style).       |
+
+Scoping: on an **interaction**, conditions gate the entire trigger — no effects or sequences activate when a condition fails. On an **effect** or **sequence**, conditions gate only that specific item; the remaining items in the interaction still evaluate independently.
 
 #### Named Effect Types
 
-All existing named effect types from `@wix/motion-presets` are available:
+All existing named effect types from `@wix/motion-presets` are available as `namedEffect: { type: '[PRESET_NAME]', ...options }`:
 
 | Category              | Types                                                                                                                                                                                                                                                                                        |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Entrance**          | `FadeIn`, `SlideIn`, `GlideIn`, `FloatIn`, `FlipIn`, `FoldIn`, `SpinIn`, `BounceIn`, `DropIn`, `ArcIn`, `CurveIn`, `TurnIn`, `WinkIn`, `TiltIn`, `ShapeIn`, `ShuttersIn`, `RevealIn`, `BlurIn`, `ExpandIn`                                                                                   |
-| **Ongoing**           | `Pulse`, `Spin`, `Breathe`, `Poke`, `Flash`, `Swing`, `Flip`, `Rubber`, `Fold`, `Jello`, `Wiggle`, `Bounce`, `Cross`, `DVD`                                                                                                                                                                  |
-| **Scroll**            | `ParallaxScroll`, `FadeScroll`, `BlurScroll`, `GrowScroll`, `ShrinkScroll`, `MoveScroll`, `PanScroll`, `SlideScroll`, `SpinScroll`, `Spin3dScroll`, `FlipScroll`, `ArcScroll`, `RevealScroll`, `ShapeScroll`, `ShuttersScroll`, `SkewPanScroll`, `StretchScroll`, `TiltScroll`, `TurnScroll` |
-| **Mouse**             | `TrackMouse`, `AiryMouse`, `BlobMouse`, `BlurMouse`, `BounceMouse`, `ScaleMouse`, `SkewMouse`, `SpinMouse`, `SwivelMouse`, `Tilt3DMouse`, `Track3DMouse`                                                                                                                                     |
+| **Entrance**          | `FadeIn`, `GlideIn`, `SlideIn`, `FloatIn`, `RevealIn`, `ExpandIn`, `BlurIn`, `FlipIn`, `ArcIn`, `ShuttersIn`, `CurveIn`, `DropIn`, `FoldIn`, `ShapeIn`, `TiltIn`, `WinkIn`, `SpinIn`, `TurnIn`, `BounceIn`                                                                                   |
+| **Ongoing**           | `Pulse`, `Spin`, `Breathe`, `Bounce`, `Wiggle`, `Flash`, `Flip`, `Fold`, `Jello`, `Poke`, `Rubber`, `Swing`, `Cross`                                                                                                                                                                         |
+| **Scroll**            | `FadeScroll`, `RevealScroll`, `ParallaxScroll`, `MoveScroll`, `SlideScroll`, `GrowScroll`, `ShrinkScroll`, `TiltScroll`, `PanScroll`, `BlurScroll`, `FlipScroll`, `SpinScroll`, `ArcScroll`, `ShapeScroll`, `ShuttersScroll`, `SkewPanScroll`, `Spin3dScroll`, `StretchScroll`, `TurnScroll` |
+| **Mouse**             | `TrackMouse`, `Tilt3DMouse`, `Track3DMouse`, `SwivelMouse`, `AiryMouse`, `ScaleMouse`, `BlurMouse`, `SkewMouse`, `BlobMouse`                                                                                                                                                                |
 | **Background Scroll** | `BgParallax`, `BgZoom`, `BgPan`, `BgFade`, `BgRotate`, `BgSkew`, `BgCloseUp`, `BgFadeBack`, `BgFake3D`, `BgPullBack`, `BgReveal`, `ImageParallax`                                                                                                                                            |
 
 Each named effect type has its own set of parameters (direction, speed, intensity, etc.) that can be driven by controls.
 
-> **Note:** `CustomMouse` also exists in `@wix/motion-presets` but is excluded from experience configs because its behavior is driven by runtime `customEffect` functions, which are not serializable. `DVD` is defined in the type system but is not exported from the published package bundle.
+> **Scroll preset `range`:** Any `*Scroll` preset used with `viewProgress` MUST include a `range` option in the `namedEffect`: `'in'` (ends at idle state), `'out'` (starts from idle state), or `'continuous'` (passes through idle). Prefer `'continuous'` when unsure.
+
+> **Note:** `CustomMouse` also exists in `@wix/motion-presets` but is excluded from experience configs because its behavior is driven by runtime `customEffect` functions, which are not serializable.
 
 ---
 
@@ -725,15 +857,17 @@ This section defines the rules that LLMs must follow when generating experiences
 
 ### Effect Selection Guidelines
 
-| Intent                   | Recommended Approach                                              |
-| ------------------------ | ----------------------------------------------------------------- |
-| Simple opacity entrance  | `namedEffect: { type: 'FadeIn' }`                                 |
-| Directional entrance     | `namedEffect: { type: 'SlideIn', direction: '...' }` or `GlideIn` |
-| Scroll-driven parallax   | `namedEffect: { type: 'ParallaxScroll', parallaxFactor: ... }`    |
-| Hover micro-interaction  | `keyframeEffect` with `transform: scale(...)` or named `Pulse`    |
-| Background scroll effect | `namedEffect: { type: 'BgParallax', speed: ... }`                 |
-| Custom keyframe motion   | `keyframeEffect: { name: '...', keyframes: [...] }`               |
-| Pointer-tracking         | `namedEffect: { type: 'TrackMouse', distance: ... }`              |
+| Intent                   | Recommended Approach                                                                           |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
+| Simple opacity entrance  | `namedEffect: { type: 'FadeIn' }` with `triggerType: 'once'`                                   |
+| Directional entrance     | `namedEffect: { type: 'SlideIn', direction: '...' }` or `GlideIn` with `triggerType: 'once'`   |
+| Scroll-driven parallax   | `namedEffect: { type: 'ParallaxScroll', range: 'continuous', ... }`                            |
+| Hover micro-interaction  | `keyframeEffect` with `transform: scale(...)`, `fill: 'both'`, `triggerType: 'alternate'`      |
+| Hover style toggle       | `transition` or `transitionProperties` with `stateAction: 'toggle'`                            |
+| Background scroll effect | `namedEffect: { type: 'BgParallax', range: 'continuous', speed: ... }`                         |
+| Custom keyframe motion   | `keyframeEffect: { name: '...', keyframes: [...] }`                                            |
+| 2D pointer-tracking      | `namedEffect: { type: 'TrackMouse', ... }` (preferred over `keyframeEffect` for 2D)            |
+| 1D pointer-tracking      | `keyframeEffect` with `params.axis: 'x' | 'y'` on the `pointerMove` interaction                |
 
 Prefer `namedEffect` over `keyframeEffect` when a suitable preset exists. Named effects are more concise, better tested, and expose semantically meaningful parameters.
 
@@ -801,14 +935,15 @@ A card that fades in when scrolled into view. Demonstrates the minimal element-t
         "namedEffect": { "type": "FadeIn" },
         "duration": 800,
         "easing": "ease-out",
-        "fill": "backwards"
+        "fill": "backwards",
+        "triggerType": "once"
       }
     },
     "interactions": [
       {
         "key": "card",
         "trigger": "viewEnter",
-        "params": { "type": "once", "threshold": 0.3 },
+        "params": { "threshold": 0.3 },
         "effects": [{ "effectId": "card-entrance" }]
       }
     ]
@@ -998,7 +1133,12 @@ A section that sticks to the viewport while content layers reveal progressively 
   "interact": {
     "effects": {
       "bg-zoom": {
-        "namedEffect": { "type": "GrowScroll", "scale": 1.2, "direction": "center" },
+        "namedEffect": {
+          "type": "GrowScroll",
+          "scale": 1.2,
+          "direction": "center",
+          "range": "continuous"
+        },
         "fill": "both"
       },
       "headline-reveal": {
@@ -1482,28 +1622,31 @@ A full-width hero with a parallax background image, staggered text entrance, and
   "interact": {
     "effects": {
       "bg-parallax": {
-        "namedEffect": { "type": "ImageParallax", "speed": 1.5 },
+        "namedEffect": { "type": "ImageParallax", "speed": 1.5, "range": "continuous" },
         "fill": "both"
       },
       "heading-entrance": {
         "namedEffect": { "type": "GlideIn", "direction": "bottom" },
         "duration": 900,
         "easing": "ease-out",
-        "fill": "backwards"
+        "fill": "backwards",
+        "triggerType": "once"
       },
       "subtitle-entrance": {
         "namedEffect": { "type": "FadeIn" },
         "duration": 800,
         "easing": "ease-out",
         "fill": "backwards",
-        "delay": 200
+        "delay": 200,
+        "triggerType": "once"
       },
       "cta-entrance": {
         "namedEffect": { "type": "GlideIn", "direction": "bottom" },
         "duration": 700,
         "easing": "ease-out",
         "fill": "backwards",
-        "delay": 400
+        "delay": 400,
+        "triggerType": "once"
       },
       "cta-hover": {
         "keyframeEffect": {
@@ -1515,7 +1658,9 @@ A full-width hero with a parallax background image, staggered text entrance, and
           ]
         },
         "duration": 300,
-        "easing": "ease-in-out"
+        "easing": "ease-in-out",
+        "fill": "both",
+        "triggerType": "repeat"
       }
     },
     "conditions": {
@@ -1534,21 +1679,21 @@ A full-width hero with a parallax background image, staggered text entrance, and
       {
         "key": "hero-heading",
         "trigger": "viewEnter",
-        "params": { "type": "once", "threshold": 0.2 },
+        "params": { "threshold": 0.2 },
         "conditions": ["motion-ok"],
         "effects": [{ "effectId": "heading-entrance" }]
       },
       {
         "key": "hero-subtitle",
         "trigger": "viewEnter",
-        "params": { "type": "once", "threshold": 0.2 },
+        "params": { "threshold": 0.2 },
         "conditions": ["motion-ok"],
         "effects": [{ "effectId": "subtitle-entrance" }]
       },
       {
         "key": "hero-cta",
         "trigger": "viewEnter",
-        "params": { "type": "once", "threshold": 0.2 },
+        "params": { "threshold": 0.2 },
         "conditions": ["motion-ok"],
         "effects": [{ "effectId": "cta-entrance" }]
       },
@@ -1713,7 +1858,8 @@ A product card with pointer-tracking 3D tilt, scroll-driven entrance, and hover 
         "namedEffect": { "type": "GlideIn", "direction": "bottom" },
         "duration": 800,
         "easing": "ease-out",
-        "fill": "backwards"
+        "fill": "backwards",
+        "triggerType": "once"
       },
       "card-tilt": {
         "namedEffect": { "type": "Tilt3DMouse", "angle": 8, "perspective": 800 },
@@ -1725,7 +1871,9 @@ A product card with pointer-tracking 3D tilt, scroll-driven entrance, and hover 
           "keyframes": [{ "transform": "scale(1)" }, { "transform": "scale(1.08)" }]
         },
         "duration": 400,
-        "easing": "ease-out"
+        "easing": "ease-out",
+        "fill": "both",
+        "triggerType": "alternate"
       }
     },
     "conditions": {
@@ -1738,7 +1886,7 @@ A product card with pointer-tracking 3D tilt, scroll-driven entrance, and hover 
       {
         "key": "product-card",
         "trigger": "viewEnter",
-        "params": { "type": "once", "threshold": 0.3 },
+        "params": { "threshold": 0.3 },
         "effects": [{ "effectId": "card-entrance" }]
       },
       {
@@ -1850,28 +1998,35 @@ An experience must pass the following checks before it is considered valid:
 
 ### Structural Validation
 
-| Rule                     | Check                                                                      |
-| ------------------------ | -------------------------------------------------------------------------- |
-| Schema                   | `$schema` is `'interact-experience/1.0'`.                                  |
-| Required fields          | `id`, `name`, `elements`, `interact`, `controls` are present.              |
-| Unique element keys      | No duplicate keys in the `elements` map.                                   |
-| Selectors present        | Every `ElementEntry` has a non-empty `selector`.                           |
-| No `customEffect`        | No effect uses the `customEffect` property.                                |
-| No function offsetEasing | No sequence uses a function for `offsetEasing` (only string easing names). |
+| Rule                     | Check                                                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Schema                   | `$schema` is `'interact-experience/1.0'`.                                                                                                |
+| Required fields          | `id`, `name`, `elements`, `interact`, `controls` are present; `interact.effects` and `interact.interactions` are present.                |
+| Unique element keys      | No duplicate keys in the `elements` map.                                                                                                 |
+| Selectors present        | Every `ElementEntry` has a non-empty `selector`.                                                                                         |
+| No `customEffect`        | No effect uses the `customEffect` property.                                                                                              |
+| Single effect shape      | Each effect in `interact.effects` (or inline) declares exactly one of `namedEffect`, `keyframeEffect`, `transition`, `transitionProperties`. |
+| No function offsetEasing | No sequence uses a function for `offsetEasing` (only string easing names).                                                               |
+| Valid `triggerType`      | `triggerType` is one of `'once'` / `'repeat'` / `'alternate'` / `'state'` and appears only on `TimeEffect` or on a sequence.            |
+| Valid `stateAction`      | `stateAction` is one of `'toggle'` / `'add'` / `'remove'` / `'clear'` and appears only on `StateEffect`.                                 |
+| Scroll preset `range`    | Every `*Scroll` `namedEffect` used with `viewProgress` includes a `range` option of `'in'` / `'out'` / `'continuous'`.                   |
+| Trigger params shape     | `params` matches the declared `trigger`: `ViewEnterParams` for `viewEnter`/`pageVisible`, `PointerMoveParams` for `pointerMove`, `AnimationEndParams` for `animationEnd`, absent for `hover`/`click`/`interest`/`activate`/`viewProgress`. |
+| No `type` in `params`    | `params.type` is NOT used for viewEnter/pageVisible — playback behavior belongs on each effect as `triggerType`.                         |
 
 ### Referential Integrity
 
-| Rule              | Check                                                                                                                                                                     |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Interaction keys  | Every `key` in an interaction exists in the `elements` map.                                                                                                               |
-| Effect IDs        | Every `effectId` referenced in an interaction or sequence exists in `interact.effects`.                                                                                   |
-| Sequence IDs      | Every `sequenceId` referenced in an interaction exists in `interact.sequences`.                                                                                           |
-| Conditions        | Every condition name referenced (in interactions, effects, or sequences) exists in `interact.conditions`.                                                                 |
-| Effects or seqs   | Every interaction has at least one of `effects` or `sequences`.                                                                                                           |
-| Control targets   | Every `targetId` in a control binding resolves to an existing target (element key, effect key, style selector, or interaction id). Does not apply to `variable` bindings. |
-| Style selectors   | Every `targetId` with `target: 'style'` matches a `selector` in the `styles` array.                                                                                       |
-| Variable names    | Every `targetId` with `target: 'variable'` is a valid CSS custom property name (starts with `--`).                                                                        |
-| Property required | `property` is required for `effect`, `style`, `element`, and `interaction` bindings.                                                                                      |
+| Rule              | Check                                                                                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Interaction keys  | Every `key` in an interaction exists in the `elements` map. Every `Effect.key` override likewise exists in `elements`.                                                           |
+| Effect IDs        | Every `effectId` referenced in an interaction or sequence exists in `interact.effects`.                                                                                          |
+| Sequence IDs      | Every `sequenceId` referenced in an interaction exists in `interact.sequences`.                                                                                                  |
+| `animationEnd`    | Every `trigger: 'animationEnd'` interaction has `params.effectId` referencing an existing entry in `interact.effects`.                                                           |
+| Conditions        | Every condition name referenced (in interactions, effects, or sequences) exists in `interact.conditions`.                                                                        |
+| Effects or seqs   | Every interaction has at least one of `effects` or `sequences`.                                                                                                                  |
+| Control targets   | Every `targetId` in a control binding resolves to an existing target (element key, effect key, style selector, or interaction `id`). Does not apply to `variable` bindings.      |
+| Style selectors   | Every `targetId` with `target: 'style'` matches a `selector` in the `styles` array.                                                                                              |
+| Variable names    | Every `targetId` with `target: 'variable'` is a valid CSS custom property name (starts with `--`).                                                                               |
+| Property required | `property` is required for `effect`, `style`, `element`, and `interaction` bindings.                                                                                             |
 
 ### Control Validation
 
