@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.2.1] - 2026-04-21
+
+#### Added
+
+- Console warnings when `Interact.getInstance()` or `Interact.getController()` cannot resolve a key (#190)
+
+#### Changed
+
+- React integration rules: document wrapping `Interact.create()` in `useEffect` with cleanup calling `destroy()` (#190)
+
 ### [2.2.0] - 2026-04-15
 
 #### Changed
