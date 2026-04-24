@@ -283,9 +283,7 @@ export class PgTransitionEffectEditor extends BaseComponent {
 
     shadow.getElementById('state-action')?.addEventListener('change', (ev) => {
       const val = (ev.target as HTMLSelectElement).value;
-      this.store.dispatch(
-        updateEffect(effectId, { ...effect, stateAction: val } as Effect),
-      );
+      this.store.dispatch(updateEffect(effectId, { ...effect, stateAction: val } as Effect));
     });
 
     shadow.getElementById('duration')?.addEventListener('change', (ev) => {

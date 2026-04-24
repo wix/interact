@@ -327,8 +327,9 @@ export class PgEffectEditor extends BaseComponent {
 
     let editorHtml = '';
     if (selectedEffect && effectType) {
+      const isSequenceCtx = ctx?.source === 'sequence';
       const tabsHtml =
-        allowed.length > 1
+        allowed.length > 1 && !isSequenceCtx
           ? `<div class="tabs">
             ${allowed
               .map(
@@ -533,7 +534,6 @@ export class PgEffectEditor extends BaseComponent {
           if (currentEffect.conditions) base.conditions = currentEffect.conditions;
           this.store.dispatch(updateEffect(selectedId, { ...newEffect, ...base } as Effect));
         }
-
       });
     });
   }

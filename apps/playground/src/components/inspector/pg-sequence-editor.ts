@@ -296,7 +296,8 @@ export class PgSequenceEditor extends BaseComponent {
     const delay = sequence.delay ?? 0;
     const offset = sequence.offset ?? 0;
     const offsetEasing = (sequence.offsetEasing as string) ?? '';
-    const triggerType = ((sequence as Record<string, unknown>).triggerType as string) ?? 'alternate';
+    const triggerType =
+      ((sequence as Record<string, unknown>).triggerType as string) ?? 'alternate';
 
     const ctx = state.selectedEffectContext;
     const selectedEffectId = state.selectedEffectId;

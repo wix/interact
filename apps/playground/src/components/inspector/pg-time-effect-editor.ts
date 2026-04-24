@@ -152,8 +152,21 @@ export class PgTimeEffectEditor extends BaseComponent {
     const reversed = (e.reversed as boolean) ?? false;
     const delay = (e.delay as number) ?? 0;
     const triggerType = (e.triggerType as string) ?? 'alternate';
+    const isSequenceCtx = state.selectedEffectContext?.source === 'sequence';
 
     const source = detectSource(effect);
+
+    const triggerBehaviorHtml = isSequenceCtx
+      ? ''
+      : `<div class="field">
+        <label>Trigger Behavior</label>
+        <select class="pg-select" id="trigger-type">
+          <option value="alternate" ${triggerType === 'alternate' ? 'selected' : ''}>Alternate</option>
+          <option value="once" ${triggerType === 'once' ? 'selected' : ''}>Once</option>
+          <option value="repeat" ${triggerType === 'repeat' ? 'selected' : ''}>Repeat</option>
+          <option value="state" ${triggerType === 'state' ? 'selected' : ''}>State</option>
+        </select>
+      </div>`;
 
     this.shadowRoot!.innerHTML = `
       <div class="section-title">Animation Source</div>
@@ -169,15 +182,7 @@ export class PgTimeEffectEditor extends BaseComponent {
       <div class="divider"></div>
       <div class="section-title">Timing</div>
 
-      <div class="field">
-        <label>Trigger Behavior</label>
-        <select class="pg-select" id="trigger-type">
-          <option value="alternate" ${triggerType === 'alternate' ? 'selected' : ''}>Alternate</option>
-          <option value="once" ${triggerType === 'once' ? 'selected' : ''}>Once</option>
-          <option value="repeat" ${triggerType === 'repeat' ? 'selected' : ''}>Repeat</option>
-          <option value="state" ${triggerType === 'state' ? 'selected' : ''}>State</option>
-        </select>
-      </div>
+      ${triggerBehaviorHtml}
 
       <div class="field-row">
         <div class="field">

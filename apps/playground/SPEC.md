@@ -224,16 +224,16 @@ Shown in the inspector when an interaction is selected. Provides:
 
 ### Supported Trigger Types
 
-| Trigger        | Description                       | Configurable Params                                                                                           |
-| -------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Trigger        | Description                       | Configurable Params                                                                   |
+| -------------- | --------------------------------- | ------------------------------------------------------------------------------------- |
 | `hover`        | Mouse enter/leave                 | No trigger params — behavior is set per-effect (`triggerType` or `stateAction`)       |
 | `click`        | Mouse click                       | Same as hover                                                                         |
 | `activate`     | Focus + click combined            | Same as hover                                                                         |
 | `interest`     | Hover + focus combined            | Same as hover                                                                         |
 | `viewEnter`    | Element enters the viewport       | `threshold` (0–1 slider), `inset`                                                     |
-| `viewProgress` | Scroll progress through viewport  | No trigger params (scroll preview controls shown instead)                                                     |
-| `pointerMove`  | Mouse movement tracking           | `hitArea` (root/self), `axis` (x/y)                                                                           |
-| `animationEnd` | After another animation completes | `effectId` — which effect to wait for (`<pg-trigger-editor>` “After Effect” dropdown)                         |
+| `viewProgress` | Scroll progress through viewport  | No trigger params (scroll preview controls shown instead)                             |
+| `pointerMove`  | Mouse movement tracking           | `hitArea` (root/self), `axis` (x/y)                                                   |
+| `animationEnd` | After another animation completes | `effectId` — which effect to wait for (`<pg-trigger-editor>` “After Effect” dropdown) |
 
 The playground does not expose the `pageVisible` trigger. When a config is applied via import or the JSON panel, any interaction using `pageVisible` is normalized to `viewEnter` (params cleared).
 
@@ -256,15 +256,15 @@ Manages the effects for the selected interaction. Provides:
 
 1. **Effect list** — shows all effects on the interaction with add/remove controls
 2. **Target Element** dropdown — selects which element gets animated. Sets the inline ref's `key`/`listContainer`/`listItemSelector` on `interaction.effects[i]`. Defaults to "Same as source" (cascades to `interaction.key`).
-3. **Effect type tabs** — Time, Scrub, or Transition/State (filtered by trigger compatibility)
+3. **Effect type tabs** — Time, Scrub, or Transition/State (filtered by trigger compatibility). Hidden when editing an effect inside a sequence, since only Time effects are valid in sequences.
 
 ### Effect Type Constraints by Trigger
 
-| Trigger                                     | Allowed Effect Types        |
-| ------------------------------------------- | --------------------------- |
-| `hover` / `click` / `activate` / `interest` | Time, Transition (State)   |
-| `viewEnter` / `animationEnd`                | Time only                   |
-| `viewProgress` / `pointerMove`              | Scrub only                  |
+| Trigger                                     | Allowed Effect Types     |
+| ------------------------------------------- | ------------------------ |
+| `hover` / `click` / `activate` / `interest` | Time, Transition (State) |
+| `viewEnter` / `animationEnd`                | Time only                |
+| `viewProgress` / `pointerMove`              | Scrub only               |
 
 When the trigger changes, incompatible effects are auto-converted to the trigger's default type.
 
@@ -285,7 +285,7 @@ For event-triggered animations (hover, click, viewEnter, etc.):
 - **Animation Source** toggle: `Named Effect` or `Keyframes` (radio buttons)
   - Named Effect → shows `<pg-named-effect-picker>`
   - Keyframes → shows `<pg-keyframe-editor>`
-- **Trigger Behavior** (`triggerType`) dropdown — controls playback behavior per-effect:
+- **Trigger Behavior** (`triggerType`) dropdown — controls playback behavior per-effect. Hidden when editing an effect inside a sequence, since trigger behavior is defined once on the sequence level (`SequenceConfig.triggerType`):
   - `alternate` — plays forward on first trigger, reverses on next (default)
   - `once` — plays once and never again
   - `repeat` — restarts from the beginning each time
@@ -545,8 +545,17 @@ The timeline rebuilds tracks and recreates animations in response to:
 
 A togglable bottom panel showing the live `InteractConfig` as formatted JSON:
 
-- **Read mode** — `JSON.stringify(config, null, 2)` displayed in a `<textarea>`
-- **Edit mode** — users can edit the JSON directly. On blur: parse → validate → `dispatch(setConfig())`. Reverts on invalid JSON.
+- **Editor surface** — `JSON.stringify(config, null, 2)` rendered in a plain-text `contenteditable` editor (not a `<textarea>`) so the text remains editable while supporting syntax highlighting.
+- **Syntax highlighting** — uses the CSS Custom Highlight API to color core JSON tokens:
+  - object keys
+  - string values
+  - numbers
+  - booleans / `null`
+  - punctuation (`{ } [ ] : ,`)
+- **Editing behavior** — highlighting refreshes on each input without mutating the editor DOM or interrupting caret/selection behavior.
+- **Apply behavior** — on blur: parse → validate → `dispatch(setConfig())`. If parsing fails, the editor reverts to the last valid formatted config.
+- **State sync** — when the editor is not focused, it mirrors the current store config; while focused, it preserves the user's draft text.
+- **Fallback** — if the browser does not support `CSS.highlights` / `Highlight`, the editor remains fully editable but renders without syntax colors.
 - Shares the bottom panel area with the Timeline panel (only one visible at a time)
 
 ---
@@ -732,7 +741,7 @@ apps/playground/
     │   │   ├── pg-sequence-editor.ts   # Sequence orchestration
     │   │   └── pg-condition-editor.ts  # Media/container/selector conditions
     │   ├── json-panel/
-    │   │   └── pg-json-panel.ts        # Bottom panel: live JSON view/edit
+    │   │   └── pg-json-panel.ts        # Bottom panel: editable JSON view with syntax highlighting
     │   ├── timeline/
     │   │   └── pg-timeline-panel.ts    # Bottom panel: timeline tracks, transport, playhead
     │   └── shared/
