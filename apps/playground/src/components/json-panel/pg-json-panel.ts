@@ -1,11 +1,7 @@
 import { BaseComponent } from '../base/BaseComponent';
 import type { PlaygroundState, Action } from '../../types';
 import { setConfig } from '../../store/actions';
-import {
-  JSON_HIGHLIGHT_NAMES,
-  tokenizeJson,
-  type JsonHighlightKind,
-} from './json-highlighter';
+import { JSON_HIGHLIGHT_NAMES, tokenizeJson, type JsonHighlightKind } from './json-highlighter';
 
 interface TextSegment {
   node: Text;
