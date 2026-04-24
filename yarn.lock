@@ -1341,7 +1341,7 @@ __metadata:
     "@types/react": "npm:^18.3.2"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    "@wix/interact": "npm:^2.2.0"
+    "@wix/interact": "npm:^2.2.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     typescript: "npm:^5.9.3"
@@ -1356,7 +1356,7 @@ __metadata:
     "@types/react": "npm:^18.3.2"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    "@wix/interact": "npm:^2.2.0"
+    "@wix/interact": "npm:^2.2.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-markdown: "npm:^9.0.1"
@@ -1379,7 +1379,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/interact@npm:^2.1.4, @wix/interact@npm:^2.2.0, @wix/interact@workspace:packages/interact":
+"@wix/interact@npm:^2.2.1, @wix/interact@workspace:packages/interact":
   version: 0.0.0-use.local
   resolution: "@wix/interact@workspace:packages/interact"
   dependencies:
@@ -2457,7 +2457,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-hooks@npm:^7.0.1":
+"eslint-plugin-react-hooks@npm:7.0.1":
   version: 7.0.1
   resolution: "eslint-plugin-react-hooks@npm:7.0.1"
   dependencies:
@@ -3182,7 +3182,7 @@ __metadata:
     eslint-config-prettier: "npm:^10.1.1"
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
     eslint-plugin-react: "npm:^7.37.5"
-    eslint-plugin-react-hooks: "npm:^7.0.1"
+    eslint-plugin-react-hooks: "npm:7.0.1"
     prettier: "npm:3.7.4"
     typescript: "npm:^5.9.3"
   languageName: unknown
