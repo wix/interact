@@ -1,8 +1,9 @@
 import { BaseComponent } from '../base/BaseComponent';
-import type { PlaygroundState } from '../../types';
+import type { PlaygroundState, Action } from '../../types';
 import type { Effect, RangeOffset } from '@wix/interact';
 import type { LengthPercentage } from '@wix/motion';
 import { updateEffect } from '../../store/actions';
+import { hasFocusedEditableInside } from '../../utils/dom';
 
 type NamedEffectObj = { type: string } & Record<string, unknown>;
 type KeyframeEffectObj = { name: string; keyframes: Record<string, unknown>[] };
@@ -66,6 +67,19 @@ function detectSource(effect: Effect): AnimationSource {
 }
 
 export class PgScrubEffectEditor extends BaseComponent {
+  private _currentEffectId: string | null = null;
+
+  protected onStateChange(state: PlaygroundState, action: Action): void {
+    if (
+      action.type === 'UPDATE_EFFECT' &&
+      action.payload.id === this._currentEffectId &&
+      hasFocusedEditableInside(this.shadowRoot)
+    ) {
+      return;
+    }
+    this.render(state);
+  }
+
   protected get componentStyles(): string {
     return /* css */ `
       :host {
@@ -192,15 +206,19 @@ export class PgScrubEffectEditor extends BaseComponent {
   protected render(state: PlaygroundState): void {
     const effectId = state.selectedEffectId;
     if (!effectId) {
+      this._currentEffectId = null;
       this.shadowRoot!.innerHTML = '';
       return;
     }
 
     const effect = state.config.effects[effectId];
     if (!effect) {
+      this._currentEffectId = null;
       this.shadowRoot!.innerHTML = '';
       return;
     }
+
+    this._currentEffectId = effectId;
 
     const e = effect as Record<string, unknown>;
     const easing = (e.easing as string) ?? '';

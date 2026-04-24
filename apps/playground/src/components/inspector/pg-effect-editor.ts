@@ -1,5 +1,5 @@
 import { BaseComponent } from '../base/BaseComponent';
-import type { PlaygroundState } from '../../types';
+import type { PlaygroundState, Action } from '../../types';
 import type { Effect, TriggerType, SequenceConfig } from '@wix/interact';
 import {
   addEffect,
@@ -10,6 +10,7 @@ import {
   updateSequence,
 } from '../../store/actions';
 import { generateId } from '../../utils/id';
+import { hasFocusedEditableInside } from '../../utils/dom';
 import { getComponent } from '../../library';
 import type { ComponentKey } from '../../library/types';
 
@@ -83,6 +84,19 @@ function createDefaultEffect(type: EffectType): Effect {
 }
 
 export class PgEffectEditor extends BaseComponent {
+  private _currentEffectId: string | null = null;
+
+  protected onStateChange(state: PlaygroundState, action: Action): void {
+    if (
+      action.type === 'UPDATE_EFFECT' &&
+      action.payload.id === this._currentEffectId &&
+      hasFocusedEditableInside(this.shadowRoot)
+    ) {
+      return;
+    }
+    this.render(state);
+  }
+
   protected get componentStyles(): string {
     return /* css */ `
       :host {
@@ -277,15 +291,19 @@ export class PgEffectEditor extends BaseComponent {
   protected render(state: PlaygroundState): void {
     const idx = state.selectedInteractionIndex;
     if (idx == null) {
+      this._currentEffectId = null;
       this.shadowRoot!.innerHTML = '';
       return;
     }
 
     const interaction = state.config.interactions[idx];
     if (!interaction) {
+      this._currentEffectId = null;
       this.shadowRoot!.innerHTML = '';
       return;
     }
+
+    this._currentEffectId = state.selectedEffectId;
 
     const trigger = interaction.trigger ?? 'hover';
     const allowed = getAllowedEffectTypes(trigger);

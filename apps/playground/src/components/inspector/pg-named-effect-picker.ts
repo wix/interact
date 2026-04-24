@@ -1236,6 +1236,12 @@ export class PgNamedEffectPicker extends BaseComponent {
   }
 
   setPreset(name: string, options: Record<string, unknown> = {}): void {
+    if (
+      this._currentPreset === name &&
+      JSON.stringify(this._currentOptions) === JSON.stringify(options)
+    ) {
+      return;
+    }
     this._currentPreset = name;
     this._currentOptions = { ...options };
     this._renderContent();
