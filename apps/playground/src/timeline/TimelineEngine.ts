@@ -362,8 +362,12 @@ export class TimelineEngine {
 
   get currentTime(): number {
     if (this._animations.length === 0) return 0;
-    const first = this._animations[0];
-    return typeof first.currentTime === 'number' ? first.currentTime : 0;
+    let max = 0;
+    for (const anim of this._animations) {
+      const ct = typeof anim.currentTime === 'number' ? anim.currentTime : 0;
+      if (ct > max) max = ct;
+    }
+    return max;
   }
 
   get totalDuration(): number {
