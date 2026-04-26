@@ -147,9 +147,9 @@ export function buildListsRule(
 ): CSSRuleData {
   const { key, childSelector, properties } = lists;
 
-  const declarations = Object.entries(properties).map(([name, { fallback, customProps }]) => ({
+  const declarations = Object.entries(properties).map(([name, { fallback, varNames }]) => ({
     name,
-    value: customProps.map((n) => `var(${n}, ${fallback})`).join(', '),
+    value: varNames.map((n) => `var(${n}, ${fallback})`).join(', '),
   }));
 
   const rule: CSSRuleData = { key, childSelector, declarations };

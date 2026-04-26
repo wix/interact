@@ -492,7 +492,7 @@ export function generate(config: InteractConfig): string {
   const { cssRules, keyframes } = _generate(config);
 
   const css = [
-    ...Object.entries(keyframes).map(([name, keyframes]) => keyframesToCSS(name, keyframes)),
+    ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),
     ...cssRules.map(CSSRuleToString),
   ];
 
