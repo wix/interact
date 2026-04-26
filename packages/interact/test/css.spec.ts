@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { generate, _generate, DEFAULT_INITIAL } from '../src/core/css';
-import type { InteractConfig, RuleObj } from '../src/types';
+import type { InteractConfig, CSSRuleData } from '../src/types';
 
 describe('css.generate', () => {
   describe('filtering logic', () => {
@@ -402,7 +402,7 @@ const isCompositionProp = (name: string) => /^--animation-composition-/.test(nam
 const isTransitionProp = (name: string) => /^--transition-/.test(name);
 
 function findDecl(
-  declarations: RuleObj['declarations'],
+  declarations: CSSRuleData['declarations'],
   predicate: (d: { name: string; value: string | number }) => boolean,
 ) {
   return declarations.find(predicate);
@@ -410,7 +410,7 @@ function findDecl(
 
 describe('css._generate', () => {
   describe('effectToCSS - namedEffect / keyframeEffect branch', () => {
-    it('should set animation custom props and turn off transition for keyframeEffect', () => {
+    it('should set animation custom properties and turn off transition for keyframeEffect', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -638,7 +638,7 @@ describe('css._generate', () => {
       expect(statePropDecl!.value).toBe('red');
     });
 
-    it('should produce var() references that link to the state custom props', () => {
+    it('should produce var() references that link to the state custom properties', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -679,7 +679,7 @@ describe('css._generate', () => {
   });
 
   describe('effectToCSS - no effect property', () => {
-    it('should set all custom props to off values when effect has no animation or transition', () => {
+    it('should set all custom properties to off values when effect has no animation or transition', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -721,7 +721,7 @@ describe('css._generate', () => {
   });
 
   describe('statePropsToInvalidate - cross-effect cascade', () => {
-    it('should invalidate transition state props in subsequent effects within the same interaction', () => {
+    it('should invalidate transition state properties in subsequent effects within the same interaction', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -1088,7 +1088,7 @@ describe('css._generate', () => {
   });
 
   describe('cross-interaction coordinated lists', () => {
-    it('should produce coordinated list with two custom props when two interactions target the same element', () => {
+    it('should produce coordinated list with two custom properties when two interactions target the same element', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -1193,7 +1193,7 @@ describe('css._generate', () => {
       const { cssRules, keyframes } = _generate(config);
 
       expect(cssRules).toEqual([]);
-      expect(keyframes).toEqual([]);
+      expect(keyframes).toEqual(new Map<string, Keyframe[]>());
     });
 
     it('should produce no rules for interaction with empty effects and sequences', () => {

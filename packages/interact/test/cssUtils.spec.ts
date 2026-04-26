@@ -7,7 +7,7 @@ import {
   CSSRuleToString,
   buildListsRule,
 } from '../src/core/cssUtils';
-import type { CoordLists, ListCustomProps, RuleObj } from '../types';
+import type { CSSCoordiantedLists, ListCustomProps, CSSRuleData } from '../types';
 
 describe('keyframePropertyToCSS', () => {
   it('should convert cssFloat to float', () => {
@@ -183,7 +183,7 @@ describe('keyframesToCSS', () => {
 
 describe('CSSRuleToString', () => {
   it('should generate a simple rule with key and declarations', () => {
-    const rule: RuleObj = {
+    const rule: CSSRuleData = {
       key: 'my-el',
       declarations: [{ name: 'opacity', value: '0' }],
     };
@@ -193,12 +193,12 @@ describe('CSSRuleToString', () => {
   });
 
   it('should return empty string when declarations are empty', () => {
-    const rule: RuleObj = { key: 'my-el', declarations: [] };
+    const rule: CSSRuleData = { key: 'my-el', declarations: [] };
     expect(CSSRuleToString(rule)).toBe('');
   });
 
   it('should append childSelector', () => {
-    const rule: RuleObj = {
+    const rule: CSSRuleData = {
       key: 'my-el',
       childSelector: '.inner',
       declarations: [{ name: 'color', value: 'red' }],
@@ -208,7 +208,7 @@ describe('CSSRuleToString', () => {
   });
 
   it('should add :where(:not([data-interact-enter])) when addInitialSelector is true', () => {
-    const rule: RuleObj = {
+    const rule: CSSRuleData = {
       key: 'my-el',
       addInitialSelector: true,
       declarations: [{ name: 'opacity', value: '0' }],
@@ -219,7 +219,7 @@ describe('CSSRuleToString', () => {
   });
 
   it('should add state selectors when states are provided', () => {
-    const rule: RuleObj = {
+    const rule: CSSRuleData = {
       key: 'my-el',
       states: ['active'],
       declarations: [{ name: 'opacity', value: '1' }],
@@ -230,7 +230,7 @@ describe('CSSRuleToString', () => {
   });
 
   it('should apply selectorCondition', () => {
-    const rule: RuleObj = {
+    const rule: CSSRuleData = {
       key: 'my-el',
       selectorCondition: ':where(.visible)',
       declarations: [{ name: 'opacity', value: '1' }],
@@ -240,7 +240,7 @@ describe('CSSRuleToString', () => {
   });
 
   it('should wrap in @media when media is provided', () => {
-    const rule: RuleObj = {
+    const rule: CSSRuleData = {
       key: 'my-el',
       media: '(min-width: 768px)',
       declarations: [{ name: 'display', value: 'block' }],
@@ -251,7 +251,7 @@ describe('CSSRuleToString', () => {
   });
 
   it('should combine all options together', () => {
-    const rule: RuleObj = {
+    const rule: CSSRuleData = {
       key: 'my-el',
       childSelector: '.child',
       addInitialSelector: true,
@@ -269,20 +269,20 @@ describe('CSSRuleToString', () => {
 });
 
 describe('buildListsRule', () => {
-  const baseLists: CoordLists = {
+  const baseLists: CSSCoordiantedLists = {
     key: 'my-el',
-    props: {
+    properties: {
       animation: {
         fallback: 'none',
-        customProps: ['--anim-1', '--anim-2'],
+        varNames: ['--anim-1', '--anim-2'],
       },
       transition: {
         fallback: '_',
-        customProps: ['--trans-1'],
+        varNames: ['--trans-1'],
       },
       'animation-composition': {
         fallback: 'replace',
-        customProps: ['--comp-1'],
+        varNames: ['--comp-1'],
       },
     },
   };
@@ -303,7 +303,7 @@ describe('buildListsRule', () => {
   });
 
   it('should include childSelector when present', () => {
-    const lists: CoordLists = { ...baseLists, childSelector: '.target' };
+    const lists: CSSCoordiantedLists = { ...baseLists, childSelector: '.target' };
     const rule = buildListsRule(lists);
     expect(rule.childSelector).toBe('.target');
   });

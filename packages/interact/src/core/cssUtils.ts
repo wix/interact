@@ -1,4 +1,10 @@
-import type { Condition, ListPropName, ListCustomProps, CoordLists, RuleObj } from '../types';
+import type {
+  Condition,
+  ListPropertyName,
+  ListCustomProps,
+  CSSCoordiantedLists,
+  CSSRuleData,
+} from '../types';
 import {
   roundNumber,
   getFullPredicateByType,
@@ -67,14 +73,14 @@ export function interpolateKeyframesOffsets(keyframes: Keyframe[]): Keyframe[] {
 }
 
 export function keyframeObjectToKeyframeCSS(keyframeObj: Keyframe, percentage: number): string {
-  const props = Object.entries(keyframeObj)
+  const properties = Object.entries(keyframeObj)
     .filter(([key, value]) => key !== 'offset' && value !== undefined && value !== null)
     .map(([key, value]) => {
       const cssKey = keyframePropertyToCSS(key);
       return `${cssKey}: ${value};`;
     })
     .join('\n');
-  return `${percentage}% {\n${props}\n}`;
+  return `${percentage}% {\n${properties}\n}`;
 }
 
 export function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
@@ -95,7 +101,7 @@ export function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
   return `@keyframes ${name} {\n${keyframeBlocks}\n}`;
 }
 
-export function CSSRuleToString(rule: RuleObj): string {
+export function CSSRuleToString(rule: CSSRuleData): string {
   const { key, childSelector, declarations, media, states, selectorCondition, addInitialSelector } =
     rule;
   if (!declarations.length) {
@@ -134,24 +140,24 @@ export function CSSRuleToString(rule: RuleObj): string {
 }
 
 export function buildListsRule(
-  lists: CoordLists,
+  lists: CSSCoordiantedLists,
   customProps?: ListCustomProps,
   conditions?: string[],
   configConditions?: Record<string, Condition>,
-): RuleObj {
-  const { key, childSelector, props } = lists;
+): CSSRuleData {
+  const { key, childSelector, properties } = lists;
 
-  const declarations = Object.entries(props).map(([name, { fallback, customProps }]) => ({
+  const declarations = Object.entries(properties).map(([name, { fallback, customProps }]) => ({
     name,
     value: customProps.map((n) => `var(${n}, ${fallback})`).join(', '),
   }));
 
-  const rule: RuleObj = { key, childSelector, declarations };
+  const rule: CSSRuleData = { key, childSelector, declarations };
 
-  // option to assign into custom-props instead of directly into the actual css properties
+  // option to assign into custom-properties instead of directly into the actual css properties
   if (customProps) {
     rule.declarations.forEach((declaration) => {
-      declaration.name = customProps[declaration.name as ListPropName];
+      declaration.name = customProps[declaration.name as ListPropertyName];
     });
   }
 

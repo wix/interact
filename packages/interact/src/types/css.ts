@@ -1,18 +1,18 @@
-export type ListPropName = 'animation' | 'transition' | 'animation-composition';
+export type ListPropertyName = 'animation' | 'transition' | 'animation-composition';
 
-export type CoordLists = {
+export type CSSCoordiantedLists = {
   key: string;
   childSelector?: string;
-  props: Record<ListPropName, { fallback: string; customProps: string[] }>;
+  properties: Record<ListPropertyName, { fallback: string; varNames: string[] }>;
 };
 
 export type ListCustomProps = {
   key: string;
   childSelector?: string;
   statePropsToInvalidate: Set<string>;
-} & Record<ListPropName, string>;
+} & Record<ListPropertyName, string>;
 
-export type RuleObj = {
+export type CSSRuleData = {
   key: string;
   childSelector?: string;
   declarations: { name: string; value: string | number }[];

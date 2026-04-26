@@ -78,8 +78,6 @@ export function transitionEffectToTransitionsList(transitionEffect: StateEffect)
         );
       }
     }
-
-    transitionProperties = transition.styleProperties;
   } else {
     transitions =
       transitionProperties
