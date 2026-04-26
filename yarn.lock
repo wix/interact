@@ -993,6 +993,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/jsdom@npm:^21.1.7":
+  version: 21.1.7
+  resolution: "@types/jsdom@npm:21.1.7::__archiveUrl=https%3A%2F%2Fnpm.dev.wixpress.com%2Fapi%2Fnpm%2Fnpm-repos%2F%40types%2Fjsdom%2F-%2Fjsdom-21.1.7.tgz"
+  dependencies:
+    "@types/node": "npm:*"
+    "@types/tough-cookie": "npm:*"
+    parse5: "npm:^7.0.0"
+  checksum: 10/a5ee54aec813ac928ef783f69828213af4d81325f584e1fe7573a9ae139924c40768d1d5249237e62d51b9a34ed06bde059c86c6b0248d627457ec5e5d532dfa
+  languageName: node
+  linkType: hard
+
 "@types/json-schema@npm:^7.0.15":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
@@ -1013,6 +1024,15 @@ __metadata:
   version: 2.1.0
   resolution: "@types/ms@npm:2.1.0"
   checksum: 10/532d2ebb91937ccc4a89389715e5b47d4c66e708d15942fe6cc25add6dc37b2be058230a327dd50f43f89b8b6d5d52b74685a9e8f70516edfc9bdd6be910eff4
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:*":
+  version: 25.5.2
+  resolution: "@types/node@npm:25.5.2::__archiveUrl=https%3A%2F%2Fnpm.dev.wixpress.com%2Fapi%2Fnpm%2Fnpm-repos%2F%40types%2Fnode%2F-%2Fnode-25.5.2.tgz"
+  dependencies:
+    undici-types: "npm:~7.18.0"
+  checksum: 10/11782030f910ecf600cd537791980bd8b68496570ecd633d512d713b5b8a16ea3740fce85c82d0593305f809a7c205d7e86c07f179063fc98f014a7f9b013166
   languageName: node
   linkType: hard
 
@@ -1039,6 +1059,13 @@ __metadata:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.2.2"
   checksum: 10/6db7bb7f19957ee9f530baa7d143527f8befedad1585b064eb80777be0d84621157de75aba4f499ff429b10c5ef0c7d13e89be6bca3296ef71c80472894ff0eb
+  languageName: node
+  linkType: hard
+
+"@types/tough-cookie@npm:*":
+  version: 4.0.5
+  resolution: "@types/tough-cookie@npm:4.0.5::__archiveUrl=https%3A%2F%2Fnpm.dev.wixpress.com%2Fapi%2Fnpm%2Fnpm-repos%2F%40types%2Ftough-cookie%2F-%2Ftough-cookie-4.0.5.tgz"
+  checksum: 10/01fd82efc8202670865928629697b62fe9bf0c0dcbc5b1c115831caeb073a2c0abb871ff393d7df1ae94ea41e256cb87d2a5a91fd03cdb1b0b4384e08d4ee482
   languageName: node
   linkType: hard
 
@@ -1334,6 +1361,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@wix/interact-debug@workspace:packages/interact-debug":
+  version: 0.0.0-use.local
+  resolution: "@wix/interact-debug@workspace:packages/interact-debug"
+  dependencies:
+    "@types/jsdom": "npm:^21.1.7"
+    "@vitest/coverage-v8": "npm:^4.0.14"
+    "@wix/interact": "workspace:*"
+    "@wix/motion": "workspace:*"
+    "@wix/motion-presets": "workspace:*"
+    jsdom: "npm:^24.0.0"
+    rimraf: "npm:^6.0.1"
+    typescript: "npm:^5.9.3"
+    vite: "npm:^7.2.2"
+    vitest: "npm:^4.0.14"
+  peerDependencies:
+    "@playwright/test": ">=1.40.0"
+    "@wix/interact": ">=2.0.0"
+    "@wix/motion": ">=2.0.0"
+    "@wix/motion-presets": ">=1.0.0"
+  peerDependenciesMeta:
+    "@playwright/test":
+      optional: true
+    "@wix/motion-presets":
+      optional: true
+  bin:
+    interact-debug: ./dist/es/cli.js
+  languageName: unknown
+  linkType: soft
+
 "@wix/interact-demo@workspace:apps/demo":
   version: 0.0.0-use.local
   resolution: "@wix/interact-demo@workspace:apps/demo"
@@ -1368,7 +1424,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/interact@npm:^2.2.0, @wix/interact@workspace:packages/interact":
+"@wix/interact@npm:^2.2.0, @wix/interact@workspace:*, @wix/interact@workspace:packages/interact":
   version: 0.0.0-use.local
   resolution: "@wix/interact@workspace:packages/interact"
   dependencies:
@@ -1400,7 +1456,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/motion-presets@workspace:packages/motion-presets":
+"@wix/motion-presets@workspace:*, @wix/motion-presets@workspace:packages/motion-presets":
   version: 0.0.0-use.local
   resolution: "@wix/motion-presets@workspace:packages/motion-presets"
   dependencies:
@@ -1413,7 +1469,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/motion@npm:^2.1.4, @wix/motion@workspace:packages/motion":
+"@wix/motion@npm:^2.1.4, @wix/motion@workspace:*, @wix/motion@workspace:packages/motion":
   version: 0.0.0-use.local
   resolution: "@wix/motion@workspace:packages/motion"
   dependencies:
@@ -4724,6 +4780,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"parse5@npm:^7.0.0":
+  version: 7.3.0
+  resolution: "parse5@npm:7.3.0::__archiveUrl=https%3A%2F%2Fnpm.dev.wixpress.com%2Fapi%2Fnpm%2Fnpm-repos%2Fparse5%2F-%2Fparse5-7.3.0.tgz"
+  dependencies:
+    entities: "npm:^6.0.0"
+  checksum: 10/b0e48be20b820c655b138b86fa6fb3a790de6c891aa2aba536524f8027b4dca4fe538f11a0e5cf2f6f847d120dbb9e4822dcaeb933ff1e10850a2ef0154d1d88
+  languageName: node
+  linkType: hard
+
 "parse5@npm:^7.1.2":
   version: 7.3.0
   resolution: "parse5@npm:7.3.0"
@@ -5857,6 +5922,13 @@ __metadata:
     has-symbols: "npm:^1.1.0"
     which-boxed-primitive: "npm:^1.1.1"
   checksum: 10/fadb347020f66b2c8aeacf8b9a79826fa34cc5e5457af4eb0bbc4e79bd87fed0fa795949825df534320f7c13f199259516ad30abc55a6e7b91d8d996ca069e50
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~7.18.0":
+  version: 7.18.2
+  resolution: "undici-types@npm:7.18.2::__archiveUrl=https%3A%2F%2Fnpm.dev.wixpress.com%2Fapi%2Fnpm%2Fnpm-repos%2Fundici-types%2F-%2Fundici-types-7.18.2.tgz"
+  checksum: 10/e61a5918f624d68420c3ca9d301e9f15b61cba6e97be39fe2ce266dd6151e4afe424d679372638826cb506be33952774e0424141200111a9857e464216c009af
   languageName: node
   linkType: hard
 

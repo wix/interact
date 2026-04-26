@@ -1,0 +1,81 @@
+{
+  "name": "@wix/interact-debug",
+  "version": "0.1.0",
+  "description": "Debug suite for @wix/interact: validate, inspect, and score interaction implementations.",
+  "license": "MIT",
+  "main": "dist/cjs/index.js",
+  "module": "dist/es/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/es/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./playwright": {
+      "types": "./dist/types/playwright/index.d.ts",
+      "import": "./dist/es/playwright.js",
+      "require": "./dist/cjs/playwright.js"
+    }
+  },
+  "bin": "./dist/es/cli.js",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rimraf dist && vite build && npm run build:types",
+    "build:types": "tsc -p tsconfig.build.json",
+    "lint": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "animation",
+    "debug",
+    "interact",
+    "validation"
+  ],
+  "author": {
+    "name": "wow!Team",
+    "email": "wow-dev@wix.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wix/interact.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wix/interact/issues"
+  },
+  "homepage": "https://github.com/wix/interact#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.40.0",
+    "@wix/interact": ">=2.0.0",
+    "@wix/motion": ">=2.0.0",
+    "@wix/motion-presets": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@playwright/test": {
+      "optional": true
+    },
+    "@wix/motion-presets": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "jsdom": "^24.0.0"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.7",
+    "@vitest/coverage-v8": "^4.0.14",
+    "@wix/interact": "workspace:*",
+    "@wix/motion": "workspace:*",
+    "@wix/motion-presets": "workspace:*",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.2",
+    "vitest": "^4.0.14"
+  }
+}
