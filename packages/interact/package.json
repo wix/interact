@@ -1,6 +1,6 @@
 {
   "name": "@wix/interact",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "A powerful, declarative interaction library for creating engaging web apps.",
   "license": "MIT",
   "main": "dist/cjs/index.js",
@@ -62,8 +62,8 @@
     "kuliso": "^0.4.13"
   },
   "peerDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^18.3.1 || ^19.0.0",
+    "react-dom": "^18.3.1 || ^19.0.0"
   },
   "peerDependenciesMeta": {
     "react": {
