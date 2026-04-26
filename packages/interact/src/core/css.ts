@@ -11,6 +11,7 @@ import type {
 } from '../types';
 import {
   kebabCustomProp,
+  camelToKebabCase,
   transitionEffectToTransitionsList,
   getFullPredicateByType,
   getSelectorCondition,
@@ -20,7 +21,8 @@ import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
 import { getElementHash, getUniqueEncodedHash } from './utilities';
 import { keyframesToCSS, CSSRuleToString, buildListsRule } from './cssUtils';
 import { effectToAnimationOptions } from '../handlers/utilities';
-import { getCSSAnimation, MotionKeyframeEffect } from '@wix/motion';
+import { getCSSAnimation, MotionKeyframeEffect, TriggerVariant } from '@wix/motion';
+import type { TriggerType } from '../types';
 
 export const DEFAULT_INITIAL = [
   { name: 'visibility', value: 'hidden' },
@@ -30,6 +32,22 @@ export const DEFAULT_INITIAL = [
   { name: 'rotate', value: 'none' },
 ];
 
+const LIST_PROPERTY_NAMES: ListPropertyName[] = [
+  'animation',
+  'animation-composition',
+  'transition',
+  'animation-timeline',
+  'animation-range',
+];
+
+const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
+  animation: 'none',
+  'animation-composition': 'replace',
+  transition: '_',
+  'animation-timeline': 'none',
+  'animation-range': 'normal',
+};
+
 // ----- Map Updaters -----
 
 function pushToTargetCustomPropsLists(
@@ -37,38 +55,24 @@ function pushToTargetCustomPropsLists(
   targetHash: string,
   customProps: Omit<ListCustomProps, 'statePropsToInvalidate'>,
 ): void {
-  const {
-    key,
-    childSelector,
-    animation,
-    transition,
-    'animation-composition': animationComposition,
-  } = customProps;
+  const { key, childSelector } = customProps;
 
   if (!targetToLists.has(targetHash)) {
-    targetToLists.set(targetHash, {
-      key,
-      childSelector,
-      properties: {
-        animation: {
-          fallback: 'none',
-          varNames: [animation],
-        },
-        'animation-composition': {
-          fallback: 'replace',
-          varNames: [animationComposition],
-        },
-        transition: {
-          fallback: '_',
-          varNames: [transition],
-        },
+    const properties = LIST_PROPERTY_NAMES.reduce(
+      (acc, name) => {
+        acc[name] = {
+          fallback: LIST_PROPERTY_FALLBACKS[name],
+          varNames: [customProps[name]],
+        };
+        return acc;
       },
-    });
+      {} as CSSCoordiantedLists['properties'],
+    );
+
+    targetToLists.set(targetHash, { key, childSelector, properties });
   } else {
     const { properties } = targetToLists.get(targetHash)!;
-    (Object.keys(properties) as ListPropertyName[]).forEach((name) =>
-      properties[name].varNames.push(customProps[name]),
-    );
+    LIST_PROPERTY_NAMES.forEach((name) => properties[name].varNames.push(customProps[name]));
   }
 }
 
@@ -80,9 +84,7 @@ function getInteractionCustomPropsForTarget(
   childSelector?: string,
 ): ListCustomProps {
   if (!targetToCustomProps.has(targetHash)) {
-    const properties = (
-      ['animation', 'animation-composition', 'transition'] as ListPropertyName[]
-    ).reduce(
+    const properties = LIST_PROPERTY_NAMES.reduce(
       (acc, name) => {
         acc[name] = kebabCustomProp([name, interactionIdx, getUniqueEncodedHash(targetHash)]);
         return acc;
@@ -108,9 +110,7 @@ function getSequenceCustomPropsForTarget(
   childSelector?: string,
 ): Record<ListPropertyName, string> {
   const index = targetToSequenceLists.get(targetHash)?.properties?.animation.varNames.length || 0;
-  const properties = (
-    ['animation', 'animation-composition', 'transition'] as ListPropertyName[]
-  ).reduce(
+  const properties = LIST_PROPERTY_NAMES.reduce(
     (acc, name) => {
       acc[name] = kebabCustomProp([name, interactionIdx, index, getUniqueEncodedHash(targetHash)]);
       return acc;
@@ -139,6 +139,7 @@ function effectToCSS(
   configConditions: Record<string, Condition>,
   customProps: ListCustomProps,
   targetHash: string,
+  trigger: TriggerType,
   childSelector?: string,
 ): {
   rules: CSSRuleData[];
@@ -177,7 +178,12 @@ function effectToCSS(
 
   if (namedEffect || keyframeEffect) {
     const animationOptions = effectToAnimationOptions(effect);
-    const cssAnimations = getCSSAnimation(null, animationOptions).filter((anim) => anim.name);
+    const motionTrigger = { trigger: camelToKebabCase(trigger), id: effectId, componentId: '' };
+    const cssAnimations = getCSSAnimation(
+      null,
+      animationOptions,
+      motionTrigger as TriggerVariant,
+    ).filter((anim) => anim.name);
 
     // accumulate keyframes
     keyframes = cssAnimations.map((anim) => ({
@@ -208,6 +214,14 @@ function effectToCSS(
       {
         name: customProps['animation-composition'],
         value: cssAnimations.map(({ composition }) => composition || 'replace').join(', '),
+      },
+      {
+        name: customProps['animation-timeline'],
+        value: cssAnimations.map(({ animationTimeline }) => animationTimeline || 'none').join(', '),
+      },
+      {
+        name: customProps['animation-range'],
+        value: cssAnimations.map(({ animationRange }) => animationRange || 'normal').join(', '),
       },
     ];
 
@@ -244,6 +258,14 @@ function effectToCSS(
         name: customProps['animation-composition'],
         value: 'replace',
       },
+      {
+        name: customProps['animation-timeline'],
+        value: 'none',
+      },
+      {
+        name: customProps['animation-range'],
+        value: 'normal',
+      },
     );
 
     // declaring transition custom property
@@ -273,12 +295,20 @@ function effectToCSS(
         value: 'none',
       },
       {
-        name: customProps['animation-composition']!,
+        name: customProps['animation-composition'],
         value: 'replace',
       },
       {
         name: customProps.transition,
         value: '_',
+      },
+      {
+        name: customProps['animation-timeline'],
+        value: 'none',
+      },
+      {
+        name: customProps['animation-range'],
+        value: 'normal',
       },
     );
   }
@@ -292,6 +322,7 @@ function parseEffect(
   effect: ResolvedEffect,
   targetToCustomProps: Map<string, ListCustomProps>,
   keyframesMap: Map<string, Keyframe[]>,
+  trigger: TriggerType,
   useFirstChild: boolean = true,
   // to use inside sequences to update the sequence's coordinated list without
   // breaking cascade logic
@@ -340,6 +371,7 @@ function parseEffect(
     configConditions,
     localCustomProps,
     targetHash,
+    trigger,
     childSelector,
   );
 
@@ -364,6 +396,7 @@ function parseSequence(
   sequence: ResolvedSequence,
   targetToCustomProps: Map<string, ListCustomProps>,
   keyframesMap: Map<string, Keyframe[]>,
+  trigger: TriggerType,
   useFirstChild: boolean = true,
 ): CSSRuleData[] {
   // in a similar manner to how we treat different interactions and use lists to concatenate them
@@ -383,6 +416,7 @@ function parseSequence(
       effect,
       targetToCustomProps,
       keyframesMap,
+      trigger,
       useFirstChild,
       targetToSequenceLists,
     ),
@@ -427,8 +461,18 @@ function parseInteraction(
     .map((effect) => resolveEffectForCSS(effect, interaction, config))
     .filter((effect) => effect !== null);
 
+  const { trigger } = interaction;
+
   const cssRules = resolvedEffects.flatMap((effect) =>
-    parseEffect(config, interactionIdx, effect, targetToCustomProps, keyframesMap, useFirstChild),
+    parseEffect(
+      config,
+      interactionIdx,
+      effect,
+      targetToCustomProps,
+      keyframesMap,
+      trigger,
+      useFirstChild,
+    ),
   );
 
   const resolvedSequences = sequences
@@ -443,6 +487,7 @@ function parseInteraction(
         sequence,
         targetToCustomProps,
         keyframesMap,
+        trigger,
         useFirstChild,
       ),
     ),

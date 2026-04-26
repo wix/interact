@@ -1,4 +1,9 @@
-export type ListPropertyName = 'animation' | 'transition' | 'animation-composition';
+export type ListPropertyName =
+  | 'animation'
+  | 'transition'
+  | 'animation-composition'
+  | 'animation-timeline'
+  | 'animation-range';
 
 export type CSSCoordiantedLists = {
   key: string;

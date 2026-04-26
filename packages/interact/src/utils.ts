@@ -13,6 +13,10 @@ export function kebabCustomProp(args: (string | number)[]) {
   return `--${args.join('-')}`;
 }
 
+export function camelToKebabCase(property: string): string {
+  return property.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+}
+
 export function calculateSequenceEffectsOffsets(
   effects: ((any & { delay?: number }) | null)[],
   delay: number,

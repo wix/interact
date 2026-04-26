@@ -400,6 +400,8 @@ describe('css.generate', () => {
 const isAnimationProp = (name: string) => /^--animation-\d/.test(name);
 const isCompositionProp = (name: string) => /^--animation-composition-/.test(name);
 const isTransitionProp = (name: string) => /^--transition-/.test(name);
+const isTimelineProp = (name: string) => /^--animation-timeline-/.test(name);
+const isRangeProp = (name: string) => /^--animation-range-/.test(name);
 
 function findDecl(
   declarations: CSSRuleData['declarations'],
@@ -444,6 +446,14 @@ describe('css._generate', () => {
 
       const compDecl = findDecl(effectRule.declarations, (d) => isCompositionProp(d.name));
       expect(compDecl).toBeDefined();
+
+      const timelineDecl = findDecl(effectRule.declarations, (d) => isTimelineProp(d.name));
+      expect(timelineDecl).toBeDefined();
+      expect(timelineDecl!.value).toBe('none');
+
+      const rangeDecl = findDecl(effectRule.declarations, (d) => isRangeProp(d.name));
+      expect(rangeDecl).toBeDefined();
+      expect(rangeDecl!.value).toBe('normal');
     });
 
     it('should produce separate initial rule with DEFAULT_INITIAL for viewEnter + once + keyframeEffect', () => {
@@ -569,6 +579,14 @@ describe('css._generate', () => {
       expect(transDecl).toBeDefined();
       expect(String(transDecl!.value)).toContain('opacity');
       expect(String(transDecl!.value)).toContain('500ms');
+
+      const timelineDecl = findDecl(effectRule.declarations, (d) => isTimelineProp(d.name));
+      expect(timelineDecl).toBeDefined();
+      expect(timelineDecl!.value).toBe('none');
+
+      const rangeDecl = findDecl(effectRule.declarations, (d) => isRangeProp(d.name));
+      expect(rangeDecl).toBeDefined();
+      expect(rangeDecl!.value).toBe('normal');
     });
 
     it('should produce a state rule with var() declarations for transition', () => {
@@ -678,6 +696,198 @@ describe('css._generate', () => {
     });
   });
 
+  describe('effectToCSS - viewProgress (scroll-driven) branch', () => {
+    it('should set animation-timeline and animation-range custom props for viewProgress keyframeEffect', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            effects: [
+              {
+                effectId: 'scroll1',
+                rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+                rangeEnd: { name: 'exit', offset: { value: 100, unit: 'percentage' } },
+                keyframeEffect: {
+                  name: 'parallax',
+                  keyframes: [
+                    { transform: 'translateY(50px)' },
+                    { transform: 'translateY(-50px)' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      const effectRule = cssRules.find((r) => r.declarations.some((d) => isAnimationProp(d.name)))!;
+      expect(effectRule).toBeDefined();
+
+      const timelineDecl = findDecl(effectRule.declarations, (d) => isTimelineProp(d.name));
+      expect(timelineDecl).toBeDefined();
+      expect(String(timelineDecl!.value)).toContain('--scroll1');
+
+      const rangeDecl = findDecl(effectRule.declarations, (d) => isRangeProp(d.name));
+      expect(rangeDecl).toBeDefined();
+      expect(String(rangeDecl!.value)).toContain('entry');
+      expect(String(rangeDecl!.value)).toContain('exit');
+    });
+
+    it('should not produce an initial rule for viewProgress trigger', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            effects: [
+              {
+                effectId: 'scroll1',
+                keyframeEffect: {
+                  name: 'parallax',
+                  keyframes: [
+                    { transform: 'translateY(50px)' },
+                    { transform: 'translateY(-50px)' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      expect(cssRules.every((r) => !r.addInitialSelector)).toBe(true);
+    });
+
+    it('should include timeline and range in coordinated list when viewProgress and click target same element', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'kf1',
+                duration: 300,
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
+          },
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            effects: [
+              {
+                effectId: 'scroll1',
+                rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+                rangeEnd: { name: 'exit', offset: { value: 100, unit: 'percentage' } },
+                keyframeEffect: {
+                  name: 'parallax',
+                  keyframes: [
+                    { transform: 'translateY(50px)' },
+                    { transform: 'translateY(-50px)' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      const coordListRule = cssRules.find(
+        (r) =>
+          r.declarations.some((d) => d.name === 'animation-timeline') &&
+          String(r.declarations.find((d) => d.name === 'animation-timeline')?.value).includes(
+            '), var(',
+          ),
+      );
+      expect(coordListRule).toBeDefined();
+
+      const rangeListDecl = coordListRule!.declarations.find((d) => d.name === 'animation-range');
+      expect(rangeListDecl).toBeDefined();
+      expect(String(rangeListDecl!.value)).toContain('), var(');
+    });
+
+    it('should set timeline to none and range to normal for non-viewProgress keyframeEffect', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'kf1',
+                duration: 300,
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      const effectRule = cssRules.find((r) => r.declarations.some((d) => isAnimationProp(d.name)))!;
+
+      const timelineDecl = findDecl(effectRule.declarations, (d) => isTimelineProp(d.name));
+      expect(timelineDecl!.value).toBe('none');
+
+      const rangeDecl = findDecl(effectRule.declarations, (d) => isRangeProp(d.name));
+      expect(rangeDecl!.value).toBe('normal');
+    });
+
+    it('should include timeline and range custom props on initial rule for viewEnter', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            effects: [
+              {
+                effectId: 'kf1',
+                duration: 500,
+                keyframeEffect: {
+                  name: 'myAnim',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      const initialRule = cssRules.find((r) => r.addInitialSelector)!;
+      expect(initialRule).toBeDefined();
+
+      const timelineDecl = findDecl(initialRule.declarations, (d) => isTimelineProp(d.name));
+      expect(timelineDecl).toBeDefined();
+      expect(timelineDecl!.value).toBe('none');
+
+      const rangeDecl = findDecl(initialRule.declarations, (d) => isRangeProp(d.name));
+      expect(rangeDecl).toBeDefined();
+      expect(rangeDecl!.value).toBe('normal');
+    });
+  });
+
   describe('effectToCSS - no effect property', () => {
     it('should set all custom properties to off values when effect has no animation or transition', () => {
       const config: InteractConfig = {
@@ -700,6 +910,14 @@ describe('css._generate', () => {
           r.declarations.some((d) => isTransitionProp(d.name) && d.value === '_'),
       );
       expect(effectRule).toBeDefined();
+
+      const timelineDecl = findDecl(effectRule!.declarations, (d) => isTimelineProp(d.name));
+      expect(timelineDecl).toBeDefined();
+      expect(timelineDecl!.value).toBe('none');
+
+      const rangeDecl = findDecl(effectRule!.declarations, (d) => isRangeProp(d.name));
+      expect(rangeDecl).toBeDefined();
+      expect(rangeDecl!.value).toBe('normal');
     });
 
     it('should produce no keyframes for an effect with no animation', () => {
@@ -997,6 +1215,16 @@ describe('css._generate', () => {
       );
       const uniqueNames = new Set(animPropNames);
       expect(uniqueNames.size).toBe(animPropNames.length);
+
+      const timelinePropNames = animRules.flatMap((r) =>
+        r.declarations.filter((d) => isTimelineProp(d.name)).map((d) => d.name),
+      );
+      expect(new Set(timelinePropNames).size).toBe(timelinePropNames.length);
+
+      const rangePropNames = animRules.flatMap((r) =>
+        r.declarations.filter((d) => isRangeProp(d.name)).map((d) => d.name),
+      );
+      expect(new Set(rangePropNames).size).toBe(rangePropNames.length);
     });
 
     it('should add a coordinated-list rule per target in a sequence', () => {
@@ -1034,13 +1262,20 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      const coordListRules = cssRules.filter((r) =>
-        r.declarations.some(
-          (d) =>
-            (isAnimationProp(d.name) || d.name === 'animation') && String(d.value).includes('var('),
-        ),
+      const seqCoordListRule = cssRules.find((r) =>
+        r.declarations.some((d) => isAnimationProp(d.name) && String(d.value).includes('var(')),
       );
-      expect(coordListRules.length).toBeGreaterThanOrEqual(1);
+      expect(seqCoordListRule).toBeDefined();
+
+      const timelineDecl = seqCoordListRule!.declarations.find(
+        (d) => isTimelineProp(d.name) && String(d.value).includes('var('),
+      );
+      expect(timelineDecl).toBeDefined();
+
+      const rangeDecl = seqCoordListRule!.declarations.find(
+        (d) => isRangeProp(d.name) && String(d.value).includes('var('),
+      );
+      expect(rangeDecl).toBeDefined();
     });
 
     it('should apply sequence-level conditions to the coordinated-list rule', () => {
@@ -1131,6 +1366,14 @@ describe('css._generate', () => {
           String(r.declarations.find((d) => d.name === 'animation')?.value).includes('), var('),
       );
       expect(coordListRule).toBeDefined();
+
+      const timelineDecl = coordListRule!.declarations.find((d) => d.name === 'animation-timeline');
+      expect(timelineDecl).toBeDefined();
+      expect(String(timelineDecl!.value)).toContain('), var(');
+
+      const rangeDecl = coordListRule!.declarations.find((d) => d.name === 'animation-range');
+      expect(rangeDecl).toBeDefined();
+      expect(String(rangeDecl!.value)).toContain('), var(');
     });
 
     it('should produce separate coordinated-list rules for different targets', () => {
