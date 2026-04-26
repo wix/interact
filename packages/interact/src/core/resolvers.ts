@@ -15,8 +15,6 @@ import type {
 import { isTemplatedKey, generateId, calculateSequenceEffectsOffsets } from '../utils';
 import { shouldUseInitial } from './utilities';
 
-export const EMPTY_KEYFRAMES_EFFECT = { name: 'interact-empty-kf-effect', keyframes: [{}, {}] };
-
 export function resolveEffectForCSS(
   effect: Effect | EffectRef,
   interaction: Interaction,
@@ -85,7 +83,7 @@ export function resolveEffectForCSS(
     }
     return { keyframeEffect, initial, ...rest };
   } else if (customEffect) {
-    return isPointerMove ? null : { keyframeEffect: EMPTY_KEYFRAMES_EFFECT, initial, ...rest };
+    return isPointerMove ? null : { initial, ...rest };
   } else if (transition) {
     return { transition, initial, ...rest };
   } else {
