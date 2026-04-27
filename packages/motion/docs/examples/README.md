@@ -94,7 +94,6 @@ button.addEventListener('mouseenter', () => {
     type: 'TimeAnimationOptions',
     namedEffect: {
       type: 'Pulse',
-      power: 'soft',
       intensity: 1.1,
     },
     duration: 300,
@@ -120,7 +119,6 @@ function startLoadingAnimation(element) {
     namedEffect: {
       type: 'Spin',
       direction: 'clockwise',
-      power: 'medium',
     },
     duration: 1000,
     iterations: Infinity,

@@ -16,7 +16,9 @@ function prepareAnimation(
     (preset as AnimationEffectAPI<'time'>).prepare!(animation as TimeAnimationOptions, domApi);
   }
 
-  callback && fastdom.mutate(callback);
+  if (callback) {
+    fastdom.mutate(callback);
+  }
 }
 
 export { prepareAnimation };

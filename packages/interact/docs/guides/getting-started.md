@@ -20,6 +20,44 @@ Before we dive in, let's understand the three main concepts:
 npm install @wix/interact
 ```
 
+### Optional: Animation Presets
+
+To use `namedEffect` presets (e.g. `FadeIn`, `SlideIn`, `BounceIn`, etc.), you can register effect modules from `@wix/motion-presets` or register your own custom-made effects.
+
+```bash
+npm install @wix/motion-presets
+```
+
+Then register the presets before creating interactions:
+
+```typescript
+import { Interact } from '@wix/interact/web';
+import { FadeIn } from '@wix/motion-presets';
+
+// Register animation presets
+Interact.registerEffects({ FadeIn });
+
+// Now you can use namedEffect in your config
+const config = {
+  interactions: [
+    {
+      key: 'hero',
+      trigger: 'viewEnter',
+      effects: [
+        {
+          namedEffect: { type: 'FadeIn' },
+          duration: 1000,
+        },
+      ],
+    },
+  ],
+};
+
+Interact.create(config);
+```
+
+> **Note:** If you only use `keyframeEffect` (custom keyframes), you don't need `@wix/motion-presets`.
+
 ## Package Entry Points
 
 `@wix/interact` provides three entry points for different use cases:
@@ -239,7 +277,6 @@ Each effect defines:
 {
     key: 'my-button',
     trigger: 'click',
-    params: { method: 'toggle' },
     effects: [
         {
             key: 'my-content',
@@ -258,13 +295,15 @@ Each effect defines:
     effects: [
         {
             key: 'my-element',
-            namedEffect: 'FadeIn',
+            namedEffect: { type: 'FadeIn' },
             duration: 800,
             easing: 'ease-out'
         }
     ]
 }
 ```
+
+> **Note**: Using `namedEffect` requires registering effects first with `Interact.registerEffects(...)` (presets from `@wix/motion-presets` or your own custom-made effects). See [Installation](#optional-animation-presets).
 
 > **Tip**: To prevent a flash of content before entrance animations start, use the `generate()` function to create CSS that hides elements until their animation triggers. See [Entrance Animations](../examples/entrance-animations.md#preventing-flash-of-unstyled-content-fouc) for details.
 

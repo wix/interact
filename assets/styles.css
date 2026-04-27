@@ -5,17 +5,6 @@
   initial-value: 0px;
 }
 
-/* Critical CSS for viewEnter entrance animations - prevents FOUC */
-@media (prefers-reduced-motion: no-preference) {
-  [data-interact-initial='true'] > :first-child:not([data-motion-enter='done']) {
-    visibility: hidden;
-    transform: none;
-    translate: none;
-    scale: none;
-    rotate: none;
-  }
-}
-
 /* Essential Overrides */
 body {
   overflow-x: hidden;

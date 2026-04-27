@@ -7,4 +7,4 @@ export { add, remove } from '../dom/api';
 export { generate } from '../core/css';
 export { Interact };
 
-export * from '../types';
+export * from '../types/external';

@@ -29,9 +29,6 @@ Each interaction defines a complete cause-and-effect relationship:
     key: 'trigger-element',           // What element triggers the interaction
     selector: '.clickable-area',          // Optional: Custom selector within source
     trigger: 'hover',                     // What user action starts it
-    params: {                             // Optional trigger parameters
-        type: 'alternate'
-    },
     conditions: ['desktop-only'],         // Optional conditions to check
     effects: [                            // Array of effects to apply
         {
@@ -43,6 +40,8 @@ Each interaction defines a complete cause-and-effect relationship:
     ]
 }
 ```
+
+Time-based playback (`once`, `repeat`, `alternate`, `state`) is set with `triggerType` on each time effect, or with `triggerType` on a sequence object when using `sequences`. Optional `params` on the interaction are for observer options (`viewEnter` / `pageVisible`), pointer/`animationEnd` settings, and other non-playback trigger configuration.
 
 ## Element Selection with Selectors
 
@@ -82,7 +81,7 @@ const config: InteractConfig = {
 
 ### Selector vs ListContainer
 
-- **`selector`**: Selects a single element using CSS selector
+- **`selector`**: Selects all matching elements using CSS selector (`querySelectorAll`)
 - **`listContainer`**: Selects a container for targeting its child elements for list-based interactions
 - **Combined**: Use both to select elements within list items
 
@@ -90,14 +89,14 @@ const config: InteractConfig = {
 // Using selector with listContainer
 {
     key: 'product-grid',
-    listContainer: '.product-item',     // Each product item
-    selector: '.product-image',         // Image within each item
+    listContainer: '.products',         // Container holding all product items
+    selector: '.product-image',         // querySelectorAll finds all images as list items
     trigger: 'hover',
     effects: [
         {
             key: 'product-grid',
-            listContainer: '.product-item',
-            selector: '.product-overlay', // Overlay within each item
+            listContainer: '.products',
+            selector: '.product-overlay', // querySelectorAll finds all overlays as list items
             namedEffect: {
               type: 'FadeIn'
             },
@@ -210,7 +209,7 @@ const complexConfig: InteractConfig = {
     {
       key: 'product-card',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.3 },
+      params: { threshold: 0.3 },
       effects: [
         {
           key: 'product-card',
@@ -343,7 +342,6 @@ export const cardInteractions = [
   {
     key: 'card',
     trigger: 'viewEnter',
-    params: { type: 'once' },
     effects: [{ key: 'card', effectId: 'card-entrance' }],
   },
 ];
@@ -500,7 +498,7 @@ const productPageConfig: InteractConfig = {
     {
       key: 'review-1',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'review-1',
@@ -512,7 +510,7 @@ const productPageConfig: InteractConfig = {
     {
       key: 'review-2',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'review-2',
@@ -676,14 +674,14 @@ const galleryConfig: InteractConfig = {
     // Gallery items with list container and selector
     {
       key: 'image-gallery',
-      listContainer: '.gallery-grid', // Container with multiple items
-      selector: '.gallery-item img', // Image within each item
+      listContainer: '.gallery-grid', // Container holding all gallery items
+      selector: '.gallery-item img', // querySelectorAll finds all matching images as list items
       trigger: 'hover',
       effects: [
         {
           key: 'image-gallery',
           listContainer: '.gallery-grid',
-          selector: '.gallery-item .overlay', // Overlay within each item
+          selector: '.gallery-item .overlay', // querySelectorAll finds all matching overlays as list items
           effectId: 'image-overlay',
         },
       ],

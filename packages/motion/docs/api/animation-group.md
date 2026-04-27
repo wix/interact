@@ -244,7 +244,7 @@ Promise that resolves when reverse playback begins.
 ```typescript
 const animation = getWebAnimation('#modal', {
   type: 'TimeAnimationOptions',
-  namedEffect: { type: 'DropIn', power: 'medium' },
+  namedEffect: { type: 'DropIn' },
   duration: 400,
 });
 

@@ -8,8 +8,8 @@ import type {
 } from '../types';
 
 const DEFAULT_RANGE_VALUES = {
-  rangeStart: { name: 'cover' as const, offset: { value: 0, type: 'percentage' as const } },
-  rangeEnd: { name: 'cover' as const, offset: { value: 100, type: 'percentage' as const } },
+  rangeStart: { name: 'cover' as const, offset: { value: 0, unit: 'percentage' as const } },
+  rangeEnd: { name: 'cover' as const, offset: { value: 100, unit: 'percentage' as const } },
 };
 
 function resolveRangeOffsets(

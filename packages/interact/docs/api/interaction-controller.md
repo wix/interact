@@ -25,27 +25,24 @@ const controller = Interact.getController('my-element');
 
 ```typescript
 interface IInteractionController {
-  // Properties
   element: HTMLElement;
   key: string | undefined;
   connected: boolean;
   sheet: CSSStyleSheet | null;
-  _observers: WeakMap<HTMLElement, MutationObserver>;
+  useFirstChild: boolean;
 
-  // Methods
   connect(key?: string): void;
-  disconnect(): void;
+  disconnect(options?: { removeFromCache?: boolean }): void;
   update(): void;
   toggleEffect(
     effectId: string,
-    method: StateParams['method'],
+    stateAction: StateAction,
     item?: HTMLElement | null,
     isLegacy?: boolean,
   ): void;
   getActiveEffects(): string[];
   renderStyle(cssRules: string[]): void;
   watchChildList(listContainer: string): void;
-  _childListChangeHandler(listContainer: string, entries: MutationRecord[]): void;
 }
 ```
 
@@ -106,9 +103,9 @@ if (controller?.sheet) {
 }
 ```
 
-### `_observers: WeakMap<HTMLElement, MutationObserver>`
+### `useFirstChild: boolean`
 
-Internal storage for mutation observers watching list containers.
+When `true`, the interaction target is the first child (e.g. with `<interact-element>`). Set via constructor options.
 
 ## Methods
 
@@ -143,32 +140,28 @@ if (controller && !controller.connected) {
 4. Calls internal `add()` function to set up interactions
 5. Sets `connected = true` on success
 
-### `disconnect()`
+### `disconnect(options?)`
 
-Disconnects the controller from the interaction system, cleaning up all resources.
+Disconnects the controller and cleans up resources.
 
 **Signature:**
 
 ```typescript
-disconnect(): void
+disconnect(options?: { removeFromCache?: boolean }): void
 ```
+
+**Parameters:** `options.removeFromCache` - When `true`, removes the controller from `Interact.controllerCache` (e.g. when calling `remove(key)`).
 
 **Example:**
 
 ```typescript
 const controller = Interact.getController('my-element');
 if (controller?.connected) {
-  controller.disconnect();
-  console.log('Controller disconnected');
+  controller.disconnect({ removeFromCache: true });
 }
 ```
 
-**Behavior:**
-
-1. Calls internal `remove()` to clean up interactions
-2. Removes adopted stylesheet from document
-3. Clears all mutation observers
-4. Sets `connected = false`
+**Behavior:** Calls internal `remove()`, removes adopted stylesheet, clears observers, sets `connected = false`.
 
 ### `update()`
 
@@ -196,7 +189,7 @@ if (controller) {
 - To reset all interaction state
 - After modifying the element's structure
 
-### `toggleEffect(effectId, method, item?, isLegacy?)`
+### `toggleEffect(effectId, stateAction, item?, isLegacy?)`
 
 Toggles a CSS state effect on the element or a specific list item.
 
@@ -205,7 +198,7 @@ Toggles a CSS state effect on the element or a specific list item.
 ```typescript
 toggleEffect(
   effectId: string,
-  method: 'add' | 'remove' | 'toggle' | 'clear',
+  stateAction: StateAction,
   item?: HTMLElement | null,
   isLegacy?: boolean
 ): void
@@ -214,7 +207,7 @@ toggleEffect(
 **Parameters:**
 
 - `effectId: string` - The effect identifier
-- `method` - How to change the state:
+- `stateAction` - How to change the state:
   - `'add'` - Add the effect
   - `'remove'` - Remove the effect
   - `'toggle'` - Toggle the effect on/off
@@ -351,16 +344,6 @@ if (controller) {
 4. Automatically calls `addListItems` for added nodes
 5. Automatically calls `removeListItems` for removed nodes
 
-### `_childListChangeHandler(listContainer, entries)`
-
-Internal handler for mutation observer callbacks. You typically don't call this directly.
-
-**Signature:**
-
-```typescript
-_childListChangeHandler(listContainer: string, entries: MutationRecord[]): void
-```
-
 ## Usage Patterns
 
 ### Accessing Controllers
@@ -377,34 +360,15 @@ Interact.controllerCache.forEach((controller, key) => {
 });
 ```
 
-### Programmatic State Management
+### State and lists
 
 ```typescript
-const controller = Interact.getController('accordion');
-if (controller) {
-  // Check current state
-  const isExpanded = controller.getActiveEffects().includes('expanded');
+// Toggle effect by current state
+const c = Interact.getController('accordion');
+c?.toggleEffect('expanded', c.getActiveEffects().includes('expanded') ? 'remove' : 'add');
 
-  // Toggle based on current state
-  controller.toggleEffect('expanded', isExpanded ? 'remove' : 'add');
-}
-```
-
-### Dynamic List Management
-
-```typescript
-const controller = Interact.getController('todo-list');
-if (controller) {
-  // Watch for list changes
-  controller.watchChildList('.todo-items');
-
-  // Add new item - interactions apply automatically
-  const todoItems = controller.element.querySelector('.todo-items');
-  const newTodo = document.createElement('div');
-  newTodo.className = 'todo-item';
-  newTodo.textContent = 'New task';
-  todoItems?.appendChild(newTodo);
-}
+// Watch list container; new children get interactions automatically
+Interact.getController('list-key')?.watchChildList('.items');
 ```
 
 ### Refreshing Interactions
@@ -449,7 +413,7 @@ const controller = Interact.getController('my-element');
 // Safe operations - won't throw
 controller?.toggleEffect('effect', 'add');
 controller?.connect(); // Safe if already connected
-controller?.disconnect(); // Safe if already disconnected
+controller?.disconnect({}); // Safe if already disconnected
 
 // Check connection status
 if (!controller?.connected) {

@@ -1,394 +1,187 @@
 import { cssEasings, jsEasings } from './easings';
-import type { ScrubTransitionEasing, EffectFourDirections, Point } from './types';
 
-/**
- * Map a value from one range 'a' to different range 'b'
- *
- * @param sourceMin - The minimum value of the source range
- * @param sourceMax - The maximum value of the source range
- * @param targetMin - The minimum value of the target range
- * @param targetMax - The maximum value of the target range
- * @param num - The number to map
- * @returns The mapped value
- */
-export function mapRange(
-  sourceMin: number,
-  sourceMax: number,
-  targetMin: number,
-  targetMax: number,
-  num: number,
-): number {
-  return ((num - sourceMin) * (targetMax - targetMin)) / (sourceMax - sourceMin) + targetMin;
-}
-
-/**
- * Get the distance between 2 points
- *
- * @param p1 - The first point [x1, y1]
- * @param p2 - The second point [x2, y2]
- * @returns The distance between the two points
- */
-export function distance2d([x1, y1]: Point, [x2, y2]: Point): number {
-  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-}
-
-/**
- * Get the angle between 2 points in degrees clamped between 0 and 360
- * Pass the third argument "offset" to rotate the angle source,
- * for example use 90 to move angle 0 to the top
- *
- * @param p1 - The first point [x1, y1]
- * @param p2 - The second point [x2, y2]
- * @param offset - The angle offset (default: 0)
- * @returns The angle between the two points in degrees
- */
-export function getAngleInDeg(p1: Point = [0, 0], p2: Point = [0, 0], offset: number = 0): number {
-  const angle = (Math.atan2(p2[1] - p1[1], p2[0] - p1[0]) * 180) / Math.PI;
-  return (360 + offset + angle) % 360;
-}
-
-export const INITIAL_FRAME_OFFSET = 1e-6;
-
-export type Direction =
-  | 'initial'
-  | 'top'
-  | 'right'
-  | 'center'
-  | 'bottom'
-  | 'left'
-  | 'vertical'
-  | 'horizontal';
-
-type ClipPolygonTemplateParams = {
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-  centerX: number;
-  centerY: number;
-  minimum: number;
-};
-
-const CLIP_POLYGON_TEMPLATES: Record<Direction, (params: ClipPolygonTemplateParams) => string> = {
-  initial: ({ top, bottom, left, right }) =>
-    `${left}% ${top}%, ${right}% ${top}%, ${right}% ${bottom}%, ${left}% ${bottom}%`,
-  top: ({ top, left, right, minimum }) =>
-    `${left}% ${top}%, ${right}% ${top}%, ${right}% ${top + minimum}%, ${left}% ${top + minimum}%`,
-  right: ({ top, bottom, right, minimum }) =>
-    `${right - minimum}% ${top}%, ${right}% ${top}%, ${right}% ${bottom}%, ${
-      right - minimum
-    }% ${bottom}%`,
-  center: ({ centerX, centerY, minimum }) =>
-    `${centerX - minimum / 2}% ${centerY - minimum / 2}%, ${
-      centerX + minimum / 2
-    }% ${centerY - minimum / 2}%, ${centerX + minimum / 2}% ${
-      centerY + minimum / 2
-    }%, ${centerX - minimum / 2}% ${centerY + minimum / 2}%`,
-  bottom: ({ bottom, left, right, minimum }) =>
-    `${left}% ${bottom - minimum}%, ${right}% ${
-      bottom - minimum
-    }%, ${right}% ${bottom}%, ${left}% ${bottom}%`,
-  left: ({ top, bottom, left, minimum }) =>
-    `${left}% ${top}%, ${left + minimum}% ${top}%, ${
-      left + minimum
-    }% ${bottom}%, ${left}% ${bottom}%`,
-  vertical: ({ top, bottom, left, right, minimum }) =>
-    `${left}% ${top + minimum / 2}%, ${right}% ${
-      top + minimum / 2
-    }%, ${right}% ${bottom - minimum / 2}%, ${left}% ${bottom - minimum / 2}%`,
-  horizontal: ({ top, bottom, left, right, minimum }) =>
-    `${left + minimum / 2}% ${top}%, ${right - minimum / 2}% ${top}%, ${
-      right - minimum / 2
-    }% ${bottom}%, ${left + minimum / 2}% ${bottom}%`,
-};
-
-export function getClipPolygonParams({
-  direction,
-  scaleX = 1,
-  scaleY = 1,
-  minimum = 0,
-}: {
-  direction: Direction;
-  scaleX?: number;
-  scaleY?: number;
-  minimum?: number;
-}) {
-  const top = ((1 - scaleY) / 2) * 100;
-  const left = ((1 - scaleX) / 2) * 100;
-  const right = 100 + left - (1 - scaleX) * 100;
-  const bottom = 100 + top - (1 - scaleY) * 100;
-  const centerX = (right + left) / 2;
-  const centerY = (bottom + top) / 2;
-
-  return `polygon(${CLIP_POLYGON_TEMPLATES[direction]({
-    top,
-    bottom,
-    left,
-    right,
-    centerX,
-    centerY,
-    minimum,
-  })})`;
-}
-
-/**
- * Adjust direction by angle from predefined list
- */
-export function getAdjustedDirection(
-  availableDirections: string[],
-  direction: string,
-  angleInDeg: number,
-) {
-  const index = availableDirections.indexOf(direction);
-  const length = availableDirections.length;
-  const shiftBy = Math.round(((angleInDeg || 0) / 360) * length);
-  const newIndex = (index + (length - 1) * shiftBy) % length;
-  return availableDirections[newIndex];
-}
-
-export function transformPolarToXY(angle: number, distance: number) {
-  const radians = (angle * Math.PI) / 180;
-  const x = Math.cos(radians) * distance;
-  const y = Math.sin(radians) * distance;
-  return [x, y];
-}
-
-export function getCssUnits(type: 'percentage' | string) {
-  return type === 'percentage' ? '%' : type || 'px';
+export function getCssUnits(unit: 'percentage' | string) {
+  return unit === 'percentage' ? '%' : unit || 'px';
 }
 
 export function getEasing(easing?: keyof typeof cssEasings | string): string {
   return easing ? cssEasings[easing as keyof typeof cssEasings] || easing : cssEasings.linear;
 }
 
+function cubicBezierEasing(x1: number, y1: number, x2: number, y2: number): (t: number) => number {
+  const cx = 3 * x1;
+  const bx = 3 * (x2 - x1) - cx;
+  const ax = 1 - cx - bx;
+  const cy = 3 * y1;
+  const by = 3 * (y2 - y1) - cy;
+  const ay = 1 - cy - by;
+
+  const sampleX = (t: number) => ((ax * t + bx) * t + cx) * t;
+  const sampleY = (t: number) => ((ay * t + by) * t + cy) * t;
+  const sampleDX = (t: number) => (3 * ax * t + 2 * bx) * t + cx;
+
+  function solveT(x: number): number {
+    let t = x;
+
+    for (let i = 0; i < 8; i++) {
+      const dx = sampleX(t) - x;
+
+      if (Math.abs(dx) < 1e-7) return t;
+
+      const d = sampleDX(t);
+
+      if (Math.abs(d) < 1e-6) break;
+
+      t -= dx / d;
+    }
+    // Bisection fallback
+    let lo = 0,
+      hi = 1;
+    t = (lo + hi) / 2;
+
+    while (hi - lo > 1e-7) {
+      const xMid = sampleX(t);
+      if (Math.abs(xMid - x) < 1e-7) return t;
+      if (x > xMid) lo = t;
+      else hi = t;
+      t = (lo + hi) / 2;
+    }
+
+    return t;
+  }
+
+  return (t: number) => {
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+    return sampleY(solveT(t));
+  };
+}
+
+function parseCubicBezier(str: string): ((t: number) => number) | undefined {
+  const m = str.match(
+    /^cubic-bezier\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)$/,
+  );
+
+  if (!m) return undefined;
+
+  const x1 = parseFloat(m[1]);
+  const y1 = parseFloat(m[2]);
+  const x2 = parseFloat(m[3]);
+  const y2 = parseFloat(m[4]);
+
+  if ([x1, y1, x2, y2].some(isNaN)) return undefined;
+
+  return cubicBezierEasing(x1, y1, x2, y2);
+}
+
+function parseCssLinear(str: string): ((t: number) => number) | undefined {
+  const m = str.match(/^linear\((.+)\)$/);
+  if (!m) return undefined;
+
+  const parts = m[1]
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return undefined;
+
+  type Stop = { output: number; pos: number | null };
+  const stops: Stop[] = [];
+
+  for (const part of parts) {
+    const tokens = part.split(/\s+/);
+    const output = parseFloat(tokens[0]);
+
+    if (isNaN(output)) return undefined;
+
+    const pcts: number[] = [];
+
+    for (let i = 1; i < tokens.length; i++) {
+      if (tokens[i].endsWith('%')) {
+        const v = parseFloat(tokens[i]) / 100;
+        if (isNaN(v)) return undefined;
+        pcts.push(v);
+      }
+    }
+
+    if (pcts.length === 0) {
+      stops.push({ output, pos: null });
+    } else if (pcts.length === 1) {
+      stops.push({ output, pos: pcts[0] });
+    } else {
+      // Two percentages: creates a plateau between the two positions
+      stops.push({ output, pos: pcts[0] });
+      stops.push({ output, pos: pcts[1] });
+    }
+  }
+
+  if (stops.length === 0) return undefined;
+  if (stops[0].pos === null) stops[0].pos = 0;
+  if (stops[stops.length - 1].pos === null) stops[stops.length - 1].pos = 1;
+
+  // Distribute positions for stops without an explicit position
+  let i = 0;
+
+  while (i < stops.length) {
+    if (stops[i].pos === null) {
+      const start = i - 1;
+      let end = i;
+
+      while (end < stops.length && stops[end].pos === null) end++;
+
+      const startPos = stops[start].pos!;
+      const endPos = stops[end].pos!;
+      const span = end - start;
+
+      for (let k = start + 1; k < end; k++) {
+        stops[k].pos = startPos + ((endPos - startPos) * (k - start)) / span;
+      }
+
+      i = end + 1;
+    } else {
+      i++;
+    }
+  }
+
+  // Clamp: each stop must be no earlier than the previous one
+  for (let j = 1; j < stops.length; j++) {
+    if (stops[j].pos! < stops[j - 1].pos!) stops[j].pos = stops[j - 1].pos;
+  }
+
+  const resolved = stops as Array<{ output: number; pos: number }>;
+
+  return (t: number) => {
+    if (t <= resolved[0].pos) return resolved[0].output;
+
+    const last = resolved[resolved.length - 1];
+
+    if (t >= last.pos) return last.output;
+
+    let lo = 0,
+      hi = resolved.length - 1;
+
+    while (lo < hi - 1) {
+      const mid = (lo + hi) >>> 1;
+
+      if (resolved[mid].pos <= t) lo = mid;
+      else hi = mid;
+    }
+
+    const a = resolved[lo];
+    const b = resolved[hi];
+    if (b.pos === a.pos) return b.output;
+    return a.output + ((b.output - a.output) * (t - a.pos)) / (b.pos - a.pos);
+  };
+}
+
 export function getJsEasing(
   easing?: keyof typeof jsEasings | string,
 ): ((t: number) => number) | undefined {
-  return easing ? jsEasings[easing as keyof typeof jsEasings] : undefined;
-}
+  if (!easing) return undefined;
 
-export function getEasingFamily(easing: string) {
-  if (!cssEasings[easing as keyof typeof cssEasings]) {
-    return {
-      in: easing,
-      inOut: easing,
-      out: easing,
-    };
-  }
+  const named = jsEasings[easing as keyof typeof jsEasings];
 
-  const ease = easing.replace(/In|Out/g, '');
-  if (ease === 'linear') {
-    return {
-      in: `linear`,
-      inOut: `linear`,
-      out: `linear`,
-    };
-  }
+  if (named) return named;
 
-  return {
-    in: `${ease}In`,
-    inOut: `${ease}InOut`,
-    out: `${ease}Out`,
-  };
-}
-
-const MOUSE_TRANSITION_EASING_MAP: Record<ScrubTransitionEasing, string> = {
-  linear: 'linear',
-  easeOut: 'ease-out',
-  hardBackOut: 'cubic-bezier(0.58, 2.5, 0, 0.95)',
-  elastic:
-    'linear( 0, 0.2178 2.1%, 1.1144 8.49%, 1.2959 10.7%, 1.3463 11.81%, 1.3705 12.94%, 1.3726, 1.3643 14.48%, 1.3151 16.2%, 1.0317 21.81%, 0.941 24.01%, 0.8912 25.91%, 0.8694 27.84%, 0.8698 29.21%, 0.8824 30.71%, 1.0122 38.33%, 1.0357, 1.046 42.71%, 1.0416 45.7%, 0.9961 53.26%, 0.9839 57.54%, 0.9853 60.71%, 1.0012 68.14%, 1.0056 72.24%, 0.9981 86.66%, 1 )',
-  bounce:
-    'linear( 0, 0.0039, 0.0157, 0.0352, 0.0625 9.09%, 0.1407, 0.25, 0.3908, 0.5625, 0.7654, 1, 0.8907, 0.8125 45.45%, 0.7852, 0.7657, 0.7539, 0.75, 0.7539, 0.7657, 0.7852, 0.8125 63.64%, 0.8905, 1 72.73%, 0.9727, 0.9532, 0.9414, 0.9375, 0.9414, 0.9531, 0.9726, 1, 0.9883, 0.9844, 0.9883, 1 )',
-};
-
-export function getMouseTransitionEasing(value?: ScrubTransitionEasing) {
-  return (value && MOUSE_TRANSITION_EASING_MAP[value]) || 'linear';
-}
-
-export function deg2rad(angleInDeg: number): number {
-  return (angleInDeg * Math.PI) / 180;
-}
-
-export function getTransformParams(
-  originDirection: { dx: number; dy: number },
-  angleInRad: number,
-  scale: number = 1,
-) {
-  const x = `calc(var(--motion-height, 100%) * ${
-    scale * originDirection.dy * Math.sin(-angleInRad)
-  } + var(--motion-width, 100%) * ${scale * originDirection.dx * Math.cos(angleInRad)})`;
-
-  const y = `calc(var(--motion-height, 100%) * ${
-    scale * originDirection.dy * Math.cos(-angleInRad)
-  } + var(--motion-width, 100%) * ${scale * originDirection.dx * Math.sin(angleInRad)})`;
-
-  return { x, y };
-}
-
-export function getOutOfScreenDistance(angle: number) {
-  const angleInRad = (angle * Math.PI) / 180;
-  const angleCos = Math.round(Math.cos(angleInRad) * 10) / 10;
-  const angleSin = Math.round(Math.sin(angleInRad) * 10) / 10;
-
-  // Calculate x and y direction based on angle
-  const xDirection = Math.sign(angleCos);
-  const yDirection = Math.sign(angleSin);
-  const left = `var(--motion-left, 0px)`;
-  const top = `var(--motion-top, 0px)`;
-
-  // Calculate x and y distances between component and stage
-  const xDistance = xDirection
-    ? xDirection === -1
-      ? `(-1 * ${left} - 100%)`
-      : `(100vw - ${left})`
-    : 0;
-  const yDistance = yDirection
-    ? yDirection === -1
-      ? `(-1 * ${top} - 100%)`
-      : `(100vh - ${top})`
-    : 0;
-
-  // Calculate hypotenuse
-  let hypotenuse;
-  const hypotX = `calc(${xDistance} / ${angleCos})`;
-  const hypotY = `calc(${yDistance} / ${angleSin})`;
-
-  if (!angleCos) {
-    hypotenuse = hypotY;
-  } else if (!angleSin) {
-    hypotenuse = hypotX;
-  } else {
-    hypotenuse = `min(${hypotY}, ${hypotX})`;
-  }
-
-  return {
-    // distance: Math.abs(hypotenuse),
-    x: `calc(${hypotenuse} * ${angleCos})`,
-    y: `calc(${hypotenuse} * ${angleSin})`,
-  };
-}
-
-export function keyframesToDuration(
-  keyframes_translation: { keyframe: number }[],
-  duration: number,
-) {
-  return keyframes_translation.map(({ keyframe }, idx) => {
-    const stepDuration = keyframe - (idx > 0 ? keyframes_translation[idx - 1].keyframe : 0);
-    return duration * (stepDuration / 100);
-  });
-}
-
-export function getElementOffset(element: HTMLElement, parent?: HTMLElement) {
-  let left = element.offsetLeft;
-  let top = element.offsetTop;
-  let offsetParent = element.offsetParent as HTMLElement;
-
-  while (offsetParent) {
-    if (parent && offsetParent === parent) {
-      break;
-    }
-
-    left += offsetParent.offsetLeft;
-    top += offsetParent.offsetTop;
-    offsetParent = offsetParent.offsetParent as HTMLElement;
-  }
-
-  return { left, top };
-}
-
-const generateShuttersClipPath = (
-  direction: EffectFourDirections,
-  shutterCount: number,
-  staggered: boolean,
-) => {
-  const isTopOrLeft = direction === 'top' || direction === 'left';
-  const iterStart = isTopOrLeft ? shutterCount : 0;
-  const iterEnd = isTopOrLeft ? 0 : shutterCount;
-  const inc = isTopOrLeft ? -1 : 1;
-
-  const isVerticalPath = direction === 'top' || direction === 'bottom';
-
-  const clipPathStart = [];
-  const clipPathEnd = [];
-
-  for (let i = iterStart; i !== iterEnd; i += inc) {
-    const shutterEndPosInPercentage = 100 * ((i + inc) / shutterCount);
-    const clipStart = (100 * (i / shutterCount)) | 0;
-    let clipEnd;
-
-    if (staggered) {
-      const staggerFactor = isTopOrLeft
-        ? 1 + (shutterCount - i) / shutterCount
-        : 1 + i / shutterCount;
-      // staggerFactor changes the speed in which the current shutter completes its animation.
-      // case = 1: shutter closes at normal rate (as if there is no stagger at all)
-      // case > 1: shutter closes faster (the bigger it is, the faster it closes)
-
-      clipEnd = isTopOrLeft
-        ? 100 - (100 - shutterEndPosInPercentage) * staggerFactor
-        : shutterEndPosInPercentage * staggerFactor;
-    } else {
-      clipEnd = shutterEndPosInPercentage;
-    }
-
-    clipEnd |= 0;
-
-    if (isVerticalPath) {
-      clipPathStart.push(
-        `0% ${clipStart}%, 100% ${clipStart}%, 100% ${clipStart}%, 0% ${clipStart}%`,
-      );
-      clipPathEnd.push(`0% ${clipStart}%, 100% ${clipStart}%, 100% ${clipEnd}%, 0% ${clipEnd}%`);
-    } else {
-      clipPathStart.push(
-        `${clipStart}% 0%, ${clipStart}% 100%, ${clipStart}% 100%, ${clipStart}% 0%`,
-      );
-      clipPathEnd.push(`${clipStart}% 0%, ${clipStart}% 100%, ${clipEnd}% 100%, ${clipEnd}% 0%`);
-    }
-  }
-
-  return { start: clipPathStart, end: clipPathEnd };
-};
-
-export function getShuttersClipPaths(
-  direction: EffectFourDirections,
-  shutterCount: number,
-  staggered: boolean,
-  reverse?: boolean,
-) {
-  const { start, end } = generateShuttersClipPath(direction, shutterCount, staggered);
-
-  if (reverse) {
-    start.reverse();
-    end.reverse();
-  }
-
-  return {
-    clipStart: `polygon(${start.join(', ')})`,
-    clipEnd: `polygon(${end.join(', ')})`,
-  };
-}
-
-export function roundNumber(num: number, precision = 2) {
-  return parseFloat(num.toFixed(precision));
-}
-
-export function toKeyframeValue(
-  custom: Record<string, string | number>,
-  key: string,
-  useValue = false,
-  fallback = '',
-) {
-  return useValue ? custom[key] : `var(${key}${fallback ? `,${fallback}` : ''})`;
-}
-
-export function getTimingFactor(
-  duration: number,
-  delay: number,
-  asString = false,
-): number | string {
-  const duration_ = duration || 1;
-  const delay_ = delay || 0;
-  const timingFactor = roundNumber(duration_ / (duration_ + delay_));
-  return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
+  return parseCubicBezier(easing) ?? parseCssLinear(easing) ?? jsEasings.linear;
 }

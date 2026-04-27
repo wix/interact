@@ -66,8 +66,8 @@ const timeOptions: TimeAnimationOptions = {
 const scrubOptions: ScrubAnimationOptions = {
   type: 'ScrubAnimationOptions',
   namedEffect: { type: 'ParallaxScroll', speed: 0.5 },
-  startOffset: { name: 'cover', offset: { value: 0, type: 'percentage' } },
-  endOffset: { name: 'cover', offset: { value: 100, type: 'percentage' } },
+  startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+  endOffset: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
 };
 ```
 
@@ -164,7 +164,6 @@ const mouseAnimation = getWebAnimation(
       type: 'Tilt3DMouse',
       angle: 15,
       perspective: 800,
-      power: 'medium',
     },
   },
   {
@@ -186,7 +185,6 @@ const multiAnimation = getWebAnimation(
     namedEffect: {
       type: 'ArcIn',
       direction: 'bottom',
-      power: 'hard',
     },
     duration: 1200,
     delay: 300,
@@ -233,8 +231,8 @@ Trigger configuration specifying how the animation responds:
 {
   trigger: 'view-progress',
   element: element,
-  startOffset: { name: 'cover', offset: { value: 20, type: 'percentage' } },
-  endOffset: { name: 'exit', offset: { value: 0, type: 'percentage' } }
+  startOffset: { name: 'cover', offset: { value: 20, unit: 'percentage' } },
+  endOffset: { name: 'exit', offset: { value: 0, unit: 'percentage' } }
 }
 
 // Pointer trigger with container
@@ -301,11 +299,11 @@ const preciseScene = getScrubScene(
     },
     startOffset: {
       name: 'entry',
-      offset: { value: 30, type: 'percentage' },
+      offset: { value: 30, unit: 'percentage' },
     },
     endOffset: {
       name: 'cover',
-      offset: { value: 70, type: 'percentage' },
+      offset: { value: 70, unit: 'percentage' },
     },
   },
   {
@@ -324,9 +322,8 @@ const mouseScene = getScrubScene(
     type: 'ScrubAnimationOptions',
     namedEffect: {
       type: 'ScaleMouse',
-      distance: { value: 100, type: 'px' },
+      distance: { value: 100, unit: 'px' },
       scale: 1.1,
-      power: 'soft',
     },
     transitionDuration: 200,
     transitionEasing: 'easeOut',
@@ -439,7 +436,6 @@ prepareAnimation(
     namedEffect: {
       type: 'ArcIn',
       direction: 'bottom',
-      power: 'hard',
     },
   },
   () => {
@@ -561,14 +557,14 @@ function createResponsiveAnimation(element: HTMLElement) {
     // Lighter animation for mobile
     options = {
       type: 'TimeAnimationOptions',
-      namedEffect: { type: 'SlideIn', direction: 'bottom', power: 'soft' },
+      namedEffect: { type: 'SlideIn', direction: 'bottom' },
       duration: 600,
     };
   } else {
     // Full animation for desktop
     options = {
       type: 'TimeAnimationOptions',
-      namedEffect: { type: 'ArcIn', direction: 'bottom', power: 'hard' },
+      namedEffect: { type: 'ArcIn', direction: 'bottom' },
       duration: 1000,
       easing: 'backOut',
     };

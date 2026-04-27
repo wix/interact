@@ -93,14 +93,6 @@ Use **Background scroll animations** for immersive backgrounds:
 
 ## Common Patterns Across Categories
 
-### Power Levels
-
-Most animations support consistent power levels:
-
-- **`soft`** - Subtle, gentle (10-30% intensity)
-- **`medium`** - Balanced, noticeable (50-70% intensity)
-- **`hard`** - Strong, dramatic (80-100% intensity)
-
 ### Directional Controls
 
 Many animations support directional parameters:
@@ -130,7 +122,7 @@ All categories support both CSS and JavaScript easing:
 #### Ongoing Animations
 
 - Limit concurrent ongoing animations
-- Use lower power levels on mobile
+- Reduce intensity on mobile
 - Prefer CSS animations for infinite loops
 
 #### Scroll Animations

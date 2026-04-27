@@ -1,6 +1,6 @@
 {
   "name": "@wix/interact",
-  "version": "2.0.0-rc.6",
+  "version": "2.2.1",
   "description": "A powerful, declarative interaction library for creating engaging web apps.",
   "license": "MIT",
   "main": "dist/cjs/index.js",
@@ -32,6 +32,7 @@
   "scripts": {
     "dev": "vite dev --open",
     "build": "rimraf dist && vite build && npm run build:types",
+    "build:landing": "../../scripts/build-landing.sh",
     "build:types": "tsc -p tsconfig.build.json",
     "lint": "tsc --noEmit",
     "test": "vitest run",
@@ -49,20 +50,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/wix-incubator/interact"
+    "url": "git+https://github.com/wix/interact.git"
   },
   "bugs": {
-    "url": "https://github.com/wix-incubator/interact/issues"
+    "url": "https://github.com/wix/interact/issues"
   },
   "dependencies": {
-    "@wix/motion": "^2.0.0-rc.2",
+    "@wix/motion": "^2.1.4",
     "fastdom": "^1.0.12",
     "fizban": "^0.7.2",
     "kuliso": "^0.4.13"
   },
   "peerDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^18.3.1 || ^19.0.0",
+    "react-dom": "^18.3.1 || ^19.0.0"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -86,6 +87,5 @@
     "typescript": "^5.9.3",
     "vite": "^7.2.2",
     "vitest": "^4.0.14"
-  },
-  "stableVersion": "2.0.0-rc.4"
+  }
 }

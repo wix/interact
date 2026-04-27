@@ -1,0 +1,60 @@
+{
+  "name": "@wix/motion-presets",
+  "version": "1.0.1",
+  "description": "Animation presets for @wix/motion",
+  "license": "MIT",
+  "main": "dist/cjs/motion-presets.js",
+  "module": "dist/es/motion-presets.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/es/motion-presets.js",
+      "require": "./dist/cjs/motion-presets.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "dev": "vite dev --open",
+    "build": "rimraf dist && npm run build:types && vite build",
+    "build:types": "tsc -p tsconfig.build.json",
+    "lint": "tsc -p tsconfig.build.json --noEmit",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "animation",
+    "presets",
+    "interact",
+    "motion"
+  ],
+  "author": {
+    "name": "wow!Team",
+    "email": "wow-dev@wix.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wix/interact.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wix/interact/issues"
+  },
+  "homepage": "https://github.com/wix/interact#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@wix/motion": "^2.1.4"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.14",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.2",
+    "vitest": "^4.0.14"
+  }
+}

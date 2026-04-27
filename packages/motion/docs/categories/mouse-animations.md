@@ -38,20 +38,20 @@ Programmable effects for unique interactions.
 
 ## Complete Preset Reference
 
-| Animation        | Category  | Complexity | Power Levels | Axis Control | Description                       |
-| ---------------- | --------- | ---------- | ------------ | ------------ | --------------------------------- |
-| **TrackMouse**   | Tracking  | Simple     | ✓            | ✓            | Element follows cursor movement   |
-| **Track3DMouse** | 3D        | Medium     | ✓            | ✓            | 3D tracking with perspective      |
-| **Tilt3DMouse**  | 3D        | Medium     | ✓            | -            | 3D tilt based on pointer position |
-| **SwivelMouse**  | 3D        | Complex    | ✓            | -            | Pivot-point 3D rotation           |
-| **ScaleMouse**   | Scale     | Medium     | ✓            | ✓            | Dynamic scaling on hover          |
-| **BlobMouse**    | Scale     | Medium     | ✓            | -            | Organic blob-like scaling         |
-| **SkewMouse**    | Deform    | Medium     | ✓            | ✓            | Skew transformation tracking      |
-| **BlurMouse**    | Visual    | Complex    | ✓            | -            | Blur filter with 3D effects       |
-| **AiryMouse**    | Tracking  | Medium     | ✓            | ✓            | Lightweight floating movement     |
-| **SpinMouse**    | Transform | Simple     | ✓            | ✓            | Rotation based on movement        |
-| **BounceMouse**  | Tracking  | Simple     | ✓            | ✓            | Elastic cursor following          |
-| **CustomMouse**  | Custom    | Variable   | -            | -            | Programmable mouse effects        |
+| Animation        | Category  | Complexity | Axis Control | Description                       |
+| ---------------- | --------- | ---------- | ------------ | --------------------------------- |
+| **TrackMouse**   | Tracking  | Simple     | ✓            | Element follows cursor movement   |
+| **Track3DMouse** | 3D        | Medium     | ✓            | 3D tracking with perspective      |
+| **Tilt3DMouse**  | 3D        | Medium     | -            | 3D tilt based on pointer position |
+| **SwivelMouse**  | 3D        | Complex    | -            | Pivot-point 3D rotation           |
+| **ScaleMouse**   | Scale     | Medium     | ✓            | Dynamic scaling on hover          |
+| **BlobMouse**    | Scale     | Medium     | -            | Organic blob-like scaling         |
+| **SkewMouse**    | Deform    | Medium     | ✓            | Skew transformation tracking      |
+| **BlurMouse**    | Visual    | Complex    | -            | Blur filter with 3D effects       |
+| **AiryMouse**    | Tracking  | Medium     | ✓            | Lightweight floating movement     |
+| **SpinMouse**    | Transform | Simple     | ✓            | Rotation based on movement        |
+| **BounceMouse**  | Tracking  | Simple     | ✓            | Elastic cursor following          |
+| **CustomMouse**  | Custom    | Variable   | -            | Programmable mouse effects        |
 
 ## Configuration Patterns
 
@@ -64,8 +64,7 @@ const mouseAnimation = getWebAnimation(
     type: 'ScrubAnimationOptions',
     namedEffect: {
       type: 'TrackMouse',
-      distance: { value: 50, type: 'px' },
-      power: 'medium',
+      distance: { value: 50, unit: 'px' },
     },
     transitionDuration: 300,
     transitionEasing: 'easeOut',
@@ -77,21 +76,6 @@ const mouseAnimation = getWebAnimation(
 );
 ```
 
-### Power Levels
-
-Control effect intensity and responsiveness:
-
-```typescript
-// Soft - Subtle, gentle response (10-30% intensity)
-{ type: 'Tilt3DMouse', power: 'soft' }
-
-// Medium - Balanced, noticeable response (50-70% intensity)
-{ type: 'Tilt3DMouse', power: 'medium' }
-
-// Hard - Strong, dramatic response (80-100% intensity)
-{ type: 'Tilt3DMouse', power: 'hard' }
-```
-
 ### Axis Control
 
 Restrict movement to specific axes:
@@ -100,7 +84,7 @@ Restrict movement to specific axes:
 {
   type: 'TrackMouse',
   axis: 'both',        // 'horizontal', 'vertical', 'both'
-  distance: { value: 100, type: 'px' }
+  distance: { value: 100, unit: 'px' }
 }
 ```
 
@@ -121,8 +105,7 @@ Restrict movement to specific axes:
 {
   type: 'ScaleMouse',
   transitionDuration: 200,    // Smooth transition time
-  transitionEasing: 'bounce', // 'linear', 'easeOut', 'elastic', 'bounce'
-  power: 'medium'
+  transitionEasing: 'bounce' // 'linear', 'easeOut', 'elastic', 'bounce'
 }
 ```
 
@@ -137,9 +120,8 @@ Restrict movement to specific axes:
 ```typescript
 {
   type: 'TrackMouse',
-  distance: { value: 80, type: 'px' },    // Movement range
+  distance: { value: 80, unit: 'px' },    // Movement range
   axis: 'both',                           // Movement constraint
-  power: 'medium',                        // Response intensity
   inverted: false                         // Movement direction
 }
 // Element follows cursor with specified constraints
@@ -152,10 +134,9 @@ Restrict movement to specific axes:
 ```typescript
 {
   type: 'AiryMouse',
-  distance: { value: 200, type: 'px' },   // Effect range
+  distance: { value: 200, unit: 'px' },   // Effect range
   angle: 30,                              // Movement bias
   axis: 'both',                           // Axis constraint
-  power: 'soft',                          // Gentle response
   inverted: false                         // Direction control
 }
 // Gentle floating movement with directional bias
@@ -168,9 +149,8 @@ Restrict movement to specific axes:
 ```typescript
 {
   type: 'BounceMouse',
-  distance: { value: 80, type: 'px' },    // Bounce range
-  axis: 'both',                           // Movement axis
-  power: 'medium'                         // Elasticity amount
+  distance: { value: 80, unit: 'px' },    // Bounce range
+  axis: 'both'                            // Movement axis
 }
 // Elastic cursor following with spring-like behavior
 ```
@@ -185,8 +165,7 @@ Restrict movement to specific axes:
 {
   type: 'Tilt3DMouse',
   angle: 15,                              // Maximum tilt angle
-  perspective: 800,                       // 3D perspective depth
-  power: 'medium'                         // Tilt sensitivity
+  perspective: 800                        // 3D perspective depth
 }
 // 3D tilting effect following pointer position
 ```
@@ -198,11 +177,10 @@ Restrict movement to specific axes:
 ```typescript
 {
   type: 'Track3DMouse',
-  distance: { value: 100, type: 'px' },   // Movement range
+  distance: { value: 100, unit: 'px' },   // Movement range
   angle: 10,                              // Rotation amount
   axis: 'both',                           // Movement constraint
-  perspective: 600,                       // 3D depth
-  power: 'hard'                           // Response intensity
+  perspective: 600                        // 3D depth
 }
 // 3D tracking with perspective transformation
 ```
@@ -216,8 +194,7 @@ Restrict movement to specific axes:
   type: 'SwivelMouse',
   angle: 25,                              // Rotation range
   perspective: 800,                       // 3D perspective
-  pivotAxis: 'center-horizontal',         // Pivot point
-  power: 'medium'                         // Rotation sensitivity
+  pivotAxis: 'center-horizontal'           // Pivot point
 }
 // Pivot-based 3D rotation around specified axis
 ```
@@ -231,10 +208,9 @@ Restrict movement to specific axes:
 ```typescript
 {
   type: 'ScaleMouse',
-  distance: { value: 150, type: 'px' },   // Effect range
+  distance: { value: 150, unit: 'px' },   // Effect range
   axis: 'both',                           // Scale constraint
   scale: 1.2,                             // Maximum scale
-  power: 'medium',                        // Scale sensitivity
   scaleDirection: 'up'                    // 'up' or 'down'
 }
 // Dynamic scaling based on cursor proximity
@@ -247,9 +223,8 @@ Restrict movement to specific axes:
 ```typescript
 {
   type: 'BlobMouse',
-  distance: { value: 120, type: 'px' },   // Effect range
-  scale: 1.5,                             // Maximum scale change
-  power: 'soft'                           // Organic responsiveness
+  distance: { value: 120, unit: 'px' },   // Effect range
+  scale: 1.5                              // Maximum scale change
 }
 // Organic blob-like scaling with smooth transitions
 ```
@@ -261,10 +236,9 @@ Restrict movement to specific axes:
 ```typescript
 {
   type: 'SkewMouse',
-  distance: { value: 100, type: 'px' },   // Effect range
+  distance: { value: 100, unit: 'px' },   // Effect range
   angle: 10,                              // Maximum skew angle
-  axis: 'both',                           // Skew constraint
-  power: 'medium'                         // Skew intensity
+  axis: 'both'                            // Skew constraint
 }
 // Skew transformation following pointer movement
 ```
@@ -278,12 +252,11 @@ Restrict movement to specific axes:
 ```typescript
 {
   type: 'BlurMouse',
-  distance: { value: 80, type: 'px' },    // Movement range
+  distance: { value: 80, unit: 'px' },    // Movement range
   angle: 5,                               // Blur direction
   scale: 0.3,                             // Scale during blur
   blur: 20,                               // Blur amount (px)
-  perspective: 600,                       // 3D perspective
-  power: 'hard'                           // Effect intensity
+  perspective: 600                        // 3D perspective
 }
 // Motion blur with 3D transformation
 ```
@@ -295,8 +268,7 @@ Restrict movement to specific axes:
 ```typescript
 {
   type: 'SpinMouse',
-  axis: 'both',                           // Rotation trigger axis
-  power: 'medium'                         // Rotation speed
+  axis: 'both'                            // Rotation trigger axis
 }
 // Rotation based on mouse movement velocity
 ```
@@ -349,9 +321,9 @@ Restrict movement to specific axes:
 
 ```typescript
 {
-  distance: { value: 200, type: 'px' },      // Pixel-based range
-  distance: { value: 50, type: 'percentage' }, // Percentage-based range
-  distance: { value: 10, type: 'vh' }         // Viewport-based range
+  distance: { value: 200, unit: 'px' },      // Pixel-based range
+  distance: { value: 50, unit: 'percentage' }, // Percentage-based range
+  distance: { value: 10, unit: 'vh' }         // Viewport-based range
 }
 ```
 
@@ -423,7 +395,6 @@ const cardHover = getWebAnimation(
       type: 'Tilt3DMouse',
       angle: 12,
       perspective: 1000,
-      power: 'soft',
     },
     transitionDuration: 200,
     transitionEasing: 'easeOut',
@@ -453,9 +424,8 @@ const follower = getWebAnimation(
     type: 'ScrubAnimationOptions',
     namedEffect: {
       type: 'TrackMouse',
-      distance: { value: 20, type: 'px' },
+      distance: { value: 20, unit: 'px' },
       axis: 'both',
-      power: 'medium',
     },
     transitionDuration: 100,
     transitionEasing: 'easeOut',
@@ -476,10 +446,9 @@ const productShowcase = getWebAnimation(
     type: 'ScrubAnimationOptions',
     namedEffect: {
       type: 'Track3DMouse',
-      distance: { value: 50, type: 'px' },
+      distance: { value: 50, unit: 'px' },
       angle: 15,
       perspective: 800,
-      power: 'medium',
     },
     transitionDuration: 300,
     transitionEasing: 'easeOut',
@@ -500,10 +469,9 @@ const buttonEffect = getWebAnimation(
     type: 'ScrubAnimationOptions',
     namedEffect: {
       type: 'ScaleMouse',
-      distance: { value: 100, type: 'px' },
+      distance: { value: 100, unit: 'px' },
       scale: 1.05,
       scaleDirection: 'up',
-      power: 'soft',
     },
     transitionDuration: 150,
     transitionEasing: 'bounce',

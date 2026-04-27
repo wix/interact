@@ -11,6 +11,10 @@ import {
 import type { AnimationOptions, TriggerVariant } from '../src/types';
 import type { Mock } from 'vitest';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { registerEffects } from '../src/api/registry';
+
+const CustomMouse = vi.fn();
+const BlobMouse = vi.fn();
 
 // Mock dependencies
 vi.mock('fastdom', () => ({
@@ -24,168 +28,159 @@ vi.mock('../src/AnimationGroup', () => ({
   AnimationGroup: vi.fn(),
 }));
 
-vi.mock('../src/utils', () => ({
-  MouseAnimationInstance: vi.fn(),
-}));
-
-vi.mock('../src/library/scroll', () => ({
-  scrollAnimations: {
-    FadeScroll: {
-      style: vi.fn((options: AnimationOptions) => [
-        {
-          name: 'fade-scroll',
-          keyframes: [{ opacity: 1 }, { opacity: 0 }],
-          fill: 'both',
-          easing: 'linear',
-          iterations: 1,
-          startOffset: {
-            name: 'entry',
-            offset: { value: 0, type: 'percentage' },
-          },
-          endOffset: {
-            name: 'exit',
-            offset: { value: 100, type: 'percentage' },
-          },
-          ...options,
-        },
-      ]),
-      web: vi.fn((options: AnimationOptions) => [
-        {
-          keyframes: [{ opacity: 0 }, { opacity: 1 }],
-          fill: 'both',
-          easing: 'linear',
-          iterations: 1,
-          startOffset: {
-            name: 'entry',
-            offset: { value: 0, type: 'percentage' },
-          },
-          endOffset: {
-            name: 'cover',
-            offset: { value: 50, type: 'percentage' },
-          },
-          ...options,
-        },
-      ]),
-      getNames: vi.fn(() => ['fade-scroll']),
+const mockFadeInPreset = {
+  style: vi.fn((options: AnimationOptions) => [
+    {
+      name: 'fade-in',
+      keyframes: [{ opacity: 0 }, { opacity: 1 }],
+      duration: 1000,
+      fill: 'both',
+      easing: 'ease-in',
+      iterations: 1,
+      ...options,
     },
-    ParallaxScroll: vi.fn((options: AnimationOptions) => [
+  ]),
+  web: vi.fn((options: AnimationOptions) => [
+    {
+      keyframes: [{ opacity: 0 }, { opacity: 1 }],
+      timing: { duration: options?.duration || 1000 },
+      duration: 1000,
+      ...options,
+    },
+  ]),
+  getNames: vi.fn(() => ['fade-in']),
+  prepare: vi.fn(),
+};
+
+const mockFadeScrollPreset = {
+  style: vi.fn((options: AnimationOptions) => [
+    {
+      ...options,
+      name: 'fade-scroll',
+      keyframes: [{ opacity: 1 }, { opacity: 0 }],
+      fill: 'both',
+      easing: 'linear',
+      iterations: 1,
+      startOffset: (options as any).startOffset || {
+        name: 'entry',
+        offset: { value: 0, unit: 'percentage' },
+      },
+      endOffset: (options as any).endOffset || {
+        name: 'exit',
+        offset: { value: 100, unit: 'percentage' },
+      },
+    },
+  ]),
+  web: vi.fn((options: AnimationOptions) => {
+    const startOffset = (options as any).startOffset
+      ? {
+          name: (options as any).startOffset.name || 'cover',
+          offset: (options as any).startOffset.offset,
+        }
+      : { name: 'cover', offset: { value: 0, unit: 'percentage' } };
+    const endOffset = (options as any).endOffset
+      ? {
+          name: (options as any).endOffset.name || 'cover',
+          offset: (options as any).endOffset.offset,
+        }
+      : { name: 'cover', offset: { value: 100, unit: 'percentage' } };
+
+    return [
       {
+        ...options,
+        name: 'fade-scroll',
+        keyframes: [{ opacity: 0 }, { opacity: 1 }],
         fill: 'both',
         easing: 'linear',
-        startOffsetAdd: '-25vh',
-        endOffsetAdd: '25vh',
-        startOffset: {
-          name: 'entry',
-          offset: { value: 0, type: 'percentage' },
-        },
-        endOffset: {
-          name: 'exit',
-          offset: { value: 100, type: 'percentage' },
-        },
-        keyframes: [{ transform: 'translateY(-25vh)' }, { transform: 'translateY(25vh)' }],
-        ...options,
+        iterations: 1,
+        startOffsetAdd: (options as any).startOffsetAdd,
+        endOffsetAdd: (options as any).endOffsetAdd,
+        startOffset,
+        endOffset,
       },
-    ]),
-  },
-}));
+    ];
+  }),
+  getNames: vi.fn(() => ['fade-scroll']),
+};
 
-vi.mock('../src/library/entrance', () => ({
-  entranceAnimations: {
-    FadeIn: {
-      style: vi.fn((options: AnimationOptions) => [
-        {
-          name: 'fade-in',
-          keyframes: [{ opacity: 0 }, { opacity: 1 }],
-          duration: 1000,
-          fill: 'both',
-          easing: 'ease-in',
-          iterations: 1,
-          ...options,
-        },
-      ]),
-      web: vi.fn((options: AnimationOptions) => [
-        {
-          keyframes: [{ opacity: 0 }, { opacity: 1 }],
-          timing: { duration: options?.duration || 1000 },
-          duration: 1000,
-          ...options,
-        },
-      ]),
-      getNames: vi.fn(() => ['fade-in']),
-      prepare: vi.fn(), // Add prepare method to mock
+const mockGlitchInPreset = {
+  style: vi.fn((options: AnimationOptions) => [
+    {
+      ...options,
+      name: 'glitch-in',
+      keyframes: [{ translate: '-100%' }, { translate: 0 }],
+      duration: 1000,
+      fill: 'both',
+      easing: 'ease',
+      iterations: 1,
     },
-    GlitchIn: {
-      style: vi.fn((options: AnimationOptions) => [
-        {
-          name: 'glitch-in',
-          keyframes: [{ translate: '-100%' }, { translate: 0 }],
-          duration: 1000,
-          fill: 'both',
-          easing: 'ease',
-          iterations: 1,
-          ...options,
-        },
-      ]),
-      web: vi.fn((options: AnimationOptions) => [
-        {
-          keyframes: [{ translate: '-100%' }, { translate: 0 }],
-          timing: { duration: options?.duration || 1000 },
-          ...options,
-        },
-      ]),
-      getNames: vi.fn(() => ['glitch-in']),
+  ]),
+  web: vi.fn((options: AnimationOptions) => [
+    {
+      ...options,
+      name: 'glitch-in',
+      keyframes: [{ translate: '-100%' }, { translate: 0 }],
+      timing: { duration: options?.duration || 1000 },
     },
-  },
-}));
+  ]),
+  getNames: vi.fn(() => ['glitch-in']),
+};
 
-vi.mock('../src/library/ongoing', () => ({
-  ongoingAnimations: {
-    Poke: {
-      style: vi.fn((options: AnimationOptions) => [
-        {
-          name: 'motion-poke',
-          easing: 'linear',
-          keyframes: [{ translate: '0 0' }, { translate: '10px 0' }],
-          ...options,
-        },
-      ]),
-      web: vi.fn((options: AnimationOptions) => [
-        {
-          name: 'motion-poke',
-          easing: 'linear',
-          keyframes: [{ translate: '0 0' }, { translate: '10px 0' }],
-          ...options,
-        },
-      ]),
-      getNames: vi.fn(() => ['motion-poke']),
+const mockBgPanPreset = {
+  web: vi.fn((options: AnimationOptions) => [
+    {
+      ...options,
+      name: 'bg-pan',
+      part: 'bg',
+      keyframes: [{ transform: 'translateX(0)' }, { transform: 'translateX(100%)' }],
+      fill: 'both',
+      easing: 'linear',
+      iterations: 1,
     },
-  },
-}));
+  ]),
+};
 
-vi.mock('../src/library/mouse', () => ({
-  mouseAnimations: {
-    CustomMouse: vi.fn(),
-    BlobMouse: vi.fn(),
-  },
-}));
-
-vi.mock('../src/library/backgroundScroll', () => ({
-  backgroundScrollAnimations: {
-    BgPan: {
-      web: vi.fn((options: AnimationOptions) => [
-        {
-          name: 'bg-pan',
-          keyframes: [{ transform: 'translateX(0)' }, { transform: 'translateX(100%)' }],
-          fill: 'both',
-          easing: 'linear',
-          part: 'bg',
-          iterations: 1,
-          ...options,
-        },
-      ]),
+const mockParallaxScrollPreset = {
+  web: vi.fn((options: AnimationOptions) => [
+    {
+      ...options,
+      name: 'parallax-scroll',
+      keyframes: [{ transform: 'translateY(0)' }, { transform: 'translateY(10px)' }],
+      fill: 'both',
+      easing: 'linear',
+      iterations: 1,
+      startOffset: (options as any).startOffset || {
+        name: 'entry',
+        offset: { value: 0, unit: 'percentage' },
+      },
+      endOffset: (options as any).endOffset || {
+        name: 'exit',
+        offset: { value: 100, unit: 'percentage' },
+      },
     },
-  },
-}));
+  ]),
+};
+
+const mockPokePreset = {
+  web: vi.fn((options: AnimationOptions) => [
+    {
+      ...options,
+      name: 'poke',
+      keyframes: [{ transform: 'translateX(0px)' }, { transform: 'translateX(10px)' }],
+    },
+  ]),
+};
+
+registerEffects({
+  FadeIn: mockFadeInPreset,
+  FadeScroll: mockFadeScrollPreset,
+  GlitchIn: mockGlitchInPreset,
+  BgPan: mockBgPanPreset,
+  ParallaxScroll: mockParallaxScrollPreset,
+  Poke: mockPokePreset,
+  CustomMouse,
+  BlobMouse,
+} as any);
 
 // Don't mock getEasing for getEasing() tests - we want to test the real implementation
 vi.mock('../src/utils', async () => {
@@ -231,11 +226,11 @@ describe('motion.ts', () => {
           },
           startOffset: {
             name: 'entry',
-            offset: { value: 0, type: 'percentage' },
+            offset: { value: 0, unit: 'percentage' },
           },
           endOffset: {
             name: 'exit',
-            offset: { value: 100, type: 'percentage' },
+            offset: { value: 100, unit: 'percentage' },
           },
         };
 
@@ -265,11 +260,11 @@ describe('motion.ts', () => {
           },
           startOffset: {
             name: 'entry',
-            offset: { value: 20, type: 'percentage' },
+            offset: { value: 20, unit: 'percentage' },
           },
           endOffset: {
             name: 'exit',
-            offset: { value: 80, type: 'percentage' },
+            offset: { value: 80, unit: 'percentage' },
           },
         };
 
@@ -332,7 +327,7 @@ describe('motion.ts', () => {
             type: 'GlitchIn',
             id: 'some-glitch',
             direction: 1,
-            distance: { value: 100, type: 'percentage' },
+            distance: { value: 100, unit: 'percentage' },
           },
           duration: 1500,
         };
@@ -346,7 +341,6 @@ describe('motion.ts', () => {
       test('should handle keyframe effects', () => {
         const animationOptions: AnimationOptions = {
           keyframeEffect: {
-            type: 'KeyframeEffect',
             name: 'custom-keyframes',
             keyframes: [
               { offset: 0, transform: 'scale(1.2)' },
@@ -388,7 +382,6 @@ describe('motion.ts', () => {
 
       beforeEach(() => {
         vi.clearAllMocks();
-
         // Create mock HTMLElement
         mockElement = {
           id: 'test-element',
@@ -433,14 +426,14 @@ describe('motion.ts', () => {
         });
 
         // Mock global constructors
-        (global as any).ViewTimeline = vi.fn(function (options = {}) {
+        (globalThis as any).ViewTimeline = vi.fn(function (options = {}) {
           Object.assign(mockViewTimeline, options);
           return mockViewTimeline;
         });
-        (global as any).KeyframeEffect = vi.fn(function () {
+        (globalThis as any).KeyframeEffect = vi.fn(function () {
           return mockKeyframeEffect;
         });
-        (global as any).Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
+        (globalThis as any).Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
           return {
             ready: Promise.resolve(),
             play: vi.fn(),
@@ -521,8 +514,7 @@ describe('motion.ts', () => {
           return customMouseMock;
         });
 
-        const { CustomMouse } = (await import('../src/library/mouse')).mouseAnimations;
-        (CustomMouse as Mock).mockImplementation(function (options: any) {
+        CustomMouse.mockImplementation(function (options: any) {
           return vi.fn(function (target_: any) {
             return new (CustomMouseMock as any)(target_, options);
           });
@@ -562,7 +554,7 @@ describe('motion.ts', () => {
           trigger: 'view-progress',
         });
 
-        expect((global as any).ViewTimeline).toHaveBeenCalledWith({
+        expect((globalThis as any).ViewTimeline).toHaveBeenCalledWith({
           subject: mockElement,
         });
         expect(AnimationGroup).toHaveBeenCalledWith(
@@ -577,7 +569,7 @@ describe('motion.ts', () => {
 
       test('should handle view-progress trigger without ViewTimeline support', async () => {
         // Remove ViewTimeline support
-        delete (global as any).ViewTimeline;
+        delete (globalThis as any).ViewTimeline;
 
         const animationOptions: AnimationOptions = {
           namedEffect: {
@@ -604,7 +596,7 @@ describe('motion.ts', () => {
         expect(mockAnimationGroup.animations[0].timeline).toBeUndefined();
 
         // Restore for other tests
-        (global as any).ViewTimeline = vi.fn(function () {
+        (globalThis as any).ViewTimeline = vi.fn(function () {
           return mockViewTimeline;
         });
       });
@@ -618,10 +610,10 @@ describe('motion.ts', () => {
             opacity: 0,
           },
           startOffset: {
-            offset: { value: 10, type: 'percentage' },
+            offset: { value: 10, unit: 'percentage' },
           },
           endOffset: {
-            offset: { value: 90, type: 'percentage' },
+            offset: { value: 90, unit: 'percentage' },
           },
         };
 
@@ -662,11 +654,11 @@ describe('motion.ts', () => {
           namedEffect: { type: 'BgPan', id: 'bg-pan', direction: 'left' },
           startOffset: {
             name: 'entry',
-            offset: { value: 0, type: 'percentage' },
+            offset: { value: 0, unit: 'percentage' },
           },
           endOffset: {
             name: 'exit',
-            offset: { value: 100, type: 'percentage' },
+            offset: { value: 100, unit: 'percentage' },
           },
         };
 
@@ -694,11 +686,11 @@ describe('motion.ts', () => {
           namedEffect: { type: 'BgPan', id: 'bg-pan', direction: 'left' },
           startOffset: {
             name: 'entry',
-            offset: { value: 0, type: 'percentage' },
+            offset: { value: 0, unit: 'percentage' },
           },
           endOffset: {
             name: 'exit',
-            offset: { value: 100, type: 'percentage' },
+            offset: { value: 100, unit: 'percentage' },
           },
         };
 
@@ -887,7 +879,6 @@ describe('motion.ts', () => {
       test('should handle keyframe effects', async () => {
         const animationOptions: AnimationOptions = {
           keyframeEffect: {
-            type: 'KeyframeEffect',
             name: 'fade-scale-in',
             keyframes: [
               { opacity: 0, transform: 'scale(0.5)' },
@@ -1359,7 +1350,7 @@ describe('motion.ts', () => {
         vi.clearAllMocks();
 
         // Mock global constructors
-        global.KeyframeEffect = vi.fn(function () {
+        (globalThis as any).KeyframeEffect = vi.fn(function () {
           return {
             target: mockElement,
             setKeyframes: vi.fn(),
@@ -1378,7 +1369,7 @@ describe('motion.ts', () => {
             }),
           };
         }) as any;
-        global.Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
+        (globalThis as any).Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
           return {
             ready: Promise.resolve(),
             play: vi.fn(),
@@ -1445,7 +1436,7 @@ describe('motion.ts', () => {
         };
 
         // Mock getElement
-        (global as any).getElement = vi.fn((id) => {
+        (globalThis as any).getElement = vi.fn((id) => {
           if (id === 'test-element') {
             return mockElement;
           }
@@ -1456,7 +1447,7 @@ describe('motion.ts', () => {
         });
 
         // Mock window.ViewTimeline
-        delete (window as any).ViewTimeline;
+        delete (globalThis as any).ViewTimeline;
 
         // Mock document.getElementById
         Object.defineProperty(document, 'getElementById', {
@@ -1900,9 +1891,7 @@ describe('motion.ts', () => {
           writable: true,
         });
 
-        // Reset the mock prepare function for each test
-        const entranceAnimations = (await import('../src/library/entrance')).entranceAnimations;
-        (entranceAnimations.FadeIn?.prepare as Mock).mockReset();
+        mockFadeInPreset.prepare.mockReset();
       });
 
       test('should call preset.prepare when available', async () => {
@@ -1912,9 +1901,7 @@ describe('motion.ts', () => {
           duration: 1000,
         };
 
-        // Get the mocked prepare function from the entrance animations
-        const entranceAnimations = (await import('../src/library/entrance')).entranceAnimations;
-        const prepareFn = entranceAnimations.FadeIn?.prepare as Mock;
+        const prepareFn = mockFadeInPreset.prepare;
 
         // Debug: Let's check if the mock is properly set up
         expect(prepareFn).toBeDefined();
@@ -1938,8 +1925,7 @@ describe('motion.ts', () => {
           duration: 1000,
         };
 
-        const entranceAnimations = (await import('../src/library/entrance')).entranceAnimations;
-        const prepareFn = entranceAnimations.FadeIn?.prepare as Mock;
+        const prepareFn = mockFadeInPreset.prepare;
 
         prepareAnimation(mockElement.id, animationOptions);
 
@@ -1969,8 +1955,7 @@ describe('motion.ts', () => {
           duration: 1000,
         };
 
-        const entranceAnimations = (await import('../src/library/entrance')).entranceAnimations;
-        const prepareFn = entranceAnimations.FadeIn?.prepare as Mock;
+        const prepareFn = mockFadeInPreset.prepare;
 
         prepareAnimation('test-element', animationOptions);
 
@@ -2019,7 +2004,7 @@ describe('motion.ts', () => {
             type: 'GlitchIn',
             id: 'glitch',
             direction: 45,
-            distance: { value: 100, type: 'percentage' },
+            distance: { value: 100, unit: 'percentage' },
           }, // Use GlitchIn which doesn't have prepare
           duration: 1000,
         };
@@ -2040,8 +2025,7 @@ describe('motion.ts', () => {
           duration: 1000,
         };
 
-        const entranceAnimations = (await import('../src/library/entrance')).entranceAnimations;
-        const prepareFn = entranceAnimations.FadeIn?.prepare as Mock;
+        const prepareFn = mockFadeInPreset.prepare;
 
         // Should not throw when target is null
         expect(() => {
@@ -2065,8 +2049,7 @@ describe('motion.ts', () => {
           fill: 'both',
         };
 
-        const entranceAnimations = (await import('../src/library/entrance')).entranceAnimations;
-        const prepareFn = entranceAnimations.FadeIn?.prepare as Mock;
+        const prepareFn = mockFadeInPreset.prepare;
 
         prepareAnimation(mockElement.id, animationOptions);
 
@@ -2185,11 +2168,11 @@ describe('motion.ts', () => {
         });
 
         // Mock global constructors
-        (global as any).ViewTimeline = vi.fn(function (options = {}) {
+        (globalThis as any).ViewTimeline = vi.fn(function (options = {}) {
           Object.assign(mockViewTimeline, options);
           return mockViewTimeline;
         });
-        (global as any).KeyframeEffect = vi.fn(function (
+        (globalThis as any).KeyframeEffect = vi.fn(function (
           _target: Element | null,
           _keyframes: Keyframe[] | PropertyIndexedKeyframes | null,
           options: KeyframeEffectOptions | number | undefined,
@@ -2197,7 +2180,7 @@ describe('motion.ts', () => {
           mockKeyframeEffectOptions = options;
           return mockKeyframeEffect;
         }) as any;
-        (global as any).Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
+        (globalThis as any).Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
           return {
             ready: Promise.resolve(),
             play: vi.fn(),

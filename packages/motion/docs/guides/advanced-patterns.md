@@ -168,7 +168,7 @@ export default function create(
         { transform: 'translateY(100px)', offset: 1 },
       ],
       timing: {
-        duration: { value: 100, type: 'percentage' },
+        duration: { value: 100, unit: 'percentage' },
       },
       custom: {
         mass,
@@ -826,8 +826,7 @@ class GestureAnimationController {
       namedEffect: {
         type: 'GlideIn',
         direction: this.directionToAngle(direction),
-        distance: { value: distance, type: 'px' },
-        power: velocity > 0.5 ? 'hard' : 'medium',
+        distance: { value: distance, unit: 'px' },
       },
       duration: Math.max(300, 1000 / velocity), // Faster swipes = shorter duration
       easing: 'easeOut',
@@ -843,9 +842,8 @@ class GestureAnimationController {
         type: 'ScrubAnimationOptions',
         namedEffect: {
           type: 'TrackMouse',
-          distance: { value: 100, type: 'px' },
+          distance: { value: 100, unit: 'px' },
           axis: 'both',
-          power: 'medium',
         },
         transitionDuration: 0, // Immediate response
       }) as AnimationGroup;
@@ -871,7 +869,6 @@ class GestureAnimationController {
       type: 'TimeAnimationOptions',
       namedEffect: {
         type: 'DropIn',
-        power: scale > 1 ? 'hard' : 'soft',
         initialScale: scale,
       },
       duration: 200,
@@ -888,7 +885,6 @@ class GestureAnimationController {
         type: 'SpinIn',
         direction: rotation > 0 ? 'clockwise' : 'counter-clockwise',
         spins: Math.abs(rotation) / 360,
-        power: 'medium',
       },
       duration: 500,
     });

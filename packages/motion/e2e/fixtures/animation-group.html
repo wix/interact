@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AnimationGroup API</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      body {
+        padding: 72px 24px 48px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+      }
+
+      .group-container {
+        display: flex;
+        gap: 16px;
+      }
+
+      .group-item {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: bold;
+        font-size: 13px;
+      }
+
+      #group-item-1 {
+        background: #e74c3c;
+      }
+      #group-item-2 {
+        background: #3498db;
+      }
+      #group-item-3 {
+        background: #2ecc71;
+      }
+
+      .controls {
+        display: flex;
+        gap: 8px;
+      }
+
+      button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        background: #4a90d9;
+        color: #fff;
+      }
+
+      button:hover {
+        background: #357abd;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="fixture-nav">
+      <strong>AnimationGroup Fixture</strong>
+      <a href="./index.html">← Back</a>
+    </nav>
+
+    <div class="group-container">
+      <div id="group-item-1" class="group-item" data-testid="group-item-1">A</div>
+      <div id="group-item-2" class="group-item" data-testid="group-item-2">B</div>
+      <div id="group-item-3" class="group-item" data-testid="group-item-3">C</div>
+    </div>
+
+    <div class="controls">
+      <button data-testid="btn-play" onclick="window.play()">Play</button>
+      <button data-testid="btn-pause" onclick="window.pause()">Pause</button>
+      <button data-testid="btn-reverse" onclick="window.reverse()">Reverse</button>
+      <button data-testid="btn-cancel" onclick="window.cancel()">Cancel</button>
+    </div>
+
+    <script type="module" src="./animation-group.ts"></script>
+  </body>
+</html>

@@ -5,7 +5,8 @@
     "outDir": "dist/es",
     "declarationDir": "dist/types",
     "declaration": true,
-    "composite": true
+    "composite": true,
+    "baseUrl": "."
   },
   "include": ["src/**/*", "src"],
   "files": ["./src/external-types.d.ts"],

@@ -57,9 +57,9 @@ export function MarkdownPage() {
       <div className="error-state">
         <h2>Page Not Found</h2>
         <p>{error}</p>
-        <a href="/" className="back-link">
+        <Link to="/" className="back-link">
           ← Back to Home
-        </a>
+        </Link>
       </div>
     );
   }
@@ -80,10 +80,18 @@ export function MarkdownPage() {
                 </a>
               );
             }
-            // Anchor links (hash only)
+            // Anchor links (hash only) - handle manually for HashRouter compatibility
             if (href?.startsWith('#')) {
+              const handleAnchorClick = (e: React.MouseEvent) => {
+                e.preventDefault();
+                const targetId = href.slice(1);
+                const element = document.getElementById(targetId);
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' });
+                }
+              };
               return (
-                <a href={href} {...props}>
+                <a href={href} onClick={handleAnchorClick} {...props}>
                   {children}
                 </a>
               );

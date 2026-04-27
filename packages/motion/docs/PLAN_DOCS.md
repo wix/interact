@@ -33,7 +33,7 @@ The motion package contains a sophisticated animation system with extensive pres
 
 - **Animation structure**: Each preset exports `web()`, `style()`, `getNames()`, optional `prepare()`
 - **Type hierarchy**: All animations inherit from `BaseDataItemLike<Type>` with specific configuration interfaces
-- **Configuration system**: Common properties like `power`, `direction`, `intensity` with preset-specific options
+- **Configuration system**: Common properties like `direction`, `intensity` with preset-specific options
 - **Platform flexibility**: Dual `web()` and `style()` functions for different rendering contexts
 - **Playground integration**: Storybook stories demonstrate interactive usage
 

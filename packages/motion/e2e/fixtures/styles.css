@@ -1,0 +1,59 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: sans-serif;
+  background: #f5f5f5;
+}
+
+.fixture-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 16px;
+  background: #1a1a2e;
+  color: #fff;
+  font-size: 13px;
+  z-index: 9999;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.fixture-nav a {
+  color: #a0c4ff;
+  text-decoration: none;
+}
+
+.fixture-nav a:hover {
+  text-decoration: underline;
+}
+
+.fixture-box {
+  width: 120px;
+  height: 120px;
+  background: #4a90d9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.fixture-label {
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.spacer {
+  height: 100vh;
+}

@@ -47,7 +47,7 @@ document.adoptedStyleSheets.push(sheet);
 // ✅ Interactive animations requiring control
 const interactiveAnimation = getWebAnimation(element, {
   type: 'TimeAnimationOptions',
-  namedEffect: { type: 'BounceIn', power: 'medium' },
+  namedEffect: { type: 'BounceIn' },
 });
 
 // Control based on user interaction

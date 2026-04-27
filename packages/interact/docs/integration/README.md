@@ -177,13 +177,13 @@ Framework-specific integration guides and migration documentation for `@wix/inte
 
 ```bash
 # npm
-npm install @wix/interact @wix/motion
+npm install @wix/interact
 
 # yarn
-yarn add @wix/interact @wix/motion
+yarn add @wix/interact
 
 # pnpm
-pnpm add @wix/interact @wix/motion
+pnpm add @wix/interact
 ```
 
 ### Entry Point Imports
@@ -225,7 +225,7 @@ function App() {
 }
 ```
 
-**Vanilla JavaScript:**
+**Web Components:**
 
 ```typescript
 import { Interact } from '@wix/interact/web';
@@ -236,11 +236,31 @@ const config = {
 
 // Initialize
 Interact.create(config);
+```
 
-// HTML
-// <interact-element data-interact-key="my-element">
-//   <div>Interactive content</div>
-// </interact-element>
+```html
+<interact-element data-interact-key="my-element">
+  <div>Interactive content</div>
+</interact-element>
+```
+
+**Vanilla:**
+
+```typescript
+import { Interact, add } from '@wix/interact';
+
+const config = {
+  /* your config */
+};
+
+// Initialize
+Interact.create(config);
+
+add(document.querySelector('[data-interact-key="my-element"]'));
+```
+
+```html
+<div data-interact-key="my-element">Interactive content</div>
 ```
 
 **Vue:**

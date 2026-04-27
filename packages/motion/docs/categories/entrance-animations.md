@@ -38,32 +38,27 @@ Creative reveals using clip-path and shape morphing.
 
 ## Complete Preset Reference
 
-| Animation      | Category | Complexity | Power Levels | Directions     | Description                       |
-| -------------- | -------- | ---------- | ------------ | -------------- | --------------------------------- |
-| **FadeIn**     | Fade     | Simple     | -            | -              | Clean opacity transition          |
-| **ArcIn**      | 3D       | Complex    | ✓            | 4-way          | Curved motion with 3D rotation    |
-| **BounceIn**   | Dynamic  | Medium     | ✓            | 5-way + center | Spring-based entrance with bounce |
-| **SlideIn**    | Movement | Medium     | ✓            | 4-way          | Slide from edge with clip reveal  |
-| **GlideIn**    | Movement | Medium     | ✓            | 360°           | Smooth directional movement       |
-| **FlipIn**     | 3D       | Medium     | ✓            | 4-way          | 3D flip rotation entrance         |
-| **DropIn**     | Dynamic  | Simple     | ✓            | -              | Scale-based drop with easing      |
-| **ExpandIn**   | Dynamic  | Medium     | ✓            | 9-way          | Scale from specific origin points |
-| **FloatIn**    | Movement | Simple     | -            | 4-way          | Gentle floating movement          |
-| **SpinIn**     | Dynamic  | Medium     | ✓            | 2-way          | Rotation with scale entrance      |
-| **FoldIn**     | 3D       | Complex    | ✓            | 4-way          | 3D fold with perspective          |
-| **TurnIn**     | 3D       | Complex    | ✓            | 4-corner       | Complex 3D corner rotation        |
-| **CircleIn**   | Movement | Complex    | -            | 2-way          | Circular arc movement             |
-| **CurveIn**    | 3D       | Complex    | -            | 4-way          | Curved 3D perspective entrance    |
-| **PunchIn**    | Dynamic  | Complex    | ✓            | 5-way          | Multi-stage bouncing animation    |
-| **RevealIn**   | Clip     | Medium     | -            | 4-way          | Clean clip-path reveal            |
-| **SlideIn**    | Clip     | Medium     | ✓            | 4-way          | Combined slide and clip           |
-| **TiltIn**     | 3D       | Complex    | -            | 2-way          | 3D tilt with clip reveal          |
-| **WinkIn**     | Clip     | Medium     | -            | 2-way          | Accordion-style reveal            |
-| **ShapeIn**    | Clip     | Medium     | -            | 5 shapes       | Morphing shape reveals            |
-| **ShuttersIn** | Clip     | Complex    | ✓            | 4-way          | Multi-segment shutter effect      |
-| **GrowIn**     | Movement | Medium     | ✓            | 360°           | Directional scale growth          |
-| **BlurIn**     | Filter   | Simple     | ✓            | -              | Blur-to-focus transition          |
-| **GlitchIn**   | Movement | Medium     | ✓            | 360°           | Modified glide with glitch feel   |
+| Animation      | Category | Complexity | Directions     | Description                       |
+| -------------- | -------- | ---------- | -------------- | --------------------------------- |
+| **FadeIn**     | Fade     | Simple     | -              | Clean opacity transition          |
+| **ArcIn**      | 3D       | Complex    | 4-way          | Curved motion with 3D rotation    |
+| **BounceIn**   | Dynamic  | Medium     | 5-way + center | Spring-based entrance with bounce |
+| **SlideIn**    | Movement | Medium     | 4-way          | Slide from edge with clip reveal  |
+| **GlideIn**    | Movement | Medium     | 360°           | Smooth directional movement       |
+| **FlipIn**     | 3D       | Medium     | 4-way          | 3D flip rotation entrance         |
+| **DropIn**     | Dynamic  | Simple     | -              | Scale-based drop with easing      |
+| **ExpandIn**   | Dynamic  | Medium     | 9-way          | Scale from specific origin points |
+| **FloatIn**    | Movement | Simple     | 4-way          | Gentle floating movement          |
+| **SpinIn**     | Dynamic  | Medium     | 2-way          | Rotation with scale entrance      |
+| **FoldIn**     | 3D       | Complex    | 4-way          | 3D fold with perspective          |
+| **TurnIn**     | 3D       | Complex    | 4-corner       | Complex 3D corner rotation        |
+| **CurveIn**    | 3D       | Complex    | 4-way          | Curved 3D perspective entrance    |
+| **RevealIn**   | Clip     | Medium     | 4-way          | Clean clip-path reveal            |
+| **TiltIn**     | 3D       | Complex    | 2-way          | 3D tilt with clip reveal          |
+| **WinkIn**     | Clip     | Medium     | 2-way          | Accordion-style reveal            |
+| **ShapeIn**    | Clip     | Medium     | 5 shapes       | Morphing shape reveals            |
+| **ShuttersIn** | Clip     | Complex    | 4-way          | Multi-segment shutter effect      |
+| **BlurIn**     | Filter   | Simple     | -              | Blur-to-focus transition          |
 
 ## Configuration Patterns
 
@@ -76,21 +71,6 @@ const animation = getWebAnimation(element, {
   duration: 800,
   easing: 'easeOut',
 });
-```
-
-### Power Levels
-
-Many entrance animations support power intensity levels:
-
-```typescript
-// Soft - Subtle, 10-30% intensity
-{ type: 'BounceIn', power: 'soft' }
-
-// Medium - Balanced, 50-70% intensity
-{ type: 'BounceIn', power: 'medium' }
-
-// Hard - Dramatic, 80-100% intensity
-{ type: 'BounceIn', power: 'hard' }
 ```
 
 ### Directional Controls
@@ -120,7 +100,7 @@ Fine-tune animations with specific parameters:
 {
   type: 'GlideIn',
   direction: 270,
-  distance: { value: 100, type: 'px' },
+  distance: { value: 100, unit: 'px' },
   startFromOffScreen: true
 }
 
@@ -128,20 +108,12 @@ Fine-tune animations with specific parameters:
 {
   type: 'DropIn',
   initialScale: 2.0,
-  power: 'hard'
 }
 
 // Shape selection
 {
   type: 'ShapeIn',
   shape: 'circle' | 'rectangle' | 'diamond' | 'ellipse' | 'window'
-}
-
-// Complex configurations
-{
-  type: 'PunchIn',
-  direction: 'top-right',
-  power: 'medium'
 }
 ```
 
@@ -168,7 +140,6 @@ Fine-tune animations with specific parameters:
 {
   type: 'BlurIn',
   blur: 25,        // Blur amount in pixels
-  power: 'medium'  // or custom blur amount
 }
 ```
 
@@ -182,7 +153,6 @@ Fine-tune animations with specific parameters:
 {
   type: 'SlideIn',
   direction: 'left',    // 'top', 'right', 'bottom', 'left'
-  power: 'medium',      // Controls slide distance
   initialTranslate: 1   // Custom distance multiplier
 }
 ```
@@ -195,8 +165,7 @@ Fine-tune animations with specific parameters:
 {
   type: 'GlideIn',
   direction: 225,                              // Angle in degrees
-  distance: { value: 150, type: 'px' },       // Movement distance
-  power: 'medium',                             // Easing intensity
+  distance: { value: 150, unit: 'px' },       // Movement distance
   startFromOffScreen: false                    // Start from viewport edge
 }
 ```
@@ -223,7 +192,6 @@ Fine-tune animations with specific parameters:
 {
   type: 'ArcIn',
   direction: 'right',   // 'top', 'right', 'bottom', 'left'
-  power: 'medium'       // Controls rotation intensity
 }
 ```
 
@@ -235,7 +203,6 @@ Fine-tune animations with specific parameters:
 {
   type: 'FlipIn',
   direction: 'top',     // Flip axis direction
-  power: 'hard',        // Rotation amount
   initialRotate: 180    // Custom rotation angle
 }
 ```
@@ -248,7 +215,6 @@ Fine-tune animations with specific parameters:
 {
   type: 'FoldIn',
   direction: 'top',     // Fold direction
-  power: 'medium',      // Rotation intensity
   initialRotate: 90     // Fold angle
 }
 ```
@@ -263,7 +229,6 @@ Fine-tune animations with specific parameters:
 {
   type: 'BounceIn',
   direction: 'bottom',      // 'top', 'right', 'bottom', 'left', 'center'
-  power: 'medium',          // Bounce intensity
   distanceFactor: 1         // Movement distance
 }
 ```
@@ -275,20 +240,7 @@ Fine-tune animations with specific parameters:
 ```typescript
 {
   type: 'DropIn',
-  power: 'medium',      // Scale amount
   initialScale: 1.6     // Starting scale (>1 = larger)
-}
-```
-
-#### PunchIn
-
-**Best for**: Attention-grabbing elements, call-to-actions
-
-```typescript
-{
-  type: 'PunchIn',
-  direction: 'top-right',   // Corner directions or 'center'
-  power: 'hard'             // Multi-bounce intensity
 }
 ```
 
@@ -326,7 +278,6 @@ Fine-tune animations with specific parameters:
   direction: 'right',   // Shutter direction
   shutters: 12,         // Number of segments
   staggered: true,      // Offset timing
-  power: 'medium'       // Effect intensity
 }
 ```
 
@@ -337,7 +288,7 @@ Fine-tune animations with specific parameters:
 - **Quick reveals**: 300-500ms (FadeIn, BlurIn)
 - **Standard entrances**: 600-900ms (SlideIn, GlideIn, DropIn)
 - **Complex 3D**: 800-1200ms (ArcIn, FlipIn, FoldIn)
-- **Bouncy effects**: 1000-1500ms (BounceIn, PunchIn)
+- **Bouncy effects**: 1000-1500ms (BounceIn)
 
 ### Easing Recommendations
 
@@ -395,7 +346,6 @@ const modalAnimation = getWebAnimation(modal, {
   type: 'TimeAnimationOptions',
   namedEffect: {
     type: 'DropIn',
-    power: 'medium',
   },
   duration: 400,
   easing: 'backOut',
@@ -410,7 +360,6 @@ const heroAnimation = getWebAnimation(heroElement, {
   namedEffect: {
     type: 'ArcIn',
     direction: 'bottom',
-    power: 'hard',
   },
   duration: 1200,
   easing: 'quintOut',
@@ -426,7 +375,7 @@ document.querySelectorAll('.card').forEach((card, i) => {
     namedEffect: {
       type: 'GlideIn',
       direction: 45,
-      distance: { value: 100, type: 'px' },
+      distance: { value: 100, unit: 'px' },
     },
     duration: 800,
     delay: i * 150,

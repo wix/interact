@@ -295,8 +295,8 @@ remove(key: string): void
           { transform: 'translateY(-200px)' }
         ]
       },
-      rangeStart: { name: 'cover', offset: { value: 0, type: 'percentage' } },
-      rangeEnd: { name: 'cover', offset: { value: 100, type: 'percentage' } },
+      rangeStart: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+      rangeEnd: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
       fill: 'both',
       easing: 'linear'
     }
@@ -337,20 +337,20 @@ remove(key: string): void
 
 ## Documentation
 
-- [Full API Documentation](https://wix-incubator.github.io/interact/docs/api)
-- [Guides and Tutorials](https://wix-incubator.github.io/interact/docs/guides)
-- [Examples and Patterns](https://wix-incubator.github.io/interact/docs/examples)
-- [Integration Guides](https://wix-incubator.github.io/interact/docs/integration)
+- [Full API Documentation](https://wix.github.io/interact/docs/api)
+- [Guides and Tutorials](https://wix.github.io/interact/docs/guides)
+- [Examples and Patterns](https://wix.github.io/interact/docs/examples)
+- [Integration Guides](https://wix.github.io/interact/docs/integration)
 
 ## AI Support
 
-- [Full-flow, lean rules](https://wix-incubator.github.io/interact/rules/full-lean.md)
-- [Rules for integration](https://wix-incubator.github.io/interact/rules/integration.md)
-- [Rules for view entrance interactions](https://wix-incubator.github.io/interact/rules/viewenter.md)
-- [Rules for click interactions](https://wix-incubator.github.io/interact/rules/click.md)
-- [Rules for hover interactions](https://wix-incubator.github.io/interact/rules/click.md)
-- [Rules for scroll interactions](https://wix-incubator.github.io/interact/rules/viewprogress.md)
-- [Rules for pointer-move interactions](https://wix-incubator.github.io/interact/rules/pointermove.md)
+- [Full-flow, lean rules](https://wix.github.io/interact/rules/full-lean.md)
+- [Rules for integration](https://wix.github.io/interact/rules/integration.md)
+- [Rules for view entrance interactions](https://wix.github.io/interact/rules/viewenter.md)
+- [Rules for click interactions](https://wix.github.io/interact/rules/click.md)
+- [Rules for hover interactions](https://wix.github.io/interact/rules/click.md)
+- [Rules for scroll interactions](https://wix.github.io/interact/rules/viewprogress.md)
+- [Rules for pointer-move interactions](https://wix.github.io/interact/rules/pointermove.md)
 
 ## Development
 
@@ -376,9 +376,9 @@ yarn build
 ## Related Packages
 
 - [`@wix/motion`](../motion/README.md) - Core animation engine
-- [`fizban`](https://github.com/wix-incubator/fizban) - For polyfilling scroll-driven animations
-- [`kuliso`](https://github.com/wix-incubator/kuliso) - For polyfilling pointer-driven animations
+- [`fizban`](https://github.com/wix/fizban) - For polyfilling scroll-driven animations
+- [`kuliso`](https://github.com/wix/kuliso) - For polyfilling pointer-driven animations
 
 ## License
 
-[MIT](https://github.com/wix-incubator/interact/blob/master/LICENSE)
+[MIT](https://github.com/wix/interact/blob/master/LICENSE)

@@ -39,23 +39,23 @@ Opacity, visibility, and special visual transitions.
 
 ## Complete Preset Reference
 
-| Animation   | Category | Complexity | Power Levels | Directions | Description                   |
-| ----------- | -------- | ---------- | ------------ | ---------- | ----------------------------- |
-| **Pulse**   | Rhythmic | Simple     | ✓            | -          | Smooth scale breathing effect |
-| **Breathe** | Rhythmic | Medium     | -            | 3-way      | Organic movement with scaling |
-| **Bounce**  | Dynamic  | Medium     | ✓            | -          | Vertical bouncing motion      |
-| **Spin**    | Rotation | Simple     | ✓            | 2-way      | Continuous rotation           |
-| **Wiggle**  | Movement | Medium     | ✓            | -          | Random shake movement         |
-| **Poke**    | Movement | Medium     | ✓            | 4-way      | Directional poking motion     |
-| **Flash**   | Visual   | Simple     | -            | -          | Opacity blinking effect       |
-| **Swing**   | Movement | Complex    | ✓            | 4-way      | Pendulum swinging motion      |
-| **Flip**    | Rotation | Medium     | ✓            | 2-way      | 3D flip rotation              |
-| **Rubber**  | Dynamic  | Medium     | ✓            | -          | Elastic scaling effect        |
-| **Fold**    | Rotation | Complex    | ✓            | 4-way      | 3D folding animation          |
-| **Jello**   | Dynamic  | Medium     | ✓            | -          | Gelatinous wobble effect      |
-| **Cross**   | Movement | Complex    | -            | 8-way      | Multi-directional crossing    |
-| **Blink**   | Visual   | Complex    | ✓            | -          | Random blinking teleport\*    |
-| **DVD**     | Movement | Medium     | ✓            | -          | Bouncing corner-to-corner\*   |
+| Animation   | Category | Complexity | Directions | Description                   |
+| ----------- | -------- | ---------- | ---------- | ----------------------------- |
+| **Pulse**   | Rhythmic | Simple     | -          | Smooth scale breathing effect |
+| **Breathe** | Rhythmic | Medium     | 3-way      | Organic movement with scaling |
+| **Bounce**  | Dynamic  | Medium     | -          | Vertical bouncing motion      |
+| **Spin**    | Rotation | Simple     | 2-way      | Continuous rotation           |
+| **Wiggle**  | Movement | Medium     | -          | Random shake movement         |
+| **Poke**    | Movement | Medium     | 4-way      | Directional poking motion     |
+| **Flash**   | Visual   | Simple     | -          | Opacity blinking effect       |
+| **Swing**   | Movement | Complex    | 4-way      | Pendulum swinging motion      |
+| **Flip**    | Rotation | Medium     | 2-way      | 3D flip rotation              |
+| **Rubber**  | Dynamic  | Medium     | -          | Elastic scaling effect        |
+| **Fold**    | Rotation | Complex    | 4-way      | 3D folding animation          |
+| **Jello**   | Dynamic  | Medium     | -          | Gelatinous wobble effect      |
+| **Cross**   | Movement | Complex    | 8-way      | Multi-directional crossing    |
+| **Blink**   | Visual   | Complex    | -          | Random blinking teleport\*    |
+| **DVD**     | Movement | Medium     | -          | Bouncing corner-to-corner\*   |
 
 \*Currently disabled in production
 
@@ -73,21 +73,6 @@ const animation = getWebAnimation(element, {
 });
 ```
 
-### Power Levels
-
-Control animation intensity across most ongoing animations:
-
-```typescript
-// Soft - Subtle, gentle (10-30% intensity)
-{ type: 'Pulse', power: 'soft' }
-
-// Medium - Balanced, noticeable (50-70% intensity)
-{ type: 'Pulse', power: 'medium' }
-
-// Hard - Strong, attention-grabbing (80-100% intensity)
-{ type: 'Pulse', power: 'hard' }
-```
-
 ### Intensity Control
 
 Fine-tune effect strength with intensity values:
@@ -95,8 +80,7 @@ Fine-tune effect strength with intensity values:
 ```typescript
 {
   type: 'Bounce',
-  power: 'medium',
-  intensity: 0.8  // 80% of power level strength
+  intensity: 0.8  // Effect strength multiplier
 }
 ```
 
@@ -129,7 +113,6 @@ Many animations support directional parameters:
 ```typescript
 {
   type: 'Pulse',
-  power: 'medium',     // Scale intensity
   intensity: 1.0       // Multiplier (0.1-2.0)
 }
 // Creates smooth scale from 1.0 to 1.1 and back
@@ -143,7 +126,7 @@ Many animations support directional parameters:
 {
   type: 'Breathe',
   direction: 'vertical',                   // Movement direction
-  distance: { value: 10, type: 'px' }     // Movement amount
+  distance: { value: 10, unit: 'px' }     // Movement amount
 }
 // Combines gentle translation with subtle scaling
 ```
@@ -157,7 +140,6 @@ Many animations support directional parameters:
 ```typescript
 {
   type: 'Wiggle',
-  power: 'soft',       // Shake intensity
   intensity: 0.5       // Movement amount
 }
 // Random horizontal shaking motion
@@ -171,7 +153,6 @@ Many animations support directional parameters:
 {
   type: 'Poke',
   direction: 'right',  // Poke direction
-  power: 'medium',     // Movement distance
   intensity: 1.2       // Effect multiplier
 }
 // Short directional movement and return
@@ -198,8 +179,7 @@ Many animations support directional parameters:
 ```typescript
 {
   type: 'Spin',
-  direction: 'clockwise',  // 'clockwise' | 'counter-clockwise'
-  power: 'medium'          // Rotation speed
+  direction: 'clockwise'   // 'clockwise' | 'counter-clockwise'
 }
 // Continuous smooth rotation
 ```
@@ -211,8 +191,7 @@ Many animations support directional parameters:
 ```typescript
 {
   type: 'Flip',
-  direction: 'horizontal',  // 'horizontal' | 'vertical'
-  power: 'hard'            // Flip speed and intensity
+  direction: 'horizontal'   // 'horizontal' | 'vertical'
 }
 // 3D flip rotation effect
 ```
@@ -225,7 +204,6 @@ Many animations support directional parameters:
 {
   type: 'Fold',
   direction: 'top',        // Fold axis direction
-  power: 'medium',         // Fold intensity
   angle: 45               // Custom fold angle
 }
 // 3D folding motion with perspective
@@ -240,7 +218,6 @@ Many animations support directional parameters:
 ```typescript
 {
   type: 'Bounce',
-  power: 'hard',           // Bounce height
   intensity: 1.5           // Effect multiplier
 }
 // Vertical bouncing with gravity simulation
@@ -253,7 +230,6 @@ Many animations support directional parameters:
 ```typescript
 {
   type: 'Rubber',
-  power: 'medium',         // Elasticity amount
   intensity: 0.8           // Effect strength
 }
 // Elastic stretching and snapping
@@ -266,7 +242,6 @@ Many animations support directional parameters:
 ```typescript
 {
   type: 'Jello',
-  power: 'soft',           // Wobble intensity
   intensity: 1.0           // Effect multiplier
 }
 // Multi-directional wobbling motion
@@ -279,7 +254,6 @@ Many animations support directional parameters:
 ```typescript
 {
   type: 'Swing',
-  power: 'medium',         // Swing angle
   swing: 15,              // Custom swing angle (degrees)
   direction: 'left'        // Swing axis point
 }
@@ -307,9 +281,8 @@ Many animations support directional parameters:
 ```typescript
 {
   type: 'Blink',
-  power: 'hard',                           // Effect intensity
   scale: 0.5,                             // Size variation
-  distance: { value: 100, type: 'px' }    // Jump distance
+  distance: { value: 100, unit: 'px' }    // Jump distance
 }
 // Random position jumping with opacity flashes
 ```
@@ -369,7 +342,7 @@ import { getCSSAnimation } from '@wix/motion';
 
 const cssRules = getCSSAnimation('elementId', {
   type: 'TimeAnimationOptions',
-  namedEffect: { type: 'Pulse', power: 'soft' },
+  namedEffect: { type: 'Pulse' },
   duration: 2000,
   iterations: Infinity,
 });
@@ -384,7 +357,7 @@ if (respectsReducedMotion) {
   // Disable ongoing animations or use gentler alternatives
   const config = { type: 'Flash' }; // Instead of intense animations
 } else {
-  const config = { type: 'Bounce', power: 'hard' };
+  const config = { type: 'Bounce' };
 }
 ```
 
@@ -397,7 +370,6 @@ const ctaAnimation = getWebAnimation(button, {
   type: 'TimeAnimationOptions',
   namedEffect: {
     type: 'Pulse',
-    power: 'medium',
   },
   duration: 1500,
   iterations: Infinity,
@@ -417,7 +389,6 @@ const loadingAnimation = getWebAnimation(spinner, {
   namedEffect: {
     type: 'Spin',
     direction: 'clockwise',
-    power: 'medium',
   },
   duration: 1000,
   iterations: Infinity,
@@ -440,7 +411,6 @@ const attentionAnimation = getWebAnimation(element, {
   type: 'TimeAnimationOptions',
   namedEffect: {
     type: 'Wiggle',
-    power: 'soft',
     intensity: 0.6,
   },
   duration: 500,
@@ -460,7 +430,7 @@ const ambientAnimation = getWebAnimation(backgroundElement, {
   namedEffect: {
     type: 'Breathe',
     direction: 'center',
-    distance: { value: 5, type: 'px' },
+    distance: { value: 5, unit: 'px' },
   },
   duration: 4000,
   iterations: Infinity,
@@ -486,7 +456,7 @@ if (isMobile) {
   config = { type: 'Flash' };
 } else {
   // Full-featured animations
-  config = { type: 'Rubber', power: 'hard' };
+  config = { type: 'Rubber' };
 }
 ```
 

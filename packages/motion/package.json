@@ -1,6 +1,6 @@
 {
   "name": "@wix/motion",
-  "version": "2.0.0-rc.2",
+  "version": "2.1.4",
   "description": "High-performance animation toolkit for the web, powering Wix motion presets and tooling.",
   "license": "MIT",
   "main": "dist/cjs/motion.js",
@@ -21,10 +21,15 @@
   "scripts": {
     "dev": "vite dev --open",
     "build": "rimraf dist && npm run build:types && vite build",
-    "build:types": "tsc",
-    "lint": "tsc --noEmit",
+    "build:types": "tsc -p tsconfig.build.json",
+    "lint": "tsc -p tsconfig.build.json --noEmit",
     "test": "vitest run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --headed",
+    "test:e2e:report": "playwright test --reporter=html",
+    "test:e2e:fixtures": "vite --config e2e/fixtures/vite.config.ts"
   },
   "keywords": [
     "animation",
@@ -40,12 +45,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/wix-incubator/interact"
+    "url": "git+https://github.com/wix/interact.git"
   },
   "bugs": {
-    "url": "https://github.com/wix-incubator/interact/issues"
+    "url": "https://github.com/wix/interact/issues"
   },
-  "homepage": "https://github.com/wix-incubator/interact#readme",
+  "homepage": "https://github.com/wix/interact#readme",
   "engines": {
     "node": ">=18"
   },
@@ -53,6 +58,7 @@
     "fastdom": "^1.0.11"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitest/coverage-v8": "^4.0.14",
@@ -62,6 +68,5 @@
     "typescript": "^5.9.3",
     "vite": "^7.2.2",
     "vitest": "^4.0.14"
-  },
-  "stableVersion": "2.0.0"
+  }
 }

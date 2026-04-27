@@ -362,11 +362,11 @@ getWebAnimation(
   range: 'in',
   startOffset: {
     name: 'cover',
-    offset: { value: 0, type: 'percentage' }
+    offset: { value: 0, unit: 'percentage' }
   },
   endOffset: {
     name: 'cover',
-    offset: { value: 50, type: 'percentage' }
+    offset: { value: 50, unit: 'percentage' }
   }
 }
 ```

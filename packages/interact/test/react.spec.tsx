@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { Interaction, createInteractRef, Interact } from '../src/react';
 import * as domApi from '../src/dom/api';
 import type { InteractConfig } from '../src/types';
@@ -28,6 +28,7 @@ vi.mock('@wix/motion', () => {
         reducedMotion,
       });
     }),
+    registerEffects: vi.fn(),
   };
 
   return mock;
@@ -71,26 +72,22 @@ describe('interact (react)', () => {
       {
         trigger: 'click',
         key: 'logo-click',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-click',
             effectId: 'logo-bounce',
+            triggerType: 'alternate',
           },
         ],
       },
       {
         trigger: 'hover',
         key: 'logo-hover',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-hover',
             effectId: 'logo-arc-in',
+            triggerType: 'alternate',
           },
         ],
       },
@@ -131,11 +128,11 @@ describe('interact (react)', () => {
         } as NamedEffect,
         rangeStart: {
           name: 'contain',
-          offset: { value: -10, type: 'percentage' },
+          offset: { value: -10, unit: 'percentage' },
         },
         rangeEnd: {
           name: 'contain',
-          offset: { value: 110, type: 'percentage' },
+          offset: { value: 110, unit: 'percentage' },
         },
       },
     },
@@ -369,7 +366,9 @@ describe('interact (react)', () => {
 
       function TestComponent() {
         const ref = useRef<HTMLDivElement>(null);
-        refValue.current = ref.current;
+        useEffect(() => {
+          refValue.current = ref.current;
+        });
 
         return (
           <Interaction tagName="div" interactKey="logo-click" ref={ref}>
@@ -521,7 +520,6 @@ describe('interact (react)', () => {
           {
             trigger: 'viewEnter',
             key: 'logo-alternate',
-            params: { type: 'alternate' },
             effects: [{ key: 'logo-alternate', effectId: 'logo-arc-in' }],
           },
         ],
@@ -529,6 +527,7 @@ describe('interact (react)', () => {
           'logo-arc-in': {
             namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
             duration: 1200,
+            triggerType: 'alternate',
           },
         },
       };
@@ -586,7 +585,6 @@ describe('interact (react)', () => {
           {
             trigger: 'viewEnter',
             key: 'logo-repeat',
-            params: { type: 'repeat' },
             effects: [{ key: 'logo-repeat', effectId: 'logo-arc-in' }],
           },
         ],
@@ -594,6 +592,7 @@ describe('interact (react)', () => {
           'logo-arc-in': {
             namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
             duration: 1200,
+            triggerType: 'repeat',
           },
         },
       };
@@ -648,7 +647,6 @@ describe('interact (react)', () => {
           {
             trigger: 'viewEnter',
             key: 'logo-state',
-            params: { type: 'state' },
             effects: [{ key: 'logo-state', effectId: 'logo-arc-in' }],
           },
         ],
@@ -656,6 +654,7 @@ describe('interact (react)', () => {
           'logo-arc-in': {
             namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
             duration: 1200,
+            triggerType: 'state',
           },
         },
       };

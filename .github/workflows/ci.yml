@@ -12,11 +12,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -46,7 +48,9 @@ jobs:
           yarn set version 4.10.3
 
       - name: Install dependencies
-        run: NPQ_PKG_MGR=yarn npx npq install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: NPQ_PKG_MGR=yarn npx npq install --immutable
 
       - name: Build
         run: yarn build

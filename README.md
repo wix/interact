@@ -11,37 +11,47 @@ This repository hosts the Interact library, accompanying docs, and any supportin
 ### Install dependencies
 
 ```bash
-npm install
+yarn install
 ```
 
 ### Building
 
 ```bash
-npm run build
+yarn build
 ```
 
 ### Testing
 
 ```bash
-npm run test
+yarn test
 ```
 
 ## Running demo app
 
 ```bash
-npm run dev:demo
+yarn dev:demo
 ```
 
 ## Running documentation app
 
 ```bash
-npm run dev:docs
+yarn dev:docs
 ```
 
 ## Tooling
 
-- `npm run lint` – runs ESLint across all packages and apps using the shared config.
-- `npm run format` – formats the repo with Prettier’s shared settings.
-- `npm run format:check` – verifies formatting without writing changes.
+- `yarn lint` – runs ESLint across all packages and apps using the shared config.
+- `yarn format` – formats the repo with Prettier's shared settings.
+- `yarn format:check` – verifies formatting without writing changes.
 
--v-1
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Setting up your development environment
+- Reporting bugs and proposing features
+- Pull request process and code standards
+
+## License
+
+[MIT](LICENSE)

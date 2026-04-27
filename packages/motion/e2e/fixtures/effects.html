@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Effect Types</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      body {
+        padding: 72px 24px 48px;
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+      }
+
+      .effects-section {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .effects-section h2 {
+        font-size: 13px;
+        font-weight: bold;
+        color: #1a1a2e;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 6px;
+      }
+
+      .effect-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .effect-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 10px;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .effect-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      button {
+        padding: 5px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+        background: #4a90d9;
+        color: #fff;
+      }
+
+      button:hover {
+        background: #357abd;
+      }
+
+      /* CSS animation keyframes injected by the fixture script */
+    </style>
+  </head>
+  <body>
+    <nav class="fixture-nav">
+      <strong>Effects Fixture</strong>
+      <a href="./index.html">← Back</a>
+    </nav>
+
+    <!-- Named Effects -->
+    <div class="effects-section">
+      <h2>Named Effects</h2>
+      <div class="effect-row">
+        <div
+          id="named-waapi-target"
+          class="effect-box"
+          data-testid="named-waapi-target"
+          style="background: #e74c3c"
+        >
+          Named WAAPI
+        </div>
+        <div class="effect-controls">
+          <button data-testid="btn-named-waapi" onclick="window.runNamedWaapi()">Run</button>
+        </div>
+      </div>
+      <div class="effect-row">
+        <div
+          id="named-css-target"
+          class="effect-box"
+          data-testid="named-css-target"
+          style="background: #c0392b"
+        >
+          Named CSS
+        </div>
+        <div class="effect-controls">
+          <button data-testid="btn-named-css" onclick="window.runNamedCss()">Run</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyframe Effects -->
+    <div class="effects-section">
+      <h2>Keyframe Effects</h2>
+      <div class="effect-row">
+        <div
+          id="keyframe-waapi-target"
+          class="effect-box"
+          data-testid="keyframe-waapi-target"
+          style="background: #3498db"
+        >
+          Keyframe WAAPI
+        </div>
+        <div class="effect-controls">
+          <button data-testid="btn-keyframe-waapi" onclick="window.runKeyframeWaapi()">Run</button>
+        </div>
+      </div>
+      <div class="effect-row">
+        <div
+          id="keyframe-css-target"
+          class="effect-box"
+          data-testid="keyframe-css-target"
+          style="background: #2980b9"
+        >
+          Keyframe CSS
+        </div>
+        <div class="effect-controls">
+          <button data-testid="btn-keyframe-css" onclick="window.runKeyframeCss()">Run</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Effects -->
+    <div class="effects-section">
+      <h2>Custom Effect</h2>
+      <div class="effect-row">
+        <div
+          id="custom-effect-target"
+          class="effect-box"
+          data-testid="custom-effect-target"
+          style="background: #2ecc71"
+        >
+          Custom
+        </div>
+        <div class="effect-controls">
+          <button data-testid="btn-custom-effect" onclick="window.runCustomEffect()">Run</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Playback Controls -->
+    <div class="effects-section">
+      <h2>Playback — Play / Reverse / Pause</h2>
+      <div class="effect-row">
+        <div
+          id="playback-target"
+          class="effect-box"
+          data-testid="playback-target"
+          style="background: #9b59b6"
+        >
+          Playback
+        </div>
+        <div class="effect-controls">
+          <button data-testid="btn-playback-play" onclick="window.runPlayback()">Play</button>
+          <button data-testid="btn-playback-reverse" onclick="window.runPlaybackReverse()">
+            Reverse
+          </button>
+          <button data-testid="btn-playback-pause" onclick="window.runPlaybackPause()">
+            Pause
+          </button>
+          <button data-testid="btn-playback-resume" onclick="window.runPlaybackResume()">
+            Resume
+          </button>
+        </div>
+      </div>
+      <p style="font-size: 11px; color: #888" data-testid="playback-state-display">state: idle</p>
+    </div>
+
+    <script type="module" src="./effects.ts"></script>
+  </body>
+</html>

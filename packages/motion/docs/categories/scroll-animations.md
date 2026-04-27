@@ -70,8 +70,8 @@ const scene = getScrubScene(
   {
     type: 'ScrubAnimationOptions',
     namedEffect: { type: 'ParallaxScroll', speed: 0.5 },
-    startOffset: { name: 'cover', offset: { value: 0, type: 'percentage' } },
-    endOffset: { name: 'cover', offset: { value: 100, type: 'percentage' } },
+    startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+    endOffset: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
   },
   {
     trigger: 'view-progress',
@@ -106,12 +106,12 @@ Fine-tune animation responsiveness:
 // Movement distance
 {
   type: 'MoveScroll',
-  distance: { value: 200, type: 'px' },
+  distance: { value: 200, unit: 'px' },
   angle: 45
 }
 
 // Scale amount
-{ type: 'GrowScroll', scale: 1.5, power: 'medium' }
+{ type: 'GrowScroll', scale: 1.5 }
 ```
 
 ### Directional Controls
@@ -155,8 +155,7 @@ Fine-tune animation responsiveness:
 {
   type: 'MoveScroll',
   angle: 225,                              // Movement direction (degrees)
-  distance: { value: 300, type: 'px' },   // Movement amount
-  power: 'medium',                         // Preset distance values
+  distance: { value: 300, unit: 'px' },   // Movement amount
   range: 'in'                             // Animation timing
 }
 // Moves element along specified angle and distance
@@ -171,7 +170,6 @@ Fine-tune animation responsiveness:
   type: 'GrowScroll',
   direction: 'center',     // Scale origin point
   scale: 1.8,             // Target scale value
-  power: 'hard',          // Preset scale values
   range: 'in',            // When to animate
   speed: 0.5              // Y-axis travel amount
 }
@@ -214,7 +212,6 @@ Fine-tune animation responsiveness:
 {
   type: 'BlurScroll',
   blur: 20,               // Blur amount in pixels
-  power: 'medium',        // Preset blur values
   range: 'in'            // Animation timing
 }
 // Blur-to-focus or focus-to-blur transition
@@ -244,7 +241,6 @@ Fine-tune animation responsiveness:
   type: 'FlipScroll',
   direction: 'vertical',   // Flip axis
   rotate: 180,            // Rotation amount (degrees)
-  power: 'hard',          // Rotation intensity
   range: 'in'            // Animation timing
 }
 // 3D flip rotation effect
@@ -259,7 +255,6 @@ Fine-tune animation responsiveness:
   type: 'TiltScroll',
   direction: 'left',       // Tilt direction
   distance: 15,           // Tilt angle
-  power: 'medium',        // Effect intensity
   range: 'continuous'     // Animation timing
 }
 // Perspective-based tilting with Y-axis movement
@@ -273,7 +268,6 @@ Fine-tune animation responsiveness:
 {
   type: 'Spin3dScroll',
   rotate: 360,            // Rotation amount
-  power: 'medium',        // Effect intensity
   range: 'continuous',    // Animation timing
   speed: 0.8             // Additional Y movement
 }
@@ -304,7 +298,6 @@ Fine-tune animation responsiveness:
   type: 'ShapeScroll',
   shape: 'circle',        // 'circle', 'rectangle', 'diamond', 'ellipse', 'window'
   range: 'in',            // Animation timing
-  power: 'medium',        // Effect intensity
   intensity: 1.2          // Scale multiplier
 }
 // Morphing shape-based reveals
@@ -335,7 +328,7 @@ Fine-tune animation responsiveness:
 {
   type: 'PanScroll',
   direction: 'left',                       // Pan direction
-  distance: { value: 100, type: 'px' },   // Pan amount
+  distance: { value: 100, unit: 'px' },   // Pan amount
   startFromOffScreen: false,              // Start position
   range: 'continuous'                     // Animation timing
 }
@@ -344,7 +337,6 @@ Fine-tune animation responsiveness:
   type: 'SkewPanScroll',
   direction: 'right',      // Pan + skew direction
   skew: 15,               // Skew angle
-  power: 'medium',        // Effect intensity
   range: 'continuous'     // Animation timing
 }
 ```
@@ -357,7 +349,6 @@ Fine-tune animation responsiveness:
 {
   type: 'StretchScroll',
   stretch: 1.3,           // Stretch amount
-  power: 'soft',          // Effect intensity
   range: 'in'            // Animation timing
 }
 // Vertical stretching with elastic feel
@@ -373,7 +364,6 @@ Fine-tune animation responsiveness:
   direction: 'left',       // Turn direction
   spin: 'clockwise',      // Rotation direction
   scale: 1.2,             // Scale during turn
-  power: 'hard',          // Effect intensity
   range: 'continuous'     // Animation timing
 }
 // Complex 3D turning with scale and translation
@@ -393,13 +383,13 @@ startOffset: { name: 'exit' }       // Element leaving viewport
 // With percentage offsets
 startOffset: {
   name: 'cover',
-  offset: { value: 20, type: 'percentage' }
+  offset: { value: 20, unit: 'percentage' }
 }
 
 // With pixel offsets
 endOffset: {
   name: 'exit',
-  offset: { value: 100, type: 'px' }
+  offset: { value: 100, unit: 'px' }
 }
 ```
 
@@ -411,11 +401,11 @@ const scene = getScrubScene(element, animationOptions, {
   trigger: 'view-progress',
   startOffset: {
     name: 'entry',
-    offset: { value: 20, type: 'percentage' },
+    offset: { value: 20, unit: 'percentage' },
   },
   endOffset: {
     name: 'exit',
-    offset: { value: 0, type: 'percentage' },
+    offset: { value: 0, unit: 'percentage' },
   },
 });
 ```
@@ -507,7 +497,7 @@ document.querySelectorAll('.reveal-item').forEach((item, index) => {
       // Stagger timing with offset
       startOffset: {
         name: 'entry',
-        offset: { value: index * 10, type: 'percentage' },
+        offset: { value: index * 10, unit: 'percentage' },
       },
     },
     {
@@ -530,7 +520,6 @@ galleryItems.forEach((item, i) => {
       namedEffect: {
         type: 'GrowScroll',
         direction: 'center',
-        power: 'medium',
         range: 'in',
       },
     },
@@ -553,7 +542,7 @@ const storyContainer = getScrubScene(
     namedEffect: {
       type: 'MoveScroll',
       angle: 90, // Vertical movement
-      distance: { value: 500, type: 'px' },
+      distance: { value: 500, unit: 'px' },
       range: 'continuous',
     },
   },

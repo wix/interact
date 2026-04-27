@@ -29,6 +29,7 @@ vi.mock('@wix/motion', () => {
         reducedMotion,
       });
     }),
+    registerEffects: vi.fn(),
   };
 
   return mock;
@@ -114,43 +115,38 @@ describe('interact (mini)', () => {
       {
         trigger: 'click',
         key: 'logo-click',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-click',
             effectId: 'logo-bounce',
+            triggerType: 'alternate',
           },
         ],
       },
       {
         trigger: 'click',
         key: 'logo-click',
-        params: {
-          method: 'toggle',
-        },
         effects: [
           {
             key: 'logo-click',
             effectId: 'logo-transition-hover',
+            stateAction: 'toggle',
           },
         ],
       },
       {
         trigger: 'hover',
         key: 'logo-hover',
-        params: {
-          type: 'alternate',
-        },
         effects: [
           {
             key: 'logo-hover',
             effectId: 'logo-arc-in',
+            triggerType: 'alternate',
           },
           {
             key: 'logo-hover',
             effectId: 'logo-arc-in',
+            triggerType: 'alternate',
             namedEffect: {
               type: 'ArcIn',
               direction: 'left',
@@ -162,13 +158,11 @@ describe('interact (mini)', () => {
       {
         trigger: 'hover',
         key: 'logo-hover',
-        params: {
-          method: 'toggle',
-        },
         effects: [
           {
             key: 'logo-hover',
             effectId: 'logo-transition-hover',
+            stateAction: 'toggle',
           },
         ],
       },
@@ -246,7 +240,7 @@ describe('interact (mini)', () => {
       'logo-track-mouse': {
         namedEffect: {
           type: 'TrackMouse',
-          distance: { value: 20, type: 'px' },
+          distance: { value: 20, unit: 'px' },
           axis: 'both',
           power: 'medium',
         } as NamedEffect,
@@ -271,11 +265,11 @@ describe('interact (mini)', () => {
         } as NamedEffect,
         rangeStart: {
           name: 'contain',
-          offset: { value: -10, type: 'percentage' },
+          offset: { value: -10, unit: 'percentage' },
         },
         rangeEnd: {
           name: 'contain',
-          offset: { value: 110, type: 'percentage' },
+          offset: { value: 110, unit: 'percentage' },
         },
       },
       'logo-transition-hover': {
@@ -298,10 +292,43 @@ describe('interact (mini)', () => {
   beforeEach(() => {
     element = document.createElement('div');
 
-    // Mock Web Animations API
+    // Mock Web Animations API (enough for real @wix/motion when vi.doUnmock('@wix/motion') is used)
     (window as any).KeyframeEffect = class KeyframeEffect {
-      constructor(element: Element | null, keyframes: any[], options: any) {
-        return { element, keyframes, options };
+      constructor(element: Element | null, keyframes: any[], options: any = {}) {
+        const timing = {
+          delay: options?.delay ?? 0,
+          duration: typeof options?.duration === 'number' ? options.duration : 100,
+          iterations: options?.iterations ?? 1,
+          easing: options?.easing ?? 'linear',
+          fill: options?.fill ?? 'none',
+          direction: options?.direction ?? 'normal',
+        };
+        const effect = {
+          target: element,
+          element,
+          keyframes,
+          options,
+          setKeyframes: vi.fn(function (this: any, k: any) {
+            this.keyframes = k;
+          }),
+          updateTiming: vi.fn(function (this: any, updates: any) {
+            Object.assign(timing, updates);
+          }),
+          getTiming: vi.fn(() => ({ ...timing })),
+          getComputedTiming: vi.fn(() => {
+            const delay = Number(timing.delay) || 0;
+            const duration = Number(timing.duration) || 0;
+            const iterations = Number(timing.iterations) || 1;
+            const activeDuration = duration * iterations;
+            return {
+              progress: 0,
+              currentIteration: 0,
+              activeDuration,
+              endTime: delay + activeDuration,
+            };
+          }),
+        };
+        return effect;
       }
     };
 
@@ -315,9 +342,22 @@ describe('interact (mini)', () => {
     // Mock Animation
     (window as any).Animation = class Animation {
       constructor(effect: any, timeline: any) {
-        return { effect, timeline, play: vi.fn() };
+        return {
+          effect,
+          timeline,
+          play: vi.fn(),
+          pause: vi.fn(),
+          reverse: vi.fn(),
+          cancel: vi.fn(),
+          playState: 'idle',
+          currentTime: null as number | null,
+          ready: Promise.resolve(),
+          finished: Promise.resolve(),
+        };
       }
     };
+
+    (window as any).CSSAnimation = class CSSAnimation extends (window as any).Animation {};
 
     // Mock IntersectionObserver
     (window as any).IntersectionObserver = class IntersectionObserver {
@@ -741,7 +781,6 @@ describe('interact (mini)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-alternate',
-              params: { type: 'alternate' },
               effects: [{ key: 'logo-alternate', effectId: 'logo-arc-in' }],
             },
           ],
@@ -749,6 +788,7 @@ describe('interact (mini)', () => {
             'logo-arc-in': {
               namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'alternate',
             },
           },
         };
@@ -803,7 +843,6 @@ describe('interact (mini)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-repeat',
-              params: { type: 'repeat' },
               effects: [{ key: 'logo-repeat', effectId: 'logo-arc-in' }],
             },
           ],
@@ -811,6 +850,7 @@ describe('interact (mini)', () => {
             'logo-arc-in': {
               namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'repeat',
             },
           },
         };
@@ -862,7 +902,6 @@ describe('interact (mini)', () => {
             {
               trigger: 'viewEnter',
               key: 'logo-state',
-              params: { type: 'state' },
               effects: [{ key: 'logo-state', effectId: 'logo-arc-in' }],
             },
           ],
@@ -870,6 +909,7 @@ describe('interact (mini)', () => {
             'logo-arc-in': {
               namedEffect: { type: 'ArcIn', direction: 'right', power: 'medium' } as NamedEffect,
               duration: 1200,
+              triggerType: 'state',
             },
           },
         };
@@ -1073,7 +1113,7 @@ describe('interact (mini)', () => {
 
           add(element, 'logo-scroll');
 
-          expect((global as any).ViewTimeline).toBeUndefined();
+          expect((globalThis as any).ViewTimeline).toBeUndefined();
 
           expect(getScrubScene).toHaveBeenCalledTimes(1);
           expect(getScrubScene).toHaveBeenCalledWith(
@@ -1273,13 +1313,20 @@ describe('interact (mini)', () => {
       element = document.createElement('div');
       element.dataset.interactKey = key;
 
-      const removeEventListenerSpy = vi.spyOn(element, 'removeEventListener');
+      const addEventListenerSpy = vi.spyOn(element, 'addEventListener');
 
       add(element, key);
+
+      const signals = addEventListenerSpy.mock.calls
+        .map((call) => (call[2] as AddEventListenerOptions)?.signal)
+        .filter(Boolean) as AbortSignal[];
+
+      expect(signals.length).toBe(2);
+      expect(signals.filter((signal) => signal.aborted)).toHaveLength(0);
+
       remove(key);
 
-      expect(removeEventListenerSpy).toHaveBeenCalledTimes(2);
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+      expect(signals.filter((signal) => signal.aborted)).toHaveLength(2);
     });
 
     it('should do nothing if key does not exist', () => {
@@ -2023,7 +2070,7 @@ describe('interact (mini)', () => {
         add(targetElement, 'invalid-target');
 
         expect(consoleSpy).toHaveBeenCalledWith(
-          'Interact: No element found for selector ".non-existent-element"',
+          'Interact: No elements found for selector ".non-existent-element"',
         );
       });
 
@@ -2289,15 +2336,18 @@ describe('interact (mini)', () => {
         Interact.create(config);
 
         const triggerButton = sourceElement.querySelector('.trigger-button') as HTMLElement;
-        const removeEventListenerSpy = vi.spyOn(triggerButton, 'removeEventListener');
+        const addEventListenerSpy = vi.spyOn(triggerButton, 'addEventListener');
 
         add(sourceElement, 'cleanup-source');
         add(targetElement, 'cleanup-target');
 
         remove('cleanup-source');
 
-        // Should remove event listeners from the selected element
-        expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+        expect(
+          addEventListenerSpy.mock.calls
+            .map((call) => (call[2] as AddEventListenerOptions)?.signal)
+            .filter((signal): signal is AbortSignal => !!signal?.aborted),
+        ).toHaveLength(1);
       });
     });
   });
@@ -2759,7 +2809,6 @@ describe('interact (mini)', () => {
       });
 
       const addEventListenerSpy = vi.spyOn(testElement, 'addEventListener');
-      const removeEventListenerSpy = vi.spyOn(testElement, 'removeEventListener');
 
       add(testElement, 'responsive-element');
 
@@ -2775,9 +2824,12 @@ describe('interact (mini)', () => {
         expect.any(Object),
       );
 
-      // Clear spies for next assertions
+      const clickSignals = addEventListenerSpy.mock.calls
+        .map((call) => (call[2] as AddEventListenerOptions)?.signal)
+        .filter(Boolean) as AbortSignal[];
+
+      // Clear spy for next assertions
       addEventListenerSpy.mockClear();
-      removeEventListenerSpy.mockClear();
 
       // Now simulate media query change to mobile
       const desktopMql = mockMQLs.get('(min-width: 1024px)');
@@ -2795,8 +2847,8 @@ describe('interact (mini)', () => {
       const mockEvent = { matches: false, media: '(min-width: 1024px)' } as MediaQueryListEvent;
       listenerEntry!.handler(mockEvent);
 
-      // The old click handler should be removed (this will fail due to isConnected check)
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
+      // The old click signals should be aborted
+      expect(clickSignals.filter((signal) => signal.aborted)).toHaveLength(1);
 
       // The new hover handler should be added
       expect(addEventListenerSpy).toHaveBeenCalledWith(
@@ -2999,19 +3051,19 @@ describe('interact (mini)', () => {
 
         expect(result.startOffset).toEqual({
           name: 'cover',
-          offset: { value: 0, type: 'percentage' },
+          offset: { value: 0, unit: 'percentage' },
         });
         expect(result.endOffset).toEqual({
           name: 'cover',
-          offset: { value: 100, type: 'percentage' },
+          offset: { value: 100, unit: 'percentage' },
         });
       });
 
       it('should use provided rangeStart and rangeEnd values when supplied', () => {
         const scrubEffect: ScrubEffect = {
           namedEffect: { type: 'FadeScroll', range: 'in', opacity: 0 } as NamedEffect,
-          rangeStart: { name: 'contain', offset: { value: 10, type: 'percentage' } },
-          rangeEnd: { name: 'entry', offset: { value: 90, type: 'percentage' } },
+          rangeStart: { name: 'contain', offset: { value: 10, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 90, unit: 'percentage' } },
         };
 
         const result = effectToAnimationOptions(scrubEffect) as {
@@ -3021,18 +3073,18 @@ describe('interact (mini)', () => {
 
         expect(result.startOffset).toEqual({
           name: 'contain',
-          offset: { value: 10, type: 'percentage' },
+          offset: { value: 10, unit: 'percentage' },
         });
         expect(result.endOffset).toEqual({
           name: 'entry',
-          offset: { value: 90, type: 'percentage' },
+          offset: { value: 90, unit: 'percentage' },
         });
       });
 
       it('should use rangeStart.name for endOffset.name when only rangeStart is provided', () => {
         const scrubEffect: ScrubEffect = {
           namedEffect: { type: 'FadeScroll', range: 'in', opacity: 0 } as NamedEffect,
-          rangeStart: { name: 'entry', offset: { value: 25, type: 'percentage' } },
+          rangeStart: { name: 'entry', offset: { value: 25, unit: 'percentage' } },
         };
 
         const result = effectToAnimationOptions(scrubEffect) as {
@@ -3042,11 +3094,11 @@ describe('interact (mini)', () => {
 
         expect(result.startOffset).toEqual({
           name: 'entry',
-          offset: { value: 25, type: 'percentage' },
+          offset: { value: 25, unit: 'percentage' },
         });
         expect(result.endOffset).toEqual({
           name: 'entry',
-          offset: { value: 100, type: 'percentage' },
+          offset: { value: 100, unit: 'percentage' },
         });
       });
 
@@ -3063,18 +3115,18 @@ describe('interact (mini)', () => {
 
         expect(result.startOffset).toEqual({
           name: 'exit',
-          offset: { value: 0, type: 'percentage' },
+          offset: { value: 0, unit: 'percentage' },
         });
         expect(result.endOffset).toEqual({
           name: 'exit',
-          offset: { value: 100, type: 'percentage' },
+          offset: { value: 100, unit: 'percentage' },
         });
       });
 
       it('should use default startOffset.name when only rangeEnd is provided', () => {
         const scrubEffect: ScrubEffect = {
           namedEffect: { type: 'FadeScroll', range: 'in', opacity: 0 } as NamedEffect,
-          rangeEnd: { name: 'exit', offset: { value: 75, type: 'percentage' } },
+          rangeEnd: { name: 'exit', offset: { value: 75, unit: 'percentage' } },
         };
 
         const result = effectToAnimationOptions(scrubEffect) as {
@@ -3084,11 +3136,11 @@ describe('interact (mini)', () => {
 
         expect(result.startOffset).toEqual({
           name: 'cover',
-          offset: { value: 0, type: 'percentage' },
+          offset: { value: 0, unit: 'percentage' },
         });
         expect(result.endOffset).toEqual({
           name: 'exit',
-          offset: { value: 75, type: 'percentage' },
+          offset: { value: 75, unit: 'percentage' },
         });
       });
     });
@@ -3295,6 +3347,64 @@ describe('interact (mini)', () => {
         // Should not throw when animation is null
         expect(() => add(testElement, 'null-viewprogress-test')).not.toThrow();
       });
+    });
+  });
+
+  describe('namedEffect registry (integration)', () => {
+    it('should use a registered namedEffect implementation', async () => {
+      vi.resetModules();
+      vi.doUnmock('@wix/motion');
+
+      const { registerEffects } = await import('@wix/motion');
+
+      const registeredKeyframes = [{ opacity: 0 }, { opacity: 1 }];
+      const webSpy = vi.fn(() => [
+        {
+          name: 'RegisteredTestEffect',
+          duration: 100,
+          keyframes: registeredKeyframes,
+        },
+      ]);
+
+      registerEffects({
+        RegisteredTestEffect: {
+          web: webSpy,
+          getNames: () => ['RegisteredTestEffect'],
+        },
+      });
+
+      const { Interact: RealInteract, add: realAdd } = await import('../src/index');
+
+      RealInteract.create({
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'namedEffect-source',
+            effects: [
+              {
+                key: 'namedEffect-target',
+                effectId: 'registered-effect',
+              },
+            ],
+          },
+        ],
+        effects: {
+          'registered-effect': {
+            namedEffect: { type: 'RegisteredTestEffect' } as NamedEffect,
+            duration: 100,
+          },
+        },
+      });
+
+      const sourceElement = document.createElement('div');
+      const targetElement = document.createElement('div');
+      (targetElement as any).getAnimations = () => [];
+
+      realAdd(sourceElement, 'namedEffect-source');
+      realAdd(targetElement, 'namedEffect-target');
+
+      // If the effect wasn't resolved from the registry, Motion would never call this factory.
+      expect(webSpy).toHaveBeenCalled();
     });
   });
 });

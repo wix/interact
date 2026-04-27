@@ -2,8 +2,7 @@
 // Define specific snippets for each interaction
 const snippets = {
   hover: `trigger: 'hover',
-params: { type: 'alternate' },
-effects: [{
+ֿeffects: [{
   keyframeEffect: {
     keyframes: [
       { transform: 'scale(1)', offset: 0 },
@@ -38,7 +37,6 @@ effects: [
 ]`,
   entrance: `trigger: 'viewEnter',
 effects: [{
-  fill: 'both', 
   keyframeEffect: {
     name: 'slideFromLeft',
     keyframes: [
@@ -77,8 +75,8 @@ effects: [
     key: 'orbit-y',
     fill: 'both',
     // Updated range to cover full entry to exit
-    rangeStart: { name: 'entry', offset: { value: 0, type: 'percentage' } },
-    rangeEnd: { name: 'exit', offset: { value: 100, type: 'percentage' } },
+    rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+    rangeEnd: { name: 'exit', offset: { value: 100, unit: 'percentage' } },
     keyframeEffect: {
         name: 'rotateY',
         keyframes: [
@@ -91,8 +89,8 @@ effects: [
 {
     key: 'orbit-x',
     fill: 'both',
-    rangeStart: { name: 'entry', offset: { value: 0, type: 'percentage' } },
-    rangeEnd: { name: 'exit', offset: { value: 100, type: 'percentage' } },
+    rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+    rangeEnd: { name: 'exit', offset: { value: 100, unit: 'percentage' } },
     keyframeEffect: {
         name: 'rotateX',
         keyframes: [
@@ -106,8 +104,8 @@ effects: [
 {
     key: 'orbit-diag-1',
     fill: 'both',
-    rangeStart: { name: 'entry', offset: { value: 0, type: 'percentage' } },
-    rangeEnd: { name: 'exit', offset: { value: 100, type: 'percentage' } },
+    rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+    rangeEnd: { name: 'exit', offset: { value: 100, unit: 'percentage' } },
     keyframeEffect: {
         name: 'rotateDiag1',
         keyframes: [
@@ -120,8 +118,8 @@ effects: [
 {
     key: 'orbit-diag-2',
     fill: 'both',
-    rangeStart: { name: 'entry', offset: { value: 0, type: 'percentage' } },
-    rangeEnd: { name: 'exit', offset: { value: 100, type: 'percentage' } },
+    rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+    rangeEnd: { name: 'exit', offset: { value: 100, unit: 'percentage' } },
     keyframeEffect: {
         name: 'rotateDiag2',
         keyframes: [

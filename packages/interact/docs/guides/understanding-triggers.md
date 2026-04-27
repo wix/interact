@@ -11,7 +11,6 @@ Triggers are the heart of `@wix/interact` - they define when an interaction shou
 | `interest`     | Accessibility-friendly hover (focus events)         |
 | `activate`     | Accessibility-friendly click (keyboard Enter/Space) |
 | `viewEnter`    | Element enters viewport                             | Entrance animations, lazy loading |
-| `pageVisible`  | Page becomes visible                                | Loop animations, Auto-play videos |
 | `animationEnd` | Previous animation completes                        | Animation sequences, chaining     |
 | `viewProgress` | Scroll progress through element                     | Parallax, progress bars           |
 | `pointerMove`  | Mouse movement over element                         | Interactive cards, 3D effects     |
@@ -46,9 +45,6 @@ The `hover` trigger responds to mouse enter and leave events.
 {
     key: 'my-card',
     trigger: 'hover',
-    params: {
-        type: 'alternate'
-    },
     effects: [
         {
             keyframeEffect: {
@@ -67,6 +63,8 @@ The `hover` trigger responds to mouse enter and leave events.
 
 ### Hover Behavior Types
 
+Set `triggerType` on each time-based effect (defaults shown below):
+
 - **`alternate`** (default): Plays forward on enter, reverses on leave
 - **`repeat`**: Restarts animation each time
 - **`once`**: Only plays once, then stops
@@ -78,7 +76,6 @@ The `hover` trigger responds to mouse enter and leave events.
 {
     key: 'image-card',
     trigger: 'hover',
-    params: { type: 'alternate' },
     effects: [
         {
             key: 'image-overlay',
@@ -128,9 +125,6 @@ The `click` trigger responds to mouse click events and supports multiple behavio
 {
     key: 'accordion-header',
     trigger: 'click',
-    params: {
-        type: 'alternate'
-    },
     effects: [
         {
             key: 'accordion-content',
@@ -152,13 +146,14 @@ The `click` trigger responds to mouse click events and supports multiple behavio
 - **`once`**: Only responds to the first click
 - **`state`**: First click plays, subsequent clicks pause/resume
 
+Configure these via `triggerType` on each time-based effect.
+
 ### Real-World Example: Menu Toggle
 
 ```typescript
 {
     key: 'menu-button',
     trigger: 'click',
-    params: { type: 'alternate' },
     effects: [
         {
             key: 'menu-icon',
@@ -277,7 +272,6 @@ The `viewEnter` trigger uses Intersection Observer to detect when elements enter
     key: 'hero-image',
     trigger: 'viewEnter',
     params: {
-        type: 'once',        // 'once' | 'repeat' | 'alternate'
         threshold: 0.5,      // 0-1, how much of element must be visible
         inset: '-50px'        // Margin around viewport
     },
@@ -300,9 +294,12 @@ The `viewEnter` trigger uses Intersection Observer to detect when elements enter
 
 ### ViewEnter Behavior Types
 
-- **`once`** (recommended): Triggers only when element first enters viewport
+Set `triggerType` on each time-based effect (defaults shown below). `params` only holds Intersection Observer options (`threshold`, `inset`, etc.).
+
+- **`once`** (default, recommended): Triggers only when element first enters viewport
 - **`repeat`**: Triggers every time element enters viewport
 - **`alternate`**: Plays forward on enter, reverses on exit
+- **`state`**: Plays on enter, pauses on exit
 
 ### Real-World Example: Staggered Card Animation
 
@@ -312,7 +309,7 @@ const cardAnimations = [
   {
     key: 'card-1',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.3 },
+    params: { threshold: 0.3 },
     effects: [
       {
         key: 'card-1',
@@ -332,7 +329,7 @@ const cardAnimations = [
   {
     key: 'card-2',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.3 },
+    params: { threshold: 0.3 },
     effects: [
       {
         key: 'card-2',
@@ -352,11 +349,7 @@ const cardAnimations = [
 ];
 ```
 
-## 6. PageVisible Trigger
-
-TBD
-
-## 7. ViewProgress Trigger
+## 6. ViewProgress Trigger
 
 The `viewProgress` trigger creates scroll-driven animations as elements move through the viewport.
 
@@ -398,8 +391,8 @@ The `viewProgress` trigger creates scroll-driven animations as elements move thr
                     { filter: 'grayscale(100%)' }
                 ]
             },
-            rangeStart: { name: 'exit', offset: { type: 'percentage', value: 0 } },
-            rangeEnd: { name: 'exit', offset: { type: 'percentage', value: 100 } }
+            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: 0 } },
+            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 100 } }
         },
         {
             key: 'foreground-text',
@@ -410,8 +403,8 @@ The `viewProgress` trigger creates scroll-driven animations as elements move thr
                     { opacity: '0', transform: 'scale(0.8)' }
                 ]
             },
-            rangeStart: { name: 'exit', offset: { type: 'percentage', value: 0 } },
-            rangeEnd: { name: 'exit', offset: { type: 'percentage', value: 100 } }
+            rangeStart: { name: 'exit', offset: { unit: 'percentage', value: 0 } },
+            rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 100 } }
         }
     ]
 }
@@ -433,14 +426,14 @@ The `viewProgress` trigger creates scroll-driven animations as elements move thr
                     { transform: 'scaleX(1)' }
                 ]
             },
-            rangeStart: { name: 'cover', offset: { type: 'percentage', value: 0 } },
-            rangeEnd: { name: 'cover', offset: { type: 'percentage', value: 100 } }
+            rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+            rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } }
         }
     ]
 }
 ```
 
-## 8. PointerMove Trigger
+## 7. PointerMove Trigger
 
 The `pointerMove` trigger creates mouse-following effects and 3D interactions.
 
@@ -472,7 +465,8 @@ The `pointerMove` trigger creates mouse-following effects and 3D interactions.
     key: 'card-section',
     trigger: 'pointerMove',
     params: {
-        hitArea: 'self'  // 'self' | 'root'
+        hitArea: 'self',  // 'self' | 'root'
+        axis: 'y'         // 'x' | 'y' – scrub axis (default 'y')
     },
     effects: [
         {
@@ -513,7 +507,7 @@ The `pointerMove` trigger creates mouse-following effects and 3D interactions.
 }
 ```
 
-## 9. AnimationEnd Trigger
+## 8. AnimationEnd Trigger
 
 The `animationEnd` trigger allows you to chain animations by waiting for a previous animation to complete.
 
@@ -621,7 +615,6 @@ You can combine multiple triggers on the same element for complex interactions:
     {
       key: 'interactive-card',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       effects: [
         {
           key: 'interactive-card',

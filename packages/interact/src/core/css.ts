@@ -1,17 +1,111 @@
-import { InteractConfig } from '../types';
+import { getSelectorCondition, applySelectorCondition } from '../utils';
+import { Effect, InteractConfig, TimeEffect } from '../types';
+import { getSelector } from './Interact';
 
-export function generate(_config: InteractConfig): string {
-  const css: string[] = [
-    `@media (prefers-reduced-motion: no-preference) {
-  [data-interact-initial="true"] > :first-child:not([data-motion-enter="done"]) {
-    visibility: hidden;
-    transform: none;
-    translate: none;
-    scale: none;
-    rotate: none;
+const buildSelector = (
+  key: string,
+  effect: Effect,
+  conditionSelector: string | undefined,
+  useFirstChild: boolean,
+): string => {
+  const escapedKey = key.replace(/"/g, "'");
+
+  let baseSelector = `[data-interact-key="${escapedKey}"]`;
+
+  const elementSelector = getSelector(effect, { asCombinator: true, useFirstChild });
+
+  if (elementSelector) {
+    baseSelector = `${baseSelector} ${elementSelector}`;
   }
-}`,
-  ];
+
+  if (conditionSelector) {
+    baseSelector = applySelectorCondition(baseSelector, conditionSelector);
+  }
+
+  return baseSelector;
+};
+
+export function generate(_config: InteractConfig, useFirstChild: boolean = false): string {
+  const css: string[] = [];
+  const processedSelectors = new Set<string>();
+
+  _config.interactions.forEach(
+    ({
+      key: interactionKey,
+      selector: interactionSelector,
+      listContainer: interactionListContainer,
+      listItemSelector: interactionListItemSelector,
+      trigger,
+      effects,
+      conditions: interactionConditions,
+    }) => {
+      const isViewEnter = trigger === 'viewEnter';
+      if (isViewEnter) {
+        effects?.forEach((effect) => {
+          const effectData = effect?.effectId ? _config.effects[effect.effectId] || effect : effect;
+          const isOnce =
+            !(effectData as TimeEffect).triggerType ||
+            (effectData as TimeEffect).triggerType === 'once';
+          if (!isOnce) return;
+          const {
+            key: effectKey,
+            selector: effectSelector,
+            listContainer: effectListContainer,
+            listItemSelector: effectListItemSelector,
+            conditions: effectConditions,
+          } = effectData;
+
+          const sameKey = !effectKey || effectKey === interactionKey;
+          if (!sameKey) return;
+
+          const sameSelector =
+            (!effectSelector && !interactionSelector) || effectSelector === interactionSelector;
+          if (!sameSelector) return;
+
+          const sameListcontainer =
+            (!effectListContainer && !interactionListContainer) ||
+            effectListContainer === interactionListContainer;
+          if (!sameListcontainer) return;
+
+          const sameListItemSelector =
+            (!effectListItemSelector && !interactionListItemSelector) ||
+            effectListItemSelector === interactionListItemSelector;
+          if (!sameListItemSelector) return;
+
+          const configConditions = _config.conditions || {};
+          const effectConditionSelector = getSelectorCondition(effectConditions, configConditions);
+          const interactionConditionSelector = getSelectorCondition(
+            interactionConditions,
+            configConditions,
+          );
+          const sameConditionSelector =
+            (!effectConditionSelector && !interactionConditionSelector) ||
+            effectConditionSelector === interactionConditionSelector;
+          if (!sameConditionSelector) return;
+
+          const selector = buildSelector(
+            interactionKey,
+            effectData,
+            interactionConditionSelector,
+            useFirstChild,
+          );
+
+          if (!processedSelectors.has(selector)) {
+            processedSelectors.add(selector);
+            css.push(`@media (prefers-reduced-motion: no-preference) {
+              ${selector}:not([data-interact-enter]) {
+                visibility: hidden;
+                transform: none;
+                translate: none;
+                scale: none;
+                rotate: none;
+              }
+            }`);
+          }
+        });
+      }
+    },
+  );
 
   return css.join('\n');
 }

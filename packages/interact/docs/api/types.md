@@ -124,7 +124,7 @@ type Interaction = {
 
 - `key` - Unique identifier for the custom element that triggers the interaction
 - `trigger` - Type of trigger event
-- `selector` - Optional CSS selector to target an element within the custom element or within each list item if combined with `listContainer`
+- `selector` - Optional CSS selector to target elements. When `listContainer` is also specified, uses `querySelectorAll` within the container to find matching elements as list items. Without `listContainer`, uses `querySelectorAll` within the root element. For dynamically added list items, uses `querySelector` within each item.
 - `listContainer` - Optional selector for list container when targeting list items
 - `params` - Optional parameters for the trigger
 - `conditions` - Optional array of condition IDs to evaluate
@@ -161,27 +161,24 @@ Interface for the controller that manages interactions on an element. This is th
 
 ```typescript
 interface IInteractionController {
-  // Properties
   element: HTMLElement;
   key: string | undefined;
   connected: boolean;
   sheet: CSSStyleSheet | null;
-  _observers: WeakMap<HTMLElement, MutationObserver>;
+  useFirstChild: boolean;
 
-  // Methods
   connect(key?: string): void;
-  disconnect(): void;
+  disconnect(options?: { removeFromCache?: boolean }): void;
   update(): void;
   toggleEffect(
     effectId: string,
-    method: StateParams['method'],
+    stateAction: StateAction,
     item?: HTMLElement | null,
     isLegacy?: boolean,
   ): void;
   getActiveEffects(): string[];
   renderStyle(cssRules: string[]): void;
   watchChildList(listContainer: string): void;
-  _childListChangeHandler(listContainer: string, entries: MutationRecord[]): void;
 }
 ```
 
@@ -189,14 +186,14 @@ interface IInteractionController {
 
 - `element` - The DOM element this controller manages
 - `key` - The unique identifier for this element's interactions
-- `connected` - Whether the controller is currently connected to the interaction system
+- `connected` - Whether the controller is currently connected
 - `sheet` - The adopted stylesheet for dynamic CSS rules
-- `_observers` - Internal storage for mutation observers
+- `useFirstChild` - When true, interaction target is the first child (e.g. custom elements)
 
 **Methods:**
 
 - `connect(key?)` - Connects the controller to the interaction system
-- `disconnect()` - Disconnects and cleans up all resources
+- `disconnect(options?)` - Disconnects and cleans up; `removeFromCache: true` removes from `Interact.controllerCache`
 - `update()` - Disconnects and reconnects (refreshes interactions)
 - `toggleEffect()` - Toggles a CSS state effect on the element
 - `getActiveEffects()` - Returns array of currently active effect IDs
@@ -232,8 +229,8 @@ interface IInteractElement extends HTMLElement {
   connectedCallback(): void;
   disconnectedCallback(): void;
   connect(key?: string): void;
-  disconnect(): void;
-  toggleEffect(effectId: string, method: StateParams['method'], item?: HTMLElement | null): void;
+  disconnect(options?: { removeFromCache?: boolean }): void;
+  toggleEffect(effectId: string, stateAction: StateAction, item?: HTMLElement | null): void;
   getActiveEffects(): string[];
 }
 ```
@@ -345,7 +342,6 @@ type TriggerType =
   | 'interest'
   | 'activate'
   | 'viewEnter'
-  | 'pageVisible'
   | 'animationEnd'
   | 'viewProgress'
   | 'pointerMove';
@@ -355,81 +351,34 @@ type TriggerType =
 
 #### `ViewEnterParams`
 
-Parameters for viewport entry triggers (`viewEnter`, `pageVisible`, `viewProgress`).
+Parameters for viewport entry triggers (`viewEnter`). Controls IntersectionObserver configuration only. Playback behavior (`'once'`, `'repeat'`, `'alternate'`, `'state'`) is configured via `triggerType` on the effect (see [TimeEffect](#timeeffect)) or on the sequence config (see [SequenceOptionsConfig](#sequenceoptionsconfig)).
 
 ```typescript
 type ViewEnterParams = {
-  type?: ViewEnterType;
   threshold?: number;
   inset?: string;
+  useSafeViewEnter?: boolean;
 };
-
-type ViewEnterType = 'once' | 'repeat' | 'alternate';
 ```
 
 **Properties:**
 
-- `type` - How the trigger behaves on repeated intersections
-  - `'once'` - Trigger only the first time (default)
-  - `'repeat'` - Trigger every time element enters viewport
-  - `'alternate'` - Alternate between enter/exit effects
 - `threshold` - Percentage of element that must be visible (0-1)
 - `inset` - CSS-style inset to shrink the root intersection area
+- `useSafeViewEnter` - When true, handles elements taller than viewport
 
 **Examples:**
 
 ```typescript
-// Trigger once when 50% visible
-const onceParams: ViewEnterParams = {
-  type: 'once',
+// Trigger when 50% visible
+const params: ViewEnterParams = {
   threshold: 0.5,
 };
 
-// Trigger repeatedly with margin
-const repeatParams: ViewEnterParams = {
-  type: 'repeat',
+// Trigger with margin
+const paramsWithMargin: ViewEnterParams = {
   threshold: 0.1,
   inset: '100px',
-};
-
-// Alternate effects on enter/exit
-const alternateParams: ViewEnterParams = {
-  type: 'alternate',
-  threshold: 0.3,
-};
-```
-
-#### `StateParams`
-
-Parameters for state-based triggers (`hover`, `click`, `interest`, `activate`).
-
-```typescript
-type StateParams = {
-  method: TransitionMethod;
-};
-
-type TransitionMethod = 'add' | 'remove' | 'toggle' | 'clear';
-```
-
-**Properties:**
-
-- `method` - How to modify the element's state
-  - `'add'` - Add the effect state
-  - `'remove'` - Remove the effect state
-  - `'toggle'` - Toggle the effect state
-  - `'clear'` - Clear all effect states
-
-**Examples:**
-
-```typescript
-// Toggle effect on click
-const toggleClick: StateParams = {
-  method: 'toggle',
-};
-
-// Add effect on hover enter, remove on hover exit
-const hoverState: StateParams = {
-  method: 'add', // hover exit automatically uses 'remove'
 };
 ```
 
@@ -438,22 +387,25 @@ const hoverState: StateParams = {
 Parameters for pointer/mouse movement triggers.
 
 ```typescript
+type PointerMoveAxis = 'x' | 'y';
+
 type PointerMoveParams = {
   hitArea?: 'root' | 'self';
+  axis?: PointerMoveAxis;
 };
 ```
 
 **Properties:**
 
-- `hitArea` - Defines the area that responds to pointer movement
-  - `'self'` - Only the source element (default)
-  - `'root'` - The entire viewport/root container
+- `hitArea` - `'self'` (default) or `'root'` (viewport)
+- `axis` - `'x'` or `'y'` (default `'y'`) for scrub direction
 
 **Example:**
 
 ```typescript
 const pointerParams: PointerMoveParams = {
-  hitArea: 'root', // Track mouse across entire page
+  hitArea: 'self',
+  axis: 'y',
 };
 ```
 
@@ -486,7 +438,7 @@ const chainedAnimation: AnimationEndParams = {
 Union type of all effect types.
 
 ```typescript
-type Effect = (TimeEffect | ScrubEffect | TransitionEffect) & {
+type Effect = (TimeEffect | ScrubEffect | StateEffect) & {
   conditions?: string[];
 };
 ```
@@ -508,6 +460,7 @@ type TimeEffect = {
   reversed?: boolean;
   delay?: number;
   effectId?: string;
+  triggerType?: TimeAnimationTriggerType;
 } & EffectProperty;
 
 type Fill = 'none' | 'forwards' | 'backwards' | 'both';
@@ -516,7 +469,7 @@ type Fill = 'none' | 'forwards' | 'backwards' | 'both';
 **Properties:**
 
 - `key` - unique identifier for targeting a custom element (optional, defaults to source key from the `Interaction`)
-- `selector` - CSS selector for targeting an element inside the custom element or each list item if combined with `listContainer` (optional, defaults to `firstElementChild`)
+- `selector` - CSS selector for targeting elements inside the custom element (uses `querySelectorAll`) or each list item if combined with `listContainer` (optional, defaults to `firstElementChild`)
 - `listContainer` - CSS selector for list container when targeting list items (optional)
 - `duration` - Animation duration in milliseconds (required)
 - `easing` - Easing function name or custom cubic-bezier
@@ -525,6 +478,11 @@ type Fill = 'none' | 'forwards' | 'backwards' | 'both';
 - `fill` - How to apply styles before/after animation
 - `reversed` - Whether to play animation in reverse
 - `delay` - Delay before animation starts in milliseconds
+- `triggerType` - Controls play behavior for event triggers (`hover`, `click`, `activate`, `interest`, `viewEnter`):
+  - `'alternate'` (default for hover/click) - Hover & viewEnter: play on enter, reverse on leave. Click: alternate play/reverse on successive clicks.
+  - `'repeat'` - Restart from progress 0 on each event; on hover leave the animation is canceled; on viewEnter full exit, pause and reset.
+  - `'once'` (default for viewEnter) - Play once and remove the listener (hover & viewEnter attach only the enter listener; no leave).
+  - `'state'` - Hover & viewEnter: play on enter if idle/paused, pause on leave if running. Click: toggle play/pause on successive clicks until finished.
 
 **Examples:**
 
@@ -605,8 +563,8 @@ type ScrubEffect = {
 // Parallax background
 const parallaxEffect: ScrubEffect = {
   easing: 'linear',
-  rangeStart: { name: 'contain', offset: { value: 0, type: 'percentage' } },
-  rangeEnd: { name: 'contain', offset: { value: 100, type: 'percentage' } },
+  rangeStart: { name: 'contain', offset: { value: 0, unit: 'percentage' } },
+  rangeEnd: { name: 'contain', offset: { value: 100, unit: 'percentage' } },
   keyframeEffect: {
     name: 'parallax',
     keyframes: [{ transform: 'translateY(0)' }, { transform: 'translateY(-50px)' }],
@@ -624,19 +582,22 @@ const progressFade: ScrubEffect = {
 };
 ```
 
-### `TransitionEffect`
+### `StateEffect`
 
 CSS transition-based effects for style property changes.
 
 ```typescript
-type TransitionEffect = {
+type StateEffect = {
   key?: string;
   effectId?: string;
+  stateAction?: StateAction;
   transition?: TransitionOptions & {
     styleProperties: StyleProperty[];
   };
   transitionProperties?: TransitionProperty[];
 };
+
+type StateAction = 'add' | 'remove' | 'toggle' | 'clear';
 
 type TransitionOptions = {
   duration?: number;
@@ -652,11 +613,19 @@ type StyleProperty = {
 type TransitionProperty = StyleProperty & TransitionOptions;
 ```
 
+**Properties:**
+
+- `stateAction` - How to modify the element's CSS state on event triggers (`hover`, `click`, `activate`, `interest`):
+  - `'toggle'` (default) - Hover: adds on enter, removes on leave. Click: toggles on each click.
+  - `'add'` - Add the effect state; hover leave will NOT auto-remove.
+  - `'remove'` - Remove the effect state.
+  - `'clear'` - Clear all effect states for the element (or list item when list context is used).
+
 **Examples:**
 
 ```typescript
 // Simple color transition
-const colorTransition: TransitionEffect = {
+const colorTransition: StateEffect = {
   transition: {
     duration: 300,
     easing: 'ease-out',
@@ -668,7 +637,7 @@ const colorTransition: TransitionEffect = {
 };
 
 // Individual property transitions
-const complexTransition: TransitionEffect = {
+const complexTransition: StateEffect = {
   transitionProperties: [
     {
       name: 'transform',
@@ -750,8 +719,8 @@ type EffectProperty =
 **Types:**
 
 - `keyframeEffect` - Raw keyframe animation definition
-- `namedEffect` - Pre-built animation from `@wix/motion`
-- `customEffect` - Custom animation function
+- `namedEffect` - Pre-built animations from `@wix/motion-presets`
+- `customEffect` - Function `(element: Element, progress: number) => void` for custom scrub/behavior
 
 **Examples:**
 
@@ -769,21 +738,131 @@ const keyframeEffect = {
 
 // Named effect
 const namedEffect = {
-  namedEffect: {
-    type: 'SlideIn',
-  }, // Pre-built animation
+  namedEffect: { type: 'SlideIn' },
 };
 
-// Custom effect
+// Custom effect (signature: element, progress)
 const customEffect = {
-  customEffect: (element: HTMLElement) => {
-    // Custom animation logic
-    return element.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], {
-      duration: 1000,
-    });
+  customEffect: (element: Element, progress: number) => {
+    (element as HTMLElement).style.opacity = String(progress);
   },
 };
 ```
+
+## Sequence Types
+
+### `SequenceOptionsConfig`
+
+Shared options for sequence timing, identity, and conditional gating.
+
+```typescript
+type SequenceOptionsConfig = {
+  delay?: number;
+  offset?: number;
+  offsetEasing?: string | ((p: number) => number);
+  sequenceId?: string;
+  conditions?: string[];
+  triggerType?: TimeAnimationTriggerType;
+};
+```
+
+**Properties:**
+
+- `delay` - Base delay (ms) applied to all effects in the sequence. Default: `0`.
+- `offset` - Stagger interval (ms) between consecutive effects. Default: `0`.
+- `offsetEasing` - Easing function or named string for offset distribution (`'linear'`, `'quadIn'`, `'sineOut'`, etc.). Default: `linear`.
+- `sequenceId` - Optional ID for referencing a reusable sequence from `InteractConfig.sequences`.
+- `conditions` - Optional array of condition IDs. When set, the sequence is only active when all conditions match.
+- `triggerType` - Controls play behavior for event trigger sequences (`hover`, `click`, `activate`, `interest`, `viewEnter`). Same values as `TimeEffect.triggerType`: `'once'` (default for viewEnter), `'alternate'` (default for hover/click), `'repeat'`, `'state'`.
+
+### `SequenceConfig`
+
+Inline sequence definition with an effects array.
+
+```typescript
+type SequenceConfig = SequenceOptionsConfig & {
+  effects: (Effect | EffectRef)[];
+};
+```
+
+**Properties:**
+
+- All properties from `SequenceOptionsConfig`
+- `effects` - Array of effects that participate in the sequence. Each effect becomes an `AnimationGroup` in the underlying `Sequence` instance.
+
+**Example:**
+
+```typescript
+const inlineSequence: SequenceConfig = {
+  offset: 150,
+  offsetEasing: 'quadIn',
+  effects: [
+    { effectId: 'card-entrance' },
+    {
+      duration: 500,
+      keyframeEffect: {
+        name: 'fade-in',
+        keyframes: [{ opacity: 0 }, { opacity: 1 }],
+      },
+    },
+  ],
+};
+```
+
+### `SequenceConfigRef`
+
+Reference to a reusable sequence by ID, with optional timing overrides.
+
+```typescript
+type SequenceConfigRef = {
+  sequenceId: string;
+  delay?: number;
+  offset?: number;
+  offsetEasing?: string | ((p: number) => number);
+  conditions?: string[];
+};
+```
+
+**Properties:**
+
+- `sequenceId` - ID of the sequence in `InteractConfig.sequences` (required)
+- `delay`, `offset`, `offsetEasing`, `conditions` - Override values that merge on top of the referenced sequence
+
+**Example:**
+
+```typescript
+// Reference a reusable sequence with override
+const sequenceRef: SequenceConfigRef = {
+  sequenceId: 'card-stagger',
+  offset: 200, // Override the default offset
+};
+```
+
+### Updated `InteractConfig`
+
+The `InteractConfig` type includes an optional `sequences` map for reusable sequence definitions:
+
+```typescript
+type InteractConfig = {
+  effects: Record<string, Effect>;
+  sequences?: Record<string, SequenceConfig>;
+  conditions?: Record<string, Condition>;
+  interactions: Interaction[];
+};
+```
+
+### Updated `Interaction`
+
+Interactions can include a `sequences` array alongside or instead of `effects`:
+
+```typescript
+type Interaction = InteractionTrigger & {
+  effects?: ((Effect | EffectRef) & { interactionId?: string })[];
+  sequences?: (SequenceConfig | SequenceConfigRef)[];
+};
+```
+
+An interaction can have `effects` only, `sequences` only, or both.
 
 ## Condition Types
 
@@ -793,17 +872,15 @@ Defines conditional logic for interactions.
 
 ```typescript
 type Condition = {
-  type: 'media' | 'container';
+  type: 'media' | 'container' | 'selector';
   predicate?: string;
 };
 ```
 
 **Properties:**
 
-- `type` - Type of condition check
-  - `'media'` - Media query condition
-  - `'container'` - Container query condition
-- `predicate` - The query string to evaluate
+- `type` - `'media'` (media query), `'container'` (container query), or `'selector'`
+- `predicate` - The query string or selector to evaluate
 
 **Examples:**
 
@@ -831,31 +908,7 @@ const wideContainer: Condition = {
 };
 ```
 
-## Handler Types
-
-### `InteractionHandlerModule`
-
-Interface for trigger handler modules.
-
-```typescript
-type InteractionHandlerModule<T extends TriggerType> = {
-  registerOptionsGetter?: (getter: () => any) => void;
-  add: (
-    source: HTMLElement,
-    target: HTMLElement,
-    effect: Effect,
-    options: InteractionParamsTypes[T],
-    interactOptions: InteractOptions,
-  ) => void;
-  remove: (element: HTMLElement) => void;
-};
-```
-
-**Properties:**
-
-- `registerOptionsGetter` - Optional function to register global options getter
-- `add` - Function to add a handler for this trigger type
-- `remove` - Function to remove all handlers from an element
+## Trigger parameter types
 
 ### `InteractionParamsTypes`
 
@@ -863,8 +916,10 @@ Map of trigger types to their parameter types.
 
 ```typescript
 type InteractionParamsTypes = {
-  hover: StateParams | PointerTriggerParams;
-  click: StateParams | PointerTriggerParams;
+  hover: Record<string, never>;
+  click: Record<string, never>;
+  interest: Record<string, never>;
+  activate: Record<string, never>;
   viewEnter: ViewEnterParams;
   pageVisible: ViewEnterParams;
   animationEnd: AnimationEndParams;
@@ -873,104 +928,19 @@ type InteractionParamsTypes = {
 };
 ```
 
-## Cache and Internal Types
-
-### `InteractCache`
-
-Internal cache structure for parsed configuration.
-
-```typescript
-type InteractCache = {
-  effects: { [effectId: string]: Effect };
-  conditions: { [conditionId: string]: Condition };
-  interactions: {
-    [key: string]: {
-      triggers: Interaction[];
-      effects: Record<string, (InteractionTrigger & { effect: Effect | EffectRef })[]>;
-      interactionIds: Set<string>;
-      selectors: Set<string>;
-    };
-  };
-};
-```
+> **Note:** `hover`, `click`, `interest`, `activate`, and `viewEnter` triggers no longer use params for playback behavior. Animation behavior (`triggerType`) is now configured on `TimeEffect` (or `SequenceOptionsConfig` for sequences), and state behavior (`stateAction`) is now configured on `StateEffect`. `viewEnter`/`pageVisible` params only contain observer configuration (`threshold`, `inset`, `useSafeViewEnter`).
 
 ### `TriggerParams`
 
 Union type of all trigger parameter types.
 
 ```typescript
-type TriggerParams =
-  | StateParams
-  | PointerTriggerParams
-  | ViewEnterParams
-  | PointerMoveParams
-  | AnimationEndParams;
-```
-
-## Utility Types
-
-### `HandlerObject`
-
-Internal type for event handler management.
-
-```typescript
-type HandlerObject = {
-  source: HTMLElement;
-  target: HTMLElement;
-  cleanup: () => void;
-  handler?: () => void;
-};
-
-type HandlerObjectMap = WeakMap<HTMLElement, Set<HandlerObject>>;
-```
-
-### Configuration Builders
-
-```typescript
-// Type-safe configuration builder
-class InteractConfigBuilder {
-  private config: Partial<InteractConfig> = { interactions: [], effects: {} };
-
-  addInteraction(interaction: Interaction): this {
-    this.config.interactions!.push(interaction);
-    return this;
-  }
-
-  addEffect(id: string, effect: Effect): this {
-    this.config.effects![id] = effect;
-    return this;
-  }
-
-  addCondition(id: string, condition: Condition): this {
-    if (!this.config.conditions) this.config.conditions = {};
-    this.config.conditions[id] = condition;
-    return this;
-  }
-
-  build(): InteractConfig {
-    return this.config as InteractConfig;
-  }
-}
-
-// Usage
-const config = new InteractConfigBuilder()
-  .addEffect('fade', {
-    duration: 1000,
-    keyframeEffect: {
-      name: 'fade',
-      keyframes: [{ opacity: 0 }, { opacity: 1 }],
-    },
-  })
-  .addInteraction({
-    trigger: 'viewEnter',
-    key: 'hero',
-    effects: [{ effectId: 'fade' }],
-  })
-  .build();
+type TriggerParams = ViewEnterParams | PointerMoveParams | AnimationEndParams;
 ```
 
 ## See Also
 
+- [Sequences & Staggering Guide](../guides/sequences.md) - Comprehensive sequences guide
 - [Interact Class](interact-class.md) - Main API class
 - [InteractionController](interaction-controller.md) - Controller API
 - [Functions](functions.md) - Standalone functions

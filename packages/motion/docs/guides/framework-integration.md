@@ -167,7 +167,6 @@ interface AnimatedContainerProps {
   children: React.ReactNode;
   animationType: 'fadeIn' | 'slideIn' | 'bounceIn';
   direction?: 'top' | 'right' | 'bottom' | 'left';
-  power?: 'soft' | 'medium' | 'hard';
   duration?: number;
   trigger?: 'immediate' | 'intersection' | 'manual';
   className?: string;
@@ -177,7 +176,6 @@ export const AnimatedContainer: React.FC<AnimatedContainerProps> = ({
   children,
   animationType,
   direction = 'bottom',
-  power = 'medium',
   duration = 800,
   trigger = 'intersection',
   className
@@ -201,12 +199,12 @@ export const AnimatedContainer: React.FC<AnimatedContainerProps> = ({
       case 'slideIn':
         return {
           ...baseOptions,
-          namedEffect: { type: 'SlideIn', direction, power }
+          namedEffect: { type: 'SlideIn', direction }
         };
       case 'bounceIn':
         return {
           ...baseOptions,
-          namedEffect: { type: 'BounceIn', direction, power }
+          namedEffect: { type: 'BounceIn', direction }
         };
       default:
         return {
@@ -214,7 +212,7 @@ export const AnimatedContainer: React.FC<AnimatedContainerProps> = ({
           namedEffect: { type: 'FadeIn' }
         };
     }
-  }, [animationType, direction, power, duration]);
+  }, [animationType, direction, duration]);
 
   const { ref } = useAnimation(animationOptions, {
     autoPlay: shouldAnimate,
@@ -277,7 +275,7 @@ function App() {
 function CustomAnimatedComponent() {
   const { ref, play, pause, progress } = useAnimation({
     type: 'TimeAnimationOptions',
-    namedEffect: { type: 'BounceIn', power: 'hard' },
+    namedEffect: { type: 'BounceIn' },
     duration: 1000,
   });
 
@@ -545,7 +543,7 @@ const fadeInOptions = {
 
 const slideInOptions = {
   type: 'TimeAnimationOptions',
-  namedEffect: { type: 'SlideIn', direction: 'left', power: 'medium' },
+  namedEffect: { type: 'SlideIn', direction: 'left' },
   duration: 1000,
 };
 
@@ -943,7 +941,7 @@ export class AppComponent {
 
   slideInOptions: AnimationOptions = {
     type: 'TimeAnimationOptions',
-    namedEffect: { type: 'SlideIn', direction: 'bottom', power: 'medium' },
+    namedEffect: { type: 'SlideIn', direction: 'bottom' },
     duration: 1000,
   };
 

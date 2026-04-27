@@ -4,6 +4,8 @@ import {
   EffectRef,
   Effect,
   Interaction,
+  SequenceConfig,
+  SequenceConfigRef,
   ViewEnterParams,
   ViewEnterHandlerModule,
   IInteractionController,
@@ -12,6 +14,13 @@ import {
 import { getInterpolatedKey } from './utilities';
 import { generateId } from '../utils';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
+import {
+  registerEffects,
+  getSequence as getMotionSequence,
+  createAnimationGroups,
+  Sequence,
+} from '@wix/motion';
+import type { SequenceOptions, AnimationGroupArgs, IndexedGroup } from '@wix/motion';
 
 function _convertToKeyTemplate(key: string) {
   return key.replace(/\[([-\w]+)]/g, '[]');
@@ -37,27 +46,29 @@ export class Interact {
   static allowA11yTriggers: boolean = true;
   static instances: Interact[] = [];
   static controllerCache = new Map<string, IInteractionController>();
+  static sequenceCache = new Map<string, Sequence>();
+  static elementSequenceMap = new WeakMap<HTMLElement, Set<Sequence>>();
 
   constructor() {
-    this.dataCache = { effects: {}, conditions: {}, interactions: {} };
+    this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
     this.addedInteractions = {};
     this.mediaQueryListeners = new Map();
     this.listInteractionsCache = {};
     this.controllers = new Set();
   }
 
-  init(config: InteractConfig, options?: { useCutsomElement?: boolean }): void {
+  init(config: InteractConfig, options?: { useCustomElement?: boolean }): void {
     if (typeof window === 'undefined' || !window.customElements) {
       return;
     }
 
-    const useCutsomElement = options?.useCutsomElement ?? !!Interact.defineInteractElement;
+    const useCustomElement = options?.useCustomElement ?? !!Interact.defineInteractElement;
 
-    this.dataCache = parseConfig(config, useCutsomElement);
+    this.dataCache = parseConfig(config, useCustomElement);
 
     const defined = Interact.defineInteractElement?.();
 
-    if (useCutsomElement && defined === false) {
+    if (useCustomElement && defined === false) {
       // mostly to recover from React's <StrictMode>, blah...
       document.querySelectorAll('interact-element').forEach((element) => {
         (element as IInteractElement).connect();
@@ -89,7 +100,7 @@ export class Interact {
     this.addedInteractions = {};
     this.listInteractionsCache = {};
     this.controllers.clear();
-    this.dataCache = { effects: {}, conditions: {}, interactions: {} };
+    this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
     Interact.instances.splice(Interact.instances.indexOf(this), 1);
   }
 
@@ -136,6 +147,14 @@ export class Interact {
       const interactionId = getInterpolatedKey(interactionId_, key);
       delete this.addedInteractions[interactionId];
     });
+
+    const seqPrefix = `${key}::seq::`;
+    for (const cacheKey of Interact.sequenceCache.keys()) {
+      if (cacheKey.startsWith(seqPrefix)) {
+        Interact.sequenceCache.delete(cacheKey);
+        delete this.addedInteractions[cacheKey];
+      }
+    }
   }
 
   setupMediaQueryListener(id: string, mql: MediaQueryList, key: string, handler: () => void) {
@@ -152,7 +171,7 @@ export class Interact {
     });
   }
 
-  static create(config: InteractConfig, options?: { useCutsomElement?: boolean }): Interact {
+  static create(config: InteractConfig, options?: { useCustomElement?: boolean }): Interact {
     const instance = new Interact();
     Interact.instances.push(instance);
 
@@ -167,6 +186,8 @@ export class Interact {
     });
     Interact.instances.length = 0;
     Interact.controllerCache.clear();
+    Interact.sequenceCache.clear();
+    Interact.elementSequenceMap = new WeakMap();
   }
 
   static setup(options: {
@@ -199,11 +220,19 @@ export class Interact {
   }
 
   static getInstance(key: string): Interact | undefined {
-    return Interact.instances.find((instance) => instance.has(key));
+    const instance = Interact.instances.find((instance) => instance.has(key));
+    if (!instance) {
+      console.warn(`Interact: Instance for key "${key}" not found`);
+    }
+    return instance;
   }
 
   static getController(key: string | undefined): IInteractionController | undefined {
-    return key ? Interact.controllerCache.get(key) : undefined;
+    const controller = key ? Interact.controllerCache.get(key) : undefined;
+    if (!controller) {
+      console.warn(`Interact: Controller for key "${key}" not found`);
+    }
+    return controller;
   }
 
   static setController(key: string, controller: IInteractionController): void {
@@ -212,6 +241,88 @@ export class Interact {
 
   static deleteController(key: string): void {
     Interact.controllerCache.delete(key);
+  }
+
+  static registerEffects = registerEffects;
+
+  static getSequence(
+    cacheKey: string,
+    sequenceOptions: SequenceOptions,
+    animationGroupArgs: AnimationGroupArgs[],
+    context?: { reducedMotion?: boolean },
+  ): Sequence {
+    const cached = Interact.sequenceCache.get(cacheKey);
+    if (cached) return cached;
+
+    const sequence = getMotionSequence(sequenceOptions, animationGroupArgs, context);
+    Interact.sequenceCache.set(cacheKey, sequence);
+    Interact._registerSequenceElements(animationGroupArgs, sequence);
+
+    return sequence;
+  }
+
+  static addToSequence(
+    cacheKey: string,
+    animationGroupArgs: AnimationGroupArgs[],
+    indices: number[],
+    context?: { reducedMotion?: boolean },
+  ): boolean {
+    const cached = Interact.sequenceCache.get(cacheKey);
+
+    if (!cached) return false;
+
+    const newGroups = createAnimationGroups(animationGroupArgs, context);
+    const entries: IndexedGroup[] = newGroups.map((group, i) => ({
+      index: indices[i] ?? cached.animationGroups.length,
+      group,
+    }));
+
+    cached.addGroups(entries);
+    Interact._registerSequenceElements(animationGroupArgs, cached);
+
+    return true;
+  }
+
+  private static _registerSequenceElements(
+    animationGroupArgs: AnimationGroupArgs[],
+    sequence: Sequence,
+  ): void {
+    for (const { target } of animationGroupArgs) {
+      // String selector targets are resolved to HTMLElements before reaching here
+      // (see _buildAnimationGroupArgsFromSequence in add.ts), so only HTMLElement
+      // and HTMLElement[] need handling.
+      const elements = Array.isArray(target)
+        ? target
+        : target instanceof HTMLElement
+          ? [target]
+          : [];
+      for (const el of elements) {
+        let seqs = Interact.elementSequenceMap.get(el);
+        if (!seqs) {
+          seqs = new Set();
+          Interact.elementSequenceMap.set(el, seqs);
+        }
+        seqs.add(sequence);
+      }
+    }
+  }
+
+  static removeFromSequences(elements: HTMLElement[]): void {
+    for (const element of elements) {
+      const sequences = Interact.elementSequenceMap.get(element);
+      if (!sequences) continue;
+
+      for (const sequence of sequences) {
+        // Optional chaining on `.effect` handles cases where animations were
+        // already cancelled (e.g. by a prior removeGroups call in this loop),
+        // which may null out the effect reference.
+        sequence.removeGroups((group) =>
+          group.animations.some((a) => (a.effect as KeyframeEffect)?.target === element),
+        );
+      }
+
+      Interact.elementSequenceMap.delete(element);
+    }
   }
 }
 
@@ -244,39 +355,78 @@ export function getSelector(
 /**
  * Parses the config object and caches interactions, effects, and conditions
  */
-function parseConfig(config: InteractConfig, useCutsomElement: boolean = false): InteractCache {
+function _isSequenceConfigRef(
+  config: SequenceConfig | SequenceConfigRef,
+): config is SequenceConfigRef {
+  return 'sequenceId' in config && !('effects' in config);
+}
+
+function _ensureInteractionEntry(
+  interactions: InteractCache['interactions'],
+  key: string,
+): InteractCache['interactions'][string] {
+  if (!interactions[key]) {
+    interactions[key] = {
+      triggers: [],
+      effects: {},
+      sequences: {},
+      interactionIds: new Set(),
+      selectors: new Set(),
+    };
+  }
+
+  return interactions[key];
+}
+
+function parseConfig(config: InteractConfig, useCustomElement: boolean = false): InteractCache {
   const conditions = config.conditions || {};
   const interactions: InteractCache['interactions'] = {};
 
   config.interactions?.forEach((interaction_) => {
     const source = interaction_.key;
     const interactionIdx = ++interactionIdCounter;
-    const { effects: effects_, ...rest } = interaction_;
+    const { effects: effects_, sequences: sequences_, ...rest } = interaction_;
 
     if (!source) {
       console.error(`Interaction ${interactionIdx} is missing a key for source element.`);
       return;
     }
 
-    if (!interactions[source]) {
-      interactions[source] = {
-        triggers: [],
-        effects: {},
-        interactionIds: new Set(),
-        selectors: new Set(),
-      };
-    }
+    _ensureInteractionEntry(interactions, source);
 
     /*
      * Cache interaction trigger by source element
      */
-    const effects = Array.from(effects_);
+    const effects = effects_ ? Array.from(effects_) : [];
     effects.reverse(); // reverse to ensure the first effect is the one that will be applied first
-    const interaction = { ...rest, effects };
+
+    // Resolve and preprocess sequences
+    const processedSequences = sequences_?.map((seqOrRef) => {
+      if (_isSequenceConfigRef(seqOrRef)) {
+        const resolved = config.sequences?.[seqOrRef.sequenceId];
+        if (!resolved) {
+          console.warn(`Interact: Sequence "${seqOrRef.sequenceId}" not found in config`);
+          return seqOrRef;
+        }
+        return { ...resolved, ...seqOrRef } as SequenceConfig;
+      }
+
+      const seq = seqOrRef as SequenceConfig;
+      if (!seq.sequenceId) {
+        seq.sequenceId = generateId();
+      }
+      return seq;
+    });
+
+    const interaction = {
+      ...rest,
+      effects: effects.length > 0 ? effects : undefined,
+      sequences: processedSequences,
+    } as Interaction;
 
     interactions[source].triggers.push(interaction);
     interactions[source].selectors.add(
-      getSelector(interaction, { useFirstChild: useCutsomElement }),
+      getSelector(interaction, { useFirstChild: useCustomElement }),
     );
 
     const listContainer = interaction.listContainer;
@@ -314,7 +464,7 @@ function parseConfig(config: InteractConfig, useCutsomElement: boolean = false):
         }
       }
 
-      const interactionId = `${target}::${effectId}::${interactionIdx}`;
+      const interactionId = `${source}::${target}::${effectId}::${interactionIdx}`;
       effect.interactionId = interactionId;
       interactions[source].interactionIds.add(interactionId);
 
@@ -326,27 +476,60 @@ function parseConfig(config: InteractConfig, useCutsomElement: boolean = false):
       /*
        * Cache interaction effect by target element
        */
-      if (!interactions[target]) {
-        interactions[target] = {
-          triggers: [],
-          effects: {
-            [interactionId]: [],
-          },
-          interactionIds: new Set(),
-          selectors: new Set(),
-        };
-      } else if (!interactions[target].effects[interactionId]) {
-        interactions[target].effects[interactionId] = [];
-        interactions[target].interactionIds.add(interactionId);
+      const targetEntry = _ensureInteractionEntry(interactions, target);
+      if (!targetEntry.effects[interactionId]) {
+        targetEntry.effects[interactionId] = [];
+        targetEntry.interactionIds.add(interactionId);
       }
 
-      interactions[target].effects[interactionId].push({ ...rest, effect });
-      interactions[target].selectors.add(getSelector(effect, { useFirstChild: useCutsomElement }));
+      targetEntry.effects[interactionId].push({ ...rest, effect });
+      targetEntry.selectors.add(getSelector(effect, { useFirstChild: useCustomElement }));
+    });
+
+    // Process sequence effects for selector tracking and cross-element referencing
+    processedSequences?.forEach((seqConfig) => {
+      if (!seqConfig || _isSequenceConfigRef(seqConfig)) return;
+
+      const sequenceConfig = seqConfig as SequenceConfig;
+      const sequenceId = sequenceConfig.sequenceId || generateId();
+      const seqEffects = sequenceConfig.effects;
+
+      for (const effect of seqEffects) {
+        if (!(effect as EffectRef).effectId) {
+          (effect as EffectRef).effectId = generateId();
+        }
+
+        let target = effect.key;
+        if (!target && (effect as EffectRef).effectId) {
+          const referencedEffect = config.effects[(effect as EffectRef).effectId];
+          if (referencedEffect) {
+            target = referencedEffect.key;
+          }
+        }
+        target = target || source;
+
+        if (target !== source) {
+          const targetEntry = _ensureInteractionEntry(interactions, target);
+          const seqInteractionId = `${target}::seq::${sequenceId}::${interactionIdx}`;
+
+          if (!targetEntry.sequences[seqInteractionId]) {
+            targetEntry.sequences[seqInteractionId] = [];
+            targetEntry.interactionIds.add(seqInteractionId);
+          }
+
+          targetEntry.sequences[seqInteractionId].push({
+            ...rest,
+            sequence: sequenceConfig,
+          });
+          targetEntry.selectors.add(getSelector(effect, { useFirstChild: useCustomElement }));
+        }
+      }
     });
   });
 
   return {
     effects: config.effects || {},
+    sequences: config.sequences || {},
     conditions,
     interactions,
   };

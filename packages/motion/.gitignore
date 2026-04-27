@@ -1,5 +1,7 @@
 dist
 node_modules
+test-results
+playwright-report
 *npm-debug.log
 target
 maven

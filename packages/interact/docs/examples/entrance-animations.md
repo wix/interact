@@ -19,14 +19,14 @@ Entrance animations bring elements to life as they enter the viewport. This guid
 The most basic entrance - element fades from invisible to visible.
 
 ```typescript
-import { Interact } from '@wix/interact';
+import { Interact } from '@wix/interact/web';
 
 const config = {
   interactions: [
     {
       key: 'content',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'content',
@@ -62,7 +62,7 @@ Add a delay for dramatic timing.
 {
     key: 'delayed-content',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'delayed-content',
         keyframeEffect: {
@@ -87,9 +87,10 @@ Trigger animation every time element enters viewport.
 {
     key: 'repeating-element',
     trigger: 'viewEnter',
-    params: { type: 'repeat', threshold: 0.3 },  // Repeat on each entry
+    params: { threshold: 0.3 },
     effects: [{
         key: 'repeating-element',
+        triggerType: 'repeat',
         keyframeEffect: {
             name: 'repeat-fade',
             keyframes: [
@@ -113,7 +114,7 @@ Element slides up from below while fading in.
 {
     key: 'slide-up',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'slide-up',
         keyframeEffect: {
@@ -137,7 +138,7 @@ Element slides down from above.
 {
     key: 'slide-down',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'slide-down',
         keyframeEffect: {
@@ -161,7 +162,7 @@ Element slides in from the left side.
 {
     key: 'slide-left',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'slide-left',
         keyframeEffect: {
@@ -185,7 +186,7 @@ Element slides in from the right side.
 {
     key: 'slide-right',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'slide-right',
         keyframeEffect: {
@@ -211,7 +212,7 @@ Element grows from small to full size.
 {
     key: 'scale-up',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'scale-up',
         keyframeEffect: {
@@ -235,7 +236,7 @@ Element shrinks from large to normal size.
 {
     key: 'scale-down',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'scale-down',
         keyframeEffect: {
@@ -259,7 +260,7 @@ Element bounces into view with elastic scaling.
 {
     key: 'bounce-in',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'bounce-in',
         keyframeEffect: {
@@ -287,7 +288,7 @@ Element rotates as it enters.
 {
     key: 'rotate-in',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'rotate-in',
         keyframeEffect: {
@@ -311,7 +312,7 @@ Element flips on the Y-axis.
 {
     key: 'flip-in',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'flip-in',
         keyframeEffect: {
@@ -335,7 +336,7 @@ Element rotates in 3D space.
 {
     key: 'rotate-3d',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'rotate-3d',
         keyframeEffect: {
@@ -367,7 +368,7 @@ Combine multiple transformations for rich effects.
 {
     key: 'combo',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'combo',
         keyframeEffect: {
@@ -397,7 +398,7 @@ Element transitions from blurred to sharp.
 {
     key: 'blur-focus',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'blur-focus',
         keyframeEffect: {
@@ -429,7 +430,7 @@ Element slides and rotates simultaneously.
 {
     key: 'slide-rotate',
     trigger: 'viewEnter',
-    params: { type: 'once', threshold: 0.2 },
+    params: { threshold: 0.2 },
     effects: [{
         key: 'slide-rotate',
         keyframeEffect: {
@@ -464,7 +465,7 @@ const config = {
     {
       key: 'hero-title',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.3 },
+      params: { threshold: 0.3 },
       effects: [
         {
           key: 'hero-title',
@@ -551,7 +552,7 @@ const config = {
     {
       key: 'feature-1',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'feature-1',
@@ -571,7 +572,7 @@ const config = {
     {
       key: 'feature-2',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'feature-2',
@@ -591,7 +592,7 @@ const config = {
     {
       key: 'feature-3',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'feature-3',
@@ -625,7 +626,7 @@ const heroConfig = {
     {
       key: 'hero-bg',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'hero-bg',
@@ -645,7 +646,7 @@ const heroConfig = {
     {
       key: 'hero-content',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'hero-title',
@@ -667,7 +668,7 @@ const heroConfig = {
     {
       key: 'hero-content',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'hero-content',
@@ -689,7 +690,7 @@ const heroConfig = {
     {
       key: 'hero-content',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'hero-content',
@@ -738,7 +739,7 @@ const featureConfig = {
       key: 'features',
       listContainer: '.feature-grid',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.15 },
+      params: { threshold: 0.15 },
       effects: [
         {
           key: 'features',
@@ -807,7 +808,7 @@ const testimonialConfig = {
       key: 'testimonials',
       listContainer: '.testimonial-list',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'testimonials',
@@ -865,7 +866,7 @@ const config = {
     {
       key: 'hero',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           keyframeEffect: {

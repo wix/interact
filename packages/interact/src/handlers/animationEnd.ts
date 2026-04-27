@@ -14,14 +14,15 @@ function addAnimationEndHandler(
   target: HTMLElement,
   effect: TimeEffect,
   __: AnimationEndParams,
-  { reducedMotion, selectorCondition }: InteractOptions,
+  { reducedMotion, selectorCondition, animation: preCreatedAnimation }: InteractOptions,
 ): void {
-  const animation = getAnimation(
-    target,
-    effectToAnimationOptions(effect),
-    undefined,
-    reducedMotion,
-  ) as AnimationGroup | null;
+  const animation = (preCreatedAnimation ||
+    getAnimation(
+      target,
+      effectToAnimationOptions(effect),
+      undefined,
+      reducedMotion,
+    )) as AnimationGroup | null;
 
   // Early return if animation is null, no handler attached
   if (!animation) {

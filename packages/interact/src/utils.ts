@@ -6,7 +6,7 @@ import type { Condition, CreateTransitionCSSParams } from './types';
  * - If `&` is in the predicate, replace `&` with the base selector
  * - If no `&`, assume `&<predicate>` (append predicate to base selector)
  */
-function applySelectorCondition(baseSelector: string, predicate: string): string {
+export function applySelectorCondition(baseSelector: string, predicate: string): string {
   if (predicate.includes('&')) {
     return predicate.replace(/&/g, baseSelector);
   }

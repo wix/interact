@@ -1,12 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
+    "rootDir": ".",
     "outDir": "dist/es",
+    "moduleResolution": "bundler",
     "declarationDir": "dist/types",
     "declaration": true,
     "composite": true
   },
-  "include": ["src/**/*", "src"],
+  "include": ["src/**/*", "src", "test/**/*", "test"],
   "files": ["./src/external-types.d.ts", "./src/test-types.d.ts"]
 }

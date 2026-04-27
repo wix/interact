@@ -19,7 +19,7 @@ Hover effects provide visual feedback when users move their mouse over elements.
 Card lifts with shadow when hovered.
 
 ```typescript
-import { Interact } from '@wix/interact';
+import { Interact } from '@wix/interact/web';
 
 const config = {
   interactions: [

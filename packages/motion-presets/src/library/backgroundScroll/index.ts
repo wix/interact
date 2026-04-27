@@ -1,0 +1,12 @@
+export * as BgCloseUp from './BgCloseUp';
+export * as BgFade from './BgFade';
+export * as BgFadeBack from './BgFadeBack';
+export * as BgFake3D from './BgFake3D';
+export * as BgPan from './BgPan';
+export * as BgParallax from './BgParallax';
+export * as BgPullBack from './BgPullBack';
+export * as BgReveal from './BgReveal';
+export * as BgRotate from './BgRotate';
+export * as BgSkew from './BgSkew';
+export * as BgZoom from './BgZoom';
+export * as ImageParallax from './ImageParallax';

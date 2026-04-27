@@ -5,27 +5,18 @@ The `@wix/interact` package exports standalone functions for managing interactio
 ## Import
 
 ```typescript
-// From the mini entry point
 import { add, remove, generate } from '@wix/interact';
-
-// From the web entry point (for use with interact-element)
-import { add, remove } from '@wix/interact/web';
-
-// From the React entry point
-import { add, remove } from '@wix/interact/react';
 ```
 
-> **Note**: The `add` and `remove` functions are available from both `@wix/interact/web` and `@wix/interact/react` entry points. The `generate` function is only available from the main `@wix/interact` entry point.
+> **Note**: `add`, `remove`, and `generate` are available from all entry points: `@wix/interact`, `@wix/interact/web`, and `@wix/interact/react`.
 
 ## Functions Overview
 
-| Function            | Purpose                                                   | Parameters                                | Returns  |
-| ------------------- | --------------------------------------------------------- | ----------------------------------------- | -------- |
-| `add()`             | Add interactions to an element                            | `element`, `key?`                         | `void`   |
-| `remove()`          | Remove interactions from an element                       | `key`                                     | `void`   |
-| `generate()`        | Generate CSS for hiding elements with entrance animations | `config`                                  | `string` |
-| `addListItems()`    | Add interactions to new list items                        | `controller`, `listContainer`, `elements` | `void`   |
-| `removeListItems()` | Remove interactions from list items                       | `elements`                                | `void`   |
+| Function     | Purpose                                                   | Parameters                 | Returns  |
+| ------------ | --------------------------------------------------------- | -------------------------- | -------- |
+| `add()`      | Add interactions to an element                            | `element`, `key?`          | `void`   |
+| `remove()`   | Remove interactions from an element                       | `key`                      | `void`   |
+| `generate()` | Generate CSS for hiding elements with entrance animations | `config`, `useFirstChild?` | `string` |
 
 ---
 
@@ -106,30 +97,33 @@ if (element) {
 
 #### With Regular HTML Elements (React approach)
 
-```typescript
+```tsx
 import { add, remove } from '@wix/interact/react';
 
-// Works with any HTML element, not just interact-element
-const div = document.createElement('div');
-div.setAttribute('data-interact-key', 'my-element');
-document.body.appendChild(div);
+function MyComponent() {
+  const elementRef = useRef<HTMLDivElement>(null);
 
-add(div, 'my-element');
+  useEffect(() => {
+    if (elementRef.current) {
+      add(elementRef.current, 'my-hero');
+    }
+
+    return () => {
+      if (elementRef.current) {
+        remove('my-hero');
+      }
+    };
+  }, []);
+
+  return (
+    <div ref={elementRef} data-interact-key="my-hero">
+      Content to animate
+    </div>
+  );
+}
 ```
 
-### Behavior Details
-
-#### What `add()` Does:
-
-1. **Creates Controller**: Instantiates an `InteractionController` for the element
-2. **Caches Controller**: Stores the controller in `Interact.controllerCache` for future reference
-3. **Finds Configuration**: Looks up the interaction configuration for the given key
-4. **Registers Triggers**: Sets up event listeners for all configured triggers (hover, click, etc.)
-5. **Applies Effects**: Registers effects that target this element from other sources
-6. **Handles Conditions**: Evaluates media queries and conditions to determine which interactions to activate
-7. **Prevents Duplicates**: Tracks added interactions to avoid duplicate registrations
-
-#### Element Requirements:
+### Element Requirements:
 
 ```html
 <!-- ✅ Using interact-element (web approach) -->
@@ -137,25 +131,11 @@ add(div, 'my-element');
   <div class="hero-content">Content to animate</div>
 </interact-element>
 
-<!-- ✅ Using regular element (React approach) -->
+<!-- ✅ Using regular element (Vanilla/React approach) -->
 <div data-interact-key="my-hero">Content to animate</div>
 
 <!-- ❌ Missing data-interact-key (and no key parameter) -->
 <div>Content without key</div>
-```
-
-#### Error Handling:
-
-```typescript
-// The function handles various error cases gracefully
-const element = document.querySelector('.my-element');
-
-// Missing key - logs warning
-add(element as HTMLElement);
-// Console: "Interact: No key provided"
-
-// No matching configuration - silently does nothing
-add(element as HTMLElement, 'nonexistent');
 ```
 
 ### Advanced Usage
@@ -167,37 +147,13 @@ import { add } from '@wix/interact';
 
 // Create element programmatically
 const container = document.createElement('div');
-container.setAttribute('data-interact-key', 'dynamic-element');
 
-const content = document.createElement('div');
-content.textContent = 'Animated content';
-container.appendChild(content);
+// add stuff to container...
 
 document.body.appendChild(container);
 
 // Add interactions
 add(container, 'dynamic-element');
-```
-
-#### Batch Processing
-
-```typescript
-import { add } from '@wix/interact';
-
-// Add interactions to multiple elements efficiently
-function addInteractionsToElements(selector: string) {
-  const elements = document.querySelectorAll(selector);
-
-  elements.forEach((element) => {
-    const key = element.getAttribute('data-interact-key');
-    if (key) {
-      add(element as HTMLElement, key);
-    }
-  });
-}
-
-// Usage
-addInteractionsToElements('[data-interact-key]');
 ```
 
 ---
@@ -238,320 +194,55 @@ remove('hero');
 console.log('Interactions removed for hero');
 ```
 
-#### Dynamic Content Management
-
-```typescript
-import { add, remove } from '@wix/interact';
-
-// Remove interactions when content changes
-function updateContent(key: string, newContent: string) {
-  // Remove old interactions
-  remove(key);
-
-  // Update content
-  const element = document.querySelector(`[data-interact-key="${key}"]`);
-  if (element?.firstElementChild) {
-    element.firstElementChild.textContent = newContent;
-  }
-
-  // Re-add interactions if needed
-  if (element) {
-    add(element as HTMLElement, key);
-  }
-}
-```
-
-#### Cleanup Before Page Navigation
-
-```typescript
-import { remove } from '@wix/interact';
-
-// Clean up all interactions before navigation
-function cleanupInteractions() {
-  const elements = document.querySelectorAll('[data-interact-key]');
-
-  elements.forEach((element) => {
-    const key = element.getAttribute('data-interact-key');
-    if (key) {
-      remove(key);
-    }
-  });
-
-  console.log('All interactions cleaned up');
-}
-
-// Call before page unload
-window.addEventListener('beforeunload', cleanupInteractions);
-```
-
-### Behavior Details
-
-#### What `remove()` Does:
-
-1. **Finds Cached Controller**: Looks up the controller in `Interact.controllerCache`
-2. **Disconnects Controller**: Calls `disconnect()` on the controller
-3. **Removes Event Listeners**: Cleans up all registered trigger handlers
-4. **Clears Element State**: Resets any active interaction states on the element
-5. **Cleans Instance State**: Calls `clearInteractionStateForKey()` on the managing instance
-6. **Removes from Cache**: Deletes the controller from `Interact.controllerCache`
-
-#### Safe to Call Multiple Times:
-
-```typescript
-// Safe to call remove() multiple times
-remove('element');
-remove('element'); // No error, simply does nothing
-remove('nonexistent'); // No error, key not found
-```
-
-#### Automatic Cleanup:
-
-```typescript
-// The interact-element custom element automatically handles cleanup
-const element = document.querySelector('interact-element[data-interact-key="auto"]');
-
-// Removing from DOM automatically triggers cleanup via disconnectedCallback
-element?.remove();
-```
-
 ---
 
-## `addListItems(controller, listContainer, elements)`
+## `generate(config, useFirstChild?)`
 
-Manually adds interactions to newly added list items in a dynamic list. This function is typically called automatically by the mutation observer when using `listContainer`, but can be called manually for advanced use cases.
+Generates CSS styles needed to hide elements that have entrance animations with a `viewEnter` trigger and the default (or explicit) `triggerType: 'once'` on effects. This prevents a flash of unstyled content (FOUC) where elements briefly appear before their entrance animation starts.
 
 ### Signature
 
 ```typescript
-function addListItems(
-  controller: IInteractionController,
-  listContainer: string,
-  elements: HTMLElement[],
-): void;
+function generate(config: InteractConfig, useFirstChild?: boolean): string;
 ```
 
 ### Parameters
 
-**`controller: IInteractionController`**
+**`config: InteractConfig`** - The interaction configuration; used to find `viewEnter` interactions whose time effects use `triggerType: 'once'` (the default) and build selectors.
 
-- The interaction controller managing the list container
-- Can be obtained via `Interact.getController(key)`
-
-**`listContainer: string`**
-
-- CSS selector for the list container
-- Must match the `listContainer` specified in the interaction configuration
-
-**`elements: HTMLElement[]`**
-
-- Array of new elements to add interactions to
-- These elements should be children (or descendants) of the list container
-
-### Examples
-
-#### Manual List Item Addition
-
-```typescript
-import { Interact } from '@wix/interact';
-
-// Get the controller
-const controller = Interact.getController('product-list');
-
-if (controller) {
-  // Create new items
-  const newItems = [document.createElement('div'), document.createElement('div')];
-
-  newItems.forEach((item, index) => {
-    item.className = 'product-card';
-    item.textContent = `Product ${index + 1}`;
-  });
-
-  // Add to DOM
-  const container = controller.element.querySelector('.products');
-  newItems.forEach((item) => container?.appendChild(item));
-
-  // Manually add interactions to new items (typically automatic)
-  // addListItems(controller, '.products', newItems);
-}
-```
-
-#### Automatic vs Manual Usage:
-
-**Automatic (Recommended):**
-
-```typescript
-// When using listContainer, mutation observer handles this automatically
-{
-    key: 'auto-list',
-    listContainer: '.items',
-    trigger: 'hover',
-    effects: [/* ... */]
-}
-
-// Just add to DOM - interactions apply automatically
-const container = document.querySelector('.items');
-container?.appendChild(newElement);
-```
-
-**Manual (Advanced):**
-
-```typescript
-import { Interact } from '@wix/interact';
-// Note: addListItems is not exported from public API
-// It's used internally by InteractionController
-
-const controller = Interact.getController('manual-list');
-if (controller) {
-  // The controller handles list items automatically via watchChildList
-  controller.watchChildList('.container');
-}
-```
-
----
-
-## `removeListItems(elements)`
-
-Removes all interactions and event listeners from list item elements. Called automatically by mutation observers when items are removed from a list, but can be called manually for cleanup.
-
-### Signature
-
-```typescript
-function removeListItems(elements: HTMLElement[]): void;
-```
-
-### Parameters
-
-**`elements: HTMLElement[]`**
-
-- Array of elements to remove interactions from
-- These should be elements that previously had interactions added
-
-### Examples
-
-#### Manual Cleanup Before Removal
-
-```typescript
-// Note: removeListItems is typically handled automatically
-// When using interact-element or Interaction component, cleanup is automatic
-
-function removeProduct(productElement: HTMLElement) {
-  // Simply remove from DOM - cleanup happens automatically
-  productElement.remove();
-}
-```
-
-#### Batch Removal
-
-```typescript
-function clearFilteredItems(category: string) {
-  const items = document.querySelectorAll(`.product-card[data-category="${category}"]`);
-
-  // Simply remove from DOM - cleanup happens automatically via mutation observer
-  items.forEach((item) => item.remove());
-}
-```
-
----
-
-## Performance Considerations
-
-### Efficient Usage Patterns
-
-#### Good: Batch Operations
-
-```typescript
-import { add } from '@wix/interact';
-
-// Process multiple elements efficiently
-const elements = document.querySelectorAll('[data-interact-key]');
-elements.forEach((el) => {
-  const key = (el as HTMLElement).dataset.interactKey;
-  if (key) add(el as HTMLElement, key);
-});
-```
-
-#### Avoid: Redundant Calls
-
-```typescript
-// Avoid: The controller already exists after first add()
-add(element, 'hero');
-add(element, 'hero'); // Redundant - controller already connected
-```
-
-## Error Handling
-
-Both functions include comprehensive error handling:
-
-```typescript
-import { add, remove } from '@wix/interact';
-
-// add() error scenarios
-const element = document.querySelector('.my-element') as HTMLElement;
-
-// Missing key - logs warning
-add(element);
-// Console: "Interact: No key provided"
-
-// No configuration found - silently continues
-add(element, 'unconfigured');
-
-// remove() error scenarios
-remove(''); // Safe, does nothing
-remove('nonexistent'); // Safe, key not found in cache
-```
-
-## TypeScript Support
-
-Full TypeScript support with proper type checking:
-
-```typescript
-import { add, remove } from '@wix/interact';
-
-const element = document.querySelector('[data-interact-key="hero"]') as HTMLElement;
-
-if (element) {
-  add(element, 'hero');
-}
-
-// Type-safe key parameter
-const key: string = 'hero';
-remove(key);
-```
-
----
-
-## `generate(config)`
-
-Generates CSS styles needed to hide elements that have entrance animations with a `viewEnter` trigger. This prevents a flash of unstyled content (FOUC) where elements briefly appear before their entrance animation starts.
-
-### Signature
-
-```typescript
-function generate(config: InteractConfig): string;
-```
-
-### Parameters
-
-**`config: InteractConfig`**
-
-- The interaction configuration object
-- Used to determine which elements need initial hiding styles
+**`useFirstChild?: boolean`** - When `true`, targets the first child of each key (e.g. for `<interact-element>`). Default `false`.
 
 ### Returns
 
-**`string`** - A CSS string that can be injected into a `<style>` tag or stylesheet
+**`string`** - A CSS string to inject into a `<style>` tag or stylesheet.
 
 ### Generated CSS
 
 The function generates CSS that:
 
-1. **Respects reduced motion preferences**: Wrapped in `@media (prefers-reduced-motion: no-preference)` to ensure accessibility
-2. **Targets first child of elements with `data-interact-initial="true"`**: Only affects elements explicitly marked for entrance animations
-3. **Excludes completed animations**: Uses `:not([data-motion-enter="done"])` to show elements after their animation completes
+1. **Respects reduced motion**: Wrapped in `@media (prefers-reduced-motion: no-preference)`.
+2. **Targets elements by key**: Selectors use `[data-interact-key="..."]` for each interaction key that has a `viewEnter` entrance with `triggerType: 'once'` (including the default).
+3. **Excludes completed animations**: Uses `:not([data-interact-enter])` so elements are shown after the animation runs.
+
+**With `useFirstChild: false` (vanilla/React, element is the target)**:
 
 ```css
 @media (prefers-reduced-motion: no-preference) {
-  [data-interact-initial='true'] > :first-child:not([data-motion-enter='done']) {
+  [data-interact-key='hero']:not([data-interact-enter]) {
+    visibility: hidden;
+    transform: none;
+    translate: none;
+    scale: none;
+    rotate: none;
+  }
+}
+```
+
+**With `useFirstChild: true` (e.g. custom elements, first child is the target)**:
+
+```css
+@media (prefers-reduced-motion: no-preference) {
+  [data-interact-key='hero'] > :first-child:not([data-interact-enter]) {
     visibility: hidden;
     transform: none;
     translate: none;
@@ -573,7 +264,7 @@ const config = {
     {
       key: 'hero',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           keyframeEffect: {
@@ -591,8 +282,8 @@ const config = {
   effects: {},
 };
 
-// Generate the CSS
-const css = generate(config);
+// Generate the CSS (pass true when using custom elements so first child is targeted)
+const css = generate(config, false);
 
 // Inject into page
 const styleElement = document.createElement('style');
@@ -636,21 +327,7 @@ const html = `
 
 ### HTML Setup
 
-For the generated CSS to work, the `<interact-element>` must have the `data-interact-initial="true"` attribute:
-
-```html
-<interact-element data-interact-key="hero" data-interact-initial="true">
-  <!-- First child will be hidden until viewEnter animation completes -->
-  <section class="hero">
-    <h1>Welcome</h1>
-  </section>
-</interact-element>
-
-<!-- Without the attribute, element is visible immediately -->
-<interact-element data-interact-key="footer">
-  <footer>Footer content</footer>
-</interact-element>
-```
+Elements must have `data-interact-key` matching the interaction key in your config. When using `<interact-element>`, use `generate(config, true)` so the first child is targeted. With the React `Interaction` component, use `initial={true}` to set `data-interact-initial="true"` for FOUC prevention; the generated CSS still selects by `data-interact-key`.
 
 ---
 

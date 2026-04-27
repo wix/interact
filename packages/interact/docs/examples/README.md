@@ -7,7 +7,7 @@ Practical examples and common interaction patterns for `@wix/interact`. All exam
 ### Basic Entrance Animation
 
 ```typescript
-import { Interact } from '@wix/interact';
+import { Interact } from '@wix/interact/web';
 
 const config = {
   interactions: [
@@ -101,11 +101,20 @@ Comprehensive patterns for lists and dynamic content.
 - [**Grid Layouts**](list-patterns.md#grid-layouts) - Masonry and responsive grids
 - [**Real-World Examples**](list-patterns.md#real-world-examples) - E-commerce and more
 
+### 🎼 **Sequence Animations**
+
+Coordinated multi-element animations with staggered timing via `Interaction.sequences`.
+
+- [**Staggered List Entrance**](list-patterns.md#sequence-based-staggering) - Easing-driven stagger for list items
+- [**Cross-Element Orchestration**](../guides/sequences.md#cross-element-sequences) - Effects targeting different keys in one sequence
+- [**Click-Triggered Sequence**](../guides/sequences.md#click-triggered-multi-element-orchestration) - Button-triggered multi-element cascade
+- [**Easing Comparison**](../guides/sequences.md#what-is-a-sequence) - Linear vs quadIn vs sineOut offset curves
+
 ## Advanced Patterns
 
 ### 🔄 **Animation Sequences**
 
-Complex multi-step animations.
+Complex multi-step animations. For staggered coordinated sequences, see [Sequence Animations](#-sequence-animations) above.
 
 - [**Chained Effects**](advanced-patterns.md#chaining) - Sequential animations
 - [**Parallel Effects**](advanced-patterns.md#parallel) - Simultaneous animations
@@ -170,7 +179,7 @@ const entranceConfig = {
     {
       trigger: 'viewEnter',
       key: 'element',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [{ effectId: 'entrance-effect' }],
     },
   ],

@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": "src",
+    "outDir": "dist/es",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "declaration": true,
@@ -11,5 +12,10 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": [
+    {
+      "path": "../motion"
+    }
+  ]
 }

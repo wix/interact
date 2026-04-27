@@ -16,8 +16,8 @@ export default defineConfig(() => ({
     emptyOutDir: false,
     sourcemap: true,
     rollupOptions: {
-      // external: ['fastdom'],
       output: {
+        compact: true,
         globals: {
           fastdom: 'fastdom',
         },

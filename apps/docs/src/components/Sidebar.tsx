@@ -46,7 +46,7 @@ export function Sidebar() {
 
       <div className="sidebar-footer">
         <a
-          href="https://github.com/wix-incubator/wow-libs"
+          href="https://github.com/wix/wow-libs"
           target="_blank"
           rel="noopener noreferrer"
           className="github-link"

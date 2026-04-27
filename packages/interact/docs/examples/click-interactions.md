@@ -19,7 +19,7 @@ Click interactions provide immediate feedback and trigger actions. This guide co
 Button pulses when clicked.
 
 ```typescript
-import { Interact } from '@wix/interact';
+import { Interact } from '@wix/interact/web';
 
 const config = {
   interactions: [
@@ -172,7 +172,6 @@ Toggle between two states.
 {
     key: 'toggle-switch',
     trigger: 'click',
-    params: { method: 'toggle' },
     effects: [{
         key: 'toggle-switch',
         transition: {
@@ -231,7 +230,6 @@ Custom checkbox with animation.
 {
     key: 'checkbox',
     trigger: 'click',
-    params: { method: 'toggle' },
     effects: [{
         key: 'checkbox',
         selector: '.checkmark',
@@ -271,7 +269,6 @@ Heart animation for like button.
 {
     key: 'like-button',
     trigger: 'click',
-    params: { method: 'toggle' },
     effects: [{
         key: 'like-button',
         selector: '.heart-icon',
@@ -301,7 +298,6 @@ Click to reveal hidden content.
     key: 'accordion-trigger',
     selector: '.accordion-header',
     trigger: 'click',
-    params: { method: 'toggle' },
     effects: [{
         key: 'accordion-trigger',
         selector: '.accordion-content',
@@ -350,7 +346,6 @@ Expand text content on click.
     key: 'read-more',
     selector: '.read-more-btn',
     trigger: 'click',
-    params: { method: 'toggle' },
     effects: [
         // Expand content
         {
@@ -705,7 +700,6 @@ Toggle mobile navigation menu.
 {
     key: 'menu-toggle',
     trigger: 'click',
-    params: { method: 'toggle' },
     effects: [
         // Hamburger icon animation
         {
@@ -760,7 +754,6 @@ Click to toggle dropdown.
 {
     key: 'dropdown-trigger',
     trigger: 'click',
-    params: { method: 'toggle' },
     effects: [
         {
             key: 'dropdown-trigger',

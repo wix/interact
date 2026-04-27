@@ -23,13 +23,16 @@ export default defineConfig(({ command }) => {
         external: ['react', 'react-dom'],
         output: {
           entryFileNames: '[format]/[name].js',
+          compact: true,
         },
       },
     },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src'),
+        '@wix/motion': path.resolve(__dirname, '../motion/src/index.ts'),
       },
+      preserveSymlinks: false,
     },
     define: {
       __DEV__: isDev,
