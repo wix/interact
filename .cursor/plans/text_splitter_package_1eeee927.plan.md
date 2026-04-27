@@ -641,7 +641,7 @@ DOM structure when `aria: 'auto'` and `preserveText: true` (defaults):
 
 When `preserveText` is true (default), create a visually-hidden duplicate of the original text for both SEO and accessibility:
 
-- Clone the original text content into a `<span>` with the visually-hidden pattern: `position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);` (or equivalent sr-only pattern).
+- Clone the original text content into a `<span>` with the visually-hidden pattern: `position: absolute; width: 1px; height: 1px; overflow: clip;` (or equivalent sr-only pattern).
 - Insert this span as a direct child of the container, alongside the `<div aria-hidden="true">` that wraps the split content.
 - The container remains accessible (no `aria-hidden` on it), so the visually-hidden span is exposed to assistive tech and crawlers.
 - When `preserveText` is false, do not create the hidden block; use `aria-label` with the original text on the container instead (ARIA is not used by crawlers, so SEO is weaker in this mode).
