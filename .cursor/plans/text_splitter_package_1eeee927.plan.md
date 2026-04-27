@@ -147,7 +147,7 @@ interface SplitTextOptions {
   preserveText?: boolean;  // default: true - visually-hidden duplicate for SEO and screen readers
 
   // DOM structure
-  nested?: 'flatten' | 'preserve' | number;  // default: 'flatten'
+  nested?: 'flatten' | 'preserve' | number;  // default: 'preserve'
 
   // Text segmentation polyfill (optional — see "Segmenter Polyfill API" section)
   segmenter?: Intl.Segmenter | { new(locale: string, options: { granularity: string }): Intl.Segmenter };
@@ -617,7 +617,7 @@ The package injects a global base stylesheet once per document via `adoptedStyle
 - `[aria-hidden="true"][data-splittext-wrapper]`: `display: contents;` — the inner aria-hidden wrapper must not introduce a new box in the layout.
 - `.sr-only`: `position: absolute; width: 1px; height: 1px; overflow: clip;` — visually-hidden pattern for the preserved original text (used when `preserveText: true`).
 
-**Documentation note (shaped languages):** Connected scripts (Arabic, Devanagari, etc.) lose shaping when split per-character — each letter loses its positional form (initial/medial/final/isolated). This is a fundamental limitation of character-level text splitting and should be clearly documented. Recommend per-word splitting for these scripts. Font-level shaping (e.g. via HarfBuzz) is out of scope for this library.
+**Documentation note (shaped languages):** Arabic and Arabic-like joining scripts can lose shaping when split per-character because each letter may lose its positional form (initial/medial/final/isolated). This is a limitation of character-level text splitting for joining scripts, not a blanket rule for every complex script. Recommend per-word splitting for affected scripts. Implementation documentation for this limitation should reference the demo CodePen: https://codepen.io/tombigel/pen/pvNzJoZ. Font-level shaping (e.g. via HarfBuzz) is out of scope for this library.
 
 ### Accessibility
 
@@ -858,11 +858,11 @@ Use `Intl.Segmenter` (native or via the `segmenter` option — see **Segmenter P
 
 ### Nested Element Handling
 
-The `nested` option controls how inner DOM structure is handled (default: `'flatten'`).
+The `nested` option controls how inner DOM structure is handled (default: `'preserve'`).
 
-- `'flatten'` (default): Extract plain text via `element.textContent`, ignore all inner DOM. Split that string only. Store original `innerHTML` for `revert()`. Safest and most predictable; avoids complex or malformed DOM.
-- `'preserve'`: Use `TreeWalker` to traverse text nodes within nested elements. Apply line detection (when lines are requested) and splitting per text node while keeping parent element references. Preserves links, bold, etc. Use guards: skip non-text/non-element nodes; skip `script`/`style`; enforce a max depth safety limit (e.g. 10 levels) to avoid runaway traversal.
-- `number`: Same as preserve but with a depth limit: preserve DOM structure for elements up to N levels deep; for content nested deeper than N, strip the HTML tags and merge the text content into the parent at depth N (i.e. treat it as plain text within that parent). Example with `nested: 2` and input `<b>bold <i>italic <u>underlined</u></i></b>`: depth 1 is `<b>`, depth 2 is `<i>` — both are preserved. The `<u>` at depth 3 exceeds the limit, so it is flattened: its text "underlined" is kept but the `<u>` wrapper is removed. Result: `<b>bold <i>italic underlined</i></b>`.
+- `'preserve'` (default): Use `TreeWalker` to traverse the original text nodes before creating split wrappers. Apply line detection (when lines are requested) and splitting per text node while keeping parent element references. This preserves inline structure such as links, bold, and italic text. Use guards: skip non-text/non-element nodes; skip `script`/`style`; enforce a max depth safety limit (e.g. 10 levels).
+- `'flatten'`: Extract plain text via `element.textContent`, ignore all inner DOM, and split that string only. Store original `innerHTML` for `revert()`. This is useful for dirty/generated markup where preserving every wrapper would make the split DOM too complex.
+- `number`: Same as `'preserve'`, but preserve only the first N element levels. Deeper content is flattened into text inside the nearest preserved parent. Example: with `nested: 2`, `<b>bold <i>italic <u>underlined</u></i></b>` keeps `<b>` and `<i>`, removes `<u>`, and keeps the text as `<b>bold <i>italic underlined</i></b>`.
 
 The `ignore` option can be an array of selectors (e.g. `['sup', 'sub']`) or a predicate `(node: Node) => boolean` to skip nodes during traversal in preserve/number modes.
 
