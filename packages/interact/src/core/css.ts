@@ -22,7 +22,6 @@ import { getElementHash, getUniqueEncodedHash } from './utilities';
 import { keyframesToCSS, CSSRuleToString, buildListsRule } from './cssUtils';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { getCSSAnimation, MotionKeyframeEffect, TriggerVariant } from '@wix/motion';
-import type { TriggerType } from '../types';
 
 export const DEFAULT_INITIAL = [
   { name: 'visibility', value: 'hidden' },

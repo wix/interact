@@ -117,7 +117,7 @@ export function createTransitionCSS({
   const escapedKey = key.replace(/"/g, "'");
 
   // Build selectors, applying condition if present
-  const stateSelector = `:where(:state(${effectId}), :--${effectId}) ${childSelector}`;
+  const stateSelector = `:is(:state(${effectId}), :--${effectId}) ${childSelector}`;
   const dataAttrSelector = `[data-interact-effect~="${effectId}"] ${childSelector}`;
 
   const finalStateSelector = selectorCondition

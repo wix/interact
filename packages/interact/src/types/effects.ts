@@ -105,4 +105,5 @@ export type EffectProperty = OneOf<{
   keyframeEffect: MotionKeyframeEffect;
   transition: TransitionOptions & { styleProperties: StyleProperty[] };
   transitionProperties: TransitionProperty[];
+  customEffect: (element: Element, progress: any) => void;
 }>;

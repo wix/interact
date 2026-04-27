@@ -266,6 +266,65 @@ describe('css resolvers', () => {
       });
     });
 
+    describe('triggerType', () => {
+      it('should default to once for viewEnter trigger', () => {
+        expect(
+          resolveSequenceForCSS(BASE_SEQUENCE, BASE_INTERACTION, EMPTY_CONFIG)?.triggerType,
+        ).toBe('once');
+      });
+      it('should default to alternate for hover trigger', () => {
+        expect(
+          resolveSequenceForCSS(
+            BASE_SEQUENCE,
+            { ...BASE_INTERACTION, trigger: 'hover' },
+            EMPTY_CONFIG,
+          )?.triggerType,
+        ).toBe('alternate');
+      });
+      it('should default to alternate for click trigger', () => {
+        expect(
+          resolveSequenceForCSS(
+            BASE_SEQUENCE,
+            { ...BASE_INTERACTION, trigger: 'click' },
+            EMPTY_CONFIG,
+          )?.triggerType,
+        ).toBe('alternate');
+      });
+      it('should respect explicit sequence-level triggerType', () => {
+        expect(
+          resolveSequenceForCSS(
+            { ...BASE_SEQUENCE, triggerType: 'repeat' },
+            { ...BASE_INTERACTION, trigger: 'hover' },
+            EMPTY_CONFIG,
+          )?.triggerType,
+        ).toBe('repeat');
+      });
+      it('should propagate triggerType to all effects in the sequence', () => {
+        const result = resolveSequenceForCSS(
+          { effects: [{ effectId: 'e1' }, { effectId: 'e2' }] },
+          { ...BASE_INTERACTION, trigger: 'click' },
+          EMPTY_CONFIG,
+        );
+        expect(result?.effects[0].triggerType).toBe('alternate');
+        expect(result?.effects[1].triggerType).toBe('alternate');
+      });
+      it('should override effect-level triggerType with sequence-level triggerType', () => {
+        const result = resolveSequenceForCSS(
+          {
+            triggerType: 'once',
+            effects: [
+              { effectId: 'e1', triggerType: 'repeat' },
+              { effectId: 'e2', triggerType: 'alternate' },
+            ],
+          },
+          BASE_INTERACTION,
+          EMPTY_CONFIG,
+        );
+        expect(result?.effects[0].triggerType).toBe('once');
+        expect(result?.effects[1].triggerType).toBe('once');
+      });
+    });
+
     describe('conditions', () => {
       it('should create empty array if conditions is undefined', () => {
         expect(

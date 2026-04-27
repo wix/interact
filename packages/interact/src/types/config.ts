@@ -67,6 +67,7 @@ export type ResolvedEffect = ElementIdentifier &
 
 export type ResolvedSequence = {
   sequenceId: string;
+  triggerType: TimeAnimationTriggerType;
   delay: number;
   offset: number;
   offsetEasing: (p: number) => number;

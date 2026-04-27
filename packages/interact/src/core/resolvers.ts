@@ -56,7 +56,6 @@ export function resolveEffectForCSS(
     ...new Set((conditions || []).filter((condition: string) => configConditions[condition])),
   ];
 
-  // TODO: is this always the default?
   if (!triggerType) {
     triggerType = trigger === 'hover' || trigger === 'click' ? 'alternate' : 'once';
   }
@@ -106,7 +105,19 @@ export function resolveSequenceForCSS(
   const { sequenceId } = sequence;
   const fullSequence = { ...(sequences[sequenceId] || {}), ...sequence };
 
-  let { effects, conditions, delay = 0, offset = 0, offsetEasing = 'linear' } = fullSequence;
+  let {
+    effects,
+    conditions,
+    triggerType,
+    delay = 0,
+    offset = 0,
+    offsetEasing = 'linear',
+  } = fullSequence;
+
+  if (!triggerType) {
+    triggerType =
+      interaction.trigger === 'hover' || interaction.trigger === 'click' ? 'alternate' : 'once';
+  }
 
   conditions = [
     ...new Set((conditions || []).filter((condition: string) => configConditions[condition])),
@@ -118,7 +129,7 @@ export function resolveSequenceForCSS(
     } else {
       effect.conditions.push(...conditions);
     }
-    return resolveEffectForCSS(effect, interaction, config);
+    return resolveEffectForCSS({ ...effect, triggerType }, interaction, config);
   });
 
   // resolving offsets
@@ -135,6 +146,7 @@ export function resolveSequenceForCSS(
 
   return {
     sequenceId,
+    triggerType,
     conditions,
     delay,
     offset,
