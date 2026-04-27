@@ -139,6 +139,7 @@ interface SplitTextOptions {
   wrapperClass?: string | WrapperClassConfig;  // CSS class(es) for wrapper spans
   wrapperStyle?: Partial<CSSStyleDeclaration> | WrapperStyleConfig;  // Inline styles
   wrapperAttrs?: Record<string, string> | WrapperAttrsConfig;  // Custom attributes (data-*, etc.)
+  contentAttribute?: 'none' | 'both' | 'attribute-only';  // default: 'both' - controls data-content on char/word wrappers
 
   // Accessibility
   aria?: 'auto' | 'none';  // default: 'auto'
@@ -294,6 +295,7 @@ Test coverage for:
 - **wrapperStyle (global)**: Verify inline styles applied to all wrapper spans
 - **wrapperStyle (per-type)**: Verify different styles for chars vs words vs lines
 - **wrapperAttrs**: Verify custom data attributes and other attributes applied
+- **contentAttribute**: Verify char/word wrappers support `data-content` modes (`none`, `both`, `attribute-only`)
 - **CSS custom property indexing**: Verify each wrapper has correct `--char-index` / `--word-index` / etc. for animation sequencing
 - **partIndexing: false**: Verify no CSS custom properties set when indexing disabled
 - **Combined options**: Verify class + style + attrs work together
@@ -443,6 +445,7 @@ Following the [interact docs structure](packages/interact/docs/README.md):
 - Default CSS classes (`split-c`, `split-w`, etc.)
 - Customizing wrapper classes
 - Applying inline styles for animation setup
+- Using `data-content` with `::before` / `::after` duplicated text effects
 - Using CSS custom property indexing for animation hooks
 - Best practices for `display: inline-block` with transforms
 - CSS custom properties for staggered animations
@@ -451,6 +454,7 @@ Following the [interact docs structure](packages/interact/docs/README.md):
 
 - **Fade-in character animation** using wrapperClass + CSS
 - **Slide-up word reveal** using wrapperStyle initial state
+- **Duplicate text reveal** using `contentAttribute: 'both'` and `content: attr(data-content)` animated vertically inside a clipped container to create a slot-machine / rolling-clock effect
 - **Staggered line animation** using CSS custom property indexing (`--line-index`)
 - **@wix/motion integration** with custom wrapper classes
 - **CSS-only animations** using @keyframes and animation-delay
@@ -516,19 +520,40 @@ animate(titleChars, { opacity: [0, 1], stagger: 0.05 });
 
 All split items are wrapped in `<span>` elements to enable styling and animation. The wrapper spans are fully customizable through options.
 
+**Content attribute option:**
+
+- Option: `contentAttribute`
+- Values: `'none' | 'both' | 'attribute-only'`
+- DOM attribute: `data-content`
+
+`contentAttribute` controls how character and word wrappers expose their text for CSS-generated content effects:
+
+- `'none'`: render normal text content only; do not set `data-content`.
+- `'both'` (default): render normal text content and mirror it to `data-content`.
+- `'attribute-only'`: set `data-content` and leave the wrapper's text content empty, for effects that render visible text only through `::before` / `::after`.
+
+This enables CSS patterns such as:
+
+```css
+.split-c::before,
+.split-c::after {
+  content: attr(data-content);
+}
+```
+
 **Default wrapper structure:**
 
 ```html
 <!-- Characters -->
-<span class="split-c">H</span>
-<span class="split-c">e</span>
-<span class="split-c">l</span>
-<span class="split-c">l</span>
-<span class="split-c">o</span>
+<span class="split-c" data-content="H">H</span>
+<span class="split-c" data-content="e">e</span>
+<span class="split-c" data-content="l">l</span>
+<span class="split-c" data-content="l">l</span>
+<span class="split-c" data-content="o">o</span>
 
 <!-- Words -->
-<span class="split-w">Hello</span>
-<span class="split-w">World</span>
+<span class="split-w" data-content="Hello">Hello</span>
+<span class="split-w" data-content="World">World</span>
 
 <!-- Lines -->
 <span class="split-l">Hello World, this is</span>
@@ -582,10 +607,19 @@ function createWrapper(
     span.style.setProperty(indexProp, String(index));
   }
 
+  // Mirror char/word content into data-content for CSS generated-content effects.
+  const contentAttribute = options.contentAttribute ?? 'both';
+  const canUseContentAttribute = type === 'chars' || type === 'words';
+  if (typeof content === 'string' && canUseContentAttribute && contentAttribute !== 'none') {
+    span.setAttribute('data-content', content);
+  }
+  const shouldUseAttributeOnly =
+    typeof content === 'string' && canUseContentAttribute && contentAttribute === 'attribute-only';
+
   // Set content
-  if (typeof content === 'string') {
+  if (typeof content === 'string' && !shouldUseAttributeOnly) {
     span.textContent = content;
-  } else {
+  } else if (typeof content !== 'string') {
     span.appendChild(content);
   }
 
