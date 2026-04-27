@@ -1,2 +1,0 @@
-Manual switch: .visible=true, line nums=true, reset btn=true, syntax spans=0
-Screenshot saved

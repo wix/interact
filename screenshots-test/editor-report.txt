@@ -1,3 +1,0 @@
-Modal opened
-After code click: CodeMirror=false, modal-code=false, .visible=false
-Screenshot 2 captured

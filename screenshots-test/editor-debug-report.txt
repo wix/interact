@@ -1,5 +1,0 @@
-CodeMirror loaded on page: true
-Modal opened, waited for load
-Code panel: class="modal-panel modal-code", visible=false, display=flex, opacity=0, visibility=hidden
-CodeMirror elements: 1
-Screenshot saved
