@@ -615,7 +615,7 @@ The package injects a global base stylesheet once per document via `adoptedStyle
 - `.split-l`: `display: block;`
 - `.split-s`: same inline-block treatment as chars/words if needed for animation.
 - `[aria-hidden="true"][data-splittext-wrapper]`: `display: contents;` — the inner aria-hidden wrapper must not introduce a new box in the layout.
-- `.sr-only`: `position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);` — visually-hidden pattern for the preserved original text (used when `preserveText: true`).
+- `.sr-only`: `position: absolute; width: 1px; height: 1px; overflow: clip;` — visually-hidden pattern for the preserved original text (used when `preserveText: true`).
 
 **Documentation note (shaped languages):** Connected scripts (Arabic, Devanagari, etc.) lose shaping when split per-character — each letter loses its positional form (initial/medial/final/isolated). This is a fundamental limitation of character-level text splitting and should be clearly documented. Recommend per-word splitting for these scripts. Font-level shaping (e.g. via HarfBuzz) is out of scope for this library.
 
