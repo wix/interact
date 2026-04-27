@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigation Menu — Light</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@100;200;300;400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    interact-element { display: contents; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      background: #e0e0e0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 80px 24px 24px;
+    }
+
+    .nav-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* --- Nav bar --- */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      height: 60px;
+      padding: 0 8px;
+      border-radius: 24px;
+      background: #000;
+      border: 1px solid #ffd7823f;
+    }
+
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 40px;
+      padding: 0 44px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.55);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 400;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      border-radius: 15px;
+      white-space: nowrap;
+    }
+
+    .nav-tab:focus-visible {
+      box-shadow: 0 0 0 2px #ffd782;
+    }
+
+    .nav-tab.active {
+      background: #ffd78215;
+      color: #ffd782;
+    }
+
+    .nav-tab .chevron {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transform: rotate(0deg);
+    }
+
+    .nav-tab.active .chevron {
+      transform: rotate(180deg);
+    }
+
+    /* --- Dropdown --- */
+    .dropdown-panel {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      right: 0;
+      border-radius: 24px;
+      background: #000;
+      border: 1px solid #ffd7823f;
+      padding: 28px 40px;
+      visibility: hidden;
+      pointer-events: none;
+      opacity: 0;
+      min-height: 240px;
+    }
+
+    .dropdown-panel.open {
+      visibility: visible;
+      pointer-events: auto;
+      opacity: 1;
+    }
+
+    .dropdown-panel::before {
+      content: '';
+      position: absolute;
+      top: -14px;
+      left: 0;
+      right: 0;
+      height: 14px;
+    }
+
+    .dropdown-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0 40px;
+      position: absolute;
+      inset: 28px 40px;
+      opacity: 0;
+      transform: translateX(-20px);
+      pointer-events: none;
+      transition: opacity 350ms ease-out, transform 350ms ease-out;
+    }
+
+    .dropdown-content.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .dropdown-content.slide-left {
+      transform: translateX(20px);
+    }
+
+    .dropdown-col-header {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 300;
+      color: #ffd78250;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0 12px 12px;
+    }
+
+    .dropdown-link {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 38px;
+      padding: 0 12px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.55);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 400;
+      text-align: left;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      border-radius: 12px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 180ms ease-out calc(var(--i, 0) * 40ms),
+                  transform 180ms ease-out calc(var(--i, 0) * 40ms);
+    }
+
+    .dropdown-panel.open .dropdown-link {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dropdown-link:focus-visible {
+      box-shadow: inset 0 0 0 2px #ffd782;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .dropdown-link, .dropdown-content { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="nav-wrapper">
+    <interact-element data-interact-key="nav-bar">
+      <div class="nav-bar" id="nav-bar">
+        <div class="nav-tabs">
+          <interact-element data-interact-key="tab-features">
+            <button type="button" class="nav-tab" data-tab="features">
+              Features
+              <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </button>
+          </interact-element>
+          <interact-element data-interact-key="tab-services">
+            <button type="button" class="nav-tab" data-tab="services">
+              Services
+              <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </button>
+          </interact-element>
+          <interact-element data-interact-key="tab-learn">
+            <button type="button" class="nav-tab" data-tab="learn">
+              Learn
+              <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </button>
+          </interact-element>
+          <interact-element data-interact-key="tab-about">
+            <button type="button" class="nav-tab" data-tab="about">
+              About
+              <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </button>
+          </interact-element>
+        </div>
+      </div>
+    </interact-element>
+
+    <!-- Dropdown panels -->
+    <div class="dropdown-panel" id="dropdown-panel">
+      <div class="dropdown-content" data-content="features">
+        <div><div class="dropdown-col-header">Core</div>
+          <interact-element data-interact-key="d-0"><button class="dropdown-link" style="--i:0">Animations</button></interact-element>
+          <interact-element data-interact-key="d-1"><button class="dropdown-link" style="--i:1">Scroll Effects</button></interact-element>
+          <interact-element data-interact-key="d-2"><button class="dropdown-link" style="--i:2">Hover States</button></interact-element>
+          <interact-element data-interact-key="d-3"><button class="dropdown-link" style="--i:3">Transitions</button></interact-element>
+        </div>
+        <div><div class="dropdown-col-header">Advanced</div>
+          <interact-element data-interact-key="d-4"><button class="dropdown-link" style="--i:4">3D Effects</button></interact-element>
+          <interact-element data-interact-key="d-5"><button class="dropdown-link" style="--i:5">Parallax</button></interact-element>
+          <interact-element data-interact-key="d-6"><button class="dropdown-link" style="--i:6">Mouse Tracking</button></interact-element>
+          <interact-element data-interact-key="d-7"><button class="dropdown-link" style="--i:7">Sequences</button></interact-element>
+        </div>
+        <div><div class="dropdown-col-header">Integrations</div>
+          <interact-element data-interact-key="d-8"><button class="dropdown-link" style="--i:8">React</button></interact-element>
+          <interact-element data-interact-key="d-9"><button class="dropdown-link" style="--i:9">Vue</button></interact-element>
+          <interact-element data-interact-key="d-10"><button class="dropdown-link" style="--i:10">Svelte</button></interact-element>
+          <interact-element data-interact-key="d-11"><button class="dropdown-link" style="--i:11">Vanilla JS</button></interact-element>
+        </div>
+      </div>
+
+      <div class="dropdown-content" data-content="services">
+        <div><div class="dropdown-col-header">Consulting</div>
+          <interact-element data-interact-key="d-12"><button class="dropdown-link" style="--i:0">Motion Audit</button></interact-element>
+          <interact-element data-interact-key="d-13"><button class="dropdown-link" style="--i:1">UX Review</button></interact-element>
+          <interact-element data-interact-key="d-14"><button class="dropdown-link" style="--i:2">Performance</button></interact-element>
+          <interact-element data-interact-key="d-15"><button class="dropdown-link" style="--i:3">Accessibility</button></interact-element>
+        </div>
+        <div><div class="dropdown-col-header">Support</div>
+          <interact-element data-interact-key="d-16"><button class="dropdown-link" style="--i:4">Starter Plan</button></interact-element>
+          <interact-element data-interact-key="d-17"><button class="dropdown-link" style="--i:5">Growth Plan</button></interact-element>
+          <interact-element data-interact-key="d-18"><button class="dropdown-link" style="--i:6">Scale Plan</button></interact-element>
+          <interact-element data-interact-key="d-19"><button class="dropdown-link" style="--i:7">Custom</button></interact-element>
+        </div>
+        <div><div class="dropdown-col-header">Partners</div>
+          <interact-element data-interact-key="d-20"><button class="dropdown-link" style="--i:8">Agency Program</button></interact-element>
+          <interact-element data-interact-key="d-21"><button class="dropdown-link" style="--i:9">Resellers</button></interact-element>
+          <interact-element data-interact-key="d-22"><button class="dropdown-link" style="--i:10">Affiliates</button></interact-element>
+          <interact-element data-interact-key="d-23"><button class="dropdown-link" style="--i:11">Certifications</button></interact-element>
+        </div>
+      </div>
+
+      <div class="dropdown-content" data-content="learn">
+        <div><div class="dropdown-col-header">Guides</div>
+          <interact-element data-interact-key="d-24"><button class="dropdown-link" style="--i:0">Getting Started</button></interact-element>
+          <interact-element data-interact-key="d-25"><button class="dropdown-link" style="--i:1">Core Concepts</button></interact-element>
+          <interact-element data-interact-key="d-26"><button class="dropdown-link" style="--i:2">Best Practices</button></interact-element>
+          <interact-element data-interact-key="d-27"><button class="dropdown-link" style="--i:3">Recipes</button></interact-element>
+        </div>
+        <div><div class="dropdown-col-header">API</div>
+          <interact-element data-interact-key="d-28"><button class="dropdown-link" style="--i:4">Configuration</button></interact-element>
+          <interact-element data-interact-key="d-29"><button class="dropdown-link" style="--i:5">Effects</button></interact-element>
+          <interact-element data-interact-key="d-30"><button class="dropdown-link" style="--i:6">Triggers</button></interact-element>
+          <interact-element data-interact-key="d-31"><button class="dropdown-link" style="--i:7">Conditions</button></interact-element>
+        </div>
+        <div><div class="dropdown-col-header">Media</div>
+          <interact-element data-interact-key="d-32"><button class="dropdown-link" style="--i:8">Video Courses</button></interact-element>
+          <interact-element data-interact-key="d-33"><button class="dropdown-link" style="--i:9">Workshops</button></interact-element>
+          <interact-element data-interact-key="d-34"><button class="dropdown-link" style="--i:10">Changelog</button></interact-element>
+          <interact-element data-interact-key="d-35"><button class="dropdown-link" style="--i:11">Newsletter</button></interact-element>
+        </div>
+      </div>
+
+      <div class="dropdown-content" data-content="about">
+        <div><div class="dropdown-col-header">Team</div>
+          <interact-element data-interact-key="d-36"><button class="dropdown-link" style="--i:0">Our Mission</button></interact-element>
+          <interact-element data-interact-key="d-37"><button class="dropdown-link" style="--i:1">Open Roles</button></interact-element>
+          <interact-element data-interact-key="d-38"><button class="dropdown-link" style="--i:2">Culture</button></interact-element>
+          <interact-element data-interact-key="d-39"><button class="dropdown-link" style="--i:3">Newsroom</button></interact-element>
+        </div>
+        <div><div class="dropdown-col-header">Connect</div>
+          <interact-element data-interact-key="d-40"><button class="dropdown-link" style="--i:4">Contact Us</button></interact-element>
+          <interact-element data-interact-key="d-41"><button class="dropdown-link" style="--i:5">Office Hours</button></interact-element>
+          <interact-element data-interact-key="d-42"><button class="dropdown-link" style="--i:6">Brand Assets</button></interact-element>
+          <interact-element data-interact-key="d-43"><button class="dropdown-link" style="--i:7">Status Page</button></interact-element>
+        </div>
+        <div><div class="dropdown-col-header">Legal</div>
+          <interact-element data-interact-key="d-44"><button class="dropdown-link" style="--i:8">Privacy Policy</button></interact-element>
+          <interact-element data-interact-key="d-45"><button class="dropdown-link" style="--i:9">Terms of Use</button></interact-element>
+          <interact-element data-interact-key="d-46"><button class="dropdown-link" style="--i:10">Cookie Settings</button></interact-element>
+          <interact-element data-interact-key="d-47"><button class="dropdown-link" style="--i:11">Compliance</button></interact-element>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { Interact } from 'https://esm.sh/@wix/interact@2.1.2/web?bundle';
+
+    const dropdownPanel = document.getElementById('dropdown-panel');
+    const tabs = document.querySelectorAll('.nav-tab');
+    const contents = document.querySelectorAll('.dropdown-content');
+    const tabNames = ['features', 'services', 'learn', 'about'];
+    let activeTab = null;
+
+    const TOTAL_LINKS = 48;
+    const linkHovers = Array.from({ length: TOTAL_LINKS }, (_, i) => ({
+      key: `d-${i}`,
+      trigger: 'hover',
+      params: { method: 'toggle' },
+      effects: [{
+        transition: {
+          duration: 200,
+          easing: 'ease-out',
+          styleProperties: [
+            { name: 'background-color', value: '#ffd78215' },
+            { name: 'color', value: '#ffd782' }
+          ]
+        }
+      }]
+    }));
+
+    Interact.create({
+      interactions: [
+        {
+          key: 'nav-bar',
+          trigger: 'hover',
+          params: { method: 'toggle' },
+          effects: [{
+            transition: {
+              duration: 300,
+              easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+              styleProperties: [
+                { name: 'border-color', value: '#ffd78255' }
+              ]
+            }
+          }]
+        },
+        ...['features', 'services', 'learn', 'about'].map(name => ({
+          key: `tab-${name}`,
+          trigger: 'hover',
+          params: { method: 'toggle' },
+          effects: [{
+            transition: {
+              duration: 250,
+              easing: 'ease-out',
+              styleProperties: [
+                { name: 'color', value: '#ffd782' }
+              ]
+            }
+          }]
+        })),
+        ...linkHovers
+      ]
+    });
+
+    tabs.forEach(tab => {
+      tab.addEventListener('mouseenter', () => {
+        const name = tab.dataset.tab;
+        if (activeTab === name) return;
+        openDropdown(name);
+      });
+    });
+
+    const navWrapper = document.querySelector('.nav-wrapper');
+    let closeTimer = null;
+    navWrapper.addEventListener('mouseleave', () => {
+      closeTimer = setTimeout(() => { if (activeTab) closeDropdown(); }, 120);
+    });
+    navWrapper.addEventListener('mouseenter', () => {
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+    });
+
+    function openDropdown(name) {
+      const prevIdx = activeTab ? tabNames.indexOf(activeTab) : -1;
+      const nextIdx = tabNames.indexOf(name);
+
+      contents.forEach(c => {
+        if (c.dataset.content === activeTab) {
+          c.classList.remove('active');
+          c.classList.toggle('slide-left', nextIdx < prevIdx);
+        }
+      });
+
+      activeTab = name;
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+
+      const incoming = document.querySelector(`.dropdown-content[data-content="${name}"]`);
+      if (prevIdx >= 0 && nextIdx < prevIdx) {
+        incoming.classList.add('slide-left');
+        incoming.offsetHeight;
+        incoming.classList.remove('slide-left');
+      } else {
+        incoming.classList.remove('slide-left');
+      }
+      incoming.classList.add('active');
+      dropdownPanel.classList.add('open');
+    }
+
+    function closeDropdown() {
+      activeTab = null;
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active', 'slide-left'));
+      dropdownPanel.classList.remove('open');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && activeTab) closeDropdown();
+    });
+  </script>
+</body>
+</html>

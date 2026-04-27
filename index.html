@@ -13,33 +13,9 @@
     <!-- Helvetica for the new section -->
     <link href="https://fonts.cdnfonts.com/css/helvetica-neue-55" rel="stylesheet">
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS (shared config) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                fontFamily: {
-                    sans: ['Inter', 'system-ui', 'sans-serif'],
-                    mono: ['JetBrains Mono', 'monospace'],
-                    helvetica: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
-                },
-                extend: {
-                    colors: {
-                        'off-black': '#111111',
-                        'apple-gray': '#86868b',
-                    },
-                    fontSize: {
-                        'giant': ['6rem', { lineHeight: '1' }],
-                        // Updated to match new design
-                        'mega': ['11rem', { lineHeight: '0.9' }],
-                    },
-                    letterSpacing: {
-                        'tighter': '-0.04em',
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="/shared/tailwind-config.js"></script>
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="assets/styles.css">
@@ -49,17 +25,9 @@
 
 <body class="bg-off-black text-white selection:bg-blue-300 selection:text-off-black">
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-50 px-6 py-6 md:px-12 flex justify-between items-center text-white">
-        <interact-element data-interact-key="nav-logo" data-interact-initial="true">
-            <div class="text-sm font-medium tracking-wide uppercase">● Interact </div>
-        </interact-element>
-        <interact-element data-interact-key="nav-cta" data-interact-initial="true">
-            <a href="https://github.com/wix-incubator/interact" target="_blank" class="text-sm font-medium border border-black px-6 py-2 rounded-full bg-white text-off-black hover:bg-black hover:text-white hover:border-white transition-colors duration-300">
-               Go to Repository ↗
-            </a>
-        </interact-element>
-    </nav>
+    <!-- Navigation (shared) -->
+    <div id="shared-nav" data-interact></div>
+    <script src="/shared/nav.js"></script>
 
     <main>
     <!-- HERO SECTION -->
@@ -721,20 +689,9 @@ Interact comes with a rich and diverse set of named effects, each designed to br
         </interact-element>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="bg-off-black text-white py-12 px-6 md:px-12 border-t border-gray-800 flex justify-between items-end">
-        <interact-element data-interact-key="footer-brand" data-interact-initial="true">
-            <h2 class="text-lg font-medium uppercase">● Interact</h2>
-            <p class="text-sm text-gray-400 mt-2">© 2025</p>
-        </interact-element>
-        
-        <interact-element data-interact-key="footer-link" data-interact-initial="true">
-             <div class="flex gap-6">
-                <a href="https://www.npmjs.com/package/@wix/interact" target="_blank" class="text-lg font-light hover:text-gray-500 transition-colors">NPM</a>
-                <a href="https://github.com/wix-incubator/interact" target="_blank" class="text-lg font-light hover:text-gray-500 transition-colors">Github</a>
-             </div>
-        </interact-element>
-    </footer>
+    <!-- Footer (shared) -->
+    <div id="shared-footer" data-interact></div>
+    <script src="/shared/footer.js"></script>
     </main>
 
     <!-- LIGHTBOX MODAL -->

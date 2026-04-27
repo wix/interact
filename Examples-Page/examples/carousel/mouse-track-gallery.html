@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquidy Gallery with @wix/interact</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            /* This will be updated by JS to ensure perfect sync with physics engine */
+            --item-size: 40vh; 
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden; /* Prevent native scroll */
+            background-color: #ffffff; 
+            color: black; 
+            font-family: 'Helvetica Neue', sans-serif;
+            user-select: none; /* easier dragging */
+        }
+
+        /* The window we look through */
+        #gallery-viewport {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            cursor: grab;
+            position: relative;
+        }
+
+        #gallery-viewport:active {
+            cursor: grabbing;
+        }
+
+        /* Container - No longer a grid, just a coordinate space */
+        #gallery-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Item container - Now Absolute for free positioning */
+        .gallery-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: var(--item-size); 
+            will-change: transform; /* Critical for performance */
+        }
+
+        /* Image styling */
+        .img-wrapper {
+            width: 100%;
+            height: var(--item-size);
+            border-radius: 4px;
+            overflow: hidden;
+            background: #1a1a1a;
+            position: relative;
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.2);
+        }
+
+        .parallax-layer {
+            width: 100%;
+            height: 100%;
+            will-change: transform;
+            transform: scale(3.0); 
+            transform-origin: center;
+        }
+
+        .gallery-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transform-origin: center;
+        }
+
+        /* Text styling */
+        .text-wrapper {
+            position: absolute;
+            top: 100%; 
+            padding-top: 5px; 
+            left: 0;
+            width: 100%;
+            pointer-events: none; 
+        }
+
+        .gallery-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #111111;
+            letter-spacing: 0.5px;
+            transform-origin: top left;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        /* Responsive styles for mobile */
+        @media (max-width: 768px) {
+            .gallery-text {
+                font-size: 12px;
+            }
+        }
+
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+<div id="loading">Initializing Gallery...</div>
+
+<div id="gallery-viewport">
+    <div id="gallery-content">
+        <!-- Items injected via JS -->
+    </div>
+</div>
+
+<script type="module">
+    import { Interact } from 'https://esm.sh/@wix/interact@1.86.0';
+
+    const container = document.getElementById('gallery-content');
+    const totalItems = 40; 
+    const interactions = [];
+    const HOVER_BLUR = 8;
+
+    // Storage for animation loop
+    window.galleryItems = [];
+
+    // Grid config
+    const GRID_COLS = 8;
+    const GRID_ROWS = 5;
+
+    // --- DYNAMIC LAYOUT STATE ---
+    // These will be calculated by updateLayout()
+    const layout = {
+        itemSize: 0,
+        gap: 0,
+        colPitch: 0,
+        rowPitch: 0,
+        worldWidth: 0,
+        worldHeight: 0
+    };
+
+    function updateLayout() {
+        // --- CONTINUOUS RESPONSIVE LOGIC ---
+        // Range: 400px width -> 0.2 (20vh)
+        // Range: 1400px width -> 0.4 (40vh)
+        
+        const rawFactor = 0.0002 * window.innerWidth + 0.12;
+        
+        // Clamp between 0.2 and 0.4
+        const vhFactor = Math.min(0.4, Math.max(0.2, rawFactor));
+        
+        // 1. Calculate sizing based on viewport height (vh)
+        layout.itemSize = window.innerHeight * vhFactor;
+        
+        // 2. Calculate Gap proportionally (Gap ratio is approx 255/400 = 0.6375)
+        layout.gap = layout.itemSize * 0.6375;
+
+        // 3. Update CSS Variable to ensure styles match physics
+        document.documentElement.style.setProperty('--item-size', `${layout.itemSize}px`);
+
+        // 4. Calculate Pitch (Distance between centers)
+        layout.colPitch = layout.itemSize + layout.gap;
+        
+        // Row pitch calculation (item height + approx text height padding + gap)
+        const textPadding = layout.itemSize * 0.25; 
+        layout.rowPitch = layout.itemSize + textPadding + layout.gap;
+
+        // 5. Total "World" Size
+        layout.worldWidth = GRID_COLS * layout.colPitch;
+        layout.worldHeight = GRID_ROWS * layout.rowPitch;
+
+        // 6. Recalculate base positions for all existing items
+        if (window.galleryItems.length > 0) {
+            window.galleryItems.forEach((item, index) => {
+                const col = index % GRID_COLS;
+                const row = Math.floor(index / GRID_COLS);
+                item.baseX = col * layout.colPitch;
+                item.baseY = row * layout.rowPitch;
+            });
+        }
+    }
+
+    // Initialize layout immediately
+    updateLayout();
+    
+    // Unique titles for each item
+    const imageTitles = [
+        "NEON VOID", "URBAN ECHO", "SILENT FORM", "LIQUID TIME", "GLASS SOUL",
+        "CONCRETE SKY", "VELVET HAZE", "IRON PULSE", "SOLAR DRIFT", "LUNAR EDGE",
+        "PRISM CORE", "STATIC FLOW", "ECHO CHAMBER", "NIGHT BLOOM", "WHITE NOISE",
+        "SHADOW PLAY", "METAL HEART", "OCEAN DUST", "WINTER SUN", "DESERT ICE",
+        "CYBER MIST", "RAPID EYE", "ZERO GRAVITY", "BLIND SPOT", "DEEP FOCUS",
+        "RAW MATTER", "PURE LOGIC", "LOST SIGNAL", "DARK MATTER", "LIGHT WAVE",
+        "AUTO PILOT", "BLUE STEEL", "RED SHIFT", "GREEN ZONE", "GOLD RUSH",
+        "SILVER LINE", "COPPER TONE", "CHROME LIFE", "CARBON COPY", "FINAL CUT"
+    ];
+
+    for (let i = 0; i < totalItems; i++) {
+        const itemKey = `item-${i}`;
+        const imgKey = `img-${i}`;
+        const txtKey = `txt-${i}`;
+        
+        // Initial Base Position
+        const col = i % GRID_COLS;
+        const row = Math.floor(i / GRID_COLS);
+        const baseX = col * layout.colPitch;
+        const baseY = row * layout.rowPitch;
+
+        const imageUrl = `https://picsum.photos/seed/${i + 88}/1200/1500`;
+        const title = imageTitles[i % imageTitles.length];
+
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+        
+        div.innerHTML = `
+            <interact-element data-interact-key="${itemKey}">
+                <div class="cursor-pointer">
+                    <div class="img-wrapper">
+                        <div class="parallax-layer" id="parallax-${i}">
+                            <interact-element data-interact-key="${imgKey}">
+                                <img 
+                                    src="${imageUrl}" 
+                                    class="gallery-img" 
+                                    alt="Gallery item ${i}"
+                                    loading="lazy"
+                                />
+                            </interact-element>
+                        </div>
+                    </div>
+                    <div class="text-wrapper">
+                        <interact-element data-interact-key="${txtKey}">
+                            <div class="gallery-text">
+                                ${title}
+                            </div>
+                        </interact-element>
+                    </div>
+                </div>
+            </interact-element>
+        `;
+        
+        container.appendChild(div);
+        
+        // Cache for physics engine
+        window.galleryItems.push({
+            container: div,
+            parallax: document.getElementById(`parallax-${i}`),
+            baseX: baseX,
+            baseY: baseY
+        });
+
+        // ---------------------------------------------------------
+        // Config Generation (Interact)
+        // ---------------------------------------------------------
+        interactions.push({
+            key: itemKey,
+            trigger: 'hover',
+            effects: [
+                {
+                    key: imgKey,
+                    transition: {
+                        duration: 600,
+                        easing: 'ease-out',
+                        styleProperties: [
+                            { name: 'filter', value: 'blur(' + HOVER_BLUR + 'px)' },
+                            { name: 'transform', value: 'scale(0.95)' }
+                        ]
+                    },
+                    fill: 'both',
+                    composite: 'add'
+                },
+                {
+                    key: txtKey,
+                    transition: {
+                        duration: 500,
+                        easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)', 
+                        styleProperties: [
+                            { name: 'opacity', value: '0.4' } 
+                        ]
+                    },
+                    fill: 'both',
+                    composite: 'replace'
+                }
+            ]
+        });
+    }
+
+    document.getElementById('loading').style.display = 'none';
+    
+    const config = { interactions: interactions };
+    Interact.create(config);
+    console.log('Interact initialized');
+
+    // ---------------------------------------------------------
+    // 4. HYBRID INTERACTION ENGINE
+    // ---------------------------------------------------------
+    
+    const viewport = document.getElementById('gallery-viewport');
+    
+    // Combined Physics State
+    const state = {
+        // Shared Position
+        currentX: 0, 
+        currentY: 0,
+        
+        // Desktop Tracking State
+        velocityX: 0,
+        velocityY: 0,
+        
+        // Mobile Drag State
+        targetX: 0,
+        targetY: 0,
+        dragStartX: 0,
+        dragStartY: 0,
+        isDragging: false
+    };
+
+    // Mouse Tracking Info (Desktop)
+    const mouse = {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+        isActive: false
+    };
+
+    // Configuration
+    const MAX_SPEED = 6;         // Desktop: Max pixels per frame
+    const VELOCITY_LERP = 0.03;  // Desktop: Momentum
+    const DRAG_LERP = 0.08;      // Mobile: Drag responsiveness
+    const PARALLAX_FACTOR = 0.08; 
+    const MOBILE_BREAKPOINT = 768;
+
+    // --- EVENT LISTENERS (HYBRID) ---
+
+    // Mouse Move (Handles both Desktop Track and Mobile Drag via mouse simulation)
+    window.addEventListener('mousemove', (e) => {
+        const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+
+        if (isMobile) {
+            // Mobile Logic (Drag)
+            if (!state.isDragging) return;
+            e.preventDefault();
+            state.targetX = e.clientX - state.dragStartX;
+            state.targetY = e.clientY - state.dragStartY;
+        } else {
+            // Desktop Logic (Track)
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            mouse.isActive = true;
+        }
+    });
+
+    // Mouse Down (Mobile Drag Start)
+    viewport.addEventListener('mousedown', (e) => {
+        const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+        if (isMobile) {
+            state.isDragging = true;
+            // Calculate offset so we don't jump
+            state.dragStartX = e.clientX - state.targetX;
+            state.dragStartY = e.clientY - state.targetY;
+            viewport.style.cursor = 'grabbing';
+        }
+    });
+
+    // Stop tracking/dragging
+    const stopInteract = () => {
+        state.isDragging = false;
+        mouse.isActive = false;
+        viewport.style.cursor = 'grab';
+    };
+
+    document.addEventListener('mouseleave', stopInteract);
+    window.addEventListener('mouseup', stopInteract);
+
+    // Touch Support
+    viewport.addEventListener('touchstart', (e) => {
+        const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+        const touch = e.touches[0];
+        
+        if (isMobile) {
+            // Mobile Drag Start
+            state.isDragging = true;
+            state.dragStartX = touch.clientX - state.targetX;
+            state.dragStartY = touch.clientY - state.targetY;
+        } else {
+            // Desktop Touch Track (Virtual Joystick)
+            mouse.x = touch.clientX;
+            mouse.y = touch.clientY;
+            mouse.isActive = true;
+        }
+        e.preventDefault(); // Prevent scroll on drag
+    }, { passive: false });
+
+    viewport.addEventListener('touchmove', (e) => {
+        const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+        const touch = e.touches[0];
+
+        if (isMobile) {
+            // Mobile Drag Move
+            if (!state.isDragging) return;
+            state.targetX = touch.clientX - state.dragStartX;
+            state.targetY = touch.clientY - state.dragStartY;
+        } else {
+            // Desktop Touch Track Move
+            mouse.x = touch.clientX;
+            mouse.y = touch.clientY;
+        }
+        e.preventDefault();
+    }, { passive: false });
+
+    viewport.addEventListener('touchend', stopInteract);
+
+
+    // Track previous size for polling
+    let lastInnerWidth = window.innerWidth;
+    let lastInnerHeight = window.innerHeight;
+
+    // ---------------------------------------------------------
+    // Animation Loop
+    // ---------------------------------------------------------
+    function animate() {
+        // --- RESIZE POLLING CHECK ---
+        if (window.innerWidth !== lastInnerWidth || window.innerHeight !== lastInnerHeight) {
+            lastInnerWidth = window.innerWidth;
+            lastInnerHeight = window.innerHeight;
+            updateLayout();
+            
+            // Recenter/Reset logic to prevent jumps on resize
+            mouse.x = window.innerWidth / 2;
+            mouse.y = window.innerHeight / 2;
+        }
+
+        const viewportCx = window.innerWidth / 2;
+        const viewportCy = window.innerHeight / 2;
+        const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+
+        // --- PHYSICS BRANCHING ---
+
+        if (isMobile) {
+            // >>> MOBILE: DRAG INTERACTION (Lerp to Position) <<<
+            const diffX = state.targetX - state.currentX;
+            const diffY = state.targetY - state.currentY;
+            
+            state.currentX += diffX * DRAG_LERP;
+            state.currentY += diffY * DRAG_LERP;
+
+            // Kill velocity so if we switch back to desktop, it doesn't drift
+            state.velocityX = 0;
+            state.velocityY = 0;
+
+        } else {
+            // >>> DESKTOP: TRACK INTERACTION (Velocity Momentum) <<<
+            
+            let targetVx = 0;
+            let targetVy = 0;
+
+            if (mouse.isActive) {
+                // Normalized distance (-1.0 to 1.0)
+                const nX = (mouse.x - viewportCx) / viewportCx;
+                const nY = (mouse.y - viewportCy) / viewportCy;
+
+                // Move opposite to mouse
+                targetVx = -nX * MAX_SPEED;
+                targetVy = -nY * MAX_SPEED;
+            }
+
+            // Apply Momentum
+            state.velocityX += (targetVx - state.velocityX) * VELOCITY_LERP;
+            state.velocityY += (targetVy - state.velocityY) * VELOCITY_LERP;
+
+            // Apply Velocity
+            state.currentX += state.velocityX;
+            state.currentY += state.velocityY;
+
+            // Sync Drag Target so if we switch to mobile, we continue from here without jumping
+            state.targetX = state.currentX;
+            state.targetY = state.currentY;
+        }
+
+        // --- UPDATE DOM ELEMENTS ---
+        if (window.galleryItems) {
+            for (let i = 0; i < window.galleryItems.length; i++) {
+                const item = window.galleryItems[i];
+                
+                // --- ENDLESS WRAP LOGIC ---
+                let x = item.baseX + state.currentX;
+                let y = item.baseY + state.currentY;
+
+                let wrappedX = ((x % layout.worldWidth) + layout.worldWidth) % layout.worldWidth;
+                if (wrappedX > layout.worldWidth / 2) wrappedX -= layout.worldWidth;
+                
+                let wrappedY = ((y % layout.worldHeight) + layout.worldHeight) % layout.worldHeight;
+                if (wrappedY > layout.worldHeight / 2) wrappedY -= layout.worldHeight;
+
+                const screenX = wrappedX + viewportCx;
+                const screenY = wrappedY + viewportCy;
+
+                // --- PARALLAX LOGIC ---
+                const pX = wrappedX * -PARALLAX_FACTOR;
+                const pY = wrappedY * -PARALLAX_FACTOR;
+
+                const offsetX = layout.itemSize / 2;
+                const offsetY = layout.itemSize / 2 + (layout.itemSize * 0.125); 
+                
+                item.container.style.transform = `translate3d(${screenX - offsetX}px, ${screenY - offsetY}px, 0)`;
+                item.parallax.style.transform = `scale(3.0) translate3d(${pX}px, ${pY}px, 0)`;
+            }
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+
+</script>
+
+</body>
+</html>

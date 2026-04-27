@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@wix/interact - Examples</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=JetBrains+Mono:wght@100;200;300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind (shared config) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/shared/tailwind-config.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/theme/material-darker.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Navigation (shared) -->
+  <div id="shared-nav"></div>
+  <script src="/shared/nav.js"></script>
+
+  <!-- Main Layout -->
+  <div class="main-layout">
+    <!-- Sidebar -->
+    <interact-element data-interact-key="page-sidebar">
+      <div class="sidebar-wrapper">
+        <div class="sidebar">
+          <div class="sidebar-arrow">→</div>
+          <div class="category-list-wrapper">
+            <div class="category-list" id="categoryList"></div>
+          </div>
+        </div>
+      </div>
+    </interact-element>
+
+    <!-- Connector -->
+    <interact-element data-interact-key="page-connector">
+      <div class="connector"></div>
+    </interact-element>
+
+    <!-- Main Content -->
+    <interact-element data-interact-key="page-content">
+      <div class="content-container">
+        <div class="content-scroll" id="contentScroll"></div>
+      </div>
+    </interact-element>
+  </div>
+
+  <!-- Footer (shared) -->
+  <div id="shared-footer"></div>
+  <script src="/shared/footer.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/addon/search/searchcursor.min.js"></script>
+
+  <!-- Interact entrance animation -->
+  <script type="module">
+    import { Interact } from 'https://esm.sh/@wix/interact@2.1.4/web?bundle';
+    import * as presets from 'https://esm.sh/@wix/motion-presets@1.0.0?bundle';
+    Interact.registerEffects(presets);
+
+    Interact.create({
+      interactions: [
+        {
+          key: 'page-sidebar',
+          trigger: 'viewEnter',
+          params: { type: 'once', threshold: 0 },
+          effects: [{ effectId: 'float-left' }],
+        },
+        {
+          key: 'page-connector',
+          trigger: 'viewEnter',
+          params: { type: 'once', threshold: 0 },
+          effects: [{ effectId: 'fade-in' }],
+        },
+        {
+          key: 'page-content',
+          trigger: 'viewEnter',
+          params: { type: 'once', threshold: 0 },
+          effects: [{ effectId: 'float-bottom' }],
+        },
+      ],
+      effects: {
+        'float-left': {
+          duration: 700,
+          delay: 150,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both',
+          namedEffect: { type: 'FloatIn', direction: 'left' },
+        },
+        'fade-in': {
+          duration: 500,
+          delay: 200,
+          easing: 'ease',
+          fill: 'both',
+          namedEffect: { type: 'FadeIn' },
+        },
+        'float-bottom': {
+          duration: 700,
+          delay: 200,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both',
+          namedEffect: { type: 'FloatIn', direction: 'bottom' },
+        },
+      },
+    });
+  </script>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

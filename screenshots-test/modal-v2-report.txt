@@ -1,0 +1,11 @@
+=== Step 3: Opened modal screenshot ===
+- Has sidebar (old design): false
+- Has modal-actions (new design): true
+- Title above container: false
+- Buttons outside/right of container: false
+
+=== Step 5: Code view screenshot ===
+- Code view visible: true
+
+=== Step 6: Back to preview ===
+=== Step 7: Modal closed ===

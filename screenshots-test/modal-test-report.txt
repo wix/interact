@@ -1,0 +1,9 @@
+1. Initial page screenshot captured
+2. Modal opened - screenshot captured
+   Layout check: hasHeaderBar=false, sidebarOnRight=true, closeBtn=true, codeBtn=true, title="Card Spread", hasIframe=true
+3. Code view - screenshot captured
+   Code textarea visible: true, preview: "..."
+4. Switched back to preview - screenshot captured
+   Preview iframe visible: true
+5. Modal closed - screenshot captured
+   Modal closed: true

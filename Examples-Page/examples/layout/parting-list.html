@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Split List — Creative Director</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { overflow: auto; }
+    body {
+      background: #fff;
+      color: #111;
+      font-family: 'Space Mono', monospace;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+    }
+
+    interact-element { display: block; }
+
+    /* ── Fixed overlay: image + indicators ── */
+    .fixed-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .fixed-layer interact-element[data-interact-key="ind"] {
+      position: absolute;
+      inset: 0;
+    }
+
+    .fixed-layer interact-element[data-interact-key="square"] {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .hero-text-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 60;
+      mix-blend-mode: difference;
+    }
+
+    .square-frame {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: clip;
+      background: #111;
+    }
+
+    .sq-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      visibility: hidden;
+    }
+    .sq-img.hero-img { visibility: visible; }
+
+    /* ── Hero overlay ── */
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-name {
+      font-family: 'Doto', sans-serif;
+      font-weight: 900;
+      font-size: clamp(50px, 10vw, 140px);
+      letter-spacing: -1px;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .hero-role {
+      font-size: 12px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-top: 16px;
+    }
+
+    /* ── Indicators ── */
+    .indicators {
+      position: absolute;
+      inset: 0;
+    }
+
+    .ind-left,
+    .ind-right {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      display: grid;
+      font-family: 'Space Mono', monospace;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #000;
+    }
+
+    .ind-left { left: 36px; }
+    .ind-right { right: 36px; }
+
+    .ind-item {
+      grid-row: 1;
+      grid-column: 1;
+      visibility: hidden;
+      padding: 2px 6px;
+    }
+
+    /* ── Hero spacer ── */
+    .hero-section {
+      height: 100vh;
+    }
+
+    /* ── Shrink zone ── */
+    .shrink-zone { height: 120vh; }
+
+    /* ── Projects ── */
+    .projects-section {
+      position: relative;
+      padding: 20vh 0 50vh;
+    }
+
+    .projects-section > interact-element {
+      display: flex;
+      align-items: center;
+      min-height: 8vh;
+    }
+
+    .project-row {
+      display: flex;
+      width: 100%;
+      color: #e0e0e0;
+    }
+
+    .half-left,
+    .half-right {
+      flex: 1;
+      font-family: 'Doto', sans-serif;
+      font-size: clamp(50px, 5.96vw, 70px);
+      font-weight: 900;
+      letter-spacing: -1px;
+      text-transform: uppercase;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .half-left {
+      text-align: right;
+      padding-right: 24px;
+    }
+
+    .half-right {
+      text-align: left;
+      padding-left: 24px;
+    }
+
+    /* ── End spacer ── */
+    .end-spacer { height: 50vh; }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      .indicators {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 12px;
+        padding-bottom: 40px;
+      }
+
+      .ind-left,
+      .ind-right {
+        position: static;
+        transform: none;
+        font-size: 13px;
+      }
+
+      .half-left,
+      .half-right {
+        font-size: 24px;
+      }
+
+      .half-left {
+        padding-right: 10px;
+      }
+
+      .half-right {
+        padding-left: 10px;
+      }
+
+      .projects-section > interact-element {
+        min-height: 6vh;
+      }
+
+      .hero-name {
+        font-size: clamp(36px, 9vw, 60px);
+      }
+
+      .hero-role {
+        font-size: 10px;
+        letter-spacing: 3px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fixed layer: indicators + image square -->
+  <div class="fixed-layer">
+    <interact-element data-interact-key="ind">
+      <div class="indicators">
+        <div class="ind-left">
+          <span class="ind-item n0">ITEM (1)</span>
+          <span class="ind-item n1">ITEM (2)</span>
+          <span class="ind-item n2">ITEM (3)</span>
+          <span class="ind-item n3">ITEM (4)</span>
+          <span class="ind-item n4">ITEM (5)</span>
+          <span class="ind-item n5">ITEM (6)</span>
+          <span class="ind-item n6">ITEM (7)</span>
+          <span class="ind-item n7">ITEM (8)</span>
+          <span class="ind-item n8">ITEM (9)</span>
+          <span class="ind-item n9">ITEM (10)</span>
+          <span class="ind-item n10">ITEM (11)</span>
+          <span class="ind-item n11">ITEM (12)</span>
+        </div>
+        <div class="ind-right">
+          <span class="ind-item y0">(2024)</span>
+          <span class="ind-item y1">(2024)</span>
+          <span class="ind-item y2">(2023)</span>
+          <span class="ind-item y3">(2025)</span>
+          <span class="ind-item y4">(2023)</span>
+          <span class="ind-item y5">(2024)</span>
+          <span class="ind-item y6">(2025)</span>
+          <span class="ind-item y7">(2023)</span>
+          <span class="ind-item y8">(2024)</span>
+          <span class="ind-item y9">(2025)</span>
+          <span class="ind-item y10">(2023)</span>
+          <span class="ind-item y11">(2024)</span>
+        </div>
+      </div>
+    </interact-element>
+
+    <interact-element data-interact-key="square">
+      <div class="square-frame">
+        <img class="sq-img hero-img"     src="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-0"   src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-1"   src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-2"   src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-3"   src="https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-4"   src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-5"   src="https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-6"   src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-7"   src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-8"   src="https://images.unsplash.com/photo-1514539079130-25950c84af65?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-9"   src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-10"  src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img proj-img-11"  src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&h=800&fit=crop&q=80" alt="">
+      </div>
+    </interact-element>
+
+  </div>
+
+  <interact-element data-interact-key="hero-text" class="hero-text-layer">
+    <div class="hero-overlay">
+      <h1 class="hero-name">ALEX RIVIERA</h1>
+      <p class="hero-role">Creative Director</p>
+    </div>
+  </interact-element>
+
+  <main>
+    <section class="hero-section"></section>
+
+    <interact-element data-interact-key="shrink-zone">
+      <div class="shrink-zone"></div>
+    </interact-element>
+
+    <div class="projects-section">
+      <interact-element data-interact-key="p0"><div class="project-row"><span class="half-left">DUSK RISING</span><span class="half-right">EDITORIAL</span></div></interact-element>
+      <interact-element data-interact-key="p1"><div class="project-row"><span class="half-left">NEON DRIFT</span><span class="half-right">COMMERCIAL</span></div></interact-element>
+      <interact-element data-interact-key="p2"><div class="project-row"><span class="half-left">STILL WATERS</span><span class="half-right">FASHION</span></div></interact-element>
+      <interact-element data-interact-key="p3"><div class="project-row"><span class="half-left">PAPER CRANE</span><span class="half-right">BRANDING</span></div></interact-element>
+      <interact-element data-interact-key="p4"><div class="project-row"><span class="half-left">ECHO CHAMBER</span><span class="half-right">MUSIC VIDEO</span></div></interact-element>
+      <interact-element data-interact-key="p5"><div class="project-row"><span class="half-left">GLASS HOUSE</span><span class="half-right">ARCHITECTURE</span></div></interact-element>
+      <interact-element data-interact-key="p6"><div class="project-row"><span class="half-left">WILD LIGHT</span><span class="half-right">PHOTOGRAPHY</span></div></interact-element>
+      <interact-element data-interact-key="p7"><div class="project-row"><span class="half-left">SLOW BURN</span><span class="half-right">FILM</span></div></interact-element>
+      <interact-element data-interact-key="p8"><div class="project-row"><span class="half-left">DEEP CURRENT</span><span class="half-right">CAMPAIGN</span></div></interact-element>
+      <interact-element data-interact-key="p9"><div class="project-row"><span class="half-left">SILVER LINE</span><span class="half-right">EDITORIAL</span></div></interact-element>
+      <interact-element data-interact-key="p10"><div class="project-row"><span class="half-left">FIRST SNOW</span><span class="half-right">SHORT FILM</span></div></interact-element>
+      <interact-element data-interact-key="p11"><div class="project-row"><span class="half-left">OPEN FIELD</span><span class="half-right">BRANDING</span></div></interact-element>
+    </div>
+
+    <div class="end-spacer"></div>
+  </main>
+
+  <script type="module">
+    import { Interact } from 'https://esm.sh/@wix/interact/web';
+
+    const mobile = window.matchMedia('(max-width: 768px)').matches;
+    const SPLIT = mobile ? 46 : 60;
+    const FINAL_SIZE = mobile ? '80px' : '120px';
+    const ITEM_COUNT = 12;
+    const C0 = { name: 'cover', offset: { value: 0, unit: 'percentage' } };
+    const C1 = { name: 'cover', offset: { value: 100, unit: 'percentage' } };
+    const interactions = [];
+
+    // ── Shrink: full-screen → square + fade hero text ──
+    interactions.push({
+      key: 'shrink-zone',
+      trigger: 'viewProgress',
+      effects: [
+        {
+          key: 'square',
+          selector: '.square-frame',
+          rangeStart: C0, rangeEnd: C1, fill: 'both',
+          keyframeEffect: {
+            name: 'shrink',
+            keyframes: [
+              { offset: 0,    width: '100vw', height: '100vh', borderRadius: '0px', boxShadow: '0 0 0 0 rgba(0,0,0,0)' },
+              { offset: 0.25, width: '100vw', height: '100vh', borderRadius: '0px', boxShadow: '0 0 0 0 rgba(0,0,0,0)' },
+              { offset: 0.78, width: FINAL_SIZE, height: FINAL_SIZE, borderRadius: '0px', boxShadow: '0 0 0 0 rgba(0,0,0,0)' },
+              { offset: 1,    width: FINAL_SIZE, height: FINAL_SIZE, borderRadius: '0px', boxShadow: '0 0 0 0 rgba(0,0,0,0)' },
+            ],
+          },
+        },
+        {
+          key: 'hero-text',
+          selector: '.hero-overlay',
+          rangeStart: C0, rangeEnd: C1, fill: 'both',
+          keyframeEffect: {
+            name: 'heroHide',
+            keyframes: [
+              { offset: 0,    opacity: '1' },
+              { offset: 0.72, opacity: '1' },
+              { offset: 0.82, opacity: '0' },
+              { offset: 1,    opacity: '0' },
+            ],
+          },
+        },
+      ],
+    });
+
+    // ── Project interactions ──
+    for (let i = 0; i < ITEM_COUNT; i++) {
+      interactions.push({
+        key: `p${i}`,
+        trigger: 'viewProgress',
+        effects: [
+          // Split left
+          {
+            selector: '.half-left',
+            rangeStart: C0, rangeEnd: C1, fill: 'both',
+            keyframeEffect: {
+              name: `sL${i}`,
+              keyframes: [
+                { offset: 0,    transform: 'translateX(0)' },
+                { offset: 0.38, transform: 'translateX(0)' },
+                { offset: 0.44, transform: `translateX(-${SPLIT}px)` },
+                { offset: 0.58, transform: `translateX(-${SPLIT}px)` },
+                { offset: 0.64, transform: 'translateX(0)' },
+                { offset: 1,    transform: 'translateX(0)' },
+              ],
+            },
+          },
+          // Split right
+          {
+            selector: '.half-right',
+            rangeStart: C0, rangeEnd: C1, fill: 'both',
+            keyframeEffect: {
+              name: `sR${i}`,
+              keyframes: [
+                { offset: 0,    transform: 'translateX(0)' },
+                { offset: 0.38, transform: 'translateX(0)' },
+                { offset: 0.44, transform: `translateX(${SPLIT}px)` },
+                { offset: 0.58, transform: `translateX(${SPLIT}px)` },
+                { offset: 0.64, transform: 'translateX(0)' },
+                { offset: 1,    transform: 'translateX(0)' },
+              ],
+            },
+          },
+          // Highlight row
+          {
+            selector: '.project-row',
+            rangeStart: C0, rangeEnd: C1, fill: 'both',
+            keyframeEffect: {
+              name: `hl${i}`,
+              keyframes: [
+                { offset: 0,     color: '#e0e0e0' },
+                { offset: 0.499, color: '#e0e0e0' },
+                { offset: 0.50,  color: '#000' },
+                { offset: 0.56,  color: '#000' },
+                { offset: 0.561, color: '#e0e0e0' },
+                { offset: 1,     color: '#e0e0e0' },
+              ],
+            },
+          },
+          // Image (snap at center, persists until next)
+          {
+            key: 'square',
+            selector: `.proj-img-${i}`,
+            rangeStart: C0, rangeEnd: C1, fill: 'both',
+            keyframeEffect: {
+              name: `img${i}`,
+              keyframes: [
+                { offset: 0,     visibility: 'hidden' },
+                { offset: 0.499, visibility: 'hidden' },
+                { offset: 0.50,  visibility: 'visible' },
+                { offset: 1,     visibility: 'visible' },
+              ],
+            },
+          },
+          // Number indicator
+          {
+            key: 'ind',
+            selector: `.n${i}`,
+            rangeStart: C0, rangeEnd: C1, fill: 'both',
+            keyframeEffect: {
+              name: `n${i}`,
+              keyframes: [
+                { offset: 0,     visibility: 'hidden' },
+                { offset: 0.499, visibility: 'hidden' },
+                { offset: 0.50,  visibility: 'visible' },
+                { offset: 0.56,  visibility: 'visible' },
+                { offset: 0.561, visibility: 'hidden' },
+                { offset: 1,     visibility: 'hidden' },
+              ],
+            },
+          },
+          // Year indicator
+          {
+            key: 'ind',
+            selector: `.y${i}`,
+            rangeStart: C0, rangeEnd: C1, fill: 'both',
+            keyframeEffect: {
+              name: `y${i}`,
+              keyframes: [
+                { offset: 0,     visibility: 'hidden' },
+                { offset: 0.499, visibility: 'hidden' },
+                { offset: 0.50,  visibility: 'visible' },
+                { offset: 0.56,  visibility: 'visible' },
+                { offset: 0.561, visibility: 'hidden' },
+                { offset: 1,     visibility: 'hidden' },
+              ],
+            },
+          },
+        ],
+      });
+    }
+
+    Interact.create({ interactions });
+  </script>
+
+</body>
+</html>
