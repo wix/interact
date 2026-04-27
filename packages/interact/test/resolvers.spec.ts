@@ -92,8 +92,29 @@ describe('css resolvers', () => {
     });
 
     describe('triggerType', () => {
-      it('should default to once if does not exist', () => {
+      it('should default to once for viewEnter trigger', () => {
         expect(resolveEffectForCSS({}, BASE_INTERACTION, EMPTY_CONFIG)?.triggerType).toBe('once');
+      });
+      it('should default to alternate for hover trigger', () => {
+        expect(
+          resolveEffectForCSS({}, { ...BASE_INTERACTION, trigger: 'hover' }, EMPTY_CONFIG)
+            ?.triggerType,
+        ).toBe('alternate');
+      });
+      it('should default to alternate for click trigger', () => {
+        expect(
+          resolveEffectForCSS({}, { ...BASE_INTERACTION, trigger: 'click' }, EMPTY_CONFIG)
+            ?.triggerType,
+        ).toBe('alternate');
+      });
+      it('should respect explicit triggerType regardless of trigger', () => {
+        expect(
+          resolveEffectForCSS(
+            { triggerType: 'repeat' } as unknown as Effect,
+            { ...BASE_INTERACTION, trigger: 'hover' },
+            EMPTY_CONFIG,
+          )?.triggerType,
+        ).toBe('repeat');
       });
     });
 

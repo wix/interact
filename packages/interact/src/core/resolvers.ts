@@ -58,7 +58,7 @@ export function resolveEffectForCSS(
 
   // TODO: is this always the default?
   if (!triggerType) {
-    triggerType = 'once';
+    triggerType = trigger === 'hover' || trigger === 'click' ? 'alternate' : 'once';
   }
 
   const { namedEffect, customEffect, keyframeEffect, transition, transitionProperties, ...rest } = {

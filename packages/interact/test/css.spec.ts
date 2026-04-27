@@ -729,7 +729,7 @@ describe('css._generate', () => {
 
       const timelineDecl = findDecl(effectRule.declarations, (d) => isTimelineProp(d.name));
       expect(timelineDecl).toBeDefined();
-      expect(String(timelineDecl!.value)).toContain('--scroll1');
+      expect(String(timelineDecl!.value)).toContain('--trigger-0');
 
       const rangeDecl = findDecl(effectRule.declarations, (d) => isRangeProp(d.name));
       expect(rangeDecl).toBeDefined();
@@ -885,6 +885,146 @@ describe('css._generate', () => {
       const rangeDecl = findDecl(initialRule.declarations, (d) => isRangeProp(d.name));
       expect(rangeDecl).toBeDefined();
       expect(rangeDecl!.value).toBe('normal');
+    });
+
+    it('should produce a view-timeline rule for viewProgress trigger', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            effects: [
+              {
+                effectId: 'scroll1',
+                keyframeEffect: {
+                  name: 'parallax',
+                  keyframes: [
+                    { transform: 'translateY(50px)' },
+                    { transform: 'translateY(-50px)' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      const viewTimelineRule = cssRules.find((r) =>
+        r.declarations.some((d) => d.name === 'view-timeline'),
+      );
+      expect(viewTimelineRule).toBeDefined();
+      expect(viewTimelineRule!.declarations.find((d) => d.name === 'view-timeline')!.value).toBe(
+        'trigger-0',
+      );
+    });
+
+    it('should use matching ids between view-timeline and animation-timeline for viewProgress', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            effects: [
+              {
+                effectId: 'scroll1',
+                rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+                rangeEnd: { name: 'exit', offset: { value: 100, unit: 'percentage' } },
+                keyframeEffect: {
+                  name: 'parallax',
+                  keyframes: [
+                    { transform: 'translateY(50px)' },
+                    { transform: 'translateY(-50px)' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      const viewTimelineRule = cssRules.find((r) =>
+        r.declarations.some((d) => d.name === 'view-timeline'),
+      )!;
+      const triggerId = viewTimelineRule.declarations.find(
+        (d) => d.name === 'view-timeline',
+      )!.value;
+
+      const effectRule = cssRules.find((r) => r.declarations.some((d) => isTimelineProp(d.name)))!;
+      const timelineValue = String(
+        effectRule.declarations.find((d) => isTimelineProp(d.name))!.value,
+      );
+      expect(timelineValue).toContain(`--${triggerId}`);
+    });
+
+    it('should not produce a view-timeline rule for non-viewProgress triggers', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'kf1',
+                duration: 300,
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      const viewTimelineRule = cssRules.find((r) =>
+        r.declarations.some((d) => d.name === 'view-timeline'),
+      );
+      expect(viewTimelineRule).toBeUndefined();
+    });
+
+    it('should propagate conditions to view-timeline rule for viewProgress', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: {
+          desktop: { type: 'media', predicate: 'min-width: 1024px' },
+        },
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            conditions: ['desktop'],
+            effects: [
+              {
+                effectId: 'scroll1',
+                keyframeEffect: {
+                  name: 'parallax',
+                  keyframes: [
+                    { transform: 'translateY(50px)' },
+                    { transform: 'translateY(-50px)' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      const viewTimelineRule = cssRules.find((r) =>
+        r.declarations.some((d) => d.name === 'view-timeline'),
+      )!;
+      expect(viewTimelineRule).toBeDefined();
+      expect(viewTimelineRule.media).toContain('min-width: 1024px');
     });
   });
 

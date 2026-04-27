@@ -134,12 +134,45 @@ function getSequenceCustomPropsForTarget(
 
 // ----- Parsers -----
 
+function triggerToCSS(
+  interaction: Interaction,
+  configConditions: Record<string, Condition>,
+  triggerId: string,
+  useFirstChild: boolean = true,
+): CSSRuleData {
+  const { key, conditions } = interaction;
+
+  const media = getFullPredicateByType(conditions, configConditions, 'media');
+  const selectorCondition = getSelectorCondition(conditions, configConditions);
+
+  const childSelector = getSelector(interaction, {
+    asCombinator: true,
+    useFirstChild,
+    addItemFilter: true,
+  });
+
+  return {
+    key,
+    media,
+    selectorCondition,
+    childSelector,
+    // invalidating earlier cascaded custom properties affected from earlier transitionEffects
+    // to implement same-interaction-cascade
+    declarations: [
+      {
+        name: 'view-timeline',
+        value: triggerId,
+      },
+    ],
+  };
+}
+
 function effectToCSS(
   effect: ResolvedEffect,
   configConditions: Record<string, Condition>,
   customProps: ListCustomProps,
   targetHash: string,
-  trigger: TriggerType,
+  trigger: TriggerVariant,
   childSelector?: string,
 ): {
   rules: CSSRuleData[];
@@ -178,12 +211,9 @@ function effectToCSS(
 
   if (namedEffect || keyframeEffect) {
     const animationOptions = effectToAnimationOptions(effect);
-    const motionTrigger = { trigger: camelToKebabCase(trigger), id: effectId, componentId: '' };
-    const cssAnimations = getCSSAnimation(
-      null,
-      animationOptions,
-      motionTrigger as TriggerVariant,
-    ).filter((anim) => anim.name);
+    const cssAnimations = getCSSAnimation(null, animationOptions, trigger).filter(
+      (anim) => anim.name,
+    );
 
     // accumulate keyframes
     keyframes = cssAnimations.map((anim) => ({
@@ -322,7 +352,7 @@ function parseEffect(
   effect: ResolvedEffect,
   targetToCustomProps: Map<string, ListCustomProps>,
   keyframesMap: Map<string, Keyframe[]>,
-  trigger: TriggerType,
+  trigger: TriggerVariant,
   useFirstChild: boolean = true,
   // to use inside sequences to update the sequence's coordinated list without
   // breaking cascade logic
@@ -396,7 +426,7 @@ function parseSequence(
   sequence: ResolvedSequence,
   targetToCustomProps: Map<string, ListCustomProps>,
   keyframesMap: Map<string, Keyframe[]>,
-  trigger: TriggerType,
+  trigger: TriggerVariant,
   useFirstChild: boolean = true,
 ): CSSRuleData[] {
   // in a similar manner to how we treat different interactions and use lists to concatenate them
@@ -461,17 +491,31 @@ function parseInteraction(
     .map((effect) => resolveEffectForCSS(effect, interaction, config))
     .filter((effect) => effect !== null);
 
-  const { trigger } = interaction;
+  const cssRules = [];
 
-  const cssRules = resolvedEffects.flatMap((effect) =>
-    parseEffect(
-      config,
-      interactionIdx,
-      effect,
-      targetToCustomProps,
-      keyframesMap,
-      trigger,
-      useFirstChild,
+  const { trigger } = interaction;
+  const motionTrigger = {
+    trigger: camelToKebabCase(trigger),
+    id: ['trigger', interactionIdx].join('-'),
+    componentId: '',
+  } as TriggerVariant;
+  if (trigger === 'viewProgress') {
+    cssRules.push(
+      triggerToCSS(interaction, config.conditions || {}, motionTrigger.id, useFirstChild),
+    );
+  }
+
+  cssRules.push(
+    ...resolvedEffects.flatMap((effect) =>
+      parseEffect(
+        config,
+        interactionIdx,
+        effect,
+        targetToCustomProps,
+        keyframesMap,
+        motionTrigger,
+        useFirstChild,
+      ),
     ),
   );
 
@@ -487,7 +531,7 @@ function parseInteraction(
         sequence,
         targetToCustomProps,
         keyframesMap,
-        trigger,
+        motionTrigger,
         useFirstChild,
       ),
     ),
