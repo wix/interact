@@ -160,7 +160,7 @@ function triggerToCSS(
     declarations: [
       {
         name: 'view-timeline',
-        value: triggerId,
+        value: `--${triggerId}`,
       },
     ],
   };

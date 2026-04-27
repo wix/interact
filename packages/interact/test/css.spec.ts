@@ -917,7 +917,7 @@ describe('css._generate', () => {
       );
       expect(viewTimelineRule).toBeDefined();
       expect(viewTimelineRule!.declarations.find((d) => d.name === 'view-timeline')!.value).toBe(
-        'trigger-0',
+        '--trigger-0',
       );
     });
 
