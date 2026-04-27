@@ -1212,7 +1212,6 @@ const config = {
     {
       key: 'tailored-header',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       effects: [
         {
           triggerType: 'once',
@@ -1225,7 +1224,6 @@ const config = {
     {
       key: 'tailored-col-1',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       effects: [
         {
           triggerType: 'once',
@@ -1239,7 +1237,6 @@ const config = {
     {
       key: 'tailored-col-2',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       effects: [
         {
           triggerType: 'once',
@@ -1253,7 +1250,6 @@ const config = {
     {
       key: 'tailored-col-3',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       effects: [
         {
           triggerType: 'once',
