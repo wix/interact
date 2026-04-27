@@ -43,7 +43,7 @@ const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
   animation: 'none',
   'animation-composition': 'replace',
   transition: '_',
-  'animation-timeline': 'none',
+  'animation-timeline': 'auto',
   'animation-range': 'normal',
 };
 

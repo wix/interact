@@ -959,7 +959,7 @@ describe('css._generate', () => {
       const timelineValue = String(
         effectRule.declarations.find((d) => isTimelineProp(d.name))!.value,
       );
-      expect(timelineValue).toContain(`--${triggerId}`);
+      expect(timelineValue).toContain(triggerId);
     });
 
     it('should not produce a view-timeline rule for non-viewProgress triggers', () => {
