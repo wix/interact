@@ -179,69 +179,74 @@ export type Breathe = {
   direction?: 'vertical' | 'horizontal' | 'center';
   distance?: UnitLengthPercentage;
   perspective?: number;
+  iterationDelay?: number;
 };
 export type Pulse = {
   type: 'Pulse';
   intensity?: number;
+  iterationDelay?: number;
 };
 export type Spin = {
   type: 'Spin';
   direction?: 'clockwise' | 'counter-clockwise';
+  iterationDelay?: number;
 };
 export type Poke = {
   type: 'Poke';
   direction?: EffectFourDirections;
   intensity?: number;
+  iterationDelay?: number;
 };
-export type Flash = { type: 'Flash' };
+export type Flash = { type: 'Flash'; iterationDelay?: number };
 export type Swing = {
   type: 'Swing';
   swing?: number;
   direction?: EffectFourDirections;
+  iterationDelay?: number;
 };
 export type Flip = {
   type: 'Flip';
   direction?: 'vertical' | 'horizontal';
   perspective?: number;
+  iterationDelay?: number;
 };
 export type Rubber = {
   type: 'Rubber';
   intensity?: number;
+  iterationDelay?: number;
 };
 export type Fold = {
   type: 'Fold';
   direction?: EffectFourDirections;
   angle?: number;
+  iterationDelay?: number;
 };
 export type Jello = {
   type: 'Jello';
   intensity?: number;
+  iterationDelay?: number;
 };
 export type Wiggle = {
   type: 'Wiggle';
   intensity?: number;
+  iterationDelay?: number;
 };
 export type Bounce = {
   type: 'Bounce';
   intensity?: number;
+  iterationDelay?: number;
 };
 export type Cross = {
   type: 'Cross';
   direction?: EffectEightDirections;
+  iterationDelay?: number;
 };
 export type DVD = {
   type: 'DVD';
 };
 
-export type Blink = {
-  type: 'Blink';
-  scale?: number;
-  distance?: UnitLengthPercentage;
-};
-
 export type OngoingAnimation =
   | Breathe
-  | Blink
   | Pulse
   | Spin
   | Poke

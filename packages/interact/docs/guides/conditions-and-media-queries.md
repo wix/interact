@@ -230,7 +230,7 @@ const accessibleConfig: InteractConfig = {
       key: 'hero-title',
       trigger: 'viewEnter',
       conditions: ['motion-ok'],
-      params: { type: 'once', threshold: 0.3 },
+      params: { threshold: 0.3 },
       effects: [
         {
           key: 'hero-title',
@@ -252,7 +252,7 @@ const accessibleConfig: InteractConfig = {
       key: 'hero-title',
       trigger: 'viewEnter',
       conditions: ['motion-reduced'],
-      params: { type: 'once', threshold: 0.3 },
+      params: { threshold: 0.3 },
       effects: [
         {
           key: 'hero-title',
@@ -905,7 +905,6 @@ const navigationConfig: InteractConfig = {
       key: 'mobile-menu-toggle',
       trigger: 'click',
       conditions: ['mobile'],
-      params: { type: 'alternate' },
       effects: [
         {
           key: 'mobile-menu',

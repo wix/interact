@@ -17,6 +17,17 @@ Complete reference for all Wix Motion functions, types, and classes.
 - Control methods and properties
 - Event handling and callbacks
 
+### [Sequence](sequence.md)
+
+- `Sequence` class - Coordinate multiple AnimationGroups with staggered delay offsets
+- `addGroups()` / `removeGroups()` for dynamic group management
+- Easing-driven offset calculation
+
+### [Sequence Creation](get-sequence.md)
+
+- `getSequence()` - Create a Sequence from target/options pairs
+- `createAnimationGroups()` - Build AnimationGroups without a Sequence wrapper
+
 ### [Type Definitions](types.md)
 
 - Complete TypeScript interfaces
@@ -76,6 +87,21 @@ prepareAnimation(
 );
 ```
 
+### Sequence Creation
+
+```typescript
+import { getSequence } from '@wix/motion';
+
+const sequence = getSequence(
+  { offset: 200, offsetEasing: 'quadIn' },
+  items.map((el) => ({
+    target: el,
+    options: { name: 'FadeIn', duration: 600 },
+  })),
+);
+sequence.play();
+```
+
 ## Types Overview
 
 ### Main Interfaces
@@ -114,6 +140,26 @@ interface AnimationGroup {
   cancel(): void;
   progress(p: number): void;
   // ... more methods
+}
+
+// Sequence options
+interface SequenceOptions {
+  delay?: number;
+  offset?: number;
+  offsetEasing?: string | ((p: number) => number);
+}
+
+// Arguments for building animation groups
+interface AnimationGroupArgs {
+  target: HTMLElement | HTMLElement[] | string | null;
+  options: AnimationOptions;
+  context?: Record<string, any>;
+}
+
+// Indexed group for addGroups()
+interface IndexedGroup {
+  index: number;
+  group: AnimationGroup;
 }
 ```
 

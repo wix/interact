@@ -3,7 +3,7 @@ import { Interact, type InteractConfig } from '@wix/interact/web';
 
 export const useInteractInstance = (
   config: InteractConfig,
-  options?: { useCutsomElement?: boolean },
+  options?: { useCustomElement?: boolean },
 ) => {
   useEffect(() => {
     const instance = Interact.create(config, options);

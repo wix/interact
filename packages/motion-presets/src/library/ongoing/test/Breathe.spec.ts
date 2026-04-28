@@ -58,8 +58,7 @@ describe('Breathe', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: {} as Breathe,
+        namedEffect: { iterationDelay: 500 } as Breathe,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -372,8 +371,7 @@ describe('Breathe', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: {} as Breathe,
+        namedEffect: { iterationDelay: 500 } as Breathe,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -604,8 +602,7 @@ describe('Breathe', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: {} as Breathe,
+        namedEffect: { iterationDelay: 500 } as Breathe,
       };
 
       const result = BreatheAnimation.getNames(mockOptions);
@@ -617,15 +614,13 @@ describe('Breathe', () => {
       const mockOptions1: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 2000,
-        delay: 0,
         namedEffect: {} as Breathe,
       };
 
       const mockOptions2: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 500,
-        delay: 1000,
-        namedEffect: {} as Breathe,
+        namedEffect: { iterationDelay: 1000 } as Breathe,
       };
 
       const result1 = BreatheAnimation.getNames(mockOptions1);

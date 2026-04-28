@@ -12,6 +12,7 @@ Comprehensive examples of list and grid animations using `@wix/interact`. All ex
 - [Filtering & Sorting](#filtering--sorting)
 - [Grid Layouts](#grid-layouts)
 - [Real-World Examples](#real-world-examples)
+- [Sequence-Based Staggering](#sequence-based-staggering)
 
 ## Entrance Animations
 
@@ -28,7 +29,7 @@ const config = {
       key: 'item-list',
       listContainer: '.items',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'item-list',
@@ -69,7 +70,7 @@ const config = {
       key: 'features',
       listContainer: '.feature-list',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'features',
@@ -120,7 +121,7 @@ const config = {
       key: 'cards',
       listContainer: '.card-grid',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.15 },
+      params: { threshold: 0.15 },
       effects: [
         {
           key: 'cards',
@@ -152,7 +153,7 @@ const config = {
       key: 'photos',
       listContainer: '.photo-grid',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'photos',
@@ -184,7 +185,7 @@ const config = {
       key: 'timeline',
       listContainer: '.timeline-items',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'timeline',
@@ -227,7 +228,7 @@ const config = {
       key: 'stagger-list',
       listContainer: '.items',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'stagger-list',
@@ -278,7 +279,7 @@ const config = {
       key: 'wave',
       listContainer: '.wave-list',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.15 },
+      params: { threshold: 0.15 },
       effects: [
         {
           key: 'wave',
@@ -316,7 +317,7 @@ const config = {
       key: 'ripple',
       listContainer: '.grid',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.2 },
+      params: { threshold: 0.2 },
       effects: [
         {
           key: 'ripple',
@@ -494,11 +495,11 @@ const config = {
       key: 'todo-list',
       listContainer: '.todos',
       trigger: 'viewEnter',
-      params: { type: 'repeat' }, // Trigger for each new item
       effects: [
         {
           key: 'todo-list',
           listContainer: '.todos',
+          triggerType: 'repeat',
           keyframeEffect: {
             name: 'add-item',
             keyframes: [
@@ -544,11 +545,11 @@ const config = {
       key: 'cart',
       listContainer: '.cart-items',
       trigger: 'viewEnter',
-      params: { type: 'repeat' },
       effects: [
         {
           key: 'cart',
           listContainer: '.cart-items',
+          triggerType: 'repeat',
           keyframeEffect: {
             name: 'cart-add',
             keyframes: [
@@ -582,11 +583,12 @@ const config = {
       key: 'infinite',
       listContainer: '.infinite-list',
       trigger: 'viewEnter',
-      params: { type: 'repeat', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'infinite',
           listContainer: '.infinite-list',
+          triggerType: 'repeat',
           keyframeEffect: {
             name: 'scroll-fade',
             keyframes: [
@@ -659,7 +661,7 @@ const config = {
       listContainer: '.responsive-grid',
       trigger: 'viewEnter',
       conditions: ['mobile'],
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'grid',
@@ -678,7 +680,7 @@ const config = {
       listContainer: '.responsive-grid',
       trigger: 'viewEnter',
       conditions: ['desktop'],
-      params: { type: 'once', threshold: 0.15 },
+      params: { threshold: 0.15 },
       effects: [
         {
           key: 'grid',
@@ -713,7 +715,7 @@ const config = {
       key: 'products',
       listContainer: '.product-grid',
       trigger: 'viewEnter',
-      params: { type: 'once', threshold: 0.1 },
+      params: { threshold: 0.1 },
       effects: [
         {
           key: 'products',
@@ -799,8 +801,155 @@ const config = {
 </interact-element>
 ```
 
+## Sequence-Based Staggering
+
+The `sequences` config provides built-in stagger support with easing-driven delay distribution — no CSS `animation-delay` hacks needed.
+
+### 17. Staggered List Entrance with Sequences
+
+```typescript
+const config = {
+  interactions: [
+    {
+      key: 'cards',
+      trigger: 'viewEnter',
+      listContainer: '.card-grid',
+      params: { threshold: 0.1 },
+      sequences: [
+        {
+          offset: 80,
+          offsetEasing: 'quadIn',
+          effects: [
+            {
+              key: 'cards',
+              listContainer: '.card-grid',
+              effectId: 'card-entrance',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  effects: {
+    'card-entrance': {
+      duration: 600,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      keyframeEffect: {
+        name: 'card-entrance',
+        keyframes: [
+          { opacity: '0', transform: 'translateY(40px) scale(0.95)' },
+          { opacity: '1', transform: 'translateY(0) scale(1)' },
+        ],
+      },
+    },
+  },
+};
+
+Interact.create(config);
+```
+
+### 18. Dynamic List Items with Sequences
+
+New items added to the DOM automatically join the Sequence with recalculated stagger offsets:
+
+```typescript
+const config = {
+  interactions: [
+    {
+      key: 'feed',
+      trigger: 'viewEnter',
+      listContainer: '.feed-items',
+      sequences: [
+        {
+          offset: 60,
+          offsetEasing: 'sineOut',
+          effects: [
+            {
+              key: 'feed',
+              listContainer: '.feed-items',
+              triggerType: 'repeat',
+              keyframeEffect: {
+                name: 'feed-entrance',
+                keyframes: [
+                  { opacity: '0', transform: 'translateY(20px)' },
+                  { opacity: '1', transform: 'translateY(0)' },
+                ],
+              },
+              duration: 400,
+              easing: 'ease-out',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  effects: {},
+};
+
+Interact.create(config);
+```
+
+### 19. Easing Comparison for List Stagger
+
+Different `offsetEasing` values produce distinct stagger patterns:
+
+```typescript
+// Linear: even spacing (0, 80, 160, 240, 320ms)
+{ offset: 80, offsetEasing: 'linear' }
+
+// quadIn: slow start then rapid (0, 20, 80, 180, 320ms)
+{ offset: 80, offsetEasing: 'quadIn' }
+
+// sineOut: fast start then gradual (0, 125, 227, 302, 320ms)
+{ offset: 80, offsetEasing: 'sineOut' }
+```
+
+### 20. Reusable Sequences with `sequenceId`
+
+Define a sequence once, reference it from multiple interactions:
+
+```typescript
+const config = {
+  sequences: {
+    'list-stagger': {
+      offset: 100,
+      offsetEasing: 'quadIn',
+      effects: [{ effectId: 'fade-up' }],
+    },
+  },
+  interactions: [
+    {
+      key: 'section-a',
+      trigger: 'viewEnter',
+      listContainer: '.list-a',
+      sequences: [{ sequenceId: 'list-stagger' }],
+    },
+    {
+      key: 'section-b',
+      trigger: 'viewEnter',
+      listContainer: '.list-b',
+      sequences: [{ sequenceId: 'list-stagger', offset: 150 }], // Override offset
+    },
+  ],
+  effects: {
+    'fade-up': {
+      duration: 500,
+      easing: 'ease-out',
+      keyframeEffect: {
+        name: 'fade-up',
+        keyframes: [
+          { opacity: '0', transform: 'translateY(20px)' },
+          { opacity: '1', transform: 'translateY(0)' },
+        ],
+      },
+    },
+  },
+};
+```
+
 ## See Also
 
+- [Sequences & Staggering Guide](../guides/sequences.md)
 - [Lists and Dynamic Content Guide](../guides/lists-and-dynamic-content.md)
 - [Element Selection](../api/element-selection.md)
 - [Performance Guide](../guides/performance.md)

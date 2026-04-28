@@ -36,6 +36,10 @@ Creating responsive interactions that adapt to different screen sizes and condit
 
 Working with dynamic lists, list containers, staggered animations, and automatic mutation tracking.
 
+### 🎼 [Sequences & Staggering](./sequences.md)
+
+Coordinate multiple effects with staggered timing using easing-driven delay offsets. Covers inline and reusable sequences, cross-element orchestration, `listContainer` integration, dynamic add/remove, and conditional sequences.
+
 ## Learning Path
 
 If you're new to `@wix/interact`, we recommend following the guides in this order:
@@ -48,6 +52,7 @@ If you're new to `@wix/interact`, we recommend following the guides in this orde
 6. **Lists and Dynamic Content** - Work with repeating elements
 7. **State Management** - Advanced state handling
 8. **Conditions and Media Queries** - Responsive design
+9. **Sequences & Staggering** - Coordinated multi-effect timing
 
 ## Prerequisites
 

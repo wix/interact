@@ -40,4 +40,6 @@ export function removeListItems(elements: HTMLElement[]) {
       module.remove(element);
     }
   }
+
+  Interact.removeFromSequences(elements);
 }

@@ -31,9 +31,9 @@ const config: InteractConfig = {
   interactions: easingRows.map((row) => ({
     key: `easing-row-${row.name}`,
     trigger: 'hover' as const,
-    params: { type: 'repeat' as const },
     sequences: [
       {
+        triggerType: 'repeat' as const,
         offset: OFFSET,
         offsetEasing: row.name,
         effects: [

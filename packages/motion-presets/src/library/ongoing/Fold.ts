@@ -62,15 +62,15 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   const easing = options.easing || 'cubicInOut';
   const duration = options.duration || 1;
-  const delay = +(options.delay || 0);
+  const iterationDelay = +(namedEffect?.iterationDelay || 0);
   const [name] = getNames(options);
 
   const { rotation, origin } = DIRECTION_MAP[direction];
   const { x, y } = origin;
   const ease = getEasingFamily(easing);
 
-  const totalDurationWithDelay = duration + delay;
-  const timingFactor = getTimingFactor(duration, delay) as number;
+  const totalDuration = duration + iterationDelay;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
 
   // Create CSS custom properties for the fold configuration
   const custom: Record<string, string | number> = {
@@ -103,8 +103,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       asWeb,
     )} * ${value} * ${angle}deg)) ${transformRight}`;
 
-  // in case a delay is applied, animate a different sequence which decays to a stop
-  const keyframes = delay
+  const keyframes = iterationDelay
     ? KEYFRAME_FACTORS.map(({ fold, frameFactor }) => {
         const keyframeOffset = frameFactor * timingFactor;
         return {
@@ -133,8 +132,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ...options,
       name,
       easing: 'linear',
-      delay: 0,
-      duration: totalDurationWithDelay,
+      duration: totalDuration,
       custom,
       keyframes: [
         {
@@ -154,13 +152,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const duration = options.duration || 1;
-  const delay = +(options.delay || 0);
+  const iterationDelay = +((options.namedEffect as Fold)?.iterationDelay || 0);
 
-  if (!delay) {
+  if (!iterationDelay) {
     return ['motion-fold'];
   }
 
-  const timingFactor = getTimingFactor(duration, delay, true) as string;
+  const timingFactor = getTimingFactor(duration, iterationDelay, true) as string;
 
   return [`motion-fold-${timingFactor}`];
 }

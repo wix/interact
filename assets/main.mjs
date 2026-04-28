@@ -1,8 +1,6 @@
 // WIX INTERACT RUNTIME
-import { Interact } from 'https://esm.sh/@wix/interact@2.0.0/dist/es/web.js';
-// import { Interact } from '../packages/interact/dist/es/web.js';
-import * as presets from 'https://esm.sh/@wix/motion-presets@latest/dist/es/motion-presets.js';
-// import * as presets from './packages/motion-presets/dist/es/motion-presets.js';
+import { Interact } from './lib/interact/es/web.js';
+import * as presets from './lib/motion-presets/motion-presets.js';
 
 // =============================================================================
 // FUNCTIONS & METHODS
@@ -717,17 +715,16 @@ const config = {
       key: 'hitbox',
       trigger: 'hover',
       conditions: ['Desktop'],
-      params: { type: 'alternate' },
-      effects: [{ effectId: 'spongeExplode' }],
+      triggerType: 'alternate',
+      effects: [{ triggerType: 'alternate', effectId: 'spongeExplode' }],
     },
     {
       key: 'hitbox',
       trigger: 'viewEnter',
-
-      params: { type: 'alternate' },
       effects: [
         {
           conditions: ['Mobile'],
+          triggerType: 'alternate',
           effectId: 'spongeExplodeMobile',
         },
       ],
@@ -745,10 +742,10 @@ const config = {
     {
       key: 'hero-grid',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       conditions: ['Desktop'],
       effects: [
         {
+          triggerType: 'once',
           customEffect: gridWaveEffect,
           duration: 16000,
           iterations: Infinity,
@@ -760,10 +757,10 @@ const config = {
     {
       key: 'hero-grid',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       conditions: ['Mobile'],
       effects: [
         {
+          triggerType: 'once',
           customEffect: rotateGridEffectMobile,
           duration: 8000,
           iterations: Infinity,
@@ -827,10 +824,13 @@ const config = {
 
     // Entrance Interactions (Swirling Plus)
     {
-      key: 'circle-top',
+      key: 'entrance-card',
       trigger: 'viewEnter',
+      params: { threshold: 0.8 },
       effects: [
         {
+          triggerType: 'alternate',
+          key: 'circle-top',
           fill: 'both',
           keyframeEffect: {
             name: 'slideFromLeftToTop',
@@ -842,13 +842,9 @@ const config = {
           duration: ENTRANCE_DURATION,
           easing: ENTRANCE_EASING,
         },
-      ],
-    },
-    {
-      key: 'circle-right',
-      trigger: 'viewEnter',
-      effects: [
         {
+          triggerType: 'alternate',
+          key: 'circle-right',
           fill: 'both',
           keyframeEffect: {
             name: 'slideFromTopToRight',
@@ -861,13 +857,9 @@ const config = {
           easing: ENTRANCE_EASING,
           delay: 100,
         },
-      ],
-    },
-    {
-      key: 'circle-bottom',
-      trigger: 'viewEnter',
-      effects: [
         {
+          key: 'circle-bottom',
+          triggerType: 'alternate',
           fill: 'both',
           keyframeEffect: {
             name: 'slideFromRightToBottom',
@@ -880,13 +872,9 @@ const config = {
           easing: ENTRANCE_EASING,
           delay: 200,
         },
-      ],
-    },
-    {
-      key: 'circle-left',
-      trigger: 'viewEnter',
-      effects: [
         {
+          key: 'circle-left',
+          triggerType: 'alternate',
           fill: 'both',
           keyframeEffect: {
             name: 'slideFromBottomToLeft',
@@ -909,6 +897,7 @@ const config = {
       effects: [
         {
           selector: '.fill-circle',
+          triggerType: 'alternate',
           transition: {
             duration: 500,
             easing: 'ease-out',
@@ -917,6 +906,7 @@ const config = {
         },
         {
           key: 'click-ripple-1',
+          triggerType: 'alternate',
           transition: {
             duration: 800,
             easing: CLICK_EASING,
@@ -928,6 +918,7 @@ const config = {
         },
         {
           key: 'click-ripple-2',
+          triggerType: 'alternate',
           transition: {
             duration: 800,
             easing: CLICK_EASING,
@@ -1037,6 +1028,7 @@ const config = {
       trigger: 'viewEnter',
       effects: [
         {
+          triggerType: 'once',
           fill: 'backwards',
           namedEffect: {
             type: 'SlideIn',
@@ -1054,11 +1046,11 @@ const config = {
       key: 'visual-break',
       trigger: 'viewEnter',
       params: {
-        type: 'once',
         threshold: 0.2,
       },
       effects: [
         {
+          triggerType: 'once',
           fill: 'backwards',
           namedEffect: { type: 'ScaleIn' },
           duration: 1200,
@@ -1204,9 +1196,9 @@ const config = {
     {
       key: 'hover-target',
       trigger: 'hover',
-      params: { type: 'alternate' },
       effects: [
         {
+          triggerType: 'alternate',
           keyframeEffect: { ...HOVER_SCALE },
           duration: 400,
           easing: 'ease-out',
@@ -1220,9 +1212,9 @@ const config = {
     {
       key: 'tailored-header',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       effects: [
         {
+          triggerType: 'once',
           fill: 'backwards',
           namedEffect: { type: 'FadeIn', distance: '40px', direction: 'bottom' },
           duration: 800,
@@ -1232,9 +1224,9 @@ const config = {
     {
       key: 'tailored-col-1',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       effects: [
         {
+          triggerType: 'once',
           fill: 'backwards',
           namedEffect: { type: 'FadeIn', distance: '40px', direction: 'bottom' },
           duration: 800,
@@ -1245,9 +1237,9 @@ const config = {
     {
       key: 'tailored-col-2',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       effects: [
         {
+          triggerType: 'once',
           fill: 'backwards',
           namedEffect: { type: 'FadeIn', distance: '40px', direction: 'bottom' },
           duration: 800,
@@ -1258,9 +1250,9 @@ const config = {
     {
       key: 'tailored-col-3',
       trigger: 'viewEnter',
-      params: { type: 'once' },
       effects: [
         {
+          triggerType: 'once',
           fill: 'backwards',
           namedEffect: { type: 'FadeIn', distance: '40px', direction: 'bottom' },
           duration: 800,

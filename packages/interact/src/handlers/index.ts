@@ -1,11 +1,4 @@
-import type {
-  Effect,
-  InteractOptions,
-  PointerTriggerParams,
-  StateParams,
-  TriggerHandlerMap,
-  TriggerType,
-} from '../types';
+import type { Effect, InteractOptions, TriggerHandlerMap, TriggerType } from '../types';
 import viewEnterHandler from './viewEnter';
 import viewProgressHandler from './viewProgress';
 import pointerMoveHandler from './pointerMove';
@@ -24,14 +17,14 @@ function withEventTriggerConfig(presetKey: keyof typeof EVENT_TRIGGER_PRESETS) {
     source: HTMLElement,
     target: HTMLElement,
     effect: Effect,
-    options: StateParams | PointerTriggerParams,
+    _options: Record<string, never>,
     interactOptions?: InteractOptions,
   ) => {
     const eventConfig =
       interactOptions?.allowA11yTriggers && presetKey in a11yTriggerOverrides
         ? a11yTriggerOverrides[presetKey as keyof typeof a11yTriggerOverrides]
         : preset;
-    eventTrigger.add(source, target, effect, { ...options, eventConfig }, interactOptions ?? {});
+    eventTrigger.add(source, target, effect, { eventConfig }, interactOptions ?? {});
   };
 }
 

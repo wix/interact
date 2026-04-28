@@ -30,6 +30,9 @@ permissions:
   contents: write
   pull-requests: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -145,23 +148,15 @@ jobs:
         run: |
           cd packages/motion
           npm publish --tag dp --provenance --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.RELEASE_MOTION_NPM_TOKEN }}
 
       - name: npm publish @wix/motion RC (trusted)
         if: ${{ github.event.inputs.dry_run == 'false' && github.event.inputs.source_branch == '' && (github.event.inputs.version_strategy == 'prerelease' || github.event.inputs.version_strategy == 'premajor' || github.event.inputs.version_strategy == 'preminor' || github.event.inputs.version_strategy == 'prepatch') }}
         run: |
           cd packages/motion
           npm publish --tag next --provenance --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.RELEASE_MOTION_NPM_TOKEN }}
 
       - name: npm publish @wix/motion Stable (trusted)
         if: ${{ github.event.inputs.dry_run == 'false' && github.event.inputs.source_branch == '' && (github.event.inputs.version_strategy == 'major' || github.event.inputs.version_strategy == 'minor' || github.event.inputs.version_strategy == 'patch') }}
         run: |
           cd packages/motion
           npm publish --tag latest --provenance --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.RELEASE_MOTION_NPM_TOKEN }}
-
-      # Merging back to master currently doesn't work, will be done manually

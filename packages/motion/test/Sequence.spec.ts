@@ -661,4 +661,185 @@ describe('Sequence', () => {
       expect(callback).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('removeGroups', () => {
+    test('removes groups matching predicate', () => {
+      const g1 = createGroup();
+      const g2 = createGroup();
+      const g3 = createGroup();
+      const sequence = new Sequence([g1, g2, g3]);
+
+      sequence.removeGroups((group) => group === g2);
+
+      expect(sequence.animationGroups).toEqual([g1, g3]);
+    });
+
+    test('removes corresponding entries from animations array', () => {
+      const a1 = createMockAnimation();
+      const a2 = createMockAnimation();
+      const a3 = createMockAnimation();
+      const g1 = createGroup({ animations: [a1] });
+      const g2 = createGroup({ animations: [a2] });
+      const g3 = createGroup({ animations: [a3] });
+      const sequence = new Sequence([g1, g2, g3]);
+
+      sequence.removeGroups((group) => group === g2);
+
+      expect(sequence.animations).toEqual([a1, a3]);
+    });
+
+    test('removes corresponding entries from timingOptions (addGroups still works after removal)', () => {
+      const groups = [createStatefulGroup(), createStatefulGroup(), createStatefulGroup()];
+      const sequence = new Sequence(groups, { offset: 100, offsetEasing: 'linear' });
+
+      sequence.removeGroups((group) => group === groups[1]);
+
+      // After removing middle group, 2 groups remain. Add a new group and verify offsets recalculate.
+      const gNew = createStatefulGroup();
+      sequence.addGroups([{ index: 1, group: gNew }]);
+
+      // 3 groups again: offsets [0, 100, 200], delays [0, 100, 200]
+      const allDelays = sequence.animationGroups.map(
+        (g) => g.animations[0]?.effect?.getTiming().delay as number,
+      );
+      expect(allDelays).toEqual([0, 100, 200]);
+    });
+
+    test('cancels animations in removed groups', () => {
+      const a1 = createMockAnimation();
+      const a2 = createMockAnimation();
+      const g1 = createGroup({ animations: [a1] });
+      const g2 = createGroup({ animations: [a2] });
+      const sequence = new Sequence([g1, g2]);
+
+      sequence.removeGroups((group) => group === g1);
+
+      expect(a1.cancel).toHaveBeenCalledTimes(1);
+      expect(a2.cancel).not.toHaveBeenCalled();
+    });
+
+    test('recalculates offsets after removal', () => {
+      const groups = [
+        createStatefulGroup(),
+        createStatefulGroup(),
+        createStatefulGroup(),
+        createStatefulGroup(),
+      ];
+      const sequence = new Sequence(groups, { delay: 0, offset: 100, offsetEasing: 'linear' });
+
+      // Before removal: 4 groups, offsets [0, 100, 200, 300]
+      // sequenceDuration = 300 + 1000 = 1300
+      // endDelays: [300, 200, 100, 0]
+      expect(groups[0].animations[0].effect!.getTiming().endDelay).toBe(300);
+
+      sequence.removeGroups((group) => group === groups[1]);
+
+      // After removal: 3 groups remain (groups[0], groups[2], groups[3])
+      // offsets: [0, 100, 200], sequenceDuration = 200 + 1000 = 1200
+      // endDelays: [200, 100, 0]
+      const delays = sequence.animationGroups.map(
+        (g) => g.animations[0]?.effect?.getTiming().delay as number,
+      );
+      const endDelays = sequence.animationGroups.map(
+        (g) => g.animations[0]?.effect?.getTiming().endDelay as number,
+      );
+      expect(delays).toEqual([0, 100, 200]);
+      expect(endDelays).toEqual([200, 100, 0]);
+    });
+
+    test('updates ready promise after removal', async () => {
+      const g1 = createGroup();
+      const g2 = createGroup();
+      const sequence = new Sequence([g1, g2]);
+
+      sequence.removeGroups((group) => group === g2);
+
+      await expect(sequence.ready).resolves.toBeUndefined();
+    });
+
+    test('returns removed groups', () => {
+      const g1 = createGroup();
+      const g2 = createGroup();
+      const g3 = createGroup();
+      const sequence = new Sequence([g1, g2, g3]);
+
+      const removed = sequence.removeGroups((group) => group === g1 || group === g3);
+
+      expect(removed).toEqual([g1, g3]);
+    });
+
+    test('no-op when predicate matches nothing', () => {
+      const g1 = createGroup();
+      const g2 = createGroup();
+      const sequence = new Sequence([g1, g2], { offset: 100 });
+      const groupsBefore = [...sequence.animationGroups];
+      const animsBefore = [...sequence.animations];
+
+      const removed = sequence.removeGroups(() => false);
+
+      expect(removed).toEqual([]);
+      expect(sequence.animationGroups).toEqual(groupsBefore);
+      expect(sequence.animations).toEqual(animsBefore);
+    });
+
+    test('handles removing all groups (empty sequence)', () => {
+      const g1 = createGroup();
+      const g2 = createGroup();
+      const sequence = new Sequence([g1, g2], { offset: 100 });
+
+      const removed = sequence.removeGroups(() => true);
+
+      expect(removed).toEqual([g1, g2]);
+      expect(sequence.animationGroups).toEqual([]);
+      expect(sequence.animations).toEqual([]);
+    });
+
+    test('addGroups after removing all groups works correctly', () => {
+      const g1 = createStatefulGroup();
+      const g2 = createStatefulGroup();
+      const sequence = new Sequence([g1, g2], { offset: 100, offsetEasing: 'linear' });
+
+      sequence.removeGroups(() => true);
+      expect(sequence.animationGroups).toEqual([]);
+
+      const gNew1 = createStatefulGroup();
+      const gNew2 = createStatefulGroup();
+      sequence.addGroups([
+        { index: 0, group: gNew1 },
+        { index: 1, group: gNew2 },
+      ]);
+
+      expect(sequence.animationGroups).toEqual([gNew1, gNew2]);
+      const delays = sequence.animationGroups.map(
+        (g) => g.animations[0]?.effect?.getTiming().delay as number,
+      );
+      expect(delays).toEqual([0, 100]);
+    });
+
+    test('handles removing from single-group sequence', () => {
+      const g1 = createGroup();
+      const sequence = new Sequence([g1], { offset: 200 });
+
+      const removed = sequence.removeGroups((group) => group === g1);
+
+      expect(removed).toEqual([g1]);
+      expect(sequence.animationGroups).toEqual([]);
+      expect(sequence.animations).toEqual([]);
+    });
+
+    test('removing multiple groups at once recalculates correctly', () => {
+      const groups = Array.from({ length: 5 }, () => createStatefulGroup());
+      const sequence = new Sequence(groups, { delay: 0, offset: 100, offsetEasing: 'linear' });
+
+      // Remove groups at index 1 and 3
+      sequence.removeGroups((group) => group === groups[1] || group === groups[3]);
+
+      // 3 groups remain: groups[0], groups[2], groups[4]
+      expect(sequence.animationGroups).toEqual([groups[0], groups[2], groups[4]]);
+      const delays = sequence.animationGroups.map(
+        (g) => g.animations[0]?.effect?.getTiming().delay as number,
+      );
+      expect(delays).toEqual([0, 100, 200]);
+    });
+  });
 });

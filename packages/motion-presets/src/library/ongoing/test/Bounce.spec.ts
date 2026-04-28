@@ -17,7 +17,6 @@ describe('Bounce', () => {
           id: 'test-id',
           namedEffect: { type: 'Bounce' },
           name: 'motion-bounce-1',
-          delay: 0,
           easing: 'linear',
           duration: 1,
           custom: {
@@ -102,16 +101,14 @@ describe('Bounce', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: { type: 'Bounce', intensity: 0.8 },
+        namedEffect: { type: 'Bounce', intensity: 0.8, iterationDelay: 500 },
       };
 
       const expectedResult = [
         {
           id: 'test-id',
           duration: 1500,
-          delay: 0,
-          namedEffect: { type: 'Bounce', intensity: 0.8 },
+          namedEffect: { type: 'Bounce', intensity: 0.8, iterationDelay: 500 },
           name: 'motion-bounce-067',
           easing: 'linear',
           custom: {
@@ -205,7 +202,6 @@ describe('Bounce', () => {
           id: 'test-id',
           namedEffect: { type: 'Bounce' },
           name: 'motion-bounce-1',
-          delay: 0,
           easing: 'linear',
           duration: 1,
           custom: {
@@ -290,16 +286,14 @@ describe('Bounce', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: { type: 'Bounce', intensity: 0.8 },
+        namedEffect: { type: 'Bounce', intensity: 0.8, iterationDelay: 500 },
       };
 
       const expectedResult = [
         {
           id: 'test-id',
           duration: 1500,
-          delay: 0,
-          namedEffect: { type: 'Bounce', intensity: 0.8 },
+          namedEffect: { type: 'Bounce', intensity: 0.8, iterationDelay: 500 },
           name: 'motion-bounce-067',
           easing: 'linear',
           custom: {
@@ -413,8 +407,7 @@ describe('Bounce', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 500,
-        namedEffect: { type: 'Bounce' },
+        namedEffect: { type: 'Bounce', iterationDelay: 500 },
       };
 
       const expectedResult = ['motion-bounce-067'];
@@ -428,8 +421,7 @@ describe('Bounce', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        delay: 1000,
-        namedEffect: { type: 'Bounce' },
+        namedEffect: { type: 'Bounce', iterationDelay: 1000 },
       };
 
       const expectedResult = ['motion-bounce-05'];
@@ -443,8 +435,7 @@ describe('Bounce', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 500,
-        delay: 1500,
-        namedEffect: { type: 'Bounce' },
+        namedEffect: { type: 'Bounce', iterationDelay: 1500 },
       };
 
       const expectedResult = ['motion-bounce-025'];

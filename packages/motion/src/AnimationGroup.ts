@@ -14,16 +14,26 @@ export class AnimationGroup {
   options?: AnimationGroupOptions;
   ready: Promise<void>;
   isCSS: boolean;
+  longestAnimation: Animation;
 
   constructor(animations: Animation[], options?: AnimationGroupOptions) {
     this.animations = animations;
     this.options = options;
     this.ready = options?.measured || Promise.resolve();
     this.isCSS = animations[0] instanceof CSSAnimation;
+    this.longestAnimation = this._getAnimationWithLongestEndTime();
+  }
+
+  _getAnimationWithLongestEndTime() {
+    return this.animations.reduce((longest, current) => {
+      const longestEndTime = longest.effect?.getComputedTiming().endTime ?? 0;
+      const currentEndTime = current.effect?.getComputedTiming().endTime ?? 0;
+      return longestEndTime > currentEndTime ? longest : current;
+    }, this.animations[0]);
   }
 
   getProgress() {
-    return this.animations[0]?.effect?.getComputedTiming().progress || 0;
+    return this.longestAnimation?.effect?.getComputedTiming().progress || 0;
   }
 
   async play(callback?: () => void): Promise<void> {
@@ -104,6 +114,27 @@ export class AnimationGroup {
       callback();
     } catch (_error) {
       console.warn('animation was interrupted - aborting onFinish callback - ', _error);
+    }
+  }
+
+  async onAbort(callback: () => void): Promise<void> {
+    try {
+      await Promise.all(this.animations.map((animation) => animation.finished));
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        const a = this.animations[0];
+
+        if (a && !this.isCSS) {
+          const target = (a.effect as KeyframeEffect)?.target;
+
+          if (target) {
+            const cancelEvent = new Event('animationcancel');
+            target.dispatchEvent(cancelEvent);
+          }
+        }
+
+        callback();
+      }
     }
   }
 

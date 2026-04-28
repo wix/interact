@@ -371,6 +371,60 @@ Dynamic values through CSS variables:
 }
 ```
 
+### Sequences & Staggering
+
+Sequences coordinate multiple AnimationGroups as a single timeline with easing-driven stagger delays. Instead of manually calculating `delay` offsets for each animation, a Sequence distributes timing automatically.
+
+#### Offset Model
+
+The stagger offset for each group is calculated with:
+
+```
+offset[i] = easing(i / last) * last * offsetMs
+```
+
+Where `i` is the group index, `last` is the final group's index, and `offsetMs` is the configured stagger interval. This produces:
+
+- **Linear** — even spacing (0, 200, 400, 600, 800)
+- **quadIn** — slow start then rapid (0, 50, 200, 450, 800)
+- **sineOut** — fast start then gradual (0, 306, 565, 739, 800)
+
+```typescript
+import { getSequence } from '@wix/motion';
+
+const items = document.querySelectorAll('.card');
+
+const sequence = getSequence(
+  { offset: 150, offsetEasing: 'quadIn' },
+  Array.from(items).map((el) => ({
+    target: el,
+    options: {
+      duration: 600,
+      keyframeEffect: {
+        name: 'fade-up',
+        keyframes: [
+          { opacity: 0, transform: 'translateY(20px)' },
+          { opacity: 1, transform: 'translateY(0)' },
+        ],
+      },
+    },
+  })),
+);
+
+sequence.play();
+```
+
+#### Dynamic Groups
+
+Groups can be added or removed at runtime. Both operations trigger automatic offset recalculation:
+
+- **`addGroups(entries)`** — inserts groups at specified indices (e.g. when new list items appear)
+- **`removeGroups(predicate)`** — removes matching groups, cancels their animations, and returns them (e.g. when DOM elements are removed)
+
+#### Relationship to AnimationGroup
+
+`Sequence` extends `AnimationGroup`, inheriting all playback controls (`play`, `pause`, `reverse`, `cancel`, `progress`, `setPlaybackRate`). The child `AnimationGroup` instances are stored in `animationGroups`, while the flattened `Animation` array is available via the inherited `animations` property.
+
 ## Performance Considerations
 
 ### Animation Lifecycle

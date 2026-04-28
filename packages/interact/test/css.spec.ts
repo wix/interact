@@ -11,8 +11,7 @@ describe('css.generate', () => {
           {
             key: 'my-element',
             trigger: 'viewEnter',
-            params: { type: 'once' },
-            effects: [{ effectId: 'fadeIn' }],
+            effects: [{ effectId: 'fadeIn', triggerType: 'once' }],
           },
         ],
       };
@@ -48,8 +47,7 @@ describe('css.generate', () => {
           {
             key: 'my-element',
             trigger: 'viewEnter',
-            params: { type: 'repeat' },
-            effects: [{ effectId: 'fadeIn' }],
+            effects: [{ effectId: 'fadeIn', triggerType: 'repeat' }],
           },
         ],
       };
@@ -66,8 +64,7 @@ describe('css.generate', () => {
           {
             key: 'my-element',
             trigger: 'viewEnter',
-            params: { type: 'state' },
-            effects: [{ effectId: 'fadeIn' }],
+            effects: [{ effectId: 'fadeIn', triggerType: 'state' }],
           },
         ],
       };

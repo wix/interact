@@ -34,9 +34,10 @@ Visual: Element bounces up and down with a natural multi-step curve, like a ball
 Parameters:
 
 - `intensity`: number — 0 to 1, maps to bounce height factor 1–3 (default: `0`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Bounce', intensity: 0.5 }
+{ type: 'Bounce', intensity: 0.5, iterationDelay: 500 }
 ```
 
 ---
@@ -50,6 +51,7 @@ Parameters:
 - `direction`: 'vertical' | 'horizontal' | 'center' (default: `'vertical'`)
 - `distance`: UnitLengthPercentage — movement distance (default: `{ value: 25, unit: 'px' }`)
 - `perspective`: number — 3D perspective for center direction (default: `800`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
 { type: 'Breathe', direction: 'horizontal', distance: { value: 15, type: 'px' } }
@@ -64,6 +66,7 @@ Visual: Element moves across the screen from side to side, horizontally or verti
 Parameters:
 
 - `direction`: EffectEightDirections — one of 'left', 'right', 'top', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right' (default: `'right'`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
 { type: 'Cross', direction: 'top-left' }
@@ -89,12 +92,12 @@ Parameters: None.
 
 Visual: Element blinks by rapidly cycling opacity from visible to invisible and back.
 
-Parameters: None.
+Parameters:
+
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{
-  type: 'Flash';
-}
+{ type: 'Flash', iterationDelay: 300 }
 ```
 
 ---
@@ -107,6 +110,7 @@ Parameters:
 
 - `direction`: 'vertical' | 'horizontal' (default: `'horizontal'`)
 - `perspective`: number — 3D perspective in px (default: `800`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
 { type: 'Flip', direction: 'vertical' }
@@ -122,6 +126,7 @@ Parameters:
 
 - `direction`: 'top' | 'right' | 'bottom' | 'left' (default: `'top'`)
 - `angle`: number — fold angle in degrees (default: `15`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
 { type: 'Fold', direction: 'right', angle: 30 }
@@ -136,6 +141,7 @@ Visual: Element wobbles with a skew-based jello-like deformation.
 Parameters:
 
 - `intensity`: number — 0 to 1, maps to skew factor 1–4 (default: `0.25`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
 { type: 'Jello', intensity: 0.5 }
@@ -151,6 +157,7 @@ Parameters:
 
 - `direction`: 'top' | 'right' | 'bottom' | 'left' (default: `'right'`)
 - `intensity`: number — 0 to 1, maps to poke strength factor 1–4 (default: `0.5`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
 { type: 'Poke', direction: 'left', intensity: 0.8 }
@@ -165,6 +172,7 @@ Visual: Element pulses by subtly scaling up and down.
 Parameters:
 
 - `intensity`: number — 0 to 1, adjusts the scale range (default: `0`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
 { type: 'Pulse', intensity: 0.5 }
@@ -179,6 +187,7 @@ Visual: Element stretches non-uniformly on X and Y axes, creating a rubber-band 
 Parameters:
 
 - `intensity`: number — 0 to 1, adjusts the stretch amplitude (default: `0.5`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
 { type: 'Rubber', intensity: 0.8 }
@@ -193,6 +202,7 @@ Visual: Element rotates continuously around its center.
 Parameters:
 
 - `direction`: 'clockwise' | 'counter-clockwise' (default: `'clockwise'`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
 { type: 'Spin', direction: 'counter-clockwise' }
@@ -208,6 +218,7 @@ Parameters:
 
 - `direction`: 'top' | 'right' | 'bottom' | 'left' — swing pivot edge (default: `'top'`)
 - `swing`: number — maximum swing angle in degrees (default: `20`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
 { type: 'Swing', swing: 40, direction: 'right' }
@@ -222,6 +233,7 @@ Visual: Element shakes with combined rotation and vertical translation.
 Parameters:
 
 - `intensity`: number — 0 to 1, maps to wiggle strength factor 1–4 (default: `0.5`)
+- `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
 { type: 'Wiggle', intensity: 0.8 }

@@ -2,9 +2,7 @@ import { getAnimation } from '@wix/motion';
 import type { AnimationGroup } from '@wix/motion';
 import type {
   TimeEffect,
-  TransitionEffect,
-  StateParams,
-  PointerTriggerParams,
+  StateEffect,
   EffectBase,
   IInteractionController,
   EventTriggerConfigEnterLeave,
@@ -15,7 +13,6 @@ import fastdom from 'fastdom';
 export function createTimeEffectHandler(
   element: HTMLElement,
   effect: TimeEffect & EffectBase,
-  options: PointerTriggerParams,
   reducedMotion: boolean = false,
   selectorCondition?: string,
   enterLeave?: EventTriggerConfigEnterLeave,
@@ -35,7 +32,7 @@ export function createTimeEffectHandler(
   }
 
   let initialPlay = true;
-  const type = options.type || 'alternate';
+  const type = effect.triggerType || 'alternate';
 
   return (event: Event) => {
     if (selectorCondition && !element.matches(selectorCondition)) return;
@@ -62,11 +59,14 @@ export function createTimeEffectHandler(
         animation.progress(0);
         delete element.dataset.interactEnter;
         if (animation.isCSS) {
-          animation.onFinish(() => {
+          const setEnterDone = () => {
             fastdom.mutate(() => {
               element.dataset.interactEnter = 'done';
             });
-          });
+          };
+
+          animation.onFinish(setEnterDone);
+          animation.onAbort(setEnterDone);
         }
         animation.play();
       }
@@ -95,14 +95,14 @@ export function createTransitionHandler(
     effectId,
     listContainer,
     listItemSelector,
-  }: TransitionEffect & EffectBase & { effectId: string },
-  options: StateParams,
+    stateAction,
+  }: StateEffect & EffectBase & { effectId: string },
   selectorCondition?: string,
   enterLeave?: EventTriggerConfigEnterLeave,
 ): (event: Event) => void {
   const shouldSetStateOnElement = !!listContainer;
-  const method = options.method || 'toggle';
-  const isToggle = method === 'toggle';
+  const action = stateAction ?? 'toggle';
+  const isToggle = action === 'toggle';
 
   return (event: Event) => {
     if (selectorCondition && !element.matches(selectorCondition)) return;
@@ -117,10 +117,10 @@ export function createTransitionHandler(
     const isLeave = enterLeave?.leave?.includes(event.type);
 
     if (isToggleMode) {
-      targetController.toggleEffect(effectId, method, item);
+      targetController.toggleEffect(effectId, action, item);
     } else {
       if (isEnter) {
-        targetController.toggleEffect(effectId, isToggle ? 'add' : method, item);
+        targetController.toggleEffect(effectId, isToggle ? 'add' : action, item);
       }
       if (isLeave && isToggle) {
         targetController.toggleEffect(effectId, 'remove', item);

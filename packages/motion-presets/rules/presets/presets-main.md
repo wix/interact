@@ -62,12 +62,16 @@ In the simplest case, a trigger and its effect are bound to the same element. Ho
 These are set on the effect configuration level, not on the preset itself:
 
 - `duration`: Animation duration in ms (entrance, ongoing)
-- `delay`: Animation delay in ms (entrance, ongoing)
+- `delay`: Animation start delay in ms (entrance, ongoing)
 - `easing`: Easing function
 - `iterations`: Number of iterations
 - `alternate`: Alternate direction on each iteration
 - `fill`: Animation fill mode
 - `reversed`: Reverse the animation
+
+**Ongoing-specific preset parameter:**
+
+- `iterationDelay`: Idle time in ms appended after each active iteration cycle. Available on all ongoing presets except DVD. This compresses the active animation keyframes into a fraction of the total iteration duration, creating a pause between repetitions. Set on the `namedEffect`, not on the animation options.
 
 **Scroll-specific animation options:**
 

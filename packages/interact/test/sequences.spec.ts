@@ -22,6 +22,7 @@ vi.mock('@wix/motion', () => {
     animations: [],
     animationGroups: [],
     addGroups: vi.fn(),
+    removeGroups: vi.fn().mockReturnValue([]),
   };
 
   return {
@@ -112,7 +113,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const trigger = instance.dataCache.interactions['source-key'].triggers[0];
 
       expect(trigger.sequences).toHaveLength(1);
@@ -133,7 +134,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const triggerSequence = instance.dataCache.interactions['source-key'].triggers[0]
         .sequences?.[0] as SequenceConfig;
 
@@ -154,7 +155,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const triggerSequence = instance.dataCache.interactions['source-key'].triggers[0]
         .sequences?.[0] as SequenceConfig;
 
@@ -179,7 +180,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const triggerSequence = instance.dataCache.interactions['source-key'].triggers[0]
         .sequences?.[0] as SequenceConfig;
 
@@ -199,7 +200,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const triggerSequence =
         instance.dataCache.interactions['source-key'].triggers[0].sequences?.[0];
 
@@ -221,7 +222,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
 
       expect(instance.dataCache.sequences).toEqual(config.sequences);
       expect(instance.dataCache.sequences['shared-sequence']).toBeDefined();
@@ -242,7 +243,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const targetEntry = instance.dataCache.interactions['target-key'];
       const sequenceKeys = Object.keys(targetEntry.sequences);
 
@@ -272,7 +273,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
 
       expect(instance.dataCache.interactions['target-key']).toBeDefined();
       const sequenceKeys = Object.keys(instance.dataCache.interactions['target-key'].sequences);
@@ -294,7 +295,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const seqEffect = (
         instance.dataCache.interactions['source-key'].triggers[0].sequences?.[0] as SequenceConfig
       ).effects[0] as { effectId?: string };
@@ -318,7 +319,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
 
       expect(Object.keys(instance.dataCache.interactions)).toEqual(['source-key']);
       expect(Object.keys(instance.dataCache.interactions['source-key'].sequences)).toHaveLength(0);
@@ -338,7 +339,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const trigger = instance.dataCache.interactions['source-key'].triggers[0];
 
       expect(trigger.effects).toBeUndefined();
@@ -360,7 +361,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const { element } = createInteractElement();
       addElement(element, 'source-key');
 
@@ -383,7 +384,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const { element } = createInteractElement();
       addElement(element, 'source-key');
 
@@ -433,7 +434,7 @@ describe('interact sequences', () => {
         ],
       };
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -498,7 +499,7 @@ describe('interact sequences', () => {
         ],
       };
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -532,7 +533,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -550,7 +551,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       const controller = addElement(source.element, 'source-key');
 
@@ -590,7 +591,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -626,7 +627,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -649,7 +650,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       expect(() => addElement(source.element, 'source-key')).not.toThrow();
 
@@ -675,7 +676,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -700,7 +701,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       const target = createInteractElement();
 
@@ -732,7 +733,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       const target = createInteractElement();
 
@@ -767,7 +768,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       const target = createInteractElement();
 
@@ -797,7 +798,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       const target = createInteractElement();
 
@@ -846,7 +847,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       const target = createInteractElement();
       addElement(source.element, 'source-key');
@@ -901,7 +902,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       const target = createInteractElement();
       addElement(source.element, 'source-key');
@@ -955,7 +956,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const target = createInteractElement();
       addElement(target.element, 'target-key');
 
@@ -977,7 +978,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const target = createInteractElement();
       const targetController = addElement(target.element, 'target-key');
 
@@ -1043,7 +1044,7 @@ describe('interact sequences', () => {
         ],
       });
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const { element, list } = createListElement('#my-list');
       const items = createListItems(3);
       items.forEach((li) => list.append(li));
@@ -1079,7 +1080,7 @@ describe('interact sequences', () => {
         ],
       });
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const { element, list } = createListElement('#my-list');
       const initialItems = createListItems(2);
       initialItems.forEach((li) => list.append(li));
@@ -1126,7 +1127,7 @@ describe('interact sequences', () => {
         ],
       });
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const { element, list } = createListElement('#my-list');
       const items = createListItems(2);
       items.forEach((li) => list.append(li));
@@ -1168,7 +1169,7 @@ describe('interact sequences', () => {
         ],
       });
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const { element, list } = createListElement('#my-list');
       const items = createListItems(2);
       items.forEach((li) => list.append(li));
@@ -1207,7 +1208,7 @@ describe('interact sequences', () => {
         ],
       });
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const { element, list } = createListElement('#my-list');
       const items = createListItems(2);
       items.forEach((li) => list.append(li));
@@ -1238,7 +1239,7 @@ describe('interact sequences', () => {
         ],
       });
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const { element, list } = createListElement('#my-list');
       const items = createListItems(2);
       items.forEach((li) => list.append(li));
@@ -1288,7 +1289,7 @@ describe('interact sequences', () => {
         ],
       };
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
 
       const source = createInteractElement();
       addElement(source.element, 'source-key');
@@ -1338,7 +1339,7 @@ describe('interact sequences', () => {
         ],
       });
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const { element, list } = createListElement('#my-list');
       const initialItems = createListItems(3);
       initialItems.forEach((li) => list.append(li));
@@ -1377,7 +1378,7 @@ describe('interact sequences', () => {
         ],
       });
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const { element, list } = createListElement('#my-list');
       const initialItems = createListItems(3);
       initialItems.forEach((li) => list.append(li));
@@ -1413,7 +1414,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -1440,7 +1441,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -1462,7 +1463,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -1490,7 +1491,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -1608,7 +1609,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -1656,7 +1657,7 @@ describe('interact sequences', () => {
         ],
       };
 
-      Interact.create(config, { useCutsomElement: false });
+      Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -1694,7 +1695,7 @@ describe('interact sequences', () => {
         },
       ];
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -1739,7 +1740,7 @@ describe('interact sequences', () => {
         ],
       };
 
-      const instance = Interact.create(config, { useCutsomElement: false });
+      const instance = Interact.create(config, { useCustomElement: false });
       const source = createInteractElement();
       addElement(source.element, 'source-key');
 
@@ -1752,6 +1753,296 @@ describe('interact sequences', () => {
       const listener = instance.mediaQueryListeners.get(effectListenerKey!);
       expect(listener).toBeDefined();
       expect(listener!.mql.addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
+    });
+  });
+
+  describe('elementSequenceMap and removeFromSequences', () => {
+    function createSeqListConfig(overrides?: Partial<InteractConfig>): InteractConfig {
+      return {
+        effects: {
+          'seq-list-effect': {
+            key: 'seq-list-key',
+            listContainer: '#seq-list',
+            keyframeEffect: {
+              name: 'seqListFade',
+              keyframes: [{ opacity: 0 }, { opacity: 1 }],
+            },
+            duration: 200,
+          },
+        },
+        interactions: [],
+        ...overrides,
+      };
+    }
+
+    function createSeqListElement(listSelector: string) {
+      const element = document.createElement('interact-element') as HTMLElement;
+      const child = document.createElement('div');
+      const list = document.createElement('ul');
+      list.id = listSelector.replace('#', '');
+      child.append(list);
+      element.append(child);
+      return { element, child, list };
+    }
+
+    function createSeqListItems(count: number): HTMLElement[] {
+      return Array.from({ length: count }, () => document.createElement('li'));
+    }
+
+    test('elementSequenceMap is populated when Sequence is created via getSequence', () => {
+      const getSequenceMock = vi.mocked(getSequence);
+      const config = createSeqListConfig({
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'seq-list-key',
+            listContainer: '#seq-list',
+            sequences: [
+              {
+                sequenceId: 'elem-map-seq',
+                effects: [
+                  { effectId: 'seq-list-effect', key: 'seq-list-key', listContainer: '#seq-list' },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      Interact.create(config, { useCustomElement: false });
+      const { element, list } = createSeqListElement('#seq-list');
+      const items = createSeqListItems(3);
+      items.forEach((li) => list.append(li));
+
+      addElement(element, 'seq-list-key');
+
+      expect(getSequenceMock).toHaveBeenCalledTimes(1);
+
+      for (const item of items) {
+        const sequences = Interact.elementSequenceMap.get(item);
+        expect(sequences).toBeDefined();
+        expect(sequences!.size).toBeGreaterThan(0);
+      }
+    });
+
+    test('elementSequenceMap is populated when groups are added via addToSequence', () => {
+      const getSequenceMock = vi.mocked(getSequence);
+      const config = createSeqListConfig({
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'seq-list-key',
+            listContainer: '#seq-list',
+            sequences: [
+              {
+                sequenceId: 'elem-map-add-seq',
+                effects: [
+                  { effectId: 'seq-list-effect', key: 'seq-list-key', listContainer: '#seq-list' },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      Interact.create(config, { useCustomElement: false });
+      const { element, list } = createSeqListElement('#seq-list');
+      const initialItems = createSeqListItems(2);
+      initialItems.forEach((li) => list.append(li));
+
+      const controller = addElement(element, 'seq-list-key');
+      expect(getSequenceMock).toHaveBeenCalledTimes(1);
+
+      const newItems = createSeqListItems(2);
+      newItems.forEach((li) => list.append(li));
+      addListItems(controller, '#seq-list', newItems);
+
+      for (const item of newItems) {
+        const sequences = Interact.elementSequenceMap.get(item);
+        expect(sequences).toBeDefined();
+        expect(sequences!.size).toBeGreaterThan(0);
+      }
+    });
+
+    test('removeFromSequences calls removeGroups on the correct Sequence', () => {
+      const getSequenceMock = vi.mocked(getSequence);
+      const mockSeq =
+        getSequenceMock.mock.results[0]?.value ??
+        getSequenceMock({ delay: 0, offset: 100 }, [{ target: null, options: {} }]);
+      const removeGroupsSpy = mockSeq.removeGroups;
+      if (!removeGroupsSpy) {
+        (mockSeq as any).removeGroups = vi.fn().mockReturnValue([]);
+      }
+
+      const config = createSeqListConfig({
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'seq-list-key',
+            listContainer: '#seq-list',
+            sequences: [
+              {
+                sequenceId: 'remove-from-seq',
+                effects: [
+                  { effectId: 'seq-list-effect', key: 'seq-list-key', listContainer: '#seq-list' },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      Interact.create(config, { useCustomElement: false });
+      const { element, list } = createSeqListElement('#seq-list');
+      const items = createSeqListItems(3);
+      items.forEach((li) => list.append(li));
+
+      addElement(element, 'seq-list-key');
+
+      expect(getSequenceMock).toHaveBeenCalled();
+
+      const cachedSequence =
+        getSequenceMock.mock.results[getSequenceMock.mock.results.length - 1].value;
+
+      removeListItems([items[1]]);
+
+      expect(cachedSequence.removeGroups).toHaveBeenCalled();
+    });
+
+    test('removeFromSequences deletes element from elementSequenceMap', () => {
+      const getSequenceMock = vi.mocked(getSequence);
+      const config = createSeqListConfig({
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'seq-list-key',
+            listContainer: '#seq-list',
+            sequences: [
+              {
+                sequenceId: 'delete-map-seq',
+                effects: [
+                  { effectId: 'seq-list-effect', key: 'seq-list-key', listContainer: '#seq-list' },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      Interact.create(config, { useCustomElement: false });
+      const { element, list } = createSeqListElement('#seq-list');
+      const items = createSeqListItems(3);
+      items.forEach((li) => list.append(li));
+
+      addElement(element, 'seq-list-key');
+      expect(getSequenceMock).toHaveBeenCalled();
+
+      // Before removal, element should be in map
+      expect(Interact.elementSequenceMap.has(items[0])).toBe(true);
+
+      removeListItems([items[0]]);
+
+      expect(Interact.elementSequenceMap.has(items[0])).toBe(false);
+    });
+
+    test('removeListItems triggers removeFromSequences for removed elements', () => {
+      const getSequenceMock = vi.mocked(getSequence);
+      const clickRemoveSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.click, 'remove');
+      const config = createSeqListConfig({
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'seq-list-key',
+            listContainer: '#seq-list',
+            sequences: [
+              {
+                sequenceId: 'integration-seq',
+                effects: [
+                  { effectId: 'seq-list-effect', key: 'seq-list-key', listContainer: '#seq-list' },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      Interact.create(config, { useCustomElement: false });
+      const { element, list } = createSeqListElement('#seq-list');
+      const items = createSeqListItems(3);
+      items.forEach((li) => list.append(li));
+
+      addElement(element, 'seq-list-key');
+      expect(getSequenceMock).toHaveBeenCalled();
+
+      const cachedSequence =
+        getSequenceMock.mock.results[getSequenceMock.mock.results.length - 1].value;
+
+      removeListItems([items[0], items[2]]);
+
+      expect(clickRemoveSpy).toHaveBeenCalledWith(items[0]);
+      expect(clickRemoveSpy).toHaveBeenCalledWith(items[2]);
+      expect(cachedSequence.removeGroups).toHaveBeenCalled();
+    });
+
+    test('removeFromSequences is a no-op for elements not in any Sequence', () => {
+      const config = createSeqListConfig({
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'seq-list-key',
+            sequences: [
+              {
+                sequenceId: 'noop-seq',
+                effects: [{ effectId: 'seq-list-effect', key: 'seq-list-key' }],
+              },
+            ],
+          },
+        ],
+      });
+
+      Interact.create(config, { useCustomElement: false });
+
+      const randomElement = document.createElement('div');
+      expect(() => {
+        Interact.removeFromSequences([randomElement]);
+      }).not.toThrow();
+    });
+
+    test('elementSequenceMap is reset on Interact.destroy()', () => {
+      const getSequenceMock = vi.mocked(getSequence);
+      const config = createSeqListConfig({
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'seq-list-key',
+            listContainer: '#seq-list',
+            sequences: [
+              {
+                sequenceId: 'destroy-map-seq',
+                effects: [
+                  { effectId: 'seq-list-effect', key: 'seq-list-key', listContainer: '#seq-list' },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      Interact.create(config, { useCustomElement: false });
+      const { element, list } = createSeqListElement('#seq-list');
+      const items = createSeqListItems(2);
+      items.forEach((li) => list.append(li));
+
+      addElement(element, 'seq-list-key');
+      expect(getSequenceMock).toHaveBeenCalled();
+
+      // Items should be in map before destroy
+      expect(Interact.elementSequenceMap.has(items[0])).toBe(true);
+
+      Interact.destroy();
+
+      // After destroy, elementSequenceMap should be replaced (items won't be found)
+      expect(Interact.elementSequenceMap.has(items[0])).toBe(false);
     });
   });
 });

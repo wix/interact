@@ -62,6 +62,8 @@ export class Sequence extends AnimationGroup {
   }
 
   private applyOffsets(): void {
+    if (this.animationGroups.length === 0 || this.animations.length === 0) return;
+
     const offsets = this.calculateOffsets();
     const sequenceDuration = this.getSequenceActiveDuration(offsets);
 
@@ -123,6 +125,41 @@ export class Sequence extends AnimationGroup {
 
     this.applyOffsets();
     this.ready = Promise.all(this.animationGroups.map((g) => g.ready)).then(() => {});
+  }
+
+  /**
+   * Removes AnimationGroups that match the predicate, then recalculates
+   * stagger offsets for remaining groups. Cancelled animations in removed
+   * groups are returned.
+   */
+  removeGroups(predicate: (group: AnimationGroup) => boolean): AnimationGroup[] {
+    const removed: AnimationGroup[] = [];
+    const keptGroups: AnimationGroup[] = [];
+    const keptTimingOptions: { delay: number; duration: number; iterations: number }[][] = [];
+
+    for (let i = 0; i < this.animationGroups.length; i++) {
+      if (predicate(this.animationGroups[i])) {
+        removed.push(this.animationGroups[i]);
+      } else {
+        keptGroups.push(this.animationGroups[i]);
+        keptTimingOptions.push(this.timingOptions[i]);
+      }
+    }
+
+    if (removed.length === 0) return removed;
+
+    for (const group of removed) {
+      group.cancel();
+    }
+
+    this.animationGroups = keptGroups;
+    this.timingOptions = keptTimingOptions;
+    this.animations = keptGroups.flatMap((group) => [...group.animations]);
+
+    this.applyOffsets();
+    this.ready = Promise.all(this.animationGroups.map((g) => g.ready)).then(() => {});
+
+    return removed;
   }
 
   async onFinish(callback: () => void): Promise<void> {

@@ -1,8 +1,15 @@
 name: Motion E2E Tests
 
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
+      branch:
+        type: string
+        description: Branch to run tests on
+        default: master
       browser:
         type: choice
         description: Browser to run tests in
@@ -11,7 +18,7 @@ on:
           - firefox
           - webkit
           - all
-        default: webkit
+        default: all
 
 permissions:
   contents: read
@@ -20,19 +27,25 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
-  e2e:
+  motion-e2e:
+    name: Motion E2E (${{ github.event.inputs.browser || 'all' }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 24
+          node-version-file: '.nvmrc'
           registry-url: https://registry.npmjs.org
 
       - name: Cache Yarn dependencies
@@ -56,7 +69,7 @@ jobs:
       - name: Install dependencies
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: NPQ_PKG_MGR=yarn npx npq install
+        run: NPQ_PKG_MGR=yarn npx npq install --immutable
 
       - name: Build motion package
         run: yarn workspace @wix/motion build
@@ -66,33 +79,31 @@ jobs:
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('packages/motion/package.json') }}
+          key: ${{ runner.os }}-playwright-${{ github.event.inputs.browser || 'all' }}-${{ hashFiles('packages/motion/package.json') }}
           restore-keys: |
+            ${{ runner.os }}-playwright-${{ github.event.inputs.browser || 'all' }}-
             ${{ runner.os }}-playwright-
 
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Install Playwright browsers (all)
+        if: steps.playwright-cache.outputs.cache-hit != 'true' && (github.event.inputs.browser == 'all' || github.event.inputs.browser == '')
         working-directory: packages/motion
         run: npx playwright install --with-deps chromium firefox webkit
 
+      - name: Install Playwright browsers (selected)
+        if: steps.playwright-cache.outputs.cache-hit != 'true' && github.event.inputs.browser != 'all' && github.event.inputs.browser != ''
+        working-directory: packages/motion
+        run: npx playwright install --with-deps ${{ github.event.inputs.browser }}
+
       - name: Install Playwright system deps
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
+        run: npx playwright install-deps ${{ github.event.inputs.browser != 'all' && github.event.inputs.browser != '' && github.event.inputs.browser || '' }}
 
       - name: Run E2E tests (selected browser)
-        if: ${{ github.event.inputs.browser != 'all' }}
+        if: github.event.inputs.browser != 'all' && github.event.inputs.browser != ''
         working-directory: packages/motion
         run: npx playwright test --project=${{ github.event.inputs.browser }}
 
       - name: Run E2E tests (all browsers)
-        if: ${{ github.event.inputs.browser == 'all' }}
+        if: github.event.inputs.browser == 'all' || github.event.inputs.browser == ''
         working-directory: packages/motion
         run: npx playwright test
-
-      - name: Upload Playwright report
-        if: ${{ always() }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: playwright-report
-          path: packages/motion/playwright-report/
-          retention-days: 14

@@ -21,6 +21,35 @@ const EXIT_OBSERVER_CONFIG: IntersectionObserverInit = {
   threshold: [0],
 };
 
+const DEFAULT_THRESHOLD = 0.2;
+
+/**
+ * Converts an `inset` value to a CSS `rootMargin` string.
+ *
+ * `inset` is one-dimensional: a single value applies to both top and bottom,
+ * two space-separated values set top and bottom independently.
+ * The inset direction is the inverse of rootMargin: a positive inset shrinks
+ * the intersection root (triggers later), so values are negated.
+ *
+ * Examples:
+ *   "20%"      → "-20% 0px -20%"
+ *   "10% 30%"  → "-10% 0px -30%"
+ */
+function insetToRootMargin(inset: string): string {
+  const parts = inset.trim().split(/\s+/);
+  const top = parts[0];
+  const bottom = parts.length > 1 ? parts[1] : parts[0];
+
+  const negate = (value: string): string => {
+    if (value.startsWith('-')) {
+      return value.slice(1);
+    }
+    return parseFloat(value) ? `-${value}` : value;
+  };
+
+  return `${negate(top)} 0px ${negate(bottom)}`;
+}
+
 const observers: Record<string, IntersectionObserver> = {};
 const handlerMap = new WeakMap() as HandlerObjectMap;
 const elementFirstRun = new WeakSet<HTMLElement>();
@@ -32,11 +61,11 @@ function setOptions(options: Partial<ViewEnterParams>) {
   viewEnterOptions = options;
 }
 
-function invokeHandlers(target: HTMLElement, isIntersecting: boolean) {
+function invokeHandlers(target: HTMLElement, isIntersecting: boolean, isFullExit?: boolean) {
   const handlers = handlerMap.get(target);
   handlers?.forEach(({ source, handler }) => {
     if (source === target) {
-      handler!(isIntersecting);
+      handler!(isIntersecting, isFullExit);
     }
   });
 }
@@ -51,8 +80,7 @@ function getExitObserver() {
       const target = entry.target as HTMLElement;
 
       if (!entry.isIntersecting) {
-        // Element has completely exited the view
-        invokeHandlers(target, false);
+        invokeHandlers(target, false, true);
       }
     });
   }, EXIT_OBSERVER_CONFIG);
@@ -67,12 +95,14 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
     return observers[key];
   }
 
+  const threshold = options.threshold ?? DEFAULT_THRESHOLD;
+
   const config: IntersectionObserverInit = isSafeMode
     ? SAFE_OBSERVER_CONFIG
     : {
         root: null,
-        rootMargin: options.inset ? `${options.inset} 0px ${options.inset}` : '0px',
-        threshold: options.threshold,
+        rootMargin: options.inset ? insetToRootMargin(options.inset) : '0px',
+        threshold,
       };
 
   const observer = new IntersectionObserver((entries) => {
@@ -111,19 +141,9 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
         }
       }
 
-      const type = options.type || 'once';
-
-      if (entry.isIntersecting || (type === 'alternate' && !isFirstRun)) {
-        // For alternate type, handle exit using same observer as entry
+      if (entry.isIntersecting || !isFirstRun) {
         invokeHandlers(target, entry.isIntersecting);
-
-        if (type === 'once') {
-          observer.unobserve(entry.target);
-          elementFirstRun.delete(target);
-        }
       }
-      // Note: repeat and state exit handling is done by a separate exit observer
-      // that watches when element is completely out of view
     });
   }, config);
 
@@ -140,7 +160,7 @@ function addViewEnterHandler(
   { reducedMotion, selectorCondition, animation: preCreatedAnimation }: InteractOptions = {},
 ) {
   const mergedOptions = { ...viewEnterOptions, ...options };
-  const type = mergedOptions.type || 'once';
+  const type = effect.triggerType || 'once';
   const animation = (preCreatedAnimation ||
     getAnimation(
       target,
@@ -165,11 +185,34 @@ function addViewEnterHandler(
   // Track initial play state for alternate type
   let isInitialPlay = true;
 
-  const handler = (isIntersecting?: boolean) => {
+  let onceDone = false;
+
+  // Declared early so the handler closure can reference it for self-cleanup
+  let handlerObj: {
+    source: HTMLElement;
+    target: HTMLElement;
+    handler: typeof handler;
+    cleanup: () => void;
+  };
+
+  const handler = (isIntersecting?: boolean, isFullExit?: boolean) => {
     if (selectorCondition && !target.matches(selectorCondition)) return;
 
     if (type === 'once') {
-      if (isIntersecting) {
+      if (isIntersecting && !onceDone) {
+        onceDone = true;
+
+        handlerMap.get(source)?.delete(handlerObj);
+        handlerMap.get(target)?.delete(handlerObj);
+
+        const remaining = handlerMap.get(source);
+
+        if (!remaining || remaining.size === 0) {
+          const currentObserver = elementObserverMap.get(source) || observer;
+          currentObserver.unobserve(source);
+          elementFirstRun.delete(source);
+        }
+
         animation.play(() => {
           const setEnterStart = () => {
             target.dataset.interactEnter = 'start';
@@ -177,15 +220,17 @@ function addViewEnterHandler(
 
           if (animation.isCSS) {
             fastdom.mutate(() => {
-              // delay for next tick to prevent content flashing
               requestAnimationFrame(setEnterStart);
             });
 
-            animation.onFinish(() => {
+            const setEnterDone = () => {
               fastdom.mutate(() => {
                 target.dataset.interactEnter = 'done';
               });
-            });
+            };
+
+            animation.onFinish(setEnterDone);
+            animation.onAbort(setEnterDone);
           } else {
             fastdom.mutate(setEnterStart);
           }
@@ -196,25 +241,20 @@ function addViewEnterHandler(
         isInitialPlay = false;
         animation.play();
       } else if (!isInitialPlay) {
-        // On subsequent entry/exit reverse the animation
         animation.reverse();
       }
     } else if (type === 'repeat') {
       if (isIntersecting) {
-        // On entry, reset progress to 0 before playing since the exit is a separate observer/range
         animation.progress(0);
         animation.play();
-      } else {
-        // On exit (completely out of view), pause and reset
+      } else if (isFullExit) {
         animation.pause();
         animation.progress(0);
       }
     } else if (type === 'state') {
       if (isIntersecting) {
-        // Resume or start playing
         animation.play();
-      } else {
-        // On exit (completely out of view), just pause
+      } else if (isFullExit) {
         animation.pause();
       }
     }
@@ -225,7 +265,6 @@ function addViewEnterHandler(
     currentObserver.unobserve(source);
 
     if (type === 'repeat' || type === 'state') {
-      // Clean up exit observer if it exists
       const exitObserver = getExitObserver();
       exitObserver.unobserve(source);
     }
@@ -234,7 +273,8 @@ function addViewEnterHandler(
     elementFirstRun.delete(source);
     elementObserverMap.delete(source);
   };
-  const handlerObj = { source, target, handler, cleanup };
+
+  handlerObj = { source, target, handler, cleanup };
 
   addHandlerToMap(handlerMap, source, handlerObj);
   addHandlerToMap(handlerMap, target, handlerObj);
