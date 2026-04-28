@@ -295,7 +295,7 @@ Test coverage for:
 - **wrapperStyle (global)**: Verify inline styles applied to all wrapper spans
 - **wrapperStyle (per-type)**: Verify different styles for chars vs words vs lines
 - **wrapperAttrs**: Verify custom data attributes and other attributes applied
-- **contentAttribute**: Verify char/word wrappers support `data-content` modes (`none`, `both`, `attribute-only`)
+- **contentAttribute**: Verify char/word wrappers `data-content` modes renders the correct html (`none`, `both`, `attribute-only`)
 - **CSS custom property indexing**: Verify each wrapper has correct `--char-index` / `--word-index` / etc. for animation sequencing
 - **partIndexing: false**: Verify no CSS custom properties set when indexing disabled
 - **Combined options**: Verify class + style + attrs work together
@@ -651,7 +651,7 @@ The package injects a global base stylesheet once per document via `adoptedStyle
 - `[aria-hidden="true"][data-splittext-wrapper]`: `display: contents;` — the inner aria-hidden wrapper must not introduce a new box in the layout.
 - `.sr-only`: `position: absolute; width: 1px; height: 1px; overflow: clip;` — visually-hidden pattern for the preserved original text (used when `preserveText: true`).
 
-**Documentation note (shaped languages):** Arabic and Arabic-like joining scripts can lose shaping when split per-character because each letter may lose its positional form (initial/medial/final/isolated). This is a limitation of character-level text splitting for joining scripts, not a blanket rule for every complex script. Recommend per-word splitting for affected scripts. Implementation documentation for this limitation should reference the demo CodePen: https://codepen.io/tombigel/pen/pvNzJoZ. Font-level shaping (e.g. via HarfBuzz) is out of scope for this library.
+**Documentation note (shaped languages):** Arabic and Arabic-like joining scripts can lose shaping when split per-character because each letter may lose its positional form (initial/medial/final/isolated). This is a limitation of character-level text splitting for joining scripts, not a blanket rule for every complex script. Recommend per-word splitting for affected scripts. Implementation documentation for this limitation should reference the demo CodePen: <https://codepen.io/tombigel/pen/pvNzJoZ>. Font-level shaping (e.g. via HarfBuzz) is out of scope for this library.
 
 ### Accessibility
 
