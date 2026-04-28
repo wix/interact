@@ -79,7 +79,7 @@ The API will have:
 - **Revertible**: Include a `revert()` method to restore original content
 - **Responsive support**: Optional `autoSplit` mode that re-splits on resize/font-load
 - `Intl.Segmenter` API for locale-sensitive text segmentation to split on meaningful items (graphemes, words or sentences) in a string
-- **Range API for line detection**: Use `Range.getClientRects()` to detect line breaks from text nodes *before* DOM manipulation, avoiding unnecessary wrapper creation during measurement
+- **Range API for line detection**: Use `Range.getClientRects()` to detect line breaks from text nodes _before_ DOM manipulation, avoiding unnecessary wrapper creation during measurement
 
 ## Package Structure
 
@@ -820,7 +820,7 @@ class SplitTextResultImpl implements SplitTextResult {
 
 **Primary Approach: Range API with `getClientRects()`** → `src/lineDetection.ts`
 
-Use the DOM Range API to detect line breaks from text nodes *before* creating wrapper elements. This avoids unnecessary DOM manipulation and provides accurate line detection based on the browser's actual rendering:
+Use the DOM Range API to detect line breaks from text nodes _before_ creating wrapper elements. This avoids unnecessary DOM manipulation and provides accurate line detection based on the browser's actual rendering:
 
 ```typescript
 function detectLines(textNode: Text): string[] {
