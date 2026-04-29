@@ -5,11 +5,12 @@ import type { InteractConfig } from '../src/types';
 function makeConfig(overrides?: Partial<InteractConfig>): InteractConfig {
   return {
     effects: {
-      fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500 } as any,
+      fadeIn: {
+        keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+        duration: 500,
+      } as any,
     },
-    interactions: [
-      { key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'fadeIn' }] } as any,
-    ],
+    interactions: [{ key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'fadeIn' }] } as any],
     ...overrides,
   };
 }
@@ -22,9 +23,13 @@ describe('validateReferences', () => {
   });
 
   it('errors when effectId references non-existent effect', () => {
-    const result = validateReferences(makeConfig({
-      interactions: [{ key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'missing' }] } as any],
-    }));
+    const result = validateReferences(
+      makeConfig({
+        interactions: [
+          { key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'missing' }] } as any,
+        ],
+      }),
+    );
     expect(result.errors.some((e) => e.rule === 'effect-ref-missing')).toBe(true);
   });
 
@@ -32,7 +37,12 @@ describe('validateReferences', () => {
     const config = makeConfig({
       conditions: { desktop: { type: 'media', predicate: '(min-width: 1024px)' } },
       interactions: [
-        { key: 'hero', trigger: 'viewEnter', conditions: ['missing'], effects: [{ effectId: 'fadeIn' }] } as any,
+        {
+          key: 'hero',
+          trigger: 'viewEnter',
+          conditions: ['missing'],
+          effects: [{ effectId: 'fadeIn' }],
+        } as any,
       ],
     });
     const result = validateReferences(config);
@@ -53,12 +63,17 @@ describe('validateReferences', () => {
   it('warns on orphaned effect', () => {
     const config = makeConfig({
       effects: {
-        fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 } as any,
+        fadeIn: {
+          keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] },
+          duration: 500,
+        } as any,
         unused: { namedEffect: { type: 'FadeIn' }, duration: 300 } as any,
       },
     });
     const result = validateReferences(config);
-    expect(result.warnings.some((w) => w.rule === 'orphan-effect' && w.message.includes('unused'))).toBe(true);
+    expect(
+      result.warnings.some((w) => w.rule === 'orphan-effect' && w.message.includes('unused')),
+    ).toBe(true);
   });
 
   it('warns on orphaned condition', () => {
@@ -66,7 +81,9 @@ describe('validateReferences', () => {
       conditions: { desktop: { type: 'media' }, unused: { type: 'selector' } },
     });
     const result = validateReferences(config);
-    expect(result.warnings.some((w) => w.rule === 'orphan-condition' && w.message.includes('unused'))).toBe(true);
+    expect(
+      result.warnings.some((w) => w.rule === 'orphan-condition' && w.message.includes('unused')),
+    ).toBe(true);
   });
 
   it('warns on orphaned sequence', () => {
@@ -82,7 +99,11 @@ describe('validateReferences', () => {
   it('warns when cross-key effect targets non-existent key', () => {
     const config = makeConfig({
       interactions: [
-        { key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'fadeIn', key: 'other' }] } as any,
+        {
+          key: 'hero',
+          trigger: 'viewEnter',
+          effects: [{ effectId: 'fadeIn', key: 'other' }],
+        } as any,
       ],
     });
     const result = validateReferences(config);
@@ -92,7 +113,11 @@ describe('validateReferences', () => {
   it('does not warn on cross-key when target key exists', () => {
     const config = makeConfig({
       interactions: [
-        { key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'fadeIn', key: 'banner' }] } as any,
+        {
+          key: 'hero',
+          trigger: 'viewEnter',
+          effects: [{ effectId: 'fadeIn', key: 'banner' }],
+        } as any,
         { key: 'banner', trigger: 'hover', effects: [] } as any,
       ],
     });
@@ -113,7 +138,10 @@ describe('validateReferences', () => {
   it('skips orphan detection when scope is provided', () => {
     const config = makeConfig({
       effects: {
-        fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 } as any,
+        fadeIn: {
+          keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] },
+          duration: 500,
+        } as any,
         unused: { namedEffect: { type: 'FadeIn' }, duration: 300 } as any,
       },
     });
@@ -125,18 +153,42 @@ describe('validateReferences', () => {
 
   it('errors when interaction references undefined condition', () => {
     const result = validateReferences({
-      effects: { fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500 } } as any,
+      effects: {
+        fadeIn: {
+          keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+          duration: 500,
+        },
+      } as any,
       conditions: { desktop: { type: 'media', predicate: '(min-width: 1024px)' } },
-      interactions: [{ key: 'hero', trigger: 'viewEnter', conditions: ['nonexistent'], effects: [{ effectId: 'fadeIn' }] } as any],
+      interactions: [
+        {
+          key: 'hero',
+          trigger: 'viewEnter',
+          conditions: ['nonexistent'],
+          effects: [{ effectId: 'fadeIn' }],
+        } as any,
+      ],
     });
     expect(result.errors.some((e) => e.rule === 'condition-ref-missing')).toBe(true);
   });
 
   it('accepts interaction referencing a valid condition', () => {
     const result = validateReferences({
-      effects: { fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500 } } as any,
+      effects: {
+        fadeIn: {
+          keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+          duration: 500,
+        },
+      } as any,
       conditions: { desktop: { type: 'media', predicate: '(min-width: 1024px)' } },
-      interactions: [{ key: 'hero', trigger: 'viewEnter', conditions: ['desktop'], effects: [{ effectId: 'fadeIn' }] } as any],
+      interactions: [
+        {
+          key: 'hero',
+          trigger: 'viewEnter',
+          conditions: ['desktop'],
+          effects: [{ effectId: 'fadeIn' }],
+        } as any,
+      ],
     });
     expect(result.valid).toBe(true);
   });
@@ -145,10 +197,19 @@ describe('validateReferences', () => {
     const result = validateReferences({
       effects: {} as any,
       conditions: {},
-      interactions: [{
-        key: 'hero', trigger: 'viewEnter',
-        effects: [{ keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500, conditions: ['missing'] }],
-      } as any],
+      interactions: [
+        {
+          key: 'hero',
+          trigger: 'viewEnter',
+          effects: [
+            {
+              keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+              duration: 500,
+              conditions: ['missing'],
+            },
+          ],
+        } as any,
+      ],
     });
     expect(result.errors.some((e) => e.rule === 'condition-ref-missing')).toBe(true);
   });
@@ -157,7 +218,9 @@ describe('validateReferences', () => {
     const result = validateReferences({
       effects: {} as any,
       sequences: {},
-      interactions: [{ key: 'hero', trigger: 'viewEnter', sequences: [{ sequenceId: 'missing' }] } as any],
+      interactions: [
+        { key: 'hero', trigger: 'viewEnter', sequences: [{ sequenceId: 'missing' }] } as any,
+      ],
     });
     expect(result.errors.some((e) => e.rule === 'sequence-ref-missing')).toBe(true);
   });
@@ -166,10 +229,23 @@ describe('validateReferences', () => {
     const result = validateReferences({
       effects: {} as any,
       conditions: {},
-      interactions: [{
-        key: 'hero', trigger: 'viewEnter',
-        sequences: [{ conditions: ['missing'], effects: [{ keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500 }] }],
-      } as any],
+      interactions: [
+        {
+          key: 'hero',
+          trigger: 'viewEnter',
+          sequences: [
+            {
+              conditions: ['missing'],
+              effects: [
+                {
+                  keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+                  duration: 500,
+                },
+              ],
+            },
+          ],
+        } as any,
+      ],
     });
     expect(result.errors.some((e) => e.rule === 'condition-ref-missing')).toBe(true);
   });

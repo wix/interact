@@ -2,6 +2,8 @@ export type {
   InteractArtifact,
   ArtifactInput,
   FrameworkType,
+  HtmlMetadata,
+  SetupMetadata,
   Scope,
   ValidationResult,
   ValidationEntry,
@@ -13,17 +15,7 @@ export type {
   LogCategory,
 } from './types';
 
-export { parseArtifact } from './artifact';
-export {
-  extractDataInteractKeys,
-  extractDataInteractInitials,
-  hasInteractElements,
-  extractInteractElementKeys,
-  hasGenerateCss,
-  hasSetupCall,
-  hasDestroyCall,
-  hasAllowA11yTriggers,
-} from './artifact';
+export { parseArtifact, buildHtmlMetadata, buildSetupMetadata } from './artifact';
 
 export {
   validateSchema,
@@ -68,11 +60,7 @@ export {
   findOrphanedElements,
 } from './inspect/domInspector';
 
-export type {
-  ElementInspection,
-  AnimationSnapshot,
-  AnimationState,
-} from './inspect/domInspector';
+export type { ElementInspection, AnimationSnapshot, AnimationState } from './inspect/domInspector';
 
 // Runtime validation (browser context)
 export {
@@ -83,7 +71,16 @@ export {
   captureWarningsAsync,
 } from './inspect/runtimeValidator';
 
-export type {
-  RuntimeCheck,
-  CapturedWarning,
-} from './inspect/runtimeValidator';
+export type { RuntimeCheck, CapturedWarning } from './inspect/runtimeValidator';
+
+// Scoring
+export {
+  scoreComplexity,
+  scoreWeight,
+  scoreA11y,
+  scoreCoherence,
+  scoreBestPractices,
+  scoreValidation,
+  scoreConfig,
+  scoreArtifact,
+} from './score';

@@ -1,4 +1,10 @@
-import type { ValidationResult, ValidationEntry, Scope, TriggerType, InteractConfig } from '../types';
+import type {
+  ValidationResult,
+  ValidationEntry,
+  Scope,
+  TriggerType,
+  InteractConfig,
+} from '../types';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -19,13 +25,32 @@ export const TRIGGER_TYPES: TriggerType[] = [
 export const TRIGGER_TYPE_VALUES = ['once', 'repeat', 'alternate', 'state'] as const;
 export const FILL_VALUES = ['none', 'forwards', 'backwards', 'both'] as const;
 export const CONDITION_TYPES = ['media', 'container', 'selector'] as const;
-export const RANGE_NAMES = ['entry', 'exit', 'contain', 'cover', 'entry-crossing', 'exit-crossing'] as const;
+export const RANGE_NAMES = [
+  'entry',
+  'exit',
+  'contain',
+  'cover',
+  'entry-crossing',
+  'exit-crossing',
+] as const;
 export const STATE_ACTIONS = ['add', 'remove', 'toggle', 'clear'] as const;
-export const SCRUB_TRANSITION_EASINGS = ['linear', 'hardBackOut', 'easeOut', 'elastic', 'bounce'] as const;
+export const SCRUB_TRANSITION_EASINGS = [
+  'linear',
+  'hardBackOut',
+  'easeOut',
+  'elastic',
+  'bounce',
+] as const;
 
 /** Triggers that support time-based animation effects (duration + effectProperty). */
 export const TIME_TRIGGERS = new Set<TriggerType>([
-  'viewEnter', 'hover', 'click', 'pageVisible', 'animationEnd', 'activate', 'interest',
+  'viewEnter',
+  'hover',
+  'click',
+  'pageVisible',
+  'animationEnd',
+  'activate',
+  'interest',
 ]);
 
 /** Triggers that support scroll/pointer-driven scrub effects. */

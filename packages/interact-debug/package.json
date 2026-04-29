@@ -16,6 +16,11 @@
       "types": "./dist/types/playwright/index.d.ts",
       "import": "./dist/es/playwright.js",
       "require": "./dist/cjs/playwright.js"
+    },
+    "./eval": {
+      "types": "./dist/types/eval/index.d.ts",
+      "import": "./dist/es/eval.js",
+      "require": "./dist/cjs/eval.js"
     }
   },
   "bin": "./dist/es/cli.js",
@@ -27,7 +32,8 @@
     "build": "rimraf dist && vite build && npm run build:types",
     "build:types": "tsc -p tsconfig.build.json",
     "lint": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "eval": "npx tsx bin/run-eval.ts"
   },
   "keywords": [
     "animation",

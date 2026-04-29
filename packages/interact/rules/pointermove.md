@@ -69,7 +69,7 @@ type Progress = {
 Controls which element's bounds define the 0–1 progress range.
 
 - **`false` (default)**: Progress is calculated against the **source element's** (or viewport's) bounds. The `50%` progress of the timeline is at the center of the source element.
-- **`true`**: `50%` progress of the timeline is calculated against the **target element's center**. The edges of the timeline are still calculated against the edges of the source element/viewport depending on `hitAea`.
+- **`true`**: `50%` progress of the timeline is calculated against the **target element's center**. The edges of the timeline are still calculated against the edges of the source element/viewport depending on `hitArea`.
 
 ---
 

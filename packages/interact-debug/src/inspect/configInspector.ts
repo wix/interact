@@ -48,7 +48,12 @@ export type EffectUsageSummary = {
   effectId: string;
   definition: Record<string, unknown>;
   kind: 'keyframe' | 'named' | 'custom' | 'state' | 'unknown';
-  referencedBy: { interactionIndex: number; key: string; trigger: TriggerType; context: 'effect' | 'sequence' }[];
+  referencedBy: {
+    interactionIndex: number;
+    key: string;
+    trigger: TriggerType;
+    context: 'effect' | 'sequence';
+  }[];
 };
 
 export type KeySummary = {
@@ -110,7 +115,10 @@ export function inspectConfig(config: InteractConfig): ConfigSummary {
 // inspectInteraction
 // ---------------------------------------------------------------------------
 
-export function inspectInteraction(config: InteractConfig, index: number): InteractionSummary | null {
+export function inspectInteraction(
+  config: InteractConfig,
+  index: number,
+): InteractionSummary | null {
   const interaction = config.interactions[index];
   if (!interaction) return null;
 
@@ -119,7 +127,9 @@ export function inspectInteraction(config: InteractConfig, index: number): Inter
   const resolvedEffects: ResolvedEffectSummary[] = [];
   if (interaction.effects) {
     for (const raw of interaction.effects) {
-      const eff = isRecord(raw) ? resolveEffect(raw as Record<string, unknown>, globalEffects) : (raw as Record<string, unknown>);
+      const eff = isRecord(raw)
+        ? resolveEffect(raw as Record<string, unknown>, globalEffects)
+        : (raw as Record<string, unknown>);
       resolvedEffects.push(summarizeEffect(eff));
     }
   }
@@ -127,13 +137,18 @@ export function inspectInteraction(config: InteractConfig, index: number): Inter
   const resolvedSequences: ResolvedSequenceSummary[] = [];
   if (interaction.sequences) {
     for (const raw of interaction.sequences) {
-      const seq = isRecord(raw) ? resolveSequence(raw as Record<string, unknown>, globalSequences) : (raw as Record<string, unknown>);
+      const seq = isRecord(raw)
+        ? resolveSequence(raw as Record<string, unknown>, globalSequences)
+        : (raw as Record<string, unknown>);
       resolvedSequences.push({
-        sequenceId: typeof (raw as Record<string, unknown>).sequenceId === 'string' ? (raw as Record<string, unknown>).sequenceId as string : undefined,
+        sequenceId:
+          typeof (raw as Record<string, unknown>).sequenceId === 'string'
+            ? ((raw as Record<string, unknown>).sequenceId as string)
+            : undefined,
         effectCount: Array.isArray(seq.effects) ? seq.effects.length : 0,
-        delay: typeof seq.delay === 'number' ? seq.delay as number : undefined,
-        offset: typeof seq.offset === 'number' ? seq.offset as number : undefined,
-        triggerType: typeof seq.triggerType === 'string' ? seq.triggerType as string : undefined,
+        delay: typeof seq.delay === 'number' ? (seq.delay as number) : undefined,
+        offset: typeof seq.offset === 'number' ? (seq.offset as number) : undefined,
+        triggerType: typeof seq.triggerType === 'string' ? (seq.triggerType as string) : undefined,
       });
     }
   }
@@ -142,7 +157,9 @@ export function inspectInteraction(config: InteractConfig, index: number): Inter
     index,
     key: interaction.key,
     trigger: interaction.trigger,
-    params: isRecord(interaction.params) ? (interaction.params as Record<string, unknown>) : undefined,
+    params: isRecord(interaction.params)
+      ? (interaction.params as Record<string, unknown>)
+      : undefined,
     conditions: Array.isArray(interaction.conditions) ? (interaction.conditions as string[]) : [],
     resolvedEffects,
     resolvedSequences,
@@ -166,18 +183,30 @@ export function inspectEffect(config: InteractConfig, effectId: string): EffectU
     if (interaction.effects) {
       for (const raw of interaction.effects) {
         if (isRecord(raw) && (raw as Record<string, unknown>).effectId === effectId) {
-          referencedBy.push({ interactionIndex: i, key: interaction.key, trigger: interaction.trigger, context: 'effect' });
+          referencedBy.push({
+            interactionIndex: i,
+            key: interaction.key,
+            trigger: interaction.trigger,
+            context: 'effect',
+          });
         }
       }
     }
 
     if (interaction.sequences) {
       for (const rawSeq of interaction.sequences) {
-        const seq = isRecord(rawSeq) ? resolveSequence(rawSeq as Record<string, unknown>, globalSequences) : (rawSeq as Record<string, unknown>);
+        const seq = isRecord(rawSeq)
+          ? resolveSequence(rawSeq as Record<string, unknown>, globalSequences)
+          : (rawSeq as Record<string, unknown>);
         if (Array.isArray(seq.effects)) {
           for (const eff of seq.effects) {
             if (isRecord(eff) && (eff as Record<string, unknown>).effectId === effectId) {
-              referencedBy.push({ interactionIndex: i, key: interaction.key, trigger: interaction.trigger, context: 'sequence' });
+              referencedBy.push({
+                interactionIndex: i,
+                key: interaction.key,
+                trigger: interaction.trigger,
+                context: 'sequence',
+              });
               break;
             }
           }
@@ -186,7 +215,10 @@ export function inspectEffect(config: InteractConfig, effectId: string): EffectU
     }
   }
 
-  const resolved = resolveEffect({ effectId, ...definition } as Record<string, unknown>, globalEffects);
+  const resolved = resolveEffect(
+    { effectId, ...definition } as Record<string, unknown>,
+    globalEffects,
+  );
 
   return {
     effectId,
@@ -263,9 +295,11 @@ function summarizeEffect(eff: Record<string, unknown>): ResolvedEffectSummary {
   return {
     effectId: typeof eff.effectId === 'string' ? (eff.effectId as string) : undefined,
     kind,
-    namedType: isRecord(eff.namedEffect) && typeof (eff.namedEffect as Record<string, unknown>).type === 'string'
-      ? (eff.namedEffect as Record<string, unknown>).type as string
-      : undefined,
+    namedType:
+      isRecord(eff.namedEffect) &&
+      typeof (eff.namedEffect as Record<string, unknown>).type === 'string'
+        ? ((eff.namedEffect as Record<string, unknown>).type as string)
+        : undefined,
     targetKey: typeof eff.key === 'string' ? (eff.key as string) : undefined,
     properties: [...new Set(properties)],
   };
@@ -290,7 +324,8 @@ function collectAllEffects(
       const seq = resolveSequence(rawSeq as Record<string, unknown>, globalSequences);
       if (Array.isArray(seq.effects)) {
         for (const eff of seq.effects) {
-          if (isRecord(eff)) result.push(resolveEffect(eff as Record<string, unknown>, globalEffects));
+          if (isRecord(eff))
+            result.push(resolveEffect(eff as Record<string, unknown>, globalEffects));
         }
       }
     }

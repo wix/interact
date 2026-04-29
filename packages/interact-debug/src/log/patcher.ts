@@ -91,13 +91,17 @@ function patchConsoleWarn(logger: InteractLogger): Cleanup {
 }
 
 function extractKey(msg: string): string | undefined {
-  return KEY_EXTRACT.exec(msg)?.[1]
-    ?? CONTROLLER_EXTRACT.exec(msg)?.[1]
-    ?? INSTANCE_EXTRACT.exec(msg)?.[1]
-    ?? undefined;
+  return (
+    KEY_EXTRACT.exec(msg)?.[1] ??
+    CONTROLLER_EXTRACT.exec(msg)?.[1] ??
+    INSTANCE_EXTRACT.exec(msg)?.[1] ??
+    undefined
+  );
 }
 
-function categorizeWarnMessage(msg: string): 'handler' | 'lifecycle' | 'dom' | 'config' | 'sequence' {
+function categorizeWarnMessage(
+  msg: string,
+): 'handler' | 'lifecycle' | 'dom' | 'config' | 'sequence' {
   if (SEQUENCE_EXTRACT.test(msg)) return 'sequence';
   if (/controller/i.test(msg)) return 'dom';
   if (/instance/i.test(msg)) return 'lifecycle';
@@ -123,7 +127,9 @@ function patchInteractLifecycle(logger: InteractLogger): Cleanup {
 
   if (typeof originalCreate === 'function') {
     InteractClass.create = function patchedCreate(...args: unknown[]) {
-      logger.info('lifecycle', 'Interact.create() called', { data: { interactionCount: (args[0] as any)?.interactions?.length } });
+      logger.info('lifecycle', 'Interact.create() called', {
+        data: { interactionCount: (args[0] as any)?.interactions?.length },
+      });
       return originalCreate.apply(this, args);
     };
   }
@@ -145,6 +151,7 @@ function patchInteractLifecycle(logger: InteractLogger): Cleanup {
   return () => {
     if (typeof originalCreate === 'function') InteractClass.create = originalCreate;
     if (typeof originalDestroy === 'function') InteractClass.destroy = originalDestroy;
-    if (typeof originalInstanceDestroy === 'function') InteractClass.prototype.destroy = originalInstanceDestroy;
+    if (typeof originalInstanceDestroy === 'function')
+      InteractClass.prototype.destroy = originalInstanceDestroy;
   };
 }

@@ -28,7 +28,12 @@ describe('InteractLogger', () => {
 
   it('supports context with key, trigger, effectId, data', () => {
     const logger = new InteractLogger();
-    logger.info('animation', 'animating', { key: 'hero', trigger: 'viewEnter', effectId: 'fadeIn', data: { progress: 0.5 } });
+    logger.info('animation', 'animating', {
+      key: 'hero',
+      trigger: 'viewEnter',
+      effectId: 'fadeIn',
+      data: { progress: 0.5 },
+    });
 
     const entry = logger.getLog()[0];
     expect(entry.key).toBe('hero');

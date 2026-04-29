@@ -1,38 +1,106 @@
-import type { InteractArtifact, ValidationResult, Scope } from '../types';
-import { isRecord, error, toResult, isInScope, resolveEffect, resolveSequence, buildGlobalMaps } from './helpers';
+import type { InteractArtifact, ValidationResult, ValidationEntry, Scope } from '../types';
+import {
+  isRecord,
+  error,
+  toResult,
+  isInScope,
+  resolveEffect,
+  resolveSequence,
+  buildGlobalMaps,
+} from './helpers';
 
 // ---------------------------------------------------------------------------
 // Known presets from @wix/motion-presets (75 total)
 // ---------------------------------------------------------------------------
 
 const ENTRANCE_PRESETS = [
-  'ArcIn', 'BlurIn', 'BounceIn', 'CurveIn', 'DropIn', 'ExpandIn',
-  'FadeIn', 'FlipIn', 'FloatIn', 'FoldIn', 'GlideIn', 'RevealIn',
-  'ShapeIn', 'ShuttersIn', 'SlideIn', 'SpinIn', 'TiltIn', 'TurnIn', 'WinkIn',
+  'ArcIn',
+  'BlurIn',
+  'BounceIn',
+  'CurveIn',
+  'DropIn',
+  'ExpandIn',
+  'FadeIn',
+  'FlipIn',
+  'FloatIn',
+  'FoldIn',
+  'GlideIn',
+  'RevealIn',
+  'ShapeIn',
+  'ShuttersIn',
+  'SlideIn',
+  'SpinIn',
+  'TiltIn',
+  'TurnIn',
+  'WinkIn',
 ] as const;
 
 const ONGOING_PRESETS = [
-  'Bounce', 'Breathe', 'Cross', 'Flash', 'Flip', 'Fold',
-  'Jello', 'Poke', 'Pulse', 'Rubber', 'Spin', 'Swing', 'Wiggle',
+  'Bounce',
+  'Breathe',
+  'Cross',
+  'Flash',
+  'Flip',
+  'Fold',
+  'Jello',
+  'Poke',
+  'Pulse',
+  'Rubber',
+  'Spin',
+  'Swing',
+  'Wiggle',
 ] as const;
 
 const SCROLL_PRESETS = [
-  'ArcScroll', 'BlurScroll', 'FadeScroll', 'FlipScroll', 'GrowScroll',
-  'MoveScroll', 'PanScroll', 'ParallaxScroll', 'RevealScroll', 'ShapeScroll',
-  'ShuttersScroll', 'ShrinkScroll', 'SkewPanScroll', 'SlideScroll',
-  'Spin3dScroll', 'SpinScroll', 'StretchScroll', 'TiltScroll', 'TurnScroll',
+  'ArcScroll',
+  'BlurScroll',
+  'FadeScroll',
+  'FlipScroll',
+  'GrowScroll',
+  'MoveScroll',
+  'PanScroll',
+  'ParallaxScroll',
+  'RevealScroll',
+  'ShapeScroll',
+  'ShuttersScroll',
+  'ShrinkScroll',
+  'SkewPanScroll',
+  'SlideScroll',
+  'Spin3dScroll',
+  'SpinScroll',
+  'StretchScroll',
+  'TiltScroll',
+  'TurnScroll',
 ] as const;
 
 const MOUSE_PRESETS = [
-  'AiryMouse', 'BlobMouse', 'BlurMouse', 'BounceMouse', 'CustomMouse',
-  'ScaleMouse', 'SkewMouse', 'SpinMouse', 'SwivelMouse', 'Tilt3DMouse',
-  'Track3DMouse', 'TrackMouse',
+  'AiryMouse',
+  'BlobMouse',
+  'BlurMouse',
+  'BounceMouse',
+  'CustomMouse',
+  'ScaleMouse',
+  'SkewMouse',
+  'SpinMouse',
+  'SwivelMouse',
+  'Tilt3DMouse',
+  'Track3DMouse',
+  'TrackMouse',
 ] as const;
 
 const BG_SCROLL_PRESETS = [
-  'BgCloseUp', 'BgFade', 'BgFadeBack', 'BgFake3D', 'BgPan',
-  'BgParallax', 'BgPullBack', 'BgReveal', 'BgRotate', 'BgSkew',
-  'BgZoom', 'ImageParallax',
+  'BgCloseUp',
+  'BgFade',
+  'BgFadeBack',
+  'BgFake3D',
+  'BgPan',
+  'BgParallax',
+  'BgPullBack',
+  'BgReveal',
+  'BgRotate',
+  'BgSkew',
+  'BgZoom',
+  'ImageParallax',
 ] as const;
 
 const ALL_PRESETS = new Set<string>([
@@ -54,12 +122,17 @@ export {
 
 /**
  * Validate that all namedEffect.type values reference known presets
- * or are covered by registerEffects() calls in the artifact JS.
+ * or are covered by registerEffects() calls.
+ *
+ * When `registeredEffects` is undefined (metadata unavailable), only the
+ * "is this a known preset name" check runs. The "was it registered" check
+ * is skipped to avoid false positives.
  */
 export function validateRegistry(artifact: InteractArtifact, scope?: Scope): ValidationResult {
-  const entries = [];
+  const entries: ValidationEntry[] = [];
   const { config, registeredEffects } = artifact;
   const { globalEffects, globalSequences } = buildGlobalMaps(config);
+  const hasRegistrationInfo = registeredEffects !== undefined;
   const registeredSet = new Set(registeredEffects ?? []);
 
   for (let i = 0; i < config.interactions.length; i++) {
@@ -72,7 +145,13 @@ export function validateRegistry(artifact: InteractArtifact, scope?: Scope): Val
         const raw = interaction.effects[j] as Record<string, unknown>;
         if (!isRecord(raw)) continue;
         const resolved = resolveEffect(raw, globalEffects);
-        checkNamedEffect(resolved, [...basePath, 'effects', j], registeredSet, entries);
+        checkNamedEffect(
+          resolved,
+          [...basePath, 'effects', j],
+          hasRegistrationInfo,
+          registeredSet,
+          entries,
+        );
       }
     }
 
@@ -87,7 +166,13 @@ export function validateRegistry(artifact: InteractArtifact, scope?: Scope): Val
           const effRaw = seqEffects[k] as Record<string, unknown>;
           if (!isRecord(effRaw)) continue;
           const resolved = resolveEffect(effRaw, globalEffects);
-          checkNamedEffect(resolved, [...basePath, 'sequences', j, 'effects', k], registeredSet, entries);
+          checkNamedEffect(
+            resolved,
+            [...basePath, 'sequences', j, 'effects', k],
+            hasRegistrationInfo,
+            registeredSet,
+            entries,
+          );
         }
       }
     }
@@ -99,8 +184,9 @@ export function validateRegistry(artifact: InteractArtifact, scope?: Scope): Val
 function checkNamedEffect(
   eff: Record<string, unknown>,
   path: (string | number)[],
+  hasRegistrationInfo: boolean,
   registeredSet: Set<string>,
-  entries: ReturnType<typeof error>[],
+  entries: ValidationEntry[],
 ): void {
   if (!isRecord(eff.namedEffect)) return;
   const ne = eff.namedEffect as Record<string, unknown>;
@@ -111,16 +197,30 @@ function checkNamedEffect(
   const isRegistered = registeredSet.has(type);
 
   if (!isKnownPreset && !isRegistered) {
-    entries.push(error(
-      [...path, 'namedEffect', 'type'],
-      'unknown-named-effect',
-      `namedEffect.type "${type}" is not a known @wix/motion-presets preset and was not found in registerEffects()`,
-    ));
-  } else if (isKnownPreset && !isRegistered) {
-    entries.push(error(
-      [...path, 'namedEffect', 'type'],
-      'preset-not-registered',
-      `namedEffect.type "${type}" is a known preset but was not registered via registerEffects(); call registerEffects({ ${type} }) before Interact.create()`,
-    ));
+    if (hasRegistrationInfo) {
+      entries.push(
+        error(
+          [...path, 'namedEffect', 'type'],
+          'unknown-named-effect',
+          `namedEffect.type "${type}" is not a known @wix/motion-presets preset and was not found in registerEffects()`,
+        ),
+      );
+    } else {
+      entries.push(
+        error(
+          [...path, 'namedEffect', 'type'],
+          'unknown-named-effect',
+          `namedEffect.type "${type}" is not a known @wix/motion-presets preset; verify it is registered via registerEffects()`,
+        ),
+      );
+    }
+  } else if (isKnownPreset && !isRegistered && hasRegistrationInfo) {
+    entries.push(
+      error(
+        [...path, 'namedEffect', 'type'],
+        'preset-not-registered',
+        `namedEffect.type "${type}" is a known preset but was not registered via registerEffects(); call registerEffects({ ${type} }) before Interact.create()`,
+      ),
+    );
   }
 }

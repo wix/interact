@@ -6,6 +6,8 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 
 **Offset semantics:** The `offset` inside `rangeStart`/`rangeEnd` is an object `{ unit: 'percentage', value: NUMBER }` where value is 0–100. For absolute lengths use `{ unit: 'px', value: NUMBER }` (or other CSS length units). Positive values move the effective range boundary forward along the scroll axis.
 
+> **Range order**: `rangeStart.name` MUST come before `rangeEnd.name` in scroll order. The correct scroll order is: `entry` → `entry-crossing` → `contain` → `exit-crossing` → `exit` → `cover`. Using an inverted range (e.g. `rangeStart: { name: 'exit' }` with `rangeEnd: { name: 'entry' }`) will break the animation.
+
 ## Table of Contents
 
 - [Rule 1: ViewProgress with keyframeEffect or namedEffect](#rule-1-viewprogress-with-keyframeeffect-or-namedeffect)

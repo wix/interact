@@ -1,4 +1,10 @@
-import type { InteractArtifact, InteractConfig, ValidationResult, ValidationEntry, Scope } from '../types';
+import type {
+  InteractArtifact,
+  InteractConfig,
+  ValidationResult,
+  ValidationEntry,
+  Scope,
+} from '../types';
 import { toResult } from './helpers';
 import { validateSchema } from './configValidator';
 import { validateReferences } from './referenceValidator';

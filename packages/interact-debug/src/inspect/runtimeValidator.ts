@@ -53,16 +53,26 @@ export function validateRuntime(config: InteractConfig, root?: ParentNode): Runt
 /**
  * Validate a single key at runtime.
  */
-export function validateKeyRuntime(config: InteractConfig, key: string, root?: ParentNode): RuntimeCheck {
+export function validateKeyRuntime(
+  config: InteractConfig,
+  key: string,
+  root?: ParentNode,
+): RuntimeCheck {
   const container = root ?? document;
   const checks: RuntimeCheck['checks'] = [];
 
   // 1. DOM element exists
-  const el = container.querySelector(`[data-interact-key="${key}"]`)
-    ?? container.querySelector(`interact-element[data-interact-key="${key}"]`);
+  const el =
+    container.querySelector(`[data-interact-key="${key}"]`) ??
+    container.querySelector(`interact-element[data-interact-key="${key}"]`);
 
   const hasElement = el !== null;
-  checks.push({ name: 'dom-element-exists', passed: hasElement, expected: 'element present', actual: hasElement ? 'found' : 'missing' });
+  checks.push({
+    name: 'dom-element-exists',
+    passed: hasElement,
+    expected: 'element present',
+    actual: hasElement ? 'found' : 'missing',
+  });
 
   if (!el) {
     return { key, passed: false, checks };
@@ -80,11 +90,10 @@ export function validateKeyRuntime(config: InteractConfig, key: string, root?: P
   // 3. Animation count
   const expected = countExpectedAnimations(config, key);
   const actual = countActualAnimations(el);
-  // Only report if animations are expected and the trigger has likely fired
   if (expected > 0) {
     checks.push({
       name: 'animation-count',
-      passed: actual >= 0, // relaxed: animations may not have fired yet
+      passed: actual > 0,
       expected: `${expected} expected`,
       actual: `${actual} present`,
     });
@@ -185,9 +194,11 @@ function checkControllerConnected(el: Element, key: string): boolean {
   }
 
   // Fallback: check if the library has set its data attributes
-  return el.hasAttribute('data-interact-enter')
-    || el.hasAttribute('data-interact-effect')
-    || el.tagName.toLowerCase() === 'interact-element';
+  return (
+    el.hasAttribute('data-interact-enter') ||
+    el.hasAttribute('data-interact-effect') ||
+    el.tagName.toLowerCase() === 'interact-element'
+  );
 }
 
 function countExpectedAnimations(config: InteractConfig, key: string): number {

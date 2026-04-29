@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { inspectElement, getAnimationState, inspectByKey, findOrphanedElements } from '../src/inspect/domInspector';
+import {
+  inspectElement,
+  getAnimationState,
+  inspectByKey,
+  findOrphanedElements,
+} from '../src/inspect/domInspector';
 
 function addKeyedElement(key: string, attrs: Record<string, string> = {}): HTMLElement {
   const el = document.createElement('div');
@@ -36,7 +41,10 @@ describe('domInspector', () => {
     });
 
     it('extracts data-interact-* attributes separately', () => {
-      const el = addKeyedElement('hero', { 'data-interact-initial': 'true', 'data-interact-enter': 'fade' });
+      const el = addKeyedElement('hero', {
+        'data-interact-initial': 'true',
+        'data-interact-enter': 'fade',
+      });
       const result = inspectElement(el);
       expect(result.interactAttributes['data-interact-key']).toBe('hero');
       expect(result.interactAttributes['data-interact-initial']).toBe('true');

@@ -31,7 +31,13 @@ export function validateReferences(config: InteractConfig, scope?: Scope): Valid
         const ref = interaction.conditions[c];
         referencedConditions.add(ref);
         if (!(ref in conditions)) {
-          entries.push(error([...basePath, 'conditions', c], 'condition-ref-missing', `Condition "${ref}" is not defined in config.conditions`));
+          entries.push(
+            error(
+              [...basePath, 'conditions', c],
+              'condition-ref-missing',
+              `Condition "${ref}" is not defined in config.conditions`,
+            ),
+          );
         }
       }
     }
@@ -45,7 +51,13 @@ export function validateReferences(config: InteractConfig, scope?: Scope): Valid
         if (typeof eff.effectId === 'string') {
           referencedEffects.add(eff.effectId);
           if (!(eff.effectId in effects)) {
-            entries.push(error([...effPath, 'effectId'], 'effect-ref-missing', `Effect "${eff.effectId}" is not defined in config.effects`));
+            entries.push(
+              error(
+                [...effPath, 'effectId'],
+                'effect-ref-missing',
+                `Effect "${eff.effectId}" is not defined in config.effects`,
+              ),
+            );
           }
         }
 
@@ -54,7 +66,13 @@ export function validateReferences(config: InteractConfig, scope?: Scope): Valid
         if (typeof eff.key === 'string' && eff.key !== interaction.key) {
           const targetExists = config.interactions.some((ix) => ix.key === eff.key);
           if (!targetExists) {
-            entries.push(warning([...effPath, 'key'], 'cross-key-missing', `Effect targets key "${eff.key}" but no interaction with that key exists`));
+            entries.push(
+              warning(
+                [...effPath, 'key'],
+                'cross-key-missing',
+                `Effect targets key "${eff.key}" but no interaction with that key exists`,
+              ),
+            );
           }
         }
       }
@@ -69,29 +87,51 @@ export function validateReferences(config: InteractConfig, scope?: Scope): Valid
         if (typeof seq.sequenceId === 'string') {
           referencedSequences.add(seq.sequenceId);
           if (!(seq.sequenceId in sequences)) {
-            entries.push(error([...seqPath, 'sequenceId'], 'sequence-ref-missing', `Sequence "${seq.sequenceId}" is not defined in config.sequences`));
+            entries.push(
+              error(
+                [...seqPath, 'sequenceId'],
+                'sequence-ref-missing',
+                `Sequence "${seq.sequenceId}" is not defined in config.sequences`,
+              ),
+            );
           }
         }
 
         collectConditionRefs(seq, seqPath, conditions, referencedConditions, entries);
 
-        const resolved = typeof seq.sequenceId === 'string' && isRecord(sequences[seq.sequenceId])
-          ? (sequences[seq.sequenceId] as Record<string, unknown>)
-          : null;
+        const resolved =
+          typeof seq.sequenceId === 'string' && isRecord(sequences[seq.sequenceId])
+            ? (sequences[seq.sequenceId] as Record<string, unknown>)
+            : null;
         const seqEffects = Array.isArray(seq.effects) ? seq.effects : [];
-        const effectsToCheck = seqEffects.length > 0
-          ? seqEffects
-          : (resolved && Array.isArray(resolved.effects) ? resolved.effects : []);
+        const effectsToCheck =
+          seqEffects.length > 0
+            ? seqEffects
+            : resolved && Array.isArray(resolved.effects)
+              ? resolved.effects
+              : [];
 
         for (let k = 0; k < effectsToCheck.length; k++) {
           const eff = effectsToCheck[k] as Record<string, unknown>;
           if (typeof eff.effectId === 'string') {
             referencedEffects.add(eff.effectId);
             if (!(eff.effectId in effects)) {
-              entries.push(error([...seqPath, 'effects', k, 'effectId'], 'effect-ref-missing', `Effect "${eff.effectId}" is not defined in config.effects`));
+              entries.push(
+                error(
+                  [...seqPath, 'effects', k, 'effectId'],
+                  'effect-ref-missing',
+                  `Effect "${eff.effectId}" is not defined in config.effects`,
+                ),
+              );
             }
           }
-          collectConditionRefs(eff, [...seqPath, 'effects', k], conditions, referencedConditions, entries);
+          collectConditionRefs(
+            eff,
+            [...seqPath, 'effects', k],
+            conditions,
+            referencedConditions,
+            entries,
+          );
         }
       }
     }
@@ -102,7 +142,13 @@ export function validateReferences(config: InteractConfig, scope?: Scope): Valid
       if (typeof params.effectId === 'string') {
         referencedEffects.add(params.effectId);
         if (!(params.effectId in effects)) {
-          entries.push(error([...basePath, 'params', 'effectId'], 'animationEnd-effect-ref', `animationEnd params.effectId "${params.effectId}" is not defined in config.effects`));
+          entries.push(
+            error(
+              [...basePath, 'params', 'effectId'],
+              'animationEnd-effect-ref',
+              `animationEnd params.effectId "${params.effectId}" is not defined in config.effects`,
+            ),
+          );
         }
       }
     }
@@ -118,7 +164,13 @@ export function validateReferences(config: InteractConfig, scope?: Scope): Valid
         if (typeof eff.effectId === 'string') {
           referencedEffects.add(eff.effectId);
           if (!(eff.effectId in effects)) {
-            entries.push(error(['sequences', seqId, 'effects', k, 'effectId'], 'effect-ref-missing', `Effect "${eff.effectId}" is not defined in config.effects`));
+            entries.push(
+              error(
+                ['sequences', seqId, 'effects', k, 'effectId'],
+                'effect-ref-missing',
+                `Effect "${eff.effectId}" is not defined in config.effects`,
+              ),
+            );
           }
         }
       }
@@ -134,17 +186,35 @@ export function validateReferences(config: InteractConfig, scope?: Scope): Valid
   if (!scope) {
     for (const id of Object.keys(effects)) {
       if (!referencedEffects.has(id)) {
-        entries.push(warning(['effects', id], 'orphan-effect', `Effect "${id}" is defined but never referenced by any interaction`));
+        entries.push(
+          warning(
+            ['effects', id],
+            'orphan-effect',
+            `Effect "${id}" is defined but never referenced by any interaction`,
+          ),
+        );
       }
     }
     for (const id of Object.keys(conditions)) {
       if (!referencedConditions.has(id)) {
-        entries.push(warning(['conditions', id], 'orphan-condition', `Condition "${id}" is defined but never referenced`));
+        entries.push(
+          warning(
+            ['conditions', id],
+            'orphan-condition',
+            `Condition "${id}" is defined but never referenced`,
+          ),
+        );
       }
     }
     for (const id of Object.keys(sequences)) {
       if (!referencedSequences.has(id)) {
-        entries.push(warning(['sequences', id], 'orphan-sequence', `Sequence "${id}" is defined but never referenced by any interaction`));
+        entries.push(
+          warning(
+            ['sequences', id],
+            'orphan-sequence',
+            `Sequence "${id}" is defined but never referenced by any interaction`,
+          ),
+        );
       }
     }
   }
@@ -164,7 +234,13 @@ function collectConditionRefs(
     const ref = obj.conditions[c] as string;
     referencedConditions.add(ref);
     if (!(ref in globalConditions)) {
-      entries.push(error([...basePath, 'conditions', c], 'condition-ref-missing', `Condition "${ref}" is not defined in config.conditions`));
+      entries.push(
+        error(
+          [...basePath, 'conditions', c],
+          'condition-ref-missing',
+          `Condition "${ref}" is not defined in config.conditions`,
+        ),
+      );
     }
   }
 }

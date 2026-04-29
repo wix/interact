@@ -1,9 +1,4 @@
-export {
-  inspectConfig,
-  inspectInteraction,
-  inspectEffect,
-  inspectKey,
-} from './configInspector';
+export { inspectConfig, inspectInteraction, inspectEffect, inspectKey } from './configInspector';
 
 export type {
   ConfigSummary,
@@ -21,11 +16,7 @@ export {
   findOrphanedElements,
 } from './domInspector';
 
-export type {
-  ElementInspection,
-  AnimationSnapshot,
-  AnimationState,
-} from './domInspector';
+export type { ElementInspection, AnimationSnapshot, AnimationState } from './domInspector';
 
 export {
   validateRuntime,
@@ -35,7 +26,4 @@ export {
   captureWarningsAsync,
 } from './runtimeValidator';
 
-export type {
-  RuntimeCheck,
-  CapturedWarning,
-} from './runtimeValidator';
+export type { RuntimeCheck, CapturedWarning } from './runtimeValidator';

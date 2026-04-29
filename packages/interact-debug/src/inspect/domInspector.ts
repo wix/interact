@@ -103,8 +103,9 @@ export function getAnimationState(element: Element): AnimationState[] {
  */
 export function inspectByKey(key: string, root?: ParentNode): ElementInspection | null {
   const container = root ?? document;
-  const element = container.querySelector(`[data-interact-key="${key}"]`)
-    ?? container.querySelector(`interact-element[data-interact-key="${key}"]`);
+  const element =
+    container.querySelector(`[data-interact-key="${key}"]`) ??
+    container.querySelector(`interact-element[data-interact-key="${key}"]`);
 
   if (!element) return null;
   return inspectElement(element);
@@ -138,8 +139,8 @@ export function findOrphanedElements(root?: ParentNode): { key: string; element:
         orphans.push({ key, element });
       }
     } else {
-      const hasController = element.hasAttribute('data-interact-enter')
-        || element.hasAttribute('data-interact-effect');
+      const hasController =
+        element.hasAttribute('data-interact-enter') || element.hasAttribute('data-interact-effect');
       if (!hasController) {
         orphans.push({ key, element });
       }

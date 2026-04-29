@@ -4,6 +4,15 @@ import { isRecord, warning, toResult, isInScope, resolveEffect, buildGlobalMaps 
 const LAYOUT_PROPERTIES = /\b(width|height|top|left|right|bottom|margin|padding)\b/i;
 const SIZE_TRANSFORMS = /\b(scale|translate)\b/i;
 
+const RANGE_ORDER: Record<string, number> = {
+  entry: 0,
+  'entry-crossing': 1,
+  contain: 2,
+  'exit-crossing': 3,
+  exit: 4,
+  cover: 5,
+};
+
 function effectChangesLayout(eff: Record<string, unknown>): boolean {
   if (isRecord(eff.keyframeEffect)) {
     const kf = eff.keyframeEffect as Record<string, unknown>;
@@ -15,7 +24,10 @@ function effectChangesLayout(eff: Record<string, unknown>): boolean {
   return false;
 }
 
-function isSameElementTarget(interaction: Record<string, unknown>, eff: Record<string, unknown>): boolean {
+function isSameElementTarget(
+  interaction: Record<string, unknown>,
+  eff: Record<string, unknown>,
+): boolean {
   if ('selector' in eff) return false;
   if (typeof eff.key === 'string' && eff.key !== interaction.key) return false;
   return true;
@@ -40,7 +52,13 @@ export function detectAntiPatterns(artifact: InteractArtifact, scope?: Scope): V
 
     const pair = `${key}::${trigger}`;
     if (keyTriggerPairs.has(pair)) {
-      entries.push(warning(basePath, 'duplicate-key-trigger', `Duplicate key+trigger combination: "${key}" + "${trigger}"; the second interaction may shadow the first`));
+      entries.push(
+        warning(
+          basePath,
+          'duplicate-key-trigger',
+          `Duplicate key+trigger combination: "${key}" + "${trigger}"; the second interaction may shadow the first`,
+        ),
+      );
     }
     keyTriggerPairs.add(pair);
 
@@ -53,26 +71,80 @@ export function detectAntiPatterns(artifact: InteractArtifact, scope?: Scope): V
       if (trigger === 'viewEnter') {
         const triggerType = eff.triggerType as string | undefined;
         if (triggerType && triggerType !== 'once' && isSameElementTarget(interaction, eff)) {
-          entries.push(warning(effPath, 'viewEnter-same-element-non-once', `viewEnter with triggerType "${triggerType}" on same source/target element; use separate source and target elements`));
+          entries.push(
+            warning(
+              effPath,
+              'viewEnter-same-element-non-once',
+              `viewEnter with triggerType "${triggerType}" on same source/target element; use separate source and target elements`,
+            ),
+          );
         }
       }
 
-      if (trigger === 'hover' && isSameElementTarget(interaction, eff) && effectChangesLayout(eff)) {
-        entries.push(warning(effPath, 'hover-layout-same-element', 'hover effect changes size/position on same element as source; this causes hit-area jitter. Use selector to animate a child element'));
+      if (
+        trigger === 'hover' &&
+        isSameElementTarget(interaction, eff) &&
+        effectChangesLayout(eff)
+      ) {
+        entries.push(
+          warning(
+            effPath,
+            'hover-layout-same-element',
+            'hover effect changes size/position on same element as source; this causes hit-area jitter. Use selector to animate a child element',
+          ),
+        );
       }
 
-      if (trigger === 'pointerMove' && isSameElementTarget(interaction, eff) && effectChangesLayout(eff)) {
+      if (
+        trigger === 'pointerMove' &&
+        isSameElementTarget(interaction, eff) &&
+        effectChangesLayout(eff)
+      ) {
         const params = interaction.params as Record<string, unknown> | undefined;
         if (params?.hitArea === 'self') {
-          entries.push(warning(effPath, 'pointerMove-self-layout', 'pointerMove with hitArea "self" and layout-changing effects on same element; use selector to animate a child'));
+          entries.push(
+            warning(
+              effPath,
+              'pointerMove-self-layout',
+              'pointerMove with hitArea "self" and layout-changing effects on same element; use selector to animate a child',
+            ),
+          );
         }
       }
 
       if (typeof eff.duration === 'number') {
         if (eff.duration === 0) {
-          entries.push(warning([...effPath, 'duration'], 'duration-zero', 'duration is 0, which produces no visible animation'));
+          entries.push(
+            warning(
+              [...effPath, 'duration'],
+              'duration-zero',
+              'duration is 0, which produces no visible animation',
+            ),
+          );
         } else if (eff.duration > 10000) {
-          entries.push(warning([...effPath, 'duration'], 'duration-extreme', `duration of ${eff.duration}ms is very long (>10s); this may be unintentional`));
+          entries.push(
+            warning(
+              [...effPath, 'duration'],
+              'duration-extreme',
+              `duration of ${eff.duration}ms is very long (>10s); this may be unintentional`,
+            ),
+          );
+        }
+      }
+
+      if (isRecord(eff.rangeStart) && isRecord(eff.rangeEnd)) {
+        const startName = (eff.rangeStart as Record<string, unknown>).name as string | undefined;
+        const endName = (eff.rangeEnd as Record<string, unknown>).name as string | undefined;
+        if (startName && endName && startName in RANGE_ORDER && endName in RANGE_ORDER) {
+          if (RANGE_ORDER[startName] > RANGE_ORDER[endName]) {
+            entries.push(
+              warning(
+                effPath,
+                'range-inverted',
+                `rangeStart "${startName}" comes after rangeEnd "${endName}" in scroll order; ranges may be inverted`,
+              ),
+            );
+          }
         }
       }
     }
@@ -81,7 +153,13 @@ export function detectAntiPatterns(artifact: InteractArtifact, scope?: Scope): V
       const hasRepeat = resolvedEffects.some((e) => e.triggerType === 'repeat');
       const params = interaction.params as Record<string, unknown> | undefined;
       if (hasRepeat && (!params || !('threshold' in params))) {
-        entries.push(warning(basePath, 'viewEnter-repeat-no-threshold', 'viewEnter with repeat triggerType but no explicit threshold param; consider setting threshold for predictable re-triggering'));
+        entries.push(
+          warning(
+            basePath,
+            'viewEnter-repeat-no-threshold',
+            'viewEnter with repeat triggerType but no explicit threshold param; consider setting threshold for predictable re-triggering',
+          ),
+        );
       }
     }
   }

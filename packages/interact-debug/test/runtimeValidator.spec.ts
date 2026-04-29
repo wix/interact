@@ -39,7 +39,9 @@ describe('runtimeValidator', () => {
 
       const results = validateRuntime(config);
       expect(results).toHaveLength(2);
-      expect(results.every((r) => r.checks.find((c) => c.name === 'dom-element-exists')?.passed)).toBe(true);
+      expect(
+        results.every((r) => r.checks.find((c) => c.name === 'dom-element-exists')?.passed),
+      ).toBe(true);
     });
 
     it('fails when a key has no DOM element', () => {
@@ -52,7 +54,9 @@ describe('runtimeValidator', () => {
       const results = validateRuntime(config);
       const missingResult = results.find((r) => r.key === 'missing');
       expect(missingResult?.passed).toBe(false);
-      expect(missingResult?.checks.find((c) => c.name === 'dom-element-exists')?.passed).toBe(false);
+      expect(missingResult?.checks.find((c) => c.name === 'dom-element-exists')?.passed).toBe(
+        false,
+      );
     });
 
     it('deduplicates keys (only checks once per key)', () => {
@@ -70,11 +74,12 @@ describe('runtimeValidator', () => {
   describe('validateKeyRuntime', () => {
     it('returns checks for a specific key', () => {
       addKeyedElement('hero');
-      const config = makeConfig([
-        { key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'fadeIn' }] },
-      ], {
-        fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 },
-      });
+      const config = makeConfig(
+        [{ key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'fadeIn' }] }],
+        {
+          fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 },
+        },
+      );
 
       const result = validateKeyRuntime(config, 'hero');
       expect(result.key).toBe('hero');
@@ -82,9 +87,7 @@ describe('runtimeValidator', () => {
     });
 
     it('fails all checks when element is missing', () => {
-      const config = makeConfig([
-        { key: 'hero', trigger: 'viewEnter', effects: [] },
-      ]);
+      const config = makeConfig([{ key: 'hero', trigger: 'viewEnter', effects: [] }]);
 
       const result = validateKeyRuntime(config, 'hero');
       expect(result.passed).toBe(false);
@@ -96,18 +99,22 @@ describe('runtimeValidator', () => {
   describe('compareExpectedAnimations', () => {
     it('counts expected animation effects for a key', () => {
       addKeyedElement('hero');
-      const config = makeConfig([
+      const config = makeConfig(
+        [
+          {
+            key: 'hero',
+            trigger: 'viewEnter',
+            effects: [{ effectId: 'fadeIn' }, { effectId: 'slideIn' }],
+          },
+        ],
         {
-          key: 'hero', trigger: 'viewEnter',
-          effects: [
-            { effectId: 'fadeIn' },
-            { effectId: 'slideIn' },
-          ],
+          fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 },
+          slideIn: {
+            keyframeEffect: { name: 'slide', keyframes: [{ transform: 'translateX(0)' }] },
+            duration: 500,
+          },
         },
-      ], {
-        fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 },
-        slideIn: { keyframeEffect: { name: 'slide', keyframes: [{ transform: 'translateX(0)' }] }, duration: 500 },
-      });
+      );
 
       const result = compareExpectedAnimations(config, 'hero');
       expect(result.expected).toBe(2);
@@ -118,10 +125,9 @@ describe('runtimeValidator', () => {
       addKeyedElement('btn');
       const config = makeConfig([
         {
-          key: 'btn', trigger: 'hover',
-          effects: [
-            { transition: { styleProperties: [{ name: 'color', value: 'red' }] } },
-          ],
+          key: 'btn',
+          trigger: 'hover',
+          effects: [{ transition: { styleProperties: [{ name: 'color', value: 'red' }] } }],
         },
       ]);
 
@@ -131,16 +137,18 @@ describe('runtimeValidator', () => {
 
     it('excludes cross-key effects from expected count', () => {
       addKeyedElement('hero');
-      const config = makeConfig([
+      const config = makeConfig(
+        [
+          {
+            key: 'hero',
+            trigger: 'viewEnter',
+            effects: [{ effectId: 'fadeIn', key: 'banner' }],
+          },
+        ],
         {
-          key: 'hero', trigger: 'viewEnter',
-          effects: [
-            { effectId: 'fadeIn', key: 'banner' },
-          ],
+          fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 },
         },
-      ], {
-        fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 },
-      });
+      );
 
       const result = compareExpectedAnimations(config, 'hero');
       expect(result.expected).toBe(0);
@@ -148,15 +156,22 @@ describe('runtimeValidator', () => {
 
     it('counts effects within sequences', () => {
       addKeyedElement('hero');
-      const config = makeConfig([
+      const config = makeConfig(
+        [
+          {
+            key: 'hero',
+            trigger: 'viewEnter',
+            sequences: [{ effects: [{ effectId: 'fadeIn' }, { effectId: 'slideIn' }] }],
+          },
+        ],
         {
-          key: 'hero', trigger: 'viewEnter',
-          sequences: [{ effects: [{ effectId: 'fadeIn' }, { effectId: 'slideIn' }] }],
+          fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 },
+          slideIn: {
+            keyframeEffect: { name: 'slide', keyframes: [{ transform: 'translateX(0)' }] },
+            duration: 500,
+          },
         },
-      ], {
-        fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 },
-        slideIn: { keyframeEffect: { name: 'slide', keyframes: [{ transform: 'translateX(0)' }] }, duration: 500 },
-      });
+      );
 
       const result = compareExpectedAnimations(config, 'hero');
       expect(result.expected).toBe(2);
@@ -184,7 +199,9 @@ describe('runtimeValidator', () => {
     it('restores console.warn even if callback throws', () => {
       const original = console.warn;
       expect(() => {
-        captureWarnings(() => { throw new Error('oops'); });
+        captureWarnings(() => {
+          throw new Error('oops');
+        });
       }).toThrow('oops');
       expect(console.warn).toBe(original);
     });

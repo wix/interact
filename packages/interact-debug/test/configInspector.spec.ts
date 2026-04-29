@@ -1,11 +1,19 @@
 import { describe, it, expect } from 'vitest';
-import { inspectConfig, inspectInteraction, inspectEffect, inspectKey } from '../src/inspect/configInspector';
+import {
+  inspectConfig,
+  inspectInteraction,
+  inspectEffect,
+  inspectKey,
+} from '../src/inspect/configInspector';
 import type { InteractConfig } from '../src/types';
 
 function makeConfig(overrides?: Partial<InteractConfig>): InteractConfig {
   return {
     effects: {
-      fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500 },
+      fadeIn: {
+        keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+        duration: 500,
+      },
       grow: { namedEffect: { type: 'GrowScroll' } },
     } as any,
     interactions: [
@@ -33,31 +41,47 @@ describe('inspectConfig', () => {
   });
 
   it('detects state effects', () => {
-    const summary = inspectConfig(makeConfig({
-      effects: {} as any,
-      interactions: [
-        { key: 'btn', trigger: 'hover', effects: [{ transition: { styleProperties: [{ name: 'color', value: 'red' }] } }] },
-      ] as any,
-    }));
+    const summary = inspectConfig(
+      makeConfig({
+        effects: {} as any,
+        interactions: [
+          {
+            key: 'btn',
+            trigger: 'hover',
+            effects: [{ transition: { styleProperties: [{ name: 'color', value: 'red' }] } }],
+          },
+        ] as any,
+      }),
+    );
     expect(summary.hasStateEffects).toBe(true);
   });
 
   it('detects cross-key edges', () => {
-    const summary = inspectConfig(makeConfig({
-      effects: { fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 } } as any,
-      interactions: [
-        { key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'fadeIn', key: 'banner' }] },
-      ] as any,
-    }));
+    const summary = inspectConfig(
+      makeConfig({
+        effects: {
+          fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 },
+        } as any,
+        interactions: [
+          { key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'fadeIn', key: 'banner' }] },
+        ] as any,
+      }),
+    );
     expect(summary.crossKeyEdges).toHaveLength(1);
-    expect(summary.crossKeyEdges[0]).toEqual({ sourceKey: 'hero', targetKey: 'banner', effectId: 'fadeIn' });
+    expect(summary.crossKeyEdges[0]).toEqual({
+      sourceKey: 'hero',
+      targetKey: 'banner',
+      effectId: 'fadeIn',
+    });
   });
 
   it('reports conditions and sequences counts', () => {
-    const summary = inspectConfig(makeConfig({
-      conditions: { desktop: { type: 'media' } },
-      sequences: { entrance: { effects: [] } },
-    } as any));
+    const summary = inspectConfig(
+      makeConfig({
+        conditions: { desktop: { type: 'media' } },
+        sequences: { entrance: { effects: [] } },
+      } as any),
+    );
     expect(summary.conditionCount).toBe(1);
     expect(summary.sequenceCount).toBe(1);
   });
@@ -96,7 +120,12 @@ describe('inspectInteraction', () => {
     const config = makeConfig({
       conditions: { desktop: { type: 'media' } },
       interactions: [
-        { key: 'hero', trigger: 'viewEnter', conditions: ['desktop'], effects: [{ effectId: 'fadeIn' }] },
+        {
+          key: 'hero',
+          trigger: 'viewEnter',
+          conditions: ['desktop'],
+          effects: [{ effectId: 'fadeIn' }],
+        },
       ] as any,
     });
     const result = inspectInteraction(config, 0);
@@ -142,7 +171,9 @@ describe('inspectKey', () => {
 
   it('finds interactions where key is target (cross-key)', () => {
     const config = makeConfig({
-      effects: { fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 } } as any,
+      effects: {
+        fadeIn: { keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }] }, duration: 500 },
+      } as any,
       interactions: [
         { key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'fadeIn', key: 'banner' }] },
       ] as any,

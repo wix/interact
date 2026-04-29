@@ -4,5 +4,6 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: [],
+    exclude: ['test/rulesEval.spec.ts', 'node_modules/**'],
   },
 });

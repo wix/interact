@@ -62,19 +62,35 @@ export class InteractLogger {
     }
   }
 
-  debug(category: LogCategory, message: string, context?: Parameters<InteractLogger['log']>[3]): void {
+  debug(
+    category: LogCategory,
+    message: string,
+    context?: Parameters<InteractLogger['log']>[3],
+  ): void {
     this.log('debug', category, message, context);
   }
 
-  info(category: LogCategory, message: string, context?: Parameters<InteractLogger['log']>[3]): void {
+  info(
+    category: LogCategory,
+    message: string,
+    context?: Parameters<InteractLogger['log']>[3],
+  ): void {
     this.log('info', category, message, context);
   }
 
-  warn(category: LogCategory, message: string, context?: Parameters<InteractLogger['log']>[3]): void {
+  warn(
+    category: LogCategory,
+    message: string,
+    context?: Parameters<InteractLogger['log']>[3],
+  ): void {
     this.log('warn', category, message, context);
   }
 
-  error(category: LogCategory, message: string, context?: Parameters<InteractLogger['log']>[3]): void {
+  error(
+    category: LogCategory,
+    message: string,
+    context?: Parameters<InteractLogger['log']>[3],
+  ): void {
     this.log('error', category, message, context);
   }
 

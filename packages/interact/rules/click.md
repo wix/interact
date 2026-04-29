@@ -173,7 +173,7 @@ Use sequences when a click should sync/stagger animations across multiple elemen
             offset: [OFFSET_MS],
             offsetEasing: '[OFFSET_EASING]',
             effects: [
-                [EFFECT_DEFINTION],
+                [EFFECT_DEFINITION],
                 // .. more effects as necessary
             ]
         }
@@ -186,4 +186,4 @@ Use sequences when a click should sync/stagger animations across multiple elemen
 - `[SOURCE_KEY]` / `[TRIGGER_TYPE]` — same as Rule 1. `triggerType` is set on the sequence config, not on individual effects within the sequence.
 - `[OFFSET_MS]` — time offset for staggering each child's animation start, in milliseconds.
 - `[OFFSET_EASING]` — easing curve for the offset staggering distribution. Defaults to `'linear'`.
-- `[EFFECT_DEFINTION]` — a definition of, or a reference to a time-based animation effect.
+- `[EFFECT_DEFINITION]` — a definition of, or a reference to a time-based animation effect.

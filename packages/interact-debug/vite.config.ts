@@ -11,6 +11,7 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         playwright: path.resolve(__dirname, 'src/playwright/index.ts'),
+        eval: path.resolve(__dirname, 'src/eval/index.ts'),
         cli: path.resolve(__dirname, 'src/cli.ts'),
       },
       formats: ['es', 'cjs'],
@@ -23,8 +24,10 @@ export default defineConfig({
         '@wix/motion-presets',
         '@playwright/test',
         'jsdom',
+        'node:child_process',
         'node:fs',
         'node:fs/promises',
+        'node:os',
         'node:path',
         'node:url',
         'vite',

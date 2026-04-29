@@ -65,7 +65,10 @@ describe('validateSchema', () => {
     const result = validateSchema({
       effects: {
         scroll: {
-          keyframeEffect: { name: 'move', keyframes: [{ transform: 'translateY(0)' }, { transform: 'translateY(100px)' }] },
+          keyframeEffect: {
+            name: 'move',
+            keyframes: [{ transform: 'translateY(0)' }, { transform: 'translateY(100px)' }],
+          },
           rangeStart: { name: 'entry' },
           rangeEnd: { name: 'cover' },
         },
@@ -111,7 +114,13 @@ describe('validateSchema', () => {
   it('rejects config with array effects', () => {
     const result = validateSchema({
       effects: [],
-      interactions: [{ key: 'a', trigger: 'hover', effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }] }],
+      interactions: [
+        {
+          key: 'a',
+          trigger: 'hover',
+          effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }],
+        },
+      ],
     });
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.rule === 'effects-not-array')).toBe(true);
@@ -134,7 +143,12 @@ describe('validateSchema', () => {
   it('rejects interaction without key', () => {
     const result = validateSchema({
       effects: {},
-      interactions: [{ trigger: 'hover', effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }] }],
+      interactions: [
+        {
+          trigger: 'hover',
+          effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }],
+        },
+      ],
     });
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.rule === 'interaction-key')).toBe(true);
@@ -143,7 +157,13 @@ describe('validateSchema', () => {
   it('rejects interaction with empty key', () => {
     const result = validateSchema({
       effects: {},
-      interactions: [{ key: '', trigger: 'hover', effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }] }],
+      interactions: [
+        {
+          key: '',
+          trigger: 'hover',
+          effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }],
+        },
+      ],
     });
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.rule === 'interaction-key')).toBe(true);
@@ -219,7 +239,12 @@ describe('validateSchema', () => {
         {
           key: 'hero',
           trigger: 'viewEnter',
-          effects: [{ effectId: 'shared', keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] } }],
+          effects: [
+            {
+              effectId: 'shared',
+              keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+            },
+          ],
         },
       ],
     });
@@ -253,7 +278,13 @@ describe('validateSchema', () => {
         {
           key: 'x',
           trigger: 'hover',
-          effects: [{ keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] }, namedEffect: { type: 'FadeIn' }, duration: 500 }],
+          effects: [
+            {
+              keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] },
+              namedEffect: { type: 'FadeIn' },
+              duration: 500,
+            },
+          ],
         },
       ],
     });
@@ -268,7 +299,13 @@ describe('validateSchema', () => {
         {
           key: 'x',
           trigger: 'hover',
-          effects: [{ keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] }, transition: { styleProperties: [{ name: 'color', value: 'red' }] }, duration: 500 }],
+          effects: [
+            {
+              keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] },
+              transition: { styleProperties: [{ name: 'color', value: 'red' }] },
+              duration: 500,
+            },
+          ],
         },
       ],
     });
@@ -283,7 +320,12 @@ describe('validateSchema', () => {
         {
           key: 'x',
           trigger: 'hover',
-          effects: [{ transition: { styleProperties: [{ name: 'color', value: 'red' }] }, transitionProperties: [{ name: 'color', value: 'blue' }] }],
+          effects: [
+            {
+              transition: { styleProperties: [{ name: 'color', value: 'red' }] },
+              transitionProperties: [{ name: 'color', value: 'blue' }],
+            },
+          ],
         },
       ],
     });
@@ -295,7 +337,11 @@ describe('validateSchema', () => {
     const result = validateSchema({
       effects: {},
       interactions: [
-        { key: 'x', trigger: 'hover', effects: [{ keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] }, duration: -100 }] },
+        {
+          key: 'x',
+          trigger: 'hover',
+          effects: [{ keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] }, duration: -100 }],
+        },
       ],
     });
     expect(result.valid).toBe(false);
@@ -306,7 +352,11 @@ describe('validateSchema', () => {
     const result = validateSchema({
       effects: {},
       interactions: [
-        { key: 'x', trigger: 'hover', effects: [{ keyframeEffect: { keyframes: [{ opacity: 0 }] }, duration: 500 }] },
+        {
+          key: 'x',
+          trigger: 'hover',
+          effects: [{ keyframeEffect: { keyframes: [{ opacity: 0 }] }, duration: 500 }],
+        },
       ],
     });
     expect(result.valid).toBe(false);
@@ -317,7 +367,11 @@ describe('validateSchema', () => {
     const result = validateSchema({
       effects: {},
       interactions: [
-        { key: 'x', trigger: 'hover', effects: [{ keyframeEffect: { name: '', keyframes: [{ opacity: 0 }] }, duration: 500 }] },
+        {
+          key: 'x',
+          trigger: 'hover',
+          effects: [{ keyframeEffect: { name: '', keyframes: [{ opacity: 0 }] }, duration: 500 }],
+        },
       ],
     });
     expect(result.valid).toBe(false);
@@ -328,7 +382,11 @@ describe('validateSchema', () => {
     const result = validateSchema({
       effects: {},
       interactions: [
-        { key: 'x', trigger: 'hover', effects: [{ keyframeEffect: { name: 'x', keyframes: [] }, duration: 500 }] },
+        {
+          key: 'x',
+          trigger: 'hover',
+          effects: [{ keyframeEffect: { name: 'x', keyframes: [] }, duration: 500 }],
+        },
       ],
     });
     expect(result.valid).toBe(false);
@@ -350,7 +408,17 @@ describe('validateSchema', () => {
     const result = validateSchema({
       effects: {},
       interactions: [
-        { key: 'x', trigger: 'hover', effects: [{ keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] }, duration: 500, triggerType: 'loop' }] },
+        {
+          key: 'x',
+          trigger: 'hover',
+          effects: [
+            {
+              keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] },
+              duration: 500,
+              triggerType: 'loop',
+            },
+          ],
+        },
       ],
     });
     expect(result.valid).toBe(false);
@@ -361,7 +429,17 @@ describe('validateSchema', () => {
     const result = validateSchema({
       effects: {},
       interactions: [
-        { key: 'x', trigger: 'hover', effects: [{ keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] }, duration: 500, fill: 'auto' }] },
+        {
+          key: 'x',
+          trigger: 'hover',
+          effects: [
+            {
+              keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] },
+              duration: 500,
+              fill: 'auto',
+            },
+          ],
+        },
       ],
     });
     expect(result.valid).toBe(false);
@@ -372,7 +450,16 @@ describe('validateSchema', () => {
     const result = validateSchema({
       effects: {},
       interactions: [
-        { key: 'btn', trigger: 'click', effects: [{ stateAction: 'flip', transition: { styleProperties: [{ name: 'color', value: 'blue' }] } }] },
+        {
+          key: 'btn',
+          trigger: 'click',
+          effects: [
+            {
+              stateAction: 'flip',
+              transition: { styleProperties: [{ name: 'color', value: 'blue' }] },
+            },
+          ],
+        },
       ],
     });
     expect(result.valid).toBe(false);
@@ -388,7 +475,13 @@ describe('validateSchema', () => {
         {
           key: 'x',
           trigger: 'viewProgress',
-          effects: [{ keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] }, rangeStart: { name: 'start' }, rangeEnd: { name: 'cover' } }],
+          effects: [
+            {
+              keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] },
+              rangeStart: { name: 'start' },
+              rangeEnd: { name: 'cover' },
+            },
+          ],
         },
       ],
     });
@@ -403,7 +496,13 @@ describe('validateSchema', () => {
         {
           key: 'x',
           trigger: 'viewProgress',
-          effects: [{ keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] }, rangeStart: { name: 'entry', offset: { value: 'bad', unit: 'percentage' } }, rangeEnd: { name: 'cover' } }],
+          effects: [
+            {
+              keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] },
+              rangeStart: { name: 'entry', offset: { value: 'bad', unit: 'percentage' } },
+              rangeEnd: { name: 'cover' },
+            },
+          ],
         },
       ],
     });
@@ -447,7 +546,13 @@ describe('validateSchema', () => {
           key: 'x',
           trigger: 'pointerMove',
           params: { hitArea: 'page' },
-          effects: [{ keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] }, rangeStart: { name: 'cover' }, rangeEnd: { name: 'cover' } }],
+          effects: [
+            {
+              keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] },
+              rangeStart: { name: 'cover' },
+              rangeEnd: { name: 'cover' },
+            },
+          ],
         },
       ],
     });
@@ -463,7 +568,13 @@ describe('validateSchema', () => {
           key: 'x',
           trigger: 'pointerMove',
           params: { axis: 'z' },
-          effects: [{ keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] }, rangeStart: { name: 'cover' }, rangeEnd: { name: 'cover' } }],
+          effects: [
+            {
+              keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] },
+              rangeStart: { name: 'cover' },
+              rangeEnd: { name: 'cover' },
+            },
+          ],
         },
       ],
     });
@@ -474,7 +585,14 @@ describe('validateSchema', () => {
   it('rejects invalid threshold type in viewEnter params', () => {
     const result = validateSchema({
       effects: {},
-      interactions: [{ key: 'x', trigger: 'viewEnter', params: { threshold: 'high' }, effects: [{ effectId: 'fadeIn' }] }],
+      interactions: [
+        {
+          key: 'x',
+          trigger: 'viewEnter',
+          params: { threshold: 'high' },
+          effects: [{ effectId: 'fadeIn' }],
+        },
+      ],
     });
     expect(result.errors.some((e) => e.rule === 'param-threshold')).toBe(true);
   });
@@ -482,35 +600,56 @@ describe('validateSchema', () => {
   // ── Scope filtering ───────────────────────────────────────────────────
 
   it('filters validation to a specific interaction index', () => {
-    const result = validateSchema({
-      effects: {},
-      interactions: [
-        { key: 'a', trigger: 'badTrigger', effects: [] },
-        { key: 'b', trigger: 'hover', effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }] },
-      ],
-    }, { interactionIndex: 1 });
+    const result = validateSchema(
+      {
+        effects: {},
+        interactions: [
+          { key: 'a', trigger: 'badTrigger', effects: [] },
+          {
+            key: 'b',
+            trigger: 'hover',
+            effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }],
+          },
+        ],
+      },
+      { interactionIndex: 1 },
+    );
     expect(result.valid).toBe(true);
   });
 
   it('filters validation to a specific key', () => {
-    const result = validateSchema({
-      effects: {},
-      interactions: [
-        { key: 'a', trigger: 'badTrigger', effects: [] },
-        { key: 'b', trigger: 'hover', effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }] },
-      ],
-    }, { key: 'b' });
+    const result = validateSchema(
+      {
+        effects: {},
+        interactions: [
+          { key: 'a', trigger: 'badTrigger', effects: [] },
+          {
+            key: 'b',
+            trigger: 'hover',
+            effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }],
+          },
+        ],
+      },
+      { key: 'b' },
+    );
     expect(result.valid).toBe(true);
   });
 
   it('filters validation to a specific trigger type', () => {
-    const result = validateSchema({
-      effects: {},
-      interactions: [
-        { key: 'a', trigger: 'badTrigger', effects: [] },
-        { key: 'b', trigger: 'hover', effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }] },
-      ],
-    }, { trigger: 'hover' });
+    const result = validateSchema(
+      {
+        effects: {},
+        interactions: [
+          { key: 'a', trigger: 'badTrigger', effects: [] },
+          {
+            key: 'b',
+            trigger: 'hover',
+            effects: [{ transition: { styleProperties: [{ name: 'x', value: 'y' }] } }],
+          },
+        ],
+      },
+      { trigger: 'hover' },
+    );
     expect(result.valid).toBe(true);
   });
 
@@ -520,7 +659,16 @@ describe('validateSchema', () => {
     const result = validateSchema({
       effects: {},
       interactions: [
-        { key: 'hero', trigger: 'viewEnter', effects: [{ keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500 }] },
+        {
+          key: 'hero',
+          trigger: 'viewEnter',
+          effects: [
+            {
+              keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+              duration: 500,
+            },
+          ],
+        },
       ],
     });
     expect(result.valid).toBe(true);
@@ -535,7 +683,16 @@ describe('validateSchema', () => {
         {
           key: 'hero',
           trigger: 'viewEnter',
-          sequences: [{ effects: [{ keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500 }] }],
+          sequences: [
+            {
+              effects: [
+                {
+                  keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+                  duration: 500,
+                },
+              ],
+            },
+          ],
         },
       ],
     });
@@ -545,8 +702,19 @@ describe('validateSchema', () => {
   it('resolves SequenceConfigRef from config.sequences', () => {
     const result = validateSchema({
       effects: {},
-      sequences: { entrance: { effects: [{ keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500 }] } },
-      interactions: [{ key: 'hero', trigger: 'viewEnter', sequences: [{ sequenceId: 'entrance' }] }],
+      sequences: {
+        entrance: {
+          effects: [
+            {
+              keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+              duration: 500,
+            },
+          ],
+        },
+      },
+      interactions: [
+        { key: 'hero', trigger: 'viewEnter', sequences: [{ sequenceId: 'entrance' }] },
+      ],
     });
     expect(result.valid).toBe(true);
   });
@@ -557,7 +725,9 @@ describe('validateSchema', () => {
       sequences: {
         base: {
           delay: 100,
-          effects: [{ keyframeEffect: { name: 'old', keyframes: [{ opacity: 0 }] }, duration: 300 }],
+          effects: [
+            { keyframeEffect: { name: 'old', keyframes: [{ opacity: 0 }] }, duration: 300 },
+          ],
         },
       },
       interactions: [
@@ -567,7 +737,12 @@ describe('validateSchema', () => {
           sequences: [
             {
               sequenceId: 'base',
-              effects: [{ keyframeEffect: { name: 'new', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500 }],
+              effects: [
+                {
+                  keyframeEffect: { name: 'new', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+                  duration: 500,
+                },
+              ],
             },
           ],
         },
@@ -583,7 +758,16 @@ describe('validateSchema', () => {
         {
           key: 'hero',
           trigger: 'viewEnter',
-          sequences: [{ effects: [{ effectId: 'shared', keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] } }] }],
+          sequences: [
+            {
+              effects: [
+                {
+                  effectId: 'shared',
+                  keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+                },
+              ],
+            },
+          ],
         },
       ],
     });
@@ -597,7 +781,17 @@ describe('validateSchema', () => {
         {
           key: 'hero',
           trigger: 'viewEnter',
-          sequences: [{ delay: 'bad', effects: [{ keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500 }] }],
+          sequences: [
+            {
+              delay: 'bad',
+              effects: [
+                {
+                  keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+                  duration: 500,
+                },
+              ],
+            },
+          ],
         },
       ],
     });
@@ -612,7 +806,17 @@ describe('validateSchema', () => {
         {
           key: 'hero',
           trigger: 'viewEnter',
-          sequences: [{ conditions: [123], effects: [{ keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }, duration: 500 }] }],
+          sequences: [
+            {
+              conditions: [123],
+              effects: [
+                {
+                  keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+                  duration: 500,
+                },
+              ],
+            },
+          ],
         },
       ],
     });
