@@ -91,6 +91,14 @@ const css = generate(config);
 - Do NOT use `initial` for `viewEnter` with `triggerType: 'repeat'`/`'alternate'`/`'state'`. For those, manually apply the initial keyframe as inline styles on the target element and use `fill: 'both'`.
 - If other interactions in the config also need FOUC prevention, `generate(config)` covers them all — set `initial` only on the relevant `viewEnter` + `triggerType: 'once'` elements.
 
+## Common Anti-patterns
+
+- **Duplicate key+trigger**: Do NOT define two interactions with the same `key` and `trigger` — they will shadow each other.
+- **`viewEnter` + `repeat` without `threshold`**: When using `triggerType: 'repeat'`, ALWAYS set a `threshold` in `params` (e.g. `threshold: 0.3`) to control when the re-trigger fires. Without it, a tiny pixel entering/leaving can cause rapid re-triggers.
+- **Missing FOUC prevention**: Every `viewEnter` + `triggerType: 'once'` (same element) entrance animation MUST have both `generate(config)` CSS AND `initial` on the element.
+
+---
+
 ## Rule 1: keyframeEffect / namedEffect (TimeEffect)
 
 Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animation (CSS or WAAPI). Set `triggerType` on each effect to control playback behavior. Use `params` only for observer configuration (`threshold`, `inset`).
@@ -207,7 +215,7 @@ Use sequences when a viewEnter should sync/stagger animations across multiple el
             offset: [OFFSET_MS],
             offsetEasing: '[OFFSET_EASING]',
             effects: [
-                [EFFECT_DEFINTION],
+                [EFFECT_DEFINITION],
                 // .. more effects as necessary
             ]
         }
@@ -221,4 +229,4 @@ Use sequences when a viewEnter should sync/stagger animations across multiple el
 - `[TRIGGER_TYPE]` — same as Rule 1. `triggerType` is set on the sequence config, not on individual effects within the sequence.
 - `[OFFSET_MS]` — time offset between each child's animation start, in milliseconds.
 - `[OFFSET_EASING]` — CSS easing or named easing from `@wix/motion`, for the stagger distribution. Defaults to `'linear'`.
-- `[EFFECT_DEFINTION]` — a definition of or a reference to a time-based animation effect.
+- `[EFFECT_DEFINITION]` — a definition of or a reference to a time-based animation effect.

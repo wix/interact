@@ -1,0 +1,425 @@
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scroll In / Out Card — @wix/interact</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: #f0eff5;
+      }
+
+      /*
+     * interact-element is a custom element; display:contents makes it
+     * layout-transparent so the inner child owns the box.
+     */
+      interact-element {
+        display: contents;
+      }
+
+      /* ─── Hero ────────────────────────────────────────────── */
+      .hero {
+        position: relative;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(155deg, #0f0c29, #302b63, #24243e);
+        color: #fff;
+        overflow: clip; /* clip, never hidden — preserves scroll contexts */
+      }
+
+      .hero__eyebrow {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.38);
+        margin-bottom: 1rem;
+      }
+
+      .hero__title {
+        font-size: clamp(2.5rem, 6vw, 5rem);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+        background: linear-gradient(140deg, #fff 35%, rgba(255, 255, 255, 0.38));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+      }
+
+      .hero__sub {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.42);
+        max-width: 360px;
+        line-height: 1.68;
+      }
+
+      .hero__scroll {
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255, 255, 255, 0.28);
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        user-select: none;
+      }
+
+      .hero__arrow {
+        width: 18px;
+        height: 18px;
+        border-right: 2px solid currentColor;
+        border-bottom: 2px solid currentColor;
+        transform: rotate(45deg);
+        animation: nudge 1.6s ease-in-out infinite;
+      }
+
+      @keyframes nudge {
+        0%,
+        100% {
+          transform: rotate(45deg) translateY(0);
+          opacity: 0.28;
+        }
+        50% {
+          transform: rotate(45deg) translateY(6px);
+          opacity: 0.7;
+        }
+      }
+
+      /* ─── Card section ────────────────────────────────────── */
+      .section {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5rem 1.5rem;
+      }
+
+      /*
+     * The card container is the first-element-child of the SOURCE
+     * interact-element (card-source). IntersectionObserver watches this.
+     */
+      .card-container {
+        width: 100%;
+        max-width: 500px;
+      }
+
+      /*
+     * The animated card — first-element-child of the TARGET
+     * interact-element (card).
+     *
+     * opacity: 0 is set manually to match GlideIn's starting keyframe,
+     * preventing a flash before the animation runs (FOUC prevention for
+     * alternate triggerType — data-interact-initial is only valid for
+     * triggerType 'once').
+     *
+     * fill: 'both' on the effect keeps this initial keyframe applied
+     * via backwards-fill once the animation is attached.
+     */
+      .card {
+        opacity: 0;
+        background: #fff;
+        border-radius: 24px;
+        padding: 2.5rem;
+        box-shadow:
+          0 2px 8px rgba(0, 0, 0, 0.04),
+          0 12px 32px rgba(0, 0, 0, 0.07),
+          0 40px 80px rgba(0, 0, 0, 0.09);
+      }
+
+      .card__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.85rem;
+        background: #f0eeff;
+        color: #6b5ce7;
+        border-radius: 100px;
+        font-size: 0.73rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 1.25rem;
+      }
+
+      .card__title {
+        font-size: 1.85rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        line-height: 1.2;
+        color: #111;
+        margin-bottom: 0.75rem;
+      }
+
+      .card__body {
+        font-size: 0.95rem;
+        color: #666;
+        line-height: 1.72;
+        margin-bottom: 1.75rem;
+      }
+
+      .card__body code {
+        background: #f4f2ff;
+        color: #6b5ce7;
+        border-radius: 4px;
+        padding: 0.1em 0.35em;
+        font-size: 0.88em;
+      }
+
+      .card__stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.75rem;
+      }
+
+      .stat {
+        background: #fafaf8;
+        border: 1px solid #efefef;
+        border-radius: 14px;
+        padding: 1rem 0.5rem;
+        text-align: center;
+      }
+
+      .stat__value {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #111;
+        line-height: 1;
+      }
+
+      .stat__label {
+        margin-top: 0.3rem;
+        font-size: 0.67rem;
+        color: #bbb;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .card__cta {
+        display: block;
+        width: 100%;
+        padding: 0.95rem;
+        background: linear-gradient(135deg, #6b5ce7 0%, #a78bfa 100%);
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          opacity 0.2s ease,
+          transform 0.15s ease;
+      }
+
+      .card__cta:hover {
+        opacity: 0.88;
+        transform: translateY(-1px);
+      }
+      .card__cta:active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* ─── Footer ──────────────────────────────────────────── */
+      .footer {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #bbb;
+        font-size: 0.9rem;
+        letter-spacing: 0.03em;
+        text-align: center;
+        padding: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ── Hero (card starts fully below this fold) ──────────── -->
+    <section class="hero" aria-label="Introduction">
+      <p class="hero__eyebrow">@wix/interact demo</p>
+      <h1 class="hero__title">Scroll to<br />Reveal</h1>
+      <p class="hero__sub">
+        The card below glides in as it enters the viewport and glides back out when you scroll past
+        it.
+      </p>
+      <div class="hero__scroll" aria-hidden="true">
+        <div class="hero__arrow"></div>
+        Scroll
+      </div>
+    </section>
+
+    <!-- ── Card section ──────────────────────────────────────────
+       SOURCE element  (data-interact-key="card-source"):
+         Observed by IntersectionObserver via its firstElementChild
+         (.card-container). MUST be separate from the TARGET when
+         using triggerType 'alternate' — animating the observed element
+         itself would cause it to leave/re-enter the viewport, producing
+         rapid re-trigger loops.
+
+       TARGET element  (data-interact-key="card"):
+         Animated by GlideIn. Its firstElementChild (.card) receives
+         the keyframe animation. Starts at opacity:0 (applied in CSS)
+         to prevent a FOUC before the animation attaches.
+  ──────────────────────────────────────────────────────────── -->
+    <div class="section">
+      <interact-element data-interact-key="card-source">
+        <!-- firstElementChild of card-source — this is what is observed -->
+        <div class="card-container">
+          <interact-element data-interact-key="card">
+            <!-- firstElementChild of card — this is what is animated -->
+            <article class="card">
+              <span class="card__badge">✦ Featured</span>
+              <h2 class="card__title">Scroll-driven<br />Entrance</h2>
+              <p class="card__body">
+                Built with <code>viewEnter</code> + <code>triggerType&nbsp;'alternate'</code> and
+                the <strong>GlideIn</strong> preset. Animates in on viewport entry and reverses out
+                on exit — GPU-accelerated and accessible by default.
+              </p>
+
+              <div class="card__stats">
+                <div class="stat">
+                  <div class="stat__value">60fps</div>
+                  <div class="stat__label">Smooth</div>
+                </div>
+                <div class="stat">
+                  <div class="stat__value">GPU</div>
+                  <div class="stat__label">Accelerated</div>
+                </div>
+                <div class="stat">
+                  <div class="stat__value">A11y</div>
+                  <div class="stat__label">Accessible</div>
+                </div>
+              </div>
+
+              <button class="card__cta">Get Started</button>
+            </article>
+          </interact-element>
+        </div>
+      </interact-element>
+    </div>
+
+    <!-- ── Extra scroll space so you can scroll past the card ── -->
+    <div class="footer">↑ Scroll back up — the card reverses out of view</div>
+
+    <script type="module">
+      import { Interact } from 'https://esm.sh/@wix/interact/web';
+      import * as presets from 'https://esm.sh/@wix/motion-presets';
+
+      // ── 1. Register all named effect presets BEFORE Interact.create() ──
+      Interact.registerEffects(presets);
+
+      const config = {
+        conditions: {
+          /*
+           * Required accessibility condition.
+           * When the user's OS requests reduced motion this condition
+           * gates (suppresses) the animation entirely.
+           */
+          'reduced-motion': {
+            type: 'media',
+            predicate: '(prefers-reduced-motion: reduce)',
+          },
+        },
+
+        interactions: [
+          {
+            /*
+             * SOURCE: the interact-element whose firstElementChild
+             * (.card-container) is watched by IntersectionObserver.
+             *
+             * Keeping the source separate from the target is MANDATORY
+             * for triggerType 'alternate' — if the same element were
+             * both observed AND animated, the transform could push it
+             * out of the viewport, causing an infinite re-trigger loop.
+             */
+            key: 'card-source',
+            trigger: 'viewEnter',
+            params: {
+              threshold: 0.25, // fire when 25 % of the source div is visible
+            },
+
+            // Suppress the entire interaction for reduced-motion users.
+            conditions: ['reduced-motion'],
+
+            effects: [
+              {
+                /*
+                 * TARGET: the interact-element whose firstElementChild
+                 * (.card) receives the GlideIn animation.
+                 */
+                key: 'card',
+
+                triggerType: 'alternate', // forward on enter, reversed on exit
+
+                namedEffect: { type: 'GlideIn' },
+
+                /*
+                 * fill: 'both' is required for 'alternate':
+                 *   backwards → holds the start keyframe (opacity:0 + offset)
+                 *               before the animation plays, preventing a flash.
+                 *   forwards  → holds the end keyframe while the card is in view.
+                 */
+                fill: 'both',
+
+                duration: 700, // ms — total play time in one direction
+                easing: 'ease-out', // decelerate into the final resting state
+              },
+            ],
+          },
+        ],
+      };
+
+      // ── 2. Create the Interact instance ───────────────────────────────
+      const instance = Interact.create(config);
+
+      // ── 3. Destroy on page unload to prevent memory / listener leaks ──
+      window.addEventListener('beforeunload', () => instance.destroy());
+    </script>
+  </body>
+</html>
+``` Here's a breakdown of every key decision made: ### Why separate source (`card-source`) and
+target (`card`) elements The **CRITICAL** rule for `viewEnter` + `triggerType: 'alternate'` forbids
+using the same element as both trigger source and animation target. If the card itself were
+observed, the `GlideIn` transform would push it out of the viewport mid-animation, causing an
+infinite enter/exit loop. The outer `
+<div class="card-container">
+  ` is observed; the inner `.card` is animated. ### Why `opacity: 0` is set in CSS (no
+  `data-interact-initial`) `data-interact-initial` (FOUC prevention) is **only valid** for
+  `triggerType: 'once'`. For `alternate`, the starting keyframe must be applied manually. Setting
+  `opacity: 0` in CSS ensures the card is invisible before the animation attaches. `fill: 'both'`
+  then takes over and holds both the start and end keyframes during the animation lifecycle. ### Why
+  `fill: 'both'` Required for `alternate` — `backwards` applies the start keyframe during any delay,
+  and `forwards` holds the final visible state while the card is in view. ### `reduced-motion`
+  condition Placed on the interaction (not just the effect) to gate the **entire trigger**, so no
+  animation runs at all for users with `prefers-reduced-motion: reduce`. ### `registerEffects()` →
+  `Interact.create()` → `destroy()` order Presets must be registered before `create()` or
+  `namedEffect: { type: 'GlideIn' }` won't resolve. The instance is stored and destroyed on
+  `beforeunload` to prevent stale listeners.
+</div>

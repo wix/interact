@@ -1,0 +1,231 @@
+{
+  "timestamp": "2026-04-29T02:44:58.143Z",
+  "summary": {
+    "total": 8,
+    "generated": 5,
+    "valid": 1,
+    "averageAggregate": 0.9511666666666668,
+    "totalErrors": 17,
+    "totalWarnings": 10
+  },
+  "results": [
+    {
+      "scenario": "viewEnter-once",
+      "success": true,
+      "validation": {
+        "valid": false,
+        "errors": 3,
+        "warnings": 1,
+        "infos": 0
+      },
+      "scores": {
+        "aggregate": 0.9325000000000001,
+        "dimensions": [
+          {
+            "dimension": "complexity",
+            "score": 1
+          },
+          {
+            "dimension": "weight",
+            "score": 1
+          },
+          {
+            "dimension": "a11y",
+            "score": 1
+          },
+          {
+            "dimension": "coherence",
+            "score": 1
+          },
+          {
+            "dimension": "bestPractices",
+            "score": 0.8500000000000001
+          },
+          {
+            "dimension": "integration",
+            "score": 0.75
+          }
+        ]
+      },
+      "durationMs": 134561
+    },
+    {
+      "scenario": "viewEnter-alternate",
+      "success": true,
+      "validation": {
+        "valid": false,
+        "errors": 3,
+        "warnings": 2,
+        "infos": 0
+      },
+      "scores": {
+        "aggregate": 0.9625000000000001,
+        "dimensions": [
+          {
+            "dimension": "complexity",
+            "score": 1
+          },
+          {
+            "dimension": "weight",
+            "score": 1
+          },
+          {
+            "dimension": "a11y",
+            "score": 1
+          },
+          {
+            "dimension": "coherence",
+            "score": 1
+          },
+          {
+            "dimension": "bestPractices",
+            "score": 1
+          },
+          {
+            "dimension": "integration",
+            "score": 0.75
+          }
+        ]
+      },
+      "durationMs": 342963
+    },
+    {
+      "scenario": "viewProgress-scroll",
+      "success": false,
+      "error": "Claude CLI failed: Command failed: cat '/var/folders/vv/v726gmnx4jz24971pdf5j6tc0000gn/T/interact-eval-VHrzFX/user-prompt.txt' | claude --system-prompt-file '/var/folders/vv/v726gmnx4jz24971pdf5j6tc0000gn/T/interact-eval-VHrzFX/system-prompt.txt' --output-format text --max-turns 3 --tools '' -p -\n",
+      "durationMs": 600019
+    },
+    {
+      "scenario": "hover-interest",
+      "success": true,
+      "validation": {
+        "valid": true,
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0
+      },
+      "scores": {
+        "aggregate": 1,
+        "dimensions": [
+          {
+            "dimension": "complexity",
+            "score": 1
+          },
+          {
+            "dimension": "weight",
+            "score": 1
+          },
+          {
+            "dimension": "a11y",
+            "score": 1
+          },
+          {
+            "dimension": "coherence",
+            "score": 1
+          },
+          {
+            "dimension": "bestPractices",
+            "score": 1
+          },
+          {
+            "dimension": "integration",
+            "score": 1
+          }
+        ]
+      },
+      "durationMs": 174646
+    },
+    {
+      "scenario": "click-activate",
+      "success": false,
+      "error": "Claude CLI failed: Command failed: cat '/var/folders/vv/v726gmnx4jz24971pdf5j6tc0000gn/T/interact-eval-67JMWL/user-prompt.txt' | claude --system-prompt-file '/var/folders/vv/v726gmnx4jz24971pdf5j6tc0000gn/T/interact-eval-67JMWL/system-prompt.txt' --output-format text --max-turns 3 --tools '' -p -\n",
+      "durationMs": 600019
+    },
+    {
+      "scenario": "pointerMove-tracking",
+      "success": true,
+      "validation": {
+        "valid": false,
+        "errors": 4,
+        "warnings": 4,
+        "infos": 0
+      },
+      "scores": {
+        "aggregate": 0.9925,
+        "dimensions": [
+          {
+            "dimension": "complexity",
+            "score": 1
+          },
+          {
+            "dimension": "weight",
+            "score": 1
+          },
+          {
+            "dimension": "a11y",
+            "score": 1
+          },
+          {
+            "dimension": "coherence",
+            "score": 1
+          },
+          {
+            "dimension": "bestPractices",
+            "score": 1
+          },
+          {
+            "dimension": "integration",
+            "score": 0.95
+          }
+        ]
+      },
+      "durationMs": 315602
+    },
+    {
+      "scenario": "animationEnd-chain",
+      "success": true,
+      "validation": {
+        "valid": false,
+        "errors": 7,
+        "warnings": 3,
+        "infos": 0
+      },
+      "scores": {
+        "aggregate": 0.8683333333333333,
+        "dimensions": [
+          {
+            "dimension": "complexity",
+            "score": 1
+          },
+          {
+            "dimension": "weight",
+            "score": 1
+          },
+          {
+            "dimension": "a11y",
+            "score": 1
+          },
+          {
+            "dimension": "coherence",
+            "score": 0.8888888888888888
+          },
+          {
+            "dimension": "bestPractices",
+            "score": 0.8
+          },
+          {
+            "dimension": "integration",
+            "score": 0.5
+          }
+        ]
+      },
+      "durationMs": 364362
+    },
+    {
+      "scenario": "reduced-motion",
+      "success": false,
+      "error": "Artifact parsing failed: Could not extract InteractConfig. Expected Interact.create(config) in JS or a <script type=\"application/json\"> with the config.",
+      "durationMs": 178093
+    }
+  ]
+}

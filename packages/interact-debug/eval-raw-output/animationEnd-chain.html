@@ -1,0 +1,189 @@
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Heading + Icon Chained Animation</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3rem;
+        padding: 2rem;
+        background: radial-gradient(ellipse at 40% 30%, #1e0a3c 0%, #0c0c1d 55%, #051428 100%);
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        overflow: clip; /* avoid scrollbar jank from scale transforms */
+      }
+
+      h1 {
+        font-size: clamp(2.5rem, 8vw, 6rem);
+        font-weight: 900;
+        text-align: center;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        background: linear-gradient(120deg, #c084fc 0%, #a78bfa 40%, #38bdf8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .icon {
+        font-size: clamp(4rem, 14vw, 8rem);
+        display: block;
+        text-align: center;
+        filter: drop-shadow(0 0 28px rgba(192, 132, 252, 0.6));
+        user-select: none;
+        will-change: transform, opacity;
+      }
+
+      /* ── FOUC Prevention ─────────────────────────────────────────────────────
+     *
+     * Heading — mirrors what generate(config) produces server-side.
+     * Hides the heading until FadeIn's first keyframe is applied by the runtime.
+     * `data-interact-initial` on the element tells the runtime this CSS is live.
+     *
+     * Icon — manual FOUC guard (generate() only covers viewEnter + once).
+     * Keeps the icon invisible until animationEnd fires and ExpandIn takes over.
+     * fill:'both' on the ExpandIn effect then holds the final visible state.
+     */
+      interact-element[data-interact-key='heading'][data-interact-initial='true'] > * {
+        opacity: 0;
+      }
+
+      interact-element[data-interact-key='icon'] > * {
+        opacity: 0;
+        transform: scale(0);
+        will-change: transform, opacity;
+      }
+
+      /* Reduced motion: reveal both elements instantly, skip all animations */
+      @media (prefers-reduced-motion: reduce) {
+        interact-element[data-interact-key='heading'][data-interact-initial='true'] > *,
+        interact-element[data-interact-key='icon'] > * {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+    Heading — source AND target of FadeIn on the same element.
+    Must use triggerType:'once' when source === target on viewEnter.
+    data-interact-initial pairs with the FOUC opacity:0 rule above.
+  -->
+    <interact-element data-interact-key="heading" data-interact-initial="true">
+      <h1>Motion is&nbsp;Magic</h1>
+    </interact-element>
+
+    <!--
+    Icon — animation target only; not a viewEnter source.
+    Driven entirely by the animationEnd interaction below.
+    FOUC is handled by the manual opacity:0 / scale(0) CSS above.
+  -->
+    <interact-element data-interact-key="icon">
+      <div class="icon">✦</div>
+    </interact-element>
+
+    <script type="module">
+      import { Interact } from 'https://esm.sh/@wix/interact/web';
+      import * as presets from 'https://esm.sh/@wix/motion-presets';
+
+      // Must be called before Interact.create() when using namedEffect presets
+      Interact.registerEffects(presets);
+
+      const config = {
+        conditions: {
+          // Required for a11y: suppresses entrance + chained animations for
+          // users who have requested reduced motion in their OS settings.
+          'reduced-motion': {
+            type: 'media',
+            predicate: '(prefers-reduced-motion: reduce)',
+          },
+        },
+
+        interactions: [
+          // ── Step 1: Heading fades in on viewport entry ────────────────────
+          //
+          // Source === target → triggerType MUST be 'once'.
+          // effectId is the stable identifier that animationEnd listens for.
+          {
+            key: 'heading',
+            trigger: 'viewEnter',
+            conditions: ['reduced-motion'],
+            effects: [
+              {
+                namedEffect: { type: 'FadeIn' },
+                duration: 900,
+                easing: 'ease-out',
+                fill: 'both',
+                triggerType: 'once',
+                effectId: 'heading-fade-in', // ← referenced by animationEnd below
+              },
+            ],
+          },
+
+          // ── Step 2: Icon scales in after heading animation completes ──────
+          //
+          // key:'heading' is the element the completed effect lived on.
+          // params.effectId must match the effectId set on that effect above.
+          // The effect targets a *different* element (key:'icon').
+          {
+            key: 'heading',
+            trigger: 'animationEnd',
+            params: { effectId: 'heading-fade-in' },
+            conditions: ['reduced-motion'],
+            effects: [
+              {
+                key: 'icon',
+                namedEffect: { type: 'ExpandIn' },
+                duration: 700,
+                easing: 'backOut',
+                fill: 'both', // holds the final keyframe — keeps icon visible
+              },
+            ],
+          },
+        ],
+      };
+
+      const instance = Interact.create(config);
+
+      // Tear down all listeners and observers when the page is left
+      window.addEventListener('beforeunload', () => {
+        instance.destroy();
+      });
+    </script>
+  </body>
+</html>
+``` ### What's happening and why | Concern | Decision | |---|---| | **FOUC — heading** | CSS
+`opacity: 0` in `<head>
+  ` (equivalent to `generate(config)` server output) + `data-interact-initial="true"` so the runtime
+  coordinates keyframe application. `fill: 'both'` holds the final visible state. | | **FOUC —
+  icon** | Manual `opacity: 0; transform: scale(0)` CSS. `generate()` only covers `viewEnter + once`
+  same-element cases, so the icon needs an explicit guard. `ExpandIn` + `fill: 'both'` takes over
+  and holds opacity/scale after the animation ends. | | **Chaining** | `effectId: 'heading-fade-in'`
+  on the `FadeIn` effect is the stable handle. The `animationEnd` interaction references that same
+  ID via `params.effectId` — the runtime fires it the moment the heading's `FadeIn` completes. | |
+  **`triggerType: 'once'`** | Mandatory when source and target are the same element on `viewEnter`;
+  animating the observed element could push it out of the viewport and cause rapid re-triggers. | |
+  **Reduced motion** | `conditions: ['reduced-motion']` on both interactions suppresses all
+  animations. The `@media (prefers-reduced-motion: reduce)` CSS overrides the initial-hidden rules
+  so both elements remain visible without any JS involvement. | | **`registerEffects` / `create` /
+  `destroy`** | `registerEffects` runs first (required before `create` when using `namedEffect`).
+  `instance.destroy()` in `beforeunload` cleans up all observers and listeners. |
+</head>

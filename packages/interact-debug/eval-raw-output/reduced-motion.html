@@ -1,0 +1,280 @@
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FadeIn on ViewEnter — @wix/interact</title>
+
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Body hidden until generate() CSS is injected — FOUC guard */
+      body {
+        visibility: hidden;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        background: #07070f;
+        color: #fff;
+        overflow-x: clip;
+      }
+
+      interact-element {
+        display: contents;
+      }
+
+      /* ── Above-the-fold hero ──────────────────────────────── */
+      .hero {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        background: radial-gradient(
+          ellipse 90% 55% at 50% -5%,
+          rgba(108, 92, 255, 0.22) 0%,
+          transparent 68%
+        );
+      }
+
+      .hero__badge {
+        display: inline-block;
+        padding: 0.3rem 0.85rem;
+        border: 1px solid rgba(108, 92, 255, 0.4);
+        border-radius: 999px;
+        font-size: 0.7rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #9b8fff;
+        margin-bottom: 1.75rem;
+      }
+
+      .hero__title {
+        font-size: clamp(2rem, 5.5vw, 4.25rem);
+        font-weight: 700;
+        line-height: 1.15;
+        color: #ddddf5;
+        max-width: 16ch;
+      }
+
+      .hero__sub {
+        margin-top: 1.25rem;
+        font-size: 1rem;
+        color: #555570;
+        max-width: 38ch;
+        line-height: 1.65;
+      }
+
+      .scroll-hint {
+        position: absolute;
+        bottom: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+      }
+
+      .scroll-hint__label {
+        font-size: 0.6rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #3a3a55;
+      }
+
+      .scroll-hint__line {
+        width: 1px;
+        height: 52px;
+        background: linear-gradient(to bottom, #6c5cff88, transparent);
+        transform-origin: top center;
+        animation: pulse-line 2.2s ease-in-out infinite;
+      }
+
+      @keyframes pulse-line {
+        0%,
+        100% {
+          opacity: 0.35;
+          transform: scaleY(0.8);
+        }
+        55% {
+          opacity: 1;
+          transform: scaleY(1);
+        }
+      }
+
+      /* ── Reveal section ───────────────────────────────────── */
+      .reveal {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 6rem 2rem;
+        background: radial-gradient(
+          ellipse 65% 65% at 50% 52%,
+          rgba(108, 92, 255, 0.09) 0%,
+          transparent 70%
+        );
+      }
+
+      .reveal__eyebrow {
+        font-size: 0.68rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #6c5cff;
+        margin-bottom: 1.75rem;
+      }
+
+      .reveal__heading {
+        font-size: clamp(3.5rem, 11vw, 9rem);
+        font-weight: 800;
+        line-height: 1.02;
+        letter-spacing: -0.025em;
+        background: linear-gradient(140deg, #ffffff 25%, #7070a0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .reveal__body {
+        margin-top: 2rem;
+        font-size: 0.95rem;
+        color: #44445a;
+        max-width: 42ch;
+        line-height: 1.75;
+      }
+
+      .reveal__body code {
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        font-size: 0.85em;
+        color: #8880c8;
+      }
+
+      /* ── Spacer ───────────────────────────────────────────── */
+      .end-space {
+        height: 25vh;
+      }
+    </style>
+
+    <!--
+    Head module script — runs after DOM is parsed (deferred by spec).
+    1. Defines the shared config.
+    2. Calls generate() to produce FOUC-prevention CSS and injects it.
+    3. Reveals the body only after the guard is active.
+  -->
+    <script type="module">
+      import { generate } from 'https://esm.sh/@wix/interact/web';
+
+      const config = {
+        conditions: {
+          /* Reduced-motion condition — REQUIRED for a11y.
+           When (prefers-reduced-motion: reduce) is true, any interaction
+           that references this condition is suppressed entirely. */
+          'reduced-motion': {
+            type: 'media',
+            predicate: '(prefers-reduced-motion: reduce)',
+          },
+        },
+        interactions: [
+          {
+            key: 'main-heading',
+            trigger: 'viewEnter',
+            params: { threshold: 0.25 },
+            /* Gate the whole interaction: disabled when user prefers less motion. */
+            conditions: ['reduced-motion'],
+            effects: [
+              {
+                namedEffect: { type: 'FadeIn' },
+                triggerType: 'once', // source === target: MUST be 'once'
+                duration: 950,
+                easing: 'ease-out',
+                fill: 'backwards', // hold initial keyframe during any delay
+              },
+            ],
+          },
+        ],
+      };
+
+      /* Share config with the body script via window (module scope isolation) */
+      window.__interactConfig = config;
+
+      /* ── FOUC prevention ─────────────────────────────────────
+       generate() produces CSS that hides elements marked with
+       data-interact-initial="true" until the animation takes over.
+       Inject it before revealing the body so no flash occurs.      */
+      const foucStyle = document.createElement('style');
+      foucStyle.textContent = generate(config);
+      document.head.appendChild(foucStyle);
+
+      /* Reveal body — FOUC guard is now active */
+      document.body.style.visibility = 'visible';
+    </script>
+  </head>
+
+  <body>
+    <!-- ── Above-the-fold hero (no animation, always visible) ── -->
+    <section class="hero">
+      <span class="hero__badge">@wix/interact demo</span>
+      <h1 class="hero__title">Scroll down to see the animation</h1>
+      <p class="hero__sub">
+        The heading below fades in the moment it enters the viewport, with full reduced-motion
+        support.
+      </p>
+      <div class="scroll-hint" aria-hidden="true">
+        <span class="scroll-hint__label">Scroll</span>
+        <div class="scroll-hint__line"></div>
+      </div>
+    </section>
+
+    <!-- ── Animated heading section ─────────────────────────── -->
+    <section class="reveal">
+      <p class="reveal__eyebrow">viewEnter · FadeIn · once</p>
+
+      <!--
+      data-interact-key  — matches the interaction key in config.
+      data-interact-initial — tells the runtime that FOUC CSS is applied;
+                              both attributes are required for FOUC prevention.
+    -->
+      <interact-element data-interact-key="main-heading" data-interact-initial="true">
+        <h2 class="reveal__heading">Hello, World.</h2>
+      </interact-element>
+
+      <p class="reveal__body">
+        Powered by <code>@wix/interact</code> with a <code>FadeIn</code> preset from
+        <code>@wix/motion-presets</code>. Automatically disabled when
+        <code>prefers-reduced-motion: reduce</code> is set.
+      </p>
+    </section>
+
+    <div class="end-space"></div>
+
+    <!-- ── Interact setup ───────────────────────────────────── -->
+    <script type="module">
+      import { Interact } from 'https://esm.sh/@wix/interact/web';
+      import * as presets from 'https://esm.sh/@wix/motion-presets';
+
+      /* 1. Register all motion-presets so namedEffect: { type: 'FadeIn' } resolves */
+      Interact.registerEffects(presets);
+
+      /* 2. Boot — must come after registerEffects */
+      const instance = Interact.create(window.__interactConfig);
+
+      /* 3. Cleanup on navigation away to prevent memory leaks */
+      window.addEventListener('pagehide', () => instance.destroy());
+    </script>
+  </body>
+</html>
+```

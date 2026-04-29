@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist/es",
+    "declarationDir": "dist/types",
+    "declaration": true,
+    "composite": true,
+    "baseUrl": "."
+  },
+  "include": ["src/**/*", "src"],
+  "references": [
+    {
+      "path": "../motion"
+    },
+    {
+      "path": "../interact"
+    }
+  ]
+}

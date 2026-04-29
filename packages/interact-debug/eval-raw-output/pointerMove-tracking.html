@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Tilt Card — @wix/interact</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+        background: #07071a;
+        background-image:
+          radial-gradient(ellipse 90% 55% at 50% -5%, rgba(110, 65, 235, 0.45) 0%, transparent 65%),
+          radial-gradient(ellipse 55% 40% at 88% 98%, rgba(25, 55, 210, 0.28) 0%, transparent 62%);
+        font-family:
+          'Segoe UI',
+          system-ui,
+          -apple-system,
+          sans-serif;
+        color: #fff;
+        user-select: none;
+        overflow: hidden;
+      }
+
+      interact-element {
+        display: block;
+      }
+
+      .card-wrapper {
+        width: 340px;
+        height: 444px;
+        perspective: 900px;
+      }
+
+      .card {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 28px;
+        background: linear-gradient(
+          148deg,
+          rgba(255, 255, 255, 0.14) 0%,
+          rgba(255, 255, 255, 0.05) 48%,
+          rgba(255, 255, 255, 0.09) 100%
+        );
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow:
+          0 4px 20px rgba(0, 0, 0, 0.3),
+          0 40px 80px rgba(0, 0, 0, 0.6),
+          inset 0 1px 0 rgba(255, 255, 255, 0.24);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        padding: 44px 36px;
+        overflow: hidden;
+        will-change: transform;
+        transform-style: preserve-3d;
+      }
+
+      /* Static inner glow — purely decorative */
+      .card-glow {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at 55% 18%,
+          rgba(140, 85, 255, 0.38) 0%,
+          transparent 68%
+        );
+        pointer-events: none;
+        border-radius: inherit;
+        z-index: 0;
+      }
+
+      /* Specular highlight — driven by customEffect */
+      .card-shine {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .card-icon {
+        font-size: 62px;
+        line-height: 1;
+        filter: drop-shadow(0 0 28px rgba(165, 120, 255, 0.95));
+        position: relative;
+        z-index: 2;
+      }
+
+      .card-body {
+        text-align: center;
+        position: relative;
+        z-index: 2;
+      }
+
+      .card-title {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.6px;
+        margin-bottom: 10px;
+        background: linear-gradient(130deg, #ffffff 0%, rgba(205, 185, 255, 0.92) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .card-subtitle {
+        font-size: 13.5px;
+        line-height: 1.65;
+        color: rgba(255, 255, 255, 0.52);
+      }
+
+      .card-sep {
+        width: 48px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+        position: relative;
+        z-index: 2;
+      }
+
+      .card-tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+      }
+
+      .card-tag {
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+        color: rgba(175, 148, 255, 0.92);
+        background: rgba(110, 68, 240, 0.16);
+        border: 1px solid rgba(135, 92, 255, 0.32);
+        border-radius: 20px;
+        padding: 5px 14px;
+      }
+
+      .hint {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.22);
+        letter-spacing: 0.5px;
+      }
+    </style>
+  </head>
+  <body>
+    <interact-element data-interact-key="card-tilt">
+      <div class="card-wrapper">
+        <div class="card">
+          <div class="card-glow"></div>
+          <div class="card-shine"></div>
+          <div class="card-icon">✦</div>
+          <div class="card-body">
+            <h2 class="card-title">Wix Interact</h2>
+            <p class="card-subtitle">Real-time 3D tilt driven<br />by your mouse position</p>
+          </div>
+          <div class="card-sep"></div>
+          <div class="card-tags">
+            <span class="card-tag">pointerMove</span>
+            <span class="card-tag">Tilt3DMouse</span>
+          </div>
+        </div>
+      </div>
+    </interact-element>
+
+    <p class="hint">Move your cursor over the card</p>
+
+    <script type="module">
+      import { Interact } from 'https://esm.sh/@wix/interact/web';
+      import * as presets from 'https://esm.sh/@wix/motion-presets';
+
+      // Register all presets before creating interactions
+      Interact.registerEffects(presets);
+
+      // Respect the OS-level reduced-motion preference globally
+      Interact.forceReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const config = {
+        conditions: {
+          // Gate the entire interaction to hover-capable devices only
+          'hover-device': {
+            type: 'media',
+            predicate: '(hover: hover)',
+          },
+          // Required a11y condition — paired with forceReducedMotion above
+          'reduced-motion': {
+            type: 'media',
+            predicate: '(prefers-reduced-motion: reduce)',
+          },
+        },
+        interactions: [
+          {
+            key: 'card-tilt',
+            trigger: 'pointerMove',
+            params: { hitArea: 'self' },
+            // Only activate on devices that support hover (not touch-only)
+            conditions: ['hover-device'],
+            effects: [
+              {
+                // Target the inner .card via selector so the hit-area element
+                // (card-wrapper / firstElementChild) never shifts — prevents jitter
+                selector: '.card',
+                namedEffect: { type: 'Tilt3DMouse' },
+                fill: 'both',
+                // Smooth out progress jumps for a physical, inertia-like feel
+                transitionDuration: 380,
+                transitionEasing: 'easeOut',
+                // Map 50 % progress to the center of the target card
+                centeredToTarget: true,
+              },
+              {
+                // Specular highlight that tracks the pointer position
+                selector: '.card-shine',
+                customEffect: (el, progress) => {
+                  el.style.background = `radial-gradient(
+                  circle at ${progress.x * 100}% ${progress.y * 100}%,
+                  rgba(255, 255, 255, 0.17) 0%,
+                  transparent 54%
+                )`;
+                },
+                transitionDuration: 220,
+                transitionEasing: 'easeOut',
+              },
+            ],
+          },
+        ],
+      };
+
+      const instance = Interact.create(config);
+
+      // Clean up listeners and observers on page unload
+      window.addEventListener('unload', () => instance.destroy());
+    </script>
+  </body>
+</html>

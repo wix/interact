@@ -38,7 +38,7 @@ Each item here is CRITICAL — ignoring any of them will break animations.
   events and flickering. Use `selector` to target a child element, or set the effect's `key` to a different element.
 - **CRITICAL**: For `pointerMove` trigger MUST AVOID using the same element as both source and target with `hitArea: 'self'` and effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
 - **CRITICAL — Do NOT guess preset options**: If you don't know the expected type/structure for a `namedEffect` param, omit it — rely on defaults rather than guessing.
-- **Reduced motion**: Use conditions to provide gentler alternatives (shorter durations, fewer transforms, no perpetual motion) for users who prefer reduced motion. You can also set `Interact.forceReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches` to force a global reduced-motion behavior programmatically.
+- **CRITICAL — Reduced motion**: You MUST define a `prefers-reduced-motion` condition and apply it to entrance/ongoing animations. This is required for accessibility compliance. Define: `'reduced-motion': { type: 'media', predicate: '(prefers-reduced-motion: reduce)' }` and reference it via `conditions: ['reduced-motion']` on interactions or effects that should be suppressed/gentled. You can also set `Interact.forceReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches` to force a global reduced-motion behavior programmatically.
 - **Perspective**: Prefer `transform: perspective(...)` inside keyframes. Use the CSS `perspective` property only when multiple children share the same `perspective-origin`.
 
 ---
@@ -569,16 +569,20 @@ Named conditions that gate interactions, effects, or sequences.
 
 Attach via `conditions: ['[CONDITION_ID]']` on interactions, effects, or sequences. On an interaction, conditions gate the entire trigger; on an effect, only that specific effect is skipped. All listed conditions must pass.
 
+**CRITICAL — Required condition**: Every config with entrance or ongoing animations MUST define and use a `reduced-motion` condition. This is required for accessibility.
+
 ### Examples
 
 ```ts
 conditions: {
+  'reduced-motion': { type: 'media', predicate: '(prefers-reduced-motion: reduce)' },  // REQUIRED for a11y
   'desktop': { type: 'media', predicate: '(min-width: 768px)' },
   'hover-device': { type: 'media', predicate: '(hover: hover)' },
-  'reduced-motion': { type: 'media', predicate: '(prefers-reduced-motion: reduce)' },
   'odd-items': { type: 'selector', predicate: ':nth-of-type(odd)' },
 }
 ```
+
+Apply `reduced-motion` on interactions or effects that should be suppressed/simplified for users who prefer reduced motion: `conditions: ['reduced-motion']`. For entrance animations, this typically means gating the entire interaction.
 
 ---
 
@@ -666,16 +670,41 @@ The target element is what the effect animates. Resolved in priority order:
 
 ---
 
+## Performance & Complexity Guidelines
+
+**Compositor-friendly animations**: Prefer animating `transform` and `opacity` properties. Avoid animating layout properties (`width`, `height`, `margin`, `padding`, `top`, `left`, `right`, `bottom`) in keyframes — these trigger expensive layout recalculations. Use `transform: scale()` instead of `width`/`height`, and `transform: translate()` instead of position properties.
+
+**Complexity budget**: Keep configs simple and focused:
+
+- Prefer ≤10 interactions per config
+- Prefer ≤5 effects + sequences per interaction
+- Prefer ≤5 conditions
+- Avoid deeply nested sequences (sequences referencing other sequences via `sequenceId`)
+- Minimize cross-key effects (effects targeting a different `key` than the interaction's source)
+
+**Duration & easing consistency**: Use a consistent duration band across related interactions. Prefer ≤3 different `easing` strings per config to maintain visual coherence.
+
+**Effect reuse**: When the same effect definition is used across multiple interactions, define it once in the top-level `effects` registry and reference it via `effectId`. This improves maintainability and reduces config size.
+
+**Preset naming affinity** — choose presets that match the trigger type for semantic clarity:
+
+- `viewEnter` → Entrance presets ending in `In` (e.g. `FadeIn`, `SlideIn`, `GlideIn`)
+- `viewProgress` → Scroll presets ending in `Scroll` (e.g. `ParallaxScroll`, `FadeScroll`, `RevealScroll`)
+- `pointerMove` → Mouse presets ending in `Mouse` (e.g. `TrackMouse`, `Tilt3DMouse`, `ScaleMouse`)
+- `hover`/`click` → Ongoing presets (e.g. `Pulse`, `Bounce`, `Wiggle`) or Entrance presets (e.g. `FadeIn`)
+
+---
+
 ## Static API
 
-| Method / Property                   | Description                                                                                                   |
-| :---------------------------------- | :------------------------------------------------------------------------------------------------------------ |
-| `Interact.create(config)`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                   |
-| `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `create`.                                                |
-| `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                             |
-| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — force reduced-motion behavior regardless of OS setting.                        |
-| `Interact.allowA11yTriggers`        | `boolean` (default: `false`) — enable accessibility trigger variants (`interest`, `activate`).                |
-| `Interact.setup(options)`           | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below. |
+| Method / Property                   | Description                                                                                                                            |
+| :---------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `Interact.create(config)`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                                            |
+| `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `create`.                                                                         |
+| `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                                                      |
+| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — force reduced-motion behavior regardless of OS setting.                                                 |
+| `Interact.allowA11yTriggers`        | `boolean` (default: `false`) — **MUST set to `true`** when using `interest` or `activate` triggers. Required for a11y pairing to work. |
+| `Interact.setup(options)`           | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below.                          |
 
 **`Interact.setup(options)`** — optional configuration object:
 
