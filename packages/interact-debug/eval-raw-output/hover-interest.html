@@ -1,0 +1,299 @@
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Card Hover Scale — @wix/interact</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(145deg, #f0f2f8 0%, #e4e8f2 100%);
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+      }
+
+      interact-element {
+        display: inline-block;
+      }
+
+      /* Hover SOURCE — must NOT scale; keeps the hit-area stable */
+      .card-outer {
+        display: inline-block;
+        cursor: pointer;
+        border-radius: 22px;
+        outline: none;
+      }
+
+      .card-outer:focus-visible {
+        outline: 3px solid #6366f1;
+        outline-offset: 5px;
+        border-radius: 22px;
+      }
+
+      /* Animation TARGET — the only thing that scales */
+      .card-inner {
+        width: 340px;
+        background: #ffffff;
+        border-radius: 22px;
+        padding: 2rem 2rem 1.75rem;
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.05),
+          0 10px 40px rgba(0, 0, 0, 0.1);
+        transform-origin: center center;
+        will-change: transform;
+      }
+
+      /* ── Card internals ── */
+      .card-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: #ede9fe;
+        color: #5b21b6;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        padding: 5px 11px;
+        border-radius: 100px;
+        margin-bottom: 1.25rem;
+      }
+
+      .card-chip-dot {
+        width: 6px;
+        height: 6px;
+        background: #7c3aed;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .card-inner h2 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 0.55rem;
+        line-height: 1.3;
+      }
+
+      .card-inner p {
+        font-size: 0.9rem;
+        color: #6b7280;
+        line-height: 1.7;
+        margin-bottom: 1.6rem;
+      }
+
+      .card-inner p strong {
+        color: #374151;
+      }
+
+      .card-divider {
+        height: 1px;
+        background: #f3f4f6;
+        margin-bottom: 1.25rem;
+      }
+
+      .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .card-avatars {
+        display: flex;
+        align-items: center;
+      }
+
+      .card-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2.5px solid #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #ffffff;
+      }
+
+      .card-avatar:nth-child(1) {
+        background: #6366f1;
+      }
+      .card-avatar:nth-child(2) {
+        background: #ec4899;
+        margin-left: -9px;
+      }
+      .card-avatar:nth-child(3) {
+        background: #f59e0b;
+        margin-left: -9px;
+      }
+
+      .card-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6366f1;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .card-label::after {
+        content: '→';
+        transition: transform 0.2s ease;
+      }
+
+      .card-outer:hover .card-label::after,
+      .card-outer:focus-visible .card-label::after {
+        transform: translateX(3px);
+      }
+
+      .hint {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.78rem;
+        color: #9ca3af;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(6px);
+        padding: 6px 14px;
+        border-radius: 100px;
+        border: 1px solid #e5e7eb;
+        white-space: nowrap;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+    Two-element pattern:
+    • .card-outer  → hover SOURCE (does not move, so hit-area stays stable)
+    • .card-inner  → animation TARGET (scales via selector in the effect)
+  -->
+    <interact-element data-interact-key="card">
+      <div
+        class="card-outer"
+        tabindex="0"
+        aria-label="Interactive card — hover or focus to animate"
+      >
+        <div class="card-inner">
+          <div class="card-chip">
+            <span class="card-chip-dot" aria-hidden="true"></span>
+            @wix/interact
+          </div>
+          <h2>Scale on Hover</h2>
+          <p>
+            Mouse over or focus this card for a smooth scale-up animation. Uses
+            <strong>triggerType&nbsp;"alternate"</strong> so it reverses gracefully on mouse-leave
+            or blur.
+          </p>
+          <div class="card-divider" role="separator"></div>
+          <div class="card-footer">
+            <div class="card-avatars" aria-label="3 team members">
+              <div class="card-avatar" aria-hidden="true">A</div>
+              <div class="card-avatar" aria-hidden="true">B</div>
+              <div class="card-avatar" aria-hidden="true">C</div>
+            </div>
+            <span class="card-label" aria-hidden="true">Explore</span>
+          </div>
+        </div>
+      </div>
+    </interact-element>
+
+    <p class="hint" aria-hidden="true">Hover the card — or Tab to focus it</p>
+
+    <script type="module">
+      import { Interact } from 'https://esm.sh/@wix/interact/web';
+      import * as presets from 'https://esm.sh/@wix/motion-presets';
+
+      // Register all presets before creating any instance
+      Interact.registerEffects(presets);
+
+      // Required to activate the `interest` a11y trigger variant
+      Interact.allowA11yTriggers = true;
+
+      const config = {
+        // ── Conditions ──────────────────────────────────────────────────────
+        conditions: {
+          // Suppresses the animation for users who prefer reduced motion
+          'reduced-motion': {
+            type: 'media',
+            predicate: '(prefers-reduced-motion: reduce)',
+          },
+        },
+
+        // ── Shared effect ────────────────────────────────────────────────────
+        // Defined once; referenced by both hover + interest interactions
+        effects: {
+          'card-scale-up': {
+            // Target the inner card (not the outer hover zone) via selector.
+            // This keeps the hover hit-area stable while only the inner
+            // element scales — preventing jittery re-entry flicker.
+            selector: '.card-inner',
+            triggerType: 'alternate', // play forward on enter, reverse on leave
+            keyframeEffect: {
+              name: 'card-scale-keyframes',
+              keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(1.07)' }],
+            },
+            fill: 'both', // required for 'alternate' to hold state correctly
+            duration: 280,
+            easing: 'ease-out',
+          },
+        },
+
+        // ── Interactions ──────────────────────────────────────────────────────
+        interactions: [
+          // 1. Mouse hover
+          {
+            key: 'card',
+            trigger: 'hover',
+            conditions: ['reduced-motion'],
+            effects: [{ effectId: 'card-scale-up' }],
+          },
+          // 2. Keyboard / focus (a11y pair for hover)
+          {
+            key: 'card',
+            trigger: 'interest',
+            conditions: ['reduced-motion'],
+            effects: [{ effectId: 'card-scale-up' }],
+          },
+        ],
+      };
+
+      const instance = Interact.create(config);
+
+      // Clean up listeners and animations when the page unloads
+      window.addEventListener('unload', () => {
+        instance.destroy();
+      });
+    </script>
+  </body>
+</html>
+``` ### Key decisions & rules applied | Rule | Implementation | |---|---| | **Hit-area shift** |
+`.card-outer` is the hover source (never transforms); `.card-inner` is the animation target,
+resolved via `selector: '.card-inner'` on the shared effect. This prevents the scaled element from
+shifting the pointer hit-area and causing flicker. | | **`fill: 'both'`** | Required for
+`triggerType: 'alternate'` so the animation holds its state between hover enter/leave. | | **a11y
+pairing** | `hover` + `interest` interactions share the same `effectId` reference.
+`Interact.allowA11yTriggers = true` is set before `create()`. `.card-outer` has `tabindex="0"` so it
+receives focus events. | | **Reduced motion** | `conditions: ['reduced-motion']` on both
+interactions suppresses the animation when `prefers-reduced-motion: reduce` is active. | | **Shared
+effect registry** | The `'card-scale-up'` entry in `effects` is defined once and referenced by both
+interactions — no duplication. | | **Destroy** | `instance.destroy()` is called on `window unload`
+to clean up all listeners and running animations. |

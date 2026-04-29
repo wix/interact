@@ -1,0 +1,189 @@
+{
+  "no-rules": {
+    "promptSizeKB": 0.4,
+    "summary": {
+      "total": 8,
+      "generated": 0,
+      "valid": 0,
+      "averageAggregate": 0,
+      "totalErrors": 0,
+      "totalWarnings": 0
+    },
+    "perScenario": [
+      {
+        "scenario": "viewEnter-once",
+        "success": false
+      },
+      {
+        "scenario": "viewEnter-alternate",
+        "success": false
+      },
+      {
+        "scenario": "viewProgress-scroll",
+        "success": false
+      },
+      {
+        "scenario": "hover-interest",
+        "success": false
+      },
+      {
+        "scenario": "click-activate",
+        "success": false
+      },
+      {
+        "scenario": "pointerMove-tracking",
+        "success": false
+      },
+      {
+        "scenario": "animationEnd-chain",
+        "success": false
+      },
+      {
+        "scenario": "reduced-motion",
+        "success": false
+      }
+    ]
+  },
+  "partial": {
+    "promptSizeKB": 35.5,
+    "summary": {
+      "total": 8,
+      "generated": 6,
+      "valid": 1,
+      "averageAggregate": 0.9197222222222222,
+      "totalErrors": 16,
+      "totalWarnings": 10
+    },
+    "perScenario": [
+      {
+        "scenario": "viewEnter-once",
+        "success": true,
+        "aggregate": 0.9225,
+        "valid": false,
+        "errors": 2,
+        "warnings": 1
+      },
+      {
+        "scenario": "viewEnter-alternate",
+        "success": true,
+        "aggregate": 0.9225000000000001,
+        "valid": false,
+        "errors": 3,
+        "warnings": 2
+      },
+      {
+        "scenario": "viewProgress-scroll",
+        "success": true,
+        "aggregate": 0.8925000000000001,
+        "valid": false,
+        "errors": 4,
+        "warnings": 2
+      },
+      {
+        "scenario": "hover-interest",
+        "success": false
+      },
+      {
+        "scenario": "click-activate",
+        "success": true,
+        "aggregate": 0.9600000000000001,
+        "valid": true,
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "scenario": "pointerMove-tracking",
+        "success": true,
+        "aggregate": 0.9225000000000001,
+        "valid": false,
+        "errors": 4,
+        "warnings": 2
+      },
+      {
+        "scenario": "animationEnd-chain",
+        "success": true,
+        "aggregate": 0.8983333333333332,
+        "valid": false,
+        "errors": 3,
+        "warnings": 3
+      },
+      {
+        "scenario": "reduced-motion",
+        "success": false
+      }
+    ]
+  },
+  "full-rules": {
+    "promptSizeKB": 95.8,
+    "summary": {
+      "total": 8,
+      "generated": 7,
+      "valid": 1,
+      "averageAggregate": 0.9333333333333333,
+      "totalErrors": 18,
+      "totalWarnings": 9
+    },
+    "perScenario": [
+      {
+        "scenario": "viewEnter-once",
+        "success": true,
+        "aggregate": 0.8925000000000001,
+        "valid": false,
+        "errors": 3,
+        "warnings": 1
+      },
+      {
+        "scenario": "viewEnter-alternate",
+        "success": true,
+        "aggregate": 0.9225000000000001,
+        "valid": false,
+        "errors": 3,
+        "warnings": 2
+      },
+      {
+        "scenario": "viewProgress-scroll",
+        "success": false
+      },
+      {
+        "scenario": "hover-interest",
+        "success": true,
+        "aggregate": 0.9600000000000001,
+        "valid": false,
+        "errors": 1,
+        "warnings": 0
+      },
+      {
+        "scenario": "click-activate",
+        "success": true,
+        "aggregate": 0.9600000000000001,
+        "valid": true,
+        "errors": 0,
+        "warnings": 0
+      },
+      {
+        "scenario": "pointerMove-tracking",
+        "success": true,
+        "aggregate": 0.9525,
+        "valid": false,
+        "errors": 3,
+        "warnings": 2
+      },
+      {
+        "scenario": "animationEnd-chain",
+        "success": true,
+        "aggregate": 0.9133333333333333,
+        "valid": false,
+        "errors": 5,
+        "warnings": 3
+      },
+      {
+        "scenario": "reduced-motion",
+        "success": true,
+        "aggregate": 0.9325000000000001,
+        "valid": false,
+        "errors": 3,
+        "warnings": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,224 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scroll Fade-In · @wix/interact</title>
+  <style>
+    /*
+     * Static FOUC guard — hides initial-flagged elements before JS loads.
+     * generate(config) produces equivalent scoped CSS at runtime and is
+     * injected into <head> by the module script below.
+     */
+    interact-element[data-interact-initial="true"] > * {
+      opacity: 0;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0d0d13;
+      color: #e2e2ec;
+    }
+
+    /* ── Hero ─────────────────────────────────────── */
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 1rem;
+      padding: 2rem;
+      background: linear-gradient(155deg, #0d0d13 55%, #160f2e 100%);
+    }
+
+    .hero__badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #7c6af5;
+    }
+
+    .hero__title {
+      font-size: clamp(2.75rem, 6.5vw, 5.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.04;
+      color: #fff;
+    }
+
+    .hero__hint {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      color: #4a4a5e;
+      animation: cue 2s ease-in-out infinite;
+    }
+
+    @keyframes cue {
+      0%, 100% { transform: translateY(0);   opacity: 0.55; }
+      50%       { transform: translateY(8px); opacity: 1;    }
+    }
+
+    /* ── Animated section ─────────────────────────── */
+    .reveal-section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6rem 2rem;
+      background: #10101a;
+    }
+
+    .reveal-section__inner {
+      max-width: 660px;
+      text-align: center;
+    }
+
+    .reveal-section__eyebrow {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #7c6af5;
+      margin-bottom: 1.25rem;
+    }
+
+    .reveal-section__heading {
+      font-size: clamp(2.25rem, 5vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.08;
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
+
+    .reveal-section__body {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: #666;
+    }
+
+    code {
+      font-family: "Fira Code", "Cascadia Code", ui-monospace, monospace;
+      font-size: 0.88em;
+      background: rgba(124, 106, 245, 0.12);
+      color: #a89cf7;
+      padding: 0.1em 0.38em;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Always-visible hero — no animation, no interact-element wrapper needed -->
+  <section class="hero">
+    <span class="hero__badge">@wix/interact demo</span>
+    <h1 class="hero__title">Scroll to reveal</h1>
+    <div class="hero__hint" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2v12M3 9l5 5 5-5" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      scroll down
+    </div>
+  </section>
+
+  <!-- Fade-in section — data-interact-initial enables FOUC prevention -->
+  <interact-element data-interact-key="fade-section" data-interact-initial="true">
+    <section class="reveal-section">
+      <div class="reveal-section__inner">
+        <span class="reveal-section__eyebrow">viewEnter · once</span>
+        <h2 class="reveal-section__heading">Fades in on scroll.</h2>
+        <p class="reveal-section__body">
+          Triggered by <code>viewEnter</code> with <code>triggerType: 'once'</code>,
+          this section uses the <code>FadeIn</code> preset from
+          <code>@wix/motion-presets</code>. FOUC is prevented via
+          <code>generate(config)</code> and <code>data-interact-initial</code>.
+        </p>
+      </div>
+    </section>
+  </interact-element>
+
+  <script type="module">
+    import { Interact, generate } from 'https://esm.sh/@wix/interact/web';
+    import * as presets from 'https://esm.sh/@wix/motion-presets';
+
+    // Must be called before Interact.create() when using namedEffect presets
+    Interact.registerEffects(presets);
+
+    const config = {
+      interactions: [
+        {
+          key: 'fade-section',
+          trigger: 'viewEnter',
+          params: {
+            threshold: 0.2,   // trigger when 20% of the section is visible
+          },
+          // Gate this entrance animation for users who prefer reduced motion
+          conditions: ['reduced-motion'],
+          effects: [
+            {
+              // Same element is source and target → 'once' is required
+              triggerType: 'once',
+              namedEffect: { type: 'FadeIn' },
+              duration: 900,
+              easing: 'ease-out',
+              // 'backwards': applies the first keyframe (opacity:0) during any
+              // delay; safe because FadeIn's final keyframe restores natural state
+              fill: 'backwards',
+            },
+          ],
+        },
+      ],
+      conditions: {
+        // Required for accessibility — suppresses entrance animation when
+        // the OS/browser "prefers-reduced-motion: reduce" setting is active
+        'reduced-motion': {
+          type: 'media',
+          predicate: '(prefers-reduced-motion: reduce)',
+        },
+      },
+    };
+
+    // generate(config) produces scoped CSS that hides entrance-animated
+    // elements until their animation plays — both this AND data-interact-initial
+    // are required for FOUC prevention to take effect
+    const foucStyle = document.createElement('style');
+    foucStyle.textContent = generate(config);
+    document.head.appendChild(foucStyle);
+
+    // Bind all interactions declared in the config
+    const instance = Interact.create(config);
+
+    // Tear down all observers and listeners on page unload
+    window.addEventListener('beforeunload', () => instance.destroy());
+  </script>
+
+</body>
+</html>
+```
+
+Key decisions made:
+
+| Choice | Reason |
+|---|---|
+| `FadeIn` preset | Canonical entrance preset; semantically matches `viewEnter` trigger |
+| `triggerType: 'once'` | Source and target are the **same** element — required by the rules |
+| `fill: 'backwards'` | `FadeIn` ends at natural `opacity: 1`, so only the backwards fill (applying `opacity: 0` during delay) is needed |
+| `threshold: 0.2` | Animation fires when 20% of the section enters the viewport — avoids triggering on a single pixel |
+| `conditions: ['reduced-motion']` | Gates the entire entrance interaction for users with `prefers-reduced-motion: reduce` |
+| Dual FOUC guard | Static CSS in `<style>` hides the element before JS parses; `generate(config)` produces the runtime-authoritative CSS and is injected immediately on script load |
