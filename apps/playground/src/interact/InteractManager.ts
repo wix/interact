@@ -1,0 +1,105 @@
+import { Interact } from '@wix/interact/web';
+import type { InteractConfig } from '@wix/interact';
+import { store } from '../store/PlaygroundStore';
+import { getAllPresets } from './preset-registry';
+
+interface IInteractElement extends HTMLElement {
+  connect(): void;
+}
+
+let presetsRegistered = false;
+
+function ensurePresets(): void {
+  if (presetsRegistered) return;
+  Interact.registerEffects(getAllPresets() as any);
+  presetsRegistered = true;
+}
+
+let currentInstance: Interact | null = null;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let stageElement: HTMLElement | null = null;
+let paused = false;
+
+export function setStageElement(el: HTMLElement): void {
+  stageElement = el;
+}
+
+export function getStageElement(): HTMLElement | null {
+  return stageElement;
+}
+
+export function pauseInteract(): void {
+  paused = true;
+  if (debounceTimer) clearTimeout(debounceTimer);
+  if (currentInstance) {
+    currentInstance.destroy();
+    currentInstance = null;
+    cancelStaleAnimations();
+  }
+}
+
+export function resumeInteract(): void {
+  paused = false;
+  debouncedApply(store.getState().config);
+}
+
+function reconnectShadowElements(): void {
+  if (!stageElement?.shadowRoot) return;
+  stageElement.shadowRoot.querySelectorAll('interact-element').forEach((el) => {
+    (el as IInteractElement).connect();
+  });
+}
+
+function cancelStaleAnimations(): void {
+  if (!stageElement?.shadowRoot) return;
+  stageElement.shadowRoot.querySelectorAll('interact-element').forEach((el) => {
+    el.getAnimations({ subtree: true }).forEach((anim) => anim.cancel());
+  });
+}
+
+function apply(config: InteractConfig): void {
+  if (paused) return;
+
+  if (currentInstance) {
+    currentInstance.destroy();
+    currentInstance = null;
+    cancelStaleAnimations();
+  }
+
+  if (config.interactions.length === 0) return;
+
+  ensurePresets();
+
+  const validConfig: InteractConfig = {
+    ...config,
+    interactions: config.interactions.filter((i) => i.key),
+  };
+
+  if (validConfig.interactions.length === 0) return;
+
+  currentInstance = Interact.create(validConfig);
+
+  reconnectShadowElements();
+}
+
+function debouncedApply(config: InteractConfig): void {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => apply(config), 100);
+}
+
+export function initInteractManager(): void {
+  store.addEventListener('state-change', () => {
+    const state = store.getState();
+    debouncedApply(state.config);
+  });
+
+  debouncedApply(store.getState().config);
+}
+
+export function destroyInteractManager(): void {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  if (currentInstance) {
+    currentInstance.destroy();
+    currentInstance = null;
+  }
+}

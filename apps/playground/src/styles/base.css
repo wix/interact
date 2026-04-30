@@ -1,0 +1,43 @@
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--pg-font-family);
+    font-size: var(--pg-font-size-md);
+    line-height: var(--pg-line-height);
+    color: var(--pg-color-text-primary);
+    background: var(--pg-color-bg-primary);
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+}
