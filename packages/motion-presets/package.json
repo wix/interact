@@ -29,8 +29,17 @@
   "keywords": [
     "animation",
     "presets",
+    "motion",
     "interact",
-    "motion"
+    "waapi",
+    "web-animations-api",
+    "javascript",
+    "css",
+    "scroll-driven",
+    "pointer-animation",
+    "declarative",
+    "config-driven",
+    "wix"
   ],
   "author": {
     "name": "wow!Team",

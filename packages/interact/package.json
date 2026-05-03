@@ -40,9 +40,18 @@
   },
   "keywords": [
     "animation",
+    "waapi",
+    "web-animations-api",
     "javascript",
     "css",
-    "waapi"
+    "scroll-driven",
+    "motion",
+    "interaction",
+    "react",
+    "web-components",
+    "declarative",
+    "config-driven",
+    "wix"
   ],
   "author": {
     "name": "wow!Team",

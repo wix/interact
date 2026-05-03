@@ -34,10 +34,14 @@
   "keywords": [
     "animation",
     "motion",
-    "web-animations",
-    "browser",
-    "effects",
-    "typescript"
+    "javascript",
+    "css",
+    "waapi",
+    "web-animations-api",
+    "scroll-driven",
+    "view-timeline",
+    "pointer-animation",
+    "wix"
   ],
   "author": {
     "name": "wow!Team",
