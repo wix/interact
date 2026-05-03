@@ -1,7 +1,7 @@
 {
   "name": "@wix/motion-presets",
   "version": "1.0.1",
-  "description": "Animation presets for @wix/motion",
+  "description": "Ready-made animation presets for @wix/motion effects — entrance, scroll, background-scroll, mouse-tracking, loop, and micro-interactions.",
   "license": "MIT",
   "main": "dist/cjs/motion-presets.js",
   "module": "dist/es/motion-presets.js",

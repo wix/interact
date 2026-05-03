@@ -19,6 +19,7 @@
     "type": "git",
     "url": "git+https://github.com/wix/interact.git"
   },
+  "description": "Monorepo for the Interact animation and interaction libraries, built on web-native, AI-ready, framework-agnostic.",
   "keywords": [
     "animation",
     "waapi",
