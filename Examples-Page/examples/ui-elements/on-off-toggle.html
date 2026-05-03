@@ -14,7 +14,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #e0e0e0;
+      background: #1F1F1F;
       font-family: 'Inter', system-ui, sans-serif;
       transition: background-color 0.4s ease;
     }
@@ -27,7 +27,7 @@
       height: 60px;
       border-radius: 50px;
       border: 1px solid #ffd7823f;
-      background-color: #000;
+      background-color: #FFD882;
       cursor: pointer;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
@@ -44,15 +44,15 @@
       position: absolute;
       top: 6px;
       bottom: 6px;
-      left: 6px;
-      right: 86px;
+      left: 86px;
+      right: 6px;
       border-radius: 40px;
-      background-color: #FFD882;
+      background-color: #000;
       z-index: 2;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #000;
+      color: #ffffff;
     }
 
     .slider:active { transform: scale(0.99); }
@@ -78,7 +78,8 @@
       overflow: visible;
     }
 
-    .icon-moon { opacity: 0; }
+    .icon-sun { opacity: 0; }
+    .icon-moon { opacity: 1; }
 
     .label-bg {
       position: absolute;
@@ -99,13 +100,13 @@
     .label-bg-on {
       left: 22px;
       color: rgba(0,0,0,0.4);
-      opacity: 0;
+      opacity: 1;
     }
 
     .label-bg-off {
       right: 22px;
       color: rgba(255,255,255,0.3);
-      opacity: 1;
+      opacity: 0;
     }
 
     @keyframes sun-pulse-rotate {
@@ -140,7 +141,7 @@
 </head>
 <body>
   <interact-element data-interact-key="toggle-btn">
-    <button type="button" class="toggle-track is-on" aria-pressed="true" aria-label="Toggle day/night mode">
+    <button type="button" class="toggle-track is-off" aria-pressed="false" aria-label="Toggle day/night mode">
       <span class="label-bg label-bg-on" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision">
           <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/>
@@ -197,10 +198,10 @@
           keyframeEffect: {
             name: 'slider-move-onoff',
             keyframes: [
-              { left: '6px', right: '86px', offset: 0 },
-              { left: '6px', right: '68px', offset: 0.12 },
-              { left: '68px', right: '6px', offset: 0.88 },
-              { left: '86px', right: '6px', offset: 1 }
+              { left: '86px', right: '6px', offset: 0 },
+              { left: '68px', right: '6px', offset: 0.12 },
+              { left: '6px', right: '68px', offset: 0.88 },
+              { left: '6px', right: '86px', offset: 1 }
             ]
           },
           duration: 400,
@@ -211,8 +212,8 @@
           keyframeEffect: {
             name: 'slider-bg-onoff',
             keyframes: [
-              { backgroundColor: '#FFD882', offset: 0 },
-              { backgroundColor: '#000000', offset: 1 }
+              { backgroundColor: '#000000', offset: 0 },
+              { backgroundColor: '#FFD882', offset: 1 }
             ]
           },
           duration: 400,
@@ -223,8 +224,8 @@
           keyframeEffect: {
             name: 'slider-color-onoff',
             keyframes: [
-              { color: '#000000', offset: 0 },
-              { color: '#ffffff', offset: 1 }
+              { color: '#ffffff', offset: 0 },
+              { color: '#000000', offset: 1 }
             ]
           },
           duration: 400,
@@ -235,8 +236,8 @@
           keyframeEffect: {
             name: 'track-bg-onoff',
             keyframes: [
-              { backgroundColor: '#000000', offset: 0 },
-              { backgroundColor: '#FFD882', offset: 1 }
+              { backgroundColor: '#FFD882', offset: 0 },
+              { backgroundColor: '#000000', offset: 1 }
             ]
           },
           duration: 400,
@@ -247,8 +248,8 @@
           keyframeEffect: {
             name: 'icon-sun-swap',
             keyframes: [
-              { opacity: 1, offset: 0 },
-              { opacity: 0, offset: 1 }
+              { opacity: 0, offset: 0 },
+              { opacity: 1, offset: 1 }
             ]
           },
           duration: 400,
@@ -259,8 +260,8 @@
           keyframeEffect: {
             name: 'icon-moon-swap',
             keyframes: [
-              { opacity: 0, offset: 0 },
-              { opacity: 1, offset: 1 }
+              { opacity: 1, offset: 0 },
+              { opacity: 0, offset: 1 }
             ]
           },
           duration: 400,
@@ -271,8 +272,8 @@
           keyframeEffect: {
             name: 'label-on-visibility',
             keyframes: [
-              { opacity: 0, offset: 0 },
-              { opacity: 1, offset: 1 }
+              { opacity: 1, offset: 0 },
+              { opacity: 0, offset: 1 }
             ]
           },
           duration: 400,
@@ -283,8 +284,8 @@
           keyframeEffect: {
             name: 'label-off-visibility',
             keyframes: [
-              { opacity: 1, offset: 0 },
-              { opacity: 0, offset: 1 }
+              { opacity: 0, offset: 0 },
+              { opacity: 1, offset: 1 }
             ]
           },
           duration: 400,
@@ -337,7 +338,7 @@
         btn.setAttribute('aria-pressed', String(!pressed));
         btn.classList.toggle('is-on');
         btn.classList.toggle('is-off');
-        document.body.style.backgroundColor = btn.classList.contains('is-on') ? '#e0e0e0' : '#000';
+        document.body.style.backgroundColor = btn.classList.contains('is-on') ? '#DDDDDD' : '#1F1F1F';
       });
     }
   </script>

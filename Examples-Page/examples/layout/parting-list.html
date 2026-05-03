@@ -11,7 +11,7 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html { overflow: auto; }
     body {
-      background: #fff;
+      background: #DDDDDD;
       color: #111;
       font-family: 'Space Mono', monospace;
       -webkit-font-smoothing: antialiased;
@@ -20,7 +20,7 @@
 
     interact-element { display: block; }
 
-    /* ── Fixed overlay: image + indicators ── */
+    /* —— Fixed overlay: image + indicators —— */
     .fixed-layer {
       position: fixed;
       inset: 0;
@@ -66,7 +66,7 @@
     }
     .sq-img.hero-img { visibility: visible; }
 
-    /* ── Hero overlay ── */
+    /* —— Hero overlay —— */
     .hero-overlay {
       position: absolute;
       inset: 0;
@@ -93,7 +93,7 @@
       margin-top: 16px;
     }
 
-    /* ── Indicators ── */
+    /* —— Indicators —— */
     .indicators {
       position: absolute;
       inset: 0;
@@ -122,15 +122,15 @@
       padding: 2px 6px;
     }
 
-    /* ── Hero spacer ── */
+    /* —— Hero spacer —— */
     .hero-section {
       height: 100vh;
     }
 
-    /* ── Shrink zone ── */
+    /* —— Shrink zone —— */
     .shrink-zone { height: 120vh; }
 
-    /* ── Projects ── */
+    /* —— Projects —— */
     .projects-section {
       position: relative;
       padding: 20vh 0 50vh;
@@ -145,7 +145,7 @@
     .project-row {
       display: flex;
       width: 100%;
-      color: #e0e0e0;
+      color: rgba(0,0,0,0.35);
     }
 
     .half-left,
@@ -170,10 +170,10 @@
       padding-left: 24px;
     }
 
-    /* ── End spacer ── */
+    /* —— End spacer —— */
     .end-spacer { height: 50vh; }
 
-    /* ── Mobile ── */
+    /* —— Mobile —— */
     @media (max-width: 768px) {
       .indicators {
         display: flex;
@@ -257,19 +257,19 @@
 
     <interact-element data-interact-key="square">
       <div class="square-frame">
-        <img class="sq-img hero-img"     src="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-0"   src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-1"   src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-2"   src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-3"   src="https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-4"   src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-5"   src="https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-6"   src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-7"   src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-8"   src="https://images.unsplash.com/photo-1514539079130-25950c84af65?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-9"   src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-10"  src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&h=800&fit=crop&q=80" alt="">
-        <img class="sq-img proj-img-11"  src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&h=800&fit=crop&q=80" alt="">
+        <img class="sq-img hero-img"     src="../../Image_assets/Example_Img4.jpg" alt="">
+        <img class="sq-img proj-img-0"   src="../../Image_assets/Example_Img38.jpg" alt="">
+        <img class="sq-img proj-img-1"   src="../../Image_assets/Example_Img6.jpg" alt="">
+        <img class="sq-img proj-img-2"   src="../../Image_assets/Example_Img8.jpg" alt="">
+        <img class="sq-img proj-img-3"   src="../../Image_assets/Example_Img13.jpg" alt="">
+        <img class="sq-img proj-img-4"   src="../../Image_assets/Example_Img17.jpg" alt="">
+        <img class="sq-img proj-img-5"   src="../../Image_assets/Example_Img20.jpg" alt="">
+        <img class="sq-img proj-img-6"   src="../../Image_assets/Example_Img23.jpg" alt="">
+        <img class="sq-img proj-img-7"   src="../../Image_assets/Example_Img28.jpg" alt="">
+        <img class="sq-img proj-img-8"   src="../../Image_assets/Example_Img30.jpg" alt="">
+        <img class="sq-img proj-img-9"   src="../../Image_assets/Example_Img35.jpg" alt="">
+        <img class="sq-img proj-img-10"  src="../../Image_assets/Example_Img37.jpg" alt="">
+        <img class="sq-img proj-img-11"  src="../../Image_assets/Example_Img42.jpg" alt="">
       </div>
     </interact-element>
 
@@ -312,13 +312,13 @@
 
     const mobile = window.matchMedia('(max-width: 768px)').matches;
     const SPLIT = mobile ? 46 : 60;
-    const FINAL_SIZE = mobile ? '80px' : '120px';
+    const FINAL_SIZE = mobile ? '64px' : '96px';
     const ITEM_COUNT = 12;
     const C0 = { name: 'cover', offset: { value: 0, unit: 'percentage' } };
     const C1 = { name: 'cover', offset: { value: 100, unit: 'percentage' } };
     const interactions = [];
 
-    // ── Shrink: full-screen → square + fade hero text ──
+    // —— Shrink: full-screen → square + fade hero text ——
     interactions.push({
       key: 'shrink-zone',
       trigger: 'viewProgress',
@@ -354,7 +354,7 @@
       ],
     });
 
-    // ── Project interactions ──
+    // —— Project interactions ——
     for (let i = 0; i < ITEM_COUNT; i++) {
       interactions.push({
         key: `p${i}`,
@@ -399,12 +399,12 @@
             keyframeEffect: {
               name: `hl${i}`,
               keyframes: [
-                { offset: 0,     color: '#e0e0e0' },
-                { offset: 0.499, color: '#e0e0e0' },
+                { offset: 0,     color: 'rgba(0,0,0,0.35)' },
+                { offset: 0.499, color: 'rgba(0,0,0,0.35)' },
                 { offset: 0.50,  color: '#000' },
                 { offset: 0.56,  color: '#000' },
-                { offset: 0.561, color: '#e0e0e0' },
-                { offset: 1,     color: '#e0e0e0' },
+                { offset: 0.561, color: 'rgba(0,0,0,0.35)' },
+                { offset: 1,     color: 'rgba(0,0,0,0.35)' },
               ],
             },
           },

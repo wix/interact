@@ -4,7 +4,7 @@ export function initSidebar() {
   if (!categoryList || !contentScroll) return;
 
   const allItems = () => Array.from(document.querySelectorAll('.category-item'));
-  const sections = () => Array.from(document.querySelectorAll('.category-section'));
+  const sections = () => Array.from(document.querySelectorAll('.hero-section, .category-section'));
 
   let isProgrammaticScroll = false;
   let currentIndex = 0;

@@ -14,7 +14,7 @@
         body {
             margin: 0;
             overflow: hidden; /* Prevent native scroll */
-            background-color: #ffffff; 
+            background-color: #DDDDDD;
             color: black; 
             font-family: 'Helvetica Neue', sans-serif;
             user-select: none; /* easier dragging */
@@ -219,7 +219,7 @@
         const baseX = col * layout.colPitch;
         const baseY = row * layout.rowPitch;
 
-        const imageUrl = `https://picsum.photos/seed/${i + 88}/1200/1500`;
+        const imageUrl = `../../Image_assets/Example_Img${(i % 46) + 1}.jpg`;
         const title = imageTitles[i % imageTitles.length];
 
         const div = document.createElement('div');

@@ -285,7 +285,7 @@ export function openModal(title, htmlPath) {
   codeBtn.classList.remove('active');
 
   titleEl.textContent = title;
-  iframe.src = htmlPath;
+  iframe.src = htmlPath + `?_=${Date.now()}`;
   iframe.removeAttribute('srcdoc');
 
   // Listen for Escape inside the modal iframe (it captures focus on click)

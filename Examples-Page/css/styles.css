@@ -239,15 +239,111 @@ body > footer.visible {
 /* ============================================
    CATEGORY SECTIONS
 ============================================ */
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  padding: 0 33px 32px;
+  margin: 33px 0 0;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+
+.hero-text {
+  flex: 0 1 480px;
+  min-width: 0;
+}
+
+.hero-illus {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 800px;
+  align-self: center;
+  margin-left: auto;
+}
+.hero-illus svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Each shape animates around its own bounding box */
+.hero-illus svg .hero-arc,
+.hero-illus svg .hero-circle {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* All arcs sway side to side with offset timings so they don't move in unison */
+.hero-illus svg .hero-arc-1 { animation: hero-sway 5s ease-in-out         infinite; }
+.hero-illus svg .hero-arc-2 { animation: hero-sway 6s ease-in-out -1s     infinite; }
+.hero-illus svg .hero-arc-3 { animation: hero-sway 7s ease-in-out -2s     infinite; }
+.hero-illus svg .hero-arc-4 { animation: hero-sway 8s ease-in-out -3s     infinite; }
+
+/* Dashes — one-time reveal-on-path via clip-path (drawn left to right) */
+.hero-illus svg .hero-dash-1,
+.hero-illus svg .hero-dash-2 {
+  clip-path: inset(0 100% 0 0);
+}
+.hero-illus svg .hero-dash-1 { animation: hero-dash-reveal 1.4s ease-out 0.3s forwards; }
+.hero-illus svg .hero-dash-2 { animation: hero-dash-reveal 1.0s ease-out 0.9s forwards; }
+
+.hero-illus svg .hero-circle { animation: hero-circle-pulse 3.5s ease-in-out infinite; }
+
+@keyframes hero-sway {
+  0%, 100% { transform: translateX(-13px); }
+  50%      { transform: translateX(13px);  }
+}
+@keyframes hero-dash-reveal {
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes hero-circle-pulse {
+  0%, 100% { transform: scale(1);    opacity: 1;   }
+  50%      { transform: scale(1.10); opacity: 0.55;}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-illus svg .hero-arc,
+  .hero-illus svg .hero-circle,
+  .hero-illus svg .hero-dash-1,
+  .hero-illus svg .hero-dash-2 {
+    animation: none;
+  }
+}
+
+.hero-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: 60px;
+  color: white;
+  margin: 0 0 32px;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.hero-title-accent {
+  color: #937B4D;
+}
+
+.hero-description {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: 16px;
+  color: white;
+  max-width: 400px;
+  margin: 0;
+  line-height: 1.6;
+}
+
 .category-section {
-  padding: 48px 33px 80px;
-  min-height: 100vh;
+  padding: 124px 33px 208px;
   scroll-margin-top: 0;
 }
 
 .category-section:last-child {
-  min-height: auto;
-  padding-bottom: 120px;
+  padding-bottom: 312px;
 }
 
 .category-header {
@@ -304,6 +400,231 @@ body > footer.visible {
   gap: 24px;
 }
 
+/* ============================================
+   GALLERY BENTO — source code (left) + sphere (right)
+============================================ */
+.gallery-top-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  /* aspect-ratio drives row height — sphere card aspect ends up ~1.45:1 (≈ Labels ratio) */
+  aspect-ratio: 21 / 10;
+  gap: 32px;
+  margin-bottom: 32px;
+  align-items: stretch;
+}
+
+/* Source-code card spans the card height only, not the label-dash space below */
+.gallery-top-row > .source-code-card {
+  align-self: start;
+  height: calc(100% - 35px);
+}
+
+/* Sphere card fills the cell (override default 16:10), gets stroke + matching dark bg */
+.gallery-top-row > .example-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.gallery-top-row > .example-card-wrapper > .example-card {
+  aspect-ratio: auto;
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--border-color);
+  background: #1F1F1F;
+}
+.gallery-top-row > .example-card-wrapper > .example-card > .example-card-inner {
+  background: #1F1F1F;
+}
+.gallery-top-row > .example-card-wrapper > .example-card > .example-card-inner::before {
+  display: none;
+}
+
+/* Decorative connector — sits on the LEFT edge of the slider card,
+   centered to its vertical middle. The slider card has position: relative. */
+.card-connector {
+  position: absolute;
+  top: 50%;
+  left: -33px;
+  width: 32px;
+  height: 1px;
+  background: var(--border-color);
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 5;
+}
+.card-connector::before,
+.card-connector::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.card-connector::before { left: 0; }
+.card-connector::after { left: 100%; }
+
+.examples-grid.gallery-bottom {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+.source-code-card {
+  position: relative;
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 100;
+  font-size: 11px;
+  color: white;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Soft gradient fade at top/bottom edges, matching the main content scroll area */
+.source-code-card::before,
+.source-code-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 48px;
+  pointer-events: none;
+  z-index: 2;
+}
+.source-code-card::before {
+  top: 0;
+  background: linear-gradient(to bottom, var(--bg-primary), transparent);
+  border-radius: 24px 24px 0 0;
+}
+.source-code-card::after {
+  bottom: 0;
+  background: linear-gradient(to top, var(--bg-primary), transparent);
+  border-radius: 0 0 24px 24px;
+}
+
+.source-code-content {
+  margin: 0;
+  padding: 24px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  white-space: pre;
+  line-height: 1.5;
+}
+
+/* Syntax highlighting — yellow/gold shades */
+.source-code-content .hl-t { color: var(--accent-gold); }       /* tags */
+.source-code-content .hl-a { color: #ffe9b3; }                  /* attribute names */
+.source-code-content .hl-s { color: #ffc865; }                  /* strings */
+.source-code-content .hl-c { color: #807055; font-style: italic; } /* comments */
+
+/* Slider panel card — sits next to the featured carousel example, controls it via window.__cfg / CSS vars */
+.slider-panel-card {
+  position: relative;
+  align-self: start;
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 28px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 100;
+  font-size: 11px;
+  color: white;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  min-height: 0;
+}
+.slider-panel-card .panel-title {
+  font-weight: 200;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: white;
+  margin-bottom: 4px;
+}
+.slider-panel-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+}
+.slider-panel-card .lbl-name {
+  color: rgba(255, 255, 255, 0.6);
+}
+.slider-panel-card .val {
+  color: white;
+  font-variant-numeric: tabular-nums;
+}
+.slider-panel-card .val-center {
+  text-align: center;
+}
+.slider-panel-card .lbl-row {
+  display: flex;
+  justify-content: space-between;
+  color: rgba(255, 255, 255, 0.6);
+}
+.slider-panel-card .lbl-row .val {
+  color: white;
+}
+.slider-panel-card input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 1px;
+  background: var(--border-color);
+  border-radius: 1px;
+  outline: none;
+}
+.slider-panel-card input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  cursor: pointer;
+  border: none;
+}
+.slider-panel-card input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  cursor: pointer;
+  border: none;
+}
+
+/* Multi-row spanning wrappers: card stretches to fill cell so its bottom
+   aligns with adjacent single-row cards. Aspect-ratio is sacrificed. */
+.example-card-wrapper.multi-row {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.example-card-wrapper.multi-row .example-card,
+.example-card-wrapper.multi-row .example-card-inner {
+  background: #1F1F1F;
+}
+.example-card-wrapper.multi-row .example-card-inner::before {
+  display: none;
+}
+.example-card-wrapper.multi-row .example-card {
+  aspect-ratio: auto;
+  flex: 1;
+  min-height: 0;
+}
+
 .example-card-wrapper {
   /* wrapper for card + label */
 
@@ -311,6 +632,7 @@ body > footer.visible {
 
 .example-card {
   background: #000;
+  border: 1px solid var(--border-color);
   border-radius: 24px;
   aspect-ratio: 16 / 10;
   overflow: hidden;
@@ -323,7 +645,7 @@ body > footer.visible {
 }
 
 .example-card.compact {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 16 / 10;
 }
 
 .example-card:hover {
@@ -354,11 +676,11 @@ body > footer.visible {
 /* Live iframe preview — rendered at fixed desktop size, scaled to fit card */
 .card-iframe {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
   width: 800px;
   height: 500px;
-  transform-origin: top left;
+  transform-origin: center;
   border: none;
   z-index: 1;
   opacity: 0;
@@ -370,13 +692,15 @@ body > footer.visible {
 }
 
 .compact .card-iframe {
-  width: 500px;
+  width: 800px;
   height: 500px;
 }
 
 /* On small screens (phones), use natural sizing so examples show their real mobile layout */
 @media (max-width: 768px) {
   .card-iframe {
+    top: 0 !important;
+    left: 0 !important;
     width: 100% !important;
     height: 100% !important;
     transform: none !important;
@@ -927,6 +1251,14 @@ body > footer.visible {
     border-radius: 24px 24px 0 0;
   }
 
+  .hero-section {
+    padding: 0 20px 21px;
+    margin: 20px 0 0;
+    flex-direction: column;
+    gap: 32px;
+    align-items: flex-start;
+  }
+  .hero-illus { max-width: 100%; margin-left: 0; }
   .category-section { padding: 32px 20px 60px; }
 
   .category-title {
@@ -935,8 +1267,8 @@ body > footer.visible {
     gap: 8px;
   }
 
-  .examples-grid { grid-template-columns: 1fr; }
-  .examples-grid.compact { grid-template-columns: repeat(2, 1fr); }
+  .examples-grid { grid-template-columns: 1fr !important; }
+  .examples-grid.compact { grid-template-columns: repeat(2, 1fr) !important; }
 
   .modal-container {
     width: 96vw;

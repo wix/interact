@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Carousel — @wix/interact</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --perspective: 1200px;
+            --card-radius: 20px;
+        }
+
+        * { margin: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #08080c;
+            color: #eeeef2;
+            overflow-x: hidden;
+        }
+
+        interact-element { display: contents; }
+
+        .scroll-section {
+            height: 400vh;
+            position: relative;
+        }
+
+        .sticky-wrapper {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: clip;
+        }
+
+        .bg-glow {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 50% 45%, rgba(170, 170, 180, 0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 30% 60%, rgba(150, 150, 160, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 70% 55%, rgba(160, 160, 170, 0.04) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .carousel-viewport {
+            perspective: var(--perspective);
+            perspective-origin: 50% 45%;
+        }
+
+        .carousel {
+            position: relative;
+            width: 280px;
+            height: 420px;
+            transform-style: preserve-3d;
+        }
+
+        .card {
+            position: absolute;
+            width: 280px;
+            height: 420px;
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            box-shadow:
+                0 8px 40px rgba(0, 0, 0, 0.55),
+                0 0 0 1px rgba(255, 255, 255, 0.06);
+            user-select: none;
+        }
+
+        .card-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 5s ease-out;
+        }
+
+        .card:hover .card-image {
+            transform: scale(1.06);
+        }
+
+        .card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to top,
+                rgba(0, 0, 0, 0.65) 0%,
+                rgba(0, 0, 0, 0.15) 35%,
+                transparent 100%
+            );
+            z-index: 1;
+        }
+
+        .card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            padding: 1.5rem 1.25rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .card:hover .card-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.25rem;
+            line-height: 1.3;
+        }
+
+        .card-subtitle {
+            font-size: 0.65rem;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.55);
+            margin-top: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.25);
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            transition: opacity 0.6s ease;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .scroll-hint::after {
+            content: '';
+            display: block;
+            width: 1px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            margin: 0.6rem auto 0;
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.15; transform: scaleY(0.5); }
+            50% { opacity: 0.5; transform: scaleY(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <interact-element data-interact-key="scroll-section">
+        <div class="scroll-section">
+            <div class="sticky-wrapper">
+                <div class="bg-glow"></div>
+                <div class="carousel-viewport">
+                    <interact-element data-interact-key="carousel">
+                        <div class="carousel" id="carousel"></div>
+                    </interact-element>
+                </div>
+                <div class="scroll-hint" id="scroll-hint">Scroll to explore</div>
+            </div>
+        </div>
+    </interact-element>
+
+    <script type="module">
+        import { Interact } from 'https://esm.sh/@wix/interact@2.0.3/web?bundle';
+
+        // Exposed for external slider panel (gallery card) to control
+        window.__cfg = { loops: 2, minB: 0.35, radius: 380 };
+
+        const cardData = [
+            { title: 'Yosemite Valley',  subtitle: 'California • Dawn • Granite',     image: '../../Image_assets/Example_Img4.jpg' },
+            { title: 'Alpine Sunrise',   subtitle: 'Mountains • Light • Silence',     image: '../../Image_assets/Example_Img12.jpg' },
+            { title: 'Mirror Lake',      subtitle: 'Reflection • Sunset • Stillness', image: '../../Image_assets/Example_Img15.jpg' },
+            { title: 'Forest Mist',      subtitle: 'Fog • Evergreen • Mystery',       image: '../../Image_assets/Example_Img25.jpg' },
+            { title: 'Starry Peaks',     subtitle: 'Night Sky • Snow • Wonder',       image: '../../Image_assets/Example_Img28.jpg' },
+            { title: 'Hidden Falls',     subtitle: 'Water • Moss • Tranquility',      image: '../../Image_assets/Example_Img32.jpg' },
+            { title: 'Golden Hour',      subtitle: 'Fields • Warmth • Horizon',       image: '../../Image_assets/Example_Img35.jpg' },
+            { title: 'Coastal Dusk',     subtitle: 'Ocean • Sand • Serenity',         image: '../../Image_assets/Example_Img40.jpg' }
+        ];
+
+        const NUM_CARDS = cardData.length;
+        const ANGLE_INC = 360 / NUM_CARDS;
+        const carousel = document.getElementById('carousel');
+
+        function buildCards() {
+            carousel.innerHTML = '';
+            cardData.forEach((data, i) => {
+                const angle = ANGLE_INC * i;
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.index = i;
+                card.style.transform = `rotateY(${angle}deg) translateZ(${window.__cfg.radius}px)`;
+                card.innerHTML =
+                    `<img class="card-image" src="${data.image}" alt="${data.title}" draggable="false">` +
+                    `<div class="card-overlay"></div>` +
+                    `<div class="card-content">` +
+                        `<div class="card-title">${data.title}</div>` +
+                        `<div class="card-subtitle">${data.subtitle}</div>` +
+                    `</div>`;
+                carousel.appendChild(card);
+            });
+        }
+
+        window.__updateRadius = () => {
+            const r = window.__cfg.radius;
+            carousel.querySelectorAll('.card').forEach((card, i) => {
+                const angle = ANGLE_INC * i;
+                card.style.transform = `rotateY(${angle}deg) translateZ(${r}px)`;
+            });
+        };
+
+        buildCards();
+
+        Interact.create({
+            interactions: [{
+                key: 'scroll-section',
+                trigger: 'viewProgress',
+                effects: [{
+                    key: 'carousel',
+                    customEffect: (el, progress) => {
+                        const totalDeg = window.__cfg.loops * 360;
+                        const rotation = progress * totalDeg;
+                        el.style.transform = `rotateY(${rotation}deg)`;
+
+                        const norm = ((rotation % 360) + 360) % 360;
+                        const minB = window.__cfg.minB;
+
+                        el.querySelectorAll('.card').forEach((card, i) => {
+                            const cardAngle = ANGLE_INC * i;
+                            const worldAngle = (norm + cardAngle) % 360;
+                            const diff = Math.min(worldAngle, 360 - worldAngle);
+                            const proximity = (Math.cos(diff * Math.PI / 180) + 1) / 2;
+                            const b = minB + (1 - minB) * proximity;
+                            card.style.filter = b > 1.05 ? 'none' : `brightness(${b.toFixed(3)})`;
+                        });
+
+                        const hint = document.getElementById('scroll-hint');
+                        if (hint) hint.style.opacity = progress > 0.015 ? '0' : '1';
+                    },
+                    rangeStart: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+                    rangeEnd:   { name: 'cover', offset: { value: 100, unit: 'percentage' } },
+                    fill: 'both'
+                }]
+            }]
+        });
+    </script>
+
+</body>
+</html>
