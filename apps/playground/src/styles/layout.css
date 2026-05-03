@@ -1,0 +1,52 @@
+@layer layout {
+  .pg-app-grid {
+    display: grid;
+    grid-template-columns: var(--pg-sidebar-width) 1fr var(--pg-inspector-width);
+    grid-template-rows: var(--pg-toolbar-height) 1fr auto;
+    grid-template-areas:
+      'toolbar  toolbar   toolbar'
+      'sidebar  stage     inspector'
+      'json     json      json';
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .pg-area-toolbar {
+    grid-area: toolbar;
+  }
+
+  .pg-area-sidebar {
+    grid-area: sidebar;
+  }
+
+  .pg-area-stage {
+    grid-area: stage;
+  }
+
+  .pg-area-inspector {
+    grid-area: inspector;
+  }
+
+  .pg-area-json {
+    grid-area: json;
+  }
+
+  .pg-panel {
+    background: var(--pg-color-bg-secondary);
+    overflow-y: auto;
+  }
+
+  .pg-panel-header {
+    padding: var(--pg-space-2) var(--pg-panel-padding);
+    font-size: var(--pg-font-size-xs);
+    font-weight: var(--pg-font-weight-bold);
+    color: var(--pg-color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: var(--pg-border-width) solid var(--pg-color-border);
+  }
+
+  .pg-panel-body {
+    padding: var(--pg-panel-padding);
+  }
+}

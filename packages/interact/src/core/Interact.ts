@@ -508,6 +508,11 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
         }
         target = target || source;
 
+        const effectSelector = getSelector(effect, { useFirstChild: useCustomElement });
+        if (effectSelector) {
+          interactions[source].selectors.add(effectSelector);
+        }
+
         if (target !== source) {
           const targetEntry = _ensureInteractionEntry(interactions, target);
           const seqInteractionId = `${target}::seq::${sequenceId}::${interactionIdx}`;
@@ -521,7 +526,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
             ...rest,
             sequence: sequenceConfig,
           });
-          targetEntry.selectors.add(getSelector(effect, { useFirstChild: useCustomElement }));
+          targetEntry.selectors.add(effectSelector);
         }
       }
     });

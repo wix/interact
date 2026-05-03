@@ -1,0 +1,39 @@
+.figure {
+  max-width: 480px;
+  width: 100%;
+  margin: 0;
+}
+
+.figure-image {
+  width: 100%;
+  height: 280px;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+}
+
+.figure-image::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 10%;
+  width: 80%;
+  height: 60%;
+  background: radial-gradient(ellipse, rgba(99, 102, 241, 0.15), transparent 70%);
+}
+
+.figure-caption {
+  font-size: 13px;
+  color: #a0a0aa;
+  text-align: center;
+  margin-top: 12px;
+  line-height: 1.5;
+  font-style: italic;
+}
