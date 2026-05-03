@@ -207,14 +207,14 @@ describe('CSSRuleToString', () => {
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
-  it('should add :where(:not([data-interact-enter])) when addInitialSelector is true', () => {
+  it('should add :is(:not([data-interact-enter])) when addInitialSelector is true', () => {
     const rule: CSSRuleData = {
       key: 'my-el',
       addInitialSelector: true,
       declarations: [{ name: 'opacity', value: '0' }],
     };
     const expected =
-      '[data-interact-key="my-el"]:where(:not([data-interact-enter])) {\nopacity: 0;\n}';
+      '[data-interact-key="my-el"]:is(:not([data-interact-enter])) {\nopacity: 0;\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
@@ -225,7 +225,7 @@ describe('CSSRuleToString', () => {
       declarations: [{ name: 'opacity', value: '1' }],
     };
     const expected =
-      '[data-interact-key="my-el"]:where(:state(active), :--active, [data-interact-effect~="active"]) {\nopacity: 1;\n}';
+      '[data-interact-key="my-el"]:is(:state(active), :--active, [data-interact-effect~="active"]) {\nopacity: 1;\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
@@ -263,7 +263,7 @@ describe('CSSRuleToString', () => {
       ],
     };
     const expected =
-      '@media (min-width: 1024px) {\n[data-interact-key="my-el"]:where(:not([data-interact-enter])):where(:state(hover), :--hover, [data-interact-effect~="hover"]) .child {\nopacity: 1;\ncolor: blue;\n}\n}';
+      '@media (min-width: 1024px) {\n[data-interact-key="my-el"]:is(:not([data-interact-enter])):is(:state(hover), :--hover, [data-interact-effect~="hover"]) .child {\nopacity: 1;\ncolor: blue;\n}\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 });
@@ -312,7 +312,6 @@ describe('buildListsRule', () => {
     const customProps = {
       key: 'my-el',
       childSelector: undefined,
-      statePropsToInvalidate: new Set<string>(),
       animation: '--my-anim',
       transition: '--my-trans',
       'animation-composition': '--my-comp',

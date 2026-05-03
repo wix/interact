@@ -109,17 +109,15 @@ export function CSSRuleToString(rule: CSSRuleData): string {
   }
 
   let selector = `[data-interact-key="${key}"]${
-    addInitialSelector ? ':where(:not([data-interact-enter]))' : ''
+    addInitialSelector ? ':is(:not([data-interact-enter]))' : ''
   }`;
 
-  // maybe nesting is simpler? - no need for `:where` only adding `&` before every option
+  // maybe nesting is simpler? - no need for `:is` only adding `&` before every option
   if (states && states.length) {
     const statesSelector = states
       .map((state) => `:state(${state}), :--${state}, [data-interact-effect~="${state}"]`)
       .join(', ');
-    // :where to add no specificity and allow following stateless rules on same target
-    // to be as specific and override
-    selector = `${selector}:where(${statesSelector})`;
+    selector = `${selector}:is(${statesSelector})`;
   }
 
   // here nesting might be confusing due to spaces already being handled?

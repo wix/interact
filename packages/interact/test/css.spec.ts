@@ -412,50 +412,6 @@ function findDecl(
 
 describe('css._generate', () => {
   describe('effectToCSS - namedEffect / keyframeEffect branch', () => {
-    it('should set animation custom properties and turn off transition for keyframeEffect', () => {
-      const config: InteractConfig = {
-        effects: {},
-        interactions: [
-          {
-            key: 'el',
-            trigger: 'click',
-            effects: [
-              {
-                effectId: 'kf1',
-                duration: 500,
-                keyframeEffect: {
-                  name: 'myAnim',
-                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
-                },
-              },
-            ],
-          },
-        ],
-      };
-
-      const { cssRules } = _generate(config);
-
-      const effectRule = cssRules.find((r) =>
-        r.declarations.some((d) => isTransitionProp(d.name) && d.value === '_'),
-      )!;
-      expect(effectRule).toBeDefined();
-
-      const animDecl = findDecl(effectRule.declarations, (d) => isAnimationProp(d.name));
-      expect(animDecl).toBeDefined();
-      expect(animDecl!.value).toContain('myAnim');
-
-      const compDecl = findDecl(effectRule.declarations, (d) => isCompositionProp(d.name));
-      expect(compDecl).toBeDefined();
-
-      const timelineDecl = findDecl(effectRule.declarations, (d) => isTimelineProp(d.name));
-      expect(timelineDecl).toBeDefined();
-      expect(timelineDecl!.value).toBe('none');
-
-      const rangeDecl = findDecl(effectRule.declarations, (d) => isRangeProp(d.name));
-      expect(rangeDecl).toBeDefined();
-      expect(rangeDecl!.value).toBe('normal');
-    });
-
     it('should produce separate initial rule with DEFAULT_INITIAL for viewEnter + once + keyframeEffect', () => {
       const config: InteractConfig = {
         effects: {},
@@ -520,9 +476,6 @@ describe('css._generate', () => {
 
       const effectRule = cssRules.find((r) => r.declarations.some((d) => isAnimationProp(d.name)))!;
       expect(effectRule).toBeDefined();
-      expect(effectRule.declarations.some((d) => isTransitionProp(d.name) && d.value === '_')).toBe(
-        true,
-      );
     });
 
     it('should not produce an initial rule for namedEffect with non-viewEnter trigger', () => {
@@ -544,7 +497,7 @@ describe('css._generate', () => {
   });
 
   describe('effectToCSS - transition branch', () => {
-    it('should turn off animation and set transition custom prop for a transition effect', () => {
+    it('should set transition custom prop for a transition effect', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -567,29 +520,17 @@ describe('css._generate', () => {
       const { cssRules } = _generate(config);
 
       const effectRule = cssRules.find(
-        (r) =>
-          !r.states && r.declarations.some((d) => isAnimationProp(d.name) && d.value === 'none'),
+        (r) => !r.states && r.declarations.some((d) => isTransitionProp(d.name)),
       )!;
       expect(effectRule).toBeDefined();
-
-      const compDecl = findDecl(effectRule.declarations, (d) => isCompositionProp(d.name));
-      expect(compDecl!.value).toBe('replace');
 
       const transDecl = findDecl(effectRule.declarations, (d) => isTransitionProp(d.name));
       expect(transDecl).toBeDefined();
       expect(String(transDecl!.value)).toContain('opacity');
       expect(String(transDecl!.value)).toContain('500ms');
-
-      const timelineDecl = findDecl(effectRule.declarations, (d) => isTimelineProp(d.name));
-      expect(timelineDecl).toBeDefined();
-      expect(timelineDecl!.value).toBe('none');
-
-      const rangeDecl = findDecl(effectRule.declarations, (d) => isRangeProp(d.name));
-      expect(rangeDecl).toBeDefined();
-      expect(rangeDecl!.value).toBe('normal');
     });
 
-    it('should produce a state rule with var() declarations for transition', () => {
+    it('should produce a state rule with direct declarations for transition', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -614,14 +555,9 @@ describe('css._generate', () => {
       const stateRule = cssRules.find((r) => r.states?.includes('trans1'))!;
       expect(stateRule).toBeDefined();
 
-      const varDecl = stateRule.declarations.find(
-        (d) => d.name === 'opacity' && String(d.value).startsWith('var('),
-      );
-      expect(varDecl).toBeDefined();
-
-      const statePropDecl = stateRule.declarations.find((d) => d.name.startsWith('--opacity-'));
-      expect(statePropDecl).toBeDefined();
-      expect(statePropDecl!.value).toBe('1');
+      const opacityDecl = stateRule.declarations.find((d) => d.name === 'opacity');
+      expect(opacityDecl).toBeDefined();
+      expect(opacityDecl!.value).toBe('1');
     });
 
     it('should produce a state rule for transitionProperties (alternative syntax)', () => {
@@ -646,53 +582,9 @@ describe('css._generate', () => {
       const stateRule = cssRules.find((r) => r.states?.includes('trans2'))!;
       expect(stateRule).toBeDefined();
 
-      const varDecl = stateRule.declarations.find(
-        (d) => d.name === 'color' && String(d.value).startsWith('var('),
-      );
-      expect(varDecl).toBeDefined();
-
-      const statePropDecl = stateRule.declarations.find((d) => d.name.startsWith('--color-'));
-      expect(statePropDecl).toBeDefined();
-      expect(statePropDecl!.value).toBe('red');
-    });
-
-    it('should produce var() references that link to the state custom properties', () => {
-      const config: InteractConfig = {
-        effects: {},
-        interactions: [
-          {
-            key: 'el',
-            trigger: 'click',
-            effects: [
-              {
-                effectId: 'trans1',
-                transition: {
-                  styleProperties: [
-                    { name: 'opacity', value: '0.5' },
-                    { name: 'transform', value: 'scale(2)' },
-                  ],
-                  duration: 400,
-                },
-              },
-            ],
-          },
-        ],
-      };
-
-      const { cssRules } = _generate(config);
-      const stateRule = cssRules.find((r) => r.states?.includes('trans1'))!;
-
-      const opacityProp = stateRule.declarations.find((d) => d.name.startsWith('--opacity-'))!;
-      const opacityVarDecl = stateRule.declarations.find(
-        (d) => d.name === 'opacity' && String(d.value).includes(opacityProp.name),
-      );
-      expect(opacityVarDecl).toBeDefined();
-
-      const transformProp = stateRule.declarations.find((d) => d.name.startsWith('--transform-'))!;
-      const transformVarDecl = stateRule.declarations.find(
-        (d) => d.name === 'transform' && String(d.value).includes(transformProp.name),
-      );
-      expect(transformVarDecl).toBeDefined();
+      const colorDecl = stateRule.declarations.find((d) => d.name === 'color');
+      expect(colorDecl).toBeDefined();
+      expect(colorDecl!.value).toBe('red');
     });
   });
 
@@ -846,7 +738,7 @@ describe('css._generate', () => {
       const effectRule = cssRules.find((r) => r.declarations.some((d) => isAnimationProp(d.name)))!;
 
       const timelineDecl = findDecl(effectRule.declarations, (d) => isTimelineProp(d.name));
-      expect(timelineDecl!.value).toBe('none');
+      expect(timelineDecl!.value).toBe('auto');
 
       const rangeDecl = findDecl(effectRule.declarations, (d) => isRangeProp(d.name));
       expect(rangeDecl!.value).toBe('normal');
@@ -880,7 +772,7 @@ describe('css._generate', () => {
 
       const timelineDecl = findDecl(initialRule.declarations, (d) => isTimelineProp(d.name));
       expect(timelineDecl).toBeDefined();
-      expect(timelineDecl!.value).toBe('none');
+      expect(timelineDecl!.value).toBe('auto');
 
       const rangeDecl = findDecl(initialRule.declarations, (d) => isRangeProp(d.name));
       expect(rangeDecl).toBeDefined();
@@ -1046,14 +938,13 @@ describe('css._generate', () => {
       const effectRule = cssRules.find(
         (r) =>
           r.declarations.some((d) => isAnimationProp(d.name) && d.value === 'none') &&
-          r.declarations.some((d) => isCompositionProp(d.name) && d.value === 'replace') &&
-          r.declarations.some((d) => isTransitionProp(d.name) && d.value === '_'),
+          r.declarations.some((d) => isCompositionProp(d.name) && d.value === 'replace'),
       );
       expect(effectRule).toBeDefined();
 
       const timelineDecl = findDecl(effectRule!.declarations, (d) => isTimelineProp(d.name));
       expect(timelineDecl).toBeDefined();
-      expect(timelineDecl!.value).toBe('none');
+      expect(timelineDecl!.value).toBe('auto');
 
       const rangeDecl = findDecl(effectRule!.declarations, (d) => isRangeProp(d.name));
       expect(rangeDecl).toBeDefined();
@@ -1075,78 +966,6 @@ describe('css._generate', () => {
       const result = generate(config);
 
       expect(result).not.toContain('@keyframes');
-    });
-  });
-
-  describe('statePropsToInvalidate - cross-effect cascade', () => {
-    it('should invalidate transition state properties in subsequent effects within the same interaction', () => {
-      const config: InteractConfig = {
-        effects: {},
-        interactions: [
-          {
-            key: 'el',
-            trigger: 'click',
-            effects: [
-              {
-                effectId: 'trans1',
-                transition: {
-                  styleProperties: [{ name: 'opacity', value: '1' }],
-                  duration: 500,
-                },
-              },
-              {
-                effectId: 'kf1',
-                duration: 300,
-                keyframeEffect: {
-                  name: 'slide',
-                  keyframes: [{ transform: 'translateX(-100px)' }, { transform: 'translateX(0)' }],
-                },
-              },
-            ],
-          },
-        ],
-      };
-
-      const { cssRules } = _generate(config);
-
-      const kfRule = cssRules.find((r) =>
-        r.declarations.some((d) => isTransitionProp(d.name) && d.value === '_'),
-      )!;
-
-      const invalidationDecls = kfRule.declarations.filter(
-        (d) => d.name.startsWith('--opacity-') && d.value === ' ',
-      );
-      expect(invalidationDecls.length).toBeGreaterThan(0);
-    });
-
-    it('should not invalidate anything for the first effect in an interaction', () => {
-      const config: InteractConfig = {
-        effects: {},
-        interactions: [
-          {
-            key: 'el',
-            trigger: 'click',
-            effects: [
-              {
-                effectId: 'kf1',
-                duration: 300,
-                keyframeEffect: {
-                  name: 'slide',
-                  keyframes: [{ transform: 'translateX(-100px)' }, { transform: 'translateX(0)' }],
-                },
-              },
-            ],
-          },
-        ],
-      };
-
-      const { cssRules } = _generate(config);
-
-      const effectRule = cssRules.find((r) =>
-        r.declarations.some((d) => isTransitionProp(d.name) && d.value === '_'),
-      )!;
-      const invalidationDecls = effectRule.declarations.filter((d) => d.value === ' ');
-      expect(invalidationDecls).toHaveLength(0);
     });
   });
 
@@ -1345,8 +1164,10 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      const animRules = cssRules.filter((r) =>
-        r.declarations.some((d) => isTransitionProp(d.name) && d.value === '_'),
+      const animRules = cssRules.filter(
+        (r) =>
+          r.declarations.some((d) => isAnimationProp(d.name)) &&
+          !r.declarations.some((d) => String(d.value).includes('var(')),
       );
       expect(animRules.length).toBeGreaterThanOrEqual(2);
 

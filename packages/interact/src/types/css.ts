@@ -14,7 +14,6 @@ export type CSSCoordiantedLists = {
 export type ListCustomProps = {
   key: string;
   childSelector?: string;
-  statePropsToInvalidate: Set<string>;
 } & Record<ListPropertyName, string>;
 
 export type CSSRuleData = {

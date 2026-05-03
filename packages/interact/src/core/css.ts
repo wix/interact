@@ -31,13 +31,22 @@ export const DEFAULT_INITIAL = [
   { name: 'rotate', value: 'none' },
 ];
 
-const LIST_PROPERTY_NAMES: ListPropertyName[] = [
+const LIST_ANIMATION_PROPERTY_NAMES: ListPropertyName[] = [
   'animation',
   'animation-composition',
-  'transition',
   'animation-timeline',
   'animation-range',
 ];
+
+const LIST_PROPERTY_NAMES: ListPropertyName[] = ['transition', ...LIST_ANIMATION_PROPERTY_NAMES];
+
+const LIST_PROPERTY_NAMES_MOTION = {
+  transition: 'animation' as const,
+  animation: 'animation' as const,
+  'animation-composition': 'composition' as const,
+  'animation-timeline': 'animationTimeline' as const,
+  'animation-range': 'animationRange' as const,
+};
 
 const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
   animation: 'none',
@@ -52,7 +61,7 @@ const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
 function pushToTargetCustomPropsLists(
   targetToLists: Map<string, CSSCoordiantedLists>,
   targetHash: string,
-  customProps: Omit<ListCustomProps, 'statePropsToInvalidate'>,
+  customProps: ListCustomProps,
 ): void {
   const { key, childSelector } = customProps;
 
@@ -93,7 +102,6 @@ function getInteractionCustomPropsForTarget(
     targetToCustomProps.set(targetHash, {
       key,
       childSelector,
-      statePropsToInvalidate: new Set<string>(),
       ...properties,
     });
   }
@@ -105,7 +113,7 @@ function getSequenceCustomPropsForTarget(
   targetHash: string,
   key: string,
   interactionIdx: number,
-  targetToSequenceLists: Map<string, CSSCoordiantedLists & { statePropsToInvalidate: Set<string> }>,
+  targetToSequenceLists: Map<string, CSSCoordiantedLists>,
   childSelector?: string,
 ): Record<ListPropertyName, string> {
   const index = targetToSequenceLists.get(targetHash)?.properties?.animation.varNames.length || 0;
@@ -122,11 +130,6 @@ function getSequenceCustomPropsForTarget(
     childSelector,
     ...properties,
   });
-
-  const sequenceList = targetToSequenceLists.get(targetHash)!;
-  if (!sequenceList.statePropsToInvalidate) {
-    sequenceList.statePropsToInvalidate = new Set<string>();
-  }
 
   return properties;
 }
@@ -170,13 +173,11 @@ function effectToCSS(
   effect: ResolvedEffect,
   configConditions: Record<string, Condition>,
   customProps: ListCustomProps,
-  targetHash: string,
   trigger: TriggerVariant,
   childSelector?: string,
 ): {
   rules: CSSRuleData[];
   keyframes: MotionKeyframeEffect[];
-  statePropsToInvalidate: Set<string>;
 } {
   const {
     key,
@@ -198,13 +199,10 @@ function effectToCSS(
       media,
       selectorCondition,
       childSelector,
-      // invalidating earlier cascaded custom properties affected from earlier transitionEffects
-      // to implement same-interaction-cascade
-      declarations: [...customProps.statePropsToInvalidate].map((name) => ({ name, value: ' ' })),
+      declarations: [],
     },
   ];
   let keyframes: MotionKeyframeEffect[] = [];
-  let statePropsToInvalidate = new Set<string>();
 
   const { declarations } = rules[0];
 
@@ -220,12 +218,6 @@ function effectToCSS(
       keyframes: anim.keyframes,
     }));
 
-    // turning off cascaded transition
-    declarations.push({
-      name: customProps.transition,
-      value: '_',
-    });
-
     // declare custom parameters
     declarations.push(
       ...cssAnimations.flatMap(({ custom }) =>
@@ -235,26 +227,19 @@ function effectToCSS(
       ),
     );
 
-    const animationDeclarations = [
-      {
-        name: customProps.animation,
-        value: cssAnimations.map(({ animation }) => animation).join(', '),
-      },
-      {
-        name: customProps['animation-composition'],
-        value: cssAnimations.map(({ composition }) => composition || 'replace').join(', '),
-      },
-      {
-        name: customProps['animation-timeline'],
-        value: cssAnimations.map(({ animationTimeline }) => animationTimeline || 'none').join(', '),
-      },
-      {
-        name: customProps['animation-range'],
-        value: cssAnimations.map(({ animationRange }) => animationRange || 'normal').join(', '),
-      },
-    ];
+    const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
+      name: customProps[propertyName],
+      value:
+        cssAnimations
+          .map((animation) => {
+            const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
+            return animation[name];
+          })
+          .join(', ') || LIST_PROPERTY_FALLBACKS[propertyName],
+    }));
 
     if (initial) {
+      // declare animation and composition custom properties with initial dependent on data-motion-enter
       rules.push({
         key,
         media,
@@ -271,36 +256,10 @@ function effectToCSS(
     const properties = transition?.styleProperties || transitionProperties || [];
     const transitions = transitionEffectToTransitionsList(effect);
 
-    // accumulating properties affected by transition
-    const stateProps = properties.map(
-      ({ name }) => `--${name}-${getUniqueEncodedHash(targetHash)}`,
-    );
-    statePropsToInvalidate = new Set(stateProps);
-
-    // turning off cascaded animation
-    declarations.push(
-      {
-        name: customProps.animation,
-        value: 'none',
-      },
-      {
-        name: customProps['animation-composition'],
-        value: 'replace',
-      },
-      {
-        name: customProps['animation-timeline'],
-        value: 'none',
-      },
-      {
-        name: customProps['animation-range'],
-        value: 'normal',
-      },
-    );
-
     // declaring transition custom property
     declarations.push({
       name: customProps.transition,
-      value: transitions.join(', '),
+      value: transitions.join(', ') || LIST_PROPERTY_FALLBACKS.transition,
     });
 
     // adding state rule using custom properties that could be overriden to implement
@@ -311,38 +270,19 @@ function effectToCSS(
       selectorCondition,
       childSelector,
       states: [effectId],
-      declarations: stateProps.flatMap((name, index) => [
-        { name, value: properties[index].value },
-        { name: properties[index].name, value: `var(${name}, )` },
-      ]),
+      declarations: properties,
     });
   } else {
     // setting off animation, composition and transition custom properties
     declarations.push(
-      {
-        name: customProps.animation,
-        value: 'none',
-      },
-      {
-        name: customProps['animation-composition'],
-        value: 'replace',
-      },
-      {
-        name: customProps.transition,
-        value: '_',
-      },
-      {
-        name: customProps['animation-timeline'],
-        value: 'none',
-      },
-      {
-        name: customProps['animation-range'],
-        value: 'normal',
-      },
+      ...LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
+        name: customProps[propertyName],
+        value: LIST_PROPERTY_FALLBACKS[propertyName],
+      })),
     );
   }
 
-  return { rules, keyframes, statePropsToInvalidate };
+  return { rules, keyframes };
 }
 
 function parseEffect(
@@ -355,10 +295,7 @@ function parseEffect(
   useFirstChild: boolean = true,
   // to use inside sequences to update the sequence's coordinated list without
   // breaking cascade logic
-  targetToSequenceLists?: Map<
-    string,
-    CSSCoordiantedLists & { statePropsToInvalidate: Set<string> }
-  >,
+  targetToSequenceLists?: Map<string, CSSCoordiantedLists>,
 ): CSSRuleData[] {
   const configConditions = config.conditions || {};
 
@@ -395,23 +332,13 @@ function parseEffect(
   }
 
   // process effect into css-rules and keyframes
-  const { rules, keyframes, statePropsToInvalidate } = effectToCSS(
+  const { rules, keyframes } = effectToCSS(
     effect,
     configConditions,
     localCustomProps,
-    targetHash,
     trigger,
     childSelector,
   );
-
-  // in case effect is part of a sequence, we do not want to invalidate the properties affected by current transitionEffect
-  // in preceeding effects in the same sequence, so instead we update them on targetToSequenceLists to be added
-  // later after parsing all of the effects of the sequence
-  if (targetToSequenceLists) {
-    localCustomProps.statePropsToInvalidate =
-      targetToSequenceLists.get(targetHash)!.statePropsToInvalidate;
-  }
-  statePropsToInvalidate.forEach((prop) => localCustomProps.statePropsToInvalidate.add(prop));
 
   // update keyframes map
   keyframes.forEach(({ name, keyframes }) => keyframesMap.set(name, keyframes));
@@ -433,10 +360,7 @@ function parseSequence(
   // exist together on the same target -
   // targetHash to lists of custom-properties for each coordinated-list type property
   // to be populated when parsing effects
-  const targetToSequenceLists = new Map<
-    string,
-    CSSCoordiantedLists & { statePropsToInvalidate: Set<string> }
-  >();
+  const targetToSequenceLists = new Map<string, CSSCoordiantedLists>();
 
   const cssRules = sequence.effects.flatMap((effect) =>
     parseEffect(
@@ -456,8 +380,6 @@ function parseSequence(
 
   targetToSequenceLists.forEach((lists, targetHash) => {
     const customProps = targetToCustomProps.get(targetHash)!;
-    // updating set of properties affected by transitionEffects on that target to invalidate on preceeding sequences
-    lists.statePropsToInvalidate.forEach((prop) => customProps.statePropsToInvalidate.add(prop));
 
     // for each target add rule with sequence-conditions for the coordinated lists from interactions targeting it
     // here we use the interaction's custom-properties to set the lists as values for them instead of
