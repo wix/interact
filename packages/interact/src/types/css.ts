@@ -8,7 +8,7 @@ export type ListPropertyName =
 export type CSSCoordiantedLists = {
   key: string;
   childSelector?: string;
-  properties: Record<ListPropertyName, { fallback: string; varNames: string[] }>;
+  properties: Partial<Record<ListPropertyName, { fallback: string; varNames: string[] }>>;
 };
 
 export type ListCustomProps = {

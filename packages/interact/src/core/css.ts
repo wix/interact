@@ -41,11 +41,12 @@ const LIST_ANIMATION_PROPERTY_NAMES: ListPropertyName[] = [
 const LIST_PROPERTY_NAMES: ListPropertyName[] = ['transition', ...LIST_ANIMATION_PROPERTY_NAMES];
 
 const LIST_PROPERTY_NAMES_MOTION = {
-  transition: 'animation' as const,
   animation: 'animation' as const,
   'animation-composition': 'composition' as const,
   'animation-timeline': 'animationTimeline' as const,
   'animation-range': 'animationRange' as const,
+  // transition is dummy for type-check
+  transition: 'animation' as const,
 };
 
 const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
@@ -62,11 +63,15 @@ function pushToTargetCustomPropsLists(
   targetToLists: Map<string, CSSCoordiantedLists>,
   targetHash: string,
   customProps: ListCustomProps,
+  usedProperties?: Set<ListPropertyName>,
 ): void {
   const { key, childSelector } = customProps;
+  const propertyNames = usedProperties
+    ? LIST_PROPERTY_NAMES.filter((n) => usedProperties.has(n))
+    : LIST_PROPERTY_NAMES;
 
   if (!targetToLists.has(targetHash)) {
-    const properties = LIST_PROPERTY_NAMES.reduce(
+    const properties = propertyNames.reduce(
       (acc, name) => {
         acc[name] = {
           fallback: LIST_PROPERTY_FALLBACKS[name],
@@ -80,7 +85,12 @@ function pushToTargetCustomPropsLists(
     targetToLists.set(targetHash, { key, childSelector, properties });
   } else {
     const { properties } = targetToLists.get(targetHash)!;
-    LIST_PROPERTY_NAMES.forEach((name) => properties[name].varNames.push(customProps[name]));
+    propertyNames.forEach((name) => {
+      if (!properties[name]) {
+        properties[name] = { fallback: LIST_PROPERTY_FALLBACKS[name], varNames: [] };
+      }
+      properties[name]!.varNames.push(customProps[name]);
+    });
   }
 }
 
@@ -109,29 +119,18 @@ function getInteractionCustomPropsForTarget(
   return targetToCustomProps.get(targetHash)!;
 }
 
-function getSequenceCustomPropsForTarget(
+function generateSequenceCustomProps(
   targetHash: string,
-  key: string,
   interactionIdx: number,
-  targetToSequenceLists: Map<string, CSSCoordiantedLists>,
-  childSelector?: string,
+  index: number,
 ): Record<ListPropertyName, string> {
-  const index = targetToSequenceLists.get(targetHash)?.properties?.animation.varNames.length || 0;
-  const properties = LIST_PROPERTY_NAMES.reduce(
+  return LIST_PROPERTY_NAMES.reduce(
     (acc, name) => {
       acc[name] = kebabCustomProp([name, interactionIdx, index, getUniqueEncodedHash(targetHash)]);
       return acc;
     },
     {} as Record<ListPropertyName, string>,
   );
-
-  pushToTargetCustomPropsLists(targetToSequenceLists, targetHash, {
-    key,
-    childSelector,
-    ...properties,
-  });
-
-  return properties;
 }
 
 // ----- Parsers -----
@@ -178,6 +177,7 @@ function effectToCSS(
 ): {
   rules: CSSRuleData[];
   keyframes: MotionKeyframeEffect[];
+  usedProperties: ListPropertyName[];
 } {
   const {
     key,
@@ -206,7 +206,11 @@ function effectToCSS(
 
   const { declarations } = rules[0];
 
+  let usedProperties: ListPropertyName[] = [];
+
   if (namedEffect || keyframeEffect) {
+    usedProperties = LIST_ANIMATION_PROPERTY_NAMES;
+
     const animationOptions = effectToAnimationOptions(effect);
     const cssAnimations = getCSSAnimation(null, animationOptions, trigger).filter(
       (anim) => anim.name,
@@ -253,6 +257,8 @@ function effectToCSS(
       declarations.push(...animationDeclarations);
     }
   } else if (transition || transitionProperties) {
+    usedProperties = ['transition'];
+
     const properties = transition?.styleProperties || transitionProperties || [];
     const transitions = transitionEffectToTransitionsList(effect);
 
@@ -282,7 +288,7 @@ function effectToCSS(
     );
   }
 
-  return { rules, keyframes };
+  return { rules, keyframes, usedProperties };
 }
 
 function parseEffect(
@@ -293,10 +299,8 @@ function parseEffect(
   keyframesMap: Map<string, Keyframe[]>,
   trigger: TriggerVariant,
   useFirstChild: boolean = true,
-  // to use inside sequences to update the sequence's coordinated list without
-  // breaking cascade logic
-  targetToSequenceLists?: Map<string, CSSCoordiantedLists>,
-): CSSRuleData[] {
+  sequenceCustomProps?: Record<ListPropertyName, string>,
+): { rules: CSSRuleData[]; usedProperties: ListPropertyName[] } {
   const configConditions = config.conditions || {};
 
   const { key } = effect;
@@ -320,19 +324,12 @@ function parseEffect(
   // in case effect is part of a sequence, we use different custom-proprties names to not override
   // the entire interaction, instead we generate unique-per-effect name to allow effects to live together
   const localCustomProps = { ...customProps };
-  if (targetToSequenceLists) {
-    const properties = getSequenceCustomPropsForTarget(
-      targetHash,
-      key,
-      interactionIdx,
-      targetToSequenceLists,
-      childSelector,
-    );
-    Object.assign(localCustomProps, properties);
+  if (sequenceCustomProps) {
+    Object.assign(localCustomProps, sequenceCustomProps);
   }
 
   // process effect into css-rules and keyframes
-  const { rules, keyframes } = effectToCSS(
+  const { rules, keyframes, usedProperties } = effectToCSS(
     effect,
     configConditions,
     localCustomProps,
@@ -343,7 +340,7 @@ function parseEffect(
   // update keyframes map
   keyframes.forEach(({ name, keyframes }) => keyframesMap.set(name, keyframes));
 
-  return rules;
+  return { rules, usedProperties };
 }
 
 function parseSequence(
@@ -354,6 +351,7 @@ function parseSequence(
   keyframesMap: Map<string, Keyframe[]>,
   trigger: TriggerVariant,
   useFirstChild: boolean = true,
+  targetUsedProperties?: Map<string, Set<ListPropertyName>>,
 ): CSSRuleData[] {
   // in a similar manner to how we treat different interactions and use lists to concatenate them
   // instead of overriding, we use the same mechanism to allow all of the effects of a sequence to
@@ -361,9 +359,25 @@ function parseSequence(
   // targetHash to lists of custom-properties for each coordinated-list type property
   // to be populated when parsing effects
   const targetToSequenceLists = new Map<string, CSSCoordiantedLists>();
+  const targetSequenceIndex = new Map<string, number>();
 
-  const cssRules = sequence.effects.flatMap((effect) =>
-    parseEffect(
+  const cssRules: CSSRuleData[] = [];
+
+  for (const effect of sequence.effects) {
+    const targetHash = getElementHash(effect);
+    const { key } = effect;
+    const childSelector = getSelector(effect, {
+      asCombinator: true,
+      useFirstChild,
+      addItemFilter: true,
+    });
+
+    const index = targetSequenceIndex.get(targetHash) || 0;
+    targetSequenceIndex.set(targetHash, index + 1);
+
+    const seqCustomProps = generateSequenceCustomProps(targetHash, interactionIdx, index);
+
+    const { rules, usedProperties } = parseEffect(
       config,
       interactionIdx,
       effect,
@@ -371,9 +385,27 @@ function parseSequence(
       keyframesMap,
       trigger,
       useFirstChild,
+      seqCustomProps,
+    );
+    cssRules.push(...rules);
+
+    const usedSet = new Set(usedProperties);
+
+    pushToTargetCustomPropsLists(
       targetToSequenceLists,
-    ),
-  );
+      targetHash,
+      { key, childSelector, ...seqCustomProps },
+      usedSet,
+    );
+
+    if (targetUsedProperties) {
+      if (!targetUsedProperties.has(targetHash)) {
+        targetUsedProperties.set(targetHash, new Set(usedProperties));
+      } else {
+        usedProperties.forEach((p) => targetUsedProperties.get(targetHash)!.add(p));
+      }
+    }
+  }
 
   const configConditions = config.conditions || {};
   const { conditions } = sequence;
@@ -408,6 +440,8 @@ function parseInteraction(
   // and the last one will be applied.
   const targetToCustomProps = new Map<string, ListCustomProps>();
 
+  const targetUsedProperties = new Map<string, Set<ListPropertyName>>();
+
   const resolvedEffects = effects
     .map((effect) => resolveEffectForCSS(effect, interaction, config))
     .filter((effect) => effect !== null);
@@ -426,19 +460,25 @@ function parseInteraction(
     );
   }
 
-  cssRules.push(
-    ...resolvedEffects.flatMap((effect) =>
-      parseEffect(
-        config,
-        interactionIdx,
-        effect,
-        targetToCustomProps,
-        keyframesMap,
-        motionTrigger,
-        useFirstChild,
-      ),
-    ),
-  );
+  for (const effect of resolvedEffects) {
+    const targetHash = getElementHash(effect);
+    const { rules, usedProperties } = parseEffect(
+      config,
+      interactionIdx,
+      effect,
+      targetToCustomProps,
+      keyframesMap,
+      motionTrigger,
+      useFirstChild,
+    );
+    cssRules.push(...rules);
+
+    if (!targetUsedProperties.has(targetHash)) {
+      targetUsedProperties.set(targetHash, new Set(usedProperties));
+    } else {
+      usedProperties.forEach((p) => targetUsedProperties.get(targetHash)!.add(p));
+    }
+  }
 
   const resolvedSequences = sequences
     .map((sequence) => resolveSequenceForCSS(sequence, interaction, config))
@@ -454,6 +494,7 @@ function parseInteraction(
         keyframesMap,
         motionTrigger,
         useFirstChild,
+        targetUsedProperties,
       ),
     ),
   );
@@ -461,7 +502,12 @@ function parseInteraction(
   // after processing all of the effects, we add to the lists of custom-properties per target
   // the new interaction's custom-property names
   targetToCustomProps.forEach((customProps, targetHash) => {
-    pushToTargetCustomPropsLists(targetToLists, targetHash, customProps);
+    pushToTargetCustomPropsLists(
+      targetToLists,
+      targetHash,
+      customProps,
+      targetUsedProperties.get(targetHash),
+    );
   });
 
   return cssRules;

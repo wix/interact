@@ -145,10 +145,15 @@ export function buildListsRule(
 ): CSSRuleData {
   const { key, childSelector, properties } = lists;
 
-  const declarations = Object.entries(properties).map(([name, { fallback, varNames }]) => ({
-    name,
-    value: varNames.map((n) => `var(${n}, ${fallback})`).join(', '),
-  }));
+  const declarations = Object.entries(properties)
+    .filter(
+      (entry: [string, { fallback: string; varNames: string[] }]) =>
+        entry[1] && entry[1].varNames.length,
+    )
+    .map(([name, { fallback, varNames }]) => ({
+      name,
+      value: varNames.map((n) => `var(${n}, ${fallback})`).join(', '),
+    }));
 
   const rule: CSSRuleData = { key, childSelector, declarations };
 
