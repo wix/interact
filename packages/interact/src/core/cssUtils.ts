@@ -2,7 +2,7 @@ import type {
   Condition,
   ListPropertyName,
   ListCustomProps,
-  CSSCoordiantedLists,
+  CSSCoordinatedLists,
   CSSRuleData,
 } from '../types';
 import {
@@ -138,7 +138,7 @@ export function CSSRuleToString(rule: CSSRuleData): string {
 }
 
 export function buildListsRule(
-  lists: CSSCoordiantedLists,
+  lists: CSSCoordinatedLists,
   customProps?: ListCustomProps,
   conditions?: string[],
   configConditions?: Record<string, Condition>,

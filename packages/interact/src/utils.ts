@@ -97,6 +97,8 @@ export function transitionEffectToTransitionsList(transitionEffect: StateEffect)
   return transitions;
 }
 
+// TODO: createTransitionCSS overlaps with effectToCSS's transition branch and could be
+// consolidated once the runtime path migrates to the CSS generation pipeline.
 export function createTransitionCSS({
   key,
   effectId,

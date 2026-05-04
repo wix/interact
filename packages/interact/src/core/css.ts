@@ -6,7 +6,7 @@ import type {
   Condition,
   ListPropertyName,
   ListCustomProps,
-  CSSCoordiantedLists,
+  CSSCoordinatedLists,
   CSSRuleData,
 } from '../types';
 import {
@@ -31,22 +31,22 @@ export const DEFAULT_INITIAL = [
   { name: 'rotate', value: 'none' },
 ];
 
-const LIST_ANIMATION_PROPERTY_NAMES: ListPropertyName[] = [
+const LIST_ANIMATION_PROPERTY_NAMES = [
   'animation',
   'animation-composition',
   'animation-timeline',
   'animation-range',
-];
+] as const satisfies readonly ListPropertyName[];
+
+type AnimationPropertyName = (typeof LIST_ANIMATION_PROPERTY_NAMES)[number];
 
 const LIST_PROPERTY_NAMES: ListPropertyName[] = ['transition', ...LIST_ANIMATION_PROPERTY_NAMES];
 
-const LIST_PROPERTY_NAMES_MOTION = {
-  animation: 'animation' as const,
-  'animation-composition': 'composition' as const,
-  'animation-timeline': 'animationTimeline' as const,
-  'animation-range': 'animationRange' as const,
-  // transition is dummy for type-check
-  transition: 'animation' as const,
+const LIST_PROPERTY_NAMES_MOTION: Record<AnimationPropertyName, string> = {
+  animation: 'animation',
+  'animation-composition': 'composition',
+  'animation-timeline': 'animationTimeline',
+  'animation-range': 'animationRange',
 };
 
 const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
@@ -59,8 +59,21 @@ const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
 
 // ----- Map Updaters -----
 
+function accumulateUsedProperties(
+  map: Map<string, Set<ListPropertyName>>,
+  targetHash: string,
+  props: ListPropertyName[],
+) {
+  const existing = map.get(targetHash);
+  if (existing) {
+    props.forEach((p) => existing.add(p));
+  } else {
+    map.set(targetHash, new Set(props));
+  }
+}
+
 function pushToTargetCustomPropsLists(
-  targetToLists: Map<string, CSSCoordiantedLists>,
+  targetToLists: Map<string, CSSCoordinatedLists>,
   targetHash: string,
   customProps: ListCustomProps,
   usedProperties?: Set<ListPropertyName>,
@@ -71,27 +84,28 @@ function pushToTargetCustomPropsLists(
     : LIST_PROPERTY_NAMES;
 
   if (!targetToLists.has(targetHash)) {
-    const properties = propertyNames.reduce(
-      (acc, name) => {
-        acc[name] = {
-          fallback: LIST_PROPERTY_FALLBACKS[name],
-          varNames: [customProps[name]],
-        };
-        return acc;
-      },
-      {} as CSSCoordiantedLists['properties'],
-    );
-
-    targetToLists.set(targetHash, { key, childSelector, properties });
-  } else {
-    const { properties } = targetToLists.get(targetHash)!;
-    propertyNames.forEach((name) => {
-      if (!properties[name]) {
-        properties[name] = { fallback: LIST_PROPERTY_FALLBACKS[name], varNames: [] };
-      }
-      properties[name]!.varNames.push(customProps[name]);
-    });
+    targetToLists.set(targetHash, { key, childSelector, properties: {} });
   }
+  const { properties } = targetToLists.get(targetHash)!;
+  for (const name of propertyNames) {
+    if (!properties[name]) {
+      properties[name] = { fallback: LIST_PROPERTY_FALLBACKS[name], varNames: [] };
+    }
+    properties[name]!.varNames.push(customProps[name]);
+  }
+}
+
+function buildCustomProps(
+  indices: (string | number)[],
+  encodedHash: string,
+): Record<ListPropertyName, string> {
+  return LIST_PROPERTY_NAMES.reduce(
+    (acc, name) => {
+      acc[name] = kebabCustomProp([name, ...indices, encodedHash]);
+      return acc;
+    },
+    {} as Record<ListPropertyName, string>,
+  );
 }
 
 function getInteractionCustomPropsForTarget(
@@ -102,17 +116,10 @@ function getInteractionCustomPropsForTarget(
   childSelector?: string,
 ): ListCustomProps {
   if (!targetToCustomProps.has(targetHash)) {
-    const properties = LIST_PROPERTY_NAMES.reduce(
-      (acc, name) => {
-        acc[name] = kebabCustomProp([name, interactionIdx, getUniqueEncodedHash(targetHash)]);
-        return acc;
-      },
-      {} as Record<ListPropertyName, string>,
-    );
     targetToCustomProps.set(targetHash, {
       key,
       childSelector,
-      ...properties,
+      ...buildCustomProps([interactionIdx], getUniqueEncodedHash(targetHash)),
     });
   }
 
@@ -124,13 +131,7 @@ function generateSequenceCustomProps(
   interactionIdx: number,
   index: number,
 ): Record<ListPropertyName, string> {
-  return LIST_PROPERTY_NAMES.reduce(
-    (acc, name) => {
-      acc[name] = kebabCustomProp([name, interactionIdx, index, getUniqueEncodedHash(targetHash)]);
-      return acc;
-    },
-    {} as Record<ListPropertyName, string>,
-  );
+  return buildCustomProps([interactionIdx, index], getUniqueEncodedHash(targetHash));
 }
 
 // ----- Parsers -----
@@ -209,7 +210,7 @@ function effectToCSS(
   let usedProperties: ListPropertyName[] = [];
 
   if (namedEffect || keyframeEffect) {
-    usedProperties = LIST_ANIMATION_PROPERTY_NAMES;
+    usedProperties = [...LIST_ANIMATION_PROPERTY_NAMES];
 
     const animationOptions = effectToAnimationOptions(effect);
     const cssAnimations = getCSSAnimation(null, animationOptions, trigger).filter(
@@ -237,7 +238,7 @@ function effectToCSS(
         cssAnimations
           .map((animation) => {
             const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
-            return animation[name];
+            return (animation as Record<string, unknown>)[name];
           })
           .join(', ') || LIST_PROPERTY_FALLBACKS[propertyName],
     }));
@@ -288,11 +289,11 @@ function effectToCSS(
     );
   }
 
-  return { rules, keyframes, usedProperties };
+  return { rules: rules.filter((r) => r.declarations.length), keyframes, usedProperties };
 }
 
 function parseEffect(
-  config: InteractConfig,
+  configConditions: Record<string, Condition>,
   interactionIdx: number,
   effect: ResolvedEffect,
   targetToCustomProps: Map<string, ListCustomProps>,
@@ -300,11 +301,10 @@ function parseEffect(
   trigger: TriggerVariant,
   useFirstChild: boolean = true,
   sequenceCustomProps?: Record<ListPropertyName, string>,
+  precomputedTargetHash?: string,
 ): { rules: CSSRuleData[]; usedProperties: ListPropertyName[] } {
-  const configConditions = config.conditions || {};
-
   const { key } = effect;
-  const targetHash = getElementHash(effect);
+  const targetHash = precomputedTargetHash ?? getElementHash(effect);
   const childSelector = getSelector(effect, {
     asCombinator: true,
     useFirstChild,
@@ -344,7 +344,7 @@ function parseEffect(
 }
 
 function parseSequence(
-  config: InteractConfig,
+  configConditions: Record<string, Condition>,
   interactionIdx: number,
   sequence: ResolvedSequence,
   targetToCustomProps: Map<string, ListCustomProps>,
@@ -358,7 +358,7 @@ function parseSequence(
   // exist together on the same target -
   // targetHash to lists of custom-properties for each coordinated-list type property
   // to be populated when parsing effects
-  const targetToSequenceLists = new Map<string, CSSCoordiantedLists>();
+  const targetToSequenceLists = new Map<string, CSSCoordinatedLists>();
   const targetSequenceIndex = new Map<string, number>();
 
   const cssRules: CSSRuleData[] = [];
@@ -378,7 +378,7 @@ function parseSequence(
     const seqCustomProps = generateSequenceCustomProps(targetHash, interactionIdx, index);
 
     const { rules, usedProperties } = parseEffect(
-      config,
+      configConditions,
       interactionIdx,
       effect,
       targetToCustomProps,
@@ -386,6 +386,7 @@ function parseSequence(
       trigger,
       useFirstChild,
       seqCustomProps,
+      targetHash,
     );
     cssRules.push(...rules);
 
@@ -399,15 +400,10 @@ function parseSequence(
     );
 
     if (targetUsedProperties) {
-      if (!targetUsedProperties.has(targetHash)) {
-        targetUsedProperties.set(targetHash, new Set(usedProperties));
-      } else {
-        usedProperties.forEach((p) => targetUsedProperties.get(targetHash)!.add(p));
-      }
+      accumulateUsedProperties(targetUsedProperties, targetHash, usedProperties);
     }
   }
 
-  const configConditions = config.conditions || {};
   const { conditions } = sequence;
 
   targetToSequenceLists.forEach((lists, targetHash) => {
@@ -426,11 +422,12 @@ function parseInteraction(
   config: InteractConfig,
   interaction: Interaction,
   interactionIdx: number,
-  targetToLists: Map<string, CSSCoordiantedLists>,
+  targetToLists: Map<string, CSSCoordinatedLists>,
   keyframesMap: Map<string, Keyframe[]>,
   useFirstChild: boolean = true,
 ): CSSRuleData[] {
   const { effects = [], sequences = [] } = interaction;
+  const configConditions = config.conditions || {};
 
   // targetHash to custom-property per each coordinated-list type property for current interaction
   // to be populated when parsing the effects (since it is per target).
@@ -455,15 +452,13 @@ function parseInteraction(
     componentId: '',
   } as TriggerVariant;
   if (trigger === 'viewProgress') {
-    cssRules.push(
-      triggerToCSS(interaction, config.conditions || {}, motionTrigger.id, useFirstChild),
-    );
+    cssRules.push(triggerToCSS(interaction, configConditions, motionTrigger.id, useFirstChild));
   }
 
   for (const effect of resolvedEffects) {
     const targetHash = getElementHash(effect);
     const { rules, usedProperties } = parseEffect(
-      config,
+      configConditions,
       interactionIdx,
       effect,
       targetToCustomProps,
@@ -473,11 +468,7 @@ function parseInteraction(
     );
     cssRules.push(...rules);
 
-    if (!targetUsedProperties.has(targetHash)) {
-      targetUsedProperties.set(targetHash, new Set(usedProperties));
-    } else {
-      usedProperties.forEach((p) => targetUsedProperties.get(targetHash)!.add(p));
-    }
+    accumulateUsedProperties(targetUsedProperties, targetHash, usedProperties);
   }
 
   const resolvedSequences = sequences
@@ -487,7 +478,7 @@ function parseInteraction(
   cssRules.push(
     ...resolvedSequences.flatMap((sequence) =>
       parseSequence(
-        config,
+        configConditions,
         interactionIdx,
         sequence,
         targetToCustomProps,
@@ -524,7 +515,7 @@ export function _generate(
 } {
   // targetHash to lists of custom-properties for each coordinated-list type property
   // to be populated when parsing interactions
-  const targetToLists = new Map<string, CSSCoordiantedLists>();
+  const targetToLists = new Map<string, CSSCoordinatedLists>();
   const keyframes = new Map<string, Keyframe[]>();
 
   const cssRules = config.interactions.flatMap((interaction, interactionIdx) =>

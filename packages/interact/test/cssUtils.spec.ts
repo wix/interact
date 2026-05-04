@@ -7,7 +7,7 @@ import {
   CSSRuleToString,
   buildListsRule,
 } from '../src/core/cssUtils';
-import type { CSSCoordiantedLists, ListCustomProps, CSSRuleData } from '../types';
+import type { CSSCoordinatedLists, ListCustomProps, CSSRuleData } from '../types';
 
 describe('keyframePropertyToCSS', () => {
   it('should convert cssFloat to float', () => {
@@ -269,7 +269,7 @@ describe('CSSRuleToString', () => {
 });
 
 describe('buildListsRule', () => {
-  const baseLists: CSSCoordiantedLists = {
+  const baseLists: CSSCoordinatedLists = {
     key: 'my-el',
     properties: {
       animation: {
@@ -303,7 +303,7 @@ describe('buildListsRule', () => {
   });
 
   it('should include childSelector when present', () => {
-    const lists: CSSCoordiantedLists = { ...baseLists, childSelector: '.target' };
+    const lists: CSSCoordinatedLists = { ...baseLists, childSelector: '.target' };
     const rule = buildListsRule(lists);
     expect(rule.childSelector).toBe('.target');
   });
