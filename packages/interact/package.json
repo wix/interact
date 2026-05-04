@@ -1,7 +1,7 @@
 {
   "name": "@wix/interact",
   "version": "2.2.1",
-  "description": "A powerful, declarative interaction library for creating engaging web apps.",
+  "description": "Declarative, configuration-driven interaction library — web-native, AI-ready, and framework-agnostic.",
   "license": "MIT",
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",
@@ -40,9 +40,18 @@
   },
   "keywords": [
     "animation",
+    "waapi",
+    "web-animations-api",
     "javascript",
     "css",
-    "waapi"
+    "scroll-driven",
+    "motion",
+    "interaction",
+    "react",
+    "web-components",
+    "declarative",
+    "config-driven",
+    "wix"
   ],
   "author": {
     "name": "wow!Team",

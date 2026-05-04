@@ -1,7 +1,7 @@
 {
   "name": "@wix/motion",
   "version": "2.1.4",
-  "description": "High-performance animation toolkit for the web, powering Wix motion presets and tooling.",
+  "description": "Low-level, web-first, animation toolkit, with support for triggered, scroll-driven, pointer-tracking, WAAPI & CSS animations.",
   "license": "MIT",
   "main": "dist/cjs/motion.js",
   "module": "dist/es/motion.js",
@@ -34,10 +34,14 @@
   "keywords": [
     "animation",
     "motion",
-    "web-animations",
-    "browser",
-    "effects",
-    "typescript"
+    "javascript",
+    "css",
+    "waapi",
+    "web-animations-api",
+    "scroll-driven",
+    "view-timeline",
+    "pointer-animation",
+    "wix"
   ],
   "author": {
     "name": "wow!Team",

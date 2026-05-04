@@ -10,6 +10,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.2.2] - 2026-05-04
+
+#### Fixed
+
+- Attach adopted constructed stylesheets to the element's root (`document` or `ShadowRoot`) so dynamically injected CSS applies when Interact runs inside shadow DOM (#173)
+- Register sequence effect selectors on the source interaction so sequence steps resolve selectors when the animated target differs from the source element (#173)
+
+#### Changed
+
+- Allow React 19 in `peerDependencies` for `react` and `react-dom` (#194)
+- Revise package description and expand npm keywords
+
+#### Added
+
+- Added a Playground app and publish it under `/playground`.
+
 ### [2.2.1] - 2026-04-21
 
 #### Added
@@ -112,6 +128,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion
 
+### [2.1.5] - 2026-05-04
+
+#### Changed
+
+- Revise package description and expand npm keywords
+
 ### [2.1.4] - 2026-04-15
 
 #### Fixed
@@ -166,6 +188,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion-presets
 
+### [1.0.2] - 2026-05-04
+
+#### Changed
+
+- Revise package description and expand npm keywords
+
 ### [1.0.1] - 2026-04-15
 
 #### Added
@@ -175,13 +203,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 #### Fixed
 
 - Fix `fadeIn` for ShuttersIn and GlideIn presets (#177)
-
-### [Unreleased]
-
-#### Changed
-
-- Documentation cleanup (presets, entrance, mouse, ongoing) (#122)
-- Move to wix org on GitHub (#126)
 
 ### [1.0.0] - 2026-02-13
 
