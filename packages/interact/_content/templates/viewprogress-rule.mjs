@@ -1,4 +1,4 @@
-export function render(trigger, data, fragments) {
+export function render(data, fragments) {
   return `# ViewProgress Trigger Rules for ${data.meta.packageName}
 
 These rules help generate scroll-driven interactions using \`${data.meta.packageName}\`. ViewProgress triggers create animations that update continuously as elements move through the viewport, leveraging native CSS ViewTimelines where supported, and using a polyfill library where unsupported. Use when animation progress should be tied to the element's scroll position.

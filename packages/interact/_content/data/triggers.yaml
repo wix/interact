@@ -33,15 +33,15 @@ triggers:
         - duration
         - easing
     triggerTypeDescriptions:
-      alternate: "plays forward on enter, reverses on leave. Default. Most common for hover."
-      repeat: "restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses."
-      once: "plays once on the first enter and never again."
-      state: "resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`)."
+      alternate: 'plays forward on enter, reverses on leave. Default. Most common for hover.'
+      repeat: 'restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses.'
+      once: 'plays once on the first enter and never again.'
+      state: 'resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`).'
     stateActionDescriptions:
-      toggle: "applies the style state on enter, removes on leave. Default."
-      add: "applies the style state on enter. Leave does NOT remove it."
-      remove: "removes a previously applied style state on enter. Use with provided `effectId` to map to a matching interaction with `add` and effect with same `effectId`."
-      clear: "clears all previously applied style states on enter. Use to reset multiple stacked `'add'` style changes at once (e.g. a \"reset\" hover area that undoes several accumulated states)."
+      toggle: 'applies the style state on enter, removes on leave. Default.'
+      add: 'applies the style state on enter. Leave does NOT remove it.'
+      remove: 'removes a previously applied style state on enter. Use with provided `effectId` to map to a matching interaction with `add` and effect with same `effectId`.'
+      clear: 'clears all previously applied style states on enter. Use to reset multiple stacked `''add''` style changes at once (e.g. a "reset" hover area that undoes several accumulated states).'
 
   - name: click
     a11yAlias: activate
@@ -78,15 +78,15 @@ triggers:
         - duration
         - easing
     triggerTypeDescriptions:
-      alternate: "plays forward on first click, reverses on next click. Default."
-      repeat: "restarts the animation from the beginning on each click."
-      once: "plays once on the first click and never again."
-      state: "resumes/pauses the animation on each click. Useful for continuous loops (`iterations: Infinity`)."
+      alternate: 'plays forward on first click, reverses on next click. Default.'
+      repeat: 'restarts the animation from the beginning on each click.'
+      once: 'plays once on the first click and never again.'
+      state: 'resumes/pauses the animation on each click. Useful for continuous loops (`iterations: Infinity`).'
     stateActionDescriptions:
-      toggle: "applies the style state, removes it on next click. Default."
-      add: "applies the style state. Does not remove on subsequent clicks."
-      remove: "removes a previously applied style state."
-      clear: "clears all previously applied style states. Useful for resetting multiple stacked style states at once."
+      toggle: 'applies the style state, removes it on next click. Default.'
+      add: 'applies the style state. Does not remove on subsequent clicks.'
+      remove: 'removes a previously applied style state.'
+      clear: 'clears all previously applied style states. Useful for resetting multiple stacked style states at once.'
 
   - name: viewEnter
     category: viewport
@@ -99,7 +99,7 @@ triggers:
       - name: threshold
         type: number
         optional: true
-        description: "Number between 0–1 indicating how much of the source element must be visible to trigger (e.g. `0.3` = 30%)."
+        description: 'Number between 0–1 indicating how much of the source element must be visible to trigger (e.g. `0.3` = 30%).'
       - name: inset
         type: string
         optional: true
@@ -131,11 +131,11 @@ triggers:
       - name: hitArea
         type: "'root' | 'self'"
         optional: true
-        description: "determines where mouse movement is tracked"
+        description: 'determines where mouse movement is tracked'
       - name: axis
         type: "'x' | 'y'"
         optional: true
-        description: "restricts pointer tracking to a single axis"
+        description: 'restricts pointer tracking to a single axis'
     pitfalls:
       - id: hit-area
 
@@ -150,7 +150,7 @@ triggers:
       - name: effectId
         type: string
         optional: false
-        description: "ID of the preceding effect"
+        description: 'ID of the preceding effect'
 
   - name: pageVisible
     category: event
@@ -161,11 +161,3 @@ triggers:
     defaultTriggerType: null
     params: []
     pitfalls: []
-
-  - name: activate
-    aliasOf: click
-    category: event
-
-  - name: interest
-    aliasOf: hover
-    category: event

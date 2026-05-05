@@ -1,4 +1,4 @@
-export function render(triggers, data, fragments) {
+export function render(data, fragments) {
   return `# ${data.meta.packageName} Integration Rules
 
 Rules for integrating \`${data.meta.packageName}\` into a webpage — binding animations and effects to user-driven triggers via declarative configuration.

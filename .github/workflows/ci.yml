@@ -56,9 +56,7 @@ jobs:
         run: yarn build
 
       - name: Verify generated rules are up to date
-        run: |
-          yarn workspace @wix/interact build:rules
-          git diff --exit-code packages/interact/rules/
+        run: yarn workspace @wix/interact build:rules --check
 
       - name: Lint
         run: yarn lint

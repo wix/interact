@@ -155,7 +155,7 @@ Use `customEffect` when you need imperative control over the animation (e.g. cou
 ### Variables
 
 - `[SOURCE_KEY]` / `[TARGET_KEY]` / `[TRIGGER_TYPE]` — same as Rule 1.
-- `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(target: HTMLElement, progress: number) => void`. Called on each animation frame with the target element and `progress` from 0 to 1.
+- `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with the target element and `progress` from 0 to 1.
 - `[DURATION_MS]` — animation duration in milliseconds.
 - `[EASING_FUNCTION]` — CSS easing string, or named easing from `@wix/motion`.
 

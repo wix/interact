@@ -61,7 +61,7 @@ Use `keyframeEffect` or `namedEffect` when the click should play an animation (C
   - `'state'` — resumes/pauses the animation on each click. Useful for continuous loops (`iterations: Infinity`).
 - `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
 - `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
-- `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built, time-based animation effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.
+- `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.
 - `[FILL_MODE]` — optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.
 - `[INITIAL_REVERSED_BOOL]` — optional. `true` to start in the finished state so the entire effect is reversed.
 - `[DURATION_MS]` — animation duration in milliseconds.
@@ -153,7 +153,7 @@ Use `customEffect` when you need imperative control over the animation (e.g. cou
 ### Variables
 
 - `[SOURCE_KEY]` / `[TARGET_KEY]` / `[TRIGGER_TYPE]` — same as Rule 1.
-- `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with target element and `progress` from 0 to 1.
+- `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with the target element and `progress` from 0 to 1.
 - `[DURATION_MS]` — animation duration in milliseconds.
 - `[EASING_FUNCTION]` — CSS easing string, or named easing from `@wix/motion`.
 
@@ -186,4 +186,4 @@ Use sequences when a click should sync/stagger animations across multiple elemen
 - `[SOURCE_KEY]` / `[TRIGGER_TYPE]` — same as Rule 1. `triggerType` is set on the sequence config, not on individual effects within the sequence.
 - `[OFFSET_MS]` — time offset for staggering each child's animation start, in milliseconds.
 - `[OFFSET_EASING]` — easing curve for the offset staggering distribution. Defaults to `'linear'`.
-- `[EFFECT_DEFINITION]` — a definition of, or a reference to a time-based animation effect.
+- `[EFFECT_DEFINITION]` — a definition of or a reference to a time-based animation effect.

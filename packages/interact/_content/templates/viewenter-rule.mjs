@@ -1,4 +1,4 @@
-export function render(trigger, data, fragments) {
+export function render(data, fragments) {
   return `# ViewEnter Trigger Rules for ${data.meta.packageName}
 
 This document contains rules for generating interactions that respond to elements entering the viewport using the \`${data.meta.packageName}\`. ViewEnter triggers use IntersectionObserver to detect when elements become visible and are ideal for entrance animations, content reveals, and lazy-loading effects.

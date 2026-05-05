@@ -83,7 +83,9 @@ class Fragments {
     }
     let content = sectionMap.get(section);
     if (content === undefined) {
-      throw new Error(`Section "${section}" not found in fragment "${path}". Available: ${[...sectionMap.keys()].join(', ')}`);
+      throw new Error(
+        `Section "${section}" not found in fragment "${path}". Available: ${[...sectionMap.keys()].join(', ')}`,
+      );
     }
     for (const [key, val] of Object.entries(params)) {
       content = content.replaceAll(`{{${key}}}`, val);
@@ -99,9 +101,17 @@ const fragments = new Fragments(join(CONTENT_DIR, 'fragments'));
 // ---------------------------------------------------------------------------
 
 const manifest = [
-  { template: 'event-trigger-rule.mjs', triggers: ['click', 'hover'], output: name => `${name}.md` },
+  {
+    template: 'event-trigger-rule.mjs',
+    triggers: ['click', 'hover'],
+    output: (name) => `${name}.md`,
+  },
   { template: 'viewenter-rule.mjs', triggers: ['viewEnter'], output: () => 'viewenter.md' },
-  { template: 'viewprogress-rule.mjs', triggers: ['viewProgress'], output: () => 'viewprogress.md' },
+  {
+    template: 'viewprogress-rule.mjs',
+    triggers: ['viewProgress'],
+    output: () => 'viewprogress.md',
+  },
   { template: 'pointermove-rule.mjs', triggers: ['pointerMove'], output: () => 'pointermove.md' },
   { template: 'full-lean.mjs', triggers: null, output: () => 'full-lean.md' },
   { template: 'integration.mjs', triggers: null, output: () => 'integration.md' },
@@ -113,25 +123,51 @@ for (const entry of manifest) {
   const mod = await import(join(CONTENT_DIR, 'templates', entry.template));
   if (entry.triggers) {
     for (const name of entry.triggers) {
-      const trigger = data.triggers.find(t => t.name === name);
+      const trigger = data.triggers.find((t) => t.name === name);
       if (!trigger) throw new Error(`Trigger "${name}" not found in triggers.yaml`);
-      outputs.push({ file: entry.output(name), content: mod.render(trigger, data, fragments) });
+      outputs.push({
+        file: entry.output(name),
+        content: mod.render({ ...data, trigger }, fragments),
+      });
     }
   } else {
-    outputs.push({ file: entry.output(), content: mod.render(data.triggers, data, fragments) });
+    outputs.push({ file: entry.output(), content: mod.render(data, fragments) });
   }
 }
 
 // ---------------------------------------------------------------------------
-// 4. Write outputs
+// 4. Write or check outputs
 // ---------------------------------------------------------------------------
+
+const checkMode = process.argv.includes('--check');
 
 mkdirSync(OUTPUT_DIR, { recursive: true });
 
+let stale = 0;
 for (const { file, content } of outputs) {
   const outPath = join(OUTPUT_DIR, file);
-  writeFileSync(outPath, content, 'utf8');
-  console.log(`  ✓ ${relative(PKG_ROOT, outPath)}`);
+  if (checkMode) {
+    let existing = '';
+    try {
+      existing = readFileSync(outPath, 'utf8');
+    } catch {}
+    if (existing !== content) {
+      console.error(`  ✗ ${relative(PKG_ROOT, outPath)} is stale`);
+      stale++;
+    } else {
+      console.log(`  ✓ ${relative(PKG_ROOT, outPath)} is up to date`);
+    }
+  } else {
+    writeFileSync(outPath, content, 'utf8');
+    console.log(`  ✓ ${relative(PKG_ROOT, outPath)}`);
+  }
 }
 
-console.log(`\nGenerated ${outputs.length} rule files.`);
+if (checkMode && stale > 0) {
+  console.error(`\n${stale} file(s) are stale. Run \`yarn build:rules\` to regenerate.`);
+  process.exit(1);
+} else if (checkMode) {
+  console.log(`\nAll ${outputs.length} rule files are up to date.`);
+} else {
+  console.log(`\nGenerated ${outputs.length} rule files.`);
+}

@@ -1,7 +1,3 @@
-fillGuidance:
-  both: "use for scroll-driven (`viewProgress`), pointer-driven (`pointerMove`), and toggling effects (`hover`/`click` with `alternate`, `repeat`, or `state` type)."
-  backwards: "use for entrance animations with `type: 'once'` when the element's own CSS already matches the final keyframe (applies the initial keyframe during any `delay`)."
-
 triggerTypes:
   - once
   - repeat
@@ -119,14 +115,9 @@ presets:
     - BlobMouse
 
 rangeNames:
-  entry: "Element entering viewport"
-  exit: "Element exiting viewport"
-  contain: "After `entry` range and before `exit` range"
-  cover: "Full range from `entry` through `contain` and `exit`"
+  entry: 'Element entering viewport'
+  exit: 'Element exiting viewport'
+  contain: 'After `entry` range and before `exit` range'
+  cover: 'Full range from `entry` through `contain` and `exit`'
   entry-crossing: "From element's leading edge entering to trailing edge entering"
   exit-crossing: "From element's leading edge exiting to trailing edge exiting"
-
-compositeOperations:
-  replace: "fully replaces prior values."
-  add: "concatenates transform/filter functions after any existing ones (e.g. existing `translateX(10px)` + added `translateY(20px)` → both apply)."
-  accumulate: "merges arguments of matching functions (e.g. `translateX(10px)` + `translateX(20px)` → `translateX(30px)`); non-matching functions concatenate like `'add'`."

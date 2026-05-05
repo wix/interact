@@ -1,22 +1,25 @@
-export function render(triggers, data, fragments) {
-  const easingList = data.effects.easings.map(e => `\`'${e}'\``).join(', ');
+import { capitalize } from './_helpers.mjs';
 
-  const presetEntries = Object.entries(data.effects.presets)
-    .map(([category, names]) => ({
-      label: category.charAt(0).toUpperCase() + category.slice(1),
-      value: `\`${names.join('`, `')}\``,
-    }));
-  const maxPresetLen = Math.max(...presetEntries.map(e => e.value.length));
+export function render(data, fragments) {
+  const easingList = data.effects.easings.map((e) => `\`'${e}'\``).join(', ');
+
+  const presetEntries = Object.entries(data.effects.presets).map(([category, names]) => ({
+    label: capitalize(category),
+    value: `\`${names.join('`, `')}\``,
+  }));
+  const maxPresetLen = Math.max(...presetEntries.map((e) => e.value.length));
   const presetTable = presetEntries
-    .map(e => `   | ${e.label.padEnd(8)} | ${e.value.padEnd(maxPresetLen)} |`)
+    .map((e) => `   | ${e.label.padEnd(8)} | ${e.value.padEnd(maxPresetLen)} |`)
     .join('\n');
 
-  const rangeEntries = Object.entries(data.effects.rangeNames)
-    .map(([name, desc]) => ({ name: `\`${name}\``, desc }));
-  const maxNameLen = Math.max(...rangeEntries.map(e => e.name.length));
-  const maxDescLen = Math.max(...rangeEntries.map(e => e.desc.length));
+  const rangeEntries = Object.entries(data.effects.rangeNames).map(([name, desc]) => ({
+    name: `\`${name}\``,
+    desc,
+  }));
+  const maxNameLen = Math.max(...rangeEntries.map((e) => e.name.length));
+  const maxDescLen = Math.max(...rangeEntries.map((e) => e.desc.length));
   const rangeTable = rangeEntries
-    .map(e => `| ${e.name.padEnd(maxNameLen)} | ${e.desc.padEnd(maxDescLen)} |`)
+    .map((e) => `| ${e.name.padEnd(maxNameLen)} | ${e.desc.padEnd(maxDescLen)} |`)
     .join('\n');
 
   return `# ${data.meta.packageName} — Rules
@@ -296,14 +299,14 @@ Each effect applies a visual change to a target element. An effect is either inl
 
 **\`fill\` guidance:**
 
-- \`'both'\` — ${data.effects.fillGuidance.both}
-- \`'backwards'\` — ${data.effects.fillGuidance.backwards}
+- \`'both'\` — use for scroll-driven (\`viewProgress\`), pointer-driven (\`pointerMove\`), and toggling effects (\`hover\`/\`click\` with \`alternate\`, \`repeat\`, or \`state\` type).
+- \`'backwards'\` — use for entrance animations with \`type: 'once'\` when the element's own CSS already matches the final keyframe (applies the initial keyframe during any \`delay\`).
 
 **\`composite\`** — same as CSS's \`animation-composition\`. Controls how this effect combines with others on the same property (transforms & filters):
 
-- \`'replace'\` (default): ${data.effects.compositeOperations.replace}
-- \`'add'\`: ${data.effects.compositeOperations.add}
-- \`'accumulate'\`: ${data.effects.compositeOperations.accumulate}
+- \`'replace'\` (default): fully replaces prior values.
+- \`'add'\`: concatenates transform/filter functions after any existing ones (e.g. existing \`translateX(10px)\` + added \`translateY(20px)\` → both apply).
+- \`'accumulate'\`: merges arguments of matching functions (e.g. \`translateX(10px)\` + \`translateX(20px)\` → \`translateX(30px)\`); non-matching functions concatenate like \`'add'\`.
 
 **\`easing\` guidance:** from \`@wix/motion\` (in addition to standard CSS easings):
 

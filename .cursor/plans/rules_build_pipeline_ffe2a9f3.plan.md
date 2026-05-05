@@ -3,7 +3,7 @@ name: Rules Build Pipeline
 overview: Implement a build pipeline for `packages/interact/rules/` using structured YAML data + JavaScript template functions + markdown fragments, eliminating all content duplication and ensuring a single source of truth.
 todos:
   - id: scaffold
-    content: "Create `_content/` directory structure: `data/`, `fragments/`, `templates/`, and `scripts/build-rules.mjs` skeleton"
+    content: 'Create `_content/` directory structure: `data/`, `fragments/`, `templates/`, and `scripts/build-rules.mjs` skeleton'
     status: completed
   - id: data-triggers
     content: Create `data/triggers.yaml` with all 9 trigger definitions (hover, click, interest, activate, viewEnter, viewProgress, pointerMove, animationEnd, pageVisible) — pull field names from actual TS types
@@ -12,7 +12,7 @@ todos:
     content: Create `data/effects.yaml` (effect field definitions, presets table, ranges, easings) and `data/meta.yaml` (package metadata)
     status: completed
   - id: fragments
-    content: "Extract ~12 fragments from existing rule files: fouc, element-resolution, 6 pitfalls, quick-start, multiple-effects-note, custom-effect-intro, sequences-intro"
+    content: 'Extract ~12 fragments from existing rule files: fouc, element-resolution, 6 pitfalls, quick-start, multiple-effects-note, custom-effect-intro, sequences-intro'
     status: completed
   - id: template-event
     content: Create `templates/event-trigger-rule.mjs` — generates click.md and hover.md from trigger data + shared fragments
@@ -27,7 +27,7 @@ todos:
     content: Create `templates/full-lean.mjs` and `templates/integration.mjs` — the two comprehensive reference files
     status: completed
   - id: build-script
-    content: "Implement `scripts/build-rules.mjs`: YAML loading, fragment parsing, template orchestration, file writing"
+    content: 'Implement `scripts/build-rules.mjs`: YAML loading, fragment parsing, template orchestration, file writing'
     status: completed
   - id: integrate
     content: Add `build:rules` script to package.json, add `js-yaml` devDependency, update CI workflow
@@ -36,31 +36,31 @@ todos:
     content: Run build, diff generated output against current rule files, verify no information loss, fix any discrepancies
     status: completed
   - id: fix-lockfile
-    content: "CI fix: run `yarn install` so yarn.lock includes the new `js-yaml` resolution, commit the updated lockfile"
+    content: 'CI fix: run `yarn install` so yarn.lock includes the new `js-yaml` resolution, commit the updated lockfile'
     status: completed
   - id: fix-dead-fragments
-    content: "Remove dead fragment files `custom-effect-intro.md` and `sequences-intro.md` (unused by any template; YAML prose fields are used instead)"
+    content: 'Remove dead fragment files `custom-effect-intro.md` and `sequences-intro.md` (unused by any template; YAML prose fields are used instead)'
     status: completed
   - id: fix-yaml-prose
-    content: "Move 15+ prose description fields (timeEffectIntro, sourceKeyDesc, etc.) out of triggers.yaml into the event-trigger template directly, keeping only structured data in YAML"
+    content: 'Move 15+ prose description fields (timeEffectIntro, sourceKeyDesc, etc.) out of triggers.yaml into the event-trigger template directly, keeping only structured data in YAML'
     status: completed
   - id: fix-fill-variables
-    content: "Collapse `buildVariablesMidFill`/`buildVariablesEndFill` into a single `buildVariables` function — always place `[FILL_MODE]` after `[NAMED_EFFECT_DEFINITION]` (matching the config block order). Remove `fillModeAtEnd` from triggers.yaml."
+    content: 'Collapse `buildVariablesMidFill`/`buildVariablesEndFill` into a single `buildVariables` function — always place `[FILL_MODE]` after `[NAMED_EFFECT_DEFINITION]` (matching the config block order). Remove `fillModeAtEnd` from triggers.yaml.'
     status: completed
   - id: fix-build-manifest
-    content: "Replace repetitive template orchestration in build-rules.mjs (lines 104-148) with a data-driven manifest array"
+    content: 'Replace repetitive template orchestration in build-rules.mjs (lines 104-148) with a data-driven manifest array'
     status: completed
   - id: fix-viewprogress-backtick
-    content: "Fix stray backtick template literal in viewprogress-rule.mjs line 86 — normalize to plain string like other templates"
+    content: 'Fix stray backtick template literal in viewprogress-rule.mjs line 86 — normalize to plain string like other templates'
     status: completed
   - id: fix-shared-fragments
-    content: "Extract duplicated sections (Conditions, Static API, Config Structure, Sequences) from full-lean.mjs and integration.mjs into shared fragments"
+    content: 'Extract duplicated sections (Conditions, Static API, Config Structure, Sequences) from full-lean.mjs and integration.mjs into shared fragments'
     status: completed
   - id: fix-ci-freshness
-    content: "Add a freshness check step to `.github/workflows/ci.yml`: `yarn workspace @wix/interact build:rules && git diff --exit-code packages/interact/rules/`"
+    content: 'Add a freshness check step to `.github/workflows/ci.yml`: `yarn workspace @wix/interact build:rules && git diff --exit-code packages/interact/rules/`'
     status: completed
   - id: fix-regenerate
-    content: "Run `build:rules`, verify output, commit regenerated rules/*.md files"
+    content: 'Run `build:rules`, verify output, commit regenerated rules/*.md files'
     status: completed
 isProject: false
 ---
@@ -90,8 +90,6 @@ graph LR
     Script --> Rules
 ```
 
-
-
 All source files live under `packages/interact/_content/`. The build script reads them and writes the final `.md` files to `packages/interact/rules/`.
 
 ## Source Layer
@@ -105,30 +103,41 @@ triggers:
   - name: hover
     a11yAlias: interest
     a11yNote: "Use `trigger: 'interest'` instead of `trigger: 'hover'` to also respond to keyboard focus."
-    category: event           # event | viewport | scroll | pointer | chain
+    category: event # event | viewport | scroll | pointer | chain
     supportsTimeEffect: true
     supportsStateEffect: true
     supportsScrubEffect: false
     supportsCustomEffect: true
-    params: []                # no trigger params
+    params: [] # no trigger params
     pitfalls:
-      - id: hit-area          # references fragments/pitfalls/hit-area.md
-    templateFields:            # which optional fields to show in config templates
-      timeEffect: [triggerType, keyframeEffect, namedEffect, fill, duration, easing, delay, iterations, alternate]
+      - id: hit-area # references fragments/pitfalls/hit-area.md
+    templateFields: # which optional fields to show in config templates
+      timeEffect:
+        [
+          triggerType,
+          keyframeEffect,
+          namedEffect,
+          fill,
+          duration,
+          easing,
+          delay,
+          iterations,
+          alternate,
+        ]
       stateEffect: [stateAction, transition, transitionProperties]
       customEffect: [triggerType, customEffect, duration, easing]
       sequence: [triggerType, offset, offsetEasing]
-    triggerTypeDescriptions:   # trigger-specific wording for each triggerType value
-      alternate: "plays forward on enter, reverses on leave"
-      repeat: "restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses"
-      once: "plays once on the first enter and never again"
-      state: "resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`)"
+    triggerTypeDescriptions: # trigger-specific wording for each triggerType value
+      alternate: 'plays forward on enter, reverses on leave'
+      repeat: 'restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses'
+      once: 'plays once on the first enter and never again'
+      state: 'resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`)'
     stateActionDescriptions:
-      toggle: "applies the style state on enter, removes on leave"
-      add: "applies the style state on enter. Leave does NOT remove it"
-      remove: "removes a previously applied style state on enter"
-      clear: "clears all previously applied style states on enter"
-    fillNote: "while hovering"  # trigger-specific fill context
+      toggle: 'applies the style state on enter, removes on leave'
+      add: 'applies the style state on enter. Leave does NOT remove it'
+      remove: 'removes a previously applied style state on enter'
+      clear: 'clears all previously applied style states on enter'
+    fillNote: 'while hovering' # trigger-specific fill context
 
   - name: click
     a11yAlias: activate
@@ -141,19 +150,32 @@ triggers:
     params: []
     pitfalls: []
     templateFields:
-      timeEffect: [triggerType, keyframeEffect, namedEffect, fill, reversed, duration, easing, delay, iterations, alternate, effectId]
+      timeEffect:
+        [
+          triggerType,
+          keyframeEffect,
+          namedEffect,
+          fill,
+          reversed,
+          duration,
+          easing,
+          delay,
+          iterations,
+          alternate,
+          effectId,
+        ]
       # ... (click includes reversed + effectId that hover omits)
     triggerTypeDescriptions:
-      alternate: "plays forward on first click, reverses on next click"
-      repeat: "restarts the animation from the beginning on each click"
-      once: "plays once on the first click and never again"
-      state: "resumes/pauses the animation on each click. Useful for continuous loops (`iterations: Infinity`)"
+      alternate: 'plays forward on first click, reverses on next click'
+      repeat: 'restarts the animation from the beginning on each click'
+      once: 'plays once on the first click and never again'
+      state: 'resumes/pauses the animation on each click. Useful for continuous loops (`iterations: Infinity`)'
     stateActionDescriptions:
-      toggle: "applies the style state, removes it on next click"
-      add: "applies the style state. Does not remove on subsequent clicks"
-      remove: "removes a previously applied style state"
-      clear: "clears all previously applied style states. Useful for resetting multiple stacked style states at once"
-    fillNote: "while finished"
+      toggle: 'applies the style state, removes it on next click'
+      add: 'applies the style state. Does not remove on subsequent clicks'
+      remove: 'removes a previously applied style state'
+      clear: 'clears all previously applied style states. Useful for resetting multiple stacked style states at once'
+    fillNote: 'while finished'
     # ... viewEnter, viewProgress, pointerMove, animationEnd entries follow
 ```
 
@@ -163,7 +185,7 @@ The trigger entries for `viewEnter`, `viewProgress`, `pointerMove`, and `animati
 
 ```yaml
 fillGuidance:
-  both: "use for scroll-driven, pointer-driven, and toggling effects (alternate, repeat, state)"
+  both: 'use for scroll-driven, pointer-driven, and toggling effects (alternate, repeat, state)'
   backwards: "use for entrance animations with triggerType 'once' when the final keyframe matches the element's base style"
 
 triggerTypes: [once, repeat, alternate, state]
@@ -181,10 +203,10 @@ presets:
   mouse: [TrackMouse, Tilt3DMouse, ...]
 
 rangeNames:
-  entry: "Element entering viewport"
-  exit: "Element exiting viewport"
-  contain: "After entry range and before exit range"
-  cover: "Full range from entry through contain and exit"
+  entry: 'Element entering viewport'
+  exit: 'Element exiting viewport'
+  contain: 'After entry range and before exit range'
+  cover: 'Full range from entry through contain and exit'
   entry-crossing: "From element's leading edge entering to trailing edge entering"
   exit-crossing: "From element's leading edge exiting to trailing edge exiting"
 ```
@@ -192,13 +214,13 @@ rangeNames:
 `**meta.yaml**` — package metadata:
 
 ```yaml
-packageName: "@wix/interact"
-presetsPackage: "@wix/motion-presets"
-installCommand: "npm install @wix/interact @wix/motion-presets"
+packageName: '@wix/interact'
+presetsPackage: '@wix/motion-presets'
+installCommand: 'npm install @wix/interact @wix/motion-presets'
 entryPoints:
-  web: "@wix/interact/web"
-  react: "@wix/interact/react"
-  vanilla: "@wix/interact"
+  web: '@wix/interact/web'
+  react: '@wix/interact/react'
+  vanilla: '@wix/interact'
 ```
 
 ### 2. Markdown fragments (`_content/fragments/`)
@@ -206,7 +228,6 @@ entryPoints:
 Each fragment has `<!-- #section -->` markers for different detail levels.
 
 **Planned fragments** (extracted from the ~15 duplicated concepts):
-
 
 | Fragment file                        | Sections                                                                                   | Used by                                     |
 | ------------------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------- |
@@ -223,11 +244,9 @@ Each fragment has `<!-- #section -->` markers for different detail levels.
 | `custom-effect-intro.md`             | `#default`                                                                                 | click, hover, viewenter                     |
 | `sequences-intro.md`                 | `#short` (parameterized with `{{triggerName}}`)                                            | click, hover, viewenter                     |
 
-
 ### 3. Templates (`_content/templates/`)
 
 Each template is a `.mjs` file exporting a function that receives data + fragments and returns a markdown string.
-
 
 | Template                 | Generates              | Key logic                                                                                                                                                                                                                                  |
 | ------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -238,7 +257,6 @@ Each template is a `.mjs` file exporting a function that receives data + fragmen
 | `full-lean.mjs`          | `full-lean.md`         | Comprehensive reference. Pulls from all data + fragments.                                                                                                                                                                                  |
 | `integration.mjs`        | `integration.md`       | Integration guide. Pulls from meta + triggers data + fragments.                                                                                                                                                                            |
 
-
 **Template function signature:**
 
 ```javascript
@@ -247,7 +265,7 @@ export function render(trigger, data, fragments) {
   return `# ${capitalize(trigger.name)} Trigger Rules for ${data.meta.packageName}
 ...
 ${trigger.a11yAlias ? `**CRITICAL — Accessible ${trigger.name}**: ${trigger.a11yNote}` : ''}
-${trigger.pitfalls.map(p => fragments.get(`pitfalls/${p.id}`, trigger.name)).join('\n')}
+${trigger.pitfalls.map((p) => fragments.get(`pitfalls/${p.id}`, trigger.name)).join('\n')}
 ...`;
 }
 ```
@@ -284,7 +302,7 @@ class Fragments {
 
 ```json
   "build:rules": "node scripts/build-rules.mjs"
-  
+
 
 ```
 
@@ -327,6 +345,7 @@ The CI `Install dependencies` step runs `yarn install --immutable` which refuses
 These fields only vary between hover and click. The viewEnter/viewProgress/pointerMove triggers don't use them at all (they have their own hardcoded templates).
 
 **Action:**
+
 - Remove all prose description fields from `triggers.yaml` (hover + click entries).
 - Move the hover/click prose differences into `event-trigger-rule.mjs` directly, keyed by a simple flag or `trigger.name` check. These are small trigger-specific word choices (e.g. "while hovering" vs "while finished"), not reusable data.
 - Keep only structured data in YAML: name, category, support flags, params, templateFields, pitfalls, triggerType/stateAction enum descriptions, `a11yAlias`, `a11yNote`, `defaultTriggerType`, `showMultipleEffectsNote`.
@@ -336,6 +355,7 @@ These fields only vary between hover and click. The viewEnter/viewProgress/point
 [`event-trigger-rule.mjs`](packages/interact/_content/templates/event-trigger-rule.mjs) has two nearly identical functions — `buildVariablesMidFill` (click) and `buildVariablesEndFill` (hover) — that differ only in where `[FILL_MODE]` appears in the variables list. The code block template itself always shows `fill` right after `namedEffect`/`keyframeEffect`, so the variables list should match that order.
 
 **Action:**
+
 - Collapse into a single `buildVariables` function that always places `[FILL_MODE]` after `[NAMED_EFFECT_DEFINITION]` (mid position, matching the config block order).
 - Remove `fillModeAtEnd` and `fillModeDash` from `triggers.yaml`.
 - Use a consistent em-dash separator for all triggers.
@@ -373,9 +393,17 @@ Lines 104-148 of [`build-rules.mjs`](packages/interact/scripts/build-rules.mjs) 
 
 ```javascript
 const manifest = [
-  { template: 'event-trigger-rule.mjs', triggers: ['click', 'hover'], output: name => `${name}.md` },
+  {
+    template: 'event-trigger-rule.mjs',
+    triggers: ['click', 'hover'],
+    output: (name) => `${name}.md`,
+  },
   { template: 'viewenter-rule.mjs', triggers: ['viewEnter'], output: () => 'viewenter.md' },
-  { template: 'viewprogress-rule.mjs', triggers: ['viewProgress'], output: () => 'viewprogress.md' },
+  {
+    template: 'viewprogress-rule.mjs',
+    triggers: ['viewProgress'],
+    output: () => 'viewprogress.md',
+  },
   { template: 'pointermove-rule.mjs', triggers: ['pointerMove'], output: () => 'pointermove.md' },
   { template: 'full-lean.mjs', triggers: null, output: () => 'full-lean.md' },
   { template: 'integration.mjs', triggers: null, output: () => 'integration.md' },
@@ -385,7 +413,7 @@ for (const entry of manifest) {
   const mod = await import(join(CONTENT_DIR, 'templates', entry.template));
   if (entry.triggers) {
     for (const name of entry.triggers) {
-      const trigger = data.triggers.find(t => t.name === name);
+      const trigger = data.triggers.find((t) => t.name === name);
       if (!trigger) throw new Error(`Trigger "${name}" not found in triggers.yaml`);
       outputs.push({ file: entry.output(name), content: mod.render(trigger, data, fragments) });
     }
@@ -415,6 +443,7 @@ Line 86 of [`viewprogress-rule.mjs`](packages/interact/_content/templates/viewpr
 **Action:** Extract each into a new fragment with `<!-- #full-lean -->` / `<!-- #integration -->` section markers (same pattern as `fouc.md`). This brings these templates closer to the single-source-of-truth goal and makes future edits to these shared concepts a one-file change.
 
 New fragment files:
+
 - `_content/fragments/conditions.md` — `#full-lean`, `#integration`
 - `_content/fragments/static-api.md` — `#full-lean`, `#integration`
 - `_content/fragments/config-structure.md` — `#full-lean`, `#integration`
@@ -447,4 +476,3 @@ After all fixes above, run `build:rules` and commit the regenerated `rules/*.md`
 - **README**: Same meta.yaml + triggers.yaml generates README sections
 - **Validation**: Add `scripts/validate-rules.mjs` that imports actual TS types and cross-checks trigger names, param fields, effect fields against the YAML data
 - **motion-presets rules**: The build mechanism is scoped to `packages/interact/` but the architecture (YAML + fragments + templates) can be replicated in `packages/motion-presets/` with shared fragments if needed
-

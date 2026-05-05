@@ -8,3 +8,6 @@ package-lock.json
 **/build/**
 index.html
 .yarnrc.yml
+
+# Build pipeline fragments use <!-- #section --> markers that Prettier must not reformat
+packages/interact/_content/fragments/

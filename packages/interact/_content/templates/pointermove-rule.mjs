@@ -1,4 +1,4 @@
-export function render(trigger, data, fragments) {
+export function render(data, fragments) {
   return `# PointerMove Trigger Rules for ${data.meta.packageName}
 
 These rules help generate pointer-driven interactions using \`${data.meta.packageName}\`. PointerMove triggers create real-time animations that respond to mouse movement over elements or the entire viewport.
