@@ -1,17 +1,37 @@
+import { when } from './_helpers.mjs';
+
 /**
  * Renders viewenter.md — rules for viewport-entry triggered animations.
  * @param {{ trigger: object, meta: object }} data — must include `trigger` (viewEnter from triggers.yaml) and `meta`
  * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
+  const { trigger } = data;
+
+  const pitfallsBlock = when(
+    trigger.pitfalls?.length > 0,
+    '\n' +
+      trigger.pitfalls
+        .map((p) => fragments.get(`pitfalls/${p.id}`, p.section || trigger.name))
+        .join('\n') +
+      '\n',
+  );
+
+  const paramVarNames = { threshold: 'VISIBILITY_THRESHOLD', inset: 'VIEWPORT_INSETS' };
+  const paramDescriptions = trigger.params
+    .map((p) => {
+      const varName = paramVarNames[p.name] || p.name.toUpperCase();
+      const optionalPrefix = p.optional ? 'optional. ' : '';
+      return `- \`[${varName}]\` — ${optionalPrefix}${p.description}`;
+    })
+    .join('\n');
+
   return `# ViewEnter Trigger Rules for ${data.meta.packageName}
 
 This document contains rules for generating interactions that respond to elements entering the viewport using the \`${data.meta.packageName}\`. ViewEnter triggers use IntersectionObserver to detect when elements become visible and are ideal for entrance animations, content reveals, and lazy-loading effects.
 
 ---
-
-${fragments.get('pitfalls/same-element-viewenter', 'short')}
-
+${pitfallsBlock}
 ## Table of Contents
 
 - [Preventing Flash of Unstyled Content (FOUC)](#preventing-flash-of-unstyled-content-fouc)
@@ -94,8 +114,7 @@ Use \`keyframeEffect\` or \`namedEffect\` when the viewEnter should play an anim
   - \`'repeat'\` — restarts the animation every time the source element enters the viewport. Use separate source and target.
   - \`'alternate'\` — plays forward when the source element enters the viewport, reverses when it leaves. Use separate source and target.
   - \`'state'\` — resumes on enter, pauses on leave. Useful for continuous loops (\`iterations: Infinity\`). Use separate source and target.
-- \`[VISIBILITY_THRESHOLD]\` — optional. Number between 0–1 indicating how much of the source element must be visible to trigger (e.g. \`0.3\` = 30%).
-- \`[VIEWPORT_INSETS]\` — optional. String adjusting the viewport detection area (e.g. \`'-100px'\` extends it, \`'50px'\` shrinks it).
+${paramDescriptions}
 - \`[KEYFRAMES]\` — array of keyframe objects (e.g. \`[{ opacity: 0 }, { opacity: 1 }]\`). Property names in camelCase.
 - \`[EFFECT_NAME]\` — unique string identifier for a \`keyframeEffect\`.
 - \`[NAMED_EFFECT_DEFINITION]\` — object with properties of pre-built effect from \`@wix/motion-presets\`. Refer to motion-presets rules for available presets and their options.

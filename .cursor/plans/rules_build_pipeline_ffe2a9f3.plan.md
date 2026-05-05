@@ -77,6 +77,21 @@ todos:
   - id: fix-regenerate-2
     content: 'Regenerate rules/*.md, verify all CI checks pass (build, lint, format, test, rules freshness)'
     status: completed
+  - id: refactor-pitfalls-yaml-section
+    content: 'Add `section` field to pitfall entries in triggers.yaml for viewEnter, viewProgress, pointerMove — enables all trigger templates to use trigger.pitfalls data-driven pattern (matching event-trigger-rule.mjs)'
+    status: completed
+  - id: refactor-viewenter-data-driven
+    content: 'Refactor viewenter-rule.mjs to use trigger.pitfalls and trigger.params from YAML instead of hardcoding fragment calls and param descriptions'
+    status: completed
+  - id: refactor-viewprogress-data-driven
+    content: 'Refactor viewprogress-rule.mjs to use trigger.pitfalls from YAML instead of hardcoding the overflow-clip fragment call'
+    status: completed
+  - id: refactor-pointermove-data-driven
+    content: 'Refactor pointermove-rule.mjs to use trigger.pitfalls from YAML instead of hardcoding the hit-area fragment call'
+    status: completed
+  - id: refactor-regenerate
+    content: 'Regenerate rules/*.md, verify output is identical to pre-refactor output'
+    status: completed
 isProject: false
 ---
 
@@ -520,6 +535,51 @@ The function took 5 positional parameters (`trigger, isClick, isHover, hasRevers
 ### Fix 14: Regenerate output (round 2)
 
 After all round 2 fixes, ran `build:rules` and verified all 5 CI checks pass: build, lint, format, test, rules freshness.
+
+---
+
+## Post-PR Fixes — Round 3 (data-driven trigger templates)
+
+The trigger-specific templates (viewenter, viewprogress, pointermove) hardcode pitfall fragment calls and param descriptions that already exist in `triggers.yaml`. The event-trigger-rule.mjs template is fully data-driven (iterates `trigger.pitfalls`, reads `trigger.variableOverrides`), but the other templates bypass YAML data entirely. This violates the single-source-of-truth principle.
+
+### Fix 15: Add `section` field to YAML pitfall entries
+
+Different pitfall fragments use different section naming conventions. The event-trigger-rule.mjs uses the trigger name as the section (e.g. `fragments.get('pitfalls/hit-area', 'hover')`), which works because `hit-area.md` has a `#hover` section. But other fragments use generic names (`#short`, `#long`, `#pointermove-source`).
+
+**Action:** Add an optional `section` field to pitfall entries in `triggers.yaml`. Templates use `p.section || name` to resolve the fragment section — defaulting to the trigger name when no explicit section is given.
+
+```yaml
+# hover — no section needed, defaults to 'hover'
+pitfalls:
+  - id: hit-area
+
+# viewEnter — fragment section is 'short', not 'viewEnter'
+pitfalls:
+  - id: same-element-viewenter
+    section: short
+
+# viewProgress
+pitfalls:
+  - id: overflow-clip
+    section: short
+
+# pointerMove — fragment section is 'pointermove-source'
+pitfalls:
+  - id: hit-area
+    section: pointermove-source
+```
+
+### Fix 16: Data-drive pitfalls in viewenter/viewprogress/pointermove templates
+
+Replace hardcoded `fragments.get('pitfalls/...', '...')` calls with iteration over `trigger.pitfalls`, matching the pattern in event-trigger-rule.mjs.
+
+### Fix 17: Data-drive param descriptions in viewenter-rule.mjs
+
+The variable descriptions for `[VISIBILITY_THRESHOLD]` and `[VIEWPORT_INSETS]` are hardcoded but match the `description` field in `trigger.params`. Pull descriptions from YAML to maintain a single source of truth.
+
+### Fix 18: Regenerate and verify
+
+Run `build:rules` and verify the generated output is byte-identical to pre-refactor output.
 
 ---
 

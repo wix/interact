@@ -1,3 +1,5 @@
+import { when } from './_helpers.mjs';
+
 /**
  * Renders pointermove.md — rules for pointer-driven interactions with 2D mouse tracking.
  * @param {{ trigger: object, effects: object, meta: object }} data
@@ -5,6 +7,13 @@
  */
 export function render(data, fragments) {
   const { trigger } = data;
+
+  const pitfallsBlock = when(
+    trigger.pitfalls?.length > 0,
+    trigger.pitfalls
+      .map((p) => fragments.get(`pitfalls/${p.id}`, p.section || trigger.name))
+      .join('\n'),
+  );
 
   const paramsTypeFields = trigger.params
     .map((p) => `  ${p.name}${p.optional ? '?' : ''}: ${p.type};`)
@@ -28,7 +37,7 @@ These rules help generate pointer-driven interactions using \`${data.meta.packag
 
 ## Trigger Source Elements with \`hitArea: 'self'\`
 
-${fragments.get('pitfalls/hit-area', 'pointermove-source')}
+${pitfallsBlock}
 
 ---
 

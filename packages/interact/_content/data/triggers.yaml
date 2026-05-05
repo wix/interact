@@ -91,6 +91,7 @@ triggers:
         description: "String adjusting the viewport detection area (e.g. `'-100px'` extends it, `'50px'` shrinks it)."
     pitfalls:
       - id: same-element-viewenter
+        section: short
     showMultipleEffectsNote: true
 
   - name: viewProgress
@@ -98,6 +99,7 @@ triggers:
     params: []
     pitfalls:
       - id: overflow-clip
+        section: short
     showMultipleEffectsNote: true
 
   - name: pointerMove
@@ -113,6 +115,7 @@ triggers:
         description: 'restricts pointer tracking to a single axis'
     pitfalls:
       - id: hit-area
+        section: pointermove-source
 
   - name: animationEnd
     defaultTriggerType: null
