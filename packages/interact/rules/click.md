@@ -62,7 +62,7 @@ Use `keyframeEffect` or `namedEffect` when the click should play an animation (C
 - `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
 - `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
 - `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built, time-based animation effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.
-- `[FILL_MODE]` - optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.
+- `[FILL_MODE]` — optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.
 - `[INITIAL_REVERSED_BOOL]` — optional. `true` to start in the finished state so the entire effect is reversed.
 - `[DURATION_MS]` — animation duration in milliseconds.
 - `[EASING_FUNCTION]` — CSS easing string, or named easing from `@wix/motion`.

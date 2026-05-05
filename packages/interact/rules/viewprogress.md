@@ -82,7 +82,7 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
             customEffect: [CUSTOM_EFFECT_CALLBACK],
             rangeStart: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [START_PERCENTAGE] } },
             rangeEnd: { name: '[RANGE_NAME]', offset: { unit: 'percentage', value: [END_PERCENTAGE] } },
-            easing: `'[EASING_FUNCTION]'`, // usually 'linear'
+            easing: '[EASING_FUNCTION]', // usually 'linear'
             fill: 'both',
             effectId: '[UNIQUE_EFFECT_ID]'
         },

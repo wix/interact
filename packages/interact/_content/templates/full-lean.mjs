@@ -114,16 +114,7 @@ import { Interaction } from '@wix/interact/react';
 
 ## Config Structure
 
-\`\`\`ts
-type InteractConfig = {
-  interactions: Interaction[]; // REQUIRED
-  effects?: Record<string, Effect>; // reusable effects referenced by effectId
-  sequences?: Record<string, SequenceConfig>; // reusable sequences by sequenceId
-  conditions?: Record<string, Condition>; // named conditions; keys are condition ids
-};
-\`\`\`
-
-All cross-references (by id) MUST point to existing entries. Element keys MUST be stable for the config's lifetime.
+${fragments.get('config-structure', 'full-lean')}
 
 ---
 
@@ -455,91 +446,13 @@ ${presetTable}
 
 ## Sequences
 
-Coordinate multiple effects with staggered timing. Prefer sequences over manual delay stagger.
-
-### Sequence As type
-
-\`\`\`ts
-{
-  effects: (Effect | EffectRef)[];      // REQUIRED
-  delay?: number;                       // ms before sequence starts
-  offset?: number;                      // ms between each child's animation start
-  offsetEasing?: string;                // easing curve for staggering offsets
-  sequenceId?: string;                  // for caching/referencing
-  conditions?: string[];                // ids referencing the top-level conditions map
-}
-\`\`\`
-
-### Template
-
-\`\`\`ts
-{
-  interactions: [
-    {
-      key: '[SOURCE_KEY]',
-      trigger: '[TRIGGER]',
-      params: [TRIGGER_PARAMS],
-      sequences: [
-        {
-          offset: [OFFSET_MS],           // optional
-          offsetEasing: '[OFFSET_EASING]', // optional
-          delay: [DELAY_MS],             // optional
-          effects: [
-            // if used \`listContainer\` each item in the list is a target of a child effect
-            {
-              effectId: '[EFFECT_ID]',
-              listContainer: '[LIST_CONTAINER_SELECTOR]',
-            },
-            // if multiple effects are given each generated effect is added to the sequence
-          ],
-        },
-      ],
-    },
-  ],
-  effects: {
-    '[EFFECT_ID]': {
-      // effect definition (namedEffect, keyframeEffect, or customEffect)
-    },
-  },
-}
-\`\`\`
-
-### Variables
-
-- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for /vanilla, \`interactKey\` for React).
-- \`[TRIGGER]\` — any trigger for time-based animation effects (e.g., \`'viewEnter'\`, \`'activate'\`, \`'interest'\`).
-- \`[TRIGGER_PARAMS]\` — trigger-specific parameters (e.g., \`{ type: 'once', threshold: 0.3 }\`).
-- \`[OFFSET_MS]\` — ms between each child's animation start.
-- \`[OFFSET_EASING]\` — CSS easing string or named easing from \`@wix/motion\`.
-- \`[DELAY_MS]\` — optional. Base delay (ms) before the entire sequence starts.
-- \`[EFFECT_ID]\` — string key referencing an entry in the top-level \`effects\` map.
-- \`[LIST_CONTAINER_SELECTOR]\` — optional. CSS selector for the container whose children will be staggered.
-
-Reusable sequences can be defined in \`InteractConfig.sequences\` and referenced by \`sequenceId\`.
+${fragments.get('sequences', 'full-lean')}
 
 ---
 
 ## Conditions
 
-Named conditions that gate interactions, effects, or sequences.
-
-| Type       | Predicate                                                                 |
-| :--------- | :------------------------------------------------------------------------ |
-| \`media\`    | CSS media query condition without \`@media\` (e.g., \`'(min-width: 768px)'\`) |
-| \`selector\` | CSS selector; \`&\` is replaced with the base element selector              |
-
-Attach via \`conditions: ['[CONDITION_ID]']\` on interactions, effects, or sequences. On an interaction, conditions gate the entire trigger; on an effect, only that specific effect is skipped. All listed conditions must pass.
-
-### Examples
-
-\`\`\`ts
-conditions: {
-  'desktop': { type: 'media', predicate: '(min-width: 768px)' },
-  'hover-device': { type: 'media', predicate: '(hover: hover)' },
-  'reduced-motion': { type: 'media', predicate: '(prefers-reduced-motion: reduce)' },
-  'odd-items': { type: 'selector', predicate: ':nth-of-type(odd)' },
-}
-\`\`\`
+${fragments.get('conditions', 'full-lean')}
 
 ---
 
@@ -579,26 +492,6 @@ ${fragments.get('element-resolution', 'target')}
 
 ## Static API
 
-| Method / Property                   | Description                                                                                                   |
-| :---------------------------------- | :------------------------------------------------------------------------------------------------------------ |
-| \`Interact.create(config)\`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                   |
-| \`Interact.registerEffects(presets)\` | Register named effect presets. MUST be called before \`create\`.                                                |
-| \`Interact.destroy()\`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                             |
-| \`Interact.forceReducedMotion\`       | \`boolean\` (default: \`false\`) — force reduced-motion behavior regardless of OS setting.                        |
-| \`Interact.allowA11yTriggers\`        | \`boolean\` (default: \`false\`) — enable accessibility trigger variants (\`interest\`, \`activate\`).                |
-| \`Interact.setup(options)\`           | Configure global options for scroll, pointer, and viewEnter systems. Call before \`create\`. See options below. |
-
-**\`Interact.setup(options)\`** — optional configuration object:
-
-| Option                 | Type                           | Description                                                           |
-| :--------------------- | :----------------------------- | :-------------------------------------------------------------------- |
-| \`scrollOptionsGetter\`  | \`() => Partial<scrollConfig>\`  | Function returning defaults for scroll-driven animation configuration |
-| \`pointerOptionsGetter\` | \`() => Partial<PointerConfig>\` | Function returning defaults for pointer-move animation configuration  |
-| \`viewEnter\`            | \`Partial<ViewEnterParams>\`     | Defaults for all viewEnter triggers (\`threshold\`,\`inset\`)             |
-| \`allowA11yTriggers\`    | \`boolean\`                      | Enable accessibility trigger variants (use \`interest\` and \`activate\`) |
-
-Use \`setup()\` when you need to override default observer thresholds or provide global configuration that applies to all interactions of a given trigger type.
-
-Each \`Interact.create()\` call returns an instance. Store instances and call \`instance.destroy()\` when no longer needed (e.g. on component unmount) to prevent stale listeners and memory leaks.
+${fragments.get('static-api', 'full-lean')}
 `;
 }

@@ -1,8 +1,46 @@
 import { capitalize } from './_helpers.mjs';
 
+const PROSE = {
+  hover: {
+    timeEffectIntro: "Use `keyframeEffect` or `namedEffect` when the hover should play an animation (CSS or WAAPI). Set `triggerType` on each effect to control playback behavior.",
+    stateEffectIntro: "Use `transition` or `transitionProperties` when the hover should toggle styles via DOM attribute change and CSS transitions rather than keyframe animations. Set `stateAction` on the effect to control how the style is applied.",
+    customEffectIntro: "Use `customEffect` when you need imperative control over the animation (e.g. counters, canvas drawing, custom DOM manipulation). The callback receives the target element and a `progress` value (0–1) driven by the animation timeline.",
+    sequencesIntro: "Use sequences when a hover should sync/stagger animations across multiple elements. Set `triggerType` on the sequence config to control playback behavior.",
+    fillCritical: "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`.",
+    sourceKeyDesc: "The element that listens for hover.",
+    targetKeyDesc: "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
+    fillModeDesc: "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished.",
+    namedEffectDesc: "object with properties of pre-built effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.",
+    easingDesc: "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`.",
+    iterationsDesc: "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.",
+    alternateDesc: "optional. `true` to alternate direction on every other iteration (within a single playback).",
+    customEffectCallbackDesc: "function with signature `(target: HTMLElement, progress: number) => void`. Called on each animation frame with the target element and `progress` from 0 to 1.",
+    sequenceEffectDefDesc: "a definition of or a reference to a time-based animation effect.",
+    sequenceOffsetEasingDesc: "easing curve for the offset staggering distribution. CSS easing string, or named easing from `@wix/motion`. Defaults to `'linear'`.",
+  },
+  click: {
+    timeEffectIntro: "Use `keyframeEffect` or `namedEffect` when the click should play an animation (CSS or WAAPI). Set `triggerType` on each effect to control playback behavior.",
+    stateEffectIntro: "Use `transition` or `transitionProperties` when the click should toggle styles via DOM attribute change and CSS transitions rather than keyframe animations. Uses the `transition` CSS property. Set `stateAction` on the effect to control how the style is applied.",
+    customEffectIntro: "Use `customEffect` when you need imperative control over the animation (e.g. counters, canvas drawing, custom DOM manipulation, randomized behavior). The callback receives the target element and a `progress` value (0–1) driven by the animation timeline.",
+    sequencesIntro: "Use sequences when a click should sync/stagger animations across multiple elements. Set `triggerType` on the sequence config to control playback behavior.",
+    fillCritical: "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`.",
+    sourceKeyDesc: "The element that listens for clicks.",
+    targetKeyDesc: "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element.",
+    fillModeDesc: "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.",
+    namedEffectDesc: "object with properties of pre-built, time-based animation effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.",
+    easingDesc: "CSS easing string, or named easing from `@wix/motion`.",
+    iterationsDesc: "optional. Number of iterations, or `Infinity` for continuous loops.",
+    alternateDesc: "optional. `true` to alternate direction on every other iteration (within a single playback). Different from `triggerType: 'alternate'` which alternates per click.",
+    customEffectCallbackDesc: "function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with target element and `progress` from 0 to 1.",
+    sequenceEffectDefDesc: "a definition of, or a reference to a time-based animation effect.",
+    sequenceOffsetEasingDesc: "easing curve for the offset staggering distribution. Defaults to `'linear'`.",
+  },
+};
+
 export function render(trigger, data, fragments) {
   const name = trigger.name;
   const Name = capitalize(name);
+  const prose = PROSE[name];
   const hasReversed = trigger.templateFields.timeEffect.includes('reversed');
   const hasEffectId = trigger.templateFields.timeEffect.includes('effectId');
   const showMultipleEffects = trigger.showMultipleEffectsNote;
@@ -28,8 +66,6 @@ export function render(trigger, data, fragments) {
     ? `\n            effectId: '[UNIQUE_EFFECT_ID]'`
     : '';
 
-  const fillModeVarDash = trigger.fillModeDash || '—';
-
   const reversedVar = hasReversed
     ? `\n- \`[INITIAL_REVERSED_BOOL]\` — optional. \`true\` to start in the finished state so the entire effect is reversed.`
     : '';
@@ -38,11 +74,9 @@ export function render(trigger, data, fragments) {
     ? `\n- \`[UNIQUE_EFFECT_ID]\` — optional. String identifier used by \`animationEnd\` triggers for chaining, and by sequences for referencing effects from the top-level \`effects\` map.`
     : '';
 
-  const fillModeVar = `- \`[FILL_MODE]\` ${fillModeVarDash} ${trigger.fillModeDesc}`;
+  const fillModeVar = `- \`[FILL_MODE]\` — ${prose.fillModeDesc}`;
 
-  const variablesBlock = trigger.fillModeAtEnd
-    ? buildVariablesEndFill(trigger, fillModeVar, reversedVar, effectIdVar)
-    : buildVariablesMidFill(trigger, fillModeVar, reversedVar, effectIdVar);
+  const variablesBlock = buildVariables(trigger, prose, fillModeVar, reversedVar, effectIdVar);
 
   return `# ${Name} Trigger Rules for ${data.meta.packageName}
 
@@ -61,9 +95,9 @@ ${pitfallsBlock}
 
 ## Rule 1: keyframeEffect / namedEffect (TimeEffect)
 
-${trigger.timeEffectIntro}
+${prose.timeEffectIntro}
 
-**CRITICAL:** ${trigger.fillCritical}
+**CRITICAL:** ${prose.fillCritical}
 ${multipleEffectsNote}
 \`\`\`typescript
 {
@@ -101,7 +135,7 @@ ${variablesBlock}
 
 ## Rule 2: transition / transitionProperties (StateEffect)
 
-${trigger.stateEffectIntro}
+${prose.stateEffectIntro}
 
 Use \`transition\` when all properties share timing. Use \`transitionProperties\` when each property needs independent \`duration\`, \`delay\`, or \`easing\`.
 
@@ -155,7 +189,7 @@ ${Object.entries(trigger.stateActionDescriptions).map(([k, v]) => `  - \`'${k}'\
 
 ## Rule 3: customEffect (TimeEffect)
 
-${trigger.customEffectIntro}
+${prose.customEffectIntro}
 
 \`\`\`typescript
 {
@@ -176,7 +210,7 @@ ${rule23Closing}
 ### Variables
 
 - \`[SOURCE_KEY]\` / \`[TARGET_KEY]\` / \`[TRIGGER_TYPE]\` — same as Rule 1.
-- \`[CUSTOM_EFFECT_CALLBACK]\` — ${trigger.customEffectCallbackDesc}
+- \`[CUSTOM_EFFECT_CALLBACK]\` — ${prose.customEffectCallbackDesc}
 - \`[DURATION_MS]\` — animation duration in milliseconds.
 - \`[EASING_FUNCTION]\` — CSS easing string, or named easing from \`@wix/motion\`.
 
@@ -184,7 +218,7 @@ ${rule23Closing}
 
 ## Rule 4: Sequences
 
-${trigger.sequencesIntro}
+${prose.sequencesIntro}
 
 \`\`\`typescript
 {
@@ -208,49 +242,30 @@ ${trigger.sequencesIntro}
 
 - \`[SOURCE_KEY]\` / \`[TRIGGER_TYPE]\` — same as Rule 1. \`triggerType\` is set on the sequence config, not on individual effects within the sequence.
 - \`[OFFSET_MS]\` — time offset for staggering each child's animation start, in milliseconds.
-- \`[OFFSET_EASING]\` — ${trigger.sequenceOffsetEasingDesc}
-- \`[EFFECT_DEFINITION]\` — ${trigger.sequenceEffectDefDesc}
+- \`[OFFSET_EASING]\` — ${prose.sequenceOffsetEasingDesc}
+- \`[EFFECT_DEFINITION]\` — ${prose.sequenceEffectDefDesc}
 `;
 }
 
-function buildVariablesMidFill(trigger, fillModeVar, reversedVar, effectIdVar) {
+function buildVariables(trigger, prose, fillModeVar, reversedVar, effectIdVar) {
   const lines = [
-    `- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React). ${trigger.sourceKeyDesc}`,
-    `- \`[TARGET_KEY]\` — ${trigger.targetKeyDesc}`,
+    `- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React). ${prose.sourceKeyDesc}`,
+    `- \`[TARGET_KEY]\` — ${prose.targetKeyDesc}`,
     `- \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:`,
     ...Object.entries(trigger.triggerTypeDescriptions).map(([k, v]) => `  - \`'${k}'\` — ${v}`),
     `- \`[KEYFRAMES]\` — array of keyframe objects (e.g. \`[{ opacity: 0 }, { opacity: 1 }]\`). Property names in camelCase.`,
     `- \`[EFFECT_NAME]\` — unique string identifier for a \`keyframeEffect\`.`,
-    `- \`[NAMED_EFFECT_DEFINITION]\` — ${trigger.namedEffectDesc}`,
+    `- \`[NAMED_EFFECT_DEFINITION]\` — ${prose.namedEffectDesc}`,
     fillModeVar,
   ];
   if (reversedVar) lines.push(reversedVar.trim());
   lines.push(
     `- \`[DURATION_MS]\` — animation duration in milliseconds.`,
-    `- \`[EASING_FUNCTION]\` — ${trigger.easingDesc}`,
+    `- \`[EASING_FUNCTION]\` — ${prose.easingDesc}`,
     `- \`[DELAY_MS]\` — optional delay before the effect starts, in milliseconds.`,
-    `- \`[ITERATIONS]\` — ${trigger.iterationsDesc}`,
-    `- \`[ALTERNATE_BOOL]\` — ${trigger.alternateDesc}`,
+    `- \`[ITERATIONS]\` — ${prose.iterationsDesc}`,
+    `- \`[ALTERNATE_BOOL]\` — ${prose.alternateDesc}`,
   );
   if (effectIdVar) lines.push(effectIdVar.trim());
-  return lines.join('\n');
-}
-
-function buildVariablesEndFill(trigger, fillModeVar, reversedVar, effectIdVar) {
-  const lines = [
-    `- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React). ${trigger.sourceKeyDesc}`,
-    `- \`[TARGET_KEY]\` — ${trigger.targetKeyDesc}`,
-    `- \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:`,
-    ...Object.entries(trigger.triggerTypeDescriptions).map(([k, v]) => `  - \`'${k}'\` — ${v}`),
-    `- \`[KEYFRAMES]\` — array of keyframe objects (e.g. \`[{ opacity: 0 }, { opacity: 1 }]\`). Property names in camelCase.`,
-    `- \`[EFFECT_NAME]\` — unique string identifier for a \`keyframeEffect\`.`,
-    `- \`[NAMED_EFFECT_DEFINITION]\` — ${trigger.namedEffectDesc}`,
-    `- \`[DURATION_MS]\` — animation duration in milliseconds.`,
-    `- \`[EASING_FUNCTION]\` — ${trigger.easingDesc}`,
-    `- \`[DELAY_MS]\` — optional delay before the effect starts, in milliseconds.`,
-    `- \`[ITERATIONS]\` — ${trigger.iterationsDesc}`,
-    `- \`[ALTERNATE_BOOL]\` — ${trigger.alternateDesc}`,
-    fillModeVar,
-  ];
   return lines.join('\n');
 }

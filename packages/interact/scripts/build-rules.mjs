@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'node:fs';
-import { join, basename, extname, relative } from 'node:path';
+import { join, basename, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 
@@ -95,57 +95,32 @@ class Fragments {
 const fragments = new Fragments(join(CONTENT_DIR, 'fragments'));
 
 // ---------------------------------------------------------------------------
-// 3. Import templates and render
+// 3. Import templates and render via manifest
 // ---------------------------------------------------------------------------
+
+const manifest = [
+  { template: 'event-trigger-rule.mjs', triggers: ['click', 'hover'], output: name => `${name}.md` },
+  { template: 'viewenter-rule.mjs', triggers: ['viewEnter'], output: () => 'viewenter.md' },
+  { template: 'viewprogress-rule.mjs', triggers: ['viewProgress'], output: () => 'viewprogress.md' },
+  { template: 'pointermove-rule.mjs', triggers: ['pointerMove'], output: () => 'pointermove.md' },
+  { template: 'full-lean.mjs', triggers: null, output: () => 'full-lean.md' },
+  { template: 'integration.mjs', triggers: null, output: () => 'integration.md' },
+];
 
 const outputs = [];
 
-// Event trigger rules: click.md and hover.md
-const eventTemplate = await import(join(CONTENT_DIR, 'templates', 'event-trigger-rule.mjs'));
-for (const triggerName of ['click', 'hover']) {
-  const trigger = data.triggers.find(t => t.name === triggerName);
-  if (!trigger) throw new Error(`Trigger "${triggerName}" not found in triggers.yaml`);
-  const md = eventTemplate.render(trigger, data, fragments);
-  outputs.push({ file: `${triggerName}.md`, content: md });
+for (const entry of manifest) {
+  const mod = await import(join(CONTENT_DIR, 'templates', entry.template));
+  if (entry.triggers) {
+    for (const name of entry.triggers) {
+      const trigger = data.triggers.find(t => t.name === name);
+      if (!trigger) throw new Error(`Trigger "${name}" not found in triggers.yaml`);
+      outputs.push({ file: entry.output(name), content: mod.render(trigger, data, fragments) });
+    }
+  } else {
+    outputs.push({ file: entry.output(), content: mod.render(data.triggers, data, fragments) });
+  }
 }
-
-// viewenter.md
-const viewenterTemplate = await import(join(CONTENT_DIR, 'templates', 'viewenter-rule.mjs'));
-const viewEnterTrigger = data.triggers.find(t => t.name === 'viewEnter');
-outputs.push({
-  file: 'viewenter.md',
-  content: viewenterTemplate.render(viewEnterTrigger, data, fragments),
-});
-
-// viewprogress.md
-const viewprogressTemplate = await import(join(CONTENT_DIR, 'templates', 'viewprogress-rule.mjs'));
-const viewProgressTrigger = data.triggers.find(t => t.name === 'viewProgress');
-outputs.push({
-  file: 'viewprogress.md',
-  content: viewprogressTemplate.render(viewProgressTrigger, data, fragments),
-});
-
-// pointermove.md
-const pointermoveTemplate = await import(join(CONTENT_DIR, 'templates', 'pointermove-rule.mjs'));
-const pointerMoveTrigger = data.triggers.find(t => t.name === 'pointerMove');
-outputs.push({
-  file: 'pointermove.md',
-  content: pointermoveTemplate.render(pointerMoveTrigger, data, fragments),
-});
-
-// full-lean.md
-const fullLeanTemplate = await import(join(CONTENT_DIR, 'templates', 'full-lean.mjs'));
-outputs.push({
-  file: 'full-lean.md',
-  content: fullLeanTemplate.render(data.triggers, data, fragments),
-});
-
-// integration.md
-const integrationTemplate = await import(join(CONTENT_DIR, 'templates', 'integration.mjs'));
-outputs.push({
-  file: 'integration.md',
-  content: integrationTemplate.render(data.triggers, data, fragments),
-});
 
 // ---------------------------------------------------------------------------
 // 4. Write outputs

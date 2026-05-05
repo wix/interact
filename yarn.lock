@@ -1392,6 +1392,7 @@ __metadata:
     "@wix/motion": "npm:^2.1.5"
     fastdom: "npm:^1.0.12"
     fizban: "npm:^0.7.2"
+    js-yaml: "npm:^4.1.0"
     jsdom: "npm:^24.0.0"
     kuliso: "npm:^0.4.13"
     react: "npm:^18.3.1"
@@ -3554,7 +3555,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:^4.1.1":
+"js-yaml@npm:^4.1.0, js-yaml@npm:^4.1.1":
   version: 4.1.1
   resolution: "js-yaml@npm:4.1.1"
   dependencies:

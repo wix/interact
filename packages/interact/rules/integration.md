@@ -248,9 +248,9 @@ Define reusable sequences in `InteractConfig.sequences` and reference by `sequen
   },
   interactions: [
     {
-      key: `'[SOURCE_KEY]'`,
-      trigger: `'[TRIGGER]'`,
-      params: `[TRIGGER_PARAMS]`,
+      key: '[SOURCE_KEY]',
+      trigger: '[TRIGGER]',
+      params: [TRIGGER_PARAMS],
       sequences: [{ sequenceId: 'stagger-fade' }],
     },
   ],

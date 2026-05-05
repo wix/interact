@@ -4,37 +4,64 @@ overview: Implement a build pipeline for `packages/interact/rules/` using struct
 todos:
   - id: scaffold
     content: "Create `_content/` directory structure: `data/`, `fragments/`, `templates/`, and `scripts/build-rules.mjs` skeleton"
-    status: pending
+    status: completed
   - id: data-triggers
     content: Create `data/triggers.yaml` with all 9 trigger definitions (hover, click, interest, activate, viewEnter, viewProgress, pointerMove, animationEnd, pageVisible) — pull field names from actual TS types
-    status: pending
+    status: completed
   - id: data-effects-meta
     content: Create `data/effects.yaml` (effect field definitions, presets table, ranges, easings) and `data/meta.yaml` (package metadata)
-    status: pending
+    status: completed
   - id: fragments
     content: "Extract ~12 fragments from existing rule files: fouc, element-resolution, 6 pitfalls, quick-start, multiple-effects-note, custom-effect-intro, sequences-intro"
-    status: pending
+    status: completed
   - id: template-event
     content: Create `templates/event-trigger-rule.mjs` — generates click.md and hover.md from trigger data + shared fragments
-    status: pending
+    status: completed
   - id: template-viewport
     content: Create `templates/viewenter-rule.mjs` and `templates/viewprogress-rule.mjs`
-    status: pending
+    status: completed
   - id: template-pointer
     content: Create `templates/pointermove-rule.mjs`
-    status: pending
+    status: completed
   - id: template-reference
     content: Create `templates/full-lean.mjs` and `templates/integration.mjs` — the two comprehensive reference files
-    status: pending
+    status: completed
   - id: build-script
     content: "Implement `scripts/build-rules.mjs`: YAML loading, fragment parsing, template orchestration, file writing"
-    status: pending
+    status: completed
   - id: integrate
     content: Add `build:rules` script to package.json, add `js-yaml` devDependency, update CI workflow
-    status: pending
+    status: completed
   - id: verify
     content: Run build, diff generated output against current rule files, verify no information loss, fix any discrepancies
-    status: pending
+    status: completed
+  - id: fix-lockfile
+    content: "CI fix: run `yarn install` so yarn.lock includes the new `js-yaml` resolution, commit the updated lockfile"
+    status: completed
+  - id: fix-dead-fragments
+    content: "Remove dead fragment files `custom-effect-intro.md` and `sequences-intro.md` (unused by any template; YAML prose fields are used instead)"
+    status: completed
+  - id: fix-yaml-prose
+    content: "Move 15+ prose description fields (timeEffectIntro, sourceKeyDesc, etc.) out of triggers.yaml into the event-trigger template directly, keeping only structured data in YAML"
+    status: completed
+  - id: fix-fill-variables
+    content: "Collapse `buildVariablesMidFill`/`buildVariablesEndFill` into a single `buildVariables` function — always place `[FILL_MODE]` after `[NAMED_EFFECT_DEFINITION]` (matching the config block order). Remove `fillModeAtEnd` from triggers.yaml."
+    status: completed
+  - id: fix-build-manifest
+    content: "Replace repetitive template orchestration in build-rules.mjs (lines 104-148) with a data-driven manifest array"
+    status: completed
+  - id: fix-viewprogress-backtick
+    content: "Fix stray backtick template literal in viewprogress-rule.mjs line 86 — normalize to plain string like other templates"
+    status: completed
+  - id: fix-shared-fragments
+    content: "Extract duplicated sections (Conditions, Static API, Config Structure, Sequences) from full-lean.mjs and integration.mjs into shared fragments"
+    status: completed
+  - id: fix-ci-freshness
+    content: "Add a freshness check step to `.github/workflows/ci.yml`: `yarn workspace @wix/interact build:rules && git diff --exit-code packages/interact/rules/`"
+    status: completed
+  - id: fix-regenerate
+    content: "Run `build:rules`, verify output, commit regenerated rules/*.md files"
+    status: completed
 isProject: false
 ---
 
@@ -276,6 +303,143 @@ These existing issues will be fixed as a natural consequence of the migration:
 - `generate` import path inconsistency (`@wix/interact` vs `@wix/interact/web`) — standardize in FOUC fragment
 - Missing "Multiple effects" note in click.md (present in hover.md but absent in click.md)
 - Inconsistent "additional effects" comments across files
+
+## Post-PR Fixes (from code review of PR #204)
+
+The initial implementation (PR #204) landed the full architecture. The fixes below address CI failures, dead code, and simplification opportunities found during review.
+
+### Fix 1: Commit updated `yarn.lock` (CI blocker)
+
+The CI `Install dependencies` step runs `yarn install --immutable` which refuses to modify the lockfile. Adding `js-yaml` to `devDependencies` in `package.json` without updating `yarn.lock` causes this failure.
+
+**Action:** Run `nvm use && yarn install` to regenerate the lockfile, then commit the updated `yarn.lock`.
+
+### Fix 2: Remove dead fragments
+
+`_content/fragments/custom-effect-intro.md` and `_content/fragments/sequences-intro.md` are not referenced by any template. The templates use `trigger.customEffectIntro` and `trigger.sequencesIntro` from YAML instead. These fragment files are dead code.
+
+**Action:** Delete both files.
+
+### Fix 3: Move prose descriptions out of `triggers.yaml`
+
+`triggers.yaml` currently stores 15+ full-sentence prose fields per trigger entry (`timeEffectIntro`, `stateEffectIntro`, `sequencesIntro`, `customEffectIntro`, `fillCritical`, `sourceKeyDesc`, `targetKeyDesc`, `fillModeDesc`, `namedEffectDesc`, `easingDesc`, `iterationsDesc`, `alternateDesc`, `customEffectCallbackDesc`, `sequenceEffectDefDesc`, `sequenceOffsetEasingDesc`). YAML is suited for structured data, not paragraphs of English.
+
+These fields only vary between hover and click. The viewEnter/viewProgress/pointerMove triggers don't use them at all (they have their own hardcoded templates).
+
+**Action:**
+- Remove all prose description fields from `triggers.yaml` (hover + click entries).
+- Move the hover/click prose differences into `event-trigger-rule.mjs` directly, keyed by a simple flag or `trigger.name` check. These are small trigger-specific word choices (e.g. "while hovering" vs "while finished"), not reusable data.
+- Keep only structured data in YAML: name, category, support flags, params, templateFields, pitfalls, triggerType/stateAction enum descriptions, `a11yAlias`, `a11yNote`, `defaultTriggerType`, `showMultipleEffectsNote`.
+
+### Fix 4: Unify fill-mode variable placement
+
+[`event-trigger-rule.mjs`](packages/interact/_content/templates/event-trigger-rule.mjs) has two nearly identical functions — `buildVariablesMidFill` (click) and `buildVariablesEndFill` (hover) — that differ only in where `[FILL_MODE]` appears in the variables list. The code block template itself always shows `fill` right after `namedEffect`/`keyframeEffect`, so the variables list should match that order.
+
+**Action:**
+- Collapse into a single `buildVariables` function that always places `[FILL_MODE]` after `[NAMED_EFFECT_DEFINITION]` (mid position, matching the config block order).
+- Remove `fillModeAtEnd` and `fillModeDash` from `triggers.yaml`.
+- Use a consistent em-dash separator for all triggers.
+
+The single function:
+
+```javascript
+function buildVariables(trigger, fillModeVar, reversedVar, effectIdVar) {
+  const lines = [
+    `- \`[SOURCE_KEY]\` — ...`,
+    `- \`[TARGET_KEY]\` — ...`,
+    `- \`[TRIGGER_TYPE]\` — ...`,
+    ...Object.entries(trigger.triggerTypeDescriptions).map(([k, v]) => `  - \`'${k}'\` — ${v}`),
+    `- \`[KEYFRAMES]\` — ...`,
+    `- \`[EFFECT_NAME]\` — ...`,
+    `- \`[NAMED_EFFECT_DEFINITION]\` — ...`,
+    fillModeVar,
+  ];
+  if (reversedVar) lines.push(reversedVar.trim());
+  lines.push(
+    `- \`[DURATION_MS]\` — ...`,
+    `- \`[EASING_FUNCTION]\` — ...`,
+    `- \`[DELAY_MS]\` — ...`,
+    `- \`[ITERATIONS]\` — ...`,
+    `- \`[ALTERNATE_BOOL]\` — ...`,
+  );
+  if (effectIdVar) lines.push(effectIdVar.trim());
+  return lines.join('\n');
+}
+```
+
+### Fix 5: Data-driven build manifest
+
+Lines 104-148 of [`build-rules.mjs`](packages/interact/scripts/build-rules.mjs) repeat the same import-find-render-push pattern 6 times. Replace with a declarative manifest:
+
+```javascript
+const manifest = [
+  { template: 'event-trigger-rule.mjs', triggers: ['click', 'hover'], output: name => `${name}.md` },
+  { template: 'viewenter-rule.mjs', triggers: ['viewEnter'], output: () => 'viewenter.md' },
+  { template: 'viewprogress-rule.mjs', triggers: ['viewProgress'], output: () => 'viewprogress.md' },
+  { template: 'pointermove-rule.mjs', triggers: ['pointerMove'], output: () => 'pointermove.md' },
+  { template: 'full-lean.mjs', triggers: null, output: () => 'full-lean.md' },
+  { template: 'integration.mjs', triggers: null, output: () => 'integration.md' },
+];
+
+for (const entry of manifest) {
+  const mod = await import(join(CONTENT_DIR, 'templates', entry.template));
+  if (entry.triggers) {
+    for (const name of entry.triggers) {
+      const trigger = data.triggers.find(t => t.name === name);
+      if (!trigger) throw new Error(`Trigger "${name}" not found in triggers.yaml`);
+      outputs.push({ file: entry.output(name), content: mod.render(trigger, data, fragments) });
+    }
+  } else {
+    outputs.push({ file: entry.output(), content: mod.render(data.triggers, data, fragments) });
+  }
+}
+```
+
+Adding a new template becomes a single manifest line.
+
+### Fix 6: Fix stray backtick in `viewprogress-rule.mjs`
+
+Line 86 of [`viewprogress-rule.mjs`](packages/interact/_content/templates/viewprogress-rule.mjs) uses `` easing: `'[EASING_FUNCTION]'` `` (backtick template literal) inside the code fence. All other templates use `easing: '[EASING_FUNCTION]'` (plain single-quoted string).
+
+**Action:** Change to `easing: '[EASING_FUNCTION]'` for consistency.
+
+### Fix 7: Extract shared sections into fragments
+
+`full-lean.mjs` (604 lines) and `integration.mjs` (285 lines) are mostly hardcoded prose with only a handful of `fragments.get()` calls. Several large sections are duplicated between them with minor variation:
+
+- **Conditions** block (~30 lines)
+- **Static API** table (~20 lines)
+- **Config Structure / InteractConfig** (~15 lines)
+- **Sequences** section (~50 lines)
+
+**Action:** Extract each into a new fragment with `<!-- #full-lean -->` / `<!-- #integration -->` section markers (same pattern as `fouc.md`). This brings these templates closer to the single-source-of-truth goal and makes future edits to these shared concepts a one-file change.
+
+New fragment files:
+- `_content/fragments/conditions.md` — `#full-lean`, `#integration`
+- `_content/fragments/static-api.md` — `#full-lean`, `#integration`
+- `_content/fragments/config-structure.md` — `#full-lean`, `#integration`
+- `_content/fragments/sequences.md` — `#full-lean`, `#integration`
+
+### Fix 8: Add CI freshness check
+
+The plan and PR description both mention a freshness check, but [`.github/workflows/ci.yml`](.github/workflows/ci.yml) was not updated.
+
+**Action:** Add a step after `Build` in the `build` job:
+
+```yaml
+- name: Verify generated rules are up to date
+  run: |
+    yarn workspace @wix/interact build:rules
+    git diff --exit-code packages/interact/rules/
+```
+
+This ensures that if someone edits a source file but forgets to re-run `build:rules`, CI catches it.
+
+### Fix 9: Regenerate output
+
+After all fixes above, run `build:rules` and commit the regenerated `rules/*.md` files so they reflect the new `[FILL_MODE]` variable ordering in hover.md.
+
+---
 
 ## Future Extension Points
 

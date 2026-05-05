@@ -126,25 +126,7 @@ For full effect type syntax (\`keyframeEffect\`, \`namedEffect\`, \`customEffect
 
 ## Configuration Schema
 
-### InteractConfig
-
-\`\`\`typescript
-type InteractConfig = {
-  interactions: Interaction[];
-  effects?: Record<string, Effect>;
-  sequences?: Record<string, SequenceConfig>;
-  conditions?: Record<string, Condition>;
-};
-\`\`\`
-
-| Field          | Description                                                             |
-| :------------- | :---------------------------------------------------------------------- |
-| \`interactions\` | Required. Array of interaction definitions binding triggers to effects. |
-| \`effects?\`     | Reusable effects referenced by \`effectId\` from interactions.            |
-| \`sequences?\`   | Reusable sequence definitions, referenced by \`sequenceId\`.              |
-| \`conditions?\`  | Named conditions (media/container/selector queries), referenced by ID.  |
-
-Each call to \`Interact.create(config)\` creates a new \`Interact\` instance. A single config can define multiple interactions.
+${fragments.get('config-structure', 'integration')}
 
 ### Interaction
 
@@ -197,38 +179,7 @@ For \`hover\`/\`click\` (and their accessible variants \`interest\`/\`activate\`
 
 ## Sequences
 
-Sequences coordinate multiple effects with staggered timing.
-
-\`\`\`typescript
-{
-  offset: number,           // ms between consecutive items
-  offsetEasing: string,     // Any valid easing string for stagger distribution curve
-  delay: number,            // ms base delay before the sequence starts
-  effects: [
-    /* ... effect definitions */,
-  ],
-}
-\`\`\`
-
-Define reusable sequences in \`InteractConfig.sequences\` and reference by \`sequenceId\`:
-
-\`\`\`typescript
-{
-  sequences: {
-    'stagger-fade': {
-      /* ... sequence definition */
-    },
-  },
-  interactions: [
-    {
-      key: \`'[SOURCE_KEY]'\`,
-      trigger: \`'[TRIGGER]'\`,
-      params: \`[TRIGGER_PARAMS]\`,
-      sequences: [{ sequenceId: 'stagger-fade' }],
-    },
-  ],
-}
-\`\`\`
+${fragments.get('sequences', 'integration')}
 
 ---
 
@@ -271,15 +222,6 @@ ${fragments.get('fouc', 'code-inject')}
 
 ## Static API
 
-Each \`Interact.create(config)\` call returns an instance. Keep a reference if you need to add/remove elements dynamically (vanilla JS) or to destroy a specific instance. Call \`Interact.destroy()\` to tear down all instances at once (e.g. on page navigation).
-
-| Method / Property                   | Description                                                                                  |
-| :---------------------------------- | :------------------------------------------------------------------------------------------- |
-| \`Interact.create(config)\`           | Initialize with a config. Returns the instance. Multiple configs create separate instances.  |
-| \`Interact.registerEffects(presets)\` | Register named effect presets before \`create\`. Required for \`namedEffect\` usage.             |
-| \`Interact.destroy()\`                | Tear down all instances.                                                                     |
-| \`Interact.forceReducedMotion\`       | \`boolean\` — force reduced-motion behavior regardless of OS setting. Default: \`false\`.        |
-| \`Interact.allowA11yTriggers\`        | \`boolean\` — enable accessibility triggers (\`interest\`, \`activate\`). Default: \`false\`.        |
-| \`Interact.setup(options)\`           | Configure global defaults for scroll/pointer/viewEnter trigger params. Call before \`create\`. |
+${fragments.get('static-api', 'integration')}
 `;
 }

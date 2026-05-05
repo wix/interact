@@ -43,23 +43,6 @@ triggers:
       remove: "removes a previously applied style state on enter. Use with provided `effectId` to map to a matching interaction with `add` and effect with same `effectId`."
       clear: "clears all previously applied style states on enter. Use to reset multiple stacked `'add'` style changes at once (e.g. a \"reset\" hover area that undoes several accumulated states)."
     fillNote: "while hovering"
-    fillCritical: "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`."
-    fillModeAtEnd: true
-    fillModeDash: "—"
-    sourceKeyDesc: "The element that listens for hover."
-    targetKeyDesc: "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above)."
-    fillModeDesc: "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished."
-    namedEffectDesc: "object with properties of pre-built effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options."
-    easingDesc: "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`."
-    iterationsDesc: "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`."
-    alternateDesc: "optional. `true` to alternate direction on every other iteration (within a single playback)."
-    customEffectIntro: "Use `customEffect` when you need imperative control over the animation (e.g. counters, canvas drawing, custom DOM manipulation). The callback receives the target element and a `progress` value (0–1) driven by the animation timeline."
-    customEffectCallbackDesc: "function with signature `(target: HTMLElement, progress: number) => void`. Called on each animation frame with the target element and `progress` from 0 to 1."
-    sequenceEffectDefDesc: "a definition of or a reference to a time-based animation effect."
-    sequenceOffsetEasingDesc: "easing curve for the offset staggering distribution. CSS easing string, or named easing from `@wix/motion`. Defaults to `'linear'`."
-    timeEffectIntro: "Use `keyframeEffect` or `namedEffect` when the hover should play an animation (CSS or WAAPI). Set `triggerType` on each effect to control playback behavior."
-    stateEffectIntro: "Use `transition` or `transitionProperties` when the hover should toggle styles via DOM attribute change and CSS transitions rather than keyframe animations. Set `stateAction` on the effect to control how the style is applied."
-    sequencesIntro: "Use sequences when a hover should sync/stagger animations across multiple elements. Set `triggerType` on the sequence config to control playback behavior."
 
   - name: click
     a11yAlias: activate
@@ -106,23 +89,6 @@ triggers:
       remove: "removes a previously applied style state."
       clear: "clears all previously applied style states. Useful for resetting multiple stacked style states at once."
     fillNote: "while finished"
-    fillCritical: "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`."
-    fillModeAtEnd: false
-    fillModeDash: "-"
-    sourceKeyDesc: "The element that listens for clicks."
-    targetKeyDesc: "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element."
-    fillModeDesc: "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect."
-    namedEffectDesc: "object with properties of pre-built, time-based animation effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options."
-    easingDesc: "CSS easing string, or named easing from `@wix/motion`."
-    iterationsDesc: "optional. Number of iterations, or `Infinity` for continuous loops."
-    alternateDesc: "optional. `true` to alternate direction on every other iteration (within a single playback). Different from `triggerType: 'alternate'` which alternates per click."
-    customEffectIntro: "Use `customEffect` when you need imperative control over the animation (e.g. counters, canvas drawing, custom DOM manipulation, randomized behavior). The callback receives the target element and a `progress` value (0–1) driven by the animation timeline."
-    customEffectCallbackDesc: "function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with target element and `progress` from 0 to 1."
-    sequenceEffectDefDesc: "a definition of, or a reference to a time-based animation effect."
-    sequenceOffsetEasingDesc: "easing curve for the offset staggering distribution. Defaults to `'linear'`."
-    timeEffectIntro: "Use `keyframeEffect` or `namedEffect` when the click should play an animation (CSS or WAAPI). Set `triggerType` on each effect to control playback behavior."
-    stateEffectIntro: "Use `transition` or `transitionProperties` when the click should toggle styles via DOM attribute change and CSS transitions rather than keyframe animations. Uses the `transition` CSS property. Set `stateAction` on the effect to control how the style is applied."
-    sequencesIntro: "Use sequences when a click should sync/stagger animations across multiple elements. Set `triggerType` on the sequence config to control playback behavior."
 
   - name: viewEnter
     category: viewport
