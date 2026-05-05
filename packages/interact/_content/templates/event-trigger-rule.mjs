@@ -1,6 +1,6 @@
-import { capitalize } from './_helpers.mjs';
+import { capitalize, when } from './_helpers.mjs';
 
-const TRIGGER_OVERRIDES = {
+const OVERRIDES = {
   hover: {
     fillCritical:
       "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`.",
@@ -17,8 +17,6 @@ const TRIGGER_OVERRIDES = {
       "easing curve for the offset staggering distribution. CSS easing string, or named easing from `@wix/motion`. Defaults to `'linear'`.",
   },
   click: {
-    stateEffectExtra: ' Uses the `transition` CSS property.',
-    customEffectExtra: ', randomized behavior',
     fillCritical:
       "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`.",
     sourceKeyDesc: 'The element that listens for clicks.',
@@ -28,74 +26,39 @@ const TRIGGER_OVERRIDES = {
       "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.",
     easingDesc: 'CSS easing string, or named easing from `@wix/motion`.',
     iterationsDesc: 'optional. Number of iterations, or `Infinity` for continuous loops.',
-    alternateExtra: " Different from `triggerType: 'alternate'` which alternates per click.",
     sequenceOffsetEasingDesc:
       "easing curve for the offset staggering distribution. Defaults to `'linear'`.",
   },
 };
 
-function buildProse(name) {
-  const o = TRIGGER_OVERRIDES[name];
-  return {
-    timeEffectIntro: `Use \`keyframeEffect\` or \`namedEffect\` when the ${name} should play an animation (CSS or WAAPI). Set \`triggerType\` on each effect to control playback behavior.`,
-    stateEffectIntro: `Use \`transition\` or \`transitionProperties\` when the ${name} should toggle styles via DOM attribute change and CSS transitions rather than keyframe animations.${o.stateEffectExtra || ''} Set \`stateAction\` on the effect to control how the style is applied.`,
-    customEffectIntro: `Use \`customEffect\` when you need imperative control over the animation (e.g. counters, canvas drawing, custom DOM manipulation${o.customEffectExtra || ''}). The callback receives the target element and a \`progress\` value (0–1) driven by the animation timeline.`,
-    sequencesIntro: `Use sequences when a ${name} should sync/stagger animations across multiple elements. Set \`triggerType\` on the sequence config to control playback behavior.`,
-    fillCritical: o.fillCritical,
-    sourceKeyDesc: o.sourceKeyDesc,
-    targetKeyDesc: o.targetKeyDesc,
-    fillModeDesc: o.fillModeDesc,
-    namedEffectDesc:
-      'object with properties of pre-built effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.',
-    easingDesc: o.easingDesc,
-    iterationsDesc: o.iterationsDesc,
-    alternateDesc: `optional. \`true\` to alternate direction on every other iteration (within a single playback).${o.alternateExtra || ''}`,
-    customEffectCallbackDesc: `function with signature \`(element: HTMLElement, progress: number) => void\`. Called on each animation frame with the target element and \`progress\` from 0 to 1.`,
-    sequenceEffectDefDesc: 'a definition of or a reference to a time-based animation effect.',
-    sequenceOffsetEasingDesc: o.sequenceOffsetEasingDesc,
-  };
-}
-
+/**
+ * Renders a trigger-specific rule file (click.md or hover.md).
+ * @param {{ trigger: object, meta: object }} data — must include `trigger` (from triggers.yaml) and `meta`
+ * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ */
 export function render(data, fragments) {
-  const trigger = data.trigger;
-  const name = trigger.name;
+  const { trigger } = data;
+  const { name } = trigger;
   const Name = capitalize(name);
-  const prose = buildProse(name);
+  const o = OVERRIDES[name];
+  const isClick = name === 'click';
   const hasReversed = trigger.templateFields.timeEffect.includes('reversed');
   const hasEffectId = trigger.templateFields.timeEffect.includes('effectId');
   const showMultipleEffects = trigger.showMultipleEffectsNote;
 
-  const pitfallsBlock =
-    trigger.pitfalls.length > 0
-      ? '\n' +
-        trigger.pitfalls.map((p) => fragments.get(`pitfalls/${p.id}`, name)).join('\n') +
-        '\n'
-      : '';
+  const pitfallsBlock = when(
+    trigger.pitfalls.length > 0,
+    '\n' + trigger.pitfalls.map((p) => fragments.get(`pitfalls/${p.id}`, name)).join('\n') + '\n',
+  );
 
-  const multipleEffectsNote = showMultipleEffects
-    ? `\n${fragments.get('multiple-effects-note', 'default', { triggerName: name, triggerEvent: `${name} event` })}\n`
-    : '';
+  const multipleEffectsNote = when(
+    showMultipleEffects,
+    `\n${fragments.get('multiple-effects-note', 'default', { triggerName: name, triggerEvent: `${name} event` })}\n`,
+  );
 
-  const rule1Closing = `        },\n        // additional effects targeting other elements can be added here`;
-  const rule23Closing = showMultipleEffects
+  const effectsClosing = showMultipleEffects
     ? `        },\n        // additional effects targeting other elements can be added here`
     : `        }`;
-
-  const reversedField = hasReversed ? `\n            reversed: [INITIAL_REVERSED_BOOL],` : '';
-
-  const effectIdField = hasEffectId ? `\n            effectId: '[UNIQUE_EFFECT_ID]'` : '';
-
-  const reversedVar = hasReversed
-    ? `\n- \`[INITIAL_REVERSED_BOOL]\` — optional. \`true\` to start in the finished state so the entire effect is reversed.`
-    : '';
-
-  const effectIdVar = hasEffectId
-    ? `\n- \`[UNIQUE_EFFECT_ID]\` — optional. String identifier used by \`animationEnd\` triggers for chaining, and by sequences for referencing effects from the top-level \`effects\` map.`
-    : '';
-
-  const fillModeVar = `- \`[FILL_MODE]\` — ${prose.fillModeDesc}`;
-
-  const variablesBlock = buildVariables(trigger, prose, fillModeVar, reversedVar, effectIdVar);
 
   return `# ${Name} Trigger Rules for ${data.meta.packageName}
 
@@ -114,9 +77,9 @@ ${pitfallsBlock}
 
 ## Rule 1: keyframeEffect / namedEffect (TimeEffect)
 
-${prose.timeEffectIntro}
+Use \`keyframeEffect\` or \`namedEffect\` when the ${name} should play an animation (CSS or WAAPI). Set \`triggerType\` on each effect to control playback behavior.
 
-**CRITICAL:** ${prose.fillCritical}
+**CRITICAL:** ${o.fillCritical}
 ${multipleEffectsNote}
 \`\`\`typescript
 {
@@ -135,26 +98,27 @@ ${multipleEffectsNote}
             // OR
             namedEffect: [NAMED_EFFECT_DEFINITION],
 
-            fill: '[FILL_MODE]',${reversedField}
+            fill: '[FILL_MODE]',${when(hasReversed, `\n            reversed: [INITIAL_REVERSED_BOOL],`)}
             duration: [DURATION_MS],
             easing: '[EASING_FUNCTION]',
             delay: [DELAY_MS],
             iterations: [ITERATIONS],
-            alternate: [ALTERNATE_BOOL]${hasEffectId ? ',' : ''}${effectIdField}
-${rule1Closing}
+            alternate: [ALTERNATE_BOOL]${when(hasEffectId, `,\n            effectId: '[UNIQUE_EFFECT_ID]'`)}
+        },
+        // additional effects targeting other elements can be added here
     ]
 }
 \`\`\`
 
 ### Variables
 
-${variablesBlock}
+${buildVariables(trigger, o, isClick, hasReversed, hasEffectId)}
 
 ---
 
 ## Rule 2: transition / transitionProperties (StateEffect)
 
-${prose.stateEffectIntro}
+Use \`transition\` or \`transitionProperties\` when the ${name} should toggle styles via DOM attribute change and CSS transitions rather than keyframe animations.${when(isClick, ' Uses the `transition` CSS property.')} Set \`stateAction\` on the effect to control how the style is applied.
 
 Use \`transition\` when all properties share timing. Use \`transitionProperties\` when each property needs independent \`duration\`, \`delay\`, or \`easing\`.
 
@@ -188,7 +152,7 @@ Use \`transition\` when all properties share timing. Use \`transitionProperties\
                 },
                 // ... more properties
             ]
-${rule23Closing}
+${effectsClosing}
     ]
 }
 \`\`\`
@@ -210,7 +174,7 @@ ${Object.entries(trigger.stateActionDescriptions)
 
 ## Rule 3: customEffect (TimeEffect)
 
-${prose.customEffectIntro}
+Use \`customEffect\` when you need imperative control over the animation (e.g. counters, canvas drawing, custom DOM manipulation${when(isClick, ', randomized behavior')}). The callback receives the target element and a \`progress\` value (0–1) driven by the animation timeline.
 
 \`\`\`typescript
 {
@@ -223,7 +187,7 @@ ${prose.customEffectIntro}
             customEffect: [CUSTOM_EFFECT_CALLBACK],
             duration: [DURATION_MS],
             easing: '[EASING_FUNCTION]'
-${rule23Closing}
+${effectsClosing}
     ]
 }
 \`\`\`
@@ -231,7 +195,7 @@ ${rule23Closing}
 ### Variables
 
 - \`[SOURCE_KEY]\` / \`[TARGET_KEY]\` / \`[TRIGGER_TYPE]\` — same as Rule 1.
-- \`[CUSTOM_EFFECT_CALLBACK]\` — ${prose.customEffectCallbackDesc}
+- \`[CUSTOM_EFFECT_CALLBACK]\` — function with signature \`(element: HTMLElement, progress: number) => void\`. Called on each animation frame with the target element and \`progress\` from 0 to 1.
 - \`[DURATION_MS]\` — animation duration in milliseconds.
 - \`[EASING_FUNCTION]\` — CSS easing string, or named easing from \`@wix/motion\`.
 
@@ -239,7 +203,7 @@ ${rule23Closing}
 
 ## Rule 4: Sequences
 
-${prose.sequencesIntro}
+Use sequences when a ${name} should sync/stagger animations across multiple elements. Set \`triggerType\` on the sequence config to control playback behavior.
 
 \`\`\`typescript
 {
@@ -263,30 +227,38 @@ ${prose.sequencesIntro}
 
 - \`[SOURCE_KEY]\` / \`[TRIGGER_TYPE]\` — same as Rule 1. \`triggerType\` is set on the sequence config, not on individual effects within the sequence.
 - \`[OFFSET_MS]\` — time offset for staggering each child's animation start, in milliseconds.
-- \`[OFFSET_EASING]\` — ${prose.sequenceOffsetEasingDesc}
-- \`[EFFECT_DEFINITION]\` — ${prose.sequenceEffectDefDesc}
+- \`[OFFSET_EASING]\` — ${o.sequenceOffsetEasingDesc}
+- \`[EFFECT_DEFINITION]\` — a definition of or a reference to a time-based animation effect.
 `;
 }
 
-function buildVariables(trigger, prose, fillModeVar, reversedVar, effectIdVar) {
+function buildVariables(trigger, o, isClick, hasReversed, hasEffectId) {
   const lines = [
-    `- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React). ${prose.sourceKeyDesc}`,
-    `- \`[TARGET_KEY]\` — ${prose.targetKeyDesc}`,
+    `- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React). ${o.sourceKeyDesc}`,
+    `- \`[TARGET_KEY]\` — ${o.targetKeyDesc}`,
     `- \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:`,
     ...Object.entries(trigger.triggerTypeDescriptions).map(([k, v]) => `  - \`'${k}'\` — ${v}`),
     `- \`[KEYFRAMES]\` — array of keyframe objects (e.g. \`[{ opacity: 0 }, { opacity: 1 }]\`). Property names in camelCase.`,
     `- \`[EFFECT_NAME]\` — unique string identifier for a \`keyframeEffect\`.`,
-    `- \`[NAMED_EFFECT_DEFINITION]\` — ${prose.namedEffectDesc}`,
-    fillModeVar,
+    `- \`[NAMED_EFFECT_DEFINITION]\` — object with properties of pre-built effect from \`@wix/motion-presets\`. Refer to motion-presets rules for available presets and their options.`,
+    `- \`[FILL_MODE]\` — ${o.fillModeDesc}`,
   ];
-  if (reversedVar) lines.push(reversedVar.trim());
+  if (hasReversed) {
+    lines.push(
+      `- \`[INITIAL_REVERSED_BOOL]\` — optional. \`true\` to start in the finished state so the entire effect is reversed.`,
+    );
+  }
   lines.push(
     `- \`[DURATION_MS]\` — animation duration in milliseconds.`,
-    `- \`[EASING_FUNCTION]\` — ${prose.easingDesc}`,
+    `- \`[EASING_FUNCTION]\` — ${o.easingDesc}`,
     `- \`[DELAY_MS]\` — optional delay before the effect starts, in milliseconds.`,
-    `- \`[ITERATIONS]\` — ${prose.iterationsDesc}`,
-    `- \`[ALTERNATE_BOOL]\` — ${prose.alternateDesc}`,
+    `- \`[ITERATIONS]\` — ${o.iterationsDesc}`,
+    `- \`[ALTERNATE_BOOL]\` — optional. \`true\` to alternate direction on every other iteration (within a single playback).${when(isClick, " Different from \`triggerType: 'alternate'\` which alternates per click.")}`,
   );
-  if (effectIdVar) lines.push(effectIdVar.trim());
+  if (hasEffectId) {
+    lines.push(
+      `- \`[UNIQUE_EFFECT_ID]\` — optional. String identifier used by \`animationEnd\` triggers for chaining, and by sequences for referencing effects from the top-level \`effects\` map.`,
+    );
+  }
   return lines.join('\n');
 }

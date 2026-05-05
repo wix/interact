@@ -1,3 +1,8 @@
+/**
+ * Renders pointermove.md — rules for pointer-driven interactions with 2D mouse tracking.
+ * @param {{ trigger: object, meta: object }} data — must include `trigger` (pointerMove from triggers.yaml) and `meta`
+ * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ */
 export function render(data, fragments) {
   return `# PointerMove Trigger Rules for ${data.meta.packageName}
 

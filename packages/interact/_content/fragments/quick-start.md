@@ -11,7 +11,7 @@ const instance = Interact.create(config);
 ```
 
 The `config` object is an `InteractConfig` containing `interactions` (required), and optionally shared `effects`, `sequences`, and `conditions`.
-<!-- #web-integration -->
+<!-- #web-brief -->
 ```typescript
 import { Interact } from '@wix/interact/web';
 
@@ -46,7 +46,7 @@ const instance = Interact.create(config);
 instance.add(element, 'hero'); // bind after element exists in DOM
 instance.remove('hero'); // unregister
 ```
-<!-- #vanilla-integration -->
+<!-- #vanilla-brief -->
 ```typescript
 import { Interact } from '@wix/interact';
 

@@ -19,7 +19,7 @@ The target element is what the effect animates. Resolved in priority order:
 2. **Registry Effect's `key`** — if the effect is an `EffectRef`, the `key` from the referenced registry entry is used.
 3. **Fallback to `Interaction.key`** — the same `key` is used for the source will be used for the target.
 4. After resolving the root target, `selector`, `listContainer`, and `listItemSelector` on the effect further refine which child elements within that target are animated (same priority order as source resolution).
-<!-- #source-integration -->
+<!-- #source-brief -->
 #### Source element resolution (Interaction level)
 
 The source element is what the trigger attaches to. Resolved in priority order:
@@ -29,7 +29,7 @@ The source element is what the trigger attaches to. Resolved in priority order:
 3. **`listContainer` + `selector`** — matches via `querySelector` within each immediate child of the container.
 4. **`selector` only** — matches via `querySelectorAll` within the root element.
 5. **Fallback** — first child of `<interact-element>` (web) or the root element (react/vanilla).
-<!-- #target-integration -->
+<!-- #target-brief -->
 #### Target element resolution (Effect level)
 
 The target element is what the effect animates. Resolved in priority order:

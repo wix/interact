@@ -1,4 +1,4 @@
-<!-- #full-lean -->
+<!-- #detailed -->
 ```ts
 type InteractConfig = {
   interactions: Interaction[]; // REQUIRED
@@ -10,7 +10,7 @@ type InteractConfig = {
 
 All cross-references (by id) MUST point to existing entries. Element keys MUST be stable for the config's lifetime.
 
-<!-- #integration -->
+<!-- #brief -->
 ### InteractConfig
 
 ```typescript

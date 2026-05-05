@@ -1,3 +1,8 @@
+/**
+ * Renders viewprogress.md — rules for scroll-driven animations using ViewTimeline.
+ * @param {{ trigger: object, meta: object }} data — must include `trigger` (viewProgress from triggers.yaml) and `meta`
+ * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ */
 export function render(data, fragments) {
   return `# ViewProgress Trigger Rules for ${data.meta.packageName}
 

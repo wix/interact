@@ -1,3 +1,8 @@
+/**
+ * Renders viewenter.md — rules for viewport-entry triggered animations.
+ * @param {{ trigger: object, meta: object }} data — must include `trigger` (viewEnter from triggers.yaml) and `meta`
+ * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ */
 export function render(data, fragments) {
   return `# ViewEnter Trigger Rules for ${data.meta.packageName}
 

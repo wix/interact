@@ -1,3 +1,8 @@
+/**
+ * Renders integration.md — integration guide covering entry points, config schema, and triggers overview.
+ * @param {{ triggers: object[], effects: object, meta: object }} data
+ * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ */
 export function render(data, fragments) {
   return `# ${data.meta.packageName} Integration Rules
 
@@ -29,7 +34,7 @@ ${fragments.get('quick-start', 'install')}
 
 ### Web (Custom Elements)
 
-${fragments.get('quick-start', 'web-integration')}
+${fragments.get('quick-start', 'web-brief')}
 
 Wrap target elements with \`<interact-element>\`:
 
@@ -79,7 +84,7 @@ import { Interaction } from '@wix/interact/react';
 
 ### Vanilla JS
 
-${fragments.get('quick-start', 'vanilla-integration')}
+${fragments.get('quick-start', 'vanilla-brief')}
 
 **Rules:**
 
@@ -126,7 +131,7 @@ For full effect type syntax (\`keyframeEffect\`, \`namedEffect\`, \`customEffect
 
 ## Configuration Schema
 
-${fragments.get('config-structure', 'integration')}
+${fragments.get('config-structure', 'brief')}
 
 ### Interaction
 
@@ -154,9 +159,9 @@ At least one of \`effects\` or \`sequences\` MUST be provided.
 
 \`listItemSelector\` is **optional** — only use it when you need to **filter** which children of \`listContainer\` participate (e.g. select only \`.active\` items). When omitted, all immediate children of the \`listContainer\` are selected.
 
-${fragments.get('element-resolution', 'source-integration')}
+${fragments.get('element-resolution', 'source-brief')}
 
-${fragments.get('element-resolution', 'target-integration')}
+${fragments.get('element-resolution', 'target-brief')}
 
 ---
 
@@ -179,15 +184,15 @@ For \`hover\`/\`click\` (and their accessible variants \`interest\`/\`activate\`
 
 ## Sequences
 
-${fragments.get('sequences', 'integration')}
+${fragments.get('sequences', 'brief')}
 
 ---
 
 ## Critical CSS (FOUC Prevention)
 
-${fragments.get('fouc', 'integration-intro')}
+${fragments.get('fouc', 'intro-brief')}
 
-${fragments.get('fouc', 'rules-integration')}
+${fragments.get('fouc', 'rules-brief')}
 
 \`\`\`javascript
 import { generate } from '${data.meta.entryPoints.web}';
@@ -222,6 +227,6 @@ ${fragments.get('fouc', 'code-inject')}
 
 ## Static API
 
-${fragments.get('static-api', 'integration')}
+${fragments.get('static-api', 'brief')}
 `;
 }

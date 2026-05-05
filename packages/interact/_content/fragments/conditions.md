@@ -1,4 +1,4 @@
-<!-- #full-lean -->
+<!-- #default -->
 Named conditions that gate interactions, effects, or sequences.
 
 | Type       | Predicate                                                                 |

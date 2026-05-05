@@ -57,7 +57,7 @@ const css = generate(config);
   <section>...</section>
 </interact-element>
 ```
-<!-- #code-web-hero -->
+<!-- #code-web-example -->
 **Web (Custom Elements):**
 
 ```html
@@ -73,7 +73,7 @@ const css = generate(config);
   ...
 </Interaction>
 ```
-<!-- #code-react-hero -->
+<!-- #code-react-example -->
 **React:**
 
 ```tsx
@@ -87,7 +87,7 @@ const css = generate(config);
 ```html
 <section data-interact-key="[SOURCE_KEY]" data-interact-initial="true">...</section>
 ```
-<!-- #code-vanilla-hero -->
+<!-- #code-vanilla-example -->
 **Vanilla:**
 
 ```html
@@ -100,19 +100,19 @@ const css = generate(config);
 - `initial` is only valid for `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
 - Do NOT use `initial` for `viewEnter` with `triggerType: 'repeat'`/`'alternate'`/`'state'`. For those, manually apply the initial keyframe as inline styles on the target element and use `fill: 'both'`.
 - If other interactions in the config also need FOUC prevention, `generate(config)` covers them all — set `initial` only on the relevant `viewEnter` + `triggerType: 'once'` elements.
-<!-- #rules-integration -->
+<!-- #rules-brief -->
 **Rules:**
 
 - `generate()` should be called server-side or at build time. Can also be called on the client if page content is initially hidden (e.g. behind a loader).
 - Only valid for `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
-<!-- #rules-full-lean -->
+<!-- #rules-detailed -->
 ### Rules
 
 - `generate()` should be called server-side or at build time. Can also be called on client-side if page content is initially hidden (e.g. behind a loader/splash screen).
 - **Both** `generate(config)` CSS **and** `initial` on the element are required. Using only one has no effect.
 - `initial` is only valid for `viewEnter` + `type: 'once'` where source and target are the same element.
 - For `repeat`/`alternate`/`state`, do NOT use `initial`. Instead, manually apply the initial keyframe as inline styles on the target element and use `fill: 'both'`.
-<!-- #integration-intro -->
+<!-- #intro-brief -->
 **Problem:** Elements with entrance animations (e.g. `FadeIn` on `viewEnter`) are initially visible in their final state. Before the animation framework applies the starting keyframe, the content flashes visibly — a flash of un-animated content (FOUC).
 
 **Solution:** Two things are required — both MUST be present:

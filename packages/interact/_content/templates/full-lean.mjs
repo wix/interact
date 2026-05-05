@@ -1,6 +1,19 @@
 import { capitalize } from './_helpers.mjs';
 
+/**
+ * Renders full-lean.md — the comprehensive reference for all triggers, effects, and API surface.
+ * @param {{ triggers: object[], effects: object, meta: object }} data
+ * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ */
 export function render(data, fragments) {
+  const hover = data.triggers.find((t) => t.name === 'hover');
+  const click = data.triggers.find((t) => t.name === 'click');
+  const viewEnter = data.triggers.find((t) => t.name === 'viewEnter');
+
+  const triggerTypeUnion = data.effects.triggerTypes.map((t) => `'${t}'`).join(' | ');
+  const rangeNameUnion = Object.keys(data.effects.rangeNames)
+    .map((n) => `'${n}'`)
+    .join(' | ');
   const easingList = data.effects.easings.map((e) => `\`'${e}'\``).join(', ');
 
   const presetEntries = Object.entries(data.effects.presets).map(([category, names]) => ({
@@ -58,8 +71,8 @@ Each item here is CRITICAL — ignoring any of them will break animations.
 
 ${fragments.get('pitfalls/overflow-clip', 'long')}
 ${fragments.get('pitfalls/same-element-viewenter', 'long')}
-${fragments.get('pitfalls/hit-area', 'full-lean-hover')}
-${fragments.get('pitfalls/hit-area', 'full-lean-pointermove')}
+${fragments.get('pitfalls/hit-area', 'detailed-hover')}
+${fragments.get('pitfalls/hit-area', 'detailed-pointermove')}
 ${fragments.get('pitfalls/dont-guess-presets', 'default')}
 ${fragments.get('pitfalls/reduced-motion', 'default')}
 ${fragments.get('pitfalls/perspective', 'default')}
@@ -117,7 +130,7 @@ import { Interaction } from '@wix/interact/react';
 
 ## Config Structure
 
-${fragments.get('config-structure', 'full-lean')}
+${fragments.get('config-structure', 'detailed')}
 
 ---
 
@@ -225,7 +238,7 @@ params: {
   inset?: string;      // like view-timeline-inset, e.g. '-100px' or '-50px 0px'
 }
 // Playback behavior is set on each effect:
-effect.triggerType: 'once' | 'repeat' | 'alternate' | 'state';  // default: 'once'
+effect.triggerType: ${triggerTypeUnion};  // default: '${viewEnter.defaultTriggerType}'
 \`\`\`
 
 **CRITICAL:** When source and target are the **same element**, MUST use \`triggerType: 'once'\`. For \`'repeat'\` / \`'alternate'\` / \`'state'\`, ALWAYS use **separate** source and target elements — animating the observed element can cause it to leave/re-enter the viewport, causing rapid re-triggers.
@@ -356,7 +369,7 @@ Used with \`viewProgress\` and \`pointerMove\` triggers.
 
 \`\`\`ts
 {
-  name?: 'entry' | 'exit' | 'contain' | 'cover' | 'entry-crossing' | 'exit-crossing';
+  name?: ${rangeNameUnion};
   offset?: { value: number; unit: 'percentage' | 'px' | 'vh' | 'vw' }
 }
 \`\`\`
@@ -449,13 +462,13 @@ ${presetTable}
 
 ## Sequences
 
-${fragments.get('sequences', 'full-lean')}
+${fragments.get('sequences', 'detailed')}
 
 ---
 
 ## Conditions
 
-${fragments.get('conditions', 'full-lean')}
+${fragments.get('conditions', 'default')}
 
 ---
 
@@ -473,13 +486,13 @@ ${fragments.get('fouc', 'code-inject')}
 
 ### Step 2: Mark elements
 
-${fragments.get('fouc', 'code-web-hero')}
+${fragments.get('fouc', 'code-web-example')}
 
-${fragments.get('fouc', 'code-react-hero')}
+${fragments.get('fouc', 'code-react-example')}
 
-${fragments.get('fouc', 'code-vanilla-hero')}
+${fragments.get('fouc', 'code-vanilla-example')}
 
-${fragments.get('fouc', 'rules-full-lean')}
+${fragments.get('fouc', 'rules-detailed')}
 
 ---
 
@@ -495,6 +508,6 @@ ${fragments.get('element-resolution', 'target')}
 
 ## Static API
 
-${fragments.get('static-api', 'full-lean')}
+${fragments.get('static-api', 'detailed')}
 `;
 }
