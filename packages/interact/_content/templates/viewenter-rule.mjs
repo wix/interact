@@ -1,4 +1,4 @@
-import { when, buildPitfallsBlock, varLine } from './_helpers.mjs';
+import { buildPitfallsBlock, varLine } from './_helpers.mjs';
 
 /**
  * Renders viewenter.md — rules for viewport-entry triggered animations.

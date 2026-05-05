@@ -13,9 +13,7 @@ export function render(data, fragments) {
 
   const rangeList = Object.entries(data.effects.rangeNames)
     .map(([name, desc]) => {
-      const extra =
-        name === 'contain' ? '. Typically used with a `position: sticky` container' : '';
-      return `  - \`'${name}'\` — ${desc.charAt(0).toLowerCase()}${desc.slice(1)}${extra}.`;
+      return `  - \`'${name}'\` — ${desc.charAt(0).toLowerCase()}${desc.slice(1)}.`;
     })
     .join('\n');
 

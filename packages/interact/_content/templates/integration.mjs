@@ -202,27 +202,11 @@ const css = generate(config);
 
 ${fragments.get('fouc', 'code-inject')}
 
-**Web:**
+${fragments.get('fouc', 'code-web', { key: 'hero', classAttr: ' class="hero"' })}
 
-\`\`\`html
-<interact-element data-interact-key="hero" data-interact-initial="true">
-  <section id="hero">...</section>
-</interact-element>
-\`\`\`
+${fragments.get('fouc', 'code-react', { key: 'hero', classAttr: ' className="hero"' })}
 
-**React:**
-
-\`\`\`tsx
-<Interaction tagName="section" interactKey="hero" initial={true} className="hero">
-  ...
-</Interaction>
-\`\`\`
-
-**Vanilla:**
-
-\`\`\`html
-<section data-interact-key="hero" data-interact-initial="true" class="hero">...</section>
-\`\`\`
+${fragments.get('fouc', 'code-vanilla', { key: 'hero', classAttr: ' class="hero"' })}
 
 ---
 

@@ -291,11 +291,11 @@ const css = generate(config);
 </style>
 ```
 
-**Web:**
+**Web (Custom Elements):**
 
 ```html
 <interact-element data-interact-key="hero" data-interact-initial="true">
-  <section id="hero">...</section>
+  <section class="hero">...</section>
 </interact-element>
 ```
 

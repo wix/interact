@@ -90,6 +90,12 @@ class Fragments {
     for (const [key, val] of Object.entries(params)) {
       content = content.replaceAll(`{{${key}}}`, val);
     }
+    const unreplaced = content.match(/\{\{[^}]+\}\}/g);
+    if (unreplaced) {
+      console.warn(
+        `Warning: unreplaced placeholders in fragment "${path}#${section}": ${unreplaced.join(', ')}`,
+      );
+    }
     return content;
   }
 }

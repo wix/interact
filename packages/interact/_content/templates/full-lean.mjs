@@ -1,8 +1,39 @@
 import { capitalize } from './_helpers.mjs';
 
-function buildBehaviorTable(headerLabel, behaviorKey, hover, click) {
-  const hoverBehavior = hover.fullLeanBehavior[behaviorKey];
-  const clickBehavior = click.fullLeanBehavior[behaviorKey];
+const FULL_LEAN_BEHAVIOR = {
+  hover: {
+    triggerType: {
+      alternate: 'Play on enter, reverse on leave',
+      repeat: 'Play on enter, stop and rewind on leave',
+      once: 'Play once on first enter only',
+      state: 'Play on enter, pause on leave',
+    },
+    stateAction: {
+      toggle: 'Add style state on enter, remove on leave',
+      add: 'Add style state on enter; leave does NOT remove',
+      remove: 'Remove style state on enter',
+      clear: 'Clear/reset all style states on enter',
+    },
+  },
+  click: {
+    triggerType: {
+      alternate: 'Alternate play/reverse per click',
+      repeat: 'Restart per click',
+      once: 'Play once on first click only',
+      state: 'Toggle play/pause per click',
+    },
+    stateAction: {
+      toggle: 'Toggle style state per click',
+      add: 'Add style state on click',
+      remove: 'Remove style state on click',
+      clear: 'Clear/reset all style states',
+    },
+  },
+};
+
+function buildBehaviorTable(headerLabel, behaviorKey) {
+  const hoverBehavior = FULL_LEAN_BEHAVIOR.hover[behaviorKey];
+  const clickBehavior = FULL_LEAN_BEHAVIOR.click[behaviorKey];
   const keys = Object.keys(hoverBehavior);
   const defaultKey = keys[0];
 
@@ -252,11 +283,11 @@ For \`TimeEffect\` (keyframe/named/custom effects), set \`triggerType\` on the e
 
 **\`triggerType\`** — on \`TimeEffect\`:
 
-${buildBehaviorTable('Type', 'triggerType', hover, click)}
+${buildBehaviorTable('Type', 'triggerType')}
 
 **\`stateAction\`** — on \`StateEffect\`:
 
-${buildBehaviorTable('Action', 'stateAction', hover, click)}
+${buildBehaviorTable('Action', 'stateAction')}
 
 ### viewEnter
 

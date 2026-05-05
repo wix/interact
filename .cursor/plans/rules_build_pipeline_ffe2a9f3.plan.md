@@ -119,6 +119,27 @@ todos:
   - id: refactor-regenerate-2
     content: 'Regenerate rules/*.md, verify output — only 5 minor consistency improvements from standardized varLine descriptions (no information loss)'
     status: completed
+  - id: review-unused-import
+    content: 'Remove unused `when` import from viewenter-rule.mjs'
+    status: completed
+  - id: review-fouc-fragments
+    content: 'Use FOUC fragments in integration.mjs instead of hardcoded code blocks — fixes id="hero" → class="hero" inconsistency and standardizes heading text'
+    status: completed
+  - id: review-contain-note
+    content: 'Move hardcoded `contain` sticky-container note from viewprogress-rule.mjs into effects.yaml rangeNames data'
+    status: completed
+  - id: review-decouple-full-lean
+    content: 'Move fullLeanBehavior data from triggers.yaml into full-lean.mjs local constant; remove dead fullLeanSection fields from trigger pitfall entries (already in effects.yaml fullLeanPitfallOrder)'
+    status: completed
+  - id: review-varline-api
+    content: "Standardize varLine API in _helpers.mjs — declarative COMMON_VARS with explicit 'suffix' / 'override' modes replacing ad-hoc function signatures"
+    status: completed
+  - id: review-fragment-warning
+    content: 'Add unreplaced {{...}} placeholder warning to Fragments.get() in build-rules.mjs'
+    status: completed
+  - id: review-regenerate
+    content: 'Regenerate rules/*.md — full-lean.md range table widened for contain note, integration.md FOUC section uses fragments. All other 5 files byte-identical.'
+    status: completed
 isProject: false
 ---
 
@@ -659,6 +680,60 @@ The hover/click `triggerType` and `stateAction` comparison tables in `full-lean.
 ### Fix 26: Regenerate output (round 4)
 
 Regenerated all 7 rule files. 5 minor consistency improvements from standardized `varLine` descriptions (dropped redundant "/vanilla" in viewenter, standardized em-dash separator, added "from the top-level `effects` map" completeness note). Zero information loss. click.md, hover.md, full-lean.md, integration.md, pointermove.md are byte-identical to pre-refactor output.
+
+---
+
+## Post-PR Fixes — Round 5 (code review refinements)
+
+Fixes from a final review pass, addressing data/template coupling, API inconsistencies, dead code, and missed deduplication.
+
+### Fix 27: Remove unused `when` import
+
+`viewenter-rule.mjs` imported `when` from `_helpers.mjs` but never called it.
+
+**Action:** Removed unused import.
+
+### Fix 28: Use FOUC fragments in integration.mjs
+
+The FOUC code examples in `integration.mjs` (Web/React/Vanilla element markup) were hardcoded instead of using the parameterized `fouc.md` fragments that `full-lean.mjs` and `viewenter-rule.mjs` already use. This caused two inconsistencies: `<section id="hero">` (should be `class="hero"` like all other examples), and the heading said "**Web:**" instead of "**Web (Custom Elements):**".
+
+**Action:** Replaced hardcoded code blocks with `fragments.get('fouc', 'code-web', { key: 'hero', classAttr: ' class="hero"' })` etc., matching `full-lean.mjs`.
+
+### Fix 29: Move `contain` range note into YAML data
+
+`viewprogress-rule.mjs` hardcoded a special case for the `contain` range name (`'. Typically used with a position: sticky container'`). This note is useful context that belongs in the data layer.
+
+**Action:** Appended the sticky-container note to the `contain` description in `effects.yaml`. Removed the hardcoded special case from `viewprogress-rule.mjs`. The `full-lean.md` range table also now includes this note (wider column, auto-adjusted).
+
+### Fix 30: Decouple full-lean.mjs from triggers.yaml
+
+`fullLeanBehavior` data on hover/click trigger entries and `fullLeanSection` on pitfall entries existed solely to serve `full-lean.mjs`. This coupled the data layer to one specific template's rendering needs — adding a new output template would require adding more `fullXxx` fields to trigger entries.
+
+**Action:**
+
+- Moved `fullLeanBehavior` (hover + click triggerType/stateAction condensed descriptions) from `triggers.yaml` into a `FULL_LEAN_BEHAVIOR` constant in `full-lean.mjs`. Updated `buildBehaviorTable()` to read from the local constant instead of trigger data.
+- Removed dead `fullLeanSection` field from all pitfall entries in `triggers.yaml` — this data was already present in `effects.yaml`'s `fullLeanPitfallOrder` array, which is what `full-lean.mjs` actually reads.
+
+### Fix 31: Standardize `varLine` API
+
+The `COMMON_VARS` map in `_helpers.mjs` used ad-hoc function signatures — `SOURCE_KEY(suffix)` appended text, `TARGET_KEY(desc)` replaced text, `EASING_FUNCTION(desc)` had a fallback default, `ALTERNATE_BOOL(suffix)` appended without space. This made the API hard to use without checking the source.
+
+**Action:** Replaced function-based `COMMON_VARS` with a declarative object where each variable has a `base` description and an optional `mode` (`'suffix'` or `'override'`). The `varLine(name, extra)` function applies the mode consistently: suffix mode always joins with a space, override mode fully replaces. Variables with no mode ignore the extra argument and always return the base. Updated `alternateBoolSuffix` in `triggers.yaml` to remove the leading space (suffix mode now adds one).
+
+### Fix 32: Add unreplaced placeholder warning
+
+The `Fragments.get()` method in `build-rules.mjs` silently ignored unmatched `{{...}}` placeholders after interpolation. A typo in a param name would produce output with raw `{{placeholder}}` text.
+
+**Action:** Added a post-interpolation check that warns about any remaining `{{...}}` patterns after parameter substitution.
+
+### Fix 33: Regenerate output (round 5)
+
+Regenerated all 7 rule files. Two files changed:
+
+- **full-lean.md**: Range table widened to accommodate `contain` note (all other content identical).
+- **integration.md**: FOUC code examples now use fragments — `id="hero"` → `class="hero"`, "**Web:**" → "**Web (Custom Elements):**".
+
+All other 5 files (click.md, hover.md, viewenter.md, viewprogress.md, pointermove.md) are byte-identical.
 
 ---
 
