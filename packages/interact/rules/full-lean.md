@@ -397,8 +397,8 @@ Used with `viewProgress` and `pointerMove` triggers.
 }
 ```
 
-| Range name       | Meaning                                                        |
-| :--------------- | :------------------------------------------------------------- |
+| Range name       | Meaning                                                                                 |
+| :--------------- | :-------------------------------------------------------------------------------------- |
 | `cover`          | Full visibility span from first pixel entering to last pixel leaving                    |
 | `entry`          | The phase while the element is entering the viewport                                    |
 | `exit`           | The phase while the element is exiting the viewport                                     |

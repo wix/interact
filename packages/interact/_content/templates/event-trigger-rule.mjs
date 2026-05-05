@@ -198,7 +198,7 @@ Use sequences when a ${name} should sync/stagger animations across multiple elem
 
 - \`[SOURCE_KEY]\` / \`[TRIGGER_TYPE]\` — same as Rule 1. \`triggerType\` is set on the sequence config, not on individual effects within the sequence.
 - \`[OFFSET_MS]\` — time offset for staggering each child's animation start, in milliseconds.
-- \`[OFFSET_EASING]\` — easing curve for the offset staggering distribution.${when(isHover, " CSS easing string, or named easing from `@wix/motion`.")} Defaults to \`'linear'\`.
+- \`[OFFSET_EASING]\` — easing curve for the offset staggering distribution.${when(isHover, ' CSS easing string, or named easing from `@wix/motion`.')} Defaults to \`'linear'\`.
 - \`[EFFECT_DEFINITION]\` — a definition of or a reference to a time-based animation effect.
 `;
 }
