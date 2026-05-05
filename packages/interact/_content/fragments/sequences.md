@@ -50,7 +50,7 @@ Coordinate multiple effects with staggered timing. Prefer sequences over manual 
 
 ### Variables
 
-- `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for /vanilla, `interactKey` for React).
+- `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for web/vanilla, `interactKey` for React).
 - `[TRIGGER]` — any trigger for time-based animation effects (e.g., `'viewEnter'`, `'activate'`, `'interest'`).
 - `[TRIGGER_PARAMS]` — trigger-specific parameters (e.g., `{ type: 'once', threshold: 0.3 }`).
 - `[OFFSET_MS]` — ms between each child's animation start.

@@ -42,7 +42,6 @@ triggers:
       add: "applies the style state on enter. Leave does NOT remove it."
       remove: "removes a previously applied style state on enter. Use with provided `effectId` to map to a matching interaction with `add` and effect with same `effectId`."
       clear: "clears all previously applied style states on enter. Use to reset multiple stacked `'add'` style changes at once (e.g. a \"reset\" hover area that undoes several accumulated states)."
-    fillNote: "while hovering"
 
   - name: click
     a11yAlias: activate
@@ -88,7 +87,6 @@ triggers:
       add: "applies the style state. Does not remove on subsequent clicks."
       remove: "removes a previously applied style state."
       clear: "clears all previously applied style states. Useful for resetting multiple stacked style states at once."
-    fillNote: "while finished"
 
   - name: viewEnter
     category: viewport
