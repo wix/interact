@@ -29,11 +29,23 @@ export function render(data, fragments) {
     name: `\`${name}\``,
     desc,
   }));
-  const maxNameLen = Math.max(...rangeEntries.map((e) => e.name.length));
-  const maxDescLen = Math.max(...rangeEntries.map((e) => e.desc.length));
-  const rangeTable = rangeEntries
-    .map((e) => `| ${e.name.padEnd(maxNameLen)} | ${e.desc.padEnd(maxDescLen)} |`)
-    .join('\n');
+  const rangeHeaderName = 'Range name';
+  const rangeHeaderDesc = 'Meaning';
+  const rangeNameWidth = Math.max(
+    rangeHeaderName.length,
+    ...rangeEntries.map((e) => e.name.length),
+  );
+  const rangeDescWidth = Math.max(
+    rangeHeaderDesc.length,
+    ...rangeEntries.map((e) => e.desc.length),
+  );
+  const rangeTable = [
+    `| ${rangeHeaderName.padEnd(rangeNameWidth)} | ${rangeHeaderDesc.padEnd(rangeDescWidth)} |`,
+    `| :${'-'.repeat(rangeNameWidth - 1)} | :${'-'.repeat(rangeDescWidth - 1)} |`,
+    ...rangeEntries.map(
+      (e) => `| ${e.name.padEnd(rangeNameWidth)} | ${e.desc.padEnd(rangeDescWidth)} |`,
+    ),
+  ].join('\n');
 
   return `# ${data.meta.packageName} — Rules
 
@@ -374,8 +386,6 @@ Used with \`viewProgress\` and \`pointerMove\` triggers.
 }
 \`\`\`
 
-| Range name       | Meaning                                                        |
-| :--------------- | :------------------------------------------------------------- |
 ${rangeTable}
 
 **Sticky container pattern** — for scroll-driven animations inside a stuck \`position: sticky\` container:

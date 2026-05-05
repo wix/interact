@@ -75,7 +75,7 @@ Use `keyframeEffect` or `namedEffect` when the click should play an animation (C
 
 ## Rule 2: transition / transitionProperties (StateEffect)
 
-Use `transition` or `transitionProperties` when the click should toggle styles via DOM attribute change and CSS transitions rather than keyframe animations. Uses the `transition` CSS property. Set `stateAction` on the effect to control how the style is applied.
+Use `transition` or `transitionProperties` when the click should toggle styles via DOM attribute change and CSS transitions rather than keyframe animations. Set `stateAction` on the effect to control how the style is applied.
 
 Use `transition` when all properties share timing. Use `transitionProperties` when each property needs independent `duration`, `delay`, or `easing`.
 

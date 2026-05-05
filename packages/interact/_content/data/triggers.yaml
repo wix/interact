@@ -2,36 +2,21 @@ triggers:
   - name: hover
     a11yAlias: interest
     a11yNote: "Use `trigger: 'interest'` instead of `trigger: 'hover'` to also respond to keyboard focus."
-    category: event
-    supportsTimeEffect: true
-    supportsStateEffect: true
-    supportsScrubEffect: false
-    supportsCustomEffect: true
     defaultTriggerType: alternate
     params: []
     pitfalls:
       - id: hit-area
     showMultipleEffectsNote: true
     templateFields:
-      timeEffect:
-        - triggerType
-        - keyframeEffect
-        - namedEffect
-        - fill
-        - duration
-        - easing
-        - delay
-        - iterations
-        - alternate
-      stateEffect:
-        - stateAction
-        - transition
-        - transitionProperties
-      customEffect:
-        - triggerType
-        - customEffect
-        - duration
-        - easing
+      - triggerType
+      - keyframeEffect
+      - namedEffect
+      - fill
+      - duration
+      - easing
+      - delay
+      - iterations
+      - alternate
     triggerTypeDescriptions:
       alternate: 'plays forward on enter, reverses on leave. Default. Most common for hover.'
       repeat: 'restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses.'
@@ -42,41 +27,36 @@ triggers:
       add: 'applies the style state on enter. Leave does NOT remove it.'
       remove: 'removes a previously applied style state on enter. Use with provided `effectId` to map to a matching interaction with `add` and effect with same `effectId`.'
       clear: 'clears all previously applied style states on enter. Use to reset multiple stacked `''add''` style changes at once (e.g. a "reset" hover area that undoes several accumulated states).'
+    variableOverrides:
+      sourceKeySuffix: 'The element that listens for hover.'
+      targetKeyDesc: "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above)."
+      fillModeDesc: "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished."
+      easingDesc: "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`."
+      iterationsDesc: "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`."
+      fillCritical: "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`."
+      customEffectExamples: ''
+      offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.'
+      alternateBoolSuffix: ''
 
   - name: click
     a11yAlias: activate
     a11yNote: "Use `trigger: 'activate'` instead of `trigger: 'click'` to also respond to keyboard activation (Enter / Space)."
-    category: event
-    supportsTimeEffect: true
-    supportsStateEffect: true
-    supportsScrubEffect: false
-    supportsCustomEffect: true
     defaultTriggerType: alternate
     params: []
     pitfalls: []
     showMultipleEffectsNote: false
     templateFields:
-      timeEffect:
-        - triggerType
-        - keyframeEffect
-        - namedEffect
-        - fill
-        - reversed
-        - duration
-        - easing
-        - delay
-        - iterations
-        - alternate
-        - effectId
-      stateEffect:
-        - stateAction
-        - transition
-        - transitionProperties
-      customEffect:
-        - triggerType
-        - customEffect
-        - duration
-        - easing
+      - triggerType
+      - keyframeEffect
+      - namedEffect
+      - fill
+      - reversed
+      - duration
+      - easing
+      - delay
+      - iterations
+      - alternate
+      - effectId
     triggerTypeDescriptions:
       alternate: 'plays forward on first click, reverses on next click. Default.'
       repeat: 'restarts the animation from the beginning on each click.'
@@ -87,13 +67,18 @@ triggers:
       add: 'applies the style state. Does not remove on subsequent clicks.'
       remove: 'removes a previously applied style state.'
       clear: 'clears all previously applied style states. Useful for resetting multiple stacked style states at once.'
+    variableOverrides:
+      sourceKeySuffix: 'The element that listens for clicks.'
+      targetKeyDesc: "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element."
+      fillModeDesc: "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect."
+      easingDesc: 'CSS easing string, or named easing from `@wix/motion`.'
+      iterationsDesc: 'optional. Number of iterations, or `Infinity` for continuous loops.'
+      fillCritical: "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`."
+      customEffectExamples: ', randomized behavior'
+      offsetEasingSuffix: ''
+      alternateBoolSuffix: " Different from `triggerType: 'alternate'` which alternates per click."
 
   - name: viewEnter
-    category: viewport
-    supportsTimeEffect: true
-    supportsStateEffect: false
-    supportsScrubEffect: false
-    supportsCustomEffect: true
     defaultTriggerType: once
     params:
       - name: threshold
@@ -109,11 +94,6 @@ triggers:
     showMultipleEffectsNote: true
 
   - name: viewProgress
-    category: scroll
-    supportsTimeEffect: false
-    supportsStateEffect: false
-    supportsScrubEffect: true
-    supportsCustomEffect: true
     defaultTriggerType: null
     params: []
     pitfalls:
@@ -121,11 +101,6 @@ triggers:
     showMultipleEffectsNote: true
 
   - name: pointerMove
-    category: pointer
-    supportsTimeEffect: false
-    supportsStateEffect: false
-    supportsScrubEffect: true
-    supportsCustomEffect: true
     defaultTriggerType: null
     params:
       - name: hitArea
@@ -140,11 +115,6 @@ triggers:
       - id: hit-area
 
   - name: animationEnd
-    category: chain
-    supportsTimeEffect: true
-    supportsStateEffect: false
-    supportsScrubEffect: false
-    supportsCustomEffect: false
     defaultTriggerType: null
     params:
       - name: effectId
@@ -153,11 +123,6 @@ triggers:
         description: 'ID of the preceding effect'
 
   - name: pageVisible
-    category: event
-    supportsTimeEffect: true
-    supportsStateEffect: false
-    supportsScrubEffect: false
-    supportsCustomEffect: false
     defaultTriggerType: null
     params: []
     pitfalls: []

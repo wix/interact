@@ -62,6 +62,21 @@ todos:
   - id: fix-regenerate
     content: 'Run `build:rules`, verify output, commit regenerated rules/*.md files'
     status: completed
+  - id: fix-prettier-range-table
+    content: 'Fix Prettier CI failure: range table in full-lean.mjs had hardcoded header widths that did not match generated data row widths. Made header + separator dynamic so column widths are computed from actual data.'
+    status: completed
+  - id: fix-variable-overrides-yaml
+    content: 'Move trigger-specific variable descriptions (sourceKeySuffix, targetKeyDesc, fillModeDesc, easingDesc, iterationsDesc, fillCritical, customEffectExamples, offsetEasingSuffix, alternateBoolSuffix) into `variableOverrides` in triggers.yaml. Eliminates all isClick/isHover ternaries from event-trigger-rule.mjs — template is now fully data-driven.'
+    status: completed
+  - id: fix-simplify-build-variables
+    content: 'Simplify buildVariables() — remove isClick/isHover/hasReversed/hasEffectId positional params, derive hasReversed/hasEffectId from trigger.templateFields internally, read all prose from trigger.variableOverrides.'
+    status: completed
+  - id: fix-remove-unused-yaml
+    content: 'Remove unused YAML fields from triggers.yaml: category, supportsTimeEffect, supportsStateEffect, supportsScrubEffect, supportsCustomEffect (never read by any template). Flatten templateFields from nested {timeEffect/stateEffect/customEffect} to a flat array (only timeEffect fields were ever consumed).'
+    status: completed
+  - id: fix-regenerate-2
+    content: 'Regenerate rules/*.md, verify all CI checks pass (build, lint, format, test, rules freshness)'
+    status: completed
 isProject: false
 ---
 
@@ -96,86 +111,81 @@ All source files live under `packages/interact/_content/`. The build script read
 
 ### 1. Data files (`_content/data/`)
 
-`**triggers.yaml**` — one entry per trigger, capturing everything that varies:
+`**triggers.yaml**` — one entry per trigger, capturing structured data:
 
 ```yaml
 triggers:
   - name: hover
     a11yAlias: interest
     a11yNote: "Use `trigger: 'interest'` instead of `trigger: 'hover'` to also respond to keyboard focus."
-    category: event # event | viewport | scroll | pointer | chain
-    supportsTimeEffect: true
-    supportsStateEffect: true
-    supportsScrubEffect: false
-    supportsCustomEffect: true
-    params: [] # no trigger params
+    defaultTriggerType: alternate
+    params: []
     pitfalls:
-      - id: hit-area # references fragments/pitfalls/hit-area.md
-    templateFields: # which optional fields to show in config templates
-      timeEffect:
-        [
-          triggerType,
-          keyframeEffect,
-          namedEffect,
-          fill,
-          duration,
-          easing,
-          delay,
-          iterations,
-          alternate,
-        ]
-      stateEffect: [stateAction, transition, transitionProperties]
-      customEffect: [triggerType, customEffect, duration, easing]
-      sequence: [triggerType, offset, offsetEasing]
-    triggerTypeDescriptions: # trigger-specific wording for each triggerType value
-      alternate: 'plays forward on enter, reverses on leave'
-      repeat: 'restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses'
-      once: 'plays once on the first enter and never again'
-      state: 'resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`)'
+      - id: hit-area
+    showMultipleEffectsNote: true
+    templateFields:
+      [
+        triggerType,
+        keyframeEffect,
+        namedEffect,
+        fill,
+        duration,
+        easing,
+        delay,
+        iterations,
+        alternate,
+      ]
+    triggerTypeDescriptions:
+      alternate: 'plays forward on enter, reverses on leave. Default. Most common for hover.'
+      repeat: 'restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses.'
+      once: 'plays once on the first enter and never again.'
+      state: 'resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`).'
     stateActionDescriptions:
-      toggle: 'applies the style state on enter, removes on leave'
-      add: 'applies the style state on enter. Leave does NOT remove it'
-      remove: 'removes a previously applied style state on enter'
-      clear: 'clears all previously applied style states on enter'
-    fillNote: 'while hovering' # trigger-specific fill context
+      toggle: 'applies the style state on enter, removes on leave. Default.'
+      # ...
+    variableOverrides: # trigger-specific prose for variable descriptions in generated rule files
+      sourceKeySuffix: 'The element that listens for hover.'
+      targetKeyDesc: "identifier matching the element's key on the element that animates. ..."
+      fillModeDesc: "usually `'both'`. Keeps the final state applied while hovering..."
+      fillCritical: "Always include `fill: 'both'` for ..."
+      easingDesc: "CSS easing string (e.g. `'ease-out'`, ...), or named easing from `@wix/motion`."
+      iterationsDesc: 'optional. Number of iterations, or `Infinity` for continuous loops. ...'
+      customEffectExamples: ''
+      offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.'
+      alternateBoolSuffix: ''
 
   - name: click
     a11yAlias: activate
-    a11yNote: "Use `trigger: 'activate'` instead of `trigger: 'click'` to also respond to keyboard activation (Enter / Space)."
-    category: event
-    supportsTimeEffect: true
-    supportsStateEffect: true
-    supportsScrubEffect: false
-    supportsCustomEffect: true
+    a11yNote: "Use `trigger: 'activate'` instead of `trigger: 'click'` ..."
+    defaultTriggerType: alternate
     params: []
     pitfalls: []
+    showMultipleEffectsNote: false
     templateFields:
-      timeEffect:
-        [
-          triggerType,
-          keyframeEffect,
-          namedEffect,
-          fill,
-          reversed,
-          duration,
-          easing,
-          delay,
-          iterations,
-          alternate,
-          effectId,
-        ]
-      # ... (click includes reversed + effectId that hover omits)
+      [
+        triggerType,
+        keyframeEffect,
+        namedEffect,
+        fill,
+        reversed,
+        duration,
+        easing,
+        delay,
+        iterations,
+        alternate,
+        effectId,
+      ]
+    # click includes reversed + effectId that hover omits
     triggerTypeDescriptions:
-      alternate: 'plays forward on first click, reverses on next click'
-      repeat: 'restarts the animation from the beginning on each click'
-      once: 'plays once on the first click and never again'
-      state: 'resumes/pauses the animation on each click. Useful for continuous loops (`iterations: Infinity`)'
-    stateActionDescriptions:
-      toggle: 'applies the style state, removes it on next click'
-      add: 'applies the style state. Does not remove on subsequent clicks'
-      remove: 'removes a previously applied style state'
-      clear: 'clears all previously applied style states. Useful for resetting multiple stacked style states at once'
-    fillNote: 'while finished'
+      alternate: 'plays forward on first click, reverses on next click. Default.'
+      # ...
+    variableOverrides:
+      sourceKeySuffix: 'The element that listens for clicks.'
+      targetKeyDesc: "identifier matching the element's key on the element that animates. If missing it defaults to ..."
+      fillModeDesc: "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, ..."
+      fillCritical: "Always include `fill: 'both'` for ..."
+      customEffectExamples: ', randomized behavior'
+      alternateBoolSuffix: " Different from `triggerType: 'alternate'` which alternates per click."
     # ... viewEnter, viewProgress, pointerMove, animationEnd entries follow
 ```
 
@@ -261,11 +271,15 @@ Each template is a `.mjs` file exporting a function that receives data + fragmen
 
 ```javascript
 // event-trigger-rule.mjs
-export function render(trigger, data, fragments) {
-  return `# ${capitalize(trigger.name)} Trigger Rules for ${data.meta.packageName}
+export function render(data, fragments) {
+  const { trigger } = data;
+  const { name, variableOverrides: vo } = trigger;
+  return `# ${capitalize(name)} Trigger Rules for ${data.meta.packageName}
 ...
-${trigger.a11yAlias ? `**CRITICAL — Accessible ${trigger.name}**: ${trigger.a11yNote}` : ''}
-${trigger.pitfalls.map((p) => fragments.get(`pitfalls/${p.id}`, trigger.name)).join('\n')}
+**CRITICAL — Accessible ${name}**: ${trigger.a11yNote}
+${trigger.pitfalls.map((p) => fragments.get(`pitfalls/${p.id}`, name)).join('\n')}
+...
+**CRITICAL:** ${vo.fillCritical}
 ...`;
 }
 ```
@@ -468,6 +482,45 @@ This ensures that if someone edits a source file but forgets to re-run `build:ru
 
 After all fixes above, run `build:rules` and commit the regenerated `rules/*.md` files so they reflect the new `[FILL_MODE]` variable ordering in hover.md.
 
+## Post-PR Fixes — Round 2 (code review refinements)
+
+Fixes from a second review pass, addressing CI failures and simplification opportunities.
+
+### Fix 10: Fix Prettier CI failure on range table
+
+The range table in `full-lean.mjs` had a hardcoded header row (`| Range name | Meaning |`) with fixed column widths, but the generated data rows were wider (due to `entry-crossing` description). Prettier auto-pads markdown tables to the widest cell, so CI's `format:check` failed.
+
+**Action:** Made the header + separator row dynamic — compute column widths from `Math.max(headerWidth, ...dataWidths)` and include the header in the generated `rangeTable` variable.
+
+### Fix 11: Move variable description overrides into `triggers.yaml`
+
+Fix 3 moved 15+ prose description fields out of YAML into `isClick`/`isHover` ternaries in `event-trigger-rule.mjs`. However, the trigger-specific differences are short structured phrases (not paragraphs), and the ternaries made the template harder to extend with new event triggers.
+
+**Action:**
+
+- Added `variableOverrides` map to each event trigger entry in `triggers.yaml` with fields: `sourceKeySuffix`, `targetKeyDesc`, `fillModeDesc`, `easingDesc`, `iterationsDesc`, `fillCritical`, `customEffectExamples`, `offsetEasingSuffix`, `alternateBoolSuffix`.
+- Updated `event-trigger-rule.mjs` to read all prose from `trigger.variableOverrides` (aliased as `vo`) instead of `isClick`/`isHover` ternaries.
+- Template is now fully data-driven — adding a third event trigger requires only a new YAML entry, no template changes.
+
+### Fix 12: Simplify `buildVariables()` function
+
+The function took 5 positional parameters (`trigger, isClick, isHover, hasReversed, hasEffectId`), 4 of which were derivable from `trigger`.
+
+**Action:** Reduced to `buildVariables(trigger, hasReversed, hasEffectId)`. Reads all prose from `trigger.variableOverrides`. The `hasReversed`/`hasEffectId` booleans are still passed from the caller since they're also used in the template string.
+
+### Fix 13: Remove unused YAML fields
+
+`triggers.yaml` had fields that no template ever consumed: `category`, `supportsTimeEffect`, `supportsStateEffect`, `supportsScrubEffect`, `supportsCustomEffect`. The `templateFields` was also a nested object (`{timeEffect, stateEffect, customEffect}`) but only `timeEffect` was ever read.
+
+**Action:**
+
+- Removed all `category` and `supports*` fields from all 7 trigger entries.
+- Flattened `templateFields` from nested object to a flat array (the fields that were under `timeEffect`).
+
+### Fix 14: Regenerate output (round 2)
+
+After all round 2 fixes, ran `build:rules` and verified all 5 CI checks pass: build, lint, format, test, rules freshness.
+
 ---
 
 ## Future Extension Points
@@ -476,3 +529,5 @@ After all fixes above, run `build:rules` and commit the regenerated `rules/*.md`
 - **README**: Same meta.yaml + triggers.yaml generates README sections
 - **Validation**: Add `scripts/validate-rules.mjs` that imports actual TS types and cross-checks trigger names, param fields, effect fields against the YAML data
 - **motion-presets rules**: The build mechanism is scoped to `packages/interact/` but the architecture (YAML + fragments + templates) can be replicated in `packages/motion-presets/` with shared fragments if needed
+- **Common variable fragment**: Extract repeated variable descriptions (`[SOURCE_KEY]`, `[TARGET_KEY]`, `[DURATION_MS]`, etc.) into a shared fragment to deduplicate across viewenter/viewprogress/pointermove/event-trigger templates
+- **FOUC fragment consolidation**: Reduce fouc.md's 13 sections to ~8 by using `{{param}}` interpolation for placeholder vs example variants
