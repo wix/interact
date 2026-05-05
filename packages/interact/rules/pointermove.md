@@ -100,7 +100,7 @@ For devices with dynamic viewport sizes (e.g. mobile browsers where the address 
 
 ## Rule 1: namedEffect
 
-Use pre-built mouse presets from `@wix/motion-presets` that handle 2D mouse tracking internally. Mouse presets are preferred over `keyframeEffect` for 2D effects.
+Use pre-built mouse presets from `@wix/motion-presets` that handle 2D mouse tracking internally. Mouse presets are preferred over `keyframeEffect` for 2D effects. Available mouse presets: `TrackMouse`, `Tilt3DMouse`, `Track3DMouse`, `SwivelMouse`, `AiryMouse`, `ScaleMouse`, `BlurMouse`, `SkewMouse`, `BlobMouse`.
 
 **Multiple effects:** The `effects` array can contain multiple effects — all share the same pointer tracking and fire together. Use this to animate different targets from the same pointer movement.
 
@@ -235,7 +235,7 @@ Use two separate interactions on the same source/target pair — one for `axis: 
 - `[HIT_AREA]` — `'self'` or `'root'`.
 - `[X_EFFECT_ID]` / `[Y_EFFECT_ID]` — unique string identifiers for the X-axis and Y-axis effects. Required — they map to keys in the top-level `effects` map.
 - `[X_EFFECT_NAME]` / `[Y_EFFECT_NAME]` — unique string names for each keyframe effect.
-- `[X_KEYFRAMES]` / `[Y_KEYFRAMES]` — arrays of WAAPI keyframe objects for the X-axis and Y-axis effects respectively. Each effect can vary in propertise and keyframes.
+- `[X_KEYFRAMES]` / `[Y_KEYFRAMES]` — arrays of WAAPI keyframe objects for the X-axis and Y-axis effects respectively. Each effect can vary in properties and keyframes.
 - `[COMPOSITE_OPERATION]` — `'add'` or `'accumulate'`. Required when both effects animate `transform` and/or both animate `filter`, so their values combine rather than override. `'add'`: composited transform functions are appended. `'accumulate'`: matching function arguments are summed.
 - `[FILL_MODE]` — typically `'both'` to ensure the effect keeps applying after exiting the effect's active range.
 - `[TRANSITION_DURATION_MS]` — optional. Milliseconds for smoothing between progress updates. See Rule 1 for details.

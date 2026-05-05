@@ -1,9 +1,15 @@
 /**
  * Renders pointermove.md — rules for pointer-driven interactions with 2D mouse tracking.
- * @param {{ trigger: object, meta: object }} data — must include `trigger` (pointerMove from triggers.yaml) and `meta`
+ * @param {{ trigger: object, effects: object, meta: object }} data
  * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
+  const { trigger } = data;
+
+  const paramsTypeFields = trigger.params
+    .map((p) => `  ${p.name}${p.optional ? '?' : ''}: ${p.type};`)
+    .join('\n');
+
   return `# PointerMove Trigger Rules for ${data.meta.packageName}
 
 These rules help generate pointer-driven interactions using \`${data.meta.packageName}\`. PointerMove triggers create real-time animations that respond to mouse movement over elements or the entire viewport.
@@ -32,8 +38,7 @@ ${fragments.get('pitfalls/hit-area', 'pointermove-source')}
 
 \`\`\`typescript
 type PointerMoveParams = {
-  hitArea?: 'root' | 'self';
-  axis?: 'x' | 'y';
+${paramsTypeFields}
 };
 \`\`\`
 
@@ -103,7 +108,7 @@ For devices with dynamic viewport sizes (e.g. mobile browsers where the address 
 
 ## Rule 1: namedEffect
 
-Use pre-built mouse presets from \`@wix/motion-presets\` that handle 2D mouse tracking internally. Mouse presets are preferred over \`keyframeEffect\` for 2D effects.
+Use pre-built mouse presets from \`${data.meta.presetsPackage}\` that handle 2D mouse tracking internally. Mouse presets are preferred over \`keyframeEffect\` for 2D effects. Available mouse presets: ${data.effects.presets.mouse.map((n) => `\`${n}\``).join(', ')}.
 
 **Multiple effects:** The \`effects\` array can contain multiple effects — all share the same pointer tracking and fire together. Use this to animate different targets from the same pointer movement.
 
@@ -135,7 +140,7 @@ Use pre-built mouse presets from \`@wix/motion-presets\` that handle 2D mouse tr
 - \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React). The element that tracks pointer movement.
 - \`[TARGET_KEY]\` — identifier matching the element's key on the element to animate (can be same as source or different).
 - \`[HIT_AREA]\` — \`'self'\` (track pointer within source element) or \`'root'\` (track pointer anywhere in viewport).
-- \`[NAMED_EFFECT_TYPE]\` — a registered effect name, or a preset from \`@wix/motion-presets\` \`mouse\` library.
+- \`[NAMED_EFFECT_TYPE]\` — a registered effect name, or a preset from \`${data.meta.presetsPackage}\` \`mouse\` library.
 - \`[EFFECT_PROPERTIES]\` — preset-specific options. Refer to motion-presets rules for each preset's available options and their value types. Do NOT guess preset option names or types; omit unknown options and rely on defaults.
 - \`[CENTERED_TO_TARGET]\` — \`true\` or \`false\`. See **Centering with \`centeredToTarget\`** above.
 - \`[TRANSITION_DURATION_MS]\` — optional number. Milliseconds for smoothing (interpolating) between progress updates. The animation does not jump to the new progress value instantly; instead it transitions over this duration. Use to add inertia/lag to the effect, making it feel more physical (e.g. \`200\`–\`600\`).
@@ -238,7 +243,7 @@ Use two separate interactions on the same source/target pair — one for \`axis:
 - \`[HIT_AREA]\` — \`'self'\` or \`'root'\`.
 - \`[X_EFFECT_ID]\` / \`[Y_EFFECT_ID]\` — unique string identifiers for the X-axis and Y-axis effects. Required — they map to keys in the top-level \`effects\` map.
 - \`[X_EFFECT_NAME]\` / \`[Y_EFFECT_NAME]\` — unique string names for each keyframe effect.
-- \`[X_KEYFRAMES]\` / \`[Y_KEYFRAMES]\` — arrays of WAAPI keyframe objects for the X-axis and Y-axis effects respectively. Each effect can vary in propertise and keyframes.
+- \`[X_KEYFRAMES]\` / \`[Y_KEYFRAMES]\` — arrays of WAAPI keyframe objects for the X-axis and Y-axis effects respectively. Each effect can vary in properties and keyframes.
 - \`[COMPOSITE_OPERATION]\` — \`'add'\` or \`'accumulate'\`. Required when both effects animate \`transform\` and/or both animate \`filter\`, so their values combine rather than override. \`'add'\`: composited transform functions are appended. \`'accumulate'\`: matching function arguments are summed.
 - \`[FILL_MODE]\` — typically \`'both'\` to ensure the effect keeps applying after exiting the effect's active range.
 - \`[TRANSITION_DURATION_MS]\` — optional. Milliseconds for smoothing between progress updates. See Rule 1 for details.

@@ -33,9 +33,8 @@ Declarative configuration-driven interaction library. Binds animations to trigge
 Each item here is CRITICAL — ignoring any of them will break animations.
 
 - **CRITICAL — `overflow: hidden` breaks `viewProgress`**: Replace with `overflow: clip` on all ancestors between source and scroll container. In Tailwind, replace `overflow-hidden` with `overflow-clip`.
-- **CRITICAL**: When using `viewEnter` trigger and source (trigger) and target (effect) elements are the **same element**, use ONLY `type: 'once'`. For all other types (`'repeat'`, `'alternate'`, `'state'`) MUST use **separate** source and target elements — animating the observed element itself can cause it to leave/re-enter the viewport, leading to rapid re-triggers or the animation never firing.
-- **CRITICAL - Hit-area shift**: When a hover effect changes the size or position of the hovered element (e.g., `transform: scale(…)`), MUST use a separate source and target elements. Otherwise the hit-area shifts, causing rapid enter/leave.
-  events and flickering. Use `selector` to target a child element, or set the effect's `key` to a different element.
+- **CRITICAL**: When using `viewEnter` trigger and source (trigger) and target (effect) elements are the **same element**, use ONLY `triggerType: 'once'`. For all other types (`'repeat'`, `'alternate'`, `'state'`) MUST use **separate** source and target elements — animating the observed element itself can cause it to leave/re-enter the viewport, leading to rapid re-triggers or the animation never firing.
+- **CRITICAL - Hit-area shift**: When a hover effect changes the size or position of the hovered element (e.g., `transform: scale(…)`), MUST use a separate source and target elements. Otherwise the hit-area shifts, causing rapid enter/leave events and flickering. Use `selector` to target a child element, or set the effect's `key` to a different element.
 - **CRITICAL**: For `pointerMove` trigger MUST AVOID using the same element as both source and target with `hitArea: 'self'` and effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
 - **CRITICAL — Do NOT guess preset options**: If you don't know the expected type/structure for a `namedEffect` param, omit it — rely on defaults rather than guessing.
 - **Reduced motion**: Use conditions to provide gentler alternatives (shorter durations, fewer transforms, no perpetual motion) for users who prefer reduced motion. You can also set `Interact.forceReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches` to force a global reduced-motion behavior programmatically.
@@ -393,19 +392,19 @@ Used with `viewProgress` and `pointerMove` triggers.
 
 ```ts
 {
-  name?: 'entry' | 'exit' | 'contain' | 'cover' | 'entry-crossing' | 'exit-crossing';
+  name?: 'cover' | 'entry' | 'exit' | 'contain' | 'entry-crossing' | 'exit-crossing';
   offset?: { value: number; unit: 'percentage' | 'px' | 'vh' | 'vw' }
 }
 ```
 
 | Range name       | Meaning                                                        |
 | :--------------- | :------------------------------------------------------------- |
-| `entry`          | Element entering viewport                                      |
-| `exit`           | Element exiting viewport                                       |
-| `contain`        | After `entry` range and before `exit` range                    |
-| `cover`          | Full range from `entry` through `contain` and `exit`           |
-| `entry-crossing` | From element's leading edge entering to trailing edge entering |
-| `exit-crossing`  | From element's leading edge exiting to trailing edge exiting   |
+| `cover`          | Full visibility span from first pixel entering to last pixel leaving                    |
+| `entry`          | The phase while the element is entering the viewport                                    |
+| `exit`           | The phase while the element is exiting the viewport                                     |
+| `contain`        | While the element is fully contained in the viewport                                    |
+| `entry-crossing` | From the element's leading edge entering to its leading edge reaching the opposite side |
+| `exit-crossing`  | From the element's trailing edge reaching the start to its trailing edge leaving        |
 
 **Sticky container pattern** — for scroll-driven animations inside a stuck `position: sticky` container:
 

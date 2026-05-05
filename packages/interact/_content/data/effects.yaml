@@ -115,9 +115,9 @@ presets:
     - BlobMouse
 
 rangeNames:
-  entry: 'Element entering viewport'
-  exit: 'Element exiting viewport'
-  contain: 'After `entry` range and before `exit` range'
-  cover: 'Full range from `entry` through `contain` and `exit`'
-  entry-crossing: "From element's leading edge entering to trailing edge entering"
-  exit-crossing: "From element's leading edge exiting to trailing edge exiting"
+  cover: 'Full visibility span from first pixel entering to last pixel leaving'
+  entry: 'The phase while the element is entering the viewport'
+  exit: 'The phase while the element is exiting the viewport'
+  contain: 'While the element is fully contained in the viewport'
+  entry-crossing: "From the element's leading edge entering to its leading edge reaching the opposite side"
+  exit-crossing: "From the element's trailing edge reaching the start to its trailing edge leaving"

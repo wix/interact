@@ -1,36 +1,5 @@
 import { capitalize, when } from './_helpers.mjs';
 
-const OVERRIDES = {
-  hover: {
-    fillCritical:
-      "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`.",
-    sourceKeyDesc: 'The element that listens for hover.',
-    targetKeyDesc:
-      "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
-    fillModeDesc:
-      "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished.",
-    easingDesc:
-      "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`.",
-    iterationsDesc:
-      "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.",
-    sequenceOffsetEasingDesc:
-      "easing curve for the offset staggering distribution. CSS easing string, or named easing from `@wix/motion`. Defaults to `'linear'`.",
-  },
-  click: {
-    fillCritical:
-      "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`.",
-    sourceKeyDesc: 'The element that listens for clicks.',
-    targetKeyDesc:
-      "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element.",
-    fillModeDesc:
-      "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.",
-    easingDesc: 'CSS easing string, or named easing from `@wix/motion`.',
-    iterationsDesc: 'optional. Number of iterations, or `Infinity` for continuous loops.',
-    sequenceOffsetEasingDesc:
-      "easing curve for the offset staggering distribution. Defaults to `'linear'`.",
-  },
-};
-
 /**
  * Renders a trigger-specific rule file (click.md or hover.md).
  * @param {{ trigger: object, meta: object }} data — must include `trigger` (from triggers.yaml) and `meta`
@@ -40,8 +9,8 @@ export function render(data, fragments) {
   const { trigger } = data;
   const { name } = trigger;
   const Name = capitalize(name);
-  const o = OVERRIDES[name];
   const isClick = name === 'click';
+  const isHover = name === 'hover';
   const hasReversed = trigger.templateFields.timeEffect.includes('reversed');
   const hasEffectId = trigger.templateFields.timeEffect.includes('effectId');
   const showMultipleEffects = trigger.showMultipleEffectsNote;
@@ -56,9 +25,9 @@ export function render(data, fragments) {
     `\n${fragments.get('multiple-effects-note', 'default', { triggerName: name, triggerEvent: `${name} event` })}\n`,
   );
 
-  const effectsClosing = showMultipleEffects
-    ? `        },\n        // additional effects targeting other elements can be added here`
-    : `        }`;
+  const fillCritical = isHover
+    ? "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`."
+    : "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`.";
 
   return `# ${Name} Trigger Rules for ${data.meta.packageName}
 
@@ -79,7 +48,7 @@ ${pitfallsBlock}
 
 Use \`keyframeEffect\` or \`namedEffect\` when the ${name} should play an animation (CSS or WAAPI). Set \`triggerType\` on each effect to control playback behavior.
 
-**CRITICAL:** ${o.fillCritical}
+**CRITICAL:** ${fillCritical}
 ${multipleEffectsNote}
 \`\`\`typescript
 {
@@ -112,7 +81,7 @@ ${multipleEffectsNote}
 
 ### Variables
 
-${buildVariables(trigger, o, isClick, hasReversed, hasEffectId)}
+${buildVariables(trigger, isClick, isHover, hasReversed, hasEffectId)}
 
 ---
 
@@ -152,7 +121,8 @@ Use \`transition\` when all properties share timing. Use \`transitionProperties\
                 },
                 // ... more properties
             ]
-${effectsClosing}
+        },
+        // additional effects targeting other elements can be added here
     ]
 }
 \`\`\`
@@ -187,7 +157,8 @@ Use \`customEffect\` when you need imperative control over the animation (e.g. c
             customEffect: [CUSTOM_EFFECT_CALLBACK],
             duration: [DURATION_MS],
             easing: '[EASING_FUNCTION]'
-${effectsClosing}
+        },
+        // additional effects targeting other elements can be added here
     ]
 }
 \`\`\`
@@ -227,21 +198,35 @@ Use sequences when a ${name} should sync/stagger animations across multiple elem
 
 - \`[SOURCE_KEY]\` / \`[TRIGGER_TYPE]\` — same as Rule 1. \`triggerType\` is set on the sequence config, not on individual effects within the sequence.
 - \`[OFFSET_MS]\` — time offset for staggering each child's animation start, in milliseconds.
-- \`[OFFSET_EASING]\` — ${o.sequenceOffsetEasingDesc}
+- \`[OFFSET_EASING]\` — easing curve for the offset staggering distribution.${when(isHover, " CSS easing string, or named easing from `@wix/motion`.")} Defaults to \`'linear'\`.
 - \`[EFFECT_DEFINITION]\` — a definition of or a reference to a time-based animation effect.
 `;
 }
 
-function buildVariables(trigger, o, isClick, hasReversed, hasEffectId) {
+function buildVariables(trigger, isClick, isHover, hasReversed, hasEffectId) {
+  const sourceKeyAction = isClick ? 'clicks' : trigger.name;
+  const targetKeyDesc = isClick
+    ? "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element."
+    : "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).";
+  const fillModeDesc = isHover
+    ? "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished."
+    : "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.";
+  const easingDesc = isHover
+    ? "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`."
+    : 'CSS easing string, or named easing from `@wix/motion`.';
+  const iterationsDesc = isHover
+    ? "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`."
+    : 'optional. Number of iterations, or `Infinity` for continuous loops.';
+
   const lines = [
-    `- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React). ${o.sourceKeyDesc}`,
-    `- \`[TARGET_KEY]\` — ${o.targetKeyDesc}`,
+    `- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React). The element that listens for ${sourceKeyAction}.`,
+    `- \`[TARGET_KEY]\` — ${targetKeyDesc}`,
     `- \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:`,
     ...Object.entries(trigger.triggerTypeDescriptions).map(([k, v]) => `  - \`'${k}'\` — ${v}`),
     `- \`[KEYFRAMES]\` — array of keyframe objects (e.g. \`[{ opacity: 0 }, { opacity: 1 }]\`). Property names in camelCase.`,
     `- \`[EFFECT_NAME]\` — unique string identifier for a \`keyframeEffect\`.`,
     `- \`[NAMED_EFFECT_DEFINITION]\` — object with properties of pre-built effect from \`@wix/motion-presets\`. Refer to motion-presets rules for available presets and their options.`,
-    `- \`[FILL_MODE]\` — ${o.fillModeDesc}`,
+    `- \`[FILL_MODE]\` — ${fillModeDesc}`,
   ];
   if (hasReversed) {
     lines.push(
@@ -250,10 +235,10 @@ function buildVariables(trigger, o, isClick, hasReversed, hasEffectId) {
   }
   lines.push(
     `- \`[DURATION_MS]\` — animation duration in milliseconds.`,
-    `- \`[EASING_FUNCTION]\` — ${o.easingDesc}`,
+    `- \`[EASING_FUNCTION]\` — ${easingDesc}`,
     `- \`[DELAY_MS]\` — optional delay before the effect starts, in milliseconds.`,
-    `- \`[ITERATIONS]\` — ${o.iterationsDesc}`,
-    `- \`[ALTERNATE_BOOL]\` — optional. \`true\` to alternate direction on every other iteration (within a single playback).${when(isClick, " Different from \`triggerType: 'alternate'\` which alternates per click.")}`,
+    `- \`[ITERATIONS]\` — ${iterationsDesc}`,
+    `- \`[ALTERNATE_BOOL]\` — optional. \`true\` to alternate direction on every other iteration (within a single playback).${when(isClick, " Different from `triggerType: 'alternate'` which alternates per click.")}`,
   );
   if (hasEffectId) {
     lines.push(

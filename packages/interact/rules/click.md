@@ -109,7 +109,8 @@ Use `transition` when all properties share timing. Use `transitionProperties` wh
                 },
                 // ... more properties
             ]
-        }
+        },
+        // additional effects targeting other elements can be added here
     ]
 }
 ```
@@ -145,7 +146,8 @@ Use `customEffect` when you need imperative control over the animation (e.g. cou
             customEffect: [CUSTOM_EFFECT_CALLBACK],
             duration: [DURATION_MS],
             easing: '[EASING_FUNCTION]'
-        }
+        },
+        // additional effects targeting other elements can be added here
     ]
 }
 ```

@@ -177,6 +177,7 @@ ${fragments.get('element-resolution', 'target-brief')}
 | \`viewProgress\` | Scroll-driven (ViewTimeline)           | No trigger params. Configure \`rangeStart\`/\`rangeEnd\` on the **effect**, not on \`params\` | [viewprogress.md](./viewprogress.md) |
 | \`pointerMove\`  | Mouse movement                         | \`hitArea?\`: \`'self'\` \\| \`'root'\`; \`axis?\`: \`'x'\` \\| \`'y'\`                               | [pointermove.md](./pointermove.md)   |
 | \`animationEnd\` | Chain after another effect             | \`effectId\`: ID of the preceding effect                                                  | —                                    |
+| \`pageVisible\`  | Page visibility change                 | No params. Fires when the page becomes visible (e.g. tab switch).                       | —                                    |
 
 For \`hover\`/\`click\` (and their accessible variants \`interest\`/\`activate\`): set \`triggerType\` on the effect for keyframe/named/custom effects (TimeEffect), or \`stateAction\` on the effect for transitions (StateEffect). Do not mix both on the same effect.
 

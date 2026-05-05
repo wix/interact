@@ -1,9 +1,16 @@
 /**
  * Renders viewprogress.md — rules for scroll-driven animations using ViewTimeline.
- * @param {{ trigger: object, meta: object }} data — must include `trigger` (viewProgress from triggers.yaml) and `meta`
+ * @param {{ trigger: object, effects: object, meta: object }} data
  * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
+  const rangeList = Object.entries(data.effects.rangeNames)
+    .map(([name, desc]) => {
+      const extra = name === 'contain' ? '. Typically used with a `position: sticky` container' : '';
+      return `  - \`'${name}'\` — ${desc.charAt(0).toLowerCase()}${desc.slice(1)}${extra}.`;
+    })
+    .join('\n');
+
   return `# ViewProgress Trigger Rules for ${data.meta.packageName}
 
 These rules help generate scroll-driven interactions using \`${data.meta.packageName}\`. ViewProgress triggers create animations that update continuously as elements move through the viewport, leveraging native CSS ViewTimelines where supported, and using a polyfill library where unsupported. Use when animation progress should be tied to the element's scroll position.
@@ -59,12 +66,7 @@ ${fragments.get('pitfalls/overflow-clip', 'short')}
 - \`[EFFECT_NAME]\` — unique name for custom keyframe effect.
 - \`[EFFECT_KEYFRAMES]\` — array of keyframe objects defining CSS property values (e.g. \`[{ opacity: 0 }, { opacity: 1 }]\`). Property names in camelCase.
 - \`[RANGE_NAME]\` — scroll range name:
-  - \`'cover'\` — full visibility span from first pixel entering to last pixel leaving.
-  - \`'entry'\` — the phase while the element is entering the viewport.
-  - \`'exit'\` — the phase while the element is exiting the viewport.
-  - \`'contain'\` — while the element is fully contained in the viewport. Typically used with a \`position: sticky\` container.
-  - \`'entry-crossing'\` — from the element's leading edge entering to its leading edge reaching the opposite side.
-  - \`'exit-crossing'\` — from the element's trailing edge reaching the start to its trailing edge leaving.
+${rangeList}
 - \`[START_PERCENTAGE]\` — 0–100, starting point within the named range.
 - \`[END_PERCENTAGE]\` — 0–100, end point within the named range.
 - \`[EASING_FUNCTION]\` - CSS easing string or named easing from \`@wix/motion\`. Typically \`'linear'\` for scrolling effects.
