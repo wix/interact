@@ -1,0 +1,132 @@
+fillGuidance:
+  both: "use for scroll-driven (`viewProgress`), pointer-driven (`pointerMove`), and toggling effects (`hover`/`click` with `alternate`, `repeat`, or `state` type)."
+  backwards: "use for entrance animations with `type: 'once'` when the element's own CSS already matches the final keyframe (applies the initial keyframe during any `delay`)."
+
+triggerTypes:
+  - once
+  - repeat
+  - alternate
+  - state
+
+stateActions:
+  - toggle
+  - add
+  - remove
+  - clear
+
+easings:
+  - linear
+  - ease
+  - ease-in
+  - ease-out
+  - ease-in-out
+  - sineIn
+  - sineOut
+  - sineInOut
+  - quadIn
+  - quadOut
+  - quadInOut
+  - cubicIn
+  - cubicOut
+  - cubicInOut
+  - quartIn
+  - quartOut
+  - quartInOut
+  - quintIn
+  - quintOut
+  - quintInOut
+  - expoIn
+  - expoOut
+  - expoInOut
+  - circIn
+  - circOut
+  - circInOut
+  - backIn
+  - backOut
+  - backInOut
+
+transitionEasings:
+  - linear
+  - hardBackOut
+  - easeOut
+  - elastic
+  - bounce
+
+presets:
+  entrance:
+    - FadeIn
+    - GlideIn
+    - SlideIn
+    - FloatIn
+    - RevealIn
+    - ExpandIn
+    - BlurIn
+    - FlipIn
+    - ArcIn
+    - ShuttersIn
+    - CurveIn
+    - DropIn
+    - FoldIn
+    - ShapeIn
+    - TiltIn
+    - WinkIn
+    - SpinIn
+    - TurnIn
+    - BounceIn
+  ongoing:
+    - Pulse
+    - Spin
+    - Breathe
+    - Bounce
+    - Wiggle
+    - Flash
+    - Flip
+    - Fold
+    - Jello
+    - Poke
+    - Rubber
+    - Swing
+    - Cross
+  scroll:
+    - FadeScroll
+    - RevealScroll
+    - ParallaxScroll
+    - MoveScroll
+    - SlideScroll
+    - GrowScroll
+    - ShrinkScroll
+    - TiltScroll
+    - PanScroll
+    - BlurScroll
+    - FlipScroll
+    - SpinScroll
+    - ArcScroll
+    - ShapeScroll
+    - ShuttersScroll
+    - SkewPanScroll
+    - Spin3dScroll
+    - StretchScroll
+    - TurnScroll
+  mouse:
+    - TrackMouse
+    - Tilt3DMouse
+    - Track3DMouse
+    - SwivelMouse
+    - AiryMouse
+    - ScaleMouse
+    - BlurMouse
+    - SkewMouse
+    - BlobMouse
+
+rangeNames:
+  entry: "Element entering viewport"
+  exit: "Element exiting viewport"
+  contain: "After `entry` range and before `exit` range"
+  cover: "Full range from `entry` through `contain` and `exit`"
+  entry-crossing: "From element's leading edge entering to trailing edge entering"
+  exit-crossing: "From element's leading edge exiting to trailing edge exiting"
+
+compositeOperations:
+  replace: "fully replaces prior values."
+  add: "concatenates transform/filter functions after any existing ones (e.g. existing `translateX(10px)` + added `translateY(20px)` → both apply)."
+  accumulate: "merges arguments of matching functions (e.g. `translateX(10px)` + `translateX(20px)` → `translateX(30px)`); non-matching functions concatenate like `'add'`."

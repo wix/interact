@@ -215,7 +215,7 @@ For most use cases, `key` alone is sufficient for both source and target resolut
           - `hitArea?`: `'root' | 'self'` (default `'self'`)
           - `axis?`: `'x' | 'y'` - when using `keyframeEffect` with `pointerMove`, selects which pointer coordinate maps to linear 0-1 progress; defaults to `'y'`. Ignored for `namedEffect` and `customEffect`.
           - Usage:
-            - `'self'`: Track pointer within the source element’s bounds.
+            - `'self'`: Track pointer within the source element's bounds.
             - `'root'`: Track pointer anywhere in the viewport (document root).
             - Only use with `ScrubEffect` mouse presets (`namedEffect`) or `customEffect` that consumes pointer progress; avoid `keyframeEffect` with `pointerMove` unless mapping a single axis via `axis`.
           - When using `customEffect` with `pointerMove`, the progress parameter is an object:

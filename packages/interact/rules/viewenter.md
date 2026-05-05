@@ -207,7 +207,7 @@ Use sequences when a viewEnter should sync/stagger animations across multiple el
             offset: [OFFSET_MS],
             offsetEasing: '[OFFSET_EASING]',
             effects: [
-                [EFFECT_DEFINTION],
+                [EFFECT_DEFINITION],
                 // .. more effects as necessary
             ]
         }
@@ -221,4 +221,4 @@ Use sequences when a viewEnter should sync/stagger animations across multiple el
 - `[TRIGGER_TYPE]` — same as Rule 1. `triggerType` is set on the sequence config, not on individual effects within the sequence.
 - `[OFFSET_MS]` — time offset between each child's animation start, in milliseconds.
 - `[OFFSET_EASING]` — CSS easing or named easing from `@wix/motion`, for the stagger distribution. Defaults to `'linear'`.
-- `[EFFECT_DEFINTION]` — a definition of or a reference to a time-based animation effect.
+- `[EFFECT_DEFINITION]` — a definition of or a reference to a time-based animation effect.
