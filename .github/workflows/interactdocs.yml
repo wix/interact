@@ -53,17 +53,24 @@ jobs:
           # Set base path for GitHub Pages deployment (absolute path for React Router compatibility)
           VITE_BASE: /interact/docs/
 
+      - name: Build playground app
+        run: yarn workspace @wix/interact-playground build
+        env:
+          VITE_BASE: /interact/playground/
+
       - name: Setup Pages
         uses: actions/configure-pages@1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d # v4
 
       - name: Prepare deployment directory
         run: |
           # Create the site structure:
-          # /           -> root index.html and assets
-          # /docs/      -> docs app
-          # /rules/     -> rules markdown files
+          # /               -> root index.html and assets
+          # /docs/          -> docs app
+          # /playground/    -> playground app
+          # /rules/         -> rules markdown files
 
           mkdir -p _site/docs
+          mkdir -p _site/playground
           mkdir -p _site/rules
           mkdir -p _site/assets
 
@@ -73,6 +80,9 @@ jobs:
 
           # Copy docs app
           cp -r apps/docs/dist/* _site/docs/
+
+          # Copy playground app
+          cp -r apps/playground/dist/* _site/playground/
 
           # Copy rules from source (served at /rules/, not /docs/rules/)
           cp -r packages/interact/rules/* _site/rules/

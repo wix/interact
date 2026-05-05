@@ -58,8 +58,16 @@ export class InteractionController {
     }
 
     if (this.sheet) {
-      const index = document.adoptedStyleSheets.indexOf(this.sheet);
-      document.adoptedStyleSheets.splice(index, 1);
+      const rootNode = this.element?.getRootNode() as ShadowRoot | Document;
+      const adoptTarget: { adoptedStyleSheets: CSSStyleSheet[] } = ((rootNode as ShadowRoot).host
+        ? (rootNode as ShadowRoot)
+        : document) as unknown as { adoptedStyleSheets: CSSStyleSheet[] };
+      const index = adoptTarget.adoptedStyleSheets.indexOf(this.sheet);
+      if (index !== -1) {
+        adoptTarget.adoptedStyleSheets = adoptTarget.adoptedStyleSheets.filter(
+          (s) => s !== this.sheet,
+        );
+      }
     }
 
     this._observers = new WeakMap();
@@ -73,11 +81,15 @@ export class InteractionController {
   }
 
   renderStyle(cssRules: string[]) {
+    const rootNode = this.element?.getRootNode() as ShadowRoot | Document;
+    const adoptTarget: { adoptedStyleSheets: CSSStyleSheet[] } = ((rootNode as ShadowRoot).host
+      ? (rootNode as ShadowRoot)
+      : document) as unknown as { adoptedStyleSheets: CSSStyleSheet[] };
     if (!this.sheet) {
       this.sheet = new CSSStyleSheet();
       void this.sheet.replaceSync(cssRules.join('\n'));
 
-      document.adoptedStyleSheets.push(this.sheet);
+      adoptTarget.adoptedStyleSheets = [...(adoptTarget.adoptedStyleSheets || []), this.sheet];
     } else {
       let position = this.sheet.cssRules.length;
 

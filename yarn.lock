@@ -1341,7 +1341,7 @@ __metadata:
     "@types/react": "npm:^18.3.2"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    "@wix/interact": "npm:^2.2.1"
+    "@wix/interact": "npm:^2.2.2"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     typescript: "npm:^5.9.3"
@@ -1356,7 +1356,7 @@ __metadata:
     "@types/react": "npm:^18.3.2"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    "@wix/interact": "npm:^2.2.1"
+    "@wix/interact": "npm:^2.2.2"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-markdown: "npm:^9.0.1"
@@ -1368,7 +1368,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/interact@npm:^2.2.1, @wix/interact@workspace:packages/interact":
+"@wix/interact-playground@workspace:apps/playground":
+  version: 0.0.0-use.local
+  resolution: "@wix/interact-playground@workspace:apps/playground"
+  dependencies:
+    "@wix/interact": "npm:^2.2.2"
+    "@wix/motion-presets": "npm:^1.0.2"
+    typescript: "npm:^5.9.3"
+    vite: "npm:^7.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@wix/interact@npm:^2.2.2, @wix/interact@workspace:packages/interact":
   version: 0.0.0-use.local
   resolution: "@wix/interact@workspace:packages/interact"
   dependencies:
@@ -1378,7 +1389,7 @@ __metadata:
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
     "@vitest/coverage-v8": "npm:^4.0.14"
-    "@wix/motion": "npm:^2.1.4"
+    "@wix/motion": "npm:^2.1.5"
     fastdom: "npm:^1.0.12"
     fizban: "npm:^0.7.2"
     jsdom: "npm:^24.0.0"
@@ -1400,12 +1411,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/motion-presets@workspace:packages/motion-presets":
+"@wix/motion-presets@npm:^1.0.2, @wix/motion-presets@workspace:packages/motion-presets":
   version: 0.0.0-use.local
   resolution: "@wix/motion-presets@workspace:packages/motion-presets"
   dependencies:
     "@vitest/coverage-v8": "npm:^4.0.14"
-    "@wix/motion": "npm:^2.1.4"
+    "@wix/motion": "npm:^2.1.5"
     rimraf: "npm:^6.0.1"
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
@@ -1413,7 +1424,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/motion@npm:^2.1.4, @wix/motion@workspace:packages/motion":
+"@wix/motion@npm:^2.1.5, @wix/motion@workspace:packages/motion":
   version: 0.0.0-use.local
   resolution: "@wix/motion@workspace:packages/motion"
   dependencies:

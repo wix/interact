@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noEmit": true,
+    "declarationMap": false,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@wix/interact/web": ["../../packages/interact/src/web"],
+      "@wix/interact": ["../../packages/interact/src/index"],
+      "@wix/motion": ["../../packages/motion/src/index"],
+      "@wix/motion-presets": ["../../packages/motion-presets/src/index"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
+}
