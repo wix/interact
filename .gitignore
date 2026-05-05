@@ -3,8 +3,8 @@ node_modules
 .env.*
 dist/
 build/
-assets/lib/*
-!assets/lib/.gitkeep
+apps/website/assets/lib/*
+!apps/website/assets/lib/.gitkeep
 coverage/
 .DS_Store
 .idea/

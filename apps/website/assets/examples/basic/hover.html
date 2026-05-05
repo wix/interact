@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hover</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      interact-element {
+        display: block;
+      }
+      body {
+        width: 100vw;
+        height: 100vh;
+        background: #1f1f1f;
+        overflow: hidden;
+        position: relative;
+      }
+      .circle {
+        width: 16rem;
+        height: 16rem;
+        background-color: transparent;
+        border: 1px solid white;
+        border-radius: 50%;
+        position: relative;
+        overflow: hidden;
+        will-change: transform;
+        cursor: pointer;
+      }
+      .fill-circle {
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        border-radius: 50%;
+        transform: scale(0);
+        will-change: transform;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Positions match the homepage exactly: -bottom-24 -left-24 / centered / -top-24 -right-24 -->
+    <interact-element
+      data-interact-key="hover-circle-1"
+      style="position: absolute; bottom: -6rem; left: -6rem"
+    >
+      <div class="circle"><div class="fill-circle"></div></div>
+    </interact-element>
+    <interact-element
+      data-interact-key="hover-circle-2"
+      style="position: absolute; top: calc(50% - 8rem); left: calc(50% - 8rem)"
+    >
+      <div class="circle"><div class="fill-circle"></div></div>
+    </interact-element>
+    <interact-element
+      data-interact-key="hover-circle-3"
+      style="position: absolute; top: -6rem; right: -6rem"
+    >
+      <div class="circle"><div class="fill-circle"></div></div>
+    </interact-element>
+
+    <script type="module">
+      import { Interact } from '/assets/lib/interact/es/web.js';
+
+      function genCircle(prefix) {
+        return [1, 2, 3].map((n) => ({
+          key: `${prefix}-circle-${n}`,
+          trigger: 'hover',
+          effects: [
+            {
+              transition: {
+                duration: 400,
+                easing: 'ease-out',
+                styleProperties: [{ name: 'transform', value: 'scale(1.1)' }],
+              },
+            },
+            {
+              selector: '.fill-circle',
+              transition: {
+                duration: 400,
+                easing: 'ease-out',
+                styleProperties: [{ name: 'transform', value: 'scale(1)' }],
+              },
+            },
+            ...[1, 2, 3]
+              .filter((i) => i !== n)
+              .map((k) => ({
+                key: `${prefix}-circle-${k}`,
+                transition: {
+                  duration: 400,
+                  easing: 'ease-out',
+                  styleProperties: [
+                    {
+                      name: 'transform',
+                      value: n === 1 ? 'translate(20px, -20px)' : 'translate(-20px, 20px)',
+                    },
+                  ],
+                },
+              })),
+          ],
+        }));
+      }
+
+      Interact.create({ interactions: genCircle('hover') });
+    </script>
+  </body>
+</html>

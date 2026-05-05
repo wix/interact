@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>On/Off Toggle (Sun/Moon)</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #1f1f1f;
+        font-family: 'Inter', system-ui, sans-serif;
+        transition: background-color 0.4s ease;
+      }
+
+      interact-element {
+        display: contents;
+      }
+
+      .toggle-track {
+        position: relative;
+        width: 140px;
+        height: 60px;
+        border-radius: 50px;
+        border: 1px solid #ffd7823f;
+        background-color: #ffd882;
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        transition: transform 0.2s ease-out;
+      }
+
+      .toggle-track:hover {
+        transform: scale(1.02);
+      }
+
+      .slider {
+        position: absolute;
+        top: 6px;
+        bottom: 6px;
+        left: 86px;
+        right: 6px;
+        border-radius: 40px;
+        background-color: #000;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+      }
+
+      .slider:active {
+        transform: scale(0.99);
+      }
+
+      .slider-icon-stack {
+        position: relative;
+        width: 24px;
+        height: 24px;
+      }
+
+      .slider-icon {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: inherit;
+      }
+
+      .slider-icon svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+
+      .icon-sun {
+        opacity: 0;
+      }
+      .icon-moon {
+        opacity: 1;
+      }
+
+      .label-bg {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+      }
+
+      .label-bg svg {
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+
+      .label-bg-on {
+        left: 22px;
+        color: rgba(0, 0, 0, 0.4);
+        opacity: 1;
+      }
+
+      .label-bg-off {
+        right: 22px;
+        color: rgba(255, 255, 255, 0.3);
+        opacity: 0;
+      }
+
+      @keyframes sun-pulse-rotate {
+        0% {
+          transform: rotate(0deg) scale(1.15);
+        }
+        12.5% {
+          transform: rotate(45deg) scale(1);
+        }
+        25% {
+          transform: rotate(90deg) scale(1.15);
+        }
+        37.5% {
+          transform: rotate(135deg) scale(1);
+        }
+        50% {
+          transform: rotate(180deg) scale(1.15);
+        }
+        62.5% {
+          transform: rotate(225deg) scale(1);
+        }
+        75% {
+          transform: rotate(270deg) scale(1.15);
+        }
+        87.5% {
+          transform: rotate(315deg) scale(1);
+        }
+        100% {
+          transform: rotate(360deg) scale(1.15);
+        }
+      }
+
+      @keyframes moon-horizontal-loop {
+        0% {
+          transform: translate(11px, 0);
+        }
+        25% {
+          transform: translate(24px, 0);
+        }
+        25.01% {
+          transform: translate(-24px, 0);
+        }
+        50% {
+          transform: translate(-11px, 0);
+        }
+        75% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(11px, 0);
+        }
+      }
+
+      .toggle-track.is-on:hover .icon-sun svg {
+        animation: sun-pulse-rotate 3s linear infinite;
+      }
+
+      .toggle-track.is-off:hover .moon-shadow-layer {
+        animation: moon-horizontal-loop 6s linear infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <interact-element data-interact-key="toggle-btn">
+      <button
+        type="button"
+        class="toggle-track is-off"
+        aria-pressed="false"
+        aria-label="Toggle day/night mode"
+      >
+        <span class="label-bg label-bg-on" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            shape-rendering="geometricPrecision"
+          >
+            <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none" />
+            <path d="M12 2v2" />
+            <path d="M12 20v2" />
+            <path d="m4.93 4.93 1.41 1.41" />
+            <path d="m17.66 17.66 1.41 1.41" />
+            <path d="M2 12h2" />
+            <path d="M20 12h2" />
+            <path d="m6.34 17.66-1.41 1.41" />
+            <path d="m19.07 4.93-1.41 1.41" />
+          </svg>
+        </span>
+        <interact-element data-interact-key="slider">
+          <div class="slider">
+            <div class="slider-icon-stack">
+              <span class="slider-icon icon-sun">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  shape-rendering="geometricPrecision"
+                >
+                  <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none" />
+                  <path d="M12 2v2" />
+                  <path d="M12 20v2" />
+                  <path d="m4.93 4.93 1.41 1.41" />
+                  <path d="m17.66 17.66 1.41 1.41" />
+                  <path d="M2 12h2" />
+                  <path d="M20 12h2" />
+                  <path d="m6.34 17.66-1.41 1.41" />
+                  <path d="m19.07 4.93-1.41 1.41" />
+                </svg>
+              </span>
+              <span class="slider-icon icon-moon">
+                <svg viewBox="0 0 24 24" fill="none" shape-rendering="geometricPrecision">
+                  <defs>
+                    <clipPath id="moon-clip-slider">
+                      <circle cx="12" cy="12" r="8" />
+                    </clipPath>
+                  </defs>
+                  <circle cx="12" cy="12" r="7.8" fill="currentColor" stroke="none" />
+                  <g clip-path="url(#moon-clip-slider)">
+                    <circle
+                      class="moon-shadow-layer"
+                      cx="12"
+                      cy="12"
+                      r="12"
+                      fill="#000000"
+                      stroke="none"
+                      transform="translate(11, 0)"
+                    />
+                  </g>
+                </svg>
+              </span>
+            </div>
+          </div>
+        </interact-element>
+        <span class="label-bg label-bg-off" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" shape-rendering="geometricPrecision">
+            <defs>
+              <clipPath id="moon-clip-bg">
+                <circle cx="12" cy="12" r="8" />
+              </clipPath>
+            </defs>
+            <circle cx="12" cy="12" r="7.8" fill="currentColor" stroke="none" />
+            <g clip-path="url(#moon-clip-bg)">
+              <circle
+                cx="12"
+                cy="12"
+                r="12"
+                fill="#000000"
+                stroke="none"
+                transform="translate(11, 0)"
+              />
+            </g>
+          </svg>
+        </span>
+      </button>
+    </interact-element>
+
+    <script type="module">
+      import { Interact } from '/assets/lib/interact/es/web.js';
+
+      Interact.create({
+        effects: {
+          'slider-move': {
+            keyframeEffect: {
+              name: 'slider-move-onoff',
+              keyframes: [
+                { left: '86px', right: '6px', offset: 0 },
+                { left: '68px', right: '6px', offset: 0.12 },
+                { left: '6px', right: '68px', offset: 0.88 },
+                { left: '6px', right: '86px', offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+            fill: 'both',
+          },
+          'slider-bg': {
+            keyframeEffect: {
+              name: 'slider-bg-onoff',
+              keyframes: [
+                { backgroundColor: '#000000', offset: 0 },
+                { backgroundColor: '#FFD882', offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'ease',
+            fill: 'both',
+          },
+          'slider-color': {
+            keyframeEffect: {
+              name: 'slider-color-onoff',
+              keyframes: [
+                { color: '#ffffff', offset: 0 },
+                { color: '#000000', offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'ease',
+            fill: 'both',
+          },
+          'track-bg': {
+            keyframeEffect: {
+              name: 'track-bg-onoff',
+              keyframes: [
+                { backgroundColor: '#FFD882', offset: 0 },
+                { backgroundColor: '#000000', offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'ease',
+            fill: 'both',
+          },
+          'icon-sun': {
+            keyframeEffect: {
+              name: 'icon-sun-swap',
+              keyframes: [
+                { opacity: 0, offset: 0 },
+                { opacity: 1, offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'ease',
+            fill: 'both',
+          },
+          'icon-moon': {
+            keyframeEffect: {
+              name: 'icon-moon-swap',
+              keyframes: [
+                { opacity: 1, offset: 0 },
+                { opacity: 0, offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'ease',
+            fill: 'both',
+          },
+          'label-on-vis': {
+            keyframeEffect: {
+              name: 'label-on-visibility',
+              keyframes: [
+                { opacity: 1, offset: 0 },
+                { opacity: 0, offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'ease',
+            fill: 'both',
+          },
+          'label-off-vis': {
+            keyframeEffect: {
+              name: 'label-off-visibility',
+              keyframes: [
+                { opacity: 0, offset: 0 },
+                { opacity: 1, offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'ease',
+            fill: 'both',
+          },
+        },
+        interactions: [
+          {
+            key: 'toggle-btn',
+            trigger: 'click',
+            params: { type: 'alternate' },
+            effects: [
+              { key: 'slider', effectId: 'slider-move' },
+              { key: 'slider', effectId: 'slider-bg' },
+              { key: 'slider', effectId: 'slider-color' },
+              { key: 'toggle-btn', effectId: 'track-bg', selector: '.toggle-track' },
+              { key: 'toggle-btn', effectId: 'icon-sun', selector: '.icon-sun' },
+              { key: 'toggle-btn', effectId: 'icon-moon', selector: '.icon-moon' },
+              { key: 'toggle-btn', effectId: 'label-on-vis', selector: '.label-bg-on' },
+              { key: 'toggle-btn', effectId: 'label-off-vis', selector: '.label-bg-off' },
+            ],
+          },
+        ],
+      });
+
+      const btn = document.querySelector('.toggle-track');
+      const sliderEl = document.querySelector('.slider');
+      let hoverAnim = null;
+
+      btn.addEventListener('mouseenter', () => {
+        if (hoverAnim) hoverAnim.cancel();
+        const isOn = btn.classList.contains('is-on');
+        hoverAnim = sliderEl.animate(
+          isOn ? [{ right: '86px' }, { right: '72px' }] : [{ left: '86px' }, { left: '72px' }],
+          { duration: 400, fill: 'forwards', easing: 'cubic-bezier(0.65, 0, 0.35, 1)' },
+        );
+      });
+
+      btn.addEventListener('mouseleave', () => {
+        if (hoverAnim) hoverAnim.reverse();
+      });
+
+      if (btn) {
+        btn.addEventListener('click', () => {
+          if (hoverAnim) {
+            hoverAnim.cancel();
+            hoverAnim = null;
+          }
+          const pressed = btn.getAttribute('aria-pressed') === 'true';
+          btn.setAttribute('aria-pressed', String(!pressed));
+          btn.classList.toggle('is-on');
+          btn.classList.toggle('is-off');
+          document.body.style.backgroundColor = btn.classList.contains('is-on')
+            ? '#DDDDDD'
+            : '#1F1F1F';
+        });
+      }
+    </script>
+  </body>
+</html>
