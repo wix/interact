@@ -1,4 +1,4 @@
-import { when } from './_helpers.mjs';
+import { when, buildPitfallsBlock, varLine } from './_helpers.mjs';
 
 /**
  * Renders viewenter.md — rules for viewport-entry triggered animations.
@@ -8,21 +8,14 @@ import { when } from './_helpers.mjs';
 export function render(data, fragments) {
   const { trigger } = data;
 
-  const pitfallsBlock = when(
-    trigger.pitfalls?.length > 0,
-    '\n' +
-      trigger.pitfalls
-        .map((p) => fragments.get(`pitfalls/${p.id}`, p.section || trigger.name))
-        .join('\n') +
-      '\n',
-  );
+  const pitfallsRaw = buildPitfallsBlock(trigger, fragments);
+  const pitfallsBlock = pitfallsRaw ? `\n${pitfallsRaw}\n` : '';
 
-  const paramVarNames = { threshold: 'VISIBILITY_THRESHOLD', inset: 'VIEWPORT_INSETS' };
   const paramDescriptions = trigger.params
     .map((p) => {
-      const varName = paramVarNames[p.name] || p.name.toUpperCase();
+      const vn = p.varName || p.name.toUpperCase();
       const optionalPrefix = p.optional ? 'optional. ' : '';
-      return `- \`[${varName}]\` — ${optionalPrefix}${p.description}`;
+      return `- \`[${vn}]\` — ${optionalPrefix}${p.description}`;
     })
     .join('\n');
 
@@ -55,11 +48,11 @@ ${fragments.get('fouc', 'code-inject')}
 
 ### Step 2: Mark elements with \`initial\`
 
-${fragments.get('fouc', 'code-web')}
+${fragments.get('fouc', 'code-web', { key: '[SOURCE_KEY]', classAttr: '' })}
 
-${fragments.get('fouc', 'code-react')}
+${fragments.get('fouc', 'code-react', { key: '[SOURCE_KEY]', classAttr: '' })}
 
-${fragments.get('fouc', 'code-vanilla')}
+${fragments.get('fouc', 'code-vanilla', { key: '[SOURCE_KEY]', classAttr: '' })}
 
 ${fragments.get('fouc', 'rules-viewenter')}
 
@@ -106,8 +99,8 @@ Use \`keyframeEffect\` or \`namedEffect\` when the viewEnter should play an anim
 
 ### Variables
 
-- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web/vanilla, \`interactKey\` for React). The **source element** is observed for viewport intersection. This is the element the IntersectionObserver watches.
-- \`[TARGET_KEY]\` — identifier matching the element's key on the element that animates.
+${varLine('SOURCE_KEY', 'The **source element** is observed for viewport intersection. This is the element the IntersectionObserver watches.')}
+${varLine('TARGET_KEY', "identifier matching the element's key on the element that animates.")}
 - \`[TARGET_SELECTOR]\` - optional. Selector for the child element to select inside the root element. For \`triggerType\` of \`'alternate'\`/\`'repeat'\`/\`'state'\` MUST either use a separate \`[TARGET_KEY]\` from \`[SOURCE_KEY]\` or \`selector\` for selecting a child element as target.
 - \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:
   - \`'once'\` (default) — plays once when the source element first enters the viewport and never again. Source and target may be the same element.
@@ -115,16 +108,16 @@ Use \`keyframeEffect\` or \`namedEffect\` when the viewEnter should play an anim
   - \`'alternate'\` — plays forward when the source element enters the viewport, reverses when it leaves. Use separate source and target.
   - \`'state'\` — resumes on enter, pauses on leave. Useful for continuous loops (\`iterations: Infinity\`). Use separate source and target.
 ${paramDescriptions}
-- \`[KEYFRAMES]\` — array of keyframe objects (e.g. \`[{ opacity: 0 }, { opacity: 1 }]\`). Property names in camelCase.
-- \`[EFFECT_NAME]\` — unique string identifier for a \`keyframeEffect\`.
-- \`[NAMED_EFFECT_DEFINITION]\` — object with properties of pre-built effect from \`@wix/motion-presets\`. Refer to motion-presets rules for available presets and their options.
-- \`[FILL_MODE]\` — \`'both'\` for \`triggerType: 'alternate'\`, \`'repeat'\`, or \`'state'\`. For \`triggerType: 'once'\`: use \`'backwards'\` when the animation's final keyframe has no additional effect (over element's base style); use \`'both'\` otherwise.
-- \`[DURATION_MS]\` — animation duration in milliseconds.
-- \`[EASING_FUNCTION]\` — CSS easing string or named easing from \`@wix/motion\`.
-- \`[DELAY_MS]\` — optional delay before the effect starts, in milliseconds.
-- \`[ITERATIONS]\` — optional. Number of iterations, or \`Infinity\` for continuous loops. Primarily useful with \`triggerType: 'state'\`.
-- \`[ALTERNATE_BOOL]\` — optional. \`true\` to alternate direction on every other iteration (within a single playback).
-- \`[UNIQUE_EFFECT_ID]\` — optional. String identifier used by \`animationEnd\` triggers for chaining, and by sequences for referencing effects.
+${varLine('KEYFRAMES')}
+${varLine('EFFECT_NAME')}
+${varLine('NAMED_EFFECT_DEFINITION')}
+${varLine('FILL_MODE', "`'both'` for `triggerType: 'alternate'`, `'repeat'`, or `'state'`. For `triggerType: 'once'`: use `'backwards'` when the animation's final keyframe has no additional effect (over element's base style); use `'both'` otherwise.")}
+${varLine('DURATION_MS')}
+${varLine('EASING_FUNCTION')}
+${varLine('DELAY_MS')}
+${varLine('ITERATIONS', "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.")}
+${varLine('ALTERNATE_BOOL')}
+${varLine('UNIQUE_EFFECT_ID')}
 
 ---
 

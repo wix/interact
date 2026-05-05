@@ -1,4 +1,4 @@
-import { when } from './_helpers.mjs';
+import { buildPitfallsBlock, varLine } from './_helpers.mjs';
 
 /**
  * Renders pointermove.md — rules for pointer-driven interactions with 2D mouse tracking.
@@ -8,12 +8,7 @@ import { when } from './_helpers.mjs';
 export function render(data, fragments) {
   const { trigger } = data;
 
-  const pitfallsBlock = when(
-    trigger.pitfalls?.length > 0,
-    trigger.pitfalls
-      .map((p) => fragments.get(`pitfalls/${p.id}`, p.section || trigger.name))
-      .join('\n'),
-  );
+  const pitfallsBlock = buildPitfallsBlock(trigger, fragments); // no extra newline wrapping — handled by template layout
 
   const paramsTypeFields = trigger.params
     .map((p) => `  ${p.name}${p.optional ? '?' : ''}: ${p.type};`)
@@ -146,14 +141,14 @@ Use pre-built mouse presets from \`${data.meta.presetsPackage}\` that handle 2D 
 
 ### Variables
 
-- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React). The element that tracks pointer movement.
-- \`[TARGET_KEY]\` — identifier matching the element's key on the element to animate (can be same as source or different).
-- \`[HIT_AREA]\` — \`'self'\` (track pointer within source element) or \`'root'\` (track pointer anywhere in viewport).
+${varLine('SOURCE_KEY', 'The element that tracks pointer movement.')}
+${varLine('TARGET_KEY', "identifier matching the element's key on the element to animate (can be same as source or different).")}
+${varLine('HIT_AREA')}
 - \`[NAMED_EFFECT_TYPE]\` — a registered effect name, or a preset from \`${data.meta.presetsPackage}\` \`mouse\` library.
 - \`[EFFECT_PROPERTIES]\` — preset-specific options. Refer to motion-presets rules for each preset's available options and their value types. Do NOT guess preset option names or types; omit unknown options and rely on defaults.
-- \`[CENTERED_TO_TARGET]\` — \`true\` or \`false\`. See **Centering with \`centeredToTarget\`** above.
-- \`[TRANSITION_DURATION_MS]\` — optional number. Milliseconds for smoothing (interpolating) between progress updates. The animation does not jump to the new progress value instantly; instead it transitions over this duration. Use to add inertia/lag to the effect, making it feel more physical (e.g. \`200\`–\`600\`).
-- \`[TRANSITION_EASING]\` — optional string. CSS easing or named easing from \`@wix/motion\`. Adds a natural deceleration feel when used with \`transitionDuration\`.
+${varLine('CENTERED_TO_TARGET')}
+${varLine('TRANSITION_DURATION_MS')}
+${varLine('TRANSITION_EASING')}
 
 ---
 

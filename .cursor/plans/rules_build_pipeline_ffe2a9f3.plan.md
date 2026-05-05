@@ -92,6 +92,33 @@ todos:
   - id: refactor-regenerate
     content: 'Regenerate rules/*.md, verify output is identical to pre-refactor output'
     status: completed
+  - id: refactor-common-vars
+    content: 'Add shared varLine() helper to _helpers.mjs — common variable descriptions (SOURCE_KEY, TARGET_KEY, DURATION_MS, etc.) defined once, used by all trigger templates via varLine(name, suffix)'
+    status: completed
+  - id: refactor-pitfalls-helper
+    content: 'Extract buildPitfallsBlock() helper to _helpers.mjs — all trigger templates use shared function to iterate trigger.pitfalls from YAML'
+    status: completed
+  - id: refactor-fouc-merge
+    content: 'Merge 3 FOUC fragment section pairs (code-web/code-web-example, code-react/code-react-example, code-vanilla/code-vanilla-example) into parameterized sections using {{key}} and {{classAttr}} interpolation'
+    status: completed
+  - id: refactor-param-varname
+    content: 'Add varName field to YAML params entries (e.g. threshold→VISIBILITY_THRESHOLD) — eliminates hardcoded paramVarNames map in viewenter-rule.mjs'
+    status: completed
+  - id: refactor-yaml-schema
+    content: 'Add template field + section comments to triggers.yaml — documents which template renders each trigger, separates event vs viewport vs pointer trigger schemas'
+    status: completed
+  - id: refactor-full-lean-tables
+    content: 'Generate hover/click triggerType + stateAction comparison tables in full-lean.mjs from YAML fullLeanBehavior data — replaces hardcoded markdown tables with buildBehaviorTable() function'
+    status: completed
+  - id: refactor-full-lean-pitfalls
+    content: 'Data-drive full-lean.mjs pitfalls from YAML — add fullLeanSection field to trigger pitfall entries + fullLeanPitfallOrder array in effects.yaml, replaces hardcoded fragment calls'
+    status: completed
+  - id: refactor-optional-chaining
+    content: 'Normalize optional chaining on trigger.pitfalls — all templates now use buildPitfallsBlock() with consistent ?. handling'
+    status: completed
+  - id: refactor-regenerate-2
+    content: 'Regenerate rules/*.md, verify output — only 5 minor consistency improvements from standardized varLine descriptions (no information loss)'
+    status: completed
 isProject: false
 ---
 
@@ -583,11 +610,63 @@ Run `build:rules` and verify the generated output is byte-identical to pre-refac
 
 ---
 
+## Post-PR Fixes — Round 4 (deduplication & consistency)
+
+Final deduplication pass addressing remaining copy-paste across templates and inconsistent data-driving patterns.
+
+### Fix 19: Shared variable descriptions helper (`varLine`)
+
+Variable descriptions like `[SOURCE_KEY]`, `[TARGET_KEY]`, `[DURATION_MS]`, `[EASING_FUNCTION]`, `[DELAY_MS]`, `[EFFECT_NAME]`, `[NAMED_EFFECT_DEFINITION]`, `[FILL_MODE]`, `[UNIQUE_EFFECT_ID]`, `[CUSTOM_EFFECT_CALLBACK]`, `[TRANSITION_DURATION_MS]`, `[TRANSITION_EASING]`, `[CENTERED_TO_TARGET]`, `[HIT_AREA]` were copy-pasted across 4 trigger templates with minor wording variations.
+
+**Action:** Added `varLine(name, ...args)` helper to `_helpers.mjs`. Each variable has a canonical description with optional trigger-specific suffix/override. All trigger templates now call `varLine('SOURCE_KEY', 'The element that listens for hover.')` instead of repeating the full description.
+
+### Fix 20: Shared `buildPitfallsBlock` helper
+
+All 4 trigger templates had an identical pattern: check `trigger.pitfalls?.length`, iterate, call `fragments.get()` with section resolution. Differed only in newline wrapping.
+
+**Action:** Extracted `buildPitfallsBlock(trigger, fragments)` to `_helpers.mjs`. Returns raw content; templates handle their own spacing.
+
+### Fix 21: Merge FOUC fragment section pairs
+
+`fouc.md` had 6 near-identical section pairs (`#code-web`/`#code-web-example`, etc.) that differed only in using `[SOURCE_KEY]` vs `"hero"` for the key value.
+
+**Action:** Merged each pair using `{{key}}` and `{{classAttr}}` interpolation. Templates now call `fragments.get('fouc', 'code-web', { key: 'hero', classAttr: ' class="hero"' })` for concrete examples and `{ key: '[SOURCE_KEY]', classAttr: '' }` for placeholders. Reduced from 6 sections to 3.
+
+### Fix 22: Add `varName` to YAML params
+
+`viewenter-rule.mjs` had a hardcoded `paramVarNames` map (`{ threshold: 'VISIBILITY_THRESHOLD', inset: 'VIEWPORT_INSETS' }`) that lived in the template rather than YAML.
+
+**Action:** Added `varName` field to each param entry in `triggers.yaml`. Template reads `p.varName || p.name.toUpperCase()`.
+
+### Fix 23: Add `template` field + schema comments to `triggers.yaml`
+
+YAML had two implicit schemas (event triggers with `templateFields`/`variableOverrides` vs other triggers with just `params`) with no documentation.
+
+**Action:** Added `template` field to each trigger entry indicating which `.mjs` template renders it. Added section comments separating event, viewport/scroll, and pointer/chaining trigger groups.
+
+### Fix 24: Data-drive full-lean.mjs tables from YAML
+
+The hover/click `triggerType` and `stateAction` comparison tables in `full-lean.mjs` were hardcoded markdown despite the data existing in `triggers.yaml`.
+
+**Action:** Added `fullLeanBehavior.triggerType` and `fullLeanBehavior.stateAction` maps to hover and click YAML entries with condensed behavior descriptions. Added `buildBehaviorTable()` function that generates Prettier-compatible padded tables from YAML data.
+
+### Fix 25: Data-drive full-lean.mjs pitfalls from YAML
+
+`full-lean.mjs` hardcoded all 4 trigger-specific pitfall fragment calls (`overflow-clip/long`, `same-element-viewenter/long`, `hit-area/detailed-hover`, `hit-area/detailed-pointermove`) rather than deriving them from YAML.
+
+**Action:** Added `fullLeanSection` field to pitfall entries in `triggers.yaml` (the section name used by full-lean.mjs). Added `fullLeanPitfallOrder` array in `effects.yaml` to control ordering. `full-lean.mjs` now iterates this array instead of hardcoding fragment calls.
+
+### Fix 26: Regenerate output (round 4)
+
+Regenerated all 7 rule files. 5 minor consistency improvements from standardized `varLine` descriptions (dropped redundant "/vanilla" in viewenter, standardized em-dash separator, added "from the top-level `effects` map" completeness note). Zero information loss. click.md, hover.md, full-lean.md, integration.md, pointermove.md are byte-identical to pre-refactor output.
+
+---
+
 ## Future Extension Points
 
 - **docs/**: Same `_content/data/` feeds docs templates — add `_content/templates/docs/` later
 - **README**: Same meta.yaml + triggers.yaml generates README sections
 - **Validation**: Add `scripts/validate-rules.mjs` that imports actual TS types and cross-checks trigger names, param fields, effect fields against the YAML data
 - **motion-presets rules**: The build mechanism is scoped to `packages/interact/` but the architecture (YAML + fragments + templates) can be replicated in `packages/motion-presets/` with shared fragments if needed
-- **Common variable fragment**: Extract repeated variable descriptions (`[SOURCE_KEY]`, `[TARGET_KEY]`, `[DURATION_MS]`, etc.) into a shared fragment to deduplicate across viewenter/viewprogress/pointermove/event-trigger templates
-- **FOUC fragment consolidation**: Reduce fouc.md's 13 sections to ~8 by using `{{param}}` interpolation for placeholder vs example variants
+- ~~**Common variable fragment**: Extract repeated variable descriptions~~ — **Done** (Fix 19: `varLine` helper)
+- ~~**FOUC fragment consolidation**: Reduce fouc.md's 13 sections~~ — **Done** (Fix 21: merged 6 sections to 3 via `{{key}}` interpolation)

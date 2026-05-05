@@ -1,4 +1,4 @@
-import { when } from './_helpers.mjs';
+import { buildPitfallsBlock, varLine } from './_helpers.mjs';
 
 /**
  * Renders viewprogress.md — rules for scroll-driven animations using ViewTimeline.
@@ -8,14 +8,8 @@ import { when } from './_helpers.mjs';
 export function render(data, fragments) {
   const { trigger } = data;
 
-  const pitfallsBlock = when(
-    trigger.pitfalls?.length > 0,
-    '\n' +
-      trigger.pitfalls
-        .map((p) => fragments.get(`pitfalls/${p.id}`, p.section || trigger.name))
-        .join('\n') +
-      '\n',
-  );
+  const pitfallsRaw = buildPitfallsBlock(trigger, fragments);
+  const pitfallsBlock = pitfallsRaw ? `\n${pitfallsRaw}\n` : '';
 
   const rangeList = Object.entries(data.effects.rangeNames)
     .map(([name, desc]) => {
@@ -72,16 +66,16 @@ ${pitfallsBlock}
 
 ### Variables
 
-- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React). The element whose scroll position drives the animation.
-- \`[TARGET_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React) on the element to animate (can be same as source or different).
+${varLine('SOURCE_KEY', 'The element whose scroll position drives the animation.')}
+${varLine('TARGET_KEY', "identifier matching the element's key (`data-interact-key` for web, `interactKey` for React) on the element to animate (can be same as source or different).")}
 - \`[NAMED_EFFECT_DEFINITION]\` — object with properties of pre-built effect from \`@wix/motion-presets\`. **CRITICAL:** Scroll presets (\`*Scroll\`) MUST include \`range: 'in' | 'out' | 'continuous'\` in their options. \`'in'\` ends at the idle state, \`'out'\` starts from the idle state, \`'continuous'\` passes through it.
-- \`[EFFECT_NAME]\` — unique name for custom keyframe effect.
+${varLine('EFFECT_NAME')}
 - \`[EFFECT_KEYFRAMES]\` — array of keyframe objects defining CSS property values (e.g. \`[{ opacity: 0 }, { opacity: 1 }]\`). Property names in camelCase.
 - \`[RANGE_NAME]\` — scroll range name:
 ${rangeList}
 - \`[START_PERCENTAGE]\` — 0–100, starting point within the named range.
 - \`[END_PERCENTAGE]\` — 0–100, end point within the named range.
-- \`[EASING_FUNCTION]\` - CSS easing string or named easing from \`@wix/motion\`. Typically \`'linear'\` for scrolling effects.
+${varLine('EASING_FUNCTION', "CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.")}
 - \`[UNIQUE_EFFECT_ID]\` — optional identifier for referencing the effect externally.
 
 ---
@@ -114,9 +108,9 @@ ${rangeList}
 ### Variables
 
 - \`[SOURCE_KEY]\` / \`[TARGET_KEY]\` — same as Rule 1.
-- \`[CUSTOM_EFFECT_CALLBACK]\` — function with signature \`(element: HTMLElement, progress: number) => void\`. Called on each animation frame with \`progress\` from 0 to 1.
+${varLine('CUSTOM_EFFECT_CALLBACK')}
 - \`[RANGE_NAME]\` / \`[START_PERCENTAGE]\` / \`[END_PERCENTAGE]\` — same as Rule 1.
-- \`[EASING_FUNCTION]\` — CSS easing string or named easing from \`@wix/motion\`. Typically \`'linear'\` for scrolling effects.
+${varLine('EASING_FUNCTION', "CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.")}
 - \`[UNIQUE_EFFECT_ID]\` — optional identifier for referencing the effect externally.
 
 ---

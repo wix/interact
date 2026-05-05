@@ -50,7 +50,7 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 - `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for web, `interactKey` for React). The element whose scroll position drives the animation.
 - `[TARGET_KEY]` — identifier matching the element's key (`data-interact-key` for web, `interactKey` for React) on the element to animate (can be same as source or different).
 - `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built effect from `@wix/motion-presets`. **CRITICAL:** Scroll presets (`*Scroll`) MUST include `range: 'in' | 'out' | 'continuous'` in their options. `'in'` ends at the idle state, `'out'` starts from the idle state, `'continuous'` passes through it.
-- `[EFFECT_NAME]` — unique name for custom keyframe effect.
+- `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
 - `[EFFECT_KEYFRAMES]` — array of keyframe objects defining CSS property values (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
 - `[RANGE_NAME]` — scroll range name:
   - `'cover'` — full visibility span from first pixel entering to last pixel leaving.
@@ -61,7 +61,7 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
   - `'exit-crossing'` — from the element's trailing edge reaching the start to its trailing edge leaving.
 - `[START_PERCENTAGE]` — 0–100, starting point within the named range.
 - `[END_PERCENTAGE]` — 0–100, end point within the named range.
-- `[EASING_FUNCTION]` - CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.
+- `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.
 - `[UNIQUE_EFFECT_ID]` — optional identifier for referencing the effect externally.
 
 ---
@@ -94,7 +94,7 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 ### Variables
 
 - `[SOURCE_KEY]` / `[TARGET_KEY]` — same as Rule 1.
-- `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with `progress` from 0 to 1.
+- `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with the target element and `progress` from 0 to 1.
 - `[RANGE_NAME]` / `[START_PERCENTAGE]` / `[END_PERCENTAGE]` — same as Rule 1.
 - `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.
 - `[UNIQUE_EFFECT_ID]` — optional identifier for referencing the effect externally.

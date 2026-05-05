@@ -1,11 +1,18 @@
+# --------------------------------------------------------------------------
+# Event triggers — rendered by event-trigger-rule.mjs (click.md, hover.md)
+# These have the full schema: templateFields, triggerTypeDescriptions,
+# stateActionDescriptions, variableOverrides, showMultipleEffectsNote.
+# --------------------------------------------------------------------------
 triggers:
   - name: hover
+    template: event-trigger-rule.mjs
     a11yAlias: interest
     a11yNote: "Use `trigger: 'interest'` instead of `trigger: 'hover'` to also respond to keyboard focus."
     defaultTriggerType: alternate
     params: []
     pitfalls:
       - id: hit-area
+        fullLeanSection: detailed-hover
     showMultipleEffectsNote: true
     templateFields:
       - triggerType
@@ -27,6 +34,17 @@ triggers:
       add: 'applies the style state on enter. Leave does NOT remove it.'
       remove: 'removes a previously applied style state on enter. Use with provided `effectId` to map to a matching interaction with `add` and effect with same `effectId`.'
       clear: 'clears all previously applied style states on enter. Use to reset multiple stacked `''add''` style changes at once (e.g. a "reset" hover area that undoes several accumulated states).'
+    fullLeanBehavior:
+      triggerType:
+        alternate: 'Play on enter, reverse on leave'
+        repeat: 'Play on enter, stop and rewind on leave'
+        once: 'Play once on first enter only'
+        state: 'Play on enter, pause on leave'
+      stateAction:
+        toggle: 'Add style state on enter, remove on leave'
+        add: 'Add style state on enter; leave does NOT remove'
+        remove: 'Remove style state on enter'
+        clear: 'Clear/reset all style states on enter'
     variableOverrides:
       sourceKeySuffix: 'The element that listens for hover.'
       targetKeyDesc: "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above)."
@@ -39,6 +57,7 @@ triggers:
       alternateBoolSuffix: ''
 
   - name: click
+    template: event-trigger-rule.mjs
     a11yAlias: activate
     a11yNote: "Use `trigger: 'activate'` instead of `trigger: 'click'` to also respond to keyboard activation (Enter / Space)."
     defaultTriggerType: alternate
@@ -67,6 +86,17 @@ triggers:
       add: 'applies the style state. Does not remove on subsequent clicks.'
       remove: 'removes a previously applied style state.'
       clear: 'clears all previously applied style states. Useful for resetting multiple stacked style states at once.'
+    fullLeanBehavior:
+      triggerType:
+        alternate: 'Alternate play/reverse per click'
+        repeat: 'Restart per click'
+        once: 'Play once on first click only'
+        state: 'Toggle play/pause per click'
+      stateAction:
+        toggle: 'Toggle style state per click'
+        add: 'Add style state on click'
+        remove: 'Remove style state on click'
+        clear: 'Clear/reset all style states'
     variableOverrides:
       sourceKeySuffix: 'The element that listens for clicks.'
       targetKeyDesc: "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element."
@@ -78,31 +108,45 @@ triggers:
       offsetEasingSuffix: ''
       alternateBoolSuffix: " Different from `triggerType: 'alternate'` which alternates per click."
 
+  # --------------------------------------------------------------------------
+  # Viewport/scroll triggers — each has its own dedicated template.
+  # Minimal schema: defaultTriggerType, params (with varName), pitfalls.
+  # --------------------------------------------------------------------------
   - name: viewEnter
+    template: viewenter-rule.mjs
     defaultTriggerType: once
     params:
       - name: threshold
+        varName: VISIBILITY_THRESHOLD
         type: number
         optional: true
         description: 'Number between 0–1 indicating how much of the source element must be visible to trigger (e.g. `0.3` = 30%).'
       - name: inset
+        varName: VIEWPORT_INSETS
         type: string
         optional: true
         description: "String adjusting the viewport detection area (e.g. `'-100px'` extends it, `'50px'` shrinks it)."
     pitfalls:
       - id: same-element-viewenter
         section: short
+        fullLeanSection: long
     showMultipleEffectsNote: true
 
   - name: viewProgress
+    template: viewprogress-rule.mjs
     defaultTriggerType: null
     params: []
     pitfalls:
       - id: overflow-clip
         section: short
+        fullLeanSection: long
     showMultipleEffectsNote: true
 
+  # --------------------------------------------------------------------------
+  # Pointer/chaining triggers — dedicated templates or no template.
+  # --------------------------------------------------------------------------
   - name: pointerMove
+    template: pointermove-rule.mjs
     defaultTriggerType: null
     params:
       - name: hitArea
@@ -116,6 +160,7 @@ triggers:
     pitfalls:
       - id: hit-area
         section: pointermove-source
+        fullLeanSection: detailed-pointermove
 
   - name: animationEnd
     defaultTriggerType: null

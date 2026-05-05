@@ -53,31 +53,15 @@ const css = generate(config);
 **Web (Custom Elements):**
 
 ```html
-<interact-element data-interact-key="[SOURCE_KEY]" data-interact-initial="true">
-  <section>...</section>
-</interact-element>
-```
-<!-- #code-web-example -->
-**Web (Custom Elements):**
-
-```html
-<interact-element data-interact-key="hero" data-interact-initial="true">
-  <section class="hero">...</section>
+<interact-element data-interact-key="{{key}}" data-interact-initial="true">
+  <section{{classAttr}}>...</section>
 </interact-element>
 ```
 <!-- #code-react -->
 **React:**
 
 ```tsx
-<Interaction tagName="section" interactKey="[SOURCE_KEY]" initial={true}>
-  ...
-</Interaction>
-```
-<!-- #code-react-example -->
-**React:**
-
-```tsx
-<Interaction tagName="section" interactKey="hero" initial={true} className="hero">
+<Interaction tagName="section" interactKey="{{key}}" initial={true}{{classAttr}}>
   ...
 </Interaction>
 ```
@@ -85,13 +69,7 @@ const css = generate(config);
 **Vanilla:**
 
 ```html
-<section data-interact-key="[SOURCE_KEY]" data-interact-initial="true">...</section>
-```
-<!-- #code-vanilla-example -->
-**Vanilla:**
-
-```html
-<section data-interact-key="hero" data-interact-initial="true" class="hero">...</section>
+<section data-interact-key="{{key}}" data-interact-initial="true"{{classAttr}}>...</section>
 ```
 <!-- #rules-viewenter -->
 ### Rules

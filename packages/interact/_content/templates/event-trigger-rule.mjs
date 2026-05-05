@@ -1,4 +1,4 @@
-import { capitalize, when } from './_helpers.mjs';
+import { capitalize, when, buildPitfallsBlock, varLine } from './_helpers.mjs';
 
 /**
  * Renders a trigger-specific rule file (click.md or hover.md).
@@ -12,10 +12,8 @@ export function render(data, fragments) {
   const hasReversed = trigger.templateFields.includes('reversed');
   const hasEffectId = trigger.templateFields.includes('effectId');
 
-  const pitfallsBlock = when(
-    trigger.pitfalls.length > 0,
-    '\n' + trigger.pitfalls.map((p) => fragments.get(`pitfalls/${p.id}`, name)).join('\n') + '\n',
-  );
+  const pitfallsRaw = buildPitfallsBlock(trigger, fragments);
+  const pitfallsBlock = pitfallsRaw ? `\n${pitfallsRaw}\n` : '';
 
   const multipleEffectsNote = when(
     trigger.showMultipleEffectsNote,
@@ -200,14 +198,14 @@ function buildVariables(trigger, hasReversed, hasEffectId) {
   const vo = trigger.variableOverrides;
 
   const lines = [
-    `- \`[SOURCE_KEY]\` — identifier matching the element's key (\`data-interact-key\` for web, \`interactKey\` for React). ${vo.sourceKeySuffix}`,
-    `- \`[TARGET_KEY]\` — ${vo.targetKeyDesc}`,
+    varLine('SOURCE_KEY', vo.sourceKeySuffix),
+    varLine('TARGET_KEY', vo.targetKeyDesc),
     `- \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:`,
     ...Object.entries(trigger.triggerTypeDescriptions).map(([k, v]) => `  - \`'${k}'\` — ${v}`),
-    `- \`[KEYFRAMES]\` — array of keyframe objects (e.g. \`[{ opacity: 0 }, { opacity: 1 }]\`). Property names in camelCase.`,
-    `- \`[EFFECT_NAME]\` — unique string identifier for a \`keyframeEffect\`.`,
-    `- \`[NAMED_EFFECT_DEFINITION]\` — object with properties of pre-built effect from \`@wix/motion-presets\`. Refer to motion-presets rules for available presets and their options.`,
-    `- \`[FILL_MODE]\` — ${vo.fillModeDesc}`,
+    varLine('KEYFRAMES'),
+    varLine('EFFECT_NAME'),
+    varLine('NAMED_EFFECT_DEFINITION'),
+    varLine('FILL_MODE', vo.fillModeDesc),
   ];
   if (hasReversed) {
     lines.push(
@@ -215,16 +213,14 @@ function buildVariables(trigger, hasReversed, hasEffectId) {
     );
   }
   lines.push(
-    `- \`[DURATION_MS]\` — animation duration in milliseconds.`,
-    `- \`[EASING_FUNCTION]\` — ${vo.easingDesc}`,
-    `- \`[DELAY_MS]\` — optional delay before the effect starts, in milliseconds.`,
-    `- \`[ITERATIONS]\` — ${vo.iterationsDesc}`,
-    `- \`[ALTERNATE_BOOL]\` — optional. \`true\` to alternate direction on every other iteration (within a single playback).${when(vo.alternateBoolSuffix, vo.alternateBoolSuffix)}`,
+    varLine('DURATION_MS'),
+    varLine('EASING_FUNCTION', vo.easingDesc),
+    varLine('DELAY_MS'),
+    varLine('ITERATIONS', vo.iterationsDesc),
+    varLine('ALTERNATE_BOOL', vo.alternateBoolSuffix || undefined),
   );
   if (hasEffectId) {
-    lines.push(
-      `- \`[UNIQUE_EFFECT_ID]\` — optional. String identifier used by \`animationEnd\` triggers for chaining, and by sequences for referencing effects from the top-level \`effects\` map.`,
-    );
+    lines.push(varLine('UNIQUE_EFFECT_ID'));
   }
   return lines.join('\n');
 }

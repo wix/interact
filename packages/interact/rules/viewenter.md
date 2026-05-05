@@ -134,7 +134,7 @@ Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animatio
 
 ### Variables
 
-- `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for web/vanilla, `interactKey` for React). The **source element** is observed for viewport intersection. This is the element the IntersectionObserver watches.
+- `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for web, `interactKey` for React). The **source element** is observed for viewport intersection. This is the element the IntersectionObserver watches.
 - `[TARGET_KEY]` — identifier matching the element's key on the element that animates.
 - `[TARGET_SELECTOR]` - optional. Selector for the child element to select inside the root element. For `triggerType` of `'alternate'`/`'repeat'`/`'state'` MUST either use a separate `[TARGET_KEY]` from `[SOURCE_KEY]` or `selector` for selecting a child element as target.
 - `[TRIGGER_TYPE]` — `triggerType` on the effect. One of:
@@ -153,7 +153,7 @@ Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animatio
 - `[DELAY_MS]` — optional delay before the effect starts, in milliseconds.
 - `[ITERATIONS]` — optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.
 - `[ALTERNATE_BOOL]` — optional. `true` to alternate direction on every other iteration (within a single playback).
-- `[UNIQUE_EFFECT_ID]` — optional. String identifier used by `animationEnd` triggers for chaining, and by sequences for referencing effects.
+- `[UNIQUE_EFFECT_ID]` — optional. String identifier used by `animationEnd` triggers for chaining, and by sequences for referencing effects from the top-level `effects` map.
 
 ---
 

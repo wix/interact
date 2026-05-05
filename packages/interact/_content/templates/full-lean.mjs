@@ -1,5 +1,34 @@
 import { capitalize } from './_helpers.mjs';
 
+function buildBehaviorTable(headerLabel, behaviorKey, hover, click) {
+  const hoverBehavior = hover.fullLeanBehavior[behaviorKey];
+  const clickBehavior = click.fullLeanBehavior[behaviorKey];
+  const keys = Object.keys(hoverBehavior);
+  const defaultKey = keys[0];
+
+  const rows = keys.map((k) => {
+    const label = k === defaultKey ? `\`'${k}'\` (default)` : `\`'${k}'\``;
+    return { label, hover: hoverBehavior[k], click: clickBehavior[k] };
+  });
+
+  const col0Width = Math.max(headerLabel.length, ...rows.map((r) => r.label.length));
+  const col1Width = Math.max('hover behavior'.length, ...rows.map((r) => r.hover.length));
+  const col2Width = Math.max('click behavior'.length, ...rows.map((r) => r.click.length));
+
+  return [
+    `| ${headerLabel.padEnd(col0Width)} | ${'hover behavior'.padEnd(col1Width)} | ${'click behavior'.padEnd(col2Width)} |`,
+    `| :${'-'.repeat(col0Width - 1)} | :${'-'.repeat(col1Width - 1)} | :${'-'.repeat(col2Width - 1)} |`,
+    ...rows.map(
+      (r) =>
+        `| ${r.label.padEnd(col0Width)} | ${r.hover.padEnd(col1Width)} | ${r.click.padEnd(col2Width)} |`,
+    ),
+  ].join('\n');
+}
+
+function buildFullLeanPitfalls(pitfallOrder, fragments) {
+  return pitfallOrder.map((p) => fragments.get(`pitfalls/${p.id}`, p.section)).join('\n');
+}
+
 /**
  * Renders full-lean.md — the comprehensive reference for all triggers, effects, and API surface.
  * @param {{ triggers: object[], effects: object, meta: object }} data
@@ -81,10 +110,7 @@ Declarative configuration-driven interaction library. Binds animations to trigge
 
 Each item here is CRITICAL — ignoring any of them will break animations.
 
-${fragments.get('pitfalls/overflow-clip', 'long')}
-${fragments.get('pitfalls/same-element-viewenter', 'long')}
-${fragments.get('pitfalls/hit-area', 'detailed-hover')}
-${fragments.get('pitfalls/hit-area', 'detailed-pointermove')}
+${buildFullLeanPitfalls(data.effects.fullLeanPitfallOrder, fragments)}
 ${fragments.get('pitfalls/dont-guess-presets', 'default')}
 ${fragments.get('pitfalls/reduced-motion', 'default')}
 ${fragments.get('pitfalls/perspective', 'default')}
@@ -226,21 +252,11 @@ For \`TimeEffect\` (keyframe/named/custom effects), set \`triggerType\` on the e
 
 **\`triggerType\`** — on \`TimeEffect\`:
 
-| Type                    | hover behavior                          | click behavior                   |
-| :---------------------- | :-------------------------------------- | :------------------------------- |
-| \`'alternate'\` (default) | Play on enter, reverse on leave         | Alternate play/reverse per click |
-| \`'repeat'\`              | Play on enter, stop and rewind on leave | Restart per click                |
-| \`'once'\`                | Play once on first enter only           | Play once on first click only    |
-| \`'state'\`               | Play on enter, pause on leave           | Toggle play/pause per click      |
+${buildBehaviorTable('Type', 'triggerType', hover, click)}
 
 **\`stateAction\`** — on \`StateEffect\`:
 
-| Action               | hover behavior                                  | click behavior               |
-| :------------------- | :---------------------------------------------- | :--------------------------- |
-| \`'toggle'\` (default) | Add style state on enter, remove on leave       | Toggle style state per click |
-| \`'add'\`              | Add style state on enter; leave does NOT remove | Add style state on click     |
-| \`'remove'\`           | Remove style state on enter                     | Remove style state on click  |
-| \`'clear'\`            | Clear/reset all style states on enter           | Clear/reset all style states |
+${buildBehaviorTable('Action', 'stateAction', hover, click)}
 
 ### viewEnter
 
@@ -496,11 +512,11 @@ ${fragments.get('fouc', 'code-inject')}
 
 ### Step 2: Mark elements
 
-${fragments.get('fouc', 'code-web-example')}
+${fragments.get('fouc', 'code-web', { key: 'hero', classAttr: ' class="hero"' })}
 
-${fragments.get('fouc', 'code-react-example')}
+${fragments.get('fouc', 'code-react', { key: 'hero', classAttr: ' className="hero"' })}
 
-${fragments.get('fouc', 'code-vanilla-example')}
+${fragments.get('fouc', 'code-vanilla', { key: 'hero', classAttr: ' class="hero"' })}
 
 ${fragments.get('fouc', 'rules-detailed')}
 
