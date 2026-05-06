@@ -28,7 +28,7 @@ The package exports **73 presets** across 5 categories (verified from source and
 - **Mouse** (9): AiryMouse, BlobMouse, BlurMouse, ScaleMouse, SkewMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, TrackMouse
 - **Background Scroll** (12): BgCloseUp, BgFade, BgFadeBack, BgFake3D, BgPan, BgParallax, BgPullBack, BgReveal, BgRotate, BgSkew, BgZoom, ImageParallax
 
-Key architectural note: `registerEffects()` lives in **`@wix/motion`**, not this package. This package exports preset modules that you pass *into* `registerEffects()`.
+Key architectural note: `registerEffects()` lives in **`@wix/motion`**, not this package. This package exports preset modules that you pass _into_ `registerEffects()`.
 
 ## Proposed Section Structure
 
@@ -70,12 +70,14 @@ Show how presets are consumed via `namedEffect` in an Interact config. One conci
 ### 6. Usage with @wix/motion
 
 Show direct usage with `getWebAnimation()` and `getScrubScene()`. Two examples:
+
 - Time-based entrance with `namedEffect`
 - Scroll-driven with `namedEffect`
 
 ### 7. Preset Categories (5 subsections)
 
 This is the catalog. For each category:
+
 - One-line description of what it does
 - How it's triggered / implemented (from [presets-main.md](packages/motion-presets/rules/presets/presets-main.md))
 - Full preset list (names only, as a comma-separated line)
@@ -84,18 +86,21 @@ This is the catalog. For each category:
 Categories: **Entrance**, **Scroll**, **Ongoing**, **Mouse**, **Background Scroll**
 
 Source for preset lists:
+
 - Entrance, Scroll, Ongoing, Mouse: from [`rules/presets/presets-main.md`](packages/motion-presets/rules/presets/presets-main.md)
 - Background Scroll: from [`src/library/backgroundScroll/index.ts`](packages/motion-presets/src/library/backgroundScroll/index.ts)
 
 ### 8. Choosing a Preset
 
 Brief guidance section:
+
 - "Choose by intent" table mapping intents (reveal, attention, parallax, pointer tracking, background media) to recommended categories and example presets
 - Link to the full "Selection by Atmosphere" guide in [`presets-main.md`](packages/motion-presets/rules/presets/presets-main.md)
 
 ### 9. Parameter Conventions
 
 Brief section covering:
+
 - `direction` parameter accepts different value sets depending on the preset (cardinal, axis, rotation, angle)
 - Distance units: `{ value, type }` object notation
 - Link to full parameter standards in `presets-main.md`
@@ -103,6 +108,7 @@ Brief section covering:
 ### 10. Accessibility
 
 Concise section noting:
+
 - Reduced-motion handling via Interact's `conditions` system
 - Preset risk levels (high/medium/low) with examples
 - Reduced-motion fallback table (subset)

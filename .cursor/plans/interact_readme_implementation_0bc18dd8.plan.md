@@ -60,6 +60,7 @@ Sourced from `package.json` description. No emoji.
 ### 3. Why Interact? (Value Proposition)
 
 5-6 concise bullet points:
+
 - **Config-driven**: Define trigger-to-effect bindings in JSON — no imperative event wiring
 - **Web-native**: Built on WAAPI, ViewTimeline, and IntersectionObserver — no custom runtime
 - **Three entry points**: Vanilla JS, React, Web Components — same config shape across all
@@ -80,6 +81,7 @@ Show with optional presets since it's the common path.
 **Key change from current:** Show ONE complete, working React example (most common path) with preset registration, `useEffect` lifecycle, and cleanup. Then provide compact "also available" snippets for Web Components and Vanilla (config reuse, only show the framework-specific wrapper).
 
 React example must include:
+
 - `import { Interact } from '@wix/interact/react'` + `Interaction` component
 - `registerEffects(presets)` before `Interact.create()`
 - `useEffect` + `instance.destroy()` cleanup
@@ -93,11 +95,11 @@ Web Components and Vanilla follow as shorter blocks showing only the binding dif
 
 Compact table:
 
-| Import | Use When |
-|--------|----------|
-| `@wix/interact` | Vanilla JS — manual element binding via `add(el, key)` |
-| `@wix/interact/react` | React — `<Interaction>` component with lifecycle |
-| `@wix/interact/web` | Web Components — `<interact-element>` custom element |
+| Import                | Use When                                               |
+| --------------------- | ------------------------------------------------------ |
+| `@wix/interact`       | Vanilla JS — manual element binding via `add(el, key)` |
+| `@wix/interact/react` | React — `<Interaction>` component with lifecycle       |
+| `@wix/interact/web`   | Web Components — `<interact-element>` custom element   |
 
 All three export the same `Interact` class, `generate()`, types.
 
@@ -124,16 +126,16 @@ type InteractConfig = {
 
 Scannable table with one-line descriptions (sourced from [`src/types/triggers.ts`](packages/interact/src/types/triggers.ts)):
 
-| Trigger | Fires When | Params |
-|---------|-----------|--------|
-| `viewEnter` | Element enters viewport | `threshold`, `inset` |
-| `viewProgress` | Element scrolls through viewport | (range on effect) |
-| `hover` | Pointer enters element | — |
-| `click` | Element is clicked | — |
-| `activate` | Click + keyboard (a11y) | — |
-| `interest` | Hover + focus (a11y) | — |
-| `pointerMove` | Pointer moves over element/root | `hitArea`, `axis` |
-| `animationEnd` | Another effect completes | `effectId` |
+| Trigger        | Fires When                       | Params               |
+| -------------- | -------------------------------- | -------------------- |
+| `viewEnter`    | Element enters viewport          | `threshold`, `inset` |
+| `viewProgress` | Element scrolls through viewport | (range on effect)    |
+| `hover`        | Pointer enters element           | —                    |
+| `click`        | Element is clicked               | —                    |
+| `activate`     | Click + keyboard (a11y)          | —                    |
+| `interest`     | Hover + focus (a11y)             | —                    |
+| `pointerMove`  | Pointer moves over element/root  | `hitArea`, `axis`    |
+| `animationEnd` | Another effect completes         | `effectId`           |
 
 ### 9. Effects
 
@@ -186,6 +188,7 @@ This is the **key differentiator** section — expanded and prominent:
 ### 13. Browser Support
 
 Keep concise:
+
 - Modern browsers with Web Animations API support (Baseline)
 - `adoptedStyleSheets` (for `transition`/`transitionProperties`): Chrome 73+, Firefox 101+, Safari 16.4+, Edge 79+
 - ViewTimeline: Chrome 115+; polyfilled via `fizban` for other browsers

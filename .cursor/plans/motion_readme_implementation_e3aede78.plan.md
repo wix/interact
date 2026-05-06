@@ -74,20 +74,17 @@ Two concise examples from the **actual API** (verified against source):
 ```typescript
 import { getWebAnimation } from '@wix/motion';
 
-const animation = getWebAnimation(
-  document.getElementById('hero'),
-  {
-    keyframeEffect: {
-      name: 'fade-up',
-      keyframes: [
-        { opacity: 0, transform: 'translateY(20px)' },
-        { opacity: 1, transform: 'translateY(0)' },
-      ],
-    },
-    duration: 600,
-    easing: 'easeOut',
+const animation = getWebAnimation(document.getElementById('hero'), {
+  keyframeEffect: {
+    name: 'fade-up',
+    keyframes: [
+      { opacity: 0, transform: 'translateY(20px)' },
+      { opacity: 1, transform: 'translateY(0)' },
+    ],
   },
-);
+  duration: 600,
+  easing: 'easeOut',
+});
 
 animation.play();
 ```
@@ -102,10 +99,7 @@ const scenes = getScrubScene(
   {
     keyframeEffect: {
       name: 'parallax',
-      keyframes: [
-        { transform: 'translateY(0)' },
-        { transform: 'translateY(-80px)' },
-      ],
+      keyframes: [{ transform: 'translateY(0)' }, { transform: 'translateY(-80px)' }],
     },
   },
   { trigger: 'view-progress', element: scrollRoot },
@@ -118,25 +112,25 @@ Use `keyframeEffect` (inline keyframes) rather than `namedEffect` in examples �
 
 Brief descriptions of the three driving modes with when-to-use guidance:
 
-| Mode | Driver | API |
-|------|--------|-----|
-| Time-based | Duration + easing | `getWebAnimation()` / `getCSSAnimation()` |
-| Scroll-driven | ViewTimeline / external scrub | `getScrubScene()` with `view-progress` trigger |
-| Pointer-driven | Mouse/touch position | `getScrubScene()` with `pointer-move` trigger |
+| Mode           | Driver                        | API                                            |
+| -------------- | ----------------------------- | ---------------------------------------------- |
+| Time-based     | Duration + easing             | `getWebAnimation()` / `getCSSAnimation()`      |
+| Scroll-driven  | ViewTimeline / external scrub | `getScrubScene()` with `view-progress` trigger |
+| Pointer-driven | Mouse/touch position          | `getScrubScene()` with `pointer-move` trigger  |
 
 ### 7. Core API Table
 
 Scannable table of main exports linking to docs:
 
-| Function | Purpose |
-|----------|---------|
-| `getWebAnimation()` | Create WAAPI-backed animations (time or scroll) |
-| `getCSSAnimation()` | Generate CSS animation descriptors for stylesheet injection |
-| `getScrubScene()` | Build scroll or pointer-driven scrub scenes |
-| `prepareAnimation()` | Pre-measure layout via fastdom before animating |
-| `getAnimation()` | Auto-select CSS (if present) or WAAPI path |
-| `getSequence()` | Coordinate staggered groups with easing-based offsets |
-| `registerEffects()` | Register named effect modules into the global registry |
+| Function             | Purpose                                                     |
+| -------------------- | ----------------------------------------------------------- |
+| `getWebAnimation()`  | Create WAAPI-backed animations (time or scroll)             |
+| `getCSSAnimation()`  | Generate CSS animation descriptors for stylesheet injection |
+| `getScrubScene()`    | Build scroll or pointer-driven scrub scenes                 |
+| `prepareAnimation()` | Pre-measure layout via fastdom before animating             |
+| `getAnimation()`     | Auto-select CSS (if present) or WAAPI path                  |
+| `getSequence()`      | Coordinate staggered groups with easing-based offsets       |
+| `registerEffects()`  | Register named effect modules into the global registry      |
 
 ### 8. Custom Effects
 
@@ -153,6 +147,7 @@ Brief paragraph + compact example from [`src/Sequence.ts`](packages/motion/src/S
 ### 10. ViewTimeline and Polyfills
 
 Explain the progressive enhancement story:
+
 - When `window.ViewTimeline` is available → native scroll-linked animation
 - When absent → `getScrubScene()` returns `ScrubScrollScene[]` objects with an `effect(progress)` method for external drivers (e.g., `fizban` in Interact, or your own IntersectionObserver/scroll listener)
 - Pointer polyfill story: `ScrubPointerScene` supports `transitionDuration` / `transitionEasing` for smoothed pointer tracking
@@ -165,11 +160,11 @@ Explain the progressive enhancement story:
 
 ### 12. Browser Support
 
-| Feature | Support |
-|---------|---------|
-| Web Animations API | Baseline — wide availability |
-| CSS Animations | Baseline — wide availability |
-| ViewTimeline | Chrome 115+; other browsers via external scroll driver |
+| Feature            | Support                                                |
+| ------------------ | ------------------------------------------------------ |
+| Web Animations API | Baseline — wide availability                           |
+| CSS Animations     | Baseline — wide availability                           |
+| ViewTimeline       | Chrome 115+; other browsers via external scroll driver |
 
 ### 13. Related Packages
 

@@ -23,6 +23,7 @@ The existing [README.md](README.md) is 57 lines of generic monorepo boilerplate 
 ## Target
 
 A single-file landing page that serves three audiences simultaneously:
+
 - **Developers**: quick-start examples, package navigation, API surface
 - **Designers / non-coders**: what-it-does framing, link to live demos
 - **AI agents / LLMs**: structured config schema, rules file links, canonical constraints
@@ -45,6 +46,7 @@ npm versions for all 3 packages, MIT license badge, bundle size badge for `@wix/
 ### 3. What is Interact? (Elevator Pitch)
 
 2-3 sentences covering:
+
 - Config-driven: define trigger-to-effect bindings in JSON, not imperative code
 - Built on native browser APIs (WAAPI, ViewTimeline, pointer tracking) — no custom animation runtime
 - Three entry points: vanilla JS, React, Web Components
@@ -71,18 +73,19 @@ graph BT
 
 Decision table with 4 rows:
 
-| Goal | Package |
-|------|---------|
-| Add animations to a page via config | `@wix/interact` |
-| Use ready-made entrance/scroll/hover presets | `@wix/interact` + `@wix/motion-presets` |
-| Build a custom animation engine or low-level control | `@wix/motion` |
-| Generate interaction configs from AI/LLM | `@wix/interact` + rules files |
+| Goal                                                 | Package                                 |
+| ---------------------------------------------------- | --------------------------------------- |
+| Add animations to a page via config                  | `@wix/interact`                         |
+| Use ready-made entrance/scroll/hover presets         | `@wix/interact` + `@wix/motion-presets` |
+| Build a custom animation engine or low-level control | `@wix/motion`                           |
+| Generate interaction configs from AI/LLM             | `@wix/interact` + rules files           |
 
 ### 6. Quick Start (The Core of the README)
 
 This is the most critical section. Three sub-sections showing complete, working examples that an LLM can copy and adapt without errors.
 
 **Important accuracy constraints** (from source code analysis):
+
 - `effects` at config top-level is `Record<string, Effect>` — always include it, even as `{}`
 - `add` / `remove` are standalone imports, NOT instance methods
 - React requires `useEffect` wrapper with `instance.destroy()` cleanup
@@ -92,6 +95,7 @@ This is the most critical section. Three sub-sections showing complete, working 
 #### 6a. React (Primary — shown first since it's the most common path)
 
 Complete working example with:
+
 - `@wix/motion-presets` registration
 - `useEffect` + cleanup pattern from [integration.md](packages/interact/rules/integration.md) lines 56-69
 - `<Interaction>` component with `tagName`, `interactKey`, `initial`
@@ -101,12 +105,14 @@ Complete working example with:
 #### 6b. Web Components
 
 Same interaction config, but using:
+
 - `import { Interact } from '@wix/interact/web'`
 - `<interact-element data-interact-key="..." data-interact-initial="true">`
 
 #### 6c. Vanilla JS
 
 Same config, but using:
+
 - `import { Interact, add } from '@wix/interact'`
 - `add(element, key)` standalone function
 - `<div data-interact-key="...">`
@@ -128,7 +134,7 @@ A concise, annotated TypeScript block showing the canonical `InteractConfig` sha
 
 ```typescript
 type InteractConfig = {
-  interactions: Interaction[];       // trigger-to-effect bindings (REQUIRED)
+  interactions: Interaction[]; // trigger-to-effect bindings (REQUIRED)
   effects?: Record<string, Effect>; // reusable effect definitions
   sequences?: Record<string, SequenceConfig>;
   conditions?: Record<string, Condition>;
@@ -140,6 +146,7 @@ Plus the `Interaction` shape, trigger list, and effect discriminants (`keyframeE
 ### 9. AI and Agent Support
 
 Structured section with:
+
 - **Rules files** — direct links (relative paths) to all rules files in `packages/interact/rules/` and `packages/motion-presets/rules/presets/`. Use the GitHub Pages URLs for public access and relative paths for local/cloned access.
 - **Config generation guidelines** — 4-5 bullet constraints:
   - Always register presets before `Interact.create()`
@@ -158,6 +165,7 @@ Structured section with:
 ### 11. Development
 
 Condensed section (this is a public README, not internal docs):
+
 - Prerequisites: Node >= 18, Yarn 4.10.3, `nvm use`
 - `yarn install && yarn build && yarn test`
 - `yarn dev:docs` / `yarn dev:demo` / `yarn dev:playground`
