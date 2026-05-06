@@ -10,7 +10,7 @@ Reusable markdown content with `<!-- #section -->` markers for granular inclusio
 | `#brief` / `#detailed`    | Two detail levels of the same content                          | `config-structure.md`        |
 | `#short` / `#long`        | Short and long versions of the same concept                    | `fouc.md`, `overflow-clip.md`|
 | `#<trigger-name>`         | Trigger-specific variant (e.g. `hover`, `viewEnter`)           | `hit-area.md`, `multiple-effects-note.md` |
-| `#full-lean`              | Condensed wording used by the full-lean reference              | `overflow-clip.md`           |
+| `#full-lean` / `#full-lean-<qualifier>` | Condensed wording used by the full-lean reference | `overflow-clip.md`, `hit-area.md` |
 | `#code-<variant>`         | Code example variant (e.g. `code-web`, `code-react`)           | `fouc.md`, `quick-start.md`  |
 | `#<noun>` / `#<noun>-<qualifier>` | Named concept sections                                | `element-resolution.md`      |
 

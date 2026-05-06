@@ -47,6 +47,45 @@ const TRIGGER_SCHEMA = {
   'pointermove-rule.mjs': ['params', 'pitfalls'],
 };
 
+const FIELD_VALIDATORS = {
+  pitfalls(arr, trigger) {
+    if (!Array.isArray(arr))
+      throw new Error(`triggers.yaml: trigger "${trigger.name}".pitfalls must be an array`);
+    for (const p of arr) {
+      if (!p.id)
+        throw new Error(
+          `triggers.yaml: trigger "${trigger.name}" has a pitfall entry missing "id"`,
+        );
+    }
+  },
+  params(arr, trigger) {
+    if (!Array.isArray(arr))
+      throw new Error(`triggers.yaml: trigger "${trigger.name}".params must be an array`);
+    for (const p of arr) {
+      if (!p.name)
+        throw new Error(
+          `triggers.yaml: trigger "${trigger.name}" has a param entry missing "name"`,
+        );
+    }
+  },
+  hasReversed(val, trigger) {
+    if (typeof val !== 'boolean')
+      throw new Error(`triggers.yaml: trigger "${trigger.name}".hasReversed must be a boolean`);
+  },
+  hasEffectId(val, trigger) {
+    if (typeof val !== 'boolean')
+      throw new Error(`triggers.yaml: trigger "${trigger.name}".hasEffectId must be a boolean`);
+  },
+  triggerTypeDescriptions(obj, trigger) {
+    for (const [key, val] of Object.entries(obj)) {
+      if (typeof val !== 'object' || !val.full)
+        throw new Error(
+          `triggers.yaml: trigger "${trigger.name}".triggerTypeDescriptions.${key} must be an object with a "full" key`,
+        );
+    }
+  },
+};
+
 for (const trigger of data.triggers) {
   const required = TRIGGER_SCHEMA[trigger.template];
   if (!required) continue;
@@ -56,48 +95,7 @@ for (const trigger of data.triggers) {
         `triggers.yaml: trigger "${trigger.name}" is missing required field "${field}" (needed by ${trigger.template})`,
       );
     }
-  }
-
-  if (trigger.pitfalls !== undefined) {
-    if (!Array.isArray(trigger.pitfalls)) {
-      throw new Error(`triggers.yaml: trigger "${trigger.name}".pitfalls must be an array`);
-    }
-    for (const p of trigger.pitfalls) {
-      if (!p.id) {
-        throw new Error(
-          `triggers.yaml: trigger "${trigger.name}" has a pitfall entry missing "id"`,
-        );
-      }
-    }
-  }
-
-  if (trigger.params !== undefined) {
-    if (!Array.isArray(trigger.params)) {
-      throw new Error(`triggers.yaml: trigger "${trigger.name}".params must be an array`);
-    }
-    for (const p of trigger.params) {
-      if (!p.name) {
-        throw new Error(
-          `triggers.yaml: trigger "${trigger.name}" has a param entry missing "name"`,
-        );
-      }
-    }
-  }
-
-  for (const field of ['hasReversed', 'hasEffectId']) {
-    if (trigger[field] !== undefined && typeof trigger[field] !== 'boolean') {
-      throw new Error(`triggers.yaml: trigger "${trigger.name}".${field} must be a boolean`);
-    }
-  }
-
-  if (trigger.triggerTypeDescriptions) {
-    for (const [key, val] of Object.entries(trigger.triggerTypeDescriptions)) {
-      if (typeof val !== 'object' || !val.full) {
-        throw new Error(
-          `triggers.yaml: trigger "${trigger.name}".triggerTypeDescriptions.${key} must be an object with a "full" key`,
-        );
-      }
-    }
+    FIELD_VALIDATORS[field]?.(trigger[field], trigger);
   }
 }
 

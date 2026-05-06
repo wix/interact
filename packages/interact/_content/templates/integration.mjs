@@ -4,6 +4,14 @@
  * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
+  const metaParams = {
+    installCommand: data.meta.installCommand,
+    webEntry: data.meta.entryPoints.web,
+    reactEntry: data.meta.entryPoints.react,
+    vanillaEntry: data.meta.entryPoints.vanilla,
+    presetsPackage: data.meta.presetsPackage,
+  };
+
   return `# ${data.meta.packageName} Integration Rules
 
 Rules for integrating \`${data.meta.packageName}\` into a webpage — binding animations and effects to user-driven triggers via declarative configuration.
@@ -30,11 +38,11 @@ Rules for integrating \`${data.meta.packageName}\` into a webpage — binding an
 
 Install with your package manager:
 
-${fragments.get('quick-start', 'install')}
+${fragments.get('quick-start', 'install', metaParams)}
 
 ### Web (Custom Elements)
 
-${fragments.get('quick-start', 'web-brief')}
+${fragments.get('quick-start', 'web-brief', metaParams)}
 
 Wrap target elements with \`<interact-element>\`:
 
@@ -84,7 +92,7 @@ import { Interaction } from '@wix/interact/react';
 
 ### Vanilla JS
 
-${fragments.get('quick-start', 'vanilla-brief')}
+${fragments.get('quick-start', 'vanilla-brief', metaParams)}
 
 **Rules:**
 

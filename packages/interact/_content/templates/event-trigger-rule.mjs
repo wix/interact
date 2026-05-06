@@ -3,8 +3,6 @@ import { capitalize, buildPitfallsBlock, varLine } from './_helpers.mjs';
 const VARIABLE_OVERRIDES_BASE = {
   customEffectExamples: '',
   offsetEasingSuffix: '',
-  alternateBoolSuffix: undefined,
-  iterationsDesc: undefined,
 };
 
 const VARIABLE_OVERRIDES = {

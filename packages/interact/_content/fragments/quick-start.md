@@ -1,19 +1,19 @@
 <!-- #install -->
 ```bash
-npm install @wix/interact @wix/motion-presets
+{{installCommand}}
 ```
 <!-- #web -->
 **Web (Custom Elements):**
 
 ```ts
-import { Interact } from '@wix/interact/web';
+import { Interact } from '{{webEntry}}';
 const instance = Interact.create(config);
 ```
 
 The `config` object is an `InteractConfig` containing `interactions` (required), and optionally shared `effects`, `sequences`, and `conditions`.
 <!-- #web-brief -->
 ```typescript
-import { Interact } from '@wix/interact/web';
+import { Interact } from '{{webEntry}}';
 
 Interact.create(config);
 ```
@@ -27,7 +27,7 @@ The `config` object contains `interactions` (trigger-effect bindings), and optio
 
 ```ts
 import { useEffect } from 'react';
-import { Interact } from '@wix/interact/react';
+import { Interact } from '{{reactEntry}}';
 
 useEffect(() => {
   const instance = Interact.create(config);
@@ -41,14 +41,14 @@ useEffect(() => {
 **Vanilla JS:**
 
 ```ts
-import { Interact } from '@wix/interact';
+import { Interact } from '{{vanillaEntry}}';
 const instance = Interact.create(config);
 instance.add(element, 'hero'); // bind after element exists in DOM
 instance.remove('hero'); // unregister
 ```
 <!-- #vanilla-brief -->
 ```typescript
-import { Interact } from '@wix/interact';
+import { Interact } from '{{vanillaEntry}}';
 
 const interact = Interact.create(config);
 interact.add(element, 'hero');
@@ -58,7 +58,7 @@ interact.add(element, 'hero');
 
 ```html
 <script type="module">
-  import { Interact } from 'https://esm.sh/@wix/interact';
+  import { Interact } from 'https://esm.sh/{{vanillaEntry}}';
   Interact.create(config);
 </script>
 ```
@@ -66,14 +66,14 @@ interact.add(element, 'hero');
 **Registering presets** — MUST be called before calling `Interact.create()` with usage of `namedEffect`:
 
 ```ts
-import * as presets from '@wix/motion-presets';
+import * as presets from '{{presetsPackage}}';
 Interact.registerEffects(presets);
 ```
 
 Or selectively:
 
 ```ts
-import { FadeIn, ParallaxScroll } from '@wix/motion-presets';
+import { FadeIn, ParallaxScroll } from '{{presetsPackage}}';
 Interact.registerEffects({ FadeIn, ParallaxScroll });
 ```
 <!-- #multiple-instances -->

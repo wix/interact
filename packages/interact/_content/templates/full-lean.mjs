@@ -3,17 +3,17 @@ import { capitalize, buildMarkdownTable } from './_helpers.mjs';
 const FULL_LEAN_PITFALL_ORDER = [
   { id: 'overflow-clip', section: 'long' },
   { id: 'same-element-viewenter', section: 'long' },
-  { id: 'hit-area', section: 'detailed-hover' },
-  { id: 'hit-area', section: 'detailed-pointermove' },
+  { id: 'hit-area', section: 'full-lean-hover' },
+  { id: 'hit-area', section: 'full-lean-pointermove' },
 ];
 
 function buildBehaviorTable(headerLabel, behaviorKey, triggers, { defaultKey } = {}) {
-  const keys = Object.keys(triggers[0][behaviorKey]);
+  const keys = [...new Set(triggers.flatMap((t) => Object.keys(t[behaviorKey])))];
 
   const rows = keys.map((k) => {
     const isDefault = defaultKey ? k === defaultKey : false;
     const label = isDefault ? `\`'${k}'\` (default)` : `\`'${k}'\``;
-    return [label, ...triggers.map((t) => t[behaviorKey][k].short)];
+    return [label, ...triggers.map((t) => t[behaviorKey][k]?.short ?? '—')];
   });
 
   return buildMarkdownTable(
@@ -62,6 +62,14 @@ export function render(data, fragments) {
     Object.entries(data.effects.rangeNames).map(([name, desc]) => [`\`${name}\``, desc]),
   );
 
+  const metaParams = {
+    installCommand: data.meta.installCommand,
+    webEntry: data.meta.entryPoints.web,
+    reactEntry: data.meta.entryPoints.react,
+    vanillaEntry: data.meta.entryPoints.vanilla,
+    presetsPackage: data.meta.presetsPackage,
+  };
+
   return `# ${data.meta.packageName} — Rules
 
 Declarative configuration-driven interaction library. Binds animations to triggers via JSON config.
@@ -105,19 +113,19 @@ ${fragments.get('pitfalls/perspective', 'default')}
 
 ## Quick Start
 
-${fragments.get('quick-start', 'install')}
+${fragments.get('quick-start', 'install', metaParams)}
 
 ${fragments.get('quick-start', 'multiple-instances')}
 
-${fragments.get('quick-start', 'web')}
+${fragments.get('quick-start', 'web', metaParams)}
 
-${fragments.get('quick-start', 'react')}
+${fragments.get('quick-start', 'react', metaParams)}
 
-${fragments.get('quick-start', 'vanilla')}
+${fragments.get('quick-start', 'vanilla', metaParams)}
 
-${fragments.get('quick-start', 'cdn')}
+${fragments.get('quick-start', 'cdn', metaParams)}
 
-${fragments.get('quick-start', 'register-presets')}
+${fragments.get('quick-start', 'register-presets', metaParams)}
 
 ---
 
