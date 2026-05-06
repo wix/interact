@@ -9,7 +9,7 @@ export const triggers = [
       "Use `trigger: 'interest'` instead of `trigger: 'hover'` to also respond to keyboard focus.",
     defaultTriggerType: 'alternate',
     params: [],
-    pitfalls: [{ id: 'hit-area' }],
+    pitfalls: [{ id: 'hit-area', fullLeanSection: 'full-lean-hover' }],
     showMultipleEffectsNote: true,
     hasReversed: false,
     hasEffectId: false,
@@ -124,7 +124,7 @@ export const triggers = [
           "String adjusting the viewport detection area (e.g. `'-100px'` extends it, `'50px'` shrinks it).",
       },
     ],
-    pitfalls: [{ id: 'same-element-viewenter', section: 'short' }],
+    pitfalls: [{ id: 'same-element-viewenter', section: 'short', fullLeanSection: 'long' }],
     showMultipleEffectsNote: true,
     triggerTypeDescriptions: {
       once: {
@@ -150,7 +150,7 @@ export const triggers = [
     name: 'viewProgress',
     defaultTriggerType: null,
     params: [],
-    pitfalls: [{ id: 'overflow-clip', section: 'short' }],
+    pitfalls: [{ id: 'overflow-clip', section: 'short', fullLeanSection: 'long' }],
     showMultipleEffectsNote: true,
   },
 
@@ -174,7 +174,7 @@ export const triggers = [
         description: 'restricts pointer tracking to a single axis',
       },
     ],
-    pitfalls: [{ id: 'hit-area', section: 'pointermove-source' }],
+    pitfalls: [{ id: 'hit-area', section: 'pointermove-source', fullLeanSection: 'full-lean-pointermove' }],
     showMultipleEffectsNote: true,
   },
 

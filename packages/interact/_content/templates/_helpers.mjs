@@ -5,15 +5,12 @@ export function capitalize(s) {
 /**
  * Builds the pitfalls block for a trigger template.
  * Iterates trigger.pitfalls from data, resolving each fragment section.
- * When `wrapped` is true, wraps non-empty output with leading/trailing newlines
- * (the common pattern used by event-trigger, viewenter, and viewprogress templates).
  */
-export function buildPitfallsBlock(trigger, fragments, { wrapped = false } = {}) {
+export function buildPitfallsBlock(trigger, fragments) {
   if (!trigger.pitfalls?.length) return '';
-  const content = trigger.pitfalls
+  return trigger.pitfalls
     .map((p) => fragments.get(`pitfalls/${p.id}`, p.section || trigger.name))
     .join('\n');
-  return wrapped ? `\n${content}\n` : content;
 }
 
 const COMMON_VARS = {

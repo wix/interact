@@ -24,7 +24,6 @@ const OVERRIDES = {
     fillModeDesc:
       "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.",
     easingDesc: 'CSS easing string, or named easing from `@wix/motion`.',
-    iterationsDesc: undefined,
     fillCritical:
       "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`.",
     customEffectExamples: ', randomized behavior',
@@ -47,7 +46,7 @@ export function render(data, fragments) {
   const hasReversed = trigger.hasReversed;
   const hasEffectId = trigger.hasEffectId;
 
-  const pitfallsBlock = buildPitfallsBlock(trigger, fragments, { wrapped: true });
+  const pitfalls = buildPitfallsBlock(trigger, fragments);
 
   const multipleEffectsNote = trigger.showMultipleEffectsNote
     ? `\n${fragments.get('multiple-effects-note', 'default', { triggerName: name, triggerEvent: `${name} event` })}\n`
@@ -58,7 +57,7 @@ export function render(data, fragments) {
 This document contains rules for generating ${name}-triggered interactions in \`${data.meta.packageName}\`.
 
 **CRITICAL — Accessible ${name}**: ${trigger.a11yNote}
-${pitfallsBlock}
+${pitfalls ? `\n${pitfalls}\n` : ''}
 ## Table of Contents
 
 - [Rule 1: keyframeEffect / namedEffect (TimeEffect)](#rule-1-keyframeeffect--namedeffect-timeeffect)

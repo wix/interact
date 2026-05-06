@@ -41,11 +41,12 @@ class Fragments {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       if (entry.isDirectory()) {
         this._loadDir(join(dir, entry.name), prefix ? `${prefix}/${entry.name}` : entry.name);
-      } else if (entry.name.endsWith('.md') && entry.name !== 'README.md') {
+      } else if (entry.name.endsWith('.md')) {
+        const raw = readFileSync(join(dir, entry.name), 'utf8');
+        if (!raw.includes('<!-- #')) continue;
         const key = prefix
           ? `${prefix}/${basename(entry.name, '.md')}`
           : basename(entry.name, '.md');
-        const raw = readFileSync(join(dir, entry.name), 'utf8');
         this.store.set(key, this._parseSections(raw, key));
       }
     }

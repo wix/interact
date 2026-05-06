@@ -8,7 +8,7 @@ import { buildPitfallsBlock, varLine } from './_helpers.mjs';
 export function render(data, fragments) {
   const { trigger } = data;
 
-  const pitfallsBlock = buildPitfallsBlock(trigger, fragments, { wrapped: true });
+  const pitfalls = buildPitfallsBlock(trigger, fragments);
 
   const rangeList = Object.entries(data.effects.rangeNames)
     .map(([name, desc]) => {
@@ -19,7 +19,7 @@ export function render(data, fragments) {
   return `# ViewProgress Trigger Rules for ${data.meta.packageName}
 
 These rules help generate scroll-driven interactions using \`${data.meta.packageName}\`. ViewProgress triggers create animations that update continuously as elements move through the viewport, leveraging native CSS ViewTimelines where supported, and using a polyfill library where unsupported. Use when animation progress should be tied to the element's scroll position.
-${pitfallsBlock}
+${pitfalls ? `\n${pitfalls}\n` : ''}
 **Offset semantics:** The \`offset\` inside \`rangeStart\`/\`rangeEnd\` is an object \`{ unit: 'percentage', value: NUMBER }\` where value is 0–100. For absolute lengths use \`{ unit: 'px', value: NUMBER }\` (or other CSS length units). Positive values move the effective range boundary forward along the scroll axis.
 
 ## Table of Contents

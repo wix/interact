@@ -32,9 +32,9 @@ Declarative configuration-driven interaction library. Binds animations to trigge
 
 Each item here is CRITICAL — ignoring any of them will break animations.
 
-- **CRITICAL — `overflow: hidden` breaks `viewProgress`**: Replace with `overflow: clip` on all ancestors between source and scroll container. In Tailwind, replace `overflow-hidden` with `overflow-clip`.
-- **CRITICAL**: When using `viewEnter` trigger and source (trigger) and target (effect) elements are the **same element**, use ONLY `triggerType: 'once'`. For all other types (`'repeat'`, `'alternate'`, `'state'`) MUST use **separate** source and target elements — animating the observed element itself can cause it to leave/re-enter the viewport, leading to rapid re-triggers or the animation never firing.
 - **CRITICAL - Hit-area shift**: When a hover effect changes the size or position of the hovered element (e.g., `transform: scale(…)`), MUST use a separate source and target elements. Otherwise the hit-area shifts, causing rapid enter/leave events and flickering. Use `selector` to target a child element, or set the effect's `key` to a different element.
+- **CRITICAL**: When using `viewEnter` trigger and source (trigger) and target (effect) elements are the **same element**, use ONLY `triggerType: 'once'`. For all other types (`'repeat'`, `'alternate'`, `'state'`) MUST use **separate** source and target elements — animating the observed element itself can cause it to leave/re-enter the viewport, leading to rapid re-triggers or the animation never firing.
+- **CRITICAL — `overflow: hidden` breaks `viewProgress`**: Replace with `overflow: clip` on all ancestors between source and scroll container. In Tailwind, replace `overflow-hidden` with `overflow-clip`.
 - **CRITICAL**: For `pointerMove` trigger MUST AVOID using the same element as both source and target with `hitArea: 'self'` and effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
 - **CRITICAL — Do NOT guess preset options**: If you don't know the expected type/structure for a `namedEffect` param, omit it — rely on defaults rather than guessing.
 - **Reduced motion**: Use conditions to provide gentler alternatives (shorter durations, fewer transforms, no perpetual motion) for users who prefer reduced motion. You can also set `Interact.forceReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches` to force a global reduced-motion behavior programmatically.
@@ -237,21 +237,21 @@ For `TimeEffect` (keyframe/named/custom effects), set `triggerType` on the effec
 
 **`triggerType`** — on `TimeEffect`:
 
-| Type                    | hover behavior                          | click behavior                   |
-| :---------------------- | :-------------------------------------- | :------------------------------- |
-| `'alternate'` (default) | Play on enter, reverse on leave         | Alternate play/reverse per click |
-| `'repeat'`              | Play on enter, stop and rewind on leave | Restart per click                |
-| `'once'`                | Play once on first enter only           | Play once on first click only    |
-| `'state'`               | Play on enter, pause on leave           | Toggle play/pause per click      |
+| Type | hover behavior | click behavior |
+| :--- | :--- | :--- |
+| `'alternate'` (default) | Play on enter, reverse on leave | Alternate play/reverse per click |
+| `'repeat'` | Play on enter, stop and rewind on leave | Restart per click |
+| `'once'` | Play once on first enter only | Play once on first click only |
+| `'state'` | Play on enter, pause on leave | Toggle play/pause per click |
 
 **`stateAction`** — on `StateEffect`:
 
-| Action               | hover behavior                                  | click behavior               |
-| :------------------- | :---------------------------------------------- | :--------------------------- |
-| `'toggle'` (default) | Add style state on enter, remove on leave       | Toggle style state per click |
-| `'add'`              | Add style state on enter; leave does NOT remove | Add style state on click     |
-| `'remove'`           | Remove style state on enter                     | Remove style state on click  |
-| `'clear'`            | Clear/reset all style states on enter           | Clear/reset all style states |
+| Action | hover behavior | click behavior |
+| :--- | :--- | :--- |
+| `'toggle'` (default) | Add style state on enter, remove on leave | Toggle style state per click |
+| `'add'` | Add style state on enter; leave does NOT remove | Add style state on click |
+| `'remove'` | Remove style state on enter | Remove style state on click |
+| `'clear'` | Clear/reset all style states on enter | Clear/reset all style states |
 
 ### viewEnter
 
@@ -397,14 +397,14 @@ Used with `viewProgress` and `pointerMove` triggers.
 }
 ```
 
-| Range name       | Meaning                                                                                                  |
-| :--------------- | :------------------------------------------------------------------------------------------------------- |
-| `cover`          | full visibility span from first pixel entering to last pixel leaving                                     |
-| `entry`          | the phase while the element is entering the viewport                                                     |
-| `exit`           | the phase while the element is exiting the viewport                                                      |
-| `contain`        | while the element is fully contained in the viewport. Typically used with a `position: sticky` container |
-| `entry-crossing` | from the element's leading edge entering to its leading edge reaching the opposite side                  |
-| `exit-crossing`  | from the element's trailing edge reaching the start to its trailing edge leaving                         |
+| Range name | Meaning |
+| :--- | :--- |
+| `cover` | full visibility span from first pixel entering to last pixel leaving |
+| `entry` | the phase while the element is entering the viewport |
+| `exit` | the phase while the element is exiting the viewport |
+| `contain` | while the element is fully contained in the viewport. Typically used with a `position: sticky` container |
+| `entry-crossing` | from the element's leading edge entering to its leading edge reaching the opposite side |
+| `exit-crossing` | from the element's trailing edge reaching the start to its trailing edge leaving |
 
 **Sticky container pattern** — for scroll-driven animations inside a stuck `position: sticky` container:
 
@@ -463,12 +463,12 @@ Exactly one MUST be provided per time-based or scroll/pointer-driven effect:
 
    Available presets:
 
-   | Category | Presets                                                                                                                                                                                                                                                                                      |
-   | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-   | Entrance | `FadeIn`, `GlideIn`, `SlideIn`, `FloatIn`, `RevealIn`, `ExpandIn`, `BlurIn`, `FlipIn`, `ArcIn`, `ShuttersIn`, `CurveIn`, `DropIn`, `FoldIn`, `ShapeIn`, `TiltIn`, `WinkIn`, `SpinIn`, `TurnIn`, `BounceIn`                                                                                   |
-   | Ongoing  | `Pulse`, `Spin`, `Breathe`, `Bounce`, `Wiggle`, `Flash`, `Flip`, `Fold`, `Jello`, `Poke`, `Rubber`, `Swing`, `Cross`                                                                                                                                                                         |
-   | Scroll   | `FadeScroll`, `RevealScroll`, `ParallaxScroll`, `MoveScroll`, `SlideScroll`, `GrowScroll`, `ShrinkScroll`, `TiltScroll`, `PanScroll`, `BlurScroll`, `FlipScroll`, `SpinScroll`, `ArcScroll`, `ShapeScroll`, `ShuttersScroll`, `SkewPanScroll`, `Spin3dScroll`, `StretchScroll`, `TurnScroll` |
-   | Mouse    | `TrackMouse`, `Tilt3DMouse`, `Track3DMouse`, `SwivelMouse`, `AiryMouse`, `ScaleMouse`, `BlurMouse`, `SkewMouse`, `BlobMouse`                                                                                                                                                                 |
+   | Category | Presets |
+   | :--- | :--- |
+   | Entrance | `FadeIn`, `GlideIn`, `SlideIn`, `FloatIn`, `RevealIn`, `ExpandIn`, `BlurIn`, `FlipIn`, `ArcIn`, `ShuttersIn`, `CurveIn`, `DropIn`, `FoldIn`, `ShapeIn`, `TiltIn`, `WinkIn`, `SpinIn`, `TurnIn`, `BounceIn` |
+   | Ongoing | `Pulse`, `Spin`, `Breathe`, `Bounce`, `Wiggle`, `Flash`, `Flip`, `Fold`, `Jello`, `Poke`, `Rubber`, `Swing`, `Cross` |
+   | Scroll | `FadeScroll`, `RevealScroll`, `ParallaxScroll`, `MoveScroll`, `SlideScroll`, `GrowScroll`, `ShrinkScroll`, `TiltScroll`, `PanScroll`, `BlurScroll`, `FlipScroll`, `SpinScroll`, `ArcScroll`, `ShapeScroll`, `ShuttersScroll`, `SkewPanScroll`, `Spin3dScroll`, `StretchScroll`, `TurnScroll` |
+   | Mouse | `TrackMouse`, `Tilt3DMouse`, `Track3DMouse`, `SwivelMouse`, `AiryMouse`, `ScaleMouse`, `BlurMouse`, `SkewMouse`, `BlobMouse` |
    - **CRITICAL** — Scroll presets (`*Scroll`) used with `viewProgress` MUST include `range` in options: `'in'` (ends at idle state), `'out'` (starts from idle state), or `'continuous'` (passes through idle). Prefer `'continuous'`.
    - Mouse presets are preferred over `keyframeEffect` for `pointerMove` 2D effects.
 

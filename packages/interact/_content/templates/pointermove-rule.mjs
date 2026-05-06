@@ -8,7 +8,7 @@ import { buildPitfallsBlock, varLine } from './_helpers.mjs';
 export function render(data, fragments) {
   const { trigger } = data;
 
-  const pitfallsBlock = buildPitfallsBlock(trigger, fragments); // no extra newline wrapping — handled by template layout
+  const pitfallsBlock = buildPitfallsBlock(trigger, fragments);
 
   const paramsTypeFields = trigger.params
     .map((p) => `  ${p.name}${p.optional ? '?' : ''}: ${p.type};`)

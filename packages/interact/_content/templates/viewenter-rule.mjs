@@ -8,7 +8,7 @@ import { buildPitfallsBlock, varLine } from './_helpers.mjs';
 export function render(data, fragments) {
   const { trigger } = data;
 
-  const pitfallsBlock = buildPitfallsBlock(trigger, fragments, { wrapped: true });
+  const pitfalls = buildPitfallsBlock(trigger, fragments);
 
   const paramDescriptions = trigger.params
     .map((p) => {
@@ -23,7 +23,7 @@ export function render(data, fragments) {
 This document contains rules for generating interactions that respond to elements entering the viewport using the \`${data.meta.packageName}\`. ViewEnter triggers use IntersectionObserver to detect when elements become visible and are ideal for entrance animations, content reveals, and lazy-loading effects.
 
 ---
-${pitfallsBlock}
+${pitfalls ? `\n${pitfalls}\n` : ''}
 ## Table of Contents
 
 - [Preventing Flash of Unstyled Content (FOUC)](#preventing-flash-of-unstyled-content-fouc)
@@ -91,7 +91,7 @@ ${fragments.get('fouc', 'code-vanilla', { key: '[SOURCE_KEY]', classAttr: '' })}
 
 Use \`keyframeEffect\` or \`namedEffect\` when the viewEnter should play an animation (CSS or WAAPI). Set \`triggerType\` on each effect to control playback behavior. Use \`params\` only for observer configuration (\`threshold\`, \`inset\`).
 
-${fragments.get('multiple-effects-note', 'viewEnter')}
+${trigger.showMultipleEffectsNote ? fragments.get('multiple-effects-note', 'viewEnter') : ''}
 
 \`\`\`typescript
 {

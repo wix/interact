@@ -1,18 +1,18 @@
 import { capitalize } from './_helpers.mjs';
 
-const FULL_LEAN_PITFALL_ORDER = [
-  { id: 'overflow-clip', section: 'long' },
-  { id: 'same-element-viewenter', section: 'long' },
-  { id: 'hit-area', section: 'full-lean-hover' },
-  { id: 'hit-area', section: 'full-lean-pointermove' },
-];
+function collectFullLeanPitfalls(triggers) {
+  return triggers.flatMap((t) =>
+    (t.pitfalls || [])
+      .filter((p) => p.fullLeanSection)
+      .map((p) => ({ id: p.id, section: p.fullLeanSection })),
+  );
+}
 
 function buildMarkdownTable(headers, rows) {
-  const widths = headers.map((h, i) => Math.max(h.length, ...rows.map((r) => (r[i] || '').length)));
   return [
-    `| ${headers.map((h, i) => h.padEnd(widths[i])).join(' | ')} |`,
-    `| ${widths.map((w) => `:${'-'.repeat(w - 1)}`).join(' | ')} |`,
-    ...rows.map((r) => `| ${r.map((c, i) => (c || '').padEnd(widths[i])).join(' | ')} |`),
+    `| ${headers.join(' | ')} |`,
+    `| ${headers.map(() => ':---').join(' | ')} |`,
+    ...rows.map((r) => `| ${r.join(' | ')} |`),
   ].join('\n');
 }
 
@@ -51,13 +51,13 @@ export function render(data, fragments) {
     .join(' | ');
   const easingList = data.effects.easings.map((e) => `\`'${e}'\``).join(', ');
 
-  const presetEntries = Object.entries(data.effects.presets).map(([category, names]) => ({
-    label: capitalize(category),
-    value: `\`${names.join('`, `')}\``,
-  }));
-  const maxPresetLen = Math.max(...presetEntries.map((e) => e.value.length));
-  const presetTable = presetEntries
-    .map((e) => `   | ${e.label.padEnd(8)} | ${e.value.padEnd(maxPresetLen)} |`)
+  const presetRows = Object.entries(data.effects.presets).map(([category, names]) => [
+    capitalize(category),
+    `\`${names.join('`, `')}\``,
+  ]);
+  const presetTable = buildMarkdownTable(['Category', 'Presets'], presetRows)
+    .split('\n')
+    .map((line) => `   ${line}`)
     .join('\n');
 
   const rangeTable = buildMarkdownTable(
@@ -101,7 +101,7 @@ Declarative configuration-driven interaction library. Binds animations to trigge
 
 Each item here is CRITICAL — ignoring any of them will break animations.
 
-${FULL_LEAN_PITFALL_ORDER.map((p) => fragments.get(`pitfalls/${p.id}`, p.section)).join('\n')}
+${collectFullLeanPitfalls(data.triggers).map((p) => fragments.get(`pitfalls/${p.id}`, p.section)).join('\n')}
 ${fragments.get('pitfalls/dont-guess-presets', 'default')}
 ${fragments.get('pitfalls/reduced-motion', 'default')}
 ${fragments.get('pitfalls/perspective', 'default')}
@@ -445,8 +445,6 @@ Exactly one MUST be provided per time-based or scroll/pointer-driven effect:
 
    Available presets:
 
-   | Category | Presets                                                                                                                                                                                                                                                                                      |
-   | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 ${presetTable}
    - **CRITICAL** — Scroll presets (\`*Scroll\`) used with \`viewProgress\` MUST include \`range\` in options: \`'in'\` (ends at idle state), \`'out'\` (starts from idle state), or \`'continuous'\` (passes through idle). Prefer \`'continuous'\`.
    - Mouse presets are preferred over \`keyframeEffect\` for \`pointerMove\` 2D effects.
