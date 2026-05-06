@@ -192,34 +192,29 @@
         container.appendChild(wrapper);
       });
 
-      // Reserve expanded width on each pill so layout never reflows
       document.querySelectorAll('.pill').forEach((pill) => {
-        const expandedWidth = pill.offsetWidth + 19; // 13px checkmark + 6px margin
+        const expandedWidth = pill.offsetWidth + 19;
         pill.style.minWidth = expandedWidth + 'px';
-      });
 
-      // Keyboard and aria-pressed sync
-      document.querySelectorAll('.pill').forEach((pill) => {
         const cb = document.getElementById(pill.getAttribute('for'));
+        const syncPressed = () =>
+          setTimeout(() => pill.setAttribute('aria-pressed', cb.checked), 0);
+
+        pill.addEventListener('click', syncPressed);
         pill.addEventListener('keydown', (e) => {
           if (e.key === ' ' || e.key === 'Enter') {
             e.preventDefault();
             cb.checked = !cb.checked;
-            pill.setAttribute('aria-pressed', cb.checked);
+            syncPressed();
           }
         });
-        pill.addEventListener('click', () =>
-          setTimeout(() => pill.setAttribute('aria-pressed', cb.checked), 0),
-        );
       });
 
-      // Interact: hover highlight + 3D tilt on pointer move
       Interact.create({
         interactions: skills.flatMap((_, i) => [
           {
             key: `pill-${i}`,
-            trigger: 'hover',
-            params: { method: 'toggle' },
+            trigger: 'interest',
             effects: [
               {
                 transition: {

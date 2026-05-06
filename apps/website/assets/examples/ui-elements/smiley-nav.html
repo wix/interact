@@ -462,10 +462,9 @@
 
       // --- Interact ---
       const TOTAL_LINKS = 48;
-      const linkHovers = Array.from({ length: TOTAL_LINKS }, (_, i) => ({
+      const linkInteractions = Array.from({ length: TOTAL_LINKS }, (_, i) => ({
         key: `d-${i}`,
-        trigger: 'hover',
-        params: { method: 'toggle' },
+        trigger: 'interest',
         effects: [
           {
             transition: {
@@ -482,11 +481,9 @@
 
       Interact.create({
         interactions: [
-          // Nav bar hover
           {
             key: 'nav-bar',
-            trigger: 'hover',
-            params: { method: 'toggle' },
+            trigger: 'interest',
             effects: [
               {
                 transition: {
@@ -497,11 +494,9 @@
               },
             ],
           },
-          // Tab hovers
           ...['features', 'services', 'learn', 'about'].map((name) => ({
             key: `tab-${name}`,
-            trigger: 'hover',
-            params: { method: 'toggle' },
+            trigger: 'interest',
             effects: [
               {
                 transition: {
@@ -512,8 +507,7 @@
               },
             ],
           })),
-          // Dropdown link hovers
-          ...linkHovers,
+          ...linkInteractions,
         ],
       });
 

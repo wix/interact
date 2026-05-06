@@ -275,8 +275,7 @@
           ...keys.flatMap((key) => [
             {
               key,
-              trigger: 'hover',
-              params: { method: 'toggle' },
+              trigger: 'interest',
               effects: [
                 { selector: '.label', effectId: 'hover-label' },
                 { selector: '.ring', effectId: 'hover-ring' },
@@ -285,7 +284,7 @@
             },
             {
               key,
-              trigger: 'click',
+              trigger: 'activate',
               params: { type: 'repeat' },
               effects: [{ selector: '.dot', effectId: 'dot-pop' }],
             },

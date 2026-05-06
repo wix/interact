@@ -461,10 +461,9 @@
       let activeTab = null;
 
       const TOTAL_LINKS = 48;
-      const linkHovers = Array.from({ length: TOTAL_LINKS }, (_, i) => ({
+      const linkInteractions = Array.from({ length: TOTAL_LINKS }, (_, i) => ({
         key: `d-${i}`,
-        trigger: 'hover',
-        params: { method: 'toggle' },
+        trigger: 'interest',
         effects: [
           {
             transition: {
@@ -483,8 +482,7 @@
         interactions: [
           {
             key: 'nav-bar',
-            trigger: 'hover',
-            params: { method: 'toggle' },
+            trigger: 'interest',
             effects: [
               {
                 transition: {
@@ -497,8 +495,7 @@
           },
           ...['features', 'services', 'learn', 'about'].map((name) => ({
             key: `tab-${name}`,
-            trigger: 'hover',
-            params: { method: 'toggle' },
+            trigger: 'interest',
             effects: [
               {
                 transition: {
@@ -509,7 +506,7 @@
               },
             ],
           })),
-          ...linkHovers,
+          ...linkInteractions,
         ],
       });
 

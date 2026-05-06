@@ -290,7 +290,7 @@
         interactions: [
           {
             key: 'toggle-btn',
-            trigger: 'click',
+            trigger: 'activate',
             params: { type: 'alternate' },
             effects: [
               { key: 'slider', effectId: 'slider-move' },
@@ -304,7 +304,7 @@
           },
           {
             key: 'toggle-btn',
-            trigger: 'hover',
+            trigger: 'interest',
             effects: [
               { key: 'slider', effectId: 'nudge-right', conditions: ['unlocked'] },
               { key: 'slider', effectId: 'nudge-left', conditions: ['locked'] },
