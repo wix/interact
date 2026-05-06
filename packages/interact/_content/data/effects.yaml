@@ -114,16 +114,6 @@ presets:
     - SkewMouse
     - BlobMouse
 
-fullLeanPitfallOrder:
-  - id: overflow-clip
-    section: long
-  - id: same-element-viewenter
-    section: long
-  - id: hit-area
-    section: detailed-hover
-  - id: hit-area
-    section: detailed-pointermove
-
 rangeNames:
   cover: 'Full visibility span from first pixel entering to last pixel leaving'
   entry: 'The phase while the element is entering the viewport'

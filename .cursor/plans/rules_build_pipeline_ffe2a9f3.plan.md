@@ -158,6 +158,24 @@ todos:
   - id: refactor6-regenerate
     content: 'Regenerate rules/*.md — pointermove.md and viewprogress.md updated (collapsed duplicate descriptions to "same as Rule 1" shorthand, UNIQUE_EFFECT_ID uses canonical varLine). click.md, hover.md, viewenter.md, full-lean.md, integration.md byte-identical.'
     status: completed
+  - id: refactor7-pitfall-order-local
+    content: 'Move fullLeanPitfallOrder from effects.yaml into full-lean.mjs as a local constant — rendering concern belongs in the template, not the data layer'
+    status: completed
+  - id: refactor7-placeholder-error
+    content: 'Make unreplaced {{...}} placeholder detection throw an error instead of console.warn — prevents silent bugs in generated output'
+    status: completed
+  - id: refactor7-inline-overrides
+    content: 'Move variableOverrides from triggers.yaml into event-trigger-rule.mjs as VARIABLE_OVERRIDES constant — prose descriptions with only 2 consumers do not belong in YAML data layer'
+    status: completed
+  - id: refactor7-explicit-booleans
+    content: 'Replace templateFields array in triggers.yaml with explicit hasReversed/hasEffectId booleans — clearer intent, no array scanning, no drift risk'
+    status: completed
+  - id: refactor7-remove-when
+    content: 'Remove when() helper from _helpers.mjs — replaced with inline ternaries in event-trigger-rule.mjs (5 usages). Eliminates unnecessary abstraction.'
+    status: completed
+  - id: refactor7-regenerate
+    content: 'Regenerate rules/*.md — all 7 files byte-identical to pre-refactor output. Zero content drift.'
+    status: completed
 isProject: false
 ---
 
@@ -812,6 +830,46 @@ Regenerated all 7 rule files. Two files changed:
 - **viewprogress.md**: `UNIQUE_EFFECT_ID` in Rule 1 now uses canonical `varLine` description. Rules 2-3 collapsed duplicate descriptions into "same as Rule 1" shorthands.
 
 All other 5 files (click.md, hover.md, viewenter.md, full-lean.md, integration.md) are byte-identical.
+
+---
+
+## Post-PR Fixes — Round 7 (separation of concerns & simplification)
+
+Refactors from a final code review, addressing data/template boundary violations, unnecessary abstractions, and silent error handling.
+
+### Fix 40: Move `fullLeanPitfallOrder` into full-lean.mjs
+
+`fullLeanPitfallOrder` in `effects.yaml` was a rendering concern — it controlled the order pitfalls render in one specific template. This coupled the data layer to `full-lean.mjs`'s layout needs (the same issue Fix 30 addressed for `fullLeanBehavior`).
+
+**Action:** Moved into a `FULL_LEAN_PITFALL_ORDER` constant at the top of `full-lean.mjs`. Removed from `effects.yaml`. Output is byte-identical.
+
+### Fix 41: Make placeholder detection throw
+
+The `Fragments.get()` method warned about unmatched `{{...}}` placeholders via `console.warn` — easy to miss in CI output. An unreplaced placeholder in generated output is always a bug.
+
+**Action:** Changed `console.warn` to `throw new Error`. Build now fails fast on typos in fragment param names.
+
+### Fix 42: Inline `variableOverrides` into template
+
+`variableOverrides` in `triggers.yaml` stored prose descriptions that only served `event-trigger-rule.mjs` for 2 triggers (hover, click). The indirection added ~40 lines of English prose to what should be a structured data file.
+
+**Action:** Moved into a `VARIABLE_OVERRIDES` constant in `event-trigger-rule.mjs`, keyed by trigger name. Template reads `VARIABLE_OVERRIDES[name]` instead of `trigger.variableOverrides`. Removed `variableOverrides` from both trigger entries in `triggers.yaml`. Output is byte-identical.
+
+### Fix 43: Replace `templateFields` with explicit booleans
+
+The `templateFields` array in `triggers.yaml` existed solely to derive two booleans (`hasReversed`, `hasEffectId`) via `.includes()`. The array created a false sense of generated config blocks — the template still hardcoded the full code block regardless.
+
+**Action:** Replaced with explicit `hasReversed: true/false` and `hasEffectId: true/false` fields. Template reads them directly. Output is byte-identical.
+
+### Fix 44: Remove `when()` helper
+
+The `when(condition, content)` helper was used 5 times in `event-trigger-rule.mjs`. In each case, a standard ternary (`condition ? content : ''`) is equally readable and doesn't require importing/learning a custom abstraction.
+
+**Action:** Removed `when()` from `_helpers.mjs`. Replaced all 5 usages in `event-trigger-rule.mjs` with inline ternaries or `|| ''` for falsy string concatenation. Output is byte-identical.
+
+### Fix 45: Regenerate output (round 7)
+
+Ran `build:rules`. All 7 rule files are byte-identical to pre-refactor output. Zero content drift.
 
 ---
 

@@ -1,4 +1,37 @@
-import { capitalize, when, buildPitfallsBlock, varLine } from './_helpers.mjs';
+import { capitalize, buildPitfallsBlock, varLine } from './_helpers.mjs';
+
+const VARIABLE_OVERRIDES = {
+  hover: {
+    sourceKeySuffix: 'The element that listens for hover.',
+    targetKeyDesc:
+      "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
+    fillModeDesc:
+      "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished.",
+    easingDesc:
+      "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`.",
+    iterationsDesc:
+      "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.",
+    fillCritical:
+      "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`.",
+    customEffectExamples: '',
+    offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.',
+    alternateBoolSuffix: '',
+  },
+  click: {
+    sourceKeySuffix: 'The element that listens for clicks.',
+    targetKeyDesc:
+      "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element.",
+    fillModeDesc:
+      "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.",
+    easingDesc: 'CSS easing string, or named easing from `@wix/motion`.',
+    iterationsDesc: 'optional. Number of iterations, or `Infinity` for continuous loops.',
+    fillCritical:
+      "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`.",
+    customEffectExamples: ', randomized behavior',
+    offsetEasingSuffix: '',
+    alternateBoolSuffix: "Different from `triggerType: 'alternate'` which alternates per click.",
+  },
+};
 
 /**
  * Renders a trigger-specific rule file (click.md or hover.md).
@@ -7,17 +40,17 @@ import { capitalize, when, buildPitfallsBlock, varLine } from './_helpers.mjs';
  */
 export function render(data, fragments) {
   const { trigger } = data;
-  const { name, variableOverrides: vo } = trigger;
+  const { name } = trigger;
+  const vo = VARIABLE_OVERRIDES[name];
   const Name = capitalize(name);
-  const hasReversed = trigger.templateFields.includes('reversed');
-  const hasEffectId = trigger.templateFields.includes('effectId');
+  const hasReversed = trigger.hasReversed;
+  const hasEffectId = trigger.hasEffectId;
 
   const pitfallsBlock = buildPitfallsBlock(trigger, fragments, { wrapped: true });
 
-  const multipleEffectsNote = when(
-    trigger.showMultipleEffectsNote,
-    `\n${fragments.get('multiple-effects-note', 'default', { triggerName: name, triggerEvent: `${name} event` })}\n`,
-  );
+  const multipleEffectsNote = trigger.showMultipleEffectsNote
+    ? `\n${fragments.get('multiple-effects-note', 'default', { triggerName: name, triggerEvent: `${name} event` })}\n`
+    : '';
 
   return `# ${Name} Trigger Rules for ${data.meta.packageName}
 
@@ -57,12 +90,12 @@ ${multipleEffectsNote}
             // OR
             namedEffect: [NAMED_EFFECT_DEFINITION],
 
-            fill: '[FILL_MODE]',${when(hasReversed, `\n            reversed: [INITIAL_REVERSED_BOOL],`)}
+            fill: '[FILL_MODE]',${hasReversed ? `\n            reversed: [INITIAL_REVERSED_BOOL],` : ''}
             duration: [DURATION_MS],
             easing: '[EASING_FUNCTION]',
             delay: [DELAY_MS],
             iterations: [ITERATIONS],
-            alternate: [ALTERNATE_BOOL]${when(hasEffectId, `,\n            effectId: '[UNIQUE_EFFECT_ID]'`)}
+            alternate: [ALTERNATE_BOOL]${hasEffectId ? `,\n            effectId: '[UNIQUE_EFFECT_ID]'` : ''}
         },
         // additional effects targeting other elements can be added here
     ]
@@ -71,7 +104,7 @@ ${multipleEffectsNote}
 
 ### Variables
 
-${buildVariables(trigger, hasReversed, hasEffectId)}
+${buildVariables(trigger, vo, hasReversed, hasEffectId)}
 
 ---
 
@@ -134,7 +167,7 @@ ${Object.entries(trigger.stateActionDescriptions)
 
 ## Rule 3: customEffect (TimeEffect)
 
-Use \`customEffect\` when you need imperative control over the animation (e.g. counters, canvas drawing, custom DOM manipulation${when(vo.customEffectExamples, vo.customEffectExamples)}). The callback receives the target element and a \`progress\` value (0–1) driven by the animation timeline.
+Use \`customEffect\` when you need imperative control over the animation (e.g. counters, canvas drawing, custom DOM manipulation${vo.customEffectExamples || ''}). The callback receives the target element and a \`progress\` value (0–1) driven by the animation timeline.
 
 \`\`\`typescript
 {
@@ -188,14 +221,12 @@ Use sequences when a ${name} should sync/stagger animations across multiple elem
 
 - \`[SOURCE_KEY]\` / \`[TRIGGER_TYPE]\` — same as Rule 1. \`triggerType\` is set on the sequence config, not on individual effects within the sequence.
 - \`[OFFSET_MS]\` — time offset for staggering each child's animation start, in milliseconds.
-- \`[OFFSET_EASING]\` — easing curve for the offset staggering distribution.${when(vo.offsetEasingSuffix, vo.offsetEasingSuffix)} Defaults to \`'linear'\`.
+- \`[OFFSET_EASING]\` — easing curve for the offset staggering distribution.${vo.offsetEasingSuffix || ''} Defaults to \`'linear'\`.
 - \`[EFFECT_DEFINITION]\` — a definition of or a reference to a time-based animation effect.
 `;
 }
 
-function buildVariables(trigger, hasReversed, hasEffectId) {
-  const vo = trigger.variableOverrides;
-
+function buildVariables(trigger, vo, hasReversed, hasEffectId) {
   const lines = [
     varLine('SOURCE_KEY', vo.sourceKeySuffix),
     varLine('TARGET_KEY', vo.targetKeyDesc),

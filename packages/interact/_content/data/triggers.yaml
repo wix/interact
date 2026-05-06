@@ -1,7 +1,7 @@
 # --------------------------------------------------------------------------
 # Event triggers — rendered by event-trigger-rule.mjs (click.md, hover.md)
-# These have the full schema: templateFields, triggerTypeDescriptions,
-# stateActionDescriptions, variableOverrides, showMultipleEffectsNote.
+# These have the full schema: hasReversed, hasEffectId, triggerTypeDescriptions,
+# stateActionDescriptions, showMultipleEffectsNote.
 # --------------------------------------------------------------------------
 triggers:
   - name: hover
@@ -13,16 +13,8 @@ triggers:
     pitfalls:
       - id: hit-area
     showMultipleEffectsNote: true
-    templateFields:
-      - triggerType
-      - keyframeEffect
-      - namedEffect
-      - fill
-      - duration
-      - easing
-      - delay
-      - iterations
-      - alternate
+    hasReversed: false
+    hasEffectId: false
     triggerTypeDescriptions:
       alternate: 'plays forward on enter, reverses on leave. Default. Most common for hover.'
       repeat: 'restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses.'
@@ -33,16 +25,6 @@ triggers:
       add: 'applies the style state on enter. Leave does NOT remove it.'
       remove: 'removes a previously applied style state on enter. Use with provided `effectId` to map to a matching interaction with `add` and effect with same `effectId`.'
       clear: 'clears all previously applied style states on enter. Use to reset multiple stacked `''add''` style changes at once (e.g. a "reset" hover area that undoes several accumulated states).'
-    variableOverrides:
-      sourceKeySuffix: 'The element that listens for hover.'
-      targetKeyDesc: "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above)."
-      fillModeDesc: "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished."
-      easingDesc: "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`."
-      iterationsDesc: "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`."
-      fillCritical: "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`."
-      customEffectExamples: ''
-      offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.'
-      alternateBoolSuffix: ''
 
   - name: click
     template: event-trigger-rule.mjs
@@ -52,18 +34,8 @@ triggers:
     params: []
     pitfalls: []
     showMultipleEffectsNote: false
-    templateFields:
-      - triggerType
-      - keyframeEffect
-      - namedEffect
-      - fill
-      - reversed
-      - duration
-      - easing
-      - delay
-      - iterations
-      - alternate
-      - effectId
+    hasReversed: true
+    hasEffectId: true
     triggerTypeDescriptions:
       alternate: 'plays forward on first click, reverses on next click. Default.'
       repeat: 'restarts the animation from the beginning on each click.'
@@ -74,16 +46,6 @@ triggers:
       add: 'applies the style state. Does not remove on subsequent clicks.'
       remove: 'removes a previously applied style state.'
       clear: 'clears all previously applied style states. Useful for resetting multiple stacked style states at once.'
-    variableOverrides:
-      sourceKeySuffix: 'The element that listens for clicks.'
-      targetKeyDesc: "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element."
-      fillModeDesc: "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect."
-      easingDesc: 'CSS easing string, or named easing from `@wix/motion`.'
-      iterationsDesc: 'optional. Number of iterations, or `Infinity` for continuous loops.'
-      fillCritical: "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`."
-      customEffectExamples: ', randomized behavior'
-      offsetEasingSuffix: ''
-      alternateBoolSuffix: "Different from `triggerType: 'alternate'` which alternates per click."
 
   # --------------------------------------------------------------------------
   # Viewport/scroll triggers — each has its own dedicated template.

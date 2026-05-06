@@ -92,8 +92,8 @@ class Fragments {
     }
     const unreplaced = content.match(/\{\{[^}]+\}\}/g);
     if (unreplaced) {
-      console.warn(
-        `Warning: unreplaced placeholders in fragment "${path}#${section}": ${unreplaced.join(', ')}`,
+      throw new Error(
+        `Unreplaced placeholders in fragment "${path}#${section}": ${unreplaced.join(', ')}`,
       );
     }
     return content;

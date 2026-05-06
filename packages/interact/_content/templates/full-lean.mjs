@@ -1,5 +1,12 @@
 import { capitalize, buildMarkdownTable } from './_helpers.mjs';
 
+const FULL_LEAN_PITFALL_ORDER = [
+  { id: 'overflow-clip', section: 'long' },
+  { id: 'same-element-viewenter', section: 'long' },
+  { id: 'hit-area', section: 'detailed-hover' },
+  { id: 'hit-area', section: 'detailed-pointermove' },
+];
+
 const FULL_LEAN_BEHAVIOR = {
   hover: {
     triggerType: {
@@ -113,7 +120,7 @@ Declarative configuration-driven interaction library. Binds animations to trigge
 
 Each item here is CRITICAL — ignoring any of them will break animations.
 
-${buildFullLeanPitfalls(data.effects.fullLeanPitfallOrder, fragments)}
+${buildFullLeanPitfalls(FULL_LEAN_PITFALL_ORDER, fragments)}
 ${fragments.get('pitfalls/dont-guess-presets', 'default')}
 ${fragments.get('pitfalls/reduced-motion', 'default')}
 ${fragments.get('pitfalls/perspective', 'default')}
