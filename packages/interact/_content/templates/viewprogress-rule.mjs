@@ -2,14 +2,13 @@ import { buildPitfallsBlock, varLine } from './_helpers.mjs';
 
 /**
  * Renders viewprogress.md — rules for scroll-driven animations using ViewTimeline.
- * @param {{ trigger: object, effects: object, meta: object }} data
+ * @param {{ triggers: object[], effects: object, meta: object, trigger: object }} data
  * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
   const { trigger } = data;
 
-  const pitfallsRaw = buildPitfallsBlock(trigger, fragments);
-  const pitfallsBlock = pitfallsRaw ? `\n${pitfallsRaw}\n` : '';
+  const pitfallsBlock = buildPitfallsBlock(trigger, fragments, { wrapped: true });
 
   const rangeList = Object.entries(data.effects.rangeNames)
     .map(([name, desc]) => {
@@ -74,7 +73,7 @@ ${rangeList}
 - \`[START_PERCENTAGE]\` — 0–100, starting point within the named range.
 - \`[END_PERCENTAGE]\` — 0–100, end point within the named range.
 ${varLine('EASING_FUNCTION', "CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.")}
-- \`[UNIQUE_EFFECT_ID]\` — optional identifier for referencing the effect externally.
+${varLine('UNIQUE_EFFECT_ID')}
 
 ---
 
@@ -107,9 +106,7 @@ ${varLine('EASING_FUNCTION', "CSS easing string or named easing from `@wix/motio
 
 - \`[SOURCE_KEY]\` / \`[TARGET_KEY]\` — same as Rule 1.
 ${varLine('CUSTOM_EFFECT_CALLBACK')}
-- \`[RANGE_NAME]\` / \`[START_PERCENTAGE]\` / \`[END_PERCENTAGE]\` — same as Rule 1.
-${varLine('EASING_FUNCTION', "CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.")}
-- \`[UNIQUE_EFFECT_ID]\` — optional identifier for referencing the effect externally.
+- \`[RANGE_NAME]\` / \`[START_PERCENTAGE]\` / \`[END_PERCENTAGE]\` / \`[EASING_FUNCTION]\` / \`[UNIQUE_EFFECT_ID]\` — same as Rule 1.
 
 ---
 
@@ -152,7 +149,6 @@ ${varLine('EASING_FUNCTION', "CSS easing string or named easing from `@wix/motio
 - \`[EFFECT_NAME]\` / \`[EFFECT_KEYFRAMES]\` — same as Rule 1.
 - \`[START_PERCENTAGE]\` — 0–100, starting point within the \`contain\` range (the stuck phase).
 - \`[END_PERCENTAGE]\` — 0–100, end point within the \`contain\` range.
-- \`[UNIQUE_EFFECT_ID]\` — same as Rule 1.
-- \`[EASING_FUNCTION]\` — CSS easing string or named easing from \`@wix/motion\`. Typically \`'linear'\` for scrolling effects.
+- \`[EASING_FUNCTION]\` / \`[UNIQUE_EFFECT_ID]\` — same as Rule 1.
 `;
 }

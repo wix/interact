@@ -2,7 +2,7 @@ import { capitalize, when, buildPitfallsBlock, varLine } from './_helpers.mjs';
 
 /**
  * Renders a trigger-specific rule file (click.md or hover.md).
- * @param {{ trigger: object, meta: object }} data — must include `trigger` (from triggers.yaml) and `meta`
+ * @param {{ triggers: object[], effects: object, meta: object, trigger: object }} data
  * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
@@ -12,8 +12,7 @@ export function render(data, fragments) {
   const hasReversed = trigger.templateFields.includes('reversed');
   const hasEffectId = trigger.templateFields.includes('effectId');
 
-  const pitfallsRaw = buildPitfallsBlock(trigger, fragments);
-  const pitfallsBlock = pitfallsRaw ? `\n${pitfallsRaw}\n` : '';
+  const pitfallsBlock = buildPitfallsBlock(trigger, fragments, { wrapped: true });
 
   const multipleEffectsNote = when(
     trigger.showMultipleEffectsNote,

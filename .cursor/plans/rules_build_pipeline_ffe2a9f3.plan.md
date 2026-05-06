@@ -140,6 +140,24 @@ todos:
   - id: review-regenerate
     content: 'Regenerate rules/*.md — full-lean.md range table widened for contain note, integration.md FOUC section uses fragments. All other 5 files byte-identical.'
     status: completed
+  - id: refactor6-varline-consistency
+    content: 'Extend varLine usage across all templates — use canonical varLine in Rule 1, standardize "same as Rule 1" shorthand in subsequent rules. Eliminates duplicated variable descriptions in viewprogress Rules 2-3 and pointermove Rules 2-4.'
+    status: completed
+  - id: refactor6-markdown-table
+    content: 'Extract generic buildMarkdownTable(headers, rows) helper to _helpers.mjs — replaces duplicated column-width padding logic in full-lean.mjs (behavior tables + range table).'
+    status: completed
+  - id: refactor6-pitfalls-wrapped
+    content: 'Add { wrapped: true } option to buildPitfallsBlock() — eliminates 3 identical 2-line wrapping patterns in event-trigger, viewenter, and viewprogress templates.'
+    status: completed
+  - id: refactor6-jsdoc
+    content: 'Standardize JSDoc @param on all render() functions — trigger-specific templates document { triggers, effects, meta, trigger }, reference templates document { triggers, effects, meta }.'
+    status: completed
+  - id: refactor6-full-lean-fragments
+    content: 'Add #full-lean sections to overflow-clip.md and same-element-viewenter.md fragments — full-lean.mjs triggers section now uses fragments instead of hardcoded CRITICAL notes for viewEnter and viewProgress.'
+    status: completed
+  - id: refactor6-regenerate
+    content: 'Regenerate rules/*.md — pointermove.md and viewprogress.md updated (collapsed duplicate descriptions to "same as Rule 1" shorthand, UNIQUE_EFFECT_ID uses canonical varLine). click.md, hover.md, viewenter.md, full-lean.md, integration.md byte-identical.'
+    status: completed
 isProject: false
 ---
 
@@ -734,6 +752,66 @@ Regenerated all 7 rule files. Two files changed:
 - **integration.md**: FOUC code examples now use fragments — `id="hero"` → `class="hero"`, "**Web:**" → "**Web (Custom Elements):**".
 
 All other 5 files (click.md, hover.md, viewenter.md, viewprogress.md, pointermove.md) are byte-identical.
+
+---
+
+## Post-PR Fixes — Round 6 (consistency & deduplication)
+
+Refactors from a structural review of the final PR, addressing duplicated logic in helpers, inconsistent variable descriptions across templates, and hardcoded content in `full-lean.mjs` that duplicates existing fragments.
+
+### Fix 34: Extend `varLine` usage across all templates
+
+Variable descriptions in `viewprogress-rule.mjs` Rules 2-3 and `pointermove-rule.mjs` Rules 2-4 had fully-written-out descriptions that duplicated `COMMON_VARS` entries or each other. The "same as Rule 1" shorthand pattern (already used by `viewenter-rule.mjs`) was not applied consistently.
+
+**Action:**
+
+- Rule 1 of each template: uses `varLine` for all COMMON_VARS (viewprogress Rule 1 `UNIQUE_EFFECT_ID` converted from hardcoded to `varLine`).
+- Rules 2+ of each template: standardized to "same as Rule 1" shorthand for variables already described in Rule 1 (collapsed 15+ standalone lines across viewprogress and pointermove into grouped shorthand references).
+- Variables unique to a specific rule (e.g. `TALL_WRAPPER_KEY`, `COMPOSITE_OPERATION`, `AXIS`) remain hardcoded — they're not shared.
+
+### Fix 35: Extract generic `buildMarkdownTable` helper
+
+`full-lean.mjs` had two independent implementations of Prettier-compatible padded markdown tables: `buildBehaviorTable` (3 columns) and the range table construction (2 columns). Both computed column widths with `Math.max` and padded cells — identical logic with different data.
+
+**Action:** Added `buildMarkdownTable(headers, rows)` to `_helpers.mjs`. Takes an array of header strings and an array of row arrays, computes column widths, returns a left-aligned padded table string. Updated `buildBehaviorTable` and the range table in `full-lean.mjs` to use it. Output is byte-identical.
+
+### Fix 36: Add `{ wrapped }` option to `buildPitfallsBlock`
+
+Three templates (`event-trigger-rule.mjs`, `viewenter-rule.mjs`, `viewprogress-rule.mjs`) had an identical 2-line pattern after calling `buildPitfallsBlock`:
+
+```javascript
+const pitfallsRaw = buildPitfallsBlock(trigger, fragments);
+const pitfallsBlock = pitfallsRaw ? `\n${pitfallsRaw}\n` : '';
+```
+
+**Action:** Added `{ wrapped: true }` option to `buildPitfallsBlock` in `_helpers.mjs`. When set, wraps non-empty output with leading/trailing newlines. Updated the 3 templates to use it, eliminating the intermediate variable. Output is byte-identical.
+
+### Fix 37: Standardize JSDoc on `render()` functions
+
+Template `render()` JSDoc annotations documented different subsets of the `data` parameter:
+
+- `event-trigger-rule.mjs`: `{ trigger, meta }`
+- `viewprogress-rule.mjs`: `{ trigger, effects, meta }`
+- `full-lean.mjs`: `{ triggers, effects, meta }`
+
+All trigger-specific templates actually receive `{ triggers, effects, meta, trigger }` (via `{ ...data, trigger }` in `build-rules.mjs`). Reference templates receive `{ triggers, effects, meta }`.
+
+**Action:** Standardized all trigger-specific templates to `@param {{ triggers: object[], effects: object, meta: object, trigger: object }} data`. Reference templates (`full-lean.mjs`, `integration.mjs`) document `{ triggers, effects, meta }` with a note that `trigger` is absent.
+
+### Fix 38: Extract full-lean.mjs trigger CRITICAL notes into fragments
+
+The viewEnter and viewProgress subsections in `full-lean.mjs`'s Triggers section contained hardcoded CRITICAL notes that duplicated content from `pitfalls/same-element-viewenter.md` and `pitfalls/overflow-clip.md`. If these pitfalls are updated in the fragments, `full-lean.md` would drift.
+
+**Action:** Added `#full-lean` sections to both pitfall fragment files with the condensed wording used by `full-lean.mjs`. Updated `full-lean.mjs` to call `fragments.get('pitfalls/same-element-viewenter', 'full-lean')` and `fragments.get('pitfalls/overflow-clip', 'full-lean')`. Output is byte-identical.
+
+### Fix 39: Regenerate output (round 6)
+
+Regenerated all 7 rule files. Two files changed:
+
+- **pointermove.md**: Collapsed 15 duplicate variable description lines across Rules 2-4 into grouped "same as Rule 1" shorthands. `EFFECT_NAME` in Rule 2 now uses the canonical `varLine` description.
+- **viewprogress.md**: `UNIQUE_EFFECT_ID` in Rule 1 now uses canonical `varLine` description. Rules 2-3 collapsed duplicate descriptions into "same as Rule 1" shorthands.
+
+All other 5 files (click.md, hover.md, viewenter.md, full-lean.md, integration.md) are byte-identical.
 
 ---
 

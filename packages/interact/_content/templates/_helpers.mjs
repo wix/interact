@@ -9,13 +9,31 @@ export function when(condition, content) {
 /**
  * Builds the pitfalls block for a trigger template.
  * Iterates trigger.pitfalls from YAML, resolving each fragment section.
- * Returns empty string if no pitfalls; raw content otherwise (caller handles spacing).
+ * When `wrapped` is true, wraps non-empty output with leading/trailing newlines
+ * (the common pattern used by event-trigger, viewenter, and viewprogress templates).
  */
-export function buildPitfallsBlock(trigger, fragments) {
+export function buildPitfallsBlock(trigger, fragments, { wrapped = false } = {}) {
   if (!trigger.pitfalls?.length) return '';
-  return trigger.pitfalls
+  const content = trigger.pitfalls
     .map((p) => fragments.get(`pitfalls/${p.id}`, p.section || trigger.name))
     .join('\n');
+  return wrapped ? `\n${content}\n` : content;
+}
+
+/**
+ * Builds a Prettier-compatible padded markdown table.
+ * @param {string[]} headers — column header labels
+ * @param {string[][]} rows — array of rows, each an array of cell strings
+ */
+export function buildMarkdownTable(headers, rows) {
+  const widths = headers.map((h, i) =>
+    Math.max(h.length, ...rows.map((r) => (r[i] || '').length)),
+  );
+  return [
+    `| ${headers.map((h, i) => h.padEnd(widths[i])).join(' | ')} |`,
+    `| ${widths.map((w) => `:${'-'.repeat(w - 1)}`).join(' | ')} |`,
+    ...rows.map((r) => `| ${r.map((c, i) => (c || '').padEnd(widths[i])).join(' | ')} |`),
+  ].join('\n');
 }
 
 /**

@@ -172,15 +172,11 @@ Use `keyframeEffect` when the pointer position along a single axis should drive 
 
 ### Variables
 
-- `[SOURCE_KEY]` / `[TARGET_KEY]` — same as Rule 1.
-- `[HIT_AREA]` — `'self'` or `'root'`.
+- `[SOURCE_KEY]` / `[TARGET_KEY]` / `[HIT_AREA]` — same as Rule 1.
 - `[AXIS]` — `'x'` (horizontal) or `'y'` (vertical). Defaults to `'y'` when omitted.
-- `[EFFECT_NAME]` — unique string name for the keyframe effect.
+- `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
 - `[KEYFRAMES]` — array of CSS keyframe objects (e.g. `[{ transform: 'rotate(-10deg)' }, { transform: 'rotate(0)' }, { transform: 'rotate(10deg)' }]`). Distributed evenly across 0–1 progress: first keyframe = progress 0 (left/top edge), last = progress 1 (right/bottom edge). Any number of keyframes is allowed.
-- `[CENTERED_TO_TARGET]` — optional. `true` or `false`. See **Centering with `centeredToTarget`** above. Defaults to `false`.
-- `[TRANSITION_DURATION_MS]` — optional. Milliseconds for smoothing between progress updates. See Rule 1 for details.
-- `[TRANSITION_EASING]` — optional. CSS easing string or named easing from `@wix/motion`. See Rule 1 for supported values.
-- `[UNIQUE_EFFECT_ID]` — optional string identifier.
+- `[CENTERED_TO_TARGET]` / `[TRANSITION_DURATION_MS]` / `[TRANSITION_EASING]` / `[UNIQUE_EFFECT_ID]` — same as Rule 1.
 
 ---
 
@@ -231,15 +227,13 @@ Use two separate interactions on the same source/target pair — one for `axis: 
 
 ### Variables
 
-- `[SOURCE_KEY]` / `[TARGET_KEY]` — same as Rule 1.
-- `[HIT_AREA]` — `'self'` or `'root'`.
+- `[SOURCE_KEY]` / `[TARGET_KEY]` / `[HIT_AREA]` — same as Rule 1.
 - `[X_EFFECT_ID]` / `[Y_EFFECT_ID]` — unique string identifiers for the X-axis and Y-axis effects. Required — they map to keys in the top-level `effects` map.
 - `[X_EFFECT_NAME]` / `[Y_EFFECT_NAME]` — unique string names for each keyframe effect.
 - `[X_KEYFRAMES]` / `[Y_KEYFRAMES]` — arrays of WAAPI keyframe objects for the X-axis and Y-axis effects respectively. Each effect can vary in properties and keyframes.
 - `[COMPOSITE_OPERATION]` — `'add'` or `'accumulate'`. Required when both effects animate `transform` and/or both animate `filter`, so their values combine rather than override. `'add'`: composited transform functions are appended. `'accumulate'`: matching function arguments are summed.
 - `[FILL_MODE]` — typically `'both'` to ensure the effect keeps applying after exiting the effect's active range.
-- `[TRANSITION_DURATION_MS]` — optional. Milliseconds for smoothing between progress updates. See Rule 1 for details.
-- `[TRANSITION_EASING]` — optional. CSS easing function for the smoothing transition. See Rule 1 for supported values.
+- `[TRANSITION_DURATION_MS]` / `[TRANSITION_EASING]` — same as Rule 1.
 
 ---
 
@@ -271,9 +265,6 @@ Use `customEffect` when you need full imperative control over pointer-driven ani
 
 ### Variables
 
-- `[SOURCE_KEY]` / `[TARGET_KEY]` — same as Rule 1.
-- `[HIT_AREA]` — `'self'` or `'root'`.
+- `[SOURCE_KEY]` / `[TARGET_KEY]` / `[HIT_AREA]` — same as Rule 1.
 - `[CUSTOM_ANIMATION_LOGIC]` — JavaScript using `progress.x`, `progress.y`, `progress.v`, and `progress.active` to apply the effect. See **Progress Object Structure** above.
-- `[CENTERED_TO_TARGET]` — optional. `true` or `false`. See **Centering with `centeredToTarget`** above. Defaults to `false`.
-- `[TRANSITION_DURATION_MS]` — optional. Milliseconds for smoothing between progress updates. See Rule 1 for details.
-- `[TRANSITION_EASING]` — optional. CSS easing function for the smoothing transition. See Rule 1 for supported values.
+- `[CENTERED_TO_TARGET]` / `[TRANSITION_DURATION_MS]` / `[TRANSITION_EASING]` — same as Rule 1.

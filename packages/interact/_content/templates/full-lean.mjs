@@ -1,4 +1,4 @@
-import { capitalize } from './_helpers.mjs';
+import { capitalize, buildMarkdownTable } from './_helpers.mjs';
 
 const FULL_LEAN_BEHAVIOR = {
   hover: {
@@ -39,21 +39,10 @@ function buildBehaviorTable(headerLabel, behaviorKey) {
 
   const rows = keys.map((k) => {
     const label = k === defaultKey ? `\`'${k}'\` (default)` : `\`'${k}'\``;
-    return { label, hover: hoverBehavior[k], click: clickBehavior[k] };
+    return [label, hoverBehavior[k], clickBehavior[k]];
   });
 
-  const col0Width = Math.max(headerLabel.length, ...rows.map((r) => r.label.length));
-  const col1Width = Math.max('hover behavior'.length, ...rows.map((r) => r.hover.length));
-  const col2Width = Math.max('click behavior'.length, ...rows.map((r) => r.click.length));
-
-  return [
-    `| ${headerLabel.padEnd(col0Width)} | ${'hover behavior'.padEnd(col1Width)} | ${'click behavior'.padEnd(col2Width)} |`,
-    `| :${'-'.repeat(col0Width - 1)} | :${'-'.repeat(col1Width - 1)} | :${'-'.repeat(col2Width - 1)} |`,
-    ...rows.map(
-      (r) =>
-        `| ${r.label.padEnd(col0Width)} | ${r.hover.padEnd(col1Width)} | ${r.click.padEnd(col2Width)} |`,
-    ),
-  ].join('\n');
+  return buildMarkdownTable([headerLabel, 'hover behavior', 'click behavior'], rows);
 }
 
 function buildFullLeanPitfalls(pitfallOrder, fragments) {
@@ -62,7 +51,7 @@ function buildFullLeanPitfalls(pitfallOrder, fragments) {
 
 /**
  * Renders full-lean.md — the comprehensive reference for all triggers, effects, and API surface.
- * @param {{ triggers: object[], effects: object, meta: object }} data
+ * @param {{ triggers: object[], effects: object, meta: object }} data — no `trigger`; receives the full data object
  * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
@@ -85,27 +74,10 @@ export function render(data, fragments) {
     .map((e) => `   | ${e.label.padEnd(8)} | ${e.value.padEnd(maxPresetLen)} |`)
     .join('\n');
 
-  const rangeEntries = Object.entries(data.effects.rangeNames).map(([name, desc]) => ({
-    name: `\`${name}\``,
-    desc,
-  }));
-  const rangeHeaderName = 'Range name';
-  const rangeHeaderDesc = 'Meaning';
-  const rangeNameWidth = Math.max(
-    rangeHeaderName.length,
-    ...rangeEntries.map((e) => e.name.length),
+  const rangeTable = buildMarkdownTable(
+    ['Range name', 'Meaning'],
+    Object.entries(data.effects.rangeNames).map(([name, desc]) => [`\`${name}\``, desc]),
   );
-  const rangeDescWidth = Math.max(
-    rangeHeaderDesc.length,
-    ...rangeEntries.map((e) => e.desc.length),
-  );
-  const rangeTable = [
-    `| ${rangeHeaderName.padEnd(rangeNameWidth)} | ${rangeHeaderDesc.padEnd(rangeDescWidth)} |`,
-    `| :${'-'.repeat(rangeNameWidth - 1)} | :${'-'.repeat(rangeDescWidth - 1)} |`,
-    ...rangeEntries.map(
-      (e) => `| ${e.name.padEnd(rangeNameWidth)} | ${e.desc.padEnd(rangeDescWidth)} |`,
-    ),
-  ].join('\n');
 
   return `# ${data.meta.packageName} — Rules
 
@@ -300,7 +272,7 @@ params: {
 effect.triggerType: ${triggerTypeUnion};  // default: '${viewEnter.defaultTriggerType}'
 \`\`\`
 
-**CRITICAL:** When source and target are the **same element**, MUST use \`triggerType: 'once'\`. For \`'repeat'\` / \`'alternate'\` / \`'state'\`, ALWAYS use **separate** source and target elements — animating the observed element can cause it to leave/re-enter the viewport, causing rapid re-triggers.
+${fragments.get('pitfalls/same-element-viewenter', 'full-lean')}
 
 ### viewProgress
 
@@ -308,7 +280,7 @@ Scroll-driven animations using native \`ViewTimeline\`, with polyfill where not 
 
 \`viewProgress\` has no trigger params. Range configuration (\`rangeStart\`/\`rangeEnd\`) is on the effect, not on the trigger.
 
-**CRITICAL:** Replace ALL \`overflow: hidden\` with \`overflow: clip\` on every element between the trigger source and the scroll container. \`overflow: hidden\` creates a new scroll context that breaks ViewTimeline. In Tailwind replace \`overflow-hidden\` with \`overflow-clip\`.
+${fragments.get('pitfalls/overflow-clip', 'full-lean')}
 
 ### pointerMove
 

@@ -2,14 +2,13 @@ import { buildPitfallsBlock, varLine } from './_helpers.mjs';
 
 /**
  * Renders viewenter.md — rules for viewport-entry triggered animations.
- * @param {{ trigger: object, meta: object }} data — must include `trigger` (viewEnter from triggers.yaml) and `meta`
+ * @param {{ triggers: object[], effects: object, meta: object, trigger: object }} data
  * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
   const { trigger } = data;
 
-  const pitfallsRaw = buildPitfallsBlock(trigger, fragments);
-  const pitfallsBlock = pitfallsRaw ? `\n${pitfallsRaw}\n` : '';
+  const pitfallsBlock = buildPitfallsBlock(trigger, fragments, { wrapped: true });
 
   const paramDescriptions = trigger.params
     .map((p) => {

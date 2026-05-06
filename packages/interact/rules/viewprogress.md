@@ -62,7 +62,7 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 - `[START_PERCENTAGE]` — 0–100, starting point within the named range.
 - `[END_PERCENTAGE]` — 0–100, end point within the named range.
 - `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.
-- `[UNIQUE_EFFECT_ID]` — optional identifier for referencing the effect externally.
+- `[UNIQUE_EFFECT_ID]` — optional. String identifier used by `animationEnd` triggers for chaining, and by sequences for referencing effects from the top-level `effects` map.
 
 ---
 
@@ -95,9 +95,7 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 
 - `[SOURCE_KEY]` / `[TARGET_KEY]` — same as Rule 1.
 - `[CUSTOM_EFFECT_CALLBACK]` — function with signature `(element: HTMLElement, progress: number) => void`. Called on each animation frame with the target element and `progress` from 0 to 1.
-- `[RANGE_NAME]` / `[START_PERCENTAGE]` / `[END_PERCENTAGE]` — same as Rule 1.
-- `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.
-- `[UNIQUE_EFFECT_ID]` — optional identifier for referencing the effect externally.
+- `[RANGE_NAME]` / `[START_PERCENTAGE]` / `[END_PERCENTAGE]` / `[EASING_FUNCTION]` / `[UNIQUE_EFFECT_ID]` — same as Rule 1.
 
 ---
 
@@ -140,5 +138,4 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 - `[EFFECT_NAME]` / `[EFFECT_KEYFRAMES]` — same as Rule 1.
 - `[START_PERCENTAGE]` — 0–100, starting point within the `contain` range (the stuck phase).
 - `[END_PERCENTAGE]` — 0–100, end point within the `contain` range.
-- `[UNIQUE_EFFECT_ID]` — same as Rule 1.
-- `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.
+- `[EASING_FUNCTION]` / `[UNIQUE_EFFECT_ID]` — same as Rule 1.
