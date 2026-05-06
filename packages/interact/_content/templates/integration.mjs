@@ -4,13 +4,7 @@
  * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
-  const metaParams = {
-    installCommand: data.meta.installCommand,
-    webEntry: data.meta.entryPoints.web,
-    reactEntry: data.meta.entryPoints.react,
-    vanillaEntry: data.meta.entryPoints.vanilla,
-    presetsPackage: data.meta.presetsPackage,
-  };
+  const { metaParams } = data;
 
   return `# ${data.meta.packageName} Integration Rules
 
@@ -64,7 +58,7 @@ Wrap target elements with \`<interact-element>\`:
 
 \`\`\`typescript
 import { useEffect } from 'react';
-import { Interact } from '@wix/interact/react';
+import { Interact } from '${data.meta.entryPoints.react}';
 
 useEffect(() => {
   const instance = Interact.create(config);
@@ -78,7 +72,7 @@ useEffect(() => {
 Replace target elements with \`<Interaction>\`:
 
 \`\`\`tsx
-import { Interaction } from '@wix/interact/react';
+import { Interaction } from '${data.meta.entryPoints.react}';
 
 <Interaction tagName="div" interactKey="hero" className="hero">
   ...

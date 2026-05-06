@@ -52,7 +52,7 @@ export function render(data, fragments) {
   const pitfallsBlock = buildPitfallsBlock(trigger, fragments, { wrapped: true });
 
   const multipleEffectsNote = trigger.showMultipleEffectsNote
-    ? `\n${fragments.get('multiple-effects-note', { triggerName: name, triggerEvent: `${name} event`, triggerContext: '', extraNote: '' })}\n`
+    ? `\n${fragments.get('multiple-effects-note', 'default', { triggerName: name, triggerEvent: `${name} event`, triggerContext: '', extraNote: '' })}\n`
     : '';
 
   return `# ${Name} Trigger Rules for ${data.meta.packageName}

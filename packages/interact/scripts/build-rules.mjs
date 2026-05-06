@@ -23,10 +23,19 @@ const triggersData = loadYaml('triggers.yaml');
 const effectsData = loadYaml('effects.yaml');
 const metaData = loadYaml('meta.yaml');
 
+const metaParams = {
+  installCommand: metaData.installCommand,
+  webEntry: metaData.entryPoints.web,
+  reactEntry: metaData.entryPoints.react,
+  vanillaEntry: metaData.entryPoints.vanilla,
+  presetsPackage: metaData.presetsPackage,
+};
+
 const data = {
   triggers: triggersData.triggers,
   effects: effectsData,
   meta: metaData,
+  metaParams,
 };
 
 // ---------------------------------------------------------------------------
@@ -41,6 +50,7 @@ const TRIGGER_SCHEMA = {
     'hasEffectId',
     'triggerTypeDescriptions',
     'stateActionDescriptions',
+    'showMultipleEffectsNote',
   ],
   'viewenter-rule.mjs': ['params', 'pitfalls', 'triggerTypeDescriptions'],
   'viewprogress-rule.mjs': ['params', 'pitfalls'],
@@ -83,6 +93,20 @@ const FIELD_VALIDATORS = {
           `triggers.yaml: trigger "${trigger.name}".triggerTypeDescriptions.${key} must be an object with a "full" key`,
         );
     }
+  },
+  stateActionDescriptions(obj, trigger) {
+    for (const [key, val] of Object.entries(obj)) {
+      if (typeof val !== 'object' || !val.full)
+        throw new Error(
+          `triggers.yaml: trigger "${trigger.name}".stateActionDescriptions.${key} must be an object with a "full" key`,
+        );
+    }
+  },
+  showMultipleEffectsNote(val, trigger) {
+    if (typeof val !== 'boolean')
+      throw new Error(
+        `triggers.yaml: trigger "${trigger.name}".showMultipleEffectsNote must be a boolean`,
+      );
   },
 };
 
@@ -151,14 +175,7 @@ class Fragments {
     return sections;
   }
 
-  get(path, sectionOrParams = 'default', params = {}) {
-    let section;
-    if (typeof sectionOrParams === 'object') {
-      section = 'default';
-      params = sectionOrParams;
-    } else {
-      section = sectionOrParams;
-    }
+  get(path, section = 'default', params = {}) {
     const sectionMap = this.store.get(path);
     if (!sectionMap) {
       throw new Error(`Fragment not found: ${path}`);

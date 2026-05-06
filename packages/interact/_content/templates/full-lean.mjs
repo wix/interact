@@ -62,13 +62,7 @@ export function render(data, fragments) {
     Object.entries(data.effects.rangeNames).map(([name, desc]) => [`\`${name}\``, desc]),
   );
 
-  const metaParams = {
-    installCommand: data.meta.installCommand,
-    webEntry: data.meta.entryPoints.web,
-    reactEntry: data.meta.entryPoints.react,
-    vanillaEntry: data.meta.entryPoints.vanilla,
-    presetsPackage: data.meta.presetsPackage,
-  };
+  const { metaParams } = data;
 
   return `# ${data.meta.packageName} — Rules
 
