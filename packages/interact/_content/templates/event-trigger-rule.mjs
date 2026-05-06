@@ -1,21 +1,7 @@
 import { capitalize, buildPitfallsBlock, varLine } from './_helpers.mjs';
 
-const VARIABLE_OVERRIDES_BASE = {
-  sourceKeySuffix: '',
-  targetKeyDesc:
-    "identifier matching the element's key on the element that animates.",
-  fillModeDesc: '',
-  easingDesc: 'CSS easing string, or named easing from `@wix/motion`.',
-  iterationsDesc: 'optional. Number of iterations, or `Infinity` for continuous loops.',
-  fillCritical: '',
-  customEffectExamples: '',
-  offsetEasingSuffix: '',
-  alternateBoolSuffix: '',
-};
-
 const VARIABLE_OVERRIDES = {
   hover: {
-    ...VARIABLE_OVERRIDES_BASE,
     sourceKeySuffix: 'The element that listens for hover.',
     targetKeyDesc:
       "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
@@ -30,12 +16,12 @@ const VARIABLE_OVERRIDES = {
     offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.',
   },
   click: {
-    ...VARIABLE_OVERRIDES_BASE,
     sourceKeySuffix: 'The element that listens for clicks.',
     targetKeyDesc:
       "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element.",
     fillModeDesc:
       "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.",
+    easingDesc: 'CSS easing string, or named easing from `@wix/motion`.',
     fillCritical:
       "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`.",
     customEffectExamples: ', randomized behavior',
@@ -241,7 +227,9 @@ function buildVariables(trigger, vo, hasReversed, hasEffectId) {
     varLine('SOURCE_KEY', vo.sourceKeySuffix),
     varLine('TARGET_KEY', vo.targetKeyDesc),
     `- \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:`,
-    ...Object.entries(trigger.triggerTypeDescriptions).map(([k, v]) => `  - \`'${k}'\` — ${v.full}`),
+    ...Object.entries(trigger.triggerTypeDescriptions).map(
+      ([k, v]) => `  - \`'${k}'\` — ${v.full}`,
+    ),
     varLine('KEYFRAMES'),
     varLine('EFFECT_NAME'),
     varLine('NAMED_EFFECT_DEFINITION'),
@@ -257,7 +245,7 @@ function buildVariables(trigger, vo, hasReversed, hasEffectId) {
     varLine('EASING_FUNCTION', vo.easingDesc),
     varLine('DELAY_MS'),
     varLine('ITERATIONS', vo.iterationsDesc),
-    varLine('ALTERNATE_BOOL', vo.alternateBoolSuffix || undefined),
+    varLine('ALTERNATE_BOOL', vo.alternateBoolSuffix),
   );
   if (hasEffectId) {
     lines.push(varLine('UNIQUE_EFFECT_ID'));

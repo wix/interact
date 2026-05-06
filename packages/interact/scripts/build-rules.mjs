@@ -58,19 +58,35 @@ for (const trigger of data.triggers) {
     }
   }
 
-  if (trigger.pitfalls) {
+  if (trigger.pitfalls !== undefined) {
+    if (!Array.isArray(trigger.pitfalls)) {
+      throw new Error(`triggers.yaml: trigger "${trigger.name}".pitfalls must be an array`);
+    }
     for (const p of trigger.pitfalls) {
       if (!p.id) {
-        throw new Error(`triggers.yaml: trigger "${trigger.name}" has a pitfall entry missing "id"`);
+        throw new Error(
+          `triggers.yaml: trigger "${trigger.name}" has a pitfall entry missing "id"`,
+        );
       }
     }
   }
 
-  if (trigger.params) {
+  if (trigger.params !== undefined) {
+    if (!Array.isArray(trigger.params)) {
+      throw new Error(`triggers.yaml: trigger "${trigger.name}".params must be an array`);
+    }
     for (const p of trigger.params) {
       if (!p.name) {
-        throw new Error(`triggers.yaml: trigger "${trigger.name}" has a param entry missing "name"`);
+        throw new Error(
+          `triggers.yaml: trigger "${trigger.name}" has a param entry missing "name"`,
+        );
       }
+    }
+  }
+
+  for (const field of ['hasReversed', 'hasEffectId']) {
+    if (trigger[field] !== undefined && typeof trigger[field] !== 'boolean') {
+      throw new Error(`triggers.yaml: trigger "${trigger.name}".${field} must be a boolean`);
     }
   }
 
@@ -104,12 +120,12 @@ class Fragments {
           ? `${prefix}/${basename(entry.name, '.md')}`
           : basename(entry.name, '.md');
         const raw = readFileSync(join(dir, entry.name), 'utf8');
-        this.store.set(key, this._parseSections(raw));
+        this.store.set(key, this._parseSections(raw, key));
       }
     }
   }
 
-  _parseSections(raw) {
+  _parseSections(raw, filePath) {
     const sections = new Map();
     let current = null;
     let buf = [];
@@ -117,6 +133,11 @@ class Fragments {
     for (const line of raw.split('\n')) {
       const m = line.match(/^<!--\s+#(\S+)\s+-->$/);
       if (m) {
+        if (current === null && buf.join('\n').trim()) {
+          throw new Error(
+            `Fragment "${filePath}" has content before the first <!-- #section --> marker. Add a marker or remove the content.`,
+          );
+        }
         if (current !== null) {
           sections.set(current, buf.join('\n').trim());
         }

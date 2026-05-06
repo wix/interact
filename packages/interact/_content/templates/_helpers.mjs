@@ -22,9 +22,7 @@ export function buildPitfallsBlock(trigger, fragments, { wrapped = false } = {})
  * @param {string[][]} rows — array of rows, each an array of cell strings
  */
 export function buildMarkdownTable(headers, rows) {
-  const widths = headers.map((h, i) =>
-    Math.max(h.length, ...rows.map((r) => (r[i] || '').length)),
-  );
+  const widths = headers.map((h, i) => Math.max(h.length, ...rows.map((r) => (r[i] || '').length)));
   return [
     `| ${headers.map((h, i) => h.padEnd(widths[i])).join(' | ')} |`,
     `| ${widths.map((w) => `:${'-'.repeat(w - 1)}`).join(' | ')} |`,
@@ -102,7 +100,7 @@ export function varLine(name, extra) {
   const v = COMMON_VARS[name];
   if (!v) throw new Error(`Unknown common variable: ${name}`);
   let desc = v.base;
-  if (extra !== undefined && v.mode) {
+  if (extra && v.mode) {
     desc = v.mode === 'suffix' ? `${v.base} ${extra}` : extra;
   }
   return `- \`[${name}]\` — ${desc}`;

@@ -4,12 +4,6 @@ triggerTypes:
   - alternate
   - state
 
-stateActions:
-  - toggle
-  - add
-  - remove
-  - clear
-
 easings:
   - linear
   - ease
