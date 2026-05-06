@@ -8,6 +8,7 @@
       "imports": {
         "@wix/motion": "/assets/lib/motion/motion.js"
       }
+    }
     </script>
 
     <title>Pointer Movement</title>
@@ -28,6 +29,35 @@
         background: #1f1f1f;
         overflow: hidden;
       }
+      body > div {
+        width: 100%;
+        height: 100%;
+        perspective: 1200px;
+      }
+      [data-interact-key='mt-scene-root'],
+      [data-interact-key='mt-card-target'] {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      [data-interact-key='mt-card-target'] > div {
+        width: 100%;
+        height: 100%;
+        background: #1f1f1f;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform-style: preserve-3d;
+      }
+      [data-interact-key='mt-content-target'] {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
       .preserve-3d {
         transform-style: preserve-3d;
       }
@@ -46,6 +76,11 @@
         border-color: rgba(255, 255, 255, 0.4);
         z-index: 10;
       }
+      .tunnel-mover-root {
+        border: none;
+        width: 100%;
+        height: 100%;
+      }
       .tunnel-moving {
         width: 85%;
         height: 85%;
@@ -59,53 +94,45 @@
       #tunnel-mount {
         width: 100vmin !important;
         height: 100vmin !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform-style: preserve-3d;
       }
     </style>
   </head>
   <body>
-    <div style="width: 100%; height: 100%; perspective: 1200px">
-      <interact-element
-        data-interact-key="mt-scene-root"
-        style="width: 100%; height: 100%; display: block"
-      >
-        <interact-element
-          data-interact-key="mt-card-target"
-          style="width: 100%; height: 100%; display: block"
-        >
-          <div
-            style="
-              width: 100%;
-              height: 100%;
-              background: #1f1f1f;
-              overflow: hidden;
-              position: relative;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              transform-style: preserve-3d;
-            "
-          >
-            <interact-element
-              data-interact-key="mt-content-target"
-              style="
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <div
-                id="tunnel-mount"
-                style="
-                  width: 100%;
-                  height: 100%;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  transform-style: preserve-3d;
-                "
-              ></div>
+    <div>
+      <interact-element data-interact-key="mt-scene-root">
+        <interact-element data-interact-key="mt-card-target">
+          <div>
+            <interact-element data-interact-key="mt-content-target">
+              <div id="tunnel-mount">
+                <div class="ring-base tunnel-static"></div>
+                <div class="ring-base tunnel-mover-root">
+                  <div class="ring-base tunnel-moving">
+                    <div class="ring-base tunnel-moving">
+                      <div class="ring-base tunnel-moving">
+                        <div class="ring-base tunnel-moving">
+                          <div class="ring-base tunnel-moving">
+                            <div class="ring-base tunnel-moving">
+                              <div class="ring-base tunnel-moving">
+                                <div class="ring-base tunnel-moving">
+                                  <div class="ring-base tunnel-moving">
+                                    <div class="ring-base tunnel-moving">
+                                      <div class="ring-base tunnel-moving"></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </interact-element>
           </div>
         </interact-element>
@@ -116,33 +143,6 @@
       import { Interact } from '/assets/lib/interact/es/web.js';
       import * as presets from '/assets/lib/motion-presets/motion-presets.js';
       Interact.registerEffects(presets);
-
-      // Build tunnel — 12 depth levels, matching homepage exactly
-      const mount = document.getElementById('tunnel-mount');
-      const DEPTH = 12;
-      let currentParent = mount;
-
-      for (let i = 0; i < DEPTH; i++) {
-        const circle = document.createElement('div');
-
-        if (i === 0) {
-          circle.classList.add('ring-base', 'tunnel-static');
-          mount.appendChild(circle);
-
-          const moverRoot = document.createElement('div');
-          moverRoot.classList.add('ring-base');
-          moverRoot.style.border = 'none';
-          moverRoot.style.width = '100%';
-          moverRoot.style.height = '100%';
-          mount.appendChild(moverRoot);
-          currentParent = moverRoot;
-        } else {
-          circle.classList.add('tunnel-moving', 'ring-base');
-          circle.style.position = 'relative';
-          currentParent.appendChild(circle);
-          currentParent = circle;
-        }
-      }
 
       Interact.create({
         interactions: [

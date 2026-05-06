@@ -51,47 +51,41 @@
         opacity: 0;
         transform: scale(0.8);
       }
+      [data-interact-key='click-ripple-2'] {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        pointer-events: none;
+      }
+      [data-interact-key='click-ripple-1'] {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 20;
+        pointer-events: none;
+      }
+      [data-interact-key='click-center'] {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 30;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
     <div class="scene">
-      <interact-element
-        data-interact-key="click-ripple-2"
-        style="
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 10;
-          pointer-events: none;
-        "
-      >
+      <interact-element data-interact-key="click-ripple-2">
         <div class="circle ripple-init"></div>
       </interact-element>
-      <interact-element
-        data-interact-key="click-ripple-1"
-        style="
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 20;
-          pointer-events: none;
-        "
-      >
+      <interact-element data-interact-key="click-ripple-1">
         <div class="circle ripple-init"></div>
       </interact-element>
-      <interact-element
-        data-interact-key="click-center"
-        style="
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 30;
-          cursor: pointer;
-        "
-      >
+      <interact-element data-interact-key="click-center">
         <div class="circle"><div class="fill-circle"></div></div>
       </interact-element>
     </div>

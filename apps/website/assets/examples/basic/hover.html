@@ -41,26 +41,32 @@
         transform: scale(0);
         will-change: transform;
       }
+      [data-interact-key='hover-circle-1'] {
+        position: absolute;
+        bottom: -6rem;
+        left: -6rem;
+      }
+      [data-interact-key='hover-circle-2'] {
+        position: absolute;
+        top: calc(50% - 8rem);
+        left: calc(50% - 8rem);
+      }
+      [data-interact-key='hover-circle-3'] {
+        position: absolute;
+        top: -6rem;
+        right: -6rem;
+      }
     </style>
   </head>
   <body>
     <!-- Positions match the homepage exactly: -bottom-24 -left-24 / centered / -top-24 -right-24 -->
-    <interact-element
-      data-interact-key="hover-circle-1"
-      style="position: absolute; bottom: -6rem; left: -6rem"
-    >
+    <interact-element data-interact-key="hover-circle-1">
       <div class="circle"><div class="fill-circle"></div></div>
     </interact-element>
-    <interact-element
-      data-interact-key="hover-circle-2"
-      style="position: absolute; top: calc(50% - 8rem); left: calc(50% - 8rem)"
-    >
+    <interact-element data-interact-key="hover-circle-2">
       <div class="circle"><div class="fill-circle"></div></div>
     </interact-element>
-    <interact-element
-      data-interact-key="hover-circle-3"
-      style="position: absolute; top: -6rem; right: -6rem"
-    >
+    <interact-element data-interact-key="hover-circle-3">
       <div class="circle"><div class="fill-circle"></div></div>
     </interact-element>
 

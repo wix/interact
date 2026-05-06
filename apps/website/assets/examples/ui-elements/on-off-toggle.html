@@ -289,6 +289,10 @@
       import { Interact } from '/assets/lib/interact/es/web.js';
 
       Interact.create({
+        conditions: {
+          'is-off': { type: 'selector', predicate: '.is-off .slider' },
+          'is-on': { type: 'selector', predicate: '.is-on .slider' },
+        },
         effects: {
           'slider-move': {
             keyframeEffect: {
@@ -388,6 +392,30 @@
             easing: 'ease',
             fill: 'both',
           },
+          'nudge-left': {
+            keyframeEffect: {
+              name: 'nudge-left-onoff',
+              keyframes: [
+                { left: '86px' },
+                { left: '72px' },
+              ],
+            },
+            duration: 400,
+            easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+            fill: 'both',
+          },
+          'nudge-right': {
+            keyframeEffect: {
+              name: 'nudge-right-onoff',
+              keyframes: [
+                { right: '86px' },
+                { right: '72px' },
+              ],
+            },
+            duration: 400,
+            easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+            fill: 'both',
+          },
         },
         interactions: [
           {
@@ -405,32 +433,21 @@
               { key: 'toggle-btn', effectId: 'label-off-vis', selector: '.label-bg-off' },
             ],
           },
+          {
+            key: 'toggle-btn',
+            trigger: 'hover',
+            effects: [
+              { key: 'slider', effectId: 'nudge-left', conditions: ['is-off'] },
+              { key: 'slider', effectId: 'nudge-right', conditions: ['is-on'] },
+            ],
+          },
         ],
       });
 
       const btn = document.querySelector('.toggle-track');
-      const sliderEl = document.querySelector('.slider');
-      let hoverAnim = null;
-
-      btn.addEventListener('mouseenter', () => {
-        if (hoverAnim) hoverAnim.cancel();
-        const isOn = btn.classList.contains('is-on');
-        hoverAnim = sliderEl.animate(
-          isOn ? [{ right: '86px' }, { right: '72px' }] : [{ left: '86px' }, { left: '72px' }],
-          { duration: 400, fill: 'forwards', easing: 'cubic-bezier(0.65, 0, 0.35, 1)' },
-        );
-      });
-
-      btn.addEventListener('mouseleave', () => {
-        if (hoverAnim) hoverAnim.reverse();
-      });
 
       if (btn) {
         btn.addEventListener('click', () => {
-          if (hoverAnim) {
-            hoverAnim.cancel();
-            hoverAnim = null;
-          }
           const pressed = btn.getAttribute('aria-pressed') === 'true';
           btn.setAttribute('aria-pressed', String(!pressed));
           btn.classList.toggle('is-on');

@@ -12,11 +12,17 @@
         margin: 0;
         padding: 0;
       }
+      interact-element {
+        display: block;
+      }
       body {
         background: #1f1f1f;
       }
       .scroll-driver {
         height: 300vh;
+      }
+      .scroll-driver-track {
+        height: 100%;
       }
       .scene {
         position: sticky;
@@ -32,6 +38,7 @@
         width: 16rem;
         height: 16rem;
         transform-style: preserve-3d;
+        perspective: 1000px;
       }
       .orbit {
         position: absolute;
@@ -48,26 +55,29 @@
     </style>
   </head>
   <body>
-    <div class="scroll-driver" id="driver">
-      <div class="scene">
-        <div class="orbits" style="perspective: 1000px">
-          <div id="orbit-y" class="orbit"><div class="orbit-ring"></div></div>
-          <div id="orbit-x" class="orbit"><div class="orbit-ring"></div></div>
-          <div id="orbit-d1" class="orbit"><div class="orbit-ring"></div></div>
-          <div id="orbit-d2" class="orbit"><div class="orbit-ring"></div></div>
+    <interact-element data-interact-key="scroll-driver" class="scroll-driver">
+      <div class="scroll-driver-track">
+        <div class="scene">
+          <div class="orbits">
+            <interact-element data-interact-key="orbit-y" class="orbit">
+              <div class="orbit-ring"></div>
+            </interact-element>
+            <interact-element data-interact-key="orbit-x" class="orbit">
+              <div class="orbit-ring"></div>
+            </interact-element>
+            <interact-element data-interact-key="orbit-d1" class="orbit">
+              <div class="orbit-ring"></div>
+            </interact-element>
+            <interact-element data-interact-key="orbit-d2" class="orbit">
+              <div class="orbit-ring"></div>
+            </interact-element>
+          </div>
         </div>
       </div>
-    </div>
+    </interact-element>
 
     <script type="module">
-      import { Interact, add } from '/assets/lib/interact/es/web.js';
-
-      // Register elements with the v2 DOM API
-      add(document.getElementById('driver'), 'scroll-driver');
-      add(document.getElementById('orbit-y'), 'orbit-y');
-      add(document.getElementById('orbit-x'), 'orbit-x');
-      add(document.getElementById('orbit-d1'), 'orbit-d1');
-      add(document.getElementById('orbit-d2'), 'orbit-d2');
+      import { Interact } from '/assets/lib/interact/es/web.js';
 
       const r = {
         rangeStart: { name: 'cover', offset: { value: 0, type: 'percentage' } },
