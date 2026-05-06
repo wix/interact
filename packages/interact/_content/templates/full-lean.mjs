@@ -1,4 +1,4 @@
-import { capitalize, buildMarkdownTable } from './_helpers.mjs';
+import { capitalize } from './_helpers.mjs';
 
 const FULL_LEAN_PITFALL_ORDER = [
   { id: 'overflow-clip', section: 'long' },
@@ -6,6 +6,15 @@ const FULL_LEAN_PITFALL_ORDER = [
   { id: 'hit-area', section: 'full-lean-hover' },
   { id: 'hit-area', section: 'full-lean-pointermove' },
 ];
+
+function buildMarkdownTable(headers, rows) {
+  const widths = headers.map((h, i) => Math.max(h.length, ...rows.map((r) => (r[i] || '').length)));
+  return [
+    `| ${headers.map((h, i) => h.padEnd(widths[i])).join(' | ')} |`,
+    `| ${widths.map((w) => `:${'-'.repeat(w - 1)}`).join(' | ')} |`,
+    ...rows.map((r) => `| ${r.map((c, i) => (c || '').padEnd(widths[i])).join(' | ')} |`),
+  ].join('\n');
+}
 
 function buildBehaviorTable(headerLabel, behaviorKey, triggers, { defaultKey } = {}) {
   const keys = [...new Set(triggers.flatMap((t) => Object.keys(t[behaviorKey])))];
@@ -29,10 +38,8 @@ function buildFullLeanPitfalls(pitfallOrder, fragments) {
 /**
  * Renders full-lean.md — the comprehensive reference for all triggers, effects, and API surface.
  *
- * The largest static prose sections (Element Binding, Interactions, StateEffect) are extracted to
- * `full-lean/` fragments for editor ergonomics (markdown highlighting, spell-checking). Remaining
- * static sections (Effects preamble, FOUC Prevention) are kept inline — they interleave with
- * dynamic content and extracting them would fragment the template's flow.
+ * Static prose sections are kept inline — they interleave with dynamic content and have a single
+ * consumer, so extraction would add indirection without deduplication benefit.
  *
  * @param {{ triggers: object[], effects: object, meta: object }} data — no `trigger`; receives the full data object
  * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
@@ -123,7 +130,34 @@ ${fragments.get('quick-start', 'register-presets', metaParams)}
 
 ---
 
-${fragments.get('full-lean/element-binding')}
+## Element Binding
+
+**CRITICAL:** Do NOT add observers/event listeners manually. The runtime binds triggers and effects via element keys.
+
+### Web: \`<interact-element>\`
+
+- MUST set \`data-interact-key\` to a unique value.
+- MUST contain at least one child element (the library targets \`.firstElementChild\`).
+- If an effect targets a different element, that element also needs its own \`<interact-element>\`.
+
+\`\`\`html
+<interact-element data-interact-key="hero">
+  <section class="hero">...</section>
+</interact-element>
+\`\`\`
+
+### React: \`<Interaction>\` component
+
+- MUST set \`tagName\` to the replaced element's HTML tag.
+- MUST set \`interactKey\` to a unique string.
+
+\`\`\`tsx
+import { Interaction } from '@wix/interact/react';
+
+<Interaction tagName="section" interactKey="hero" className="hero">
+  ...
+</Interaction>;
+\`\`\`
 
 ---
 
@@ -133,7 +167,29 @@ ${fragments.get('config-structure', 'detailed')}
 
 ---
 
-${fragments.get('full-lean/interactions')}
+## Interactions
+
+Each interaction maps a source element + trigger to one or more effects.
+
+**Multiple effects per interaction:** A single interaction can contain multiple effects in its \`effects\` array. All effects in the same interaction share the same trigger — they all fire together when the trigger activates. Use this to apply different animations to different targets from the same trigger event, rather than creating separate interactions with duplicate trigger configs.
+
+\`\`\`ts
+{
+  key: string;                   // REQUIRED — matches data-interact-key / interactKey - the root element
+  trigger: TriggerType;          // REQUIRED
+  params?: TriggerParams;        // trigger-specific options
+  effects?: (Effect | EffectRef)[]; // possible to add multiple effects for same trigger
+  sequences?: (SequenceConfig | SequenceConfigRef)[]; // possible to add multiple sequences for same trigger
+  conditions?: string[];         // ids referencing the top-level conditions map; all must pass
+  selector?: string;             // optional - CSS selector to refine source element selection within the root element
+  listContainer?: string;        // optional — CSS selector for list container
+  listItemSelector?: string;     // optional — CSS selector to filter which children of listContainer are observed as sources
+}
+\`\`\`
+
+At least one of \`effects\` or \`sequences\` MUST be provided.
+
+For most use cases, \`key\` alone is sufficient for both source and target resolution. The \`selector\`, \`listContainer\`, and \`listItemSelector\` fields are only needed for advanced patterns (lists, delegated triggers, child targeting). See [Element Resolution](#element-resolution) for details.
 
 ---
 
@@ -342,7 +398,38 @@ ${rangeTable}
 - Sticky child (\`key\`) with \`position: sticky; top: 0; height: 100vh\`: stays fixed while the wrapper scrolls. This is the ViewTimeline source.
 - Use \`rangeStart/rangeEnd\` with \`name: 'contain'\` to animate only during the stuck phase.
 
-${fragments.get('full-lean/state-effect')}
+### StateEffect (CSS style toggle)
+
+Used with \`hover\` / \`click\` triggers. Set \`stateAction\` on the effect to control state behavior.
+
+**StateEffect** (CSS transition-style state toggles):
+
+- \`key?\`: string (target override; see TARGET CASCADE)
+- \`effectId?\`: string (when used as a reference identity)
+- One of:
+  - \`transition?\`: \`{ duration?: number; delay?: number; easing?: string; styleProperties: { name: string; value: string }[] }\`
+    - Applies a single transition options block to all listed style properties.
+  - \`transitionProperties?\`: \`Array<{ name: string; value: string; duration?: number; delay?: number; easing?: string }>\`
+    - Allows per-property transition options. If both \`transition\` and \`transitionProperties\` are provided, the system SHOULD apply both with per-property entries taking precedence for overlapping properties.
+
+\`\`\`ts
+// Shared timing for all properties:
+{
+  transition: {
+    duration?: number; delay?: number; easing?: string;
+    styleProperties: [{ name: string; value: string }]
+  }
+}
+
+// Per-property timing:
+{
+  transitionProperties: [
+    { name: string; value: string; duration?: number; delay?: number; easing?: string }
+  ]
+}
+\`\`\`
+
+CSS property names use **camelCase** (e.g. \`'backgroundColor'\`, \`'borderRadius'\`).
 
 ### Animation Payloads
 

@@ -1,40 +1,39 @@
 import { capitalize, buildPitfallsBlock, varLine } from './_helpers.mjs';
 
-const VARIABLE_OVERRIDES_BASE = {
-  customEffectExamples: '',
-  offsetEasingSuffix: '',
-};
-
-const VARIABLE_OVERRIDES = {
-  hover: {
-    ...VARIABLE_OVERRIDES_BASE,
-    sourceKeySuffix: 'The element that listens for hover.',
-    targetKeyDesc:
-      "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
-    fillModeDesc:
-      "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished.",
-    easingDesc:
-      "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`.",
-    iterationsDesc:
-      "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.",
-    fillCritical:
-      "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`.",
-    offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.',
-  },
-  click: {
-    ...VARIABLE_OVERRIDES_BASE,
+function getOverrides(name) {
+  if (name === 'hover') {
+    return {
+      sourceKeySuffix: 'The element that listens for hover.',
+      targetKeyDesc:
+        "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
+      fillModeDesc:
+        "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished.",
+      easingDesc:
+        "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`.",
+      iterationsDesc:
+        "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.",
+      fillCritical:
+        "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`.",
+      customEffectExamples: '',
+      offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.',
+      alternateBoolSuffix: '',
+    };
+  }
+  return {
     sourceKeySuffix: 'The element that listens for clicks.',
     targetKeyDesc:
       "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element.",
     fillModeDesc:
       "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.",
     easingDesc: 'CSS easing string, or named easing from `@wix/motion`.',
+    iterationsDesc: undefined,
     fillCritical:
       "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`.",
     customEffectExamples: ', randomized behavior',
+    offsetEasingSuffix: '',
     alternateBoolSuffix: "Different from `triggerType: 'alternate'` which alternates per click.",
-  },
-};
+  };
+}
 
 /**
  * Renders a trigger-specific rule file (click.md or hover.md).
@@ -44,7 +43,7 @@ const VARIABLE_OVERRIDES = {
 export function render(data, fragments) {
   const { trigger } = data;
   const { name } = trigger;
-  const vo = VARIABLE_OVERRIDES[name];
+  const vo = getOverrides(name);
   const Name = capitalize(name);
   const hasReversed = trigger.hasReversed;
   const hasEffectId = trigger.hasEffectId;

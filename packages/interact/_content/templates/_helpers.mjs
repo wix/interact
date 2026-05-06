@@ -4,7 +4,7 @@ export function capitalize(s) {
 
 /**
  * Builds the pitfalls block for a trigger template.
- * Iterates trigger.pitfalls from YAML, resolving each fragment section.
+ * Iterates trigger.pitfalls from data, resolving each fragment section.
  * When `wrapped` is true, wraps non-empty output with leading/trailing newlines
  * (the common pattern used by event-trigger, viewenter, and viewprogress templates).
  */
@@ -14,20 +14,6 @@ export function buildPitfallsBlock(trigger, fragments, { wrapped = false } = {})
     .map((p) => fragments.get(`pitfalls/${p.id}`, p.section || trigger.name))
     .join('\n');
   return wrapped ? `\n${content}\n` : content;
-}
-
-/**
- * Builds a Prettier-compatible padded markdown table.
- * @param {string[]} headers — column header labels
- * @param {string[][]} rows — array of rows, each an array of cell strings
- */
-export function buildMarkdownTable(headers, rows) {
-  const widths = headers.map((h, i) => Math.max(h.length, ...rows.map((r) => (r[i] || '').length)));
-  return [
-    `| ${headers.map((h, i) => h.padEnd(widths[i])).join(' | ')} |`,
-    `| ${widths.map((w) => `:${'-'.repeat(w - 1)}`).join(' | ')} |`,
-    ...rows.map((r) => `| ${r.map((c, i) => (c || '').padEnd(widths[i])).join(' | ')} |`),
-  ].join('\n');
 }
 
 /**

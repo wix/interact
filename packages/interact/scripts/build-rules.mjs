@@ -3,7 +3,6 @@
 import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'node:fs';
 import { join, basename, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import yaml from 'js-yaml';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const PKG_ROOT = join(__dirname, '..');
@@ -11,120 +10,25 @@ const CONTENT_DIR = join(PKG_ROOT, '_content');
 const OUTPUT_DIR = join(PKG_ROOT, 'rules');
 
 // ---------------------------------------------------------------------------
-// 1. Load YAML data
+// 1. Load data modules
 // ---------------------------------------------------------------------------
 
-function loadYaml(name) {
-  const raw = readFileSync(join(CONTENT_DIR, 'data', name), 'utf8');
-  return yaml.load(raw);
-}
-
-const triggersData = loadYaml('triggers.yaml');
-const effectsData = loadYaml('effects.yaml');
-const metaData = loadYaml('meta.yaml');
+const { triggers } = await import(join(CONTENT_DIR, 'data', 'triggers.mjs'));
+const { effects } = await import(join(CONTENT_DIR, 'data', 'effects.mjs'));
+const { meta } = await import(join(CONTENT_DIR, 'data', 'meta.mjs'));
 
 const metaParams = {
-  installCommand: metaData.installCommand,
-  webEntry: metaData.entryPoints.web,
-  reactEntry: metaData.entryPoints.react,
-  vanillaEntry: metaData.entryPoints.vanilla,
-  presetsPackage: metaData.presetsPackage,
+  installCommand: meta.installCommand,
+  webEntry: meta.entryPoints.web,
+  reactEntry: meta.entryPoints.react,
+  vanillaEntry: meta.entryPoints.vanilla,
+  presetsPackage: meta.presetsPackage,
 };
 
-const data = {
-  triggers: triggersData.triggers,
-  effects: effectsData,
-  meta: metaData,
-  metaParams,
-};
+const data = { triggers, effects, meta, metaParams };
 
 // ---------------------------------------------------------------------------
-// 1b. Validate YAML schema
-// ---------------------------------------------------------------------------
-
-const TRIGGER_SCHEMA = {
-  'event-trigger-rule.mjs': [
-    'a11yAlias',
-    'a11yNote',
-    'hasReversed',
-    'hasEffectId',
-    'triggerTypeDescriptions',
-    'stateActionDescriptions',
-    'showMultipleEffectsNote',
-  ],
-  'viewenter-rule.mjs': ['params', 'pitfalls', 'triggerTypeDescriptions'],
-  'viewprogress-rule.mjs': ['params', 'pitfalls'],
-  'pointermove-rule.mjs': ['params', 'pitfalls'],
-};
-
-const FIELD_VALIDATORS = {
-  pitfalls(arr, trigger) {
-    if (!Array.isArray(arr))
-      throw new Error(`triggers.yaml: trigger "${trigger.name}".pitfalls must be an array`);
-    for (const p of arr) {
-      if (!p.id)
-        throw new Error(
-          `triggers.yaml: trigger "${trigger.name}" has a pitfall entry missing "id"`,
-        );
-    }
-  },
-  params(arr, trigger) {
-    if (!Array.isArray(arr))
-      throw new Error(`triggers.yaml: trigger "${trigger.name}".params must be an array`);
-    for (const p of arr) {
-      if (!p.name)
-        throw new Error(
-          `triggers.yaml: trigger "${trigger.name}" has a param entry missing "name"`,
-        );
-    }
-  },
-  hasReversed(val, trigger) {
-    if (typeof val !== 'boolean')
-      throw new Error(`triggers.yaml: trigger "${trigger.name}".hasReversed must be a boolean`);
-  },
-  hasEffectId(val, trigger) {
-    if (typeof val !== 'boolean')
-      throw new Error(`triggers.yaml: trigger "${trigger.name}".hasEffectId must be a boolean`);
-  },
-  triggerTypeDescriptions(obj, trigger) {
-    for (const [key, val] of Object.entries(obj)) {
-      if (typeof val !== 'object' || !val.full)
-        throw new Error(
-          `triggers.yaml: trigger "${trigger.name}".triggerTypeDescriptions.${key} must be an object with a "full" key`,
-        );
-    }
-  },
-  stateActionDescriptions(obj, trigger) {
-    for (const [key, val] of Object.entries(obj)) {
-      if (typeof val !== 'object' || !val.full)
-        throw new Error(
-          `triggers.yaml: trigger "${trigger.name}".stateActionDescriptions.${key} must be an object with a "full" key`,
-        );
-    }
-  },
-  showMultipleEffectsNote(val, trigger) {
-    if (typeof val !== 'boolean')
-      throw new Error(
-        `triggers.yaml: trigger "${trigger.name}".showMultipleEffectsNote must be a boolean`,
-      );
-  },
-};
-
-for (const trigger of data.triggers) {
-  const required = TRIGGER_SCHEMA[trigger.template];
-  if (!required) continue;
-  for (const field of required) {
-    if (trigger[field] === undefined) {
-      throw new Error(
-        `triggers.yaml: trigger "${trigger.name}" is missing required field "${field}" (needed by ${trigger.template})`,
-      );
-    }
-    FIELD_VALIDATORS[field]?.(trigger[field], trigger);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 2. Load fragments  —  parse <!-- #section --> markers
+// 2. Load fragments — parse <!-- #section --> markers
 // ---------------------------------------------------------------------------
 
 class Fragments {
@@ -229,7 +133,7 @@ for (const entry of manifest) {
   if (entry.triggers) {
     for (const name of entry.triggers) {
       const trigger = data.triggers.find((t) => t.name === name);
-      if (!trigger) throw new Error(`Trigger "${name}" not found in triggers.yaml`);
+      if (!trigger) throw new Error(`Trigger "${name}" not found in data/triggers.mjs`);
       outputs.push({
         file: entry.output(name),
         content: mod.render({ ...data, trigger }, fragments),
