@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lock Toggle — @wix/interact</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500&display=swap');
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #1f1f1f;
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      interact-element {
+        display: contents;
+      }
+
+      .toggle-group {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .toggle-track {
+        position: relative;
+        width: 100px;
+        height: 50px;
+        border-radius: 9999px;
+        border: 1px solid #ffd7823f;
+        background-color: #000;
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        outline: none;
+        flex-shrink: 0;
+      }
+
+      .toggle-track:focus-visible {
+        box-shadow: 0 0 0 3px #ffd782;
+      }
+
+      .slider {
+        position: absolute;
+        top: 5px;
+        bottom: 5px;
+        left: 5px;
+        right: 57px;
+        border-radius: 9999px;
+        background-color: #ffd882;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .icon-stack {
+        position: relative;
+        width: 22px;
+        height: 22px;
+      }
+
+      .face-icon {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .face-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .icon-happy {
+        opacity: 0;
+      }
+
+      .label-container {
+        display: grid;
+        overflow: hidden;
+      }
+
+      .toggle-label {
+        grid-area: 1 / 1;
+        font-family: 'Inter', sans-serif;
+        font-weight: 300;
+        font-size: 20px;
+        line-height: 1.5;
+        white-space: nowrap;
+      }
+
+      .label-available {
+        color: #a3a3a3;
+      }
+
+      .label-unavailable {
+        color: #ffd782;
+        opacity: 0;
+        transform: translateY(100%);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .slider,
+        .toggle-track,
+        .toggle-label {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <interact-element data-interact-key="toggle-btn" data-state="unlocked">
+      <div class="toggle-group">
+        <button
+          type="button"
+          class="toggle-track"
+          aria-pressed="false"
+          aria-label="Toggle availability"
+        >
+          <interact-element data-interact-key="slider">
+            <div class="slider">
+              <div class="icon-stack">
+                <span class="face-icon icon-happy">
+                  <svg
+                    viewBox="6 6 12 12"
+                    fill="none"
+                    stroke="#FFD882"
+                    stroke-width="1.3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                    <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.3" />
+                    <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.3" />
+                  </svg>
+                </span>
+                <span class="face-icon icon-sad">
+                  <svg
+                    viewBox="6 6 12 12"
+                    fill="none"
+                    stroke="#000"
+                    stroke-width="1"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
+                    <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.3" />
+                    <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.3" />
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </interact-element>
+        </button>
+        <div class="label-container">
+          <span class="toggle-label label-available">Unavailable</span>
+          <span class="toggle-label label-unavailable">Available</span>
+        </div>
+      </div>
+    </interact-element>
+
+    <script type="module">
+      import { Interact } from '/assets/lib/interact/es/web.js';
+
+      Interact.create({
+        conditions: {
+          unlocked: { type: 'selector', predicate: '[data-state="unlocked"] .slider' },
+          locked: { type: 'selector', predicate: '[data-state="locked"] .slider' },
+        },
+        effects: {
+          'slider-move': {
+            keyframeEffect: {
+              name: 'slider-move',
+              keyframes: [
+                { left: '5px', right: '57px', offset: 0 },
+                { left: '5px', right: '44px', offset: 0.12 },
+                { left: '44px', right: '5px', offset: 0.88 },
+                { left: '57px', right: '5px', offset: 1 },
+              ],
+            },
+            duration: 500,
+            easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+            fill: 'both',
+          },
+          'slider-bg': {
+            keyframeEffect: {
+              name: 'slider-bg',
+              keyframes: [
+                { backgroundColor: '#FFD882', offset: 0 },
+                { backgroundColor: '#000000', offset: 1 },
+              ],
+            },
+            duration: 500,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            fill: 'both',
+          },
+          'track-bg': {
+            keyframeEffect: {
+              name: 'track-bg',
+              keyframes: [
+                { backgroundColor: '#000000', offset: 0 },
+                { backgroundColor: '#FFD882', offset: 1 },
+              ],
+            },
+            duration: 500,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            fill: 'both',
+          },
+          'icon-happy': {
+            keyframeEffect: {
+              name: 'icon-happy',
+              keyframes: [
+                { opacity: 0, offset: 0 },
+                { opacity: 1, offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'ease',
+            fill: 'both',
+          },
+          'icon-sad': {
+            keyframeEffect: {
+              name: 'icon-sad',
+              keyframes: [
+                { opacity: 1, offset: 0 },
+                { opacity: 0, offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'ease',
+            fill: 'both',
+          },
+          'label-avail': {
+            keyframeEffect: {
+              name: 'label-avail',
+              keyframes: [
+                { opacity: 1, transform: 'translateY(0)', offset: 0 },
+                { opacity: 0, transform: 'translateY(-100%)', offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+            fill: 'both',
+          },
+          'label-unavail': {
+            keyframeEffect: {
+              name: 'label-unavail',
+              keyframes: [
+                { opacity: 0, transform: 'translateY(100%)', offset: 0 },
+                { opacity: 1, transform: 'translateY(0)', offset: 1 },
+              ],
+            },
+            duration: 400,
+            easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+            fill: 'both',
+          },
+          'nudge-right': {
+            keyframeEffect: {
+              name: 'nudge-right',
+              keyframes: [{ right: '57px' }, { right: '48px' }],
+            },
+            duration: 400,
+            easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+            fill: 'both',
+          },
+          'nudge-left': {
+            keyframeEffect: {
+              name: 'nudge-left',
+              keyframes: [{ left: '57px' }, { left: '48px' }],
+            },
+            duration: 400,
+            easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+            fill: 'both',
+          },
+        },
+        interactions: [
+          {
+            key: 'toggle-btn',
+            trigger: 'activate',
+            params: { type: 'alternate' },
+            effects: [
+              { key: 'slider', effectId: 'slider-move' },
+              { key: 'slider', effectId: 'slider-bg' },
+              { key: 'toggle-btn', effectId: 'track-bg', selector: '.toggle-track' },
+              { key: 'toggle-btn', effectId: 'icon-happy', selector: '.icon-happy' },
+              { key: 'toggle-btn', effectId: 'icon-sad', selector: '.icon-sad' },
+              { key: 'toggle-btn', effectId: 'label-avail', selector: '.label-available' },
+              { key: 'toggle-btn', effectId: 'label-unavail', selector: '.label-unavailable' },
+            ],
+          },
+          {
+            key: 'toggle-btn',
+            trigger: 'interest',
+            effects: [
+              { key: 'slider', effectId: 'nudge-right', conditions: ['unlocked'] },
+              { key: 'slider', effectId: 'nudge-left', conditions: ['locked'] },
+            ],
+          },
+        ],
+      });
+
+      const btn = document.querySelector('.toggle-track');
+      const wrapper = document.querySelector('[data-interact-key="toggle-btn"]');
+
+      if (btn) {
+        btn.addEventListener('click', () => {
+          const pressed = btn.getAttribute('aria-pressed') === 'true';
+          btn.setAttribute('aria-pressed', String(!pressed));
+          wrapper.setAttribute('data-state', pressed ? 'unlocked' : 'locked');
+        });
+      }
+    </script>
+  </body>
+</html>

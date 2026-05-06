@@ -1,0 +1,12 @@
+/**
+ * Base typography.
+ * Token definitions: variables.css (see file header there for full mapping).
+ */
+
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  font-family: inherit;
+}

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scroll</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      interact-element {
+        display: block;
+      }
+      body {
+        background: #1f1f1f;
+      }
+      .scroll-driver {
+        height: 300vh;
+      }
+      .scroll-driver-track {
+        height: 100%;
+      }
+      .scene {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .orbits {
+        position: relative;
+        width: 16rem;
+        height: 16rem;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+      }
+      .orbit {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .orbit-ring {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.8);
+      }
+    </style>
+  </head>
+  <body>
+    <interact-element data-interact-key="scroll-driver" class="scroll-driver">
+      <div class="scroll-driver-track">
+        <div class="scene">
+          <div class="orbits">
+            <interact-element data-interact-key="orbit-y" class="orbit">
+              <div class="orbit-ring"></div>
+            </interact-element>
+            <interact-element data-interact-key="orbit-x" class="orbit">
+              <div class="orbit-ring"></div>
+            </interact-element>
+            <interact-element data-interact-key="orbit-d1" class="orbit">
+              <div class="orbit-ring"></div>
+            </interact-element>
+            <interact-element data-interact-key="orbit-d2" class="orbit">
+              <div class="orbit-ring"></div>
+            </interact-element>
+          </div>
+        </div>
+      </div>
+    </interact-element>
+
+    <script type="module">
+      import { Interact } from '/assets/lib/interact/es/web.js';
+
+      const r = {
+        rangeStart: { name: 'cover', offset: { value: 0, type: 'percentage' } },
+        rangeEnd: { name: 'cover', offset: { value: 100, type: 'percentage' } },
+      };
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'scroll-driver',
+            trigger: 'viewProgress',
+            effects: [
+              {
+                key: 'orbit-y',
+                fill: 'both',
+                ...r,
+                keyframeEffect: {
+                  name: 'ry',
+                  keyframes: [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(360deg)' }],
+                },
+              },
+              {
+                key: 'orbit-x',
+                fill: 'both',
+                ...r,
+                keyframeEffect: {
+                  name: 'rx',
+                  keyframes: [
+                    { transform: 'rotateX(90deg) rotateZ(0deg)' },
+                    { transform: 'rotateX(90deg) rotateZ(360deg)' },
+                  ],
+                },
+              },
+              {
+                key: 'orbit-d1',
+                fill: 'both',
+                ...r,
+                keyframeEffect: {
+                  name: 'rd1',
+                  keyframes: [
+                    { transform: 'rotateZ(45deg) rotateY(0deg)' },
+                    { transform: 'rotateZ(45deg) rotateY(360deg)' },
+                  ],
+                },
+              },
+              {
+                key: 'orbit-d2',
+                fill: 'both',
+                ...r,
+                keyframeEffect: {
+                  name: 'rd2',
+                  keyframes: [
+                    { transform: 'rotateZ(-45deg) rotateY(0deg)' },
+                    { transform: 'rotateZ(-45deg) rotateY(-360deg)' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      });
+    </script>
+  </body>
+</html>
