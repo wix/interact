@@ -280,57 +280,98 @@
     </style>
   </head>
   <body>
-    <div class="page">
-      <nav class="nav">
-        <div class="nav-group">
-          <a href="#" class="nav-brand">forma°</a>
-          <a href="#">design collective</a>
-        </div>
-        <div></div>
-        <div class="nav-group">
-          <a href="#">threads</a>
-          <a href="#">behance</a>
-        </div>
-        <div>
-          <span class="nav-location">brooklyn, ny</span>
-        </div>
-      </nav>
+    <interact-element data-interact-key="page" data-interact-initial="true">
+      <div class="page">
+        <nav class="nav">
+          <div class="nav-group">
+            <a href="#" class="nav-brand">forma°</a>
+            <a href="#">design collective</a>
+          </div>
+          <div></div>
+          <div class="nav-group">
+            <a href="#">threads</a>
+            <a href="#">behance</a>
+          </div>
+          <div>
+            <span class="nav-location">brooklyn, ny</span>
+          </div>
+        </nav>
 
-      <div class="h1-section">
-        <div class="clip-mask">
-          <interact-element data-interact-key="h1-line1" data-interact-initial="true">
+        <div class="h1-section">
+          <div class="clip-mask">
             <div class="h1-line">
               <h1>Recent work</h1>
             </div>
-          </interact-element>
-        </div>
-        <div class="clip-mask">
-          <interact-element data-interact-key="h1-line2" data-interact-initial="true">
+          </div>
+          <div class="clip-mask">
             <div class="h1-line">
               <h1>2018/present</h1>
             </div>
-          </interact-element>
+          </div>
         </div>
-      </div>
 
-      <div class="list-header">
-        <span>index</span>
-        <span>brand</span>
-        <span>discipline</span>
-        <span>date</span>
-      </div>
+        <div class="list-header">
+          <span>index</span>
+          <span>brand</span>
+          <span>discipline</span>
+          <span>date</span>
+        </div>
 
-      <div id="list"></div>
-    </div>
+        <div id="list"></div>
+
+        <template id="list-line-tpl">
+          <div class="list-line">
+            <div class="line-divider"></div>
+          </div>
+        </template>
+
+        <template id="list-row-tpl">
+          <div class="clip-mask">
+            <interact-element>
+              <div class="list-item">
+                <div class="list-item-cols">
+                  <div class="col">
+                    <span class="col-text js-num"></span>
+                    <div class="marker"></div>
+                  </div>
+                  <div class="col">
+                    <span class="col-text js-client"></span>
+                    <div class="marker"></div>
+                  </div>
+                  <div class="col">
+                    <span class="col-text js-type"></span>
+                    <div class="marker"></div>
+                  </div>
+                  <div class="col">
+                    <span class="col-text js-year"></span>
+                    <div class="marker"></div>
+                  </div>
+                </div>
+                <div class="item-expand">
+                  <div class="expand-inner">
+                    <div class="expand-grid">
+                      <div class="expand-image">
+                        <img alt="" loading="lazy" />
+                      </div>
+                      <div class="expand-meta">
+                        <span class="js-meta-type"></span>
+                        <span class="js-meta-year"></span>
+                      </div>
+                      <div class="expand-text">
+                        <p class="js-desc"></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </interact-element>
+          </div>
+        </template>
+      </div>
+    </interact-element>
 
     <script type="module">
-      let Interact;
-      try {
-        const mod = await import('/assets/lib/interact/es/web.js');
-        Interact = mod.Interact;
-      } catch (e) {
-        console.error('Wix Interact failed to load:', e);
-      }
+      import { Interact } from '/assets/lib/interact/es/web.js';
 
       const items = [
         {
@@ -384,187 +425,159 @@
       ];
 
       const listEl = document.getElementById('list');
+      const lineTpl = document.getElementById('list-line-tpl');
+      const rowTpl = document.getElementById('list-row-tpl');
 
-      function addLine(parent, index) {
-        const lineEl = document.createElement('interact-element');
-        lineEl.setAttribute('data-interact-key', `line-${index}`);
-        lineEl.innerHTML = '<div class="line-divider"></div>';
-        parent.appendChild(lineEl);
+      function appendLine() {
+        listEl.appendChild(lineTpl.content.cloneNode(true));
       }
 
-      addLine(listEl, 0);
+      function appendRow(item, i) {
+        const frag = rowTpl.content.cloneNode(true);
+        frag.querySelector('interact-element').setAttribute('data-interact-key', `item-${i}`);
+        frag.querySelector('.js-num').textContent = item.num;
+        frag.querySelector('.js-client').textContent = item.client;
+        frag.querySelector('.js-type').textContent = item.type;
+        frag.querySelector('.js-year').textContent = item.year;
+        const img = frag.querySelector('.expand-image img');
+        img.src = item.img;
+        img.alt = item.client;
+        frag.querySelector('.js-meta-type').textContent = item.type;
+        frag.querySelector('.js-meta-year').textContent = item.year;
+        frag.querySelector('.js-desc').textContent = item.desc;
+        listEl.appendChild(frag);
+      }
 
+      appendLine();
       items.forEach((item, i) => {
-        const clipMask = document.createElement('div');
-        clipMask.className = 'clip-mask';
-
-        const interactEl = document.createElement('interact-element');
-        interactEl.setAttribute('data-interact-key', `item-${i}`);
-        interactEl.setAttribute('data-interact-initial', 'true');
-        interactEl.innerHTML = `
-        <div class="list-item">
-          <div class="list-item-cols">
-            <div class="col"><span class="col-text">${item.num}</span><div class="marker"></div></div>
-            <div class="col"><span class="col-text">${item.client}</span><div class="marker"></div></div>
-            <div class="col"><span class="col-text">${item.type}</span><div class="marker"></div></div>
-            <div class="col"><span class="col-text">${item.year}</span><div class="marker"></div></div>
-          </div>
-          <div class="item-expand">
-            <div class="expand-inner">
-              <div class="expand-grid">
-                <div class="expand-image"><img src="${item.img}" alt="${item.client}" loading="lazy"></div>
-                <div class="expand-meta"><span>${item.type}</span><span>${item.year}</span></div>
-                <div class="expand-text"><p>${item.desc}</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-        clipMask.appendChild(interactEl);
-        listEl.appendChild(clipMask);
-
-        addLine(listEl, i + 1);
+        appendRow(item, i);
+        appendLine();
       });
 
-      if (!Interact) {
-        console.error('Interact not available, showing content without animations');
-        document.querySelectorAll('.clip-mask').forEach((el) => {
-          el.style.overflow = 'visible';
-        });
-      } else {
-        const interactions = [];
+      const interactions = [];
 
-        // H1 line 1 entrance
-        interactions.push({
-          key: 'h1-line1',
-          trigger: 'viewEnter',
-          params: { type: 'once' },
-          effects: [
-            {
-              keyframeEffect: {
-                name: 'h1Line1',
-                keyframes: [
-                  { transform: 'translateY(100%)', offset: 0 },
-                  { transform: 'translateY(0%)', offset: 1 },
-                ],
-              },
-              duration: 900,
-              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-              fill: 'both',
-            },
-          ],
-        });
+      const entranceEasing = 'cubic-bezier(0.16, 1, 0.3, 1)';
 
-        // H1 line 2 entrance
-        interactions.push({
-          key: 'h1-line2',
-          trigger: 'viewEnter',
-          params: { type: 'once' },
-          effects: [
-            {
-              keyframeEffect: {
-                name: 'h1Line2',
-                keyframes: [
-                  { transform: 'translateY(100%)', offset: 0 },
-                  { transform: 'translateY(0%)', offset: 1 },
-                ],
-              },
-              duration: 900,
-              delay: 100,
-              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-              fill: 'both',
-            },
-          ],
-        });
-
-        // Line divider entrances (scaleX 0→1, no opacity change)
-        for (let l = 0; l <= items.length; l++) {
-          interactions.push({
-            key: `line-${l}`,
-            trigger: 'viewEnter',
-            params: { type: 'once' },
-            effects: [
-              {
-                keyframeEffect: {
-                  name: `lineEntrance${l}`,
-                  keyframes: [
-                    { transform: 'scaleX(0)', offset: 0 },
-                    { transform: 'scaleX(1)', offset: 1 },
-                  ],
-                },
-                duration: 600,
-                delay: 280 + l * 100,
-                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                fill: 'both',
-              },
+      /** One timeline: per-effect delays preserve the previous choreography; sequence offset is 0 so stagger is not applied on top. */
+      const pageEntranceEffects = [
+        {
+          selector: '.h1-section > .clip-mask:nth-child(1) .h1-line',
+          keyframeEffect: {
+            name: 'h1Line1',
+            keyframes: [
+              { transform: 'translateY(100%)', offset: 0 },
+              { transform: 'translateY(0%)', offset: 1 },
             ],
-          });
-        }
-
-        // Per-item interactions
-        items.forEach((_, i) => {
-          const key = `item-${i}`;
-
-          // Entrance
-          interactions.push({
-            key,
-            trigger: 'viewEnter',
-            params: { type: 'once' },
-            effects: [
-              {
-                keyframeEffect: {
-                  name: `itemEntrance${i}`,
-                  keyframes: [
-                    { transform: 'translateY(100%)', offset: 0 },
-                    { transform: 'translateY(0%)', offset: 1 },
-                  ],
-                },
-                duration: 700,
-                delay: 350 + i * 100,
-                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                fill: 'both',
-              },
+          },
+          duration: 900,
+          delay: 0,
+          easing: entranceEasing,
+          fill: 'both',
+        },
+        {
+          selector: '.h1-section > .clip-mask:nth-child(2) .h1-line',
+          keyframeEffect: {
+            name: 'h1Line2',
+            keyframes: [
+              { transform: 'translateY(100%)', offset: 0 },
+              { transform: 'translateY(0%)', offset: 1 },
             ],
-          });
+          },
+          duration: 900,
+          delay: 100,
+          easing: entranceEasing,
+          fill: 'both',
+        },
+      ];
 
-          // Click: marker + text lock + expand toggle
-          interactions.push({
-            key,
-            trigger: 'click',
-            effects: [
-              {
-                selector: '.marker',
-                transition: {
-                  duration: 450,
-                  easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                  styleProperties: [{ name: 'transform', value: 'scaleX(1)' }],
-                },
-              },
-              {
-                selector: '.col-text',
-                transition: {
-                  duration: 450,
-                  easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                  styleProperties: [{ name: 'color', value: '#ffffff' }],
-                },
-              },
-              {
-                selector: '.item-expand',
-                transition: {
-                  duration: 500,
-                  easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                  styleProperties: [
-                    { name: 'grid-template-rows', value: '1fr' },
-                    { name: 'opacity', value: '1' },
-                  ],
-                },
-              },
+      for (let l = 0; l <= items.length; l++) {
+        pageEntranceEffects.push({
+          selector: `#list > :nth-child(${2 * l + 1}) .line-divider`,
+          keyframeEffect: {
+            name: `lineEntrance${l}`,
+            keyframes: [
+              { transform: 'scaleX(0)', offset: 0 },
+              { transform: 'scaleX(1)', offset: 1 },
             ],
-          });
+          },
+          duration: 600,
+          delay: 280 + l * 100,
+          easing: entranceEasing,
+          fill: 'both',
         });
-
-        Interact.create({ interactions });
       }
+
+      for (let i = 0; i < items.length; i++) {
+        pageEntranceEffects.push({
+          selector: `#list > :nth-child(${2 * i + 2}) .list-item`,
+          keyframeEffect: {
+            name: `itemEntrance${i}`,
+            keyframes: [
+              { transform: 'translateY(100%)', offset: 0 },
+              { transform: 'translateY(0%)', offset: 1 },
+            ],
+          },
+          duration: 700,
+          delay: 350 + i * 100,
+          easing: entranceEasing,
+          fill: 'both',
+        });
+      }
+
+      interactions.push({
+        key: 'page',
+        trigger: 'viewEnter',
+        sequences: [
+          {
+            offset: 0,
+            offsetEasing: 'linear',
+            delay: 0,
+            effects: pageEntranceEffects,
+          },
+        ],
+      });
+
+      // Per-item interactions
+      items.forEach((_, i) => {
+        const key = `item-${i}`;
+
+        // Click: marker + text lock + expand toggle
+        interactions.push({
+          key,
+          trigger: 'click',
+          effects: [
+            {
+              selector: '.marker',
+              transition: {
+                duration: 450,
+                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                styleProperties: [{ name: 'transform', value: 'scaleX(1)' }],
+              },
+            },
+            {
+              selector: '.col-text',
+              transition: {
+                duration: 450,
+                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                styleProperties: [{ name: 'color', value: '#ffffff' }],
+              },
+            },
+            {
+              selector: '.item-expand',
+              transition: {
+                duration: 500,
+                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                styleProperties: [
+                  { name: 'grid-template-rows', value: '1fr' },
+                  { name: 'opacity', value: '1' },
+                ],
+              },
+            },
+          ],
+        });
+      });
+
+      Interact.create({ interactions });
     </script>
   </body>
 </html>

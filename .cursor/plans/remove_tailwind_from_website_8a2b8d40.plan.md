@@ -21,10 +21,10 @@ todos:
     content: Create `assets/css/landing.css` by migrating `assets/styles.css` and adding new rules for Tailwind classes replaced in `index.html`
     status: pending
   - id: convert-index
-    content: "Convert `index.html`: remove Tailwind scripts, add new CSS links, replace all Tailwind class attributes with utility/semantic classes"
+    content: 'Convert `index.html`: remove Tailwind scripts, add new CSS links, replace all Tailwind class attributes with utility/semantic classes'
     status: pending
   - id: convert-examples
-    content: "Convert `examples.html`: remove Tailwind scripts, add new CSS links, verify existing styles still work"
+    content: 'Convert `examples.html`: remove Tailwind scripts, add new CSS links, verify existing styles still work'
     status: pending
   - id: refactor-examples-css
     content: Refactor `assets/css/styles.css` into `assets/css/examples.css`, importing shared variables
@@ -46,16 +46,19 @@ isProject: false
 ## Current State
 
 Tailwind is loaded via CDN (`https://cdn.tailwindcss.com`) + a config script (`/assets/shared/tailwind-config.js`) in two pages:
+
 - [apps/website/index.html](apps/website/index.html) -- heavy Tailwind usage (~200+ utility class instances)
 - [apps/website/examples.html](apps/website/examples.html) -- minimal direct usage; relies on Tailwind via injected nav/footer
 
 Additionally, two shared JS files inject HTML with Tailwind classes:
+
 - [apps/website/assets/shared/nav.js](apps/website/assets/shared/nav.js)
 - [apps/website/assets/shared/footer.js](apps/website/assets/shared/footer.js)
 
 One example file loads Tailwind (`mouse-track-gallery.html`) but only uses `cursor-pointer`.
 
 Existing CSS files:
+
 - [apps/website/assets/styles.css](apps/website/assets/styles.css) -- landing page component styles (hero grid, tunnel, pyramid, cards, modal, sponge)
 - [apps/website/assets/css/styles.css](apps/website/assets/css/styles.css) -- examples page layout/sidebar/gallery styles (already has `:root` variables)
 
@@ -166,13 +169,40 @@ Instead of mirroring Tailwind's one-property-per-class approach, group frequentl
 ### Compound layout utilities
 
 ```css
-.stack          { display: flex; flex-direction: column; }
-.row            { display: flex; flex-direction: row; }
-.center         { display: flex; align-items: center; justify-content: center; }
-.center-col     { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.between        { display: flex; align-items: center; justify-content: space-between; }
-.cover          { position: absolute; inset: 0; width: 100%; height: 100%; }
-.full           { width: 100%; height: 100%; }
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+}
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.center-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.full {
+  width: 100%;
+  height: 100%;
+}
 ```
 
 ### Compound typography utilities
@@ -234,24 +264,50 @@ Instead of mirroring Tailwind's one-property-per-class approach, group frequentl
   left: 50%;
   translate: -50% -50%;
 }
-.no-interact    { pointer-events: none; }
-.clickable      { cursor: pointer; }
+.no-interact {
+  pointer-events: none;
+}
+.clickable {
+  cursor: pointer;
+}
 ```
 
 ### Minimal single-purpose utilities (kept only where compounds don't apply)
 
 ```css
-.relative       { position: relative; }
-.sticky         { position: sticky; }
-.hidden         { display: none; }
-.inline-block   { display: inline-block; }
-.block          { display: block; }
-.text-center    { text-align: center; }
-.mx-auto        { margin-inline: auto; }
-.overflow-clip  { overflow: clip; }
-.overflow-hidden{ overflow: hidden; }
-.w-full         { width: 100%; }
-.h-full         { height: 100%; }
+.relative {
+  position: relative;
+}
+.sticky {
+  position: sticky;
+}
+.hidden {
+  display: none;
+}
+.inline-block {
+  display: inline-block;
+}
+.block {
+  display: block;
+}
+.text-center {
+  text-align: center;
+}
+.mx-auto {
+  margin-inline: auto;
+}
+.overflow-clip {
+  overflow: clip;
+}
+.overflow-hidden {
+  overflow: hidden;
+}
+.w-full {
+  width: 100%;
+}
+.h-full {
+  height: 100%;
+}
 ```
 
 ### Responsive modifiers
@@ -260,17 +316,37 @@ Rather than `.md\:` prefixes for every property, define responsive compound shif
 
 ```css
 @media (min-width: 768px) {
-  .md\:row      { flex-direction: row; }
-  .md\:hidden   { display: none; }
-  .md\:block    { display: block; }
-  .md\:center   { display: flex; align-items: center; justify-content: center; }
+  .md\:row {
+    flex-direction: row;
+  }
+  .md\:hidden {
+    display: none;
+  }
+  .md\:block {
+    display: block;
+  }
+  .md\:center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 @media (min-width: 1024px) {
-  .lg\:row       { flex-direction: row; }
-  .lg\:row-rev   { flex-direction: row-reverse; }
-  .lg\:text-left { text-align: left; }
-  .lg\:hidden    { display: none; }
-  .lg\:block     { display: block; }
+  .lg\:row {
+    flex-direction: row;
+  }
+  .lg\:row-rev {
+    flex-direction: row-reverse;
+  }
+  .lg\:text-left {
+    text-align: left;
+  }
+  .lg\:hidden {
+    display: none;
+  }
+  .lg\:block {
+    display: block;
+  }
 }
 ```
 
@@ -284,6 +360,7 @@ Rather than `.md\:` prefixes for every property, define responsive compound shif
 ## Conversion Strategy for `nav.js` and `footer.js`
 
 Replace inline Tailwind classes with semantic class names:
+
 - Nav: `.site-nav`, `.nav-link`, `.nav-logo`, `.nav-cta`
 - Footer: `.site-footer`, `.footer-brand`, `.footer-links`, `.footer-link`
 
@@ -292,6 +369,7 @@ Style these in `nav.css` and `footer.css` using the theme variables.
 ## Conversion Strategy for `index.html`
 
 Replace Tailwind classes on elements with either:
+
 1. A utility class from `utilities.css` (when the pattern is generic and reused)
 2. A semantic component class in `landing.css` (for page-specific styling like `.hero-section`, `.perf-section`, `.interaction-grid`, `.interaction-card`, `.code-panel`, `.tailored-section`, `.horizontal-section`, `.h-card-overlay`, `.pinned-tag`, `.section-title`, `.section-subtitle`, `.cta-btn`, `.cta-btn--outline`)
 

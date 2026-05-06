@@ -124,18 +124,18 @@ Refresh the page. The example appears as a live interactive iframe in the grid.
 
 ## Key files
 
-| File                      | Purpose                                                         |
-| ------------------------- | --------------------------------------------------------------- |
-| `assets/js/config.js`     | **Primary file to edit** when adding an example                  |
-| `assets/js/renderer.js`   | iframe cards, lazy-loading, auto-scroll, scale observer         |
-| `assets/js/modal.js`      | Full-screen preview + CodeMirror + custom find bar (examples)    |
-| `assets/js/sidebar.js`    | Category nav with scroll sync                                   |
-| `assets/js/app.js`        | Examples page entry (module)                                    |
-| `examples.html`           | Examples shell, import map for `@wix/motion`, entrance Interact   |
-| `assets/main.mjs`         | Landing page animation config and interactive demos              |
-| `assets/shared/nav.js`    | Shared navigation (injected into `#shared-nav`)                 |
-| `assets/shared/footer.js` | Shared footer (injected into `#shared-footer`)                  |
-| `scripts/build-landing.sh` (repo root) | Populates `assets/lib/` from package builds              |
+| File                                   | Purpose                                                         |
+| -------------------------------------- | --------------------------------------------------------------- |
+| `assets/js/config.js`                  | **Primary file to edit** when adding an example                 |
+| `assets/js/renderer.js`                | iframe cards, lazy-loading, auto-scroll, scale observer         |
+| `assets/js/modal.js`                   | Full-screen preview + CodeMirror + custom find bar (examples)   |
+| `assets/js/sidebar.js`                 | Category nav with scroll sync                                   |
+| `assets/js/app.js`                     | Examples page entry (module)                                    |
+| `examples.html`                        | Examples shell, import map for `@wix/motion`, entrance Interact |
+| `assets/main.mjs`                      | Landing page animation config and interactive demos             |
+| `assets/shared/nav.js`                 | Shared navigation (injected into `#shared-nav`)                 |
+| `assets/shared/footer.js`              | Shared footer (injected into `#shared-footer`)                  |
+| `scripts/build-landing.sh` (repo root) | Populates `assets/lib/` from package builds                     |
 
 ## Grid layouts (examples page)
 
