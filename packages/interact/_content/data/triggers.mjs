@@ -189,6 +189,8 @@ export const triggers = [
         description: 'ID of the preceding effect',
       },
     ],
+    pitfalls: [],
+    showMultipleEffectsNote: false,
   },
 
   {
@@ -196,5 +198,6 @@ export const triggers = [
     defaultTriggerType: null,
     params: [],
     pitfalls: [],
+    showMultipleEffectsNote: false,
   },
 ];

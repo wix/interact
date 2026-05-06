@@ -12,7 +12,7 @@ export function render(data, fragments) {
 
   const rangeList = Object.entries(data.effects.rangeNames)
     .map(([name, desc]) => {
-      return `  - \`'${name}'\` — ${desc}.`;
+      return `  - \`'${name}'\` — ${desc}`;
     })
     .join('\n');
 
