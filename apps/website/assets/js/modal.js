@@ -1,3 +1,5 @@
+/* global CodeMirror */
+
 let overlay;
 let titleEl;
 let iframe;
@@ -12,7 +14,6 @@ let isCodeMode = false;
 
 const CLOSE_SVG = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>`;
 const CODE_SVG = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5,3 1,8 5,13"/><polyline points="11,3 15,8 11,13"/></svg>`;
-const RESET_SVG = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v5h5"/><path d="M3.51 10a6 6 0 1 0 .49-5.87L1 7"/></svg>`;
 const CHEVRON_UP_SVG = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4,10 8,6 12,10"/></svg>`;
 const CHEVRON_DOWN_SVG = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4,6 8,10 12,6"/></svg>`;
 const CLOSE_SM_SVG = `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>`;
@@ -294,7 +295,7 @@ export function openModal(title, htmlPath) {
       iframe.contentDocument.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeModal();
       });
-    } catch (e) {
+    } catch {
       /* cross-origin */
     }
     iframe.removeEventListener('load', onLoad);

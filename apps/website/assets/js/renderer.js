@@ -112,7 +112,7 @@ function createExampleCard(example, categoryId, compact) {
       doc.addEventListener('dblclick', () => {
         if (_openModal) _openModal(card.dataset.title, card.dataset.htmlPath);
       });
-    } catch (e) {
+    } catch {
       // cross-origin — ignore
     }
   });
@@ -153,7 +153,7 @@ function startAutoScroll(iframe) {
           if (win.scrollY <= 1) direction = 1;
           win.scrollBy(0, direction * 0.5);
         }
-      } catch (e) {
+      } catch {
         return; // stop if cross-origin or detached
       }
     }
@@ -161,23 +161,6 @@ function startAutoScroll(iframe) {
   }
 
   requestAnimationFrame(tick);
-}
-
-function highlightHtml(text) {
-  const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-  // Single tokenizer pass — order of alternatives matters
-  const re =
-    /(&lt;!--[\s\S]*?--&gt;)|(&lt;\/?[\w-]+)|(\/?&gt;)|("[^"]*")|('[^']*')|(\s)([\w-]+)(=)/g;
-  return escaped.replace(re, (m, comment, tag, closeTag, dq, sq, ws, attr, eq) => {
-    if (comment) return `<span class="hl-c">${comment}</span>`;
-    if (tag) return `<span class="hl-t">${tag}</span>`;
-    if (closeTag) return `<span class="hl-t">${closeTag}</span>`;
-    if (dq) return `<span class="hl-s">${dq}</span>`;
-    if (sq) return `<span class="hl-s">${sq}</span>`;
-    if (attr) return `${ws}<span class="hl-a">${attr}</span>${eq}`;
-    return m;
-  });
 }
 
 function createCarouselSliderPanel(iframe) {
@@ -240,27 +223,6 @@ function createCarouselSliderPanel(iframe) {
   // Iframe content might already be loaded by the time we attach;
   // wire up on load + try once immediately in case it's ready.
   iframe.addEventListener('load', wireUp);
-
-  return card;
-}
-
-function createSourceCodeCard(example) {
-  const card = document.createElement('div');
-  card.className = 'source-code-card';
-
-  const code = document.createElement('pre');
-  code.className = 'source-code-content';
-  code.textContent = '// loading source…';
-  card.appendChild(code);
-
-  fetch(example.htmlPath + CACHE_BUST)
-    .then((res) => res.text())
-    .then((text) => {
-      code.innerHTML = highlightHtml(text);
-    })
-    .catch(() => {
-      code.textContent = '// Unable to load source';
-    });
 
   return card;
 }

@@ -1,6 +1,11 @@
+/**
+ * Theme tokens.
+ * fontFamily: sans / mono / helvetica · colors: off-black, apple-gray
+ * · fontSize: giant (6rem / lh 1), mega (11rem / lh 0.9) · letterSpacing.tighter
+ */
 :root {
   /* Colors */
-  --color-off-black: hsl(0 0% 7%);
+  --color-off-black: #111111;
   --color-white: hsl(0 0% 100%);
   --color-gray-50: hsl(210 20% 98%);
   --color-gray-100: hsl(220 14% 96%);
@@ -10,7 +15,7 @@
   --color-gray-500: hsl(220 9% 46%);
   --color-gray-600: hsl(215 14% 34%);
   --color-gray-800: hsl(217 19% 17%);
-  --color-apple-gray: hsl(240 2% 54%);
+  --color-apple-gray: #86868b;
   --color-accent-gold: hsl(41 100% 75%);
   --color-accent-purple: hsl(277 22% 64%);
   --color-accent-blue: hsl(221 100% 75%);
@@ -33,6 +38,8 @@
   --fs-8xl: 6rem;
   --fs-giant: 6rem;
   --fs-mega: 11rem;
+  --lh-giant: 1;
+  --lh-mega: 0.9;
 
   /* Spacing scale */
   --space-1: 0.25rem;
@@ -76,7 +83,7 @@
   --tracking-widest: 0.1em;
 
   /* Examples page aliases (shared palette) */
-  --bg-primary: hsl(0 0% 6.67%);
+  --bg-primary: var(--color-off-black);
   --bg-secondary: hsl(0 0% 3.92%);
   --bg-tertiary: hsl(0 0% 10.2%);
   --border-color: hsl(0 0% 20%);
