@@ -12,7 +12,7 @@ export function render(data, fragments) {
 
   const rangeList = Object.entries(data.effects.rangeNames)
     .map(([name, desc]) => {
-      return `  - \`'${name}'\` — ${desc.charAt(0).toLowerCase()}${desc.slice(1)}.`;
+      return `  - \`'${name}'\` — ${desc}.`;
     })
     .join('\n');
 
@@ -34,7 +34,7 @@ ${pitfallsBlock}
 
 **Use Case**: Scroll-driven CSS-based effects.
 
-${fragments.get('multiple-effects-note', 'viewProgress')}
+${trigger.showMultipleEffectsNote ? fragments.get('multiple-effects-note', 'viewProgress') : ''}
 
 ### Template
 

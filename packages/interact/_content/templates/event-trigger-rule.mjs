@@ -1,25 +1,23 @@
 import { capitalize, buildPitfallsBlock, varLine } from './_helpers.mjs';
 
-function getOverrides(name) {
-  if (name === 'hover') {
-    return {
-      sourceKeySuffix: 'The element that listens for hover.',
-      targetKeyDesc:
-        "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
-      fillModeDesc:
-        "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished.",
-      easingDesc:
-        "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`.",
-      iterationsDesc:
-        "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.",
-      fillCritical:
-        "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`.",
-      customEffectExamples: '',
-      offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.',
-      alternateBoolSuffix: '',
-    };
-  }
-  return {
+const OVERRIDES = {
+  hover: {
+    sourceKeySuffix: 'The element that listens for hover.',
+    targetKeyDesc:
+      "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
+    fillModeDesc:
+      "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished.",
+    easingDesc:
+      "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`.",
+    iterationsDesc:
+      "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.",
+    fillCritical:
+      "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`.",
+    customEffectExamples: '',
+    offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.',
+    alternateBoolSuffix: '',
+  },
+  click: {
     sourceKeySuffix: 'The element that listens for clicks.',
     targetKeyDesc:
       "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element.",
@@ -32,8 +30,8 @@ function getOverrides(name) {
     customEffectExamples: ', randomized behavior',
     offsetEasingSuffix: '',
     alternateBoolSuffix: "Different from `triggerType: 'alternate'` which alternates per click.",
-  };
-}
+  },
+};
 
 /**
  * Renders a trigger-specific rule file (click.md or hover.md).
@@ -43,7 +41,8 @@ function getOverrides(name) {
 export function render(data, fragments) {
   const { trigger } = data;
   const { name } = trigger;
-  const vo = getOverrides(name);
+  const vo = OVERRIDES[name];
+  if (!vo) throw new Error(`Unknown event trigger: ${name}`);
   const Name = capitalize(name);
   const hasReversed = trigger.hasReversed;
   const hasEffectId = trigger.hasEffectId;
@@ -51,7 +50,7 @@ export function render(data, fragments) {
   const pitfallsBlock = buildPitfallsBlock(trigger, fragments, { wrapped: true });
 
   const multipleEffectsNote = trigger.showMultipleEffectsNote
-    ? `\n${fragments.get('multiple-effects-note', 'default', { triggerName: name, triggerEvent: `${name} event`, triggerContext: '', extraNote: '' })}\n`
+    ? `\n${fragments.get('multiple-effects-note', 'default', { triggerName: name, triggerEvent: `${name} event` })}\n`
     : '';
 
   return `# ${Name} Trigger Rules for ${data.meta.packageName}

@@ -102,7 +102,7 @@ For devices with dynamic viewport sizes (e.g. mobile browsers where the address 
 
 Use pre-built mouse presets from \`${data.meta.presetsPackage}\` that handle 2D mouse tracking internally. Mouse presets are preferred over \`keyframeEffect\` for 2D effects. Available mouse presets: ${data.effects.presets.mouse.map((n) => `\`${n}\``).join(', ')}.
 
-${fragments.get('multiple-effects-note', 'pointerMove')}
+${trigger.showMultipleEffectsNote ? fragments.get('multiple-effects-note', 'pointerMove') : ''}
 
 \`\`\`typescript
 {

@@ -399,12 +399,12 @@ Used with `viewProgress` and `pointerMove` triggers.
 
 | Range name       | Meaning                                                                                                  |
 | :--------------- | :------------------------------------------------------------------------------------------------------- |
-| `cover`          | Full visibility span from first pixel entering to last pixel leaving                                     |
-| `entry`          | The phase while the element is entering the viewport                                                     |
-| `exit`           | The phase while the element is exiting the viewport                                                      |
-| `contain`        | While the element is fully contained in the viewport. Typically used with a `position: sticky` container |
-| `entry-crossing` | From the element's leading edge entering to its leading edge reaching the opposite side                  |
-| `exit-crossing`  | From the element's trailing edge reaching the start to its trailing edge leaving                         |
+| `cover`          | full visibility span from first pixel entering to last pixel leaving                                     |
+| `entry`          | the phase while the element is entering the viewport                                                     |
+| `exit`           | the phase while the element is exiting the viewport                                                      |
+| `contain`        | while the element is fully contained in the viewport. Typically used with a `position: sticky` container |
+| `entry-crossing` | from the element's leading edge entering to its leading edge reaching the opposite side                  |
+| `exit-crossing`  | from the element's trailing edge reaching the start to its trailing edge leaving                         |
 
 **Sticky container pattern** — for scroll-driven animations inside a stuck `position: sticky` container:
 

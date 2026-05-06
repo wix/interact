@@ -175,6 +175,7 @@ export const triggers = [
       },
     ],
     pitfalls: [{ id: 'hit-area', section: 'pointermove-source' }],
+    showMultipleEffectsNote: true,
   },
 
   {
