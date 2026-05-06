@@ -100,9 +100,9 @@ export const triggers = [
     },
   },
 
-  // --------------------------------------------------------------------------
-  // Viewport/scroll triggers — each has its own dedicated template.
-  // --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// Viewport/scroll triggers — each has its own dedicated template.
+// --------------------------------------------------------------------------
   {
     name: 'viewEnter',
     defaultTriggerType: 'once',

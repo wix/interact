@@ -20,7 +20,7 @@ function buildBehaviorTable(headerLabel, behaviorKey, triggers, { defaultKey } =
   const keys = [...new Set(triggers.flatMap((t) => Object.keys(t[behaviorKey])))];
 
   const rows = keys.map((k) => {
-    const isDefault = defaultKey ? k === defaultKey : false;
+    const isDefault = k === defaultKey;
     const label = isDefault ? `\`'${k}'\` (default)` : `\`'${k}'\``;
     return [label, ...triggers.map((t) => t[behaviorKey][k]?.short ?? '—')];
   });
@@ -38,7 +38,7 @@ function buildBehaviorTable(headerLabel, behaviorKey, triggers, { defaultKey } =
  * consumer, so extraction would add indirection without deduplication benefit.
  *
  * @param {{ triggers: object[], effects: object, meta: object }} data — no `trigger`; receives the full data object
- * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ * @param {import('../lib/fragments.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
   const hover = data.triggers.find((t) => t.name === 'hover');

@@ -3,20 +3,12 @@ import { buildPitfallsBlock, varLine } from './_helpers.mjs';
 /**
  * Renders viewenter.md — rules for viewport-entry triggered animations.
  * @param {{ triggers: object[], effects: object, meta: object, trigger: object }} data
- * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ * @param {import('../lib/fragments.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
   const { trigger } = data;
 
   const pitfalls = buildPitfallsBlock(trigger, fragments);
-
-  const paramDescriptions = trigger.params
-    .map((p) => {
-      const vn = p.varName || p.name.toUpperCase();
-      const optionalPrefix = p.optional ? 'optional. ' : '';
-      return `- \`[${vn}]\` — ${optionalPrefix}${p.description}`;
-    })
-    .join('\n');
 
   return `# ViewEnter Trigger Rules for ${data.meta.packageName}
 
@@ -140,7 +132,8 @@ ${Object.entries(trigger.triggerTypeDescriptions)
     return `  - \`'${k}'\`${isDefault ? ' (default)' : ''} — ${v.full}`;
   })
   .join('\n')}
-${paramDescriptions}
+${varLine('VISIBILITY_THRESHOLD')}
+${varLine('VIEWPORT_INSETS')}
 ${varLine('KEYFRAMES')}
 ${varLine('EFFECT_NAME')}
 ${varLine('NAMED_EFFECT_DEFINITION')}

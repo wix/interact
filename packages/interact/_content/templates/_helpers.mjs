@@ -45,6 +45,10 @@ const COMMON_VARS = {
     '`true` or `false`. See **Centering with `centeredToTarget`** above.',
   HIT_AREA: () =>
     "`'self'` (track pointer within source element) or `'root'` (track pointer anywhere in viewport).",
+  VISIBILITY_THRESHOLD: () =>
+    'optional. Number between 0–1 indicating how much of the source element must be visible to trigger (e.g. `0.3` = 30%).',
+  VIEWPORT_INSETS: () =>
+    "optional. String adjusting the viewport detection area (e.g. `'-100px'` extends it, `'50px'` shrinks it).",
 };
 
 export function varLine(name, extra) {

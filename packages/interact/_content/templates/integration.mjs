@@ -1,7 +1,7 @@
 /**
  * Renders integration.md — integration guide covering entry points, config schema, and triggers overview.
  * @param {{ triggers: object[], effects: object, meta: object }} data — no `trigger`; receives the full data object
- * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ * @param {import('../lib/fragments.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
   const { metaParams } = data;

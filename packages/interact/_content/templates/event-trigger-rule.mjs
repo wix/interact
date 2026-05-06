@@ -1,41 +1,74 @@
 import { capitalize, buildPitfallsBlock, varLine } from './_helpers.mjs';
 
+// Fields ending in `Extra` are passed to varLine(name, extra) — either appended or used as
+// a full override depending on the COMMON_VARS function for that variable.
 const OVERRIDES = {
   hover: {
-    sourceKeySuffix: 'The element that listens for hover.',
-    targetKeyDesc:
+    sourceKeyExtra: 'The element that listens for hover.',
+    targetKeyExtra:
       "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
-    fillModeDesc:
+    fillModeExtra:
       "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished.",
-    easingDesc:
+    easingExtra:
       "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`.",
-    iterationsDesc:
+    iterationsExtra:
       "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.",
+    alternateBoolExtra: '',
     fillCritical:
       "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`.",
     customEffectExamples: '',
     offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.',
-    alternateBoolSuffix: '',
   },
   click: {
-    sourceKeySuffix: 'The element that listens for clicks.',
-    targetKeyDesc:
+    sourceKeyExtra: 'The element that listens for clicks.',
+    targetKeyExtra:
       "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element.",
-    fillModeDesc:
+    fillModeExtra:
       "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.",
-    easingDesc: 'CSS easing string, or named easing from `@wix/motion`.',
+    easingExtra: 'CSS easing string, or named easing from `@wix/motion`.',
+    alternateBoolExtra: "Different from `triggerType: 'alternate'` which alternates per click.",
     fillCritical:
       "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`.",
     customEffectExamples: ', randomized behavior',
     offsetEasingSuffix: '',
-    alternateBoolSuffix: "Different from `triggerType: 'alternate'` which alternates per click.",
   },
 };
+
+function buildVariables(trigger, vo, hasReversed, hasEffectId) {
+  const lines = [
+    varLine('SOURCE_KEY', vo.sourceKeyExtra),
+    varLine('TARGET_KEY', vo.targetKeyExtra),
+    `- \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:`,
+    ...Object.entries(trigger.triggerTypeDescriptions).map(
+      ([k, v]) => `  - \`'${k}'\` — ${v.full}`,
+    ),
+    varLine('KEYFRAMES'),
+    varLine('EFFECT_NAME'),
+    varLine('NAMED_EFFECT_DEFINITION'),
+    varLine('FILL_MODE', vo.fillModeExtra),
+  ];
+  if (hasReversed) {
+    lines.push(
+      `- \`[INITIAL_REVERSED_BOOL]\` — optional. \`true\` to start in the finished state so the entire effect is reversed.`,
+    );
+  }
+  lines.push(
+    varLine('DURATION_MS'),
+    varLine('EASING_FUNCTION', vo.easingExtra),
+    varLine('DELAY_MS'),
+    varLine('ITERATIONS', vo.iterationsExtra),
+    varLine('ALTERNATE_BOOL', vo.alternateBoolExtra),
+  );
+  if (hasEffectId) {
+    lines.push(varLine('UNIQUE_EFFECT_ID'));
+  }
+  return lines.join('\n');
+}
 
 /**
  * Renders a trigger-specific rule file (click.md or hover.md).
  * @param {{ triggers: object[], effects: object, meta: object, trigger: object }} data
- * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ * @param {import('../lib/fragments.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
   const { trigger } = data;
@@ -224,35 +257,4 @@ Use sequences when a ${name} should sync/stagger animations across multiple elem
 - \`[OFFSET_EASING]\` — easing curve for the offset staggering distribution.${vo.offsetEasingSuffix || ''} Defaults to \`'linear'\`.
 - \`[EFFECT_DEFINITION]\` — a definition of or a reference to a time-based animation effect.
 `;
-}
-
-function buildVariables(trigger, vo, hasReversed, hasEffectId) {
-  const lines = [
-    varLine('SOURCE_KEY', vo.sourceKeySuffix),
-    varLine('TARGET_KEY', vo.targetKeyDesc),
-    `- \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:`,
-    ...Object.entries(trigger.triggerTypeDescriptions).map(
-      ([k, v]) => `  - \`'${k}'\` — ${v.full}`,
-    ),
-    varLine('KEYFRAMES'),
-    varLine('EFFECT_NAME'),
-    varLine('NAMED_EFFECT_DEFINITION'),
-    varLine('FILL_MODE', vo.fillModeDesc),
-  ];
-  if (hasReversed) {
-    lines.push(
-      `- \`[INITIAL_REVERSED_BOOL]\` — optional. \`true\` to start in the finished state so the entire effect is reversed.`,
-    );
-  }
-  lines.push(
-    varLine('DURATION_MS'),
-    varLine('EASING_FUNCTION', vo.easingDesc),
-    varLine('DELAY_MS'),
-    varLine('ITERATIONS', vo.iterationsDesc),
-    varLine('ALTERNATE_BOOL', vo.alternateBoolSuffix),
-  );
-  if (hasEffectId) {
-    lines.push(varLine('UNIQUE_EFFECT_ID'));
-  }
-  return lines.join('\n');
 }

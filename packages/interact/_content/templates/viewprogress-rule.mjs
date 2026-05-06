@@ -3,7 +3,7 @@ import { buildPitfallsBlock, varLine } from './_helpers.mjs';
 /**
  * Renders viewprogress.md — rules for scroll-driven animations using ViewTimeline.
  * @param {{ triggers: object[], effects: object, meta: object, trigger: object }} data
- * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ * @param {import('../lib/fragments.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
   const { trigger } = data;

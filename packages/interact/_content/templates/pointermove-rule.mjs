@@ -3,7 +3,7 @@ import { buildPitfallsBlock, varLine } from './_helpers.mjs';
 /**
  * Renders pointermove.md — rules for pointer-driven interactions with 2D mouse tracking.
  * @param {{ triggers: object[], effects: object, meta: object, trigger: object }} data
- * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
+ * @param {import('../lib/fragments.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
   const { trigger } = data;
