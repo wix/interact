@@ -191,9 +191,21 @@ ${fragments.get('sequences', 'brief')}
 
 ## Critical CSS (FOUC Prevention)
 
-${fragments.get('fouc', 'intro-brief')}
+**Problem:** Elements with entrance animations (e.g. \`FadeIn\` on \`viewEnter\`) are initially visible in their final state. Before the animation framework applies the starting keyframe, the content flashes visibly — a flash of un-animated content (FOUC).
 
-${fragments.get('fouc', 'rules-brief')}
+**Solution:** Two things are required — both MUST be present:
+
+1. **Generate critical CSS** with \`generate(config)\` — produces CSS that hides entrance-animated elements until the animation plays.
+2. **Mark elements with \`initial\`** — \`data-interact-initial="true"\` on \`<interact-element>\`, or \`initial={true}\` on \`<Interaction>\` in React.
+
+Using only one of these has no effect — both are required.
+
+See [viewenter.md](./viewenter.md) for full details.
+
+**Rules:**
+
+- \`generate()\` should be called server-side or at build time. Can also be called on the client if page content is initially hidden (e.g. behind a loader).
+- Only valid for \`viewEnter\` + \`triggerType: 'once'\` (or no \`triggerType\`, which defaults to \`'once'\`) where source and target are the same element.
 
 \`\`\`javascript
 import { generate } from '${data.meta.entryPoints.web}';

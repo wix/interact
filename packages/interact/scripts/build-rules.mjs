@@ -30,6 +30,36 @@ const data = {
 };
 
 // ---------------------------------------------------------------------------
+// 1b. Validate YAML schema
+// ---------------------------------------------------------------------------
+
+const TRIGGER_SCHEMA = {
+  'event-trigger-rule.mjs': [
+    'a11yAlias',
+    'a11yNote',
+    'hasReversed',
+    'hasEffectId',
+    'triggerTypeDescriptions',
+    'stateActionDescriptions',
+  ],
+  'viewenter-rule.mjs': ['params', 'pitfalls', 'triggerTypeDescriptions'],
+  'viewprogress-rule.mjs': ['params', 'pitfalls'],
+  'pointermove-rule.mjs': ['params', 'pitfalls'],
+};
+
+for (const trigger of data.triggers) {
+  const required = TRIGGER_SCHEMA[trigger.template];
+  if (!required) continue;
+  for (const field of required) {
+    if (trigger[field] === undefined) {
+      throw new Error(
+        `triggers.yaml: trigger "${trigger.name}" is missing required field "${field}" (needed by ${trigger.template})`,
+      );
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // 2. Load fragments  —  parse <!-- #section --> markers
 // ---------------------------------------------------------------------------
 

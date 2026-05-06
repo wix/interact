@@ -60,19 +60,7 @@ ${paramsTypeFields}
 
 ## Progress Object Structure
 
-When using \`customEffect\` with \`pointerMove\`, the progress parameter is an object:
-
-\`\`\`typescript
-type Progress = {
-  x: number; // 0-1: horizontal position (0 = left edge, 1 = right edge)
-  y: number; // 0-1: vertical position (0 = top edge, 1 = bottom edge)
-  v?: {
-    x: number; // Horizontal velocity: negative = moving left, positive = moving right. Magnitude reflects speed.
-    y: number; // Vertical velocity: negative = moving up, positive = moving down. Magnitude reflects speed.
-  };
-  active?: boolean; // Whether mouse is currently in the hit area
-};
-\`\`\`
+${fragments.get('progress-type', 'detailed')}
 
 ---
 
@@ -114,7 +102,7 @@ For devices with dynamic viewport sizes (e.g. mobile browsers where the address 
 
 Use pre-built mouse presets from \`${data.meta.presetsPackage}\` that handle 2D mouse tracking internally. Mouse presets are preferred over \`keyframeEffect\` for 2D effects. Available mouse presets: ${data.effects.presets.mouse.map((n) => `\`${n}\``).join(', ')}.
 
-**Multiple effects:** The \`effects\` array can contain multiple effects — all share the same pointer tracking and fire together. Use this to animate different targets from the same pointer movement.
+${fragments.get('multiple-effects-note', 'pointerMove')}
 
 \`\`\`typescript
 {

@@ -34,7 +34,7 @@ ${pitfallsBlock}
 
 **Use Case**: Scroll-driven CSS-based effects.
 
-**Multiple effects:** The \`effects\` array can contain multiple effects — all are driven by the same scroll progress. Use this to animate different targets or properties in sync with the same scroll position.
+${fragments.get('multiple-effects-note', 'viewProgress')}
 
 ### Template
 

@@ -155,7 +155,7 @@ Use \`transition\` when all properties share timing. Use \`transitionProperties\
 - \`[SOURCE_KEY]\` / \`[TARGET_KEY]\` — same as Rule 1.
 - \`[STATE_ACTION]\` — \`stateAction\` on the effect. One of:
 ${Object.entries(trigger.stateActionDescriptions)
-  .map(([k, v]) => `  - \`'${k}'\` — ${v}`)
+  .map(([k, v]) => `  - \`'${k}'\` — ${v.full}`)
   .join('\n')}
 - \`[CSS_PROP]\` — CSS property name as a string in camelCase format (e.g. \`'backgroundColor'\`, \`'borderRadius'\`, \`'opacity'\`).
 - \`[VALUE]\` — target CSS value for the property.
@@ -231,7 +231,7 @@ function buildVariables(trigger, vo, hasReversed, hasEffectId) {
     varLine('SOURCE_KEY', vo.sourceKeySuffix),
     varLine('TARGET_KEY', vo.targetKeyDesc),
     `- \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:`,
-    ...Object.entries(trigger.triggerTypeDescriptions).map(([k, v]) => `  - \`'${k}'\` — ${v}`),
+    ...Object.entries(trigger.triggerTypeDescriptions).map(([k, v]) => `  - \`'${k}'\` — ${v.full}`),
     varLine('KEYFRAMES'),
     varLine('EFFECT_NAME'),
     varLine('NAMED_EFFECT_DEFINITION'),

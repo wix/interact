@@ -7,46 +7,15 @@ const FULL_LEAN_PITFALL_ORDER = [
   { id: 'hit-area', section: 'detailed-pointermove' },
 ];
 
-const FULL_LEAN_BEHAVIOR = {
-  hover: {
-    triggerType: {
-      alternate: 'Play on enter, reverse on leave',
-      repeat: 'Play on enter, stop and rewind on leave',
-      once: 'Play once on first enter only',
-      state: 'Play on enter, pause on leave',
-    },
-    stateAction: {
-      toggle: 'Add style state on enter, remove on leave',
-      add: 'Add style state on enter; leave does NOT remove',
-      remove: 'Remove style state on enter',
-      clear: 'Clear/reset all style states on enter',
-    },
-  },
-  click: {
-    triggerType: {
-      alternate: 'Alternate play/reverse per click',
-      repeat: 'Restart per click',
-      once: 'Play once on first click only',
-      state: 'Toggle play/pause per click',
-    },
-    stateAction: {
-      toggle: 'Toggle style state per click',
-      add: 'Add style state on click',
-      remove: 'Remove style state on click',
-      clear: 'Clear/reset all style states',
-    },
-  },
-};
-
-function buildBehaviorTable(headerLabel, behaviorKey) {
-  const hoverBehavior = FULL_LEAN_BEHAVIOR.hover[behaviorKey];
-  const clickBehavior = FULL_LEAN_BEHAVIOR.click[behaviorKey];
-  const keys = Object.keys(hoverBehavior);
+function buildBehaviorTable(headerLabel, behaviorKey, hover, click) {
+  const hoverDescs = hover[behaviorKey];
+  const clickDescs = click[behaviorKey];
+  const keys = Object.keys(hoverDescs);
   const defaultKey = keys[0];
 
   const rows = keys.map((k) => {
     const label = k === defaultKey ? `\`'${k}'\` (default)` : `\`'${k}'\``;
-    return [label, hoverBehavior[k], clickBehavior[k]];
+    return [label, hoverDescs[k].short, clickDescs[k].short];
   });
 
   return buildMarkdownTable([headerLabel, 'hover behavior', 'click behavior'], rows);
@@ -262,11 +231,11 @@ For \`TimeEffect\` (keyframe/named/custom effects), set \`triggerType\` on the e
 
 **\`triggerType\`** — on \`TimeEffect\`:
 
-${buildBehaviorTable('Type', 'triggerType')}
+${buildBehaviorTable('Type', 'triggerTypeDescriptions', hover, click)}
 
 **\`stateAction\`** — on \`StateEffect\`:
 
-${buildBehaviorTable('Action', 'stateAction')}
+${buildBehaviorTable('Action', 'stateActionDescriptions', hover, click)}
 
 ### viewEnter
 
@@ -308,14 +277,7 @@ params: {
 
 **\`centeredToTarget\`** — set \`true\` to remap the \`0–1\` progress range so that \`0.5\` progress corresponds to the center of the target element. Use when source and target are different elements, or when \`hitArea: 'root'\` is used, so that the pointer resting over the target center produces 50% progress regardless of position in viewport.
 
-**Progress object** (for \`customEffect\`):
-
-\`\`\`ts
-{ x: number; y: number; v?: { x: number; y: number }; active?: boolean }
-// x, y: 0–1 normalized position within hit area
-// v: velocity vector (unbounded, typically -1 to 1 range at moderate speed; 0 = stationary)
-// active: whether pointer is within the active hit area
-\`\`\`
+${fragments.get('progress-type', 'brief')}
 
 ### animationEnd
 
@@ -510,13 +472,21 @@ ${fragments.get('conditions', 'default')}
 
 ## FOUC Prevention
 
-${fragments.get('fouc', 'long')}
+**Problem:** Elements with entrance animations (e.g. \`viewEnter\` + \`type: 'once'\` with \`FadeIn\`) start in their final visible state. Before the animation framework initializes and applies the starting keyframe (e.g. \`opacity: 0\`), the element is briefly visible at full opacity — causing a flash of unstyled/un-animated content (FOUC).
+
+**Solution:** Two things are required — both MUST be present:
+
+1. **Generate critical CSS** using \`generate(config)\` — produces CSS rules that hide entrance-animated elements from the moment the page renders.
+2. **Mark elements with \`initial\`** — tells the runtime which elements have critical CSS applied so it can coordinate with the generated styles.
 
 ### Step 1: Generate CSS
 
 Call \`generate(config)\` server-side or at build time and inject the result into the \`<head>\` (preferred), or insert to beginning of \`<body>\`, so it loads before the page content is painted:
 
-${fragments.get('fouc', 'code-generate-web')}
+\`\`\`ts
+import { generate } from '@wix/interact/web';
+const css = generate(config);
+\`\`\`
 
 ${fragments.get('fouc', 'code-inject')}
 
@@ -528,7 +498,12 @@ ${fragments.get('fouc', 'code-react', { key: 'hero', classAttr: ' className="her
 
 ${fragments.get('fouc', 'code-vanilla', { key: 'hero', classAttr: ' class="hero"' })}
 
-${fragments.get('fouc', 'rules-detailed')}
+### Rules
+
+- \`generate()\` should be called server-side or at build time. Can also be called on client-side if page content is initially hidden (e.g. behind a loader/splash screen).
+- **Both** \`generate(config)\` CSS **and** \`initial\` on the element are required. Using only one has no effect.
+- \`initial\` is only valid for \`viewEnter\` + \`type: 'once'\` where source and target are the same element.
+- For \`repeat\`/\`alternate\`/\`state\`, do NOT use \`initial\`. Instead, manually apply the initial keyframe as inline styles on the target element and use \`fill: 'both'\`.
 
 ---
 

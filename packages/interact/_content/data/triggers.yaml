@@ -16,15 +16,31 @@ triggers:
     hasReversed: false
     hasEffectId: false
     triggerTypeDescriptions:
-      alternate: 'plays forward on enter, reverses on leave. Default. Most common for hover.'
-      repeat: 'restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses.'
-      once: 'plays once on the first enter and never again.'
-      state: 'resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`).'
+      alternate:
+        full: 'plays forward on enter, reverses on leave. Default. Most common for hover.'
+        short: 'Play on enter, reverse on leave'
+      repeat:
+        full: 'restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses.'
+        short: 'Play on enter, stop and rewind on leave'
+      once:
+        full: 'plays once on the first enter and never again.'
+        short: 'Play once on first enter only'
+      state:
+        full: 'resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`).'
+        short: 'Play on enter, pause on leave'
     stateActionDescriptions:
-      toggle: 'applies the style state on enter, removes on leave. Default.'
-      add: 'applies the style state on enter. Leave does NOT remove it.'
-      remove: 'removes a previously applied style state on enter. Use with provided `effectId` to map to a matching interaction with `add` and effect with same `effectId`.'
-      clear: 'clears all previously applied style states on enter. Use to reset multiple stacked `''add''` style changes at once (e.g. a "reset" hover area that undoes several accumulated states).'
+      toggle:
+        full: 'applies the style state on enter, removes on leave. Default.'
+        short: 'Add style state on enter, remove on leave'
+      add:
+        full: 'applies the style state on enter. Leave does NOT remove it.'
+        short: 'Add style state on enter; leave does NOT remove'
+      remove:
+        full: 'removes a previously applied style state on enter. Use with provided `effectId` to map to a matching interaction with `add` and effect with same `effectId`.'
+        short: 'Remove style state on enter'
+      clear:
+        full: 'clears all previously applied style states on enter. Use to reset multiple stacked `''add''` style changes at once (e.g. a "reset" hover area that undoes several accumulated states).'
+        short: 'Clear/reset all style states on enter'
 
   - name: click
     template: event-trigger-rule.mjs
@@ -37,15 +53,31 @@ triggers:
     hasReversed: true
     hasEffectId: true
     triggerTypeDescriptions:
-      alternate: 'plays forward on first click, reverses on next click. Default.'
-      repeat: 'restarts the animation from the beginning on each click.'
-      once: 'plays once on the first click and never again.'
-      state: 'resumes/pauses the animation on each click. Useful for continuous loops (`iterations: Infinity`).'
+      alternate:
+        full: 'plays forward on first click, reverses on next click. Default.'
+        short: 'Alternate play/reverse per click'
+      repeat:
+        full: 'restarts the animation from the beginning on each click.'
+        short: 'Restart per click'
+      once:
+        full: 'plays once on the first click and never again.'
+        short: 'Play once on first click only'
+      state:
+        full: 'resumes/pauses the animation on each click. Useful for continuous loops (`iterations: Infinity`).'
+        short: 'Toggle play/pause per click'
     stateActionDescriptions:
-      toggle: 'applies the style state, removes it on next click. Default.'
-      add: 'applies the style state. Does not remove on subsequent clicks.'
-      remove: 'removes a previously applied style state.'
-      clear: 'clears all previously applied style states. Useful for resetting multiple stacked style states at once.'
+      toggle:
+        full: 'applies the style state, removes it on next click. Default.'
+        short: 'Toggle style state per click'
+      add:
+        full: 'applies the style state. Does not remove on subsequent clicks.'
+        short: 'Add style state on click'
+      remove:
+        full: 'removes a previously applied style state.'
+        short: 'Remove style state on click'
+      clear:
+        full: 'clears all previously applied style states. Useful for resetting multiple stacked style states at once.'
+        short: 'Clear/reset all style states'
 
   # --------------------------------------------------------------------------
   # Viewport/scroll triggers — each has its own dedicated template.
@@ -69,6 +101,11 @@ triggers:
       - id: same-element-viewenter
         section: short
     showMultipleEffectsNote: true
+    triggerTypeDescriptions:
+      once: 'plays once when the source element first enters the viewport and never again. Source and target may be the same element.'
+      repeat: 'restarts the animation every time the source element enters the viewport. Use separate source and target.'
+      alternate: 'plays forward when the source element enters the viewport, reverses when it leaves. Use separate source and target.'
+      state: 'resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`). Use separate source and target.'
 
   - name: viewProgress
     template: viewprogress-rule.mjs

@@ -35,13 +35,40 @@ ${pitfallsBlock}
 
 ## Preventing Flash of Unstyled Content (FOUC)
 
-${fragments.get('fouc', 'short')}
+**Problem:** Elements with entrance animations (e.g. \`FadeIn\`) start in their final visible state (e.g. \`opacity: 1\`). Before the animation framework initializes and applies the starting keyframe (e.g. \`opacity: 0\`), the element is briefly visible at full opacity — a flash of un-animated content.
+
+**Solution:** Two things are required — **both** MUST be present for FOUC prevention to work:
+
+1. **Generate critical CSS** using \`generate(config)\` — produces CSS rules that hide entrance-animated elements from the moment the page renders, before JavaScript runs.
+2. **Mark elements with \`initial\`** — set \`data-interact-initial="true"\` on \`<interact-element>\`, or \`initial={true}\` on the \`<Interaction>\` React component. This tells the runtime which elements have critical CSS applied.
+
+If only one of these is present, FOUC prevention will **not** work. Both the CSS and the \`initial\` attribute are required.
 
 ### Step 1: Generate CSS and inject into \`<head>\` (preferred), or beginning of \`<body>\`
 
 Call \`generate(config)\` server-side or at build time. Inject the resulting CSS into the document \`<head>\` (or in \`<body>\` before your content) so it loads before the page content is painted:
 
-${fragments.get('fouc', 'code-generate-viewenter')}
+\`\`\`typescript
+import { generate } from '@wix/interact';
+
+const config: InteractConfig = {
+  interactions: [
+    {
+      key: '[SOURCE_KEY]',
+      trigger: 'viewEnter',
+      params: {
+        threshold: [VIEW_TRIGGER_THRESHOLD],
+        inset: [VIEW_TRIGGER_INSET],
+      },
+      effects: [EFFECT_DEFINITIONS],
+      // and/or
+      sequences: [SEQUENCE_DEFINITIONS],
+    },
+  ],
+};
+
+const css = generate(config);
+\`\`\`
 
 ${fragments.get('fouc', 'code-inject')}
 
@@ -53,13 +80,18 @@ ${fragments.get('fouc', 'code-react', { key: '[SOURCE_KEY]', classAttr: '' })}
 
 ${fragments.get('fouc', 'code-vanilla', { key: '[SOURCE_KEY]', classAttr: '' })}
 
-${fragments.get('fouc', 'rules-viewenter')}
+### Rules
+
+- \`generate()\` should be called server-side or at build time. Can also be called on the client if the page content is initially hidden (e.g. behind a loader/splash screen).
+- \`initial\` is only valid for \`viewEnter\` + \`triggerType: 'once'\` (or no \`triggerType\`, which defaults to \`'once'\`) where source and target are the same element.
+- Do NOT use \`initial\` for \`viewEnter\` with \`triggerType: 'repeat'\`/\`'alternate'\`/\`'state'\`. For those, manually apply the initial keyframe as inline styles on the target element and use \`fill: 'both'\`.
+- If other interactions in the config also need FOUC prevention, \`generate(config)\` covers them all — set \`initial\` only on the relevant \`viewEnter\` + \`triggerType: 'once'\` elements.
 
 ## Rule 1: keyframeEffect / namedEffect (TimeEffect)
 
 Use \`keyframeEffect\` or \`namedEffect\` when the viewEnter should play an animation (CSS or WAAPI). Set \`triggerType\` on each effect to control playback behavior. Use \`params\` only for observer configuration (\`threshold\`, \`inset\`).
 
-**Multiple effects:** The \`effects\` array can contain multiple effects — all share the same viewEnter trigger and fire together when the element enters the viewport. Each effect can have its own \`triggerType\`. Use this to animate different targets from a single viewport entry event.
+${fragments.get('multiple-effects-note', 'viewEnter')}
 
 \`\`\`typescript
 {
@@ -102,10 +134,12 @@ ${varLine('SOURCE_KEY', 'The **source element** is observed for viewport interse
 ${varLine('TARGET_KEY', "identifier matching the element's key on the element that animates.")}
 - \`[TARGET_SELECTOR]\` - optional. Selector for the child element to select inside the root element. For \`triggerType\` of \`'alternate'\`/\`'repeat'\`/\`'state'\` MUST either use a separate \`[TARGET_KEY]\` from \`[SOURCE_KEY]\` or \`selector\` for selecting a child element as target.
 - \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:
-  - \`'once'\` (default) — plays once when the source element first enters the viewport and never again. Source and target may be the same element.
-  - \`'repeat'\` — restarts the animation every time the source element enters the viewport. Use separate source and target.
-  - \`'alternate'\` — plays forward when the source element enters the viewport, reverses when it leaves. Use separate source and target.
-  - \`'state'\` — resumes on enter, pauses on leave. Useful for continuous loops (\`iterations: Infinity\`). Use separate source and target.
+${Object.entries(trigger.triggerTypeDescriptions)
+  .map(([k, v]) => {
+    const isDefault = k === trigger.defaultTriggerType;
+    return `  - \`'${k}'\`${isDefault ? ' (default)' : ''} — ${v}`;
+  })
+  .join('\n')}
 ${paramDescriptions}
 ${varLine('KEYFRAMES')}
 ${varLine('EFFECT_NAME')}

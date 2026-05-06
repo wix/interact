@@ -176,6 +176,30 @@ todos:
   - id: refactor7-regenerate
     content: 'Regenerate rules/*.md — all 7 files byte-identical to pre-refactor output. Zero content drift.'
     status: completed
+  - id: refactor8-multiple-effects-fragment
+    content: 'Add trigger-specific sections (#viewEnter, #viewProgress, #pointerMove) to multiple-effects-note.md — viewenter, viewprogress, pointermove templates now use shared fragment instead of hardcoded notes'
+    status: completed
+  - id: refactor8-viewenter-triggertype-yaml
+    content: 'Add triggerTypeDescriptions to viewEnter trigger in triggers.yaml — template renders them dynamically via Object.entries(), matching the event-trigger-rule.mjs pattern'
+    status: completed
+  - id: refactor8-progress-type-fragment
+    content: 'Extract Progress type into fragments/progress-type.md with #detailed and #brief sections — pointermove-rule.mjs and full-lean.mjs now share the same source'
+    status: completed
+  - id: refactor8-yaml-validation
+    content: 'Add TRIGGER_SCHEMA validation to build-rules.mjs — checks required fields per template, throws on missing fields to catch typos at build time'
+    status: completed
+  - id: refactor8-short-full-descriptions
+    content: 'Consolidate FULL_LEAN_BEHAVIOR with triggers.yaml — triggerTypeDescriptions and stateActionDescriptions now have short/full structure. Removed FULL_LEAN_BEHAVIOR constant from full-lean.mjs, buildBehaviorTable reads .short from YAML data'
+    status: completed
+  - id: refactor8-fragment-naming-guide
+    content: 'Add fragments/README.md documenting section naming conventions (#default, #brief/#detailed, #<trigger-name>, #full-lean, #code-<variant>)'
+    status: completed
+  - id: refactor8-fouc-single-consumer
+    content: 'Move 8 single-consumer FOUC sections from fouc.md into their respective templates — fouc.md reduced from 12 to 4 genuinely shared sections (#code-inject, #code-web, #code-react, #code-vanilla)'
+    status: completed
+  - id: refactor8-regenerate
+    content: 'Regenerate rules/*.md — all 7 files byte-identical to pre-refactor output. Zero content drift.'
+    status: completed
 isProject: false
 ---
 
@@ -873,11 +897,63 @@ Ran `build:rules`. All 7 rule files are byte-identical to pre-refactor output. Z
 
 ---
 
+## Post-PR Fixes — Round 8 (single-source-of-truth & validation)
+
+Refactors from a structural review of the final PR, addressing remaining duplication, missing data-driving, and build-time safety.
+
+### Fix 46: Use multiple-effects-note fragment everywhere
+
+The `multiple-effects-note.md` fragment was only used by `event-trigger-rule.mjs`. The viewenter, viewprogress, and pointermove templates each hardcoded their own "Multiple effects" note with trigger-specific wording.
+
+**Action:** Added `#viewEnter`, `#viewProgress`, and `#pointerMove` sections to the fragment. Updated all three templates to use `fragments.get('multiple-effects-note', triggerName)`.
+
+### Fix 47: Data-drive viewEnter triggerType descriptions
+
+`viewenter-rule.mjs` hardcoded 4 `triggerType` descriptions while `event-trigger-rule.mjs` read them from `trigger.triggerTypeDescriptions` in YAML. The viewEnter trigger had no `triggerTypeDescriptions` entry.
+
+**Action:** Added `triggerTypeDescriptions` to the viewEnter trigger in `triggers.yaml`. Updated `viewenter-rule.mjs` to render them dynamically via `Object.entries(trigger.triggerTypeDescriptions).map(...)`, with `(default)` annotation derived from `trigger.defaultTriggerType`. Also added `triggerTypeDescriptions` to the YAML validation schema.
+
+### Fix 48: Extract Progress type into shared fragment
+
+The `Progress` type definition was duplicated between `pointermove-rule.mjs` (detailed, 13 lines) and `full-lean.mjs` (brief, 4 lines). A change to one would not propagate to the other.
+
+**Action:** Created `fragments/progress-type.md` with `#detailed` and `#brief` sections. Updated both templates to use the fragment. The deeply nested instance in full-lean.mjs's Triggers overview (lines 246-257) was left in place — it's inside a deeply indented markdown list where fragment extraction would be fragile.
+
+### Fix 49: Add YAML schema validation
+
+A typo in `triggers.yaml` (e.g. `hasReverse` instead of `hasReversed`) would produce silently wrong output. No build-time guard existed for field names.
+
+**Action:** Added `TRIGGER_SCHEMA` map to `build-rules.mjs` keyed by template name, listing required fields per trigger type. Build now throws on missing fields before template rendering begins.
+
+### Fix 50: Consolidate FULL_LEAN_BEHAVIOR with triggers.yaml
+
+`FULL_LEAN_BEHAVIOR` in `full-lean.mjs` maintained condensed descriptions for hover/click triggerType and stateAction behaviors — duplicating concepts from `triggers.yaml`'s `triggerTypeDescriptions` and `stateActionDescriptions`. Adding a new value to one required updating the other.
+
+**Action:** Changed `triggerTypeDescriptions` and `stateActionDescriptions` in hover and click trigger entries from flat strings to `{ full, short }` objects. `event-trigger-rule.mjs` reads `.full`, `full-lean.mjs` reads `.short` via `buildBehaviorTable()`. Removed the 30-line `FULL_LEAN_BEHAVIOR` constant entirely. Single source of truth for all behavior descriptions.
+
+### Fix 51: Document fragment section naming conventions
+
+Fragment sections used several different naming conventions with no documentation, making it hard for contributors to predict section names.
+
+**Action:** Added `fragments/README.md` documenting the naming convention patterns: `#default` for single-section fragments, `#brief`/`#detailed` for detail levels, `#<trigger-name>` for trigger-specific variants, `#full-lean` for condensed reference wording, `#code-<variant>` for code examples.
+
+### Fix 52: Move single-consumer FOUC sections into templates
+
+`fouc.md` had 12 sections, 8 of which were used by exactly one template — providing no deduplication benefit, just indirection.
+
+**Action:** Inlined the 8 single-consumer sections (`#short`, `#long`, `#code-generate-viewenter`, `#code-generate-web`, `#rules-viewenter`, `#rules-brief`, `#rules-detailed`, `#intro-brief`) into their respective templates. `fouc.md` reduced from 12 to 4 genuinely shared sections (`#code-inject`, `#code-web`, `#code-react`, `#code-vanilla`).
+
+### Fix 53: Regenerate output (round 8)
+
+Ran `build:rules`. All 7 rule files are byte-identical to pre-refactor output. Zero content drift.
+
+---
+
 ## Future Extension Points
 
 - **docs/**: Same `_content/data/` feeds docs templates — add `_content/templates/docs/` later
 - **README**: Same meta.yaml + triggers.yaml generates README sections
-- **Validation**: Add `scripts/validate-rules.mjs` that imports actual TS types and cross-checks trigger names, param fields, effect fields against the YAML data
+- ~~**Validation**: Add `scripts/validate-rules.mjs` that imports actual TS types and cross-checks trigger names, param fields, effect fields against the YAML data~~ — **Partially done** (Fix 49: YAML schema validation in build-rules.mjs). Full TS type cross-checking remains a future extension.
 - **motion-presets rules**: The build mechanism is scoped to `packages/interact/` but the architecture (YAML + fragments + templates) can be replicated in `packages/motion-presets/` with shared fragments if needed
 - ~~**Common variable fragment**: Extract repeated variable descriptions~~ — **Done** (Fix 19: `varLine` helper)
-- ~~**FOUC fragment consolidation**: Reduce fouc.md's 13 sections~~ — **Done** (Fix 21: merged 6 sections to 3 via `{{key}}` interpolation)
+- ~~**FOUC fragment consolidation**: Reduce fouc.md's 13 sections~~ — **Done** (Fix 21: merged 6 sections to 3 via `{{key}}` interpolation; Fix 52: moved single-consumer sections to templates, reduced to 4 shared sections)
