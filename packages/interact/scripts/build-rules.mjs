@@ -164,6 +164,16 @@ for (const { file, content } of outputs) {
     }
     if (existing !== content) {
       console.error(`  ✗ ${relative(PKG_ROOT, outPath)} is stale`);
+      const existingLines = existing.split('\n');
+      const contentLines = content.split('\n');
+      for (let i = 0; i < Math.max(existingLines.length, contentLines.length); i++) {
+        if (existingLines[i] !== contentLines[i]) {
+          console.error(`    first diff at line ${i + 1}:`);
+          if (existingLines[i] !== undefined) console.error(`    - ${existingLines[i]}`);
+          if (contentLines[i] !== undefined) console.error(`    + ${contentLines[i]}`);
+          break;
+        }
+      }
       stale++;
     } else {
       console.log(`  ✓ ${relative(PKG_ROOT, outPath)} is up to date`);

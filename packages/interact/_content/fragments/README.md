@@ -15,3 +15,11 @@ Reusable markdown content with `<!-- #section -->` markers for granular inclusio
 | `#<noun>` / `#<noun>-<qualifier>` | Named concept sections                                | `element-resolution.md`      |
 
 When adding a new section, follow the closest existing pattern. Prefer descriptive names over generic ones when the section has trigger-specific or template-specific content.
+
+## Parameter Conventions
+
+Fragments use `{{paramName}}` placeholders for interpolation. Some conventions:
+
+- **`{{key}}`** — element key. Pass `'hero'` for concrete examples, `'[SOURCE_KEY]'` for template placeholders.
+- **`{{classAttr}}`** — an HTML attribute string **including the leading space** (e.g. `' class="hero"'`), or empty string `''` when omitted. The leading space is required because the placeholder is adjacent to the tag name (`<section{{classAttr}}>`).
+- **`{{installCommand}}`**, **`{{webEntry}}`**, etc. — package metadata from `data/meta.mjs`, passed as `metaParams` by the build script.

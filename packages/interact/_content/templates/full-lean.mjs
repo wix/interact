@@ -31,10 +31,6 @@ function buildBehaviorTable(headerLabel, behaviorKey, triggers, { defaultKey } =
   );
 }
 
-function buildFullLeanPitfalls(pitfallOrder, fragments) {
-  return pitfallOrder.map((p) => fragments.get(`pitfalls/${p.id}`, p.section)).join('\n');
-}
-
 /**
  * Renders full-lean.md — the comprehensive reference for all triggers, effects, and API surface.
  *
@@ -105,7 +101,7 @@ Declarative configuration-driven interaction library. Binds animations to trigge
 
 Each item here is CRITICAL — ignoring any of them will break animations.
 
-${buildFullLeanPitfalls(FULL_LEAN_PITFALL_ORDER, fragments)}
+${FULL_LEAN_PITFALL_ORDER.map((p) => fragments.get(`pitfalls/${p.id}`, p.section)).join('\n')}
 ${fragments.get('pitfalls/dont-guess-presets', 'default')}
 ${fragments.get('pitfalls/reduced-motion', 'default')}
 ${fragments.get('pitfalls/perspective', 'default')}
