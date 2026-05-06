@@ -11,6 +11,13 @@
       rel="stylesheet"
     />
     <style>
+      /* Critical CSS for viewEnter entrance animations - prevents FOUC */
+      @media (prefers-reduced-motion: no-preference) {
+          [data-interact-key='page']:not([data-interact-enter]) :is(.h1-line, .list-item) {
+              visibility: hidden;
+          }
+      }
+
       * {
         margin: 0;
         padding: 0;
@@ -280,7 +287,7 @@
     </style>
   </head>
   <body>
-    <interact-element data-interact-key="page" data-interact-initial="true">
+    <interact-element data-interact-key="page">
       <div class="page">
         <nav class="nav">
           <div class="nav-group">

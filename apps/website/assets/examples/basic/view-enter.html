@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>View Enter</title>
     <style>
+      /* Critical CSS for viewEnter entrance animations - prevents FOUC */
+      @media (prefers-reduced-motion: no-preference) {
+          [data-interact-initial='true'] > :first-child:not([data-interact-enter]) {
+              visibility: hidden;
+              transform: none;
+              translate: none;
+              scale: none;
+              rotate: none;
+          }
+      }
+
       *,
       *::before,
       *::after {
