@@ -396,68 +396,70 @@
       const C1 = { name: 'cover', offset: { value: 100, unit: 'percentage' } };
 
       // —— Shrink: full-screen → square + fade hero text ——
-      const interactions = [{
-        key: 'shrink-zone',
-        trigger: 'viewProgress',
-        effects: [
-          {
-            key: 'square',
-            selector: '.square-frame',
-            rangeStart: C0,
-            rangeEnd: C1,
-            fill: 'both',
-            keyframeEffect: {
-              name: 'shrink',
-              keyframes: [
-                {
-                  offset: 0,
-                  width: '100vw',
-                  height: '100vh',
-                  borderRadius: '0px',
-                  boxShadow: '0 0 0 0 rgba(0,0,0,0)',
-                },
-                {
-                  offset: 0.25,
-                  width: '100vw',
-                  height: '100vh',
-                  borderRadius: '0px',
-                  boxShadow: '0 0 0 0 rgba(0,0,0,0)',
-                },
-                {
-                  offset: 0.78,
-                  width: 'var(--parting-shrink-size)',
-                  height: 'var(--parting-shrink-size)',
-                  borderRadius: '0px',
-                  boxShadow: '0 0 0 0 rgba(0,0,0,0)',
-                },
-                {
-                  offset: 1,
-                  width: 'var(--parting-shrink-size)',
-                  height: 'var(--parting-shrink-size)',
-                  borderRadius: '0px',
-                  boxShadow: '0 0 0 0 rgba(0,0,0,0)',
-                },
-              ],
+      const interactions = [
+        {
+          key: 'shrink-zone',
+          trigger: 'viewProgress',
+          effects: [
+            {
+              key: 'square',
+              selector: '.square-frame',
+              rangeStart: C0,
+              rangeEnd: C1,
+              fill: 'both',
+              keyframeEffect: {
+                name: 'shrink',
+                keyframes: [
+                  {
+                    offset: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    borderRadius: '0px',
+                    boxShadow: '0 0 0 0 rgba(0,0,0,0)',
+                  },
+                  {
+                    offset: 0.25,
+                    width: '100vw',
+                    height: '100vh',
+                    borderRadius: '0px',
+                    boxShadow: '0 0 0 0 rgba(0,0,0,0)',
+                  },
+                  {
+                    offset: 0.78,
+                    width: 'var(--parting-shrink-size)',
+                    height: 'var(--parting-shrink-size)',
+                    borderRadius: '0px',
+                    boxShadow: '0 0 0 0 rgba(0,0,0,0)',
+                  },
+                  {
+                    offset: 1,
+                    width: 'var(--parting-shrink-size)',
+                    height: 'var(--parting-shrink-size)',
+                    borderRadius: '0px',
+                    boxShadow: '0 0 0 0 rgba(0,0,0,0)',
+                  },
+                ],
+              },
             },
-          },
-          {
-            key: 'hero-text',
-            selector: '.hero-overlay',
-            rangeStart: C0,
-            rangeEnd: C1,
-            fill: 'both',
-            keyframeEffect: {
-              name: 'heroHide',
-              keyframes: [
-                { offset: 0, opacity: '1' },
-                { offset: 0.72, opacity: '1' },
-                { offset: 0.82, opacity: '0' },
-                { offset: 1, opacity: '0' },
-              ],
+            {
+              key: 'hero-text',
+              selector: '.hero-overlay',
+              rangeStart: C0,
+              rangeEnd: C1,
+              fill: 'both',
+              keyframeEffect: {
+                name: 'heroHide',
+                keyframes: [
+                  { offset: 0, opacity: '1' },
+                  { offset: 0.72, opacity: '1' },
+                  { offset: 0.82, opacity: '0' },
+                  { offset: 1, opacity: '0' },
+                ],
+              },
             },
-          },
-        ],
-      }];
+          ],
+        },
+      ];
 
       // —— Project interactions ——
       for (let i = 0; i < ITEM_COUNT; i++) {
