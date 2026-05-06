@@ -21,6 +21,13 @@
       html {
         overflow: auto;
       }
+
+      /* View-timeline motion tokens (desktop default; mobile in @media below) */
+      :root {
+        --parting-shrink-size: 96px;
+        --parting-split: 60px;
+      }
+
       body {
         background: #dddddd;
         color: #111;
@@ -198,6 +205,11 @@
 
       /* —— Mobile —— */
       @media (max-width: 768px) {
+        :root {
+          --parting-shrink-size: 64px;
+          --parting-split: 46px;
+        }
+
         .indicators {
           display: flex;
           align-items: flex-end;
@@ -379,16 +391,12 @@
     <script type="module">
       import { Interact } from '/assets/lib/interact/es/web.js';
 
-      const mobile = window.matchMedia('(max-width: 768px)').matches;
-      const SPLIT = mobile ? 46 : 60;
-      const FINAL_SIZE = mobile ? '64px' : '96px';
       const ITEM_COUNT = 12;
       const C0 = { name: 'cover', offset: { value: 0, unit: 'percentage' } };
       const C1 = { name: 'cover', offset: { value: 100, unit: 'percentage' } };
-      const interactions = [];
 
       // —— Shrink: full-screen → square + fade hero text ——
-      interactions.push({
+      const interactions = [{
         key: 'shrink-zone',
         trigger: 'viewProgress',
         effects: [
@@ -417,15 +425,15 @@
                 },
                 {
                   offset: 0.78,
-                  width: FINAL_SIZE,
-                  height: FINAL_SIZE,
+                  width: 'var(--parting-shrink-size)',
+                  height: 'var(--parting-shrink-size)',
                   borderRadius: '0px',
                   boxShadow: '0 0 0 0 rgba(0,0,0,0)',
                 },
                 {
                   offset: 1,
-                  width: FINAL_SIZE,
-                  height: FINAL_SIZE,
+                  width: 'var(--parting-shrink-size)',
+                  height: 'var(--parting-shrink-size)',
                   borderRadius: '0px',
                   boxShadow: '0 0 0 0 rgba(0,0,0,0)',
                 },
@@ -449,7 +457,7 @@
             },
           },
         ],
-      });
+      }];
 
       // —— Project interactions ——
       for (let i = 0; i < ITEM_COUNT; i++) {
@@ -457,7 +465,6 @@
           key: `p${i}`,
           trigger: 'viewProgress',
           effects: [
-            // Split left
             {
               selector: '.half-left',
               rangeStart: C0,
@@ -468,14 +475,13 @@
                 keyframes: [
                   { offset: 0, transform: 'translateX(0)' },
                   { offset: 0.38, transform: 'translateX(0)' },
-                  { offset: 0.44, transform: `translateX(-${SPLIT}px)` },
-                  { offset: 0.58, transform: `translateX(-${SPLIT}px)` },
+                  { offset: 0.44, transform: 'translateX(calc(-1 * var(--parting-split)))' },
+                  { offset: 0.58, transform: 'translateX(calc(-1 * var(--parting-split)))' },
                   { offset: 0.64, transform: 'translateX(0)' },
                   { offset: 1, transform: 'translateX(0)' },
                 ],
               },
             },
-            // Split right
             {
               selector: '.half-right',
               rangeStart: C0,
@@ -486,8 +492,8 @@
                 keyframes: [
                   { offset: 0, transform: 'translateX(0)' },
                   { offset: 0.38, transform: 'translateX(0)' },
-                  { offset: 0.44, transform: `translateX(${SPLIT}px)` },
-                  { offset: 0.58, transform: `translateX(${SPLIT}px)` },
+                  { offset: 0.44, transform: 'translateX(var(--parting-split))' },
+                  { offset: 0.58, transform: 'translateX(var(--parting-split))' },
                   { offset: 0.64, transform: 'translateX(0)' },
                   { offset: 1, transform: 'translateX(0)' },
                 ],

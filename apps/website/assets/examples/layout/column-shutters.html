@@ -461,6 +461,7 @@
       /** One timeline: per-effect delays preserve the previous choreography; sequence offset is 0 so stagger is not applied on top. */
       const pageEntranceEffects = [
         {
+          key: 'page',
           selector: '.h1-section > .clip-mask:nth-child(1) .h1-line',
           keyframeEffect: {
             name: 'h1Line1',
@@ -475,6 +476,7 @@
           fill: 'both',
         },
         {
+          key: 'page',
           selector: '.h1-section > .clip-mask:nth-child(2) .h1-line',
           keyframeEffect: {
             name: 'h1Line2',
@@ -492,6 +494,7 @@
 
       for (let l = 0; l <= items.length; l++) {
         pageEntranceEffects.push({
+          key: 'page',
           selector: `#list > :nth-child(${2 * l + 1}) .line-divider`,
           keyframeEffect: {
             name: `lineEntrance${l}`,
@@ -509,6 +512,7 @@
 
       for (let i = 0; i < items.length; i++) {
         pageEntranceEffects.push({
+          key: 'page',
           selector: `#list > :nth-child(${2 * i + 2}) .list-item`,
           keyframeEffect: {
             name: `itemEntrance${i}`,
