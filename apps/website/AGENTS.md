@@ -26,7 +26,7 @@ The landing page is at `/`, the examples page at `/examples.html`.
 
 - Vanilla HTML/JS/CSS (no framework, no Vite/webpack for the site)
 - Yarn workspace package **`@wix/interact-website`** (`package.json` here) — `dev` / `build` / format scripts only; site files stay static
-- Tailwind CSS via CDN with shared config (`/assets/shared/tailwind-config.js`)
+- Modular CSS under **`assets/css/`** — shared **`variables.css`** / **`reset.css`**, **`utilities.css`**, **`nav.css`** / **`footer.css`**, plus **`landing.css`** (landing page) and **`examples.css`** (examples gallery)
 - **`@wix/interact`**, **`@wix/motion`**, and presets loaded from **`assets/lib/`** — built copies produced by `scripts/build-landing.sh` (import map on the landing page; examples page + example iframes import `/assets/lib/...` URLs)
 - CodeMirror 5 for the live code editor in the examples modal
 - highlight.js for code snippets on the landing page
@@ -41,18 +41,21 @@ apps/website/
   AGENTS.md                   Agent notes (this file)
   CLAUDE.md                   Symlink to AGENTS.md (for Claude / tooling)
   assets/
-    shared/                   Cross-page scripts and Tailwind config (served as /assets/shared/…)
+    shared/                   Cross-page scripts (served as /assets/shared/…)
       nav.js
       footer.js
-      tailwind-config.js
     lib/                      Generated — interact, motion, motion-presets ESM (gitignored except .gitkeep)
       .gitkeep
     main.mjs                  Landing page animation configs and JS
-    styles.css                Landing page stylesheet
     modal.js                  Landing page source-code modal controller
     snippets.js               Landing page code snippet content
     css/
-      styles.css              Examples page styles (dark theme, CSS vars)
+      variables.css           Design tokens (:root)
+      reset.css               Minimal reset
+      utilities.css           Shared utility classes
+      nav.css / footer.css    Shared chrome styles
+      landing.css             Landing page components
+      examples.css            Examples gallery layout and modal
     js/
       app.js                  Examples page bootstrap
       config.js               Example registry — the main file to edit when adding examples

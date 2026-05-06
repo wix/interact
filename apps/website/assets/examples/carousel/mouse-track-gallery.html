@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Liquidy Gallery with @wix/interact</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       :root {
         /* This will be updated by JS to ensure perfect sync with physics engine */
@@ -308,7 +307,7 @@
 
         div.innerHTML = `
             <interact-element data-interact-key="${itemKey}">
-                <div class="cursor-pointer">
+                <div style="cursor: pointer">
                     <div class="img-wrapper">
                         <div class="parallax-layer" id="parallax-${i}">
                             <interact-element data-interact-key="${imgKey}">

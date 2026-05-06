@@ -12,20 +12,6 @@ interact-element {
   display: contents;
 }
 
-:root {
-  --bg-primary: #111;
-  --bg-secondary: #0a0a0a;
-  --bg-tertiary: #1a1a1a;
-  --border-color: #333;
-  --text-primary: #e5e5e5;
-  --text-secondary: #999;
-  --text-muted: #666;
-  --accent-gold: #ffd882;
-  --accent-purple: #a88fb8;
-  --accent-blue: #82aaff;
-  --accent-green: #c3e88d;
-}
-
 html {
   scroll-behavior: smooth;
 }
