@@ -156,20 +156,20 @@ I identified **14 recurring section patterns** across these projects. Here's wha
 
 ### Cross-Cutting Recommendations
 
-1. **Kill the emojis in headers.** The current Motion README uses emoji headers. None of the top-tier libraries (Motion, GSAP, Lenis) do this. Use clean markdown headers.  
+1. **Kill the emojis in headers.** The current Motion README uses emoji headers. None of the top-tier libraries (Motion, GSAP, Lenis) do this. Use clean markdown headers.
 
-2. **Add badges to all packages.** npm version, bundle size (bundlephobia), license badge, and CI status. This is universal across all well-maintained OSS.  
+2. **Add badges to all packages.** npm version, bundle size (bundlephobia), license badge, and CI status. This is universal across all well-maintained OSS.
 
-3. **AI Support is your differentiator — make it prominent.** No other animation library has a dedicated AI/LLM section. Interact's existing `AI Support` section with rule links is ahead of the curve. Expand it in the Interact README and reference it from root.  
+3. **AI Support is your differentiator — make it prominent.** No other animation library has a dedicated AI/LLM section. Interact's existing `AI Support` section with rule links is ahead of the curve. Expand it in the Interact README and reference it from root.
 
-4. **Use a consistent structure.** All 3 package READMEs should follow the same template: Title \+ one-liner → badges → why/value prop → install → quick start → core concepts → API overview → docs links → related → license.  
+4. **Use a consistent structure.** All 3 package READMEs should follow the same template: Title \+ one-liner → badges → why/value prop → install → quick start → core concepts → API overview → docs links → related → license.
 
 5. **Add visual assets.** Theatre.js and AutoAnimate demonstrate that GIFs/screenshots dramatically increase engagement. Consider adding:
    - A hero GIF for the root README showing the examples page
    - Small inline GIFs for each animation category in motion-presets
 
-6. **Keep API reference minimal in READMEs.** Lenis is an outlier with its full API tables in the README. For your project, link to the docs site — the README should be a "menu" not the "full meal."  
+6. **Keep API reference minimal in READMEs.** Lenis is an outlier with its full API tables in the README. For your project, link to the docs site — the README should be a "menu" not the "full meal."
 
-7. **llms.txt consideration.** Given the AI-ready positioning, consider adding an `llms.txt` file at the root that describes the project in a structured format for AI agents. Reference it from the root README. This aligns with the emerging GitHub convention.  
+7. **llms.txt consideration.** Given the AI-ready positioning, consider adding an `llms.txt` file at the root that describes the project in a structured format for AI agents. Reference it from the root README. This aligns with the emerging GitHub convention.
 
 8. **Fix factual errors.** The current Motion README says "UNLICENSED" but package.json says MIT. It also claims features (82+ presets, GSAP compatibility) that belong to other packages or aren't accurate.
