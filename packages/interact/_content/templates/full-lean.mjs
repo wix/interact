@@ -3,9 +3,15 @@ import { capitalize } from './_helpers.mjs';
 function collectFullLeanPitfalls(triggers) {
   return triggers.flatMap((t) =>
     (t.pitfalls || [])
-      .filter((p) => p.fullLeanSection)
-      .map((p) => ({ id: p.id, section: p.fullLeanSection })),
+      .filter((p) => p.sections?.fullLean)
+      .map((p) => ({ id: p.id, section: p.sections.fullLean })),
   );
+}
+
+function requireTrigger(triggers, name) {
+  const t = triggers.find((t) => t.name === name);
+  if (!t) throw new Error(`Trigger "${name}" not found in data/triggers.mjs`);
+  return t;
 }
 
 function buildMarkdownTable(headers, rows) {
@@ -41,9 +47,9 @@ function buildBehaviorTable(headerLabel, behaviorKey, triggers, { defaultKey } =
  * @param {import('../lib/fragments.mjs').Fragments} fragments
  */
 export function render(data, fragments) {
-  const hover = data.triggers.find((t) => t.name === 'hover');
-  const click = data.triggers.find((t) => t.name === 'click');
-  const viewEnter = data.triggers.find((t) => t.name === 'viewEnter');
+  const hover = requireTrigger(data.triggers, 'hover');
+  const click = requireTrigger(data.triggers, 'click');
+  const viewEnter = requireTrigger(data.triggers, 'viewEnter');
 
   const triggerTypeUnion = data.effects.triggerTypes.map((t) => `'${t}'`).join(' | ');
   const rangeNameUnion = Object.keys(data.effects.rangeNames)
@@ -512,7 +518,7 @@ conditions: {
 Call \`generate(config)\` server-side or at build time and inject the result into the \`<head>\` (preferred), or insert to beginning of \`<body>\`, so it loads before the page content is painted:
 
 \`\`\`ts
-import { generate } from '@wix/interact/web';
+import { generate } from '${data.meta.entryPoints.web}';
 const css = generate(config);
 \`\`\`
 

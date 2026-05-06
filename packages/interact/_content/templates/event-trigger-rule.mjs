@@ -1,32 +1,34 @@
 import { capitalize, buildPitfallsBlock, varLine } from './_helpers.mjs';
 
-// Fields ending in `Extra` are passed to varLine(name, extra) — either appended or used as
-// a full override depending on the COMMON_VARS function for that variable.
 const OVERRIDES = {
   hover: {
-    sourceKeyExtra: 'The element that listens for hover.',
-    targetKeyExtra:
-      "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
-    fillModeExtra:
-      "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished.",
-    easingExtra:
-      "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`.",
-    iterationsExtra:
-      "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.",
-    alternateBoolExtra: '',
+    vars: {
+      SOURCE_KEY: 'The element that listens for hover.',
+      TARGET_KEY:
+        "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
+      FILL_MODE:
+        "usually `'both'`. Keeps the final state applied while hovering, and prevents garbage-collection of animation when finished.",
+      EASING_FUNCTION:
+        "CSS easing string (e.g. `'ease-out'`, `'ease-in-out'`, `'cubic-bezier(0.4, 0, 0.2, 1)'`), or named easing from `@wix/motion`.",
+      ITERATIONS:
+        "optional. Number of iterations, or `Infinity` for continuous loops. Primarily useful with `triggerType: 'state'`.",
+      ALTERNATE_BOOL: '',
+    },
     fillCritical:
       "Always include `fill: 'both'` for `triggerType: 'alternate'`, `'repeat'` — keeps the effect applied while hovering and prevents garbage-collection. For `triggerType: 'once'` use `fill: 'backwards'`.",
     customEffectExamples: '',
     offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.',
   },
   click: {
-    sourceKeyExtra: 'The element that listens for clicks.',
-    targetKeyExtra:
-      "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element.",
-    fillModeExtra:
-      "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.",
-    easingExtra: 'CSS easing string, or named easing from `@wix/motion`.',
-    alternateBoolExtra: "Different from `triggerType: 'alternate'` which alternates per click.",
+    vars: {
+      SOURCE_KEY: 'The element that listens for clicks.',
+      TARGET_KEY:
+        "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element.",
+      FILL_MODE:
+        "optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.",
+      EASING_FUNCTION: 'CSS easing string, or named easing from `@wix/motion`.',
+      ALTERNATE_BOOL: "Different from `triggerType: 'alternate'` which alternates per click.",
+    },
     fillCritical:
       "Always include `fill: 'both'` for `triggerType: 'alternate'` or `'repeat'` — keeps the effect applied while finished and prevents garbage-collection, allowing efficient toggling. For `triggerType: 'once'` use `fill: 'backwards'`.",
     customEffectExamples: ', randomized behavior',
@@ -35,17 +37,18 @@ const OVERRIDES = {
 };
 
 function buildVariables(trigger, vo, hasReversed, hasEffectId) {
+  const v = vo.vars;
   const lines = [
-    varLine('SOURCE_KEY', vo.sourceKeyExtra),
-    varLine('TARGET_KEY', vo.targetKeyExtra),
+    varLine('SOURCE_KEY', v.SOURCE_KEY),
+    varLine('TARGET_KEY', v.TARGET_KEY),
     `- \`[TRIGGER_TYPE]\` — \`triggerType\` on the effect. One of:`,
     ...Object.entries(trigger.triggerTypeDescriptions).map(
-      ([k, v]) => `  - \`'${k}'\` — ${v.full}`,
+      ([k, d]) => `  - \`'${k}'\` — ${d.full}`,
     ),
     varLine('KEYFRAMES'),
     varLine('EFFECT_NAME'),
     varLine('NAMED_EFFECT_DEFINITION'),
-    varLine('FILL_MODE', vo.fillModeExtra),
+    varLine('FILL_MODE', v.FILL_MODE),
   ];
   if (hasReversed) {
     lines.push(
@@ -54,10 +57,10 @@ function buildVariables(trigger, vo, hasReversed, hasEffectId) {
   }
   lines.push(
     varLine('DURATION_MS'),
-    varLine('EASING_FUNCTION', vo.easingExtra),
+    varLine('EASING_FUNCTION', v.EASING_FUNCTION),
     varLine('DELAY_MS'),
-    varLine('ITERATIONS', vo.iterationsExtra),
-    varLine('ALTERNATE_BOOL', vo.alternateBoolExtra),
+    varLine('ITERATIONS', v.ITERATIONS),
+    varLine('ALTERNATE_BOOL', v.ALTERNATE_BOOL),
   );
   if (hasEffectId) {
     lines.push(varLine('UNIQUE_EFFECT_ID'));

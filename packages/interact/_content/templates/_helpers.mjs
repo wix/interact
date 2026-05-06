@@ -9,7 +9,7 @@ export function capitalize(s) {
 export function buildPitfallsBlock(trigger, fragments) {
   if (!trigger.pitfalls?.length) return '';
   return trigger.pitfalls
-    .map((p) => fragments.get(`pitfalls/${p.id}`, p.section || trigger.name))
+    .map((p) => fragments.get(`pitfalls/${p.id}`, p.sections?.trigger || trigger.name))
     .join('\n');
 }
 

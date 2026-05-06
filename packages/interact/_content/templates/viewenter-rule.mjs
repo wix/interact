@@ -41,7 +41,7 @@ If only one of these is present, FOUC prevention will **not** work. Both the CSS
 Call \`generate(config)\` server-side or at build time. Inject the resulting CSS into the document \`<head>\` (or in \`<body>\` before your content) so it loads before the page content is painted:
 
 \`\`\`typescript
-import { generate } from '@wix/interact';
+import { generate } from '${data.meta.packageName}';
 
 const config: InteractConfig = {
   interactions: [
