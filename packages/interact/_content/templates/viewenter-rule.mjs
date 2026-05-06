@@ -91,7 +91,7 @@ ${fragments.get('fouc', 'code-vanilla', { key: '[SOURCE_KEY]', classAttr: '' })}
 
 Use \`keyframeEffect\` or \`namedEffect\` when the viewEnter should play an animation (CSS or WAAPI). Set \`triggerType\` on each effect to control playback behavior. Use \`params\` only for observer configuration (\`threshold\`, \`inset\`).
 
-${fragments.get('multiple-effects-note', 'default', { triggerName: 'viewEnter', triggerEvent: 'viewport entry event', triggerContext: ' when the element enters the viewport', extraNote: ' Each effect can have its own `triggerType`.' })}
+${fragments.get('multiple-effects-note', { triggerName: 'viewEnter', triggerEvent: 'viewport entry event', triggerContext: ' when the element enters the viewport', extraNote: ' Each effect can have its own `triggerType`.' })}
 
 \`\`\`typescript
 {

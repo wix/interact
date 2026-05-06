@@ -153,7 +153,14 @@ class Fragments {
     return sections;
   }
 
-  get(path, section = 'default', params = {}) {
+  get(path, sectionOrParams = 'default', params = {}) {
+    let section;
+    if (typeof sectionOrParams === 'object') {
+      section = 'default';
+      params = sectionOrParams;
+    } else {
+      section = sectionOrParams;
+    }
     const sectionMap = this.store.get(path);
     if (!sectionMap) {
       throw new Error(`Fragment not found: ${path}`);

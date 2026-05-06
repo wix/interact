@@ -1,7 +1,15 @@
 import { capitalize, buildPitfallsBlock, varLine } from './_helpers.mjs';
 
+const VARIABLE_OVERRIDES_BASE = {
+  customEffectExamples: '',
+  offsetEasingSuffix: '',
+  alternateBoolSuffix: undefined,
+  iterationsDesc: undefined,
+};
+
 const VARIABLE_OVERRIDES = {
   hover: {
+    ...VARIABLE_OVERRIDES_BASE,
     sourceKeySuffix: 'The element that listens for hover.',
     targetKeyDesc:
       "identifier matching the element's key on the element that animates. Use a different key from `[SOURCE_KEY]` when source and target must be separated (see hit-area shift above).",
@@ -16,6 +24,7 @@ const VARIABLE_OVERRIDES = {
     offsetEasingSuffix: ' CSS easing string, or named easing from `@wix/motion`.',
   },
   click: {
+    ...VARIABLE_OVERRIDES_BASE,
     sourceKeySuffix: 'The element that listens for clicks.',
     targetKeyDesc:
       "identifier matching the element's key on the element that animates. If missing it defaults to `[SOURCE_KEY]` for targeting the source element.",
@@ -45,7 +54,7 @@ export function render(data, fragments) {
   const pitfallsBlock = buildPitfallsBlock(trigger, fragments, { wrapped: true });
 
   const multipleEffectsNote = trigger.showMultipleEffectsNote
-    ? `\n${fragments.get('multiple-effects-note', 'default', { triggerName: name, triggerEvent: `${name} event`, triggerContext: '', extraNote: '' })}\n`
+    ? `\n${fragments.get('multiple-effects-note', { triggerName: name, triggerEvent: `${name} event`, triggerContext: '', extraNote: '' })}\n`
     : '';
 
   return `# ${Name} Trigger Rules for ${data.meta.packageName}

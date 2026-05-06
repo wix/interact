@@ -94,11 +94,17 @@ const COMMON_VARS = {
  * Returns a formatted variable description line.
  * For 'suffix' mode vars, `extra` is appended after the base description.
  * For 'override' mode vars, `extra` replaces the base description.
- * For vars with no mode, `extra` is ignored.
+ * Throws if `extra` is passed to a variable with no mode (would be silently ignored).
  */
 export function varLine(name, extra) {
   const v = COMMON_VARS[name];
   if (!v) throw new Error(`Unknown common variable: ${name}`);
+  if (extra && !v.mode) {
+    throw new Error(
+      `varLine('${name}'): extra argument passed but this variable has no mode (suffix/override). ` +
+        `Either add a mode to COMMON_VARS['${name}'] or remove the extra argument.`,
+    );
+  }
   let desc = v.base;
   if (extra && v.mode) {
     desc = v.mode === 'suffix' ? `${v.base} ${extra}` : extra;

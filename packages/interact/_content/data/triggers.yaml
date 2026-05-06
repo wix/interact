@@ -144,6 +144,7 @@ triggers:
         section: pointermove-source
 
   - name: animationEnd
+    template: null
     defaultTriggerType: null
     params:
       - name: effectId
@@ -152,6 +153,7 @@ triggers:
         description: 'ID of the preceding effect'
 
   - name: pageVisible
+    template: null
     defaultTriggerType: null
     params: []
     pitfalls: []
