@@ -7,14 +7,14 @@ const FULL_LEAN_PITFALL_ORDER = [
   { id: 'hit-area', section: 'detailed-pointermove' },
 ];
 
-function buildBehaviorTable(headerLabel, behaviorKey, hover, click) {
+function buildBehaviorTable(headerLabel, behaviorKey, hover, click, { defaultKey } = {}) {
   const hoverDescs = hover[behaviorKey];
   const clickDescs = click[behaviorKey];
   const keys = Object.keys(hoverDescs);
-  const defaultKey = keys[0];
 
   const rows = keys.map((k) => {
-    const label = k === defaultKey ? `\`'${k}'\` (default)` : `\`'${k}'\``;
+    const isDefault = defaultKey ? k === defaultKey : false;
+    const label = isDefault ? `\`'${k}'\` (default)` : `\`'${k}'\``;
     return [label, hoverDescs[k].short, clickDescs[k].short];
   });
 
@@ -27,6 +27,11 @@ function buildFullLeanPitfalls(pitfallOrder, fragments) {
 
 /**
  * Renders full-lean.md — the comprehensive reference for all triggers, effects, and API surface.
+ *
+ * Large static prose sections (Element Binding, Interactions, Effects, FOUC Prevention) are kept
+ * inline rather than extracted to fragments. They have exactly one consumer and change together
+ * with the surrounding template logic — extracting them would add indirection without deduplication.
+ *
  * @param {{ triggers: object[], effects: object, meta: object }} data — no `trigger`; receives the full data object
  * @param {import('../../scripts/build-rules.mjs').Fragments} fragments
  */
@@ -231,11 +236,11 @@ For \`TimeEffect\` (keyframe/named/custom effects), set \`triggerType\` on the e
 
 **\`triggerType\`** — on \`TimeEffect\`:
 
-${buildBehaviorTable('Type', 'triggerTypeDescriptions', hover, click)}
+${buildBehaviorTable('Type', 'triggerTypeDescriptions', hover, click, { defaultKey: hover.defaultTriggerType })}
 
 **\`stateAction\`** — on \`StateEffect\`:
 
-${buildBehaviorTable('Action', 'stateActionDescriptions', hover, click)}
+${buildBehaviorTable('Action', 'stateActionDescriptions', hover, click, { defaultKey: 'toggle' })}
 
 ### viewEnter
 

@@ -57,6 +57,32 @@ for (const trigger of data.triggers) {
       );
     }
   }
+
+  if (trigger.pitfalls) {
+    for (const p of trigger.pitfalls) {
+      if (!p.id) {
+        throw new Error(`triggers.yaml: trigger "${trigger.name}" has a pitfall entry missing "id"`);
+      }
+    }
+  }
+
+  if (trigger.params) {
+    for (const p of trigger.params) {
+      if (!p.name) {
+        throw new Error(`triggers.yaml: trigger "${trigger.name}" has a param entry missing "name"`);
+      }
+    }
+  }
+
+  if (trigger.triggerTypeDescriptions) {
+    for (const [key, val] of Object.entries(trigger.triggerTypeDescriptions)) {
+      if (typeof val !== 'object' || !val.full) {
+        throw new Error(
+          `triggers.yaml: trigger "${trigger.name}".triggerTypeDescriptions.${key} must be an object with a "full" key`,
+        );
+      }
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -73,7 +99,7 @@ class Fragments {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       if (entry.isDirectory()) {
         this._loadDir(join(dir, entry.name), prefix ? `${prefix}/${entry.name}` : entry.name);
-      } else if (entry.name.endsWith('.md')) {
+      } else if (entry.name.endsWith('.md') && entry.name !== 'README.md') {
         const key = prefix
           ? `${prefix}/${basename(entry.name, '.md')}`
           : basename(entry.name, '.md');
@@ -186,7 +212,9 @@ for (const { file, content } of outputs) {
     let existing = '';
     try {
       existing = readFileSync(outPath, 'utf8');
-    } catch {}
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err;
+    }
     if (existing !== content) {
       console.error(`  ✗ ${relative(PKG_ROOT, outPath)} is stale`);
       stale++;

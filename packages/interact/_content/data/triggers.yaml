@@ -102,10 +102,18 @@ triggers:
         section: short
     showMultipleEffectsNote: true
     triggerTypeDescriptions:
-      once: 'plays once when the source element first enters the viewport and never again. Source and target may be the same element.'
-      repeat: 'restarts the animation every time the source element enters the viewport. Use separate source and target.'
-      alternate: 'plays forward when the source element enters the viewport, reverses when it leaves. Use separate source and target.'
-      state: 'resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`). Use separate source and target.'
+      once:
+        full: 'plays once when the source element first enters the viewport and never again. Source and target may be the same element.'
+        short: 'Play once on first enter only'
+      repeat:
+        full: 'restarts the animation every time the source element enters the viewport. Use separate source and target.'
+        short: 'Restart on each viewport enter'
+      alternate:
+        full: 'plays forward when the source element enters the viewport, reverses when it leaves. Use separate source and target.'
+        short: 'Play on enter, reverse on leave'
+      state:
+        full: 'resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`). Use separate source and target.'
+        short: 'Play on enter, pause on leave'
 
   - name: viewProgress
     template: viewprogress-rule.mjs

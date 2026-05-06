@@ -200,6 +200,36 @@ todos:
   - id: refactor8-regenerate
     content: 'Regenerate rules/*.md — all 7 files byte-identical to pre-refactor output. Zero content drift.'
     status: completed
+  - id: review2-missing-files
+    content: 'Add missing progress-type.md and README.md fragments to git — build fails without progress-type.md (referenced by pointermove-rule.mjs and full-lean.mjs)'
+    status: completed
+  - id: review2-schema-consistency
+    content: 'Make viewEnter triggerTypeDescriptions use { full, short } objects matching hover/click — uniform schema prevents runtime errors when new templates read .full'
+    status: completed
+  - id: review2-default-key
+    content: 'Fix buildBehaviorTable to accept explicit defaultKey parameter instead of relying on YAML key insertion order — pass defaultTriggerType for triggerType table, hardcode toggle for stateAction table'
+    status: completed
+  - id: review2-multiple-effects
+    content: 'Consolidate multiple-effects-note.md #viewEnter section into #default via {{triggerContext}} and {{extraNote}} params — reduces from 4 to 3 sections'
+    status: completed
+  - id: review2-full-lean-comment
+    content: 'Add JSDoc comment to full-lean.mjs explaining why static prose sections are kept inline rather than extracted to fragments (single consumer, no deduplication benefit)'
+    status: completed
+  - id: review2-deeper-validation
+    content: 'Add deeper YAML schema validation in build-rules.mjs: check pitfalls[].id exists, params[].name exists, triggerTypeDescriptions values are { full } objects'
+    status: completed
+  - id: review2-variable-overrides
+    content: 'Simplify VARIABLE_OVERRIDES in event-trigger-rule.mjs with shared VARIABLE_OVERRIDES_BASE — per-trigger objects only override what differs'
+    status: completed
+  - id: review2-empty-catch
+    content: 'Fix empty catch block in build-rules.mjs --check mode to only catch ENOENT, rethrow unexpected errors'
+    status: completed
+  - id: review2-readme-filter
+    content: 'Filter README.md from fragment loader to prevent accidental inclusion as fragment data'
+    status: completed
+  - id: review2-regenerate
+    content: 'Regenerate rules/*.md — all 7 files byte-identical to pre-refactor output. Zero content drift.'
+    status: completed
 isProject: false
 ---
 
@@ -944,6 +974,70 @@ Fragment sections used several different naming conventions with no documentatio
 **Action:** Inlined the 8 single-consumer sections (`#short`, `#long`, `#code-generate-viewenter`, `#code-generate-web`, `#rules-viewenter`, `#rules-brief`, `#rules-detailed`, `#intro-brief`) into their respective templates. `fouc.md` reduced from 12 to 4 genuinely shared sections (`#code-inject`, `#code-web`, `#code-react`, `#code-vanilla`).
 
 ### Fix 53: Regenerate output (round 8)
+
+Ran `build:rules`. All 7 rule files are byte-identical to pre-refactor output. Zero content drift.
+
+---
+
+## Post-PR Fixes — Round 9 (review hardening)
+
+Fixes from a structural review addressing a build-breaking bug, schema inconsistencies, fragile assumptions, and missing safety checks.
+
+### Fix 54: Add missing fragment files
+
+`progress-type.md` and `README.md` were created locally but never committed to the branch. `progress-type.md` is referenced by `pointermove-rule.mjs` and `full-lean.mjs` — the build throws `Fragment not found: progress-type` without it.
+
+**Action:** Staged both files via `git add`.
+
+### Fix 55: Uniform `triggerTypeDescriptions` schema
+
+viewEnter's `triggerTypeDescriptions` used flat strings while hover/click used `{ full, short }` objects. A new template reading `.full` on a viewEnter description would crash at runtime.
+
+**Action:** Changed viewEnter to `{ full, short }` objects. Updated `viewenter-rule.mjs` to read `.full`. Added schema validation in `build-rules.mjs` that enforces all `triggerTypeDescriptions` values must be objects with a `full` key.
+
+### Fix 56: Fix `buildBehaviorTable` default key derivation
+
+`buildBehaviorTable` assumed the first YAML key was the default (`const defaultKey = keys[0]`). Reordering keys in `triggers.yaml` would move the "(default)" annotation to the wrong row.
+
+**Action:** Added explicit `{ defaultKey }` option parameter. Callers pass `hover.defaultTriggerType` for the triggerType table and `'toggle'` for the stateAction table. No key-order dependency.
+
+### Fix 57: Consolidate `multiple-effects-note.md` sections
+
+The `#viewEnter` section was nearly identical to `#default` — only adding "when the element enters the viewport" and "Each effect can have its own `triggerType`." The `#viewProgress` and `#pointerMove` sections have meaningfully different sentence structures and remain separate.
+
+**Action:** Removed `#viewEnter` section. Added `{{triggerContext}}` and `{{extraNote}}` params to `#default`. Updated callers: event triggers pass empty strings, viewEnter passes context and note. Fragment reduced from 4 to 3 sections.
+
+### Fix 58: Document static prose design choice in `full-lean.mjs`
+
+`full-lean.mjs` is 524 lines with ~400 lines of static prose. Without context, this looks like content that should be extracted to fragments.
+
+**Action:** Added JSDoc explaining that single-consumer static sections are intentionally kept inline — they change together with surrounding template logic and extraction would add indirection without deduplication.
+
+### Fix 59: Deeper YAML schema validation
+
+Schema validation only checked top-level field existence. Missing `pitfalls[].id`, `params[].name`, or flat-string `triggerTypeDescriptions` values would pass validation but fail at render time.
+
+**Action:** Added checks for `pitfalls[].id`, `params[].name`, and `triggerTypeDescriptions` value shape (`typeof === 'object'` with `full` key).
+
+### Fix 60: Simplify `VARIABLE_OVERRIDES` with shared base
+
+The hover and click override objects had 9 fields each, most sharing the same value. Shared defaults were duplicated.
+
+**Action:** Extracted `VARIABLE_OVERRIDES_BASE` with common defaults. Per-trigger objects spread the base and only override what differs.
+
+### Fix 61: Fix empty catch block
+
+`build-rules.mjs` `--check` mode used `catch {}` when reading existing files. This silently swallowed all errors, not just missing files.
+
+**Action:** Changed to `catch (err) { if (err.code !== 'ENOENT') throw err; }`.
+
+### Fix 62: Filter `README.md` from fragment loader
+
+The recursive fragment loader picked up every `.md` file in the fragments directory, including `README.md`. This loaded documentation as fragment data under the key `"README"` — harmless but unintentional.
+
+**Action:** Added `entry.name !== 'README.md'` filter to `_loadDir`.
+
+### Fix 63: Regenerate output (round 9)
 
 Ran `build:rules`. All 7 rule files are byte-identical to pre-refactor output. Zero content drift.
 
