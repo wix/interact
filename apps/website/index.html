@@ -27,13 +27,13 @@
     </style>
 
     <!-- Design tokens + base type (see variables.css / theme.css) -->
-    <link rel="stylesheet" href="assets/css/variables.css">
-    <link rel="stylesheet" href="assets/css/theme.css">
-    <link rel="stylesheet" href="assets/css/reset.css">
-    <link rel="stylesheet" href="assets/css/utilities.css">
-    <link rel="stylesheet" href="assets/css/nav.css">
-    <link rel="stylesheet" href="assets/css/footer.css">
-    <link rel="stylesheet" href="assets/css/landing.css">
+    <link rel="stylesheet" href="./assets/css/variables.css">
+    <link rel="stylesheet" href="./assets/css/theme.css">
+    <link rel="stylesheet" href="./assets/css/reset.css">
+    <link rel="stylesheet" href="./assets/css/utilities.css">
+    <link rel="stylesheet" href="./assets/css/nav.css">
+    <link rel="stylesheet" href="./assets/css/footer.css">
+    <link rel="stylesheet" href="./assets/css/landing.css">
     <!-- Code highlighting (highlight.js) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
 </head>
@@ -42,15 +42,15 @@
 
     <nav class="site-nav">
         <interact-element data-interact-key="nav-logo" data-interact-initial="true">
-            <a href="/" class="nav-logo">● Interact</a>
+            <a href="./" class="nav-logo">● Interact</a>
         </interact-element>
         <div class="nav-actions">
             <div class="nav-links">
-                <a href="#" class="nav-link">Docs</a>
-                <a href="/examples.html" class="nav-link">Examples</a>
+                <a href="./docs/" class="nav-link">Docs</a>
+                <a href="./examples.html" class="nav-link">Examples</a>
             </div>
             <interact-element data-interact-key="nav-cta" data-interact-initial="true">
-                <a href="https://github.com/wix-incubator/interact" target="_blank" rel="noopener noreferrer" class="nav-cta">Go to Repository ↗</a>
+                <a href="https://github.com/wix/interact" target="_blank" rel="noopener noreferrer" class="nav-cta">Go to Repository ↗</a>
             </interact-element>
         </div>
     </nav>
@@ -723,7 +723,7 @@ Interact comes with a rich and diverse set of named effects, each designed to br
         <interact-element data-interact-key="footer-link" data-interact-initial="true">
             <div class="footer-links">
                 <a href="https://www.npmjs.com/package/@wix/interact" target="_blank" rel="noopener noreferrer" class="footer-link">NPM</a>
-                <a href="https://github.com/wix-incubator/interact" target="_blank" rel="noopener noreferrer" class="footer-link">Github</a>
+                <a href="https://github.com/wix/interact" target="_blank" rel="noopener noreferrer" class="footer-link">Github</a>
             </div>
         </interact-element>
     </footer>
@@ -748,8 +748,8 @@ Interact comes with a rich and diverse set of named effects, each designed to br
 
     <!-- External JavaScript Files -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="assets/modal.js"></script>
-    <script src="assets/snippets.js"></script>
+    <script src="./assets/modal.js"></script>
+    <script src="./assets/snippets.js"></script>
     <script type="importmap">
     {
         "imports": {
@@ -757,6 +757,6 @@ Interact comes with a rich and diverse set of named effects, each designed to br
         }
     }
     </script>
-    <script type="module" src="assets/main.mjs"></script>
+    <script type="module" src="./assets/main.mjs"></script>
 </body>
 </html>
