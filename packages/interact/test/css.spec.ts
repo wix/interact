@@ -657,6 +657,35 @@ describe('css._generate', () => {
       expect(cssRules.every((r) => !r.addInitialSelector)).toBe(true);
     });
 
+    it('should emit auto duration in animation shorthand for viewProgress (SSR-safe)', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            effects: [
+              {
+                effectId: 'scroll1',
+                keyframeEffect: {
+                  name: 'parallax',
+                  keyframes: [
+                    { transform: 'translateY(50px)' },
+                    { transform: 'translateY(-50px)' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = generate(config);
+
+      expect(result).toContain('parallax auto');
+      expect(result).not.toContain('99.99ms');
+    });
+
     it('should include timeline and range in coordinated list when viewProgress and click target same element', () => {
       const config: InteractConfig = {
         effects: {},

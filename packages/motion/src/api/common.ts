@@ -89,6 +89,7 @@ function getEffectsData(
   animations: AnimationData[],
   trigger?: Partial<TriggerVariant>,
   effectId?: string,
+  forCSS?: boolean,
 ) {
   // process each AnimationData object into a KeyframeEffect object
   return animations.map((effect, index) => {
@@ -106,9 +107,9 @@ function getEffectsData(
       effectOptions.duration = effect.duration as number;
       effectOptions.delay = (effect as TimeAnimationOptions).delay || 0;
     } else {
-      // if ViewTimeline is supported AND this is a view-progress trigger
-      if (window.ViewTimeline && trigger?.trigger === 'view-progress') {
-        // set duration to 'auto'
+      // forCSS bypasses the runtime ViewTimeline check so that SSR / CSS generation
+      // always emits `duration: auto` for scroll-driven animations.
+      if (trigger?.trigger === 'view-progress' && (forCSS || window.ViewTimeline)) {
         effectOptions.duration = 'auto';
       } else {
         // if ViewTimeline not supported then put a 100ms value in duration get a progress we can easily relate to
