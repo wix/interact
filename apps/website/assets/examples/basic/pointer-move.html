@@ -6,7 +6,7 @@
     <script type="importmap">
       {
         "imports": {
-          "@wix/motion": "/assets/lib/motion/motion.js"
+          "@wix/motion": "../../lib/motion/motion.js"
         }
       }
     </script>
@@ -140,8 +140,8 @@
     </div>
 
     <script type="module">
-      import { Interact } from '/assets/lib/interact/es/web.js';
-      import * as presets from '/assets/lib/motion-presets/motion-presets.js';
+      import { Interact } from '../../lib/interact/es/web.js';
+      import * as presets from '../../lib/motion-presets/motion-presets.js';
       Interact.registerEffects(presets);
 
       Interact.create({
