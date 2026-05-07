@@ -64,19 +64,21 @@ jobs:
       - name: Prepare deployment directory
         run: |
           # Create the site structure:
-          # /               -> root index.html and assets
-          # /docs/          -> docs app
+          # /              -> landing page, examples page
+          # /assets/       -> landing + examples assets (includes lib/ from build-landing.sh)
+          # /docs/         -> docs app
           # /playground/    -> playground app
-          # /rules/         -> rules markdown files
+          # /rules/        -> rules markdown files
 
           mkdir -p _site/docs
           mkdir -p _site/playground
           mkdir -p _site/rules
           mkdir -p _site/assets
 
-          # Copy root landing page and assets (includes assets/lib/ from build-landing.sh)
-          cp index.html _site/
-          cp -r assets/* _site/assets/
+          # Copy website app (landing page, examples page, assets)
+          cp apps/website/index.html _site/
+          cp apps/website/examples.html _site/
+          cp -r apps/website/assets/* _site/assets/
 
           # Copy docs app
           cp -r apps/docs/dist/* _site/docs/
