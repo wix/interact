@@ -65,7 +65,7 @@ jobs:
         run: |
           # Create the site structure:
           # /              -> landing page, examples page
-          # /assets/       -> landing + examples assets (includes shared/, lib/ from build-landing.sh)
+          # /assets/       -> landing + examples assets (includes lib/ from build-landing.sh)
           # /docs/         -> docs app
           # /playground/    -> playground app
           # /rules/        -> rules markdown files
@@ -75,7 +75,7 @@ jobs:
           mkdir -p _site/rules
           mkdir -p _site/assets
 
-          # Copy website app (landing page, examples page, assets including shared/)
+          # Copy website app (landing page, examples page, assets)
           cp apps/website/index.html _site/
           cp apps/website/examples.html _site/
           cp -r apps/website/assets/* _site/assets/

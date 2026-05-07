@@ -41,9 +41,6 @@ apps/website/
   AGENTS.md                   Agent notes (this file)
   CLAUDE.md                   Symlink to AGENTS.md (for Claude / tooling)
   assets/
-    shared/                   Cross-page scripts (served as /assets/shared/…)
-      nav.js
-      footer.js
     lib/                      Generated — interact, motion, motion-presets ESM (gitignored except .gitkeep)
       .gitkeep
     main.mjs                  Landing page animation configs and JS
@@ -85,7 +82,7 @@ The `interactdocs.yml` workflow:
 3. Builds the playground app (`apps/playground`)
 4. Assembles `_site/`:
    - `/` — `index.html` and `examples.html`
-   - `/assets/` — all website assets under `apps/website/assets/` (including `shared/`, `lib/`, examples, etc.)
+   - `/assets/` — all website assets under `apps/website/assets/` (including `lib/`, examples, etc.)
    - `/docs/` — docs app
    - `/playground/` — playground app
    - `/rules/` — interact rules markdown
@@ -136,8 +133,7 @@ Refresh the page. The example appears as a live interactive iframe in the grid.
 | `assets/js/app.js`                     | Examples page entry (module)                                    |
 | `examples.html`                        | Examples shell, import map for `@wix/motion`, entrance Interact |
 | `assets/main.mjs`                      | Landing page animation config and interactive demos             |
-| `assets/shared/nav.js`                 | Shared navigation (injected into `#shared-nav`)                 |
-| `assets/shared/footer.js`              | Shared footer (injected into `#shared-footer`)                  |
+| `index.html`, `examples.html`          | Site nav and footer markup (inline, no shared inject scripts)   |
 | `scripts/build-landing.sh` (repo root) | Populates `assets/lib/` from package builds                     |
 
 ## Grid layouts (examples page)

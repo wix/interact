@@ -40,9 +40,20 @@
 
 <body>
 
-    <!-- Navigation (shared) -->
-    <div id="shared-nav" data-interact></div>
-    <script src="/assets/shared/nav.js"></script>
+    <nav class="site-nav">
+        <interact-element data-interact-key="nav-logo" data-interact-initial="true">
+            <a href="/" class="nav-logo">● Interact</a>
+        </interact-element>
+        <div class="nav-actions">
+            <div class="nav-links">
+                <a href="#" class="nav-link">Docs</a>
+                <a href="/examples.html" class="nav-link">Examples</a>
+            </div>
+            <interact-element data-interact-key="nav-cta" data-interact-initial="true">
+                <a href="https://github.com/wix-incubator/interact" target="_blank" rel="noopener noreferrer" class="nav-cta">Go to Repository ↗</a>
+            </interact-element>
+        </div>
+    </nav>
 
     <main>
     <!-- HERO SECTION -->
@@ -702,9 +713,20 @@ Interact comes with a rich and diverse set of named effects, each designed to br
         </interact-element>
     </div>
 
-    <!-- Footer (shared) -->
-    <div id="shared-footer" data-interact></div>
-    <script src="/assets/shared/footer.js"></script>
+    <footer class="site-footer">
+        <interact-element data-interact-key="footer-brand" data-interact-initial="true">
+            <div class="footer-brand">
+                <h2>● Interact</h2>
+                <p>© 2026</p>
+            </div>
+        </interact-element>
+        <interact-element data-interact-key="footer-link" data-interact-initial="true">
+            <div class="footer-links">
+                <a href="https://www.npmjs.com/package/@wix/interact" target="_blank" rel="noopener noreferrer" class="footer-link">NPM</a>
+                <a href="https://github.com/wix-incubator/interact" target="_blank" rel="noopener noreferrer" class="footer-link">Github</a>
+            </div>
+        </interact-element>
+    </footer>
     </main>
 
     <!-- LIGHTBOX MODAL -->

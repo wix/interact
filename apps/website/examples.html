@@ -41,9 +41,22 @@
     </style>
   </head>
   <body>
-    <!-- Navigation (shared) -->
-    <div id="shared-nav"></div>
-    <script src="/assets/shared/nav.js"></script>
+    <nav class="site-nav">
+      <a href="/" class="nav-logo">● Interact</a>
+      <div class="nav-actions">
+        <div class="nav-links">
+          <a href="#" class="nav-link">Docs</a>
+          <a href="/examples.html" class="nav-link is-active">Examples</a>
+        </div>
+        <a
+          href="https://github.com/wix-incubator/interact"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="nav-cta"
+          >Go to Repository ↗</a
+        >
+      </div>
+    </nav>
 
     <!-- Main Layout -->
     <div class="main-layout">
@@ -72,9 +85,28 @@
       </interact-element>
     </div>
 
-    <!-- Footer (shared) -->
-    <div id="shared-footer"></div>
-    <script src="/assets/shared/footer.js"></script>
+    <footer class="site-footer">
+      <div class="footer-brand">
+        <h2>● Interact</h2>
+        <p>© 2026</p>
+      </div>
+      <div class="footer-links">
+        <a
+          href="https://www.npmjs.com/package/@wix/interact"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-link"
+          >NPM</a
+        >
+        <a
+          href="https://github.com/wix-incubator/interact"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-link"
+          >Github</a
+        >
+      </div>
+    </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/xml/xml.min.js"></script>
