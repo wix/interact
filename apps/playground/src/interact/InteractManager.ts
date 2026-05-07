@@ -8,7 +8,7 @@ interface IInteractElement extends HTMLElement {
   connect(): void;
 }
 
-const GENERATED_STYLE_ID = 'interact-generated';
+let generatedSheet: CSSStyleSheet | null = null;
 
 let presetsRegistered = false;
 
@@ -62,16 +62,28 @@ function cancelStaleAnimations(): void {
 }
 
 function removeGeneratedCSS(): void {
-  stageElement?.shadowRoot?.getElementById(GENERATED_STYLE_ID)?.remove();
+  const root = stageElement?.shadowRoot;
+  if (!root || !generatedSheet) return;
+  root.adoptedStyleSheets = root.adoptedStyleSheets.filter((s) => s !== generatedSheet);
+  generatedSheet = null;
 }
 
 function injectGeneratedCSS(css: string): void {
-  removeGeneratedCSS();
-  if (!css || !stageElement?.shadowRoot) return;
-  const style = document.createElement('style');
-  style.id = GENERATED_STYLE_ID;
-  style.textContent = css;
-  stageElement.shadowRoot.prepend(style);
+  const root = stageElement?.shadowRoot;
+  if (!root) return;
+
+  if (!css) {
+    removeGeneratedCSS();
+    return;
+  }
+
+  if (generatedSheet) {
+    generatedSheet.replaceSync(css);
+  } else {
+    generatedSheet = new CSSStyleSheet();
+    generatedSheet.replaceSync(css);
+    root.adoptedStyleSheets = [generatedSheet, ...root.adoptedStyleSheets];
+  }
 }
 
 function apply(config: InteractConfig): void {
