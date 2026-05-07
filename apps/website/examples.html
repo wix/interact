@@ -42,14 +42,14 @@
   </head>
   <body>
     <nav class="site-nav">
-      <a href="/" class="nav-logo">● Interact</a>
+      <a href="./" class="nav-logo">● Interact</a>
       <div class="nav-actions">
         <div class="nav-links">
-          <a href="#" class="nav-link">Docs</a>
-          <a href="/examples.html" class="nav-link is-active">Examples</a>
+          <a href="./docs/" class="nav-link">Docs</a>
+          <a href="./examples.html" class="nav-link is-active">Examples</a>
         </div>
         <a
-          href="https://github.com/wix-incubator/interact"
+          href="https://github.com/wix/interact"
           target="_blank"
           rel="noopener noreferrer"
           class="nav-cta"
@@ -99,7 +99,7 @@
           >NPM</a
         >
         <a
-          href="https://github.com/wix-incubator/interact"
+          href="https://github.com/wix/interact"
           target="_blank"
           rel="noopener noreferrer"
           class="footer-link"
@@ -117,8 +117,8 @@
 
     <!-- Interact entrance animation -->
     <script type="module">
-      import { Interact } from '/assets/lib/interact/es/web.js';
-      import * as presets from '/assets/lib/motion-presets/motion-presets.js';
+      import { Interact } from './assets/lib/interact/es/web.js';
+      import * as presets from './assets/lib/motion-presets/motion-presets.js';
 
       Interact.registerEffects(presets);
 
@@ -173,6 +173,6 @@
         }
       }
     </script>
-    <script type="module" src="assets/js/app.js"></script>
+    <script type="module" src="./assets/js/app.js"></script>
   </body>
 </html>

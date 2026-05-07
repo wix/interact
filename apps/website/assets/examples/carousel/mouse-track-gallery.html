@@ -125,7 +125,7 @@
     </div>
 
     <script type="module">
-      import { Interact } from '/assets/lib/interact/es/web.js';
+      import { Interact } from '../../lib/interact/es/web.js';
 
       const container = document.getElementById('gallery-content');
       const totalItems = 40;
@@ -299,7 +299,7 @@
         const baseX = col * layout.colPitch;
         const baseY = row * layout.rowPitch;
 
-        const imageUrl = `/assets/img/${GALLERY_IMAGE_FILES[i % GALLERY_IMAGE_FILES.length]}`;
+        const imageUrl = `../../img/${GALLERY_IMAGE_FILES[i % GALLERY_IMAGE_FILES.length]}`;
         const title = imageTitles[i % imageTitles.length];
 
         const div = document.createElement('div');
