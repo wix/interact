@@ -232,10 +232,10 @@ describe('CSSRuleToString', () => {
   it('should apply selectorCondition', () => {
     const rule: CSSRuleData = {
       key: 'my-el',
-      selectorCondition: ':where(.visible)',
+      selectorCondition: ':is(.visible)',
       declarations: [{ name: 'opacity', value: '1' }],
     };
-    const expected = '[data-interact-key="my-el"]:where(.visible) {\nopacity: 1;\n}';
+    const expected = '[data-interact-key="my-el"]:is(.visible) {\nopacity: 1;\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
@@ -343,7 +343,7 @@ describe('buildListsRule', () => {
       visible: { type: 'selector' as const, predicate: '.is-visible' },
     };
     const rule = buildListsRule(baseLists, undefined, conditions, configConditions);
-    expect(rule.selectorCondition).toBe(':where(.is-visible)');
+    expect(rule.selectorCondition).toBe(':is(.is-visible)');
     expect(rule.media).toBeFalsy();
   });
 

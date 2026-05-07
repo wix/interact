@@ -688,7 +688,7 @@ describe('interact sequences', () => {
       const interactionCall = clickAddSpy.mock.calls.find((call) => call[4]?.animation);
       expect(interactionCall?.[4]).toEqual(
         expect.objectContaining({
-          selectorCondition: ':where(.is-active &)',
+          selectorCondition: ':is(.is-active &)',
         }),
       );
     });

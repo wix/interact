@@ -186,7 +186,7 @@ export function getSelectorCondition(
       return conditions[conditionName]?.type === 'selector' && conditions[conditionName].predicate;
     })
     .map((conditionName) => {
-      return `:where(${conditions[conditionName].predicate})`;
+      return `:is(${conditions[conditionName].predicate})`;
     })
     .join('');
 }
