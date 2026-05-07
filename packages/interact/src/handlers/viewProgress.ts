@@ -1,5 +1,10 @@
 import type { AnimationGroup, ScrubScrollScene } from '@wix/motion';
-import { getWebAnimation, getScrubScene } from '@wix/motion';
+import {
+  getWebAnimation,
+  getElementCSSAnimation,
+  prepareAnimation,
+  getScrubScene,
+} from '@wix/motion';
 import { Scroll } from 'fizban';
 import type { ViewEnterParams, ScrubEffect, HandlerObjectMap, InteractOptions } from '../types';
 import {
@@ -34,17 +39,31 @@ function addViewProgressHandler(
   const effectOptions = effectToAnimationOptions(effect);
   let cleanup;
   if ('ViewTimeline' in window) {
-    // Use ViewTimeline for modern browsers
-    const animationGroup = getWebAnimation(target, effectOptions, triggerParams);
+    const cssAnimation = getElementCSSAnimation(target, effectOptions);
 
-    if (animationGroup) {
-      animationGroup.play();
+    if (cssAnimation) {
+      cssAnimation.ready = new Promise((resolve) => {
+        prepareAnimation(target, effectOptions, resolve);
+      });
+      cssAnimation.play();
 
       cleanup = () => {
-        (animationGroup as AnimationGroup).ready.then(() => {
-          animationGroup.cancel();
+        cssAnimation.ready.then(() => {
+          cssAnimation.cancel();
         });
       };
+    } else {
+      const animationGroup = getWebAnimation(target, effectOptions, triggerParams);
+
+      if (animationGroup) {
+        animationGroup.play();
+
+        cleanup = () => {
+          (animationGroup as AnimationGroup).ready.then(() => {
+            animationGroup.cancel();
+          });
+        };
+      }
     }
   } else {
     const scene = getScrubScene(target, effectOptions, triggerParams);

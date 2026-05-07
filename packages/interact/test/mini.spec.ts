@@ -22,6 +22,8 @@ vi.mock('@wix/motion', () => {
       playState: 'idle',
       ready: Promise.resolve(),
     }),
+    getElementCSSAnimation: vi.fn().mockReturnValue(null),
+    prepareAnimation: vi.fn(),
     getScrubScene: vi.fn().mockReturnValue({}),
     getEasing: vi.fn().mockImplementation((v) => v),
     getAnimation: vi.fn().mockImplementation((target, options, trigger, reducedMotion) => {
