@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds all packages and copies the dist files into assets/lib/
+# Builds all packages and copies the dist files into apps/website/assets/lib/
 # so that index.html can load Interact and Presets from local bundles.
 #
 # Usage:
@@ -9,7 +9,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-LIB_DIR="$REPO_ROOT/assets/lib"
+LIB_DIR="$REPO_ROOT/apps/website/assets/lib"
 
 yarn workspaces foreach --all --topological --include 'packages/*' run build
 
@@ -24,4 +24,4 @@ cp "$REPO_ROOT/packages/interact/dist"/index-*.mjs "$LIB_DIR/interact/"
 cp "$REPO_ROOT/packages/motion-presets/dist/es/motion-presets.js" "$LIB_DIR/motion-presets/"
 cp "$REPO_ROOT/packages/motion/dist/es/motion.js" "$LIB_DIR/motion/"
 
-echo "Landing page libraries copied to assets/lib/"
+echo "Landing page libraries copied to apps/website/assets/lib/"

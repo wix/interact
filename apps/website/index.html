@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wix Interact - Animation Library</title>
+    
+    <!-- Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Helvetica for the new section -->
+    <link href="https://fonts.cdnfonts.com/css/helvetica-neue-55" rel="stylesheet">
+
+    <style>
+        /* Critical CSS for viewEnter entrance animations - prevents FOUC */
+        @media (prefers-reduced-motion: no-preference) {
+            [data-interact-initial='true'] > :first-child:not([data-interact-enter]) {
+                visibility: hidden;
+                transform: none;
+                translate: none;
+                scale: none;
+                rotate: none;
+            }
+        }
+    </style>
+
+    <!-- Design tokens + base type (see variables.css / theme.css) -->
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/reset.css">
+    <link rel="stylesheet" href="assets/css/utilities.css">
+    <link rel="stylesheet" href="assets/css/nav.css">
+    <link rel="stylesheet" href="assets/css/footer.css">
+    <link rel="stylesheet" href="assets/css/landing.css">
+    <!-- Code highlighting (highlight.js) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+</head>
+
+<body>
+
+    <nav class="site-nav">
+        <interact-element data-interact-key="nav-logo" data-interact-initial="true">
+            <a href="/" class="nav-logo">● Interact</a>
+        </interact-element>
+        <div class="nav-actions">
+            <div class="nav-links">
+                <a href="#" class="nav-link">Docs</a>
+                <a href="/examples.html" class="nav-link">Examples</a>
+            </div>
+            <interact-element data-interact-key="nav-cta" data-interact-initial="true">
+                <a href="https://github.com/wix-incubator/interact" target="_blank" rel="noopener noreferrer" class="nav-cta">Go to Repository ↗</a>
+            </interact-element>
+        </div>
+    </nav>
+
+    <main>
+    <!-- HERO SECTION -->
+    <interact-element data-interact-key="hero-section">
+        <header class="hero-header">
+            <!-- INTERACTIVE GRID BACKGROUND -->
+            <interact-element data-interact-key="hero-grid" class="cover z-0">
+                <div id="grid-container" class="hero-grid-container cover z-0">
+                    <!-- Javascript will populate this -->
+                </div>
+            </interact-element>
+            <!-- HERO CONTENT -->
+            <div class="hero-title-cluster">
+                <interact-element data-interact-key="hero-title" class="perspective-2500">
+                    <div class="inline-block">
+                        <interact-element data-interact-key="hero-line-1" data-interact-initial="true">
+                            <h1 class="text-2xl md:text-3xl lg:text-6xl font-light tracking-tighter text-white mb-2 leading-085">
+                                  Interact
+                            </h1>
+                        </interact-element>
+                        
+                        <interact-element data-interact-key="hero-line-2" data-interact-initial="true">
+                            <h1 class="text-6xl md:text-8xl lg:text-mega font-light tracking-tighter text-white leading-085">
+                                Powers the web with motion.
+                            </h1>
+                        </interact-element>
+                    </div>
+                </interact-element>
+            </div>
+
+            <div class="hero-subtitle-col">
+                <interact-element data-interact-key="hero-subtitle" data-interact-initial="true">
+                    <div class="p-4 md:p-0">
+                        <p class="text-xl md:text-3xl font-light text-stroke-black text-gray-400 leading-tight tracking-tight mb-8 ">
+Create high-performance, beautiful web animations with Interact — from simple micro-interactions to complex, scroll-driven storytelling. Designed for designers and developers alike, with a robust, production-ready API
+                        </p>
+                        
+                        <div class="row gap-4">
+                            <a href="https://github.com/wix/interact" target="_blank" rel="noopener noreferrer" class="cta-pill-solid">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" /></svg>
+                                Github
+                            </a>
+<a href="https://www.npmjs.com/package/@wix/interact" target="_blank" rel="noopener noreferrer" class="cta-pill-outline">                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M1.763 0c-.966 0-1.75.79-1.75 1.764v20.472c0 .974.784 1.764 1.75 1.764h20.474c.966 0 1.75-.79 1.75-1.764v-20.472c0-.974-.784-1.764-1.75-1.764h-20.474zm12.516 5.5h2.972v13h-2.972v-13zm-9.972 0h2.971v13h-2.971v-13zm5.003 0h2.972v13h-2.972v-13z" /></svg>
+                                NPM
+                            </a>
+                        </div>
+                    </div>
+                </interact-element>
+            </div>
+        </header>
+    </interact-element>
+
+    <!-- PERFORMANCE SECTION (UPDATED) -->
+    <interact-element data-interact-key="performance-section">
+        <!-- Decreased height to 100vh -->
+        <section class="section-fullvh-dark">
+            <div class="sticky-wrapper">
+                
+                <!-- NEW LAYOUT CONTAINER (for 2 columns) -->
+                <div class="perf-inner">
+                    
+                    <!-- COLUMN 1: TEXT -->
+                    <div class="perf-col-text">
+                        <interact-element data-interact-key="perf-text" data-interact-initial="true">
+                            <h3 class="text-6xl md:text-8xl lg:text-giant font-light tracking-tighter text-white leading-085 lg:text-left">
+                                Unleash high performance web motion
+                            </h3>
+                            <p><br></p>
+                            <p class="text-xl md:text-3xl font-light text-gray-400 leading-tight tracking-tight mb-8 lg:text-left">
+Interact runs closer to the browser, delivering smooth, GPU-accelerated animations with minimal overhead. Build complex interactions without compromising site speed — from subtle micro-interactions to full-page storytelling.
+                            </p>
+                        </interact-element>
+                    </div>
+
+                    <!-- COLUMN 2: TUNNEL VISUALIZATION CONTAINER -->
+                    <div id="tunnel-scene-container" class="perf-col-visual"> 
+                        <interact-element data-interact-key="tunnel-root" class="full relative">
+                            <!-- The tunnel-container is now constrained to this w-1/2 element -->
+                            <div class="tunnel-container" id="tunnel-container">
+                                <!-- Filled by JS -->
+                            </div>
+                        </interact-element>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </interact-element>
+<!-- CUBE SECTION -->
+        <interact-element data-interact-key="cube-section">
+            <section class="section-fullvh-dark">
+                <div class="sticky-wrapper">
+                   
+                    <!-- LAYOUT CONTAINER -->
+                    <!-- Kept lg:flex-row-reverse from previous edit -->
+                    <div class="perf-inner perf-inner--rev">
+                       
+                        <!-- COLUMN 1: TEXT -->
+                        <!-- Kept lg:pl-12 from previous edit -->
+                        <div class="perf-col-text">
+                            <interact-element data-interact-key="perf-text-2" data-interact-initial="true">
+                                <h3 class="text-6xl md:text-8xl lg:text-giant font-light tracking-tighter text-white leading-085 lg:text-left">
+                                    Motion That Fits Every Screen
+                                </h3>
+                                <p><br></p>
+                                <p class="text-xl md:text-3xl font-light text-gray-400 leading-tight tracking-tight mb-8 lg:text-left">
+    Interact enables precise control over responsive animations across screen sizes. Using media queries, you can define how effects behave at different breakpoints, ensuring motion is optimized for every layout.
+                                </p>
+                            </interact-element>
+                        </div>
+
+                        <!-- COLUMN 2: MENGER SPONGE GRAPHIC -->
+                        <!-- Removed max-h-[600px] to unconfine the vertical space -->
+                        <div id="graphic-container" class="perf-col-visual">
+                           
+                            <!-- 3D Scene -->
+                            <div class="scene-container-2">
+                                <interact-element data-interact-key="hitbox" class="interact-sponge-wrapper">
+                                    <interact-element data-interact-key="sponge" style="display: block; width: 100%; height: 100%;">
+                                        <div id="sponge" class="sponge-root">
+                                            <!-- Voxels injected here -->
+                                        </div>
+                                    </interact-element>
+                                </interact-element>
+
+                                <!-- Label removed as requested -->
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </interact-element>
+    <!-- BEAUTIFUL EFFECTS (NEW SCROLL-SCRUBBED LAYOUT) -->
+    <interact-element data-interact-key="beautiful-section">
+        <!-- Height set to 300vh for long scrub -->
+        <section class="section-beautiful-track" id="beautiful-scroll-track">
+            <div class="sticky-wrapper scene-container" style="perspective: 500px; flex-direction: column;">
+                
+                <!-- 1. PYRAMID (Visual Element) -->
+                <div class="pyramid-wrapper absolute">
+                    <interact-element data-interact-key="pyramid-target" class="w-full h-full">
+                        <div class="pyramid-rotator">
+                            <div class="face front">
+                                <svg viewBox="0 0 100 100">
+                                    <polygon points="50,0 100,100 0,100" fill="rgba(0,0,0,0.3)" stroke="white" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                            <div class="face right">
+                                <svg viewBox="0 0 100 100">
+                                    <polygon points="50,0 100,100 0,100" fill="rgba(0,0,0,0.3)" stroke="white" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                            <div class="face back">
+                                <svg viewBox="0 0 100 100">
+                                    <polygon points="50,0 100,100 0,100" fill="rgba(0,0,0,0.3)" stroke="white" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                            <div class="face left">
+                                <svg viewBox="0 0 100 100">
+                                    <polygon points="50,0 100,100 0,100" fill="rgba(0,0,0,0.3)" stroke="white" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                            <div class="face base">
+                                <svg viewBox="0 0 100 100">
+                                    <rect x="0" y="0" width="100" height="100" fill="rgba(0,0,0,0.3)" stroke="white" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </interact-element>
+                </div>
+
+                <!-- 2. TEXT (Content Layer) -->
+                <div class="content-layer px-6 md:px-12 max-w-7xl mx-auto">
+                    <!-- Text Container -->
+                    <div class="mt-0">
+                        <h3 class="beautiful-headline">
+                            <interact-element data-interact-key="word-1" class="inline-block"><span class="block">Beautiful</span></interact-element>
+                            <interact-element data-interact-key="word-2" class="inline-block"><span class="block">Effects,</span></interact-element><br>
+                            <interact-element data-interact-key="word-3" class="inline-block"><span class="block">Ready</span></interact-element>
+                            <interact-element data-interact-key="word-4" class="inline-block"><span class="block">to</span></interact-element>
+                            <interact-element data-interact-key="word-5" class="inline-block"><span class="block">Use.</span></interact-element>
+                        </h3>
+                        <!-- Description -->
+                        <interact-element data-interact-key="desc-text" class="block">
+                            <p class="beautiful-desc">
+Interact comes with a rich and diverse set of named effects, each designed to bring your website to life. Apply them instantly to text, images, cards, buttons, and entire sections, and create smooth, expressive animations that engage users and elevate every interaction.
+                            </p>
+                        </interact-element>
+                    </div>
+                    <div class="stack center-col gap-4 translate-y-12">
+                        <h2 class="text-sm font-medium tracking-widest uppercase text-white">
+                            Watch it move
+                        </h2>
+                        <!-- Arrow Down -->
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14M19 12l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </interact-element>
+
+    <!-- CARD SPREAD -->
+    <interact-element data-interact-key="spread-section">
+        <section class="relative h-300vh bg-white text-off-black" id="spread-section">
+
+            <div class="sticky-wrapper">
+                
+                <div class="relative full center perspective-1000">
+                    <interact-element data-interact-key="spread-card-0">
+                        <div class="spread-card spread-card-init" style="background-image: url('https://static.wixstatic.com/media/9eca39_e6637e07dfcb4e53b7678a9cef40aa7a~mv2.png');"></div>
+                    </interact-element>
+                    <interact-element data-interact-key="spread-card-1">
+                        <div class="spread-card spread-card-init" style="background-image: url('https://static.wixstatic.com/media/9eca39_2946702578bc4f3196e15f2ea4f93f0b~mv2.png');"></div>
+                    </interact-element>
+                    <interact-element data-interact-key="spread-card-2">
+                        <div class="spread-card spread-card-init" style="background-image: url('https://static.wixstatic.com/media/9eca39_e42d5b5ebaf942f1979ced8700e0d499~mv2.png');"></div>
+                    </interact-element>
+                    <interact-element data-interact-key="spread-card-3">
+                        <div class="spread-card spread-card-init" style="background-image: url('https://static.wixstatic.com/media/9eca39_00ea4d8b1bfc418486b742e3bcdf0e53~mv2.png');"></div>
+                    </interact-element>
+                    <interact-element data-interact-key="spread-card-4">
+                        <div class="spread-card spread-card-init" style="background-image: url('https://static.wixstatic.com/media/9eca39_2ffdb3397a52442a928502e6f447dfc1~mv2.png');"></div>
+                    </interact-element>
+                </div>
+
+                <div class="spread-btn-wrap">
+                    <button type="button" class="cta-view-modal" onclick="openModal('spread')">View Source Code</button>
+                </div>
+            </div>
+        </section>
+    </interact-element>
+
+    <!-- INTERACTION GRID -->
+    <section class="interaction-section">
+        <h2 class="interaction-intro-title">Trigger Your Motion</h2>
+        <p><br></p>
+          <p class="interaction-intro-desc">Animate elements based on user interactions -  from micro-motion touches to large-scale expressive interactions.</p>
+        <div class="interaction-rows">
+            
+            <!-- 1. HOVER -->
+            <div class="interaction-row">
+                <div class="interaction-demo-wrap">
+                    <div class="interaction-demo-inner aspect-square">
+                        <interact-element data-interact-key="hover-circle-1" class="demo-circle-bl">
+                            <div class="circle cursor-pointer"><div class="fill-circle"></div></div>
+                        </interact-element>
+                        <interact-element data-interact-key="hover-circle-2" class="demo-circle-center">
+                            <div class="circle cursor-pointer"><div class="fill-circle"></div></div>
+                        </interact-element>
+                        <interact-element data-interact-key="hover-circle-3" class="demo-circle-tr">
+                            <div class="circle cursor-pointer"><div class="fill-circle"></div></div>
+                        </interact-element>
+                    </div>
+                </div>
+                <div class="interaction-copy-col">
+                    <div class="interaction-copy-col-title">
+                        <h1 class="text-xl md:text-3xl font-light text-gray-600 leading-tight tracking-tight ">Hover</h1>
+                        <p class="text-base text-gray-500 font-light leading-relaxed">Add playful hover interactions to buttons, images, or UI elements.</p>
+                    </div>
+                    <div class="code-snippet-panel stack">
+                        <button class="copy-btn">
+                            <span class="copy-text">COPY</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                        <div class="code-snippet-scroll custom-scrollbar" tabindex="0">
+                            <code class="code-display-line codeDisplay text-gray-700" data-snippet="hover"></code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. CLICK -->
+            <div class="interaction-row">
+                <div class="interaction-demo-wrap">
+                    <div class="interaction-demo-inner aspect-square">
+                        
+                        <!-- Ripple 2 (Outer - Back) -->
+                        <interact-element data-interact-key="click-ripple-2" class="abs-center z-10 pointer-events-none">
+                            <div class="circle ripple-init"></div>
+                        </interact-element>
+
+                        <!-- Ripple 1 (Middle) -->
+                        <interact-element data-interact-key="click-ripple-1" class="abs-center z-20 pointer-events-none">
+                            <div class="circle ripple-init"></div>
+                        </interact-element>
+
+                        <!-- Center Circle (Trigger - Front) -->
+                        <interact-element data-interact-key="click-center" class="abs-center z-30 cursor-pointer">
+                            <div class="circle">
+                                <div class="fill-circle"></div>
+                            </div>
+                        </interact-element>
+
+                    </div>
+                </div>
+                <div class="interaction-copy-col">
+                    <div class="interaction-copy-col-title">
+                        <h1 class="text-xl md:text-3xl font-light text-gray-600 leading-tight tracking-tight">Click</h1>
+                        <p class="text-base text-gray-500 font-light leading-relaxed">Trigger motion on user clicks for buttons, dialogs, or interactive components.
+</p>
+                    </div>
+                    <div class="code-snippet-panel stack">
+                        <button class="copy-btn">
+                            <span class="copy-text">COPY</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                        <div class="code-snippet-scroll custom-scrollbar" tabindex="0">
+                            <!-- Added whitespace-pre class to preserve formatting -->
+                            <code class="code-display-line codeDisplay text-gray-700" data-snippet="click"></code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. ENTRANCE -->
+            <div class="interaction-row">
+                <interact-element data-interact-key="entrance-card" class="interaction-demo-wrap">
+                    <div class="interaction-demo-inner aspect-square">
+                        
+                        <!-- Top Circle -->
+                        <interact-element data-interact-key="circle-top" class="abs-center z-10">
+                            <div class="circle"><div class="fill-circle bg-transparent"></div></div>
+                        </interact-element>
+
+                        <!-- Right Circle -->
+                        <interact-element data-interact-key="circle-right" class="abs-center z-20">
+                            <div class="circle"><div class="fill-circle bg-transparent"></div></div>
+                        </interact-element>
+
+                        <!-- Bottom Circle -->
+                        <interact-element data-interact-key="circle-bottom" class="abs-center z-30">
+                            <div class="circle"><div class="fill-circle bg-transparent"></div></div>
+                        </interact-element>
+
+                          <!-- Left Circle -->
+                          <interact-element data-interact-key="circle-left" class="abs-center z-40">
+                            <div class="circle"><div class="fill-circle bg-transparent"></div></div>
+                        </interact-element>
+
+                    </div>
+                </interact-element>
+                <div class="interaction-copy-col">
+                    <div class="interaction-copy-col-title">
+                        <h1 class="text-xl md:text-3xl font-light text-gray-600 leading-tight tracking-tight">View Enter (AKA Scroll Triggered Animations and Entrance Animations)</h1>
+                        <p class="text-base text-gray-500 font-light leading-relaxed">Animate elements as they enter the viewport, or pause infinite animations as they exit — perfect for cards, sections, or hero elements.</p>
+                    </div>
+                    <div class="code-snippet-panel stack">
+                        <button class="copy-btn">
+                            <span class="copy-text">COPY</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                        <div class="code-snippet-scroll custom-scrollbar" tabindex="0">
+                            <!-- Added whitespace-pre class to preserve formatting -->
+                            <code class="code-display-line codeDisplay text-gray-700" data-snippet="entrance"></code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. MOUSE TRACK -->
+            <div class="interaction-row">
+                <div id="mouseTrack_hit" class="interaction-demo-wrap">
+                    <div class="mouse-demo-shell">
+                        
+                        <!-- SCENE ROOT -->
+                        <interact-element data-interact-key="mt-scene-root" class="full block">
+                            
+                            <!-- CARD TARGET (Tilts) -->
+                            <interact-element data-interact-key="mt-card-target" class="full block">
+                                <div class="full bg-black rounded-2xl overflow-hidden relative center preserve-3d">
+                                    
+                                    <!-- CONTENT TARGET (Deep Tilt) -->
+                                    <interact-element data-interact-key="mt-content-target" class="full center block">
+                                        <div id="mt-tunnel-mount" class="full center preserve-3d">
+                                            <!-- JS Injects Rings Here -->
+                                        </div>
+                                    </interact-element>
+
+                                </div>
+                            </interact-element>
+
+                        </interact-element>
+
+                    </div>
+                </div>
+                <div class="interaction-copy-col">
+                    <div class="interaction-copy-col-title">
+                        <h1 class="text-xl md:text-3xl font-light text-gray-600 leading-tight tracking-tight">Pointer movement (AKA Trigger by Mouse)</h1>
+                        <p class="text-base text-gray-500 font-light leading-relaxed">Move elements relative to cursor position for depth and engagement.</p>
+                    </div>
+                    <div class="code-snippet-panel stack">
+                        <button class="copy-btn">
+                            <span class="copy-text">COPY</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                        <div class="code-snippet-scroll custom-scrollbar" tabindex="0">
+                            <!-- Added whitespace-pre class to preserve formatting -->
+                            <code class="code-display-line codeDisplay text-gray-700" data-snippet="mouseTrack"></code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. SCROLLYTELLING (ATOM SPIN) -->
+            <!-- Changed overflow-hidden to overflow-clip to fix ViewTimeline -->
+            <div class="interaction-row interaction-row--clip">
+                <div class="interaction-demo-wrap">
+                    <!-- Changed overflow-hidden to overflow-clip here as well -->
+                    <div class="interaction-demo-inner interaction-demo-inner--clip aspect-square">
+                        
+                        <!-- Main wrapper for the scroll trigger -->
+                        <interact-element data-interact-key="scrolly-atom-card" class="w-full h-full block">
+                            <div class="full center" style="perspective: 1000px;">
+                                
+                                <!-- 3D Scene -->
+                                <div class="relative atom-scene-box" style="transform-style: preserve-3d;">
+                                    
+                                    <!-- Orbit 1: Vertical (Y-Axis) -->
+                                    <interact-element data-interact-key="orbit-y" class="cover">
+                                        <div class="rounded-orbit"></div>
+                                    </interact-element>
+
+                                    <!-- Orbit 2: Horizontal (X-Axis) -->
+                                    <interact-element data-interact-key="orbit-x" class="cover">
+                                        <div class="rounded-orbit"></div>
+                                    </interact-element>
+
+                                    <!-- Orbit 3: Diagonal 1 -->
+                                    <interact-element data-interact-key="orbit-diag-1" class="cover">
+                                        <div class="rounded-orbit"></div>
+                                    </interact-element>
+
+                                    <!-- Orbit 4: Diagonal 2 -->
+                                    <interact-element data-interact-key="orbit-diag-2" class="cover">
+                                        <div class="rounded-orbit"></div>
+                                    </interact-element>
+
+                                </div>
+
+                                <!-- Hint Text -->
+                                <div class="absolute bottom-6 w-full text-center text-white-60 text-xs tracking-widest uppercase font-mono pointer-events-none">
+                                    Scroll to Spin
+                                </div>
+
+                            </div>
+                        </interact-element>
+
+                    </div>
+                </div>
+                <div class="interaction-copy-col">
+                    <div class="interaction-copy-col-title">
+                        <h1 class="text-xl md:text-3xl font-light text-gray-600 leading-tight tracking-tight">Scroll</h1>
+                        <p class="text-base text-gray-500 font-light leading-relaxed">Animate elements or sections based on scroll position to create immersive, narrative-driven experiences.</p>
+                    </div>
+                    <div class="code-snippet-panel code-snippet-panel--clip stack">
+                        <button class="copy-btn">
+                            <span class="copy-text">COPY</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                        <div class="code-snippet-scroll custom-scrollbar" tabindex="0">
+                            <!-- Added whitespace-pre class to preserve formatting -->
+                            <code class="code-display-line codeDisplay text-gray-700" data-snippet="scrollytelling"></code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gradient Fade to Dark Section -->
+
+        </div>
+    </section>
+
+    <!-- NEW SECTION: TAILORED EFFECTS -->
+    <interact-element data-interact-key="tailored-section">
+        <section class="tailored-section">
+            <div class="max-w-7xl mx-auto">
+                
+                <!-- Title & Description -->
+                <interact-element data-interact-key="tailored-header" data-interact-initial="true">
+                    <div class="tailored-head">
+                        <h2>Effects. Tailored to Your Vision</h2>
+                        <p><br></p>
+                        <p>
+                            From a curated set of ready-to-use effects to fully custom motion, Interact gives you control to tailor animations precisely to your vision.
+                        </p>
+                    </div>
+                </interact-element>
+
+                <!-- 3 Columns -->
+                <div class="tailored-grid">
+                    
+                    <!-- Column 1 -->
+                    <interact-element data-interact-key="tailored-col-1" data-interact-initial="true">
+                        <div class="tailored-col">
+                            <h3>Named Effects <span class="tailored-sub">(Built-In Library)</span></h3>
+                            <p>
+                                A rich collection of ready-to-use effects that bring elements to life instantly. Perfect for rapid creation while ensuring polished, consistent motion.
+                            </p>
+                        </div>
+                    </interact-element>
+
+                    <!-- Column 2 -->
+                    <interact-element data-interact-key="tailored-col-2" data-interact-initial="true">
+                        <div class="tailored-col">
+                            <h3>Custom Keyframes</h3>
+                            <p> <br> </p>
+                            <p>
+                                Gain control to design animations with precision. Write your own keyframes and animate any property exactly as needed.
+                            </p>
+                        </div>
+                    </interact-element>
+
+                    <!-- Column 3 -->
+                    <interact-element data-interact-key="tailored-col-3" data-interact-initial="true">
+                        <div class="tailored-col">
+                            <h3>Custom Effects <span class="tailored-sub">(Full Extensibility)</span></h3>
+                            <p>
+                                Build reusable effects or integrate advanced motion systems — including physics-based animations, shaders, and WebGL.
+                            </p>
+                        </div>
+                    </interact-element>
+
+                </div>
+            </div>
+        </section>
+    </interact-element>
+
+    <!-- HORIZONTAL SCROLL SECTION (Moved to End) -->
+    <interact-element data-interact-key="h-section">
+        <section class="horizontal-section-track" id="horizontal-section">
+            <div class="sticky-wrapper">
+                <div class="h-section-inner">
+                    <div class="h-section-head">
+                        <h2>Hey, Good Looking</h2>
+                        <p><br></p>
+                        <p>Get inspired by these motion-forward Wix websites created with Interact</p>
+                    </div>
+
+                    <interact-element data-interact-key="h-track">
+                        <div class="horizontal-track" id="h-track">
+                            <!-- Card 1 -->
+                            <interact-element data-interact-key="h-card-1">
+                                <div class="h-card" style="background-image: url('https://static.wixstatic.com/media/9eca39_c371f3dae6cc46d9a89789a6f65f5a33~mv2.png')">
+                                    <div class="h-card-shade"></div>
+                                    <div class="h-card-info">
+                                        <h3>Cosmic Scroll</h3>
+                                        
+                                        <a href="https://www.wix.com/website-template/view/html/3534" target="_blank" class="h-card-link">Go to Website ↗</a>
+                                    </div>
+                                </div>
+                            </interact-element>
+                            <!-- Card 2 -->
+                            <interact-element data-interact-key="h-card-2">
+                                <div class="h-card" style="background-image: url('https://static.wixstatic.com/media/9eca39_db75f5ca33fb48e3b3a734a30bfea317~mv2.png')">
+                                    <div class="h-card-shade"></div>
+                                    <div class="h-card-info">
+                                        <h3>Animal Motion</h3>
+                                 
+                                        <a href="https://www.wix.com/website-template/view/html/3536" target="_blank" class="h-card-link">Go to Website ↗</a>
+                                    </div>
+                                </div>
+                            </interact-element>
+                            <!-- Card 3 -->
+                            <interact-element data-interact-key="h-card-3">
+                                <div class="h-card" style="background-image: url('https://static.wixstatic.com/media/9eca39_b823d93bb5004e4e8e666937e013002e~mv2.png')">
+                                    <div class="h-card-shade"></div>
+                                    <div class="h-card-info">
+                                        <h3>Year in Review</h3>
+                                       
+                                        <a href="https://www.wix.com/website-template/view/html/3791" target="_blank" class="h-card-link">Go to Website ↗</a>
+                                    </div>
+                                </div>
+                            </interact-element>
+                            <!-- Card 4 -->
+                            <interact-element data-interact-key="h-card-4">
+                                <div class="h-card" style="background-image: url('https://static.wixstatic.com/media/9eca39_d0e0bc1ae2d04b3da60db5e5f70fbde6~mv2.png')">
+                                    <div class="h-card-shade"></div>
+                                    <div class="h-card-info">
+                                        <h3>Starcast Project</h3>
+                                        
+                                        <a href="https://www.wix.com/website-template/view/html/3538" target="_blank" class="h-card-link">Go to Website ↗</a>
+                                    </div>
+                                </div>
+                            </interact-element>
+                            <!-- Card 5 -->
+                            <interact-element data-interact-key="h-card-5">
+                                <div class="h-card" style="background-image: url('https://static.wixstatic.com/media/9eca39_6626db560cf841ad86c7313766f95297~mv2.png')">
+                                    <div class="h-card-shade"></div>
+                                    <div class="h-card-info">
+                                        <h3>Product Store</h3>
+                                       
+                                        <a href="https://www.wix.com/website-template/view/html/3517" target="_blank" class="h-card-link">Go to Website ↗</a>
+                                    </div>
+                                </div>
+                            </interact-element>
+                            <!-- Card 6 -->
+                            <interact-element data-interact-key="h-card-6">
+                                <div class="h-card" style="background-image: url('https://static.wixstatic.com/media/9eca39_c05aed6fa07b4947ae0439c714427a68~mv2.png')">
+                                    <div class="h-card-shade"></div>
+                                    <div class="h-card-info">
+                                        <h3>Software Company</h3>
+                                         
+                                        <a href="https://www.wix.com/website-template/view/html/3608" target="_blank" class="h-card-link">Go to Website ↗</a>
+                                    </div>
+                                </div>
+                            </interact-element>
+                            <!-- Card 7 (New) -->
+                            <interact-element data-interact-key="h-card-7">
+                                <div class="h-card" style="background-image: url('https://static.wixstatic.com/media/9eca39_4e6846ae7912472b9241de416ef951a8~mv2.png')">
+                                    <div class="h-card-shade"></div>
+                                    <div class="h-card-info">
+                                        <h3>Coming Soon Landing Page</h3>
+                                     
+                                        <a href="https://www.wix.com/website-template/view/html/3748" target="_blank" class="h-card-link">Go to Website ↗</a>
+                                    </div>
+                                </div>
+                            </interact-element>
+                            <!-- Card 8 (New) -->
+                            <interact-element data-interact-key="h-card-8">
+                                <div class="h-card" style="background-image: url('https://static.wixstatic.com/media/9eca39_e6a7e442d88243e2aec66c05374d8a2f~mv2.png')">
+                                    <div class="h-card-shade"></div>
+                                    <div class="h-card-info">
+                                        <h3>Artist</h3>
+                                         
+                                        <a href="https://www.wix.com/website-template/view/html/3545" target="_blank" class="h-card-link">Go to Website ↗</a>
+                                    </div>
+                                </div>
+                            </interact-element>
+                            <!-- Card 9 (New) -->
+                            <interact-element data-interact-key="h-card-9">
+                                <div class="h-card" style="background-image: url('https://static.wixstatic.com/media/9eca39_7f4c2bc9aa9141e39bcc7a867506878b~mv2.png')">
+                                    <div class="h-card-shade"></div>
+                                    <div class="h-card-info">
+                                        <h3>Electronics Store</h3>
+                                       
+                                        <a href="https://www.wix.com/website-template/view/html/3745" target="_blank" class="h-card-link">Go to Website ↗</a>
+                                    </div>
+                                </div>
+                            </interact-element>
+                        </div>
+                    </interact-element>
+                </div>
+            </div>
+        </section>
+    </interact-element>
+
+    <!-- PINNED TAG (New Addition) -->
+    <div class="pinned-tag-ribbon hidden md:block">
+        <interact-element data-interact-key="pinned-tag">
+            <div class="pinned-tag-inner" style="writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);">
+                Made for Professionals by Professionals
+            </div>
+        </interact-element>
+    </div>
+
+    <footer class="site-footer">
+        <interact-element data-interact-key="footer-brand" data-interact-initial="true">
+            <div class="footer-brand">
+                <h2>● Interact</h2>
+                <p>© 2026</p>
+            </div>
+        </interact-element>
+        <interact-element data-interact-key="footer-link" data-interact-initial="true">
+            <div class="footer-links">
+                <a href="https://www.npmjs.com/package/@wix/interact" target="_blank" rel="noopener noreferrer" class="footer-link">NPM</a>
+                <a href="https://github.com/wix-incubator/interact" target="_blank" rel="noopener noreferrer" class="footer-link">Github</a>
+            </div>
+        </interact-element>
+    </footer>
+    </main>
+
+    <!-- LIGHTBOX MODAL -->
+    <div id="code-modal" class="modal-overlay">
+        <div class="modal-content text-off-black">
+            <div class="modal-toolbar">
+                <h3>Source Code</h3>
+                <button type="button" onclick="closeModal()" class="modal-close-btn">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 1l12 12M13 1L1 13" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-0">
+                <pre class="code-block modal-code-block text-sm"><code id="modal-code" class="language-javascript"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- External JavaScript Files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="assets/modal.js"></script>
+    <script src="assets/snippets.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "@wix/motion": "./assets/lib/motion/motion.js"
+        }
+    }
+    </script>
+    <script type="module" src="assets/main.mjs"></script>
+</body>
+</html>
