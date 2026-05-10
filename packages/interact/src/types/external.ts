@@ -2,10 +2,6 @@
 export type {
   TriggerType,
   PointerMoveAxis,
-  EventTriggerKind,
-  EventTriggerConfigToggle,
-  EventTriggerConfigEnterLeave,
-  EventTriggerConfig,
   EventTriggerParams,
   ViewEnterParams,
   PointerMoveParams,
@@ -26,13 +22,11 @@ export type {
   StateEffect,
   EffectRef,
   Effect,
-  AnimationOptions,
 } from './effects';
 
 // Config
 export type {
   Condition,
-  SequenceOptionsConfig,
   SequenceConfig,
   SequenceConfigRef,
   InteractionTrigger,
