@@ -45,12 +45,16 @@ npm versions for all 3 packages, MIT license badge, bundle size badge for `@wix/
 
 ### 3. What is Interact? (Elevator Pitch)
 
+#### 3.a features
+
 2-3 sentences covering:
 
 - Config-driven: define trigger-to-effect bindings in JSON, not imperative code
-- Built on native browser APIs (WAAPI, ViewTimeline, pointer tracking) — no custom animation runtime
-- Three entry points: vanilla JS, React, Web Components
-- Ready-made presets for common patterns (entrance, scroll, hover, pointer)
+- Built on native browser APIs (WAAPI, ViewTimeline, pointer tracking) with support for custom animation runtime
+- Three entry points: Web Components, React, vanilla JS
+- Ready-made presets for common patterns (entrance, scroll, pointer, micro-interactions)
+
+Add link to website (https://wix.github.io/interact/), and examples (https://wix.github.io/interact/examples.html)
 
 ### 4. Packages Table
 
@@ -60,54 +64,35 @@ Three-column table: Package | Description | Links.
 - `@wix/motion` v2.1.5 — Low-level animation engine
 - `@wix/motion-presets` v1.0.2 — Ready-made animation presets
 
-Include the dependency diagram as a compact mermaid graph:
-
-```mermaid
-graph BT
-    Motion["@wix/motion"]
-    Interact["@wix/interact"] --> Motion
-    Presets["@wix/motion-presets"] --> Motion
-```
-
-### 5. Which Package Should I Use?
-
-Decision table with 4 rows:
-
-| Goal                                                 | Package                                 |
-| ---------------------------------------------------- | --------------------------------------- |
-| Add animations to a page via config                  | `@wix/interact`                         |
-| Use ready-made entrance/scroll/hover presets         | `@wix/interact` + `@wix/motion-presets` |
-| Build a custom animation engine or low-level control | `@wix/motion`                           |
-| Generate interaction configs from AI/LLM             | `@wix/interact` + rules files           |
-
-### 6. Quick Start (The Core of the README)
+### 5. Quick Start (The Core of the README)
 
 This is the most critical section. Three sub-sections showing complete, working examples that an LLM can copy and adapt without errors.
 
 **Important accuracy constraints** (from source code analysis):
 
-- `effects` at config top-level is `Record<string, Effect>` — always include it, even as `{}`
+- `effects` at config top-level is `Record<string, Effect>`
 - `add` / `remove` are standalone imports, NOT instance methods
 - React requires `useEffect` wrapper with `instance.destroy()` cleanup
 - `Interact.registerEffects(presets)` must be called before `Interact.create()` when using `namedEffect`
 - `<interact-element>` must have exactly one child (library targets `.firstElementChild`)
 
-#### 6a. React (Primary — shown first since it's the most common path)
+#### 6a. Web Components (Primary — shown first since it's the prefered path)
 
 Complete working example with:
 
+- `import { Interact } from '@wix/interact/web'`
 - `@wix/motion-presets` registration
-- `useEffect` + cleanup pattern from [integration.md](packages/interact/rules/integration.md) lines 56-69
-- `<Interaction>` component with `tagName`, `interactKey`, `initial`
 - `generate()` for FOUC prevention
 - A `viewEnter` + `FadeIn` named effect (most common use case)
+- `<interact-element data-interact-key="..." data-interact-initial="true">`
+- note on adding `inteteract-element { display: contents; }` to reset styles if desired for the `InteractElement` custom element to not participate in layout
 
-#### 6b. Web Components
+#### 6b. React
 
 Same interaction config, but using:
 
-- `import { Interact } from '@wix/interact/web'`
-- `<interact-element data-interact-key="..." data-interact-initial="true">`
+- `useEffect` + cleanup pattern from [integration.md](packages/interact/rules/integration.md) lines 56-69
+- `<Interaction>` component with `tagName`, `interactKey`, `initial`
 
 #### 6c. Vanilla JS
 
@@ -121,10 +106,11 @@ Same config, but using:
 
 3-4 config-only snippets (no framework wrapper — just the `InteractConfig` object) for:
 
-1. **Entrance animation** — `viewEnter` + `namedEffect: { type: 'FadeIn' }` + `triggerType: 'once'`
-2. **Hover effect** — `hover` + keyframes with `triggerType: 'in'` (enter) behavior
+1. **Entrance animation** — `viewEnter` + `namedEffect: { type: 'FloatIn', direction: 'bottom', distance: '80px' }` + `triggerType: 'once'`
+2. **Click effect** — `click` + keyframes with `triggerType: 'in'` (enter) behavior
 3. **Scroll-driven parallax** — `viewProgress` + `rangeStart`/`rangeEnd` with cover offsets
-4. **Click toggle** — `click` + `stateAction: 'toggle'` + CSS transition
+4. **Hover toggle** — `hover` + `stateAction: 'toggle'` + CSS transition
+5. **Mouse aniamtion** - `pointerMove` + customEffect
 
 Each snippet must be a valid `InteractConfig` shape (with `interactions` array and `effects` record).
 
@@ -184,9 +170,7 @@ Only one file: [README.md](README.md) (full rewrite, ~250-300 lines).
 - [packages/interact/rules/integration.md](packages/interact/rules/integration.md) — canonical entry point patterns, React lifecycle, FOUC
 - [packages/interact/rules/full-lean.md](packages/interact/rules/full-lean.md) — complete config spec, pitfalls, constraints
 - [packages/interact/src/types/config.ts](packages/interact/src/types/config.ts) — TypeScript types for `InteractConfig`
-- [packages/interact/src/types/triggers.ts](packages/interact/src/types/triggers.ts) — trigger type enum
-- [packages/interact/src/types/effects.ts](packages/interact/src/types/effects.ts) — effect type unions
-- [packages/interact/src/core/Interact.ts](packages/interact/src/core/Interact.ts) — static API surface
+- [packages/interact/src/types/external.ts](packages/interact/src/types/external.ts) — types for exposed API surface
 
 ## Style Decisions
 
