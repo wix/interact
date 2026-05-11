@@ -1291,7 +1291,7 @@ describe('interact (web)', () => {
       });
 
       it('should add a handler per newly added list item for viewProgress trigger but not add same interaction twice', async () => {
-        const { getWebAnimation } = await import('@wix/motion');
+        const { getAnimation } = await import('@wix/motion');
 
         const keySource = 'logo-scroll-container';
         const keyTarget = 'logo-scroll-items';
@@ -1312,12 +1312,12 @@ describe('interact (web)', () => {
         targetElement.append(divTarget);
 
         add(element, keySource);
-        expect(getWebAnimation).toHaveBeenCalledTimes(0);
+        expect(getAnimation).toHaveBeenCalledTimes(0);
 
         add(targetElement, keyTarget);
 
-        expect(getWebAnimation).toHaveBeenCalledTimes(2);
-        expect(getWebAnimation).toHaveBeenCalledWith(
+        expect(getAnimation).toHaveBeenCalledTimes(2);
+        expect(getAnimation).toHaveBeenCalledWith(
           li,
           expect.objectContaining(
             effectToAnimationOptions(getMockConfig().effects['logo-fade-scroll'] as ScrubEffect),
@@ -1326,7 +1326,7 @@ describe('interact (web)', () => {
             trigger: 'view-progress',
           }),
         );
-        expect(getWebAnimation).toHaveBeenCalledWith(
+        expect(getAnimation).toHaveBeenCalledWith(
           li2,
           expect.objectContaining(
             effectToAnimationOptions(getMockConfig().effects['logo-fade-scroll'] as ScrubEffect),
@@ -1342,8 +1342,8 @@ describe('interact (web)', () => {
         const controller = Interact.getController(keyTarget);
         addListItems(controller!, '#logo-scroll-list', [li3]);
 
-        expect(getWebAnimation).toHaveBeenCalledTimes(3);
-        expect(getWebAnimation).toHaveBeenCalledWith(
+        expect(getAnimation).toHaveBeenCalledTimes(3);
+        expect(getAnimation).toHaveBeenCalledWith(
           li3,
           expect.objectContaining(
             effectToAnimationOptions(getMockConfig().effects['logo-fade-scroll'] as ScrubEffect),
