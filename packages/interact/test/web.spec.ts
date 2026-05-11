@@ -1120,7 +1120,7 @@ describe('interact (web)', () => {
 
     describe('viewProgress', () => {
       it('should add handler for viewProgress trigger with native ViewTimeline support', async () => {
-        const { getWebAnimation } = await import('@wix/motion');
+        const { getAnimation } = await import('@wix/motion');
 
         element = document.createElement('interact-element') as IInteractElement;
         const div = document.createElement('div');
@@ -1128,8 +1128,8 @@ describe('interact (web)', () => {
 
         add(element, 'logo-scroll');
 
-        expect(getWebAnimation).toHaveBeenCalledTimes(1);
-        expect(getWebAnimation).toHaveBeenCalledWith(
+        expect(getAnimation).toHaveBeenCalledTimes(1);
+        expect(getAnimation).toHaveBeenCalledWith(
           expect.any(HTMLElement),
           expect.objectContaining(
             effectToAnimationOptions(getMockConfig().effects['logo-fade-scroll'] as ScrubEffect),
