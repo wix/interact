@@ -1,10 +1,5 @@
 import type { AnimationGroup, ScrubScrollScene } from '@wix/motion';
-import {
-  getWebAnimation,
-  getElementCSSAnimation,
-  prepareAnimation,
-  getScrubScene,
-} from '@wix/motion';
+import { getAnimation, getScrubScene } from '@wix/motion';
 import { Scroll } from 'fizban';
 import type { ViewEnterParams, ScrubEffect, HandlerObjectMap, InteractOptions } from '../types';
 import {
@@ -40,9 +35,13 @@ function addViewProgressHandler(
   let cleanup;
   if ('ViewTimeline' in window) {
     // Use ViewTimeline for modern browsers
-    const animationGroup = getWebAnimation(target, effectOptions, triggerParams);
+    const animationGroup = getAnimation(
+      target,
+      effectOptions,
+      triggerParams,
+    ) as AnimationGroup | null;
 
-    if (animationGroup) {
+    if (animationGroup && !animationGroup.isCSS) {
       animationGroup.play();
 
       cleanup = () => {
