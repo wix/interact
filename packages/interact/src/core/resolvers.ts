@@ -11,9 +11,20 @@ import type {
   SequenceConfig,
   SequenceConfigRef,
   TimeAnimationTriggerType,
+  TriggerType,
 } from '../types';
 import { isTemplatedKey, generateId, calculateSequenceEffectsOffsets } from '../utils';
 import { shouldUseInitial } from './utilities';
+
+const TIME_TRIGGER_TO_DEFAULT_TYPE: Map<TriggerType, TimeAnimationTriggerType> = new Map([
+  ['viewEnter', 'once'],
+  ['pageVisible', 'once'],
+  ['animationEnd', 'once'],
+  ['hover', 'alternate'],
+  ['click', 'alternate'],
+  ['activate', 'alternate'],
+  ['interest', 'alternate'],
+]);
 
 export function resolveEffectForCSS(
   effect: Effect | EffectRef,
@@ -57,7 +68,7 @@ export function resolveEffectForCSS(
   ];
 
   if (!triggerType) {
-    triggerType = trigger === 'hover' || trigger === 'click' ? 'alternate' : 'once';
+    triggerType = TIME_TRIGGER_TO_DEFAULT_TYPE.get(trigger)!;
   }
 
   const { namedEffect, customEffect, keyframeEffect, transition, transitionProperties, ...rest } = {
@@ -115,8 +126,7 @@ export function resolveSequenceForCSS(
   } = fullSequence;
 
   if (!triggerType) {
-    triggerType =
-      interaction.trigger === 'hover' || interaction.trigger === 'click' ? 'alternate' : 'once';
+    triggerType = TIME_TRIGGER_TO_DEFAULT_TYPE.get(interaction.trigger)!;
   }
 
   conditions = [

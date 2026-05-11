@@ -39,7 +39,7 @@ export function interpolateKeyframesOffsets(keyframes: Keyframe[]): Keyframe[] {
   if (result[0].offset === undefined) {
     result[0].offset = 0;
   }
-  if (result[result.length - 1].offset === undefined) {
+  if (result[result.length - 1].offset === undefined || result.length === 1) {
     result[result.length - 1].offset = 1;
   }
 
