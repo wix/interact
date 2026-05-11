@@ -39,31 +39,17 @@ function addViewProgressHandler(
   const effectOptions = effectToAnimationOptions(effect);
   let cleanup;
   if ('ViewTimeline' in window) {
-    const cssAnimation = getElementCSSAnimation(target, effectOptions);
+    // Use ViewTimeline for modern browsers
+    const animationGroup = getWebAnimation(target, effectOptions, triggerParams);
 
-    if (cssAnimation) {
-      cssAnimation.ready = new Promise((resolve) => {
-        prepareAnimation(target, effectOptions, resolve);
-      });
-      cssAnimation.play();
+    if (animationGroup) {
+      animationGroup.play();
 
       cleanup = () => {
-        cssAnimation.ready.then(() => {
-          cssAnimation.cancel();
+        (animationGroup as AnimationGroup).ready.then(() => {
+          animationGroup.cancel();
         });
       };
-    } else {
-      const animationGroup = getWebAnimation(target, effectOptions, triggerParams);
-
-      if (animationGroup) {
-        animationGroup.play();
-
-        cleanup = () => {
-          (animationGroup as AnimationGroup).ready.then(() => {
-            animationGroup.cancel();
-          });
-        };
-      }
     }
   } else {
     const scene = getScrubScene(target, effectOptions, triggerParams);
