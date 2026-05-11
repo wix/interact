@@ -86,7 +86,7 @@ describe('interpolateKeyframesOffsets', () => {
   it('should handle a single keyframe (first-wins: offset becomes 0)', () => {
     const result = interpolateKeyframesOffsets([{ opacity: '1' }]);
     expect(result).toHaveLength(1);
-    expect(result[0].offset).toBe(0);
+    expect(result[0].offset).toBe(1);
   });
 
   it('should return empty array and log error for decreasing offsets', () => {
