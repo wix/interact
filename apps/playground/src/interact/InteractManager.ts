@@ -1,4 +1,5 @@
 import { Interact } from '@wix/interact/web';
+import { generate } from '@wix/interact';
 import type { InteractConfig } from '@wix/interact';
 import { store } from '../store/PlaygroundStore';
 import { getAllPresets } from './preset-registry';
@@ -6,6 +7,8 @@ import { getAllPresets } from './preset-registry';
 interface IInteractElement extends HTMLElement {
   connect(): void;
 }
+
+let generatedSheet: CSSStyleSheet | null = null;
 
 let presetsRegistered = false;
 
@@ -36,6 +39,7 @@ export function pauseInteract(): void {
     currentInstance = null;
     cancelStaleAnimations();
   }
+  removeGeneratedCSS();
 }
 
 export function resumeInteract(): void {
@@ -57,6 +61,31 @@ function cancelStaleAnimations(): void {
   });
 }
 
+function removeGeneratedCSS(): void {
+  const root = stageElement?.shadowRoot;
+  if (!root || !generatedSheet) return;
+  root.adoptedStyleSheets = root.adoptedStyleSheets.filter((s) => s !== generatedSheet);
+  generatedSheet = null;
+}
+
+function injectGeneratedCSS(css: string): void {
+  const root = stageElement?.shadowRoot;
+  if (!root) return;
+
+  if (!css) {
+    removeGeneratedCSS();
+    return;
+  }
+
+  if (generatedSheet) {
+    generatedSheet.replaceSync(css);
+  } else {
+    generatedSheet = new CSSStyleSheet();
+    generatedSheet.replaceSync(css);
+    root.adoptedStyleSheets = [generatedSheet, ...root.adoptedStyleSheets];
+  }
+}
+
 function apply(config: InteractConfig): void {
   if (paused) return;
 
@@ -76,6 +105,8 @@ function apply(config: InteractConfig): void {
   };
 
   if (validConfig.interactions.length === 0) return;
+
+  injectGeneratedCSS(generate(validConfig));
 
   currentInstance = Interact.create(validConfig);
 

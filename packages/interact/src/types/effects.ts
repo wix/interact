@@ -93,3 +93,17 @@ export type Effect = EffectBase & (TimeEffect | ScrubEffect | StateEffect);
 
 export type AnimationOptions<T extends 'time' | 'scrub'> = MotionAnimationOptions<T> &
   EffectEffectProperty;
+
+export type OneOf<T extends Record<string, unknown>> =
+  | {
+      [K in keyof T]: Pick<T, K> & Partial<Record<Exclude<keyof T, K>, never>>;
+    }[keyof T]
+  | Partial<Record<keyof T, never>>;
+
+export type EffectProperty = OneOf<{
+  namedEffect: NamedEffect;
+  keyframeEffect: MotionKeyframeEffect;
+  transition: TransitionOptions & { styleProperties: StyleProperty[] };
+  transitionProperties: TransitionProperty[];
+  customEffect: (element: Element, progress: any) => void;
+}>;

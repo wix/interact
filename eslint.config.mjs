@@ -13,6 +13,8 @@ export default [
     ignores: [
       '**/dist/**',
       '**/build/**',
+      // Website copies of package builds (see scripts/build-landing.sh) — not authored here
+      'apps/website/assets/lib/**',
       '**/node_modules/**',
       '**/*.d.ts',
       '**/coverage/**',

@@ -1,0 +1,13 @@
+{
+  "name": "@wix/interact-website",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx http-server . -p 3000",
+    "dev:public": "npx http-server . -p 3000 -c-1",
+    "build": "../../scripts/build-landing.sh",
+    "preview": "npx http-server . -p 3000",
+    "lint": "prettier --check '**/*.{js,mjs,css,html,json}'",
+    "format": "prettier --write '**/*.{js,mjs,css,html,json}'"
+  }
+}

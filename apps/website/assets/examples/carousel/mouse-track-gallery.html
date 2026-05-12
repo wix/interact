@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="importmap">
+      {
+        "imports": {
+          "@wix/motion": "../../lib/motion/motion.js"
+        }
+      }
+    </script>
+    <title>Liquidy Gallery with @wix/interact</title>
+    <style>
+      @property --offset-x {
+        syntax: '<number>';
+        inherits: true;
+        initial-value: 0;
+      }
+      @property --offset-y {
+        syntax: '<number>';
+        inherits: true;
+        initial-value: 0;
+      }
+
+      body {
+        margin: 0;
+        overflow: hidden;
+        background-color: #dddddd;
+        color: black;
+        font-family: 'Helvetica Neue', sans-serif;
+        user-select: none;
+      }
+
+      #gallery-viewport {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        cursor: grab;
+        position: relative;
+      }
+
+      #gallery-viewport:active {
+        cursor: grabbing;
+      }
+
+      #gallery-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        --item-size: 0;
+        --world-w: 0;
+        --world-h: 0;
+        --viewport-cx: 0;
+        --viewport-cy: 0;
+        --parallax-factor: 0.08;
+      }
+
+      .gallery-item {
+        --x: calc(var(--base-x) + var(--offset-x));
+        --y: calc(var(--base-y) + var(--offset-y));
+        --half-w: calc(var(--world-w) / 2);
+        --half-h: calc(var(--world-h) / 2);
+        --wrapped-x: calc(mod(var(--x) + var(--half-w), var(--world-w)) - var(--half-w));
+        --wrapped-y: calc(mod(var(--y) + var(--half-h), var(--world-h)) - var(--half-h));
+        --screen-x: calc(var(--wrapped-x) + var(--viewport-cx) - var(--item-size) / 2);
+        --screen-y: calc(
+          var(--wrapped-y) + var(--viewport-cy) - var(--item-size) / 2 - var(--item-size) * 0.125
+        );
+
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: calc(var(--item-size) * 1px);
+        will-change: transform;
+        transform: translate3d(calc(var(--screen-x) * 1px), calc(var(--screen-y) * 1px), 0px);
+      }
+
+      .img-wrapper {
+        width: 100%;
+        height: calc(var(--item-size) * 1px);
+        border-radius: 4px;
+        overflow: hidden;
+        background: #1a1a1a;
+        position: relative;
+        box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.2);
+      }
+
+      .parallax-layer {
+        --px: calc(var(--wrapped-x) * var(--parallax-factor) * -1);
+        --py: calc(var(--wrapped-y) * var(--parallax-factor) * -1);
+
+        width: 100%;
+        height: 100%;
+        will-change: transform;
+        transform: scale(3) translate3d(calc(var(--px) * 1px), calc(var(--py) * 1px), 0px);
+        transform-origin: center;
+      }
+
+      .gallery-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transform-origin: center;
+      }
+
+      .text-wrapper {
+        position: absolute;
+        top: 100%;
+        padding-top: 5px;
+        left: 0;
+        width: 100%;
+        pointer-events: none;
+      }
+
+      .gallery-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: #111111;
+        letter-spacing: 0.5px;
+        transform-origin: top left;
+        display: inline-block;
+        white-space: nowrap;
+      }
+
+      @media (max-width: 768px) {
+        .gallery-text {
+          font-size: 12px;
+        }
+      }
+
+      #loading {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #666;
+        z-index: 100;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loading">Initializing Gallery...</div>
+
+    <interact-element data-interact-key="gallery-viewport">
+      <div id="gallery-viewport">
+        <div id="gallery-content">
+          <!-- Items injected via JS -->
+        </div>
+      </div>
+    </interact-element>
+
+    <script type="module">
+      import { Interact } from '../../lib/interact/es/web.js';
+      import * as presets from '../../lib/motion-presets/motion-presets.js';
+      Interact.registerEffects(presets);
+
+      const viewport = document.getElementById('gallery-viewport');
+      const container = document.getElementById('gallery-content');
+      const totalItems = 40;
+      const interactions = [];
+      const HOVER_BLUR = 8;
+
+      const GRID_COLS = 8;
+      const GRID_ROWS = 5;
+      const MOBILE_BREAKPOINT = 768;
+
+      const layout = {
+        itemSize: 0,
+        gap: 0,
+        colPitch: 0,
+        rowPitch: 0,
+        worldWidth: 0,
+        worldHeight: 0,
+        viewportWidth: 0,
+        viewportHeight: 0,
+        isMobile: false,
+      };
+
+      const galleryItemEls = [];
+
+      function updateLayout() {
+        layout.viewportWidth = window.innerWidth;
+        layout.viewportHeight = window.innerHeight;
+        layout.isMobile = layout.viewportWidth < MOBILE_BREAKPOINT;
+
+        const rawFactor = 0.0002 * layout.viewportWidth + 0.12;
+        const vhFactor = Math.min(0.4, Math.max(0.2, rawFactor));
+
+        layout.itemSize = layout.viewportHeight * vhFactor;
+        layout.gap = layout.itemSize * 0.6375;
+        layout.colPitch = layout.itemSize + layout.gap;
+        const textPadding = layout.itemSize * 0.25;
+        layout.rowPitch = layout.itemSize + textPadding + layout.gap;
+        layout.worldWidth = GRID_COLS * layout.colPitch;
+        layout.worldHeight = GRID_ROWS * layout.rowPitch;
+
+        container.style.setProperty('--item-size', String(layout.itemSize));
+        container.style.setProperty('--world-w', String(layout.worldWidth));
+        container.style.setProperty('--world-h', String(layout.worldHeight));
+        container.style.setProperty('--viewport-cx', String(layout.viewportWidth / 2));
+        container.style.setProperty('--viewport-cy', String(layout.viewportHeight / 2));
+
+        for (let i = 0; i < galleryItemEls.length; i++) {
+          const col = i % GRID_COLS;
+          const row = Math.floor(i / GRID_COLS);
+          galleryItemEls[i].style.setProperty('--base-x', String(col * layout.colPitch));
+          galleryItemEls[i].style.setProperty('--base-y', String(row * layout.rowPitch));
+        }
+      }
+
+      updateLayout();
+
+      // Cycle order matches pre-rename gallery numbering (commit f9acac8).
+      const GALLERY_IMAGE_FILES = [
+        'leaf.jpg',
+        'stone-sunwheel.jpg',
+        'snail-shell.jpg',
+        'glyph-symbol.jpg',
+        'metal-rose.jpg',
+        'conch-shell.jpg',
+        'stone-tool.jpg',
+        'scallop-shell.jpg',
+        'fern-fiddlehead.jpg',
+        'spike-ball.jpg',
+        'topographic-map.jpg',
+        'water-ripples.jpg',
+        'thistle-cluster.jpg',
+        'geometric-circle.jpg',
+        'flowing-rock.jpg',
+        'desert-mirror-pool.jpg',
+        'moon-surface.jpg',
+        'cracked-membrane.jpg',
+        'motion-blur-stripes.jpg',
+        'tall-grass.jpg',
+        'folk-horse-figurine.jpg',
+        'leaf-veins.jpg',
+        'cracked-mud.jpg',
+        'metal-tulip.jpg',
+        'stone-mask.jpg',
+        'stone-pendant.jpg',
+        'dolmen-stones.jpg',
+        'mossy-lava-rocks.jpg',
+        'spiral-petroglyph.jpg',
+        'broken-tile-pattern.jpg',
+        'ammonite-fossil.jpg',
+        'cracked-rock-face.jpg',
+        'stone-statue.jpg',
+        'palm-trunk.jpg',
+        'desert-boulder.jpg',
+        'lily-flower.jpg',
+        'fern-leaf.jpg',
+        'black-sand.jpg',
+        'thorn-stem.jpg',
+        'charred-wood.jpg',
+        'cracked-stone-sphere.jpg',
+        'dry-cracked-earth.jpg',
+        'thistle-flower.jpg',
+        'stone-rosette.jpg',
+        'chalk-scribbles.jpg',
+        'blurry-grid-dots.jpg',
+      ];
+
+      const imageTitles = [
+        'NEON VOID',
+        'URBAN ECHO',
+        'SILENT FORM',
+        'LIQUID TIME',
+        'GLASS SOUL',
+        'CONCRETE SKY',
+        'VELVET HAZE',
+        'IRON PULSE',
+        'SOLAR DRIFT',
+        'LUNAR EDGE',
+        'PRISM CORE',
+        'STATIC FLOW',
+        'ECHO CHAMBER',
+        'NIGHT BLOOM',
+        'WHITE NOISE',
+        'SHADOW PLAY',
+        'METAL HEART',
+        'OCEAN DUST',
+        'WINTER SUN',
+        'DESERT ICE',
+        'CYBER MIST',
+        'RAPID EYE',
+        'ZERO GRAVITY',
+        'BLIND SPOT',
+        'DEEP FOCUS',
+        'RAW MATTER',
+        'PURE LOGIC',
+        'LOST SIGNAL',
+        'DARK MATTER',
+        'LIGHT WAVE',
+        'AUTO PILOT',
+        'BLUE STEEL',
+        'RED SHIFT',
+        'GREEN ZONE',
+        'GOLD RUSH',
+        'SILVER LINE',
+        'COPPER TONE',
+        'CHROME LIFE',
+        'CARBON COPY',
+        'FINAL CUT',
+      ];
+
+      for (let i = 0; i < totalItems; i++) {
+        const itemKey = `item-${i}`;
+        const imgKey = `img-${i}`;
+        const txtKey = `txt-${i}`;
+
+        const col = i % GRID_COLS;
+        const row = Math.floor(i / GRID_COLS);
+
+        const imageUrl = `../../img/${GALLERY_IMAGE_FILES[i % GALLERY_IMAGE_FILES.length]}`;
+        const title = imageTitles[i % imageTitles.length];
+
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+        div.style.setProperty('--base-x', String(col * layout.colPitch));
+        div.style.setProperty('--base-y', String(row * layout.rowPitch));
+
+        div.innerHTML = `
+            <interact-element data-interact-key="${itemKey}">
+                <div style="cursor: pointer">
+                    <div class="img-wrapper">
+                        <div class="parallax-layer">
+                            <interact-element data-interact-key="${imgKey}">
+                                <img 
+                                    src="${imageUrl}" 
+                                    class="gallery-img" 
+                                    alt="Gallery item ${i}"
+                                    loading="lazy"
+                                />
+                            </interact-element>
+                        </div>
+                    </div>
+                    <div class="text-wrapper">
+                        <interact-element data-interact-key="${txtKey}">
+                            <div class="gallery-text">
+                                ${title}
+                            </div>
+                        </interact-element>
+                    </div>
+                </div>
+            </interact-element>
+        `;
+
+        container.appendChild(div);
+        galleryItemEls.push(div);
+
+        interactions.push({
+          key: itemKey,
+          trigger: 'hover',
+          effects: [
+            {
+              key: imgKey,
+              transition: {
+                duration: 600,
+                easing: 'ease-out',
+                styleProperties: [
+                  { name: 'filter', value: 'blur(' + HOVER_BLUR + 'px)' },
+                  { name: 'transform', value: 'scale(0.95)' },
+                ],
+              },
+              fill: 'both',
+              composite: 'add',
+            },
+            {
+              key: txtKey,
+              transition: {
+                duration: 500,
+                easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+                styleProperties: [{ name: 'opacity', value: '0.4' }],
+              },
+              fill: 'both',
+              composite: 'replace',
+            },
+          ],
+        });
+      }
+
+      document.getElementById('loading').style.display = 'none';
+
+      // ---------------------------------------------------------
+      // Velocity-drift engine — the rAF only writes two CSS vars
+      // ---------------------------------------------------------
+      const MAX_SPEED = 6;
+      const VELOCITY_LERP = 0.03;
+      const DRAG_LERP = 0.08;
+
+      const state = {
+        currentX: 0,
+        currentY: 0,
+        velocityX: 0,
+        velocityY: 0,
+        // Normalized pointer position: 0 = left/top edge, 1 = right/bottom edge
+        pointerX: 0.5,
+        pointerY: 0.5,
+        pointerInside: false,
+        // Mobile drag
+        targetX: 0,
+        targetY: 0,
+        dragAnchorX: 0.5,
+        dragAnchorY: 0.5,
+        dragStartOffsetX: 0,
+        dragStartOffsetY: 0,
+        wasDragging: false,
+      };
+
+      function animate() {
+        if (layout.isMobile) {
+          state.currentX += (state.targetX - state.currentX) * DRAG_LERP;
+          state.currentY += (state.targetY - state.currentY) * DRAG_LERP;
+          state.velocityX = 0;
+          state.velocityY = 0;
+        } else {
+          // Distance from center: -1 (left/top edge) to +1 (right/bottom edge)
+          const nX = (state.pointerX - 0.5) * 2;
+          const nY = (state.pointerY - 0.5) * 2;
+
+          // Drift continuously away from the pointer direction.
+          // Speed is proportional to distance from center.
+          // When pointer leaves, target velocity decays to zero (momentum wind-down).
+          const targetVx = state.pointerInside ? -nX * MAX_SPEED : 0;
+          const targetVy = state.pointerInside ? -nY * MAX_SPEED : 0;
+
+          state.velocityX += (targetVx - state.velocityX) * VELOCITY_LERP;
+          state.velocityY += (targetVy - state.velocityY) * VELOCITY_LERP;
+          state.currentX += state.velocityX;
+          state.currentY += state.velocityY;
+
+          state.targetX = state.currentX;
+          state.targetY = state.currentY;
+        }
+
+        container.style.setProperty('--offset-x', String(state.currentX));
+        container.style.setProperty('--offset-y', String(state.currentY));
+
+        requestAnimationFrame(animate);
+      }
+
+      // ---------------------------------------------------------
+      // Pointer input via Interact pointerMove + customEffect
+      // ---------------------------------------------------------
+      interactions.push({
+        key: 'gallery-viewport',
+        trigger: 'pointerMove',
+        params: { hitArea: 'self' },
+        effects: [
+          {
+            key: 'gallery-viewport',
+            customEffect: (_element, progress) => {
+              if (layout.isMobile) {
+                if (progress.active && !state.wasDragging) {
+                  state.dragAnchorX = progress.x;
+                  state.dragAnchorY = progress.y;
+                  state.dragStartOffsetX = state.currentX;
+                  state.dragStartOffsetY = state.currentY;
+                }
+                if (progress.active) {
+                  const dx = (progress.x - state.dragAnchorX) * layout.viewportWidth;
+                  const dy = (progress.y - state.dragAnchorY) * layout.viewportHeight;
+                  state.targetX = state.dragStartOffsetX + dx;
+                  state.targetY = state.dragStartOffsetY + dy;
+                }
+                state.wasDragging = progress.active ?? false;
+              } else {
+                state.pointerX = progress.x;
+                state.pointerY = progress.y;
+                state.pointerInside = progress.active ?? true;
+              }
+            },
+          },
+        ],
+      });
+
+      Interact.setup({
+        pointerOptionsGetter: () => ({ allowActiveEvent: true }),
+      });
+
+      Interact.create({ interactions });
+
+      // ---------------------------------------------------------
+      // Responsive layout via ResizeObserver
+      // ---------------------------------------------------------
+      new ResizeObserver(() => updateLayout()).observe(viewport);
+
+      animate();
+    </script>
+  </body>
+</html>

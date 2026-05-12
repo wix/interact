@@ -1,5 +1,37 @@
 import { getEasing } from '@wix/motion';
-import type { Condition, CreateTransitionCSSParams } from './types';
+import type { Condition, CreateTransitionCSSParams, StateEffect } from './types';
+
+export function roundNumber(num: number, precision = 2): number {
+  return parseFloat(num.toFixed(precision));
+}
+
+export function isTemplatedKey(key: string) {
+  return /\[]/g.test(key);
+}
+
+export function kebabCustomProp(args: (string | number)[]) {
+  return `--${args.join('-')}`;
+}
+
+export function camelToKebabCase(property: string): string {
+  return property.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+}
+
+export function calculateSequenceEffectsOffsets(
+  effects: ((any & { delay?: number }) | null)[],
+  delay: number,
+  offset: number,
+  offsetEasing: (p: number) => number,
+): void {
+  const maxIndex = effects.length - 1;
+
+  effects.forEach((effect, index) => {
+    if (effect) {
+      const safeOffset = index ? (offsetEasing(index / maxIndex) * maxIndex * offset) | 0 : 0;
+      effect.delay = delay + safeOffset + (effect.delay || 0);
+    }
+  });
+}
 
 /**
  * Applies a selector condition predicate to a base selector.
@@ -23,14 +55,8 @@ export function generateId() {
   );
 }
 
-export function createTransitionCSS({
-  key,
-  effectId,
-  transition,
-  properties,
-  childSelector = '> :first-child',
-  selectorCondition,
-}: CreateTransitionCSSParams): string[] {
+export function transitionEffectToTransitionsList(transitionEffect: StateEffect) {
+  let { transition, transitionProperties } = transitionEffect;
   let transitions: string[] = [];
 
   if (transition?.styleProperties) {
@@ -56,11 +82,9 @@ export function createTransitionCSS({
         );
       }
     }
-
-    properties = transition.styleProperties;
   } else {
     transitions =
-      properties
+      transitionProperties
         ?.filter((property) => property.duration)
         .map(
           (property) =>
@@ -70,8 +94,28 @@ export function createTransitionCSS({
         ) || [];
   }
 
+  return transitions;
+}
+
+// TODO: createTransitionCSS overlaps with effectToCSS's transition branch and could be
+// consolidated once the runtime path migrates to the CSS generation pipeline.
+export function createTransitionCSS({
+  key,
+  effectId,
+  transition,
+  transitionProperties,
+  childSelector = '> :first-child',
+  selectorCondition,
+}: CreateTransitionCSSParams): string[] {
+  const transitions: string[] = transitionEffectToTransitionsList({
+    transition,
+    transitionProperties,
+  });
+
   const styleProperties =
-    properties?.map((property) => `${property.name}: ${property.value};`) || [];
+    (transition?.styleProperties || transitionProperties)?.map(
+      (property) => `${property.name}: ${property.value};`,
+    ) || [];
   const escapedKey = key.replace(/"/g, "'");
 
   // Build selectors, applying condition if present
@@ -106,20 +150,28 @@ export function createTransitionCSS({
   return result;
 }
 
-export function getMediaQuery(
+export function getFullPredicateByType(
   conditionNames: string[] | undefined,
   conditions: Record<string, Condition>,
+  type: 'media' | 'container',
 ) {
   const conditionContent = (conditionNames || [])
     .filter((conditionName) => {
-      return conditions[conditionName]?.type === 'media' && conditions[conditionName].predicate;
+      return conditions[conditionName]?.type === type && conditions[conditionName].predicate;
     })
     .map((conditionName) => {
       return conditions[conditionName].predicate;
     })
     .join(') and (');
 
-  const condition = conditionContent && `(${conditionContent})`;
+  return conditionContent && `(${conditionContent})`;
+}
+
+export function getMediaQuery(
+  conditionNames: string[] | undefined,
+  conditions: Record<string, Condition>,
+) {
+  const condition = getFullPredicateByType(conditionNames, conditions, 'media');
   const mql = condition && window.matchMedia(condition);
 
   return mql;
@@ -129,11 +181,12 @@ export function getSelectorCondition(
   conditionNames: string[] | undefined,
   conditions: Record<string, Condition>,
 ): string | undefined {
-  for (const name of conditionNames || []) {
-    const condition = conditions[name];
-    if (condition?.type === 'selector' && condition.predicate) {
-      return condition.predicate;
-    }
-  }
-  return;
+  return (conditionNames || [])
+    .filter((conditionName) => {
+      return conditions[conditionName]?.type === 'selector' && conditions[conditionName].predicate;
+    })
+    .map((conditionName) => {
+      return `:is(${conditions[conditionName].predicate})`;
+    })
+    .join('');
 }
