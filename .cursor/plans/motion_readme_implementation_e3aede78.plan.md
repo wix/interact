@@ -19,7 +19,7 @@ The existing [`packages/motion/README.md`](packages/motion/README.md) has severa
 
 - Claims "82+ presets" and lists preset categories — these belong in `@wix/motion-presets`
 - Says "UNLICENSED" while `package.json` declares MIT
-- Claims GSAP/Framer Motion "compatibility" which is inaccurate
+- Claims GSAP/Framer Motion "compatibility" which is just plain wrong
 - Uses emoji headers (inconsistent with best-practice OSS READMEs)
 - Fails to position Motion as the **engine layer** beneath Interact
 - Doesn't showcase the dual-rendering (WAAPI + CSS) architecture properly
@@ -92,6 +92,25 @@ animation.play();
 **Scroll-driven (ViewTimeline):**
 
 ```typescript
+import { getWebAnimation } from '@wix/motion';
+
+const scenes = getWebAnimation(
+  document.getElementById('parallax'),
+  {
+    keyframeEffect: {
+      name: 'parallax',
+      keyframes: [{ transform: 'translateY(80px)' }, { transform: 'translateY(-80px)' }],
+    },
+    startOffset: { name: 'cover', value: { unit: 'percentage', value: 0 } },
+    endOffset: { name: 'cover', value: { unit: 'percentage', value: 100 } },
+  },
+  { trigger: 'view-progress', element: scrollRoot },
+);
+```
+
+**Scroll-driven (without ViewTimeline support):**
+
+```typescript
 import { getScrubScene } from '@wix/motion';
 
 const scenes = getScrubScene(
@@ -99,8 +118,10 @@ const scenes = getScrubScene(
   {
     keyframeEffect: {
       name: 'parallax',
-      keyframes: [{ transform: 'translateY(0)' }, { transform: 'translateY(-80px)' }],
+      keyframes: [{ transform: 'translateY(80px)' }, { transform: 'translateY(-80px)' }],
     },
+    startOffset: { name: 'cover', value: { unit: 'percentage', value: 0 } },
+    endOffset: { name: 'cover', value: { unit: 'percentage', value: 100 } },
   },
   { trigger: 'view-progress', element: scrollRoot },
 );
@@ -126,8 +147,8 @@ Scannable table of main exports linking to docs:
 | -------------------- | ----------------------------------------------------------- |
 | `getWebAnimation()`  | Create WAAPI-backed animations (time or scroll)             |
 | `getCSSAnimation()`  | Generate CSS animation descriptors for stylesheet injection |
-| `getScrubScene()`    | Build scroll or pointer-driven scrub scenes                 |
-| `prepareAnimation()` | Pre-measure layout via fastdom before animating             |
+| `getScrubScene()`    | Build scroll polyfill/custom or pointer-driven scrub scenes |
+| `prepareAnimation()` | Pre-measure/mutate DOM via fastdom before animating         |
 | `getAnimation()`     | Auto-select CSS (if present) or WAAPI path                  |
 | `getSequence()`      | Coordinate staggered groups with easing-based offsets       |
 | `registerEffects()`  | Register named effect modules into the global registry      |
@@ -160,11 +181,7 @@ Explain the progressive enhancement story:
 
 ### 12. Browser Support
 
-| Feature            | Support                                                |
-| ------------------ | ------------------------------------------------------ |
-| Web Animations API | Baseline — wide availability                           |
-| CSS Animations     | Baseline — wide availability                           |
-| ViewTimeline       | Chrome 115+; other browsers via external scroll driver |
+Baseline — wide availability, with options for polyfill integration.
 
 ### 13. Related Packages
 
