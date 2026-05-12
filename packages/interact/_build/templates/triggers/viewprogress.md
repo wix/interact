@@ -1,8 +1,8 @@
-# ViewProgress Trigger Rules for @wix/interact
+# ViewProgress Trigger Rules for {{meta.packageName}}
 
-These rules help generate scroll-driven interactions using `@wix/interact`. ViewProgress triggers create animations that update continuously as elements move through the viewport, leveraging native CSS ViewTimelines where supported, and using a polyfill library where unsupported. Use when animation progress should be tied to the element's scroll position.
+These rules help generate scroll-driven interactions using `{{meta.packageName}}`. ViewProgress triggers create animations that update continuously as elements move through the viewport, leveraging native CSS ViewTimelines where supported, and using a polyfill library where unsupported. Use when animation progress should be tied to the element's scroll position.
 
-> **CRITICAL:** You MUST replace all usage of `overflow: hidden` with `overflow: clip` on every element between the trigger source element and the scroll container. `overflow: hidden` creates a new scroll context that breaks the ViewTimeline; `overflow: clip` clips overflow visually without affecting scroll ancestry. If using Tailwind, replace all `overflow-hidden` classes with `overflow-clip`.
+{{> pitfalls#overflow-clip-short}}
 
 **Offset semantics:** The `offset` inside `rangeStart`/`rangeEnd` is an object `{ unit: 'percentage', value: NUMBER }` where value is 0–100. For absolute lengths use `{ unit: 'px', value: NUMBER }` (or other CSS length units). Positive values move the effective range boundary forward along the scroll axis.
 
@@ -17,9 +17,9 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 ## Rule 1: ViewProgress with keyframeEffect or namedEffect
 
 **Use Case**: Scroll-driven CSS-based effects.
-
-**Multiple effects:** The `effects` array can contain multiple effects — all are driven by the same scroll progress. Use this to animate different targets or properties in sync with the same scroll position.
-
+{{#if trigger.flags.showMultipleEffectsNote}}
+{{> multiple-effects-note#viewProgress}}
+{{/if}}
 
 ### Template
 
@@ -54,19 +54,9 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 - `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
 - `[EFFECT_KEYFRAMES]` — array of keyframe objects defining CSS property values (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
 - `[RANGE_NAME]` — scroll range name:
-
-  - `'cover'` — full visibility span from first pixel entering to last pixel leaving.
-
-  - `'entry'` — the phase while the element is entering the viewport.
-
-  - `'exit'` — the phase while the element is exiting the viewport.
-
-  - `'contain'` — while the element is fully contained in the viewport. Typically used with a `position: sticky` container.
-
-  - `'entry-crossing'` — from the element's leading edge entering to its leading edge reaching the opposite side.
-
-  - `'exit-crossing'` — from the element's trailing edge reaching the start to its trailing edge leaving.
-
+{{#each effects.ranges as range}}
+  - `'{{range.key}}'` — {{range.value}}
+{{/each}}
 - `[START_PERCENTAGE]` — 0–100, starting point within the named range.
 - `[END_PERCENTAGE]` — 0–100, end point within the named range.
 - `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.

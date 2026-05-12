@@ -1,4 +1,4 @@
-# @wix/interact — Rules
+# {{meta.packageName}} — Rules
 
 Declarative configuration-driven interaction library. Binds animations to triggers via JSON config.
 
@@ -36,78 +36,27 @@ Each item here is CRITICAL — ignoring any of them will break animations.
 - **CRITICAL**: When using `viewEnter` trigger and source (trigger) and target (effect) elements are the **same element**, use ONLY `triggerType: 'once'`. For all other types (`'repeat'`, `'alternate'`, `'state'`) MUST use **separate** source and target elements — animating the observed element itself can cause it to leave/re-enter the viewport, leading to rapid re-triggers or the animation never firing.
 - **CRITICAL — `overflow: hidden` breaks `viewProgress`**: Replace with `overflow: clip` on all ancestors between source and scroll container. In Tailwind, replace `overflow-hidden` with `overflow-clip`.
 - **CRITICAL**: For `pointerMove` trigger MUST AVOID using the same element as both source and target with `hitArea: 'self'` and effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
-- **CRITICAL — Do NOT guess preset options**: If you don't know the expected type/structure for a `namedEffect` param, omit it — rely on defaults rather than guessing.
-- **Reduced motion**: Use conditions to provide gentler alternatives (shorter durations, fewer transforms, no perpetual motion) for users who prefer reduced motion. You can also set `Interact.forceReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches` to force a global reduced-motion behavior programmatically.
-- **Perspective**: Prefer `transform: perspective(...)` inside keyframes. Use the CSS `perspective` property only when multiple children share the same `perspective-origin`.
+{{> pitfalls#dont-guess-presets}}
+{{> pitfalls#reduced-motion}}
+{{> pitfalls#perspective}}
 
 ---
 
 ## Quick Start
 
-```bash
-npm install @wix/interact @wix/motion-presets
-```
+{{> quick-start#install}}
 
-Create the full config up-front and pass it in a single `create` call. Subsequent calls create new `Interact` instances. When creating multiple instances, each manages its own set of interactions independently — use separate instances for isolated component scopes or lazy-loaded sections.
+{{> quick-start#multiple-instances}}
 
-**Web (Custom Elements):**
+{{> quick-start#web}}
 
-```ts
-import { Interact } from '@wix/interact/web';
-const instance = Interact.create(config);
-```
+{{> quick-start#react}}
 
-The `config` object is an `InteractConfig` containing `interactions` (required), and optionally shared `effects`, `sequences`, and `conditions`.
+{{> quick-start#vanilla}}
 
-**React:**
+{{> quick-start#cdn}}
 
-- Wrap the `Interact.create()` call in a `useEffect` hook to prevent it from running on server-side.
-- Store the returned instance, and call its `.destroy()` method on the effect's cleanup function.
-
-```ts
-import { useEffect } from 'react';
-import { Interact } from '@wix/interact/react';
-
-useEffect(() => {
-  const instance = Interact.create(config);
-
-  return () => {
-    instance.destroy();
-  };
-}, [config]);
-```
-
-**Vanilla JS:**
-
-```ts
-import { Interact } from '@wix/interact';
-const instance = Interact.create(config);
-instance.add(element, 'hero'); // bind after element exists in DOM
-instance.remove('hero'); // unregister
-```
-
-**CDN (no build tools):**
-
-```html
-<script type="module">
-  import { Interact } from 'https://esm.sh/@wix/interact';
-  Interact.create(config);
-</script>
-```
-
-**Registering presets** — MUST be called before calling `Interact.create()` with usage of `namedEffect`:
-
-```ts
-import * as presets from '@wix/motion-presets';
-Interact.registerEffects(presets);
-```
-
-Or selectively:
-
-```ts
-import { FadeIn, ParallaxScroll } from '@wix/motion-presets';
-Interact.registerEffects({ FadeIn, ParallaxScroll });
-```
+{{> quick-start#register-presets}}
 
 ---
 
@@ -133,7 +82,7 @@ Interact.registerEffects({ FadeIn, ParallaxScroll });
 - MUST set `interactKey` to a unique string.
 
 ```tsx
-import { Interaction } from '@wix/interact/react';
+import { Interaction } from '{{meta.entry.react}}';
 
 <Interaction tagName="section" interactKey="hero" className="hero">
   ...
@@ -144,16 +93,7 @@ import { Interaction } from '@wix/interact/react';
 
 ## Config Structure
 
-```ts
-type InteractConfig = {
-  interactions: Interaction[]; // REQUIRED
-  effects?: Record<string, Effect>; // reusable effects referenced by effectId
-  sequences?: Record<string, SequenceConfig>; // reusable sequences by sequenceId
-  conditions?: Record<string, Condition>; // named conditions; keys are condition ids
-};
-```
-
-All cross-references (by id) MUST point to existing entries. Element keys MUST be stable for the config's lifetime.
+{{> config-structure#detailed}}
 
 ---
 
@@ -239,21 +179,15 @@ For `TimeEffect` (keyframe/named/custom effects), set `triggerType` on the effec
 
 | Type | hover behavior | click behavior |
 | :--- | :--- | :--- |
-| `'alternate'` (default) | Play on enter, reverse on leave | Alternate play/reverse per click |
-| `'repeat'` | Play on enter, stop and rewind on leave | Restart per click |
-| `'once'` | Play once on first enter only | Play once on first click only |
-| `'state'` | Play on enter, pause on leave | Toggle play/pause per click |
-
+{{#each computed.triggerTypeBehaviorRows as row}}| {{row.label}} | {{row.hoverShort}} | {{row.clickShort}} |
+{{/each}}
 
 **`stateAction`** — on `StateEffect`:
 
 | Action | hover behavior | click behavior |
 | :--- | :--- | :--- |
-| `'toggle'` (default) | Add style state on enter, remove on leave | Toggle style state per click |
-| `'add'` | Add style state on enter; leave does NOT remove | Add style state on click |
-| `'remove'` | Remove style state on enter | Remove style state on click |
-| `'clear'` | Clear/reset all style states on enter | Clear/reset all style states |
-
+{{#each computed.stateActionBehaviorRows as row}}| {{row.label}} | {{row.hoverShort}} | {{row.clickShort}} |
+{{/each}}
 
 ### viewEnter
 
@@ -263,7 +197,7 @@ params: {
   inset?: string;      // like view-timeline-inset, e.g. '-100px' or '-50px 0px'
 }
 // Playback behavior is set on each effect:
-effect.triggerType: 'once' | 'repeat' | 'alternate' | 'state';  // default: 'once'
+effect.triggerType: {{computed.triggerTypeUnion}};  // default: '{{triggers.viewEnter.defaultTriggerType}}'
 ```
 
 **CRITICAL:** When source and target are the **same element**, MUST use `triggerType: 'once'`. For `'repeat'` / `'alternate'` / `'state'`, ALWAYS use **separate** source and target elements — animating the observed element can cause it to leave/re-enter the viewport, causing rapid re-triggers.
@@ -295,14 +229,7 @@ params: {
 
 **`centeredToTarget`** — set `true` to remap the `0–1` progress range so that `0.5` progress corresponds to the center of the target element. Use when source and target are different elements, or when `hitArea: 'root'` is used, so that the pointer resting over the target center produces 50% progress regardless of position in viewport.
 
-**Progress object** (for `customEffect`):
-
-```ts
-{ x: number; y: number; v?: { x: number; y: number }; active?: boolean }
-// x, y: 0–1 normalized position within hit area
-// v: velocity vector (unbounded, typically -1 to 1 range at moderate speed; 0 = stationary)
-// active: whether pointer is within the active hit area
-```
+{{> progress-type#brief}}
 
 ### animationEnd
 
@@ -346,9 +273,9 @@ Each effect applies a visual change to a target element. An effect is either inl
 - `'add'`: concatenates transform/filter functions after any existing ones (e.g. existing `translateX(10px)` + added `translateY(20px)` → both apply).
 - `'accumulate'`: merges arguments of matching functions (e.g. `translateX(10px)` + `translateX(20px)` → `translateX(30px)`); non-matching functions concatenate like `'add'`.
 
-**`easing` guidance:** from `@wix/motion` (in addition to standard CSS easings):
+**`easing` guidance:** from `{{meta.motionPackage}}` (in addition to standard CSS easings):
 
-'linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out', 'sineIn', 'sineOut', 'sineInOut', 'quadIn', 'quadOut', 'quadInOut', 'cubicIn', 'cubicOut', 'cubicInOut', 'quartIn', 'quartOut', 'quartInOut', 'quintIn', 'quintOut', 'quintInOut', 'expoIn', 'expoOut', 'expoInOut', 'circIn', 'circOut', 'circInOut', 'backIn', 'backOut', 'backInOut', or any `'cubic-bezier(...)'` / `'linear(...)'` string.
+{{computed.easingList}}, or any `'cubic-bezier(...)'` / `'linear(...)'` string.
 
 ### Time-based Effect
 
@@ -385,7 +312,7 @@ Used with `viewProgress` and `pointerMove` triggers.
   centeredToTarget?: boolean;
   transitionDuration?: number; // ms, smoothing on progress jumps (primarily for pointerMove)
   transitionDelay?: number;    // ms (primarily for pointerMove)
-  transitionEasing?: 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce';
+  transitionEasing?: {{computed.transitionEasingUnion}};
   // + exactly one animation payload (see below)
 }
 ```
@@ -394,19 +321,12 @@ Used with `viewProgress` and `pointerMove` triggers.
 
 ```ts
 {
-  name?: 'cover' | 'entry' | 'exit' | 'contain' | 'entry-crossing' | 'exit-crossing';
+  name?: {{computed.rangeNameUnion}};
   offset?: { value: number; unit: 'percentage' | 'px' | 'vh' | 'vw' }
 }
 ```
 
-| Range name | Meaning |
-| :--- | :--- |
-| `cover` | full visibility span from first pixel entering to last pixel leaving. |
-| `entry` | the phase while the element is entering the viewport. |
-| `exit` | the phase while the element is exiting the viewport. |
-| `contain` | while the element is fully contained in the viewport. Typically used with a `position: sticky` container. |
-| `entry-crossing` | from the element's leading edge entering to its leading edge reaching the opposite side. |
-| `exit-crossing` | from the element's trailing edge reaching the start to its trailing edge leaving. |
+{{computed.rangeTable}}
 
 **Sticky container pattern** — for scroll-driven animations inside a stuck `position: sticky` container:
 
@@ -451,7 +371,7 @@ CSS property names use **camelCase** (e.g. `'backgroundColor'`, `'borderRadius'`
 
 Exactly one MUST be provided per time-based or scroll/pointer-driven effect:
 
-1. **`namedEffect`** (preferred) — pre-built presets from `@wix/motion-presets`. GPU-friendly and tuned.
+1. **`namedEffect`** (preferred) — pre-built presets from `{{meta.presetsPackage}}`. GPU-friendly and tuned.
 
    ```ts
    namedEffect: {
@@ -465,12 +385,7 @@ Exactly one MUST be provided per time-based or scroll/pointer-driven effect:
 
    Available presets:
 
-   | Category | Presets |
-   | :--- | :--- |
-   | Entrance | `FadeIn`, `GlideIn`, `SlideIn`, `FloatIn`, `RevealIn`, `ExpandIn`, `BlurIn`, `FlipIn`, `ArcIn`, `ShuttersIn`, `CurveIn`, `DropIn`, `FoldIn`, `ShapeIn`, `TiltIn`, `WinkIn`, `SpinIn`, `TurnIn`, `BounceIn` |
-   | Ongoing | `Pulse`, `Spin`, `Breathe`, `Bounce`, `Wiggle`, `Flash`, `Flip`, `Fold`, `Jello`, `Poke`, `Rubber`, `Swing`, `Cross` |
-   | Scroll | `FadeScroll`, `RevealScroll`, `ParallaxScroll`, `MoveScroll`, `SlideScroll`, `GrowScroll`, `ShrinkScroll`, `TiltScroll`, `PanScroll`, `BlurScroll`, `FlipScroll`, `SpinScroll`, `ArcScroll`, `ShapeScroll`, `ShuttersScroll`, `SkewPanScroll`, `Spin3dScroll`, `StretchScroll`, `TurnScroll` |
-   | Mouse | `TrackMouse`, `Tilt3DMouse`, `Track3DMouse`, `SwivelMouse`, `AiryMouse`, `ScaleMouse`, `BlurMouse`, `SkewMouse`, `BlobMouse` |
+{{computed.presetTable}}
    - **CRITICAL** — Scroll presets (`*Scroll`) used with `viewProgress` MUST include `range` in options: `'in'` (ends at idle state), `'out'` (starts from idle state), or `'continuous'` (passes through idle). Prefer `'continuous'`.
    - Mouse presets are preferred over `keyframeEffect` for `pointerMove` 2D effects.
 
@@ -495,67 +410,7 @@ Exactly one MUST be provided per time-based or scroll/pointer-driven effect:
 
 ## Sequences
 
-Coordinate multiple effects with staggered timing. Prefer sequences over manual delay stagger.
-
-### Sequence As type
-
-```ts
-{
-  effects: (Effect | EffectRef)[];      // REQUIRED
-  delay?: number;                       // ms before sequence starts
-  offset?: number;                      // ms between each child's animation start
-  offsetEasing?: string;                // easing curve for staggering offsets
-  sequenceId?: string;                  // for caching/referencing
-  conditions?: string[];                // ids referencing the top-level conditions map
-}
-```
-
-### Template
-
-```ts
-{
-  interactions: [
-    {
-      key: '[SOURCE_KEY]',
-      trigger: '[TRIGGER]',
-      params: [TRIGGER_PARAMS],
-      sequences: [
-        {
-          offset: [OFFSET_MS],           // optional
-          offsetEasing: '[OFFSET_EASING]', // optional
-          delay: [DELAY_MS],             // optional
-          effects: [
-            // if used `listContainer` each item in the list is a target of a child effect
-            {
-              effectId: '[EFFECT_ID]',
-              listContainer: '[LIST_CONTAINER_SELECTOR]',
-            },
-            // if multiple effects are given each generated effect is added to the sequence
-          ],
-        },
-      ],
-    },
-  ],
-  effects: {
-    '[EFFECT_ID]': {
-      // effect definition (namedEffect, keyframeEffect, or customEffect)
-    },
-  },
-}
-```
-
-### Variables
-
-- `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for web/vanilla, `interactKey` for React).
-- `[TRIGGER]` — any trigger for time-based animation effects (e.g., `'viewEnter'`, `'activate'`, `'interest'`).
-- `[TRIGGER_PARAMS]` — trigger-specific parameters (e.g., `{ type: 'once', threshold: 0.3 }`).
-- `[OFFSET_MS]` — ms between each child's animation start.
-- `[OFFSET_EASING]` — CSS easing string or named easing from `@wix/motion`.
-- `[DELAY_MS]` — optional. Base delay (ms) before the entire sequence starts.
-- `[EFFECT_ID]` — string key referencing an entry in the top-level `effects` map.
-- `[LIST_CONTAINER_SELECTOR]` — optional. CSS selector for the container whose children will be staggered.
-
-Reusable sequences can be defined in `InteractConfig.sequences` and referenced by `sequenceId`.
+{{> sequences#detailed}}
 
 ---
 
@@ -597,41 +452,19 @@ conditions: {
 Call `generate(config)` server-side or at build time and inject the result into the `<head>` (preferred), or insert to beginning of `<body>`, so it loads before the page content is painted:
 
 ```ts
-import { generate } from '@wix/interact/web';
+import { generate } from '{{meta.entry.web}}';
 const css = generate(config);
 ```
 
-**Append to `<head>` or beginning of `<body>`:**
-
-```html
-<style>
-  ${css}
-</style>
-```
+{{> fouc#code-inject}}
 
 ### Step 2: Mark elements
 
-**Web (Custom Elements):**
+{{> fouc#code-web}}
 
-```html
-<interact-element data-interact-key="hero" data-interact-initial="true">
-  <section class="hero">...</section>
-</interact-element>
-```
+{{> fouc#code-react}}
 
-**React:**
-
-```tsx
-<Interaction tagName="section" interactKey="hero" initial={true} className="hero">
-  ...
-</Interaction>
-```
-
-**Vanilla:**
-
-```html
-<section data-interact-key="hero" data-interact-initial="true" class="hero">...</section>
-```
+{{> fouc#code-vanilla}}
 
 ### Rules
 
@@ -644,49 +477,14 @@ const css = generate(config);
 
 ## Element Resolution
 
-For simple use cases, `key` on the interaction matches the element, and the same element is both trigger source and animation target. The fields below are only needed for advanced patterns (lists, delegated triggers, child targeting).
+{{> element-resolution#intro}}
 
-### Source element resolution (Interaction level)
+{{> element-resolution#source}}
 
-The source element is what the trigger attaches to. Resolved in priority order:
-
-1. **`listContainer` + `listItemSelector`** — trigger attaches to each element matching `listItemSelector` within the `listContainer`. Use `listItemSelector` only when you need to **filter** which children participate (e.g. select only `.active` items). If all immediate children should participate, omit `listItemSelector`.
-2. **`listContainer` only** — trigger attaches to each immediate child of the container. This is the common case for lists.
-3. **`listContainer` + `selector`** — trigger attaches to the element found via `querySelector` within each immediate child of the container.
-4. **`selector` only** — trigger attaches to all elements matching `querySelectorAll` within the root `<interact-element>`.
-5. **Fallback** — first child of `<interact-element>` (web) or the root element (react/vanilla).
-
-### Target element resolution (Effect level)
-
-The target element is what the effect animates. Resolved in priority order:
-
-1. **`Effect.key`** — the `<interact-element>` with matching `data-interact-key`.
-2. **Registry Effect's `key`** — if the effect is an `EffectRef`, the `key` from the referenced registry entry is used.
-3. **Fallback to `Interaction.key`** — the same `key` is used for the source will be used for the target.
-4. After resolving the root target, `selector`, `listContainer`, and `listItemSelector` on the effect further refine which child elements within that target are animated (same priority order as source resolution).
+{{> element-resolution#target}}
 
 ---
 
 ## Static API
 
-| Method / Property                   | Description                                                                                                   |
-| :---------------------------------- | :------------------------------------------------------------------------------------------------------------ |
-| `Interact.create(config)`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                   |
-| `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `create`.                                                |
-| `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                             |
-| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — force reduced-motion behavior regardless of OS setting.                        |
-| `Interact.allowA11yTriggers`        | `boolean` (default: `false`) — enable accessibility trigger variants (`interest`, `activate`).                |
-| `Interact.setup(options)`           | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below. |
-
-**`Interact.setup(options)`** — optional configuration object:
-
-| Option                 | Type                           | Description                                                           |
-| :--------------------- | :----------------------------- | :-------------------------------------------------------------------- |
-| `scrollOptionsGetter`  | `() => Partial<scrollConfig>`  | Function returning defaults for scroll-driven animation configuration |
-| `pointerOptionsGetter` | `() => Partial<PointerConfig>` | Function returning defaults for pointer-move animation configuration  |
-| `viewEnter`            | `Partial<ViewEnterParams>`     | Defaults for all viewEnter triggers (`threshold`,`inset`)             |
-| `allowA11yTriggers`    | `boolean`                      | Enable accessibility trigger variants (use `interest` and `activate`) |
-
-Use `setup()` when you need to override default observer thresholds or provide global configuration that applies to all interactions of a given trigger type.
-
-Each `Interact.create()` call returns an instance. Store instances and call `instance.destroy()` when no longer needed (e.g. on component unmount) to prevent stale listeners and memory leaks.
+{{> static-api#detailed}}

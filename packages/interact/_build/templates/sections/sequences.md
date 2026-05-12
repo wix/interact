@@ -1,4 +1,4 @@
-<!-- #detailed -->
+## detailed
 Coordinate multiple effects with staggered timing. Prefer sequences over manual delay stagger.
 
 ### Sequence As type
@@ -61,7 +61,7 @@ Coordinate multiple effects with staggered timing. Prefer sequences over manual 
 
 Reusable sequences can be defined in `InteractConfig.sequences` and referenced by `sequenceId`.
 
-<!-- #brief -->
+## brief
 Sequences coordinate multiple effects with staggered timing.
 
 ```typescript

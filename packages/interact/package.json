@@ -33,7 +33,7 @@
     "dev": "vite dev --open",
     "build": "rimraf dist && vite build && npm run build:types",
     "build:landing": "../../scripts/build-landing.sh",
-    "build:rules": "node scripts/build-rules.mjs",
+    "build:rules": "node _build/assemble.mjs",
     "build:types": "tsc -p tsconfig.build.json",
     "lint": "tsc --noEmit",
     "test": "vitest run",

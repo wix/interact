@@ -1,4 +1,4 @@
-<!-- #detailed -->
+## detailed
 | Method / Property                   | Description                                                                                                   |
 | :---------------------------------- | :------------------------------------------------------------------------------------------------------------ |
 | `Interact.create(config)`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                   |
@@ -21,7 +21,7 @@ Use `setup()` when you need to override default observer thresholds or provide g
 
 Each `Interact.create()` call returns an instance. Store instances and call `instance.destroy()` when no longer needed (e.g. on component unmount) to prevent stale listeners and memory leaks.
 
-<!-- #brief -->
+## brief
 Each `Interact.create(config)` call returns an instance. Keep a reference if you need to add/remove elements dynamically (vanilla JS) or to destroy a specific instance. Call `Interact.destroy()` to tear down all instances at once (e.g. on page navigation).
 
 | Method / Property                   | Description                                                                                  |

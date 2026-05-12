@@ -9,5 +9,5 @@ package-lock.json
 index.html
 .yarnrc.yml
 
-# Build pipeline fragments use <!-- #section --> markers that Prettier must not reformat
-packages/interact/_content/fragments/
+# Build pipeline templates use {{}} placeholders that Prettier must not reformat
+packages/interact/_build/templates/

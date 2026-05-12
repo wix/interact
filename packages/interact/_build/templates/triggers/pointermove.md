@@ -1,6 +1,6 @@
-# PointerMove Trigger Rules for @wix/interact
+# PointerMove Trigger Rules for {{meta.packageName}}
 
-These rules help generate pointer-driven interactions using `@wix/interact`. PointerMove triggers create real-time animations that respond to mouse movement over elements or the entire viewport.
+These rules help generate pointer-driven interactions using `{{meta.packageName}}`. PointerMove triggers create real-time animations that respond to mouse movement over elements or the entire viewport.
 
 ## Table of Contents
 
@@ -16,10 +16,7 @@ These rules help generate pointer-driven interactions using `@wix/interact`. Poi
 
 ## Trigger Source Elements with `hitArea: 'self'`
 
-When using `hitArea: 'self'`, the source element is the hit area for pointer tracking:
-
-- The source element **MUST NOT** have `pointer-events: none` — it needs to receive pointer events.
-- **CRITICAL**: MUST AVOID using the same element as both source and target with effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
+{{> pitfalls#hit-area-trigger}}
 
 ---
 
@@ -28,10 +25,7 @@ When using `hitArea: 'self'`, the source element is the hit area for pointer tra
 `params` object for `pointerMove` interactions:
 
 ```typescript
-type PointerMoveParams = {
-  hitArea?: 'root' | 'self';
-  axis?: 'x' | 'y';
-};
+type PointerMoveParams = {{computed.paramsType}};
 ```
 
 ### Properties
@@ -48,19 +42,7 @@ type PointerMoveParams = {
 
 ## Progress Object Structure
 
-When using `customEffect` with `pointerMove`, the progress parameter is an object:
-
-```typescript
-type Progress = {
-  x: number; // 0-1: horizontal position (0 = left edge, 1 = right edge)
-  y: number; // 0-1: vertical position (0 = top edge, 1 = bottom edge)
-  v?: {
-    x: number; // Horizontal velocity: negative = moving left, positive = moving right. Magnitude reflects speed.
-    y: number; // Vertical velocity: negative = moving up, positive = moving down. Magnitude reflects speed.
-  };
-  active?: boolean; // Whether mouse is currently in the hit area
-};
-```
+{{> progress-type#detailed}}
 
 ---
 
@@ -100,10 +82,10 @@ For devices with dynamic viewport sizes (e.g. mobile browsers where the address 
 
 ## Rule 1: namedEffect
 
-Use pre-built mouse presets from `@wix/motion-presets` that handle 2D mouse tracking internally. Mouse presets are preferred over `keyframeEffect` for 2D effects. Available mouse presets: `TrackMouse`, `Tilt3DMouse`, `Track3DMouse`, `SwivelMouse`, `AiryMouse`, `ScaleMouse`, `BlurMouse`, `SkewMouse`, `BlobMouse`.
-
-**Multiple effects:** The `effects` array can contain multiple effects — all share the same pointer tracking and fire together. Use this to animate different targets from the same pointer movement.
-
+Use pre-built mouse presets from `{{meta.presetsPackage}}` that handle 2D mouse tracking internally. Mouse presets are preferred over `keyframeEffect` for 2D effects. Available mouse presets: {{#each effects.presets.mouse as preset}}`{{preset}}`{{#if !last}}, {{/if}}{{/each}}.
+{{#if trigger.flags.showMultipleEffectsNote}}
+{{> multiple-effects-note#pointerMove}}
+{{/if}}
 
 ```typescript
 {
@@ -132,12 +114,12 @@ Use pre-built mouse presets from `@wix/motion-presets` that handle 2D mouse trac
 
 - `[SOURCE_KEY]` — identifier matching the element's key (`data-interact-key` for web, `interactKey` for React). The element that tracks pointer movement.
 - `[TARGET_KEY]` — identifier matching the element's key on the element to animate (can be same as source or different).
-- `[HIT_AREA]` — `'self'` (track pointer within source element) or `'root'` (track pointer anywhere in viewport).
-- `[NAMED_EFFECT_TYPE]` — a registered effect name, or a preset from `@wix/motion-presets` `mouse` library.
+- `[HIT_AREA]` — {{var.HIT_AREA}}
+- `[NAMED_EFFECT_TYPE]` — a registered effect name, or a preset from `{{meta.presetsPackage}}` `mouse` library.
 - `[EFFECT_PROPERTIES]` — preset-specific options. Refer to motion-presets rules for each preset's available options and their value types. Do NOT guess preset option names or types; omit unknown options and rely on defaults.
-- `[CENTERED_TO_TARGET]` — `true` or `false`. See **Centering with `centeredToTarget`** above.
-- `[TRANSITION_DURATION_MS]` — optional number. Milliseconds for smoothing (interpolating) between progress updates. The animation does not jump to the new progress value instantly; instead it transitions over this duration. Use to add inertia/lag to the effect, making it feel more physical (e.g. `200`–`600`).
-- `[TRANSITION_EASING]` — optional string. CSS easing or named easing from `@wix/motion`. Adds a natural deceleration feel when used with `transitionDuration`.
+- `[CENTERED_TO_TARGET]` — {{var.CENTERED_TO_TARGET}}
+- `[TRANSITION_DURATION_MS]` — {{var.TRANSITION_DURATION_MS}}
+- `[TRANSITION_EASING]` — {{var.TRANSITION_EASING}}
 
 ---
 
@@ -175,7 +157,7 @@ Use `keyframeEffect` when the pointer position along a single axis should drive 
 
 - `[SOURCE_KEY]` / `[TARGET_KEY]` / `[HIT_AREA]` — same as Rule 1.
 - `[AXIS]` — `'x'` (horizontal) or `'y'` (vertical). Defaults to `'y'` when omitted.
-- `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
+- `[EFFECT_NAME]` — {{var.EFFECT_NAME}}
 - `[KEYFRAMES]` — array of CSS keyframe objects (e.g. `[{ transform: 'rotate(-10deg)' }, { transform: 'rotate(0)' }, { transform: 'rotate(10deg)' }]`). Distributed evenly across 0–1 progress: first keyframe = progress 0 (left/top edge), last = progress 1 (right/bottom edge). Any number of keyframes is allowed.
 - `[CENTERED_TO_TARGET]` / `[TRANSITION_DURATION_MS]` / `[TRANSITION_EASING]` / `[UNIQUE_EFFECT_ID]` — same as Rule 1.
 

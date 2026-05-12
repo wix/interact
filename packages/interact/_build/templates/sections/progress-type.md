@@ -1,4 +1,4 @@
-<!-- #detailed -->
+## detailed
 When using `customEffect` with `pointerMove`, the progress parameter is an object:
 
 ```typescript
@@ -12,7 +12,7 @@ type Progress = {
   active?: boolean; // Whether mouse is currently in the hit area
 };
 ```
-<!-- #brief -->
+## brief
 **Progress object** (for `customEffect`):
 
 ```ts
