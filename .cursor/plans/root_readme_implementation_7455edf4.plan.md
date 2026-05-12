@@ -104,7 +104,7 @@ Same config, but using:
 
 ### 7. Common Patterns (Recipes)
 
-3-4 config-only snippets (no framework wrapper — just the `InteractConfig` object) for:
+3-5 config-only snippets (no framework wrapper — just the `InteractConfig` object) for:
 
 1. **Entrance animation** — `viewEnter` + `namedEffect: { type: 'FloatIn', direction: 'bottom', distance: '80px' }` + `triggerType: 'once'`
 2. **Click effect** — `click` + keyframes with `triggerType: 'in'` (enter) behavior

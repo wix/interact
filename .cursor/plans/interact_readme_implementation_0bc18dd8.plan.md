@@ -34,7 +34,6 @@ The existing [`packages/interact/README.md`](packages/interact/README.md) (385 l
 
 ## What NOT to Repeat (covered elsewhere)
 
-- Monorepo overview, architecture diagram, "which package" decision table → root README
 - Motion API details (`getWebAnimation`, `getScrubScene`, etc.) → Motion README
 - Preset catalog listing → motion-presets README
 
@@ -63,7 +62,7 @@ Sourced from `package.json` description. No emoji.
 
 - **Config-driven**: Define trigger-to-effect bindings in JSON — no imperative event wiring
 - **Web-native**: Built on WAAPI, ViewTimeline, and IntersectionObserver — no custom runtime
-- **Three entry points**: Vanilla JS, React, Web Components — same config shape across all
+- **Three entry points**: Web Components, React, Vanilla JS — same config shape across all
 - **AI-ready**: JSON configs are machine-readable — LLMs can generate and validate them
 - **Preset ecosystem**: Plug in `@wix/motion-presets` for 80+ ready-made effects
 - **Accessible**: Built-in `activate` (keyboard) and `interest` (focus) trigger variants
@@ -71,7 +70,7 @@ Sourced from `package.json` description. No emoji.
 ### 4. Install
 
 ```bash
-npm install @wix/interact @wix/motion-presets
+npm install @wix/interact
 ```
 
 Show with optional presets since it's the common path.
@@ -150,10 +149,11 @@ Brief descriptions of the four effect types (from [`src/types/effects.ts`](packa
 
 Config-only snippets (framework-agnostic `InteractConfig` objects):
 
-1. **Entrance animation** — `viewEnter` + `namedEffect` + `triggerType: 'once'`
-2. **Hover lift** — `hover` + inline `keyframeEffect` with transform + box-shadow
-3. **Scroll parallax** — `viewProgress` + `rangeStart`/`rangeEnd` cover offsets
-4. **Click toggle** — `click` + `stateAction: 'toggle'` + CSS transition
+1. **Entrance animation** — `viewEnter` + `namedEffect: { type: 'FloatIn', direction: 'bottom', distance: '80px' }` + `triggerType: 'once'`
+2. **Click effect** — `click` + keyframes with `triggerType: 'in'` (enter) behavior
+3. **Scroll-driven parallax** — `viewProgress` + `rangeStart`/`rangeEnd` with cover offsets
+4. **Hover toggle** — `hover` + `stateAction: 'toggle'` + CSS transition
+5. **Mouse aniamtion** - `pointerMove` + customEffect
 
 Each shows a valid, complete `InteractConfig` (with `interactions` + `effects`).
 
@@ -183,7 +183,6 @@ This is the **key differentiator** section — expanded and prominent:
   - Do not use `overflow: hidden` on scroll-tracked ancestors
   - Always include `generate()` + `initial` for entrance animations (FOUC)
   - Always call `registerEffects` before `Interact.create()`
-- **For repo-level agent context**: link to `AGENTS.md` / `CLAUDE.md` at root
 
 ### 13. Browser Support
 
@@ -202,10 +201,15 @@ Keep concise:
 
 ### 15. Documentation
 
-- Full API docs
-- Guides and tutorials
-- Examples gallery
-- Live playground
+Links to the [`docs/`](packages/interact/docs/) directory shipped with the package:
+
+- [**Getting Started**](docs/guides/getting-started.md)
+- [**API Reference**](docs/api/README.md) — `Interact` class, `InteractionController`, standalone functions, types
+- [**Guides**](docs/guides/README.md) — triggers, effects, configuration structure, state management, conditions
+- [**Examples**](docs/examples/README.md) — entrance animations, click interactions, hover effects, list patterns
+- [**React Integration**](docs/integration/react.md)
+- [**Web Components**](docs/guides/custom-elements.md)
+- [**Full Documentation Index**](docs/README.md)
 
 ### 16. License
 
