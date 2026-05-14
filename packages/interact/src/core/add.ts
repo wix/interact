@@ -692,7 +692,7 @@ function addInteraction<T extends TriggerType>(
       key: targetKey,
       effectId: (effect as Effect).effectId!,
       transition: (effect as StateEffect).transition,
-      properties: (effect as StateEffect).transitionProperties,
+      transitionProperties: (effect as StateEffect).transitionProperties,
       childSelector: getSelector(effect, {
         asCombinator: true,
         addItemFilter: true,

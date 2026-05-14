@@ -57,7 +57,7 @@ function getCSSAnimation(
   const namedEffect = getNamedEffect(animationOptions) as AnimationEffectAPI<any> | null;
 
   const animationsData = getCSSAnimationEffect(namedEffect, animationOptions);
-  const data = getEffectsData(animationsData, trigger, animationOptions.effectId);
+  const data = getEffectsData(animationsData, trigger, animationOptions.effectId, true);
   const isViewProgress = trigger?.trigger === 'view-progress';
 
   return data.map((item, index) => {

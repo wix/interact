@@ -18,9 +18,9 @@ Complete reference documentation for all public APIs in `@wix/interact`.
   - [Error handling](functions.md#error-handling) and [performance considerations](functions.md#performance-considerations)
 - [**remove(path)**](functions.md#remove) - Remove interactions from an element
   - [Cleanup behavior](functions.md#behavior-details) and [advanced usage](functions.md#advanced-usage)
-- [**generateCSS(config)**](functions.md#generate) - Generate CSS for hiding elements with entrance animations
-  - [SSR usage](functions.md#server-side-rendering-ssr) and [React integration](functions.md#with-react)
-  - [HTML setup](functions.md#html-setup) and [accessibility](functions.md#accessibility)
+- [**generate(config, useFirstChild?)**](functions.md#generate) - Generate complete CSS for all animations, transitions, scroll-driven effects, and FOUC prevention
+  - [What it generates](functions.md#what-it-generates), [benefits](functions.md#benefits), and [use cases](functions.md#use-cases)
+  - [FOUC prevention](functions.md#fouc-prevention-viewenter), [scroll-driven CSS](functions.md#scroll-driven-css-viewprogress), and [SSR](functions.md#server-side-rendering-ssr)
 - [**addListItems(root, key, listContainer, elements)**](functions.md#addlistitems) - Add interactions to new list items
   - [Manual list management](functions.md#manual-list-item-addition) and [batch operations](functions.md#batch-adding-items)
 - [**removeListItems(elements)**](functions.md#removelistitems) - Remove interactions from list items
@@ -80,7 +80,7 @@ import {
   Interact, // Main class
   add,
   remove, // Standalone functions
-  generate, // CSS generation for entrance animations
+  generate, // CSS generation for all animations, transitions, and scroll-driven effects
   InteractConfig, // Configuration type
   IInteractElement, // Custom element interface
 } from '@wix/interact';

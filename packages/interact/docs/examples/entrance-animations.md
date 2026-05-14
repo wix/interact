@@ -851,7 +851,9 @@ const testimonialConfig = {
 
 ## Preventing Flash of Unstyled Content (FOUC)
 
-When using entrance animations, elements may briefly appear before their animation starts (a "flash"). To prevent this, use the `generate()` function to create CSS that hides elements until their animation completes.
+When using entrance animations, elements may briefly appear before their animation starts (a "flash"). The `generate()` function produces complete CSS for all interactions in your config — including `@keyframes`, animation properties, scroll-driven timelines, and more. For `viewEnter` + `triggerType: 'once'` effects where source and target are the same element, it also emits FOUC-prevention rules that hide the element until its animation starts.
+
+> **Note**: `generate()` is not limited to FOUC prevention — it generates CSS for every interaction in the config. See the [generate() function documentation](../api/functions.md#generate) for the full scope.
 
 ### Server-Side Setup
 
@@ -909,7 +911,7 @@ const html = `
 
 ### HTML Markup
 
-Add `data-interact-initial="true"` to the `<interact-element>` that has a child that should be hidden until its entrance animation:
+Add `data-interact-initial="true"` to the `<interact-element>` that has a child that should be hidden until its entrance animation starts:
 
 ```html
 <interact-element data-interact-key="hero" data-interact-initial="true">
@@ -920,11 +922,11 @@ Add `data-interact-initial="true"` to the `<interact-element>` that has a child 
 </interact-element>
 ```
 
-### Accessibility
+### Why generate()?
 
-The generated CSS respects `prefers-reduced-motion`. Users who prefer reduced motion will see content immediately without waiting for animations.
+Beyond FOUC prevention, `generate()` produces all CSS needed for your animations — `@keyframes`, animation custom properties, scroll-driven timelines, state-effect rules, and more. Because the CSS uses attribute selectors (`[data-interact-key="..."]`), animations bind reactively as elements appear in the DOM. No DOM element references, no lifecycle management, no stale-reference bugs.
 
-See the [generate() function documentation](../api/functions.md#generate) for more details.
+See the [generate() function documentation](../api/functions.md#generate) for the full scope, benefits, and examples.
 
 ---
 

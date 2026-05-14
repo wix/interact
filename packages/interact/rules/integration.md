@@ -15,7 +15,7 @@ Rules for integrating `@wix/interact` into a webpage — binding animations and 
   - [Element Selection](#element-selection)
 - [Triggers](#triggers)
 - [Sequences](#sequences)
-- [Critical CSS (FOUC Prevention)](#critical-css-fouc-prevention)
+- [CSS Generation & FOUC Prevention](#css-generation--fouc-prevention)
 - [Static API](#static-api)
 
 ---
@@ -259,23 +259,10 @@ Define reusable sequences in `InteractConfig.sequences` and reference by `sequen
 
 ---
 
-## Critical CSS (FOUC Prevention)
+## CSS Generation & FOUC Prevention
 
-**Problem:** Elements with entrance animations (e.g. `FadeIn` on `viewEnter`) are initially visible in their final state. Before the animation framework applies the starting keyframe, the content flashes visibly — a flash of un-animated content (FOUC).
-
-**Solution:** Two things are required — both MUST be present:
-
-1. **Generate critical CSS** with `generate(config)` — produces CSS that hides entrance-animated elements until the animation plays.
-2. **Mark elements with `initial`** — `data-interact-initial="true"` on `<interact-element>`, or `initial={true}` on `<Interaction>` in React.
-
-Using only one of these has no effect — both are required.
-
-See [viewenter.md](./viewenter.md) for full details.
-
-**Rules:**
-
-- `generate()` should be called server-side or at build time. Can also be called on the client if page content is initially hidden (e.g. behind a loader).
-- Only valid for `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
+`generate(config, useFirstChild)` produces complete CSS for **all** interactions in the config — `@keyframes`, animation/transition custom properties, `view-timeline` declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules. Call it server-side or at build time and inject the result into `<head>`.
+The `useFirstChild` argument is a boolean flag which tells Interact whether to render `:first-child` selectors when using custom element (`web`) integration.
 
 ```javascript
 import { generate } from '@wix/interact/web';
@@ -289,6 +276,25 @@ const css = generate(config);
   ${css}
 </style>
 ```
+
+### FOUC Prevention (viewEnter + once)
+
+**Problem:** Elements with entrance animations (e.g. `FadeIn` on `viewEnter`) are initially visible in their final state. Before the animation framework applies the starting keyframe, the content flashes visibly — a flash of un-animated content (FOUC).
+
+**Solution:** Two things are required — both MUST be present:
+
+1. **Generate CSS** with `generate(config, useFirstChild)` — among all the rules it produces, it includes initial rules that hide entrance-animated elements until the animation starts.
+2. **Mark elements with `initial`** — `data-interact-initial="true"` on `<interact-element>`, or `initial={true}` on `<Interaction>` in React.
+
+Using only one of these has no effect — both are required.
+
+See [viewenter.md](./viewenter.md) for full details.
+
+**Rules:**
+
+- `generate()` should be called server-side or at build time. Can also be called on the client if page content is initially hidden (e.g. behind a loader).
+- `generate()` processes all interactions, not just `viewEnter`.
+- `initial` is only valid for `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
 
 **Web:**
 
