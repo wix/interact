@@ -53,6 +53,7 @@ npm versions for all 3 packages, MIT license badge, bundle size badge for `@wix/
 - Built on native browser APIs (WAAPI, ViewTimeline, pointer tracking) with support for custom animation runtime
 - Three entry points: Web Components, React, vanilla JS
 - Ready-made presets for common patterns (entrance, scroll, pointer, micro-interactions)
+- `generate()` emits complete CSS for the whole config (keyframes, view-timeline, transitions, FOUC rules) so animations are ready before JS runs — ideal for SSR / build-time output
 
 Add link to website (https://wix.github.io/interact/), and examples (https://wix.github.io/interact/examples.html)
 
@@ -82,7 +83,7 @@ Complete working example with:
 
 - `import { Interact } from '@wix/interact/web'`
 - `@wix/motion-presets` registration
-- `generate()` for FOUC prevention
+- `generate(config)` to pre-render complete CSS for all interactions (keyframes, view-timeline, FOUC rules); inject into `<head>`
 - A `viewEnter` + `FadeIn` named effect (most common use case)
 - `<interact-element data-interact-key="..." data-interact-initial="true">`
 - note on adding `inteteract-element { display: contents; }` to reset styles if desired for the `InteractElement` custom element to not participate in layout
@@ -139,7 +140,7 @@ Structured section with:
   - Do not invent `namedEffect` types — use only registered presets
   - Do not manually attach DOM event listeners — use triggers
   - `viewProgress` elements must not have `overflow: hidden` ancestors (use `overflow: clip`)
-  - Include `generate()` + `initial` for entrance animations to prevent FOUC
+  - Call `generate(config)` server-side or at build time and inject the CSS into `<head>` — produces native, JS-free CSS for the entire config. For `viewEnter` + `triggerType: 'once'` interactions, also set `initial` on the element to prevent FOUC
 - **For LLM context loading** — point to `AGENTS.md` / `CLAUDE.md` at repo root for full agent guidelines
 
 ### 10. Live Demo and Documentation

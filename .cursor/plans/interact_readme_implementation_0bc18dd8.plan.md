@@ -58,13 +58,14 @@ Sourced from `package.json` description. No emoji.
 
 ### 3. Why Interact? (Value Proposition)
 
-5-6 concise bullet points:
+6-7 concise bullet points:
 
 - **Config-driven**: Define trigger-to-effect bindings in JSON — no imperative event wiring
 - **Web-native**: Built on WAAPI, ViewTimeline, and IntersectionObserver — no custom runtime
 - **Three entry points**: Web Components, React, Vanilla JS — same config shape across all
 - **AI-ready**: JSON configs are machine-readable — LLMs can generate and validate them
 - **Preset ecosystem**: Plug in `@wix/motion-presets` for 80+ ready-made effects
+- **Pre-rendered CSS**: `generate(config)` emits complete CSS for the whole config — `@keyframes`, `view-timeline`, transitions, FOUC rules — so animations run natively before JS loads (SSR / build-time friendly)
 - **Accessible**: Built-in `activate` (keyboard) and `interest` (focus) trigger variants
 
 ### 4. Install
@@ -84,7 +85,7 @@ React example must include:
 - `import { Interact } from '@wix/interact/react'` + `Interaction` component
 - `registerEffects(presets)` before `Interact.create()`
 - `useEffect` + `instance.destroy()` cleanup
-- `generate(config)` for FOUC prevention
+- `generate(config, false)` to pre-render CSS for the entire config (keyframes, view-timeline, transitions, FOUC); inject into `<head>` so animations are ready before JS hydrates
 - `<Interaction tagName="div" interactKey="hero" initial>`
 - A `viewEnter` trigger with `namedEffect: { type: 'FadeIn' }`
 
@@ -107,8 +108,11 @@ All three export the same `Interact` class, `generate()`, types.
 A mermaid diagram showing the data flow:
 
 ```
-Config → Interact.create() → Trigger Observer → Effect Engine → Animation (via @wix/motion)
+Config ─┬─► Interact.create() ─► Trigger Observer ─► Effect Engine ─► Animation (via @wix/motion)
+        └─► generate() ────────► CSS (keyframes, view-timeline, transitions, FOUC) ─► <head>
 ```
+
+Brief callout: `generate(config)` runs at build time or on the server to emit complete CSS for the entire config — animations bind via attribute selectors and run natively before JS loads. The runtime engine then handles event triggers, `customEffect` callbacks, and lifecycle.
 
 Plus a concise annotated `InteractConfig` type block (from [`src/types/config.ts`](packages/interact/src/types/config.ts)):
 
@@ -165,7 +169,8 @@ Surface the top constraints from [`rules/full-lean.md`](packages/interact/rules/
 - Same element as source + target with `viewEnter` must use `triggerType: 'once'`
 - Hit-area transforms on hover/pointerMove can cause jitter — animate a child via `selector`
 - `registerEffects()` must be called before `Interact.create()` when using `namedEffect`
-- FOUC prevention requires **both** `generate(config)` and `initial` on elements
+- FOUC prevention requires **both** `generate(config)` injected into `<head>` and `initial` set on the `viewEnter` + `triggerType: 'once'` element
+- `generate(config, useFirstChild)` — pass `true` for `<interact-element>` (default), `false` for vanilla / React `<Interaction>`
 - `<interact-element>` must have exactly one child element (library targets `.firstElementChild`)
 
 ### 12. AI and Agent Support
@@ -181,7 +186,7 @@ This is the **key differentiator** section — expanded and prominent:
   - Do not invent `namedEffect` types — use only registered presets
   - Do not manually attach DOM event listeners — use triggers
   - Do not use `overflow: hidden` on scroll-tracked ancestors
-  - Always include `generate()` + `initial` for entrance animations (FOUC)
+  - Always pre-render CSS with `generate(config)` and inject into `<head>` (SSR / build-time). For `viewEnter` + `triggerType: 'once'`, also set `initial` on the element to prevent FOUC
   - Always call `registerEffects` before `Interact.create()`
 
 ### 13. Browser Support
