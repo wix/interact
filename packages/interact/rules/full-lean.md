@@ -22,7 +22,7 @@ Declarative configuration-driven interaction library. Binds animations to trigge
   - [Animation Payloads](#animation-payloads)
 - [Sequences](#sequences)
 - [Conditions](#conditions)
-- [FOUC Prevention](#fouc-prevention)
+- [CSS Generation & FOUC Prevention](#css-generation--fouc-prevention)
 - [Element Resolution](#element-resolution)
 - [Static API](#static-api)
 
@@ -582,25 +582,19 @@ conditions: {
 
 ---
 
-## FOUC Prevention
+## CSS Generation & FOUC Prevention
 
-**Problem:** Elements with entrance animations (e.g. `viewEnter` + `type: 'once'` with `FadeIn`) start in their final visible state. Before the animation framework initializes and applies the starting keyframe (e.g. `opacity: 0`), the element is briefly visible at full opacity — causing a flash of unstyled/un-animated content (FOUC).
+### Generating CSS
 
-**Solution:** Two things are required — both MUST be present:
-
-1. **Generate critical CSS** using `generate(config)` — produces CSS rules that hide entrance-animated elements from the moment the page renders.
-2. **Mark elements with `initial`** — tells the runtime which elements have critical CSS applied so it can coordinate with the generated styles.
-
-### Step 1: Generate CSS
-
-Call `generate(config)` server-side or at build time and inject the result into the `<head>` (preferred), or insert to beginning of `<body>`, so it loads before the page content is painted:
+Call `generate(config, useFirstChild)` server-side or at build time to produce complete CSS for **all** interactions in the config — including initial state for entrance effects triggered by `viewEnter`. The output includes `@keyframes`, animation/transition custom properties, `view-timeline` declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules.
+The `useFirstChild` argument is a boolean flag which tells Interact whether to render `:first-child` selectors when using custom element (`web`) integration.
 
 ```ts
 import { generate } from '@wix/interact/web';
 const css = generate(config);
 ```
 
-**Append to `<head>` or beginning of `<body>`:**
+Inject the result into the `<head>` (preferred), or beginning of `<body>`, so it loads before the page content is painted:
 
 ```html
 <style>
@@ -608,7 +602,18 @@ const css = generate(config);
 </style>
 ```
 
-### Step 2: Mark elements
+### FOUC Prevention (viewEnter + once)
+
+**Problem:** Elements with entrance animations (e.g. `viewEnter` + `triggerType: 'once'` with `FadeIn`) start in their final visible state. Before the animation framework initializes and applies the starting keyframe (e.g. `opacity: 0`), the element is briefly visible at full opacity — causing a flash of unstyled/un-animated content (FOUC).
+
+**Solution:** Two things are required — both MUST be present:
+
+1. **Generate CSS** using `generate(config, useFirstChild)` — among all the rules it produces, it includes initial rules that hide entrance-animated elements from the moment the page renders.
+2. **Mark elements with `initial`** — tells the runtime which elements have critical CSS applied so it can coordinate with the generated styles.
+
+**Step 1: Generate CSS** — see above.
+
+**Step 2: Mark elements**
 
 **Web (Custom Elements):**
 
@@ -632,11 +637,15 @@ const css = generate(config);
 <section data-interact-key="hero" data-interact-initial="true" class="hero">...</section>
 ```
 
+### Scroll-driven CSS (viewProgress)
+
+For `viewProgress` interactions, `generate()` emits `view-timeline` declarations and `animation-timeline`/`animation-range` properties.
+No `initial` attribute is needed for scroll-driven animations.
+
 ### Rules
 
 - `generate()` should be called server-side or at build time. Can also be called on client-side if page content is initially hidden (e.g. behind a loader/splash screen).
-- **Both** `generate(config)` CSS **and** `initial` on the element are required. Using only one has no effect.
-- `initial` is only valid for `viewEnter` + `type: 'once'` where source and target are the same element.
+- `initial` is only valid for `viewEnter` + `triggerType: 'once'` where source and target are the same element.
 - For `repeat`/`alternate`/`state`, do NOT use `initial`. Instead, manually apply the initial keyframe as inline styles on the target element and use `fill: 'both'`.
 
 ---

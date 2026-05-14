@@ -17,11 +17,13 @@ This document contains rules for generating interactions that respond to element
 
 ## Preventing Flash of Unstyled Content (FOUC)
 
+> **Note:** `generate(config)` produces complete CSS for **all** interactions in the config — `@keyframes`, animation/transition properties, scroll-driven timelines, state effects, and more — not only the FOUC-prevention rules described here. The generated CSS uses attribute selectors, so animations bind reactively as elements appear in the DOM without JS-managed DOM references. See the [generate() documentation](../docs/api/functions.md#generate) for the full scope.
+
 **Problem:** Elements with entrance animations (e.g. `FadeIn`) start in their final visible state (e.g. `opacity: 1`). Before the animation framework initializes and applies the starting keyframe (e.g. `opacity: 0`), the element is briefly visible at full opacity — a flash of un-animated content.
 
 **Solution:** Two things are required — **both** MUST be present for FOUC prevention to work:
 
-1. **Generate critical CSS** using `generate(config)` — produces CSS rules that hide entrance-animated elements from the moment the page renders, before JavaScript runs.
+1. **Generate CSS** using `generate(config)` — among all the CSS it produces, it includes initial rules that hide entrance-animated elements from the moment the page renders, before JavaScript runs.
 2. **Mark elements with `initial`** — set `data-interact-initial="true"` on `<interact-element>`, or `initial={true}` on the `<Interaction>` React component. This tells the runtime which elements have critical CSS applied.
 
 If only one of these is present, FOUC prevention will **not** work. Both the CSS and the `initial` attribute are required.
@@ -89,7 +91,7 @@ const css = generate(config);
 - `generate()` should be called server-side or at build time. Can also be called on the client if the page content is initially hidden (e.g. behind a loader/splash screen).
 - `initial` is only valid for `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
 - Do NOT use `initial` for `viewEnter` with `triggerType: 'repeat'`/`'alternate'`/`'state'`. For those, manually apply the initial keyframe as inline styles on the target element and use `fill: 'both'`.
-- If other interactions in the config also need FOUC prevention, `generate(config)` covers them all — set `initial` only on the relevant `viewEnter` + `triggerType: 'once'` elements.
+- `generate(config)` processes all interactions in the config, not just `viewEnter`. Set `initial` only on the relevant `viewEnter` + `triggerType: 'once'` elements.
 
 ## Rule 1: keyframeEffect / namedEffect (TimeEffect)
 

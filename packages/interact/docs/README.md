@@ -17,7 +17,7 @@ Welcome to the complete documentation for the `@wix/interact` package - a powerf
 - [**Core API**](api/README.md) - Main classes and functions
   - [Interact Class](api/interact-class.md) - Main interaction manager
   - [InteractionController](api/interaction-controller.md) - Controller for element interactions
-  - [Standalone Functions](api/functions.md) - `add()`, `remove()`, `generate()`
+  - [Standalone Functions](api/functions.md) - `add()`, `remove()`, `generate()` (complete CSS generation)
   - [Custom Element](api/interact-element.md) - `<interact-element>` API
   - [Element Selection](api/element-selection.md) - Selection priority and patterns
 - [**Type Definitions**](api/types.md) - TypeScript interfaces and types
