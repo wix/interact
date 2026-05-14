@@ -305,7 +305,7 @@ Each effect defines:
 
 > **Note**: Using `namedEffect` requires registering effects first with `Interact.registerEffects(...)` (presets from `@wix/motion-presets` or your own custom-made effects). See [Installation](#optional-animation-presets).
 
-> **Tip**: To prevent a flash of content before entrance animations start, use the `generate()` function to create CSS that hides elements until their animation triggers. See [Entrance Animations](../examples/entrance-animations.md#preventing-flash-of-unstyled-content-fouc) for details.
+> **Tip**: Call `generate(config)` to produce complete CSS for all interactions — `@keyframes`, animation properties, scroll-driven timelines, state effects, and FOUC-prevention rules. The generated CSS uses attribute selectors, so animations bind reactively as elements appear in the DOM without needing JS-managed DOM references. See [generate() documentation](../api/functions.md#generate) for details.
 
 ---
 

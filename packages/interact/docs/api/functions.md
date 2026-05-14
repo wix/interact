@@ -12,11 +12,11 @@ import { add, remove, generate } from '@wix/interact';
 
 ## Functions Overview
 
-| Function     | Purpose                                                   | Parameters                 | Returns  |
-| ------------ | --------------------------------------------------------- | -------------------------- | -------- |
-| `add()`      | Add interactions to an element                            | `element`, `key?`          | `void`   |
-| `remove()`   | Remove interactions from an element                       | `key`                      | `void`   |
-| `generate()` | Generate CSS for hiding elements with entrance animations | `config`, `useFirstChild?` | `string` |
+| Function     | Purpose                                                                          | Parameters                 | Returns  |
+| ------------ | -------------------------------------------------------------------------------- | -------------------------- | -------- |
+| `add()`      | Add interactions to an element                                                   | `element`, `key?`          | `void`   |
+| `remove()`   | Remove interactions from an element                                              | `key`                      | `void`   |
+| `generate()` | Generate complete CSS for all animations, transitions, and scroll-driven effects | `config`, `useFirstChild?` | `string` |
 
 ---
 
@@ -198,7 +198,7 @@ console.log('Interactions removed for hero');
 
 ## `generate(config, useFirstChild?)`
 
-Generates CSS styles needed to hide elements that have entrance animations with a `viewEnter` trigger and the default (or explicit) `triggerType: 'once'` on effects. This prevents a flash of unstyled content (FOUC) where elements briefly appear before their entrance animation starts.
+Generates a complete CSS string from an `InteractConfig`. The output includes `@keyframes`, animation and transition custom properties, view-timeline declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules — everything the browser needs to run the configured animations and transitions natively, without waiting for JavaScript.
 
 ### Signature
 
@@ -208,53 +208,85 @@ function generate(config: InteractConfig, useFirstChild?: boolean): string;
 
 ### Parameters
 
-**`config: InteractConfig`** - The interaction configuration; used to find `viewEnter` interactions whose time effects use `triggerType: 'once'` (the default) and build selectors.
+**`config: InteractConfig`** - The full interaction configuration. Every interaction in the config is processed — not just `viewEnter`.
 
-**`useFirstChild?: boolean`** - When `true`, targets the first child of each key (e.g. for `<interact-element>`). Default `false`.
+**`useFirstChild?: boolean`** - When `true` (the default), generated selectors target the first child of each keyed element (e.g. `[data-interact-key="hero"] > :first-child`). This is the correct mode for `<interact-element>` custom elements. Pass `false` when the keyed element itself is the animation target (vanilla JS or React `<Interaction>`).
 
 ### Returns
 
-**`string`** - A CSS string to inject into a `<style>` tag or stylesheet.
+**`string`** - A CSS string to inject into a `<style>` tag, adopted stylesheet, or inline `<style>` in the document `<head>`.
 
-### Generated CSS
+### What it generates
 
-The function generates CSS that:
+The output covers every CSS-expressible aspect of the configuration:
 
-1. **Respects reduced motion**: Wrapped in `@media (prefers-reduced-motion: no-preference)`.
-2. **Targets elements by key**: Selectors use `[data-interact-key="..."]` for each interaction key that has a `viewEnter` entrance with `triggerType: 'once'` (including the default).
-3. **Excludes completed animations**: Uses `:not([data-interact-enter])` so elements are shown after the animation runs.
+- **`@keyframes`** for every `namedEffect` and `keyframeEffect` across all interactions.
+- **Animation custom properties** (`--animation-*`, `--animation-composition-*`, `--animation-timeline-*`, `--animation-range-*`) that wire each effect to its target.
+- **`view-timeline` declarations** for `viewProgress` triggers, enabling native scroll-driven animations.
+- **Transition custom properties** for `StateEffect` CSS transitions.
+- **State selector rules** using `:state()`, `:--`, and `[data-interact-effect~=]` for state-driven style overrides.
+- **Coordinated-list aggregation rules** that combine animation/transition properties from multiple interactions targeting the same element, using CSS custom properties so they compose rather than override.
+- **FOUC-prevention initial rules** for `viewEnter` + `triggerType: 'once'` effects where source and target are the same element — these hide the target with `visibility: hidden` and neutral transform values until the animation starts (gated by `:not([data-interact-enter])`).
+- **Condition-gated rules** — `@media` wrappers for media-type conditions, and selector-based conditions appended to the element selector.
 
-**With `useFirstChild: false` (vanilla/React, element is the target)**:
+### Benefits
+
+- **No DOM element references needed.** The generated CSS uses attribute selectors (`[data-interact-key="..."]`, `:state()`, `[data-interact-effect~="..."]`) rather than JS-managed DOM references. Animations bind reactively as elements appear in the DOM — no `querySelector`, no cached element references, no observer wiring, no cleanup on unmount. This removes entire categories of error-prone JS: stale references, race conditions between element mount and JS initialization, and manual lifecycle management. The browser's style engine handles the binding.
+- **Reduced runtime JS.** CSS-expressible animations and transitions run natively on the compositor thread, freeing the main thread. Scroll-driven animations via `view-timeline` are especially beneficial — they run entirely in CSS without any JS scroll listeners.
+- **Instant first paint.** When injected in `<head>`, animations are ready before the page content is painted. No waiting for JS to load, parse, and execute.
+
+### Use cases
+
+1. **FOUC prevention** — hide entrance-animated elements (`viewEnter` + `triggerType: 'once'`) until their animation starts.
+2. **Pre-rendering scroll-driven animations** — `viewProgress` effects produce `view-timeline` + `animation-timeline` CSS that works before (or without) JS.
+3. **Reducing runtime JS overhead** — all CSS-expressible animations run natively; the runtime only handles `customEffect` callbacks and event-trigger wiring.
+4. **SSR / static-site generation** — generate CSS at build time or on the server and embed it in the HTML.
+5. **Declarative, reference-free animation binding** — no element queries, no reference caching; elements animate simply by having the right `data-interact-key` attribute in the DOM.
+
+### FOUC prevention (viewEnter)
+
+For entrance animations where the source and target are the same element, `generate()` emits an initial rule that hides the element until its animation starts. Two things are required:
+
+1. **Inject the generated CSS** into `<head>` (preferred) or the beginning of `<body>`.
+2. **Mark elements with `initial`** — set `data-interact-initial="true"` on the element, or use `initial={true}` on the React `<Interaction>` component.
+
+The initial rule uses `:not([data-interact-enter])` so the element becomes visible once the animation begins. This only applies to `viewEnter` interactions with `triggerType: 'once'` (the default for `viewEnter`).
+
+For `triggerType: 'repeat'`/`'alternate'`/`'state'`, do NOT use `initial`. Instead, manually apply the starting keyframe as inline styles on the target element and use `fill: 'both'`.
+
+**Generated FOUC CSS with `useFirstChild: false`:**
 
 ```css
-@media (prefers-reduced-motion: no-preference) {
-  [data-interact-key='hero']:not([data-interact-enter]) {
-    visibility: hidden;
-    transform: none;
-    translate: none;
-    scale: none;
-    rotate: none;
-  }
+[data-interact-key='hero']:is(:not([data-interact-enter])) {
+  visibility: hidden;
+  transform: none;
+  translate: none;
+  scale: none;
+  rotate: none;
 }
 ```
 
-**With `useFirstChild: true` (e.g. custom elements, first child is the target)**:
+**Generated FOUC CSS with `useFirstChild: true`:**
 
 ```css
-@media (prefers-reduced-motion: no-preference) {
-  [data-interact-key='hero'] > :first-child:not([data-interact-enter]) {
-    visibility: hidden;
-    transform: none;
-    translate: none;
-    scale: none;
-    rotate: none;
-  }
+[data-interact-key='hero'] > :first-child:is(:not([data-interact-enter])) {
+  visibility: hidden;
+  transform: none;
+  translate: none;
+  scale: none;
+  rotate: none;
 }
 ```
+
+### Scroll-driven CSS (viewProgress)
+
+For `viewProgress` interactions, `generate()` emits `view-timeline` declarations and `animation-timeline`/`animation-range` custom properties. This produces fully native scroll-driven animations that work before JavaScript loads — the browser drives the animation based on the element's scroll position, with zero JS overhead.
+
+No `initial` attribute is needed for scroll-driven animations.
 
 ### Examples
 
-#### Basic Usage
+#### Entrance animation (viewEnter)
 
 ```typescript
 import { Interact, generate } from '@wix/interact';
@@ -282,21 +314,101 @@ const config = {
   effects: {},
 };
 
-// Generate the CSS (pass true when using custom elements so first child is targeted)
 const css = generate(config, false);
 
-// Inject into page
 const styleElement = document.createElement('style');
 styleElement.textContent = css;
 document.head.appendChild(styleElement);
 
-// Create the Interact instance
 Interact.create(config);
 ```
 
-#### Server-Side Rendering (SSR)
+#### Scroll-driven animation (viewProgress)
 
-For SSR scenarios, generate the CSS on the server and include it in the initial HTML:
+```typescript
+import { generate } from '@wix/interact';
+
+const config = {
+  interactions: [
+    {
+      key: 'parallax-section',
+      trigger: 'viewProgress',
+      effects: [
+        {
+          keyframeEffect: {
+            name: 'parallax',
+            keyframes: [{ transform: 'translateY(50px)' }, { transform: 'translateY(-50px)' }],
+          },
+          rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+          rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+          fill: 'both',
+        },
+      ],
+    },
+  ],
+  effects: {},
+};
+
+const css = generate(config, false);
+// Produces @keyframes, view-timeline, animation-timeline, and animation-range CSS
+```
+
+#### Mixed config (multiple trigger types)
+
+```typescript
+const config = {
+  interactions: [
+    {
+      key: 'hero',
+      trigger: 'viewEnter',
+      effects: [
+        {
+          keyframeEffect: {
+            name: 'fade-in',
+            keyframes: [{ opacity: 0 }, { opacity: 1 }],
+          },
+          duration: 800,
+        },
+      ],
+    },
+    {
+      key: 'card',
+      trigger: 'hover',
+      effects: [
+        {
+          keyframeEffect: {
+            name: 'lift',
+            keyframes: [{ transform: 'translateY(-4px)' }],
+          },
+          duration: 200,
+          fill: 'both',
+        },
+      ],
+    },
+    {
+      key: 'progress-bar',
+      trigger: 'viewProgress',
+      effects: [
+        {
+          keyframeEffect: {
+            name: 'fill-bar',
+            keyframes: [{ width: '0%' }, { width: '100%' }],
+          },
+          rangeStart: { name: 'entry', offset: { unit: 'percentage', value: 0 } },
+          rangeEnd: { name: 'exit', offset: { unit: 'percentage', value: 100 } },
+          fill: 'both',
+        },
+      ],
+    },
+  ],
+  effects: {},
+};
+
+// generate() processes ALL interactions — viewEnter, hover, AND viewProgress
+const css = generate(config, false);
+```
+
+#### Server-Side Rendering (SSR)
 
 ```typescript
 // server.ts
@@ -304,14 +416,13 @@ import { generate, InteractConfig } from '@wix/interact';
 
 const config: InteractConfig = {
   interactions: [
-    /* your interactions */
+    /* all your interactions */
   ],
   effects: {},
 };
 
 const css = generate(config);
 
-// Include in your HTML template
 const html = `
 <!DOCTYPE html>
 <html>
@@ -319,7 +430,7 @@ const html = `
   <style>${css}</style>
 </head>
 <body>
-  <!-- Your content -->
+  <!-- Animations are ready before JS loads -->
 </body>
 </html>
 `;
@@ -327,7 +438,11 @@ const html = `
 
 ### HTML Setup
 
-Elements must have `data-interact-key` matching the interaction key in your config. When using `<interact-element>`, use `generate(config, true)` so the first child is targeted. With the React `Interaction` component, use `initial={true}` to set `data-interact-initial="true"` for FOUC prevention; the generated CSS still selects by `data-interact-key`.
+Elements must have `data-interact-key` matching the interaction key in your config.
+
+- **Custom elements (`<interact-element>`)**: use `generate(config, true)` (the default) so selectors target the first child.
+- **Vanilla JS / React**: use `generate(config, false)` so selectors target the keyed element directly.
+- **FOUC prevention**: for `viewEnter` + `triggerType: 'once'`, also set `data-interact-initial="true"` on the element (or `initial={true}` on the React `<Interaction>` component).
 
 ---
 

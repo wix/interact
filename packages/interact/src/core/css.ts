@@ -533,10 +533,11 @@ export function _generate(
  * Generates CSS for animations from an InteractConfig.
  *
  * @param config - The interact configuration containing effects and interactions
+ * @param useFirstChild - Whether to use the first child selector (default: true)
  * @returns string containing all of the CSS rules needed for time-based animations
  */
-export function generate(config: InteractConfig): string {
-  const { cssRules, keyframes } = _generate(config);
+export function generate(config: InteractConfig, useFirstChild: boolean = true): string {
+  const { cssRules, keyframes } = _generate(config, useFirstChild);
 
   const css = [
     ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),
