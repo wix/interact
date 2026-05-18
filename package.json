@@ -13,6 +13,9 @@
     "dev:demo": "yarn workspace @wix/interact-demo run dev",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
+    "build:context": "yarn workspace @wix/context-scripts run build",
+    "validate:context": "yarn workspace @wix/context-scripts run validate",
+    "test:context": "yarn workspace @wix/context-scripts run test",
     "serve": "npx serve apps/website -l 3000",
     "serve:public": "npx serve apps/website -l tcp://0.0.0.0:3000"
   },
@@ -44,7 +47,8 @@
   "homepage": "https://github.com/wix/interact#readme",
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "scripts"
   ],
   "engines": {
     "node": ">=18"

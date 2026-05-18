@@ -1,0 +1,15 @@
+{
+  "name": "@wix/context-scripts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build-context.js --all",
+    "validate": "node validate-context.js --all",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "ts-morph": "^25.0.0",
+    "vitest": "^4.0.14",
+    "yaml": "^2.7.0"
+  }
+}

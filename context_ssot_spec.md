@@ -31,10 +31,9 @@ This document is the detailed implementation spec for **Phase 0** of the [Contex
   - [3.5 Generated File Header](#35-generated-file-header)
 - [4. Validation Script (`scripts/validate-context.js`)](#4-validation-script-scriptsvalidate-contextjs)
   - [4.1 CLI Interface](#41-cli-interface)
-  - [4.2 Extraction Strategy](#42-extraction-strategy)
+  - [4.2 Extraction Strategy (ts-morph)](#42-extraction-strategy-ts-morph)
   - [4.3 What Gets Validated](#43-what-gets-validated)
   - [4.4 Report Format](#44-report-format)
-  - [4.5 Limitations and Future Considerations](#45-limitations-and-future-considerations)
 - [5. Directory Layout](#5-directory-layout)
 - [6. Gitignore and CI Strategy](#6-gitignore-and-ci-strategy)
 - [7. Root `package.json` Changes](#7-root-packagejson-changes)
@@ -241,7 +240,7 @@ The build script validates these constraints before producing output:
 | --------------------------------- | ----------- | ------------------------------------------------------------ |
 | Unique IDs                        | error       | No duplicate `id` values within a glossary                   |
 | Required fields present           | error       | Every term has `id`, `name`, `category`, `llm`, `human`      |
-| Valid category                    | error       | `category` is one of the enumerated values                   |
+| Valid category                     | error       | `category` is one of the enumerated values                   |
 | Params have required fields       | error       | Each param has `name`, `type`, `default`, `description`      |
 | Fields have required fields       | error       | Each field has `name`, `type`, `required`, `description`     |
 | Values have required fields       | error       | Each value has `value`, `description`                        |
@@ -522,8 +521,8 @@ These generate structured markdown from array fields:
 
 | Scenario                           | Behavior                                                      |
 | ---------------------------------- | ------------------------------------------------------------- |
-| Marker inside fenced code block    | **Not replaced.** The build script skips markers that appear between `` ``` `` fences. This allows documenting the marker syntax itself. |
-| Marker with unknown term ID        | **Build error.** The script exits with code 1 and reports the file, line number, and unresolved marker. |
+| Marker inside fenced code block    | **Not replaced.** The build script uses a simple toggle (flip state on lines starting with `` ``` `` or `~~~`) to detect code regions. |
+| Marker with unknown term ID        | **Build error.** The script exits with code 1 and reports the file and unresolved marker. |
 | Marker with unknown renderer       | **Build error.** Same as above.                               |
 | Term exists but requested field is empty/missing | **Build error** for required renderers (`llm`, `human`, `name`). **Renders as empty string** for optional fields (`code`, `caveats`, `signature`). When `params`, `fields`, or `values` is missing and a table renderer is called, renders the string `*No parameters.*`, `*No fields.*`, or `*No values.*` respectively. |
 | `{{include:...}}` target not found | **Build error.** Reports the missing file path.               |
@@ -619,9 +618,9 @@ For each package:
 3. **Discover templates.** Recursively glob `packages/<pkg>/context/templates/rules/**/*.md` and `packages/<pkg>/context/templates/docs/**/*.md`.
 
 4. **Process each template.**
-   - Read the file contents.
-   - Identify fenced code blocks (``` regions) and mark their line ranges as "skip zones."
-   - For each line outside skip zones, find all `{{...}}` markers using regex: `/(?<!\\)\{\{(term|include):([^}]+)\}\}/g`
+   - Read the file contents as an array of lines.
+   - Track code-fence state: toggle a boolean `inCodeBlock` on any line whose trimmed content starts with `` ``` `` or `~~~`. This is a simple parity toggle — no line-range bookkeeping needed.
+   - For each line where `inCodeBlock` is false, find all `{{...}}` markers using regex: `/(?<!\\)\{\{(term|include):([^}]+)\}\}/g`
    - For `term` markers: look up the term in the index, invoke the appropriate renderer, replace the marker with the output.
    - For `include` markers: read the referenced file relative to `context/templates/`, process it for markers (one level deep), and insert the result.
    - Collect any errors (unknown IDs, missing fields, missing includes).
@@ -638,16 +637,16 @@ Errors are collected per-file and reported together at the end, not one-at-a-tim
 
 ```
 ERROR in context/templates/rules/triggers.md:
-  Line 45: Unknown term ID "trigger-viewEntr" (did you mean "trigger-viewEnter"?)
-  Line 89: Term "effect-type-time" has no "values" field for renderer "values-table"
+  Unknown term ID "trigger-viewEntr"
+  Term "effect-type-time" has no "values" field for renderer "values-table"
 
 ERROR in context/templates/docs/guides/fouc.md:
-  Line 12: Include not found: "fragments/does-not-exist.md"
+  Include not found: "fragments/does-not-exist.md"
 
 Build failed: 3 errors in 2 files.
 ```
 
-The script provides "did you mean?" suggestions when an ID is close (Levenshtein distance ≤ 3) to an existing ID.
+No fuzzy matching or Levenshtein suggestions — the error messages are clear enough given the small glossary size. If an ID is wrong, the developer checks the glossary.
 
 ### 3.4 Output File Rules
 
@@ -674,64 +673,61 @@ This prevents accidental edits to generated files and points to the source.
 ### 4.1 CLI Interface
 
 ```bash
-node scripts/validate-context.js --package <name> [--all] [--fix] [--json]
+node scripts/validate-context.js --package <name> [--all] [--json]
 ```
 
 | Flag        | Description                                                    |
 | ----------- | -------------------------------------------------------------- |
 | `--package` | Package directory name. Repeatable.                            |
 | `--all`     | Validate all packages with a `context/` directory.             |
-| `--fix`     | Write corrected values back to glossary (future; not in v1).   |
 | `--json`    | Output report as JSON instead of human-readable text.          |
 
 **Exit codes:**
 - `0` — all checks pass.
 - `1` — one or more validation errors.
 
-### 4.2 Extraction Strategy
+### 4.2 Extraction Strategy (ts-morph)
 
-**Phase 0 uses regex-based extraction.** No additional dependencies.
+**Phase 0 uses `ts-morph` for TypeScript source analysis.** This replaces fragile regex-based parsing that would need to handle multi-line types, generics, union types, intersections, and conditional types — all patterns present in this codebase.
 
-The script extracts ground truth from TypeScript source using these patterns:
+`ts-morph` wraps the TypeScript compiler API in a high-level interface. It leverages the same `typescript` package already in the monorepo's devDependencies, so there is no version conflict or duplicate. It provides:
 
-**Type member extraction** (for verifying param/field names and types):
+- Reliable type/interface member enumeration (names, optionality)
+- Union type literal extraction (for enum validation)
+- Export symbol discovery (for API validation)
+- Proper resolution of type aliases, intersections, and re-exports
 
-```javascript
-// Match: name?: type;  or  name: type;
-/^\s*(\w+)(\?)?:\s*(.+?);/gm
-```
-
-Applied to the content of the type block identified by `sourceName` in the file at `sourceFile`.
-
-**Type block identification:**
+**How it's used:**
 
 ```javascript
-// Match: export type Name = { ... }  (handles multi-line)
-/export\s+type\s+NAME\s*=\s*\{([^}]*(?:\{[^}]*\}[^}]*)*)\}/s
+import { Project } from 'ts-morph';
+
+const project = new Project({
+  tsConfigFilePath: `packages/${pkg}/tsconfig.json`,
+  skipAddingFilesFromTsConfig: true,
+});
+
+project.addSourceFileAtPath(sourceFilePath);
+const sourceFile = project.getSourceFileOrThrow(sourceFilePath);
+
+// For type aliases: get properties
+const typeAlias = sourceFile.getTypeAlias(sourceName);
+const type = typeAlias.getType();
+const properties = type.getProperties();
+for (const prop of properties) {
+  const name = prop.getName();
+  const isOptional = prop.isOptional();
+}
+
+// For union types: get literal values
+if (type.isUnion()) {
+  const literals = type.getUnionTypes()
+    .filter(t => t.isStringLiteral())
+    .map(t => t.getLiteralValue());
+}
 ```
 
-Where `NAME` is the `sourceName` from the glossary entry.
-
-**Destructuring default extraction** (for verifying default values):
-
-```javascript
-// Match: name = defaultValue  in destructuring patterns
-/(\w+)\s*=\s*([^,}\n]+)/g
-```
-
-**Enum/union extraction** (for verifying enum values):
-
-```javascript
-// Match: | 'value'  in union types
-/'\s*([^']+)\s*'/g
-```
-
-**Fallback plan:** If regex extraction proves unreliable for a specific pattern (e.g., complex generic types, conditional types), the validation script should:
-1. Log a warning that the entry could not be automatically verified.
-2. Continue without failing the build.
-3. The entry gets flagged for manual review.
-
-If more than 30% of entries cannot be automatically verified, evaluate adding `ts-morph` as a devDependency. This decision is deferred to implementation.
+This approach is deterministic — no string parsing, no whitespace sensitivity, no false positives from formatting differences.
 
 ### 4.3 What Gets Validated
 
@@ -740,15 +736,19 @@ For each glossary entry that has both `sourceFile` and `sourceName`:
 | Check                  | What it does                                                                     | Severity |
 | ---------------------- | -------------------------------------------------------------------------------- | -------- |
 | File exists            | `sourceFile` resolves to an existing `.ts` file                                  | error    |
-| Symbol exists          | `sourceName` appears as an exported type/const/function in the file              | error    |
-| Param names match      | Every `params[].name` exists as a member of the source type                      | error    |
-| Param types match      | Each param's `type` matches the source type annotation (normalized, see below)   | warning  |
-| Field names match      | Every `fields[].name` exists as a member of the source type                      | error    |
-| Value members match    | Every `values[].value` appears in the source union type                          | error    |
-| No missing members     | Source type has no members missing from the glossary params/fields               | warning  |
+| Symbol exists          | `sourceName` is found as an exported type/interface/const/function               | error    |
+| Param names match      | Every `params[].name` exists as a property of the source type                    | error    |
+| Param optionality      | Each param's `required` matches whether the source property has `?`              | warning  |
+| Field names match      | Every `fields[].name` exists as a property of the source type                    | error    |
+| Value members match    | Every `values[].value` appears as a string literal in the source union type      | error    |
+| No missing members     | Source type has no properties missing from the glossary params/fields             | warning  |
 | Export still exists    | For `api` entries, the symbol is still exported from the package entry point      | warning  |
 
-**Type normalization:** Before comparing types, both the glossary type and the source type are normalized: whitespace is collapsed, `readonly` is stripped, import-path qualifiers are removed. This prevents false positives from formatting differences.
+**What is NOT validated** (to keep things reliable and avoid false positives):
+
+- **Type text matching** — The `type` field in the glossary is for human/LLM display, not a contract. ts-morph resolves to fully-qualified types that may differ in formatting from what we write in the glossary (e.g., `Fill` vs the resolved `"forwards" | "backwards" | "both" | "none"`). Comparing these would produce noise.
+- **Default values** — Defaults live in runtime code (destructuring, handler initialization), not in type definitions. Verifying them would require tracing control flow. Defaults are verified manually during the audit phase (Phase 1).
+- **Cross-file inherited members** — If a type extends another from a different file, only direct properties are checked. Inherited members require manual review.
 
 ### 4.4 Report Format
 
@@ -758,10 +758,10 @@ For each glossary entry that has both `sourceFile` and `sourceName`:
 Validating @wix/interact glossary (42 terms, 28 with sourceFile)...
 
 ✓ trigger-viewEnter — ViewEnterParams in src/types/triggers.ts — 3/3 params match
-✗ trigger-hover — no sourceFile (skipped)
+- trigger-hover — no sourceFile (skipped)
 ✗ config-InteractConfig — InteractConfig in src/types/config.ts
-    ERROR: param "effects" marked required=false in glossary but is required in source
-    WARNING: source has member "interactions" not listed in glossary fields
+    ERROR: glossary field "effects" marked required=false but source property is required
+    WARNING: source has property "interactions" not listed in glossary fields
 
 Summary: 26 passed, 1 error, 2 warnings, 14 skipped (no sourceFile)
 ```
@@ -778,7 +778,7 @@ Summary: 26 passed, 1 error, 2 warnings, 14 skipped (no sourceFile)
     {
       "termId": "config-InteractConfig",
       "check": "field-required",
-      "message": "param 'effects' marked required=false in glossary but is required in source",
+      "message": "glossary field 'effects' marked required=false but source property is required",
       "sourceFile": "src/types/config.ts",
       "sourceName": "InteractConfig"
     }
@@ -786,13 +786,6 @@ Summary: 26 passed, 1 error, 2 warnings, 14 skipped (no sourceFile)
   "warnings": []
 }
 ```
-
-### 4.5 Limitations and Future Considerations
-
-- **Default values from destructuring** can only be verified when the handler code uses destructuring with defaults (e.g., `{ threshold = 0.2 }`). Many defaults are applied elsewhere in the logic (e.g., in handler initialization). The script does not trace runtime logic — it only checks static destructuring patterns.
-- **Cross-file type resolution** is not supported. If a type extends or intersects another type from a different file, only the direct members are checked. Inherited members require manual review.
-- **Generic types** like `Record<string, Effect>` are compared as opaque strings after normalization. The script does not resolve generic parameters.
-- If the regex strategy proves insufficient, `ts-morph` can be added later. The validation script's internal architecture uses an `Extractor` interface (`extractTypeMembers(file, name) → Member[]`) that can be swapped without changing the rest of the script.
 
 ---
 
@@ -853,7 +846,7 @@ Rationale:
 - name: Verify context output is up to date
   run: |
     node scripts/build-context.js --all
-    git diff --exit-code rules/ docs/
+    git diff --exit-code packages/*/rules/ packages/*/docs/
 ```
 
 If someone edits the glossary or templates but forgets to re-run the build, CI catches it.
@@ -885,16 +878,17 @@ Per-package `package.json` files are **not modified**. The context scripts are m
 
 ## 8. Dependencies
 
-| Dependency | Purpose                        | Type       | Notes                             |
-| ---------- | ------------------------------ | ---------- | --------------------------------- |
-| `yaml`     | Parse YAML glossary files      | devDep     | Standard YAML parser; ~50KB       |
+| Dependency | Purpose                              | Type   | Notes                                          |
+| ---------- | ------------------------------------ | ------ | ---------------------------------------------- |
+| `yaml`     | Parse YAML glossary files            | devDep | Standard YAML parser; ~50KB                    |
+| `ts-morph` | TypeScript AST analysis (validation) | devDep | Wraps the TS compiler API; uses existing `typescript` devDep |
 
-No other new dependencies. The scripts use:
+The scripts also use:
 - `node:fs` / `node:path` / `node:process` — built-in
 - `node:url` — for `import.meta.url` resolution
-- Regex — for TypeScript source extraction (no ts-morph in v1)
+- `node:util` — for `parseArgs` (built-in since Node 18.3, available in this repo's Node 22)
 
-**The `yaml` package is added to the root `package.json` devDependencies**, not to individual packages.
+**Both packages are added to the root `package.json` devDependencies**, not to individual packages.
 
 ---
 
@@ -959,19 +953,20 @@ Phase 0 is complete when:
 
 2. **`scripts/validate-context.js` exists** and can:
    - Parse a `glossary.yaml` file
-   - For each term with `sourceFile`/`sourceName`, extract type members via regex
-   - Report mismatches between glossary entries and source code
+   - For each term with `sourceFile`/`sourceName`, use ts-morph to extract type properties
+   - Report mismatches between glossary entries and source code (missing/extra members, optionality)
    - Exit 0 on success, 1 on errors
 
-3. **Test fixture passes.** A minimal test glossary and template set (can live in `scripts/test-fixtures/` or be inline in the test) exercises:
-   - All six renderers (name, llm, human, params-table, fields-table, values-table, caveats-list, code, signature, returns)
+3. **Test fixture passes.** A Vitest test file (`scripts/build-context.test.js`) exercises:
+   - All renderers (name, llm, human, params-table, fields-table, values-table, caveats-list, code, signature, returns)
    - The `{{include:...}}` marker
    - Error cases: unknown term, missing field, include-not-found
    - Fenced-code-block skipping
+   - Test fixtures live in `scripts/test-fixtures/`
 
 4. **Root `package.json`** has `build:context` and `validate:context` scripts.
 
-5. **`yaml` devDependency** is installed at the root.
+5. **`yaml` and `ts-morph` devDependencies** are installed at the root.
 
 6. **No existing tests break.** Running `yarn test` at the root still passes.
 
