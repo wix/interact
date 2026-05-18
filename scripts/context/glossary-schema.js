@@ -107,6 +107,13 @@ function validateTerms(terms, errors, warnings) {
       validateTermValues(term.values, term.id ?? i, errors);
     }
 
+    const structuredKeys = ['params', 'fields', 'values'].filter((k) => Array.isArray(term[k]) && term[k].length > 0);
+    if (structuredKeys.length > 1) {
+      warnings.push(
+        `${termLabel}: has multiple structured fields (${structuredKeys.join(', ')}); only one of params/fields/values should be present`,
+      );
+    }
+
   });
 
   const allIds = new Set(terms.filter((t) => t.id).map((t) => t.id));

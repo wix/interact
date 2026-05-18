@@ -12,5 +12,14 @@ export function discoverPackages(flags) {
         return existsSync(contextDir) && statSync(contextDir).isDirectory();
       });
   }
-  return flags.package || [];
+
+  const names = flags.package || [];
+  for (const name of names) {
+    const pkgDir = join(PACKAGES_DIR, name);
+    if (!existsSync(pkgDir)) {
+      console.error(`Package directory not found: ${pkgDir}`);
+      process.exit(1);
+    }
+  }
+  return names;
 }

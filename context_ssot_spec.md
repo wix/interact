@@ -859,20 +859,20 @@ If someone edits the glossary or templates but forgets to re-run the build, CI c
 
 ## 7. Root `package.json` Changes
 
-Add two new scripts to the root `package.json`:
+The `scripts/` directory is registered as a Yarn workspace (`@wix/context-scripts`) with its own `package.json` that holds the `yaml`, `ts-morph`, and `vitest` devDependencies. Three new scripts delegate to it from the root:
 
 ```json
 {
   "scripts": {
-    "build:context": "node scripts/build-context.js --all",
-    "validate:context": "node scripts/validate-context.js --all"
-  }
+    "build:context": "yarn workspace @wix/context-scripts run build",
+    "validate:context": "yarn workspace @wix/context-scripts run validate",
+    "test:context": "yarn workspace @wix/context-scripts run test"
+  },
+  "workspaces": ["packages/*", "apps/*", "scripts"]
 }
 ```
 
-These sit alongside the existing `build`, `lint`, `test` scripts. They are not wired into the main `build` command — context building is a separate concern that runs less frequently than code builds.
-
-Per-package `package.json` files are **not modified**. The context scripts are monorepo-level tooling.
+This uses Yarn workspace delegation rather than direct `node` invocation so that dependencies resolve correctly through the workspace's own `package.json`. The scripts are not wired into the main `build` command — context building is a separate concern that runs less frequently than code builds.
 
 ---
 
@@ -885,10 +885,9 @@ Per-package `package.json` files are **not modified**. The context scripts are m
 
 The scripts also use:
 - `node:fs` / `node:path` / `node:process` — built-in
-- `node:url` — for `import.meta.url` resolution
 - `node:util` — for `parseArgs` (built-in since Node 18.3, available in this repo's Node 22)
 
-**Both packages are added to the root `package.json` devDependencies**, not to individual packages.
+**Dependencies live in `scripts/package.json`** (the `@wix/context-scripts` workspace), not in the root `package.json`.
 
 ---
 

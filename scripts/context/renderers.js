@@ -9,8 +9,10 @@ export function renderParamsTable(params) {
     const name = `\`${p.name}\``;
     const type = `\`${escapeCell(p.type)}\``;
     let def;
-    if (p.required === true || p.default === null) {
+    if (p.required === true) {
       def = '**required**';
+    } else if (p.default === null) {
+      def = p.required === false ? '—' : '**required**';
     } else if (p.default === 'undefined') {
       def = '—';
     } else {

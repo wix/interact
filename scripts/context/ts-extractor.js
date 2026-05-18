@@ -4,8 +4,12 @@ import { existsSync } from 'node:fs';
 
 export function createProject(packageDir) {
   const tsConfigPath = join(packageDir, 'tsconfig.json');
+  const hasTsConfig = existsSync(tsConfigPath);
+  if (!hasTsConfig) {
+    console.warn(`Warning: No tsconfig.json found at ${tsConfigPath} — using default compiler options`);
+  }
   const project = new Project({
-    tsConfigFilePath: existsSync(tsConfigPath) ? tsConfigPath : undefined,
+    tsConfigFilePath: hasTsConfig ? tsConfigPath : undefined,
     skipAddingFilesFromTsConfig: true,
   });
   return project;

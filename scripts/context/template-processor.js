@@ -2,10 +2,13 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { resolveRenderer } from './renderers.js';
 
-const MARKER_RE = /(?<!\\)\{\{(term|include):([^}]+)\}\}/g;
+const ESCAPE_PLACEHOLDER = '\x00ESC_BRACE\x00';
 
 function processMarkers(line, termIndex, templatesDir, errors, resolveIncludes, options = {}) {
-  return line.replace(MARKER_RE, (match, type, arg) => {
+  const markerRe = /(?<!\\)\{\{(term|include):([^}]+)\}\}/g;
+  const safeLineInput = line.replace(/\\\{\{/g, ESCAPE_PLACEHOLDER);
+
+  const processed = safeLineInput.replace(markerRe, (match, type, arg) => {
     if (type === 'term') {
       const dotIdx = arg.indexOf('.');
       if (dotIdx === -1) {
@@ -43,73 +46,78 @@ function processMarkers(line, termIndex, templatesDir, errors, resolveIncludes, 
       if (options.verbose) {
         console.log(`    {{include:${arg}}} → resolved`);
       }
-      return processInclude(fileContent, termIndex, templatesDir, errors);
+      return processLines(fileContent.split('\n'), termIndex, templatesDir, errors, false).result.join('\n');
     }
 
     return match;
   });
+
+  return processed.replaceAll(ESCAPE_PLACEHOLDER, '{{');
 }
 
-function processInclude(content, termIndex, templatesDir, errors) {
-  const lines = content.split('\n');
+function tryToggleFence(trimmed, currentFence) {
+  const fenceMatch = trimmed.match(/^(`{3,}|~{3,})/);
+  if (!fenceMatch) return { fence: currentFence, matched: false };
+
+  const fence = fenceMatch[1];
+  if (currentFence === null) {
+    return { fence, matched: true };
+  }
+  if (fence[0] === currentFence[0] && fence.length >= currentFence.length && trimmed.slice(fence.length).trim() === '') {
+    return { fence: null, matched: true };
+  }
+  return { fence: currentFence, matched: false };
+}
+
+function processLines(lines, termIndex, templatesDir, errors, resolveIncludes, options = {}) {
   const result = [];
-  let inCodeBlock = false;
+  let codeBlockFence = null;
 
   for (const line of lines) {
     const trimmed = line.trimStart();
-    if (trimmed.startsWith('```') || trimmed.startsWith('~~~')) {
-      inCodeBlock = !inCodeBlock;
+    const { fence, matched } = tryToggleFence(trimmed, codeBlockFence);
+    codeBlockFence = fence;
+
+    if (matched || codeBlockFence !== null) {
       result.push(line);
       continue;
     }
-    if (inCodeBlock) {
-      result.push(line);
-      continue;
-    }
-    result.push(processMarkers(line, termIndex, templatesDir, errors, false));
+
+    result.push(processMarkers(line, termIndex, templatesDir, errors, resolveIncludes, options));
   }
 
-  return result.join('\n');
+  return { result, unterminatedFence: codeBlockFence !== null };
 }
 
 export function processTemplate(content, termIndex, templatesDir, options = {}) {
   const errors = [];
   const lines = content.split('\n');
-  const result = [];
-  let inCodeBlock = false;
+
   let inFrontmatter = lines.length > 0 && lines[0].trim() === '---';
+  let frontmatterEnd = 0;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    if (inFrontmatter) {
-      result.push(line);
-      if (i > 0 && line.trim() === '---') {
-        inFrontmatter = false;
+  if (inFrontmatter) {
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i].trim() === '---') {
+        frontmatterEnd = i + 1;
+        break;
       }
-      continue;
     }
-
-    const trimmed = line.trimStart();
-    if (trimmed.startsWith('```') || trimmed.startsWith('~~~')) {
-      inCodeBlock = !inCodeBlock;
-      result.push(line);
-      continue;
+    if (frontmatterEnd === 0) {
+      errors.push('Unterminated frontmatter (opening --- without closing ---)');
+      frontmatterEnd = lines.length;
     }
-
-    if (inCodeBlock) {
-      result.push(line);
-      continue;
-    }
-
-    result.push(processMarkers(line, termIndex, templatesDir, errors, true, options));
   }
 
-  if (inCodeBlock) {
+  const frontmatterLines = lines.slice(0, frontmatterEnd);
+  const bodyLines = lines.slice(frontmatterEnd);
+
+  const { result: processedBody, unterminatedFence } = processLines(bodyLines, termIndex, templatesDir, errors, true, options);
+
+  if (unterminatedFence) {
     errors.push('Unterminated code fence (odd number of ``` or ~~~ lines)');
   }
 
-  const output = result.join('\n').replace(/\\\{\{/g, '{{');
-
+  const output = [...frontmatterLines, ...processedBody].join('\n');
   return { output, errors };
 }

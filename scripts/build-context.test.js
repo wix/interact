@@ -92,6 +92,19 @@ describe('glossary-schema', () => {
     expect(warnings.some((w) => w.includes('@motion/api-registerEffects'))).toBe(false);
   });
 
+  it('warns when term has multiple structured fields', () => {
+    const data = {
+      meta: { package: 'test', version: '1.0.0', lastAudit: '2026-01-01' },
+      terms: [{
+        id: 'x', name: 'x', category: 'trigger', llm: 'x', human: 'x',
+        params: [{ name: 'a', type: 'string', default: null, description: 'd' }],
+        fields: [{ name: 'b', type: 'string', required: true, description: 'd' }],
+      }],
+    };
+    const { warnings } = validateGlossary(data);
+    expect(warnings.some((w) => w.includes('params') && w.includes('fields'))).toBe(true);
+  });
+
   it('exports VALID_CATEGORIES', () => {
     expect(VALID_CATEGORIES).toContain('trigger');
     expect(VALID_CATEGORIES).toContain('preset');
@@ -125,6 +138,13 @@ describe('renderers', () => {
       const result = renderParamsTable(params);
       expect(result).toContain('**required**');
       expect(result).not.toContain('`foo`');
+    });
+
+    it('renders — when required: false with default: null', () => {
+      const params = [{ name: 'x', type: 'string', default: null, required: false, description: 'desc' }];
+      const result = renderParamsTable(params);
+      expect(result).toContain('—');
+      expect(result).not.toContain('**required**');
     });
 
     it('escapes pipe characters in type and description', () => {
@@ -351,10 +371,49 @@ describe('template-processor', () => {
     expect(errors.length).toBe(2);
   });
 
+  it('handles nested code fences (4-backtick wrapping 3-backtick)', () => {
+    const content = [
+      '# Test',
+      '````markdown',
+      '```typescript',
+      '{{term:trigger-hover.name}}',
+      '```',
+      '````',
+      '{{term:trigger-hover.name}}',
+    ].join('\n');
+    const { output, errors } = processTemplate(content, termIndex, TEMPLATES_DIR);
+    expect(errors).toHaveLength(0);
+    expect(output).toContain('{{term:trigger-hover.name}}');
+    expect(output).toMatch(/````\nhover$/m);
+  });
+
+  it('does not close backtick fence with tilde fence', () => {
+    const content = [
+      '```typescript',
+      '{{term:trigger-hover.name}}',
+      '~~~',
+      '{{term:trigger-hover.name}}',
+      '```',
+      '{{term:trigger-hover.name}}',
+    ].join('\n');
+    const { output, errors } = processTemplate(content, termIndex, TEMPLATES_DIR);
+    expect(errors).toHaveLength(0);
+    const lines = output.split('\n');
+    expect(lines[1]).toBe('{{term:trigger-hover.name}}');
+    expect(lines[3]).toBe('{{term:trigger-hover.name}}');
+    expect(lines[5]).toBe('hover');
+  });
+
   it('reports unterminated code fence', () => {
     const content = '# Title\n\n```typescript\nconst x = 1;\n';
     const { errors } = processTemplate(content, termIndex, TEMPLATES_DIR);
     expect(errors.some((e) => e.includes('Unterminated code fence'))).toBe(true);
+  });
+
+  it('warns on unterminated frontmatter', () => {
+    const content = '---\nname: test\nno closing delimiter\n';
+    const { errors } = processTemplate(content, termIndex, TEMPLATES_DIR);
+    expect(errors.some((e) => e.includes('Unterminated frontmatter'))).toBe(true);
   });
 
   it('preserves failed include marker in output', () => {
