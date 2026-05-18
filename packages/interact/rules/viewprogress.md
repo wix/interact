@@ -11,6 +11,7 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 - [Rule 1: ViewProgress with keyframeEffect or namedEffect](#rule-1-viewprogress-with-keyframeeffect-or-namedeffect)
 - [Rule 2: ViewProgress with customEffect](#rule-2-viewprogress-with-customeffect)
 - [Rule 3: ViewProgress with Tall Wrapper + Sticky Container (contain range)](#rule-3-viewprogress-with-tall-wrapper--sticky-container-contain-range)
+- [Pre-rendering Scroll-driven CSS with generate()](#pre-rendering-scroll-driven-css-with-generate)
 
 ---
 
@@ -142,3 +143,54 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 - `[END_PERCENTAGE]` — 0–100, end point within the `contain` range.
 - `[UNIQUE_EFFECT_ID]` — same as Rule 1.
 - `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.
+
+---
+
+## Pre-rendering Scroll-driven CSS with generate()
+
+Call `generate(config)` server-side or at build time to produce native scroll-driven CSS for `viewProgress` interactions. The generated output includes `view-timeline` declarations, `animation-timeline`/`animation-range` custom properties, and `@keyframes` — everything the browser needs to run scroll-driven animations without any JavaScript.
+
+```typescript
+import { generate } from '@wix/interact';
+
+const config = {
+  interactions: [
+    {
+      key: 'parallax-hero',
+      trigger: 'viewProgress',
+      effects: [
+        {
+          keyframeEffect: {
+            name: 'parallax',
+            keyframes: [{ transform: 'translateY(50px)' }, { transform: 'translateY(-50px)' }],
+          },
+          rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+          rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+          fill: 'both',
+        },
+      ],
+    },
+  ],
+  effects: {},
+};
+
+const css = generate(config, false);
+```
+
+Inject the resulting CSS into `<head>` so scroll-driven animations are ready before JS loads:
+
+```html
+<style>
+  ${css}
+</style>
+```
+
+**Benefits:**
+
+- **Zero JS scroll overhead.** The browser drives animations based on scroll position natively via CSS `view-timeline` — no JS scroll listeners, no `requestAnimationFrame` polling.
+- **No DOM references needed.** CSS attribute selectors (`[data-interact-key]`) bind to elements reactively as they appear in the DOM. No `querySelector`, no cached references, no lifecycle management.
+- **Instant first paint.** Animations work as soon as CSS is parsed, before JS loads or hydrates.
+
+No `initial` attribute is needed for scroll-driven animations — unlike `viewEnter` FOUC prevention, there is no flash-of-content concern since the animation is continuously driven by scroll position.
+
+> **Note:** `generate()` processes all interactions in the config, not just `viewProgress`. If your config also includes `viewEnter`, `hover`, `click`, or other triggers, CSS for those is generated too.
