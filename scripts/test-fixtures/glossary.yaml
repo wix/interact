@@ -84,6 +84,8 @@ terms:
         description: "Fires every time the trigger activates."
       - value: "alternate"
         description: "Alternates forward/reverse."
+      - value: "state"
+        description: "Applies CSS state via stateAction."
 
   - id: api-create
     name: Interact.create

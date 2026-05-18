@@ -1,10 +1,10 @@
 import { parseArgs } from 'node:util';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
-import { resolve, join, relative, dirname } from 'node:path';
+import { join, relative, dirname } from 'node:path';
 import { loadAndValidateGlossary, buildTermIndex } from './context/glossary-loader.js';
 import { processTemplate } from './context/template-processor.js';
 import { generateHeader } from './context/renderers.js';
-import { discoverPackages } from './context/cli-helpers.js';
+import { discoverPackages, PACKAGES_DIR } from './context/cli-helpers.js';
 
 const { values: flags } = parseArgs({
   options: {
@@ -15,9 +15,6 @@ const { values: flags } = parseArgs({
   },
   strict: true,
 });
-
-const REPO_ROOT = resolve(import.meta.dirname, '..');
-const PACKAGES_DIR = join(REPO_ROOT, 'packages');
 
 let packages;
 try {

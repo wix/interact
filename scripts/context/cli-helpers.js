@@ -1,8 +1,8 @@
 import { readdirSync, statSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 
-const REPO_ROOT = resolve(import.meta.dirname, '..', '..');
-const PACKAGES_DIR = join(REPO_ROOT, 'packages');
+export const REPO_ROOT = resolve(import.meta.dirname, '..', '..');
+export const PACKAGES_DIR = join(REPO_ROOT, 'packages');
 
 export function discoverPackages(flags) {
   if (flags.all) {

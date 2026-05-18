@@ -78,6 +78,8 @@ function processLines(lines, termIndex, templatesDir, errors, resolveIncludes, o
     const { fence, matched } = tryToggleFence(trimmed, codeBlockFence);
     codeBlockFence = fence;
 
+    // Skip marker processing on fence lines (matched=true covers both opening
+    // and closing fences) and on all lines inside a code block.
     if (matched || codeBlockFence !== null) {
       result.push(line);
       continue;
@@ -89,6 +91,11 @@ function processLines(lines, termIndex, templatesDir, errors, resolveIncludes, o
   return { result, unterminatedFence: codeBlockFence !== null };
 }
 
+/**
+ * Process a template string, resolving term markers and includes.
+ * Returns { output, errors } — output is always populated (even on error),
+ * so callers must check errors before using the output.
+ */
 export function processTemplate(content, termIndex, templatesDir, options = {}) {
   const errors = [];
   const lines = content.split('\n');

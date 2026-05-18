@@ -1,21 +1,19 @@
 import { parseArgs } from 'node:util';
 import { existsSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { join } from 'node:path';
 import { loadAndValidateGlossary } from './context/glossary-loader.js';
 import { createProject, validateTermAgainstSource } from './context/ts-extractor.js';
-import { discoverPackages } from './context/cli-helpers.js';
+import { discoverPackages, PACKAGES_DIR } from './context/cli-helpers.js';
 
 const { values: flags } = parseArgs({
   options: {
     package: { type: 'string', multiple: true },
     all: { type: 'boolean', default: false },
     json: { type: 'boolean', default: false },
+    verbose: { type: 'boolean', default: false },
   },
   strict: true,
 });
-
-const REPO_ROOT = resolve(import.meta.dirname, '..');
-const PACKAGES_DIR = join(REPO_ROOT, 'packages');
 
 function validatePackage(pkgName) {
   const pkgDir = join(PACKAGES_DIR, pkgName);
@@ -105,8 +103,13 @@ for (const pkgName of packages) {
     if (report.results) {
       for (const { term, errors, warnings } of report.results) {
         if (errors.length === 0 && warnings.length === 0) {
-          const memberCount = (term.params ?? term.fields ?? term.values ?? []).length;
-          console.log(`✓ ${term.id} — ${term.sourceName} in ${term.sourceFile}${memberCount ? ` — ${memberCount} members match` : ''}`);
+          const members = term.params ?? term.fields ?? term.values ?? [];
+          console.log(`✓ ${term.id} — ${term.sourceName} in ${term.sourceFile}${members.length ? ` — ${members.length} members match` : ''}`);
+          if (flags.verbose) {
+            for (const m of members) {
+              console.log(`    ✓ ${m.name ?? m.value}`);
+            }
+          }
         } else {
           console.log(`✗ ${term.id} — ${term.sourceName} in ${term.sourceFile}`);
           for (const e of errors) {

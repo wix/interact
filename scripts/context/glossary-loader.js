@@ -10,6 +10,10 @@ export function buildTermIndex(terms) {
   return index;
 }
 
+/**
+ * Parse a YAML glossary file and return the raw result.
+ * Not validated — use loadAndValidateGlossary for schema checks.
+ */
 export function loadGlossaryFromFile(filePath) {
   const raw = readFileSync(filePath, 'utf-8');
   try {

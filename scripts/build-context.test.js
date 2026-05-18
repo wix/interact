@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { resolve, join } from 'node:path';
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { validateGlossary, VALID_CATEGORIES } from './context/glossary-schema.js';
 import { buildTermIndex, loadGlossaryFromFile } from './context/glossary-loader.js';
 import {
@@ -123,6 +124,11 @@ describe('glossary-schema', () => {
     expect(VALID_CATEGORIES).toContain('trigger');
     expect(VALID_CATEGORIES).toContain('preset');
     expect(VALID_CATEGORIES).toHaveLength(7);
+  });
+
+  it('reports error for null data', () => {
+    const { errors } = validateGlossary(null);
+    expect(errors[0]).toContain('non-null object');
   });
 });
 
@@ -337,7 +343,18 @@ describe('template-processor', () => {
   });
 
   it('skips markers inside fenced code blocks', () => {
-    const content = readFileSync(join(TEMPLATES_DIR, 'rules/code-block-skip.md'), 'utf-8');
+    const content = [
+      '# Code Block Test',
+      '',
+      'Normal marker: {{term:trigger-hover.name}}',
+      '',
+      '```typescript',
+      '// This marker should NOT be replaced:',
+      '{{term:trigger-viewEnter.name}}',
+      '```',
+      '',
+      'After code block: {{term:trigger-hover.llm}}',
+    ].join('\n');
     const { output, errors } = processTemplate(content, termIndex, TEMPLATES_DIR);
     expect(errors).toHaveLength(0);
     expect(output).toContain('Normal marker: hover');
@@ -346,7 +363,13 @@ describe('template-processor', () => {
   });
 
   it('handles escaped markers', () => {
-    const content = readFileSync(join(TEMPLATES_DIR, 'rules/escaped.md'), 'utf-8');
+    const content = [
+      '# Escaped Markers',
+      '',
+      'This is a literal: \\{{term:trigger-viewEnter.name}}',
+      '',
+      'This is real: {{term:trigger-hover.name}}',
+    ].join('\n');
     const { output, errors } = processTemplate(content, termIndex, TEMPLATES_DIR);
     expect(errors).toHaveLength(0);
     expect(output).toContain('This is a literal: {{term:trigger-viewEnter.name}}');
@@ -410,7 +433,13 @@ describe('template-processor', () => {
   });
 
   it('collects multiple errors from one file', () => {
-    const content = readFileSync(join(TEMPLATES_DIR, 'rules/errors.md'), 'utf-8');
+    const content = [
+      '# Errors Test',
+      '',
+      'Unknown term: {{term:nonexistent-term.llm}}',
+      '',
+      'Unknown renderer: {{term:trigger-viewEnter.bad-renderer}}',
+    ].join('\n');
     const { errors } = processTemplate(content, termIndex, TEMPLATES_DIR);
     expect(errors.length).toBe(2);
   });
@@ -627,7 +656,7 @@ describe('integration — build pipeline', () => {
   });
 
   it('processes all fixture templates without errors', () => {
-    const templateFiles = ['rules/triggers.md', 'rules/config.md', 'rules/code-block-skip.md', 'docs/README.md'];
+    const templateFiles = ['rules/triggers.md', 'rules/config.md', 'docs/README.md'];
     for (const file of templateFiles) {
       const content = readFileSync(join(TEMPLATES_DIR, file), 'utf-8');
       const { errors } = processTemplate(content, termIndex, TEMPLATES_DIR);
@@ -643,5 +672,38 @@ describe('integration — build pipeline', () => {
     expect(output).toContain('`effects`');
     expect(output).toContain("| Value | Description |");
     expect(output).toContain("`'once'`");
+  });
+});
+
+describe('CLI integration', () => {
+  const scriptsDir = import.meta.dirname;
+
+  it('build-context.js exits 1 with no flags', () => {
+    let caught;
+    try {
+      execFileSync('node', [join(scriptsDir, 'build-context.js')], { encoding: 'utf-8', stdio: 'pipe' });
+    } catch (e) { caught = e; }
+    expect(caught).toBeDefined();
+    expect(caught.status).toBe(1);
+    expect(caught.stderr).toContain('No packages specified');
+  });
+
+  it('build-context.js exits 1 for nonexistent package', () => {
+    let caught;
+    try {
+      execFileSync('node', [join(scriptsDir, 'build-context.js'), '--package', 'nonexistent-pkg-xyz'], { encoding: 'utf-8', stdio: 'pipe' });
+    } catch (e) { caught = e; }
+    expect(caught).toBeDefined();
+    expect(caught.status).toBe(1);
+    expect(caught.stderr).toContain('Package directory not found');
+  });
+
+  it('validate-context.js exits 1 with no flags', () => {
+    let caught;
+    try {
+      execFileSync('node', [join(scriptsDir, 'validate-context.js')], { encoding: 'utf-8', stdio: 'pipe' });
+    } catch (e) { caught = e; }
+    expect(caught).toBeDefined();
+    expect(caught.status).toBe(1);
   });
 });

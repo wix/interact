@@ -1,5 +1,6 @@
 {
   "name": "@wix/context-scripts",
+  "description": "Context SSOT build tooling. Plain JS (no compile step) by design.",
   "private": true,
   "type": "module",
   "scripts": {
