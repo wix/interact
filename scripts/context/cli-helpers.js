@@ -17,8 +17,7 @@ export function discoverPackages(flags) {
   for (const name of names) {
     const pkgDir = join(PACKAGES_DIR, name);
     if (!existsSync(pkgDir)) {
-      console.error(`Package directory not found: ${pkgDir}`);
-      process.exit(1);
+      throw new Error(`Package directory not found: ${pkgDir}`);
     }
   }
   return names;

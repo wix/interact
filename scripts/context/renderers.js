@@ -74,6 +74,14 @@ export function renderSignature(signature) {
   return `\`${signature}\``;
 }
 
+export function generateHeader(relPath) {
+  return [
+    '<!-- GENERATED FILE — do not edit directly. Edit context/glossary.yaml and context/templates/ instead. -->',
+    `<!-- Built from: context/templates/${relPath} -->`,
+    '',
+  ].join('\n');
+}
+
 const TEXT_RENDERERS = {
   name: { field: 'name', required: true },
   llm: { field: 'llm', required: true },

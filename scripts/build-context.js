@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 
 import { resolve, join, relative, dirname } from 'node:path';
 import { loadAndValidateGlossary, buildTermIndex } from './context/glossary-loader.js';
 import { processTemplate } from './context/template-processor.js';
+import { generateHeader } from './context/renderers.js';
 import { discoverPackages } from './context/cli-helpers.js';
 
 const { values: flags } = parseArgs({
@@ -18,7 +19,13 @@ const { values: flags } = parseArgs({
 const REPO_ROOT = resolve(import.meta.dirname, '..');
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
 
-const packages = discoverPackages(flags);
+let packages;
+try {
+  packages = discoverPackages(flags);
+} catch (e) {
+  console.error(e.message);
+  process.exit(1);
+}
 
 const OUTPUT_SUBDIRS = ['rules', 'docs'];
 
@@ -43,14 +50,6 @@ function discoverTemplates(templatesDir) {
   }
 
   return files;
-}
-
-function generateHeader(templateRelPath) {
-  return [
-    '<!-- GENERATED FILE — do not edit directly. Edit context/glossary.yaml and context/templates/ instead. -->',
-    `<!-- Built from: context/templates/${templateRelPath} -->`,
-    '',
-  ].join('\n');
 }
 
 function buildPackage(pkgName) {

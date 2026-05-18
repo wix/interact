@@ -77,7 +77,13 @@ function validatePackage(pkgName) {
   };
 }
 
-const packages = discoverPackages(flags);
+let packages;
+try {
+  packages = discoverPackages(flags);
+} catch (e) {
+  console.error(e.message);
+  process.exit(1);
+}
 
 if (packages.length === 0) {
   console.error('No packages specified. Use --package <name> or --all.');

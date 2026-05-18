@@ -25,26 +25,25 @@ export function validateTermAgainstSource(term, project, packageDir) {
 
   const { sourceFile: relPath, sourceName } = term;
 
+  const absPath = resolve(packageDir, relPath);
+  if (!existsSync(absPath)) {
+    errors.push({ message: `Source file not found: ${relPath}`, check: 'file-exists' });
+    return { errors, warnings };
+  }
+
+  const sf = project.addSourceFileAtPathIfExists(absPath) ?? project.getSourceFile(absPath);
+  if (!sf) {
+    errors.push({ message: `Could not add source file: ${relPath}`, check: 'file-exists' });
+    return { errors, warnings };
+  }
+
+  const symbol = findSymbol(sf, sourceName);
+  if (!symbol) {
+    errors.push({ message: `Symbol "${sourceName}" not found in ${relPath}`, check: 'symbol-exists' });
+    return { errors, warnings };
+  }
+
   try {
-    const absPath = resolve(packageDir, relPath);
-    if (!existsSync(absPath)) {
-      errors.push({ message: `Source file not found: ${relPath}`, check: 'file-exists' });
-      return { errors, warnings };
-    }
-
-    // addSourceFileAtPathIfExists returns null if already added; fall back to getSourceFile for reuse
-    const sf = project.addSourceFileAtPathIfExists(absPath) ?? project.getSourceFile(absPath);
-    if (!sf) {
-      errors.push({ message: `Could not add source file: ${relPath}`, check: 'file-exists' });
-      return { errors, warnings };
-    }
-
-    const symbol = findSymbol(sf, sourceName);
-    if (!symbol) {
-      errors.push({ message: `Symbol "${sourceName}" not found in ${relPath}`, check: 'symbol-exists' });
-      return { errors, warnings };
-    }
-
     if (term.params || term.fields) {
       validateProperties(symbol, term, errors, warnings);
     }
@@ -53,15 +52,17 @@ export function validateTermAgainstSource(term, project, packageDir) {
       validateEnumValues(symbol, term, errors, warnings);
     }
   } catch (e) {
-    errors.push({ message: `ts-morph error for "${sourceName}" in ${relPath}: ${e.message}`, check: 'ts-morph' });
+    errors.push({ message: `Type analysis error for "${sourceName}" in ${relPath}: ${e.message}`, check: 'ts-morph' });
   }
 
   return { errors, warnings };
 }
 
 function findSymbol(sf, sourceName) {
-  if (sourceName.includes('.')) {
-    const [className, memberName] = sourceName.split('.');
+  const dotIdx = sourceName.indexOf('.');
+  if (dotIdx !== -1) {
+    const className = sourceName.slice(0, dotIdx);
+    const memberName = sourceName.slice(dotIdx + 1);
     const cls = sf.getClass(className);
     if (!cls) return null;
     return cls.getMethod(memberName) ?? cls.getProperty(memberName) ?? null;

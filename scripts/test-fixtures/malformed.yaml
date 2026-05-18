@@ -1,0 +1,5 @@
+meta:
+  package: test
+  bad: [unterminated
+terms:
+  - id: broken

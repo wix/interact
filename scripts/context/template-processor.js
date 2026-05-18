@@ -5,7 +5,7 @@ import { resolveRenderer } from './renderers.js';
 const ESCAPE_PLACEHOLDER = '\x00ESC_BRACE\x00';
 
 function processMarkers(line, termIndex, templatesDir, errors, resolveIncludes, options = {}) {
-  const markerRe = /(?<!\\)\{\{(term|include):([^}]+)\}\}/g;
+  const markerRe = /\{\{(term|include):([^}]+)\}\}/g;
   const safeLineInput = line.replace(/\\\{\{/g, ESCAPE_PLACEHOLDER);
 
   const processed = safeLineInput.replace(markerRe, (match, type, arg) => {

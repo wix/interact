@@ -12,7 +12,11 @@ export function buildTermIndex(terms) {
 
 export function loadGlossaryFromFile(filePath) {
   const raw = readFileSync(filePath, 'utf-8');
-  return parse(raw);
+  try {
+    return parse(raw);
+  } catch (e) {
+    throw new Error(`Failed to parse YAML in ${filePath}: ${e.message}`);
+  }
 }
 
 export function loadAndValidateGlossary(filePath) {

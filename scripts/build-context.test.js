@@ -11,9 +11,11 @@ import {
   renderCode,
   renderSignature,
   resolveRenderer,
+  generateHeader,
 } from './context/renderers.js';
 import { processTemplate } from './context/template-processor.js';
 import { createProject, validateTermAgainstSource } from './context/ts-extractor.js';
+import { discoverPackages } from './context/cli-helpers.js';
 
 const FIXTURES_DIR = resolve(import.meta.dirname, 'test-fixtures');
 const TEMPLATES_DIR = join(FIXTURES_DIR, 'templates');
@@ -105,6 +107,18 @@ describe('glossary-schema', () => {
     expect(warnings.some((w) => w.includes('params') && w.includes('fields'))).toBe(true);
   });
 
+  it('warns on contradictory default:null + required:false', () => {
+    const data = {
+      meta: { package: 'test', version: '1.0.0', lastAudit: '2026-01-01' },
+      terms: [{
+        id: 'x', name: 'x', category: 'trigger', llm: 'x', human: 'x',
+        params: [{ name: 'p', type: 'string', default: null, required: false, description: 'd' }],
+      }],
+    };
+    const { warnings } = validateGlossary(data);
+    expect(warnings.some((w) => w.includes('null') && w.includes('required'))).toBe(true);
+  });
+
   it('exports VALID_CATEGORIES', () => {
     expect(VALID_CATEGORIES).toContain('trigger');
     expect(VALID_CATEGORIES).toContain('preset');
@@ -145,6 +159,22 @@ describe('renderers', () => {
       const result = renderParamsTable(params);
       expect(result).toContain('—');
       expect(result).not.toContain('**required**');
+    });
+
+    it('renders **required** when required is omitted and default is null', () => {
+      const params = [{ name: 'x', type: 'string', default: null, description: 'desc' }];
+      const result = renderParamsTable(params);
+      expect(result).toContain('**required**');
+    });
+
+    it('renders falsy defaults correctly (0, false)', () => {
+      const params = [
+        { name: 'a', type: 'number', default: 0, description: 'zero' },
+        { name: 'b', type: 'boolean', default: false, description: 'false val' },
+      ];
+      const result = renderParamsTable(params);
+      expect(result).toContain('`0`');
+      expect(result).toContain('`false`');
     });
 
     it('escapes pipe characters in type and description', () => {
@@ -265,6 +295,20 @@ describe('renderers', () => {
     it('returns error for missing required field', () => {
       const result = resolveRenderer({ id: 'no-name' }, 'name');
       expect(result.error).toContain('no "name" field');
+    });
+  });
+
+  describe('generateHeader', () => {
+    it('produces a header pointing to the source template', () => {
+      const header = generateHeader('rules/triggers.md');
+      expect(header).toContain('GENERATED FILE');
+      expect(header).toContain('context/templates/rules/triggers.md');
+      expect(header).toMatch(/^<!--.*-->$/m);
+    });
+
+    it('ends with a blank line for clean separation', () => {
+      const header = generateHeader('docs/README.md');
+      expect(header.endsWith('\n')).toBe(true);
     });
   });
 });
@@ -422,6 +466,14 @@ describe('template-processor', () => {
     expect(errors.length).toBeGreaterThan(0);
     expect(output).toContain('{{include:fragments/does-not-exist.md}}');
   });
+
+  it('does not resolve includes inside included files (single-level nesting)', () => {
+    const content = '{{include:fragments/with-nested-include.md}}';
+    const { output, errors } = processTemplate(content, termIndex, TEMPLATES_DIR);
+    expect(errors).toHaveLength(0);
+    expect(output).toContain('Nested fragment content.');
+    expect(output).toContain('{{include:fragments/intro.md}}');
+  });
 });
 
 describe('ts-extractor', () => {
@@ -539,6 +591,30 @@ describe('ts-extractor', () => {
     const { warnings } = validateTermAgainstSource(term, project, SOURCE_DIR);
     expect(warnings.some((w) => w.message.includes('optional in source'))).toBe(true);
     expect(warnings[0].check).toBe('param-optionality');
+  });
+});
+
+describe('glossary-loader', () => {
+  it('throws a descriptive error for malformed YAML', () => {
+    const malformedPath = join(FIXTURES_DIR, 'malformed.yaml');
+    expect(() => loadGlossaryFromFile(malformedPath)).toThrow('Failed to parse YAML');
+  });
+});
+
+describe('cli-helpers', () => {
+  it('throws on nonexistent package name', () => {
+    expect(() => discoverPackages({ package: ['nonexistent-pkg-xyz'] }))
+      .toThrow('Package directory not found');
+  });
+
+  it('returns empty array when no packages have context/', () => {
+    const result = discoverPackages({ all: true });
+    expect(Array.isArray(result)).toBe(true);
+  });
+
+  it('returns empty array when no flags provided', () => {
+    const result = discoverPackages({});
+    expect(result).toEqual([]);
   });
 });
 

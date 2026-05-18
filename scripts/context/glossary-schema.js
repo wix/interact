@@ -31,14 +31,16 @@ function validateMeta(meta, errors) {
   if (err) errors.push(err);
 }
 
-function validateTermParams(params, termId, errors) {
+function validateTermParams(params, termId, errors, warnings) {
   params.forEach((param, i) => {
-    const err = checkRequiredKeys(
-      param,
-      REQUIRED_PARAM_FIELDS,
-      `term "${termId}" params[${i}]`,
-    );
+    const label = `term "${termId}" params[${i}]`;
+    const err = checkRequiredKeys(param, REQUIRED_PARAM_FIELDS, label);
     if (err) errors.push(err);
+    if (param.default === null && param.required === false) {
+      warnings.push(
+        `${label} ("${param.name}"): default is null (implies required) but required is false`,
+      );
+    }
   });
 }
 
@@ -96,7 +98,7 @@ function validateTerms(terms, errors, warnings) {
     }
 
     if (term.params && Array.isArray(term.params)) {
-      validateTermParams(term.params, term.id ?? i, errors);
+      validateTermParams(term.params, term.id ?? i, errors, warnings);
     }
 
     if (term.fields && Array.isArray(term.fields)) {
