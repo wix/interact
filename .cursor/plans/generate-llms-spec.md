@@ -24,11 +24,11 @@ Both files are generated (never hand-edited). The script runs at deploy time in 
 
 The script writes three files (all paths relative to repo root):
 
-| Output | Purpose |
-|---|---|
-| `llms.txt` | Deployed to site root; also the file that ships in the npm package |
-| `llms-full.txt` | Deployed to site root only |
-| `packages/interact/llms.txt` | Copy for npm package inclusion (identical to root `llms.txt`) |
+| Output                       | Purpose                                                            |
+| ---------------------------- | ------------------------------------------------------------------ |
+| `llms.txt`                   | Deployed to site root; also the file that ships in the npm package |
+| `llms-full.txt`              | Deployed to site root only                                         |
+| `packages/interact/llms.txt` | Copy for npm package inclusion (identical to root `llms.txt`)      |
 
 ### llms.txt format
 
@@ -58,6 +58,7 @@ Must conform to the llmstxt.org spec: exactly one H1, blockquote immediately aft
 ```
 
 Where:
+
 - `BASE_URL` = `https://wix.github.io/interact`
 - `{extracted description}` = the text on the line immediately following the `# ...` heading in each file (the first non-empty line after the H1). Trim to first sentence if longer than 120 chars.
 - `{N}` = line count of that file
@@ -97,6 +98,7 @@ New files added to the rules directory in the future are automatically discovere
 ## Determinism
 
 The script must produce **byte-identical output** given the same input files and package.json version. This means:
+
 - No timestamps, dates, or random values in output
 - File discovery uses sorted directory listing
 - Line counts are computed, not hardcoded
@@ -130,6 +132,7 @@ The script should export these for testability:
 ### Test cases
 
 **orderFiles**:
+
 - Current 7 files: returns `['full-lean.md', 'integration.md', 'click.md', 'hover.md', 'pointermove.md', 'viewenter.md', 'viewprogress.md']`
 - With unknown file `zebra.md`: appended after all known trigger files
 - With unknown files `aaa.md` and `zzz.md`: both appended alphabetically after known files
@@ -137,6 +140,7 @@ The script should export these for testability:
 - Only unknown files: returns them sorted alphabetically
 
 **extractDescription**:
+
 - Standard file (`# Title\n\nDescription line here`): returns `"Description line here"`
 - File with blank lines between heading and description: skips blanks, returns first non-empty line
 - File with no content after heading: returns empty string
@@ -144,6 +148,7 @@ The script should export these for testability:
 - Long description (>120 chars): truncated to first sentence (first `.` followed by space or EOL)
 
 **generateLlmsTxt**:
+
 - With the current 7 files: output starts with `# @wix/interact`, has `> ` blockquote, has `## Docs` with 2 entries, has `## Optional` with 6 entries (5 triggers + llms-full.txt link)
 - All URLs are absolute HTTPS
 - Line counts in parentheses match input
@@ -152,6 +157,7 @@ The script should export these for testability:
 - No trailing whitespace on any line
 
 **generateLlmsFullTxt**:
+
 - Header contains version and file count
 - Each file preceded by `--- {filename} ---` separator
 - Content of each file appears verbatim (byte-equal to input)
@@ -160,6 +166,7 @@ The script should export these for testability:
 - Total line count in header matches actual line count of body
 
 **Determinism**:
+
 - Calling `generateLlmsTxt` twice with same input produces identical output
 - Calling `generateLlmsFullTxt` twice with same input produces identical output
 

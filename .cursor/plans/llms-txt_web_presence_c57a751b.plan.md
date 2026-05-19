@@ -41,6 +41,7 @@ Surveyed the llms.txt ecosystem as of May 2026 to inform this plan:
 - **Registry**: [llms-txt-hub](https://github.com/thedaviddias/llms-txt-hub) (650+ entries) accepts submissions via web form at llmstxthub.com or PR with `.mdx` file in `packages/content/data/websites/`.
 
 **Design decisions informed by research**:
+
 - Two tiers (not three): our total corpus is ~2115 lines / ~65KB. PixiJS needs three tiers because their full docs are 29,000+ lines. For us, `full-lean.md` (700 lines) already serves as the "medium" read -- an agent can fetch just that one file. Adding a separate `llms-medium.txt` would duplicate it without value.
 - `## Optional` section: per the spec, this signals "skip these for shorter context." Trigger-specific files go here since `full-lean.md` already covers all triggers at a summary level. An agent only needs the trigger files for deep dives.
 - Absolute URLs throughout (not relative): GSAP uses relative paths, but those only resolve when fetched from their domain. Absolute URLs work everywhere -- in npm, in GitHub raw views, in agent tool output.
@@ -67,6 +68,7 @@ The deployment workflow ([`.github/workflows/interactdocs.yml`](.github/workflow
 A single ESM script that produces **both** files deterministically from the rules directory. This is the core of the "continuous development" strategy -- when rules change, re-running the script updates both outputs.
 
 **Design:**
+
 - Reads `packages/interact/rules/` directory
 - Produces `llms.txt` (table of contents) and `llms-full.txt` (concatenated content)
 - File discovery is **dynamic** (reads directory listing), but ordering is explicit via a priority list with a fallback for unknown files (alphabetical). New files get included automatically but appended at the end.
@@ -75,6 +77,7 @@ A single ESM script that produces **both** files deterministically from the rule
 - Plain ESM, no dependencies beyond `node:fs` and `node:path`.
 
 **File ordering** (optimized for truncation -- essentials first):
+
 1. `full-lean.md` -- the comprehensive reference, always first
 2. `integration.md` -- setup and framework patterns
 3. Trigger files alphabetically: `click.md`, `hover.md`, `pointermove.md`, `viewenter.md`, `viewprogress.md`
@@ -109,6 +112,7 @@ A single ESM script that produces **both** files deterministically from the rule
 ```
 
 Key structural decisions vs. previous plan:
+
 - **`## Docs` instead of `## Reference`**: aligns with PixiJS and the llmstxt.org example (FastHTML uses `## Docs`).
 - **Trigger files under `## Optional`**: per the spec, this section signals "can be skipped for shorter context." An agent reading only `## Docs` gets `full-lean.md` + `integration.md` (1034 lines) -- sufficient for most tasks. Trigger files are supplementary deep dives.
 - **`llms-full.txt` also under `## Optional`**: it's an alternative consumption path, not required.
@@ -127,10 +131,10 @@ Key structural decisions vs. previous plan:
 Edit [`.github/workflows/interactdocs.yml`](.github/workflows/interactdocs.yml) -- add after the rules copy (line 90):
 
 ```yaml
-          # Generate llms.txt files for AI agent discoverability
-          node scripts/generate-llms.mjs
-          cp llms.txt _site/llms.txt
-          cp llms-full.txt _site/llms-full.txt
+# Generate llms.txt files for AI agent discoverability
+node scripts/generate-llms.mjs
+cp llms.txt _site/llms.txt
+cp llms-full.txt _site/llms-full.txt
 ```
 
 This runs generation at deploy time so files are always in sync with the rules that ship. No need to commit generated files.
@@ -138,8 +142,8 @@ This runs generation at deploy time so files are always in sync with the rules t
 Also update the directory structure comment (lines 67-71) to document the new paths:
 
 ```yaml
-          # /llms.txt      -> AI agent discovery index (llmstxt.org standard)
-          # /llms-full.txt -> All rules concatenated for single-fetch consumption
+# /llms.txt      -> AI agent discovery index (llmstxt.org standard)
+# /llms-full.txt -> All rules concatenated for single-fetch consumption
 ```
 
 ### 3. Ship llms.txt in npm package
@@ -160,6 +164,7 @@ Add a single-line HTML comment at the top of [`packages/interact/rules/full-lean
 
 ```markdown
 <!-- AI: full docs index at https://wix.github.io/interact/llms.txt -->
+
 # @wix/interact -- Rules
 ```
 
@@ -176,6 +181,7 @@ Add to [`package.json`](package.json) scripts:
 ### 6. Submit to registries (manual, post-deploy)
 
 **llms-txt-hub** (primary): After deployment, submit via the web form at [llmstxthub.com](https://llmstxthub.com) (log in with GitHub). The submission requires:
+
 - Website URL: `https://wix.github.io/interact/`
 - llms.txt URL: `https://wix.github.io/interact/llms.txt`
 - llms-full.txt URL: `https://wix.github.io/interact/llms-full.txt`
