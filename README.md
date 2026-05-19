@@ -10,7 +10,7 @@ Web-native animation and interaction libraries — declarative, AI-ready, framew
 
 ## What is Interact?
 
-**Wix Interact** (`@wix/interact`) is a declarative interaction layer on top of **@wix/motion**. You describe *when* something should animate and *what* should happen in a JSON config — no manual event listeners, no imperative animation wiring.
+**Wix Interact** (`@wix/interact`) is a declarative interaction layer on top of **@wix/motion**. You describe _when_ something should animate and _what_ should happen in a JSON config — no manual event listeners, no imperative animation wiring.
 
 - **Config-driven** — bind triggers (`viewEnter`, `click`, `hover`, `viewProgress`, `pointerMove`, and more) to effects in one `InteractConfig` object
 - **Built on native browser APIs** — Web Animations API, `ViewTimeline`, pointer tracking, and CSS; with an optional custom animation runtime via `@wix/motion`
@@ -22,11 +22,11 @@ Web-native animation and interaction libraries — declarative, AI-ready, framew
 
 ## Packages
 
-| Package | Version | Description | Links |
-| --- | --- | --- | --- |
-| [`@wix/interact`](https://www.npmjs.com/package/@wix/interact) | 2.2.2 | Declarative interaction layer (main package) | [README](packages/interact/README.md) · [npm](https://www.npmjs.com/package/@wix/interact) |
-| [`@wix/motion`](https://www.npmjs.com/package/@wix/motion) | 2.1.5 | Low-level animation engine | [README](packages/motion/README.md) · [npm](https://www.npmjs.com/package/@wix/motion) |
-| [`@wix/motion-presets`](https://www.npmjs.com/package/@wix/motion-presets) | 1.0.2 | Ready-made animation presets | [npm](https://www.npmjs.com/package/@wix/motion-presets) · [preset rules](packages/motion-presets/rules/presets/presets-main.md) |
+| Package                                                                    | Version | Description                                  | Links                                                                                                                            |
+| -------------------------------------------------------------------------- | ------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| [`@wix/interact`](https://www.npmjs.com/package/@wix/interact)             | 2.2.2   | Declarative interaction layer (main package) | [README](packages/interact/README.md) · [npm](https://www.npmjs.com/package/@wix/interact)                                       |
+| [`@wix/motion`](https://www.npmjs.com/package/@wix/motion)                 | 2.1.5   | Low-level animation engine                   | [README](packages/motion/README.md) · [npm](https://www.npmjs.com/package/@wix/motion)                                           |
+| [`@wix/motion-presets`](https://www.npmjs.com/package/@wix/motion-presets) | 1.0.2   | Ready-made animation presets                 | [npm](https://www.npmjs.com/package/@wix/motion-presets) · [preset rules](packages/motion-presets/rules/presets/presets-main.md) |
 
 ```
 @wix/motion ← @wix/interact (declarative layer)
@@ -281,7 +281,8 @@ const config: InteractConfig = {
           customEffect: (element, progress) => {
             const x = progress.x * 100;
             const y = progress.y * 100;
-            (element as HTMLElement).style.background = `radial-gradient(circle at ${x}% ${y}%, rgba(255,255,255,0.15), transparent 50%)`;
+            (element as HTMLElement).style.background =
+              `radial-gradient(circle at ${x}% ${y}%, rgba(255,255,255,0.15), transparent 50%)`;
           },
         },
       ],
