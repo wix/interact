@@ -4,7 +4,7 @@ overview: Add llms.txt and llms-full.txt to the docs site for AI agent discovera
 todos:
   - id: gen-script
     content: Create `scripts/generate-llms.mjs` -- reads rules dir, produces both `llms.txt` and `llms-full.txt` deterministically
-    status: pending
+    status: completed
   - id: workflow
     content: Update `.github/workflows/interactdocs.yml` -- run generation script and copy outputs to `_site/`
     status: pending
