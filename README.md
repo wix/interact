@@ -1,56 +1,374 @@
-# Interact Monorepo
+# Wix Interact
 
-This repository hosts the Interact library, accompanying docs, and any supporting applications. It is structured as an npm workspace-powered monorepo with the following layout:
+Web-native animation and interaction libraries — declarative, AI-ready, framework-agnostic.
 
-- `packages/` for publishable libraries (starting with the core Interact library).
-- `apps/` for documentation, demos, and future experience-specific frontends.
-- Shared root tooling such as TypeScript configs, linting, and scripts.
+[![npm version](https://img.shields.io/npm/v/@wix/interact)](https://www.npmjs.com/package/@wix/interact)
+[![npm version](https://img.shields.io/npm/v/@wix/motion)](https://www.npmjs.com/package/@wix/motion)
+[![npm version](https://img.shields.io/npm/v/@wix/motion-presets)](https://www.npmjs.com/package/@wix/motion-presets)
+[![license](https://img.shields.io/npm/l/@wix/interact)](LICENSE)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@wix/interact)](https://bundlephobia.com/package/@wix/interact)
 
-## Getting Started
+## What is Interact?
 
-### Install dependencies
+**Wix Interact** (`@wix/interact`) is a declarative interaction layer on top of **@wix/motion**. You describe *when* something should animate and *what* should happen in a JSON config — no manual event listeners, no imperative animation wiring.
+
+- **Config-driven** — bind triggers (`viewEnter`, `click`, `hover`, `viewProgress`, `pointerMove`, and more) to effects in one `InteractConfig` object
+- **Built on native browser APIs** — Web Animations API, `ViewTimeline`, pointer tracking, and CSS; with an optional custom animation runtime via `@wix/motion`
+- **Three entry points** — Web Components (`@wix/interact/web`), React (`@wix/interact/react`), and vanilla JS (`@wix/interact`)
+- **Ready-made presets** — entrance, scroll, pointer, loop, and micro-interactions from `@wix/motion-presets`
+- **SSR-friendly CSS** — `generate(config)` emits complete CSS for the whole config (keyframes, view-timeline, transitions, FOUC rules) so animations can be ready before JS runs
+
+**Live site:** [wix.github.io/interact](https://wix.github.io/interact/) · **Examples gallery:** [wix.github.io/interact/examples.html](https://wix.github.io/interact/examples.html)
+
+## Packages
+
+| Package | Version | Description | Links |
+| --- | --- | --- | --- |
+| [`@wix/interact`](https://www.npmjs.com/package/@wix/interact) | 2.2.2 | Declarative interaction layer (main package) | [README](packages/interact/README.md) · [npm](https://www.npmjs.com/package/@wix/interact) |
+| [`@wix/motion`](https://www.npmjs.com/package/@wix/motion) | 2.1.5 | Low-level animation engine | [README](packages/motion/README.md) · [npm](https://www.npmjs.com/package/@wix/motion) |
+| [`@wix/motion-presets`](https://www.npmjs.com/package/@wix/motion-presets) | 1.0.2 | Ready-made animation presets | [npm](https://www.npmjs.com/package/@wix/motion-presets) · [preset rules](packages/motion-presets/rules/presets/presets-main.md) |
+
+```
+@wix/motion ← @wix/interact (declarative layer)
+@wix/motion ← @wix/motion-presets (ready-made effects)
+```
+
+## Quick Start
+
+Install the interaction layer and presets (presets are required when using `namedEffect`):
 
 ```bash
+npm install @wix/interact @wix/motion-presets
+```
+
+All examples below share this config — a `viewEnter` entrance using the `FadeIn` preset:
+
+```typescript
+import type { InteractConfig } from '@wix/interact';
+
+const config: InteractConfig = {
+  interactions: [
+    {
+      key: 'hero',
+      trigger: 'viewEnter',
+      params: { threshold: 0.2 },
+      effects: [{ effectId: 'hero-fade' }],
+    },
+  ],
+  effects: {
+    'hero-fade': {
+      duration: 800,
+      easing: 'ease-out',
+      fill: 'both',
+      triggerType: 'once',
+      namedEffect: { type: 'FadeIn' },
+    },
+  },
+};
+```
+
+> **Accuracy notes:** `effects` at the config top level is a reusable `Record<string, Effect>`. `add` and `remove` are standalone imports, not instance methods. Call `Interact.registerEffects(presets)` before `Interact.create()` when using `namedEffect`. `<interact-element>` must wrap exactly one child (the library targets `.firstElementChild`).
+
+### Web Components (recommended)
+
+Pre-render CSS with `generate()` to avoid a flash of unstyled content on entrance animations, then boot the runtime:
+
+```typescript
+import { Interact, generate } from '@wix/interact/web';
+import * as presets from '@wix/motion-presets';
+
+Interact.registerEffects(presets);
+
+const css = generate(config, true); // `true` = use :first-child selectors for <interact-element>
+document.head.insertAdjacentHTML('beforeend', `<style id="interact-critical">${css}</style>`);
+
+Interact.create(config);
+```
+
+```html
+<interact-element data-interact-key="hero" data-interact-initial="true">
+  <section class="hero">
+    <h1>Hello, Interact</h1>
+  </section>
+</interact-element>
+```
+
+```css
+/* Optional — keep the custom element from affecting layout */
+interact-element {
+  display: contents;
+}
+```
+
+### React
+
+Wrap `Interact.create()` in `useEffect` and destroy on cleanup. Use `<Interaction>` instead of raw elements:
+
+```tsx
+import { useEffect } from 'react';
+import { Interact, Interaction } from '@wix/interact/react';
+import * as presets from '@wix/motion-presets';
+
+function App() {
+  useEffect(() => {
+    Interact.registerEffects(presets);
+    const instance = Interact.create(config);
+
+    return () => {
+      instance.destroy();
+    };
+  }, []);
+
+  return (
+    <Interaction tagName="section" interactKey="hero" initial className="hero">
+      <h1>Hello, Interact</h1>
+    </Interaction>
+  );
+}
+```
+
+Inject `generate(config, false)` output into your document shell (e.g. Remix `links`, Next.js layout `<head>`) the same way as the Web Components example.
+
+### Vanilla JS
+
+```typescript
+import { Interact, add } from '@wix/interact';
+import * as presets from '@wix/motion-presets';
+
+Interact.registerEffects(presets);
+Interact.create(config);
+
+const hero = document.querySelector('.hero') as HTMLElement;
+add(hero, 'hero');
+```
+
+```html
+<section data-interact-key="hero" data-interact-initial="true" class="hero">
+  <h1>Hello, Interact</h1>
+</section>
+```
+
+Call `add(element, key)` after the element exists in the DOM. Use `remove(key)` to unregister a key.
+
+## Common Patterns
+
+Config-only recipes — each is a valid `InteractConfig` shape. Register presets before `Interact.create()` when using `namedEffect`.
+
+### Entrance animation
+
+```typescript
+const config: InteractConfig = {
+  interactions: [
+    {
+      key: 'card',
+      trigger: 'viewEnter',
+      params: { threshold: 0.15 },
+      effects: [{ effectId: 'card-float' }],
+    },
+  ],
+  effects: {
+    'card-float': {
+      duration: 900,
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fill: 'both',
+      triggerType: 'once',
+      namedEffect: { type: 'FloatIn', direction: 'bottom' },
+    },
+  },
+};
+```
+
+Set `data-interact-initial="true"` (or `initial` on `<Interaction>`) and inject `generate(config)` CSS for FOUC prevention.
+
+### Click effect
+
+```typescript
+const config: InteractConfig = {
+  interactions: [
+    {
+      key: 'button',
+      trigger: 'click',
+      effects: [
+        {
+          key: 'button',
+          triggerType: 'once',
+          fill: 'backwards',
+          duration: 400,
+          easing: 'ease-out',
+          keyframeEffect: {
+            name: 'button-pop',
+            keyframes: [
+              { transform: 'scale(1)' },
+              { transform: 'scale(0.92)' },
+              { transform: 'scale(1)' },
+            ],
+          },
+        },
+      ],
+    },
+  ],
+};
+```
+
+Use `trigger: 'activate'` instead of `click` for keyboard-accessible activation (Enter / Space).
+
+### Scroll-driven parallax
+
+```typescript
+const config: InteractConfig = {
+  interactions: [
+    {
+      key: 'parallax-bg',
+      trigger: 'viewProgress',
+      effects: [
+        {
+          key: 'parallax-bg',
+          namedEffect: { type: 'ParallaxScroll', speed: 0.5, range: 'continuous' },
+          rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+          rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+          easing: 'linear',
+          fill: 'both',
+        },
+      ],
+    },
+  ],
+};
+```
+
+Replace `overflow: hidden` with `overflow: clip` on ancestors between the element and the scroll container — `hidden` breaks `ViewTimeline`.
+
+### Hover toggle (CSS transition)
+
+```typescript
+const config: InteractConfig = {
+  interactions: [
+    {
+      key: 'card',
+      trigger: 'hover',
+      effects: [
+        {
+          key: 'card',
+          stateAction: 'toggle',
+          transition: {
+            duration: 200,
+            easing: 'ease-out',
+            styleProperties: [
+              { name: 'transform', value: 'scale(1.08)' },
+              { name: 'boxShadow', value: '0 12px 24px rgb(0 0 0 / 0.12)' },
+            ],
+          },
+        },
+      ],
+    },
+  ],
+};
+```
+
+Use `trigger: 'interest'` for accessible hover (mouse + keyboard focus).
+
+### Pointer-driven custom effect
+
+```typescript
+const config: InteractConfig = {
+  interactions: [
+    {
+      key: 'spotlight',
+      trigger: 'pointerMove',
+      params: { hitArea: 'root' },
+      effects: [
+        {
+          key: 'spotlight',
+          customEffect: (element, progress) => {
+            const x = progress.x * 100;
+            const y = progress.y * 100;
+            (element as HTMLElement).style.background = `radial-gradient(circle at ${x}% ${y}%, rgba(255,255,255,0.15), transparent 50%)`;
+          },
+        },
+      ],
+    },
+  ],
+};
+```
+
+## Configuration Schema
+
+```typescript
+type InteractConfig = {
+  interactions: Interaction[]; // REQUIRED
+  effects?: Record<string, Effect>;
+  sequences?: Record<string, SequenceConfig>;
+  conditions?: Record<string, Condition>;
+};
+
+type Interaction = InteractionTrigger & {
+  effects?: (Effect | EffectRef)[];
+  sequences?: (SequenceConfig | SequenceConfigRef)[];
+};
+
+// Triggers: hover | click | interest | activate | viewEnter | viewProgress |
+//           pointerMove | pageVisible | animationEnd
+
+// Effect discriminant (one per effect): keyframeEffect | namedEffect |
+//   customEffect | transition | transitionProperties
+```
+
+Each interaction needs at least one of `effects` or `sequences`. Types: [`config.ts`](packages/interact/src/types/config.ts). Full spec: [`full-lean.md`](packages/interact/rules/full-lean.md).
+
+## AI and Agent Support
+
+### Rules files
+
+**@wix/interact** (also on [GitHub Pages /rules/](https://wix.github.io/interact/rules/integration.md)):
+
+- [`integration.md`](packages/interact/rules/integration.md) — entry points, FOUC, static API
+- [`full-lean.md`](packages/interact/rules/full-lean.md) — complete config spec
+- [`viewenter.md`](packages/interact/rules/viewenter.md) · [`viewprogress.md`](packages/interact/rules/viewprogress.md)
+- [`hover.md`](packages/interact/rules/hover.md) · [`click.md`](packages/interact/rules/click.md) · [`pointermove.md`](packages/interact/rules/pointermove.md)
+
+**@wix/motion-presets** (repo only):
+
+- [`presets-main.md`](packages/motion-presets/rules/presets/presets-main.md) · [`entrance-presets.md`](packages/motion-presets/rules/presets/entrance-presets.md) · [`scroll-presets.md`](packages/motion-presets/rules/presets/scroll-presets.md) · [`ongoing-presets.md`](packages/motion-presets/rules/presets/ongoing-presets.md) · [`mouse-presets.md`](packages/motion-presets/rules/presets/mouse-presets.md)
+
+### Config generation guidelines
+
+- Always call `Interact.registerEffects(presets)` before `Interact.create()` when using `namedEffect`
+- Do not invent `namedEffect` types — use only registered presets (see preset rules above)
+- Do not attach DOM event listeners manually — express behavior through `trigger` and config
+- For `viewProgress`, avoid `overflow: hidden` on ancestors; use `overflow: clip` instead
+- Call `generate(config)` at build time or on the server and inject CSS into `<head>`. For `viewEnter` + `triggerType: 'once'`, also set `initial` on the element to prevent FOUC
+
+### Repository agent context
+
+For monorepo layout, dependency graph, and CLI conventions, see [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md).
+
+## Live Demo and Documentation
+
+- [Landing page](https://wix.github.io/interact/)
+- [Examples gallery](https://wix.github.io/interact/examples.html)
+- [Documentation](https://wix.github.io/interact/docs/)
+- [Playground](https://wix.github.io/interact/playground/)
+
+## Development
+
+**Prerequisites:** Node.js ≥ 18, Yarn 4.10.3. Use the repo’s Node version:
+
+```bash
+nvm use
 yarn install
-```
-
-### Building
-
-```bash
 yarn build
-```
-
-### Testing
-
-```bash
 yarn test
 ```
 
-## Running demo app
+**Local apps:**
 
 ```bash
-yarn dev:demo
+yarn dev:website    # landing + examples (http://localhost:3000)
+yarn dev:docs       # documentation app
+yarn dev:demo       # interactive demo app
+yarn workspace @wix/interact-playground run dev   # preset playground
 ```
 
-## Running documentation app
-
-```bash
-yarn dev:docs
-```
-
-## Tooling
-
-- `yarn lint` – runs ESLint across all packages and apps using the shared config.
-- `yarn format` – formats the repo with Prettier's shared settings.
-- `yarn format:check` – verifies formatting without writing changes.
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
-
-- Setting up your development environment
-- Reporting bugs and proposing features
-- Pull request process and code standards
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution workflow and standards.
 
 ## License
 
