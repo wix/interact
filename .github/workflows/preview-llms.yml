@@ -1,0 +1,75 @@
+name: Preview llms.txt
+
+on:
+  pull_request:
+    paths:
+      - 'packages/interact/rules/**'
+      - 'scripts/generate-llms.mjs'
+      - 'packages/interact/package.json'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+
+      - name: Generate llms.txt files
+        run: node scripts/generate-llms.mjs
+
+      - name: Post or update PR comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          MARKER='<!-- llms-txt-preview -->'
+
+          {
+            echo "$MARKER"
+            echo '### Generated `llms.txt` preview'
+            echo ''
+            echo '<details open>'
+            echo '<summary><code>llms.txt</code></summary>'
+            echo ''
+            echo '```markdown'
+            cat llms.txt
+            echo '```'
+            echo ''
+            echo '</details>'
+            echo ''
+            echo '<details>'
+            echo '<summary><code>llms-full.txt</code> header</summary>'
+            echo ''
+            echo '```'
+            head -3 llms-full.txt
+            echo '```'
+            echo ''
+            echo '</details>'
+            echo ''
+            echo '> Run `node scripts/generate-llms.mjs` locally to inspect the full output.'
+          } > /tmp/comment.md
+
+          COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+            --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
+            | head -1)
+
+          if [ -n "$COMMENT_ID" ]; then
+            jq -Rs '{body: .}' /tmp/comment.md | \
+              gh api "repos/${REPO}/issues/comments/${COMMENT_ID}" -X PATCH --input -
+          else
+            gh pr comment "$PR_NUMBER" --body-file /tmp/comment.md
+          fi
