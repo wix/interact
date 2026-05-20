@@ -223,7 +223,7 @@ const config: InteractConfig = {
       effects: [
         {
           key: 'parallax-bg',
-          namedEffect: { type: 'ParallaxScroll', speed: 0.5, range: 'continuous' },
+          namedEffect: { type: 'ParallaxScroll', speed: 0.5 },
           rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
           rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
           easing: 'linear',
@@ -282,7 +282,7 @@ const config: InteractConfig = {
             const x = progress.x * 100;
             const y = progress.y * 100;
             (element as HTMLElement).style.background =
-              `radial-gradient(circle at ${x}% ${y}%, rgba(255,255,255,0.15), transparent 50%)`;
+              `radial-gradient(circle at ${x}% ${y}%, rgb(255 255 255 / 0.15), transparent 50%)`;
           },
         },
       ],
@@ -307,7 +307,7 @@ type Interaction = InteractionTrigger & {
 };
 
 // Triggers: hover | click | interest | activate | viewEnter | viewProgress |
-//           pointerMove | pageVisible | animationEnd
+//           pointerMove | animationEnd
 
 // Effect discriminant (one per effect): keyframeEffect | namedEffect |
 //   customEffect | transition | transitionProperties
@@ -330,7 +330,7 @@ Each interaction needs at least one of `effects` or `sequences`. Types: [`config
 
 - [`presets-main.md`](packages/motion-presets/rules/presets/presets-main.md) · [`entrance-presets.md`](packages/motion-presets/rules/presets/entrance-presets.md) · [`scroll-presets.md`](packages/motion-presets/rules/presets/scroll-presets.md) · [`ongoing-presets.md`](packages/motion-presets/rules/presets/ongoing-presets.md) · [`mouse-presets.md`](packages/motion-presets/rules/presets/mouse-presets.md)
 
-### Config generation guidelines
+### AI generation guidelines
 
 - Always call `Interact.registerEffects(presets)` before `Interact.create()` when using `namedEffect`
 - Do not invent `namedEffect` types — use only registered presets (see preset rules above)
@@ -351,7 +351,7 @@ For monorepo layout, dependency graph, and CLI conventions, see [`AGENTS.md`](AG
 
 ## Development
 
-**Prerequisites:** Node.js ≥ 18, Yarn 4.10.3. Use the repo’s Node version:
+**Prerequisites:** Node.js ≥ 18. Use the repo’s Node version:
 
 ```bash
 nvm use
@@ -365,8 +365,8 @@ yarn test
 ```bash
 yarn dev:website    # landing + examples (http://localhost:3000)
 yarn dev:docs       # documentation app
-yarn dev:demo       # interactive demo app
-yarn workspace @wix/interact-playground run dev   # preset playground
+yarn dev:demo       # test demo app
+yarn workspace @wix/interact-playground run dev   # interactive playground
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution workflow and standards.
