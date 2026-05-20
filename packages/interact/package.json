@@ -26,7 +26,8 @@
   "files": [
     "dist",
     "rules",
-    "docs"
+    "docs",
+    "llms.txt"
   ],
   "sideEffects": false,
   "scripts": {
