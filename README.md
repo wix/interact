@@ -69,16 +69,37 @@ const config: InteractConfig = {
 
 ### Web Components (recommended)
 
-Pre-render CSS with `generate()` to avoid a flash of unstyled content on entrance animations, then boot the runtime:
+Pre-render CSS with `generate()` to avoid a flash of unstyled content on entrance animations:
 
 ```typescript
-import { Interact, generate } from '@wix/interact/web';
+import { generate } from '@wix/interact';
+
+const css = generate(config, true); // `true` = use :first-child as default selectors
+
+// then inject into <head>
+```
+
+In HTML template add:
+
+```html
+<head>
+  <style>
+    ${css}
+    /* Optional — keep the custom element from affecting layout */
+    interact-element {
+      display: contents;
+    }
+  </style>
+</head>
+```
+
+Then boot the runtime:
+
+```typescript
+import { Interact } from '@wix/interact/web';
 import * as presets from '@wix/motion-presets';
 
 Interact.registerEffects(presets);
-
-const css = generate(config, true); // `true` = use :first-child selectors for <interact-element>
-document.head.insertAdjacentHTML('beforeend', `<style id="interact-critical">${css}</style>`);
 
 Interact.create(config);
 ```
@@ -89,13 +110,6 @@ Interact.create(config);
     <h1>Hello, Interact</h1>
   </section>
 </interact-element>
-```
-
-```css
-/* Optional — keep the custom element from affecting layout */
-interact-element {
-  display: contents;
-}
 ```
 
 ### React
