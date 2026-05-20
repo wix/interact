@@ -12,6 +12,11 @@
       "import": "./dist/es/motion-presets.js",
       "require": "./dist/cjs/motion-presets.js"
     },
+    "./types": {
+      "types": "./dist/types/types.d.ts",
+      "import": "./dist/es/types.js",
+      "require": "./dist/cjs/types.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
