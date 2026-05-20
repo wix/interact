@@ -2,6 +2,7 @@ import type { MockInstance } from 'vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Interact, remove } from '../src/web';
 import { addListItems } from '../src/core/add';
+import { INTERACT_ELEMENT_STYLE_ID } from '../src/web/defineInteractElement';
 import type { InteractConfig, ScrubEffect, IInteractElement, TriggerType } from '../src/types';
 import type { NamedEffect } from '@wix/motion';
 import { effectToAnimationOptions } from '../src/handlers/utilities';
@@ -474,6 +475,18 @@ describe('interact (web)', () => {
     it('should initialize with valid config and register custom element', () => {
       Interact.create({} as InteractConfig, { useCustomElement: true });
       expect(customElements.get('interact-element')).toBeDefined();
+    });
+
+    it('should register a layout-transparent default style for interact-element', () => {
+      document.getElementById(INTERACT_ELEMENT_STYLE_ID)?.remove();
+
+      Interact.create({} as InteractConfig, { useCustomElement: true });
+      Interact.create({} as InteractConfig, { useCustomElement: true });
+
+      const styles = document.querySelectorAll(`#${INTERACT_ELEMENT_STYLE_ID}`);
+
+      expect(styles).toHaveLength(1);
+      expect(styles[0]?.textContent).toBe('interact-element { display: contents; }');
     });
   });
 
