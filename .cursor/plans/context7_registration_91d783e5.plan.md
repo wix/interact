@@ -6,13 +6,13 @@ todos:
     content: Create context7.json at repo root with validated schema-compliant config
     status: pending
   - id: submit-to-context7
-    content: "Manual: submit github.com/wix/interact at context7.com/add-library"
+    content: 'Manual: submit github.com/wix/interact at context7.com/add-library'
     status: pending
   - id: claim-library
-    content: "Manual: claim library ownership on Context7 for admin panel access"
+    content: 'Manual: claim library ownership on Context7 for admin panel access'
     status: pending
   - id: verify-index
-    content: "Manual: verify indexed content via resolve-library-id and query-docs MCP tools"
+    content: 'Manual: verify indexed content via resolve-library-id and query-docs MCP tools'
     status: pending
 isProject: false
 ---
@@ -88,11 +88,7 @@ New file at repo root: [context7.json](context7.json)
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "@wix/interact",
   "description": "Declarative animation library -- wire scroll, hover, click, and pointer triggers to effects via JSON config. Built on Web Animations API.",
-  "folders": [
-    "packages/interact/rules",
-    "packages/interact/docs",
-    "packages/interact"
-  ],
+  "folders": ["packages/interact/rules", "packages/interact/docs", "packages/interact"],
   "excludeFolders": [
     "packages/interact/src",
     "packages/interact/test",
