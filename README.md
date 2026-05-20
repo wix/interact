@@ -22,11 +22,11 @@ Web-native animation and interaction libraries — declarative, AI-ready, framew
 
 ## Packages
 
-| Package                                                                    | Version | Description                                  | Links                                                                                                                            |
-| -------------------------------------------------------------------------- | ------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| [`@wix/interact`](https://www.npmjs.com/package/@wix/interact)             | 2.2.2   | Declarative interaction layer (main package) | [README](packages/interact/README.md) · [npm](https://www.npmjs.com/package/@wix/interact)                                       |
-| [`@wix/motion`](https://www.npmjs.com/package/@wix/motion)                 | 2.1.5   | Low-level animation engine                   | [README](packages/motion/README.md) · [npm](https://www.npmjs.com/package/@wix/motion)                                           |
-| [`@wix/motion-presets`](https://www.npmjs.com/package/@wix/motion-presets) | 1.0.2   | Ready-made animation presets                 | [npm](https://www.npmjs.com/package/@wix/motion-presets) · [preset rules](packages/motion-presets/rules/presets/presets-main.md) |
+| Package                                                                    | Version | Description                                  | Links                                                                                                                                            |
+| -------------------------------------------------------------------------- | ------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`@wix/interact`](https://www.npmjs.com/package/@wix/interact)             | 2.2.2   | Declarative interaction layer (main package) | [README](https://github.com/wix/interact/blob/master/packages/interact/README.md) · [npm](https://www.npmjs.com/package/@wix/interact)           |
+| [`@wix/motion`](https://www.npmjs.com/package/@wix/motion)                 | 2.1.5   | Low-level animation engine                   | [README](https://github.com/wix/interact/blob/master/packages/motion/README.md) · [npm](https://www.npmjs.com/package/@wix/motion)               |
+| [`@wix/motion-presets`](https://www.npmjs.com/package/@wix/motion-presets) | 1.0.2   | Ready-made animation presets                 | [README](https://github.com/wix/interact/blob/master/packages/motion-presets/README.md) [npm](https://www.npmjs.com/package/@wix/motion-presets) |
 
 ```
 @wix/motion ← @wix/interact (declarative layer)
@@ -313,7 +313,7 @@ type Interaction = InteractionTrigger & {
 //   customEffect | transition | transitionProperties
 ```
 
-Each interaction needs at least one of `effects` or `sequences`. Types: [`config.ts`](packages/interact/src/types/config.ts). Full spec: [`full-lean.md`](packages/interact/rules/full-lean.md).
+Each interaction needs at least one of `effects` or `sequences`. Full spec: [`full-lean.md`](https://wix.github.io/interact/rules/full-lean.md).
 
 ## AI and Agent Support
 
@@ -321,14 +321,14 @@ Each interaction needs at least one of `effects` or `sequences`. Types: [`config
 
 **@wix/interact** (also on [GitHub Pages /rules/](https://wix.github.io/interact/rules/integration.md)):
 
-- [`integration.md`](packages/interact/rules/integration.md) — entry points, FOUC, static API
-- [`full-lean.md`](packages/interact/rules/full-lean.md) — complete config spec
-- [`viewenter.md`](packages/interact/rules/viewenter.md) · [`viewprogress.md`](packages/interact/rules/viewprogress.md)
-- [`hover.md`](packages/interact/rules/hover.md) · [`click.md`](packages/interact/rules/click.md) · [`pointermove.md`](packages/interact/rules/pointermove.md)
+- [`integration.md`](https://wix.github.io/interact/rules/integration.md) — entry points, FOUC, static API
+- [`full-lean.md`](https://wix.github.io/interact/rules/full-lean.md) — complete config spec
+- [`viewenter.md`](https://wix.github.io/interact/rules/viewenter.md) · [`viewprogress.md`](https://wix.github.io/interact/rules/viewprogress.md)
+- [`hover.md`](https://wix.github.io/interact/rules/hover.md) · [`click.md`](https://wix.github.io/interact/rules/click.md) · [`pointermove.md`](https://wix.github.io/interact/rules/pointermove.md)
 
 **@wix/motion-presets** (repo only):
 
-- [`presets-main.md`](packages/motion-presets/rules/presets/presets-main.md) · [`entrance-presets.md`](packages/motion-presets/rules/presets/entrance-presets.md) · [`scroll-presets.md`](packages/motion-presets/rules/presets/scroll-presets.md) · [`ongoing-presets.md`](packages/motion-presets/rules/presets/ongoing-presets.md) · [`mouse-presets.md`](packages/motion-presets/rules/presets/mouse-presets.md)
+- [`presets-main.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/presets-main.md) · [`entrance-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/entrance-presets.md) · [`scroll-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/scroll-presets.md) · [`ongoing-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/ongoing-presets.md) · [`mouse-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/mouse-presets.md)
 
 ### AI generation guidelines
 
@@ -340,11 +340,11 @@ Each interaction needs at least one of `effects` or `sequences`. Types: [`config
 
 ### Repository agent context
 
-For monorepo layout, dependency graph, and CLI conventions, see [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md).
+For monorepo layout, dependency graph, and CLI conventions, see [`AGENTS.md`](https://github.com/wix/interact/blob/master/AGENTS.md) and [`CLAUDE.md`](https://github.com/wix/interact/blob/master/CLAUDE.md).
 
 ## Live Demo and Documentation
 
-- [Landing page](https://wix.github.io/interact/)
+- [Website](https://wix.github.io/interact/)
 - [Examples gallery](https://wix.github.io/interact/examples.html)
 - [Documentation](https://wix.github.io/interact/docs/)
 - [Playground](https://wix.github.io/interact/playground/)
@@ -369,8 +369,8 @@ yarn dev:demo       # test demo app
 yarn workspace @wix/interact-playground run dev   # interactive playground
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution workflow and standards.
+See [CONTRIBUTING.md](https://github.com/wix/interact/blob/master/CONTRIBUTING.md) for contribution workflow and standards.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/wix/interact/blob/master/LICENSE)
