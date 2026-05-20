@@ -1,0 +1,47 @@
+name: Preview llms.txt
+
+on:
+  pull_request:
+    paths:
+      - 'packages/interact/rules/**'
+      - 'scripts/generate-llms.mjs'
+      - 'packages/interact/package.json'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+
+      - name: Generate llms.txt files
+        run: node scripts/generate-llms.mjs
+
+      - name: Upload generated files
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: llms-txt-preview
+          path: |
+            llms.txt
+            llms-full.txt
+
+      - name: Post or update PR comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: ./scripts/post-llms-preview.sh
