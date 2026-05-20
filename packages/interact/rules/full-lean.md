@@ -1,5 +1,3 @@
-<!-- AI: full docs index at https://wix.github.io/interact/llms.txt -->
-
 # @wix/interact — Rules
 
 Declarative configuration-driven interaction library. Binds animations to triggers via JSON config.

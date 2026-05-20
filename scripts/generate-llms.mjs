@@ -176,8 +176,8 @@ function main() {
     const content = readFileSync(join(RULES_DIR, name), 'utf-8');
     const lineCount = countLines(content);
 
-    if (!content.match(/^#\s/m)) {
-      console.warn(`Warning: ${name} has no H1 heading`);
+    if (!content.startsWith('# ')) {
+      console.warn(`Warning: ${name} has no H1 heading on first line`);
     }
 
     return { name, content, lineCount };
