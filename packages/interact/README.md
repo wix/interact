@@ -1,383 +1,367 @@
 # @wix/interact
 
-A powerful, declarative interaction library for creating engaging web animations and effects. Built on top of `@wix/motion`, it provides a configuration-driven approach to adding triggers, animations, and state transitions to web applications.
+Declarative, configuration-driven interaction library — web-native, AI-ready, and framework-agnostic.
 
-## Features
+[![npm version](https://img.shields.io/npm/v/@wix/interact.svg)](https://www.npmjs.com/package/@wix/interact)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@wix/interact)](https://bundlephobia.com/package/@wix/interact)
+[![license](https://img.shields.io/npm/l/@wix/interact.svg)](https://github.com/wix/interact/blob/master/LICENSE)
+[![downloads](https://img.shields.io/npm/dm/@wix/interact.svg)](https://www.npmjs.com/package/@wix/interact)
 
-- 🎯 **Declarative Configuration** - Define complex interactions through simple JSON configuration
-- 🎨 **Rich Animation Support** - Integration with `@wix/motion` for high-performance animations
-- 🖱️ **Multiple Trigger Types** - Support for hover, click, scroll, viewport, and custom triggers
-- 📱 **Responsive Conditions** - Media query and container-based conditional interactions
-- 🔧 **Custom Elements** - Web Components API for easy framework integration
-- ⚡ **Performance Optimized** - Efficient event handling and animation management
-- 🧩 **Framework Agnostic** - Works with React, vanilla JS, and other frameworks
+## Why Interact?
 
-## Installation
+- **Declerative** — Define trigger-to-effect bindings in JSON; no imperative event wiring
+- **Web-native** — Built on CSS, WAAPI, ViewTimeline, and DOM APIs; supports DOM management via Custom Elements
+- **Framework-agnostic** — Web Components and vanilla JS integrations; React integration included
+- **AI-ready** — JSON configs are machine-readable and provide guardrails; LLMs can generate and agents can validate them
+- **CSS generation** — `generate(config)` emits complete CSS for the whole config (`@keyframes`, `view-timeline`, transitions, FOUC rules)
+- **Preset ecosystem** — Plug in [`@wix/motion-presets`](../motion-presets/README.md) for 80+ ready-made effects.
+- **Accessible** — Built-in `activate` (click + keyboard) and `interest` (hover + focus) trigger variants
+
+## Install
 
 ```bash
-npm install @wix/interact
+npm install @wix/interact @wix/motion-presets
 ```
+
+`@wix/motion-presets` is optional but recommended — it provides the `namedEffect` library used in most examples below.
 
 ## Quick Start
 
-### Using Custom Elements
+### Using Web Components (recommended)
 
-#### 1. Basic Setup
+**Web Components** — wrap the target element with `<interact-element>`:
 
-```typescript
+```ts
 import { Interact } from '@wix/interact/web';
+import * as presets from '@wix/motion-presets'; // optional
 
-// Define your interaction configuration
-const config = {
+Interact.registerEffects(presets); // optional
+
+onst config = {
   interactions: [
     {
+      key: 'hero',
       trigger: 'viewEnter',
-      key: '#my-element',
-      effects: [
-        {
-          effectId: 'fade-in',
-        },
-      ],
+      effects: [{ effectId: 'hero-in' }],
     },
   ],
   effects: {
-    'fade-in': {
-      duration: 1000,
-      keyframeEffect: {
-        name: 'fade',
-        keyframes: { opacity: [0, 1] },
-      },
+    'hero-in': {
+      duration: 800,
+      easing: 'ease-out',
+      namedEffect: { type: 'FadeIn' }, // requires motion-presets
+      triggerType: 'once',
     },
   },
 };
 
-// Initialize the interact instance
-const interact = Interact.create(config);
+// render styles  - e.g. for SSR
+const interactCSS = generate(config, false);
+
+// run on client - e.g. on pagereveal event
+const instance = Interact.create(config);
 ```
 
-#### 2. HTML Setup
-
 ```html
-<!-- Wrap your target element with interact-element -->
-<interact-element data-interact-key="my-element">
-  <div>This will fade in when it enters the viewport!</div>
+<interact-element data-interact-key="hero" data-interact-initial="true">
+  <section class="hero">Hello, animated world!</section>
 </interact-element>
 ```
 
 ### Using React
 
-#### 1. Basic Setup
+A complete React example: register presets, generate CSS, mount the component, clean up on unmount.
 
-```typescript
-import { Interact } from '@wix/interact/react';
+```tsx
+import { useEffect } from 'react';
+import { Interact, Interaction, generate } from '@wix/interact/react';
+import * as presets from '@wix/motion-presets'; // optional
 
-// Define your interaction configuration
+Interact.registerEffects(presets); // optional
+
 const config = {
   interactions: [
     {
+      key: 'hero',
       trigger: 'viewEnter',
-      key: '#my-element',
-      effects: [
-        {
-          effectId: 'fade-in',
-        },
-      ],
+      effects: [{ effectId: 'hero-in' }],
     },
   ],
   effects: {
-    'fade-in': {
-      duration: 1000,
-      keyframeEffect: {
-        name: 'fade',
-        keyframes: { opacity: [0, 1] },
-      },
+    'hero-in': {
+      duration: 800,
+      easing: 'ease-out',
+      namedEffect: { type: 'FadeIn' }, // requires motion-presets
+      triggerType: 'once',
     },
   },
 };
 
-// Initialize the interact instance
-const interact = Interact.create(config);
-```
+export function App () {
+  const interactCSS = generate(config, false);
+  // rest of App logic ...
 
-#### 2. HTML Setup
+  useEffect(() => {
+    const instance = Interact.create(config);
+    return () => instance.destroy();
+  }, []);
 
-```tsx
-import { Interaction } from '@wix/interact/react';
-
-function MyComponent() {
   return (
-    <Interaction tagName="div" interactKey="my-element" className="animated-content">
+    // can go to <head>
+    <style>{interactCSS}</style>
+    // ...
+    <Hero/>
+    // ...
+  )
+}
+
+// in components/Hero.jsx
+export function Hero() {
+  return (
+    <Interaction tagName="section" interactKey="hero" initial className="hero">
       Hello, animated world!
     </Interaction>
   );
 }
 ```
 
-### Vanilla usage
+### Using vaniall JS - no DOM management
 
-#### 1. Basic Setup
+**Vanilla JS** — bind elements after they exist in the DOM:
 
-```typescript
+```ts
 import { Interact, add } from '@wix/interact';
 
-// Define your interaction configuration
-const config = {
-  interactions: [
-    {
-      trigger: 'viewEnter',
-      key: '#my-element',
-      effects: [
-        {
-          effectId: 'fade-in',
-        },
-      ],
-    },
-  ],
-  effects: {
-    'fade-in': {
-      duration: 1000,
-      keyframeEffect: {
-        name: 'fade',
-        keyframes: { opacity: [0, 1] },
-      },
-    },
-  },
+const instance = Interact.create(config);
+
+add(document.querySelector('#hero'), 'hero');
+```
+
+## Entry Points
+
+| Import                | Use When                                                    |
+| --------------------- | ----------------------------------------------------------- |
+| `@wix/interact`       | Vanilla JS — manual element binding via `add()`/`remove()`. |
+| `@wix/interact/web`   | Web Components — `<interact-element>` custom element.       |
+| `@wix/interact/react` | React — `<Interaction>` component with lifecycle.           |
+
+All three entry points export the same `Interact` class, `generate()` function, and types.
+
+## How It Works
+
+```
+Config ─┬─► Interact.create() ─► Trigger Observers ─► Effect Engine ─► Animation (via @wix/motion)
+        └─► generate() ────────► CSS (@keyframes, view-timeline, animations, transitions) ─► <head>
+```
+
+`generate(config)` runs at build time or on the server to emit complete CSS for the entire config — maximizing offload of effect creation, binding, and running to the browser.
+Interact also uses native effect triggering, i.e. `view-timeline`, as it becomes more widely supported
+
+The `InteractConfig` shape:
+
+```ts
+type InteractConfig = {
+  interactions: Interaction[];                  // trigger → effect bindings
+  effects: Record<string, Effect>;              // reusable effect definitions
+  sequences?: Record<string, SequenceConfig>;   // staggered multi-effect timelines
+  conditions?: Record<string, Condition>;       // media / selector gates
 };
-
-// add element
-add(document.querySelector('[data-interact-key="my-element"]'), 'my-element');
-
-// Initialize the interact instance
-const interact = Interact.create(config);
 ```
 
-#### 2. HTML Setup
+## Triggers
 
-```html
-<div data-interact-key="my-element" class="animated-content">Hello, animated world!</div>
-```
+| Trigger        | Fires When                                  | Params                                  |
+| -------------- | ------------------------------------------- | --------------------------------------- |
+| `viewEnter`    | Element enters viewport                     | `threshold?`, `inset?`                  |
+| `viewProgress` | Element scrolls through viewport            | (use `rangeStart`/`rangeEnd` on effect) |
+| `hover`        | Pointer enters/leaves element               | —                                       |
+| `click`        | Element is clicked                          | —                                       |
+| `activate`     | Click + keyboard (a11y variant of `click`)  | —                                       |
+| `interest`     | Hover + focus (a11y variant of `hover`)     | —                                       |
+| `pointerMove`  | Pointer moves over element or viewport      | `hitArea?`, `axis?`                     |
+| `animationEnd` | Another effect completes                    | `effectId`                              |
 
-## Core Concepts
+## Effects
 
-### Triggers
+| Effect Type                            | Use For                                                                   |
+| -------------------------------------- | ------------------------------------------------------------------------- |
+| `keyframeEffect`                       | Inline keyframes — self-contained, no preset needed.                      |
+| `namedEffect`                          | Registered presets from `@wix/motion-presets` (e.g. `{ type: 'FadeIn' }`).|
+| `customEffect`                         | Programmatic `(element, progress) => void` callback.                      |
+| `transition` / `transitionProperties`  | CSS state changes driven by `stateAction` (`add`/`remove`/`toggle`).      |
 
-Define when interactions should occur:
+## Recipes
 
-- `viewEnter` - When element enters viewport
-- `click` - On element click
-- `hover` - On element hover
-- `viewProgress` - Scroll-driven animations based on progress of element in viewport
-- `pointerMove` - On pointer/mouse movement over an element or viewport
-- `animationEnd` - When another animation completes
+Each example is a complete `InteractConfig` — pass it to `Interact.create(config)`.
 
-### Effects
+### Entrance animation
 
-Define what should happen:
-
-- **Time-based animations** - Duration-based effects with easing
-- **Scroll-driven animations** - Progress-based effects tied to scroll
-- **Pointer-driven animations** - Progress-based effects linked to pointer position
-- **CSS transitions** - Style property transitions
-- **Custom effects** - Integration with `@wix/motion`
-
-### Configuration Structure
-
-```typescript
-{
-  interactions: [    // Define trigger → effect relationships
-    {
-      trigger: 'viewEnter',
-      key: 'source-element',
-      effects: [{ effectId: 'my-effect' }]
-    }
-  ],
-  effects: {         // Define reusable effect definitions
-    'my-effect': {
-      duration: 1000,
-      keyframeEffect: {
-        name: 'fade',
-        keyframes: { opacity: [0, 1] }
-      }
-    }
-  },
-  conditions: {      // Define conditional logic
-    'mobile-only': {
-      type: 'media',
-      predicate: '(max-width: 768px)'
-    }
-  }
-}
-```
-
-## Basic API Reference
-
-### Interact Class
-
-#### Static Methods
-
-```typescript
-// Create a new instance with configuration
-Interact.create(config: InteractConfig): Interact
-```
-
-### Standalone Functions
-
-```typescript
-// Add interactions to an element
-add(element: IInteractElement, key: string): boolean
-
-// Remove all interactions from an element
-remove(key: string): void
-```
-
-## Examples
-
-### Entrance Animation
-
-```typescript
+```ts
 {
   interactions: [{
-    trigger: 'viewEnter',
     key: 'hero',
-    effects: [{ effectId: 'slide-up' }]
+    trigger: 'viewEnter',
+    effects: [{ effectId: 'float-in' }],
   }],
   effects: {
-    'slide-up': {
+    'float-in': {
       duration: 800,
       easing: 'ease-out',
-      keyframeEffect: {
-        name: 'slide-up',
-        keyframes: {
-          transform: ['translateY(20px)', 'translateY(0)'],
-          opacity: [0, 1]
-        }
-      }
-    }
-  }
+      namedEffect: { type: 'FloatIn', direction: 'bottom', distance: '80px' },
+      triggerType: 'once',
+    },
+  },
 }
 ```
 
-### Click Interaction
+### Click effect
 
-```typescript
+```ts
 {
   interactions: [{
+    key: 'cta',
     trigger: 'click',
-    key: 'button',
-    effects: [{ effectId: 'bounce' }]
+    effects: [{ effectId: 'pulse' }],
   }],
   effects: {
-    'bounce': {
-      duration: 600,
-      namedEffect: {
-        type: 'Bounce'
-      }
-    }
-  }
+    'pulse': {
+      duration: 300,
+      keyframeEffect: {
+        name: 'pulse',
+        keyframes: { transform: ['scale(1)', 'scale(1.08)', 'scale(1)'] },
+      },
+      triggerType: 'once',
+    },
+  },
 }
 ```
 
-### Scroll-driven Animation
+### Scroll-driven parallax
 
-```typescript
+```ts
 {
   interactions: [{
+    key: 'card',
     trigger: 'viewProgress',
-    key: 'parallax-card',
-    effects: [{ effectId: 'parallax-scroll' }]
+    effects: [{ effectId: 'parallax' }],
   }],
   effects: {
-    'parallax-scroll': {
+    'parallax': {
       keyframeEffect: {
-        name: 'parallax-1',
+        name: 'parallax',
         keyframes: [
-          { transform: 'translateY(200px)' },
-          { transform: 'translateY(-200px)' }
-        ]
+          { transform: 'translateY(-120px)' },
+          { transform: 'translateY(120px)' },
+        ],
       },
       rangeStart: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
       rangeEnd: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
       fill: 'both',
-      easing: 'linear'
-    }
-  }
+      easing: 'linear',
+    },
+  },
 }
 ```
 
-### Responsive Interactions
+### Hover toggle (CSS transition)
 
-```typescript
+```ts
 {
   interactions: [{
-    trigger: 'hover',
     key: 'card',
-    conditions: ['desktop-only'],
-    effects: [{ effectId: 'lift' }]
+    trigger: 'hover',
+    effects: [{ effectId: 'lift', stateAction: 'toggle' }],
   }],
-  conditions: {
-    'desktop-only': {
-      type: 'media',
-      predicate: '(min-width: 1024px)'
-    }
-  },
   effects: {
     'lift': {
-      duration: 200,
-      keyframeEffect: {
-        name: 'lift',
-        keyframes: {
-          transform: ['translateY(0)', 'translateY(-8px)'],
-          boxShadow: ['0 2px 4px rgb(0 0 0 / 0.1)', '0 8px 16px rgb(0 0 0 / 0.15)']
-        }
-      }
-    }
-  }
+      transition: {
+        duration: 200,
+        easing: 'ease-out',
+        styleProperties: [
+          { name: 'transform', value: 'scale(1.08)' },
+          { name: 'box-shadow', value: '0 8px 16px rgb(0 0 0 / 0.15)' },
+        ],
+      },
+    },
+  },
 }
 ```
 
-## Documentation
+### Pointer-tracking custom effect
 
-- [Full API Documentation](https://wix.github.io/interact/docs/api)
-- [Guides and Tutorials](https://wix.github.io/interact/docs/guides)
-- [Examples and Patterns](https://wix.github.io/interact/docs/examples)
-- [Integration Guides](https://wix.github.io/interact/docs/integration)
-
-## AI Support
-
-- [Full-flow, lean rules](https://wix.github.io/interact/rules/full-lean.md)
-- [Rules for integration](https://wix.github.io/interact/rules/integration.md)
-- [Rules for view entrance interactions](https://wix.github.io/interact/rules/viewenter.md)
-- [Rules for click interactions](https://wix.github.io/interact/rules/click.md)
-- [Rules for hover interactions](https://wix.github.io/interact/rules/click.md)
-- [Rules for scroll interactions](https://wix.github.io/interact/rules/viewprogress.md)
-- [Rules for pointer-move interactions](https://wix.github.io/interact/rules/pointermove.md)
-
-## Development
-
-```bash
-# Install dependencies
-yarn install
-
-# Run tests
-yarn test
-
-# Run playground
-yarn playground
-
-# Build package
-yarn build
+```ts
+{
+  interactions: [{
+    key: 'spotlight',
+    trigger: 'pointerMove',
+    params: { hitArea: 'root' },
+    effects: [{ effectId: 'follow' }],
+  }],
+  effects: {
+    'follow': {
+      customEffect: (element, progress) => {
+        (element as HTMLElement).style.setProperty('--x', `${progress.x * 100}%`);
+        (element as HTMLElement).style.setProperty('--y', `${progress.y * 100}%`);
+      },
+    },
+  },
+}
 ```
+
+## Common Pitfalls
+
+- **`overflow: hidden` breaks `viewProgress`** — Use `overflow: clip` on all ancestors between the source and the scroll container.
+- **Same element as source and target with `viewEnter`** — Must use `triggerType: 'once'`. Other types cause re-entry loops.
+- **Hit-area shift on `hover` / `pointerMove`** — Animating size/position of the hovered element shifts the hit area and causes jitter. Animate a child via `selector` instead.
+- **`registerEffects()` must run before `Interact.create()`** when using `namedEffect`.
+- **FOUC prevention requires both** — `generate(config)` injected into `<head>` AND `initial` set on the `viewEnter` + `triggerType: 'once'` element.
+- **`generate(config, useFirstChild)`** — Pass `true` for `<interact-element>` (web), `false` for vanilla and React `<Interaction>`.
+- **`<interact-element>` must wrap exactly one child** — the library targets `.firstElementChild` by default.
+
+## AI & Agent Support
+
+Interact's JSON-config surface is the differentiator: configs are serializable, schema-typed, and validate-able (guardrails) — no imperative DOM logic for an LLM to hallucinate.
+
+**Rules files** ship with the package under [`rules/`](./rules/) — point your agent at them:
+
+- [`rules/full-lean.md`](./rules/full-lean.md) — complete config spec, pitfalls, and constraints
+- [`rules/integration.md`](./rules/integration.md) — entry points, lifecycle, FOUC
+- [`rules/viewenter.md`](./rules/viewenter.md) — viewport entrance triggers
+- [`rules/viewprogress.md`](./rules/viewprogress.md) — scroll-driven animations
+- [`rules/click.md`](./rules/click.md) — click and activate triggers
+- [`rules/hover.md`](./rules/hover.md) — hover and interest triggers
+- [`rules/pointermove.md`](./rules/pointermove.md) — pointer-driven animations
+
+**Generation constraints** for agents producing configs:
+
+- Do not invent `namedEffect` types — use only registered presets.
+- Do not attach DOM event listeners manually — use triggers.
+- Do not use `overflow: hidden` on scroll-tracked ancestors — use `overflow: clip`.
+- Always pre-render CSS with `generate(config)` and inject into `<head>`. For `viewEnter` + `triggerType: 'once'`, also set `initial` on the element to prevent FOUC.
+- Always call `Interact.registerEffects(presets)` before `Interact.create()` when using `namedEffect`.
 
 ## Browser Support
 
-- ✅ Modern browsers with Web Components support
-- ⚠️ If using setting styles via JS in `transition` or `transitionProerties` - which use `adoptedStyleSheets`, browser support is: Chrome 73+, Firefox 101+, Safari 16.4+, Edge 79+
+- Modern browsers with the Web Animations API (Baseline).
+- `adoptedStyleSheets` (used by `transition` / `transitionProperties`): Chrome 73+, Firefox 101+, Safari 16.4+, Edge 79+.
+- ViewTimeline: Chrome 115+; polyfilled via [`fizban`](https://github.com/wix/fizban) elsewhere.
 
 ## Related Packages
 
-- [`@wix/motion`](../motion/README.md) - Core animation engine
-- [`fizban`](https://github.com/wix/fizban) - For polyfilling scroll-driven animations
-- [`kuliso`](https://github.com/wix/kuliso) - For polyfilling pointer-driven animations
+- [`@wix/motion`](../motion/README.md) — low-level animation engine underneath Interact.
+- [`@wix/motion-presets`](../motion-presets/README.md) — ready-made effect catalog (entrance, scroll, hover, pointer).
+- [`fizban`](https://github.com/wix/fizban) — scroll-driven animation polyfill (bundled dependency).
+- [`kuliso`](https://github.com/wix/kuliso) — pointer-driven animation polyfill (bundled dependency).
+
+## Documentation
+
+- [**Getting Started**](./docs/guides/getting-started.md)
+- [**API Reference**](./docs/api/README.md) — `Interact` class, `InteractionController`, standalone functions, types
+- [**Guides**](./docs/guides/README.md) — triggers, effects, configuration, state, conditions, sequences
+- [**Examples**](./docs/examples/README.md) — entrance, click, hover, list patterns
+- [**React Integration**](./docs/integration/react.md)
+- [**Web Components**](./docs/guides/custom-elements.md)
+- [**Full Documentation Index**](./docs/README.md)
 
 ## License
 
