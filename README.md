@@ -67,8 +67,6 @@ const config: InteractConfig = {
 };
 ```
 
-> **Accuracy notes:** `effects` at the config top level is a reusable `Record<string, Effect>`. `add` and `remove` are standalone imports, not instance methods. Call `Interact.registerEffects(presets)` before `Interact.create()` when using `namedEffect`. `<interact-element>` must wrap exactly one child (the library targets `.firstElementChild`).
-
 ### Web Components (recommended)
 
 Pre-render CSS with `generate()` to avoid a flash of unstyled content on entrance animations, then boot the runtime:
@@ -337,6 +335,8 @@ Each interaction needs at least one of `effects` or `sequences`. Full spec: [`fu
 - Do not attach DOM event listeners manually — express behavior through `trigger` and config
 - For `viewProgress`, avoid `overflow: hidden` on ancestors; use `overflow: clip` instead
 - Call `generate(config)` at build time or on the server and inject CSS into `<head>`. For `viewEnter` + `triggerType: 'once'`, also set `initial` on the element to prevent FOUC
+- `effects` at the config top level is a reusable `Record<string, Effect>`
+- `<interact-element>` should wrap exactly one child (the library targets `.firstElementChild` by default).
 
 ### Repository agent context
 
