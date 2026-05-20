@@ -161,34 +161,34 @@ The `InteractConfig` shape:
 
 ```ts
 type InteractConfig = {
-  interactions: Interaction[];                  // trigger → effect bindings
-  effects: Record<string, Effect>;              // reusable effect definitions
-  sequences?: Record<string, SequenceConfig>;   // staggered multi-effect timelines
-  conditions?: Record<string, Condition>;       // media / selector gates
+  interactions: Interaction[]; // trigger → effect bindings
+  effects: Record<string, Effect>; // reusable effect definitions
+  sequences?: Record<string, SequenceConfig>; // staggered multi-effect timelines
+  conditions?: Record<string, Condition>; // media / selector gates
 };
 ```
 
 ## Triggers
 
-| Trigger        | Fires When                                  | Params                                  |
-| -------------- | ------------------------------------------- | --------------------------------------- |
-| `viewEnter`    | Element enters viewport                     | `threshold?`, `inset?`                  |
-| `viewProgress` | Element scrolls through viewport            | (use `rangeStart`/`rangeEnd` on effect) |
-| `hover`        | Pointer enters/leaves element               | —                                       |
-| `click`        | Element is clicked                          | —                                       |
-| `activate`     | Click + keyboard (a11y variant of `click`)  | —                                       |
-| `interest`     | Hover + focus (a11y variant of `hover`)     | —                                       |
-| `pointerMove`  | Pointer moves over element or viewport      | `hitArea?`, `axis?`                     |
-| `animationEnd` | Another effect completes                    | `effectId`                              |
+| Trigger        | Fires When                                 | Params                                  |
+| -------------- | ------------------------------------------ | --------------------------------------- |
+| `viewEnter`    | Element enters viewport                    | `threshold?`, `inset?`                  |
+| `viewProgress` | Element scrolls through viewport           | (use `rangeStart`/`rangeEnd` on effect) |
+| `hover`        | Pointer enters/leaves element              | —                                       |
+| `click`        | Element is clicked                         | —                                       |
+| `activate`     | Click + keyboard (a11y variant of `click`) | —                                       |
+| `interest`     | Hover + focus (a11y variant of `hover`)    | —                                       |
+| `pointerMove`  | Pointer moves over element or viewport     | `hitArea?`, `axis?`                     |
+| `animationEnd` | Another effect completes                   | `effectId`                              |
 
 ## Effects
 
-| Effect Type                            | Use For                                                                   |
-| -------------------------------------- | ------------------------------------------------------------------------- |
-| `keyframeEffect`                       | Inline keyframes — self-contained, no preset needed.                      |
-| `namedEffect`                          | Registered presets from `@wix/motion-presets` (e.g. `{ type: 'FadeIn' }`).|
-| `customEffect`                         | Programmatic `(element, progress) => void` callback.                      |
-| `transition` / `transitionProperties`  | CSS state changes driven by `stateAction` (`add`/`remove`/`toggle`).      |
+| Effect Type                           | Use For                                                                    |
+| ------------------------------------- | -------------------------------------------------------------------------- |
+| `keyframeEffect`                      | Inline keyframes — self-contained, no preset needed.                       |
+| `namedEffect`                         | Registered presets from `@wix/motion-presets` (e.g. `{ type: 'FadeIn' }`). |
+| `customEffect`                        | Programmatic `(element, progress) => void` callback.                       |
+| `transition` / `transitionProperties` | CSS state changes driven by `stateAction` (`add`/`remove`/`toggle`).       |
 
 ## Recipes
 
