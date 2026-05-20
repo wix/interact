@@ -37,6 +37,19 @@ const animation = getWebAnimation(document.getElementById('myElement'), {
 await animation.play();
 ```
 
+### Named Easings
+
+`@wix/motion` exports the `cssEasings` map for reusable CSS easing strings, plus `CssEasingName` and `CssEasing` types for typed pickers and animation config.
+
+```typescript
+import { cssEasings, type CssEasingName } from '@wix/motion';
+
+const easingName: CssEasingName = 'sineInOut';
+const easing = cssEasings[easingName];
+```
+
+Available names: `linear`, `ease`, `easeIn`, `easeOut`, `easeInOut`, `sineIn`, `sineOut`, `sineInOut`, `quadIn`, `quadOut`, `quadInOut`, `cubicIn`, `cubicOut`, `cubicInOut`, `quartIn`, `quartOut`, `quartInOut`, `quintIn`, `quintOut`, `quintInOut`, `expoIn`, `expoOut`, `expoInOut`, `circIn`, `circOut`, `circInOut`, `backIn`, `backOut`, `backInOut`.
+
 ### Scroll-Driven Animation
 
 ```typescript

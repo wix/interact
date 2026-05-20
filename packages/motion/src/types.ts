@@ -1,3 +1,5 @@
+import type { CssEasing, JsEasing } from './easings';
+
 type LengthUnit = 'px' | 'em' | 'rem' | 'vh' | 'vw' | 'vmin' | 'vmax';
 
 export declare type Length = {
@@ -148,7 +150,7 @@ export type TimeAnimationOptions<TNamedEffect extends NamedEffect = NamedEffect>
   duration?: number;
   delay?: number;
   endDelay?: number;
-  easing?: string;
+  easing?: CssEasing;
   iterations?: number;
   alternate?: boolean;
   fill?: AnimationFillMode;
@@ -165,7 +167,7 @@ type ScrubAnimationDataBase<TNamedEffect extends NamedEffect = NamedEffect> = {
   startOffset?: RangeOffset;
   endOffset?: RangeOffset;
   playbackRate?: number;
-  easing?: string;
+  easing?: CssEasing;
   iterations?: number;
   fill?: AnimationFillMode;
   alternate?: boolean;
@@ -268,7 +270,7 @@ export type EffectModule =
 export type SequenceOptions = {
   delay?: number;
   offset?: number;
-  offsetEasing?: string | ((p: number) => number);
+  offsetEasing?: JsEasing | ((p: number) => number);
 };
 
 export type AnimationGroupArgs = {

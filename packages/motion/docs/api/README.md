@@ -40,7 +40,7 @@ Complete reference for all Wix Motion functions, types, and classes.
 ### Basic Animation Creation
 
 ```typescript
-import { getWebAnimation } from '@wix/motion';
+import { getWebAnimation, cssEasings, type CssEasingName } from '@wix/motion';
 
 const animation = getWebAnimation(
   element,           // HTMLElement | string | null
@@ -48,6 +48,9 @@ const animation = getWebAnimation(
   trigger?,          // TriggerVariant (for scroll/mouse)
   options?           // Record<string, any>
 );
+
+const easingName: CssEasingName = 'sineInOut';
+const easingValue = cssEasings[easingName];
 ```
 
 ### Scroll Scene Creation
@@ -115,7 +118,7 @@ interface TimeAnimationOptions {
   customEffect?: CustomEffect;
   duration?: number;
   delay?: number;
-  easing?: string;
+  easing?: CssEasing;
   iterations?: number;
   // ... more properties
 }

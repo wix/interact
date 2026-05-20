@@ -3,6 +3,7 @@ import type {
   RangeOffset,
   ScrubTransitionEasing,
   MotionAnimationOptions,
+  CssEasing,
 } from '@wix/motion';
 
 type Fill = 'none' | 'forwards' | 'backwards' | 'both';
@@ -29,7 +30,7 @@ type EffectEffectProperty =
 
 export type TimeEffect = {
   duration: number;
-  easing?: string;
+  easing?: CssEasing;
   iterations?: number;
   alternate?: boolean;
   fill?: Fill;
@@ -40,7 +41,7 @@ export type TimeEffect = {
 } & EffectEffectProperty;
 
 export type ScrubEffect = {
-  easing?: string;
+  easing?: CssEasing;
   iterations?: number;
   alternate?: boolean;
   fill?: Fill;
@@ -57,7 +58,7 @@ export type ScrubEffect = {
 export type TransitionOptions = {
   duration?: number;
   delay?: number;
-  easing?: string;
+  easing?: CssEasing;
 };
 
 export type StyleProperty = {

@@ -12,6 +12,20 @@ Wix Motion provides comprehensive TypeScript support with detailed type definiti
 - **Utility Types** - Measurements, directions, and helper types
 - **Advanced Types** - Custom effects and trigger configurations
 
+## Named Easing Types
+
+`@wix/motion` exports `cssEasings`, a map of public CSS easing names to their CSS values. Use `CssEasingName` when you need the exact named key set, such as for dropdowns, autocomplete, or persisted config validation.
+
+```typescript
+import { cssEasings, type CssEasingName, type CssEasing } from '@wix/motion';
+
+const name: CssEasingName = 'quadOut';
+const cssValue = cssEasings[name];
+const option: CssEasing = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+```
+
+Available `CssEasingName` values: `linear`, `ease`, `easeIn`, `easeOut`, `easeInOut`, `sineIn`, `sineOut`, `sineInOut`, `quadIn`, `quadOut`, `quadInOut`, `cubicIn`, `cubicOut`, `cubicInOut`, `quartIn`, `quartOut`, `quartInOut`, `quintIn`, `quintOut`, `quintInOut`, `expoIn`, `expoOut`, `expoInOut`, `circIn`, `circOut`, `circInOut`, `backIn`, `backOut`, `backInOut`.
+
 ## Core Configuration Types
 
 ### `TimeAnimationOptions`
@@ -27,7 +41,7 @@ interface TimeAnimationOptions {
   duration?: number; // Milliseconds
   delay?: number; // Milliseconds
   endDelay?: number; // Milliseconds
-  easing?: string; // CSS or JS easing function
+  easing?: CssEasing; // Named easing from cssEasings, or any CSS easing string
   iterations?: number; // Number of repeats (Infinity or 0 for infinite)
   alternate?: boolean; // Alternating effect direction on each iteration
   fill?: AnimationFillMode; // 'none' | 'backwards' | 'forwards' | 'both'
@@ -86,7 +100,7 @@ interface ScrubAnimationOptions {
   startOffset?: RangeOffset; // animation-range-start for usage with view() timelines
   endOffset?: RangeOffset; // animation-range-end for usage with view() timelines
   playbackRate?: number; // Speed multiplier
-  easing?: string; // Transition easing
+  easing?: CssEasing; // Named easing from cssEasings, or any CSS easing string
   iterations?: number; // Usually 1 for scrub animations
   fill?: AnimationFillMode;
   alternate?: boolean;

@@ -1,10 +1,11 @@
 import { cssEasings, jsEasings } from './easings';
+import type { CssEasing, JsEasing } from './easings';
 
 export function getCssUnits(unit: 'percentage' | string) {
   return unit === 'percentage' ? '%' : unit || 'px';
 }
 
-export function getEasing(easing?: keyof typeof cssEasings | string): string {
+export function getEasing(easing?: CssEasing): string {
   return easing ? cssEasings[easing as keyof typeof cssEasings] || easing : cssEasings.linear;
 }
 
@@ -174,9 +175,7 @@ function parseCssLinear(str: string): ((t: number) => number) | undefined {
   };
 }
 
-export function getJsEasing(
-  easing?: keyof typeof jsEasings | string,
-): ((t: number) => number) | undefined {
+export function getJsEasing(easing?: JsEasing): ((t: number) => number) | undefined {
   if (!easing) return undefined;
 
   const named = jsEasings[easing as keyof typeof jsEasings];

@@ -212,6 +212,9 @@ export const jsEasings = {
   backInOut,
 };
 
+export type JsEasingName = keyof typeof jsEasings;
+export type JsEasing = JsEasingName | (string & {});
+
 /**
  * CSS cubic-bezier easings based on PostCSS Easings
  */
@@ -246,3 +249,6 @@ export const cssEasings = {
   backOut: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
   backInOut: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
 } as const;
+
+export type CssEasingName = keyof typeof cssEasings;
+export type CssEasing = CssEasingName | (string & {});

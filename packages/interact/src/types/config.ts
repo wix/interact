@@ -1,3 +1,4 @@
+import type { JsEasing } from '@wix/motion';
 import type { TriggerType, TriggerParams } from './triggers';
 import type { Effect, EffectRef, EffectProperty, TimeAnimationTriggerType } from './effects';
 
@@ -9,7 +10,7 @@ export type Condition = {
 export type SequenceOptionsConfig = {
   delay?: number;
   offset?: number;
-  offsetEasing?: string | ((p: number) => number);
+  offsetEasing?: JsEasing | ((p: number) => number);
   sequenceId?: string;
   conditions?: string[];
   triggerType?: TimeAnimationTriggerType;
@@ -24,7 +25,7 @@ export type SequenceConfigRef = {
 } & {
   delay?: number;
   offset?: number;
-  offsetEasing?: string | ((p: number) => number);
+  offsetEasing?: JsEasing | ((p: number) => number);
   conditions?: string[];
 };
 

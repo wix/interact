@@ -453,7 +453,7 @@ type TimeEffect = {
   selector?: string;
   listContainer?: string;
   duration: number;
-  easing?: string;
+  easing?: CssEasing;
   iterations?: number;
   alternate?: boolean;
   fill?: Fill;
@@ -534,7 +534,7 @@ type ScrubEffect = {
   key?: string;
   selector?: string;
   listContainer?: string;
-  easing?: string;
+  easing?: CssEasing;
   iterations?: number;
   alternate?: boolean;
   fill?: Fill;
