@@ -63,3 +63,71 @@ jobs:
 
       - name: Test
         run: yarn test
+
+  interact-react-compat:
+    name: Test @wix/interact (React ${{ matrix.react_version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - react_version: 18
+            react: '^18.3.1'
+            react_dom: '^18.3.1'
+            types_react: '^18.3.2'
+            types_react_dom: '^18.3.0'
+            testing_library_react: '^16.1.0'
+          - react_version: 19
+            react: '^19.0.0'
+            react_dom: '^19.0.0'
+            types_react: '^19.0.0'
+            types_react_dom: '^19.0.0'
+            testing_library_react: '^16.1.0'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Cache Yarn dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            .yarn/cache
+            .yarn/install-state.gz
+            node_modules
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare yarn@4.10.3 --activate
+          yarn set version 4.10.3
+
+      - name: Install dependencies
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: NPQ_PKG_MGR=yarn npx npq install --immutable
+
+      - name: Build @wix/motion
+        run: yarn workspace @wix/motion build
+
+      - name: Install React ${{ matrix.react_version }} test dependencies
+        run: |
+          yarn workspace @wix/interact add --dev \
+            react@${{ matrix.react }} \
+            react-dom@${{ matrix.react_dom }} \
+            @types/react@${{ matrix.types_react }} \
+            @types/react-dom@${{ matrix.types_react_dom }} \
+            @testing-library/react@${{ matrix.testing_library_react }}
+
+      - name: Test @wix/interact
+        run: yarn workspace @wix/interact test
