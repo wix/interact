@@ -139,7 +139,7 @@ function App() {
 }
 ```
 
-Inject `generate(config, false)` output into your document shell (e.g. Remix `links`, Next.js layout `<head>`) the same way as the Web Components example.
+Inject `generate(config, false)` output into your document's `<head>` (e.g. Remix `links`, Next.js layout `<head>`) the same way as the Web Components example.
 
 ### Vanilla JS
 
