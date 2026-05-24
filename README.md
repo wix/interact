@@ -104,7 +104,7 @@ Interact.create(config);
 ```
 
 ```html
-<interact-element data-interact-key="hero" data-interact-initial="true">
+<interact-element data-interact-key="hero">
   <section class="hero">
     <h1>Hello, Interact</h1>
   </section>
@@ -131,7 +131,7 @@ function App() {
   }, []);
 
   return (
-    <Interaction tagName="section" interactKey="hero" initial className="hero">
+    <Interaction tagName="section" interactKey="hero" className="hero">
       <h1>Hello, Interact</h1>
     </Interaction>
   );
@@ -154,7 +154,7 @@ add(hero, 'hero');
 ```
 
 ```html
-<section data-interact-key="hero" data-interact-initial="true" class="hero">
+<section data-interact-key="hero" class="hero">
   <h1>Hello, Interact</h1>
 </section>
 ```
@@ -181,14 +181,13 @@ const config: InteractConfig = {
     'card-float': {
       duration: 900,
       easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-      fill: 'both',
       namedEffect: { type: 'FloatIn', direction: 'bottom' },
     },
   },
 };
 ```
 
-Set `data-interact-initial="true"` (or `initial` on `<Interaction>`) and inject `generate(config)` CSS for FOUC prevention.
+Inject the styles returned from `generate(config)` into `<head>` for FOUC prevention.
 
 ### Click effect
 
@@ -356,7 +355,7 @@ type Interaction = {
 - Do not invent `namedEffect` types — use only registered presets (see preset rules above)
 - Do not attach DOM event listeners manually — express behavior through `trigger` and config
 - For `viewProgress`, avoid `overflow: hidden` on ancestors; use `overflow: clip` instead
-- Call `generate(config)` at build time or on the server and inject CSS into `<head>`. For `viewEnter` + `triggerType: 'once'`, also set `initial` on the element to prevent FOUC
+- Call `generate(config)` at build time or on the server and inject CSS into `<head>`. For `viewEnter` + `triggerType: 'once'`, to prevent FOUC
 - `effects` at the config top level is a reusable `Record<string, Effect>`
 - `<interact-element>` should wrap exactly one child (the library targets `.firstElementChild` by default).
 
