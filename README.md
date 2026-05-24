@@ -340,8 +340,11 @@ type Interaction = {
 
 - [`integration.md`](https://wix.github.io/interact/rules/integration.md) — entry points, FOUC, static API
 - [`full-lean.md`](https://wix.github.io/interact/rules/full-lean.md) — complete config spec
-- [`viewenter.md`](https://wix.github.io/interact/rules/viewenter.md) · [`viewprogress.md`](https://wix.github.io/interact/rules/viewprogress.md)
-- [`hover.md`](https://wix.github.io/interact/rules/hover.md) · [`click.md`](https://wix.github.io/interact/rules/click.md) · [`pointermove.md`](https://wix.github.io/interact/rules/pointermove.md)
+- [`viewenter.md`](https://wix.github.io/interact/rules/viewenter.md)
+- [`hover.md`](https://wix.github.io/interact/rules/hover.md)
+- [`click.md`](https://wix.github.io/interact/rules/click.md)
+- [`viewprogress.md`](https://wix.github.io/interact/rules/viewprogress.md)
+- [`pointermove.md`](https://wix.github.io/interact/rules/pointermove.md)
 
 **@wix/motion-presets**:
 
