@@ -159,12 +159,13 @@ export class TimelineEngine {
     }
 
     let trackCounter = 0;
+    const effects = config.effects ?? {};
 
     const effectRefs = (interaction.effects ?? []) as Record<string, any>[];
     for (const ref of effectRefs) {
       const effectId = ref.effectId as string | undefined;
       if (!effectId) continue;
-      const effect = config.effects[effectId];
+      const effect = effects[effectId];
       if (!effect) continue;
 
       const subTracks = this._buildEffectTracks(
@@ -194,7 +195,7 @@ export class TimelineEngine {
         const effRef = seqEffects[i];
         const effectId = effRef.effectId as string | undefined;
         if (!effectId) continue;
-        const effect = config.effects[effectId];
+        const effect = effects[effectId];
         if (!effect) continue;
 
         const staggerDelay = seqDelay + i * seqOffset;
