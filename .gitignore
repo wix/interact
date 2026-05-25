@@ -13,3 +13,9 @@ pnpm-lock.yaml
 package-lock.json
 .yarn/
 tmp/
+tsconfig.tsbuildinfo
+
+# Generated llms.txt files (built by scripts/generate-llms.mjs)
+llms.txt
+llms-full.txt
+packages/interact/llms.txt

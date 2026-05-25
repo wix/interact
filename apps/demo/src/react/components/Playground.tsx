@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import type { InteractConfig, TriggerType } from '@wix/interact/react';
+import type { Effect, InteractConfig, TriggerType } from '@wix/interact/react';
 import { Interaction } from '@wix/interact/react';
 import { useInteractInstance } from '../hooks/useInteractInstance';
 
@@ -44,7 +44,7 @@ const createEffectConfig = (
             { transform: 'scale(1)', opacity: 1 },
           ],
         },
-      } satisfies InteractConfig['effects'][string];
+      } satisfies Effect;
     case 'tilt':
       return {
         key: 'demo-card',
@@ -58,7 +58,7 @@ const createEffectConfig = (
             { transform: 'rotate3d(0, 0, 0, 0deg)', filter: 'brightness(100%)' },
           ],
         },
-      } satisfies InteractConfig['effects'][string];
+      } satisfies Effect;
     default:
       return {
         key: 'demo-card',
@@ -78,7 +78,7 @@ const createEffectConfig = (
             easing,
           },
         ],
-      } satisfies InteractConfig['effects'][string];
+      } satisfies Effect;
   }
 };
 

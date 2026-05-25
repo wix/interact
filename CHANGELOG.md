@@ -10,6 +10,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.3.0] - 2026-05-25
+
+#### Added
+
+- Rewrite `generate()` to produce complete CSS from an `InteractConfig`: `@keyframes`, animation and transition custom properties, `view-timeline` declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules (#7)
+- Ship `llms.txt` in the published package; add `scripts/generate-llms.mjs` plus CI workflows to generate and deploy it (#212, #215)
+- Monorepo root `README.md` with project overview and integration guidance (#213)
+- Interactive examples website (`apps/website`) with landing page and example gallery (#199)
+- Extensive tests for CSS generation, resolvers, and utilities (#7)
+
+#### Changed
+
+- `InteractConfig.effects` is now optional (#7)
+- Docs and interaction rules updated for the new `generate()` implementation, FOUC prevention, and scroll-driven pre-rendering (#211)
+- `viewProgress` handler uses `getAnimation()` and skips WAAPI playback when the animation group is CSS-based (`isCSS`) (#7)
+- Refactored transition CSS helpers and shared selector/property utilities (#7)
+
+#### Removed
+
+- Unused public type exports: `EventTriggerKind`, `EventTriggerConfigToggle`, `EventTriggerConfigEnterLeave`, `EventTriggerConfig`, `AnimationOptions`, `SequenceOptionsConfig` (#205)
+
 ### [2.2.2] - 2026-05-04
 
 #### Fixed
@@ -127,6 +148,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion
+
+### [2.1.6] - 2026-05-25
+
+#### Changed
+
+- `getEffectsData()` accepts an optional `forCSS` flag so CSS generation always emits `duration: auto` for view-progress triggers without requiring `window.ViewTimeline` at build time (#7)
 
 ### [2.1.5] - 2026-05-04
 
