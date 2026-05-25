@@ -106,9 +106,7 @@ New file at repo root: [context7.json](context7.json)
   "excludeFiles": [
     "AGENTS.md",
     "CLAUDE.md",
-    "CONTRIBUTING.md",
-    "readme-spec-1.md",
-    "readme-spec-2.md"
+    "CONTRIBUTING.md"
   ],
   "rules": [
     "Always call registerEffects() before Interact.create()",
