@@ -72,7 +72,7 @@ In `<head>` add:
 
 ```html
 <style>
-  ${css}
+  ${interactCSS}
   /* Optional — keep the custom element from affecting layout */
   interact-element {
     display: contents;
