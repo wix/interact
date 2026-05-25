@@ -138,7 +138,7 @@ export function App () {
 // in components/Hero.jsx
 export function Hero() {
   return (
-    <Interaction tagName="section" interactKey="hero" initial className="hero">
+    <Interaction tagName="section" interactKey="hero">
       Hello, animated world!
     </Interaction>
   );
