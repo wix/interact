@@ -44,7 +44,7 @@ export type Interaction = InteractionTrigger & {
 };
 
 export type InteractConfig = {
-  effects: Record<string, Effect>;
+  effects?: Record<string, Effect>;
   sequences?: Record<string, SequenceConfig>;
   conditions?: Record<string, Condition>;
   interactions: Interaction[];

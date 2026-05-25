@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { InteractConfig } from '@wix/interact/react';
+import type { Effect, InteractConfig } from '@wix/interact/react';
 import { Interaction } from '@wix/interact/react';
 import { useInteractInstance } from '../hooks/useInteractInstance';
 
@@ -30,7 +30,7 @@ export const ScrollShowcase = () => {
       effects: [{ effectId: `scroll-effect-${index}` }],
     }));
 
-    const effects = cards.reduce<InteractConfig['effects']>((acc, card, index) => {
+    const effects = cards.reduce<Record<string, Effect>>((acc, card, index) => {
       acc[`scroll-effect-${index}`] = {
         key: card.key,
         easing: 'linear',
