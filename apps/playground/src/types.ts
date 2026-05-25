@@ -1,4 +1,9 @@
-import type { InteractConfig, Condition, SequenceConfig } from '@wix/interact';
+import type { InteractConfig, Condition, SequenceConfig, Effect } from '@wix/interact';
+
+/** Playground always maintains a defined effects map (InteractConfig.effects is optional). */
+export type PlaygroundConfig = Omit<InteractConfig, 'effects'> & {
+  effects: Record<string, Effect>;
+};
 
 export interface ScrollPreviewState {
   enabled: boolean;
@@ -14,7 +19,7 @@ export type EffectContext =
 export type BottomPanel = 'none' | 'json' | 'timeline';
 
 export interface PlaygroundState {
-  config: InteractConfig;
+  config: PlaygroundConfig;
   activeComponentId: string;
   selectedInteractionIndex: number | null;
   selectedEffectId: string | null;
@@ -33,8 +38,8 @@ export type Action =
       payload: { index: number; data: Partial<InteractConfig['interactions'][number]> };
     }
   | { type: 'SELECT_INTERACTION'; payload: number | null }
-  | { type: 'ADD_EFFECT'; payload: { id: string; effect: InteractConfig['effects'][string] } }
-  | { type: 'UPDATE_EFFECT'; payload: { id: string; effect: InteractConfig['effects'][string] } }
+  | { type: 'ADD_EFFECT'; payload: { id: string; effect: Effect } }
+  | { type: 'UPDATE_EFFECT'; payload: { id: string; effect: Effect } }
   | { type: 'REMOVE_EFFECT'; payload: string }
   | { type: 'SELECT_EFFECT'; payload: { id: string | null; context?: EffectContext } }
   | { type: 'SET_BOTTOM_PANEL'; payload: BottomPanel }
