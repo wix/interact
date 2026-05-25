@@ -190,16 +190,16 @@ type InteractConfig = {
 
 ## Triggers
 
-| Trigger        | Fires When                                 | Params                                  |
-| -------------- | ------------------------------------------ | --------------------------------------- |
-| `viewEnter`    | Element enters viewport                    | `threshold?`, `inset?`                  |
-| `viewProgress` | Element scrolls through viewport           | (use `rangeStart`/`rangeEnd` on effect) |
-| `hover`        | Pointer enters/leaves element              | —                                       |
-| `click`        | Element is clicked                         | —                                       |
-| `activate`     | Click + keyboard (a11y variant of `click`) | —                                       |
-| `interest`     | Hover + focus (a11y variant of `hover`)    | —                                       |
-| `pointerMove`  | Pointer moves over element or viewport     | `hitArea?`, `axis?`                     |
-| `animationEnd` | Another effect completes                   | `effectId`                              |
+| Trigger        | Fires On                                     | Params                                  |
+| -------------- | -------------------------------------------- | --------------------------------------- |
+| `viewEnter`    | Element enters viewport                      | `threshold?`, `inset?`                  |
+| `viewProgress` | While element scrolls through viewport       | (use `rangeStart`/`rangeEnd` on effect) |
+| `hover`        | Pointer enters/leaves element                | —                                       |
+| `click`        | Element is clicked                           | —                                       |
+| `activate`     | Click + keyboard (a11y variant of `click`)   | —                                       |
+| `interest`     | Hover + focus (a11y variant of `hover`)      | —                                       |
+| `pointerMove`  | While pointer moves over element or viewport | `hitArea?`, `axis?`                     |
+| `animationEnd` | Another effect completes                     | `effectId`                              |
 
 ## Effects
 
