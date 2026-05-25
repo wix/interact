@@ -145,7 +145,7 @@ export function Hero() {
 }
 ```
 
-### Using vaniall JS - no DOM management
+### Using vaniall JS - no handling for DOM changes
 
 **Vanilla JS** — bind elements after they exist in the DOM:
 
