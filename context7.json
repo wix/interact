@@ -1,0 +1,36 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "@wix/interact",
+  "description": "Declarative, configuration-driven interaction library — web-native, AI-ready, and framework-agnostic.",
+  "folders": ["packages/interact/rules", "packages/interact/docs", "packages/interact"],
+  "excludeFolders": [
+    "packages/interact/src",
+    "packages/interact/test",
+    "packages/motion",
+    "packages/motion-presets",
+    "apps",
+    ".github",
+    ".cursor",
+    ".claude",
+    "scripts",
+    "node_modules",
+    "dist"
+  ],
+  "excludeFiles": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    "CONTRIBUTING.md",
+    "readme-spec-1.md",
+    "readme-spec-2.md"
+  ],
+  "rules": [
+    "Always call registerEffects() before Interact.create()",
+    "Use overflow: clip (not overflow: hidden) on all ancestors between source and scroll container for viewProgress",
+    "When viewEnter source and target are the same element, use type 'once' only — other types cause re-trigger loops",
+    "Separate source and target elements when hover or click effects change size or position to prevent hit-area flicker",
+    "Avoid same-element source/target with pointerMove hitArea:'self' and size-changing effects — causes jitter",
+    "Use trigger: 'activate' instead of 'click' to also handle keyboard activation (Enter/Space)",
+    "Call generate() from @wix/interact/web before page render for FOUC prevention with custom elements",
+    "Add prefers-reduced-motion conditions or set Interact.forceReducedMotion for accessibility"
+  ]
+}

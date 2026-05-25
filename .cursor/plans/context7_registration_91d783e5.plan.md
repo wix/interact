@@ -4,7 +4,7 @@ overview: Register @wix/interact on Context7 by creating a validated context7.js
 todos:
   - id: create-context7-json
     content: Create context7.json at repo root with validated schema-compliant config
-    status: pending
+    status: completed
   - id: submit-to-context7
     content: 'Manual: submit github.com/wix/interact at context7.com/add-library'
     status: pending
@@ -72,6 +72,7 @@ Neither competitor uses a `context7.json`, so `@wix/interact` can differentiate 
 These constraints were discovered by reading the actual JSON Schema at `schema/context7.json` and confirmed via Context7 docs and GitHub issues:
 
 - **`rules` must be an array of strings**, each 5-200 characters. NOT a single string.
+- **`rules` purpose**: strings are injected verbatim into the LLM context alongside code snippets when `query-docs` is called. They are **usage guidelines for the coding agent**, not navigation hints for the indexer. Use imperative mood: "Use X", "Avoid Y". Common mistakes: navigation hints ("Start with file X"), vague/passive language ("You should try to..."), file-path references that only make sense to a human browsing the repo.
 - **`excludeFiles` accepts filenames only** -- pattern `^[^/\\]+$`, no glob, no regex. `"*.ts"` is invalid.
 - **`additionalProperties: false`** -- any unknown field fails validation.
 - **Root-level markdown is always included** when `folders` is specified (confirmed behavior, narrowed to README.md only when folders are set).
@@ -87,7 +88,7 @@ New file at repo root: [context7.json](context7.json)
 {
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "@wix/interact",
-  "description": "Declarative animation library -- wire scroll, hover, click, and pointer triggers to effects via JSON config. Built on Web Animations API.",
+  "description": "Declarative, configuration-driven interaction library — web-native, AI-ready, and framework-agnostic.",
   "folders": ["packages/interact/rules", "packages/interact/docs", "packages/interact"],
   "excludeFolders": [
     "packages/interact/src",
@@ -110,12 +111,14 @@ New file at repo root: [context7.json](context7.json)
     "readme-spec-2.md"
   ],
   "rules": [
-    "Start with rules/full-lean.md for the complete @wix/interact reference",
-    "For trigger-specific rules: click.md, hover.md, viewenter.md, viewprogress.md, pointermove.md",
-    "For integration patterns (React, vanilla JS, custom elements) use rules/integration.md",
     "Always call registerEffects() before Interact.create()",
-    "Use generate() from @wix/interact/web for FOUC prevention with custom elements",
-    "Include a prefers-reduced-motion condition for accessibility"
+    "Use overflow: clip (not overflow: hidden) on all ancestors between source and scroll container for viewProgress",
+    "When viewEnter source and target are the same element, use type 'once' only — other types cause re-trigger loops",
+    "Separate source and target elements when hover or click effects change size or position to prevent hit-area flicker",
+    "Avoid same-element source/target with pointerMove hitArea:'self' and size-changing effects — causes jitter",
+    "Use trigger: 'activate' instead of 'click' to also handle keyboard activation (Enter/Space)",
+    "Call generate() from @wix/interact/web before page render for FOUC prevention with custom elements",
+    "Add prefers-reduced-motion conditions or set Interact.forceReducedMotion for accessibility"
   ]
 }
 ```
@@ -124,7 +127,7 @@ New file at repo root: [context7.json](context7.json)
 
 - **`folders` includes `packages/interact`** (not just `rules` and `docs`) so that `packages/interact/README.md` is explicitly in scope. The `excludeFolders` for `src/` and `test/` prevents source code from leaking. This is the belt-and-suspenders approach against the known `folders` bug.
 - **`excludeFiles` lists exact filenames** -- no globs. Context7 only indexes markdown by default, so there is no need to filter `*.ts`, `*.js`, `*.css` etc. (which would be invalid anyway). The five listed files are root-level markdown that would otherwise pollute the index with internal agent instructions and spec drafts.
-- **`rules` is an array of 6 strings**, each under 200 characters, referencing actual filenames that exist in the repo. This replaces the previous plans' single-string approach (which would fail schema validation). The rules guide agents to start with `full-lean.md` and drill into trigger-specific files as needed.
+- **`rules` is an array of 8 strings**, each under 200 characters, all in imperative mood. Context7 injects these verbatim into the LLM context alongside code snippets when `query-docs` is called — they are coding-agent guidelines, not file navigation hints. The previous plan's first three entries (`"Start with rules/full-lean.md..."`, `"For trigger-specific rules: click.md..."`, `"For integration patterns... use rules/integration.md"`) were navigation hints that misused the field: Context7 performs its own semantic search, so pointing an agent at a filename adds no value. The replacement rules surface the CRITICAL pitfalls documented in `rules/full-lean.md` and `rules/click.md`: the `overflow: clip` requirement for `viewProgress`, the `viewEnter` same-element re-trigger trap, hit-area flicker with hover/click, `pointerMove` jitter, and the accessibility requirements (`trigger: 'activate'`, `prefers-reduced-motion`, FOUC prevention).
 - **No `excludeFiles` globs** -- the previous detailed plan's `"*.ts"`, `"*.js"` entries would fail the schema's `^[^/\\]+$` pattern constraint.
 - **Dropped `packages/interact-debug`** from excludeFolders -- this directory does not exist.
 
