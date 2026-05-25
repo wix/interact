@@ -20,7 +20,13 @@ Declarative, configuration-driven interaction library — web-native, AI-ready, 
 ## Install
 
 ```bash
-npm install @wix/interact @wix/motion-presets
+npm install @wix/interact
+```
+
+### Use pre-made presets
+
+```bash
+npm install @wix/motion-presets
 ```
 
 `@wix/motion-presets` is optional but recommended — it provides the `namedEffect` library used in most examples below.
@@ -32,12 +38,12 @@ npm install @wix/interact @wix/motion-presets
 **Web Components** — wrap the target element with `<interact-element>`:
 
 ```ts
-import { Interact } from '@wix/interact/web';
+import { Interact, generate, type InteractConfig } from '@wix/interact/web';
 import * as presets from '@wix/motion-presets'; // optional
 
 Interact.registerEffects(presets); // optional
 
-const config = {
+const config: InteractConfig = {
   interactions: [
     {
       key: 'hero',
@@ -62,8 +68,22 @@ const interactCSS = generate(config, false);
 const instance = Interact.create(config);
 ```
 
+In `<head>` add:
+
 ```html
-<interact-element data-interact-key="hero" data-interact-initial="true">
+<style>
+  ${css}
+  /* Optional — keep the custom element from affecting layout */
+  interact-element {
+    display: contents;
+  }
+</style>
+```
+
+In the `<body>` add:
+
+```html
+<interact-element data-interact-key="hero">
   <section class="hero">Hello, animated world!</section>
 </interact-element>
 ```
@@ -207,8 +227,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
     'float-in': {
       duration: 800,
       easing: 'ease-out',
-      namedEffect: { type: 'FloatIn', direction: 'bottom', distance: '80px' },
-      triggerType: 'once',
+      namedEffect: { type: 'FloatIn', direction: 'bottom', distance: '60px' },
     },
   },
 }
@@ -230,7 +249,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
         name: 'pulse',
         keyframes: { transform: ['scale(1)', 'scale(1.08)', 'scale(1)'] },
       },
-      triggerType: 'once',
+      triggerType: 'repeat',
     },
   },
 }
@@ -314,31 +333,31 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
 - **Same element as source and target with `viewEnter`** — Must use `triggerType: 'once'`. Other types cause re-entry loops.
 - **Hit-area shift on `hover` / `pointerMove`** — Animating size/position of the hovered element shifts the hit area and causes jitter. Animate a child via `selector` instead.
 - **`registerEffects()` must run before `Interact.create()`** when using `namedEffect`.
-- **FOUC prevention requires both** — `generate(config)` injected into `<head>` AND `initial` set on the `viewEnter` + `triggerType: 'once'` element.
+- **FOUC prevention requires both** — `generate(config)` injected into `<head>`.
 - **`generate(config, useFirstChild)`** — Pass `true` for `<interact-element>` (web), `false` for vanilla and React `<Interaction>`.
-- **`<interact-element>` must wrap exactly one child** — the library targets `.firstElementChild` by default.
+- **`<interact-element>` must wrap exactly one child** — the library targets `:first-child` by default.
 
 ## AI & Agent Support
 
 Interact's JSON-config surface is the differentiator: configs are serializable, schema-typed, and validate-able (guardrails) — no imperative DOM logic for an LLM to hallucinate.
 
-**Rules files** ship with the package under [`rules/`](./rules/) — point your agent at them:
+**Rules files** ship with the package under [`rules/`](https://github.com/wix/interact/tree/master/packages/interact/rules) — point your agent at them:
 
-- [`rules/full-lean.md`](./rules/full-lean.md) — complete config spec, pitfalls, and constraints
-- [`rules/integration.md`](./rules/integration.md) — entry points, lifecycle, FOUC
-- [`rules/viewenter.md`](./rules/viewenter.md) — viewport entrance triggers
-- [`rules/viewprogress.md`](./rules/viewprogress.md) — scroll-driven animations
-- [`rules/click.md`](./rules/click.md) — click and activate triggers
-- [`rules/hover.md`](./rules/hover.md) — hover and interest triggers
-- [`rules/pointermove.md`](./rules/pointermove.md) — pointer-driven animations
+- [`rules/full-lean.md`](https://wix.github.io/interact/rules/full-lean.md) — complete config spec, pitfalls, and constraints
+- [`rules/integration.md`](https://wix.github.io/interact/rules/integration.md) — integration entry points, lifecycle, style generation
+- [`rules/viewenter.md`](https://wix.github.io/interact/rules/viewenter.md) — viewport entrance triggers (scroll-triggered animations)
+- [`rules/viewprogress.md`](https://wix.github.io/interact/rules/viewprogress.md) — scroll-driven animations
+- [`rules/click.md`](https://wix.github.io/interact/rules/click.md) — click and activate triggers
+- [`rules/hover.md`](https://wix.github.io/interact/rules/hover.md) — hover and interest triggers
+- [`rules/pointermove.md`](https://wix.github.io/interact/rules/pointermove.md) — pointer-driven animations
 
 **Generation constraints** for agents producing configs:
 
 - Do not invent `namedEffect` types — use only registered presets.
 - Do not attach DOM event listeners manually — use triggers.
 - Do not use `overflow: hidden` on scroll-tracked ancestors — use `overflow: clip`.
-- Always pre-render CSS with `generate(config)` and inject into `<head>`. For `viewEnter` + `triggerType: 'once'`, also set `initial` on the element to prevent FOUC.
-- Always call `Interact.registerEffects(presets)` before `Interact.create()` when using `namedEffect`.
+- Always pre-render CSS with `generate(config)` and inject into `<head>`.
+- Always call `Interact.registerEffects(presets)` before `generate()` and `Interact.create()` when using `namedEffect`.
 
 ## Browser Support
 
@@ -348,20 +367,19 @@ Interact's JSON-config surface is the differentiator: configs are serializable, 
 
 ## Related Packages
 
-- [`@wix/motion`](../motion/README.md) — low-level animation engine underneath Interact.
-- [`@wix/motion-presets`](../motion-presets/README.md) — ready-made effect catalog (entrance, scroll, hover, pointer).
+- [`@wix/motion`](https://github.com/wix/interact/tree/master/packages/motion) — low-level animation engine underneath Interact.
+- [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) — ready-made effect catalog (entrance, scroll, hover, pointer).
 - [`fizban`](https://github.com/wix/fizban) — scroll-driven animation polyfill (bundled dependency).
 - [`kuliso`](https://github.com/wix/kuliso) — pointer-driven animation polyfill (bundled dependency).
 
 ## Documentation
 
-- [**Getting Started**](./docs/guides/getting-started.md)
-- [**API Reference**](./docs/api/README.md) — `Interact` class, `InteractionController`, standalone functions, types
-- [**Guides**](./docs/guides/README.md) — triggers, effects, configuration, state, conditions, sequences
-- [**Examples**](./docs/examples/README.md) — entrance, click, hover, list patterns
-- [**React Integration**](./docs/integration/react.md)
-- [**Web Components**](./docs/guides/custom-elements.md)
-- [**Full Documentation Index**](./docs/README.md)
+- [**Getting Started**](https://wix.github.io/interact/docs/guides/getting-started.md)
+- [**API Reference**](https://wix.github.io/interact/docs/api/README.md) — `Interact` class, `InteractionController`, standalone functions, types
+- [**Guides**](https://wix.github.io/interact/docs/guides/README.md) — triggers, effects, configuration, state, conditions, sequences
+- [**Examples**](https://wix.github.io/interact/docs/examples/README.md) — entrance, click, hover, list patterns
+- [**Web Components**](https://wix.github.io/interact/docs/guides/custom-elements.md) - integration via custom elements
+- [**React Integration**](https://wix.github.io/interact/docs/integration/react.md) - React integration
 
 ## License
 
