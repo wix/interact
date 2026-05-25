@@ -37,7 +37,7 @@ import * as presets from '@wix/motion-presets'; // optional
 
 Interact.registerEffects(presets); // optional
 
-onst config = {
+const config = {
   interactions: [
     {
       key: 'hero',
