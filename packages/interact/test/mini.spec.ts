@@ -3519,7 +3519,7 @@ describe('interact (mini)', () => {
         expect(playMock).not.toHaveBeenCalled();
       });
 
-      it('should use effectId prefix fallback when getElementCSSAnimation returns null and animationName matches effectId', async () => {
+      it('should trigger unconditionally when source animations cannot be resolved', async () => {
         const { getAnimation, getElementCSSAnimation } = await import('@wix/motion');
 
         const playMock = vi.fn();
@@ -3538,12 +3538,8 @@ describe('interact (mini)', () => {
         const el = document.createElement('div');
         add(el, 'anim-end-el');
 
-        // Unrelated animationName → should NOT trigger.
+        // When source group cannot be resolved we do not block — any animationend triggers.
         el.dispatchEvent(createAnimationEndEvent('unrelated'));
-        expect(playMock).not.toHaveBeenCalled();
-
-        // animationName matching effectId → SHOULD trigger.
-        el.dispatchEvent(createAnimationEndEvent('src-effect'));
         expect(playMock).toHaveBeenCalledOnce();
       });
 
