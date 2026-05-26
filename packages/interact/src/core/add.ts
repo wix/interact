@@ -11,6 +11,7 @@ import type {
   SequenceConfigRef,
   CreateTransitionCSSParams,
   IInteractionController,
+  AnimationEndParams,
 } from '../types';
 import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
 import { getInterpolatedKey } from './utilities';
@@ -709,11 +710,25 @@ function addInteraction<T extends TriggerType>(
     targetController.renderStyle(createTransitionCSS(args));
   }
 
+  let sourceAnimationOptions;
+  if (trigger === 'animationEnd') {
+    const triggerEffectId = (options as AnimationEndParams).effectId;
+    // The animationEnd trigger is defined on the source element, so look up
+    // the source effect using the source element's key, not the targetKey.
+    const sourceKey = source.dataset.interactKey;
+    const instance = Interact.getInstance(sourceKey || targetKey);
+    const srcEffect = instance?.dataCache.effects[triggerEffectId] as TimeEffect | undefined;
+    if (srcEffect) {
+      sourceAnimationOptions = effectToAnimationOptions(srcEffect);
+    }
+  }
+
   TRIGGER_TO_HANDLER_MODULE_MAP[trigger]?.add(source, target, effect, options, {
     reducedMotion: Interact.forceReducedMotion,
     targetController,
     selectorCondition,
     allowA11yTriggers: Interact.allowA11yTriggers,
+    sourceAnimationOptions,
   });
 }
 
