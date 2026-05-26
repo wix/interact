@@ -199,7 +199,7 @@ type InteractConfig = {
 | `activate`     | Click + keyboard (a11y variant of `click`)   | —                                       |
 | `interest`     | Hover + focus (a11y variant of `hover`)      | —                                       |
 | `pointerMove`  | While pointer moves over element or viewport | `hitArea?`, `axis?`                     |
-| `animationEnd` | Another effect completes                     | `effectId`                              |
+| `animationEnd` | Another specified effect is finished         | `effectId`                              |
 
 ## Effects
 
@@ -318,9 +318,9 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
   }],
   effects: {
     'follow': {
-      customEffect: (element, progress) => {
-        (element as HTMLElement).style.setProperty('--x', `${progress.x * 100}%`);
-        (element as HTMLElement).style.setProperty('--y', `${progress.y * 100}%`);
+      customEffect: (element: HTMLElement, progress: { x: number, y: number }) => {
+        element.style.setProperty('--x', `${progress.x * 100}%`);
+        element.style.setProperty('--y', `${progress.y * 100}%`);
       },
     },
   },
