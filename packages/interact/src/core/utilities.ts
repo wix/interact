@@ -42,3 +42,4 @@ export function getUniqueEncodedHash(hash: string): string {
   }
   return ((h1 >>> 0) * 0x100000 + ((h2 >>> 0) % 0x100000)).toString(36);
 }
+
