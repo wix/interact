@@ -12,6 +12,7 @@ import type {
   CreateTransitionCSSParams,
   IInteractionController,
   AnimationEndParams,
+  AnimationOptions,
 } from '../types';
 import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
 import { getInterpolatedKey } from './utilities';
@@ -717,7 +718,9 @@ function addInteraction<T extends TriggerType>(
     const instance = Interact.getInstance(sourceKey!);
     const srcEffect = instance?.dataCache.effects[triggerEffectId] as TimeEffect | undefined;
     if (srcEffect) {
-      sourceAnimationOptions = effectToAnimationOptions(srcEffect);
+      sourceAnimationOptions = effectToAnimationOptions(srcEffect) as
+        | AnimationOptions<'time'>
+        | undefined;
     }
   }
 
