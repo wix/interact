@@ -42,25 +42,23 @@ function addAnimationEndHandler(
     const animName = (event as AnimationEvent).animationName;
     const eventEffectId = (event as CustomEvent).detail?.effectId;
 
-    const sourceGroup = (sourceAnimationOptions
-      ? getElementCSSAnimation(source, sourceAnimationOptions) as AnimationGroup | null
-      : getElementAnimation(source, effectId) as AnimationGroup | null)?.animations;
+    const sourceGroup = (
+      sourceAnimationOptions
+        ? (getElementCSSAnimation(source, sourceAnimationOptions) as AnimationGroup | null)
+        : (getElementAnimation(source, effectId) as AnimationGroup | null)
+    )?.animations;
 
     if (sourceGroup && sourceGroup.length) {
       if (sourceGroup.some((a: Animation) => a.playState === 'running')) {
         return;
       }
       if (animName) {
-        const groupNames = sourceGroup.map(
-          (a: Animation) => (a as CSSAnimation).animationName,
-        );
+        const groupNames = sourceGroup.map((a: Animation) => (a as CSSAnimation).animationName);
         if (!groupNames.includes(animName)) {
           return;
         }
       } else if (eventEffectId) {
-        const groupIds = sourceGroup.map(
-          (a: Animation) => a.id,
-        );
+        const groupIds = sourceGroup.map((a: Animation) => a.id);
         if (eventEffectId !== effectId && !groupIds.includes(eventEffectId)) {
           return;
         }

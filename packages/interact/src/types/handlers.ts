@@ -26,7 +26,7 @@ export type InteractOptions = {
   selectorCondition?: string;
   allowA11yTriggers?: boolean;
   animation?: AnimationGroup;
-  sourceAnimationOptions?: AnimationOptions;
+  sourceAnimationOptions?: AnimationOptions<'time'>;
 };
 
 export type InteractionHandlerModule<T extends TriggerType> = {
