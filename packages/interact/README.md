@@ -227,7 +227,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
     'float-in': {
       duration: 800,
       easing: 'ease-out',
-      namedEffect: { type: 'FloatIn', direction: 'bottom', distance: '60px' },
+      namedEffect: { type: 'FloatIn', direction: 'bottom' },
     },
   },
 }
@@ -247,7 +247,9 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
       duration: 300,
       keyframeEffect: {
         name: 'pulse',
-        keyframes: { transform: ['scale(1)', 'scale(1.08)', 'scale(1)'] },
+        keyframes: [
+          { transform: 'scale(1.08)', offset: 0.5 }
+        ],
       },
       triggerType: 'repeat',
     },
@@ -289,7 +291,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
   interactions: [{
     key: 'card',
     trigger: 'hover',
-    effects: [{ effectId: 'lift', stateAction: 'toggle' }],
+    effects: [{ effectId: 'lift', stateAction: 'toggle', key: 'card-figure' }],
   }],
   effects: {
     'lift': {
