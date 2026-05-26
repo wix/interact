@@ -106,7 +106,8 @@ export class AnimationGroup {
         const target = (a.effect as KeyframeEffect)?.target;
 
         if (target) {
-          const endEvent = new Event('animationend');
+          const effectId = this.options?.effectId || a.id;
+          const endEvent = new CustomEvent('animationend', { detail: { effectId } });
           target.dispatchEvent(endEvent);
         }
       }

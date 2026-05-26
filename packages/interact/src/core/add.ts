@@ -713,10 +713,8 @@ function addInteraction<T extends TriggerType>(
   let sourceAnimationOptions;
   if (trigger === 'animationEnd') {
     const triggerEffectId = (options as AnimationEndParams).effectId;
-    // The animationEnd trigger is defined on the source element, so look up
-    // the source effect using the source element's key, not the targetKey.
     const sourceKey = source.dataset.interactKey;
-    const instance = Interact.getInstance(sourceKey || targetKey);
+    const instance = Interact.getInstance(sourceKey!);
     const srcEffect = instance?.dataCache.effects[triggerEffectId] as TimeEffect | undefined;
     if (srcEffect) {
       sourceAnimationOptions = effectToAnimationOptions(srcEffect);

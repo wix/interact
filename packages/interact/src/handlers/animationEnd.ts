@@ -39,32 +39,32 @@ function addAnimationEndHandler(
   const handler = (event: Event) => {
     if (selectorCondition && !target.matches(selectorCondition)) return;
 
-    // Resolve the source AnimationGroup at event time so we always see the
-    // latest set of animations (they may not exist at setup time).
-    const sourceGroup = sourceAnimationOptions
-      ? (getElementCSSAnimation(source, sourceAnimationOptions) as AnimationGroup | null)
-      : effectId
-        ? (getElementAnimation(source, effectId) as AnimationGroup | null)
-        : null;
+    const animName = (event as AnimationEvent).animationName;
+    const eventEffectId = (event as CustomEvent).detail?.effectId;
 
-    if (sourceGroup) {
-      const animName = (event as AnimationEvent).animationName;
-      // For CSS animations the event carries animationName; for the synthetic
-      // WAAPI event it is undefined. Build the set of names the group owns.
-      const groupNames = sourceGroup.animations.map(
-        (a: Animation) => (a as CSSAnimation).animationName ?? undefined,
-      );
+    const sourceGroup = (sourceAnimationOptions
+      ? getElementCSSAnimation(source, sourceAnimationOptions) as AnimationGroup | null
+      : getElementAnimation(source, effectId) as AnimationGroup | null)?.animations;
 
-      // If this event belongs to a different CSS animation, skip it.
-      if (animName !== undefined && !groupNames.includes(animName)) return;
-
-      // Wait until every animation in the group has finished.
-      if (sourceGroup.animations.some((a: Animation) => a.playState === 'running')) return;
-    } else if (effectId) {
-      // Fallback when the source group cannot be resolved (e.g. CSS keyframeEffect
-      // whose name equals the effectId, or when animations are gone post-finish).
-      const animName = (event as AnimationEvent).animationName;
-      if (animName !== undefined && !animName.startsWith(effectId)) return;
+    if (sourceGroup && sourceGroup.length) {
+      if (sourceGroup.some((a: Animation) => a.playState === 'running')) {
+        return;
+      }
+      if (animName) {
+        const groupNames = sourceGroup.map(
+          (a: Animation) => (a as CSSAnimation).animationName,
+        );
+        if (!groupNames.includes(animName)) {
+          return;
+        }
+      } else if (eventEffectId) {
+        const groupIds = sourceGroup.map(
+          (a: Animation) => a.id,
+        );
+        if (eventEffectId !== effectId && !groupIds.includes(eventEffectId)) {
+          return;
+        }
+      }
     }
 
     animation.play();
