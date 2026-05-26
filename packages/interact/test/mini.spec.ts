@@ -3573,9 +3573,6 @@ describe('interact (mini)', () => {
       });
 
       it('should resolve sourceAnimationOptions from source element config when source and target differ', async () => {
-        // This verifies the bug-fix: previously Interact.getInstance(targetKey) was
-        // used, which failed when source ≠ target because the source effect lives
-        // in the source element's config, not the target's.
         const { getAnimation, getElementCSSAnimation } = await import('@wix/motion');
 
         const playMock = vi.fn();
