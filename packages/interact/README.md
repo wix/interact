@@ -14,7 +14,7 @@ Declarative, configuration-driven interaction library — web-native, AI-ready, 
 - **Framework-agnostic** — Web Components and vanilla JS integrations; React integration included
 - **AI-ready** — JSON configs are machine-readable and provide guardrails; LLMs can generate and agents can validate them
 - **CSS generation** — `generate(config)` emits complete CSS for the whole config (`@keyframes`, `view-timeline`, transitions, FOUC rules)
-- **Preset ecosystem** — Plug in [`@wix/motion-presets`](../motion-presets/README.md) for 80+ ready-made effects.
+- **Preset ecosystem** — Plug in [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) for 80+ ready-made effects.
 - **Accessible** — Built-in `activate` (click + keyboard) and `interest` (hover + focus) trigger variants
 
 ## Install
@@ -438,12 +438,12 @@ Interact's JSON-config surface is the differentiator: configs are serializable, 
 
 ## Documentation
 
-- [**Getting Started**](https://wix.github.io/interact/docs/guides/getting-started.md)
-- [**API Reference**](https://wix.github.io/interact/docs/api/README.md) — `Interact` class, `InteractionController`, standalone functions, types
-- [**Guides**](https://wix.github.io/interact/docs/guides/README.md) — triggers, effects, configuration, state, conditions, sequences
-- [**Examples**](https://wix.github.io/interact/docs/examples/README.md) — entrance, click, hover, list patterns
-- [**Web Components**](https://wix.github.io/interact/docs/guides/custom-elements.md) - integration via custom elements
-- [**React Integration**](https://wix.github.io/interact/docs/integration/react.md) - React integration
+- [**Getting Started**](https://github.com/wix/interact/blob/master/packages/interact/docs/guides/getting-started.md)
+- [**API Reference**](https://github.com/wix/interact/blob/master/packages/interact/docs/api/README.md) — `Interact` class, `InteractionController`, standalone functions, types
+- [**Guides**](https://github.com/wix/interact/blob/master/packages/interact/docs/guides/README.md) — triggers, effects, configuration, state, conditions, sequences
+- [**Examples**](https://github.com/wix/interact/blob/master/packages/interact/docs/examples/README.md) — entrance, click, hover, list patterns
+- [**Web Components**](https://github.com/wix/interact/blob/master/packages/interact/docs/guides/custom-elements.md) — integration via custom elements
+- [**React Integration**](https://github.com/wix/interact/blob/master/packages/interact/docs/integration/react.md) — React integration
 
 ## License
 

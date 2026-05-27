@@ -5,7 +5,7 @@ Web-native animation and interaction libraries — declarative, AI-ready, framew
 [![npm version](https://img.shields.io/npm/v/@wix/interact)](https://www.npmjs.com/package/@wix/interact)
 [![npm version](https://img.shields.io/npm/v/@wix/motion)](https://www.npmjs.com/package/@wix/motion)
 [![npm version](https://img.shields.io/npm/v/@wix/motion-presets)](https://www.npmjs.com/package/@wix/motion-presets)
-[![license](https://img.shields.io/npm/l/@wix/interact)](LICENSE)
+[![license](https://img.shields.io/npm/l/@wix/interact)](https://github.com/wix/interact/blob/master/LICENSE)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@wix/interact)](https://bundlephobia.com/package/@wix/interact)
 
 ## What is Interact?
@@ -26,7 +26,7 @@ Web-native animation and interaction libraries — declarative, AI-ready, framew
 | --------------------------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [`@wix/interact`](https://github.com/wix/interact/blob/master/packages/interact/)             | Declarative interaction layer (main package) | [README](https://github.com/wix/interact/blob/master/packages/interact/README.md) · [npm](https://www.npmjs.com/package/@wix/interact)           |
 | [`@wix/motion`](https://github.com/wix/interact/blob/master/packages/motion/)                 | Low-level animation engine                   | [README](https://github.com/wix/interact/blob/master/packages/motion/README.md) · [npm](https://www.npmjs.com/package/@wix/motion)               |
-| [`@wix/motion-presets`](https://github.com/wix/interact/blob/master/packages/motion-presets/) | Ready-made animation presets                 | [README](https://github.com/wix/interact/blob/master/packages/motion-presets/README.md) [npm](https://www.npmjs.com/package/@wix/motion-presets) |
+| [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) | Ready-made animation presets                 | [npm](https://www.npmjs.com/package/@wix/motion-presets) |
 
 ```
 @wix/motion ← @wix/interact (declarative layer)

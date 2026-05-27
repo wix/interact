@@ -4,7 +4,7 @@ Low-level, web-native animation engine — WAAPI, CSS, scroll-driven, and pointe
 
 [![npm version](https://img.shields.io/npm/v/@wix/motion.svg)](https://www.npmjs.com/package/@wix/motion)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@wix/motion)](https://bundlephobia.com/package/@wix/motion)
-[![license](https://img.shields.io/npm/l/@wix/motion.svg)](./LICENSE)
+[![license](https://img.shields.io/npm/l/@wix/motion.svg)](https://github.com/wix/interact/blob/master/LICENSE)
 
 ## Why Motion?
 
@@ -13,10 +13,8 @@ Low-level, web-native animation engine — WAAPI, CSS, scroll-driven, and pointe
 - **Pointer-driven** — `pointer-move` animations map cursor `(x, y)` progress to effects, with optional transition smoothing.
 - **Custom effects** — Plug in programmatic render callbacks — no preset registration required.
 - **Dual rendering** — Choose CSS for declarative effects or WAAPI for fine-grained control, using the same options shape.
-- **Performance** — `fastdom` batches DOM reads/writes; no `requestAnimationFrame` loop unless a custom callback opts in.
-- **Pluggable presets** — `registerEffects()` accepts any effect module. Use [`@wix/motion-presets`](../motion-presets) or roll your own.
-
-Motion is the engine layer. [`@wix/interact`](../interact) is the declarative configuration layer built on top of it.
+- **Performance** — `fastdom` batches DOM reads/writes; no `requestAnimationFrame` loop (except for customEffects).
+- **Pluggable presets** — `registerEffects()` accepts any effect module. Use [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) or create your own.
 
 ## Install
 
@@ -51,7 +49,7 @@ animation.play();
 ```typescript
 import { getWebAnimation } from '@wix/motion';
 
-const scrollRoot = document.getElementById('viewport')!;
+const scrollRoot = document.getElementById('scrollRoot')!;
 
 const animation = getWebAnimation(
   document.getElementById('parallax'),
@@ -72,7 +70,7 @@ const animation = getWebAnimation(
 ```typescript
 import { getScrubScene } from '@wix/motion';
 
-const scrollRoot = document.getElementById('viewport')!;
+const scrollRoot = document.getElementById('scrollRoot')!;
 
 const scenes = getScrubScene(
   document.getElementById('parallax'),
@@ -112,7 +110,7 @@ Quickstart examples use `keyframeEffect` (inline keyframes) so they run without 
 | `getSequence()`      | Coordinate staggered groups with easing-based offsets       |
 | `registerEffects()`  | Register named effect modules into the global registry      |
 
-See [`docs/api/`](./docs/api/) for full signatures and options.
+See [`docs/api/`](https://github.com/wix/interact/blob/master/packages/motion/docs/api/README.md) for full signatures and options.
 
 ## Custom Effects
 
@@ -120,11 +118,11 @@ Three ways to define what an animation does:
 
 1. **Inline keyframes** — pass `keyframeEffect: { name, keyframes }` directly. Zero registration.
 2. **Custom callback** — pass `customEffect: (element, progress) => void` for full programmatic control per frame.
-3. **Named presets** — pass `namedEffect: { type: '…', …params }` referencing effects you've registered via `registerEffects()` (use [`@wix/motion-presets`](../motion-presets) or your own modules).
+3. **Named presets** — pass `namedEffect: { type: '…', …params }` referencing effects you've registered via `registerEffects()` (use [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) or your own modules).
 
 ## Sequences and Staggering
 
-`getSequence()` coordinates multiple `AnimationGroup`s with staggered offsets. The stagger interval can be eased so groups bunch toward the start or end of the sequence.
+`getSequence()` plays multiple animations with staggered start times. Pass `offset` (ms between each start) and an optional `offsetEasing` to shape how the offsets are distributed across the sequence.
 
 ```typescript
 import { getSequence } from '@wix/motion';
@@ -150,7 +148,7 @@ const sequence = getSequence(
 sequence.play();
 ```
 
-See [`docs/api/get-sequence.md`](./docs/api/get-sequence.md) for the full stagger model.
+See [`docs/api/get-sequence.md`](https://github.com/wix/interact/blob/master/packages/motion/docs/api/get-sequence.md) for the full stagger model.
 
 ## ViewTimeline and Polyfills
 
@@ -172,16 +170,18 @@ Modern evergreen browsers with Web Animations API support (Chrome, Edge, Firefox
 
 ## Related Packages
 
-- [`@wix/interact`](../interact) — declarative, config-driven interaction layer built on Motion.
-- [`@wix/motion-presets`](../motion-presets) — ready-made effect catalog (entrance, ongoing, scroll, mouse, background-scroll).
+Motion is the engine layer. The other packages in this repo build on top of it:
+
+- [`@wix/interact`](https://github.com/wix/interact/tree/master/packages/interact) — declarative, config-driven interaction layer built on Motion.
+- [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) — ready-made effect catalog (entrance, ongoing, scroll, mouse, background-scroll).
 
 ## Documentation
 
-- [Getting Started](./docs/getting-started.md)
-- [Core Concepts](./docs/core-concepts.md)
-- [API Reference](./docs/api/)
-- [Category Guides](./docs/categories/)
-- [Advanced Patterns](./docs/guides/)
+- [Getting Started](https://github.com/wix/interact/blob/master/packages/motion/docs/getting-started.md)
+- [Core Concepts](https://github.com/wix/interact/blob/master/packages/motion/docs/core-concepts.md)
+- [API Reference](https://github.com/wix/interact/blob/master/packages/motion/docs/api/README.md)
+- [Category Guides](https://github.com/wix/interact/blob/master/packages/motion/docs/categories/README.md)
+- [Advanced Patterns](https://github.com/wix/interact/blob/master/packages/motion/docs/guides/README.md)
 
 ## License
 
