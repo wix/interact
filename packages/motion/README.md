@@ -13,7 +13,7 @@ Low-level, web-native animation engine — WAAPI, CSS, scroll-driven, and pointe
 - **Pointer-driven** — `pointer-move` animations map cursor `(x, y)` progress to effects, with optional transition smoothing.
 - **Custom effects** — Plug in programmatic render callbacks — no preset registration required.
 - **Dual rendering** — Choose CSS for declarative effects or WAAPI for fine-grained control, using the same options shape.
-- **Performance** — `fastdom` batches DOM reads/writes; no `requestAnimationFrame` loop (except for customEffects).
+- **Performance** — `fastdom` batches DOM reads/writes; no `requestAnimationFrame` loop (except for customEffect callbacks).
 - **Pluggable presets** — `registerEffects()` accepts any effect module. Use [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) or create your own.
 
 ## Install
@@ -155,7 +155,7 @@ See [`docs/api/get-sequence.md`](https://github.com/wix/interact/blob/master/pac
 Motion is built around progressive enhancement:
 
 - **Native path** — when `window.ViewTimeline` is available, `getWebAnimation()` with a `view-progress` trigger returns a WAAPI animation linked to the scroll timeline.
-- **Polyfill path** — `getScrubScene()` with `view-progress` returns `ScrubScrollScene[]` objects exposing `start`, `end`, `viewSource`, and `effect(scene, progress)`. Drive these from your own IntersectionObserver/scroll listener (or use the scroll driver in `@wix/interact`).
+- **Polyfill path** — `getScrubScene()` with `view-progress` returns `ScrubScrollScene[]` objects exposing `start`, `end`, `viewSource`, and `effect(scene, progress)`. Drive these from your own IntersectionObserver/scroll listener. If using `@wix/interact`, its bundled scroll polyfill - [`fizban`](https://github.com/wix-incubator/fizban) - handles this automatically.
 - **Pointer smoothing** — `ScrubPointerScene` accepts `transitionDuration` and `transitionEasing` so pointer-tracking effects don't snap to the cursor.
 
 ## Performance Notes

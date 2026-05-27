@@ -9,12 +9,12 @@ Declarative, configuration-driven interaction library — web-native, AI-ready, 
 
 ## Why Interact?
 
-- **Declerative** — Define trigger-to-effect bindings in JSON; no imperative event wiring
+- **Declarative** — Define trigger-to-effect bindings in JSON; no imperative event wiring
 - **Web-native** — Built on CSS, WAAPI, ViewTimeline, and DOM APIs; supports DOM management via Custom Elements
 - **Framework-agnostic** — Web Components and vanilla JS integrations; React integration included
 - **AI-ready** — JSON configs are machine-readable and provide guardrails; LLMs can generate and agents can validate them
 - **CSS generation** — `generate(config)` emits complete CSS for the whole config (`@keyframes`, `view-timeline`, transitions, FOUC rules)
-- **Preset ecosystem** — Plug in [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) for 80+ ready-made effects.
+- **Preset ecosystem** — Plug in [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) for 70+ ready-made effects.
 - **Accessible** — Built-in `activate` (click + keyboard) and `interest` (hover + focus) trigger variants
 
 ## Install
@@ -62,7 +62,7 @@ const config: InteractConfig = {
 };
 
 // render styles  - e.g. for SSR
-const interactCSS = generate(config, false);
+const interactCSS = generate(config, true);
 
 // run on client - e.g. on pagereveal event
 const instance = Interact.create(config);
@@ -132,7 +132,7 @@ export function Hero() {
 }
 ```
 
-### Using vaniall JS - no handling for DOM changes
+### Using Vanilla JS (you manage element lifecycle)
 
 **Vanilla JS** — bind elements after they exist in the DOM:
 
@@ -167,14 +167,14 @@ Config ─┬─► Interact.create() ─► Trigger Observers ─► Effect Eng
 ```
 
 `generate(config)` runs at build time or on the server to emit complete CSS for the entire config — maximizing offload of effect creation, binding, and running to the browser.
-Interact also uses native effect triggering, i.e. `view-timeline`, as it becomes more widely supported
+Interact also generates native `view-timeline` CSS declarations, so browsers that support it can drive scroll animations entirely without JS.
 
 The `InteractConfig` shape:
 
 ```ts
 type InteractConfig = {
   interactions: Interaction[]; // trigger → effect bindings
-  effects: ?Record<string, Effect>; // reusable effect definitions
+  effects?: Record<string, Effect>; // reusable effect definitions
   sequences?: Record<string, SequenceConfig>; // staggered multi-effect timelines
   conditions?: Record<string, Condition>; // media / selector gates
 };
@@ -315,7 +315,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
     'lift': {
       keyframeEffect: {
         keyframes: [
-          { transform: 'transformY(-80px)', boxShadow: '0 8px 16px rgb(0 0 0 / 0.15)' },
+          { transform: 'translateY(-80px)', boxShadow: '0 8px 16px rgb(0 0 0 / 0.15)' },
         ],
       },
       duration: 200,
@@ -397,7 +397,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
 - **Same element as source and target with `viewEnter`** — Must use `triggerType: 'once'`. Other types cause re-entry loops.
 - **Hit-area shift on `hover` / `pointerMove`** — Animating size/position of the hovered element shifts the hit area and causes jitter. Instead, animate a child via `selector` or a different `key`.
 - **`registerEffects()` must run before `Interact.create()`/`generate()`** when using `namedEffect`.
-- **FOUC prevention requires** — `generate(config)` injected into `<head>`.
+- **FOUC prevention requires two steps** — (1) inject the output of `generate(config)` into `<head>`, and (2) mark each entrance-animated element with `data-interact-initial="true"` (`initial={true}` in React). Both are required.
 - **`generate(config, useFirstChild)`** — Pass `true` for `<interact-element>` (web), `false` for vanilla and React `<Interaction>`.
 - **`<interact-element>` must wrap exactly one child** — the library targets `:first-child` by default.
 
@@ -427,14 +427,14 @@ Interact's JSON-config surface is the differentiator: configs are serializable, 
 
 - Modern browsers with the Web Animations API (Baseline).
 - `adoptedStyleSheets` (used by `transition` / `transitionProperties`): Chrome 73+, Firefox 101+, Safari 16.4+, Edge 79+.
-- ViewTimeline: Chrome 115+; polyfilled via [`fizban`](https://github.com/wix/fizban) elsewhere.
+- ViewTimeline: Chrome 115+; polyfilled via [`fizban`](https://github.com/wix-incubator/fizban) elsewhere.
 
 ## Related Packages
 
 - [`@wix/motion`](https://github.com/wix/interact/tree/master/packages/motion) — low-level animation engine underneath Interact.
 - [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) — ready-made effect catalog (entrance, scroll, hover, pointer).
-- [`fizban`](https://github.com/wix/fizban) — scroll-driven animation polyfill (bundled dependency).
-- [`kuliso`](https://github.com/wix/kuliso) — pointer-driven animation polyfill (bundled dependency).
+- [`fizban`](https://github.com/wix-incubator/fizban) — scroll-driven animation polyfill (bundled dependency).
+- [`kuliso`](https://github.com/wix-incubator/kuliso) — pointer-driven animation polyfill (bundled dependency).
 
 ## Documentation
 

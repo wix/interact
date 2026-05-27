@@ -13,7 +13,7 @@ Web-native animation and interaction libraries — declarative, AI-ready, framew
 **Wix Interact** (`@wix/interact`) is a declarative interaction layer on top of **@wix/motion**. You describe _when_ something should animate and _what_ should happen in a JSON config — no manual event listeners, no imperative animation wiring.
 
 - **Config-driven** — bind triggers (`viewEnter`, `click`, `hover`, `viewProgress`, `pointerMove`, and more) to effects in one `InteractConfig` object
-- **Built on native browser APIs** — Web Animations API, `ViewTimeline`, pointer tracking, and CSS; with an optional custom animation runtime via `@wix/motion`
+- **Built on native browser APIs** — Web Animations API, `ViewTimeline`, pointer tracking, and CSS; optional `customEffect` adds programmatic per-frame JS callbacks for effects that go beyond what native APIs can express.
 - **Three entry points** — Web Components (`@wix/interact/web`), React (`@wix/interact/react`), and vanilla JS (`@wix/interact`)
 - **Ready-made presets** — entrance, scroll, pointer, loop, and micro-interactions from `@wix/motion-presets`
 - **SSR-friendly CSS** — `generate(config)` emits complete CSS for the whole config (keyframes, view-timeline, transitions, FOUC rules) so animations can be ready before JS runs
@@ -355,7 +355,7 @@ type Interaction = {
 - Do not invent `namedEffect` types — use only registered presets (see preset rules above)
 - Do not attach DOM event listeners manually — express behavior through `trigger` and config
 - For `viewProgress`, avoid `overflow: hidden` on ancestors; use `overflow: clip` instead
-- Call `generate(config)` at build time or on the server and inject CSS into `<head>`. For `viewEnter` + `triggerType: 'once'`, to prevent FOUC
+- Call `generate(config)` at build time or on the server and inject CSS into `<head>`. For `viewEnter` + `triggerType: 'once'`, to prevent FOUC, also mark elements with `data-interact-initial="true"`.
 - `effects` at the config top level is a reusable `Record<string, Effect>`
 - `<interact-element>` should wrap exactly one child (the library targets `.firstElementChild` by default).
 
