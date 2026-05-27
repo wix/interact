@@ -3317,7 +3317,7 @@ describe('interact (mini)', () => {
       // ── effectId filtering tests ──────────────────────────────────────────
 
       // jsdom does not expose AnimationEvent; create one manually.
-      function createAnimationEndEvent(animationName: string): Event {
+      function createCSSAnimationEndEvent(animationName: string): Event {
         const event = new Event('animationend');
         Object.defineProperty(event, 'animationName', { value: animationName });
         return event;
@@ -3379,7 +3379,7 @@ describe('interact (mini)', () => {
         const el = document.createElement('div');
         add(el, 'anim-end-el');
 
-        el.dispatchEvent(createAnimationEndEvent('unrelated-animation'));
+        el.dispatchEvent(createCSSAnimationEndEvent('unrelated-animation'));
 
         expect(playMock).not.toHaveBeenCalled();
       });
@@ -3406,7 +3406,7 @@ describe('interact (mini)', () => {
         const el = document.createElement('div');
         add(el, 'anim-end-el');
 
-        el.dispatchEvent(createAnimationEndEvent('motion-arcIn'));
+        el.dispatchEvent(createCSSAnimationEndEvent('motion-arcIn'));
 
         expect(playMock).toHaveBeenCalledOnce();
       });
@@ -3439,7 +3439,7 @@ describe('interact (mini)', () => {
         add(el, 'anim-end-el');
 
         // First animation in the ArcIn group ends – should NOT trigger yet.
-        el.dispatchEvent(createAnimationEndEvent('motion-fadeIn'));
+        el.dispatchEvent(createCSSAnimationEndEvent('motion-fadeIn'));
 
         expect(playMock).not.toHaveBeenCalled();
       });
@@ -3472,12 +3472,12 @@ describe('interact (mini)', () => {
         add(el, 'anim-end-el');
 
         // First animation finishes – still waiting for the second.
-        el.dispatchEvent(createAnimationEndEvent('motion-fadeIn'));
+        el.dispatchEvent(createCSSAnimationEndEvent('motion-fadeIn'));
         expect(playMock).not.toHaveBeenCalled();
 
         // Second animation finishes – now the whole group is done.
         arcAnim.playState = 'finished';
-        el.dispatchEvent(createAnimationEndEvent('motion-arcIn'));
+        el.dispatchEvent(createCSSAnimationEndEvent('motion-arcIn'));
         expect(playMock).toHaveBeenCalledOnce();
       });
 
@@ -3558,7 +3558,7 @@ describe('interact (mini)', () => {
         add(el, 'anim-end-el');
 
         // When source group cannot be resolved we do not block — any animationend triggers.
-        el.dispatchEvent(createAnimationEndEvent('unrelated'));
+        el.dispatchEvent(createCSSAnimationEndEvent('unrelated'));
         expect(playMock).toHaveBeenCalledOnce();
       });
 
@@ -3580,7 +3580,7 @@ describe('interact (mini)', () => {
         add(el, 'anim-end-el');
 
         // Trigger the handler so getElementCSSAnimation is called.
-        el.dispatchEvent(createAnimationEndEvent('anything'));
+        el.dispatchEvent(createCSSAnimationEndEvent('anything'));
 
         expect(getElementCSSAnimation).toHaveBeenCalledWith(
           el,
@@ -3638,7 +3638,7 @@ describe('interact (mini)', () => {
         add(sourceEl, 'trigger-el');
 
         // Fire an animationend on the source element.
-        sourceEl.dispatchEvent(createAnimationEndEvent('any'));
+        sourceEl.dispatchEvent(createCSSAnimationEndEvent('any'));
 
         // getElementCSSAnimation must be called with options derived from the
         // SOURCE effect ('src-fx' / FadeIn), not the target effect.
