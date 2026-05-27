@@ -185,4 +185,4 @@ Motion is the engine layer. The other packages in this repo build on top of it:
 
 ## License
 
-MIT
+[MIT](https://github.com/wix/interact/blob/master/LICENSE)
