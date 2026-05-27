@@ -379,7 +379,7 @@ function _ensureInteractionEntry(
 }
 
 function parseConfig(config: InteractConfig, useCustomElement: boolean = false): InteractCache {
-  const conditions = config.conditions || {};
+  const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {} } = config;
   const interactions: InteractCache['interactions'] = {};
 
   config.interactions?.forEach((interaction_) => {
@@ -403,7 +403,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
     // Resolve and preprocess sequences
     const processedSequences = sequences_?.map((seqOrRef) => {
       if (_isSequenceConfigRef(seqOrRef)) {
-        const resolved = config.sequences?.[seqOrRef.sequenceId];
+        const resolved = sequenceMap[seqOrRef.sequenceId];
         if (!resolved) {
           console.warn(`Interact: Sequence "${seqOrRef.sequenceId}" not found in config`);
           return seqOrRef;
@@ -441,7 +441,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
       let target = effect.key;
 
       if (!target && (effect as EffectRef).effectId) {
-        const referencedEffect = config.effects[(effect as EffectRef).effectId];
+        const referencedEffect = effectMap[(effect as EffectRef).effectId];
 
         if (referencedEffect) {
           target = referencedEffect.key;
@@ -501,7 +501,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
 
         let target = effect.key;
         if (!target && (effect as EffectRef).effectId) {
-          const referencedEffect = config.effects[(effect as EffectRef).effectId];
+          const referencedEffect = effectMap[(effect as EffectRef).effectId];
           if (referencedEffect) {
             target = referencedEffect.key;
           }
@@ -533,8 +533,8 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
   });
 
   return {
-    effects: config.effects || {},
-    sequences: config.sequences || {},
+    effects: effectMap,
+    sequences: sequenceMap,
     conditions,
     interactions,
   };

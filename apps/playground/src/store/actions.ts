@@ -1,4 +1,4 @@
-import type { InteractConfig, Condition, SequenceConfig } from '@wix/interact';
+import type { InteractConfig, Condition, SequenceConfig, Effect } from '@wix/interact';
 import type { Action, BottomPanel, EffectContext, ScrollPreviewState } from '../types';
 
 export const selectComponent = (id: string): Action => ({
@@ -33,12 +33,12 @@ export const selectInteraction = (index: number | null): Action => ({
   payload: index,
 });
 
-export const addEffect = (id: string, effect: InteractConfig['effects'][string]): Action => ({
+export const addEffect = (id: string, effect: Effect): Action => ({
   type: 'ADD_EFFECT',
   payload: { id, effect },
 });
 
-export const updateEffect = (id: string, effect: InteractConfig['effects'][string]): Action => ({
+export const updateEffect = (id: string, effect: Effect): Action => ({
   type: 'UPDATE_EFFECT',
   payload: { id, effect },
 });

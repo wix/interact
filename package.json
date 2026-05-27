@@ -14,7 +14,8 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "serve": "npx serve apps/website -l 3000",
-    "serve:public": "npx serve apps/website -l tcp://0.0.0.0:3000"
+    "serve:public": "npx serve apps/website -l tcp://0.0.0.0:3000",
+    "generate:llms": "node scripts/generate-llms.mjs"
   },
   "repository": {
     "type": "git",

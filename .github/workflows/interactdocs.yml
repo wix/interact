@@ -61,6 +61,9 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d # v4
 
+      - name: Generate llms.txt files
+        run: node scripts/generate-llms.mjs
+
       - name: Prepare deployment directory
         run: |
           # Create the site structure:
@@ -69,6 +72,8 @@ jobs:
           # /docs/         -> docs app
           # /playground/    -> playground app
           # /rules/        -> rules markdown files
+          # /llms.txt      -> AI agent discovery index (llmstxt.org standard)
+          # /llms-full.txt -> All rules concatenated for single-fetch consumption
 
           mkdir -p _site/docs
           mkdir -p _site/playground
@@ -88,6 +93,10 @@ jobs:
 
           # Copy rules from source (served at /rules/, not /docs/rules/)
           cp -r packages/interact/rules/* _site/rules/
+
+          # Copy generated llms.txt files
+          cp llms.txt _site/llms.txt
+          cp llms-full.txt _site/llms-full.txt
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4

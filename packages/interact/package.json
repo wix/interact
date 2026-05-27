@@ -1,6 +1,6 @@
 {
   "name": "@wix/interact",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "Declarative, configuration-driven interaction library — web-native, AI-ready, and framework-agnostic.",
   "license": "MIT",
   "main": "dist/cjs/index.js",
@@ -26,7 +26,8 @@
   "files": [
     "dist",
     "rules",
-    "docs"
+    "docs",
+    "llms.txt"
   ],
   "sideEffects": false,
   "scripts": {
@@ -65,7 +66,7 @@
     "url": "https://github.com/wix/interact/issues"
   },
   "dependencies": {
-    "@wix/motion": "^2.1.5",
+    "@wix/motion": "^2.1.6",
     "fastdom": "^1.0.12",
     "fizban": "^0.7.2",
     "kuliso": "^0.4.13"
