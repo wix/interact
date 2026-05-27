@@ -395,7 +395,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
 
 - **`overflow: hidden` breaks `viewProgress`** — Use `overflow: clip` on all ancestors between the source and the scroll container.
 - **Same element as source and target with `viewEnter`** — Must use `triggerType: 'once'`. Other types cause re-entry loops.
-- **Hit-area shift on `hover` / `pointerMove`** — Animating size/position of the hovered element shifts the hit area and causes jitter. Animate a child via `selector` instead.
+- **Hit-area shift on `hover` / `pointerMove`** — Animating size/position of the hovered element shifts the hit area and causes jitter. Instead, animate a child via `selector` or a different `key`.
 - **`registerEffects()` must run before `Interact.create()`/`generate()`** when using `namedEffect`.
 - **FOUC prevention requires** — `generate(config)` injected into `<head>`.
 - **`generate(config, useFirstChild)`** — Pass `true` for `<interact-element>` (web), `false` for vanilla and React `<Interaction>`.
