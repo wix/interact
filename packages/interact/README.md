@@ -94,27 +94,14 @@ A complete React example: register presets, generate CSS, mount the component, c
 
 ```tsx
 import { useEffect } from 'react';
+import type { InteractConfig } from '@wix/interact';
 import { Interact, Interaction, generate } from '@wix/interact/react';
 import * as presets from '@wix/motion-presets'; // optional
 
 Interact.registerEffects(presets); // optional
 
-const config = {
-  interactions: [
-    {
-      key: 'hero',
-      trigger: 'viewEnter',
-      effects: [{ effectId: 'hero-in' }],
-    },
-  ],
-  effects: {
-    'hero-in': {
-      duration: 800,
-      easing: 'ease-out',
-      namedEffect: { type: 'FadeIn' }, // requires motion-presets
-      triggerType: 'once',
-    },
-  },
+const config: InteractConfig = {
+  //...
 };
 
 export function App () {
@@ -150,7 +137,12 @@ export function Hero() {
 **Vanilla JS** — bind elements after they exist in the DOM:
 
 ```ts
+import type { InteractConfig } from '@wix/interact';
 import { Interact, add } from '@wix/interact';
+
+const config: InteractConfig = {
+  //...
+};
 
 const instance = Interact.create(config);
 
@@ -182,7 +174,7 @@ The `InteractConfig` shape:
 ```ts
 type InteractConfig = {
   interactions: Interaction[]; // trigger → effect bindings
-  effects: Record<string, Effect>; // reusable effect definitions
+  effects: ?Record<string, Effect>; // reusable effect definitions
   sequences?: Record<string, SequenceConfig>; // staggered multi-effect timelines
   conditions?: Record<string, Condition>; // media / selector gates
 };
@@ -257,7 +249,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
 }
 ```
 
-### Scroll-driven parallax
+### Scroll-driven animations
 
 ```ts
 {
@@ -284,14 +276,16 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
 }
 ```
 
-### Hover toggle (CSS transition)
+### Hover toggle
+
+#### CSS transition
 
 ```ts
 {
   interactions: [{
     key: 'card',
     trigger: 'hover',
-    effects: [{ effectId: 'lift', stateAction: 'toggle', key: 'card-figure' }],
+    effects: [{ effectId: 'lift', selector: '.card-figure' }],
   }],
   effects: {
     'lift': {
@@ -308,7 +302,75 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
 }
 ```
 
-### Pointer-tracking custom effect
+#### CSS Animation
+
+```ts
+{
+  interactions: [{
+    key: 'card',
+    trigger: 'hover',
+    effects: [{ effectId: 'lift', selector: '.card-figure' }],
+  }],
+  effects: {
+    'lift': {
+      keyframeEffect: {
+        keyframes: [
+          { transform: 'transformY(-80px)', boxShadow: '0 8px 16px rgb(0 0 0 / 0.15)' },
+        ],
+      },
+      duration: 200,
+      easing: 'ease-out',
+    },
+  },
+}
+```
+
+### Pointer-tracking
+
+#### Keyframe effect
+
+```ts
+{
+  interactions: [{
+    key: 'card-wrapper',
+    trigger: 'pointerMove',
+    params: { hitArea: 'root', axis: 'x' },
+    effects: [{ effectId: 'follow-x', key: 'card' }],
+  }, {
+    key: 'card-wrapper',
+    trigger: 'pointerMove',
+    params: { hitArea: 'root', axis: 'y' },
+    effects: [{ effectId: 'follow-y', key: 'card' }],
+  }],
+  effects: {
+    'follow-x': {
+      keyframeEffect: {
+        keyframes: [
+          { transform: 'rotateY(-45deg)' },
+          { transform: 'rotateY(0px)' },
+          { transform: 'rotateY(45deg)' },
+        ],
+      },
+      easing: 'linear',
+      centeredToTarget: true,
+    },
+    'follow-y': {
+      keyframeEffect: {
+        keyframes: [
+          { transform: 'rotateX(45deg)' },
+          { transform: 'rotateX(0px)' },
+          { transform: 'rotateX(-45deg)' },
+        ],
+      },
+      easing: 'linear',
+      composite: 'add',
+      centeredToTarget: true,
+    },
+  },
+}
+```
+
+#### Custom effect
 
 ```ts
 {
@@ -334,8 +396,8 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
 - **`overflow: hidden` breaks `viewProgress`** — Use `overflow: clip` on all ancestors between the source and the scroll container.
 - **Same element as source and target with `viewEnter`** — Must use `triggerType: 'once'`. Other types cause re-entry loops.
 - **Hit-area shift on `hover` / `pointerMove`** — Animating size/position of the hovered element shifts the hit area and causes jitter. Animate a child via `selector` instead.
-- **`registerEffects()` must run before `Interact.create()`** when using `namedEffect`.
-- **FOUC prevention requires both** — `generate(config)` injected into `<head>`.
+- **`registerEffects()` must run before `Interact.create()`/`generate()`** when using `namedEffect`.
+- **FOUC prevention requires** — `generate(config)` injected into `<head>`.
 - **`generate(config, useFirstChild)`** — Pass `true` for `<interact-element>` (web), `false` for vanilla and React `<Interaction>`.
 - **`<interact-element>` must wrap exactly one child** — the library targets `:first-child` by default.
 
