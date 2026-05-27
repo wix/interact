@@ -60,13 +60,13 @@ Sourced from `package.json` description. No emoji.
 
 6-7 concise bullet points:
 
-- **Config-driven**: Define trigger-to-effect bindings in JSON — no imperative event wiring
-- **Web-native**: Built on WAAPI, ViewTimeline, and IntersectionObserver — no custom runtime
-- **Three entry points**: Web Components, React, Vanilla JS — same config shape across all
-- **AI-ready**: JSON configs are machine-readable — LLMs can generate and validate them
-- **Preset ecosystem**: Plug in `@wix/motion-presets` for 80+ ready-made effects
-- **Pre-rendered CSS**: `generate(config)` emits complete CSS for the whole config — `@keyframes`, `view-timeline`, transitions, FOUC rules — so animations run natively before JS loads (SSR / build-time friendly)
-- **Accessible**: Built-in `activate` (keyboard) and `interest` (focus) trigger variants
+- **Declerative** — Define trigger-to-effect bindings in JSON; no imperative event wiring
+- **Web-native** — Built on CSS, WAAPI, ViewTimeline, and DOM APIs; supports DOM management via Custom Elements
+- **Framework-agnostic** — Web Components and vanilla JS integrations; React integration included
+- **AI-ready** — JSON configs are machine-readable and provide guardrails; LLMs can generate and agents can validate them
+- **CSS generation** — `generate(config)` emits complete CSS for the whole config (`@keyframes`, `view-timeline`, transitions, FOUC rules)
+- **Preset ecosystem** — Plug in [`@wix/motion-presets`](../motion-presets/README.md) for 80+ ready-made effects.
+- **Accessible** — Built-in `activate` (click + keyboard) and `interest` (hover + focus) trigger variants
 
 ### 4. Install
 
