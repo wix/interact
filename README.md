@@ -120,9 +120,10 @@ import { useEffect } from 'react';
 import { Interact, Interaction } from '@wix/interact/react';
 import * as presets from '@wix/motion-presets';
 
+Interact.registerEffects(presets);
+
 function App() {
   useEffect(() => {
-    Interact.registerEffects(presets);
     const instance = Interact.create(config);
 
     return () => {
@@ -187,7 +188,7 @@ const config: InteractConfig = {
 };
 ```
 
-Inject the styles returned from `generate(config)` into `<head>` for FOUC prevention.
+FOUC prevention requires two steps — (1) inject the output of `generate(config)` into `<head>`, and (2) mark each entrance-animated element with `data-interact-initial="true"` (`initial={true}` in React). Both are required.
 
 ### Click effect
 
@@ -229,7 +230,7 @@ const config: InteractConfig = {
       trigger: 'viewProgress',
       effects: [
         {
-          namedEffect: { type: 'ParallaxScroll', speed: 0.5 },
+          namedEffect: { type: 'ParallaxScroll', parallaxFactor: 0.5 },
           rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
           rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
           easing: 'linear',
