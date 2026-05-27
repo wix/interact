@@ -3370,7 +3370,9 @@ describe('interact (mini)', () => {
 
         // Source group contains 'motion-arcIn'; listener should ignore others.
         (getElementCSSAnimation as any).mockReturnValue({
-          animations: [{ animationName: 'motion-arcIn', playState: 'finished' }],
+          playState: 'finished',
+          hasAnimationName: (name: string) => name === 'motion-arcIn',
+          hasAnimationId: () => false,
         });
 
         Interact.create(buildAnimEndConfig());
@@ -3395,7 +3397,9 @@ describe('interact (mini)', () => {
         });
 
         (getElementCSSAnimation as any).mockReturnValue({
-          animations: [{ animationName: 'motion-arcIn', playState: 'finished' }],
+          playState: 'finished',
+          hasAnimationName: (name: string) => name === 'motion-arcIn',
+          hasAnimationId: () => false,
         });
 
         Interact.create(buildAnimEndConfig());
@@ -3421,7 +3425,14 @@ describe('interact (mini)', () => {
 
         const fadeAnim = { animationName: 'motion-fadeIn', playState: 'finished' };
         const arcAnim = { animationName: 'motion-arcIn', playState: 'running' };
-        (getElementCSSAnimation as any).mockReturnValue({ animations: [fadeAnim, arcAnim] });
+        const anims3 = [fadeAnim, arcAnim];
+        (getElementCSSAnimation as any).mockReturnValue({
+          get playState() {
+            return anims3.some((a) => a.playState === 'running') ? 'running' : 'finished';
+          },
+          hasAnimationName: (name: string) => anims3.some((a) => a.animationName === name),
+          hasAnimationId: () => false,
+        });
 
         Interact.create(buildAnimEndConfig());
         const el = document.createElement('div');
@@ -3447,7 +3458,14 @@ describe('interact (mini)', () => {
 
         const fadeAnim = { animationName: 'motion-fadeIn', playState: 'finished' };
         const arcAnim = { animationName: 'motion-arcIn', playState: 'running' };
-        (getElementCSSAnimation as any).mockReturnValue({ animations: [fadeAnim, arcAnim] });
+        const anims4 = [fadeAnim, arcAnim];
+        (getElementCSSAnimation as any).mockReturnValue({
+          get playState() {
+            return anims4.some((a) => a.playState === 'running') ? 'running' : 'finished';
+          },
+          hasAnimationName: (name: string) => anims4.some((a) => a.animationName === name),
+          hasAnimationId: () => false,
+        });
 
         Interact.create(buildAnimEndConfig());
         const el = document.createElement('div');
@@ -3477,15 +3495,17 @@ describe('interact (mini)', () => {
 
         // WAAPI animations have no animationName; all in 'finished' state.
         (getElementCSSAnimation as any).mockReturnValue({
-          animations: [{ animationName: undefined, playState: 'finished' }],
+          playState: 'finished',
+          hasAnimationName: () => false,
+          hasAnimationId: () => false,
         });
 
         Interact.create(buildAnimEndConfig());
         const el = document.createElement('div');
         add(el, 'anim-end-el');
 
-        // Synthetic event dispatched by AnimationGroup.onFinish for WAAPI animations.
-        el.dispatchEvent(new Event('animationend'));
+        // Synthetic CustomEvent dispatched by AnimationGroup.onFinish for WAAPI animations.
+        el.dispatchEvent(new CustomEvent('animationend', { detail: { effectId: 'src-effect' } }));
 
         expect(playMock).toHaveBeenCalledOnce();
       });
@@ -3504,17 +3524,16 @@ describe('interact (mini)', () => {
 
         // One WAAPI animation still running.
         (getElementCSSAnimation as any).mockReturnValue({
-          animations: [
-            { animationName: undefined, playState: 'finished' },
-            { animationName: undefined, playState: 'running' },
-          ],
+          playState: 'running',
+          hasAnimationName: () => false,
+          hasAnimationId: () => false,
         });
 
         Interact.create(buildAnimEndConfig());
         const el = document.createElement('div');
         add(el, 'anim-end-el');
 
-        el.dispatchEvent(new Event('animationend'));
+        el.dispatchEvent(new CustomEvent('animationend', { detail: { effectId: 'src-effect' } }));
 
         expect(playMock).not.toHaveBeenCalled();
       });

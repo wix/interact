@@ -1,5 +1,5 @@
 import type { AnimationGroup } from '@wix/motion';
-import { getAnimation, getElementCSSAnimation, getElementAnimation } from '@wix/motion';
+import { getAnimation, getElementCSSAnimation } from '@wix/motion';
 import type { AnimationEndParams, TimeEffect, HandlerObjectMap, InteractOptions } from '../types';
 import {
   effectToAnimationOptions,
@@ -42,26 +42,20 @@ function addAnimationEndHandler(
     const animName = (event as AnimationEvent).animationName;
     const eventEffectId = (event as CustomEvent).detail?.effectId;
 
-    const sourceGroup = (
-      sourceAnimationOptions
-        ? (getElementCSSAnimation(source, sourceAnimationOptions) as AnimationGroup | null)
-        : (getElementAnimation(source, effectId) as AnimationGroup | null)
-    )?.animations;
+    const sourceAnimationGroup = sourceAnimationOptions
+      ? getElementCSSAnimation(source, sourceAnimationOptions)
+      : null;
 
-    if (sourceGroup && sourceGroup.length) {
-      if (sourceGroup.some((a: Animation) => a.playState === 'running')) {
+    if (sourceAnimationGroup) {
+      if (sourceAnimationGroup.playState === 'running') return;
+      if (animName && !sourceAnimationGroup.hasAnimationName(animName)) {
         return;
-      }
-      if (animName) {
-        const groupNames = sourceGroup.map((a: Animation) => (a as CSSAnimation).animationName);
-        if (!groupNames.includes(animName)) {
-          return;
-        }
-      } else if (eventEffectId) {
-        const groupIds = sourceGroup.map((a: Animation) => a.id);
-        if (eventEffectId !== effectId && !groupIds.includes(eventEffectId)) {
-          return;
-        }
+      } else if (
+        eventEffectId &&
+        eventEffectId !== effectId &&
+        !sourceAnimationGroup.hasAnimationId(eventEffectId)
+      ) {
+        return;
       }
     }
 

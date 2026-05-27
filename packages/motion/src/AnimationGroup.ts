@@ -144,7 +144,17 @@ export class AnimationGroup {
   }
 
   get playState() {
-    return this.animations[0]?.playState;
+    return this.animations.some((a) => a.playState === 'running')
+      ? 'running'
+      : this.animations[0]?.playState;
+  }
+
+  hasAnimationName(name: string): boolean {
+    return this.animations.some((a) => (a as CSSAnimation).animationName === name);
+  }
+
+  hasAnimationId(id: string): boolean {
+    return this.animations.some((a) => a.id === id);
   }
 
   getTimingOptions() {
