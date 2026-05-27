@@ -108,9 +108,7 @@ export function CSSRuleToString(rule: CSSRuleData): string {
     return '';
   }
 
-  let selector = `[data-interact-key="${key}"]${
-    addInitialSelector ? ':is(:not([data-interact-enter]))' : ''
-  }`;
+  let selector = `[data-interact-key="${key}"]`;
 
   // maybe nesting is simpler? - no need for `:is` only adding `&` before every option
   if (states && states.length) {
@@ -123,6 +121,10 @@ export function CSSRuleToString(rule: CSSRuleData): string {
   // here nesting might be confusing due to spaces already being handled?
   if (childSelector) {
     selector = `${selector} ${childSelector}`;
+  }
+
+  if (addInitialSelector) {
+    selector = `${selector}:is(:not([data-interact-enter]))`;
   }
 
   // maybe nesting is simpler? -

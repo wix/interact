@@ -263,7 +263,7 @@ describe('CSSRuleToString', () => {
       ],
     };
     const expected =
-      '@media (min-width: 1024px) {\n[data-interact-key="my-el"]:is(:not([data-interact-enter])):is(:state(hover), :--hover, [data-interact-effect~="hover"]) .child {\nopacity: 1;\ncolor: blue;\n}\n}';
+      '@media (min-width: 1024px) {\n[data-interact-key="my-el"]:is(:state(hover), :--hover, [data-interact-effect~="hover"]) .child:is(:not([data-interact-enter])) {\nopacity: 1;\ncolor: blue;\n}\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 });
