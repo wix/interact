@@ -10,6 +10,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.3.1] - 2026-05-28
+
+#### Changed
+
+- Revamp package `README.md` with expanded overview, `generate()` documentation, framework integration guides, and examples (#214)
+- README follow-up: add `llms` and `llmsFull` fields to `package.json`, AI discovery section, and corrected documentation and dependency links (#216)
+
+#### Fixed
+
+- FOUC-prevention CSS: apply `:not([data-interact-enter])` on the animated child selector instead of the source element, so initial-state hiding targets the correct element when effects use `selector` (#229)
+- `animationEnd` trigger: resolve and match only the source animation identified by `effectId` (via `animationName` and `detail.effectId`), so unrelated `animationend` events on the source no longer fire chained effects (#227)
+
 ### [2.3.0] - 2026-05-25
 
 #### Added
@@ -149,6 +161,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion
 
+### [2.1.7] - 2026-05-28
+
+#### Added
+
+- `AnimationGroup.hasAnimationName()` and `AnimationGroup.hasAnimationId()` for checking which animation finished (#227)
+
+#### Changed
+
+- Revamp package `README.md` with expanded API reference, usage examples, scroll/pointer/sequence sections, AI/`llms.txt` pointers, and corrected links (#216)
+- Dispatched `animationend` is now a `CustomEvent` with `detail.effectId` for effect-specific matching (#227)
+- `AnimationGroup.playState` returns `running` when any child animation is running (#227)
+
 ### [2.1.6] - 2026-05-25
 
 #### Changed
@@ -214,6 +238,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion-presets
+
+### [1.0.3] - 2026-05-28
+
+#### Changed
+
+- Bump `@wix/motion` dependency to `^2.1.6` (#223)
 
 ### [1.0.2] - 2026-05-04
 
