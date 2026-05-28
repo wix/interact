@@ -1,182 +1,188 @@
-# Wix Motion
+# @wix/motion
 
-A comprehensive animation library featuring 82+ carefully crafted presets, designed for modern web applications, built on native browser technology.
+Low-level, web-native animation engine — WAAPI, CSS, scroll-driven, and pointer-tracking animations with a single dependency.
 
-## ✨ Features
+[![npm version](https://img.shields.io/npm/v/@wix/motion.svg)](https://www.npmjs.com/package/@wix/motion)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@wix/motion)](https://bundlephobia.com/package/@wix/motion)
+[![license](https://img.shields.io/npm/l/@wix/motion.svg)](https://github.com/wix/interact/blob/master/LICENSE)
 
-- **Web Platform First** - Built on native browser technology for smooth 60fps animations
-- **82+ Animation Presets** - Professionally designed animations ready to use
-- **5 Animation Categories** - Entrance, Ongoing, Scroll, Mouse, and Background Scroll effects
-- **TypeScript Support** - Complete type definitions with IntelliSense support
-- **Dual Rendering** - Both Web Animations API and CSS-based rendering
-- **Scroll Integration** - Advanced scroll-driven animations with ViewTimeline API support
-- **Mouse Parallax** - Interactive pointer-based animations
-- **Performance Optimized** - Uses fastdom to minimize layout thrashing
+## Why Motion?
 
-## 🚀 Quick Start
+- **Native-first** — Built directly on the Web Animations API and CSS Animations.
+- **ViewTimeline** — First-class scroll-driven animations via the ViewTimeline API, with a scrub fallback when the API is unavailable.
+- **Pointer-driven** — `pointer-move` animations map cursor `(x, y)` progress to effects, with optional transition smoothing.
+- **Custom effects** — Plug in programmatic render callbacks — no preset registration required.
+- **Dual rendering** — Choose CSS for declarative effects or WAAPI for fine-grained control, using the same options shape.
+- **Performance** — `fastdom` batches DOM reads/writes; no `requestAnimationFrame` loop (except for customEffect callbacks).
+- **Pluggable presets** — `registerEffects()` accepts any effect module. Use [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) or create your own.
 
-### Installation
+## Install
 
 ```bash
 npm install @wix/motion
 ```
 
-### Basic Usage
+## Quick Start
+
+### Time-based animation (WAAPI)
 
 ```typescript
 import { getWebAnimation } from '@wix/motion';
 
-// Create a fade-in entrance animation
-const animation = getWebAnimation(document.getElementById('myElement'), {
-  namedEffect: { type: 'FadeIn' },
-  duration: 1000,
-  easing: 'easeOut',
+const animation = getWebAnimation(document.getElementById('hero'), {
+  keyframeEffect: {
+    name: 'fade-up',
+    keyframes: [
+      { opacity: 0, transform: 'translateY(20px)' },
+      { opacity: 1, transform: 'translateY(0)' },
+    ],
+  },
+  duration: 600,
+  easing: 'ease-out',
 });
 
-// Play the animation
-await animation.play();
+animation.play();
 ```
 
-### Scroll-Driven Animation
+### Scroll-driven (ViewTimeline)
+
+```typescript
+import { getWebAnimation } from '@wix/motion';
+
+const scrollRoot = document.getElementById('scrollRoot')!;
+
+const animation = getWebAnimation(
+  document.getElementById('parallax'),
+  {
+    keyframeEffect: {
+      name: 'parallax',
+      keyframes: [{ transform: 'translateY(80px)' }, { transform: 'translateY(-80px)' }],
+    },
+    startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+    endOffset: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
+  },
+  { trigger: 'view-progress', element: scrollRoot },
+);
+```
+
+### Scroll-driven (polyfill / custom scrubbing)
 
 ```typescript
 import { getScrubScene } from '@wix/motion';
 
-// Create a scroll-driven parallax effect
-const scene = getScrubScene(
-  document.getElementById('scrollElement'),
+const scrollRoot = document.getElementById('scrollRoot')!;
+
+const scenes = getScrubScene(
+  document.getElementById('parallax'),
   {
-    namedEffect: {
-      type: 'ParallaxScroll',
-      speed: 0.5,
+    keyframeEffect: {
+      name: 'parallax',
+      keyframes: [{ transform: 'translateY(80px)' }, { transform: 'translateY(-80px)' }],
     },
+    startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+    endOffset: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
   },
-  { trigger: 'view-progress', element: document.getElementById('viewport') },
+  { trigger: 'view-progress', element: scrollRoot },
 );
+// Drive each scene's `effect(scene, progress)` from your own scroll/IO listener
+// when ViewTimeline is unavailable.
 ```
 
-## 📚 Animation Categories
+Quickstart examples use `keyframeEffect` (inline keyframes) so they run without registering presets.
 
-### 🎭 Entrance Animations (24 presets)
+## Animation Modes
 
-Perfect for element reveals and page transitions:
+| Mode           | Driver                        | API                                            |
+| -------------- | ----------------------------- | ---------------------------------------------- |
+| Time-based     | Duration + easing             | `getWebAnimation()` / `getCSSAnimation()`      |
+| Scroll-driven  | ViewTimeline / external scrub | `getScrubScene()` with `view-progress` trigger |
+| Pointer-driven | Mouse / touch position        | `getScrubScene()` with `pointer-move` trigger  |
 
-- **FadeIn** - Simple opacity transition
-- **ArcIn** - Curved motion with 3D rotation
-- **BounceIn** - Spring-based entrance with bounce effect
-- **SlideIn** - Directional slides from off-screen
-- **FlipIn** - 3D flip transitions
-- [See all entrance animations →](docs/categories/entrance-animations.md)
+## Core API
 
-### 🔄 Ongoing Animations (16 presets)
+| Function             | Purpose                                                     |
+| -------------------- | ----------------------------------------------------------- |
+| `getWebAnimation()`  | Create WAAPI-backed animations (time- or scroll-linked)     |
+| `getCSSAnimation()`  | Generate CSS animation descriptors for stylesheet injection |
+| `getScrubScene()`    | Build scroll-polyfill or pointer-driven scrub scenes        |
+| `prepareAnimation()` | Pre-measure / mutate DOM via `fastdom` before animating     |
+| `getAnimation()`     | Auto-select CSS (if present) or WAAPI path                  |
+| `getSequence()`      | Coordinate staggered groups with easing-based offsets       |
+| `registerEffects()`  | Register named effect modules into the global registry      |
 
-Continuous looping animations for attention and delight:
+See [`docs/api/`](https://github.com/wix/interact/blob/master/packages/motion/docs/api/README.md) for full signatures and options.
 
-- **Pulse** - Rhythmic scaling effect
-- **Breathe** - Organic scaling animation
-- **Spin** - Smooth rotation loops
-- **Wiggle** - Playful shake motions
-- **Float** - Gentle floating movement
-- [See all ongoing animations →](docs/categories/ongoing-animations.md)
+## Custom Effects
 
-### 📜 Scroll Animations (19 presets)
+Three ways to define what an animation does:
 
-Scroll-synchronized effects that respond to viewport position:
+1. **Inline keyframes** — pass `keyframeEffect: { name, keyframes }` directly. Zero registration.
+2. **Custom callback** — pass `customEffect: (element, progress) => void` for full programmatic control per frame.
+3. **Named presets** — pass `namedEffect: { type: '…', …params }` referencing effects you've registered via `registerEffects()` (use [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) or your own modules).
 
-- **ParallaxScroll** - Classic parallax movement
-- **FadeScroll** - Opacity changes on scroll
-- **GrowScroll** - Scale transformations
-- **RevealScroll** - Clip-path reveals
-- **TiltScroll** - 3D perspective tilting
-- [See all scroll animations →](docs/categories/scroll-animations.md)
+## Sequences and Staggering
 
-### 🖱️ Mouse Animations (12 presets)
-
-Interactive pointer-driven effects:
-
-- **TrackMouse** - Element follows cursor
-- **Tilt3DMouse** - 3D tilt based on pointer position
-- **ScaleMouse** - Dynamic scaling on hover
-- **BlurMouse** - Motion blur effects
-- [See all mouse animations →](docs/categories/mouse-animations.md)
-
-### 🖼️ Background Scroll Animations (12 presets)
-
-Specialized effects for background media elements:
-
-- **BgParallax** - Background parallax scrolling
-- **BgZoom** - Dynamic background scaling
-- **BgFade** - Background opacity transitions
-- **BgRotate** - Background rotation effects
-- [See all background animations →](docs/categories/background-scroll-animations.md)
-
-## 🛠️ Core APIs
-
-### Animation Creation
-
-- `getWebAnimation()` - Create Web Animations API instances
-- `getScrubScene()` - Generate scroll/pointer-driven scenes
-- `prepareAnimation()` - Pre-calculate measurements for performance
-
-### CSS Integration
-
-- CSS custom properties for dynamic values
-- CSS Animation API for stylesheet-based animations
-- Automatic vendor prefixing and fallbacks
-
-### TypeScript Support
-
-Complete type definitions for all animation options:
+`getSequence()` plays multiple animations with staggered start times. Pass `offset` (ms between each start) and an optional `offsetEasing` to shape how the offsets are distributed across the sequence.
 
 ```typescript
-interface TimeAnimationOptions {
-  namedEffect: EntranceAnimation | OngoingAnimation;
-  duration?: number;
-  easing?: string;
-  // ... more options
-}
+import { getSequence } from '@wix/motion';
+
+const sequence = getSequence(
+  { offset: 150, offsetEasing: 'quadIn' },
+  Array.from(document.querySelectorAll('.card')).map((el) => ({
+    target: el,
+    options: {
+      duration: 600,
+      easing: 'ease-out',
+      keyframeEffect: {
+        name: 'fade-up',
+        keyframes: [
+          { opacity: 0, transform: 'translateY(20px)' },
+          { opacity: 1, transform: 'translateY(0)' },
+        ],
+      },
+    },
+  })),
+);
+
+sequence.play();
 ```
 
-## 📖 Documentation
+See [`docs/api/get-sequence.md`](https://github.com/wix/interact/blob/master/packages/motion/docs/api/get-sequence.md) for the full stagger model.
 
-- **[Getting Started](docs/getting-started.md)** - Setup and first animation
-- **[Core Concepts](docs/core-concepts.md)** - Understanding the animation system
-- **[API Reference](docs/api/)** - Complete function documentation
-- **[Category Guides](docs/categories/)** - Detailed category overviews
-- **[Preset Reference](docs/presets/)** - Individual animation documentation
-- **[Advanced Usage](docs/guides/)** - Performance tips and patterns
+## ViewTimeline and Polyfills
 
-## 🎮 Interactive Playground
+Motion is built around progressive enhancement:
 
-Explore animations interactively in our Storybook playground:
+- **Native path** — when `window.ViewTimeline` is available, `getWebAnimation()` with a `view-progress` trigger returns a WAAPI animation linked to the scroll timeline.
+- **Polyfill path** — `getScrubScene()` with `view-progress` returns `ScrubScrollScene[]` objects exposing `start`, `end`, `viewSource`, and `effect(scene, progress)`. Drive these from your own IntersectionObserver/scroll listener. If using `@wix/interact`, its bundled scroll polyfill - [`fizban`](https://github.com/wix-incubator/fizban) - handles this automatically.
+- **Pointer smoothing** — `ScrubPointerScene` accepts `transitionDuration` and `transitionEasing` so pointer-tracking effects don't snap to the cursor.
 
-```bash
-yarn start  # Opens interactive documentation
-```
+## Performance Notes
 
-## 🔧 Framework Integration
+- `prepareAnimation()` runs `fastdom` measure/mutate phases before the animation starts, avoiding layout thrash.
+- The CSS rendering path (`getCSSAnimation`) offloads work to the compositor thread.
+- No `requestAnimationFrame` loop runs unless a `customEffect` callback is used.
 
-Works seamlessly with popular frameworks:
+## Browser Support
 
-- React/Vue/Angular components
-- GSAP and Framer Motion compatibility
-- CSS-in-JS libraries
-- Server-side rendering support
+Modern evergreen browsers with Web Animations API support (Chrome, Edge, Firefox, Safari). The ViewTimeline API is used where available; pair `getScrubScene()` with an external driver for older browsers.
 
-## 🌐 Browser Support
+## Related Packages
 
-- **Modern browsers** with Web Animations API
-- **Progressive enhancement** with CSS fallbacks
-- **ViewTimeline API** for advanced scroll effects (with polyfill)
+Motion is the engine layer. The other packages in this repo build on top of it:
 
-## 🤝 Contributing
+- [`@wix/interact`](https://github.com/wix/interact/tree/master/packages/interact) — declarative, config-driven interaction layer built on Motion.
+- [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) — ready-made effect catalog (entrance, ongoing, scroll, mouse, background-scroll).
 
-This package is part of the Wix wow-libs monorepo. See [contributing guidelines](../../CONTRIBUTING.md) for development setup and contribution process.
+## Documentation
 
-## 📄 License
+- [Getting Started](https://github.com/wix/interact/blob/master/packages/motion/docs/getting-started.md)
+- [Core Concepts](https://github.com/wix/interact/blob/master/packages/motion/docs/core-concepts.md)
+- [API Reference](https://github.com/wix/interact/blob/master/packages/motion/docs/api/README.md)
+- [Category Guides](https://github.com/wix/interact/blob/master/packages/motion/docs/categories/README.md)
+- [Advanced Patterns](https://github.com/wix/interact/blob/master/packages/motion/docs/guides/README.md)
 
-UNLICENSED - Internal Wix package
+## License
 
----
-
-**Built with ❤️ by the Wix wow!Team**
+[MIT](https://github.com/wix/interact/blob/master/LICENSE)
