@@ -1,3 +1,5 @@
+<!-- AI: full docs index at https://wix.github.io/interact/llms.txt -->
+
 # Wix Interact
 
 Web-native animation and interaction libraries — declarative, AI-ready, framework-agnostic.

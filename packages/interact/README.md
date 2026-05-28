@@ -1,3 +1,5 @@
+<!-- AI: full docs index at https://wix.github.io/interact/llms.txt -->
+
 # @wix/interact
 
 Declarative, configuration-driven interaction library — web-native, AI-ready, and framework-agnostic.
