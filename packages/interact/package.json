@@ -6,6 +6,8 @@
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",
   "types": "dist/types/index.d.ts",
+  "llms": "https://wix.github.io/interact/llms.txt",
+  "llmsFull": "https://wix.github.io/interact/llms-full.txt",
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",

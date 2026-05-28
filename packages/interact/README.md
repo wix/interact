@@ -1,3 +1,5 @@
+<!-- AI: full docs index at https://wix.github.io/interact/llms.txt -->
+
 # @wix/interact
 
 Declarative, configuration-driven interaction library — web-native, AI-ready, and framework-agnostic.
@@ -9,12 +11,12 @@ Declarative, configuration-driven interaction library — web-native, AI-ready, 
 
 ## Why Interact?
 
-- **Declerative** — Define trigger-to-effect bindings in JSON; no imperative event wiring
+- **Declarative** — Define trigger-to-effect bindings in JSON; no imperative event wiring
 - **Web-native** — Built on CSS, WAAPI, ViewTimeline, and DOM APIs; supports DOM management via Custom Elements
 - **Framework-agnostic** — Web Components and vanilla JS integrations; React integration included
 - **AI-ready** — JSON configs are machine-readable and provide guardrails; LLMs can generate and agents can validate them
 - **CSS generation** — `generate(config)` emits complete CSS for the whole config (`@keyframes`, `view-timeline`, transitions, FOUC rules)
-- **Preset ecosystem** — Plug in [`@wix/motion-presets`](../motion-presets/README.md) for 80+ ready-made effects.
+- **Preset ecosystem** — Plug in [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) for 75+ ready-made effects.
 - **Accessible** — Built-in `activate` (click + keyboard) and `interest` (hover + focus) trigger variants
 
 ## Install
@@ -39,9 +41,9 @@ npm install @wix/motion-presets
 
 ```ts
 import { Interact, generate, type InteractConfig } from '@wix/interact/web';
-import * as presets from '@wix/motion-presets'; // optional
+import * as presets from '@wix/motion-presets'; // required when using namedEffect
 
-Interact.registerEffects(presets); // optional
+Interact.registerEffects(presets); // required when using namedEffect
 
 const config: InteractConfig = {
   interactions: [
@@ -62,7 +64,7 @@ const config: InteractConfig = {
 };
 
 // render styles  - e.g. for SSR
-const interactCSS = generate(config, false);
+const interactCSS = generate(config, true);
 
 // run on client - e.g. on pagereveal event
 const instance = Interact.create(config);
@@ -132,7 +134,7 @@ export function Hero() {
 }
 ```
 
-### Using vaniall JS - no handling for DOM changes
+### Using Vanilla JS (you manage element lifecycle)
 
 **Vanilla JS** — bind elements after they exist in the DOM:
 
@@ -167,14 +169,14 @@ Config ─┬─► Interact.create() ─► Trigger Observers ─► Effect Eng
 ```
 
 `generate(config)` runs at build time or on the server to emit complete CSS for the entire config — maximizing offload of effect creation, binding, and running to the browser.
-Interact also uses native effect triggering, i.e. `view-timeline`, as it becomes more widely supported
+Interact also generates native `view-timeline` CSS declarations, so browsers that support it can drive scroll animations entirely without JS.
 
 The `InteractConfig` shape:
 
 ```ts
 type InteractConfig = {
   interactions: Interaction[]; // trigger → effect bindings
-  effects: ?Record<string, Effect>; // reusable effect definitions
+  effects?: Record<string, Effect>; // reusable effect definitions
   sequences?: Record<string, SequenceConfig>; // staggered multi-effect timelines
   conditions?: Record<string, Condition>; // media / selector gates
 };
@@ -314,8 +316,9 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
   effects: {
     'lift': {
       keyframeEffect: {
+        name: 'lift',
         keyframes: [
-          { transform: 'transformY(-80px)', boxShadow: '0 8px 16px rgb(0 0 0 / 0.15)' },
+          { transform: 'translateY(-80px)', boxShadow: '0 8px 16px rgb(0 0 0 / 0.15)' },
         ],
       },
       duration: 200,
@@ -345,6 +348,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
   effects: {
     'follow-x': {
       keyframeEffect: {
+        name: 'follow-x',
         keyframes: [
           { transform: 'rotateY(-45deg)' },
           { transform: 'rotateY(0px)' },
@@ -356,6 +360,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
     },
     'follow-y': {
       keyframeEffect: {
+        name: 'follow-y',
         keyframes: [
           { transform: 'rotateX(45deg)' },
           { transform: 'rotateX(0px)' },
@@ -397,13 +402,18 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
 - **Same element as source and target with `viewEnter`** — Must use `triggerType: 'once'`. Other types cause re-entry loops.
 - **Hit-area shift on `hover` / `pointerMove`** — Animating size/position of the hovered element shifts the hit area and causes jitter. Instead, animate a child via `selector` or a different `key`.
 - **`registerEffects()` must run before `Interact.create()`/`generate()`** when using `namedEffect`.
-- **FOUC prevention requires** — `generate(config)` injected into `<head>`.
+- **FOUC prevention** — requires injecting the output of `generate(config)` into `<head>`.
 - **`generate(config, useFirstChild)`** — Pass `true` for `<interact-element>` (web), `false` for vanilla and React `<Interaction>`.
 - **`<interact-element>` must wrap exactly one child** — the library targets `:first-child` by default.
 
 ## AI & Agent Support
 
 Interact's JSON-config surface is the differentiator: configs are serializable, schema-typed, and validate-able (guardrails) — no imperative DOM logic for an LLM to hallucinate.
+
+AI agents can discover @wix/interact documentation through:
+
+- **[llms.txt](https://wix.github.io/interact/llms.txt)** — structured docs index ([llms.txt standard](https://llmstxt.org/))
+- **[llms-full.txt](https://wix.github.io/interact/llms-full.txt)** — all rules in a single file
 
 **Rules files** ship with the package under [`rules/`](https://github.com/wix/interact/tree/master/packages/interact/rules) — point your agent at them:
 
@@ -427,23 +437,23 @@ Interact's JSON-config surface is the differentiator: configs are serializable, 
 
 - Modern browsers with the Web Animations API (Baseline).
 - `adoptedStyleSheets` (used by `transition` / `transitionProperties`): Chrome 73+, Firefox 101+, Safari 16.4+, Edge 79+.
-- ViewTimeline: Chrome 115+; polyfilled via [`fizban`](https://github.com/wix/fizban) elsewhere.
+- ViewTimeline: Chrome 115+; polyfilled via [`fizban`](https://github.com/wix-incubator/fizban) elsewhere.
 
 ## Related Packages
 
 - [`@wix/motion`](https://github.com/wix/interact/tree/master/packages/motion) — low-level animation engine underneath Interact.
 - [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) — ready-made effect catalog (entrance, scroll, hover, pointer).
-- [`fizban`](https://github.com/wix/fizban) — scroll-driven animation polyfill (bundled dependency).
-- [`kuliso`](https://github.com/wix/kuliso) — pointer-driven animation polyfill (bundled dependency).
+- [`fizban`](https://github.com/wix-incubator/fizban) — scroll-driven animation polyfill (bundled dependency).
+- [`kuliso`](https://github.com/wix-incubator/kuliso) — pointer-driven animation polyfill (bundled dependency).
 
 ## Documentation
 
-- [**Getting Started**](https://wix.github.io/interact/docs/guides/getting-started.md)
-- [**API Reference**](https://wix.github.io/interact/docs/api/README.md) — `Interact` class, `InteractionController`, standalone functions, types
-- [**Guides**](https://wix.github.io/interact/docs/guides/README.md) — triggers, effects, configuration, state, conditions, sequences
-- [**Examples**](https://wix.github.io/interact/docs/examples/README.md) — entrance, click, hover, list patterns
-- [**Web Components**](https://wix.github.io/interact/docs/guides/custom-elements.md) - integration via custom elements
-- [**React Integration**](https://wix.github.io/interact/docs/integration/react.md) - React integration
+- [**Getting Started**](https://wix.github.io/interact/docs/#/guides/getting-started)
+- [**API Reference**](https://wix.github.io/interact/docs/#/api) — `Interact` class, `InteractionController`, standalone functions, types
+- [**Guides**](https://wix.github.io/interact/docs/#/guides) — triggers, effects, configuration, state, conditions, sequences
+- [**Examples**](https://wix.github.io/interact/docs/#/examples) — entrance, click, hover, list patterns
+- [**Web Components**](https://wix.github.io/interact/docs/#/guides/custom-elements) — integration via custom elements
+- [**React Integration**](https://wix.github.io/interact/docs/#/integration/react) — React integration
 
 ## License
 
