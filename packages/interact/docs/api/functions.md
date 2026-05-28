@@ -257,7 +257,7 @@ For `triggerType: 'repeat'`/`'alternate'`/`'state'`, do NOT use `initial`. Inste
 **Generated FOUC CSS with `useFirstChild: false`:**
 
 ```css
-[data-interact-key='hero']:is(:not([data-interact-enter])) {
+[data-interact-key='hero']:not([data-interact-enter]) {
   visibility: hidden;
   transform: none;
   translate: none;
@@ -269,7 +269,7 @@ For `triggerType: 'repeat'`/`'alternate'`/`'state'`, do NOT use `initial`. Inste
 **Generated FOUC CSS with `useFirstChild: true`:**
 
 ```css
-[data-interact-key='hero'] > :first-child:is(:not([data-interact-enter])) {
+[data-interact-key='hero'] > :first-child:not([data-interact-enter]) {
   visibility: hidden;
   transform: none;
   translate: none;
