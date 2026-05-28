@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 #### Changed
 
 - Revamp package `README.md` with expanded overview, `generate()` documentation, framework integration guides, and examples (#214)
+- README follow-up: add `llms` and `llmsFull` fields to `package.json`, AI discovery section, and corrected documentation and dependency links (#216)
+
+#### Fixed
+
+- FOUC-prevention CSS: apply `:not([data-interact-enter])` on the animated child selector instead of the source element, so initial-state hiding targets the correct element when effects use `selector` (#229)
 
 ### [2.3.0] - 2026-05-25
 
@@ -154,6 +159,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion
+
+### [2.1.7] - 2026-05-28
+
+#### Changed
+
+- Revamp package `README.md` with expanded API reference, usage examples, scroll/pointer/sequence sections, AI/`llms.txt` pointers, and corrected links (#216)
 
 ### [2.1.6] - 2026-05-25
 
