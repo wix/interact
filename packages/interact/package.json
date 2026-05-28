@@ -1,7 +1,7 @@
 {
   "name": "@wix/interact",
   "version": "2.3.0",
-  "description": "Declarative animation library — wire scroll, hover, click, and pointer triggers to effects via JSON config. Built on Web Animations API and CSS. AI-ready, and framework-agnostic.",
+  "description": "Declarative animation library — wire scroll, hover, click, and pointer triggers to effects via JSON config. Built on the Web Animations API.",
   "license": "MIT",
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",
