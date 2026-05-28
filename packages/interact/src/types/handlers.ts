@@ -5,7 +5,7 @@ import type {
   PointerMoveParams,
   AnimationEndParams,
 } from './triggers';
-import type { Effect } from './effects';
+import type { Effect, AnimationOptions } from './effects';
 import type { IInteractionController } from './controller';
 
 export type InteractionParamsTypes = {
@@ -26,6 +26,7 @@ export type InteractOptions = {
   selectorCondition?: string;
   allowA11yTriggers?: boolean;
   animation?: AnimationGroup;
+  sourceAnimationOptions?: AnimationOptions<'time'>;
 };
 
 export type InteractionHandlerModule<T extends TriggerType> = {

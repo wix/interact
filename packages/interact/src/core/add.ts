@@ -11,6 +11,8 @@ import type {
   SequenceConfigRef,
   CreateTransitionCSSParams,
   IInteractionController,
+  AnimationEndParams,
+  AnimationOptions,
 } from '../types';
 import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
 import { getInterpolatedKey } from './utilities';
@@ -28,6 +30,7 @@ type InteractionsToApply = Array<
     HTMLElement | HTMLElement[],
     string | undefined,
     boolean,
+    string | undefined,
   ]
 >;
 
@@ -109,6 +112,7 @@ function _applyInteraction(
   targetElements: HTMLElement | HTMLElement[],
   selectorCondition?: string,
   useFirstChild?: boolean,
+  sourceKey?: string,
 ) {
   const isSourceArray = Array.isArray(sourceElements);
   const isTargetArray = Array.isArray(targetElements);
@@ -127,6 +131,7 @@ function _applyInteraction(
           interaction.params!,
           selectorCondition,
           useFirstChild,
+          sourceKey,
         );
       }
     });
@@ -142,6 +147,7 @@ function _applyInteraction(
         interaction.params!,
         selectorCondition,
         useFirstChild,
+        sourceKey,
       );
     });
   }
@@ -240,6 +246,7 @@ function _addInteraction(
         targetElements,
         selectorCondition,
         targetController.useFirstChild,
+        sourceKey,
       ]);
     }
   });
@@ -651,6 +658,7 @@ function addEffectsForTarget(
           targetElements,
           selectorCondition,
           targetController.useFirstChild,
+          sourceKey || undefined,
         ]);
 
         // short-circuit the loop since we have a match
@@ -684,6 +692,7 @@ function addInteraction<T extends TriggerType>(
   options: InteractionParamsTypes[T],
   selectorCondition?: string,
   useFirstChild?: boolean,
+  sourceKey?: string,
 ): void {
   let targetController;
 
@@ -709,11 +718,24 @@ function addInteraction<T extends TriggerType>(
     targetController.renderStyle(createTransitionCSS(args));
   }
 
+  let sourceAnimationOptions;
+  if (trigger === 'animationEnd') {
+    const triggerEffectId = (options as AnimationEndParams).effectId;
+    const instance = sourceKey ? Interact.getInstance(sourceKey) : undefined;
+    const srcEffect = instance?.dataCache.effects[triggerEffectId] as TimeEffect | undefined;
+    if (srcEffect) {
+      sourceAnimationOptions = effectToAnimationOptions(srcEffect) as
+        | AnimationOptions<'time'>
+        | undefined;
+    }
+  }
+
   TRIGGER_TO_HANDLER_MODULE_MAP[trigger]?.add(source, target, effect, options, {
     reducedMotion: Interact.forceReducedMotion,
     targetController,
     selectorCondition,
     allowA11yTriggers: Interact.allowA11yTriggers,
+    sourceAnimationOptions,
   });
 }
 
