@@ -1,11 +1,13 @@
 {
   "name": "@wix/interact",
   "version": "2.3.0",
-  "description": "Declarative, configuration-driven interaction library — web-native, AI-ready, and framework-agnostic.",
+  "description": "Declarative animation library — wire scroll, hover, click, and pointer triggers to effects via JSON config. Built on Web Animations API and CSS.",
   "license": "MIT",
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",
   "types": "dist/types/index.d.ts",
+  "llms": "https://wix.github.io/interact/llms.txt",
+  "llmsFull": "https://wix.github.io/interact/llms-full.txt",
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
@@ -42,16 +44,22 @@
   "keywords": [
     "animation",
     "waapi",
+    "web-animation",
     "web-animations-api",
     "javascript",
+    "typescript",
     "css",
     "scroll-driven",
+    "scroll-animation",
     "motion",
     "interaction",
     "react",
     "web-components",
     "declarative",
+    "declarative-animation",
     "config-driven",
+    "entrance-animation",
+    "hover-animation",
     "wix"
   ],
   "author": {
