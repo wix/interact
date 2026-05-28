@@ -402,7 +402,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
 - **Same element as source and target with `viewEnter`** — Must use `triggerType: 'once'`. Other types cause re-entry loops.
 - **Hit-area shift on `hover` / `pointerMove`** — Animating size/position of the hovered element shifts the hit area and causes jitter. Instead, animate a child via `selector` or a different `key`.
 - **`registerEffects()` must run before `Interact.create()`/`generate()`** when using `namedEffect`.
-- **FOUC prevention requires two steps** — (1) inject the output of `generate(config)` into `<head>`, and (2) mark each entrance-animated element with `data-interact-initial="true"` (`initial={true}` in React). Both are required.
+- **FOUC prevention** — requires injecting the output of `generate(config)` into `<head>`.
 - **`generate(config, useFirstChild)`** — Pass `true` for `<interact-element>` (web), `false` for vanilla and React `<Interaction>`.
 - **`<interact-element>` must wrap exactly one child** — the library targets `:first-child` by default.
 

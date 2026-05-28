@@ -190,7 +190,7 @@ const config: InteractConfig = {
 };
 ```
 
-FOUC prevention requires two steps — (1) inject the output of `generate(config)` into `<head>`, and (2) mark each entrance-animated element with `data-interact-initial="true"` (`initial={true}` in React). Both are required.
+FOUC prevention requires injecting the output of `generate(config)` into `<head>`.
 
 ### Click effect
 
@@ -363,7 +363,7 @@ AI agents can discover @wix/interact documentation through:
 - Do not invent `namedEffect` types — use only registered presets (see preset rules above)
 - Do not attach DOM event listeners manually — express behavior through `trigger` and config
 - For `viewProgress`, avoid `overflow: hidden` on ancestors; use `overflow: clip` instead
-- Call `generate(config)` at build time or on the server and inject CSS into `<head>`. For `viewEnter` + `triggerType: 'once'`, to prevent FOUC, also mark elements with `data-interact-initial="true"`.
+- Call `generate(config)` at build time or on the server and inject CSS into `<head>`
 - `effects` at the config top level is a reusable `Record<string, Effect>`
 - `<interact-element>` should wrap exactly one child (the library targets `.firstElementChild` by default).
 
