@@ -1,6 +1,6 @@
 # @wix/interact
 
-Declarative animation library — wire scroll, hover, click, and pointer triggers to effects via JSON config. Built on the Web Animations API.
+Declarative interaction library — wire scroll, hover, click, and pointer triggers to animations via JSON config. Built on the Web Animations API.
 
 [![npm version](https://img.shields.io/npm/v/@wix/interact.svg)](https://www.npmjs.com/package/@wix/interact)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@wix/interact)](https://bundlephobia.com/package/@wix/interact)
