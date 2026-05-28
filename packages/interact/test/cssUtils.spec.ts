@@ -207,14 +207,14 @@ describe('CSSRuleToString', () => {
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
-  it('should add :is(:not([data-interact-enter])) when addInitialSelector is true', () => {
+  it('should add :not([data-interact-enter]) when addInitialSelector is true', () => {
     const rule: CSSRuleData = {
       key: 'my-el',
       addInitialSelector: true,
       declarations: [{ name: 'opacity', value: '0' }],
     };
     const expected =
-      '[data-interact-key="my-el"]:is(:not([data-interact-enter])) {\nopacity: 0;\n}';
+      '[data-interact-key="my-el"]:not([data-interact-enter]) {\nopacity: 0;\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
