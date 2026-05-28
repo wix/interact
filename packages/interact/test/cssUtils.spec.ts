@@ -213,8 +213,7 @@ describe('CSSRuleToString', () => {
       addInitialSelector: true,
       declarations: [{ name: 'opacity', value: '0' }],
     };
-    const expected =
-      '[data-interact-key="my-el"]:not([data-interact-enter]) {\nopacity: 0;\n}';
+    const expected = '[data-interact-key="my-el"]:not([data-interact-enter]) {\nopacity: 0;\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
