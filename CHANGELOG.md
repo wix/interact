@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.3.1] - 2026-05-28
+
+#### Changed
+
+- Revamp package `README.md` with expanded overview, `generate()` documentation, framework integration guides, and examples (#214)
+
 ### [2.3.0] - 2026-05-25
 
 #### Added
