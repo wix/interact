@@ -336,6 +336,11 @@ type Interaction = {
 
 ## AI and Agent Support
 
+AI agents can discover @wix/interact documentation through:
+
+- **[llms.txt](https://wix.github.io/interact/llms.txt)** — structured docs index ([llms.txt standard](https://llmstxt.org/))
+- **[llms-full.txt](https://wix.github.io/interact/llms-full.txt)** — all rules in a single file
+
 ### Rules files
 
 **@wix/interact**:

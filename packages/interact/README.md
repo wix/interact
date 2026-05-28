@@ -410,6 +410,11 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
 
 Interact's JSON-config surface is the differentiator: configs are serializable, schema-typed, and validate-able (guardrails) — no imperative DOM logic for an LLM to hallucinate.
 
+AI agents can discover @wix/interact documentation through:
+
+- **[llms.txt](https://wix.github.io/interact/llms.txt)** — structured docs index ([llms.txt standard](https://llmstxt.org/))
+- **[llms-full.txt](https://wix.github.io/interact/llms-full.txt)** — all rules in a single file
+
 **Rules files** ship with the package under [`rules/`](https://github.com/wix/interact/tree/master/packages/interact/rules) — point your agent at them:
 
 - [`rules/full-lean.md`](https://wix.github.io/interact/rules/full-lean.md) — complete config spec, pitfalls, and constraints
