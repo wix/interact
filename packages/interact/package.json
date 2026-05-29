@@ -1,6 +1,6 @@
 {
   "name": "@wix/interact",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Declarative, configuration-driven interaction library — web-native, AI-ready, and framework-agnostic.",
   "license": "MIT",
   "main": "dist/cjs/index.js",
