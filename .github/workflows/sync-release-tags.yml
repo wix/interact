@@ -14,7 +14,7 @@ env:
 
 jobs:
   sync-tags:
-    if: contains(github.event.head_commit.message, 'chore: bump @wix/')
+    if: "contains(github.event.head_commit.message, 'chore: bump @wix/')"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
