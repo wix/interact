@@ -15,22 +15,22 @@ todos:
     content: Fix missing barrel export — add DVD to packages/motion-presets/src/library/ongoing/index.ts (the preset is fully implemented and documented but was accidentally omitted from the barrel)
     status: completed
   - id: phase2-rules-audit
-    content: "[Phase 2] After the README is complete, audit rules/presets/ files for any discrepancies surfaced during README preparation and update them to match verified ground truth"
+    content: '[Phase 2] After the README is complete, audit rules/presets/ files for any discrepancies surfaced during README preparation and update them to match verified ground truth'
     status: pending
   - id: phase2-mouse-rules
-    content: "[Phase 2] Add BounceMouse and SpinMouse entries to mouse-presets.md (currently only 9 of 11 user-facing mouse presets are documented there)"
+    content: '[Phase 2] Add BounceMouse and SpinMouse entries to mouse-presets.md (currently only 9 of 11 user-facing mouse presets are documented there)'
     status: pending
   - id: phase3-extend-script
-    content: "[Phase 3] Extend scripts/generate-llms.mjs to also read packages/motion-presets/rules/presets/ and include those files in both llms.txt and llms-full.txt"
+    content: '[Phase 3] Extend scripts/generate-llms.mjs to also read packages/motion-presets/rules/presets/ and include those files in both llms.txt and llms-full.txt'
     status: pending
   - id: phase3-docs-section
-    content: "[Phase 3] Add presets-main.md under the ## Docs section of llms.txt (below full-lean.md and integration.md)"
+    content: '[Phase 3] Add presets-main.md under the ## Docs section of llms.txt (below full-lean.md and integration.md)'
     status: pending
   - id: phase3-presets-section
-    content: "[Phase 3] Add a new ## Presets section to llms.txt containing the 4 category rule files (entrance, scroll, ongoing, mouse)"
+    content: '[Phase 3] Add a new ## Presets section to llms.txt containing the 4 category rule files (entrance, scroll, ongoing, mouse)'
     status: pending
   - id: phase3-verify
-    content: "[Phase 3] Re-run scripts/generate-llms.mjs and verify both outputs are correct"
+    content: '[Phase 3] Re-run scripts/generate-llms.mjs and verify both outputs are correct'
     status: pending
 isProject: false
 ---
@@ -45,11 +45,11 @@ The package exports **75 presets** across 5 categories:
 
 - **Entrance** (19): FadeIn, ArcIn, BlurIn, BounceIn, CurveIn, DropIn, ExpandIn, FlipIn, FloatIn, FoldIn, GlideIn, RevealIn, ShapeIn, ShuttersIn, SlideIn, SpinIn, TiltIn, TurnIn, WinkIn
 - **Scroll** (19): ArcScroll, BlurScroll, FadeScroll, FlipScroll, GrowScroll, MoveScroll, PanScroll, ParallaxScroll, RevealScroll, ShapeScroll, ShrinkScroll, ShuttersScroll, SkewPanScroll, SlideScroll, Spin3dScroll, SpinScroll, StretchScroll, TiltScroll, TurnScroll
-- **Ongoing** (14): Bounce, Breathe, Cross, DVD, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, Wiggle *(DVD is fully implemented and documented but accidentally missing from the barrel — see `fix-dvd-export` todo)*
-- **Mouse** (11): AiryMouse, BlobMouse, BlurMouse, BounceMouse, ScaleMouse, SkewMouse, SpinMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, TrackMouse *(`CustomMouse` is excluded — it is internal infrastructure used to implement `customEffect` for the `pointerMove` trigger, not a user-facing preset)*
+- **Ongoing** (14): Bounce, Breathe, Cross, DVD, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, Wiggle _(DVD is fully implemented and documented but accidentally missing from the barrel — see `fix-dvd-export` todo)_
+- **Mouse** (11): AiryMouse, BlobMouse, BlurMouse, BounceMouse, ScaleMouse, SkewMouse, SpinMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, TrackMouse _(`CustomMouse` is excluded — it is internal infrastructure used to implement `customEffect` for the `pointerMove` trigger, not a user-facing preset)_
 - **Background Scroll** (12): BgCloseUp, BgFade, BgFadeBack, BgFake3D, BgPan, BgParallax, BgPullBack, BgReveal, BgRotate, BgSkew, BgZoom, ImageParallax
 
-Key architectural note: `registerEffects()` lives in `**@wix/motion`**, not this package. This package exports preset modules that you pass *into* `registerEffects()`.
+Key architectural note: `registerEffects()` lives in `**@wix/motion`\**, not this package. This package exports preset modules that you pass *into\* `registerEffects()`.
 
 > **SSOT:** This README and the rules files will eventually be migrated to generated templates under `context/` in Phase 3 of the [SSOT restructure plan](https://github.com/wix/interact/pull/210/changes#diff-a68c779a9afdb459ce4130f6f8d9fa811df80d04b64ef7c7a6232051048a6ecb). Write it as a static file for now.
 
@@ -209,7 +209,7 @@ The script currently only reads `packages/interact/rules/`. It needs to:
 
 1. Also read `packages/motion-presets/rules/presets/` and load those 5 files.
 2. Route `presets-main.md` into the `## Docs` section (below `full-lean.md` and `integration.md`), using a display title like `"Presets Reference"`.
-3. Route the 4 category files (`entrance-presets.md`, `scroll-presets.md`, `ongoing-presets.md`, `mouse-presets.md`) into a new `**## Presets`** section inserted between `## Docs` and `## Optional`.
+3. Route the 4 category files (`entrance-presets.md`, `scroll-presets.md`, `ongoing-presets.md`, `mouse-presets.md`) into a new `**## Presets`\*\* section inserted between `## Docs` and `## Optional`.
 4. Include all 5 preset files in the `llms-full.txt` concatenation (after the interact files).
 
 ### Resulting `llms.txt` structure
@@ -225,14 +225,14 @@ The script currently only reads `packages/interact/rules/`. It needs to:
 
 - [Full Reference](...full-lean.md): ...
 - [Integration Guide](...integration.md): ...
-- [Presets Reference](...presets-main.md): ...     ← new
+- [Presets Reference](...presets-main.md): ... ← new
 
 ## Presets
 
-- [Entrance Presets](...entrance-presets.md): ...  ← new
-- [Scroll Presets](...scroll-presets.md): ...       ← new
-- [Ongoing Presets](...ongoing-presets.md): ...     ← new
-- [Mouse Presets](...mouse-presets.md): ...         ← new
+- [Entrance Presets](...entrance-presets.md): ... ← new
+- [Scroll Presets](...scroll-presets.md): ... ← new
+- [Ongoing Presets](...ongoing-presets.md): ... ← new
+- [Mouse Presets](...mouse-presets.md): ... ← new
 
 ## Optional
 

@@ -12,13 +12,13 @@ Ready-made animation presets for @wix/motion — entrance, scroll, pointer, loop
 
 75 ready-made animation presets across 5 categories:
 
-| Category | Count | Description |
-| --- | --- | --- |
-| [Entrance](#entrance) | 19 | Play once when an element enters the viewport |
-| [Scroll](#scroll) | 19 | Progress tied to the element's scroll position |
-| [Ongoing](#ongoing) | 14 | Continuous looping animations |
-| [Mouse](#mouse) | 11 | Real-time response to cursor position |
-| [Background Scroll](#background-scroll) | 12 | Parallax and depth effects for background media |
+| Category                                | Count | Description                                     |
+| --------------------------------------- | ----- | ----------------------------------------------- |
+| [Entrance](#entrance)                   | 19    | Play once when an element enters the viewport   |
+| [Scroll](#scroll)                       | 19    | Progress tied to the element's scroll position  |
+| [Ongoing](#ongoing)                     | 14    | Continuous looping animations                   |
+| [Mouse](#mouse)                         | 11    | Real-time response to cursor position           |
+| [Background Scroll](#background-scroll) | 12    | Parallax and depth effects for background media |
 
 ## Install
 
@@ -94,14 +94,11 @@ import * as presets from '@wix/motion-presets';
 
 registerEffects(presets);
 
-const animation = getWebAnimation(
-  document.getElementById('hero'),
-  {
-    namedEffect: { type: 'FadeIn' },
-    duration: 800,
-    easing: 'ease-out',
-  },
-);
+const animation = getWebAnimation(document.getElementById('hero'), {
+  namedEffect: { type: 'FadeIn' },
+  duration: 800,
+  easing: 'ease-out',
+});
 
 animation.play();
 ```
@@ -173,13 +170,13 @@ Parallax and depth effects optimized for full-bleed background images and videos
 
 ## Choosing a Preset
 
-| Intent | Category | Example Presets |
-| --- | --- | --- |
-| Reveal content on scroll | Entrance | FadeIn, SlideIn, FloatIn |
-| Animate through the viewport | Scroll | FadeScroll, ParallaxScroll, MoveScroll |
-| Draw continuous attention | Ongoing | Pulse, Breathe, Wiggle |
-| Respond to cursor position | Mouse | TrackMouse, Tilt3DMouse, BlurMouse |
-| Depth on background media | Background Scroll | BgParallax, ImageParallax, BgZoom |
+| Intent                       | Category          | Example Presets                        |
+| ---------------------------- | ----------------- | -------------------------------------- |
+| Reveal content on scroll     | Entrance          | FadeIn, SlideIn, FloatIn               |
+| Animate through the viewport | Scroll            | FadeScroll, ParallaxScroll, MoveScroll |
+| Draw continuous attention    | Ongoing           | Pulse, Breathe, Wiggle                 |
+| Respond to cursor position   | Mouse             | TrackMouse, Tilt3DMouse, BlurMouse     |
+| Depth on background media    | Background Scroll | BgParallax, ImageParallax, BgZoom      |
 
 For selection by tone and atmosphere (playful, elegant, bold, soft, dramatic, modern, etc.), see the [Selection by Atmosphere](rules/presets/presets-main.md#selection-by-atmosphere) guide.
 
@@ -189,13 +186,13 @@ For selection by tone and atmosphere (playful, elegant, bold, soft, dramatic, mo
 
 The `direction` parameter accepts different value sets depending on the preset:
 
-| Values | Example Presets |
-| --- | --- |
-| `'top' \| 'right' \| 'bottom' \| 'left'` | SlideIn, FloatIn, FlipIn, FoldIn |
-| `'horizontal' \| 'vertical'` | WinkIn, ArcScroll, FlipScroll, Flip |
-| `'clockwise' \| 'counter-clockwise'` | SpinIn, SpinScroll, Spin |
-| `0–360` (degrees, number) | GlideIn, ExpandIn, MoveScroll |
-| Corner values | TurnIn (`'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`) |
+| Values                                   | Example Presets                                                         |
+| ---------------------------------------- | ----------------------------------------------------------------------- |
+| `'top' \| 'right' \| 'bottom' \| 'left'` | SlideIn, FloatIn, FlipIn, FoldIn                                        |
+| `'horizontal' \| 'vertical'`             | WinkIn, ArcScroll, FlipScroll, Flip                                     |
+| `'clockwise' \| 'counter-clockwise'`     | SpinIn, SpinScroll, Spin                                                |
+| `0–360` (degrees, number)                | GlideIn, ExpandIn, MoveScroll                                           |
+| Corner values                            | TurnIn (`'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`) |
 
 **Angle convention:** `0° = right (east)`, angles increase counter-clockwise.
 
@@ -232,34 +229,34 @@ See [Accessibility](rules/presets/presets-main.md#accessibility) in `presets-mai
 
 ### Preset risk levels
 
-| Risk | Presets |
-| --- | --- |
-| High | SpinIn, Spin, BounceIn, Bounce, ArcIn, ArcScroll, FlipIn, FlipScroll, Spin3dScroll, Tilt3DMouse, Flash, DVD, Jello, Wiggle |
-| Medium | TurnIn, ParallaxScroll (at high speed values) |
-| Low / safe | FadeIn, FadeScroll, BlurIn, BlurScroll, Pulse, Breathe |
+| Risk       | Presets                                                                                                                    |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------- |
+| High       | SpinIn, Spin, BounceIn, Bounce, ArcIn, ArcScroll, FlipIn, FlipScroll, Spin3dScroll, Tilt3DMouse, Flash, DVD, Jello, Wiggle |
+| Medium     | TurnIn, ParallaxScroll (at high speed values)                                                                              |
+| Low / safe | FadeIn, FadeScroll, BlurIn, BlurScroll, Pulse, Breathe                                                                     |
 
 ### Reduced-motion fallbacks (subset)
 
-| Original | Fallback |
-| --- | --- |
-| BounceIn, SpinIn | FadeIn |
-| ArcIn, FlipIn, TurnIn | FadeIn |
-| Spin, Bounce, Wiggle | Stop or subtle Pulse |
-| Flash | Reduce frequency (<3/sec) |
-| ParallaxScroll | Static position |
-| All mouse presets | Static state |
+| Original              | Fallback                  |
+| --------------------- | ------------------------- |
+| BounceIn, SpinIn      | FadeIn                    |
+| ArcIn, FlipIn, TurnIn | FadeIn                    |
+| Spin, Bounce, Wiggle  | Stop or subtle Pulse      |
+| Flash                 | Reduce frequency (<3/sec) |
+| ParallaxScroll        | Static position           |
+| All mouse presets     | Static state              |
 
 ## AI & Agent Support
 
 **Rules files** ship with the package under [`rules/presets/`](rules/presets/) — point your agent at them:
 
-| File | Contents |
-| --- | --- |
-| [`presets-main.md`](rules/presets/presets-main.md) | Overview, parameter standards, atmosphere guide, accessibility |
-| [`entrance-presets.md`](rules/presets/entrance-presets.md) | Entrance preset parameters and defaults |
-| [`scroll-presets.md`](rules/presets/scroll-presets.md) | Scroll preset parameters and defaults |
-| [`ongoing-presets.md`](rules/presets/ongoing-presets.md) | Ongoing preset parameters and defaults |
-| [`mouse-presets.md`](rules/presets/mouse-presets.md) | Mouse preset parameters and defaults |
+| File                                                       | Contents                                                       |
+| ---------------------------------------------------------- | -------------------------------------------------------------- |
+| [`presets-main.md`](rules/presets/presets-main.md)         | Overview, parameter standards, atmosphere guide, accessibility |
+| [`entrance-presets.md`](rules/presets/entrance-presets.md) | Entrance preset parameters and defaults                        |
+| [`scroll-presets.md`](rules/presets/scroll-presets.md)     | Scroll preset parameters and defaults                          |
+| [`ongoing-presets.md`](rules/presets/ongoing-presets.md)   | Ongoing preset parameters and defaults                         |
+| [`mouse-presets.md`](rules/presets/mouse-presets.md)       | Mouse preset parameters and defaults                           |
 
 **Generation constraints** for agents:
 
