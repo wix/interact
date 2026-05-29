@@ -20,6 +20,9 @@ todos:
   - id: phase2-mouse-rules
     content: '[Phase 2] Add BounceMouse and SpinMouse entries to mouse-presets.md (currently only 9 of 11 user-facing mouse presets are documented there)'
     status: pending
+  - id: phase2-npm-publish
+    content: "[Phase 2] Add 'rules' and 'docs' to packages/motion-presets/package.json files array once rule files are verified — consistent with @wix/interact npm publishing pattern"
+    status: pending
   - id: phase3-extend-script
     content: '[Phase 3] Extend scripts/generate-llms.mjs to also read packages/motion-presets/rules/presets/ and include those files in both llms.txt and llms-full.txt'
     status: pending
@@ -196,6 +199,7 @@ After the README is complete, the research done during preparation will have sur
 - `mouse-presets.md`: Add BounceMouse and SpinMouse entries (see `phase2-mouse-rules` todo).
 - `presets-main.md`: Update mouse count from 9 to 11; update total from 74 to 75 (once `fix-dvd-export` lands).
 - Any param name / default mismatches found during the `verify-examples` step.
+- Add `"rules"` and `"docs"` to `packages/motion-presets/package.json` `"files"` array (see `phase2-npm-publish` todo) — currently only `dist` is shipped; adding rules enables local agent access via `node_modules/@wix/motion-presets/rules/`.
 
 Phase 2 is a separate task. Do not attempt it during README preparation.
 

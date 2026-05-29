@@ -134,7 +134,7 @@ Animations optimized for when an element enters the viewport. Used with the `vie
 
 **Presets (19):** ArcIn, BlurIn, BounceIn, CurveIn, DropIn, ExpandIn, FadeIn, FlipIn, FloatIn, FoldIn, GlideIn, RevealIn, ShapeIn, ShuttersIn, SlideIn, SpinIn, TiltIn, TurnIn, WinkIn
 
-→ [Entrance Preset Reference](rules/presets/entrance-presets.md)
+→ [Entrance Preset Reference](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/entrance-presets.md)
 
 ### Scroll
 
@@ -142,7 +142,7 @@ Animations driven by an element's scroll progress through the viewport via ViewT
 
 **Presets (19):** ArcScroll, BlurScroll, FadeScroll, FlipScroll, GrowScroll, MoveScroll, PanScroll, ParallaxScroll, RevealScroll, ShapeScroll, ShrinkScroll, ShuttersScroll, SkewPanScroll, SlideScroll, Spin3dScroll, SpinScroll, StretchScroll, TiltScroll, TurnScroll
 
-→ [Scroll Preset Reference](rules/presets/scroll-presets.md)
+→ [Scroll Preset Reference](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/scroll-presets.md)
 
 ### Ongoing
 
@@ -150,7 +150,7 @@ Continuous looping animations that run indefinitely until stopped. Used with any
 
 **Presets (14):** Bounce, Breathe, Cross, DVD, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, Wiggle
 
-→ [Ongoing Preset Reference](rules/presets/ongoing-presets.md)
+→ [Ongoing Preset Reference](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/ongoing-presets.md)
 
 ### Mouse
 
@@ -160,7 +160,7 @@ Animations driven by pointer position in real time. Transform values respond to 
 
 **Presets (11):** AiryMouse, BlobMouse, BlurMouse, BounceMouse, ScaleMouse, SkewMouse, SpinMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, TrackMouse
 
-→ [Mouse Preset Reference](rules/presets/mouse-presets.md)
+→ [Mouse Preset Reference](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/mouse-presets.md)
 
 ### Background Scroll
 
@@ -178,7 +178,7 @@ Parallax and depth effects optimized for full-bleed background images and videos
 | Respond to cursor position   | Mouse             | TrackMouse, Tilt3DMouse, BlurMouse     |
 | Depth on background media    | Background Scroll | BgParallax, ImageParallax, BgZoom      |
 
-For selection by tone and atmosphere (playful, elegant, bold, soft, dramatic, modern, etc.), see the [Selection by Atmosphere](rules/presets/presets-main.md#selection-by-atmosphere) guide.
+For selection by tone and atmosphere (playful, elegant, bold, soft, dramatic, modern, etc.), see the [Selection by Atmosphere](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/presets-main.md#selection-by-atmosphere) guide.
 
 ## Parameter Conventions
 
@@ -219,13 +219,13 @@ namedEffect: { type: 'Bounce', iterationDelay: 1000 } // 1 s pause after each cy
 
 Available on all ongoing presets except DVD.
 
-For full parameter standards and the coordinate system reference, see [Parameter Standards](rules/presets/presets-main.md#parameter-standards) in `presets-main.md`.
+For full parameter standards and the coordinate system reference, see [Parameter Standards](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/presets-main.md#parameter-standards) in `presets-main.md`.
 
 ## Accessibility
 
 Interact's `conditions` system lets you define media-query gates. Define a condition for `(prefers-reduced-motion: reduce)` and attach it to interactions or effects that use high-risk presets — when the query matches, those effects are skipped or replaced with safer alternatives.
 
-See [Accessibility](rules/presets/presets-main.md#accessibility) in `presets-main.md` for full guidance and LLM principles.
+See [Accessibility](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/presets-main.md#accessibility) in `presets-main.md` for full guidance and LLM principles.
 
 ### Preset risk levels
 
@@ -248,15 +248,15 @@ See [Accessibility](rules/presets/presets-main.md#accessibility) in `presets-mai
 
 ## AI & Agent Support
 
-**Rules files** ship with the package under [`rules/presets/`](rules/presets/) — point your agent at them:
+**Rules files** ship with the package under [`rules/presets/`](https://github.com/wix/interact/tree/master/packages/motion-presets/rules/presets) — point your agent at them:
 
-| File                                                       | Contents                                                       |
-| ---------------------------------------------------------- | -------------------------------------------------------------- |
-| [`presets-main.md`](rules/presets/presets-main.md)         | Overview, parameter standards, atmosphere guide, accessibility |
-| [`entrance-presets.md`](rules/presets/entrance-presets.md) | Entrance preset parameters and defaults                        |
-| [`scroll-presets.md`](rules/presets/scroll-presets.md)     | Scroll preset parameters and defaults                          |
-| [`ongoing-presets.md`](rules/presets/ongoing-presets.md)   | Ongoing preset parameters and defaults                         |
-| [`mouse-presets.md`](rules/presets/mouse-presets.md)       | Mouse preset parameters and defaults                           |
+| File                                                                                                                           | Contents                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| [`presets-main.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/presets-main.md)         | Overview, parameter standards, atmosphere guide, accessibility |
+| [`entrance-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/entrance-presets.md) | Entrance preset parameters and defaults                        |
+| [`scroll-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/scroll-presets.md)     | Scroll preset parameters and defaults                          |
+| [`ongoing-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/ongoing-presets.md)   | Ongoing preset parameters and defaults                         |
+| [`mouse-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/mouse-presets.md)       | Mouse preset parameters and defaults                           |
 
 **Generation constraints** for agents:
 
