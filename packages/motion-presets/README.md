@@ -198,16 +198,16 @@ The `direction` parameter accepts different value sets depending on the preset:
 
 ### Distance units
 
-Prefer the `{ value, type }` object notation:
+Prefer the `{ value, unit }` object notation:
 
 ```typescript
 namedEffect: {
   type: 'GlideIn',
-  distance: { value: 120, type: 'px' },
+  distance: { value: 120, unit: 'px' },
 }
 ```
 
-Supported types: `px`, `em`, `rem`, `vh`, `vw`, `vmin`, `vmax`, `percentage`.
+Supported units: `px`, `em`, `rem`, `vh`, `vw`, `vmin`, `vmax`, `percentage`.
 
 ### `iterationDelay` (ongoing only)
 

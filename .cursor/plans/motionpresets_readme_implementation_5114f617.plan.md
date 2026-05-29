@@ -16,10 +16,10 @@ todos:
     status: completed
   - id: phase2-rules-audit
     content: '[Phase 2] After the README is complete, audit rules/presets/ files for any discrepancies surfaced during README preparation and update them to match verified ground truth'
-    status: pending
+    status: completed
   - id: phase2-mouse-rules
     content: '[Phase 2] Add BounceMouse and SpinMouse entries to mouse-presets.md (currently only 9 of 11 user-facing mouse presets are documented there)'
-    status: pending
+    status: completed
   - id: phase2-npm-publish
     content: "[Phase 2] Add 'rules' and 'docs' to packages/motion-presets/package.json files array once rule files are verified — consistent with @wix/interact npm publishing pattern"
     status: pending

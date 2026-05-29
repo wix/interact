@@ -94,11 +94,11 @@ The `direction` parameter accepts different values depending on the preset:
 | Axis               | 'horizontal', 'vertical'                                  | WinkIn, ArcScroll, FlipScroll, Flip                                                                                  |
 | Axis + center      | 'horizontal', 'vertical', 'center'                        | Breathe                                                                                                              |
 | Rotation           | 'clockwise', 'counter-clockwise'                          | SpinIn, SpinScroll, Spin                                                                                             |
-| Angle (number)     | 0–360 (0° = right, 90° = top, 180° = left, 270° = bottom) | GlideIn, ExpandIn, MoveScroll                                                                                        |
+| Angle (number)     | 0–360 (0° = right, 90° = top, 180° = left, 270° = bottom) | GlideIn, ExpandIn                                                                                                    |
 
 ### Using Units
 
-Interact supports both a CSSUnitValue-style object (e.g., `distance: { value: 120, type: 'px' }`, mapped to the internal type `UnitLengthPercentage`) and flat string values (e.g., `distance: '120px'`).
+Interact supports both an object (e.g., `distance: { value: 120, unit: 'px' }`, typed as `UnitLengthPercentage`) and flat string values (e.g., `distance: '120px'`).
 
 Prefer the object notation. Be consistent within a configuration — use one format, not both.
 
@@ -116,9 +116,9 @@ Prefer the object notation. Be consistent within a configuration — use one for
 Supported unit types: `px`, `em`, `rem`, `vh`, `vw`, `vmin`, `vmax`, `percentage`
 
 ```typescript
-distance: { value: 120, type: 'px' }       // pixels
-distance: { value: 50, type: 'percentage' } // percentage
-distance: { value: 10, type: 'vh' }        // viewport height
+distance: { value: 120, unit: 'px' }       // pixels
+distance: { value: 50, unit: 'percentage' } // percentage
+distance: { value: 10, unit: 'vh' }        // viewport height
 ```
 
 ### CSS Custom Properties
@@ -147,9 +147,9 @@ Bounce, Breathe, Cross, DVD, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin
 
 → [Full ongoing preset reference](./ongoing-presets.md)
 
-### Mouse (9 presets)
+### Mouse (11 presets)
 
-AiryMouse, BlobMouse, BlurMouse, ScaleMouse, SkewMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, TrackMouse
+AiryMouse, BlobMouse, BlurMouse, BounceMouse, ScaleMouse, SkewMouse, SpinMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, TrackMouse
 
 → [Full mouse preset reference](./mouse-presets.md)
 
@@ -175,6 +175,7 @@ Keywords: playful, fun, quirky, whimsical, lighthearted, bouncy, cheerful, cute,
 | Flip   | loop     | Flip        |
 | Bounce | entrance | BounceIn    |
 | Bounce | loop     | Bounce      |
+| Bounce | mouse    | BounceMouse |
 | Swing  | loop     | Swing       |
 | Blob   | mouse    | BlobMouse   |
 | Rubber | loop     | Rubber      |
@@ -279,6 +280,7 @@ Keywords: modern, tech, immersive, dimensional, spatial, 3d, depth, layered, inn
 | Track 3D | mouse    | Track3DMouse   |
 | Track    | mouse    | TrackMouse     |
 | Skew     | mouse    | SkewMouse      |
+| Spin     | mouse    | SpinMouse      |
 | 3D spin  | scroll   | Spin3dScroll   |
 | Parallax | scroll   | ParallaxScroll |
 | Resize   | mouse    | ScaleMouse     |
@@ -300,6 +302,7 @@ Keywords: creative, artistic, experimental, unconventional, edgy, distorted, uni
 | Shape   | entrance | ShapeIn       |
 | Shape   | scroll   | ShapeScroll   |
 | Blob    | mouse    | BlobMouse     |
+| Spin    | mouse    | SpinMouse     |
 | Cross   | loop     | Cross         |
 | Stretch | scroll   | StretchScroll |
 | Rubber  | loop     | Rubber        |
@@ -332,8 +335,8 @@ Keywords: clean, structured, organized, directional, purposeful, direct, simple,
 | ---------- | -------------- | ------- | ----------- |
 | FadeIn     | FadeScroll     | Flash   | -           |
 | ArcIn      | ArcScroll      | -       | -           |
-| SpinIn     | SpinScroll     | Spin    | -           |
-| BounceIn   | -              | Bounce  | -           |
+| SpinIn     | SpinScroll     | Spin    | SpinMouse   |
+| BounceIn   | -              | Bounce  | BounceMouse |
 | TiltIn     | TiltScroll     | -       | Tilt3DMouse |
 | FlipIn     | FlipScroll     | Flip    | -           |
 | FoldIn     | -              | Fold    | -           |

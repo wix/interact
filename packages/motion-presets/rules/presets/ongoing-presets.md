@@ -54,7 +54,7 @@ Parameters:
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Breathe', direction: 'horizontal', distance: { value: 15, type: 'px' } }
+{ type: 'Breathe', direction: 'horizontal', distance: { value: 15, unit: 'px' } }
 ```
 
 ---

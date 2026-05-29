@@ -24,7 +24,7 @@ interface OptionDef {
   min?: number;
   max?: number;
   step?: number;
-  defaultValue?: string | number | boolean | { value: number; type: string };
+  defaultValue?: string | number | boolean | { value: number; unit: string };
   units?: string[];
 }
 
@@ -42,7 +42,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'depth',
       label: 'Depth',
       type: 'unit-value',
-      defaultValue: { value: 200, type: 'px' },
+      defaultValue: { value: 200, unit: 'px' },
       step: 10,
     },
     {
@@ -97,7 +97,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'depth',
       label: 'Depth',
       type: 'unit-value',
-      defaultValue: { value: 300, type: 'px' },
+      defaultValue: { value: 300, unit: 'px' },
       step: 10,
     },
     {
@@ -142,7 +142,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 120, type: 'percentage' },
+      defaultValue: { value: 120, unit: 'percentage' },
       step: 10,
     },
   ],
@@ -221,7 +221,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 100, type: 'percentage' },
+      defaultValue: { value: 100, unit: 'percentage' },
       step: 10,
     },
   ],
@@ -313,7 +313,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'depth',
       label: 'Depth',
       type: 'unit-value',
-      defaultValue: { value: 200, type: 'px' },
+      defaultValue: { value: 200, unit: 'px' },
       step: 10,
     },
     {
@@ -377,7 +377,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 25, type: 'px' },
+      defaultValue: { value: 25, unit: 'px' },
       step: 5,
     },
     {
@@ -713,7 +713,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 400, type: 'px' },
+      defaultValue: { value: 400, unit: 'px' },
       step: 10,
     },
   ],
@@ -729,7 +729,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 400, type: 'px' },
+      defaultValue: { value: 400, unit: 'px' },
       step: 10,
     },
     { name: 'startFromOffScreen', label: 'Start Off-Screen', type: 'boolean', defaultValue: true },
@@ -939,7 +939,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 200, type: 'px' },
+      defaultValue: { value: 200, unit: 'px' },
       step: 10,
     },
     {
@@ -959,7 +959,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 200, type: 'px' },
+      defaultValue: { value: 200, unit: 'px' },
       step: 10,
     },
     {
@@ -978,7 +978,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 80, type: 'px' },
+      defaultValue: { value: 80, unit: 'px' },
       step: 10,
     },
     {
@@ -1016,7 +1016,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 80, type: 'px' },
+      defaultValue: { value: 80, unit: 'px' },
       step: 10,
     },
     { name: 'scale', label: 'Scale', type: 'number', min: 0, max: 5, step: 0.1, defaultValue: 1.4 },
@@ -1028,7 +1028,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 200, type: 'px' },
+      defaultValue: { value: 200, unit: 'px' },
       step: 10,
     },
     {
@@ -1097,7 +1097,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 200, type: 'px' },
+      defaultValue: { value: 200, unit: 'px' },
       step: 10,
     },
     {
@@ -1126,7 +1126,7 @@ const PRESET_OPTIONS: Record<string, OptionDef[]> = {
       name: 'distance',
       label: 'Distance',
       type: 'unit-value',
-      defaultValue: { value: 200, type: 'px' },
+      defaultValue: { value: 200, unit: 'px' },
       step: 10,
     },
     { name: 'axis', label: 'Axis', type: 'select', options: MOUSE_AXIS, defaultValue: 'both' },
@@ -1309,11 +1309,11 @@ export class PgNamedEffectPicker extends BaseComponent {
 
     if (def.type === 'unit-value') {
       const current = this._currentOptions[def.name] as
-        | { value?: number; type?: string }
+        | { value?: number; unit?: string }
         | undefined;
-      const defaults = def.defaultValue as { value: number; type: string } | undefined;
+      const defaults = def.defaultValue as { value: number; unit: string } | undefined;
       const numVal = current?.value ?? defaults?.value ?? 0;
-      const unitVal = current?.type ?? defaults?.type ?? 'px';
+      const unitVal = current?.unit ?? defaults?.unit ?? 'px';
       const units = def.units ?? UNIT_OPTIONS;
       const unitOpts = units
         .map(
@@ -1421,16 +1421,16 @@ export class PgNamedEffectPicker extends BaseComponent {
       const handler = () => {
         const presetDefs = PRESET_OPTIONS[this._currentPreset];
         const def = presetDefs?.find((d) => d.name === optName);
-        const defaults = def?.defaultValue as { value: number; type: string } | undefined;
-        const current = (this._currentOptions[optName] as { value?: number; type?: string }) ?? {};
+        const defaults = def?.defaultValue as { value: number; unit: string } | undefined;
+        const current = (this._currentOptions[optName] as { value?: number; unit?: string }) ?? {};
         const merged = {
           value: current.value ?? defaults?.value ?? 0,
-          type: current.type ?? defaults?.type ?? 'px',
+          unit: current.unit ?? defaults?.unit ?? 'px',
         };
         if (part === 'value') {
           merged.value = parseFloat((el as HTMLInputElement).value) || 0;
         } else {
-          merged.type = (el as HTMLSelectElement).value;
+          merged.unit = (el as HTMLSelectElement).value;
         }
         this._currentOptions[optName] = merged;
         this._emitChange();
