@@ -98,7 +98,7 @@ The `direction` parameter accepts different values depending on the preset:
 
 ### Using Units
 
-Interact supports both an object (e.g., `distance: { value: 120, unit: 'px' }`, typed as `UnitLengthPercentage`) and flat string values (e.g., `distance: '120px'`).
+Interact supports both a CSSUnitValue-style object (e.g., `distance: { value: 120, unit: 'px' }`, mapped to the internal type `UnitLengthPercentage`) and flat string values (e.g., `distance: '120px'`).
 
 Prefer the object notation. Be consistent within a configuration — use one format, not both.
 
