@@ -39,19 +39,19 @@ isProject: false
 
 ## Context
 
-[`packages/motion-presets/`](packages/motion-presets/) has no `README.md`. Both research specs ([readme-spec-1.md](readme-spec-1.md), [readme-spec-2.md](readme-spec-2.md)) call for creating one, positioning it as a **catalog gateway** -- the entry point for discovering and using ready-made animation presets.
+`[packages/motion-presets/](packages/motion-presets/)` has no `README.md`. Both research specs ([readme-spec-1.md](readme-spec-1.md), [readme-spec-2.md](readme-spec-2.md)) call for creating one, positioning it as a **catalog gateway** -- the entry point for discovering and using ready-made animation presets.
 
 The package exports **75 presets** across 5 categories:
 
 - **Entrance** (19): FadeIn, ArcIn, BlurIn, BounceIn, CurveIn, DropIn, ExpandIn, FlipIn, FloatIn, FoldIn, GlideIn, RevealIn, ShapeIn, ShuttersIn, SlideIn, SpinIn, TiltIn, TurnIn, WinkIn
 - **Scroll** (19): ArcScroll, BlurScroll, FadeScroll, FlipScroll, GrowScroll, MoveScroll, PanScroll, ParallaxScroll, RevealScroll, ShapeScroll, ShrinkScroll, ShuttersScroll, SkewPanScroll, SlideScroll, Spin3dScroll, SpinScroll, StretchScroll, TiltScroll, TurnScroll
-- **Ongoing** (14): Bounce, Breathe, Cross, DVD, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, Wiggle _(DVD is fully implemented and documented but accidentally missing from the barrel — see `fix-dvd-export` todo)_
-- **Mouse** (11): AiryMouse, BlobMouse, BlurMouse, BounceMouse, ScaleMouse, SkewMouse, SpinMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, TrackMouse _(`CustomMouse` is excluded — it is internal infrastructure used to implement `customEffect` for the `pointerMove` trigger, not a user-facing preset)_
+- **Ongoing** (14): Bounce, Breathe, Cross, DVD, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, Wiggle *(DVD is fully implemented and documented but accidentally missing from the barrel — see `fix-dvd-export` todo)*
+- **Mouse** (11): AiryMouse, BlobMouse, BlurMouse, BounceMouse, ScaleMouse, SkewMouse, SpinMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, TrackMouse *(`CustomMouse` is excluded — it is internal infrastructure used to implement `customEffect` for the `pointerMove` trigger, not a user-facing preset)*
 - **Background Scroll** (12): BgCloseUp, BgFade, BgFadeBack, BgFake3D, BgPan, BgParallax, BgPullBack, BgReveal, BgRotate, BgSkew, BgZoom, ImageParallax
 
-Key architectural note: `registerEffects()` lives in **`@wix/motion`**, not this package. This package exports preset modules that you pass _into_ `registerEffects()`.
+Key architectural note: `registerEffects()` lives in `**@wix/motion`**, not this package. This package exports preset modules that you pass *into* `registerEffects()`.
 
-> **SSOT:** This README and the rules files will eventually be migrated to generated templates under `context/` in Phase 3 of the [SSOT restructure plan](.cursor/plans/context_ssot_restructure_c6889ec0.plan.md). Write it as a static file for now.
+> **SSOT:** This README and the rules files will eventually be migrated to generated templates under `context/` in Phase 3 of the [SSOT restructure plan](https://github.com/wix/interact/pull/210/changes#diff-a68c779a9afdb459ce4130f6f8d9fa811df80d04b64ef7c7a6232051048a6ecb). Write it as a static file for now.
 
 ## Proposed Section Structure
 
@@ -112,14 +112,14 @@ Source strategy (layered):
 
 - **Which presets exist**: barrel exports (`src/library/*/index.ts`) are ground truth — not the rules files.
 - **Param names, types, defaults**: TypeScript source files. When code and rules conflict on structured data, the code wins — unless the discrepancy looks like a code omission (e.g., DVD missing from barrel), in which case fix the code.
-- **Verbal descriptions, atmosphere tables, selection guidance**: [`presets-main.md`](packages/motion-presets/rules/presets/presets-main.md) and the category rule files. This prose has no equivalent in the code — use it as-is, and log any structural mismatches found for Phase 2 correction.
+- **Verbal descriptions, atmosphere tables, selection guidance**: `[presets-main.md](packages/motion-presets/rules/presets/presets-main.md)` and the category rule files. This prose has no equivalent in the code — use it as-is, and log any structural mismatches found for Phase 2 correction.
 
 ### 8. Choosing a Preset
 
 Brief guidance section:
 
 - "Choose by intent" table mapping intents (reveal, attention, parallax, pointer tracking, background media) to recommended categories and example presets
-- Link to the full "Selection by Atmosphere" guide in [`presets-main.md`](packages/motion-presets/rules/presets/presets-main.md)
+- Link to the full "Selection by Atmosphere" guide in `[presets-main.md](packages/motion-presets/rules/presets/presets-main.md)`
 
 ### 9. Parameter Conventions
 
@@ -142,13 +142,13 @@ Concise section noting:
 
 Match the pattern used in the other package READMEs: list rule files with one-line descriptions, then generation constraints.
 
-**Rules files** ship with the package under [`rules/presets/`](packages/motion-presets/rules/presets/):
+**Rules files** ship with the package under `[rules/presets/](packages/motion-presets/rules/presets/)`:
 
-- [`presets-main.md`](packages/motion-presets/rules/presets/presets-main.md) — overview, parameter standards, atmosphere guide, accessibility
-- [`entrance-presets.md`](packages/motion-presets/rules/presets/entrance-presets.md) — entrance preset parameters
-- [`scroll-presets.md`](packages/motion-presets/rules/presets/scroll-presets.md) — scroll preset parameters
-- [`ongoing-presets.md`](packages/motion-presets/rules/presets/ongoing-presets.md) — ongoing preset parameters
-- [`mouse-presets.md`](packages/motion-presets/rules/presets/mouse-presets.md) — mouse preset parameters
+- `[presets-main.md](packages/motion-presets/rules/presets/presets-main.md)` — overview, parameter standards, atmosphere guide, accessibility
+- `[entrance-presets.md](packages/motion-presets/rules/presets/entrance-presets.md)` — entrance preset parameters
+- `[scroll-presets.md](packages/motion-presets/rules/presets/scroll-presets.md)` — scroll preset parameters
+- `[ongoing-presets.md](packages/motion-presets/rules/presets/ongoing-presets.md)` — ongoing preset parameters
+- `[mouse-presets.md](packages/motion-presets/rules/presets/mouse-presets.md)` — mouse preset parameters
 
 **Generation constraints** for agents:
 
@@ -163,7 +163,7 @@ Match the pattern used in the other package READMEs: list rule files with one-li
 
 ### 13. License
 
-MIT (from [`package.json`](packages/motion-presets/package.json)).
+MIT (from `[package.json](packages/motion-presets/package.json)`).
 
 ## Style Guidelines (from Specs)
 
@@ -175,7 +175,7 @@ MIT (from [`package.json`](packages/motion-presets/package.json)).
 
 ## Discrepancy Notes
 
-**Docs README:** The existing [`docs/presets/README.md`](packages/motion-presets/docs/presets/README.md) claims "82+ presets", "16 ongoing", and "12 mouse" — these counts are inaccurate. The new README uses verified counts (75 total: 19 entrance + 19 scroll + 14 ongoing + 11 mouse + 12 background-scroll). Fixing the docs README is out of scope for this task but should be addressed in Phase 2.
+**Docs README:** The existing `[docs/presets/README.md](packages/motion-presets/docs/presets/README.md)` claims "82+ presets", "16 ongoing", and "12 mouse" — these counts are inaccurate. The new README uses verified counts (75 total: 19 entrance + 19 scroll + 14 ongoing + 11 mouse + 12 background-scroll). Fixing the docs README is out of scope for this task but should be addressed in Phase 2.
 
 **Rules files:** `presets-main.md` lists mouse as 9 presets and omits BounceMouse and SpinMouse — Phase 2 will add these entries to `mouse-presets.md`.
 
@@ -209,7 +209,7 @@ The script currently only reads `packages/interact/rules/`. It needs to:
 
 1. Also read `packages/motion-presets/rules/presets/` and load those 5 files.
 2. Route `presets-main.md` into the `## Docs` section (below `full-lean.md` and `integration.md`), using a display title like `"Presets Reference"`.
-3. Route the 4 category files (`entrance-presets.md`, `scroll-presets.md`, `ongoing-presets.md`, `mouse-presets.md`) into a new **`## Presets`** section inserted between `## Docs` and `## Optional`.
+3. Route the 4 category files (`entrance-presets.md`, `scroll-presets.md`, `ongoing-presets.md`, `mouse-presets.md`) into a new `**## Presets`** section inserted between `## Docs` and `## Optional`.
 4. Include all 5 preset files in the `llms-full.txt` concatenation (after the interact files).
 
 ### Resulting `llms.txt` structure
