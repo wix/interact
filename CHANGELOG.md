@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
-### [2.3.1] - 2026-05-28
+### [2.3.1] - 2026-05-29
 
 #### Changed
 
@@ -161,7 +161,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion
 
-### [2.1.7] - 2026-05-28
+### [2.1.7] - 2026-05-29
 
 #### Added
 
@@ -239,7 +239,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion-presets
 
-### [1.0.3] - 2026-05-28
+### [1.0.3] - 2026-05-29
 
 #### Changed
 
