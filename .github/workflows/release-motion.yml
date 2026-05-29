@@ -115,8 +115,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git add .
           git commit -m "chore: bump @wix/motion to ${{ steps.get_version.outputs.version }}"
-          git tag "motion@${{ steps.get_version.outputs.version }}"
-          git push --follow-tags origin ${{ steps.release_branch.outputs.name }}
+          TAG="motion@${{ steps.get_version.outputs.version }}"
+          git tag -a "$TAG" -m "chore: release @wix/motion ${{ steps.get_version.outputs.version }}"
+          git push origin ${{ steps.release_branch.outputs.name }}
+          git push origin "$TAG"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

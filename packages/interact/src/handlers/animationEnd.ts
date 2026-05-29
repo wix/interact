@@ -1,5 +1,5 @@
 import type { AnimationGroup } from '@wix/motion';
-import { getAnimation } from '@wix/motion';
+import { getAnimation, getElementCSSAnimation } from '@wix/motion';
 import type { AnimationEndParams, TimeEffect, HandlerObjectMap, InteractOptions } from '../types';
 import {
   effectToAnimationOptions,
@@ -13,8 +13,13 @@ function addAnimationEndHandler(
   source: HTMLElement,
   target: HTMLElement,
   effect: TimeEffect,
-  __: AnimationEndParams,
-  { reducedMotion, selectorCondition, animation: preCreatedAnimation }: InteractOptions,
+  params: AnimationEndParams,
+  {
+    reducedMotion,
+    selectorCondition,
+    animation: preCreatedAnimation,
+    sourceAnimationOptions,
+  }: InteractOptions,
 ): void {
   const animation = (preCreatedAnimation ||
     getAnimation(
@@ -29,10 +34,34 @@ function addAnimationEndHandler(
     return;
   }
 
-  const handler = () => {
+  const { effectId } = params;
+
+  const handler = (event: Event) => {
     if (selectorCondition && !target.matches(selectorCondition)) return;
+
+    const animName = (event as AnimationEvent).animationName;
+    const eventEffectId = (event as CustomEvent).detail?.effectId;
+
+    const sourceAnimationGroup = sourceAnimationOptions
+      ? getElementCSSAnimation(source, sourceAnimationOptions)
+      : null;
+
+    if (sourceAnimationGroup) {
+      if (sourceAnimationGroup.playState === 'running') return;
+      if (animName && !sourceAnimationGroup.hasAnimationName(animName)) {
+        return;
+      } else if (
+        eventEffectId &&
+        eventEffectId !== effectId &&
+        !sourceAnimationGroup.hasAnimationId(eventEffectId)
+      ) {
+        return;
+      }
+    }
+
     animation.play();
   };
+
   const cleanup = () => {
     animation.cancel();
     source.removeEventListener('animationend', handler);

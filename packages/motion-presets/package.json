@@ -1,6 +1,6 @@
 {
   "name": "@wix/motion-presets",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Ready-made animation presets for @wix/motion effects — entrance, scroll, pointer, loop, and micro-interactions.",
   "license": "MIT",
   "main": "dist/cjs/motion-presets.js",
@@ -57,7 +57,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@wix/motion": "^2.1.6"
+    "@wix/motion": "^2.1.7"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.14",

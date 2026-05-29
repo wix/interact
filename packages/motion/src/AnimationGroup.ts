@@ -106,7 +106,8 @@ export class AnimationGroup {
         const target = (a.effect as KeyframeEffect)?.target;
 
         if (target) {
-          const endEvent = new Event('animationend');
+          const effectId = this.options?.effectId || a.id;
+          const endEvent = new CustomEvent('animationend', { detail: { effectId } });
           target.dispatchEvent(endEvent);
         }
       }
@@ -143,7 +144,17 @@ export class AnimationGroup {
   }
 
   get playState() {
-    return this.animations[0]?.playState;
+    return this.animations.some((a) => a.playState === 'running')
+      ? 'running'
+      : this.animations[0]?.playState;
+  }
+
+  hasAnimationName(name: string): boolean {
+    return this.animations.some((a) => (a as CSSAnimation).animationName === name);
+  }
+
+  hasAnimationId(id: string): boolean {
+    return this.animations.some((a) => a.id === id);
   }
 
   getTimingOptions() {

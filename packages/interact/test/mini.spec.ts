@@ -3313,6 +3313,343 @@ describe('interact (mini)', () => {
 
         expect(addEventListenerSpy).not.toHaveBeenCalledWith('animationend', expect.any(Function));
       });
+
+      // ── effectId filtering tests ──────────────────────────────────────────
+
+      // jsdom does not expose AnimationEvent; create one manually.
+      function createCSSAnimationEndEvent(animationName: string): Event {
+        const event = new Event('animationend');
+        Object.defineProperty(event, 'animationName', { value: animationName });
+        return event;
+      }
+
+      // Shared config for filtering tests: source effect is a named preset (ArcIn)
+      // with two CSS animation names: 'motion-fadeIn' and 'motion-arcIn'.
+      function buildAnimEndConfig(): InteractConfig {
+        return {
+          interactions: [
+            {
+              trigger: 'animationEnd',
+              key: 'anim-end-el',
+              params: { effectId: 'src-effect' },
+              effects: [{ key: 'anim-end-el', effectId: 'tgt-effect' }],
+            },
+          ],
+          effects: {
+            'src-effect': {
+              namedEffect: { type: 'ArcIn' as any } as NamedEffect,
+              duration: 1000,
+            },
+            'tgt-effect': {
+              namedEffect: { type: 'FadeIn' as any } as NamedEffect,
+              duration: 500,
+            },
+          },
+        };
+      }
+
+      afterEach(async () => {
+        // Restore getElementCSSAnimation to the default (null) so no state leaks
+        // between tests in this block. vi.clearAllMocks() only clears call history,
+        // not mockReturnValue implementations.
+        const { getElementCSSAnimation } = await import('@wix/motion');
+        (getElementCSSAnimation as any).mockReturnValue(null);
+      });
+
+      it('should NOT trigger play() when animationend fires for an animation not in the source group', async () => {
+        const { getAnimation, getElementCSSAnimation } = await import('@wix/motion');
+
+        const playMock = vi.fn();
+        (getAnimation as any).mockReturnValueOnce({
+          play: playMock,
+          cancel: vi.fn(),
+          isCSS: false,
+          playState: 'idle',
+          ready: Promise.resolve(),
+        });
+
+        // Source group contains 'motion-arcIn'; listener should ignore others.
+        (getElementCSSAnimation as any).mockReturnValue({
+          playState: 'finished',
+          hasAnimationName: (name: string) => name === 'motion-arcIn',
+          hasAnimationId: () => false,
+        });
+
+        Interact.create(buildAnimEndConfig());
+        const el = document.createElement('div');
+        add(el, 'anim-end-el');
+
+        el.dispatchEvent(createCSSAnimationEndEvent('unrelated-animation'));
+
+        expect(playMock).not.toHaveBeenCalled();
+      });
+
+      it('should trigger play() when the matching CSS animation in the source group finishes', async () => {
+        const { getAnimation, getElementCSSAnimation } = await import('@wix/motion');
+
+        const playMock = vi.fn();
+        (getAnimation as any).mockReturnValueOnce({
+          play: playMock,
+          cancel: vi.fn(),
+          isCSS: false,
+          playState: 'idle',
+          ready: Promise.resolve(),
+        });
+
+        (getElementCSSAnimation as any).mockReturnValue({
+          playState: 'finished',
+          hasAnimationName: (name: string) => name === 'motion-arcIn',
+          hasAnimationId: () => false,
+        });
+
+        Interact.create(buildAnimEndConfig());
+        const el = document.createElement('div');
+        add(el, 'anim-end-el');
+
+        el.dispatchEvent(createCSSAnimationEndEvent('motion-arcIn'));
+
+        expect(playMock).toHaveBeenCalledOnce();
+      });
+
+      it('should NOT trigger play() when first animation in a multi-animation group finishes but others are still running', async () => {
+        const { getAnimation, getElementCSSAnimation } = await import('@wix/motion');
+
+        const playMock = vi.fn();
+        (getAnimation as any).mockReturnValueOnce({
+          play: playMock,
+          cancel: vi.fn(),
+          isCSS: false,
+          playState: 'idle',
+          ready: Promise.resolve(),
+        });
+
+        const fadeAnim = { animationName: 'motion-fadeIn', playState: 'finished' };
+        const arcAnim = { animationName: 'motion-arcIn', playState: 'running' };
+        const anims3 = [fadeAnim, arcAnim];
+        (getElementCSSAnimation as any).mockReturnValue({
+          get playState() {
+            return anims3.some((a) => a.playState === 'running') ? 'running' : 'finished';
+          },
+          hasAnimationName: (name: string) => anims3.some((a) => a.animationName === name),
+          hasAnimationId: () => false,
+        });
+
+        Interact.create(buildAnimEndConfig());
+        const el = document.createElement('div');
+        add(el, 'anim-end-el');
+
+        // First animation in the ArcIn group ends – should NOT trigger yet.
+        el.dispatchEvent(createCSSAnimationEndEvent('motion-fadeIn'));
+
+        expect(playMock).not.toHaveBeenCalled();
+      });
+
+      it('should trigger play() only once when the last animation in the group finishes', async () => {
+        const { getAnimation, getElementCSSAnimation } = await import('@wix/motion');
+
+        const playMock = vi.fn();
+        (getAnimation as any).mockReturnValueOnce({
+          play: playMock,
+          cancel: vi.fn(),
+          isCSS: false,
+          playState: 'idle',
+          ready: Promise.resolve(),
+        });
+
+        const fadeAnim = { animationName: 'motion-fadeIn', playState: 'finished' };
+        const arcAnim = { animationName: 'motion-arcIn', playState: 'running' };
+        const anims4 = [fadeAnim, arcAnim];
+        (getElementCSSAnimation as any).mockReturnValue({
+          get playState() {
+            return anims4.some((a) => a.playState === 'running') ? 'running' : 'finished';
+          },
+          hasAnimationName: (name: string) => anims4.some((a) => a.animationName === name),
+          hasAnimationId: () => false,
+        });
+
+        Interact.create(buildAnimEndConfig());
+        const el = document.createElement('div');
+        add(el, 'anim-end-el');
+
+        // First animation finishes – still waiting for the second.
+        el.dispatchEvent(createCSSAnimationEndEvent('motion-fadeIn'));
+        expect(playMock).not.toHaveBeenCalled();
+
+        // Second animation finishes – now the whole group is done.
+        arcAnim.playState = 'finished';
+        el.dispatchEvent(createCSSAnimationEndEvent('motion-arcIn'));
+        expect(playMock).toHaveBeenCalledOnce();
+      });
+
+      it('should trigger play() on a synthetic WAAPI animationend (no animationName) when all source animations are done', async () => {
+        const { getAnimation, getElementCSSAnimation } = await import('@wix/motion');
+
+        const playMock = vi.fn();
+        (getAnimation as any).mockReturnValueOnce({
+          play: playMock,
+          cancel: vi.fn(),
+          isCSS: false,
+          playState: 'idle',
+          ready: Promise.resolve(),
+        });
+
+        // WAAPI animations have no animationName; all in 'finished' state.
+        (getElementCSSAnimation as any).mockReturnValue({
+          playState: 'finished',
+          hasAnimationName: () => false,
+          hasAnimationId: () => false,
+        });
+
+        Interact.create(buildAnimEndConfig());
+        const el = document.createElement('div');
+        add(el, 'anim-end-el');
+
+        // Synthetic CustomEvent dispatched by AnimationGroup.onFinish for WAAPI animations.
+        el.dispatchEvent(new CustomEvent('animationend', { detail: { effectId: 'src-effect' } }));
+
+        expect(playMock).toHaveBeenCalledOnce();
+      });
+
+      it('should NOT trigger play() on a synthetic WAAPI event when source animations are still running', async () => {
+        const { getAnimation, getElementCSSAnimation } = await import('@wix/motion');
+
+        const playMock = vi.fn();
+        (getAnimation as any).mockReturnValueOnce({
+          play: playMock,
+          cancel: vi.fn(),
+          isCSS: false,
+          playState: 'idle',
+          ready: Promise.resolve(),
+        });
+
+        // One WAAPI animation still running.
+        (getElementCSSAnimation as any).mockReturnValue({
+          playState: 'running',
+          hasAnimationName: () => false,
+          hasAnimationId: () => false,
+        });
+
+        Interact.create(buildAnimEndConfig());
+        const el = document.createElement('div');
+        add(el, 'anim-end-el');
+
+        el.dispatchEvent(new CustomEvent('animationend', { detail: { effectId: 'src-effect' } }));
+
+        expect(playMock).not.toHaveBeenCalled();
+      });
+
+      it('should trigger unconditionally when source animations cannot be resolved', async () => {
+        const { getAnimation, getElementCSSAnimation } = await import('@wix/motion');
+
+        const playMock = vi.fn();
+        (getAnimation as any).mockReturnValueOnce({
+          play: playMock,
+          cancel: vi.fn(),
+          isCSS: false,
+          playState: 'idle',
+          ready: Promise.resolve(),
+        });
+
+        // Source group not resolvable (e.g. CSS keyframeEffect not yet running).
+        (getElementCSSAnimation as any).mockReturnValue(null);
+
+        Interact.create(buildAnimEndConfig());
+        const el = document.createElement('div');
+        add(el, 'anim-end-el');
+
+        // When source group cannot be resolved we do not block — any animationend triggers.
+        el.dispatchEvent(createCSSAnimationEndEvent('unrelated'));
+        expect(playMock).toHaveBeenCalledOnce();
+      });
+
+      it('should call getElementCSSAnimation with the source animation options from the data cache', async () => {
+        const { getAnimation, getElementCSSAnimation } = await import('@wix/motion');
+
+        const playMock = vi.fn();
+        (getAnimation as any).mockReturnValueOnce({
+          play: playMock,
+          cancel: vi.fn(),
+          isCSS: false,
+          playState: 'idle',
+          ready: Promise.resolve(),
+        });
+        (getElementCSSAnimation as any).mockReturnValue(null);
+
+        Interact.create(buildAnimEndConfig());
+        const el = document.createElement('div');
+        add(el, 'anim-end-el');
+
+        // Trigger the handler so getElementCSSAnimation is called.
+        el.dispatchEvent(createCSSAnimationEndEvent('anything'));
+
+        expect(getElementCSSAnimation).toHaveBeenCalledWith(
+          el,
+          expect.objectContaining({
+            namedEffect: expect.objectContaining({ type: 'ArcIn' }),
+            duration: 1000,
+          }),
+        );
+      });
+
+      it('should resolve sourceAnimationOptions from source element config when source and target differ', async () => {
+        const { getAnimation, getElementCSSAnimation } = await import('@wix/motion');
+
+        const playMock = vi.fn();
+        (getAnimation as any).mockReturnValueOnce({
+          play: playMock,
+          cancel: vi.fn(),
+          isCSS: false,
+          playState: 'idle',
+          ready: Promise.resolve(),
+        });
+        (getElementCSSAnimation as any).mockReturnValue(null);
+
+        // Source element is 'trigger-el'; target element is 'target-el'.
+        // The source effect is on 'trigger-el'; the target effect is on 'target-el'.
+        const config: InteractConfig = {
+          interactions: [
+            {
+              trigger: 'animationEnd',
+              key: 'trigger-el',
+              params: { effectId: 'src-fx' },
+              effects: [{ key: 'target-el', effectId: 'tgt-fx' }],
+            },
+          ],
+          effects: {
+            'src-fx': {
+              namedEffect: { type: 'FadeIn' as any } as NamedEffect,
+              duration: 800,
+            },
+            'tgt-fx': {
+              namedEffect: { type: 'BounceIn' as any } as NamedEffect,
+              duration: 400,
+            },
+          },
+        };
+
+        Interact.create(config);
+
+        const sourceEl = document.createElement('div');
+        const targetEl = document.createElement('div');
+
+        // Register target first so the controller cache entry exists when
+        // the source is added and tries to look up the target.
+        add(targetEl, 'target-el');
+        add(sourceEl, 'trigger-el');
+
+        // Fire an animationend on the source element.
+        sourceEl.dispatchEvent(createCSSAnimationEndEvent('any'));
+
+        // getElementCSSAnimation must be called with options derived from the
+        // SOURCE effect ('src-fx' / FadeIn), not the target effect.
+        expect(getElementCSSAnimation).toHaveBeenCalledWith(
+          sourceEl,
+          expect.objectContaining({
+            namedEffect: expect.objectContaining({ type: 'FadeIn' }),
+            duration: 800,
+          }),
+        );
+      });
     });
 
     describe('viewProgress handler', () => {
