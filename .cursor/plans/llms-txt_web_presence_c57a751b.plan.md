@@ -7,19 +7,19 @@ todos:
     status: completed
   - id: workflow
     content: Update `.github/workflows/interactdocs.yml` -- run generation script and copy outputs to `_site/`
-    status: pending
+    status: completed
   - id: npm-ship
     content: Add `llms.txt` to `packages/interact/package.json` files array, add `.gitignore` entries for generated files
-    status: pending
+    status: completed
   - id: canonical-url
     content: Add canonical URL HTML comment to top of `full-lean.md`
-    status: pending
+    status: completed
   - id: root-script
     content: Add `generate:llms` script to root `package.json`
-    status: pending
+    status: completed
   - id: verify
     content: Run generation script locally and verify both outputs are correct
-    status: pending
+    status: completed
 isProject: false
 ---
 

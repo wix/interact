@@ -1,3 +1,4 @@
+// NOT PRODUCTION READY — background-scroll presets are experimental and excluded from public documentation.
 export * as BgCloseUp from './BgCloseUp';
 export * as BgFade from './BgFade';
 export * as BgFadeBack from './BgFadeBack';

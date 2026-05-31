@@ -135,7 +135,7 @@ Parameters:
 - `distance`: UnitLengthPercentage — travel distance (default: `{ value: 400, unit: 'px' }`)
 
 ```typescript
-{ type: 'MoveScroll', angle: 90, distance: { value: 200, type: 'px' } }
+{ type: 'MoveScroll', angle: 90, distance: { value: 200, unit: 'px' } }
 ```
 
 ---
@@ -164,7 +164,6 @@ Visual: Element moves at a different speed than the scroll, creating a depth ill
 Parameters:
 
 - `parallaxFactor`: number — speed multiplier relative to scroll (default: `0.5`)
-- `range`: 'in' | 'out' | 'continuous'
 
 ```typescript
 { type: 'ParallaxScroll', parallaxFactor: 0.8 }

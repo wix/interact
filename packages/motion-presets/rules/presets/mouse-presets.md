@@ -1,6 +1,6 @@
 ---
 name: mouse-presets
-description: Full parameter reference for mouse motion presets. Read when configuring AiryMouse, BlobMouse, BlurMouse, ScaleMouse, SkewMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, or TrackMouse pointer-driven animations.
+description: Full parameter reference for mouse motion presets. Read when configuring AiryMouse, BlobMouse, BlurMouse, BounceMouse, ScaleMouse, SkewMouse, SpinMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, or TrackMouse pointer-driven animations.
 ---
 
 # Mouse Presets
@@ -15,8 +15,10 @@ Mouse presets drive element transforms in real-time based on pointer position. T
 - [AiryMouse](#airymouse)
 - [BlobMouse](#blobmouse)
 - [BlurMouse](#blurmouse)
+- [BounceMouse](#bouncemouse)
 - [ScaleMouse](#scalemouse)
 - [SkewMouse](#skewmouse)
+- [SpinMouse](#spinmouse)
 - [SwivelMouse](#swivelmouse)
 - [Tilt3DMouse](#tilt3dmouse)
 - [Track3DMouse](#track3dmouse)
@@ -51,7 +53,7 @@ Parameters:
 - `axis`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
 
 ```typescript
-{ type: 'AiryMouse', angle: 50, distance: { value: 150, type: 'px' } }
+{ type: 'AiryMouse', angle: 50, distance: { value: 150, unit: 'px' } }
 ```
 
 ---
@@ -67,7 +69,7 @@ Parameters:
 - `scale`: number — max scale at edges (default: `1.4`)
 
 ```typescript
-{ type: 'BlobMouse', scale: 2, distance: { value: 100, type: 'px' } }
+{ type: 'BlobMouse', scale: 2, distance: { value: 100, unit: 'px' } }
 ```
 
 ---
@@ -87,6 +89,22 @@ Parameters:
 
 ```typescript
 { type: 'BlurMouse', blur: 30, angle: 10 }
+```
+
+---
+
+### BounceMouse
+
+Visual: Element follows the cursor like TrackMouse but with elastic easing — the element snaps to the cursor position with a springy bounce rather than following linearly.
+
+Parameters:
+
+- `inverted`: boolean (default: `false`)
+- `distance`: UnitLengthPercentage — max translate distance (default: `{ value: 80, unit: 'px' }`)
+- `axis`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
+
+```typescript
+{ type: 'BounceMouse', distance: { value: 120, unit: 'px' } }
 ```
 
 ---
@@ -121,6 +139,21 @@ Parameters:
 
 ```typescript
 { type: 'SkewMouse', angle: 15, axis: 'horizontal' }
+```
+
+---
+
+### SpinMouse
+
+Visual: Element rotates in response to cursor direction — the rotation angle is derived from the angle between the element's center and the cursor position, so the element always "points toward" the cursor.
+
+Parameters:
+
+- `inverted`: boolean (default: `false`)
+- `axis`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
+
+```typescript
+{ type: 'SpinMouse', axis: 'horizontal' }
 ```
 
 ---
@@ -171,7 +204,7 @@ Parameters:
 - `perspective`: number — 3D perspective in px (default: `800`)
 
 ```typescript
-{ type: 'Track3DMouse', angle: 15, distance: { value: 100, type: 'px' } }
+{ type: 'Track3DMouse', angle: 15, distance: { value: 100, unit: 'px' } }
 ```
 
 ---
@@ -187,7 +220,7 @@ Parameters:
 - `axis`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
 
 ```typescript
-{ type: 'TrackMouse', distance: { value: 100, type: 'px' }, axis: 'vertical' }
+{ type: 'TrackMouse', distance: { value: 100, unit: 'px' }, axis: 'vertical' }
 ```
 
 ---
@@ -201,6 +234,7 @@ Tested values for different intensity levels. When a user asks for "soft", "subt
 | AiryMouse         | angle              | 10°         | 50°      | 85°           |
 | BlobMouse         | scale              | 1.2         | 1.6      | 2.4           |
 | BlurMouse         | angle, scale       | 0°, 1       | 25°, 0.7 | 65°, 0.25     |
+| BounceMouse       | distance           | 40px        | 80px     | 200px         |
 | ScaleMouse (down) | scale              | 0.85        | 0.5      | 0             |
 | ScaleMouse (up)   | scale              | 1.2         | 1.6      | 2.4           |
 | SkewMouse         | angle              | 10°         | 20°      | 45°           |

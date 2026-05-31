@@ -1,3 +1,5 @@
+> **NOT PRODUCTION READY** — Background-scroll presets are experimental and not available in production builds. Do not use them in production code or reference them in user-facing documentation.
+
 # Background Scroll Animations
 
 Specialized effects designed for background media elements and hero sections. Perfect for creating immersive backgrounds, parallax landscapes, and cinematic scroll experiences.
