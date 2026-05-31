@@ -10,15 +10,14 @@ Ready-made animation presets for @wix/motion — entrance, scroll, pointer, loop
 
 ## What's Included
 
-75 ready-made animation presets across 5 categories:
+62 ready-made animation presets across 4 categories:
 
-| Category                                | Count | Description                                     |
-| --------------------------------------- | ----- | ----------------------------------------------- |
-| [Entrance](#entrance)                   | 19    | Play once when an element enters the viewport   |
-| [Scroll](#scroll)                       | 19    | Progress tied to the element's scroll position  |
-| [Ongoing](#ongoing)                     | 14    | Continuous looping animations                   |
-| [Mouse](#mouse)                         | 11    | Real-time response to cursor position           |
-| [Background Scroll](#background-scroll) | 12    | Parallax and depth effects for background media |
+| Category              | Count | Description                                    |
+| --------------------- | ----- | ---------------------------------------------- |
+| [Entrance](#entrance) | 19    | Play once when an element enters the viewport  |
+| [Scroll](#scroll)     | 19    | Progress tied to the element's scroll position |
+| [Ongoing](#ongoing)   | 13    | Continuous looping animations                  |
+| [Mouse](#mouse)       | 11    | Real-time response to cursor position          |
 
 ## Install
 
@@ -148,7 +147,7 @@ Animations driven by an element's scroll progress through the viewport via ViewT
 
 Continuous looping animations that run indefinitely until stopped. Used with any trigger — typically `viewEnter` or `hover`.
 
-**Presets (14):** Bounce, Breathe, Cross, DVD, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, Wiggle
+**Presets (13):** Bounce, Breathe, Cross, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, Wiggle
 
 → [Ongoing Preset Reference](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/ongoing-presets.md)
 
@@ -162,21 +161,14 @@ Animations driven by pointer position in real time. Transform values respond to 
 
 → [Mouse Preset Reference](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/mouse-presets.md)
 
-### Background Scroll
-
-Parallax and depth effects optimized for full-bleed background images and videos. Progress is tied to scroll position.
-
-**Presets (12):** BgCloseUp, BgFade, BgFadeBack, BgFake3D, BgPan, BgParallax, BgPullBack, BgReveal, BgRotate, BgSkew, BgZoom, ImageParallax
-
 ## Choosing a Preset
 
-| Intent                       | Category          | Example Presets                        |
-| ---------------------------- | ----------------- | -------------------------------------- |
-| Reveal content on scroll     | Entrance          | FadeIn, SlideIn, FloatIn               |
-| Animate through the viewport | Scroll            | FadeScroll, ParallaxScroll, MoveScroll |
-| Draw continuous attention    | Ongoing           | Pulse, Breathe, Wiggle                 |
-| Respond to cursor position   | Mouse             | TrackMouse, Tilt3DMouse, BlurMouse     |
-| Depth on background media    | Background Scroll | BgParallax, ImageParallax, BgZoom      |
+| Intent                       | Category | Example Presets                        |
+| ---------------------------- | -------- | -------------------------------------- |
+| Reveal content on scroll     | Entrance | FadeIn, SlideIn, FloatIn               |
+| Animate through the viewport | Scroll   | FadeScroll, ParallaxScroll, MoveScroll |
+| Draw continuous attention    | Ongoing  | Pulse, Breathe, Wiggle                 |
+| Respond to cursor position   | Mouse    | TrackMouse, Tilt3DMouse, BlurMouse     |
 
 For selection by tone and atmosphere (playful, elegant, bold, soft, dramatic, modern, etc.), see the [Selection by Atmosphere](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/presets-main.md#selection-by-atmosphere) guide.
 
@@ -217,7 +209,7 @@ Adds an idle pause between loop cycles. Set on the `namedEffect`:
 namedEffect: { type: 'Bounce', iterationDelay: 1000 } // 1 s pause after each cycle
 ```
 
-Available on all ongoing presets except DVD.
+Available on all ongoing presets.
 
 For full parameter standards and the coordinate system reference, see [Parameter Standards](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/presets-main.md#parameter-standards) in `presets-main.md`.
 
@@ -229,11 +221,11 @@ See [Accessibility](https://github.com/wix/interact/blob/master/packages/motion-
 
 ### Preset risk levels
 
-| Risk       | Presets                                                                                                                    |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------- |
-| High       | SpinIn, Spin, BounceIn, Bounce, ArcIn, ArcScroll, FlipIn, FlipScroll, Spin3dScroll, Tilt3DMouse, Flash, DVD, Jello, Wiggle |
-| Medium     | TurnIn, ParallaxScroll (at high speed values)                                                                              |
-| Low / safe | FadeIn, FadeScroll, BlurIn, BlurScroll, Pulse, Breathe                                                                     |
+| Risk       | Presets                                                                                                               |
+| ---------- | --------------------------------------------------------------------------------------------------------------------- |
+| High       | SpinIn, Spin, BounceIn, Bounce, ArcIn, ArcScroll, FlipIn, FlipScroll, Spin3dScroll, Tilt3DMouse, Flash, Jello, Wiggle |
+| Medium     | TurnIn, ParallaxScroll (at high speed values)                                                                         |
+| Low / safe | FadeIn, FadeScroll, BlurIn, BlurScroll, Pulse, Breathe                                                                |
 
 ### Reduced-motion fallbacks (subset)
 

@@ -13,7 +13,7 @@ todos:
     status: completed
   - id: fix-dvd-export
     content: Fix missing barrel export — add DVD to packages/motion-presets/src/library/ongoing/index.ts (the preset is fully implemented and documented but was accidentally omitted from the barrel)
-    status: completed
+    status: cancelled
   - id: phase2-rules-audit
     content: '[Phase 2] After the README is complete, audit rules/presets/ files for any discrepancies surfaced during README preparation and update them to match verified ground truth'
     status: completed

@@ -71,7 +71,7 @@ These are set on the effect configuration level, not on the preset itself:
 
 **Ongoing-specific preset parameter:**
 
-- `iterationDelay`: Idle time in ms appended after each active iteration cycle. Available on all ongoing presets except DVD. This compresses the active animation keyframes into a fraction of the total iteration duration, creating a pause between repetitions. Set on the `namedEffect`, not on the animation options.
+- `iterationDelay`: Idle time in ms appended after each active iteration cycle. Available on all ongoing presets. This compresses the active animation keyframes into a fraction of the total iteration duration, creating a pause between repetitions. Set on the `namedEffect`, not on the animation options.
 
 **Scroll-specific animation options:**
 
@@ -141,9 +141,9 @@ ArcScroll, BlurScroll, FadeScroll, FlipScroll, GrowScroll, MoveScroll, PanScroll
 
 → [Full scroll preset reference](./scroll-presets.md)
 
-### Ongoing (14 presets)
+### Ongoing (13 presets)
 
-Bounce, Breathe, Cross, DVD, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, Wiggle
+Bounce, Breathe, Cross, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, Wiggle
 
 → [Full ongoing preset reference](./ongoing-presets.md)
 
@@ -165,7 +165,6 @@ Keywords: playful, fun, quirky, whimsical, lighthearted, bouncy, cheerful, cute,
 | Wiggle | loop     | Wiggle      |
 | Jello  | loop     | Jello       |
 | Poke   | loop     | Poke        |
-| DVD    | loop     | DVD         |
 | Cross  | loop     | Cross       |
 | Spin   | entrance | SpinIn      |
 | Spin   | scroll   | SpinScroll  |
@@ -366,7 +365,7 @@ If the host handles accessibility globally (e.g., disabling all animations on `(
 - Spinning: SpinIn, Spin, SpinScroll, Spin3dScroll
 - Bouncing: BounceIn, Bounce
 - 3D rotations: ArcIn, FlipIn, ArcScroll, FlipScroll, Tilt3DMouse
-- Continuous motion: Flash, DVD, Jello, Wiggle
+- Continuous motion: Flash, Jello, Wiggle
 
 **Medium risk** (strong motion, may affect some users):
 

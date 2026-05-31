@@ -1,7 +1,6 @@
 export * as Bounce from './Bounce';
 export * as Breathe from './Breathe';
 export * as Cross from './Cross';
-export * as DVD from './DVD';
 export * as Flash from './Flash';
 export * as Flip from './Flip';
 export * as Fold from './Fold';

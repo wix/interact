@@ -28,12 +28,6 @@ Interactive pointer-driven effects.
 
 **Featured Presets**: [TrackMouse](mouse/track-mouse.md) • [Tilt3DMouse](mouse/tilt-3d-mouse.md) • [ScaleMouse](mouse/scale-mouse.md) • [BlurMouse](mouse/blur-mouse.md)
 
-### 🖼️ [Background Scroll Animations](background-scroll/) (12 presets)
-
-Specialized effects for background media elements.
-
-**Featured Presets**: [BgParallax](background-scroll/bg-parallax.md) • [BgZoom](background-scroll/bg-zoom.md) • [BgFade](background-scroll/bg-fade.md) • [BgFake3D](background-scroll/bg-fake-3d.md)
-
 ## 🔍 Quick Reference
 
 ### By Complexity

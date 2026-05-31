@@ -1,6 +1,6 @@
 ---
 name: ongoing-presets
-description: Full parameter reference for ongoing motion presets. Read when configuring Bounce, Breathe, Cross, DVD, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, or Wiggle continuous loop animations.
+description: Full parameter reference for ongoing motion presets. Read when configuring Bounce, Breathe, Cross, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, or Wiggle continuous loop animations.
 ---
 
 # Ongoing Presets
@@ -12,7 +12,6 @@ Ongoing presets run as continuous, looping animations. They repeat indefinitely 
 - [Bounce](#bounce)
 - [Breathe](#breathe)
 - [Cross](#cross)
-- [DVD](#dvd)
 - [Flash](#flash)
 - [Flip](#flip)
 - [Fold](#fold)
@@ -70,20 +69,6 @@ Parameters:
 
 ```typescript
 { type: 'Cross', direction: 'top-left' }
-```
-
----
-
-### DVD
-
-Visual: Element bounces diagonally off the viewport edges like a DVD screensaver logo. No configurable parameters — uses viewport dimensions to calculate bounce paths.
-
-Parameters: None.
-
-```typescript
-{
-  type: 'DVD';
-}
 ```
 
 ---

@@ -1,3 +1,4 @@
+// NOT PRODUCTION READY — this preset is experimental and excluded from public documentation and exports.
 import type { TimeAnimationOptions, DomApi } from '../../types';
 import { getElementOffset } from '../../utils';
 
