@@ -2,7 +2,7 @@
 
 Time-based looping animations designed to create continuous movement and draw user attention. Perfect for call-to-action emphasis, loading states, and ambient motion.
 
-## Complete Preset List (16 presets)
+## Complete Preset List (15 presets)
 
 ### 💓 Rhythmic Scaling
 
@@ -41,13 +41,6 @@ Time-based looping animations designed to create continuous movement and draw us
 | Animation             | Complexity | Description             |
 | --------------------- | ---------- | ----------------------- |
 | **[Flash](flash.md)** | Simple     | Opacity blinking effect |
-
-### 🎪 Special Effects (Experimental)
-
-| Animation             | Complexity | Description               | Status      |
-| --------------------- | ---------- | ------------------------- | ----------- |
-| **[Blink](blink.md)** | Complex    | Random blinking teleport  | ⚠️ Disabled |
-| **[DVD](dvd.md)**     | Medium     | Bouncing corner-to-corner | ⚠️ Disabled |
 
 _Note: Experimental animations are currently disabled in production but available in development environments._
 
@@ -89,10 +82,6 @@ _Note: Experimental animations are currently disabled in production but availabl
 #### Fixed Configuration
 
 - Breathe, Flash, Cross
-
-#### Experimental
-
-- Blink, DVD (disabled in production)
 
 ### By Performance
 

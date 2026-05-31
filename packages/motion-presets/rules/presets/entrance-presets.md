@@ -195,7 +195,7 @@ Parameters:
 - `distance`: UnitLengthPercentage | 'top' | 'right' | 'bottom' | 'left' — travel distance or edge keyword (default: `{ value: 100, unit: 'percentage' }`)
 
 ```typescript
-{ type: 'GlideIn', direction: 270, distance: { value: 200, type: 'px' } }
+{ type: 'GlideIn', direction: 270, distance: { value: 200, unit: 'px' } }
 ```
 
 ---

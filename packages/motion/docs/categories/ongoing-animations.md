@@ -54,8 +54,6 @@ Opacity, visibility, and special visual transitions.
 | **Fold**    | Rotation | Complex    | 4-way      | 3D folding animation          |
 | **Jello**   | Dynamic  | Medium     | -          | Gelatinous wobble effect      |
 | **Cross**   | Movement | Complex    | 8-way      | Multi-directional crossing    |
-| **Blink**   | Visual   | Complex    | -          | Random blinking teleport\*    |
-| **DVD**     | Movement | Medium     | -          | Bouncing corner-to-corner\*   |
 
 \*Currently disabled in production
 
@@ -273,21 +271,6 @@ Many animations support directional parameters:
 }
 // Quick opacity flash effect
 ```
-
-#### Blink\* (Experimental)
-
-**Best for**: Glitch effects, teleportation, magical elements
-
-```typescript
-{
-  type: 'Blink',
-  scale: 0.5,                             // Size variation
-  distance: { value: 100, unit: 'px' }    // Jump distance
-}
-// Random position jumping with opacity flashes
-```
-
-\*Note: Currently disabled in production
 
 ## Timing and Control
 

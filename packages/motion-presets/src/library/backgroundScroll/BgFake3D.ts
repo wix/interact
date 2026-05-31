@@ -1,3 +1,4 @@
+// NOT PRODUCTION READY — background-scroll presets are experimental and excluded from public documentation.
 import type {
   BgFake3D,
   RangeOffset,
