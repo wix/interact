@@ -42,12 +42,6 @@ Time-based looping animations designed to create continuous movement and draw us
 | --------------------- | ---------- | ----------------------- |
 | **[Flash](flash.md)** | Simple     | Opacity blinking effect |
 
-### 🎪 Special Effects (Experimental)
-
-| Animation             | Complexity | Description              | Status      |
-| --------------------- | ---------- | ------------------------ | ----------- |
-| **[Blink](blink.md)** | Complex    | Random blinking teleport | ⚠️ Disabled |
-
 _Note: Experimental animations are currently disabled in production but available in development environments._
 
 ## Quick Reference
@@ -88,10 +82,6 @@ _Note: Experimental animations are currently disabled in production but availabl
 #### Fixed Configuration
 
 - Breathe, Flash, Cross
-
-#### Experimental
-
-- Blink (disabled in production)
 
 ### By Performance
 
