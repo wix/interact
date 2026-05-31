@@ -10,6 +10,7 @@ let cmEditor = null;
 let cmWrapper = null;
 let originalSource = '';
 let htmlSource = '';
+let htmlPath = '';
 let isCodeMode = false;
 
 const CLOSE_SVG = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>`;
@@ -172,6 +173,42 @@ function resetCode() {
   htmlSource = originalSource;
 }
 
+function getExampleBaseHref(path) {
+  return new URL('./', new URL(path, location.href)).href;
+}
+
+function withBaseHref(html, baseHref) {
+  if (/<base\s/i.test(html)) return html;
+  if (/<head[^>]*>/i.test(html)) {
+    return html.replace(/<head[^>]*>/i, `$&\n    <base href="${baseHref}">`);
+  }
+  return `<base href="${baseHref}">\n${html}`;
+}
+
+function attachIframeEscapeListener() {
+  iframe.addEventListener('load', function onLoad() {
+    try {
+      iframe.contentDocument.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+      });
+    } catch {
+      /* cross-origin */
+    }
+    iframe.removeEventListener('load', onLoad);
+  });
+}
+
+function loadPreviewFromSource() {
+  if (htmlSource === originalSource) {
+    iframe.removeAttribute('srcdoc');
+    iframe.src = htmlPath + `?_=${Date.now()}`;
+  } else {
+    iframe.removeAttribute('src');
+    iframe.srcdoc = withBaseHref(htmlSource, getExampleBaseHref(htmlPath));
+  }
+  attachIframeEscapeListener();
+}
+
 function toggleCodeMode() {
   isCodeMode = !isCodeMode;
 
@@ -190,8 +227,7 @@ function toggleCodeMode() {
   } else {
     closeSearch();
     htmlSource = cmEditor.getValue();
-    iframe.removeAttribute('src');
-    iframe.srcdoc = htmlSource;
+    loadPreviewFromSource();
     previewPanel.classList.remove('hidden');
     codePanel.classList.remove('visible');
     codeBtn.classList.remove('active');
@@ -277,7 +313,7 @@ function searchPrev() {
   highlightCurrent();
 }
 
-export function openModal(title, htmlPath) {
+export function openModal(title, htmlPathArg) {
   if (!overlay) buildModalDOM();
 
   isCodeMode = false;
@@ -286,22 +322,13 @@ export function openModal(title, htmlPath) {
   codeBtn.classList.remove('active');
 
   titleEl.textContent = title;
+  htmlPath = htmlPathArg;
   iframe.src = htmlPath + `?_=${Date.now()}`;
   iframe.removeAttribute('srcdoc');
 
-  // Listen for Escape inside the modal iframe (it captures focus on click)
-  iframe.addEventListener('load', function onLoad() {
-    try {
-      iframe.contentDocument.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeModal();
-      });
-    } catch {
-      /* cross-origin */
-    }
-    iframe.removeEventListener('load', onLoad);
-  });
+  attachIframeEscapeListener();
 
-  fetch(htmlPath)
+  fetch(htmlPathArg)
     .then((r) => r.text())
     .then((text) => {
       originalSource = text;
@@ -331,6 +358,7 @@ export function closeModal() {
     iframe.removeAttribute('srcdoc');
     originalSource = '';
     htmlSource = '';
+    htmlPath = '';
     isCodeMode = false;
     previewPanel.classList.remove('hidden');
     codePanel.classList.remove('visible');

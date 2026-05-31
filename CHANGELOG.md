@@ -10,6 +10,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.3.1] - 2026-05-29
+
+#### Changed
+
+- Revamp package `README.md` with expanded overview, `generate()` documentation, framework integration guides, and examples (#214)
+- README follow-up: add `llms` and `llmsFull` fields to `package.json`, AI discovery section, and corrected documentation and dependency links (#216)
+
+#### Fixed
+
+- FOUC-prevention CSS: apply `:not([data-interact-enter])` on the animated child selector instead of the source element, so initial-state hiding targets the correct element when effects use `selector` (#229)
+- `animationEnd` trigger: resolve and match only the source animation identified by `effectId` (via `animationName` and `detail.effectId`), so unrelated `animationend` events on the source no longer fire chained effects (#227)
+
+### [2.3.0] - 2026-05-25
+
+#### Added
+
+- Rewrite `generate()` to produce complete CSS from an `InteractConfig`: `@keyframes`, animation and transition custom properties, `view-timeline` declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules (#7)
+- Ship `llms.txt` in the published package; add `scripts/generate-llms.mjs` plus CI workflows to generate and deploy it (#212, #215)
+- Monorepo root `README.md` with project overview and integration guidance (#213)
+- Interactive examples website (`apps/website`) with landing page and example gallery (#199)
+- Extensive tests for CSS generation, resolvers, and utilities (#7)
+
+#### Changed
+
+- `InteractConfig.effects` is now optional (#7)
+- Docs and interaction rules updated for the new `generate()` implementation, FOUC prevention, and scroll-driven pre-rendering (#211)
+- `viewProgress` handler uses `getAnimation()` and skips WAAPI playback when the animation group is CSS-based (`isCSS`) (#7)
+- Refactored transition CSS helpers and shared selector/property utilities (#7)
+
+#### Removed
+
+- Unused public type exports: `EventTriggerKind`, `EventTriggerConfigToggle`, `EventTriggerConfigEnterLeave`, `EventTriggerConfig`, `AnimationOptions`, `SequenceOptionsConfig` (#205)
+
 ### [2.2.2] - 2026-05-04
 
 #### Fixed
@@ -128,6 +161,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion
 
+### [2.1.7] - 2026-05-29
+
+#### Added
+
+- `AnimationGroup.hasAnimationName()` and `AnimationGroup.hasAnimationId()` for checking which animation finished (#227)
+
+#### Changed
+
+- Revamp package `README.md` with expanded API reference, usage examples, scroll/pointer/sequence sections, AI/`llms.txt` pointers, and corrected links (#216)
+- Dispatched `animationend` is now a `CustomEvent` with `detail.effectId` for effect-specific matching (#227)
+- `AnimationGroup.playState` returns `running` when any child animation is running (#227)
+
+### [2.1.6] - 2026-05-25
+
+#### Changed
+
+- `getEffectsData()` accepts an optional `forCSS` flag so CSS generation always emits `duration: auto` for view-progress triggers without requiring `window.ViewTimeline` at build time (#7)
+
 ### [2.1.5] - 2026-05-04
 
 #### Changed
@@ -187,6 +238,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion-presets
+
+### [1.0.3] - 2026-05-29
+
+#### Changed
+
+- Bump `@wix/motion` dependency to `^2.1.6` (#223)
 
 ### [1.0.2] - 2026-05-04
 
