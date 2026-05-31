@@ -4,7 +4,7 @@ overview: "Restructure the rules/ and docs/ across all three packages (@wix/inte
 todos:
   - id: phase-0-schema
     content: Design YAML glossary schema and marker syntax for templates
-    status: completed
+    status: pending
   - id: phase-0-build
     content: Build scripts/build-context.js (YAML + templates -> rules/ and docs/ markdown)
     status: pending
