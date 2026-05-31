@@ -1,6 +1,6 @@
 ---
 name: MotionPresets README Implementation
-overview: Create a new README.md for the @wix/motion-presets package, positioned as a catalog gateway that summarizes all 75 presets across 5 categories, shows registration and usage patterns with both @wix/motion and @wix/interact, and links to detailed reference docs and agent rules.
+overview: Create a new README.md for the @wix/motion-presets package, positioned as a catalog gateway that summarizes all 62 presets across 4 categories, shows registration and usage patterns with both @wix/motion and @wix/interact, and links to detailed reference docs and agent rules. DVD and background-scroll presets are excluded — not production ready.
 todos:
   - id: write-readme
     content: Write the new packages/motion-presets/README.md following the 13-section structure above
@@ -14,6 +14,9 @@ todos:
   - id: fix-dvd-export
     content: Fix missing barrel export — add DVD to packages/motion-presets/src/library/ongoing/index.ts (the preset is fully implemented and documented but was accidentally omitted from the barrel)
     status: cancelled
+  - id: exclude-non-production
+    content: 'DVD and all background-scroll presets confirmed not production ready — removed from all docs and rules, DVD removed from barrel export, NOT PRODUCTION READY comment added to each source file'
+    status: completed
   - id: phase2-rules-audit
     content: '[Phase 2] After the README is complete, audit rules/presets/ files for any discrepancies surfaced during README preparation and update them to match verified ground truth'
     status: completed
@@ -44,13 +47,14 @@ isProject: false
 
 `[packages/motion-presets/](packages/motion-presets/)` has no `README.md`. Both research specs ([readme-spec-1.md](readme-spec-1.md), [readme-spec-2.md](readme-spec-2.md)) call for creating one, positioning it as a **catalog gateway** -- the entry point for discovering and using ready-made animation presets.
 
-The package exports **75 presets** across 5 categories:
+The package exports **62 presets** across 4 categories:
 
 - **Entrance** (19): FadeIn, ArcIn, BlurIn, BounceIn, CurveIn, DropIn, ExpandIn, FlipIn, FloatIn, FoldIn, GlideIn, RevealIn, ShapeIn, ShuttersIn, SlideIn, SpinIn, TiltIn, TurnIn, WinkIn
 - **Scroll** (19): ArcScroll, BlurScroll, FadeScroll, FlipScroll, GrowScroll, MoveScroll, PanScroll, ParallaxScroll, RevealScroll, ShapeScroll, ShrinkScroll, ShuttersScroll, SkewPanScroll, SlideScroll, Spin3dScroll, SpinScroll, StretchScroll, TiltScroll, TurnScroll
-- **Ongoing** (14): Bounce, Breathe, Cross, DVD, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, Wiggle _(DVD is fully implemented and documented but accidentally missing from the barrel — see `fix-dvd-export` todo)_
+- **Ongoing** (13): Bounce, Breathe, Cross, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swing, Wiggle _(`DVD` is implemented but **not production ready** — excluded from barrel exports and all documentation)_
 - **Mouse** (11): AiryMouse, BlobMouse, BlurMouse, BounceMouse, ScaleMouse, SkewMouse, SpinMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, TrackMouse _(`CustomMouse` is excluded — it is internal infrastructure used to implement `customEffect` for the `pointerMove` trigger, not a user-facing preset)_
-- **Background Scroll** (12): BgCloseUp, BgFade, BgFadeBack, BgFake3D, BgPan, BgParallax, BgPullBack, BgReveal, BgRotate, BgSkew, BgZoom, ImageParallax
+
+> **Excluded (not production ready):** DVD (ongoing) and all 12 background-scroll presets (BgCloseUp, BgFade, BgFadeBack, BgFake3D, BgPan, BgParallax, BgPullBack, BgReveal, BgRotate, BgSkew, BgZoom, ImageParallax). Each source file carries a `NOT PRODUCTION READY` comment. DVD is also removed from the barrel export.
 
 Key architectural note: `registerEffects()` lives in `**@wix/motion`\**, not this package. This package exports preset modules that you pass *into\* `registerEffects()`.
 
@@ -87,7 +91,7 @@ Show the critical first step: importing presets and registering them with `regis
 - **Register all** -- import all category exports and register at once
 - **Selective registration** -- import only the categories/presets you need (for bundle size)
 
-Based on actual source: `src/index.ts` exports 5 namespace re-exports (`entrance`, `ongoing`, `scroll`, `mouse`, `backgroundScroll`).
+Based on actual source: `src/index.ts` exports 5 namespace re-exports (`entrance`, `ongoing`, `scroll`, `mouse`, `backgroundScroll`). Note: `backgroundScroll` remains re-exported at the module level for internal use but is excluded from all public documentation.
 
 ### 5. Usage with @wix/interact
 
@@ -109,12 +113,12 @@ This is the catalog. For each category:
 - Full preset list (names only, as a comma-separated line)
 - Link to detailed reference docs
 
-Categories: **Entrance**, **Scroll**, **Ongoing**, **Mouse**, **Background Scroll**
+Categories: **Entrance**, **Scroll**, **Ongoing**, **Mouse** (Background Scroll excluded — not production ready)
 
 Source strategy (layered):
 
 - **Which presets exist**: barrel exports (`src/library/*/index.ts`) are ground truth — not the rules files.
-- **Param names, types, defaults**: TypeScript source files. When code and rules conflict on structured data, the code wins — unless the discrepancy looks like a code omission (e.g., DVD missing from barrel), in which case fix the code.
+- **Param names, types, defaults**: TypeScript source files. When code and rules conflict on structured data, the code wins.
 - **Verbal descriptions, atmosphere tables, selection guidance**: `[presets-main.md](packages/motion-presets/rules/presets/presets-main.md)` and the category rule files. This prose has no equivalent in the code — use it as-is, and log any structural mismatches found for Phase 2 correction.
 
 ### 8. Choosing a Preset
@@ -178,11 +182,11 @@ MIT (from `[package.json](packages/motion-presets/package.json)`).
 
 ## Discrepancy Notes
 
-**Docs README:** The existing `[docs/presets/README.md](packages/motion-presets/docs/presets/README.md)` claims "82+ presets", "16 ongoing", and "12 mouse" — these counts are inaccurate. The new README uses verified counts (75 total: 19 entrance + 19 scroll + 14 ongoing + 11 mouse + 12 background-scroll). Fixing the docs README is out of scope for this task but should be addressed in Phase 2.
+**Docs README:** The existing `[docs/presets/README.md](packages/motion-presets/docs/presets/README.md)` claims "82+ presets", "16 ongoing", and "12 mouse" — these counts are inaccurate. The Background Scroll section was removed from `docs/presets/README.md` as part of the not-production-ready exclusion work. Remaining count inaccuracies ("82+", "16 ongoing", "12 mouse") are pre-existing and out of scope.
 
-**Rules files:** `presets-main.md` lists mouse as 9 presets and omits BounceMouse and SpinMouse — Phase 2 will add these entries to `mouse-presets.md`.
+**Ground-truth counts (current):** 62 total: 19 entrance + 19 scroll + 13 ongoing + 11 mouse. DVD and all 12 background-scroll presets are excluded as not production ready.
 
-**Known param discrepancies to watch for when verifying code examples (verify-examples todo):**
+**Known param discrepancies (resolved during verify-examples):**
 
 - `ParallaxScroll`: the param is `parallaxFactor` (not `speed`) — critical, would break integrations.
 - `ArcIn`: default direction is `'right'` (not `'bottom'`).
@@ -196,8 +200,8 @@ After the README is complete, the research done during preparation will have sur
 
 **Known items to address (seed list — extend with anything found during Phase 1):**
 
-- `mouse-presets.md`: Add BounceMouse and SpinMouse entries (see `phase2-mouse-rules` todo).
-- `presets-main.md`: Update mouse count from 9 to 11; update total from 74 to 75 (once `fix-dvd-export` lands).
+- `mouse-presets.md`: Add BounceMouse and SpinMouse entries (see `phase2-mouse-rules` todo). ✅ Done.
+- `presets-main.md`: Update mouse count from 9 to 11; update ongoing count and total to reflect exclusions. ✅ Done (ongoing 13, total 62).
 - Any param name / default mismatches found during the `verify-examples` step.
 - Add `"rules"` and `"docs"` to `packages/motion-presets/package.json` `"files"` array (see `phase2-npm-publish` todo) — currently only `dist` is shipped; adding rules enables local agent access via `node_modules/@wix/motion-presets/rules/`.
 
