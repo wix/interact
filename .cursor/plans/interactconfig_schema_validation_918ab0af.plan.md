@@ -4,7 +4,7 @@ overview: Ship schema + referential + semantic validation for `InteractConfig` a
 todos:
   - id: phase0-deps-wiring
     content: "Phase 0: Add zod as production dep (v4); wire validate entry in vite.config.ts and package.json exports; confirm bundle isolation (dist/es/index.js has no zod)"
-    status: pending
+    status: completed
   - id: phase1-schema
     content: "Phase 1: Move src/schema/ → src/validate/schema/; trim primitives (keep MediaCondition), effects (accept customEffect), sequences (accept function offsetEasing), interactions (remove id, no interactionId, discriminatedUnion); rewrite index.ts to re-export canonical types from types/config.ts"
     status: pending
