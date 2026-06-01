@@ -5,7 +5,9 @@ export const styleBindingSelectorExists: Rule = {
   defaultSeverity: 'error',
   run: (ctx) =>
     ctx.controlBindingReferences
-      .filter(({ binding }) => binding.target === 'style' && !ctx.styleSelectors.has(binding.targetId))
+      .filter(
+        ({ binding }) => binding.target === 'style' && !ctx.styleSelectors.has(binding.targetId),
+      )
       .map(({ path, binding }) => ({
         code: 'STYLE_BINDING_SELECTOR_NOT_FOUND',
         severity: 'error' as const,

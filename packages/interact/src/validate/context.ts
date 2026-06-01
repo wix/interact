@@ -65,11 +65,19 @@ function walkEffect(
 function walkSequence(
   seq: SerializableSequenceConfig,
   basePath: Path,
-  ctx: Pick<ValidationContext, 'effectIdReferences' | 'conditionReferences' | 'effectKeyReferences'>,
+  ctx: Pick<
+    ValidationContext,
+    'effectIdReferences' | 'conditionReferences' | 'effectKeyReferences'
+  >,
 ): void {
   seq.effects.forEach((entry, i) => {
     const path = [...basePath, 'effects', i];
-    if ('effectId' in entry && entry.effectId !== undefined && !('namedEffect' in entry) && !('keyframeEffect' in entry)) {
+    if (
+      'effectId' in entry &&
+      entry.effectId !== undefined &&
+      !('namedEffect' in entry) &&
+      !('keyframeEffect' in entry)
+    ) {
       // Ref-only entry
       ctx.effectIdReferences.push({ path: [...path, 'effectId'], effectId: entry.effectId });
     } else {

@@ -21,18 +21,9 @@ export {
   TIME_FIELDS,
 } from './effects';
 
-export {
-  SerializableSequenceConfig,
-  SerializableSequenceConfigRef,
-} from './sequences';
+export { SerializableSequenceConfig, SerializableSequenceConfigRef } from './sequences';
 
-export {
-  Keyframe,
-  LengthPercentage,
-  RangeOffset,
-  Condition,
-  MediaCondition,
-} from './primitives';
+export { Keyframe, LengthPercentage, RangeOffset, Condition, MediaCondition } from './primitives';
 
 // Canonical types — single source of truth, no z.infer<> re-derivation.
 // Names that collide with a zod schema value above are exported with a

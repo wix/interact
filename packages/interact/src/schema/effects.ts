@@ -3,9 +3,7 @@ import { Keyframe, RangeOffset } from './primitives';
 
 const TriggerType = z.enum(['once', 'repeat', 'alternate', 'state']);
 
-export const NamedEffect = z
-  .object({ type: z.string().min(1) })
-  .catchall(z.unknown());
+export const NamedEffect = z.object({ type: z.string().min(1) }).catchall(z.unknown());
 
 const KeyframeEffectInline = z
   .object({
@@ -45,9 +43,7 @@ const ScrubEffectFields = {
   centeredToTarget: z.boolean().optional(),
   transitionDuration: z.number().optional(),
   transitionDelay: z.number().optional(),
-  transitionEasing: z
-    .enum(['linear', 'hardBackOut', 'easeOut', 'elastic', 'bounce'])
-    .optional(),
+  transitionEasing: z.enum(['linear', 'hardBackOut', 'easeOut', 'elastic', 'bounce']).optional(),
 };
 
 const StateEffectFields = {
@@ -57,9 +53,7 @@ const StateEffectFields = {
       duration: z.number().optional(),
       delay: z.number().optional(),
       easing: z.string().optional(),
-      styleProperties: z.array(
-        z.object({ name: z.string(), value: z.string() }),
-      ),
+      styleProperties: z.array(z.object({ name: z.string(), value: z.string() })),
     })
     .optional(),
   transitionProperties: z
@@ -83,10 +77,9 @@ const SourceFields = {
 export const SerializableEffectSource = z
   .object(SourceFields)
   .strict()
-  .refine(
-    (v) => (v.namedEffect ? 1 : 0) + (v.keyframeEffect ? 1 : 0) === 1,
-    { message: 'Effect source must define exactly one of namedEffect or keyframeEffect' },
-  );
+  .refine((v) => (v.namedEffect ? 1 : 0) + (v.keyframeEffect ? 1 : 0) === 1, {
+    message: 'Effect source must define exactly one of namedEffect or keyframeEffect',
+  });
 
 const EffectShape = EffectBase.extend({
   ...SourceFields,
@@ -146,8 +139,7 @@ export const SerializableTimeEffect = SerializableEffect.superRefine((v, ctx) =>
   if (v.namedEffect === undefined && v.keyframeEffect === undefined) {
     ctx.addIssue({
       code: 'custom',
-      message:
-        'Time effect must define an effect source (namedEffect or keyframeEffect).',
+      message: 'Time effect must define an effect source (namedEffect or keyframeEffect).',
       path: [],
     });
   }
