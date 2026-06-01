@@ -15,12 +15,13 @@ export default defineConfig(({ command }) => {
           index: path.resolve(__dirname, 'src/index.ts'),
           react: path.resolve(__dirname, 'src/react/index.ts'),
           web: path.resolve(__dirname, 'src/web/index.ts'),
+          validate: path.resolve(__dirname, 'src/validate/index.ts'),
         },
         formats: ['es', 'cjs'],
       },
       sourcemap: true,
       rollupOptions: {
-        external: ['react', 'react-dom'],
+        external: ['react', 'react-dom', 'zod'],
         output: {
           entryFileNames: '[format]/[name].js',
           compact: true,
