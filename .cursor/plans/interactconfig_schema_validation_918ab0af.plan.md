@@ -22,7 +22,7 @@ todos:
     status: completed
   - id: phase5-tests
     content: 'Phase 5: Unit tests per rule (valid config + per-code fixture); structural tests; type-parity test (expectTypeOf); bundle test (CI grep for zod)'
-    status: pending
+    status: completed
   - id: phase6-docs
     content: 'Phase 6: README section for @wix/interact/validate; error-code table (§7); llms.txt entry'
     status: pending
