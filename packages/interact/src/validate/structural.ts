@@ -1,5 +1,6 @@
 import type { ZodIssue } from 'zod';
-import { ExperienceSchema, type Experience } from '../schema';
+import { InteractConfigSchema } from './schema';
+import type { InteractConfig } from '../types/config';
 import type { ValidationError } from './errors';
 
 function mapZodCode(issue: ZodIssue): string {
@@ -12,6 +13,8 @@ function mapZodCode(issue: ZodIssue): string {
       return 'SCHEMA_INVALID_UNION';
     case 'invalid_value':
       return 'SCHEMA_INVALID_LITERAL';
+    case 'too_small':
+      return 'SCHEMA_TOO_SMALL';
     default:
       return 'SCHEMA_INVALID';
   }
@@ -19,12 +22,12 @@ function mapZodCode(issue: ZodIssue): string {
 
 export function validateStructural(input: unknown): {
   ok: boolean;
-  parsed?: Experience;
+  parsed?: InteractConfig;
   errors: ValidationError[];
 } {
-  const result = ExperienceSchema.safeParse(input);
+  const result = InteractConfigSchema.safeParse(input);
   if (result.success) {
-    return { ok: true, parsed: result.data, errors: [] };
+    return { ok: true, parsed: result.data as unknown as InteractConfig, errors: [] };
   }
   const errors: ValidationError[] = result.error.issues.map((issue) => ({
     code: mapZodCode(issue),

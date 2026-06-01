@@ -30,19 +30,21 @@ function isValidMediaQuery(query: string): boolean {
 
 export const validMediaQueries: Rule = {
   code: 'INVALID_MEDIA_QUERY',
-  defaultSeverity: 'error',
+  defaultSeverity: 'warning',
   run: (ctx) => {
     const errors: ValidationError[] = [];
-    (ctx.experience.disableWhen ?? []).forEach((condition, i) => {
-      if (!isValidMediaQuery(condition.mediaQuery)) {
-        errors.push({
-          code: 'INVALID_MEDIA_QUERY' as const,
-          severity: 'error' as const,
-          path: ['disableWhen', i, 'mediaQuery'],
-          message: `Invalid media query: ${JSON.stringify(condition.mediaQuery)}.`,
-        });
+    for (const [id, condition] of Object.entries(ctx.config.conditions ?? {})) {
+      if (condition.type === 'media' && condition.predicate !== undefined) {
+        if (!isValidMediaQuery(condition.predicate)) {
+          errors.push({
+            code: 'INVALID_MEDIA_QUERY',
+            severity: 'warning',
+            path: ['conditions', id, 'predicate'],
+            message: `Invalid media query: ${JSON.stringify(condition.predicate)}.`,
+          });
+        }
       }
-    });
+    }
     return errors;
   },
 };

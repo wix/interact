@@ -10,10 +10,10 @@ todos:
     status: completed
   - id: phase2-harness-rename
     content: 'Phase 2: Rename ExperienceValidationError → InteractValidationError; retarget structural.ts to InteractConfigSchema (extend mapZodCode); rename public API to validateInteractConfig / assertValidInteractConfig; export RULES, Rule type, and zod sub-schemas'
-    status: pending
+    status: completed
   - id: phase3-context
     content: 'Phase 3: Rewrite validate/context.ts — drop elementKeys/controlIds/styleSelectors/etc.; walk InteractConfig directly; add isEffectRef/isSequenceRef predicates; collect trigger+effect tuples and definition maps for new rules'
-    status: pending
+    status: completed
   - id: phase4-rules-trim
     content: 'Phase 4a: Delete controls/* and 6 out-of-scope referential rules; add rules/_factory.ts with referenceRule() helper; rewrite 4 ID-existence rules as one-liners'
     status: pending

@@ -1,229 +1,158 @@
 import type {
-  Control,
-  ControlBinding,
-  Experience,
-  ExperienceInteraction,
-  SerializableEffect,
-  SerializableSequenceConfig,
-} from '../schema';
+  InteractConfig,
+  SequenceConfig,
+  SequenceConfigRef,
+  Interaction,
+} from '../types/config';
+import type { Effect, EffectRef } from '../types/effects';
 
 export type Path = (string | number)[];
 
 export type EffectIdRef = { path: Path; effectId: string };
 export type SequenceIdRef = { path: Path; sequenceId: string };
-export type ElementKeyRef = { path: Path; key: string };
 export type ConditionRef = { path: Path; conditionId: string };
-export type ControlBindingRef = { path: Path; binding: ControlBinding; controlId: string };
-export type VariableBindingRef = { path: Path; name: string; controlId: string };
-export type InteractionRef = { path: Path; interaction: ExperienceInteraction };
+export type InteractionRef = { path: Path; interaction: Interaction };
+
+export type TriggerEffectTuple = {
+  trigger: string;
+  effect: Effect;
+  path: Path;
+};
+
+export type KeyframeNameRef = {
+  name: string;
+  path: Path;
+};
 
 export type ValidationContext = {
-  experience: Experience;
+  config: InteractConfig;
 
-  elementKeys: Set<string>;
   effectIds: Set<string>;
   sequenceIds: Set<string>;
   conditionIds: Set<string>;
-  controlIds: Set<string>;
-  styleSelectors: Set<string>;
-  interactionIds: Set<string>;
 
   effectIdReferences: EffectIdRef[];
   sequenceIdReferences: SequenceIdRef[];
-  interactionKeyReferences: ElementKeyRef[];
-  effectKeyReferences: ElementKeyRef[];
   conditionReferences: ConditionRef[];
-  controlBindingReferences: ControlBindingRef[];
-  variableBindings: VariableBindingRef[];
   interactions: InteractionRef[];
-  controls: Control[];
 
-  cssVarUsage: Set<string>;
+  triggerEffectTuples: TriggerEffectTuple[];
+  keyframeNames: KeyframeNameRef[];
 };
 
-const VAR_RE = /var\(\s*(--[A-Za-z0-9_-]+)/g;
+function isEffectRef(entry: Effect | EffectRef): entry is EffectRef {
+  return !('keyframeEffect' in entry) && !('namedEffect' in entry) && !('customEffect' in entry);
+}
 
-function collectVarUsage(value: string, out: Set<string>): void {
-  for (const m of value.matchAll(VAR_RE)) out.add(m[1]!);
+function isSequenceRef(entry: SequenceConfig | SequenceConfigRef): entry is SequenceConfigRef {
+  return !('effects' in entry);
+}
+
+function collectKeyframeName(effect: Effect, basePath: Path, out: KeyframeNameRef[]): void {
+  const ke = (effect as Record<string, unknown>)['keyframeEffect'] as { name: string } | undefined;
+  if (ke) {
+    out.push({ name: ke.name, path: [...basePath, 'keyframeEffect', 'name'] });
+  }
 }
 
 function walkEffect(
-  effect: SerializableEffect,
+  effect: Effect,
   basePath: Path,
-  ctx: Pick<ValidationContext, 'effectKeyReferences' | 'conditionReferences'>,
+  ctx: Pick<ValidationContext, 'conditionReferences' | 'keyframeNames'>,
 ): void {
-  if (effect.key !== undefined) {
-    ctx.effectKeyReferences.push({ path: [...basePath, 'key'], key: effect.key });
-  }
-  if (effect.conditions) {
-    effect.conditions.forEach((c, i) =>
-      ctx.conditionReferences.push({ path: [...basePath, 'conditions', i], conditionId: c }),
-    );
-  }
+  effect.conditions?.forEach((c, i) =>
+    ctx.conditionReferences.push({ path: [...basePath, 'conditions', i], conditionId: c }),
+  );
+  collectKeyframeName(effect, basePath, ctx.keyframeNames);
 }
 
 function walkSequence(
-  seq: SerializableSequenceConfig,
+  seq: SequenceConfig,
   basePath: Path,
-  ctx: Pick<
-    ValidationContext,
-    'effectIdReferences' | 'conditionReferences' | 'effectKeyReferences'
-  >,
+  ctx: Pick<ValidationContext, 'effectIdReferences' | 'conditionReferences' | 'keyframeNames'>,
 ): void {
   seq.effects.forEach((entry, i) => {
     const path = [...basePath, 'effects', i];
-    if (
-      'effectId' in entry &&
-      entry.effectId !== undefined &&
-      !('namedEffect' in entry) &&
-      !('keyframeEffect' in entry)
-    ) {
-      // Ref-only entry
+    if (isEffectRef(entry)) {
       ctx.effectIdReferences.push({ path: [...path, 'effectId'], effectId: entry.effectId });
     } else {
-      walkEffect(entry as SerializableEffect, path, ctx);
+      walkEffect(entry, path, ctx);
     }
   });
-  if (seq.conditions) {
-    seq.conditions.forEach((c, i) =>
-      ctx.conditionReferences.push({ path: [...basePath, 'conditions', i], conditionId: c }),
-    );
-  }
+  seq.conditions?.forEach((c, i) =>
+    ctx.conditionReferences.push({ path: [...basePath, 'conditions', i], conditionId: c }),
+  );
 }
 
-export function buildContext(experience: Experience): ValidationContext {
-  const elementKeys = new Set(Object.keys(experience.elements));
-  const effectIds = new Set(Object.keys(experience.interact.effects));
-  const sequenceIds = new Set(Object.keys(experience.interact.sequences ?? {}));
-  const conditionIds = new Set(Object.keys(experience.interact.conditions ?? {}));
-  const controlIds = new Set(experience.controls.map((c) => c.id));
-  const styleSelectors = new Set((experience.styles ?? []).map((s) => s.selector));
-  const interactionIds = new Set(
-    experience.interact.interactions.map((i) => i.id).filter((id): id is string => Boolean(id)),
-  );
+export function buildContext(config: InteractConfig): ValidationContext {
+  const effectIds = new Set(Object.keys(config.effects ?? {}));
+  const sequenceIds = new Set(Object.keys(config.sequences ?? {}));
+  const conditionIds = new Set(Object.keys(config.conditions ?? {}));
 
   const effectIdReferences: EffectIdRef[] = [];
   const sequenceIdReferences: SequenceIdRef[] = [];
-  const interactionKeyReferences: ElementKeyRef[] = [];
-  const effectKeyReferences: ElementKeyRef[] = [];
   const conditionReferences: ConditionRef[] = [];
-  const controlBindingReferences: ControlBindingRef[] = [];
-  const variableBindings: VariableBindingRef[] = [];
   const interactions: InteractionRef[] = [];
-  const cssVarUsage = new Set<string>();
+  const triggerEffectTuples: TriggerEffectTuple[] = [];
+  const keyframeNames: KeyframeNameRef[] = [];
 
-  // Effects (top-level)
-  for (const [id, effect] of Object.entries(experience.interact.effects)) {
-    walkEffect(effect, ['interact', 'effects', id], {
-      effectKeyReferences,
-      conditionReferences,
-    });
+  for (const [id, effect] of Object.entries(config.effects ?? {})) {
+    walkEffect(effect, ['effects', id], { conditionReferences, keyframeNames });
   }
 
-  // Sequences
-  for (const [id, seq] of Object.entries(experience.interact.sequences ?? {})) {
-    walkSequence(seq, ['interact', 'sequences', id], {
+  for (const [id, seq] of Object.entries(config.sequences ?? {})) {
+    walkSequence(seq, ['sequences', id], {
       effectIdReferences,
-      effectKeyReferences,
       conditionReferences,
+      keyframeNames,
     });
   }
 
-  // Interactions
-  experience.interact.interactions.forEach((interaction, i) => {
-    const base: Path = ['interact', 'interactions', i];
+  config.interactions.forEach((interaction, i) => {
+    const base: Path = ['interactions', i];
     interactions.push({ path: base, interaction });
 
-    interactionKeyReferences.push({ path: [...base, 'key'], key: interaction.key });
-
-    if (interaction.conditions) {
-      interaction.conditions.forEach((c, ci) =>
-        conditionReferences.push({
-          path: [...base, 'conditions', ci],
-          conditionId: c,
-        }),
-      );
-    }
+    interaction.conditions?.forEach((c, ci) =>
+      conditionReferences.push({ path: [...base, 'conditions', ci], conditionId: c }),
+    );
 
     if (interaction.trigger === 'animationEnd' && interaction.params) {
       effectIdReferences.push({
         path: [...base, 'params', 'effectId'],
-        effectId: interaction.params.effectId,
+        effectId: (interaction.params as { effectId: string }).effectId,
       });
     }
 
     interaction.effects?.forEach((entry, ei) => {
       const path: Path = [...base, 'effects', ei];
-      if (
-        'effectId' in entry &&
-        entry.effectId !== undefined &&
-        !('namedEffect' in entry) &&
-        !('keyframeEffect' in entry)
-      ) {
+      if (isEffectRef(entry)) {
         effectIdReferences.push({ path: [...path, 'effectId'], effectId: entry.effectId });
       } else {
-        walkEffect(entry as SerializableEffect, path, {
-          effectKeyReferences,
-          conditionReferences,
-        });
+        walkEffect(entry, path, { conditionReferences, keyframeNames });
+        triggerEffectTuples.push({ trigger: interaction.trigger, effect: entry, path });
       }
     });
 
     interaction.sequences?.forEach((entry, si) => {
       const path: Path = [...base, 'sequences', si];
-      if ('sequenceId' in entry && !('effects' in entry)) {
-        sequenceIdReferences.push({
-          path: [...path, 'sequenceId'],
-          sequenceId: entry.sequenceId,
-        });
+      if (isSequenceRef(entry)) {
+        sequenceIdReferences.push({ path: [...path, 'sequenceId'], sequenceId: entry.sequenceId });
       } else {
-        walkSequence(entry as SerializableSequenceConfig, path, {
-          effectIdReferences,
-          effectKeyReferences,
-          conditionReferences,
-        });
+        walkSequence(entry, path, { effectIdReferences, conditionReferences, keyframeNames });
       }
     });
   });
-
-  // Controls
-  experience.controls.forEach((control, ci) => {
-    control.bindings.forEach((binding, bi) => {
-      const path: Path = ['controls', ci, 'bindings', bi];
-      controlBindingReferences.push({ path, binding, controlId: control.id });
-      if (binding.target === 'variable') {
-        variableBindings.push({ path, name: binding.targetId, controlId: control.id });
-      }
-    });
-  });
-
-  // CSS var() usage in element styles + top-level styles
-  for (const el of Object.values(experience.elements)) {
-    if (!el.styles) continue;
-    for (const v of Object.values(el.styles)) collectVarUsage(v, cssVarUsage);
-  }
-  for (const rule of experience.styles ?? []) {
-    for (const v of Object.values(rule.properties)) collectVarUsage(v, cssVarUsage);
-  }
 
   return {
-    experience,
-    elementKeys,
+    config,
     effectIds,
     sequenceIds,
     conditionIds,
-    controlIds,
-    styleSelectors,
-    interactionIds,
     effectIdReferences,
     sequenceIdReferences,
-    interactionKeyReferences,
-    effectKeyReferences,
     conditionReferences,
-    controlBindingReferences,
-    variableBindings,
     interactions,
-    controls: experience.controls,
-    cssVarUsage,
+    triggerEffectTuples,
+    keyframeNames,
   };
 }

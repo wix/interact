@@ -1,7 +1,7 @@
-import type { Experience } from '../schema';
+import type { InteractConfig } from '../types/config';
 import { buildContext } from './context';
 import {
-  ExperienceValidationError,
+  InteractValidationError,
   type Severity,
   type ValidationError,
   type ValidationResult,
@@ -9,8 +9,48 @@ import {
 import { validateSemantic } from './semantic';
 import { validateStructural } from './structural';
 
-export { ExperienceValidationError };
+export { InteractValidationError };
 export type { Severity, ValidationError, ValidationResult } from './errors';
+
+export { RULES, type Rule } from './rules';
+
+// Zod schemas and sub-schemas for host-project schema composition
+export {
+  InteractConfigSchema,
+  Interaction,
+  TriggerType,
+  ViewEnterParams,
+  PointerMoveParams,
+  AnimationEndParams,
+  TriggerParams,
+  SerializableEffect,
+  SerializableEffectRef,
+  SerializableEffectSource,
+  SerializableTimeEffect,
+  EffectBase,
+  NamedEffect,
+  SCRUB_FIELDS,
+  STATE_FIELDS,
+  TIME_FIELDS,
+  SerializableSequenceConfig,
+  SerializableSequenceConfigRef,
+  Keyframe,
+  LengthPercentage,
+  RangeOffset,
+  Condition,
+  MediaCondition,
+} from './schema';
+export type {
+  InteractConfig,
+  ConditionDef,
+  SequenceOptionsConfig,
+  SequenceConfig,
+  SequenceConfigRef,
+  InteractionDef,
+  InteractionTrigger,
+  Effect,
+  EffectRef,
+} from './schema';
 
 export type ValidateOptions = {
   strict?: boolean;
@@ -43,7 +83,7 @@ function finalize(errors: ValidationError[], opts: ValidateOptions): ValidationR
   return { valid, errors: next };
 }
 
-export function validateExperience(
+export function validateInteractConfig(
   input: unknown,
   options: ValidateOptions = {},
 ): ValidationResult {
@@ -56,12 +96,12 @@ export function validateExperience(
   return finalize(layer2, options);
 }
 
-export function assertValidExperience(
+export function assertValidInteractConfig(
   input: unknown,
   options: ValidateOptions = {},
-): asserts input is Experience {
-  const result = validateExperience(input, options);
+): asserts input is InteractConfig {
+  const result = validateInteractConfig(input, options);
   if (!result.valid) {
-    throw new ExperienceValidationError(result.errors);
+    throw new InteractValidationError(result.errors);
   }
 }

@@ -8,7 +8,7 @@ export const animationEndEffectExists: Rule = {
     const errors: ValidationError[] = [];
     for (const { path, interaction } of ctx.interactions) {
       if (interaction.trigger !== 'animationEnd' || !interaction.params) continue;
-      const effectId = interaction.params.effectId;
+      const effectId = (interaction.params as { effectId: string }).effectId;
       if (!ctx.effectIds.has(effectId)) {
         errors.push({
           code: 'ANIMATION_END_EFFECT_NOT_FOUND',

@@ -13,12 +13,12 @@ export type ValidationResult = {
   errors: ValidationError[];
 };
 
-export class ExperienceValidationError extends Error {
+export class InteractValidationError extends Error {
   readonly errors: ValidationError[];
 
   constructor(errors: ValidationError[]) {
-    super(`Experience validation failed with ${errors.length} issue(s).`);
-    this.name = 'ExperienceValidationError';
+    super(`Interact config validation failed with ${errors.length} issue(s).`);
+    this.name = 'InteractValidationError';
     this.errors = errors;
   }
 }
