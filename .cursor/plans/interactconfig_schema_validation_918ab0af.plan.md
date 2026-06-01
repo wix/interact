@@ -7,7 +7,7 @@ todos:
     status: completed
   - id: phase1-schema
     content: "Phase 1: Move src/schema/ → src/validate/schema/; trim primitives (keep MediaCondition), effects (accept customEffect), sequences (accept function offsetEasing), interactions (remove id, no interactionId, discriminatedUnion); rewrite index.ts to re-export canonical types from types/config.ts"
-    status: pending
+    status: completed
   - id: phase2-harness-rename
     content: "Phase 2: Rename ExperienceValidationError → InteractValidationError; retarget structural.ts to InteractConfigSchema (extend mapZodCode); rename public API to validateInteractConfig / assertValidInteractConfig; export RULES, Rule type, and zod sub-schemas"
     status: pending
