@@ -1,16 +1,11 @@
-import type { Rule } from '..';
+import { referenceRule } from '../_factory';
 
-export const conditionsExist: Rule = {
+export const conditionsExist = referenceRule({
   code: 'CONDITION_NOT_FOUND',
-  defaultSeverity: 'error',
-  run: (ctx) =>
-    ctx.conditionReferences
-      .filter((ref) => !ctx.conditionIds.has(ref.conditionId))
-      .map((ref) => ({
-        code: 'CONDITION_NOT_FOUND',
-        severity: 'error',
-        path: ref.path,
-        message: `Condition "${ref.conditionId}" is referenced but not defined in interact.conditions.`,
-        hint: 'Add an entry to interact.conditions or remove the reference.',
-      })),
-};
+  severity: 'error',
+  refs: (ctx) => ctx.conditionReferences,
+  has: (ctx, ref) => ctx.conditionIds.has(ref.conditionId),
+  message: (ref) =>
+    `Condition "${ref.conditionId}" is referenced but not defined in interact.conditions.`,
+  hint: 'Add an entry to interact.conditions or remove the reference.',
+});

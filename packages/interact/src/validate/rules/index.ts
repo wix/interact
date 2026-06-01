@@ -9,6 +9,12 @@ import { interactionHasEffectsOrSequences } from './referential/interactionHasEf
 
 import { validMediaQueries } from './conditions/validMediaQueries';
 
+import { triggerEffectCompatible } from './semantic/triggerEffectCompatible';
+import { numericBounds } from './semantic/numericBounds';
+import { conditionPredicateRequired } from './semantic/conditionPredicateRequired';
+import { uniqueDefinitionIds } from './semantic/uniqueDefinitionIds';
+import { unusedDefinitions } from './semantic/unusedDefinitions';
+
 export type Rule = {
   code: string;
   defaultSeverity: Severity;
@@ -16,10 +22,18 @@ export type Rule = {
 };
 
 export const RULES: Rule[] = [
+  // Referential rules (errors)
   effectIdsExist,
   sequenceIdsExist,
   animationEndEffectExists,
   conditionsExist,
   interactionHasEffectsOrSequences,
+  // Condition rules (warnings)
   validMediaQueries,
+  // Semantic rules
+  triggerEffectCompatible,
+  numericBounds,
+  conditionPredicateRequired,
+  uniqueDefinitionIds,
+  unusedDefinitions,
 ];

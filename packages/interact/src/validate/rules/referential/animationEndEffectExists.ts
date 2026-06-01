@@ -1,24 +1,13 @@
-import type { Rule } from '..';
-import type { ValidationError } from '../../errors';
+import { referenceRule } from '../_factory';
 
-export const animationEndEffectExists: Rule = {
+// effectIdReferences entries whose path contains 'params' come exclusively from
+// animationEnd interactions (context.ts adds them at [...base, 'params', 'effectId']).
+export const animationEndEffectExists = referenceRule({
   code: 'ANIMATION_END_EFFECT_NOT_FOUND',
-  defaultSeverity: 'error',
-  run: (ctx) => {
-    const errors: ValidationError[] = [];
-    for (const { path, interaction } of ctx.interactions) {
-      if (interaction.trigger !== 'animationEnd' || !interaction.params) continue;
-      const effectId = (interaction.params as { effectId: string }).effectId;
-      if (!ctx.effectIds.has(effectId)) {
-        errors.push({
-          code: 'ANIMATION_END_EFFECT_NOT_FOUND',
-          severity: 'error' as const,
-          path: [...path, 'params', 'effectId'],
-          message: `animationEnd interaction references effect "${effectId}" which is not defined.`,
-          hint: 'Define the effect in interact.effects or fix the params.effectId.',
-        });
-      }
-    }
-    return errors;
-  },
-};
+  severity: 'error',
+  refs: (ctx) => ctx.effectIdReferences.filter((ref) => ref.path.includes('params')),
+  has: (ctx, ref) => ctx.effectIds.has(ref.effectId),
+  message: (ref) =>
+    `animationEnd interaction references effect "${ref.effectId}" which is not defined.`,
+  hint: 'Define the effect in interact.effects or fix the params.effectId.',
+});

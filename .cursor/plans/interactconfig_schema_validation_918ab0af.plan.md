@@ -16,10 +16,10 @@ todos:
     status: completed
   - id: phase4-rules-trim
     content: 'Phase 4a: Delete controls/* and 6 out-of-scope referential rules; add rules/_factory.ts with referenceRule() helper; rewrite 4 ID-existence rules as one-liners'
-    status: pending
+    status: completed
   - id: phase4-rules-add
     content: 'Phase 4b: Add 5 new semantic rules — triggerEffectCompatible (warning), numericBounds, conditionPredicateRequired, uniqueDefinitionIds, unusedDefinitions (warnings); update rules/index.ts RULES array'
-    status: pending
+    status: completed
   - id: phase5-tests
     content: 'Phase 5: Unit tests per rule (valid config + per-code fixture); structural tests; type-parity test (expectTypeOf); bundle test (CI grep for zod)'
     status: pending
