@@ -79,13 +79,7 @@ describe('triggerEffectCompatible — TRIGGER_EFFECT_INCOMPATIBLE', () => {
   });
 
   describe('state fields on scrub trigger', () => {
-    // A pure state effect (stateAction, transition, transitionProperties with no source field) is
-    // classified as an EffectRef by isEffectRef() because it lacks namedEffect/keyframeEffect/
-    // customEffect. It is therefore never added to triggerEffectTuples, so TRIGGER_EFFECT_INCOMPATIBLE
-    // cannot fire for it. Instead it is caught by EFFECT_ID_NOT_FOUND (effectId is undefined).
-    // Mixing a source field WITH state fields is rejected by the schema (SCHEMA_INVALID), so
-    // STATE_FIELDS checks via triggerEffectCompatible are effectively a forward-compatibility guard.
-    it('does not emit TRIGGER_EFFECT_INCOMPATIBLE for a pure state effect (classified as effectRef)', () => {
+    it('emits TRIGGER_EFFECT_INCOMPATIBLE for stateAction on viewProgress', () => {
       const result = validateInteractConfig({
         interactions: [
           {
@@ -95,7 +89,11 @@ describe('triggerEffectCompatible — TRIGGER_EFFECT_INCOMPATIBLE', () => {
           },
         ],
       });
-      expect(result.errors.filter((e) => e.code === 'TRIGGER_EFFECT_INCOMPATIBLE')).toHaveLength(0);
+      expect(
+        result.errors.some(
+          (e) => e.code === 'TRIGGER_EFFECT_INCOMPATIBLE' && e.path.includes('stateAction'),
+        ),
+      ).toBe(true);
     });
   });
 

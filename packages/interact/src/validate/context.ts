@@ -41,7 +41,7 @@ export type ValidationContext = {
 };
 
 function isEffectRef(entry: Effect | EffectRef): entry is EffectRef {
-  return !('keyframeEffect' in entry) && !('namedEffect' in entry) && !('customEffect' in entry);
+  return typeof (entry as Record<string, unknown>)['effectId'] === 'string';
 }
 
 function isSequenceRef(entry: SequenceConfig | SequenceConfigRef): entry is SequenceConfigRef {
