@@ -100,7 +100,7 @@ const StateEffectFields = {
 const SourceFields = {
   namedEffect: NamedEffect.optional(),
   keyframeEffect: KeyframeEffectInline.optional(),
-  customEffect: z.custom<Function>((v) => typeof v === 'function').optional(),
+  customEffect: z.custom<(...args: unknown[]) => unknown>((v) => typeof v === 'function').optional(),
 };
 
 export const SerializableEffectSource = z

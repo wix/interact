@@ -8,7 +8,7 @@ export const SerializableSequenceConfig = z.object({
   delay: z.number().optional(),
   offset: z.number().optional(),
   offsetEasing: z
-    .union([z.string(), z.custom<Function>((v) => typeof v === 'function')])
+    .union([z.string(), z.custom<(...args: unknown[]) => unknown>((v) => typeof v === 'function')])
     .optional(),
   triggerType: TriggerType.optional(),
   sequenceId: z.string().optional(),
@@ -21,7 +21,7 @@ export const SerializableSequenceConfigRef = z
     delay: z.number().optional(),
     offset: z.number().optional(),
     offsetEasing: z
-      .union([z.string(), z.custom<Function>((v) => typeof v === 'function')])
+      .union([z.string(), z.custom<(...args: unknown[]) => unknown>((v) => typeof v === 'function')])
       .optional(),
     triggerType: TriggerType.optional(),
     conditions: z.array(z.string()).optional(),
