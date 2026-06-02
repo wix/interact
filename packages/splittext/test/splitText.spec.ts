@@ -24,9 +24,7 @@ function el(html: string): HTMLElement {
  * through Vitest internals). We use a manual delete fallback as well.
  */
 function mockLines(lineCount: number) {
-  const rects = Array.from({ length: lineCount }, (_, i) =>
-    new DOMRect(0, i * 20, 200, 20),
-  );
+  const rects = Array.from({ length: lineCount }, (_, i) => new DOMRect(0, i * 20, 200, 20));
   const mockResult: DOMRectList = {
     length: rects.length,
     item: (i: number) => rects[i] ?? null,

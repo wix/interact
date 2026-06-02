@@ -89,7 +89,9 @@ export interface SplitTextOptions {
    * missing. Accepts either an already-constructed instance or the constructor
    * itself (the library will instantiate it per granularity).
    */
-  segmenter?: Intl.Segmenter | { new (locale: string, options: { granularity: string }): Intl.Segmenter };
+  segmenter?:
+    | Intl.Segmenter
+    | { new (locale: string, options: { granularity: string }): Intl.Segmenter };
 
   /**
    * Optional plugin for BiDi (bidirectional text) handling. Receives the flat

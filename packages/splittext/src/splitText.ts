@@ -223,10 +223,7 @@ class SplitTextResultImpl implements SplitTextResult {
    * Wrap split spans in `<span dir="…">` runs when a `bidiResolver` is
    * provided. Returns the original array unchanged when no resolver is set.
    */
-  private _applyBidi(
-    spans: HTMLSpanElement[],
-    text: string,
-  ): Array<HTMLSpanElement> {
+  private _applyBidi(spans: HTMLSpanElement[], text: string): Array<HTMLSpanElement> {
     const resolver = this._options.bidiResolver;
     if (!resolver) return spans;
 

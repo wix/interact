@@ -4,9 +4,7 @@ import type { SplitTextOptions } from './types';
  * Resolve `Intl.Segmenter` constructor from the `segmenter` option or the
  * global. Throws a descriptive error when neither is available.
  */
-function resolveSegmenterCtor(
-  option: SplitTextOptions['segmenter'],
-): typeof Intl.Segmenter {
+function resolveSegmenterCtor(option: SplitTextOptions['segmenter']): typeof Intl.Segmenter {
   // Option is already a constructor (has `prototype.segment`)
   if (typeof option === 'function') {
     return option as unknown as typeof Intl.Segmenter;

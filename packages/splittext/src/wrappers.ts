@@ -74,7 +74,10 @@ export function createWrapper(
   }
 
   // Custom inline styles
-  const customStyle = resolveWrapperOption<Partial<CSSStyleDeclaration>>(options.wrapperStyle, type);
+  const customStyle = resolveWrapperOption<Partial<CSSStyleDeclaration>>(
+    options.wrapperStyle,
+    type,
+  );
   if (customStyle) {
     Object.assign(span.style, customStyle);
   }

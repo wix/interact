@@ -58,7 +58,10 @@ splitText('.headline', {
   animation-delay: calc(var(--char-index) * 0.04s);
 }
 @keyframes fadeUp {
-  to { opacity: 1; transform: translateY(0); }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 ```
 
@@ -85,38 +88,38 @@ function Headline() {
 
 ### `splitText(target, options?)`
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `target` | `string \| HTMLElement` | CSS selector or element |
-| `options` | `SplitTextOptions` | Configuration (see below) |
+| Parameter | Type                    | Description               |
+| --------- | ----------------------- | ------------------------- |
+| `target`  | `string \| HTMLElement` | CSS selector or element   |
+| `options` | `SplitTextOptions`      | Configuration (see below) |
 
 Returns a `SplitTextResult` with lazy getters: `.chars`, `.words`, `.lines`, `.sentences`.
 
 ### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `type` | `SplitType \| SplitType[]` | — | Split eagerly on call instead of lazily |
-| `wrapperClass` | `string \| WrapperClassConfig` | — | Extra CSS class(es) on wrapper spans |
-| `wrapperStyle` | `Partial<CSSStyleDeclaration> \| WrapperStyleConfig` | — | Inline styles on wrapper spans |
-| `wrapperAttrs` | `Record<string, string> \| WrapperAttrsConfig` | — | Custom attributes on wrapper spans |
-| `contentAttribute` | `'none' \| 'both' \| 'attribute-only'` | `'both'` | Controls `data-content` on char/word wrappers |
-| `aria` | `'auto' \| 'none'` | `'auto'` | ARIA handling mode |
-| `preserveText` | `boolean` | `true` | Insert visually-hidden original text for a11y/SEO |
-| `partIndexing` | `boolean` | `true` | Set `--char-index` / `--word-index` etc. on spans |
-| `nested` | `'flatten' \| 'preserve' \| number` | `'preserve'` | How inner DOM structure is handled |
-| `autoSplit` | `boolean` | — | Re-split on resize / font load |
-| `onSplit` | `(result) => void` | — | Callback after each split |
-| `segmenter` | `Intl.Segmenter \| constructor` | — | Polyfill for `Intl.Segmenter` |
-| `ignore` | `string[] \| (node) => boolean` | — | Selectors / predicate to skip nodes |
+| Option             | Type                                                 | Default      | Description                                       |
+| ------------------ | ---------------------------------------------------- | ------------ | ------------------------------------------------- |
+| `type`             | `SplitType \| SplitType[]`                           | —            | Split eagerly on call instead of lazily           |
+| `wrapperClass`     | `string \| WrapperClassConfig`                       | —            | Extra CSS class(es) on wrapper spans              |
+| `wrapperStyle`     | `Partial<CSSStyleDeclaration> \| WrapperStyleConfig` | —            | Inline styles on wrapper spans                    |
+| `wrapperAttrs`     | `Record<string, string> \| WrapperAttrsConfig`       | —            | Custom attributes on wrapper spans                |
+| `contentAttribute` | `'none' \| 'both' \| 'attribute-only'`               | `'both'`     | Controls `data-content` on char/word wrappers     |
+| `aria`             | `'auto' \| 'none'`                                   | `'auto'`     | ARIA handling mode                                |
+| `preserveText`     | `boolean`                                            | `true`       | Insert visually-hidden original text for a11y/SEO |
+| `partIndexing`     | `boolean`                                            | `true`       | Set `--char-index` / `--word-index` etc. on spans |
+| `nested`           | `'flatten' \| 'preserve' \| number`                  | `'preserve'` | How inner DOM structure is handled                |
+| `autoSplit`        | `boolean`                                            | —            | Re-split on resize / font load                    |
+| `onSplit`          | `(result) => void`                                   | —            | Callback after each split                         |
+| `segmenter`        | `Intl.Segmenter \| constructor`                      | —            | Polyfill for `Intl.Segmenter`                     |
+| `ignore`           | `string[] \| (node) => boolean`                      | —            | Selectors / predicate to skip nodes               |
 
 ### Default CSS classes
 
-| Split type | Class |
-|------------|-------|
-| `chars` | `.split-c` |
-| `words` | `.split-w` |
-| `lines` | `.split-l` |
+| Split type  | Class      |
+| ----------- | ---------- |
+| `chars`     | `.split-c` |
+| `words`     | `.split-w` |
+| `lines`     | `.split-l` |
 | `sentences` | `.split-s` |
 
 Base styles (`display: inline-block`, etc.) are injected once via `adoptedStyleSheets`.
