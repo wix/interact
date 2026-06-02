@@ -24,15 +24,17 @@ Web-native animation and interaction libraries — declarative, AI-ready, framew
 
 ## Packages
 
-| Package                                                                                      | Description                                  | Links                                                                                                                                  |
-| -------------------------------------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@wix/interact`](https://github.com/wix/interact/blob/master/packages/interact/)            | Declarative interaction layer (main package) | [README](https://github.com/wix/interact/blob/master/packages/interact/README.md) · [npm](https://www.npmjs.com/package/@wix/interact) |
-| [`@wix/motion`](https://github.com/wix/interact/blob/master/packages/motion/)                | Low-level animation engine                   | [README](https://github.com/wix/interact/blob/master/packages/motion/README.md) · [npm](https://www.npmjs.com/package/@wix/motion)     |
-| [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) | Ready-made animation presets                 | [npm](https://www.npmjs.com/package/@wix/motion-presets)                                                                               |
+| Package                                                                                        | Description                                  | Links                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`@wix/interact`](https://github.com/wix/interact/blob/master/packages/interact/)              | Declarative interaction layer (main package) | [README](https://github.com/wix/interact/blob/master/packages/interact/README.md) · [npm](https://www.npmjs.com/package/@wix/interact)     |
+| [`@wix/motion`](https://github.com/wix/interact/blob/master/packages/motion/)                  | Low-level animation engine                   | [README](https://github.com/wix/interact/blob/master/packages/motion/README.md) · [npm](https://www.npmjs.com/package/@wix/motion)         |
+| [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets)   | Ready-made animation presets                 | [npm](https://www.npmjs.com/package/@wix/motion-presets)                                                                                   |
+| [`@wix/splittext`](https://github.com/wix/interact/blob/master/packages/splittext/)            | Accessible text splitting for animations     | [README](https://github.com/wix/interact/blob/master/packages/splittext/README.md) · [npm](https://www.npmjs.com/package/@wix/splittext)   |
 
 ```
 @wix/motion ← @wix/interact (declarative layer)
 @wix/motion ← @wix/motion-presets (ready-made effects)
+@wix/splittext (standalone — pairs with @wix/motion for staggered animations)
 ```
 
 ## Quick Start
