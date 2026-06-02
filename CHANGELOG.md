@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
-### [2.3.1] - 2026-05-29
+### [2.4.0] - 2026-05-29
 
 #### Changed
 
