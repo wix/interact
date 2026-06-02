@@ -22,15 +22,12 @@ export type Rule = {
 };
 
 export const RULES: Rule[] = [
-  // Referential rules (errors)
   effectIdsExist,
   sequenceIdsExist,
   animationEndEffectExists,
   conditionsExist,
   interactionHasEffectsOrSequences,
-  // Condition rules (warnings)
   validMediaQueries,
-  // Semantic rules
   triggerEffectCompatible,
   numericBounds,
   conditionPredicateRequired,

@@ -1,10 +1,5 @@
-import type {
-  InteractConfig,
-  SequenceConfig,
-  SequenceConfigRef,
-  Interaction,
-} from '../types/config';
-import type { Effect, EffectRef } from '../types/effects';
+import type { InteractConfig, SequenceConfig, SequenceConfigRef, Interaction } from '@wix/interact';
+import type { Effect, EffectRef } from '@wix/interact';
 
 export type Path = (string | number)[];
 

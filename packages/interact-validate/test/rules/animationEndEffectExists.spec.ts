@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateInteractConfig } from '../../../src/validate';
+import { validateInteractConfig } from '../../src';
 
 describe('animationEndEffectExists — ANIMATION_END_EFFECT_NOT_FOUND', () => {
   it('emits no errors when the animationEnd params.effectId resolves to a defined effect', () => {

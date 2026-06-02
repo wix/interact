@@ -1,7 +1,7 @@
 import { describe, expectTypeOf, it } from 'vitest';
 import type { z } from 'zod';
-import type { InteractConfig, Condition as ConditionDef } from '../../src/types/config';
-import { InteractConfigSchema, Condition } from '../../src/validate/schema';
+import type { InteractConfig, Condition as ConditionDef } from '@wix/interact';
+import { InteractConfigSchema, Condition } from '../src/schema';
 
 type InferredConfig = z.infer<typeof InteractConfigSchema>;
 type InferredCondition = z.infer<typeof Condition>;
@@ -9,7 +9,7 @@ type InferredCondition = z.infer<typeof Condition>;
 // ---------------------------------------------------------------------------
 // These tests are compile-time drift guards. They fail at TypeScript type-
 // checking time (yarn lint / tsc --noEmit) if the zod schemas diverge from
-// the hand-written types in src/types/. At runtime they are no-ops.
+// the hand-written types in @wix/interact. At runtime they are no-ops.
 // ---------------------------------------------------------------------------
 
 describe('schema type parity (drift guard)', () => {

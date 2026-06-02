@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateInteractConfig } from '../../../src/validate';
+import { validateInteractConfig } from '../../src';
 
 describe('conditionPredicateRequired — CONDITION_PREDICATE_REQUIRED', () => {
   it('emits no errors for a media condition with a predicate', () => {

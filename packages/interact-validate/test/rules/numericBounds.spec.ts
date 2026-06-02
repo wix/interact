@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateInteractConfig } from '../../../src/validate';
+import { validateInteractConfig } from '../../src';
 
 describe('numericBounds', () => {
   describe('valid configs', () => {

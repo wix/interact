@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateInteractConfig } from '../../../src/validate';
+import { validateInteractConfig } from '../../src';
 
 describe('conditionsExist — CONDITION_NOT_FOUND', () => {
   it('emits no errors when all condition references resolve to defined conditions', () => {

@@ -26,8 +26,6 @@ export { SerializableSequenceConfig, SerializableSequenceConfigRef } from './seq
 export { Keyframe, LengthPercentage, RangeOffset, Condition, MediaCondition } from './primitives';
 
 // Canonical types — single source of truth, no z.infer<> re-derivation.
-// Names that collide with a zod schema value above are exported with a
-// `Def` suffix; unambiguous names are exported as-is.
 export type {
   InteractConfig,
   Condition as ConditionDef,
@@ -36,6 +34,6 @@ export type {
   SequenceConfigRef,
   Interaction as InteractionDef,
   InteractionTrigger,
-} from '../../types/config';
+} from '@wix/interact';
 
-export type { Effect, EffectRef } from '../../types/effects';
+export type { Effect, EffectRef } from '@wix/interact';

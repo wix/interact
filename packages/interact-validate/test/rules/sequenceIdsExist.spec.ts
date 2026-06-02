@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateInteractConfig } from '../../../src/validate';
+import { validateInteractConfig } from '../../src';
 
 describe('sequenceIdsExist — SEQUENCE_ID_NOT_FOUND', () => {
   it('emits no errors when a sequenceId reference resolves to a defined sequence', () => {

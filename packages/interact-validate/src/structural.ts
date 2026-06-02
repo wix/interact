@@ -1,6 +1,6 @@
 import type { ZodIssue } from 'zod';
 import { InteractConfigSchema } from './schema';
-import type { InteractConfig } from '../types/config';
+import type { InteractConfig } from '@wix/interact';
 import type { ValidationError } from './errors';
 
 function mapZodCode(issue: ZodIssue): string {

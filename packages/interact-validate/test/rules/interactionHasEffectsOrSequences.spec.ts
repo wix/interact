@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateInteractConfig } from '../../../src/validate';
+import { validateInteractConfig } from '../../src';
 
 describe('interactionHasEffectsOrSequences — INTERACTION_EMPTY', () => {
   it('emits no errors when an interaction has at least one effect', () => {

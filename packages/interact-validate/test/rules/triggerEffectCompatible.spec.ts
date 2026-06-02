@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateInteractConfig } from '../../../src/validate';
+import { validateInteractConfig } from '../../src';
 
 describe('triggerEffectCompatible — TRIGGER_EFFECT_INCOMPATIBLE', () => {
   describe('valid combinations', () => {

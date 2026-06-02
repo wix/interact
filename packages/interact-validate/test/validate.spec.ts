@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  validateInteractConfig,
-  assertValidInteractConfig,
-  InteractValidationError,
-} from '../../src/validate';
+import { validateInteractConfig, assertValidInteractConfig, InteractValidationError } from '../src';
 
 const VALID_CONFIG = {
   interactions: [

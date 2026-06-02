@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateStructural } from '../../src/validate/structural';
+import { validateStructural } from '../src/structural';
 
 const VALID_CONFIG = {
   interactions: [

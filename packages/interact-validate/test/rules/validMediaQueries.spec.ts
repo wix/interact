@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { validateInteractConfig } from '../../../src/validate';
+import { validateInteractConfig } from '../../src';
 
 // jsdom defines window.matchMedia but its stub returns `media: ''` for all
 // queries because jsdom does not implement CSS parsing. Provide a minimal

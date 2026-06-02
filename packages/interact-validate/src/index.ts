@@ -1,4 +1,4 @@
-import type { InteractConfig } from '../types/config';
+import type { InteractConfig } from '@wix/interact';
 import { buildContext } from './context';
 import {
   InteractValidationError,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateInteractConfig } from '../../../src/validate';
+import { validateInteractConfig } from '../../src';
 
 const KEYFRAME_EFFECT_A = { name: 'anim1', keyframes: [{ opacity: '0' }, { opacity: '1' }] };
 const KEYFRAME_EFFECT_B = { name: 'anim2', keyframes: [{ opacity: '0' }, { opacity: '1' }] };
