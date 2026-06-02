@@ -1396,6 +1396,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@wix/interact-validate@workspace:packages/interact-validate":
+  version: 0.0.0-use.local
+  resolution: "@wix/interact-validate@workspace:packages/interact-validate"
+  dependencies:
+    "@vitest/coverage-v8": "npm:^4.0.14"
+    "@wix/interact": "npm:^2.4.0"
+    rimraf: "npm:^6.0.1"
+    typescript: "npm:^5.9.3"
+    vite: "npm:^7.2.2"
+    vitest: "npm:^4.0.14"
+    zod: "npm:^4.0.0"
+  peerDependencies:
+    "@wix/interact": ^2.4.0
+  languageName: unknown
+  linkType: soft
+
 "@wix/interact-website@workspace:apps/website":
   version: 0.0.0-use.local
   resolution: "@wix/interact-website@workspace:apps/website"
@@ -1423,7 +1439,6 @@ __metadata:
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
     vitest: "npm:^4.0.14"
-    zod: "npm:^4.0.0"
   peerDependencies:
     react: ^18.3.1 || ^19.0.0
     react-dom: ^18.3.1 || ^19.0.0
