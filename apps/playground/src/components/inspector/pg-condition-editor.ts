@@ -236,7 +236,7 @@ export class PgConditionEditor extends BaseComponent {
           <div class="field" style="flex: 2">
             <label>Predicate</label>
             <input type="text" class="pg-input" data-cond-predicate="${id}"
-              value="${this._escapeAttr(condition.predicate ?? '')}"
+              value="${this._escapeAttr(condition.predicate)}"
               placeholder="${placeholder}">
           </div>
         </div>
@@ -350,7 +350,7 @@ export class PgConditionEditor extends BaseComponent {
           this.store.dispatch(
             updateCondition(condId, {
               ...current,
-              predicate: input.value || undefined,
+              predicate: input.value || '',
             }),
           );
         }

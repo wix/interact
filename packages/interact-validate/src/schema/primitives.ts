@@ -25,7 +25,7 @@ export const RangeOffset = z
 export const Condition = z
   .object({
     type: z.enum(['media', 'container', 'selector']),
-    predicate: z.string().optional(),
+    predicate: z.string(),
   })
   .strict();
 

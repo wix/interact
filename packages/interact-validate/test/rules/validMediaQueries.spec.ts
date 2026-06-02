@@ -30,7 +30,7 @@ function configWithCondition(
   type: 'media' | 'container' | 'selector' = 'media',
 ) {
   return {
-    conditions: { [id]: predicate !== undefined ? { type, predicate } : { type } },
+    conditions: { [id]: { type, predicate: predicate || '' } },
     interactions: [
       {
         key: 'el',

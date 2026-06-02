@@ -405,47 +405,6 @@ observer.observe(interactElement, {
 });
 ```
 
-### State-Based Conditional Logic
-
-Use states to control other interactions:
-
-```typescript
-const conditionalConfig = {
-  conditions: {
-    'menu-open': {
-      type: 'custom',
-      predicate: () => {
-        const element = document.querySelector('interact-element');
-        return hasState('menu-open');
-      },
-    },
-  },
-  interactions: [
-    // Close menu when clicking outside
-    {
-      key: 'page-body',
-      trigger: 'click',
-      conditions: ['menu-open'],
-      effects: [
-        {
-          key: 'mobile-menu',
-          effectId: 'menu-close',
-          keyframeEffect: {
-            name: 'slide-out',
-            keyframes: [
-              { opacity: '1', transform: 'translateX(0)' },
-              { opacity: '0', transform: 'translateX(100%)' },
-            ],
-          },
-          duration: 300,
-          easing: 'ease-in',
-        },
-      ],
-    },
-  ],
-};
-```
-
 ## State Management Patterns
 
 ### State Machine Pattern

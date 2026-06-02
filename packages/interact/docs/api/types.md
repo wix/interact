@@ -873,7 +873,7 @@ Defines conditional logic for interactions.
 ```typescript
 type Condition = {
   type: 'media' | 'container' | 'selector';
-  predicate?: string;
+  predicate: string;
 };
 ```
 
