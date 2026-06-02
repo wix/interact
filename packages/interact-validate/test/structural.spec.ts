@@ -5,7 +5,7 @@ const VALID_CONFIG = {
   interactions: [
     { key: 'el', trigger: 'viewEnter', effects: [{ namedEffect: { type: 'FadeIn' } }] },
   ],
-  conditions: {'condition-id': { type: 'media', predicate: '(min-width: 768px)' }},
+  conditions: { 'condition-id': { type: 'media', predicate: '(min-width: 768px)' } },
 };
 
 describe('validateStructural', () => {
