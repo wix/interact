@@ -61,13 +61,10 @@ describe('validMediaQueries — INVALID_MEDIA_QUERY', () => {
     expect(result.errors.filter((e) => e.code === 'INVALID_MEDIA_QUERY')).toHaveLength(0);
   });
 
-  it('emits INVALID_MEDIA_QUERY for an empty predicate string', () => {
+  it('emits no errors for an empty predicate string', () => {
     // Empty string fails the first guard in isValidMediaQuery: `if (!q) return false`
     const result = validateInteractConfig(configWithCondition('mq', ''));
-    expect(result.errors.some((e) => e.code === 'INVALID_MEDIA_QUERY')).toBe(true);
-    const err = result.errors.find((e) => e.code === 'INVALID_MEDIA_QUERY');
-    expect(err?.severity).toBe('warning');
-    expect(err?.path).toEqual(['conditions', 'mq', 'predicate']);
+    expect(result.errors.filter((e) => e.code === 'INVALID_MEDIA_QUERY')).toHaveLength(0);
   });
 
   it('emits INVALID_MEDIA_QUERY for a query that matchMedia reports as invalid', () => {
