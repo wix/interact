@@ -11,7 +11,6 @@ import { validMediaQueries } from './conditions/validMediaQueries';
 
 import { triggerEffectCompatible } from './semantic/triggerEffectCompatible';
 import { numericBounds } from './semantic/numericBounds';
-import { conditionPredicateRequired } from './semantic/conditionPredicateRequired';
 import { uniqueDefinitionIds } from './semantic/uniqueDefinitionIds';
 import { unusedDefinitions } from './semantic/unusedDefinitions';
 
@@ -30,7 +29,6 @@ export const RULES: Rule[] = [
   validMediaQueries,
   triggerEffectCompatible,
   numericBounds,
-  conditionPredicateRequired,
   uniqueDefinitionIds,
   unusedDefinitions,
 ];

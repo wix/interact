@@ -5,6 +5,7 @@ const VALID_CONFIG = {
   interactions: [
     { key: 'el', trigger: 'viewEnter', effects: [{ namedEffect: { type: 'FadeIn' } }] },
   ],
+  conditions: {'condition-id': { type: 'media', predicate: '(min-width: 768px)' }},
 };
 
 describe('validateStructural', () => {
@@ -80,5 +81,19 @@ describe('validateStructural', () => {
   it('exposes path information in errors', () => {
     const result = validateStructural({ interactions: 'bad' });
     expect(result.errors[0].path).toBeDefined();
+  });
+
+  it('emits SCHEMA_TOO_SMALL when condition predicate is an empty string', () => {
+    const result = validateStructural({
+      interactions: [],
+      conditions: {
+        'condition-id': {
+          type: 'media',
+          predicate: '',
+        },
+      },
+    });
+    expect(result.ok).toBe(false);
+    expect(result.errors.some((e) => e.code === 'SCHEMA_TOO_SMALL')).toBe(true);
   });
 });

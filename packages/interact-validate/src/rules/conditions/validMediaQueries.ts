@@ -34,7 +34,7 @@ export const validMediaQueries: Rule = {
   run: (ctx) => {
     const errors: ValidationError[] = [];
     for (const [id, condition] of Object.entries(ctx.config.conditions ?? {})) {
-      if (condition.type === 'media') {
+      if (condition.type === 'media' && condition.predicate) {
         if (!isValidMediaQuery(condition.predicate)) {
           errors.push({
             code: 'INVALID_MEDIA_QUERY',
