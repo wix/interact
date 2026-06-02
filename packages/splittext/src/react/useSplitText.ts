@@ -44,7 +44,6 @@ export function useSplitText(
       setResult(null);
     };
     // optionsKey is the serialised version of options — safe to use as dep
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref, optionsKey]);
 
   return result;
