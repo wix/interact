@@ -313,9 +313,7 @@ describe('splitText', () => {
       const target = el('Hello World');
       splitText(target, { type: 'words' });
       const wrapper = target.querySelector('[data-splittext-wrapper]')!;
-      const textNodes = Array.from(wrapper.childNodes).filter(
-        (n) => n.nodeType === Node.TEXT_NODE,
-      );
+      const textNodes = Array.from(wrapper.childNodes).filter((n) => n.nodeType === Node.TEXT_NODE);
       expect(textNodes).toHaveLength(0);
       expect(wrapper.querySelectorAll('.split-w')).toHaveLength(2);
     });
@@ -976,9 +974,20 @@ describe('splitText', () => {
   // -------------------------------------------------------------------------
 
   describe('ignore option', () => {
-    it('skips elements matching selector array for word splits', () => {
+    it('skips elements matching selector array for word splits (preserve mode)', () => {
+      // In preserve mode (default) each text node is split independently.
+      // "Hello " and " World" are separate text nodes; the <sup> stays in the DOM.
       const target = el('Hello <sup>1</sup> World');
       const { words } = splitText(target, { type: 'words', ignore: ['sup'] });
+      expect(words).toHaveLength(2);
+      expect(words[0].textContent).toBe('Hello ');
+      expect(words[1].textContent).toBe(' World');
+    });
+
+    it('skips elements matching selector array for word splits (flatten mode)', () => {
+      // In flatten mode the two text nodes are concatenated → double space.
+      const target = el('Hello <sup>1</sup> World');
+      const { words } = splitText(target, { type: 'words', ignore: ['sup'], nested: 'flatten' });
       expect(words).toHaveLength(2);
       expect(words[0].textContent).toBe('Hello  ');
       expect(words[1].textContent).toBe('World');
@@ -989,6 +998,129 @@ describe('splitText', () => {
       const { chars } = splitText(target, { type: 'chars', ignore: ['sup'] });
       const text = chars.map((c) => c.textContent).join('');
       expect(text).toBe('ABCD');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // nested option
+  // -------------------------------------------------------------------------
+
+  describe('nested option', () => {
+    describe("nested: 'flatten'", () => {
+      it('extracts flat text and removes nested elements from output', () => {
+        const target = el('<b>Hello</b> <i>World</i>');
+        const { chars } = splitText(target, { type: 'chars', nested: 'flatten' });
+        expect(chars.map((c) => c.textContent).join('')).toBe('Hello World');
+        const wrapper = target.querySelector('[data-splittext-wrapper]')!;
+        expect(wrapper.querySelector('b')).toBeNull();
+        expect(wrapper.querySelector('i')).toBeNull();
+      });
+
+      it('splits words from concatenated flat text', () => {
+        const target = el('<b>Hello</b> <i>World</i>');
+        const { words } = splitText(target, { type: 'words', nested: 'flatten' });
+        expect(words).toHaveLength(2);
+        expect(words[0].textContent).toBe('Hello ');
+        expect(words[1].textContent).toBe('World');
+      });
+    });
+
+    describe("nested: 'preserve' (default)", () => {
+      it('keeps nested elements intact in the output DOM', () => {
+        const target = el('<b>Hello</b> World');
+        splitText(target, { type: 'chars', nested: 'preserve' });
+        const wrapper = target.querySelector('[data-splittext-wrapper]')!;
+        expect(wrapper.querySelector('b')).not.toBeNull();
+      });
+
+      it('is active when the nested option is omitted (default)', () => {
+        const target = el('<strong>Hi</strong>');
+        splitText(target, { type: 'chars' });
+        const wrapper = target.querySelector('[data-splittext-wrapper]')!;
+        expect(wrapper.querySelector('strong')).not.toBeNull();
+      });
+
+      it('splits chars within nested elements', () => {
+        const target = el('Hi <strong>AB</strong>');
+        const { chars } = splitText(target, { type: 'chars', nested: 'preserve' });
+        const wrapper = target.querySelector('[data-splittext-wrapper]')!;
+        const strong = wrapper.querySelector('strong')!;
+        expect(strong).not.toBeNull();
+        // "AB" = 2 chars inside <strong>
+        expect(strong.querySelectorAll('.split-c')).toHaveLength(2);
+        // Chars outside <strong> are siblings of it
+        expect(chars.length).toBeGreaterThan(2);
+      });
+
+      it('char indices are continuous across nested elements', () => {
+        const target = el('Hi <strong>AB</strong>');
+        // "Hi " = 3 chars (H=0, i=1, ' '=2), "AB" = 2 chars (A=3, B=4)
+        const { chars } = splitText(target, { type: 'chars', nested: 'preserve' });
+        expect(chars[0].style.getPropertyValue('--char-index')).toBe('0');
+        const wrapper = target.querySelector('[data-splittext-wrapper]')!;
+        const strongSpans = wrapper
+          .querySelector('strong')!
+          .querySelectorAll<HTMLElement>('.split-c');
+        expect(strongSpans[0].style.getPropertyValue('--char-index')).toBe('3');
+      });
+
+      it('word indices are continuous across nested elements', () => {
+        const target = el('Hello <strong>World</strong>');
+        const { words } = splitText(target, { type: 'words', nested: 'preserve' });
+        expect(words).toHaveLength(2);
+        expect(words[0].style.getPropertyValue('--word-index')).toBe('0');
+        expect(words[1].style.getPropertyValue('--word-index')).toBe('1');
+      });
+
+      it('word inside nested element is a descendant of that element', () => {
+        const target = el('Hello <strong>World</strong>');
+        const { words } = splitText(target, { type: 'words', nested: 'preserve' });
+        const strong = target.querySelector('strong')!;
+        expect(strong.contains(words[1])).toBe(true);
+      });
+
+      it('cached spans are reused when re-activating after a type switch', () => {
+        const target = el('<em>Hi</em>');
+        const result = splitText(target, { nested: 'preserve' });
+        const chars1 = result.chars;
+        void result.words;
+        const chars2 = result.chars;
+        expect(chars1).toBe(chars2);
+      });
+    });
+
+    describe('nested: number', () => {
+      it('preserves elements within the depth limit', () => {
+        const target = el('<b>bold <i>italic <u>under</u></i></b>');
+        splitText(target, { type: 'chars', nested: 2 });
+        const wrapper = target.querySelector('[data-splittext-wrapper]')!;
+        expect(wrapper.querySelector('b')).not.toBeNull(); // depth 1 — preserved
+        expect(wrapper.querySelector('i')).not.toBeNull(); // depth 2 — preserved
+        expect(wrapper.querySelector('u')).toBeNull(); // depth 3 — flattened
+      });
+
+      it('includes text from elements that were flattened', () => {
+        const target = el('<b>x <i>y <u>z</u></i></b>');
+        const { chars } = splitText(target, { type: 'chars', nested: 2 });
+        const text = chars.map((c) => c.textContent).join('');
+        expect(text).toContain('z'); // was inside the removed <u>
+      });
+
+      it('nested: 1 preserves only direct children', () => {
+        const target = el('<b>bold <i>italic</i></b>');
+        splitText(target, { type: 'chars', nested: 1 });
+        const wrapper = target.querySelector('[data-splittext-wrapper]')!;
+        expect(wrapper.querySelector('b')).not.toBeNull(); // depth 1 — preserved
+        expect(wrapper.querySelector('i')).toBeNull(); // depth 2 — flattened
+      });
+
+      it('char indices are continuous across depth-limited elements', () => {
+        const target = el('<b>AB</b><i>CD</i>');
+        const { chars } = splitText(target, { type: 'chars', nested: 1 });
+        // A=0, B=1 (in <b>), C=2, D=3 (in <i>)
+        expect(chars[0].style.getPropertyValue('--char-index')).toBe('0');
+        expect(chars[2].style.getPropertyValue('--char-index')).toBe('2');
+      });
     });
   });
 });

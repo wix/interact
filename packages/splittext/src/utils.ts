@@ -180,6 +180,44 @@ export function walkTextNodes(
 }
 
 /**
+ * Flatten all element descendants of `element` that are deeper than `maxDepth`
+ * levels by replacing them with a text node containing their `textContent`.
+ *
+ * Depth is counted from `element` (depth 0). Direct children are depth 1.
+ * Elements at depth ≤ `maxDepth` are preserved; elements at depth > `maxDepth`
+ * are replaced in-place with a plain text node. Mutates `element` directly.
+ *
+ * @param element  - Root element (depth 0).
+ * @param maxDepth - Maximum element depth to preserve (e.g. 2 keeps direct children and grandchildren).
+ * @param ignore   - Selectors or predicate matching elements to leave completely untouched.
+ */
+export function flattenBeyondDepth(
+  element: HTMLElement,
+  maxDepth: number,
+  ignore?: SplitTextOptions['ignore'],
+): void {
+  function processChildren(parent: Element, childDepth: number): void {
+    for (const child of Array.from(parent.children)) {
+      if (ignore) {
+        if (Array.isArray(ignore)) {
+          if (ignore.some((sel) => child.matches(sel))) continue;
+        } else if (ignore(child)) {
+          continue;
+        }
+      }
+
+      if (childDepth > maxDepth) {
+        parent.replaceChild(document.createTextNode(child.textContent ?? ''), child);
+      } else {
+        processChildren(child, childDepth + 1);
+      }
+    }
+  }
+
+  processChildren(element, 1);
+}
+
+/**
  * Return the plain text content of `element`. Equivalent to
  * `element.textContent` but strips leading/trailing whitespace from
  * the result.
@@ -200,8 +238,12 @@ export function getFilteredTextContent(
   if (!ignore) return getTextContent(element);
 
   const parts: string[] = [];
-  walkTextNodes(element, (node) => {
-    parts.push(node.textContent ?? '');
-  }, ignore);
+  walkTextNodes(
+    element,
+    (node) => {
+      parts.push(node.textContent ?? '');
+    },
+    ignore,
+  );
   return parts.join('').trim();
 }

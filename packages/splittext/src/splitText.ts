@@ -9,6 +9,8 @@ import {
   isWhitespaceOnly,
   getTextContent,
   getFilteredTextContent,
+  walkTextNodes,
+  flattenBeyondDepth,
 } from './utils';
 import { createWrapper, injectBaseStyles } from './wrappers';
 
@@ -20,12 +22,28 @@ type SplitCache = {
 };
 
 /**
+ * Tracks the replacement nodes for one text node in preserve mode.
+ * Stored so spans can be re-inserted into fresh DOM on type switches.
+ */
+interface PreserveSegment {
+  /** Sequential index of this text node in the tree-walk order. */
+  nodeIndex: number;
+  /** All DOM nodes to insert in place of the original text node. */
+  nodes: Node[];
+  /** Only the `<span>` wrapper elements (subset of `nodes`). */
+  spans: HTMLSpanElement[];
+}
+
+/**
  * Perform character-level splitting on a plain text string.
  * Returns an array of `<span>` elements (not yet inserted into the DOM).
+ *
+ * @param indexOffset - Starting value for the `--char-index` CSS property
+ *   (used in preserve mode for continuous global indexing across text nodes).
  */
-function splitChars(text: string, options: SplitTextOptions): HTMLSpanElement[] {
+function splitChars(text: string, options: SplitTextOptions, indexOffset = 0): HTMLSpanElement[] {
   const chars = segmentChars(text, options);
-  return chars.map((char, i) => createWrapper(char, 'chars', i, options));
+  return chars.map((char, i) => createWrapper(char, 'chars', i + indexOffset, options));
 }
 
 /**
@@ -33,10 +51,13 @@ function splitChars(text: string, options: SplitTextOptions): HTMLSpanElement[] 
  * Returns the word `<span>` elements AND a full DOM node list. With
  * `wordGlue: 'adjacent'` (default) every token is a span; with `'none'`,
  * whitespace-only segments remain as text nodes between spans.
+ *
+ * @param indexOffset - Starting value for `--word-index` (preserve mode global index).
  */
 function splitWordsWithSpacing(
   text: string,
   options: SplitTextOptions,
+  indexOffset = 0,
 ): { spans: HTMLSpanElement[]; nodes: Node[] } {
   const wordGlue = options.wordGlue ?? 'adjacent';
   const allSegments = segmentWordsAll(text, options);
@@ -46,14 +67,14 @@ function splitWordsWithSpacing(
   if (wordGlue === 'adjacent') {
     const tokens = buildAdjacentWordTokens(allSegments);
     tokens.forEach((token, index) => {
-      const span = createWrapper(token, 'words', index, options);
+      const span = createWrapper(token, 'words', index + indexOffset, options);
       spans.push(span);
       nodes.push(span);
     });
     return { spans, nodes };
   }
 
-  let wordIndex = 0;
+  let wordIndex = indexOffset;
   for (const seg of allSegments) {
     if (!seg.segment) continue;
 
@@ -72,10 +93,18 @@ function splitWordsWithSpacing(
 /**
  * Perform sentence-level splitting on a plain text string.
  * Returns an array of `<span>` elements (not yet inserted into the DOM).
+ *
+ * @param indexOffset - Starting value for `--sentence-index` (preserve mode global index).
  */
-function splitSentences(text: string, options: SplitTextOptions): HTMLSpanElement[] {
+function splitSentences(
+  text: string,
+  options: SplitTextOptions,
+  indexOffset = 0,
+): HTMLSpanElement[] {
   const sentences = segmentSentences(text, options);
-  return sentences.map((sentence, i) => createWrapper(sentence, 'sentences', i, options));
+  return sentences.map((sentence, i) =>
+    createWrapper(sentence, 'sentences', i + indexOffset, options),
+  );
 }
 
 /**
@@ -130,9 +159,15 @@ class SplitTextResultImpl implements SplitTextResult {
   /**
    * Parallel cache of DOM nodes for types that include non-span nodes
    * (e.g. text nodes for inter-word spacing). For types without extra nodes
-   * this mirrors `_cache`.
+   * this mirrors `_cache`. Only used in flatten mode.
    */
   private _domNodes: Partial<Record<SplitType, Node[]>> = {};
+  /**
+   * Per-type list of preserve-mode segments: maps text-node walk order to
+   * the replacement nodes created during `_computePreserve`. Allows spans to
+   * be re-inserted after an HTML restore without re-computing them.
+   */
+  private _preserveMap: Partial<Record<SplitType, PreserveSegment[]>> = {};
   private _isSplit = false;
   /**
    * Which split type currently occupies the element's DOM. Only one type is
@@ -230,12 +265,17 @@ class SplitTextResultImpl implements SplitTextResult {
   // -------------------------------------------------------------------------
 
   /**
-   * Compute and cache the spans for `type` **without mutating the DOM**,
-   * except for `'lines'` which requires the pre-split layout.
+   * Compute and cache the spans for `type` **without mutating the real DOM**
+   * (except `'lines'`, which requires the pre-split layout via Range API).
    *
-   * Separating computation from activation lets multiple types be computed
-   * and cached independently without overwriting each other's cached spans
-   * in the DOM between calls.
+   * - Preserve mode (`nested !== 'flatten'`, the default): clones the original
+   *   HTML into a detached element, optionally applies depth-limiting, walks
+   *   text nodes in the clone, and creates spans per text node. The real DOM
+   *   is only touched during `_activate`.
+   * - Flatten mode (`nested: 'flatten'`): uses `_splitText` (the pre-captured
+   *   flat text) to create spans. Classic single-pass approach.
+   * - Lines: always restores the real DOM and runs Range-based detection
+   *   regardless of the `nested` setting.
    */
   private _compute(type: SplitType): void {
     if (this._cache[type]) return;
@@ -252,16 +292,99 @@ class SplitTextResultImpl implements SplitTextResult {
       }
       this._cache.lines = splitLinesInElement(this.element, this._options);
       this._domNodes.lines = this._cache.lines;
-    } else if (type === 'chars') {
-      this._cache.chars = splitChars(this._splitText, this._options);
-      this._domNodes.chars = this._cache.chars;
-    } else if (type === 'words') {
-      const { spans, nodes } = splitWordsWithSpacing(this._splitText, this._options);
-      this._cache.words = spans;
-      this._domNodes.words = nodes;
+    } else if (this._options.nested !== 'flatten') {
+      // Preserve mode (default 'preserve' or numeric depth limit).
+      // Uses a detached clone so the real DOM is never touched during compute.
+      this._computePreserve(type);
     } else {
-      this._cache.sentences = splitSentences(this._splitText, this._options);
-      this._domNodes.sentences = this._cache.sentences;
+      // Flatten mode: segment the pre-captured flat text.
+      if (type === 'chars') {
+        this._cache.chars = splitChars(this._splitText, this._options);
+        this._domNodes.chars = this._cache.chars;
+      } else if (type === 'words') {
+        const { spans, nodes } = splitWordsWithSpacing(this._splitText, this._options);
+        this._cache.words = spans;
+        this._domNodes.words = nodes;
+      } else {
+        this._cache.sentences = splitSentences(this._splitText, this._options);
+        this._domNodes.sentences = this._cache.sentences;
+      }
+    }
+  }
+
+  /**
+   * Preserve-mode computation (chars / words / sentences).
+   *
+   * Clones the original HTML into a detached container, applies an optional
+   * depth limit (`nested: number`), walks every non-whitespace text node, and
+   * creates the appropriate span wrappers for each. Global indices stay
+   * continuous across all text nodes within the element.
+   *
+   * The real DOM is never modified here — only the detached clone is used.
+   * Results are stored in `_cache[type]` and `_preserveMap[type]`.
+   */
+  private _computePreserve(type: Exclude<SplitType, 'lines'>): void {
+    const nested = this._options.nested;
+
+    // Work on a detached clone so the real element is untouched.
+    const container = this.element.ownerDocument.createElement('div');
+    container.innerHTML = this.originalHTML;
+
+    if (typeof nested === 'number') {
+      flattenBeyondDepth(container, nested, this._options.ignore);
+    }
+
+    const mapping: PreserveSegment[] = [];
+    const allSpans: HTMLSpanElement[] = [];
+    let globalIndex = 0;
+    let nodeIdx = 0;
+
+    walkTextNodes(
+      container,
+      (textNode) => {
+        const text = textNode.textContent ?? '';
+        // Skip whitespace-only text nodes (HTML formatting artefacts between
+        // block-level elements). Meaningful spaces within inline content are
+        // part of a text node that also has non-whitespace content.
+        if (!text.trim()) {
+          nodeIdx++;
+          return;
+        }
+
+        let nodeSpans: HTMLSpanElement[];
+        let nodeNodes: Node[];
+
+        if (type === 'chars') {
+          nodeSpans = splitChars(text, this._options, globalIndex);
+          nodeNodes = nodeSpans;
+        } else if (type === 'words') {
+          const { spans, nodes } = splitWordsWithSpacing(text, this._options, globalIndex);
+          nodeSpans = spans;
+          nodeNodes = nodes;
+        } else {
+          nodeSpans = splitSentences(text, this._options, globalIndex);
+          nodeNodes = nodeSpans;
+        }
+
+        if (nodeSpans.length > 0) {
+          mapping.push({ nodeIndex: nodeIdx, nodes: nodeNodes, spans: nodeSpans });
+          allSpans.push(...nodeSpans);
+          globalIndex += nodeSpans.length;
+        }
+        nodeIdx++;
+      },
+      this._options.ignore,
+    );
+
+    if (type === 'chars') {
+      this._cache.chars = allSpans;
+      this._preserveMap.chars = mapping;
+    } else if (type === 'words') {
+      this._cache.words = allSpans;
+      this._preserveMap.words = mapping;
+    } else {
+      this._cache.sentences = allSpans;
+      this._preserveMap.sentences = mapping;
     }
   }
 
@@ -269,8 +392,17 @@ class SplitTextResultImpl implements SplitTextResult {
    * Insert the cached spans for `type` into the element's DOM, replacing any
    * currently active split content. Only one type is active in the DOM at a
    * time.
+   *
+   * Dispatches to `_activatePreserve` when preserve mode is active (default).
    */
   private _activate(type: SplitType): void {
+    // Lines always use the flat insertion path since line spans replace the
+    // entire content regardless of `nested` mode.
+    if (type !== 'lines' && this._options.nested !== 'flatten') {
+      this._activatePreserve(type as Exclude<SplitType, 'lines'>);
+      return;
+    }
+
     const nodes = this._domNodes[type] ?? this._cache[type];
     if (!nodes?.length) return;
 
@@ -280,6 +412,88 @@ class SplitTextResultImpl implements SplitTextResult {
     const innerWrapper = applyAccessibility(this.element, this._originalText, this._options);
     for (const node of finalNodes) {
       innerWrapper.appendChild(node);
+    }
+
+    this._activeType = type;
+    this._isSplit = true;
+    this._options.onSplit?.(this);
+  }
+
+  /**
+   * Preserve-mode DOM activation (chars / words / sentences).
+   *
+   * Restores the original HTML, optionally applies the numeric depth limit,
+   * calls `applyAccessibility` (which moves all children into the aria-hidden
+   * wrapper), then replaces each text node with its pre-computed span nodes
+   * from `_preserveMap`.
+   *
+   * The walk and DOM mutations are intentionally separated into two phases so
+   * the TreeWalker is never active while the tree is being modified (modifying
+   * a live tree during traversal produces undefined walker behaviour).
+   *
+   * The same span objects created by `_computePreserve` are reused, so the
+   * cached array reference in `_cache[type]` never changes between activations
+   * — satisfying the caching contract for repeated getter access.
+   */
+  private _activatePreserve(type: Exclude<SplitType, 'lines'>): void {
+    const mapping = this._preserveMap[type];
+    if (!mapping) return;
+
+    const nested = this._options.nested;
+
+    // Restore original DOM structure so applyAccessibility can move the
+    // correct children into the inner wrapper.
+    this.element.innerHTML = this.originalHTML;
+
+    if (typeof nested === 'number') {
+      flattenBeyondDepth(this.element, nested, this._options.ignore);
+    }
+
+    // applyAccessibility moves all current children of element into the
+    // aria-hidden inner wrapper (or a passthrough div for aria:'none').
+    const innerWrapper = applyAccessibility(this.element, this._originalText, this._options);
+
+    // ── Phase 1: walk text nodes and collect replacement pairs (read-only) ──
+    const toReplace: Array<{ textNode: Text; seg: PreserveSegment }> = [];
+    let mappingIdx = 0;
+    let nodeIdx = 0;
+
+    walkTextNodes(
+      innerWrapper,
+      (textNode) => {
+        if (!(textNode.textContent ?? '').trim()) {
+          nodeIdx++;
+          return;
+        }
+        if (mappingIdx < mapping.length && mapping[mappingIdx].nodeIndex === nodeIdx) {
+          toReplace.push({ textNode, seg: mapping[mappingIdx] });
+          mappingIdx++;
+        }
+        nodeIdx++;
+      },
+      this._options.ignore,
+    );
+
+    // ── Phase 2: replace text nodes with cached span nodes (DOM mutations) ──
+    for (const { textNode, seg } of toReplace) {
+      const parent = textNode.parentNode!;
+      for (const node of seg.nodes) {
+        parent.insertBefore(node, textNode);
+      }
+      parent.removeChild(textNode);
+    }
+
+    // ── Phase 3: bidi wrapping (if configured) ──
+    // Collect all replacement nodes in order and wrap them in bidi run spans.
+    // This flattens any preserved nesting structure when bidi is active, which
+    // is an acceptable trade-off (bidi takes priority over element structure).
+    if (this._options.bidiResolver) {
+      const allNodes = mapping.flatMap((seg) => seg.nodes);
+      const bidiNodes = this._applyBidi(allNodes, this._splitText);
+      innerWrapper.innerHTML = '';
+      for (const node of bidiNodes) {
+        innerWrapper.appendChild(node);
+      }
     }
 
     this._activeType = type;
@@ -379,6 +593,7 @@ class SplitTextResultImpl implements SplitTextResult {
     // Reset state and restore original DOM
     this._cache = {};
     this._domNodes = {};
+    this._preserveMap = {};
     this._isSplit = false;
     this._activeType = null;
     this.element.innerHTML = this.originalHTML;

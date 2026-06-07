@@ -107,7 +107,7 @@ Returns a `SplitTextResult` with lazy getters: `.chars`, `.words`, `.lines`, `.s
 | `aria`             | `'auto' \| 'none'`                                   | `'auto'`     | ARIA handling mode                                |
 | `preserveText`     | `boolean`                                            | `true`       | Insert visually-hidden original text for a11y/SEO |
 | `partIndexing`     | `boolean`                                            | `true`       | Set `--char-index` / `--word-index` etc. on spans |
-| `wordGlue`         | `'adjacent' \| 'none'`                               | `'adjacent'` | Glue punctuation to words, or wrap it separately |
+| `wordGlue`         | `'adjacent' \| 'none'`                               | `'adjacent'` | Glue punctuation to words, or wrap it separately  |
 | `autoSplit`        | `boolean`                                            | —            | Re-split on resize / font load                    |
 | `onSplit`          | `(result) => void`                                   | —            | Callback after each split                         |
 | `segmenter`        | `Intl.Segmenter \| constructor`                      | —            | Polyfill for `Intl.Segmenter`                     |

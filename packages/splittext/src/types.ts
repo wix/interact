@@ -121,6 +121,21 @@ export interface SplitTextOptions {
   wordGlue?: 'adjacent' | 'none';
 
   /**
+   * Controls how nested DOM elements within the target are handled during splitting.
+   *
+   * - `'preserve'` (default): Preserves inline element structure (e.g. `<a>`, `<strong>`,
+   *   `<em>`). Each text node is split in place, keeping parent elements intact so they
+   *   remain in the output DOM alongside the split spans.
+   * - `'flatten'`: Extracts plain text via `element.textContent`, ignores all inner DOM
+   *   structure, and splits that flat string. Useful for dirty/generated markup.
+   * - `number`: Like `'preserve'`, but only the first N element levels are kept. Elements
+   *   deeper than N levels are replaced with their text content. For example, `nested: 2`
+   *   on `<b>bold <i>italic <u>underlined</u></i></b>` keeps `<b>` and `<i>` but removes
+   *   `<u>`, inlining its text as `<b>bold <i>italic underlined</i></b>`.
+   */
+  nested?: 'flatten' | 'preserve' | number;
+
+  /**
    * Selectors or a predicate to skip nodes during traversal (only applies in
    * `'preserve'` / `number` nested modes). Example: `['sup', 'sub']`.
    */
