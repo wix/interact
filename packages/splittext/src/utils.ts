@@ -69,8 +69,66 @@ export function segmentWords(
 }
 
 /**
+ * Segment `text` into all word-granularity tokens (including non-word-like
+ * segments such as whitespace and punctuation). Used by the DOM builder to
+ * preserve inter-word spacing via text nodes.
+ */
+export function segmentWordsAll(
+  text: string,
+  options: Pick<SplitTextOptions, 'segmenter'> = {},
+): Array<{ segment: string; isWordLike: boolean }> {
+  const Ctor = resolveSegmenterCtor(options.segmenter);
+  const segmenter = new Ctor(resolveLocale(), { granularity: 'word' });
+  return Array.from(segmenter.segment(text), (s) => ({
+    segment: s.segment,
+    isWordLike: Boolean(s.isWordLike),
+  }));
+}
+
+/** Return `true` when `segment` contains only whitespace characters. */
+export function isWhitespaceOnly(segment: string): boolean {
+  return segment.length > 0 && /^\s+$/.test(segment);
+}
+
+/**
+ * Merge word-granularity segments into animation tokens by gluing punctuation
+ * (and intra-token hyphens etc.) to adjacent words and attaching inter-word
+ * whitespace to the preceding token.
+ */
+export function buildAdjacentWordTokens(
+  segments: Array<{ segment: string; isWordLike: boolean }>,
+): string[] {
+  const tokens: string[] = [];
+  let current = '';
+
+  for (const { segment } of segments) {
+    if (!segment) continue;
+
+    if (isWhitespaceOnly(segment)) {
+      if (current) {
+        tokens.push(current + segment);
+        current = '';
+      } else if (tokens.length > 0) {
+        tokens[tokens.length - 1] += segment;
+      } else {
+        current += segment;
+      }
+      continue;
+    }
+
+    current += segment;
+  }
+
+  if (current) tokens.push(current);
+
+  return tokens;
+}
+
+/**
  * Segment `text` into sentences using `Intl.Segmenter` with
- * `granularity: 'sentence'`.
+ * `granularity: 'sentence'`. Trailing whitespace within each segment is
+ * preserved so that adjacent sentence spans render with correct spacing
+ * (`.split-s` uses `white-space: pre`).
  */
 export function segmentSentences(
   text: string,
@@ -78,20 +136,19 @@ export function segmentSentences(
 ): string[] {
   const Ctor = resolveSegmenterCtor(options.segmenter);
   const segmenter = new Ctor(resolveLocale(), { granularity: 'sentence' });
-  return Array.from(segmenter.segment(text), (s) => s.segment.trim()).filter(Boolean);
+  return Array.from(segmenter.segment(text), (s) => s.segment).filter((s) => s.trim());
 }
 
 /**
  * Walk all text node descendants of `root`, invoking `callback` for each.
  * Skips `<script>`, `<style>`, and elements matched by the `ignore` option.
- * Enforces a max-depth safety limit to prevent infinite loops on pathological
- * DOM trees.
+ * A `TreeWalker` on a finite DOM visits each node exactly once and terminates
+ * naturally — no artificial cap is needed.
  */
 export function walkTextNodes(
   root: HTMLElement,
   callback: (node: Text) => void,
   ignoreOption?: SplitTextOptions['ignore'],
-  maxDepth = 10,
 ): void {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
     acceptNode(node) {
@@ -113,14 +170,12 @@ export function walkTextNodes(
     },
   });
 
-  let depth = 0;
   let current = walker.nextNode();
-  while (current && depth < maxDepth * 100) {
+  while (current) {
     if (current.nodeType === Node.TEXT_NODE) {
       callback(current as Text);
     }
     current = walker.nextNode();
-    depth++;
   }
 }
 
@@ -131,4 +186,22 @@ export function walkTextNodes(
  */
 export function getTextContent(element: HTMLElement): string {
   return (element.textContent ?? '').trim();
+}
+
+/**
+ * Return the plain text content of `element`, excluding text from nodes
+ * matched by `ignore`. Falls back to `getTextContent` when no `ignore`
+ * option is provided.
+ */
+export function getFilteredTextContent(
+  element: HTMLElement,
+  ignore?: SplitTextOptions['ignore'],
+): string {
+  if (!ignore) return getTextContent(element);
+
+  const parts: string[] = [];
+  walkTextNodes(element, (node) => {
+    parts.push(node.textContent ?? '');
+  }, ignore);
+  return parts.join('').trim();
 }

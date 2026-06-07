@@ -42,6 +42,17 @@ function restoreGetClientRects() {
   delete (Range.prototype as unknown as Record<string, unknown>).getClientRects;
 }
 
+/** Minimal `ResizeObserverEntry` for autoSplit tests. */
+function resizeEntry(target: Element, inlineSize: number): ResizeObserverEntry {
+  return {
+    target,
+    borderBoxSize: [{ inlineSize, blockSize: 100 }],
+    contentBoxSize: [{ inlineSize, blockSize: 100 }],
+    contentRect: new DOMRectReadOnly(0, 0, inlineSize, 100),
+    devicePixelContentBoxSize: [],
+  } as ResizeObserverEntry;
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -253,15 +264,23 @@ describe('splitText', () => {
       const target = el('Hello World');
       const { words } = splitText(target, { type: 'words' });
       expect(words).toHaveLength(2);
-      expect(words[0].textContent).toBe('Hello');
+      expect(words[0].textContent).toBe('Hello ');
       expect(words[1].textContent).toBe('World');
     });
 
-    it('filters punctuation-only tokens via isWordLike', () => {
+    it('glues punctuation to adjacent words by default (wordGlue: adjacent)', () => {
       const target = el('Hello, World!');
       const { words } = splitText(target, { type: 'words' });
-      // Intl.Segmenter filters commas, exclamation marks etc.
-      expect(words.every((w) => /\w/.test(w.textContent ?? ''))).toBe(true);
+      expect(words).toHaveLength(2);
+      expect(words[0].textContent).toBe('Hello, ');
+      expect(words[1].textContent).toBe('World!');
+    });
+
+    it('merges hyphenated compounds into a single word token', () => {
+      const target = el('state-of-the-art');
+      const { words } = splitText(target, { type: 'words' });
+      expect(words).toHaveLength(1);
+      expect(words[0].textContent).toBe('state-of-the-art');
     });
 
     it('applies the default split-w class', () => {
@@ -273,7 +292,7 @@ describe('splitText', () => {
     it('sets data-content on word wrappers', () => {
       const target = el('Hello World');
       const { words } = splitText(target, { type: 'words' });
-      expect(words[0].getAttribute('data-content')).toBe('Hello');
+      expect(words[0].getAttribute('data-content')).toBe('Hello ');
       expect(words[1].getAttribute('data-content')).toBe('World');
     });
 
@@ -288,6 +307,40 @@ describe('splitText', () => {
       const { words } = splitText(target, { type: 'words' });
       expect(words[0].style.getPropertyValue('--word-index')).toBe('0');
       expect(words[1].style.getPropertyValue('--word-index')).toBe('1');
+    });
+
+    it('uses only wrapper spans in the DOM when wordGlue is adjacent', () => {
+      const target = el('Hello World');
+      splitText(target, { type: 'words' });
+      const wrapper = target.querySelector('[data-splittext-wrapper]')!;
+      const textNodes = Array.from(wrapper.childNodes).filter(
+        (n) => n.nodeType === Node.TEXT_NODE,
+      );
+      expect(textNodes).toHaveLength(0);
+      expect(wrapper.querySelectorAll('.split-w')).toHaveLength(2);
+    });
+
+    describe('wordGlue: none', () => {
+      it('wraps lexical words and punctuation in separate indexed spans', () => {
+        const target = el('Hello, World!');
+        const { words } = splitText(target, { type: 'words', wordGlue: 'none' });
+        expect(words.map((w) => w.textContent)).toEqual(['Hello', ',', 'World', '!']);
+        expect(words[0].style.getPropertyValue('--word-index')).toBe('0');
+        expect(words[1].style.getPropertyValue('--word-index')).toBe('1');
+        expect(words[2].style.getPropertyValue('--word-index')).toBe('2');
+        expect(words[3].style.getPropertyValue('--word-index')).toBe('3');
+      });
+
+      it('preserves inter-word whitespace as text nodes in the DOM', () => {
+        const target = el('Hello World');
+        splitText(target, { type: 'words', wordGlue: 'none' });
+        const wrapper = target.querySelector('[data-splittext-wrapper]')!;
+        const textNodes = Array.from(wrapper.childNodes).filter(
+          (n) => n.nodeType === Node.TEXT_NODE,
+        );
+        expect(textNodes.length).toBeGreaterThan(0);
+        expect(textNodes[0].textContent).toBe(' ');
+      });
     });
   });
 
@@ -772,16 +825,47 @@ describe('splitText', () => {
       expect(mockDisconnect).toHaveBeenCalled();
     });
 
-    it('re-splits on resize callback', () => {
+    it('re-splits when border-box inline size changes', () => {
       const target = el('Hello');
       const onSplit = vi.fn();
       splitText(target, { type: 'chars', autoSplit: true, onSplit });
       expect(capturedCallback).not.toBeNull();
       onSplit.mockClear();
 
-      // Trigger the resize observer callback
-      capturedCallback!([], {} as ResizeObserver);
-      expect(onSplit).toHaveBeenCalled();
+      capturedCallback!([resizeEntry(target, 200)], {} as ResizeObserver);
+      expect(onSplit).toHaveBeenCalledOnce();
+    });
+
+    it('does not re-split when border-box inline size is unchanged', () => {
+      const target = el('Hello');
+      const onSplit = vi.fn();
+      splitText(target, { type: 'chars', autoSplit: true, onSplit });
+      expect(capturedCallback).not.toBeNull();
+      onSplit.mockClear();
+
+      // First resize records width and re-splits
+      capturedCallback!([resizeEntry(target, 200)], {} as ResizeObserver);
+      expect(onSplit).toHaveBeenCalledOnce();
+      onSplit.mockClear();
+
+      // Same width (e.g. height-only change) — ignore feedback loop
+      capturedCallback!([resizeEntry(target, 200)], {} as ResizeObserver);
+      expect(onSplit).not.toHaveBeenCalled();
+    });
+
+    it('reads inline size from ResizeObserver entry without getBoundingClientRect', () => {
+      const target = el('Hello');
+      const onSplit = vi.fn();
+      const getBoundingClientRect = vi.spyOn(target, 'getBoundingClientRect');
+      splitText(target, { type: 'chars', autoSplit: true, onSplit });
+      expect(capturedCallback).not.toBeNull();
+      onSplit.mockClear();
+      getBoundingClientRect.mockClear();
+
+      capturedCallback!([resizeEntry(target, 200)], {} as ResizeObserver);
+
+      expect(onSplit).toHaveBeenCalledOnce();
+      expect(getBoundingClientRect).not.toHaveBeenCalled();
     });
   });
 
@@ -838,6 +922,23 @@ describe('splitText', () => {
       expect(rtlSpan).not.toBeNull();
       expect(rtlSpan!.classList.contains('split-rtl')).toBe(true);
     });
+
+    it('distributes word spans correctly across multiple bidi runs', () => {
+      const target = el('Hello שלום');
+      const resolver = vi.fn().mockReturnValue([
+        { text: 'Hello ', direction: 'ltr' as const },
+        { text: 'שלום', direction: 'rtl' as const },
+      ]);
+      const { words } = splitText(target, { type: 'words', bidiResolver: resolver });
+
+      const ltrRun = target.querySelector('[dir="ltr"]')!;
+      const rtlRun = target.querySelector('[dir="rtl"]')!;
+      expect(ltrRun).not.toBeNull();
+      expect(rtlRun).not.toBeNull();
+      expect(ltrRun.querySelectorAll('.split-w')).toHaveLength(1);
+      expect(rtlRun.querySelectorAll('.split-w')).toHaveLength(1);
+      expect(words).toHaveLength(2);
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -875,17 +976,19 @@ describe('splitText', () => {
   // -------------------------------------------------------------------------
 
   describe('ignore option', () => {
-    it('skips elements matching selector array', () => {
+    it('skips elements matching selector array for word splits', () => {
       const target = el('Hello <sup>1</sup> World');
-      // sup is ignored so textContent used for splitting should exclude it
       const { words } = splitText(target, { type: 'words', ignore: ['sup'] });
-      // "Hello World" → 2 words (sup content ignored)
-      // Note: the sup element itself may still be in originalHTML but its
-      // text is skipped during text-node walking. Since splitWords uses
-      // _originalText (from getTextContent which reads textContent), the sup
-      // content IS included in the plain text. The ignore option only affects
-      // TreeWalker-based operations (lines detection).
-      expect(words.length).toBeGreaterThan(0);
+      expect(words).toHaveLength(2);
+      expect(words[0].textContent).toBe('Hello  ');
+      expect(words[1].textContent).toBe('World');
+    });
+
+    it('skips elements matching selector array for char splits', () => {
+      const target = el('AB<sup>1</sup>CD');
+      const { chars } = splitText(target, { type: 'chars', ignore: ['sup'] });
+      const text = chars.map((c) => c.textContent).join('');
+      expect(text).toBe('ABCD');
     });
   });
 });

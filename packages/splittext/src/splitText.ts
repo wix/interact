@@ -1,7 +1,15 @@
 import type { SplitTextOptions, SplitTextResult, SplitType } from './types';
 import { applyAccessibility } from './accessibility';
 import { detectLines } from './lineDetection';
-import { segmentChars, segmentSentences, segmentWords, getTextContent } from './utils';
+import {
+  segmentChars,
+  segmentSentences,
+  segmentWordsAll,
+  buildAdjacentWordTokens,
+  isWhitespaceOnly,
+  getTextContent,
+  getFilteredTextContent,
+} from './utils';
 import { createWrapper, injectBaseStyles } from './wrappers';
 
 type SplitCache = {
@@ -22,11 +30,43 @@ function splitChars(text: string, options: SplitTextOptions): HTMLSpanElement[] 
 
 /**
  * Perform word-level splitting on a plain text string.
- * Returns an array of `<span>` elements (not yet inserted into the DOM).
+ * Returns the word `<span>` elements AND a full DOM node list. With
+ * `wordGlue: 'adjacent'` (default) every token is a span; with `'none'`,
+ * whitespace-only segments remain as text nodes between spans.
  */
-function splitWords(text: string, options: SplitTextOptions): HTMLSpanElement[] {
-  const words = segmentWords(text, options);
-  return words.map((word, i) => createWrapper(word, 'words', i, options));
+function splitWordsWithSpacing(
+  text: string,
+  options: SplitTextOptions,
+): { spans: HTMLSpanElement[]; nodes: Node[] } {
+  const wordGlue = options.wordGlue ?? 'adjacent';
+  const allSegments = segmentWordsAll(text, options);
+  const spans: HTMLSpanElement[] = [];
+  const nodes: Node[] = [];
+
+  if (wordGlue === 'adjacent') {
+    const tokens = buildAdjacentWordTokens(allSegments);
+    tokens.forEach((token, index) => {
+      const span = createWrapper(token, 'words', index, options);
+      spans.push(span);
+      nodes.push(span);
+    });
+    return { spans, nodes };
+  }
+
+  let wordIndex = 0;
+  for (const seg of allSegments) {
+    if (!seg.segment) continue;
+
+    if (seg.isWordLike || !isWhitespaceOnly(seg.segment)) {
+      const span = createWrapper(seg.segment, 'words', wordIndex++, options);
+      spans.push(span);
+      nodes.push(span);
+    } else {
+      nodes.push(document.createTextNode(seg.segment));
+    }
+  }
+
+  return { spans, nodes };
 }
 
 /**
@@ -63,6 +103,17 @@ function resolveElement(target: string | HTMLElement): HTMLElement {
   return target;
 }
 
+/**
+ * Read border-box inline size from a `ResizeObserver` entry. Matches
+ * `getBoundingClientRect().width` in horizontal writing modes while staying
+ * writing-mode aware. Falls back to `contentRect.width` on older engines.
+ */
+function readBorderInlineSize(entry: ResizeObserverEntry): number {
+  const box = entry.borderBoxSize;
+  if (box?.length) return box[0].inlineSize;
+  return entry.contentRect.width;
+}
+
 // ---------------------------------------------------------------------------
 // SplitTextResultImpl
 // ---------------------------------------------------------------------------
@@ -72,8 +123,16 @@ class SplitTextResultImpl implements SplitTextResult {
   readonly originalHTML: string;
 
   private _originalText: string;
+  /** Text used for segmentation — respects the `ignore` option. */
+  private _splitText: string;
   private _options: SplitTextOptions;
   private _cache: SplitCache = {};
+  /**
+   * Parallel cache of DOM nodes for types that include non-span nodes
+   * (e.g. text nodes for inter-word spacing). For types without extra nodes
+   * this mirrors `_cache`.
+   */
+  private _domNodes: Partial<Record<SplitType, Node[]>> = {};
   private _isSplit = false;
   /**
    * Which split type currently occupies the element's DOM. Only one type is
@@ -85,12 +144,16 @@ class SplitTextResultImpl implements SplitTextResult {
   /** ResizeObserver for autoSplit support. */
   private _resizeObserver: ResizeObserver | null = null;
 
+  /** Last observed width — used to avoid resize feedback loops. */
+  private _lastWidth = -1;
+
   constructor(element: HTMLElement, options: SplitTextOptions = {}) {
     this.element = element;
     this.originalHTML = element.innerHTML;
     // Capture plain text before any DOM mutation so getters always use the
     // correct source string regardless of the element's current DOM state.
     this._originalText = getTextContent(element);
+    this._splitText = getFilteredTextContent(element, options.ignore);
     this._options = options;
 
     // Inject base stylesheet once per document
@@ -152,6 +215,7 @@ class SplitTextResultImpl implements SplitTextResult {
     this._detachObservers();
     this.element.innerHTML = this.originalHTML;
     this._cache = {};
+    this._domNodes = {};
     this._isSplit = false;
     this._activeType = null;
   }
@@ -187,12 +251,17 @@ class SplitTextResultImpl implements SplitTextResult {
         // can be re-activated later via _activate().
       }
       this._cache.lines = splitLinesInElement(this.element, this._options);
+      this._domNodes.lines = this._cache.lines;
     } else if (type === 'chars') {
-      this._cache.chars = splitChars(this._originalText, this._options);
+      this._cache.chars = splitChars(this._splitText, this._options);
+      this._domNodes.chars = this._cache.chars;
     } else if (type === 'words') {
-      this._cache.words = splitWords(this._originalText, this._options);
+      const { spans, nodes } = splitWordsWithSpacing(this._splitText, this._options);
+      this._cache.words = spans;
+      this._domNodes.words = nodes;
     } else {
-      this._cache.sentences = splitSentences(this._originalText, this._options);
+      this._cache.sentences = splitSentences(this._splitText, this._options);
+      this._domNodes.sentences = this._cache.sentences;
     }
   }
 
@@ -202,16 +271,15 @@ class SplitTextResultImpl implements SplitTextResult {
    * time.
    */
   private _activate(type: SplitType): void {
-    const spans = this._cache[type];
-    if (!spans) return;
+    const nodes = this._domNodes[type] ?? this._cache[type];
+    if (!nodes?.length) return;
 
-    const text = this._originalText;
-    const finalSpans = this._applyBidi(spans, text);
+    const finalNodes = this._applyBidi(nodes, this._splitText);
 
     this.element.innerHTML = '';
-    const innerWrapper = applyAccessibility(this.element, text, this._options);
-    for (const span of finalSpans) {
-      innerWrapper.appendChild(span);
+    const innerWrapper = applyAccessibility(this.element, this._originalText, this._options);
+    for (const node of finalNodes) {
+      innerWrapper.appendChild(node);
     }
 
     this._activeType = type;
@@ -220,29 +288,45 @@ class SplitTextResultImpl implements SplitTextResult {
   }
 
   /**
-   * Wrap split spans in `<span dir="…">` runs when a `bidiResolver` is
+   * Wrap split nodes in `<span dir="…">` runs when a `bidiResolver` is
    * provided. Returns the original array unchanged when no resolver is set.
+   *
+   * Distributes nodes into runs by matching cumulative text length against
+   * each run's text length — works correctly for any split type (chars,
+   * words, lines, sentences) and for interleaved text nodes.
    */
-  private _applyBidi(spans: HTMLSpanElement[], text: string): Array<HTMLSpanElement> {
+  private _applyBidi(nodes: Node[], text: string): Node[] {
     const resolver = this._options.bidiResolver;
-    if (!resolver) return spans;
+    if (!resolver) return nodes;
 
     const runs = resolver(text);
-    const runEls: HTMLSpanElement[] = [];
-    let spanIndex = 0;
+    const runEls: Node[] = [];
+    let nodeIndex = 0;
+
     for (const run of runs) {
       const runSpan = document.createElement('span') as HTMLSpanElement;
       runSpan.setAttribute('dir', run.direction);
       runSpan.classList.add(run.direction === 'rtl' ? 'split-rtl' : 'split-ltr');
 
-      const runChars = Array.from(
-        new Intl.Segmenter('en', { granularity: 'grapheme' }).segment(run.text),
-      );
-      for (let i = 0; i < runChars.length && spanIndex < spans.length; i++, spanIndex++) {
-        runSpan.appendChild(spans[spanIndex]);
+      let consumed = 0;
+      while (nodeIndex < nodes.length && consumed < run.text.length) {
+        const node = nodes[nodeIndex];
+        runSpan.appendChild(node);
+        consumed += (node.textContent ?? '').length;
+        nodeIndex++;
       }
+
       runEls.push(runSpan);
     }
+
+    // Append any remaining nodes to the last run element
+    if (nodeIndex < nodes.length && runEls.length > 0) {
+      const lastRun = runEls[runEls.length - 1];
+      while (nodeIndex < nodes.length) {
+        (lastRun as HTMLSpanElement).appendChild(nodes[nodeIndex++]);
+      }
+    }
+
     return runEls;
   }
 
@@ -252,12 +336,17 @@ class SplitTextResultImpl implements SplitTextResult {
 
   private _attachObservers(): void {
     if (typeof ResizeObserver !== 'undefined') {
-      this._resizeObserver = new ResizeObserver(() => this._onResize());
+      this._resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries.find((e) => e.target === this.element) ?? entries[0];
+        if (entry) this._onResize(entry);
+      });
       this._resizeObserver.observe(this.element);
     }
 
     if (typeof document !== 'undefined' && document.fonts) {
-      document.fonts.ready.then(() => this._onResize());
+      // fonts.ready is a one-shot — bypass the width guard since font loading
+      // changes glyph metrics (and thus line breaks) without changing width.
+      document.fonts.ready.then(() => this._resplit());
     }
   }
 
@@ -266,19 +355,36 @@ class SplitTextResultImpl implements SplitTextResult {
     this._resizeObserver = null;
   }
 
-  private _onResize(): void {
+  /**
+   * Width-guarded entry point for ResizeObserver. Only re-splits when width
+   * actually changed — height changes are expected side-effects of our own
+   * DOM mutations and must be ignored to prevent a feedback loop.
+   */
+  private _onResize(entry: ResizeObserverEntry): void {
+    const currentWidth = readBorderInlineSize(entry);
+    if (Math.abs(currentWidth - this._lastWidth) < 1) return;
+    this._resplit(currentWidth);
+  }
+
+  /** Unconditionally re-compute and re-activate all cached split types. */
+  private _resplit(knownWidth?: number): void {
     const cachedTypes = Object.keys(this._cache) as SplitType[];
-    if (cachedTypes.length === 0) return;
+    if (cachedTypes.length === 0) {
+      this._lastWidth = knownWidth ?? this.element.getBoundingClientRect().width;
+      return;
+    }
 
     const prevActive = this._activeType;
 
     // Reset state and restore original DOM
     this._cache = {};
+    this._domNodes = {};
     this._isSplit = false;
     this._activeType = null;
     this.element.innerHTML = this.originalHTML;
     // Re-read plain text in case the element's content changed
     this._originalText = getTextContent(this.element);
+    this._splitText = getFilteredTextContent(this.element, this._options.ignore);
 
     // Re-compute all previously cached types
     for (const type of cachedTypes) {
@@ -289,6 +395,10 @@ class SplitTextResultImpl implements SplitTextResult {
     if (prevActive && this._cache[prevActive]) {
       this._activate(prevActive);
     }
+
+    // Record width so the next RO callback (triggered by our height change)
+    // sees a matching inline size and early-returns.
+    this._lastWidth = knownWidth ?? this.element.getBoundingClientRect().width;
   }
 }
 

@@ -9,6 +9,9 @@ import type { SplitTextOptions, SplitTextResult } from '../types';
  * is `null` on the first render and during SSR. On unmount the element is
  * automatically reverted to its original HTML.
  *
+ * Memoize function-valued options (`bidiResolver`, `onSplit`, `segmenter`,
+ * `ignore`) with `useCallback`/`useMemo` to avoid re-splitting on every render.
+ *
  * ```tsx
  * function Headline() {
  *   const ref = useRef<HTMLHeadingElement>(null);
@@ -28,9 +31,15 @@ export function useSplitText(
   options: SplitTextOptions = {},
 ): SplitTextResult | null {
   const [result, setResult] = useState<SplitTextResult | null>(null);
-  // Serialise options to a stable string so the effect re-runs only when
-  // options genuinely change (avoids infinite loops from inline object literals).
-  const optionsKey = JSON.stringify(options);
+
+  // Serialise only the JSON-safe portion of options so inline object literals
+  // don't cause infinite re-runs. Function-valued options are tracked by
+  // reference identity in the dependency array below.
+  const serializableKey = JSON.stringify(options, (_, v) =>
+    typeof v === 'function' ? undefined : v,
+  );
+  const { bidiResolver, onSplit, segmenter } = options;
+  const ignoreFn = typeof options.ignore === 'function' ? options.ignore : null;
 
   useEffect(() => {
     const element = ref.current;
@@ -43,8 +52,9 @@ export function useSplitText(
       splitResult.revert();
       setResult(null);
     };
-    // optionsKey is the serialised version of options — safe to use as dep
-  }, [ref, optionsKey]);
+    // covers all JSON-safe options; function-valued options are tracked by
+    // reference identity via the remaining deps.
+  }, [ref, serializableKey, bidiResolver, onSplit, segmenter, ignoreFn]);
 
   return result;
 }

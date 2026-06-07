@@ -75,16 +75,6 @@ export interface SplitTextOptions {
   preserveText?: boolean;
 
   /**
-   * How inner DOM structure is handled.
-   *
-   * - `'preserve'` (default): traverse text nodes via `TreeWalker`, keeping
-   *   inline elements (links, bold, italic) intact.
-   * - `'flatten'`: use `element.textContent`, discarding all inner DOM.
-   * - `number`: preserve N element levels; deeper content is flattened.
-   */
-  nested?: 'flatten' | 'preserve' | number;
-
-  /**
    * Provide a custom `Intl.Segmenter` constructor when native support is
    * missing. Accepts either an already-constructed instance or the constructor
    * itself (the library will instantiate it per granularity).
@@ -118,6 +108,17 @@ export interface SplitTextOptions {
    * for use in staggered CSS animations.
    */
   partIndexing?: boolean;
+
+  /**
+   * Controls how punctuation and whitespace relate to word wrappers.
+   *
+   * - `'adjacent'` (default): punctuation is glued to the nearest word within
+   *   each whitespace-delimited token; trailing spaces attach to the preceding
+   *   word. Every visible character participates in word-level effects.
+   * - `'none'`: lexical words and punctuation each receive their own indexed
+   *   wrapper; whitespace remains as plain text nodes between spans.
+   */
+  wordGlue?: 'adjacent' | 'none';
 
   /**
    * Selectors or a predicate to skip nodes during traversal (only applies in
