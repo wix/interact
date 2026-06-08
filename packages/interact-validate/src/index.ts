@@ -38,7 +38,6 @@ export {
   LengthPercentage,
   RangeOffset,
   Condition,
-  MediaCondition,
 } from './schema';
 export type {
   InteractConfig,

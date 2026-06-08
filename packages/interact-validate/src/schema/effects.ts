@@ -18,7 +18,7 @@ export const EffectBase = z.object({
   selector: z.string().optional(),
   listContainer: z.string().optional(),
   listItemSelector: z.string().optional(),
-  conditions: z.array(z.string()).optional(),
+  conditions: z.array(z.string().min(1)).optional(),
 });
 
 export const SerializableEffectRef = EffectBase.extend({
@@ -66,13 +66,13 @@ const StateEffectFields = {
       duration: z.number().optional(),
       delay: z.number().optional(),
       easing: z.string().optional(),
-      styleProperties: z.array(z.object({ name: z.string(), value: z.string() })),
+      styleProperties: z.array(z.object({ name: z.string().min(1), value: z.string() })),
     })
     .optional(),
   transitionProperties: z
     .array(
       z.object({
-        name: z.string(),
+        name: z.string().min(1),
         value: z.string(),
         duration: z.number().optional(),
         delay: z.number().optional(),

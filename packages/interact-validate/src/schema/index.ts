@@ -23,7 +23,7 @@ export {
 
 export { SerializableSequenceConfig, SerializableSequenceConfigRef } from './sequences';
 
-export { Keyframe, LengthPercentage, RangeOffset, Condition, MediaCondition } from './primitives';
+export { Keyframe, LengthPercentage, RangeOffset, Condition } from './primitives';
 
 // Canonical types — single source of truth, no z.infer<> re-derivation.
 export type {
