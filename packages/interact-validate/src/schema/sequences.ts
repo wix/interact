@@ -12,7 +12,7 @@ export const SerializableSequenceConfig = z.object({
     .optional(),
   triggerType: TriggerType.optional(),
   sequenceId: z.string().optional(),
-  conditions: z.array(z.string()).optional(),
+  conditions: z.array(z.string().min(1)).optional(),
 });
 
 export const SerializableSequenceConfigRef = z
@@ -27,6 +27,6 @@ export const SerializableSequenceConfigRef = z
       ])
       .optional(),
     triggerType: TriggerType.optional(),
-    conditions: z.array(z.string()).optional(),
+    conditions: z.array(z.string().min(1)).optional(),
   })
   .strict();
