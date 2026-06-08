@@ -48,16 +48,7 @@ export const SCRUB_FIELDS = [
 
 export const STATE_FIELDS = ['stateAction', 'transition', 'transitionProperties'] as const;
 
-export const TIME_FIELDS = [
-  'duration',
-  'easing',
-  'iterations',
-  'alternate',
-  'reversed',
-  'delay',
-  'fill',
-  'composite',
-] as const;
+export const TIME_FIELDS = ['duration', 'delay'] as const;
 
 const ScrubEffectFields = {
   rangeStart: RangeOffset.optional(),

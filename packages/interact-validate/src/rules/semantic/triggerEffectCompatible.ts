@@ -4,6 +4,7 @@ import { SCRUB_FIELDS, STATE_FIELDS, TIME_FIELDS } from '../../schema/effects';
 
 // viewProgress and pointerMove are scrub triggers; all others are discrete (time-based).
 const SCRUB_TRIGGERS = new Set(['viewProgress', 'pointerMove']);
+const STATE_TRIGGERS = new Set(['hover', 'click', 'activate', 'interest']);
 
 export const triggerEffectCompatible: Rule = {
   code: 'TRIGGER_EFFECT_INCOMPATIBLE',
@@ -47,6 +48,18 @@ export const triggerEffectCompatible: Rule = {
               message: `"${field}" is a scrub-effect field and is incompatible with the "${trigger}" trigger.`,
               hint: 'Scrub fields (rangeStart, rangeEnd, etc.) are only valid on viewProgress and pointerMove triggers.',
             });
+          }
+        }
+        if (!STATE_TRIGGERS.has(trigger)) {
+          for (const field of STATE_FIELDS) {
+            if (e[field] !== undefined) {
+              errors.push({
+                code: 'TRIGGER_EFFECT_INCOMPATIBLE',
+                severity: 'warning',
+                path: [...path, field],
+                message: `"${field}" is a state-effect field and is incompatible with the "${trigger}" trigger.`,
+              });
+            }
           }
         }
       }
