@@ -3,7 +3,6 @@ import type { ValidationContext } from '../context';
 
 import { effectIdsExist } from './referential/effectIdsExist';
 import { sequenceIdsExist } from './referential/sequenceIdsExist';
-import { animationEndEffectExists } from './referential/animationEndEffectExists';
 import { conditionsExist } from './referential/conditionsExist';
 import { interactionHasEffectsOrSequences } from './referential/interactionHasEffectsOrSequences';
 
@@ -23,7 +22,6 @@ export type Rule = {
 export const RULES: Rule[] = [
   effectIdsExist,
   sequenceIdsExist,
-  animationEndEffectExists,
   conditionsExist,
   interactionHasEffectsOrSequences,
   validMediaQueries,

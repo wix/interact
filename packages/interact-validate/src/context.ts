@@ -3,7 +3,7 @@ import type { Effect, EffectRef } from '@wix/interact';
 
 export type Path = (string | number)[];
 
-export type EffectIdRef = { path: Path; effectId: string };
+export type EffectIdRef = { path: Path; effectId: string; fromAnimationEnd?: true };
 export type SequenceIdRef = { path: Path; sequenceId: string };
 export type ConditionRef = { path: Path; conditionId: string };
 export type InteractionRef = { path: Path; interaction: Interaction };
@@ -115,6 +115,7 @@ export function buildContext(config: InteractConfig): ValidationContext {
       effectIdReferences.push({
         path: [...base, 'params', 'effectId'],
         effectId: (interaction.params as { effectId: string }).effectId,
+        fromAnimationEnd: true,
       });
     }
 
