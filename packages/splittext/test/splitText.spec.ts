@@ -974,28 +974,28 @@ describe('splitText', () => {
   // -------------------------------------------------------------------------
 
   describe('ignore option', () => {
-    it('skips elements matching selector array for word splits (preserve mode)', () => {
+    it('skips elements matching selector for word splits (preserve mode)', () => {
       // In preserve mode (default) each text node is split independently.
       // "Hello " and " World" are separate text nodes; the <sup> stays in the DOM.
       const target = el('Hello <sup>1</sup> World');
-      const { words } = splitText(target, { type: 'words', ignore: ['sup'] });
+      const { words } = splitText(target, { type: 'words', ignore: 'sup' });
       expect(words).toHaveLength(2);
       expect(words[0].textContent).toBe('Hello ');
       expect(words[1].textContent).toBe(' World');
     });
 
-    it('skips elements matching selector array for word splits (flatten mode)', () => {
+    it('skips elements matching selector for word splits (flatten mode)', () => {
       // In flatten mode the two text nodes are concatenated → double space.
       const target = el('Hello <sup>1</sup> World');
-      const { words } = splitText(target, { type: 'words', ignore: ['sup'], nested: 'flatten' });
+      const { words } = splitText(target, { type: 'words', ignore: 'sup', nested: 'flatten' });
       expect(words).toHaveLength(2);
       expect(words[0].textContent).toBe('Hello  ');
       expect(words[1].textContent).toBe('World');
     });
 
-    it('skips elements matching selector array for char splits', () => {
+    it('skips elements matching selector for char splits', () => {
       const target = el('AB<sup>1</sup>CD');
-      const { chars } = splitText(target, { type: 'chars', ignore: ['sup'] });
+      const { chars } = splitText(target, { type: 'chars', ignore: 'sup' });
       const text = chars.map((c) => c.textContent).join('');
       expect(text).toBe('ABCD');
     });

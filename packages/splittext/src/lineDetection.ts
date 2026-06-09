@@ -34,11 +34,11 @@ export function detectLinesFromTextNode(textNode: Text): DetectedLine[] {
   textNode.textContent = normalised;
 
   const range = document.createRange();
+  range.setStart(textNode, 0);
   const lines: DetectedLine[] = [];
   let currentLine: DetectedLine | null = null;
 
   for (let i = 0; i < normalised.length; i++) {
-    range.setStart(textNode, 0);
     range.setEnd(textNode, i + 1);
 
     const rects = range.getClientRects();
@@ -69,9 +69,9 @@ export function detectLinesFromTextNode(textNode: Text): DetectedLine[] {
  * Notes:
  * - Line detection reads layout (via `getClientRects`) and therefore must run
  *   **before** any DOM mutation that would reflow the element.
- * - When the element contains multiple text nodes (e.g. nested inline
- *   elements), lines that span text-node boundaries are treated as separate
- *   segments; the caller is responsible for merging if needed.
+ * - When inline elements wrap across line breaks (e.g. a `<span>` that opens on
+ *   one line and closes on the next), each text node's lines are detected
+ *   independently; merging segments across element boundaries is out of scope.
  */
 export function detectLines(
   element: HTMLElement,

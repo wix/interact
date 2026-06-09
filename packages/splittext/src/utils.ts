@@ -87,7 +87,7 @@ export function segmentWordsAll(
 
 /** Return `true` when `segment` contains only whitespace characters. */
 export function isWhitespaceOnly(segment: string): boolean {
-  return segment.length > 0 && /^\s+$/.test(segment);
+  return /^\s+$/.test(segment);
 }
 
 /**
@@ -158,12 +158,13 @@ export function walkTextNodes(
         if (tag === 'script' || tag === 'style') return NodeFilter.FILTER_REJECT;
 
         if (ignoreOption) {
-          if (Array.isArray(ignoreOption)) {
-            if (ignoreOption.some((sel) => el.matches(sel))) return NodeFilter.FILTER_REJECT;
+          if (typeof ignoreOption === 'string') {
+            if (el.matches(ignoreOption)) return NodeFilter.FILTER_REJECT;
           } else if (ignoreOption(node)) {
             return NodeFilter.FILTER_REJECT;
           }
         }
+        // Descend into elements to collect descendant text nodes.
         return NodeFilter.FILTER_SKIP;
       }
       return NodeFilter.FILTER_ACCEPT;
@@ -199,8 +200,8 @@ export function flattenBeyondDepth(
   function processChildren(parent: Element, childDepth: number): void {
     for (const child of Array.from(parent.children)) {
       if (ignore) {
-        if (Array.isArray(ignore)) {
-          if (ignore.some((sel) => child.matches(sel))) continue;
+        if (typeof ignore === 'string') {
+          if (child.matches(ignore)) continue;
         } else if (ignore(child)) {
           continue;
         }
@@ -218,12 +219,11 @@ export function flattenBeyondDepth(
 }
 
 /**
- * Return the plain text content of `element`. Equivalent to
- * `element.textContent` but strips leading/trailing whitespace from
- * the result.
+ * Return the plain text content of `node`. Equivalent to `node.textContent`
+ * but strips leading/trailing whitespace from the result.
  */
-export function getTextContent(element: HTMLElement): string {
-  return (element.textContent ?? '').trim();
+export function getTextContent(node: HTMLElement | Text): string {
+  return (node.textContent ?? '').trim();
 }
 
 /**

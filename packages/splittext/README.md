@@ -38,9 +38,16 @@ const chars = result.chars; // DOM split into chars here, cached
 // Eager — split immediately on call
 const { chars } = splitText('.headline', { type: 'chars' });
 
-// Animate with any library
-animate(chars, { opacity: [0, 1], transform: ['translateY(8px)', 'translateY(0)'], stagger: 0.03 });
+// Animate with the Web Animations API
+chars.forEach((char, index) => {
+  char.animate(
+    { opacity: [0, 1], transform: ['translateY(8px)', 'translateY(0)'] },
+    { duration: 400, delay: index * 30, fill: 'forwards' },
+  );
+});
 ```
+
+When `type` is an array, every listed type is computed eagerly but only the **last** type is inserted into the DOM. Access another getter later to switch which split is active.
 
 ### Staggered CSS animation
 
@@ -66,6 +73,8 @@ splitText('.headline', {
 ```
 
 ### React
+
+`useSplitText` returns `null` on the first render and during SSR because the ref is not attached yet. After mount it returns a `SplitTextResult`; the element is automatically reverted on unmount. Memoize function-valued options (`bidiResolver`, `onSplit`, `segmenter`, `ignore`) with `useCallback`/`useMemo` to avoid re-splitting on every render.
 
 ```tsx
 import { useRef, useEffect } from 'react';
@@ -97,40 +106,43 @@ Returns a `SplitTextResult` with lazy getters: `.chars`, `.words`, `.lines`, `.s
 
 ### Options
 
-| Option             | Type                                                 | Default      | Description                                       |
-| ------------------ | ---------------------------------------------------- | ------------ | ------------------------------------------------- |
-| `type`             | `SplitType \| SplitType[]`                           | —            | Split eagerly on call instead of lazily           |
-| `wrapperClass`     | `string \| WrapperClassConfig`                       | —            | Extra CSS class(es) on wrapper spans              |
-| `wrapperStyle`     | `Partial<CSSStyleDeclaration> \| WrapperStyleConfig` | —            | Inline styles on wrapper spans                    |
-| `wrapperAttrs`     | `Record<string, string> \| WrapperAttrsConfig`       | —            | Custom attributes on wrapper spans                |
-| `contentAttribute` | `'none' \| 'both' \| 'attribute-only'`               | `'both'`     | Controls `data-content` on char/word wrappers     |
-| `aria`             | `'auto' \| 'none'`                                   | `'auto'`     | ARIA handling mode                                |
-| `preserveText`     | `boolean`                                            | `true`       | Insert visually-hidden original text for a11y/SEO |
-| `partIndexing`     | `boolean`                                            | `true`       | Set `--char-index` / `--word-index` etc. on spans |
-| `wordGlue`         | `'adjacent' \| 'none'`                               | `'adjacent'` | Glue punctuation to words, or wrap it separately  |
-| `autoSplit`        | `boolean`                                            | —            | Re-split on resize / font load                    |
-| `onSplit`          | `(result) => void`                                   | —            | Callback after each split                         |
-| `segmenter`        | `Intl.Segmenter \| constructor`                      | —            | Polyfill for `Intl.Segmenter`                     |
-| `ignore`           | `string[] \| (node) => boolean`                      | —            | Selectors / predicate to skip nodes               |
+| Option             | Type                                                                 | Default      | Description                                                                 |
+| ------------------ | -------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------- |
+| `type`             | `'chars' \| 'words' \| 'lines' \| 'sentences'` or array of those    | —            | Split eagerly on call instead of lazily                                     |
+| `wrapperClass`     | `string` or `{ chars?, words?, lines?, sentences? }`                 | —            | Extra CSS class(es) on wrapper spans                                        |
+| `wrapperStyle`     | CSS style object or per-type style object                            | —            | Inline styles on wrapper spans                                              |
+| `wrapperAttrs`     | `Record<string, string>` or per-type attribute object                | —            | Custom attributes on wrapper spans                                          |
+| `contentAttribute` | `'none' \| 'both' \| 'attribute-only'`                               | `'both'`     | `both`: text content and `data-content`; `attribute-only`: attribute only   |
+| `aria`             | `'auto' \| 'none'`                                                   | `'auto'`     | ARIA handling mode                                                          |
+| `preserveText`     | `boolean`                                                            | `true`       | Insert visually-hidden original text for a11y/SEO                             |
+| `partIndexing`     | `boolean`                                                            | `true`       | Set `--char-index` / `--word-index` etc. on spans                           |
+| `wordGlue`         | `'adjacent' \| 'none'`                                               | `'adjacent'` | Glue punctuation to words, or wrap it separately                            |
+| `nested`           | `'flatten' \| 'preserve' \| number`                                  | `'preserve'` | How inner DOM structure is handled                                          |
+| `autoSplit`        | `boolean`                                                            | `false`      | Re-split on resize / font load                                              |
+| `onSplit`          | `(result) => void`                                                   | —            | Callback after each split                                                   |
+| `segmenter`        | `Intl.Segmenter` or constructor                                      | —            | Polyfill for `Intl.Segmenter`                                               |
+| `ignore`           | CSS selector string or `(node) => boolean`                           | —            | Skip matching elements during traversal (selector uses native OR via `,`)   |
 
 ### Default CSS classes
 
-| Split type  | Class      |
-| ----------- | ---------- |
-| `chars`     | `.split-c` |
-| `words`     | `.split-w` |
-| `lines`     | `.split-l` |
-| `sentences` | `.split-s` |
+Every wrapper `<span>` automatically receives a built-in class in addition to any `wrapperClass` you pass:
+
+| Split type  | Class added automatically |
+| ----------- | ------------------------- |
+| `chars`     | `.split-c`                |
+| `words`     | `.split-w`                |
+| `lines`     | `.split-l`                |
+| `sentences` | `.split-s`                |
 
 Base styles (`display: inline-block`, etc.) are injected once via `adoptedStyleSheets`.
 
 ## Accessibility
 
-With defaults (`aria: 'auto'`, `preserveText: true`), the DOM looks like:
+With defaults (`aria: 'auto'`, `preserveText: true`), split content is wrapped in an `aria-hidden` inner div and a screen-reader-accessible copy of the original text is injected as a sibling:
 
 ```html
 <h1>
-  <span class="sr-only">Original text</span>
+  <span class="sr-only" data-splittext-sr>Original text</span>
   <div aria-hidden="true" data-splittext-wrapper>
     <span class="split-c" data-content="H">H</span>
     <!-- … -->
@@ -138,7 +150,9 @@ With defaults (`aria: 'auto'`, `preserveText: true`), the DOM looks like:
 </h1>
 ```
 
-Screen readers and crawlers see the original text; the split spans are hidden from the accessibility tree.
+When `preserveText` is `false`, `aria-label` is set on the container instead of injecting the visually-hidden span. With `aria: 'none'`, no ARIA attributes are added — a transparent wrapper div is still used so callers have a consistent element to append split spans to.
+
+Screen readers and crawlers see the original text; the split spans are hidden from the accessibility tree. `result.revert()` restores `originalHTML` captured at construction time. On re-split (`autoSplit`), plain text is re-read from the element so content changes are picked up.
 
 ## License
 

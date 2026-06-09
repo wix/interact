@@ -100,7 +100,7 @@ export interface SplitTextOptions {
    * Called after every split (including re-splits triggered by `autoSplit`).
    * Receives the updated `SplitTextResult`.
    */
-  onSplit?: (result: SplitTextResult) => Animation | void;
+  onSplit?: (result: SplitTextResult) => void;
 
   /**
    * When `true` (default), sets CSS custom properties (`--char-index`,
@@ -136,10 +136,11 @@ export interface SplitTextOptions {
   nested?: 'flatten' | 'preserve' | number;
 
   /**
-   * Selectors or a predicate to skip nodes during traversal (only applies in
-   * `'preserve'` / `number` nested modes). Example: `['sup', 'sub']`.
+   * CSS selector or predicate to skip nodes during traversal (only applies in
+   * `'preserve'` / `number` nested modes). Use a comma-separated selector for
+   * logical OR (e.g. `'sup, sub'`).
    */
-  ignore?: string[] | ((node: Node) => boolean);
+  ignore?: string | ((node: Node) => boolean);
 }
 
 export interface SplitTextResult {

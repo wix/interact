@@ -95,20 +95,15 @@ export function createWrapper(
     span.style.setProperty(INDEX_PROP[type], String(index));
   }
 
-  // data-content attribute for CSS generated-content effects (chars & words only)
+  const isStringContent = typeof content === 'string';
   const contentAttribute = options.contentAttribute ?? 'both';
   const supportsContentAttr = type === 'chars' || type === 'words';
 
-  if (typeof content === 'string' && supportsContentAttr && contentAttribute !== 'none') {
-    span.setAttribute('data-content', content);
-  }
-
-  const attributeOnly =
-    typeof content === 'string' && supportsContentAttr && contentAttribute === 'attribute-only';
-
-  // Set inner content
-  if (typeof content === 'string') {
-    if (!attributeOnly) {
+  if (isStringContent) {
+    if (supportsContentAttr && contentAttribute !== 'none') {
+      span.setAttribute('data-content', content);
+    }
+    if (!supportsContentAttr || contentAttribute !== 'attribute-only') {
       span.textContent = content;
     }
   } else {
@@ -158,7 +153,7 @@ export function injectBaseStyles(doc: Document = document): void {
   try {
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(BASE_CSS);
-    doc.adoptedStyleSheets = [...doc.adoptedStyleSheets, sheet];
+    doc.adoptedStyleSheets.push(sheet);
   } catch {
     // Fallback for environments without Constructable Stylesheets (e.g. jsdom)
     const style = doc.createElement('style');

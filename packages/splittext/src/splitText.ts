@@ -38,12 +38,15 @@ interface PreserveSegment {
  * Perform character-level splitting on a plain text string.
  * Returns an array of `<span>` elements (not yet inserted into the DOM).
  *
- * @param indexOffset - Starting value for the `--char-index` CSS property
- *   (used in preserve mode for continuous global indexing across text nodes).
+ * @param charIndexOffset - Starting value for `--char-index` (preserve mode).
  */
-function splitChars(text: string, options: SplitTextOptions, indexOffset = 0): HTMLSpanElement[] {
+function splitChars(
+  text: string,
+  options: SplitTextOptions,
+  charIndexOffset = 0,
+): HTMLSpanElement[] {
   const chars = segmentChars(text, options);
-  return chars.map((char, i) => createWrapper(char, 'chars', i + indexOffset, options));
+  return chars.map((char, i) => createWrapper(char, 'chars', i + charIndexOffset, options));
 }
 
 /**
@@ -52,13 +55,13 @@ function splitChars(text: string, options: SplitTextOptions, indexOffset = 0): H
  * `wordGlue: 'adjacent'` (default) every token is a span; with `'none'`,
  * whitespace-only segments remain as text nodes between spans.
  *
- * @param indexOffset - Starting value for `--word-index` (preserve mode global index).
+ * @param wordIndexOffset - Starting value for `--word-index` (preserve mode).
  */
 function splitWordsWithSpacing(
   text: string,
   options: SplitTextOptions,
-  indexOffset = 0,
-): { spans: HTMLSpanElement[]; nodes: Node[] } {
+  wordIndexOffset = 0,
+): Pick<PreserveSegment, 'spans' | 'nodes'> {
   const wordGlue = options.wordGlue ?? 'adjacent';
   const allSegments = segmentWordsAll(text, options);
   const spans: HTMLSpanElement[] = [];
@@ -67,14 +70,14 @@ function splitWordsWithSpacing(
   if (wordGlue === 'adjacent') {
     const tokens = buildAdjacentWordTokens(allSegments);
     tokens.forEach((token, index) => {
-      const span = createWrapper(token, 'words', index + indexOffset, options);
+      const span = createWrapper(token, 'words', index + wordIndexOffset, options);
       spans.push(span);
       nodes.push(span);
     });
     return { spans, nodes };
   }
 
-  let wordIndex = indexOffset;
+  let wordIndex = wordIndexOffset;
   for (const seg of allSegments) {
     if (!seg.segment) continue;
 
@@ -94,16 +97,16 @@ function splitWordsWithSpacing(
  * Perform sentence-level splitting on a plain text string.
  * Returns an array of `<span>` elements (not yet inserted into the DOM).
  *
- * @param indexOffset - Starting value for `--sentence-index` (preserve mode global index).
+ * @param sentenceIndexOffset - Starting value for `--sentence-index` (preserve mode).
  */
 function splitSentences(
   text: string,
   options: SplitTextOptions,
-  indexOffset = 0,
+  sentenceIndexOffset = 0,
 ): HTMLSpanElement[] {
   const sentences = segmentSentences(text, options);
   return sentences.map((sentence, i) =>
-    createWrapper(sentence, 'sentences', i + indexOffset, options),
+    createWrapper(sentence, 'sentences', i + sentenceIndexOffset, options),
   );
 }
 
@@ -255,9 +258,9 @@ class SplitTextResultImpl implements SplitTextResult {
     this._activeType = null;
   }
 
-  split(options?: SplitTextOptions): SplitTextResult {
+  split(optionsOverride?: SplitTextOptions): SplitTextResult {
     this.revert();
-    return new SplitTextResultImpl(this.element, { ...this._options, ...options });
+    return new SplitTextResultImpl(this.element, { ...this._options, ...optionsOverride });
   }
 
   // -------------------------------------------------------------------------
@@ -343,14 +346,14 @@ class SplitTextResultImpl implements SplitTextResult {
       container,
       (textNode) => {
         const text = textNode.textContent ?? '';
-        // Skip whitespace-only text nodes (HTML formatting artefacts between
-        // block-level elements). Meaningful spaces within inline content are
-        // part of a text node that also has non-whitespace content.
-        if (!text.trim()) {
+        // Whitespace-only text nodes still advance nodeIdx so activate-phase
+        // walk order matches this compute-phase walk.
+        if (!getTextContent(textNode)) {
           nodeIdx++;
           return;
         }
 
+        // Distinct from PreserveSegment.spans / .nodes below.
         let nodeSpans: HTMLSpanElement[];
         let nodeNodes: Node[];
 
@@ -410,9 +413,7 @@ class SplitTextResultImpl implements SplitTextResult {
 
     this.element.innerHTML = '';
     const innerWrapper = applyAccessibility(this.element, this._originalText, this._options);
-    for (const node of finalNodes) {
-      innerWrapper.appendChild(node);
-    }
+    innerWrapper.append(...finalNodes);
 
     this._activeType = type;
     this._isSplit = true;
@@ -461,7 +462,7 @@ class SplitTextResultImpl implements SplitTextResult {
     walkTextNodes(
       innerWrapper,
       (textNode) => {
-        if (!(textNode.textContent ?? '').trim()) {
+        if (!getTextContent(textNode)) {
           nodeIdx++;
           return;
         }
