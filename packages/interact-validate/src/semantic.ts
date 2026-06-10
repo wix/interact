@@ -5,15 +5,17 @@ import type { Severity, ValidationError } from './errors';
 export function validateSemantic(
   ctx: ValidationContext,
   severityOverrides: Record<string, Severity | 'off'> = {},
-): ValidationError[] {
+): { errors: ValidationError[]; hasNaturalError: boolean } {
   const out: ValidationError[] = [];
+  let hasNaturalError = false;
   for (const rule of RULES) {
     const override = severityOverrides[rule.code];
     if (override === 'off') continue;
     const errs = rule.run(ctx);
     if (!errs.length) continue;
+    if (rule.defaultSeverity === 'error') hasNaturalError = true;
     const severity = override ?? rule.defaultSeverity;
     for (const e of errs) out.push({ ...e, severity });
   }
-  return out;
+  return { errors: out, hasNaturalError };
 }

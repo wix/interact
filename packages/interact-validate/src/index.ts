@@ -64,12 +64,17 @@ function comparePath(a: (string | number)[], b: (string | number)[]): number {
     const bv = b[i]!;
     if (av === bv) continue;
     if (typeof av === 'number' && typeof bv === 'number') return av - bv;
+    if (typeof av !== typeof bv) return typeof av === 'number' ? -1 : 1;
     return String(av) < String(bv) ? -1 : 1;
   }
   return a.length - b.length;
 }
 
-function finalize(errors: ValidationError[], opts: ValidateOptions): ValidationResult {
+function finalize(
+  errors: ValidationError[],
+  opts: ValidateOptions,
+  hasNaturalError = false,
+): ValidationResult {
   let next = errors;
   if (opts.strict) {
     next = next.map((e) => (e.severity === 'warning' ? { ...e, severity: 'error' } : e));
@@ -78,7 +83,9 @@ function finalize(errors: ValidationError[], opts: ValidateOptions): ValidationR
   if (opts.max !== undefined && next.length > opts.max) {
     next = next.slice(0, opts.max);
   }
-  const valid = !next.some((e) => e.severity === 'error');
+  // hasNaturalError tracks rules whose defaultSeverity is 'error', regardless of
+  // any severityOverrides that may have downgraded them to warnings for display.
+  const valid = !hasNaturalError && !next.some((e) => e.severity === 'error');
   return { valid, errors: next };
 }
 
@@ -91,8 +98,8 @@ export function validateInteractConfig(
     return finalize(layer1.errors, options);
   }
   const ctx = buildContext(layer1.parsed);
-  const layer2 = validateSemantic(ctx, options.severityOverrides);
-  return finalize(layer2, options);
+  const { errors: layer2, hasNaturalError } = validateSemantic(ctx, options.severityOverrides);
+  return finalize(layer2, options, hasNaturalError);
 }
 
 export function assertValidInteractConfig(

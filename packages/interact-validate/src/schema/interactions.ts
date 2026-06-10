@@ -43,7 +43,7 @@ const InteractionBase = {
   selector: z.string().optional(),
   listContainer: z.string().optional(),
   listItemSelector: z.string().optional(),
-  conditions: z.array(z.string()).optional(),
+  conditions: z.array(z.string().min(1)).optional(),
   effects: z.array(z.union([SerializableEffect, SerializableEffectRef])).optional(),
   sequences: z
     .array(z.union([SerializableSequenceConfig, SerializableSequenceConfigRef]))
