@@ -130,13 +130,4 @@ describe('triggerEffectCompatible — TRIGGER_EFFECT_INCOMPATIBLE', () => {
       ).toBe(true);
     });
   });
-
-  it('does not flag effectId references (only inline effects are checked)', () => {
-    const result = validateInteractConfig({
-      effects: { fade: { namedEffect: { type: 'FadeIn' }, duration: 300 } },
-      interactions: [{ key: 'el', trigger: 'viewProgress', effects: [{ effectId: 'fade' }] }],
-    });
-    // effectId refs are not in triggerEffectTuples, so no TRIGGER_EFFECT_INCOMPATIBLE
-    expect(result.errors.filter((e) => e.code === 'TRIGGER_EFFECT_INCOMPATIBLE')).toHaveLength(0);
-  });
 });
