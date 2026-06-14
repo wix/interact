@@ -36,11 +36,11 @@ export type ValidationContext = {
 };
 
 function isEffectRef(entry: Effect | EffectRef): entry is EffectRef {
-  return typeof (entry as Record<string, unknown>)['effectId'] === 'string';
+  return !!(entry as Record<string, unknown>)['effectId'];
 }
 
 function isSequenceRef(entry: SequenceConfig | SequenceConfigRef): entry is SequenceConfigRef {
-  return !('effects' in entry);
+  return !!(entry as Record<string, unknown>)['sequenceId'];
 }
 
 function collectKeyframeName(effect: Effect, basePath: Path, out: KeyframeNameRef[]): void {
@@ -70,9 +70,8 @@ function walkSequence(
     const path = [...basePath, 'effects', i];
     if (isEffectRef(entry)) {
       ctx.effectIdReferences.push({ path: [...path, 'effectId'], effectId: entry.effectId });
-    } else {
-      walkEffect(entry, path, ctx);
     }
+    walkEffect(entry, path, ctx);
   });
   seq.conditions?.forEach((c, i) =>
     ctx.conditionReferences.push({ path: [...basePath, 'conditions', i], conditionId: c }),
@@ -123,19 +122,25 @@ export function buildContext(config: InteractConfig): ValidationContext {
       const path: Path = [...base, 'effects', ei];
       if (isEffectRef(entry)) {
         effectIdReferences.push({ path: [...path, 'effectId'], effectId: entry.effectId });
-      } else {
-        walkEffect(entry, path, { conditionReferences, keyframeNames });
-        triggerEffectTuples.push({ trigger: interaction.trigger, effect: entry, path });
       }
+      walkEffect(entry, path, { conditionReferences, keyframeNames });
+      triggerEffectTuples.push({
+        trigger: interaction.trigger,
+        effect: { ...(config.effects?.[entry.effectId || ''] || {}), ...entry },
+        path,
+      });
     });
 
     interaction.sequences?.forEach((entry, si) => {
       const path: Path = [...base, 'sequences', si];
       if (isSequenceRef(entry)) {
         sequenceIdReferences.push({ path: [...path, 'sequenceId'], sequenceId: entry.sequenceId });
-      } else {
-        walkSequence(entry, path, { effectIdReferences, conditionReferences, keyframeNames });
       }
+      walkSequence({ effects: [], ...entry }, path, {
+        effectIdReferences,
+        conditionReferences,
+        keyframeNames,
+      });
     });
   });
 
