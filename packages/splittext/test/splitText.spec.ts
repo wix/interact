@@ -726,11 +726,11 @@ describe('splitText', () => {
   // -------------------------------------------------------------------------
 
   describe('split() method', () => {
-    it('returns a new SplitTextResult with updated options', () => {
+    it('returns the same SplitTextResult with updated options', () => {
       const target = el('Hello');
       const result1 = splitText(target, { type: 'chars' });
       const result2 = result1.split({ type: 'words' });
-      // New result should have word spans in DOM
+      expect(result2).toBe(result1);
       expect(target.querySelectorAll('.split-w').length).toBeGreaterThan(0);
       expect(result2.isSplit).toBe(true);
     });
@@ -742,6 +742,15 @@ describe('splitText', () => {
       result1.split({ type: 'words' });
       // No char spans should remain
       expect(target.querySelectorAll('.split-c').length).toBe(0);
+    });
+
+    it('returns the same instance and calls onSplit with it', () => {
+      const onSplit = vi.fn();
+      const result = splitText(el('Hello'), { type: 'chars', onSplit });
+      onSplit.mockClear();
+      const returned = result.split({ type: 'words', onSplit });
+      expect(returned).toBe(result);
+      expect(onSplit).toHaveBeenCalledWith(result);
     });
   });
 

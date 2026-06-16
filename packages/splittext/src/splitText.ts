@@ -154,10 +154,10 @@ class SplitTextResultImpl implements SplitTextResult {
   readonly element: HTMLElement;
   readonly originalHTML: string;
 
-  private _originalText: string;
+  private _originalText!: string;
   /** Text used for segmentation — respects the `ignore` option. */
-  private _splitText: string;
-  private _options: SplitTextOptions;
+  private _splitText!: string;
+  private _options!: SplitTextOptions;
   private _cache: SplitCache = {};
   /**
    * Parallel cache of DOM nodes for types that include non-span nodes
@@ -188,26 +188,29 @@ class SplitTextResultImpl implements SplitTextResult {
   constructor(element: HTMLElement, options: SplitTextOptions = {}) {
     this.element = element;
     this.originalHTML = element.innerHTML;
+    injectBaseStyles(element.ownerDocument);
+    this._init(options);
+  }
+
+  /**
+   * Apply options, capture source text, and run eager split / autoSplit setup.
+   * Shared by the constructor and `split()`.
+   */
+  private _init(options: SplitTextOptions): void {
+    this._options = options;
     // Capture plain text before any DOM mutation so getters always use the
     // correct source string regardless of the element's current DOM state.
-    this._originalText = getTextContent(element);
-    this._splitText = getFilteredTextContent(element, options.ignore);
-    this._options = options;
+    this._originalText = getTextContent(this.element);
+    this._splitText = getFilteredTextContent(this.element, options.ignore);
 
-    // Inject base stylesheet once per document
-    injectBaseStyles(element.ownerDocument);
-
-    // Eager split when `type` is specified
     if (options.type) {
       const types = Array.isArray(options.type) ? options.type : [options.type];
       for (const type of types) {
         this._compute(type);
       }
-      // Activate the last requested type in the DOM
       this._activate(types[types.length - 1]);
     }
 
-    // AutoSplit observers
     if (options.autoSplit) {
       this._attachObservers();
     }
@@ -265,8 +268,10 @@ class SplitTextResultImpl implements SplitTextResult {
   }
 
   split(optionsOverride?: SplitTextOptions): SplitTextResult {
-    this.revert();
-    return new SplitTextResultImpl(this.element, { ...this._options, ...optionsOverride });
+    this._detachObservers();
+    this._resetState();
+    this._init({ ...this._options, ...optionsOverride });
+    return this;
   }
 
   // -------------------------------------------------------------------------

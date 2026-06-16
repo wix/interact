@@ -164,7 +164,7 @@ export interface SplitTextResult {
 
   /**
    * Re-split the element with (optionally new) options, clearing the current
-   * cache first.
+   * cache first. Returns the same result instance.
    */
   split(options?: SplitTextOptions): SplitTextResult;
 
