@@ -15,9 +15,7 @@ export function useSplitText(
   // Serialise only the JSON-safe portion of options so inline object literals
   // don't cause infinite re-runs. Function-valued options are tracked by
   // reference identity in the dependency array below.
-  const serializableKey = JSON.stringify(options, (_, v) =>
-    typeof v === 'function' ? v.name : v,
-  );
+  const serializableKey = JSON.stringify(options, (_, v) => (typeof v === 'function' ? v.name : v));
   const { bidiResolver, onSplit, segmenter } = options;
   const ignoreFn = typeof options.ignore === 'function' ? options.ignore : null;
 

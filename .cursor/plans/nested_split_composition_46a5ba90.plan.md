@@ -37,12 +37,12 @@ Input order is **ignored** — types are always normalized to canonical hierarch
 
 Existing `type` option drives behavior:
 
-| `type` | DOM behavior |
-|--------|--------------|
-| Omitted | Lazy — no DOM mutation until a getter is accessed |
-| Single value (`'chars'`) | Flat split of that one type |
-| Array, length 1 (`['chars']`) | Same as single value |
-| Array, length 2+ | **Nested** tree; types auto-sorted to canonical order |
+| `type`                        | DOM behavior                                          |
+| ----------------------------- | ----------------------------------------------------- |
+| Omitted                       | Lazy — no DOM mutation until a getter is accessed     |
+| Single value (`'chars'`)      | Flat split of that one type                           |
+| Array, length 1 (`['chars']`) | Same as single value                                  |
+| Array, length 2+              | **Nested** tree; types auto-sorted to canonical order |
 
 **Canonical type order** (coarse → fine):
 
@@ -62,11 +62,11 @@ Update JSDoc on `type` in [`packages/splittext/src/types.ts`](packages/splittext
 
 ## Breaking changes
 
-| Before | After |
-|--------|-------|
+| Before                                                          | After                                                                     |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------- |
 | `type: ['chars', 'words']` computes both, mounts **words** only | Builds nested tree: words containing chars (same as `['words', 'chars']`) |
-| `result.chars` then `result.words` swaps active type in DOM | Rebuilds as nested `['words', 'chars']` regardless of access order |
-| README: "only last type inserted into DOM" | Remove; document nested default + auto-sort |
+| `result.chars` then `result.words` swaps active type in DOM     | Rebuilds as nested `['words', 'chars']` regardless of access order        |
+| README: "only last type inserted into DOM"                      | Remove; document nested default + auto-sort                               |
 
 ## Lazy evaluation rules
 
@@ -204,14 +204,14 @@ get chars(): HTMLSpanElement[] {
 
 ## Files
 
-| File | Change |
-|------|--------|
-| [`packages/splittext/src/types.ts`](packages/splittext/src/types.ts) | Update `type` JSDoc only |
-| [`packages/splittext/src/nestedSplit.ts`](packages/splittext/src/nestedSplit.ts) | **New** — normalization + `buildNestedNodes` + line orchestration |
-| [`packages/splittext/src/splitText.ts`](packages/splittext/src/splitText.ts) | `_buildDom`, remove activate/activeType, refactor getters / `_init` / `_resplit` |
-| [`packages/splittext/test/nestedSplit.spec.ts`](packages/splittext/test/nestedSplit.spec.ts) | **New** — unit tests |
-| [`packages/splittext/test/splitText.spec.ts`](packages/splittext/test/splitText.spec.ts) | Nested tests + update breaking tests |
-| [`packages/splittext/README.md`](packages/splittext/README.md) | Multi-type nesting docs, auto-sort note, breaking change |
+| File                                                                                         | Change                                                                           |
+| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [`packages/splittext/src/types.ts`](packages/splittext/src/types.ts)                         | Update `type` JSDoc only                                                         |
+| [`packages/splittext/src/nestedSplit.ts`](packages/splittext/src/nestedSplit.ts)             | **New** — normalization + `buildNestedNodes` + line orchestration                |
+| [`packages/splittext/src/splitText.ts`](packages/splittext/src/splitText.ts)                 | `_buildDom`, remove activate/activeType, refactor getters / `_init` / `_resplit` |
+| [`packages/splittext/test/nestedSplit.spec.ts`](packages/splittext/test/nestedSplit.spec.ts) | **New** — unit tests                                                             |
+| [`packages/splittext/test/splitText.spec.ts`](packages/splittext/test/splitText.spec.ts)     | Nested tests + update breaking tests                                             |
+| [`packages/splittext/README.md`](packages/splittext/README.md)                               | Multi-type nesting docs, auto-sort note, breaking change                         |
 
 ## Tests
 

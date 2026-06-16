@@ -807,9 +807,9 @@ describe('splitText', () => {
   describe('nested composition', () => {
     it('throws when multi-type used with nested: preserve', () => {
       const target = el('Hello');
-      expect(() =>
-        splitText(target, { type: ['words', 'chars'], nested: 'preserve' }),
-      ).toThrow(/nested: "flatten"/);
+      expect(() => splitText(target, { type: ['words', 'chars'], nested: 'preserve' })).toThrow(
+        /nested: "flatten"/,
+      );
     });
 
     it('lines contain word spans', () => {

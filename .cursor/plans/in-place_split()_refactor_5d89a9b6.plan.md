@@ -9,7 +9,7 @@ todos:
     content: Rewrite `split()` to detach observers, `_resetState`, `_init` merged options, `return this`
     status: completed
   - id: update-tests
-    content: "Update split() tests: same-instance identity, onSplit reference, keep DOM behavior tests"
+    content: 'Update split() tests: same-instance identity, onSplit reference, keep DOM behavior tests'
     status: completed
   - id: run-tests
     content: Run `@wix/splittext` test suite to verify
@@ -64,6 +64,7 @@ Add a private method in [`splitText.ts`](packages/splittext/src/splitText.ts) th
 - If `options.autoSplit`: `_attachObservers()`
 
 **Do not** move into `_init`:
+
 - `this.element = element` (constructor-only)
 - `this.originalHTML = element.innerHTML` (constructor-only; `_resetState` restores to this snapshot)
 - `injectBaseStyles()` (document-level, idempotent; constructor-only)
@@ -95,6 +96,7 @@ split(optionsOverride?: SplitTextOptions): SplitTextResult {
 Use `_detachObservers` + `_resetState` directly instead of `revert()` so the method name reflects intent (re-split, not full teardown). Behavior matches today: observers detached, DOM restored, caches cleared, then re-initialized.
 
 **Preserved semantics:**
+
 - `originalHTML` baseline unchanged (same as current: revert restores snapshot before init)
 - Option merging is shallow (`{ ...this._options, ...optionsOverride }`)
 - `autoSplit` observers re-attached only when the merged options include `autoSplit: true`
@@ -104,10 +106,10 @@ Use `_detachObservers` + `_resetState` directly instead of `revert()` so the met
 
 In [`splitText.spec.ts`](packages/splittext/test/splitText.spec.ts), update the `split() method` describe block (lines 728–746):
 
-| Test | Change |
-|------|--------|
+| Test                                                 | Change                                                                                             |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | "returns a new SplitTextResult with updated options" | Rename to reflect same-instance behavior; add `expect(result2).toBe(result1)`; keep DOM assertions |
-| "restores DOM before re-splitting" | No logic change |
+| "restores DOM before re-splitting"                   | No logic change                                                                                    |
 
 Add one focused test for stable identity + `onSplit`:
 

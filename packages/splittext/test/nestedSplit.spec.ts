@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  buildNestedNodes,
-  createIndexOffsets,
-  normalizeSplitTypes,
-} from '../src/nestedSplit';
+import { buildNestedNodes, createIndexOffsets, normalizeSplitTypes } from '../src/nestedSplit';
 
 describe('normalizeSplitTypes', () => {
   it('dedupes and sorts to canonical order', () => {
@@ -11,19 +7,11 @@ describe('normalizeSplitTypes', () => {
   });
 
   it('sorts lines, words, and chars', () => {
-    expect(normalizeSplitTypes(['chars', 'lines', 'words'])).toEqual([
-      'lines',
-      'words',
-      'chars',
-    ]);
+    expect(normalizeSplitTypes(['chars', 'lines', 'words'])).toEqual(['lines', 'words', 'chars']);
   });
 
   it('preserves canonical order when already sorted', () => {
-    expect(normalizeSplitTypes(['lines', 'words', 'chars'])).toEqual([
-      'lines',
-      'words',
-      'chars',
-    ]);
+    expect(normalizeSplitTypes(['lines', 'words', 'chars'])).toEqual(['lines', 'words', 'chars']);
   });
 });
 
@@ -50,7 +38,12 @@ describe('buildNestedNodes', () => {
 
   it('returns flat word spans for words only', () => {
     const offsets = createIndexOffsets();
-    const { nodes, spansByType } = buildNestedNodes('Hello World', ['words'], flattenOptions, offsets);
+    const { nodes, spansByType } = buildNestedNodes(
+      'Hello World',
+      ['words'],
+      flattenOptions,
+      offsets,
+    );
 
     expect(spansByType.words).toHaveLength(2);
     expect(spansByType.chars).toBeUndefined();
@@ -70,7 +63,9 @@ describe('buildNestedNodes', () => {
     expect(spansByType.words![0].style.getPropertyValue('--word-index')).toBe('0');
     expect(spansByType.words![1].style.getPropertyValue('--word-index')).toBe('1');
     expect(spansByType.chars![0].style.getPropertyValue('--char-index')).toBe('0');
-    expect(spansByType.chars![spansByType.chars!.length - 1].style.getPropertyValue('--char-index')).toBe('7');
+    expect(
+      spansByType.chars![spansByType.chars!.length - 1].style.getPropertyValue('--char-index'),
+    ).toBe('7');
   });
 
   it('wordGlue none: text nodes between words, chars inside word spans', () => {
