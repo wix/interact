@@ -684,6 +684,17 @@ describe('splitText', () => {
       expect(secondChars).not.toBe(firstChars);
     });
 
+    it('clears preserve-mode cache so nested re-split creates fresh spans', () => {
+      const target = el('<b>Hi</b> there');
+      const result = splitText(target, { type: 'chars', nested: 'preserve' });
+      const firstChars = result.chars;
+      result.revert();
+      const secondChars = result.chars;
+      expect(secondChars).not.toBe(firstChars);
+      expect(secondChars).toHaveLength(8);
+      expect(target.querySelector('b')).not.toBeNull();
+    });
+
     it('re-split after revert produces correct spans', () => {
       const target = el('Hi');
       const result = splitText(target, { type: 'chars' });

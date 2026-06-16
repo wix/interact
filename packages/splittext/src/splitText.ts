@@ -251,9 +251,15 @@ class SplitTextResultImpl implements SplitTextResult {
 
   revert(): void {
     this._detachObservers();
+    this._resetState();
+  }
+
+  /** Restore original DOM and clear all split caches. Keeps observers attached. */
+  private _resetState(): void {
     this.element.innerHTML = this.originalHTML;
     this._cache = {};
     this._domNodes = {};
+    this._preserveMap = {};
     this._isSplit = false;
     this._activeType = null;
   }
@@ -591,13 +597,7 @@ class SplitTextResultImpl implements SplitTextResult {
 
     const prevActive = this._activeType;
 
-    // Reset state and restore original DOM
-    this._cache = {};
-    this._domNodes = {};
-    this._preserveMap = {};
-    this._isSplit = false;
-    this._activeType = null;
-    this.element.innerHTML = this.originalHTML;
+    this._resetState();
     // Re-read plain text in case the element's content changed
     this._originalText = getTextContent(this.element);
     this._splitText = getFilteredTextContent(this.element, this._options.ignore);
