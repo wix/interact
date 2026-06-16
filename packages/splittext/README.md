@@ -47,7 +47,15 @@ chars.forEach((char, index) => {
 });
 ```
 
-When `type` is an array, every listed type is computed eagerly but only the **last** type is inserted into the DOM. Access another getter later to switch which split is active.
+When `type` is an array of two or more values, a **nested** DOM tree is built (coarse → fine), e.g. words containing chars. Array order is normalized automatically (`lines → sentences → words → chars`). Multi-type splits require `nested: 'flatten'`.
+
+```typescript
+// Words containing chars — order in the array does not matter
+splitText('.headline', {
+  nested: 'flatten',
+  type: ['chars', 'words'],
+});
+```
 
 ### Staggered CSS animation
 

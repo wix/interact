@@ -23,9 +23,15 @@ export interface WrapperAttrsConfig {
 
 export interface SplitTextOptions {
   /**
-   * Split types to compute. When specified, those types are split eagerly on
-   * invocation; omitting the option defers splitting until each getter is
-   * accessed.
+   * Split types to build. When specified, splitting runs eagerly on invocation;
+   * omitting the option defers splitting until each getter is accessed.
+   *
+   * A single type produces a flat split. An array of two or more types builds a
+   * **nested** DOM tree (coarse → fine), e.g. words containing chars. Array
+   * order is normalized automatically to `lines → sentences → words → chars`.
+   *
+   * Multi-type arrays require `nested: 'flatten'` (v1). Single-type splits
+   * support all `nested` modes (`'preserve'`, `'flatten'`, or a number).
    */
   type?: SplitType | SplitType[];
 

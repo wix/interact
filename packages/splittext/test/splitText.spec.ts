@@ -169,26 +169,31 @@ describe('splitText', () => {
 
     it('computes both types when type: [chars, words]', () => {
       const target = el('Hello World');
-      const result = splitText(target, { type: ['chars', 'words'] });
+      const result = splitText(target, { type: ['chars', 'words'], nested: 'flatten' });
       expect(result.chars.length).toBeGreaterThan(0);
       expect(result.words.length).toBeGreaterThan(0);
     });
 
-    it('last type in array is active in DOM for multi-type eager split', () => {
+    it('nests chars inside words for multi-type eager split', () => {
       const target = el('Hello World');
-      const result = splitText(target, { type: ['chars', 'words'] });
-      // Words is last, so word spans should be in the DOM
-      expect(target.querySelectorAll('.split-w').length).toBeGreaterThan(0);
-      // Char spans exist in cache but might not be in DOM
-      expect(result.words.length).toBe(2);
+      const result = splitText(target, { type: ['chars', 'words'], nested: 'flatten' });
+      expect(target.querySelectorAll('.split-w').length).toBe(2);
+      expect(target.querySelectorAll('.split-c').length).toBeGreaterThan(0);
+      const wordSpan = result.words[0];
+      expect(wordSpan.querySelectorAll('.split-c').length).toBeGreaterThan(0);
     });
 
-    it('re-activates chars after words were last active', () => {
-      const target = el('Hello World');
-      const result = splitText(target, { type: ['chars', 'words'] });
-      // words is last-active; accessing chars should swap them back in
-      void result.chars;
-      expect(target.querySelectorAll('.split-c').length).toBeGreaterThan(0);
+    it('auto-sorts type array order (chars, words same as words, chars)', () => {
+      const target = el('Hi');
+      const a = splitText(target, { type: ['words', 'chars'], nested: 'flatten' });
+      const htmlA = target.innerHTML;
+      target.innerHTML = 'Hi';
+      const b = splitText(target, { type: ['chars', 'words'], nested: 'flatten' });
+      expect(a.words.length).toBe(b.words.length);
+      expect(a.chars.length).toBe(b.chars.length);
+      expect(target.querySelectorAll('.split-w').length).toBeGreaterThan(0);
+      expect(target.querySelectorAll('.split-c').length).toBe(2);
+      void htmlA;
     });
   });
 
@@ -759,41 +764,72 @@ describe('splitText', () => {
   // -------------------------------------------------------------------------
 
   describe('multiple split types', () => {
-    it('accessing chars then words: words become active in DOM', () => {
+    it('lazy chars then words builds nested tree', () => {
       const target = el('Hello World');
-      const result = splitText(target);
+      const result = splitText(target, { nested: 'flatten' });
       void result.chars;
       void result.words;
-      expect(target.querySelectorAll('.split-w').length).toBeGreaterThan(0);
+      expect(target.querySelectorAll('.split-w').length).toBe(2);
+      expect(result.words[0].querySelectorAll('.split-c').length).toBeGreaterThan(0);
     });
 
-    it('re-accessing chars after words swaps them back into the DOM', () => {
-      const target = el('Hello World');
-      const result = splitText(target);
-      void result.chars;
-      void result.words;
-      void result.chars; // Re-activates chars
-      expect(target.querySelectorAll('.split-c').length).toBeGreaterThan(0);
-    });
-
-    it('cached spans are re-used (same reference) when re-activated', () => {
-      const target = el('Hello World');
-      const result = splitText(target);
-      const chars1 = result.chars;
-      void result.words; // Words now active
-      const chars2 = result.chars; // Chars re-activated
-      expect(chars1).toBe(chars2); // Same cached array
-    });
-
-    it('chars text content is correct after re-activation', () => {
+    it('lazy words then chars produces same nested structure', () => {
       const target = el('Hi');
-      const result = splitText(target);
-      const chars = result.chars;
+      const result = splitText(target, { nested: 'flatten' });
       void result.words;
-      void result.chars; // Re-activate
-      // Spans are the same objects, content unchanged
+      void result.chars;
+      expect(target.querySelectorAll('.split-w').length).toBe(1);
+      expect(result.words[0].querySelectorAll('.split-c').length).toBe(2);
+    });
+
+    it('repeated getter access does not mutate DOM after multi-type build', () => {
+      const target = el('Hello World');
+      const result = splitText(target, { type: ['words', 'chars'], nested: 'flatten' });
+      const htmlAfterBuild = target.innerHTML;
+      void result.chars;
+      void result.words;
+      expect(target.innerHTML).toBe(htmlAfterBuild);
+    });
+
+    it('chars text content is correct inside nested word spans', () => {
+      const target = el('Hi');
+      const result = splitText(target, { type: ['words', 'chars'], nested: 'flatten' });
+      const chars = result.chars;
       expect(chars[0].textContent).toBe('H');
       expect(chars[1].textContent).toBe('i');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Nested composition
+  // -------------------------------------------------------------------------
+
+  describe('nested composition', () => {
+    it('throws when multi-type used with nested: preserve', () => {
+      const target = el('Hello');
+      expect(() =>
+        splitText(target, { type: ['words', 'chars'], nested: 'preserve' }),
+      ).toThrow(/nested: "flatten"/);
+    });
+
+    it('lines contain word spans', () => {
+      mockLines(2);
+      const target = el('Line one and line two here');
+      splitText(target, { type: ['lines', 'words'], nested: 'flatten' });
+      const lineSpans = target.querySelectorAll('.split-l');
+      expect(lineSpans.length).toBeGreaterThan(0);
+      expect(target.querySelectorAll('.split-w').length).toBeGreaterThan(0);
+      const firstLine = lineSpans[0] as HTMLElement;
+      expect(firstLine.querySelector('.split-w')).not.toBeNull();
+    });
+
+    it('lines, words, and chars nest three levels deep', () => {
+      mockLines(1);
+      const target = el('Hello');
+      splitText(target, { type: ['lines', 'words', 'chars'], nested: 'flatten' });
+      const line = target.querySelector('.split-l')!;
+      const word = line.querySelector('.split-w')!;
+      expect(word.querySelectorAll('.split-c').length).toBe(5);
     });
   });
 
@@ -1099,11 +1135,10 @@ describe('splitText', () => {
         expect(strong.contains(words[1])).toBe(true);
       });
 
-      it('cached spans are reused when re-activating after a type switch', () => {
+      it('repeated chars getter returns same cached array in single-type preserve mode', () => {
         const target = el('<em>Hi</em>');
         const result = splitText(target, { nested: 'preserve' });
         const chars1 = result.chars;
-        void result.words;
         const chars2 = result.chars;
         expect(chars1).toBe(chars2);
       });
