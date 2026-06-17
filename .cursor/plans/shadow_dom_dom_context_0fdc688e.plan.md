@@ -102,14 +102,14 @@ Store `ctx` as `private readonly _ctx: SplitDomContext` on `SplitTextResultImpl`
 
 Add a final `doc: Document` parameter to internal helpers (or pass full `SplitDomContext` where both are needed). Replace every `document.createElement` / `createTextNode` / `createRange` / `createTreeWalker` with `doc.*` equivalents.
 
-| File | Changes |
-|------|---------|
-| [`wrappers.ts`](packages/splittext/src/wrappers.ts) | `createWrapper(..., doc)` |
-| [`accessibility.ts`](packages/splittext/src/accessibility.ts) | `applyAccessibility(..., doc)` |
-| [`utils.ts`](packages/splittext/src/utils.ts) | `walkTextNodes(root, cb, ignore, doc)`, `flattenBeyondDepth(..., doc)` |
-| [`lineDetection.ts`](packages/splittext/src/lineDetection.ts) | `detectLinesFromTextNode` uses `textNode.ownerDocument.createRange()`; `detectLines` passes `doc` to `walkTextNodes` |
-| [`splitText.ts`](packages/splittext/src/splitText.ts) | Top-level `splitChars` / `splitWordsWithSpacing` / `splitSentences`, `_applyBidi`, all `createWrapper` / `walkTextNodes` / `applyAccessibility` / `detectLines` call sites pass `this._ctx.doc` |
-| [`nestedSplit.ts`](packages/splittext/src/nestedSplit.ts) | Add `doc` param to `buildNestedNodes`, `buildNestedFromLines`, and internal split helpers; thread from `splitText.ts` |
+| File                                                          | Changes                                                                                                                                                                                         |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`wrappers.ts`](packages/splittext/src/wrappers.ts)           | `createWrapper(..., doc)`                                                                                                                                                                       |
+| [`accessibility.ts`](packages/splittext/src/accessibility.ts) | `applyAccessibility(..., doc)`                                                                                                                                                                  |
+| [`utils.ts`](packages/splittext/src/utils.ts)                 | `walkTextNodes(root, cb, ignore, doc)`, `flattenBeyondDepth(..., doc)`                                                                                                                          |
+| [`lineDetection.ts`](packages/splittext/src/lineDetection.ts) | `detectLinesFromTextNode` uses `textNode.ownerDocument.createRange()`; `detectLines` passes `doc` to `walkTextNodes`                                                                            |
+| [`splitText.ts`](packages/splittext/src/splitText.ts)         | Top-level `splitChars` / `splitWordsWithSpacing` / `splitSentences`, `_applyBidi`, all `createWrapper` / `walkTextNodes` / `applyAccessibility` / `detectLines` call sites pass `this._ctx.doc` |
+| [`nestedSplit.ts`](packages/splittext/src/nestedSplit.ts)     | Add `doc` param to `buildNestedNodes`, `buildNestedFromLines`, and internal split helpers; thread from `splitText.ts`                                                                           |
 
 **`_buildDomPreserve`**: replace bare `createElement('div')` pattern with `this._ctx.doc` (already uses `ownerDocument` — unify on `_ctx.doc`).
 
@@ -127,6 +127,7 @@ if (fonts) fonts.ready.then(() => this._resplit());
 Keep `resolveElement` using `document.querySelector` for string targets. **Do not** add a `queryRoot` option.
 
 Document clearly in AGENTS.md (and a brief JSDoc on `splitText`'s `target` param) that:
+
 - String selectors only resolve in the **light DOM**.
 - Targets inside Shadow DOM **must** be passed as an `HTMLElement` ref (e.g. via `useSplitText(ref)` or `host.shadowRoot.querySelector(...)` called by the consumer).
 
@@ -136,12 +137,12 @@ Document clearly in AGENTS.md (and a brief JSDoc on `splitText`'s `target` param
 
 Add [`packages/splittext/test/shadowDom.spec.ts`](packages/splittext/test/shadowDom.spec.ts):
 
-| Test | Asserts |
-|------|---------|
-| Open shadow root + `HTMLElement` target | Split produces `.split-c` spans inside shadow |
-| Base styles in shadow | After split, wrapper has expected layout (e.g. `getComputedStyle(span).display === 'inline-block'`) — may need to check injected `<style>` or `adoptedStyleSheets` depending on jsdom support |
-| String selector inside shadow | Throws or returns not found (existing error path) — confirms documented limitation |
-| `aria: 'auto'` in shadow | `.sr-only` span exists and is visually hidden via injected shadow styles |
+| Test                                    | Asserts                                                                                                                                                                                       |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Open shadow root + `HTMLElement` target | Split produces `.split-c` spans inside shadow                                                                                                                                                 |
+| Base styles in shadow                   | After split, wrapper has expected layout (e.g. `getComputedStyle(span).display === 'inline-block'`) — may need to check injected `<style>` or `adoptedStyleSheets` depending on jsdom support |
+| String selector inside shadow           | Throws or returns not found (existing error path) — confirms documented limitation                                                                                                            |
+| `aria: 'auto'` in shadow                | `.sr-only` span exists and is visually hidden via injected shadow styles                                                                                                                      |
 
 Reuse existing test helpers from [`splitText.spec.ts`](packages/splittext/test/splitText.spec.ts) where practical (extract `el()` helper to a shared `test/helpers.ts` only if duplication is significant — optional).
 
