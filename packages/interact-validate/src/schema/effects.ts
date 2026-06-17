@@ -1,178 +1,187 @@
 import { z } from 'zod';
 import { Keyframe, RangeOffset } from './primitives';
 
-const TriggerType = z.enum(['once', 'repeat', 'alternate', 'state']);
+export const StateActionType = z.enum(['add', 'remove', 'toggle', 'clear']);
+export const TimeTriggerType = z.enum(['once', 'repeat', 'alternate', 'state']);
+
+const TransitionOptions = {
+  duration: z.number().optional(),
+  delay: z.number().optional(),
+  easing: z.string().optional(),
+};
+const StyleProperty = { name: z.string().min(1), value: z.string() };
 
 export const NamedEffect = z.object({ type: z.string().min(1) }).catchall(z.unknown());
 
-const KeyframeEffectInline = z
+export const KeyframeEffect = z
   .object({
     name: z.string().min(1),
     keyframes: z.array(Keyframe).min(1),
   })
   .strict();
 
-export const EffectBase = z.object({
+export const CustomEffect = z.custom<(...args: unknown[]) => unknown>(
+  (v) => typeof v === 'function',
+);
+
+export const exactlyOne = (obj: Record<string, unknown>) =>
+  Object.values(obj).filter(Boolean).length === 1;
+export const atMostOne = (obj: Record<string, unknown>) =>
+  Object.values(obj).filter(Boolean).length <= 1;
+
+const EFFECT_SOURCE_MESSAGE =
+  'Effect source must define exactly one of namedEffect, keyframeEffect, or customEffect';
+const TRANSITION_SOURCE_MESSAGE = 'Exactly one of transition or transitionProperties must be used';
+
+const TransitionEffectSourceBase = z
+  .object({
+    transition: z
+      .object({
+        ...TransitionOptions,
+        styleProperties: z.array(z.object(StyleProperty)),
+      })
+      .optional(),
+    transitionProperties: z.array(z.object({ ...StyleProperty, ...TransitionOptions })).optional(),
+  })
+  .strict();
+
+const EffectSourceBase = z
+  .object({
+    namedEffect: NamedEffect.optional(),
+    keyframeEffect: KeyframeEffect.optional(),
+    customEffect: CustomEffect.optional(),
+  })
+  .strict();
+
+// Keep the standalone refined schema for external use (schema composition in host projects).
+// Do NOT use these with .extend() — use the base + .check() pattern below instead.
+export const EffectSource = EffectSourceBase.refine(exactlyOne, {
+  message: EFFECT_SOURCE_MESSAGE,
+});
+
+// Reusable checks — applied via .check() after .extend() to avoid the Zod v4
+// behavior where .extend() creates a new ZodObject that drops parent refinements.
+const checkExactlyOneEffectSource = z.check<any>((input) => {
+  const { namedEffect, keyframeEffect, customEffect } = input.value;
+  if (!exactlyOne({ namedEffect, keyframeEffect, customEffect })) {
+    input.issues.push({ code: 'custom', message: EFFECT_SOURCE_MESSAGE, input: input.value });
+  }
+});
+
+const checkAtMostOneEffectSource = z.check<any>((input) => {
+  const { namedEffect, keyframeEffect, customEffect } = input.value;
+  if (!atMostOne({ namedEffect, keyframeEffect, customEffect })) {
+    input.issues.push({ code: 'custom', message: EFFECT_SOURCE_MESSAGE, input: input.value });
+  }
+});
+
+const checkExactlyOneTransition = z.check<any>((input) => {
+  const { transition, transitionProperties } = input.value;
+  if (!exactlyOne({ transition, transitionProperties })) {
+    input.issues.push({ code: 'custom', message: TRANSITION_SOURCE_MESSAGE, input: input.value });
+  }
+});
+
+const checkAtMostOneTransition = z.check<any>((input) => {
+  const { transition, transitionProperties } = input.value;
+  if (!atMostOne({ transition, transitionProperties })) {
+    input.issues.push({ code: 'custom', message: TRANSITION_SOURCE_MESSAGE, input: input.value });
+  }
+});
+
+const EffectBase = {
   key: z.string().optional(),
   effectId: z.string().optional(),
   selector: z.string().optional(),
   listContainer: z.string().optional(),
   listItemSelector: z.string().optional(),
   conditions: z.array(z.string().min(1)).optional(),
-});
-
-export const SerializableEffectRef = EffectBase.extend({
-  effectId: z.string().min(1),
-}).strict();
-
-const TimeEffectFields = {
-  duration: z.number().optional(),
-  easing: z.string().optional(),
-  iterations: z.number().optional(),
-  alternate: z.boolean().optional(),
-  reversed: z.boolean().optional(),
-  delay: z.number().optional(),
-  fill: z.enum(['none', 'forwards', 'backwards', 'both']).optional(),
-  composite: z.enum(['replace', 'add', 'accumulate']).optional(),
-  triggerType: TriggerType.optional(),
 };
 
-export const SCRUB_FIELDS = [
-  'rangeStart',
-  'rangeEnd',
-  'centeredToTarget',
-  'transitionDuration',
-  'transitionDelay',
-  'transitionEasing',
-] as const;
+export const StateEffect = TransitionEffectSourceBase.extend({
+  ...EffectBase,
+  stateAction: StateActionType.optional(),
+})
+  .strict()
+  .check(checkExactlyOneTransition);
+export const StateEffectRef = TransitionEffectSourceBase.extend({
+  ...EffectBase,
+  effectId: z.string().min(1),
+  stateAction: StateActionType.optional(),
+})
+  .strict()
+  .check(checkAtMostOneTransition);
 
-export const STATE_FIELDS = ['stateAction', 'transition', 'transitionProperties'] as const;
+const AnimationEffectBase = {
+  ...EffectBase,
+  iterations: z.number().int().positive().optional(),
+  easing: z.string().optional(),
+  alternate: z.boolean().optional(),
+  reversed: z.boolean().optional(),
+  fill: z.enum(['none', 'forwards', 'backwards', 'both']).optional(),
+  composite: z.enum(['replace', 'add', 'accumulate']).optional(),
+};
 
-export const TIME_FIELDS = ['duration', 'delay'] as const;
-
-const ScrubEffectFields = {
+const viewProgressEffectFields = {
   rangeStart: RangeOffset.optional(),
   rangeEnd: RangeOffset.optional(),
+};
+
+const pointerMoveEffectFields = {
   centeredToTarget: z.boolean().optional(),
-  transitionDuration: z.number().optional(),
-  transitionDelay: z.number().optional(),
+  transitionDuration: z.number().int().nonnegative().optional(),
+  transitionDelay: z.number().int().nonnegative().optional(),
   transitionEasing: z.enum(['linear', 'hardBackOut', 'easeOut', 'elastic', 'bounce']).optional(),
 };
 
-const StateEffectFields = {
-  stateAction: z.enum(['add', 'remove', 'toggle', 'clear']).optional(),
-  transition: z
-    .object({
-      duration: z.number().optional(),
-      delay: z.number().optional(),
-      easing: z.string().optional(),
-      styleProperties: z.array(z.object({ name: z.string().min(1), value: z.string() })),
-    })
-    .optional(),
-  transitionProperties: z
-    .array(
-      z.object({
-        name: z.string().min(1),
-        value: z.string(),
-        duration: z.number().optional(),
-        delay: z.number().optional(),
-        easing: z.string().optional(),
-      }),
-    )
-    .optional(),
-};
-
-const SourceFields = {
-  namedEffect: NamedEffect.optional(),
-  keyframeEffect: KeyframeEffectInline.optional(),
-  customEffect: z
-    .custom<(...args: unknown[]) => unknown>((v) => typeof v === 'function')
-    .optional(),
-};
-
-export const SerializableEffectSource = z
-  .object(SourceFields)
+export const TimeEffect = EffectSourceBase.extend({
+  ...AnimationEffectBase,
+  duration: z.number().nonnegative(),
+  delay: z.number().nonnegative().optional(),
+  triggerType: TimeTriggerType.optional(),
+})
   .strict()
-  .refine(
-    (v) => (v.namedEffect ? 1 : 0) + (v.keyframeEffect ? 1 : 0) + (v.customEffect ? 1 : 0) === 1,
-    {
-      message:
-        'Effect source must define exactly one of namedEffect, keyframeEffect, or customEffect',
-    },
-  );
+  .check(checkExactlyOneEffectSource);
+export const TimeEffectRef = EffectSourceBase.extend({
+  ...AnimationEffectBase,
+  effectId: z.string().min(1),
+  duration: z.number().nonnegative().optional(),
+  delay: z.number().nonnegative().optional(),
+  triggerType: TimeTriggerType.optional(),
+})
+  .strict()
+  .check(checkAtMostOneEffectSource);
 
-const EffectShape = EffectBase.extend({
-  ...SourceFields,
-  ...TimeEffectFields,
-  ...ScrubEffectFields,
-  ...StateEffectFields,
-}).strict();
+export const ViewProgressEffect = EffectSourceBase.extend({
+  ...AnimationEffectBase,
+  ...viewProgressEffectFields,
+})
+  .strict()
+  .check(checkExactlyOneEffectSource);
+export const ViewProgressEffectRef = EffectSourceBase.extend({
+  ...AnimationEffectBase,
+  effectId: z.string().min(1),
+  ...viewProgressEffectFields,
+})
+  .strict()
+  .check(checkAtMostOneEffectSource);
 
-export const SerializableEffect = EffectShape.superRefine((v, ctx) => {
-  const hasNamed = v.namedEffect !== undefined;
-  const hasKeyframe = v.keyframeEffect !== undefined;
-  const hasCustom = v.customEffect !== undefined;
-  const sourceCount = (hasNamed ? 1 : 0) + (hasKeyframe ? 1 : 0) + (hasCustom ? 1 : 0);
-  const hasSource = sourceCount > 0;
-  const hasState =
-    v.stateAction !== undefined ||
-    v.transition !== undefined ||
-    v.transitionProperties !== undefined;
+export const PointerMoveEffect = EffectSourceBase.extend({
+  ...AnimationEffectBase,
+  ...pointerMoveEffectFields,
+})
+  .strict()
+  .check(checkExactlyOneEffectSource);
+export const PointerMoveEffectRef = EffectSourceBase.extend({
+  ...AnimationEffectBase,
+  effectId: z.string().min(1),
+  ...pointerMoveEffectFields,
+})
+  .strict()
+  .check(checkAtMostOneEffectSource);
 
-  if (sourceCount > 1) {
-    ctx.addIssue({
-      code: 'custom',
-      message: 'Effect must define exactly one of namedEffect, keyframeEffect, or customEffect.',
-      path: [],
-    });
-  }
-  if (hasSource && hasState) {
-    ctx.addIssue({
-      code: 'custom',
-      message:
-        'Effect source fields (namedEffect, keyframeEffect, or customEffect) cannot be combined with state effect fields.',
-      path: [],
-    });
-  }
-  if (!hasSource && !hasState) {
-    ctx.addIssue({
-      code: 'custom',
-      message:
-        'Effect must define an effect source (namedEffect, keyframeEffect, or customEffect) or be a state effect (stateAction / transition / transitionProperties).',
-      path: [],
-    });
-  }
-});
+export const ScrubEffect = z.union([ViewProgressEffect, PointerMoveEffect]);
+export const ScrubEffectRef = z.union([ViewProgressEffectRef, PointerMoveEffectRef]);
 
-export const SerializableTimeEffect = SerializableEffect.superRefine((v, ctx) => {
-  if (
-    v.namedEffect === undefined &&
-    v.keyframeEffect === undefined &&
-    v.customEffect === undefined
-  ) {
-    ctx.addIssue({
-      code: 'custom',
-      message:
-        'Time effect must define an effect source (namedEffect, keyframeEffect, or customEffect).',
-      path: [],
-    });
-  }
-  for (const field of SCRUB_FIELDS) {
-    if ((v as Record<string, unknown>)[field] !== undefined) {
-      ctx.addIssue({
-        code: 'custom',
-        message: `"${field}" is a scrub-effect field and is not allowed on a time effect.`,
-        path: [field],
-      });
-    }
-  }
-  for (const field of STATE_FIELDS) {
-    if ((v as Record<string, unknown>)[field] !== undefined) {
-      ctx.addIssue({
-        code: 'custom',
-        message: `"${field}" is a state-effect field and is not allowed on a time effect.`,
-        path: [field],
-      });
-    }
-  }
-});
+export const Effect = z.union([TimeEffect, ScrubEffect, StateEffect]);
+export const EffectRef = z.union([TimeEffectRef, ScrubEffectRef, StateEffectRef]);

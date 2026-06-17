@@ -10,10 +10,10 @@ export {
 } from './interactions';
 
 export {
-  SerializableEffect,
-  SerializableEffectRef,
-  SerializableEffectSource,
-  SerializableTimeEffect,
+  Effect,
+  EffectRef,
+  EffectSource,
+  TimeEffect,
   EffectBase,
   NamedEffect,
   SCRUB_FIELDS,
@@ -21,7 +21,7 @@ export {
   TIME_FIELDS,
 } from './effects';
 
-export { SerializableSequenceConfig, SerializableSequenceConfigRef } from './sequences';
+export { SequenceConfig, SequenceConfigRef } from './sequences';
 
 export { Keyframe, LengthPercentage, RangeOffset, Condition } from './primitives';
 
@@ -30,10 +30,10 @@ export type {
   InteractConfig,
   Condition as ConditionDef,
   SequenceOptionsConfig,
-  SequenceConfig,
-  SequenceConfigRef,
+  SequenceConfig as SequenceConfigDef,
+  SequenceConfigRef as SequenceConfigRefDef,
   Interaction as InteractionDef,
   InteractionTrigger,
 } from '@wix/interact';
 
-export type { Effect, EffectRef } from '@wix/interact';
+export type { Effect as EffectDef, EffectRef as EffectRefDef } from '@wix/interact';

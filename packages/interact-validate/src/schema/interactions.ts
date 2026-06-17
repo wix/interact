@@ -1,7 +1,18 @@
 import { z } from 'zod';
 import { Condition } from './primitives';
-import { SerializableEffect, SerializableEffectRef } from './effects';
-import { SerializableSequenceConfig, SerializableSequenceConfigRef } from './sequences';
+import {
+  Effect,
+  ViewProgressEffect,
+  ViewProgressEffectRef,
+  PointerMoveEffect,
+  PointerMoveEffectRef,
+  StateEffect,
+  StateEffectRef,
+  TimeEffect,
+  TimeEffectRef,
+  exactlyOne,
+} from './effects';
+import { SequenceConfig, SequenceConfigRef } from './sequences';
 
 export const TriggerType = z.enum([
   'hover',
@@ -17,7 +28,7 @@ export const TriggerType = z.enum([
 
 export const ViewEnterParams = z
   .object({
-    threshold: z.number().optional(),
+    threshold: z.number().min(0).max(1).optional(),
     inset: z.string().optional(),
     useSafeViewEnter: z.boolean().optional(),
   })
@@ -44,96 +55,266 @@ const InteractionBase = {
   listContainer: z.string().optional(),
   listItemSelector: z.string().optional(),
   conditions: z.array(z.string().min(1)).optional(),
-  effects: z.array(z.union([SerializableEffect, SerializableEffectRef])).optional(),
-  sequences: z
-    .array(z.union([SerializableSequenceConfig, SerializableSequenceConfigRef]))
-    .optional(),
 };
 
-const ViewEnterInteraction = z
-  .object({
-    ...InteractionBase,
-    trigger: z.literal('viewEnter'),
-    params: ViewEnterParams.optional(),
-  })
-  .strict();
+const hasEffectsOrSequences = (interaction: { effects?: unknown[]; sequences?: unknown[] }) =>
+  (interaction.effects?.length ?? 0) > 0 || (interaction.sequences?.length ?? 0) > 0;
 
-const PageVisibleInteraction = z
-  .object({
-    ...InteractionBase,
-    trigger: z.literal('pageVisible'),
-    params: ViewEnterParams.optional(),
-  })
-  .strict();
-
-const PointerMoveInteraction = z
-  .object({
-    ...InteractionBase,
-    trigger: z.literal('pointerMove'),
-    params: PointerMoveParams.optional(),
-  })
-  .strict();
-
-const AnimationEndInteraction = z
+export const AnimationEndInteraction = z
   .object({
     ...InteractionBase,
     trigger: z.literal('animationEnd'),
     params: AnimationEndParams,
+    effects: z.array(z.union([TimeEffect, TimeEffectRef])).optional(),
+    sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
   })
-  .strict();
+  .strict()
+  .refine(hasEffectsOrSequences, {
+    message: 'Interaction must have at least one effect or sequence',
+  });
 
-const HoverInteraction = z
+export const ViewEnterInteraction = z
   .object({
     ...InteractionBase,
-    trigger: z.literal('hover'),
+    trigger: z.enum(['viewEnter', 'pageVisible']),
+    params: ViewEnterParams.optional(),
+    effects: z.array(z.union([TimeEffect, TimeEffectRef])).optional(),
+    sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
   })
-  .strict();
+  .strict()
+  .refine(hasEffectsOrSequences, {
+    message: 'Interaction must have at least one effect or sequence',
+  });
 
-const ClickInteraction = z
-  .object({
-    ...InteractionBase,
-    trigger: z.literal('click'),
-  })
-  .strict();
-
-const InterestInteraction = z
-  .object({
-    ...InteractionBase,
-    trigger: z.literal('interest'),
-  })
-  .strict();
-
-const ActivateInteraction = z
-  .object({
-    ...InteractionBase,
-    trigger: z.literal('activate'),
-  })
-  .strict();
-
-const ViewProgressInteraction = z
+export const ViewProgressInteraction = z
   .object({
     ...InteractionBase,
     trigger: z.literal('viewProgress'),
+    effects: z.array(z.union([ViewProgressEffect, ViewProgressEffectRef])).min(1),
+  })
+  .strict();
+
+export const PointerMoveInteraction = z
+  .object({
+    ...InteractionBase,
+    trigger: z.literal('pointerMove'),
+    params: PointerMoveParams.optional(),
+    effects: z.array(z.union([PointerMoveEffect, PointerMoveEffectRef])).min(1),
+  })
+  .strict();
+
+export const ScrubInteraction = z.discriminatedUnion('trigger', [
+  ViewProgressInteraction,
+  PointerMoveInteraction,
+]);
+
+export const StateInteraction = z
+  .object({
+    ...InteractionBase,
+    trigger: z.enum(['hover', 'click', 'activate', 'interest']),
+    effects: z.array(z.union([StateEffect, StateEffectRef])).min(1),
   })
   .strict();
 
 export const Interaction = z.discriminatedUnion('trigger', [
-  ViewEnterInteraction,
-  PageVisibleInteraction,
-  PointerMoveInteraction,
   AnimationEndInteraction,
-  HoverInteraction,
-  ClickInteraction,
-  InterestInteraction,
-  ActivateInteraction,
+  ViewEnterInteraction,
   ViewProgressInteraction,
+  PointerMoveInteraction,
+  StateInteraction,
 ]);
+
+function validateEffectSource(ctx: z.RefinementCtx, path: (string | number)[], effect: any): void {
+  const { transition, transitionProperties, namedEffect, keyframeEffect, customEffect } = effect;
+  if (
+    !exactlyOne({ transition, transitionProperties, namedEffect, keyframeEffect, customEffect })
+  ) {
+    ctx.addIssue({
+      code: 'custom',
+      path,
+      message: `Effect source must define exactly one of transition, transitionProperties, namedEffect, keyframeEffect, or customEffect`,
+    });
+  }
+}
+
+function validateEffectReference(
+  ctx: z.RefinementCtx,
+  path: (string | number)[],
+  effect: { effectId?: string },
+  configEffects: Record<string, any>,
+): void {
+  const { effectId } = effect;
+  if (effectId) {
+    if (configEffects[effectId]) {
+      validateEffectSource(ctx, path, { ...configEffects[effectId], ...effect });
+    } else {
+      ctx.addIssue({
+        code: 'custom',
+        path: [...path, 'effectId'],
+        message: `Effect "${effectId}" not found`,
+      });
+    }
+  } else {
+    validateEffectSource(ctx, path, effect);
+  }
+}
+
+function collectEffectKeyframeNames(
+  warnings: z.ZodIssue[],
+  path: (string | number)[],
+  keyframeNames: Set<string>,
+  keyframeEffect?: { name: string },
+): void {
+  if (keyframeEffect) {
+    if (keyframeNames.has(keyframeEffect.name)) {
+      warnings.push({
+        code: 'custom',
+        path: [...path, 'keyframeEffect', 'name'],
+        message: `Keyframe name "${keyframeEffect.name}" already used`,
+      });
+    }
+    keyframeNames.add(keyframeEffect.name);
+  }
+}
+
+function validateConditionReferences(
+  ctx: z.RefinementCtx,
+  path: (string | number)[],
+  configConditions: Record<string, any>,
+  conditions?: string[],
+): void {
+  conditions?.forEach((conditionId, ci) => {
+    if (!configConditions[conditionId]) {
+      ctx.addIssue({
+        code: 'custom',
+        path: [...path, 'conditions', ci],
+        message: `Condition "${conditionId}" not found`,
+      });
+    }
+  });
+}
+
+type Path = (string | number)[];
+
+function walkConfig(
+  config: {
+    effects?: Record<string, any>;
+    sequences?: Record<string, any>;
+    interactions: any[];
+  },
+  visitors: {
+    onEffect: (path: Path, effect: any, isTopLevel: boolean) => void;
+    onSequence: (path: Path, sequence: any, isTopLevel: boolean) => void;
+  },
+): void {
+  const { onEffect, onSequence } = visitors;
+
+  Object.entries(config.effects ?? {}).forEach(([id, effect]) => {
+    onEffect(['effects', id], effect, true);
+  });
+
+  Object.entries(config.sequences ?? {}).forEach(([id, sequence]) => {
+    onSequence(['sequences', id], sequence, true);
+    sequence.effects.forEach((effect: any, ei: number) => {
+      onEffect(['sequences', id, 'effects', ei], effect, false);
+    });
+  });
+
+  config.interactions.forEach((interaction: any, i: number) => {
+    const { effects, sequences } = interaction as { effects?: any[]; sequences?: any[] };
+    effects?.forEach((effect, ei) => {
+      onEffect(['interactions', i, 'effects', ei], effect, false);
+    });
+    sequences?.forEach((sequence, si) => {
+      const seqPath: Path = ['interactions', i, 'sequences', si];
+      onSequence(seqPath, sequence, false);
+      sequence.effects?.forEach((effect: any, ei: number) => {
+        onEffect([...seqPath, 'effects', ei], effect, false);
+      });
+    });
+  });
+}
 
 export const InteractConfigSchema = z
   .object({
-    effects: z.record(z.string().min(1), SerializableEffect).optional(),
-    sequences: z.record(z.string().min(1), SerializableSequenceConfig).optional(),
+    effects: z.record(z.string().min(1), Effect).optional(),
+    sequences: z.record(z.string().min(1), SequenceConfig).optional(),
     conditions: z.record(z.string().min(1), Condition).optional(),
     interactions: z.array(Interaction),
   })
-  .strict();
+  .strict()
+  .superRefine((config, ctx) => {
+    const configEffects = config.effects ?? {};
+    const configSequences = config.sequences ?? {};
+    const configConditions = config.conditions ?? {};
+
+    walkConfig(config, {
+      onEffect: (path, effect, isTopLevel) => {
+        validateConditionReferences(ctx, path, configConditions, effect.conditions);
+        if (!isTopLevel) {
+          validateEffectReference(ctx, path, effect, configEffects);
+        }
+      },
+      onSequence: (path, sequence, isTopLevel) => {
+        validateConditionReferences(ctx, path, configConditions, sequence.conditions);
+        if (!isTopLevel && sequence.sequenceId && !configSequences[sequence.sequenceId]) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [...path, 'sequenceId'],
+            message: `Sequence "${sequence.sequenceId}" not found`,
+          });
+        }
+      },
+    });
+  })
+  .transform((config) => {
+    const configEffects = config.effects ?? {};
+    const configSequences = config.sequences ?? {};
+    const configConditions = config.conditions ?? {};
+    const keyframeNames = new Set<string>();
+    const effectIdReferences = new Set(Object.keys(configEffects));
+    const sequenceIdReferences = new Set(Object.keys(configSequences));
+    const conditionReferences = new Set(Object.keys(configConditions));
+
+    const warnings: z.ZodIssue[] = [];
+
+    walkConfig(config, {
+      onEffect: (path, effect, isTopLevel) => {
+        effect.conditions?.forEach(Set.prototype.delete, conditionReferences);
+        collectEffectKeyframeNames(warnings, path, keyframeNames, (effect as any).keyframeEffect);
+        if (!isTopLevel && effect.effectId) {
+          effectIdReferences.delete(effect.effectId);
+        }
+      },
+      onSequence: (_path, sequence, isTopLevel) => {
+        sequence.conditions?.forEach(Set.prototype.delete, conditionReferences);
+        if (!isTopLevel && sequence.sequenceId) {
+          sequenceIdReferences.delete(sequence.sequenceId);
+        }
+      },
+    });
+
+    effectIdReferences.forEach((effectId) => {
+      warnings.push({
+        code: 'custom',
+        path: ['effects', effectId],
+        message: `Effect "${effectId}" is not referenced by any interaction`,
+      });
+    });
+    sequenceIdReferences.forEach((sequenceId) => {
+      warnings.push({
+        code: 'custom',
+        path: ['sequences', sequenceId],
+        message: `Sequence "${sequenceId}" is not referenced by any interaction`,
+      });
+    });
+    conditionReferences.forEach((conditionId) => {
+      warnings.push({
+        code: 'custom',
+        path: ['conditions', conditionId],
+        message: `Condition "${conditionId}" is not referenced by any interaction`,
+      });
+    });
+
+    return { ...config, warnings };
+  });

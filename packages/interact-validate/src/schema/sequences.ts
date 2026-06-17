@@ -1,32 +1,27 @@
 import { z } from 'zod';
-import { SerializableEffectRef, SerializableTimeEffect } from './effects';
+import { TimeEffect, TimeEffectRef, TimeTriggerType } from './effects';
 
-const TriggerType = z.enum(['once', 'repeat', 'alternate', 'state']);
-
-export const SerializableSequenceConfig = z.object({
-  effects: z.array(z.union([SerializableTimeEffect, SerializableEffectRef])),
-  delay: z.number().optional(),
-  offset: z.number().optional(),
+const SequenceOptionsConfig = {
+  delay: z.number().int().nonnegative().optional(),
+  offset: z.number().int().nonnegative().optional(),
   offsetEasing: z
     .union([z.string(), z.custom<(...args: unknown[]) => unknown>((v) => typeof v === 'function')])
     .optional(),
-  triggerType: TriggerType.optional(),
+  triggerType: TimeTriggerType.optional(),
   sequenceId: z.string().optional(),
   conditions: z.array(z.string().min(1)).optional(),
-});
+};
 
-export const SerializableSequenceConfigRef = z
+export const SequenceConfig = z
   .object({
+    ...SequenceOptionsConfig,
+    effects: z.array(z.union([TimeEffect, TimeEffectRef])).min(1),
+  })
+  .strict();
+
+export const SequenceConfigRef = z
+  .object({
+    ...SequenceOptionsConfig,
     sequenceId: z.string().min(1),
-    delay: z.number().optional(),
-    offset: z.number().optional(),
-    offsetEasing: z
-      .union([
-        z.string(),
-        z.custom<(...args: unknown[]) => unknown>((v) => typeof v === 'function'),
-      ])
-      .optional(),
-    triggerType: TriggerType.optional(),
-    conditions: z.array(z.string().min(1)).optional(),
   })
   .strict();
