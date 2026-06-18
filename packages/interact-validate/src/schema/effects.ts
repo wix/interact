@@ -4,6 +4,20 @@ import { Keyframe, RangeOffset } from './primitives';
 export const StateActionType = z.enum(['add', 'remove', 'toggle', 'clear']);
 export const TimeTriggerType = z.enum(['once', 'repeat', 'alternate', 'state']);
 
+const TimeIterations = z.number().nonnegative().or(z.literal(Infinity)).optional();
+const ScrubIterations = z
+  .union([z.number().int().positive(), z.literal(Infinity)])
+  .superRefine((n, ctx) => {
+    if (n === Infinity) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'iterations must not be Infinity for scroll/pointer-driven effects',
+        params: { domainCode: 'ITERATIONS_INFINITY_ON_SCRUB' },
+      } as any);
+    }
+  })
+  .optional();
+
 const TransitionOptions = {
   duration: z.number().optional(),
   delay: z.number().optional(),
@@ -134,7 +148,6 @@ export const StateEffectRef = TransitionEffectSourceBase.extend({
 
 const AnimationEffectBase = {
   ...EffectBase,
-  iterations: z.number().int().positive().optional(),
   easing: z.string().optional(),
   alternate: z.boolean().optional(),
   reversed: z.boolean().optional(),
@@ -156,6 +169,7 @@ const pointerMoveEffectFields = {
 
 export const TimeEffect = EffectSourceBase.extend({
   ...AnimationEffectBase,
+  iterations: TimeIterations,
   duration: z.number().nonnegative(),
   delay: z.number().nonnegative().optional(),
   triggerType: TimeTriggerType.optional(),
@@ -164,6 +178,7 @@ export const TimeEffect = EffectSourceBase.extend({
   .check(checkExactlyOneEffectSource);
 export const TimeEffectRef = EffectSourceBase.extend({
   ...AnimationEffectBase,
+  iterations: TimeIterations,
   effectId: z.string().min(1),
   duration: z.number().nonnegative().optional(),
   delay: z.number().nonnegative().optional(),
@@ -174,12 +189,14 @@ export const TimeEffectRef = EffectSourceBase.extend({
 
 export const ViewProgressEffect = EffectSourceBase.extend({
   ...AnimationEffectBase,
+  iterations: ScrubIterations,
   ...viewProgressEffectFields,
 })
   .strict()
   .check(checkExactlyOneEffectSource);
 export const ViewProgressEffectRef = EffectSourceBase.extend({
   ...AnimationEffectBase,
+  iterations: ScrubIterations,
   effectId: z.string().min(1),
   ...viewProgressEffectFields,
 })
@@ -188,12 +205,14 @@ export const ViewProgressEffectRef = EffectSourceBase.extend({
 
 export const PointerMoveEffect = EffectSourceBase.extend({
   ...AnimationEffectBase,
+  iterations: ScrubIterations,
   ...pointerMoveEffectFields,
 })
   .strict()
   .check(checkExactlyOneEffectSource);
 export const PointerMoveEffectRef = EffectSourceBase.extend({
   ...AnimationEffectBase,
+  iterations: ScrubIterations,
   effectId: z.string().min(1),
   ...pointerMoveEffectFields,
 })

@@ -120,11 +120,11 @@ export const ScrubInteraction = z.discriminatedUnion('trigger', [
   PointerMoveInteraction,
 ]);
 
-export const StateInteraction = z
+export const DiscreteInteraction = z
   .object({
     ...InteractionBase,
     trigger: z.enum(['hover', 'click', 'activate', 'interest']),
-    effects: z.array(z.union([StateEffect, StateEffectRef])).min(1),
+    effects: z.array(z.union([TimeEffect, TimeEffectRef, StateEffect, StateEffectRef])).min(1),
   })
   .strict();
 
@@ -133,7 +133,7 @@ export const Interaction = z.discriminatedUnion('trigger', [
   ViewEnterInteraction,
   ViewProgressInteraction,
   PointerMoveInteraction,
-  StateInteraction,
+  DiscreteInteraction,
 ]);
 
 function validateEffectSource(ctx: z.RefinementCtx, path: (string | number)[], effect: any): void {

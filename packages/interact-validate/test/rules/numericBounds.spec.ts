@@ -102,6 +102,82 @@ describe('numericBounds', () => {
     });
   });
 
+  describe('iterations: Infinity', () => {
+    it('allows iterations: Infinity on a time-based effect (continuous loop)', () => {
+      const result = validateInteractConfig({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            effects: [
+              {
+                namedEffect: { type: 'Pulse' },
+                duration: 400,
+                triggerType: 'state',
+                iterations: Infinity,
+              },
+            ],
+          },
+        ],
+      });
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('allows iterations: 0 on a time-based effect (treated as Infinity at runtime)', () => {
+      const result = validateInteractConfig({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'hover',
+            effects: [
+              { namedEffect: { type: 'Pulse' }, duration: 400, iterations: 0, fill: 'both' },
+            ],
+          },
+        ],
+      });
+      expect(result.errors.filter((e) => e.code === 'NEGATIVE_ITERATIONS')).toHaveLength(0);
+      expect(result.valid).toBe(true);
+    });
+
+    it('rejects iterations: Infinity on a scroll-driven (viewProgress) effect', () => {
+      const result = validateInteractConfig({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            effects: [
+              {
+                namedEffect: { type: 'FadeScroll', range: 'continuous' },
+                rangeStart: { name: 'entry' },
+                iterations: Infinity,
+              },
+            ],
+          },
+        ],
+      });
+      expect(result.valid).toBe(false);
+      const err = result.errors.find((e) => e.code === 'ITERATIONS_INFINITY_ON_SCRUB');
+      expect(err).toBeDefined();
+      expect(err?.severity).toBe('error');
+      expect(err?.path).toContain('iterations');
+    });
+
+    it('rejects iterations: Infinity on a pointerMove effect', () => {
+      const result = validateInteractConfig({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'pointerMove',
+            effects: [{ namedEffect: { type: 'TrackMouse' }, iterations: Infinity }],
+          },
+        ],
+      });
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.code === 'ITERATIONS_INFINITY_ON_SCRUB')).toBe(true);
+    });
+  });
+
   describe('NEGATIVE_OFFSET', () => {
     it('emits NEGATIVE_OFFSET for a negative offset on a top-level sequence', () => {
       const result = validateInteractConfig({
