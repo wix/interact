@@ -4,7 +4,7 @@ import { validateInteractConfig } from '../../src';
 describe('sequenceIdsExist — SEQUENCE_ID_NOT_FOUND', () => {
   it('emits no errors when a sequenceId reference resolves to a defined sequence', () => {
     const result = validateInteractConfig({
-      sequences: { seq: { effects: [{ namedEffect: { type: 'FadeIn' } }] } },
+      sequences: { seq: { effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }] } },
       interactions: [{ key: 'el', trigger: 'viewEnter', sequences: [{ sequenceId: 'seq' }] }],
     });
     expect(result.errors.filter((e) => e.code === 'SEQUENCE_ID_NOT_FOUND')).toHaveLength(0);

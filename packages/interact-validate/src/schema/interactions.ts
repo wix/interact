@@ -69,8 +69,14 @@ export const AnimationEndInteraction = z
     sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
   })
   .strict()
-  .refine(hasEffectsOrSequences, {
-    message: 'Interaction must have at least one effect or sequence',
+  .superRefine((interaction, ctx) => {
+    if (!hasEffectsOrSequences(interaction)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Interaction must have at least one effect or sequence',
+        params: { domainCode: 'INTERACTION_EMPTY' },
+      } as any);
+    }
   });
 
 export const ViewEnterInteraction = z
@@ -82,8 +88,14 @@ export const ViewEnterInteraction = z
     sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
   })
   .strict()
-  .refine(hasEffectsOrSequences, {
-    message: 'Interaction must have at least one effect or sequence',
+  .superRefine((interaction, ctx) => {
+    if (!hasEffectsOrSequences(interaction)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Interaction must have at least one effect or sequence',
+        params: { domainCode: 'INTERACTION_EMPTY' },
+      } as any);
+    }
   });
 
 export const ViewProgressInteraction = z
@@ -133,7 +145,8 @@ function validateEffectSource(ctx: z.RefinementCtx, path: (string | number)[], e
       code: 'custom',
       path,
       message: `Effect source must define exactly one of transition, transitionProperties, namedEffect, keyframeEffect, or customEffect`,
-    });
+      params: { domainCode: 'MULTIPLE_EFFECT_SOURCES' },
+    } as any);
   }
 }
 
@@ -152,15 +165,23 @@ function validateEffectReference(
         code: 'custom',
         path: [...path, 'effectId'],
         message: `Effect "${effectId}" not found`,
-      });
+        params: { domainCode: 'EFFECT_ID_NOT_FOUND' },
+      } as any);
     }
   } else {
     validateEffectSource(ctx, path, effect);
   }
 }
 
+type WarningIssue = {
+  code: 'custom';
+  path: (string | number)[];
+  message: string;
+  params: { domainCode: string };
+};
+
 function collectEffectKeyframeNames(
-  warnings: z.ZodIssue[],
+  warnings: WarningIssue[],
   path: (string | number)[],
   keyframeNames: Set<string>,
   keyframeEffect?: { name: string },
@@ -171,6 +192,7 @@ function collectEffectKeyframeNames(
         code: 'custom',
         path: [...path, 'keyframeEffect', 'name'],
         message: `Keyframe name "${keyframeEffect.name}" already used`,
+        params: { domainCode: 'DUPLICATE_KEYFRAME_NAME' },
       });
     }
     keyframeNames.add(keyframeEffect.name);
@@ -189,7 +211,8 @@ function validateConditionReferences(
         code: 'custom',
         path: [...path, 'conditions', ci],
         message: `Condition "${conditionId}" not found`,
-      });
+        params: { domainCode: 'CONDITION_NOT_FOUND' },
+      } as any);
     }
   });
 }
@@ -203,11 +226,12 @@ function walkConfig(
     interactions: any[];
   },
   visitors: {
+    onInteraction?: (path: Path, interaction: any) => void;
     onEffect: (path: Path, effect: any, isTopLevel: boolean) => void;
     onSequence: (path: Path, sequence: any, isTopLevel: boolean) => void;
   },
 ): void {
-  const { onEffect, onSequence } = visitors;
+  const { onInteraction, onEffect, onSequence } = visitors;
 
   Object.entries(config.effects ?? {}).forEach(([id, effect]) => {
     onEffect(['effects', id], effect, true);
@@ -221,6 +245,7 @@ function walkConfig(
   });
 
   config.interactions.forEach((interaction: any, i: number) => {
+    onInteraction?.(['interactions', i], interaction);
     const { effects, sequences } = interaction as { effects?: any[]; sequences?: any[] };
     effects?.forEach((effect, ei) => {
       onEffect(['interactions', i, 'effects', ei], effect, false);
@@ -248,7 +273,25 @@ export const InteractConfigSchema = z
     const configSequences = config.sequences ?? {};
     const configConditions = config.conditions ?? {};
 
+    // Validate animationEnd params.effectId references
+    config.interactions.forEach((interaction: any, i: number) => {
+      if (interaction.trigger === 'animationEnd' && interaction.params?.effectId) {
+        const { effectId } = interaction.params;
+        if (!configEffects[effectId]) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['interactions', i, 'params', 'effectId'],
+            message: `Effect "${effectId}" not found`,
+            params: { domainCode: 'ANIMATION_END_EFFECT_NOT_FOUND' },
+          } as any);
+        }
+      }
+    });
+
     walkConfig(config, {
+      onInteraction: (path, interaction) => {
+        validateConditionReferences(ctx, path, configConditions, interaction.conditions);
+      },
       onEffect: (path, effect, isTopLevel) => {
         validateConditionReferences(ctx, path, configConditions, effect.conditions);
         if (!isTopLevel) {
@@ -262,7 +305,8 @@ export const InteractConfigSchema = z
             code: 'custom',
             path: [...path, 'sequenceId'],
             message: `Sequence "${sequence.sequenceId}" not found`,
-          });
+            params: { domainCode: 'SEQUENCE_ID_NOT_FOUND' },
+          } as any);
         }
       },
     });
@@ -276,9 +320,12 @@ export const InteractConfigSchema = z
     const sequenceIdReferences = new Set(Object.keys(configSequences));
     const conditionReferences = new Set(Object.keys(configConditions));
 
-    const warnings: z.ZodIssue[] = [];
+    const warnings: WarningIssue[] = [];
 
     walkConfig(config, {
+      onInteraction: (_path, interaction) => {
+        interaction.conditions?.forEach(Set.prototype.delete, conditionReferences);
+      },
       onEffect: (path, effect, isTopLevel) => {
         effect.conditions?.forEach(Set.prototype.delete, conditionReferences);
         collectEffectKeyframeNames(warnings, path, keyframeNames, (effect as any).keyframeEffect);
@@ -299,6 +346,7 @@ export const InteractConfigSchema = z
         code: 'custom',
         path: ['effects', effectId],
         message: `Effect "${effectId}" is not referenced by any interaction`,
+        params: { domainCode: 'UNUSED_EFFECT' },
       });
     });
     sequenceIdReferences.forEach((sequenceId) => {
@@ -306,6 +354,7 @@ export const InteractConfigSchema = z
         code: 'custom',
         path: ['sequences', sequenceId],
         message: `Sequence "${sequenceId}" is not referenced by any interaction`,
+        params: { domainCode: 'UNUSED_SEQUENCE' },
       });
     });
     conditionReferences.forEach((conditionId) => {
@@ -313,6 +362,7 @@ export const InteractConfigSchema = z
         code: 'custom',
         path: ['conditions', conditionId],
         message: `Condition "${conditionId}" is not referenced by any interaction`,
+        params: { domainCode: 'UNUSED_CONDITION' },
       });
     });
 

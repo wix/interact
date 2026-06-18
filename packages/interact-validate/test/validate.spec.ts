@@ -3,7 +3,11 @@ import { validateInteractConfig, assertValidInteractConfig, InteractValidationEr
 
 const VALID_CONFIG = {
   interactions: [
-    { key: 'el', trigger: 'viewEnter', effects: [{ namedEffect: { type: 'FadeIn' } }] },
+    {
+      key: 'el',
+      trigger: 'viewEnter',
+      effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
+    },
   ],
 };
 
@@ -11,7 +15,11 @@ const VALID_CONFIG = {
 const CONFIG_WITH_WARNING = {
   effects: { unused: { namedEffect: { type: 'FadeIn' } } },
   interactions: [
-    { key: 'el', trigger: 'viewEnter', effects: [{ namedEffect: { type: 'SlideIn' } }] },
+    {
+      key: 'el',
+      trigger: 'viewEnter',
+      effects: [{ namedEffect: { type: 'SlideIn' }, duration: 400 }],
+    },
   ],
 };
 
@@ -52,7 +60,11 @@ describe('validateInteractConfig', () => {
         b: { namedEffect: { type: 'Bar' } },
       },
       interactions: [
-        { key: 'el', trigger: 'viewEnter', effects: [{ namedEffect: { type: 'Baz' } }] },
+        {
+          key: 'el',
+          trigger: 'viewEnter',
+          effects: [{ namedEffect: { type: 'Baz' }, duration: 400 }],
+        },
       ],
     };
     const result = validateInteractConfig(config);
@@ -94,7 +106,11 @@ describe('ValidateOptions', () => {
         c: { namedEffect: { type: 'Baz' } },
       },
       interactions: [
-        { key: 'el', trigger: 'viewEnter', effects: [{ namedEffect: { type: 'Qux' } }] },
+        {
+          key: 'el',
+          trigger: 'viewEnter',
+          effects: [{ namedEffect: { type: 'Qux' }, duration: 400 }],
+        },
       ],
     };
     const result = validateInteractConfig(config, { max: 1 });

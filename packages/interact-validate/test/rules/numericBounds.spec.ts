@@ -65,7 +65,7 @@ describe('numericBounds', () => {
           {
             key: 'el',
             trigger: 'viewEnter',
-            effects: [{ namedEffect: { type: 'FadeIn' }, delay: -50 }],
+            effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400, delay: -50 }],
           },
         ],
       });
@@ -76,7 +76,9 @@ describe('numericBounds', () => {
 
     it('emits NEGATIVE_DELAY for a negative delay in a top-level sequence definition', () => {
       const result = validateInteractConfig({
-        sequences: { seq: { effects: [{ namedEffect: { type: 'FadeIn' } }], delay: -10 } },
+        sequences: {
+          seq: { effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }], delay: -10 },
+        },
         interactions: [{ key: 'el', trigger: 'viewEnter', sequences: [{ sequenceId: 'seq' }] }],
       });
       expect(result.errors.some((e) => e.code === 'NEGATIVE_DELAY')).toBe(true);
@@ -90,7 +92,7 @@ describe('numericBounds', () => {
           {
             key: 'el',
             trigger: 'viewEnter',
-            effects: [{ namedEffect: { type: 'FadeIn' }, iterations: -2 }],
+            effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400, iterations: -2 }],
           },
         ],
       });
@@ -103,7 +105,9 @@ describe('numericBounds', () => {
   describe('NEGATIVE_OFFSET', () => {
     it('emits NEGATIVE_OFFSET for a negative offset on a top-level sequence', () => {
       const result = validateInteractConfig({
-        sequences: { seq: { effects: [{ namedEffect: { type: 'FadeIn' } }], offset: -5 } },
+        sequences: {
+          seq: { effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }], offset: -5 },
+        },
         interactions: [{ key: 'el', trigger: 'viewEnter', sequences: [{ sequenceId: 'seq' }] }],
       });
       const err = result.errors.find((e) => e.code === 'NEGATIVE_OFFSET');
@@ -120,7 +124,7 @@ describe('numericBounds', () => {
             key: 'el',
             trigger: 'viewEnter',
             params: { threshold: 1.5 },
-            effects: [{ namedEffect: { type: 'FadeIn' } }],
+            effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
           },
         ],
       });
@@ -137,7 +141,7 @@ describe('numericBounds', () => {
             key: 'el',
             trigger: 'pageVisible',
             params: { threshold: -0.1 },
-            effects: [{ namedEffect: { type: 'FadeIn' } }],
+            effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
           },
         ],
       });
@@ -152,7 +156,7 @@ describe('numericBounds', () => {
               key: 'el',
               trigger: 'viewEnter',
               params: { threshold },
-              effects: [{ namedEffect: { type: 'FadeIn' } }],
+              effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
             },
           ],
         });

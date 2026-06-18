@@ -18,18 +18,12 @@ export const RangeOffset = z
   })
   .strict();
 
+// Static regex-based media query validation: balanced parentheses + allowed character set.
+// matchMedia is a runtime browser API and is deliberately not used here — this library
+// performs static config validation and must work identically in all environments.
 function isValidMediaQuery(query: string): boolean {
   const q = query.trim();
   if (!q) return false;
-  if (typeof globalThis !== 'undefined' && 'matchMedia' in globalThis) {
-    try {
-      const mql = (globalThis as { matchMedia(q: string): { media: string } }).matchMedia(q);
-      // Invalid queries make matchMedia return `media: ''` in most engines.
-      return mql.media !== '' || q === 'all';
-    } catch {
-      return false;
-    }
-  }
   let depth = 0;
   for (const ch of q) {
     if (ch === '(') depth++;
@@ -48,7 +42,19 @@ export const Condition = z
     predicate: z.string().min(1),
   })
   .strict()
-  .refine((condition) => condition.type !== 'media' || isValidMediaQuery(condition.predicate), {
-    message: 'Invalid media query',
-    path: ['predicate'],
+  .superRefine((condition, ctx) => {
+    // Only validate media query syntax when the predicate has content
+    // (empty predicate is caught by the min(1) check above).
+    if (
+      condition.predicate &&
+      condition.type === 'media' &&
+      !isValidMediaQuery(condition.predicate)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Invalid media query',
+        path: ['predicate'],
+        params: { domainCode: 'INVALID_MEDIA_QUERY' },
+      } as any);
+    }
   });

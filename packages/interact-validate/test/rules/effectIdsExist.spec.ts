@@ -43,7 +43,7 @@ describe('effectIdsExist — ANIMATION_END_EFFECT_NOT_FOUND', () => {
           key: 'el',
           trigger: 'animationEnd',
           params: { effectId: 'fade' },
-          effects: [{ namedEffect: { type: 'SlideIn' } }],
+          effects: [{ namedEffect: { type: 'SlideIn' }, duration: 400 }],
         },
       ],
     });
@@ -59,7 +59,7 @@ describe('effectIdsExist — ANIMATION_END_EFFECT_NOT_FOUND', () => {
           key: 'el',
           trigger: 'animationEnd',
           params: { effectId: 'ghost' },
-          effects: [{ namedEffect: { type: 'SlideIn' } }],
+          effects: [{ namedEffect: { type: 'SlideIn' }, duration: 400 }],
         },
       ],
     });

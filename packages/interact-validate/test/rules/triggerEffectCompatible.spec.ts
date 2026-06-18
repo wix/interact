@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { validateInteractConfig } from '../../src';
 
-describe('triggerEffectCompatible — TRIGGER_EFFECT_INCOMPATIBLE', () => {
+// Trigger-effect compatibility is enforced structurally by the Zod discriminated-union
+// schemas: each trigger type uses a strict effect schema that only allows the fields
+// appropriate for that trigger.  The old TRIGGER_EFFECT_INCOMPATIBLE warning code is
+// therefore never emitted; instead, incompatible field combinations fail schema
+// validation (SCHEMA_INVALID_UNION / SCHEMA_UNRECOGNIZED_KEYS / SCHEMA_INVALID).
+// The error is always anchored at the effect element:
+//   path = ['interactions', interactionIndex, 'effects', effectIndex]
+
+describe('triggerEffectCompatible', () => {
   describe('valid combinations', () => {
     it('emits no errors for a time effect on a discrete trigger', () => {
       const result = validateInteractConfig({
@@ -43,8 +51,8 @@ describe('triggerEffectCompatible — TRIGGER_EFFECT_INCOMPATIBLE', () => {
     });
   });
 
-  describe('time fields on scrub trigger', () => {
-    it('emits TRIGGER_EFFECT_INCOMPATIBLE for duration on viewProgress', () => {
+  describe('time fields on scrub trigger (structurally rejected by strict schema)', () => {
+    it('rejects duration on viewProgress (schema does not allow time fields here)', () => {
       const result = validateInteractConfig({
         interactions: [
           {
@@ -54,13 +62,12 @@ describe('triggerEffectCompatible — TRIGGER_EFFECT_INCOMPATIBLE', () => {
           },
         ],
       });
-      const errs = result.errors.filter((e) => e.code === 'TRIGGER_EFFECT_INCOMPATIBLE');
-      expect(errs.length).toBeGreaterThan(0);
-      expect(errs[0].severity).toBe('warning');
-      expect(errs[0].path).toContain('duration');
+      expect(result.valid).toBe(false);
+      const err = result.errors.find((e) => e.path[2] === 'effects');
+      expect(err?.path).toEqual(['interactions', 0, 'effects', 0]);
     });
 
-    it('emits TRIGGER_EFFECT_INCOMPATIBLE for delay on pointerMove', () => {
+    it('rejects delay on pointerMove (schema does not allow time fields here)', () => {
       const result = validateInteractConfig({
         interactions: [
           {
@@ -70,16 +77,14 @@ describe('triggerEffectCompatible — TRIGGER_EFFECT_INCOMPATIBLE', () => {
           },
         ],
       });
-      expect(
-        result.errors.some(
-          (e) => e.code === 'TRIGGER_EFFECT_INCOMPATIBLE' && e.path.includes('delay'),
-        ),
-      ).toBe(true);
+      expect(result.valid).toBe(false);
+      const err = result.errors.find((e) => e.path[2] === 'effects');
+      expect(err?.path).toEqual(['interactions', 0, 'effects', 0]);
     });
   });
 
-  describe('state fields on scrub trigger', () => {
-    it('emits TRIGGER_EFFECT_INCOMPATIBLE for stateAction on viewProgress', () => {
+  describe('state fields on scrub trigger (structurally rejected by strict schema)', () => {
+    it('rejects stateAction on viewProgress (schema does not allow state fields here)', () => {
       const result = validateInteractConfig({
         interactions: [
           {
@@ -89,16 +94,14 @@ describe('triggerEffectCompatible — TRIGGER_EFFECT_INCOMPATIBLE', () => {
           },
         ],
       });
-      expect(
-        result.errors.some(
-          (e) => e.code === 'TRIGGER_EFFECT_INCOMPATIBLE' && e.path.includes('stateAction'),
-        ),
-      ).toBe(true);
+      expect(result.valid).toBe(false);
+      const err = result.errors.find((e) => e.path[2] === 'effects');
+      expect(err?.path).toEqual(['interactions', 0, 'effects', 0]);
     });
   });
 
-  describe('scrub fields on discrete trigger', () => {
-    it('emits TRIGGER_EFFECT_INCOMPATIBLE for rangeStart on viewEnter', () => {
+  describe('scrub fields on discrete trigger (structurally rejected by strict schema)', () => {
+    it('rejects rangeStart on viewEnter (schema does not allow scrub fields here)', () => {
       const result = validateInteractConfig({
         interactions: [
           {
@@ -108,12 +111,12 @@ describe('triggerEffectCompatible — TRIGGER_EFFECT_INCOMPATIBLE', () => {
           },
         ],
       });
-      const errs = result.errors.filter((e) => e.code === 'TRIGGER_EFFECT_INCOMPATIBLE');
-      expect(errs.length).toBeGreaterThan(0);
-      expect(errs[0].path).toContain('rangeStart');
+      expect(result.valid).toBe(false);
+      const err = result.errors.find((e) => e.path[2] === 'effects');
+      expect(err?.path).toEqual(['interactions', 0, 'effects', 0]);
     });
 
-    it('emits TRIGGER_EFFECT_INCOMPATIBLE for transitionDuration on click', () => {
+    it('rejects transitionDuration on click (schema does not allow scrub fields here)', () => {
       const result = validateInteractConfig({
         interactions: [
           {
@@ -123,11 +126,9 @@ describe('triggerEffectCompatible — TRIGGER_EFFECT_INCOMPATIBLE', () => {
           },
         ],
       });
-      expect(
-        result.errors.some(
-          (e) => e.code === 'TRIGGER_EFFECT_INCOMPATIBLE' && e.path.includes('transitionDuration'),
-        ),
-      ).toBe(true);
+      expect(result.valid).toBe(false);
+      const err = result.errors.find((e) => e.path[2] === 'effects');
+      expect(err?.path).toEqual(['interactions', 0, 'effects', 0]);
     });
   });
 });

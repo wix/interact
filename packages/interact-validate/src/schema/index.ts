@@ -9,17 +9,7 @@ export {
   TriggerParams,
 } from './interactions';
 
-export {
-  Effect,
-  EffectRef,
-  EffectSource,
-  TimeEffect,
-  EffectBase,
-  NamedEffect,
-  SCRUB_FIELDS,
-  STATE_FIELDS,
-  TIME_FIELDS,
-} from './effects';
+export { Effect, EffectRef, EffectSource, TimeEffect, NamedEffect } from './effects';
 
 export { SequenceConfig, SequenceConfigRef } from './sequences';
 

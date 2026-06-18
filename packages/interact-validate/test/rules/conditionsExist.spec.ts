@@ -10,7 +10,7 @@ describe('conditionsExist — CONDITION_NOT_FOUND', () => {
           key: 'el',
           trigger: 'viewEnter',
           conditions: ['mq'],
-          effects: [{ namedEffect: { type: 'FadeIn' } }],
+          effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
         },
       ],
     });
@@ -24,7 +24,7 @@ describe('conditionsExist — CONDITION_NOT_FOUND', () => {
           key: 'el',
           trigger: 'viewEnter',
           conditions: ['ghost'],
-          effects: [{ namedEffect: { type: 'FadeIn' } }],
+          effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
         },
       ],
     });
@@ -40,7 +40,9 @@ describe('conditionsExist — CONDITION_NOT_FOUND', () => {
         {
           key: 'el',
           trigger: 'viewEnter',
-          effects: [{ namedEffect: { type: 'FadeIn' }, conditions: ['noSuchCondition'] }],
+          effects: [
+            { namedEffect: { type: 'FadeIn' }, duration: 400, conditions: ['noSuchCondition'] },
+          ],
         },
       ],
     });

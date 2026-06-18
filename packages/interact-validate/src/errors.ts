@@ -13,6 +13,12 @@ export type ValidationResult = {
   errors: ValidationError[];
 };
 
+export type ValidateOptions = {
+  strict?: boolean;
+  max?: number;
+  severityOverrides?: Record<string, Severity | 'off'>;
+};
+
 export class InteractValidationError extends Error {
   readonly errors: ValidationError[];
 

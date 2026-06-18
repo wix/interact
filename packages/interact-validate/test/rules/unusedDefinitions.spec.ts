@@ -5,7 +5,7 @@ describe('unusedDefinitions', () => {
   it('emits no errors when all definitions are referenced', () => {
     const result = validateInteractConfig({
       effects: { fade: { namedEffect: { type: 'FadeIn' } } },
-      sequences: { seq: { effects: [{ namedEffect: { type: 'SlideIn' } }] } },
+      sequences: { seq: { effects: [{ namedEffect: { type: 'SlideIn' }, duration: 400 }] } },
       conditions: { mq: { type: 'media', predicate: '(min-width: 768px)' } },
       interactions: [
         {
@@ -26,7 +26,11 @@ describe('unusedDefinitions', () => {
       const result = validateInteractConfig({
         effects: { fade: { namedEffect: { type: 'FadeIn' } } },
         interactions: [
-          { key: 'el', trigger: 'viewEnter', effects: [{ namedEffect: { type: 'SlideIn' } }] },
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            effects: [{ namedEffect: { type: 'SlideIn' }, duration: 400 }],
+          },
         ],
       });
       const err = result.errors.find((e) => e.code === 'UNUSED_EFFECT');
@@ -56,9 +60,13 @@ describe('unusedDefinitions', () => {
   describe('UNUSED_SEQUENCE', () => {
     it('emits UNUSED_SEQUENCE for a defined sequence that no interaction references', () => {
       const result = validateInteractConfig({
-        sequences: { seq: { effects: [{ namedEffect: { type: 'FadeIn' } }] } },
+        sequences: { seq: { effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }] } },
         interactions: [
-          { key: 'el', trigger: 'viewEnter', effects: [{ namedEffect: { type: 'SlideIn' } }] },
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            effects: [{ namedEffect: { type: 'SlideIn' }, duration: 400 }],
+          },
         ],
       });
       const err = result.errors.find((e) => e.code === 'UNUSED_SEQUENCE');
@@ -69,7 +77,7 @@ describe('unusedDefinitions', () => {
 
     it('does not emit UNUSED_SEQUENCE for a sequence referenced via sequenceId', () => {
       const result = validateInteractConfig({
-        sequences: { seq: { effects: [{ namedEffect: { type: 'FadeIn' } }] } },
+        sequences: { seq: { effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }] } },
         interactions: [{ key: 'el', trigger: 'viewEnter', sequences: [{ sequenceId: 'seq' }] }],
       });
       expect(result.errors.filter((e) => e.code === 'UNUSED_SEQUENCE')).toHaveLength(0);
@@ -81,7 +89,11 @@ describe('unusedDefinitions', () => {
       const result = validateInteractConfig({
         conditions: { mq: { type: 'media', predicate: '(min-width: 768px)' } },
         interactions: [
-          { key: 'el', trigger: 'viewEnter', effects: [{ namedEffect: { type: 'FadeIn' } }] },
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
+          },
         ],
       });
       const err = result.errors.find((e) => e.code === 'UNUSED_CONDITION');
@@ -98,7 +110,7 @@ describe('unusedDefinitions', () => {
             key: 'el',
             trigger: 'viewEnter',
             conditions: ['mq'],
-            effects: [{ namedEffect: { type: 'FadeIn' } }],
+            effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
           },
         ],
       });
@@ -112,7 +124,7 @@ describe('unusedDefinitions', () => {
           {
             key: 'el',
             trigger: 'viewEnter',
-            effects: [{ namedEffect: { type: 'FadeIn' }, conditions: ['mq'] }],
+            effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400, conditions: ['mq'] }],
           },
         ],
       });

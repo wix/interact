@@ -64,28 +64,48 @@ export const EffectSource = EffectSourceBase.refine(exactlyOne, {
 const checkExactlyOneEffectSource = z.check<any>((input) => {
   const { namedEffect, keyframeEffect, customEffect } = input.value;
   if (!exactlyOne({ namedEffect, keyframeEffect, customEffect })) {
-    input.issues.push({ code: 'custom', message: EFFECT_SOURCE_MESSAGE, input: input.value });
+    input.issues.push({
+      code: 'custom',
+      message: EFFECT_SOURCE_MESSAGE,
+      input: input.value,
+      params: { domainCode: 'MULTIPLE_EFFECT_SOURCES' },
+    });
   }
 });
 
 const checkAtMostOneEffectSource = z.check<any>((input) => {
   const { namedEffect, keyframeEffect, customEffect } = input.value;
   if (!atMostOne({ namedEffect, keyframeEffect, customEffect })) {
-    input.issues.push({ code: 'custom', message: EFFECT_SOURCE_MESSAGE, input: input.value });
+    input.issues.push({
+      code: 'custom',
+      message: EFFECT_SOURCE_MESSAGE,
+      input: input.value,
+      params: { domainCode: 'MULTIPLE_EFFECT_SOURCES' },
+    });
   }
 });
 
 const checkExactlyOneTransition = z.check<any>((input) => {
   const { transition, transitionProperties } = input.value;
   if (!exactlyOne({ transition, transitionProperties })) {
-    input.issues.push({ code: 'custom', message: TRANSITION_SOURCE_MESSAGE, input: input.value });
+    input.issues.push({
+      code: 'custom',
+      message: TRANSITION_SOURCE_MESSAGE,
+      input: input.value,
+      params: { domainCode: 'MULTIPLE_TRANSITION_SOURCES' },
+    });
   }
 });
 
 const checkAtMostOneTransition = z.check<any>((input) => {
   const { transition, transitionProperties } = input.value;
   if (!atMostOne({ transition, transitionProperties })) {
-    input.issues.push({ code: 'custom', message: TRANSITION_SOURCE_MESSAGE, input: input.value });
+    input.issues.push({
+      code: 'custom',
+      message: TRANSITION_SOURCE_MESSAGE,
+      input: input.value,
+      params: { domainCode: 'MULTIPLE_TRANSITION_SOURCES' },
+    });
   }
 });
 

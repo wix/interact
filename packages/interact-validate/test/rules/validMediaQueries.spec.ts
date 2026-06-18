@@ -36,7 +36,7 @@ function configWithCondition(
         key: 'el',
         trigger: 'viewEnter' as const,
         conditions: [id],
-        effects: [{ namedEffect: { type: 'FadeIn' } }],
+        effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
       },
     ],
   };
