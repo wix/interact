@@ -14,8 +14,7 @@
     }
   },
   "files": [
-    "dist",
-    "rules"
+    "dist"
   ],
   "sideEffects": false,
   "scripts": {
@@ -40,7 +39,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wix/interact.git"
+    "url": "git+https://github.com/wix/interact.git",
+    "directory": "packages/interact-validate"
   },
   "bugs": {
     "url": "https://github.com/wix/interact/issues"

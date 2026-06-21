@@ -419,6 +419,7 @@ AI agents can discover @wix/interact documentation through:
 
 - [`rules/full-lean.md`](https://wix.github.io/interact/rules/full-lean.md) — complete config spec, pitfalls, and constraints
 - [`rules/integration.md`](https://wix.github.io/interact/rules/integration.md) — integration entry points, lifecycle, style generation
+- [`rules/validate.md`](https://wix.github.io/interact/rules/validate.md) — validating a config with [`@wix/interact-validate`](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md)
 - [`rules/viewenter.md`](https://wix.github.io/interact/rules/viewenter.md) — viewport entrance triggers (scroll-triggered animations)
 - [`rules/viewprogress.md`](https://wix.github.io/interact/rules/viewprogress.md) — scroll-driven animations
 - [`rules/click.md`](https://wix.github.io/interact/rules/click.md) — click and activate triggers
@@ -432,6 +433,7 @@ AI agents can discover @wix/interact documentation through:
 - Do not use `overflow: hidden` on scroll-tracked ancestors — use `overflow: clip`.
 - Always pre-render CSS with `generate(config)` and inject into `<head>`.
 - Always call `Interact.registerEffects(presets)` before `generate()` and `Interact.create()` when using `namedEffect`.
+- Validate generated configs with [`@wix/interact-validate`](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md) (`validateInteractConfig`) and resolve all errors before emitting.
 
 ## Browser Support
 
@@ -443,6 +445,7 @@ AI agents can discover @wix/interact documentation through:
 
 - [`@wix/motion`](https://github.com/wix/interact/tree/master/packages/motion) — low-level animation engine underneath Interact.
 - [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) — ready-made effect catalog (entrance, scroll, hover, pointer).
+- [`@wix/interact-validate`](https://github.com/wix/interact/tree/master/packages/interact-validate) — static schema/referential/semantic validation for `InteractConfig`.
 - [`fizban`](https://github.com/wix-incubator/fizban) — scroll-driven animation polyfill (bundled dependency).
 - [`kuliso`](https://github.com/wix-incubator/kuliso) — pointer-driven animation polyfill (bundled dependency).
 
