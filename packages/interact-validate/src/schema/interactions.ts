@@ -124,9 +124,19 @@ export const DiscreteInteraction = z
   .object({
     ...InteractionBase,
     trigger: z.enum(['hover', 'click', 'activate', 'interest']),
-    effects: z.array(z.union([TimeEffect, TimeEffectRef, StateEffect, StateEffectRef])).min(1),
+    effects: z.array(z.union([TimeEffect, TimeEffectRef, StateEffect, StateEffectRef])).optional(),
+    sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((interaction, ctx) => {
+    if (!hasEffectsOrSequences(interaction)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Interaction must have at least one effect or sequence',
+        params: { domainCode: 'INTERACTION_EMPTY' },
+      } as any);
+    }
+  });
 
 export const Interaction = z.discriminatedUnion('trigger', [
   AnimationEndInteraction,
