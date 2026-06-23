@@ -6,12 +6,13 @@ A monorepo for Wix's web animation and interaction libraries, built on the nativ
 
 ### Project Map
 
-| Project  | Package                  | Directory                     |
-| -------- | ------------------------ | ----------------------------- |
-| Motion   | `@wix/motion`            | `packages/motion/`            |
-| Interact | `@wix/interact`          | `packages/interact/`          |
-| Presets  | `@wix/motion-presets`    | `packages/motion-presets/`    |
-| Validate | `@wix/interact-validate` | `packages/interact-validate/` |
+| Project   | Package                  | Directory                     |
+| --------  | ------------------------ | ----------------------------- |
+| Motion    | `@wix/motion`            | `packages/motion/`            |
+| Interact  | `@wix/interact`          | `packages/interact/`          |
+| Presets   | `@wix/motion-presets`    | `packages/motion-presets/`    |
+| Validate  | `@wix/interact-validate` | `packages/interact-validate/` |
+| SplitText | `@wix/splittext`         | `packages/splittext/`         |
 
 ### Dependency Graph
 
@@ -33,6 +34,10 @@ A monorepo for Wix's web animation and interaction libraries, built on the nativ
 @wix/interact-validate   ← static config validation
 ```
 
+```
+@wix/splittext            ← standalone text splitting utility (no @wix/motion dependency)
+```
+
 ### Motion (`@wix/motion`)
 
 Core animation toolkit. Provides low-level APIs for running animations via the Web Animations API and CSS, including scroll-driven (ViewTimeline) and pointer-based animations. Uses `fastdom` to batch DOM reads/writes and reduce layout thrashing.
@@ -48,6 +53,10 @@ Ready-made animation presets for `@wix/motion`, organized in five categories: en
 ### Validate (`@wix/interact-validate`)
 
 Static, zod-powered validator for `@wix/interact`'s `InteractConfig` (schema, referential, and semantic checks). Runs with no DOM/runtime — suitable for CI, build steps, and LLM-output validation. Depends on `@wix/interact` only for its config **types** (peer dependency); the schemas are kept in sync via a compile-time drift guard. Agent rules live at `packages/interact/rules/validate.md`.
+
+### SplitText (`@wix/splittext`)
+
+Lightweight, accessible text splitting utility. Splits element text into animatable `<span>` wrappers at the character, word, line, or sentence level. Uses `Intl.Segmenter` for locale-aware segmentation and the Range API for accurate line detection. Ships two entry points: vanilla JS (`@wix/splittext`) and React (`@wix/splittext/react`). Pairs naturally with `@wix/motion` for staggered entrance animations.
 
 ## CLI Commands
 
