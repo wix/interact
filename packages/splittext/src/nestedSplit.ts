@@ -93,7 +93,7 @@ function splitSentences(
   );
 }
 
-function mergeSpans(
+function concatSpansPerType(
   target: Partial<Record<SplitType, HTMLSpanElement[]>>,
   source: Partial<Record<SplitType, HTMLSpanElement[]>>,
 ): void {
@@ -103,6 +103,23 @@ function mergeSpans(
       target[type] = (target[type] ?? []).concat(added);
     }
   }
+}
+
+function nestInsideSpan(
+  span: HTMLSpanElement,
+  rest: SplitType[],
+  options: SplitTextOptions,
+  offsets: IndexOffsets,
+): Partial<Record<SplitType, HTMLSpanElement[]>> {
+  if (rest.length === 1 && rest[0] === 'chars') {
+    return nestCharsInsideSpan(span, options, offsets);
+  }
+
+  const innerText = span.textContent ?? '';
+  const inner = buildNestedNodes(innerText, rest, options, offsets);
+  span.textContent = '';
+  span.append(...inner.nodes);
+  return inner.spansByType;
 }
 
 function buildSingleTypeNodes(
@@ -180,15 +197,7 @@ export function buildNestedNodes(
     spansByType.sentences = sentenceSpans;
 
     for (const sentenceSpan of sentenceSpans) {
-      const innerText = sentenceSpan.textContent ?? '';
-      if (rest.length === 1 && rest[0] === 'chars') {
-        mergeSpans(spansByType, nestCharsInsideSpan(sentenceSpan, options, offsets));
-      } else {
-        const inner = buildNestedNodes(innerText, rest, options, offsets);
-        sentenceSpan.textContent = '';
-        sentenceSpan.append(...inner.nodes);
-        mergeSpans(spansByType, inner.spansByType);
-      }
+      concatSpansPerType(spansByType, nestInsideSpan(sentenceSpan, rest, options, offsets));
     }
     nodes.push(...sentenceSpans);
     return { nodes, spansByType };
@@ -206,15 +215,7 @@ export function buildNestedNodes(
       }
 
       const wordSpan = node as HTMLSpanElement;
-      const innerText = wordSpan.textContent ?? '';
-      if (rest.length === 1 && rest[0] === 'chars') {
-        mergeSpans(spansByType, nestCharsInsideSpan(wordSpan, options, offsets));
-      } else {
-        const inner = buildNestedNodes(innerText, rest, options, offsets);
-        wordSpan.textContent = '';
-        wordSpan.append(...inner.nodes);
-        mergeSpans(spansByType, inner.spansByType);
-      }
+      concatSpansPerType(spansByType, nestInsideSpan(wordSpan, rest, options, offsets));
       nodes.push(wordSpan);
     }
     return { nodes, spansByType };
@@ -244,7 +245,7 @@ export function buildNestedFromLines(
     const inner = buildNestedNodes(lineText, typesWithoutLines, options, offsets);
     lineSpan.textContent = '';
     lineSpan.append(...inner.nodes);
-    mergeSpans(spansByType, inner.spansByType);
+    concatSpansPerType(spansByType, inner.spansByType);
     nodes.push(lineSpan);
   }
 

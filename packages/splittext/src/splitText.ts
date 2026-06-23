@@ -163,25 +163,24 @@ class SplitTextResultImpl implements SplitTextResult {
   }
 
   get chars(): HTMLSpanElement[] {
-    if (this._domBuilt && this._builtTypes.length >= 2) return this._cache.chars ?? [];
     this._buildDom(this._resolveLazyTypes('chars'));
     return this._cache.chars ?? [];
   }
 
   get words(): HTMLSpanElement[] {
-    if (this._domBuilt && this._builtTypes.length >= 2) return this._cache.words ?? [];
+    if (this._cache.words) return this._cache.words;
     this._buildDom(this._resolveLazyTypes('words'));
     return this._cache.words ?? [];
   }
 
   get lines(): HTMLSpanElement[] {
-    if (this._domBuilt && this._builtTypes.length >= 2) return this._cache.lines ?? [];
+    if (this._cache.lines) return this._cache.lines;
     this._buildDom(this._resolveLazyTypes('lines'));
     return this._cache.lines ?? [];
   }
 
   get sentences(): HTMLSpanElement[] {
-    if (this._domBuilt && this._builtTypes.length >= 2) return this._cache.sentences ?? [];
+    if (this._cache.sentences) return this._cache.sentences;
     this._buildDom(this._resolveLazyTypes('sentences'));
     return this._cache.sentences ?? [];
   }
@@ -205,17 +204,13 @@ class SplitTextResultImpl implements SplitTextResult {
   }
 
   split(optionsOverride?: SplitTextOptions): SplitTextResult {
-    this._detachObservers();
-    this._resetState();
+    this.revert();
     this._init({ ...this._options, ...optionsOverride });
     return this;
   }
 
   private _resolveLazyTypes(requested: SplitType): SplitType[] {
-    const merged = this._builtTypes.length
-      ? [...new Set([...this._builtTypes, requested])]
-      : [requested];
-    return normalizeSplitTypes(merged);
+    return normalizeSplitTypes([...new Set([...this._builtTypes, requested])]);
   }
 
   private _buildDom(types: SplitType[]): void {

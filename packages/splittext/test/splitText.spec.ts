@@ -798,6 +798,18 @@ describe('splitText', () => {
       expect(chars[0].textContent).toBe('H');
       expect(chars[1].textContent).toBe('i');
     });
+
+    it('extends an eager multi-type split when a new getter is accessed', () => {
+      mockLines(1);
+      const target = el('Hello');
+      const result = splitText(target, { type: ['lines', 'words'], nested: 'flatten' });
+      expect(result.words.length).toBeGreaterThan(0);
+      expect(target.querySelectorAll('.split-c').length).toBe(0);
+
+      const chars = result.chars;
+      expect(chars.length).toBeGreaterThan(0);
+      expect(target.querySelectorAll('.split-c').length).toBe(chars.length);
+    });
   });
 
   // -------------------------------------------------------------------------
