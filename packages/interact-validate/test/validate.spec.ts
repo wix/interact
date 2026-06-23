@@ -98,6 +98,61 @@ describe('ValidateOptions', () => {
     expect(unusedErr?.severity).toBe('error');
   });
 
+  // Semantic rule categories registered for the rule-derived checks (A/C/D + animationEnd graph).
+  const RETRIGGER_CONFIG = {
+    interactions: [
+      {
+        key: 'el',
+        trigger: 'viewEnter',
+        effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400, triggerType: 'alternate' }],
+      },
+    ],
+  };
+
+  it("severityOverrides 'off' silences a semantic warning category (SAME_ELEMENT_RETRIGGER)", () => {
+    const result = validateInteractConfig(RETRIGGER_CONFIG, {
+      severityOverrides: { SAME_ELEMENT_RETRIGGER: 'off' },
+    });
+    expect(result.errors.filter((e) => e.code === 'SAME_ELEMENT_RETRIGGER')).toHaveLength(0);
+  });
+
+  it("severityOverrides can promote a semantic warning to 'error'", () => {
+    const result = validateInteractConfig(RETRIGGER_CONFIG, {
+      severityOverrides: { SAME_ELEMENT_RETRIGGER: 'error' },
+    });
+    const err = result.errors.find((e) => e.code === 'SAME_ELEMENT_RETRIGGER');
+    expect(err?.severity).toBe('error');
+    expect(result.valid).toBe(false);
+  });
+
+  it('strict promotes semantic warnings to errors', () => {
+    const result = validateInteractConfig(RETRIGGER_CONFIG, { strict: true });
+    expect(result.valid).toBe(false);
+    expect(result.errors.every((e) => e.severity === 'error')).toBe(true);
+  });
+
+  it("severityOverrides can demote the ANIMATION_END_CYCLE error to a warning", () => {
+    const cyclic = {
+      effects: {
+        e1: { namedEffect: { type: 'Pulse' }, duration: 300 },
+        e2: { namedEffect: { type: 'Spin' }, duration: 300 },
+      },
+      interactions: [
+        { key: 'a', trigger: 'animationEnd', params: { effectId: 'e2' }, effects: [{ effectId: 'e1' }] },
+        { key: 'b', trigger: 'animationEnd', params: { effectId: 'e1' }, effects: [{ effectId: 'e2' }] },
+      ],
+    };
+    const errored = validateInteractConfig(cyclic);
+    expect(errored.valid).toBe(false);
+
+    const demoted = validateInteractConfig(cyclic, {
+      severityOverrides: { ANIMATION_END_GRAPH: 'warning' },
+    });
+    expect(demoted.errors.some((e) => e.code === 'ANIMATION_END_CYCLE')).toBe(true);
+    expect(demoted.errors.every((e) => e.severity !== 'error')).toBe(true);
+    expect(demoted.valid).toBe(true);
+  });
+
   it('max truncates the returned error list', () => {
     const config = {
       effects: {
