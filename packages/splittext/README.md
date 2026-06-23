@@ -114,22 +114,22 @@ Returns a `SplitTextResult` with lazy getters: `.chars`, `.words`, `.lines`, `.s
 
 ### Options
 
-| Option             | Type                                                             | Default      | Description                                                               |
-| ------------------ | ---------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------- |
-| `type`             | `'chars' \| 'words' \| 'lines' \| 'sentences'` or array of those | —            | Split eagerly on call instead of lazily                                   |
-| `wrapperClass`     | `string` or `{ chars?: string, words?: string, lines?: string, sentences?: string }` | — | Extra CSS class(es) on wrapper spans |
-| `wrapperStyle`     | CSS style object or `{ chars?, words?, lines?, sentences? }` per-type partial styles | — | Inline styles on wrapper spans |
-| `wrapperAttrs`     | `Record<string, string>` or `{ chars?, words?, lines?, sentences? }` per-type attrs | — | Custom attributes on wrapper spans |
-| `contentAttribute` | `'none' \| 'both' \| 'attribute-only'`                           | `'both'`     | `both`: text content and `data-content`; `attribute-only`: attribute only |
-| `aria`             | `'auto' \| 'none'`                                               | `'auto'`     | ARIA handling mode                                                        |
-| `preserveText`     | `boolean`                                                        | `true`       | Insert visually-hidden original text for a11y/SEO                         |
-| `partIndexing`     | `boolean`                                                        | `true`       | Set `--char-index` / `--word-index` etc. on spans                         |
-| `wordGlue`         | `'adjacent' \| 'none'`                                           | `'adjacent'` | Glue punctuation to words, or wrap it separately                          |
-| `nested`           | `'flatten' \| 'preserve' \| number`                              | `'preserve'` | How inner DOM structure is handled                                        |
-| `autoSplit`        | `boolean`                                                        | `false`      | Re-split on resize / font load                                            |
-| `onSplit`          | `(result) => void`                                               | —            | Callback after each split                                                 |
-| `segmenter`        | `Intl.Segmenter` or constructor                                  | —            | Polyfill for `Intl.Segmenter`                                             |
-| `ignore`           | CSS selector string or `(node) => boolean`                       | —            | Skip matching elements during traversal (selector uses native OR via `,`) |
+| Option             | Type                                                                                 | Default      | Description                                                               |
+| ------------------ | ------------------------------------------------------------------------------------ | ------------ | ------------------------------------------------------------------------- |
+| `type`             | `'chars' \| 'words' \| 'lines' \| 'sentences'` or array of those                     | —            | Split eagerly on call instead of lazily                                   |
+| `wrapperClass`     | `string` or `{ chars?: string, words?: string, lines?: string, sentences?: string }` | —            | Extra CSS class(es) on wrapper spans                                      |
+| `wrapperStyle`     | CSS style object or `{ chars?, words?, lines?, sentences? }` per-type partial styles | —            | Inline styles on wrapper spans                                            |
+| `wrapperAttrs`     | `Record<string, string>` or `{ chars?, words?, lines?, sentences? }` per-type attrs  | —            | Custom attributes on wrapper spans                                        |
+| `contentAttribute` | `'none' \| 'both' \| 'attribute-only'`                                               | `'both'`     | `both`: text content and `data-content`; `attribute-only`: attribute only |
+| `aria`             | `'auto' \| 'none'`                                                                   | `'auto'`     | ARIA handling mode                                                        |
+| `preserveText`     | `boolean`                                                                            | `true`       | Insert visually-hidden original text for a11y/SEO                         |
+| `partIndexing`     | `boolean`                                                                            | `true`       | Set `--char-index` / `--word-index` etc. on spans                         |
+| `wordGlue`         | `'adjacent' \| 'none'`                                                               | `'adjacent'` | Glue punctuation to words, or wrap it separately                          |
+| `nested`           | `'flatten' \| 'preserve' \| number`                                                  | `'preserve'` | How inner DOM structure is handled                                        |
+| `autoSplit`        | `boolean`                                                                            | `false`      | Re-split on resize / font load                                            |
+| `onSplit`          | `(result) => void`                                                                   | —            | Callback after each split                                                 |
+| `segmenter`        | `Intl.Segmenter` or constructor                                                      | —            | Polyfill for `Intl.Segmenter`                                             |
+| `ignore`           | CSS selector string or `(node) => boolean`                                           | —            | Skip matching elements during traversal (selector uses native OR via `,`) |
 
 ### Default CSS classes
 
