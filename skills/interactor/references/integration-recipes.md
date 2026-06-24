@@ -6,6 +6,7 @@ Copy-paste setup for each entry point. Pick the one matching the project's stack
 elements get bound.
 
 Shared rules that apply to **every** recipe:
+
 - `Interact.registerEffects(presets)` runs **before** `generate()` / `create()`.
 - `generate(config, useFirstChild)`: `true` for **web**, `false` for **vanilla/React**.
 - Inject the generated CSS into `<head>` (or top of `<body>`) so it applies before JS.
@@ -23,17 +24,24 @@ one** child (the library targets `:first-child`).
 ```ts
 // interactions.ts
 import { Interact, generate, type InteractConfig } from '@wix/interact/web';
-import { FadeIn } from '@wix/motion-presets';   // import only what you use (tree-shakes)
+import { FadeIn } from '@wix/motion-presets'; // import only what you use (tree-shakes)
 
 Interact.registerEffects({ FadeIn });
 
 export const config: InteractConfig = {
   interactions: [{ key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'hero-in' }] }],
-  effects: { 'hero-in': { duration: 800, easing: 'ease-out', namedEffect: { type: 'FadeIn' }, triggerType: 'once' } },
+  effects: {
+    'hero-in': {
+      duration: 800,
+      easing: 'ease-out',
+      namedEffect: { type: 'FadeIn' },
+      triggerType: 'once',
+    },
+  },
 };
 
-export const interactCSS = generate(config, true);   // useFirstChild = true for web
-export const instance = Interact.create(config);     // binds <interact-element>s automatically
+export const interactCSS = generate(config, true); // useFirstChild = true for web
+export const instance = Interact.create(config); // binds <interact-element>s automatically
 ```
 
 ```html
@@ -41,7 +49,9 @@ export const instance = Interact.create(config);     // binds <interact-element>
   <style>
     /* optional: keep the wrapper out of layout. Omit if you want it to lay out
        like a normal block — it's a layout preference, not a requirement. */
-    interact-element { display: contents; }
+    interact-element {
+      display: contents;
+    }
     /* inject interactCSS here (build-time or via the <script> below) */
   </style>
 </head>
@@ -61,7 +71,7 @@ SKILL.md invariant 3). Each distinct **target** element needs its own
 ## B. CDN / no build step — `@wix/interact/web` via esm.sh
 
 For a static `.html` page with no bundler. Inject `generate()` output and run
-`create()` client-side. Because the CSS is generated *after* first paint here, an
+`create()` client-side. Because the CSS is generated _after_ first paint here, an
 entrance can flash before the script runs. For strict FOUC safety, either keep page
 content hidden behind a loader until injection, or **precompile** `generate(config,
 true)` once and paste its output into a static `<style>` in `<head>` (the robust
@@ -73,32 +83,43 @@ get stranded hidden.
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <style> interact-element { display: contents; } </style>
-</head>
-<body>
-  <interact-element data-interact-key="hero" data-interact-initial="true">
-    <section class="hero">Hello, animated world!</section>
-  </interact-element>
+  <head>
+    <style>
+      interact-element {
+        display: contents;
+      }
+    </style>
+  </head>
+  <body>
+    <interact-element data-interact-key="hero" data-interact-initial="true">
+      <section class="hero">Hello, animated world!</section>
+    </interact-element>
 
-  <script type="module">
-    import { Interact, generate } from 'https://esm.sh/@wix/interact/web';
-    import * as presets from 'https://esm.sh/@wix/motion-presets';
+    <script type="module">
+      import { Interact, generate } from 'https://esm.sh/@wix/interact/web';
+      import * as presets from 'https://esm.sh/@wix/motion-presets';
 
-    Interact.registerEffects(presets);
+      Interact.registerEffects(presets);
 
-    const config = {
-      interactions: [{ key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'hero-in' }] }],
-      effects: { 'hero-in': { duration: 800, easing: 'ease-out', namedEffect: { type: 'FadeIn' }, triggerType: 'once' } },
-    };
+      const config = {
+        interactions: [{ key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'hero-in' }] }],
+        effects: {
+          'hero-in': {
+            duration: 800,
+            easing: 'ease-out',
+            namedEffect: { type: 'FadeIn' },
+            triggerType: 'once',
+          },
+        },
+      };
 
-    const style = document.createElement('style');
-    style.textContent = generate(config, true);
-    document.head.appendChild(style);
+      const style = document.createElement('style');
+      style.textContent = generate(config, true);
+      document.head.appendChild(style);
 
-    Interact.create(config);
-  </script>
-</body>
+      Interact.create(config);
+    </script>
+  </body>
 </html>
 ```
 
@@ -114,21 +135,28 @@ comments); use this shape instead.
 ```tsx
 import { useEffect } from 'react';
 import { Interact, Interaction, generate, type InteractConfig } from '@wix/interact/react';
-import { FadeIn } from '@wix/motion-presets';   // import only what you use (tree-shakes)
+import { FadeIn } from '@wix/motion-presets'; // import only what you use (tree-shakes)
 
-Interact.registerEffects({ FadeIn });   // module scope — runs once
+Interact.registerEffects({ FadeIn }); // module scope — runs once
 
 const config: InteractConfig = {
   interactions: [{ key: 'hero', trigger: 'viewEnter', effects: [{ effectId: 'hero-in' }] }],
-  effects: { 'hero-in': { duration: 800, easing: 'ease-out', namedEffect: { type: 'FadeIn' }, triggerType: 'once' } },
+  effects: {
+    'hero-in': {
+      duration: 800,
+      easing: 'ease-out',
+      namedEffect: { type: 'FadeIn' },
+      triggerType: 'once',
+    },
+  },
 };
 
 export function Hero() {
-  const interactCSS = generate(config, false);   // useFirstChild = false for React
+  const interactCSS = generate(config, false); // useFirstChild = false for React
 
   useEffect(() => {
     const instance = Interact.create(config);
-    return () => instance.destroy();             // cleanup on unmount (StrictMode-safe)
+    return () => instance.destroy(); // cleanup on unmount (StrictMode-safe)
   }, []);
 
   return (
@@ -161,7 +189,7 @@ DOM. There is no `instance.add()`.
 
 ```ts
 import { Interact, add, remove, generate, type InteractConfig } from '@wix/interact';
-import { FadeIn } from '@wix/motion-presets';   // import only what you use (tree-shakes)
+import { FadeIn } from '@wix/motion-presets'; // import only what you use (tree-shakes)
 
 Interact.registerEffects({ FadeIn });
 
@@ -171,16 +199,18 @@ const config: InteractConfig = {
 };
 
 const style = document.createElement('style');
-style.textContent = generate(config, false);   // useFirstChild = false for vanilla
+style.textContent = generate(config, false); // useFirstChild = false for vanilla
 document.head.appendChild(style);
 
-Interact.create(config);                        // 1) load config
-add(document.querySelector('#hero')!, 'hero');  // 2) bind the element (key optional if it has data-interact-key)
+Interact.create(config); // 1) load config
+add(document.querySelector('#hero')!, 'hero'); // 2) bind the element (key optional if it has data-interact-key)
 // later: remove('hero');
 ```
 
 ```html
-<section id="hero" data-interact-key="hero" data-interact-initial="true">Hello, animated world!</section>
+<section id="hero" data-interact-key="hero" data-interact-initial="true">
+  Hello, animated world!
+</section>
 ```
 
 ---

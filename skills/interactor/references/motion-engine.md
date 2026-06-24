@@ -7,7 +7,7 @@ when you need imperative control the config can't express: driving an animation 
 custom JS, building a one-off scripted timeline, or generating CSS descriptors
 yourself.
 
-`@wix/motion` ships *inside* `@wix/interact`, so it's already installed. Import from
+`@wix/motion` ships _inside_ `@wix/interact`, so it's already installed. Import from
 `@wix/motion` directly. Single entry point (ESM: `dist/es/motion.js`).
 
 > **Trust the source, not the bundled `docs/`.** The package's `docs/` folder
@@ -20,17 +20,17 @@ yourself.
 
 ## Public functions
 
-| Function | Purpose |
-| :-- | :-- |
+| Function                                                       | Purpose                                                                                  |
+| :------------------------------------------------------------- | :--------------------------------------------------------------------------------------- |
 | `getWebAnimation(target, options, trigger?, opts?, ownerDoc?)` | Build a WAAPI-backed `AnimationGroup` (time or scroll/ViewTimeline) or a mouse instance. |
-| `getScrubScene(target, options, trigger, sceneOpts?)` | Build scroll-polyfill or pointer-driven "scenes" you drive yourself. |
-| `getSequence(options, groups[], context?)` | Coordinate multiple `AnimationGroup`s with eased stagger offsets. |
-| `getCSSAnimation(target, options, trigger?)` | Generate CSS animation **descriptor objects** (array) for stylesheet injection / SSR. |
-| `getAnimation(...)` | Auto-pick CSS vs WAAPI. |
-| `createAnimationGroups(...)` | Build `AnimationGroup[]` without wrapping in a `Sequence`. |
-| `prepareAnimation(target, options, cb?)` | Run an effect's measure/mutate `prepare()` phase via fastdom, then a callback. |
-| `getEasing(name)` | Map an easing name → CSS easing string. |
-| `registerEffects(map)` | Register named-effect modules (same fn re-exported as `Interact.registerEffects`). |
+| `getScrubScene(target, options, trigger, sceneOpts?)`          | Build scroll-polyfill or pointer-driven "scenes" you drive yourself.                     |
+| `getSequence(options, groups[], context?)`                     | Coordinate multiple `AnimationGroup`s with eased stagger offsets.                        |
+| `getCSSAnimation(target, options, trigger?)`                   | Generate CSS animation **descriptor objects** (array) for stylesheet injection / SSR.    |
+| `getAnimation(...)`                                            | Auto-pick CSS vs WAAPI.                                                                  |
+| `createAnimationGroups(...)`                                   | Build `AnimationGroup[]` without wrapping in a `Sequence`.                               |
+| `prepareAnimation(target, options, cb?)`                       | Run an effect's measure/mutate `prepare()` phase via fastdom, then a callback.           |
+| `getEasing(name)`                                              | Map an easing name → CSS easing string.                                                  |
+| `registerEffects(map)`                                         | Register named-effect modules (same fn re-exported as `Interact.registerEffects`).       |
 
 ## AnimationOptions
 
@@ -61,13 +61,17 @@ registration) → `customEffect` `(element, progress) => void`.
 import { getWebAnimation } from '@wix/motion';
 
 const anim = getWebAnimation(document.getElementById('hero'), {
-  keyframeEffect: { name: 'fade-up', keyframes: [
-    { opacity: 0, transform: 'translateY(20px)' },
-    { opacity: 1, transform: 'translateY(0)' },
-  ]},
-  duration: 600, easing: 'ease-out',
+  keyframeEffect: {
+    name: 'fade-up',
+    keyframes: [
+      { opacity: 0, transform: 'translateY(20px)' },
+      { opacity: 1, transform: 'translateY(0)' },
+    ],
+  },
+  duration: 600,
+  easing: 'ease-out',
 });
-await anim.play();   // play/reverse await internal fastdom 'ready' first
+await anim.play(); // play/reverse await internal fastdom 'ready' first
 ```
 
 **`AnimationGroup`**: `play(cb?)`, `pause()`, `reverse(cb?)`, `progress(p)` (scrub by
@@ -98,8 +102,17 @@ const seq = getSequence(
   { offset: 150, offsetEasing: 'quadIn' },
   [...document.querySelectorAll('.card')].map((el) => ({
     target: el,
-    options: { duration: 600, easing: 'ease-out', keyframeEffect: { name: 'fade-up', keyframes: [
-      { opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'translateY(0)' } ] } },
+    options: {
+      duration: 600,
+      easing: 'ease-out',
+      keyframeEffect: {
+        name: 'fade-up',
+        keyframes: [
+          { opacity: 0, transform: 'translateY(20px)' },
+          { opacity: 1, transform: 'translateY(0)' },
+        ],
+      },
+    },
   })),
 );
 seq.play();
@@ -128,8 +141,8 @@ group's delay so all end together.
 import { registerEffects } from '@wix/motion';
 registerEffects({
   MyFade: {
-    web:      (o) => [{ ...o, name: 'MyFade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }],
-    style:    (o) => [{ ...o, name: 'MyFade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }],
+    web: (o) => [{ ...o, name: 'MyFade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }],
+    style: (o) => [{ ...o, name: 'MyFade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }],
     getNames: () => ['MyFade'],
   },
 });

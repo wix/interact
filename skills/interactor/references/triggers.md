@@ -7,7 +7,8 @@ break them. Pair this with `config-schema.md` (effect field definitions) and
 `TriggerType` = `'hover' | 'click' | 'viewEnter' | 'pageVisible' | 'animationEnd' |
 'viewProgress' | 'pointerMove' | 'activate' | 'interest'`.
 
-The trigger sets *when*; the effect's playback field sets *how it plays*:
+The trigger sets _when_; the effect's playback field sets _how it plays_:
+
 - **Time effects** (keyframe/named/custom) on hover/click/viewEnter → `triggerType`.
 - **State effects** (CSS transitions) on hover/click → `stateAction`.
 - **Scrub effects** on viewProgress/pointerMove → `rangeStart`/`rangeEnd` (no triggerType).
@@ -30,12 +31,12 @@ params?: {
 
 Playback is set per effect via `triggerType` (default `'once'`):
 
-| `triggerType` | Behavior |
-| :-- | :-- |
+| `triggerType`      | Behavior                                                |
+| :----------------- | :------------------------------------------------------ |
 | `'once'` (default) | Play once, the first time it enters. The entrance case. |
-| `'repeat'` | Replay every time it re-enters. |
-| `'alternate'` | Play in, reverse out. |
-| `'state'` | Play on enter, hold; reverse on leave. |
+| `'repeat'`         | Replay every time it re-enters.                         |
+| `'alternate'`      | Play in, reverse out.                                   |
+| `'state'`          | Play on enter, hold; reverse on leave.                  |
 
 **CRITICAL:** when source and target are the **same** element, use **only**
 `'once'`. With `repeat`/`alternate`/`state`, the animation can push the element
@@ -61,7 +62,7 @@ when you want the entrance to play on page-visible rather than scroll-into-view.
 
 The element's animation progress is tied to its scroll position through the
 viewport (native `ViewTimeline`, with a bundled polyfill where unsupported). **No
-trigger params** — the range lives on the *effect* via `rangeStart` / `rangeEnd`
+trigger params** — the range lives on the _effect_ via `rangeStart` / `rangeEnd`
 (see `RangeOffset` in `config-schema.md`).
 
 ```ts
@@ -92,28 +93,28 @@ No trigger params — behavior is configured entirely on the effect. Two flavors
 
 **Time effect → `triggerType`:**
 
-| `triggerType` | hover | click |
-| :-- | :-- | :-- |
-| `'alternate'` (default) | play on enter, reverse on leave | alternate play/reverse per click |
-| `'repeat'` | play on enter, stop+rewind on leave | restart per click |
-| `'once'` | play once on first enter | play once on first click |
-| `'state'` | play on enter, pause on leave | toggle play/pause per click |
+| `triggerType`           | hover                               | click                            |
+| :---------------------- | :---------------------------------- | :------------------------------- |
+| `'alternate'` (default) | play on enter, reverse on leave     | alternate play/reverse per click |
+| `'repeat'`              | play on enter, stop+rewind on leave | restart per click                |
+| `'once'`                | play once on first enter            | play once on first click         |
+| `'state'`               | play on enter, pause on leave       | toggle play/pause per click      |
 
 **State effect (CSS transition) → `stateAction`:**
 
-| `stateAction` | hover | click |
-| :-- | :-- | :-- |
+| `stateAction`        | hover                               | click            |
+| :------------------- | :---------------------------------- | :--------------- |
 | `'toggle'` (default) | add state on enter, remove on leave | toggle per click |
-| `'add'` | add on enter, leave doesn't remove | add on click |
-| `'remove'` | remove on enter | remove on click |
-| `'clear'` | clear all states on enter | clear all states |
+| `'add'`              | add on enter, leave doesn't remove  | add on click     |
+| `'remove'`           | remove on enter                     | remove on click  |
+| `'clear'`            | clear all states on enter           | clear all states |
 
 **CRITICAL — hit-area shift:** if a hover effect changes the element's size or
 position (`scale`, `translate`), the hovered region shifts and the pointer
 rapidly enters/leaves → flicker. Keep the **trigger on the stable parent** and
 animate a **child** as the target. Do this by putting `selector` (or `key`) on the
-**effect** — `selector` on the *effect* refines the **target**; `selector` on the
-*interaction* would instead move the trigger's **source** onto the scaling element
+**effect** — `selector` on the _effect_ refines the **target**; `selector` on the
+_interaction_ would instead move the trigger's **source** onto the scaling element
 (the opposite of what you want). See "source vs target selector" in
 `config-schema.md`.
 
@@ -166,6 +167,7 @@ see `presets.md`) or a `customEffect`. A `keyframeEffect` only maps a single axi
 ```
 
 **Rules / gotchas:**
+
 - The source element must **not** have `pointer-events: none`.
 - **CRITICAL — hit-area shift:** never use the same element as source and target with `hitArea: 'self'` and a size/position effect — the transform shifts the hit area → jitter. Keep the trigger on the parent and animate a child by putting `selector` (or `key`) on the **effect** (the target) — not on the interaction (that moves the source).
 - **Multiple items (grid of cards):** use `listContainer` so each item becomes its own source with its own pointer tracker — one interaction, not a hand-written list of per-card interactions. Key an ancestor wrapper, point `listContainer` at the cards' container; the effect's `selector` then resolves the target within each card.
@@ -194,7 +196,9 @@ see `presets.md`) or a `customEffect`. A `keyframeEffect` only maps a single axi
 ## animationEnd — chain after another effect
 
 ```ts
-params: { effectId: string }   // the effect to wait for, on the same source
+params: {
+  effectId: string;
+} // the effect to wait for, on the same source
 ```
 
 Fires when the named effect completes on the source element. Use it to sequence
@@ -223,12 +227,14 @@ element becomes a staggered participant.
 - Reusable sequences go in `config.sequences` and are referenced by `sequenceId`.
 - Set `triggerType` on the **sequence**, not on its child effects.
 
-**`selector` vs `listContainer` for groups of items** — pick by *who triggers*:
+**`selector` vs `listContainer` for groups of items** — pick by _who triggers_:
+
 - **One trigger fans an effect/sequence across many targets** (a single `viewEnter` staggering a row of cards): put **`selector`** on the effect to select the items. This is the sequence case above. Here source ≠ target, so the items need **no** `data-interact-initial` — the injected `generate()` rules prevent FOUC on their own (see [viewEnter](#viewenter)).
 - **Each item needs its own trigger** (per-card `hover`/`pointerMove`, one tracker each): put **`listContainer`** on the interaction so each child becomes its own source.
 
 **Two rules that silently break list binding either way:**
-- **A `listContainer`/`selector` must match a descendant of the keyed element**, not the keyed element itself — they're resolved *within* the keyed root. Key an **ancestor wrapper** (e.g. `key: 'features'` on a section). Keying the grid itself and pointing `listContainer` at that same grid matches nothing → zero items bind.
+
+- **A `listContainer`/`selector` must match a descendant of the keyed element**, not the keyed element itself — they're resolved _within_ the keyed root. Key an **ancestor wrapper** (e.g. `key: 'features'` on a section). Keying the grid itself and pointing `listContainer` at that same grid matches nothing → zero items bind.
 - **Don't put the same key on every item.** The runtime stores one controller per key (a `Map`), so N items sharing one `interactKey`/`data-interact-key` clobber each other and only the last binds. Use a keyed wrapper + `selector`/`listContainer`, not duplicated keys.
 
 See the sequences section of `config-schema.md` for the full type.

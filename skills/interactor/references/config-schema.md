@@ -24,10 +24,10 @@ element resolution, FOUC, and the static API. This is source-accurate as of
 
 ```ts
 type InteractConfig = {
-  interactions: Interaction[];                  // REQUIRED
-  effects?:    Record<string, Effect>;          // reusable effects, keyed by effectId
-  sequences?:  Record<string, SequenceConfig>;  // reusable sequences, keyed by sequenceId
-  conditions?: Record<string, Condition>;       // named media/selector/container gates
+  interactions: Interaction[]; // REQUIRED
+  effects?: Record<string, Effect>; // reusable effects, keyed by effectId
+  sequences?: Record<string, SequenceConfig>; // reusable sequences, keyed by sequenceId
+  conditions?: Record<string, Condition>; // named media/selector/container gates
 };
 ```
 
@@ -44,14 +44,14 @@ Maps one **source element + trigger** to one or more **effects** (and/or sequenc
 
 ```ts
 type Interaction = {
-  key: string;               // REQUIRED — matches data-interact-key / interactKey (the source root)
-  trigger: TriggerType;      // REQUIRED — see triggers.md
-  params?: TriggerParams;    // trigger-specific options
-  effects?:   (Effect | EffectRef)[];          // ≥1 of effects/sequences REQUIRED
+  key: string; // REQUIRED — matches data-interact-key / interactKey (the source root)
+  trigger: TriggerType; // REQUIRED — see triggers.md
+  params?: TriggerParams; // trigger-specific options
+  effects?: (Effect | EffectRef)[]; // ≥1 of effects/sequences REQUIRED
   sequences?: (SequenceConfig | SequenceConfigRef)[];
-  conditions?: string[];     // condition ids; ALL must pass; gates the whole trigger
-  selector?: string;         // CSS selector refining the source within the keyed root
-  listContainer?: string;    // CSS selector for a list container context
+  conditions?: string[]; // condition ids; ALL must pass; gates the whole trigger
+  selector?: string; // CSS selector refining the source within the keyed root
+  listContainer?: string; // CSS selector for a list container context
   listItemSelector?: string; // filter which children of listContainer participate
 };
 ```
@@ -129,12 +129,12 @@ names like `easeOutCubic`/`elasticOut` are **not** valid and silently no-op.)
 
 ### Exactly one payload per effect
 
-| Payload | Shape | Use for |
-| :-- | :-- | :-- |
-| `namedEffect` | `{ type: string, ...presetOptions }` | Prebuilt preset (preferred). Do **not** guess option names — omit unknowns. |
-| `keyframeEffect` | `{ name: string, keyframes: Keyframe[] }` | Inline custom keyframes (WAAPI; camelCase props). |
-| `customEffect` | `(element, progress) => void` | Imperative; only when CSS can't express it (SVG/canvas/text). `progress` is `0–1`, or the 2D object for `pointerMove`. |
-| `transition` / `transitionProperties` | see [State effect](#state-effect) | CSS-state toggle (transitions) on hover/click. |
+| Payload                               | Shape                                     | Use for                                                                                                                |
+| :------------------------------------ | :---------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
+| `namedEffect`                         | `{ type: string, ...presetOptions }`      | Prebuilt preset (preferred). Do **not** guess option names — omit unknowns.                                            |
+| `keyframeEffect`                      | `{ name: string, keyframes: Keyframe[] }` | Inline custom keyframes (WAAPI; camelCase props).                                                                      |
+| `customEffect`                        | `(element, progress) => void`             | Imperative; only when CSS can't express it (SVG/canvas/text). `progress` is `0–1`, or the 2D object for `pointerMove`. |
+| `transition` / `transitionProperties` | see [State effect](#state-effect)         | CSS-state toggle (transitions) on hover/click.                                                                         |
 
 ### Time effect
 
@@ -192,14 +192,14 @@ directly. The pointer-relevant fields are `transitionDuration`/`transitionEasing
   offset?: { value: number; unit: 'percentage' | 'px' | 'vh' | 'vw' } }
 ```
 
-| Range name | Meaning |
-| :-- | :-- |
-| `entry` | element entering the viewport |
-| `exit` | element exiting the viewport |
-| `contain` | between full `entry` and start of `exit` |
-| `cover` | full span: `entry` → `contain` → `exit` |
+| Range name       | Meaning                                        |
+| :--------------- | :--------------------------------------------- |
+| `entry`          | element entering the viewport                  |
+| `exit`           | element exiting the viewport                   |
+| `contain`        | between full `entry` and start of `exit`       |
+| `cover`          | full span: `entry` → `contain` → `exit`        |
 | `entry-crossing` | leading edge entering → trailing edge entering |
-| `exit-crossing` | leading edge exiting → trailing edge exiting |
+| `exit-crossing`  | leading edge exiting → trailing edge exiting   |
 
 **Sticky scroll pattern:** a tall wrapper (e.g. `height: 300vh`) defines scroll
 distance; a `position: sticky; top: 0; height: 100vh` child (the `key`, the
@@ -238,25 +238,28 @@ manually incrementing `delay` per item.
 
 ```ts
 type SequenceConfig = {
-  effects: (Effect | EffectRef)[];                    // REQUIRED
-  delay?: number;                                     // ms before the sequence starts
-  offset?: number;                                    // ms between each child's start
-  offsetEasing?: string | ((p: number) => number);   // stagger distribution curve (default 'linear')
-  sequenceId?: string;                                // auto-generated if omitted
+  effects: (Effect | EffectRef)[]; // REQUIRED
+  delay?: number; // ms before the sequence starts
+  offset?: number; // ms between each child's start
+  offsetEasing?: string | ((p: number) => number); // stagger distribution curve (default 'linear')
+  sequenceId?: string; // auto-generated if omitted
   conditions?: string[];
-  triggerType?: 'once' | 'repeat' | 'alternate' | 'state';  // set on the sequence, NOT its child effects
+  triggerType?: 'once' | 'repeat' | 'alternate' | 'state'; // set on the sequence, NOT its child effects
 };
 
 type SequenceConfigRef = {
-  sequenceId: string;  // points at config.sequences[sequenceId]
-  delay?: number; offset?: number; offsetEasing?: string | ((p: number) => number); conditions?: string[];
+  sequenceId: string; // points at config.sequences[sequenceId]
+  delay?: number;
+  offset?: number;
+  offsetEasing?: string | ((p: number) => number);
+  conditions?: string[];
 };
 ```
 
 A common pattern: one trigger fires a sequence whose single effect uses `selector`
 to pick the items — each matched element becomes a staggered child. (Use `selector`
 here, not `listContainer`: one trigger fanning across many targets is the `selector`
-case; `listContainer` is for when each item needs its *own* trigger, like per-card
+case; `listContainer` is for when each item needs its _own_ trigger, like per-card
 `hover`/`pointerMove`. See `triggers.md`.)
 
 ```ts
@@ -279,11 +282,11 @@ Named gates that enable/disable interactions, effects, or sequences.
 type Condition = { type: 'media' | 'container' | 'selector'; predicate?: string };
 ```
 
-| Type | Predicate |
-| :-- | :-- |
-| `media` | a media query **without** `@media` — e.g. `'(min-width: 768px)'`, `'(hover: hover)'`, `'(prefers-reduced-motion: reduce)'` |
-| `selector` | a CSS selector; `&` is replaced by the base element selector — e.g. `':nth-of-type(odd)'` |
-| `container` | a container-query condition |
+| Type        | Predicate                                                                                                                  |
+| :---------- | :------------------------------------------------------------------------------------------------------------------------- |
+| `media`     | a media query **without** `@media` — e.g. `'(min-width: 768px)'`, `'(hover: hover)'`, `'(prefers-reduced-motion: reduce)'` |
+| `selector`  | a CSS selector; `&` is replaced by the base element selector — e.g. `':nth-of-type(odd)'`                                  |
+| `container` | a container-query condition                                                                                                |
 
 Attach with `conditions: ['desktop']` on an interaction (gates the whole trigger),
 an effect (skips just that effect), or a sequence. **All** listed conditions must
@@ -308,6 +311,7 @@ target (same element). The fields below only matter for lists/delegation/child
 targeting.
 
 **Source element** (where the trigger attaches), priority order:
+
 1. `listContainer` + `listItemSelector` → each matching child within the container.
 2. `listContainer` only → each immediate child (common list case).
 3. `listContainer` + `selector` → `querySelector` within each child.
@@ -320,6 +324,7 @@ can't be its own `listContainer`. Key an ancestor wrapper and target the inner
 container.
 
 **Target element** (what the effect animates), priority order:
+
 1. `Effect.key`.
 2. The referenced registry effect's `key` (for an `EffectRef`).
 3. Fallback to `Interaction.key` (source = target).
@@ -337,7 +342,7 @@ inject into `<head>` (or the top of `<body>`) so styles apply before JS loads.
 
 ```ts
 import { generate } from '@wix/interact/web';
-const css = generate(config, true);   // true for web; false for vanilla/React
+const css = generate(config, true); // true for web; false for vanilla/React
 ```
 
 **`useFirstChild`:** `true` for the **web** (`<interact-element>`) entry point —
@@ -350,11 +355,17 @@ on itself) requires **both** the injected `generate()` output **and** the elemen
 marked initial:
 
 ```html
-<interact-element data-interact-key="hero" data-interact-initial="true"><section>…</section></interact-element>
+<interact-element data-interact-key="hero" data-interact-initial="true"
+  ><section>…</section></interact-element
+>
 ```
+
 ```tsx
-<Interaction tagName="section" interactKey="hero" initial>…</Interaction>
+<Interaction tagName="section" interactKey="hero" initial>
+  …
+</Interaction>
 ```
+
 ```html
 <section data-interact-key="hero" data-interact-initial="true">…</section>
 ```
@@ -387,17 +398,17 @@ common choice); omit it if you'd rather it lay out like a normal block.
 `Interact.create(config)` returns an instance. Keep the reference to manage its
 lifecycle.
 
-| Member | Description |
-| :-- | :-- |
-| `Interact.create(config, options?)` | Initialize; returns an independent instance. `options.useCustomElement` toggles `<interact-element>` mode. |
-| `Interact.registerEffects(presets)` | Register named-effect presets. **Call before `create()`/`generate()`** when using `namedEffect`. Same function as `@wix/motion`'s `registerEffects`. |
-| `Interact.setup(options)` | Global defaults — call before `create()`. See below. |
-| `Interact.destroy()` | Static — tears down **all** instances (e.g. on route change). |
-| `Interact.getInstance(key)` / `Interact.getController(key)` | Look up the instance/controller owning a key. |
-| `Interact.forceReducedMotion` | `boolean`, default `false` — force reduced-motion globally. |
-| `Interact.allowA11yTriggers` | `boolean`, **default `true`** — enable `interest`/`activate` and layer a11y behavior onto `hover`/`click`. |
-| `instance.destroy()` | Tear down just this instance — call on component unmount. |
-| `instance.has(key)` / `instance.get(key)` | Instance lookups. |
+| Member                                                      | Description                                                                                                                                          |
+| :---------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Interact.create(config, options?)`                         | Initialize; returns an independent instance. `options.useCustomElement` toggles `<interact-element>` mode.                                           |
+| `Interact.registerEffects(presets)`                         | Register named-effect presets. **Call before `create()`/`generate()`** when using `namedEffect`. Same function as `@wix/motion`'s `registerEffects`. |
+| `Interact.setup(options)`                                   | Global defaults — call before `create()`. See below.                                                                                                 |
+| `Interact.destroy()`                                        | Static — tears down **all** instances (e.g. on route change).                                                                                        |
+| `Interact.getInstance(key)` / `Interact.getController(key)` | Look up the instance/controller owning a key.                                                                                                        |
+| `Interact.forceReducedMotion`                               | `boolean`, default `false` — force reduced-motion globally.                                                                                          |
+| `Interact.allowA11yTriggers`                                | `boolean`, **default `true`** — enable `interest`/`activate` and layer a11y behavior onto `hover`/`click`.                                           |
+| `instance.destroy()`                                        | Tear down just this instance — call on component unmount.                                                                                            |
+| `instance.has(key)` / `instance.get(key)`                   | Instance lookups.                                                                                                                                    |
 
 > The `Interact` class has **no `add`/`remove` methods.** Vanilla DOM binding uses
 > the **standalone** functions below.
