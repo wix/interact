@@ -1,0 +1,259 @@
+---
+name: interactor
+description: >-
+  Install, integrate, and configure Wix's web-animation stack — @wix/interact
+  (declarative interactions), @wix/motion-presets (ready-made effects), and
+  @wix/motion (engine) — to add or edit scroll-, hover-, click-, entrance-, and
+  pointer-driven animations on a webpage or web app. Use whenever the user wants to
+  add or change web animations/interactions with @wix/interact or
+  @wix/motion(-presets); wire animations to scroll, viewport-enter, hover, click, or
+  mouse-move; build entrance / parallax / stagger / tilt / reveal effects; install
+  or set up @wix/interact (vanilla JS, React, or Web Components); or edit an existing
+  interact config. Trigger even on phrasings like "fade in on scroll", "parallax
+  background", "stagger the cards in", "hover-scale the button", or "tilt toward the
+  mouse" in a project using these packages. Do NOT use for other animation libraries
+  (GSAP, Framer Motion, Anime.js, Lottie, React Spring) or generic CSS @keyframes
+  unrelated to the Wix stack.
+---
+
+# Interactor — build interactions with @wix/interact
+
+This skill installs, wires up, and configures Wix's animation stack so you can
+add or edit interactions on any webpage or web app. It is **interact-first**: you
+describe *what should animate and when* as a declarative JSON config, and the
+library does the DOM wiring. You almost never call the motion engine directly.
+
+## Mental model — three packages, one config
+
+| Package | Role | You touch it… |
+| :-- | :-- | :-- |
+| `@wix/interact` | Declarative layer. Binds **triggers → effects** via an `InteractConfig`. Ships vanilla / React / Web-Component entry points. | Always. This is the API. |
+| `@wix/motion-presets` | ~62 ready-made named effects (entrance, scroll, ongoing, mouse). Referenced as `namedEffect: { type: 'FadeIn' }`. | When you want a prebuilt effect (the common case). |
+| `@wix/motion` | The engine (WAAPI, CSS, ViewTimeline, fastdom). Bundled inside interact. | Rarely — only for programmatic/escape-hatch animation. See `references/motion-engine.md`. |
+
+The whole job is: **pick a trigger, pick an effect, bind it to an element with a
+key.** Everything else is detail.
+
+```
+┌── trigger (when) ──┐        ┌── effect (what) ──────────────┐
+│ viewEnter, hover,  │  ───►  │ namedEffect: { type: 'FadeIn' }│  ──► applied to
+│ click, viewProgress│        │ duration, easing, triggerType  │      element with
+│ pointerMove, …     │        │ (or keyframeEffect/customEffect)│     matching key
+└────────────────────┘        └────────────────────────────────┘
+```
+
+## Workflow
+
+Follow three steps in order: **Install → Integrate → Add/Edit interactions.** If
+the project already uses interact (a config and the package exist), skip to
+*Add/Edit*. Read the linked reference files as you reach each step — they hold the
+full schema, the preset catalog, and per-trigger rules. Don't try to hold it all
+in your head; the references are the source of truth.
+
+---
+
+### Step 1 — Install
+
+Both packages, one command. `@wix/motion` comes transitively inside
+`@wix/interact` — **do not install it separately** on this path.
+
+```bash
+npm install @wix/interact @wix/motion-presets
+# (yarn add / pnpm add work too — match the project's package manager)
+```
+
+A no-build / plain-HTML site can skip npm and import from a CDN instead — see the
+CDN recipe in `references/integration-recipes.md`.
+
+---
+
+### Step 2 — Integrate
+
+**First, detect the stack and pick the entry point** (this determines every
+import and a couple of flags). Decision procedure:
+
+1. **React / Next / any JSX project** (a `package.json` with `react`, `.jsx`/`.tsx` files) → use `@wix/interact/react` with the `<Interaction>` component.
+2. **Plain HTML, no bundler** (static `.html`, no build step) → use `@wix/interact/web` with `<interact-element>` custom elements, imported from a CDN.
+3. **Bundled vanilla JS / other framework** (Vite/Webpack but no React, or Vue/Svelte/Angular) → use `@wix/interact/web` (Web Components are framework-agnostic) **or** the base `@wix/interact` vanilla API. Prefer `/web` unless the user wants to control binding manually.
+
+If you can't tell, ask the user which framework the page uses. The full
+copy-paste setup for each entry point — including SSR, cleanup, and a verification
+snippet — is in **`references/integration-recipes.md`**. Read it now for the entry
+point you chose.
+
+The shape is the same everywhere:
+
+```ts
+import { Interact, generate } from '@wix/interact/web'; // or /react, or '@wix/interact'
+import { FadeIn } from '@wix/motion-presets';            // import only what you use (tree-shakes)
+
+Interact.registerEffects({ FadeIn });   // BEFORE generate()/create() — see invariants
+const css = generate(config, /* useFirstChild */ true);  // inject into <head>
+const instance = Interact.create(config);                 // wire it up
+```
+
+(For CDN/quick-start, `import * as presets` + `registerEffects(presets)` is fine —
+selective imports just keep bundled apps lean. See `references/presets.md`.)
+
+Mark up target elements with a **key** that matches the config:
+
+```html
+<!-- web -->         <interact-element data-interact-key="hero"><section>…</section></interact-element>
+<!-- react -->       <Interaction tagName="section" interactKey="hero">…</Interaction>
+<!-- vanilla -->     <section data-interact-key="hero">…</section>  + add(el, 'hero')
+```
+
+---
+
+### Step 3 — Add / edit interactions
+
+This is where most work happens. An `InteractConfig` is:
+
+```ts
+{
+  interactions: [            // REQUIRED — each binds one source+trigger to effect(s)
+    { key, trigger, params?, effects?, sequences?, conditions?, selector?, listContainer?, listItemSelector? }
+  ],
+  effects?:   { [effectId]: Effect },        // reusable effects, referenced by effectId
+  sequences?: { [sequenceId]: SequenceConfig },
+  conditions?:{ [conditionId]: Condition },  // media/selector gates
+}
+```
+
+To **add** an interaction:
+1. Choose the **trigger** (see decision table below).
+2. Choose the **effect**: prefer a `namedEffect` preset (browse `references/presets.md`); fall back to inline `keyframeEffect` for custom keyframes, or `customEffect` for non-CSS (SVG/canvas/text).
+3. Set the **playback field** the trigger needs: `triggerType` for time effects on hover/click/viewEnter; `stateAction` for CSS-state (transition) effects; `rangeStart`/`rangeEnd` for `viewProgress`. Never set both `triggerType` and `stateAction` on one effect.
+4. Bind it: give the target element the matching `key` in the markup.
+
+To **edit** an existing config: read the current config first, find the
+interaction/effect by its `key`/`effectId`, and change *only* what's asked.
+Preserve the rest (other interactions, ids, markup keys). After editing, re-run
+the validation checklist below — a changed `namedEffect.type` or a new
+`viewProgress` effect can silently break if you skip it. If the effect catalog or
+trigger semantics are involved, open `references/presets.md` / `references/triggers.md`.
+
+For multi-target staggering (cards, lists, nav items), use **sequences**, not
+manual per-item delays — see `references/triggers.md` and the sequences section of
+`references/config-schema.md`.
+
+---
+
+## Trigger → use-case quick reference
+
+| Trigger | Use for | Effect type & key field | Deep rules |
+| :-- | :-- | :-- | :-- |
+| `viewEnter` | Entrance animations when an element scrolls into view | Time effect; `triggerType` (default `'once'`) | `references/triggers.md` |
+| `viewProgress` | Scroll-driven (parallax, reveal, scrub tied to scroll position) | Scrub effect; `rangeStart`/`rangeEnd` | `references/triggers.md` |
+| `hover` / `interest` | Hover effects (`interest` = hover+focus, accessible) | Time effect (`triggerType`) **or** State effect (`stateAction`) | `references/triggers.md` |
+| `click` / `activate` | Click toggles (`activate` = click+keyboard, accessible) | Time effect (`triggerType`) **or** State effect (`stateAction`) | `references/triggers.md` |
+| `pointerMove` | Cursor-following / tilt / parallax-on-mouse | Scrub effect; `params.hitArea`, `params.axis` | `references/triggers.md` |
+| `animationEnd` | Chain one effect after another finishes | `params.effectId` of the preceding effect | `references/triggers.md` |
+
+Effect catalog (which preset for which look) → **`references/presets.md`**. Full
+field-by-field schema for every config object → **`references/config-schema.md`**.
+
+---
+
+## Critical invariants — get these wrong and output silently breaks
+
+These are the failure modes that don't throw — the page just renders wrong or the
+animation no-ops. Apply them every time, even if you don't open a reference file.
+
+1. **`registerEffects()` runs BEFORE `generate()` and `Interact.create()`.** An
+   unregistered `namedEffect.type` doesn't error — it logs a console warning and
+   the animation never runs. Register the presets you use up front — prefer a
+   selective `import { FadeIn, … }` (tree-shakeable) over `import * as presets` in
+   bundled apps.
+
+2. **`generate(config, useFirstChild)` parity** — pass `true` for the **web**
+   (`<interact-element>`) entry point, `false` for **vanilla** and **React**.
+   Backwards = the FOUC/initial selectors target the wrong node and break.
+
+3. **FOUC prevention — inject `generate()`, and mark `initial` only for
+   same-element entrances.** Always inject the `generate()` output (ideally at
+   SSR/build) — that's the load-bearing half and it carries the rules that hide
+   entrance elements before JS runs. Add `data-interact-initial="true"` / `initial`
+   **only** when a `viewEnter`+`once` entrance triggers on the *same element* it
+   animates (e.g. a hero). When the trigger and target differ — a container/parent
+   triggers and child elements animate, like a staggered list via `selector` — do
+   **not** mark `initial`; the generated rules hide the targets on their own and the
+   marker would just get in the way. (That's why a hero gets `initial` but the
+   below-it staggered cards don't.) For `repeat`/`alternate`/`state`, also skip
+   `initial` — inline the starting keyframe and use `fill: 'both'`.
+
+4. **Vanilla binding is two steps.** `Interact.create(config)` loads the config but
+   binds nothing. You must then call the **standalone** `add(element, 'key')` for
+   each element once it exists in the DOM. (Web and React bind automatically via
+   `<interact-element>` / `<Interaction>`.) There is **no** `instance.add(...)`
+   method — `add`/`remove` are functions imported from the package.
+
+5. **`viewEnter` with same source & target → only `triggerType: 'once'`.** For
+   `repeat`/`alternate`/`state`, the animation can move the element out of/into the
+   viewport and re-trigger forever. Use **separate** source and target elements for
+   those.
+
+6. **Hit-area shift.** On `hover` or `pointerMove`, if the effect changes the
+   element's size/position (`scale`, `translate`), the hovered hit-area shifts and
+   flickers. Keep the trigger on the stable parent and animate a **child** by
+   putting `selector` (or `key`) on the **effect** — `selector` on the *effect*
+   sets the **target**; `selector` on the *interaction* moves the trigger's
+   **source** instead (the opposite of what you want).
+
+7. **`viewProgress` needs `overflow: clip`, not `hidden`.** `overflow: hidden` on
+   any ancestor between the element and the scroll container creates a scroll
+   context that kills ViewTimeline. Replace every `overflow: hidden` with
+   `overflow: clip` (Tailwind: `overflow-clip`).
+
+8. **Never invent or guess.** Use only real preset names (`references/presets.md`).
+   If you don't know a preset's option name/type, **omit it** and rely on defaults
+   — guessing produces silently-wrong output. Never emit `DVD` (exists in types but
+   isn't registered) or any `Bg*`/`ImageParallax` preset (experimental, not
+   production-ready). For "background parallax", use the public **`ParallaxScroll`**
+   on the image element with `viewProgress`.
+
+9. **Scroll presets carry a `range`.** Every `*Scroll` preset needs `range: 'in' |
+   'out' | 'continuous'` in its `namedEffect` (prefer `'continuous'`) — **except**
+   `ParallaxScroll`, which takes `parallaxFactor` instead.
+
+10. **Lists: one keyed wrapper, fan out by `selector` or `listContainer` — never
+    duplicate keys.** Keys are unique (one controller per key), so never put the
+    same key on N repeated elements — they'd clobber and only the last binds.
+    Instead key an **ancestor wrapper** and choose by *who triggers*: use
+    **`selector`** on the **effect** when one trigger staggers/animates many targets
+    (a `viewEnter` sequence over cards); use **`listContainer`** on the
+    **interaction** when each item needs its **own** trigger (per-card
+    `hover`/`pointerMove`, one tracker each). Either way the `selector`/
+    `listContainer` must match a **descendant** of the keyed element, not the keyed
+    element itself.
+
+## Verify your work (run this checklist before declaring done)
+
+Animations are hard to confirm headlessly, so this static check is your reliable
+proxy. Walk the finished config:
+
+- [ ] Every `effectId` / `sequenceId` / condition id referenced in an interaction **exists** in the top-level `effects` / `sequences` / `conditions` maps.
+- [ ] Every `namedEffect.type` is a **real registered preset** from `references/presets.md` (not `DVD`, not a `Bg*` preset, not invented).
+- [ ] Every `*Scroll` preset used with `viewProgress` has a `range` (except `ParallaxScroll`).
+- [ ] `pointerMove` effects have **no** `rangeStart`/`rangeEnd` (those are `viewProgress`-only).
+- [ ] Every interaction `key` (and effect `key`) has a **matching element** in the markup (`data-interact-key` / `interactKey`).
+- [ ] Each effect has **exactly one** payload (`namedEffect` xor `keyframeEffect` xor `customEffect` xor `transition`/`transitionProperties`).
+- [ ] `triggerType` and `stateAction` are not both set on the same effect.
+- [ ] `generate()` output is injected and `useFirstChild` matches the entry point; `initial` is only on `viewEnter`+`once` same-element entrances.
+- [ ] Child-target effects put `selector`/`key` on the **effect**, not the interaction. Groups of items use one keyed wrapper + a **descendant** match (no duplicate keys): `selector` on the effect for a one-trigger stagger/sequence, `listContainer` on the interaction for per-item triggers.
+- [ ] Invariants 5–7 and 10 hold for the relevant triggers (separate source/target, child targets, `overflow: clip`, unique keys).
+
+If a dev server is available, load the page and confirm the animation runs and the
+browser console is free of "not found in registry" warnings.
+
+## Reference files
+
+Read the one(s) relevant to the task — they are self-contained and source-accurate
+(do **not** read the `rules/`/`docs/` folders shipped inside the installed packages;
+some contain known inaccuracies that these references correct).
+
+- **`references/config-schema.md`** — every config object field-by-field: `InteractConfig`, `Interaction`, all three effect variants, sequences, conditions, element resolution (source vs target), FOUC, and the full `Interact` static API.
+- **`references/triggers.md`** — per-trigger deep rules and gotchas: `viewEnter`, `viewProgress`, `hover`/`click` (+ `triggerType`/`stateAction` tables), `pointerMove`, `animationEnd`, accessibility variants, and sequences/stagger.
+- **`references/presets.md`** — the full 62-preset catalog by category with parameters, defaults, accessibility risk tiers + reduced-motion fallbacks, and an "atmosphere → preset" selection guide.
+- **`references/integration-recipes.md`** — complete copy-paste setup per entry point (web / React / vanilla / CDN), with SSR, lifecycle/cleanup, and verification.
+- **`references/motion-engine.md`** — thin escape-hatch reference for calling `@wix/motion` directly (programmatic `getWebAnimation`/`getScrubScene`/`getSequence`), easings, and engine gotchas. Only when the declarative config can't express what's needed.

@@ -1,0 +1,61 @@
+{
+  "skill_name": "interactor",
+  "evals": [
+    {
+      "id": 1,
+      "name": "plain-html-add-entrance-and-hover",
+      "prompt": "I have a plain static HTML landing page — no build tools, no framework, I just edit index.html and open it in the browser. I want to add some motion: make the hero section fade in when it scrolls into view, and make the 'Get Started' CTA button grow a little when you hover it. I'd like to use Wix's @wix/interact library for this. Walk me through it and give me the code.",
+      "expected_output": "Sets up @wix/interact via the /web (custom-element) entry point loaded from a CDN (no build step). Registers presets with Interact.registerEffects before create/generate. Hero: viewEnter trigger + FadeIn namedEffect with triggerType:'once', wrapped in <interact-element data-interact-key=...>, with FOUC handled correctly (both data-interact-initial=\"true\" AND injected generate(config, true) output). CTA hover-grow avoids the hit-area-shift pitfall (animates a child via selector, or uses a state/transition effect, or targets a separate key) rather than scaling the same hovered element. generate() called with useFirstChild=true for the web entry point. No invented preset names; no Bg*/DVD presets.",
+      "files": [],
+      "assertions": [
+        "Uses @wix/interact correctly: imports the Interact API and calls Interact.create(config) with a valid InteractConfig.",
+        "Registers presets before use: Interact.registerEffects(...) is called BEFORE create/generate when a namedEffect is used.",
+        "Hero entrance correct: trigger 'viewEnter' + FadeIn namedEffect with triggerType:'once'.",
+        "FOUC handled as a pair: generate() output injected AND hero marked data-interact-initial=\"true\".",
+        "generate() useFirstChild matches the entry point (true for /web custom elements, false for vanilla).",
+        "Hover-grow avoids hit-area shift: scales a child/separate target or uses a state/transition effect, not the same hovered element.",
+        "No invented or forbidden presets (no Bg*/ImageParallax/DVD/made-up names).",
+        "Runnable with no build step: index.html is self-contained (CDN/module import)."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "react-add-mouse-tilt-and-scroll-parallax",
+      "prompt": "I'm building a product showcase in a React app (Vite + TypeScript). Two things I want to add with @wix/interact: (1) the product cards should tilt toward the cursor in 3D as you move the mouse over them, and (2) the big hero background image should have a subtle parallax effect as you scroll down the page. Can you set this up?",
+      "expected_output": "Uses the @wix/interact/react entry point: <Interaction> components, Interact.create inside useEffect with instance.destroy() cleanup, generate(config, false). registerEffects called once. Tilt: pointerMove + Tilt3DMouse/Track3DMouse scrub effect (rangeStart/rangeEnd, fill:'both'), gated behind (hover: hover), targeting a child wrapper. Parallax: viewProgress + ParallaxScroll (NOT BgParallax/ImageParallax) on the image; mentions overflow:hidden->overflow:clip. No invented presets.",
+      "files": [],
+      "assertions": [
+        "Uses the React entry point: imports from @wix/interact/react and uses <Interaction> with tagName + interactKey.",
+        "Correct React lifecycle: Interact.create inside useEffect with instance.destroy() cleanup.",
+        "generate() uses useFirstChild=false (correct for React).",
+        "Registers presets before create/generate.",
+        "Tilt correct: pointerMove + Tilt3DMouse/Track3DMouse scrub effect with rangeStart/rangeEnd and fill:'both'.",
+        "Tilt gated for touch with a (hover: hover) media condition.",
+        "Tilt avoids hit-area shift: animates a child wrapper, not the same element with hitArea:'self' + transform.",
+        "Parallax uses the public ParallaxScroll with viewProgress — not BgParallax/ImageParallax/invented.",
+        "Mentions overflow:hidden -> overflow:clip for viewProgress to work.",
+        "No invented or forbidden presets anywhere."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "edit-existing-config-slide-and-stagger",
+      "prompt": "Attached is my current setup (index.html + interactions.js). Right now the hero just fades in when it enters the viewport. I want two changes: (1) make the hero slide in from the left instead of fading, and (2) make the four feature cards stagger-fade in one after another as they scroll into view. Please update my files and keep the existing setup working.",
+      "expected_output": "EDITS the existing files in place. Hero: FadeIn -> SlideIn with direction:'left', preserving effectId 'hero-in', key 'hero', viewEnter, triggerType:'once'. Cards: staggered entrance via a sequence (offset + offsetEasing) with a viewEnter trigger and listContainer pointing at .feature-grid/cards — not per-card delays; adds the needed key/markup so the container is bound. Preserves registerEffects, generate(config, true), Interact.create and the web entry point. Targeted edit, valid references.",
+      "files": [
+        "/Users/Yehonatand/.claude/skills/interactor/evals/files/edit-config/index.html",
+        "/Users/Yehonatand/.claude/skills/interactor/evals/files/edit-config/interactions.js"
+      ],
+      "assertions": [
+        "Hero switched to SlideIn from the left (namedEffect SlideIn, direction:'left', replacing FadeIn).",
+        "Hero identity preserved: effectId 'hero-in', key 'hero', trigger 'viewEnter', triggerType:'once'.",
+        "Cards stagger via a sequence (offset + offsetEasing) over the list/container — not per-card delays or duplicate interactions.",
+        "Cards use the viewEnter trigger.",
+        "Cards actually bound: adds key/markup (interact-element/data-interact-key + listContainer) matching the cards.",
+        "Existing setup preserved: registerEffects, generate(config, true), Interact.create, /web entry point intact.",
+        "Targeted edit, not a rewrite: unrelated structure preserved.",
+        "No invented or forbidden presets (SlideIn/FadeIn are real)."
+      ]
+    }
+  ]
+}
