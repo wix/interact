@@ -124,7 +124,7 @@ export function CSSRuleToString(rule: CSSRuleData): string {
   }
 
   if (addInitialSelector) {
-    selector = `${selector}:not([data-interact-enter])`;
+    selector = `${selector}:not([data-interact-enter="done"])`;
   }
 
   // maybe nesting is simpler? -
