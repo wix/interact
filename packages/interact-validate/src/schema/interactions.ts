@@ -170,13 +170,6 @@ function validateEffectReference(
   if (effectId) {
     if (configEffects[effectId]) {
       validateEffectSource(ctx, path, { ...configEffects[effectId], ...effect });
-    } else {
-      ctx.addIssue({
-        code: 'custom',
-        path: [...path, 'effectId'],
-        message: `Effect "${effectId}" not found`,
-        params: { domainCode: 'EFFECT_ID_NOT_FOUND' },
-      } as any);
     }
   } else {
     validateEffectSource(ctx, path, effect);
@@ -340,6 +333,14 @@ export const InteractConfigSchema = z
         effect.conditions?.forEach(Set.prototype.delete, conditionReferences);
         collectEffectKeyframeNames(warnings, path, keyframeNames, (effect as any).keyframeEffect);
         if (!isTopLevel && effect.effectId) {
+          if (!configEffects[effect.effectId]) {
+            warnings.push({
+              code: 'custom',
+              path: [...path, 'effectId'],
+              message: `Effect "${effect.effectId}" not found`,
+              params: { domainCode: 'EFFECT_ID_NOT_FOUND' },
+            } as any);
+          }
           effectIdReferences.delete(effect.effectId);
         }
       },

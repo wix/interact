@@ -24,7 +24,7 @@ It runs with no DOM and no browser, so it works identically in Node, CI, and the
 npm install @wix/interact-validate
 ```
 
-`@wix/interact` is a **peer dependency** (`^2.4.0`) — the config types come from there, so the validator never drifts from the runtime shape. `zod` (`^4`) is a regular dependency.
+`@wix/interact` is a **peer dependency** — the config types come from there, so the validator never drifts from the runtime shape. `zod` is a regular dependency.
 
 ## Quick start
 

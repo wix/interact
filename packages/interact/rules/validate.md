@@ -2,7 +2,7 @@
 
 Rules for using `@wix/interact-validate` — validate an `InteractConfig` before it reaches the runtime.
 
-`@wix/interact-validate` is a standalone, zod-powered validator for the `@wix/interact` `InteractConfig` shape. It runs **statically** (no DOM, no browser, no runtime), so it is safe in build tools, CI, and server-side code. It is a separate package from `@wix/interact` and declares `@wix/interact` as a peer dependency (`^2.4.0`) — its config types come from there, so the two never drift.
+`@wix/interact-validate` is a standalone, zod-powered validator for the `@wix/interact` `InteractConfig` shape. It runs **statically** (no DOM, no browser, no runtime), so it is safe in build tools, CI, and server-side code. It is a separate package from `@wix/interact` and declares `@wix/interact` as a peer dependency — its config types come from there, so the two never drift.
 
 ## Table of Contents
 

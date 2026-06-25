@@ -1,7 +1,7 @@
 {
   "name": "@wix/interact-validate",
   "version": "1.0.0",
-  "description": "Schema + referential + semantic validation for @wix/interact's InteractConfig, powered by zod.",
+  "description": "Schema + referential + semantic validation for @wix/interact's InteractConfig.",
   "license": "MIT",
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",

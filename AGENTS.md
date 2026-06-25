@@ -7,7 +7,7 @@ A monorepo for Wix's web animation and interaction libraries, built on the nativ
 ### Project Map
 
 | Project   | Package                  | Directory                     |
-| --------  | ------------------------ | ----------------------------- |
+| --------- | ------------------------ | ----------------------------- |
 | Motion    | `@wix/motion`            | `packages/motion/`            |
 | Interact  | `@wix/interact`          | `packages/interact/`          |
 | Presets   | `@wix/motion-presets`    | `packages/motion-presets/`    |
