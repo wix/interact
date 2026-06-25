@@ -441,7 +441,6 @@ Interact.setup({
 The packages ship `rules/` and `docs/` folders. Several entries there contradict
 the source — **do not propagate them** (this file already corrects them):
 
-- `instance.add(el, key)` / `interact.add(...)` — **wrong**. Use the standalone `add(el, key)` / `remove(key)` functions (the README is correct).
 - `allowA11yTriggers` "default: false" — **wrong**; the source default is `true`.
 - `method: 'toggle'` on a state effect — no such field; use **`stateAction`**.
 - `stagger: 100` on an effect — no such field; stagger via **sequences** (`offset`/`offsetEasing`).

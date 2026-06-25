@@ -184,11 +184,9 @@ animation no-ops. Apply them every time, even if you don't open a reference file
    below-it staggered cards don't.) For `repeat`/`alternate`/`state`, also skip
    `initial` — inline the starting keyframe and use `fill: 'both'`.
 
-4. **Vanilla binding is two steps.** `Interact.create(config)` loads the config but
-   binds nothing. You must then call the **standalone** `add(element, 'key')` for
-   each element once it exists in the DOM. (Web and React bind automatically via
-   `<interact-element>` / `<Interaction>`.) There is **no** `instance.add(...)`
-   method — `add`/`remove` are functions imported from the package.
+4. **Vanilla binding.** You must then call the **standalone** `add(element, 'key')` for
+   each element once it exists in the DOM. For clean up call the `remove('key')` function.
+   `add`/`remove` are functions importedfrom the package.
 
 5. **`viewEnter` with same source & target → only `triggerType: 'once'`.** For
    `repeat`/`alternate`/`state`, the animation can move the element out of/into the
@@ -198,8 +196,8 @@ animation no-ops. Apply them every time, even if you don't open a reference file
 6. **Hit-area shift.** On `hover` or `pointerMove`, if the effect changes the
    element's size/position (`scale`, `translate`), the hovered hit-area shifts and
    flickers. Keep the trigger on the stable parent and animate a **child** by
-   putting `selector` (or `key`) on the **effect** — `selector` on the _effect_
-   sets the **target**; `selector` on the _interaction_ moves the trigger's
+   putting `selector` (or different `key`) on the **effect** — `selector` on the _effect_
+   sets the **target**; `selector` on the _interaction_ sets the trigger's
    **source** instead (the opposite of what you want).
 
 7. **`viewProgress` needs `overflow: clip`, not `hidden`.** `overflow: hidden` on
@@ -214,9 +212,9 @@ animation no-ops. Apply them every time, even if you don't open a reference file
    production-ready). For "background parallax", use the public **`ParallaxScroll`**
    on the image element with `viewProgress`.
 
-9. **Scroll presets carry a `range`.** Every `*Scroll` preset needs `range: 'in' |
-'out' | 'continuous'` in its `namedEffect` (prefer `'continuous'`) — **except**
-   `ParallaxScroll`, which takes `parallaxFactor` instead.
+9. **Scroll presets carry a `range`.** Every `*Scroll` preset needs
+   `range: 'in' | 'out' | 'continuous'` in its `namedEffect`
+   (prefer `'continuous'`) — **except** `ParallaxScroll`, which takes `parallaxFactor` instead.
 
 10. **Lists: one keyed wrapper, fan out by `selector` or `listContainer` — never
     duplicate keys.** Keys are unique (one controller per key), so never put the
@@ -250,9 +248,7 @@ browser console is free of "not found in registry" warnings.
 
 ## Reference files
 
-Read the one(s) relevant to the task — they are self-contained and source-accurate
-(do **not** read the `rules/`/`docs/` folders shipped inside the installed packages;
-some contain known inaccuracies that these references correct).
+Read the one(s) relevant to the task — they are self-contained and source-accurate:
 
 - **`references/config-schema.md`** — every config object field-by-field: `InteractConfig`, `Interaction`, all three effect variants, sequences, conditions, element resolution (source vs target), FOUC, and the full `Interact` static API.
 - **`references/triggers.md`** — per-trigger deep rules and gotchas: `viewEnter`, `viewProgress`, `hover`/`click` (+ `triggerType`/`stateAction` tables), `pointerMove`, `animationEnd`, accessibility variants, and sequences/stagger.
