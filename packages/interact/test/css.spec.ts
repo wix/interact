@@ -435,7 +435,9 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      const initialRule = cssRules.find((r) => r.addInitialSelector)!;
+      const initialRule = cssRules.find(
+        (r) => r.dataInteractEnterSelector === ':not([data-interact-enter])',
+      )!;
       expect(initialRule).toBeDefined();
 
       DEFAULT_INITIAL.forEach(({ name, value }) => {
@@ -444,7 +446,12 @@ describe('css._generate', () => {
         expect(decl!.value).toBe(value);
       });
 
-      const animDeclOnInitial = findDecl(initialRule.declarations, (d) => isAnimationProp(d.name));
+      const animationRule = cssRules.find(
+        (r) => r.dataInteractEnterSelector === ':not([data-interact-enter="done"])',
+      )!;
+      const animDeclOnInitial = findDecl(animationRule.declarations, (d) =>
+        isAnimationProp(d.name),
+      );
       expect(animDeclOnInitial).toBeDefined();
       expect(animDeclOnInitial!.value).toContain('myAnim');
     });
@@ -472,7 +479,7 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      expect(cssRules.every((r) => !r.addInitialSelector)).toBe(true);
+      expect(cssRules.every((r) => !r.dataInteractEnterSelector)).toBe(true);
 
       const effectRule = cssRules.find((r) => r.declarations.some((d) => isAnimationProp(d.name)))!;
       expect(effectRule).toBeDefined();
@@ -492,7 +499,7 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      expect(cssRules.every((r) => !r.addInitialSelector)).toBe(true);
+      expect(cssRules.every((r) => !r.dataInteractEnterSelector)).toBe(true);
     });
   });
 
@@ -654,7 +661,7 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      expect(cssRules.every((r) => !r.addInitialSelector)).toBe(true);
+      expect(cssRules.every((r) => !r.dataInteractEnterSelector)).toBe(true);
     });
 
     it('should emit auto duration in animation shorthand for viewProgress (SSR-safe)', () => {
@@ -796,7 +803,9 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      const initialRule = cssRules.find((r) => r.addInitialSelector)!;
+      const initialRule = cssRules.find(
+        (r) => r.dataInteractEnterSelector === ':not([data-interact-enter])="done"',
+      )!;
       expect(initialRule).toBeDefined();
 
       const timelineDecl = findDecl(initialRule.declarations, (d) => isTimelineProp(d.name));
@@ -1150,7 +1159,7 @@ describe('css._generate', () => {
       };
 
       const { cssRules } = _generate(config);
-      const initialRule = cssRules.find((r) => r.addInitialSelector)!;
+      const initialRule = cssRules.find((r) => r.dataInteractEnterSelector)!;
 
       expect(initialRule).toBeDefined();
       expect(initialRule.media).toContain('min-width: 1024px');

@@ -250,8 +250,16 @@ function effectToCSS(
         media,
         selectorCondition,
         childSelector,
-        declarations: animationDeclarations.concat(DEFAULT_INITIAL),
-        addInitialSelector: true,
+        declarations: DEFAULT_INITIAL,
+        dataInteractEnterSelector: ':not([data-interact-enter])',
+      });
+      rules.push({
+        key,
+        media,
+        selectorCondition,
+        childSelector,
+        declarations: animationDeclarations,
+        dataInteractEnterSelector: ':not([data-interact-enter="done"])',
       });
     } else {
       // declare animation and composition custom properties

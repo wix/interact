@@ -207,10 +207,10 @@ describe('CSSRuleToString', () => {
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
-  it('should add :not([data-interact-enter="done"]) when addInitialSelector is true', () => {
+  it('should dataInteractEnterSelector when provided', () => {
     const rule: CSSRuleData = {
       key: 'my-el',
-      addInitialSelector: true,
+      dataInteractEnterSelector: ':not([data-interact-enter="done"])',
       declarations: [{ name: 'opacity', value: '0' }],
     };
     const expected =
@@ -254,7 +254,7 @@ describe('CSSRuleToString', () => {
     const rule: CSSRuleData = {
       key: 'my-el',
       childSelector: '.child',
-      addInitialSelector: true,
+      dataInteractEnterSelector: ':not([data-interact-enter="done"])',
       states: ['hover'],
       media: '(min-width: 1024px)',
       declarations: [
