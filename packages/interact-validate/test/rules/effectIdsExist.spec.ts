@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { validateInteractConfig } from '../../src';
 
 describe('effectIdsExist — EFFECT_ID_NOT_FOUND', () => {
-  it('emits no errors when an effectId reference resolves to a defined effect', () => {
+  it('emits no warnings when an effectId reference resolves to a defined effect', () => {
     const result = validateInteractConfig({
       effects: { fade: { namedEffect: { type: 'FadeIn' } } },
       interactions: [{ key: 'el', trigger: 'viewEnter', effects: [{ effectId: 'fade' }] }],
@@ -16,7 +16,7 @@ describe('effectIdsExist — EFFECT_ID_NOT_FOUND', () => {
     });
     const errs = result.errors.filter((e) => e.code === 'EFFECT_ID_NOT_FOUND');
     expect(errs).toHaveLength(1);
-    expect(errs[0].severity).toBe('error');
+    expect(errs[0].severity).toBe('warning');
     expect(errs[0].path).toContain('effectId');
   });
 

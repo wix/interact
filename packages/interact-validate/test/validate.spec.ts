@@ -23,9 +23,9 @@ const CONFIG_WITH_WARNING = {
   ],
 };
 
-// Missing effectId reference → EFFECT_ID_NOT_FOUND (error)
+// Missing sequenceId reference → SEQUENCE_ID_NOT_FOUND (error)
 const CONFIG_WITH_ERROR = {
-  interactions: [{ key: 'el', trigger: 'viewEnter', effects: [{ effectId: 'missing' }] }],
+  interactions: [{ key: 'el', trigger: 'viewEnter', sequences: [{ sequenceId: 'missing' }] }],
 };
 
 describe('validateInteractConfig', () => {
@@ -50,7 +50,7 @@ describe('validateInteractConfig', () => {
   it('returns valid=false for a config with semantic errors', () => {
     const result = validateInteractConfig(CONFIG_WITH_ERROR);
     expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.code === 'EFFECT_ID_NOT_FOUND')).toBe(true);
+    expect(result.errors.some((e) => e.code === 'SEQUENCE_ID_NOT_FOUND')).toBe(true);
   });
 
   it('sorts errors by path lexicographically', () => {
@@ -133,7 +133,7 @@ describe('assertValidInteractConfig', () => {
     } catch (e) {
       expect(e).toBeInstanceOf(InteractValidationError);
       expect((e as InteractValidationError).errors.length).toBeGreaterThan(0);
-      expect((e as InteractValidationError).errors[0].code).toBe('EFFECT_ID_NOT_FOUND');
+      expect((e as InteractValidationError).errors[0].code).toBe('SEQUENCE_ID_NOT_FOUND');
     }
   });
 
