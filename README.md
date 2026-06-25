@@ -30,10 +30,12 @@ Web-native animation and interaction libraries — declarative, AI-ready, framew
 | [`@wix/motion`](https://github.com/wix/interact/blob/master/packages/motion/)                      | Low-level animation engine                   | [README](https://github.com/wix/interact/blob/master/packages/motion/README.md) · [npm](https://www.npmjs.com/package/@wix/motion)                       |
 | [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets)       | Ready-made animation presets                 | [npm](https://www.npmjs.com/package/@wix/motion-presets)                                                                                                 |
 | [`@wix/interact-validate`](https://github.com/wix/interact/tree/master/packages/interact-validate) | Static validation for `InteractConfig`       | [README](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md) · [npm](https://www.npmjs.com/package/@wix/interact-validate) |
+| [`@wix/splittext`](https://github.com/wix/interact/blob/master/packages/splittext/)                | Accessible text splitting for animations     | [README](https://github.com/wix/interact/blob/master/packages/splittext/README.md) · [npm](https://www.npmjs.com/package/@wix/splittext)                 |
 
 ```
 @wix/motion ← @wix/interact (declarative layer)
 @wix/motion ← @wix/motion-presets (ready-made effects)
+@wix/splittext (standalone — pairs with @wix/motion for staggered animations)
 ```
 
 ## Quick Start

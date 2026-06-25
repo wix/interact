@@ -4,47 +4,47 @@ overview: Add a new `@wix/splittext` package to the interact monorepo that provi
 todos:
   - id: pkg-setup
     content: Create package directory structure, package.json, tsconfig, vite.config
-    status: pending
+    status: completed
   - id: types
     content: Define TypeScript interfaces for options and result types
-    status: pending
+    status: completed
     dependencies:
       - pkg-setup
   - id: line-detection
     content: Implement Range API-based line detection (lineDetection.ts)
-    status: pending
+    status: completed
     dependencies:
       - types
   - id: core-split
     content: Implement core splitText function with chars/words/lines splitting
-    status: pending
+    status: completed
     dependencies:
       - types
       - line-detection
       - wrapper-spans
   - id: accessibility
     content: Add ARIA attribute handling for screen reader support
-    status: pending
+    status: completed
     dependencies:
       - core-split
   - id: wrapper-spans
     content: Implement customizable span wrapper creation with class/style/attrs options
-    status: pending
+    status: completed
     dependencies:
       - types
   - id: autosplit
     content: Add responsive autoSplit with resize/font-load observers
-    status: pending
+    status: completed
     dependencies:
       - core-split
   - id: react-hook
     content: Create useSplitText React hook with proper cleanup
-    status: pending
+    status: completed
     dependencies:
       - core-split
   - id: tests
     content: Write comprehensive test suite for all features
-    status: pending
+    status: completed
     dependencies:
       - core-split
       - accessibility
