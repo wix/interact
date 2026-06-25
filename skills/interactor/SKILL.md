@@ -1,9 +1,8 @@
 ---
 name: interactor
 description: >-
-  Install, integrate, and configure Wix's web-animation stack — @wix/interact
-  (declarative interactions), @wix/motion-presets (ready-made effects), and
-  @wix/motion (engine) — to add or edit scroll-, hover-, click-, entrance-, and
+  Install, integrate, and configure Interact — @wix/interact —
+  declarative interactions library — to add or edit hover/click/view triggered, scroll-driven, and
   pointer-driven animations on a webpage or web app. Use whenever the user wants to
   add or change web animations/interactions with @wix/interact or
   @wix/motion(-presets); wire animations to scroll, viewport-enter, hover, click, or
@@ -11,14 +10,12 @@ description: >-
   or set up @wix/interact (vanilla JS, React, or Web Components); or edit an existing
   interact config. Trigger even on phrasings like "fade in on scroll", "parallax
   background", "stagger the cards in", "hover-scale the button", or "tilt toward the
-  mouse" in a project using these packages. Do NOT use for other animation libraries
-  (GSAP, Framer Motion, Anime.js, Lottie, React Spring) or generic CSS @keyframes
-  unrelated to the Wix stack.
+  mouse" in a project using these packages. Do NOT use for other animation libraries.
 ---
 
 # Interactor — build interactions with @wix/interact
 
-This skill installs, wires up, and configures Wix's animation stack so you can
+This skill installs, wires up, and configures motion interactions so you can
 add or edit interactions on any webpage or web app. It is **interact-first**: you
 describe _what should animate and when_ as a declarative JSON config, and the
 library does the DOM wiring. You almost never call the motion engine directly.
@@ -35,11 +32,11 @@ The whole job is: **pick a trigger, pick an effect, bind it to an element with a
 key.** Everything else is detail.
 
 ```
-┌── trigger (when) ──┐        ┌── effect (what) ──────────────┐
-│ viewEnter, hover,  │  ───►  │ namedEffect: { type: 'FadeIn' }│  ──► applied to
-│ click, viewProgress│        │ duration, easing, triggerType  │      element with
-│ pointerMove, …     │        │ (or keyframeEffect/customEffect)│     matching key
-└────────────────────┘        └────────────────────────────────┘
+┌── trigger (when) ──┐        ┌── effect (what) ────────────────┐
+│ viewEnter, hover,  │  ───►  │ namedEffect: { type: 'FadeIn' } │  ──► applied to
+│ click, viewProgress│        │ duration, easing, triggerType   │      element with
+│ pointerMove, …     │        │ (or keyframeEffect/customEffect)│      matching key
+└────────────────────┘        └─────────────────────────────────┘
 ```
 
 ## Workflow
