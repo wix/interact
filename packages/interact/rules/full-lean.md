@@ -81,10 +81,10 @@ useEffect(() => {
 **Vanilla JS:**
 
 ```ts
-import { Interact } from '@wix/interact';
+import { Interact, add, remove } from '@wix/interact';
 const instance = Interact.create(config);
-instance.add(element, 'hero'); // bind after element exists in DOM
-instance.remove('hero'); // unregister
+add(element, 'hero'); // bind after element exists in DOM
+remove('hero'); // unregister
 ```
 
 **CDN (no build tools):**

@@ -87,10 +87,10 @@ import { Interaction } from '@wix/interact/react';
 ### Vanilla JS
 
 ```typescript
-import { Interact } from '@wix/interact';
+import { Interact, add } from '@wix/interact';
 
 const interact = Interact.create(config);
-interact.add(element, 'hero');
+add(element, 'hero');
 ```
 
 **Rules:**
