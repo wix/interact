@@ -804,7 +804,7 @@ describe('css._generate', () => {
       const { cssRules } = _generate(config);
 
       const initialRule = cssRules.find(
-        (r) => r.dataInteractEnterSelector === ':not([data-interact-enter])="done"',
+        (r) => r.dataInteractEnterSelector === ':not([data-interact-enter="done"])',
       )!;
       expect(initialRule).toBeDefined();
 
