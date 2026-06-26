@@ -127,10 +127,7 @@ get stranded hidden.
 
 ## C. React — `@wix/interact/react`
 
-Use the `<Interaction>` component (it handles element binding via a ref) and run
-`Interact.create()` inside `useEffect` so it never executes during SSR. This example
-**compiles** — the README's React snippet does not (it uses sibling roots + JSX
-comments); use this shape instead.
+Use the `<Interaction>` component (it handles element binding via a ref) and run `Interact.create()` inside `useEffect` so it never executes during SSR. 
 
 ```tsx
 import { useEffect } from 'react';
@@ -146,7 +143,6 @@ const config: InteractConfig = {
       duration: 800,
       easing: 'ease-out',
       namedEffect: { type: 'FadeIn' },
-      triggerType: 'once',
     },
   },
 };

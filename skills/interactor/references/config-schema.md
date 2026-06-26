@@ -2,9 +2,7 @@
 
 The complete `InteractConfig` schema, every effect variant, sequences, conditions,
 element resolution, FOUC, and the static API. This is source-accurate as of
-`@wix/interact` 2.4.0 — where it differs from the package's own bundled
-`rules/`/`docs/`, **this file is correct** (those folders carry known bugs; see the
-"Known doc bugs" note at the bottom).
+`@wix/interact` 2.4.0.
 
 ## Table of contents
 
@@ -410,9 +408,6 @@ lifecycle.
 | `instance.destroy()`                                        | Tear down just this instance — call on component unmount.                                                                                            |
 | `instance.has(key)` / `instance.get(key)`                   | Instance lookups.                                                                                                                                    |
 
-> The `Interact` class has **no `add`/`remove` methods.** Vanilla DOM binding uses
-> the **standalone** functions below.
-
 **Standalone functions** (exported from every entry point):
 
 ```ts
@@ -433,15 +428,3 @@ Interact.setup({
   allowA11yTriggers?:    boolean,
 });
 ```
-
----
-
-## Known doc bugs
-
-The packages ship `rules/` and `docs/` folders. Several entries there contradict
-the source — **do not propagate them** (this file already corrects them):
-
-- `allowA11yTriggers` "default: false" — **wrong**; the source default is `true`.
-- `method: 'toggle'` on a state effect — no such field; use **`stateAction`**.
-- `stagger: 100` on an effect — no such field; stagger via **sequences** (`offset`/`offsetEasing`).
-- A React snippet with multiple sibling roots — won't compile; see `integration-recipes.md` for a correct version.

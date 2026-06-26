@@ -401,7 +401,7 @@ const config: InteractConfig = {
       key: 'accordion',
       trigger: 'click',
       selector: '.accordion-header',
-      effects: [{ effectId: 'expanded', method: 'toggle' }],
+      effects: [{ effectId: 'expanded', stateAction: 'toggle' }],
     },
   ],
 };
@@ -461,22 +461,24 @@ import { Interact, Interaction, InteractConfig } from '@wix/interact/react';
 const config: InteractConfig = {
   interactions: [
     {
-      key: 'product-list',
+      key: 'product-list', // single triggering parent
       trigger: 'viewEnter',
-      listContainer: '.products',
-      effects: [
-        {
-          keyframeEffect: {
-            name: 'slide-up',
-            keyframes: [
-              { opacity: 0, transform: 'translateY(30px)' },
-              { opacity: 1, transform: 'translateY(0)' },
-            ],
+      sequences: [{
+        offset: 100, // Stagger animation for list items
+        effects: [
+          {
+            listContainer: '.products', //multiple target elements
+            keyframeEffect: {
+              name: 'slide-up',
+              keyframes: [
+                { opacity: 0, transform: 'translateY(30px)' },
+                { opacity: 1, transform: 'translateY(0)' },
+              ],
+            },
+            duration: 400,
           },
-          duration: 400,
-          stagger: 100, // Stagger animation for list items
-        },
-      ],
+        ],
+      }],
     },
   ],
 };

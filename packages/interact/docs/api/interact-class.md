@@ -153,7 +153,7 @@ Interact.setup({
   }),
 });
 
-// Enable accessibility for click and hover triggers
+// Enable accessibility for all click and hover triggers
 Interact.setup({
   allowA11yTriggers: true,
 });
