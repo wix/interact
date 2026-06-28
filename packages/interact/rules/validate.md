@@ -170,7 +170,7 @@ This is the authoritative list of every code the validator emits today. Codes no
 | `NEGATIVE_DELAY`               | `delay` is negative.                                                                                                                                                                                                  |
 | `NEGATIVE_ITERATIONS`          | `iterations` is negative (or, on scroll/pointer effects, `0` / non-integer).                                                                                                                                          |
 | `NEGATIVE_OFFSET`              | A sequence `offset` is negative.                                                                                                                                                                                      |
-| `THRESHOLD_OUT_OF_RANGE`       | `viewEnter` / `pageVisible` `params.threshold` is outside `[0, 1]`.                                                                                                                                                   |
+| `THRESHOLD_OUT_OF_RANGE`       | `viewEnter` `params.threshold` is outside `[0, 1]`.                                                                                                                                                                   |
 | `ITERATIONS_INFINITY_ON_SCRUB` | `iterations: Infinity` on a `viewProgress` / `pointerMove` effect. Scrubbed effects are progress-driven, so an infinite count is invalid. (Time-based effects DO allow `Infinity`, and `0` is treated as `Infinity`.) |
 
 ### Effect-source errors (severity: error)

@@ -168,7 +168,7 @@ The single source of truth for every code the validator emits. The agent-facing 
 | `NEGATIVE_DELAY`                 | `delay` is negative.                                                                                                                         |
 | `NEGATIVE_ITERATIONS`            | `iterations` is negative (or `0`/non-integer on a scroll/pointer effect).                                                                    |
 | `NEGATIVE_OFFSET`                | A sequence `offset` is negative.                                                                                                             |
-| `THRESHOLD_OUT_OF_RANGE`         | `viewEnter`/`pageVisible` `params.threshold` outside `[0, 1]`.                                                                               |
+| `THRESHOLD_OUT_OF_RANGE`         | `viewEnter` `params.threshold` outside `[0, 1]`.                                                                                             |
 | `ITERATIONS_INFINITY_ON_SCRUB`   | `iterations: Infinity` on a `viewProgress`/`pointerMove` effect (time effects DO allow `Infinity`).                                          |
 | `MULTIPLE_EFFECT_SOURCES`        | Not exactly one of `namedEffect`/`keyframeEffect`/`customEffect` (surfaces when resolving an `effectId` reference).                          |
 | `MULTIPLE_TRANSITION_SOURCES`    | Not exactly one of `transition`/`transitionProperties` on a state effect.                                                                    |

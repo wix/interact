@@ -235,8 +235,6 @@ Shown in the inspector when an interaction is selected. Provides:
 | `pointerMove`  | Mouse movement tracking           | `hitArea` (root/self), `axis` (x/y)                                                   |
 | `animationEnd` | After another animation completes | `effectId` — which effect to wait for (`<pg-trigger-editor>` “After Effect” dropdown) |
 
-The playground does not expose the `pageVisible` trigger. When a config is applied via import or the JSON panel, any interaction using `pageVisible` is normalized to `viewEnter` (params cleared).
-
 ### Trigger Editor (`<pg-trigger-editor>`)
 
 Renders dynamic parameter forms based on the selected trigger type. Key behavior:

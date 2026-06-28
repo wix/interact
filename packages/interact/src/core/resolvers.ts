@@ -18,7 +18,6 @@ import { shouldUseInitial } from './utilities';
 
 const TIME_TRIGGER_TO_DEFAULT_TYPE: Map<TriggerType, TimeAnimationTriggerType> = new Map([
   ['viewEnter', 'once'],
-  ['pageVisible', 'once'],
   ['animationEnd', 'once'],
   ['hover', 'alternate'],
   ['click', 'alternate'],

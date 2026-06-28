@@ -921,14 +921,13 @@ type InteractionParamsTypes = {
   interest: Record<string, never>;
   activate: Record<string, never>;
   viewEnter: ViewEnterParams;
-  pageVisible: ViewEnterParams;
   animationEnd: AnimationEndParams;
   viewProgress: ViewEnterParams;
   pointerMove: PointerMoveParams;
 };
 ```
 
-> **Note:** `hover`, `click`, `interest`, `activate`, and `viewEnter` triggers no longer use params for playback behavior. Animation behavior (`triggerType`) is now configured on `TimeEffect` (or `SequenceOptionsConfig` for sequences), and state behavior (`stateAction`) is now configured on `StateEffect`. `viewEnter`/`pageVisible` params only contain observer configuration (`threshold`, `inset`, `useSafeViewEnter`).
+> **Note:** `hover`, `click`, `interest`, `activate`, and `viewEnter` triggers no longer use params for playback behavior. Animation behavior (`triggerType`) is now configured on `TimeEffect` (or `SequenceOptionsConfig` for sequences), and state behavior (`stateAction`) is now configured on `StateEffect`. `viewEnter` params only contain observer configuration (`threshold`, `inset`, `useSafeViewEnter`).
 
 ### `TriggerParams`
 

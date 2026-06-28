@@ -1,20 +1,4 @@
-import type { InteractConfig, TriggerType } from '@wix/interact';
-import type { PlaygroundState, Action, PlaygroundConfig } from '../types';
-
-/** `pageVisible` is not supported in the playground UI; normalized when config is applied (e.g. import). */
-function normalizePlaygroundConfig(config: InteractConfig): PlaygroundConfig {
-  let changed = false;
-  const interactions = config.interactions.map((interaction) => {
-    const t = interaction.trigger as string;
-    if (t === 'pageVisible') {
-      changed = true;
-      return { ...interaction, trigger: 'viewEnter' as TriggerType, params: undefined };
-    }
-    return interaction;
-  });
-  const normalized = changed ? { ...config, interactions } : config;
-  return { ...normalized, effects: normalized.effects ?? {} };
-}
+import type { PlaygroundState, Action } from '../types';
 
 export function createInitialState(componentId = 'card'): PlaygroundState {
   return {
@@ -44,7 +28,7 @@ export function reduce(state: PlaygroundState, action: Action): PlaygroundState 
     case 'SET_CONFIG':
       return {
         ...state,
-        config: normalizePlaygroundConfig(action.payload),
+        config: { ...action.payload, effects: action.payload.effects ?? {} },
         selectedInteractionIndex: null,
         selectedEffectId: null,
         selectedEffectContext: null,

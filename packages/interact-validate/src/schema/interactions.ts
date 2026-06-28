@@ -23,7 +23,6 @@ export const TriggerType = z.enum([
   'viewProgress',
   'pointerMove',
   'animationEnd',
-  'pageVisible',
 ]);
 
 export const ViewEnterParams = z
@@ -82,7 +81,7 @@ export const AnimationEndInteraction = z
 export const ViewEnterInteraction = z
   .object({
     ...InteractionBase,
-    trigger: z.enum(['viewEnter', 'pageVisible']),
+    trigger: z.literal('viewEnter'),
     params: ViewEnterParams.optional(),
     effects: z.array(z.union([TimeEffect, TimeEffectRef])).optional(),
     sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),

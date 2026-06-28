@@ -65,9 +65,14 @@ export function finalize(
   }
 
   result.sort((a, b) => {
-    const pa = a.path.join('\0');
-    const pb = b.path.join('\0');
-    return pa < pb ? -1 : pa > pb ? 1 : 0;
+    const minLength = Math.min(a.path.length, b.path.length);
+    let i = 0;
+    while (i < minLength) {
+      if (a.path[i] < b.path[i]) return -1;
+      if (a.path[i] > b.path[i]) return 1;
+      i++;
+    }
+    return a.path.length < b.path.length ? -1 : a.path.length > b.path.length ? 1 : 0;
   });
 
   if (max !== undefined) {

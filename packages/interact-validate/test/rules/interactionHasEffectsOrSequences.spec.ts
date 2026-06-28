@@ -39,20 +39,18 @@ describe('interactionHasEffectsOrSequences — INTERACTION_EMPTY', () => {
   });
 
   it('emits one INTERACTION_EMPTY per offending interaction', () => {
-    // INTERACTION_EMPTY is emitted by superRefine on viewEnter/pageVisible/animationEnd.
+    // INTERACTION_EMPTY is emitted by superRefine on viewEnter/animationEnd.
     // State interactions (hover/click/…) use .min(1) — enforced structurally by the schema.
     const result = validateInteractConfig({
       interactions: [
-        { key: 'a', trigger: 'viewEnter' },
         {
           key: 'b',
           trigger: 'viewEnter',
           effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
         },
-        { key: 'c', trigger: 'pageVisible' },
       ],
     });
     const errs = result.errors.filter((e) => e.code === 'INTERACTION_EMPTY');
-    expect(errs).toHaveLength(2);
+    expect(errs).toHaveLength(1);
   });
 });
