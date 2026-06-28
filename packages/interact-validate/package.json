@@ -1,0 +1,62 @@
+{
+  "name": "@wix/interact-validate",
+  "version": "1.0.0",
+  "description": "Schema + referential + semantic validation for @wix/interact's InteractConfig.",
+  "license": "MIT",
+  "main": "dist/cjs/index.js",
+  "module": "dist/es/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/es/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rimraf dist && vite build && npm run build:types",
+    "build:types": "tsc -p tsconfig.build.json",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "animation",
+    "interaction",
+    "validation",
+    "zod",
+    "schema",
+    "interact",
+    "wix"
+  ],
+  "author": {
+    "name": "wow!Team",
+    "email": "wow-dev@wix.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wix/interact.git",
+    "directory": "packages/interact-validate"
+  },
+  "bugs": {
+    "url": "https://github.com/wix/interact/issues"
+  },
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
+  "peerDependencies": {
+    "@wix/interact": "^2.4.0"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.14",
+    "@wix/interact": "^2.4.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.2",
+    "vitest": "^4.0.14"
+  }
+}

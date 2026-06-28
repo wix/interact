@@ -10,7 +10,7 @@ Your first interaction in under 5 minutes. Learn the basic concepts and create a
 
 ### ⚡ [Understanding Triggers](./understanding-triggers.md)
 
-Complete guide to all 7 trigger types: `hover`, `click`, `viewEnter`, `pageVisible`, `animationEnd`, `viewProgress`, and `pointerMove`.
+Complete guide to all 6 trigger types: `hover`, `click`, `viewEnter`, `animationEnd`, `viewProgress`, and `pointerMove`.
 
 ### 🎬 [Effects and Animations](./effects-and-animations.md)
 

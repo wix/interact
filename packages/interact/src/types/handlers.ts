@@ -12,7 +12,6 @@ export type InteractionParamsTypes = {
   hover: Record<string, never>;
   click: Record<string, never>;
   viewEnter: ViewEnterParams;
-  pageVisible: ViewEnterParams;
   animationEnd: AnimationEndParams;
   viewProgress: ViewEnterParams;
   pointerMove: PointerMoveParams;

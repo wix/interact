@@ -41,6 +41,13 @@ Complete reference documentation for all public APIs in `@wix/interact`.
   - [Common patterns](element-selection.md#common-patterns) and [troubleshooting](element-selection.md#troubleshooting)
   - [listContainer vs selector](element-selection.md#scenario-4-listcontainer--selector)
 
+## Config Validation
+
+Validate an `InteractConfig` statically — schema, referential, and semantic checks — with the separate [`@wix/interact-validate`](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md) package. Use it in CI, at build time, or on LLM-generated configs.
+
+- [**@wix/interact-validate README**](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md) - `validateInteractConfig()`, `assertValidInteractConfig()`, options, and the full error-code catalogue
+- [**Agent rules — validate.md**](https://wix.github.io/interact/rules/validate.md) - machine-readable rules for agents generating configs
+
 ## Type Definitions
 
 ### Configuration Types
