@@ -43,6 +43,7 @@ describe('interactionHasEffectsOrSequences — INTERACTION_EMPTY', () => {
     // State interactions (hover/click/…) use .min(1) — enforced structurally by the schema.
     const result = validateInteractConfig({
       interactions: [
+        { key: 'a', trigger: 'viewEnter' },
         {
           key: 'b',
           trigger: 'viewEnter',
