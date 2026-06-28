@@ -86,6 +86,17 @@ describe('interact (web)', () => {
         ],
       },
       {
+        trigger: 'viewEnter',
+        key: 'logo-loop',
+        effects: [
+          {
+            key: 'logo-loop',
+            triggerType: 'state',
+            effectId: 'logo-poke',
+          },
+        ],
+      },
+      {
         trigger: 'animationEnd',
         key: 'logo-animation-end',
         params: {
