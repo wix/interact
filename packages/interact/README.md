@@ -179,6 +179,7 @@ type InteractConfig = {
   effects?: Record<string, Effect>; // reusable effect definitions
   sequences?: Record<string, SequenceConfig>; // staggered multi-effect timelines
   conditions?: Record<string, Condition>; // media / selector gates
+  splitText?: Record<string, SplitTextConfig>; // reusable text-split definitions (see SplitText)
 };
 ```
 
@@ -203,6 +204,138 @@ type InteractConfig = {
 | `namedEffect`                         | Registered presets from `@wix/motion-presets` (e.g. `{ type: 'FadeIn' }`). |
 | `customEffect`                        | Programmatic `(element, progress) => void` callback.                       |
 | `transition` / `transitionProperties` | CSS state changes driven by `stateAction` (`add`/`remove`/`toggle`).       |
+
+## SplitText
+
+Interact can split an element's text into per-character / word / line / sentence
+`<span>` wrappers **before** it resolves animation targets, so you can stagger
+effects across the generated spans declaratively. The split implementation lives
+in [`@wix/splittext`](https://www.npmjs.com/package/@wix/splittext) and is wired
+in as a resolver — Interact ships the config **types** (zero bundle cost when
+unused) and calls out to the registered resolver at runtime.
+
+### Setup
+
+Register the resolver once, before creating any interactions:
+
+```ts
+import { Interact } from '@wix/interact';
+import { splitTextResolver } from '@wix/splittext/interact';
+
+Interact.use('splitText', splitTextResolver);
+Interact.create(config);
+```
+
+If a config contains `splitText` but no resolver is registered, `Interact.create` /
+the first element connect throws:
+
+> `splitText found in config but no resolver registered. Call Interact.use('splitText', resolver) before Interact.create().`
+
+### Where `splitText` can appear
+
+A `splitText` block can be attached at three levels — the container selector is
+always resolved relative to the element that owns it:
+
+| Level                    | Field                   | Split runs when…                     |
+| ------------------------ | ----------------------- | ------------------------------------ |
+| **Reusable definition**  | `config.splitText[id]`  | referenced by `splitId` (see below)  |
+| **Interaction (source)** | `interaction.splitText` | the source element connects          |
+| **Effect (target)**      | `effect.splitText`      | the effect's target element connects |
+
+`SplitTextConfig`:
+
+```ts
+type SplitTextConfig = {
+  container: string; // selector for the element to split, relative to root
+  type: 'chars' | 'words' | 'lines' | 'sentences' | SplitType[];
+  splitId?: string;
+  wrapperClass?: string;
+  wrapperStyle?: Record<string, string>;
+  wrapperAttrs?: Record<string, string>;
+  autoSplit?: boolean; // re-split on resize / font load (re-resolves targets)
+  aria?: 'auto' | 'none';
+  hide?: boolean; // hide container until split completes (FOUC guard)
+};
+```
+
+The generated spans carry default classes — `.split-c` (chars), `.split-w`
+(words), `.split-l` (lines), `.split-s` (sentences) — which you target with the
+effect's `selector`.
+
+### Example — staggered character entrance
+
+```ts
+const config = {
+  interactions: [
+    {
+      trigger: 'viewEnter',
+      key: 'hero',
+      splitText: { container: '.headline', type: 'chars', hide: true },
+      effects: [{ key: 'hero', selector: '.split-c', effectId: 'fade-up' }],
+    },
+  ],
+  effects: {
+    'fade-up': { namedEffect: { type: 'FadeIn' }, duration: 400 },
+  },
+};
+```
+
+### Reusable definitions (`splitId`)
+
+Define once and reference with `splitId`; inline fields override the definition:
+
+```ts
+const config = {
+  splitText: {
+    heroSplit: { container: '.headline', type: 'chars', hide: true },
+  },
+  interactions: [
+    {
+      trigger: 'viewEnter',
+      key: 'hero',
+      splitText: { splitId: 'heroSplit', type: 'words' }, // overrides type → words
+      effects: [{ key: 'hero', selector: '.split-w', effectId: 'fade-up' }],
+    },
+  ],
+  effects: { 'fade-up': { namedEffect: { type: 'FadeIn' }, duration: 400 } },
+};
+```
+
+### Preventing FOUC (`hide`)
+
+`hide: true` hides the container until splitting completes, then reveals it
+(always — never gated on reduced motion). Two layers cooperate:
+
+1. **Runtime** — Interact stamps the container `data-text-split="pending"` before
+   the split and `data-text-split="split"` after.
+2. **First paint (SSR)** — `generate(config)` emits, when any `hide` split is
+   present, a single rule:
+
+   ```css
+   [data-text-split]:not([data-text-split='split']) {
+     visibility: hidden;
+   }
+   ```
+
+   For this to cover the pre-hydration paint, the **SSR HTML must render the
+   `hide` container with `data-text-split="pending"`** (the same way the platform
+   stamps `data-interact-*`). For DOM you build imperatively, the helper
+   `markSplitTextHidden(el)` stamps the attribute for you. The exported constants
+   `TEXT_SPLIT_STATE_ATTR`, `TEXT_SPLIT_PENDING`, and `TEXT_SPLIT_DONE` are the
+   shared contract.
+
+`visibility: hidden` (not `display: none`) is used so layout boxes remain for the
+Range-API line measurement used by `type: 'lines'`.
+
+### Notes & limitations
+
+- **`autoSplit`** re-splits on resize / font load and asks Interact to re-resolve
+  targets (via the connecting controller's `update()`), so captured span
+  references stay valid.
+- On disconnect (and on `update()`), the container is reverted to its original
+  content.
+- Splitting inside dynamically-added **list items** (`listContainer`) is out of
+  scope for now.
 
 ## Recipes
 
@@ -443,6 +576,7 @@ AI agents can discover @wix/interact documentation through:
 
 - [`@wix/motion`](https://github.com/wix/interact/tree/master/packages/motion) — low-level animation engine underneath Interact.
 - [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) — ready-made effect catalog (entrance, scroll, hover, pointer).
+- [`@wix/splittext`](https://github.com/wix/interact/tree/master/packages/splittext) — text splitting utility; its `/interact` entry registers the `splitText` resolver (see [SplitText](#splittext)).
 - [`fizban`](https://github.com/wix-incubator/fizban) — scroll-driven animation polyfill (bundled dependency).
 - [`kuliso`](https://github.com/wix-incubator/kuliso) — pointer-driven animation polyfill (bundled dependency).
 

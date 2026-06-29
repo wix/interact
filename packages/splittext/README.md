@@ -101,6 +101,52 @@ function Headline() {
 }
 ```
 
+## Use with @wix/interact
+
+The `@wix/splittext/interact` entry point exposes a resolver that lets you wire
+splitting declaratively into [`@wix/interact`](https://www.npmjs.com/package/@wix/interact)
+configs. Register it once, before creating interactions:
+
+```ts
+import { Interact } from '@wix/interact';
+import { splitTextResolver } from '@wix/splittext/interact';
+
+Interact.use('splitText', splitTextResolver);
+Interact.create(config);
+```
+
+With the resolver registered, any `splitText` block in your config splits the
+target element's text into wrapper spans **before** Interact resolves animation
+targets, so the generated `.split-c` / `.split-w` / `.split-l` / `.split-s`
+spans become animatable targets:
+
+```ts
+const config = {
+  interactions: [
+    {
+      trigger: 'viewEnter',
+      key: 'hero',
+      // split the heading into characters on connect …
+      splitText: { container: '.headline', type: 'chars', hide: true },
+      // … then stagger an entrance across the generated spans
+      effects: [{ key: 'hero', selector: '.split-c', effectId: 'fade-in' }],
+    },
+  ],
+  effects: {
+    'fade-in': { namedEffect: { type: 'FadeIn' }, duration: 400 },
+  },
+};
+```
+
+`hide: true` opts into the FOUC guard: the container is hidden (via the
+`data-text-split` attribute + a generated CSS rule) until splitting completes.
+On disconnect the resolver reverts the container to its original content.
+
+> This entry point has a **type-only** dependency on `@wix/interact`; it adds
+> no interact code to your runtime bundle. The full config surface
+> (`SplitTextConfig`, levels, the `hide` SSR contract) is documented in the
+> `@wix/interact` README.
+
 ## API
 
 ### `splitText(target, options?)`

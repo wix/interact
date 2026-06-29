@@ -8,7 +8,11 @@ import type {
   ListCustomProps,
   CSSCoordinatedLists,
   CSSRuleData,
+  SequenceConfig,
+  SplitTextConfig,
+  SplitTextConfigRef,
 } from '../types';
+import { TEXT_SPLIT_STATE_ATTR, TEXT_SPLIT_DONE } from './splitText';
 import {
   kebabCustomProp,
   camelToKebabCase,
@@ -512,6 +516,41 @@ function parseInteraction(
   return cssRules;
 }
 
+/** Whether a single splitText config/ref resolves to `hide: true`. */
+function splitTextHides(
+  raw: SplitTextConfig | SplitTextConfigRef | undefined,
+  defs: Record<string, SplitTextConfig>,
+): boolean {
+  if (!raw) return false;
+
+  const splitId = (raw as SplitTextConfigRef).splitId;
+  if (splitId && defs[splitId]) {
+    return (raw.hide ?? defs[splitId].hide) === true;
+  }
+
+  return raw.hide === true;
+}
+
+/** Scan the whole config for any splitText (definition, interaction, or effect) with `hide: true`. */
+function configHasHiddenSplitText(config: InteractConfig): boolean {
+  const defs = config.splitText || {};
+
+  if (Object.values(defs).some((c) => c.hide === true)) return true;
+
+  return (config.interactions || []).some((interaction) => {
+    if (splitTextHides(interaction.splitText, defs)) return true;
+
+    if ((interaction.effects || []).some((effect) => splitTextHides(effect.splitText, defs))) {
+      return true;
+    }
+
+    return (interaction.sequences || []).some((seq) => {
+      const effects = (seq as SequenceConfig).effects;
+      return !!effects && effects.some((effect) => splitTextHides(effect.splitText, defs));
+    });
+  });
+}
+
 // ----- EndPoints -----
 
 export function _generate(
@@ -551,6 +590,15 @@ export function generate(config: InteractConfig, useFirstChild: boolean = true):
     ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),
     ...cssRules.map(CSSRuleToString),
   ];
+
+  // FOUC guard: hide `hide: true` splitText containers until splitting completes.
+  // Mirrors the entrance pattern's visibility:hidden (keeps layout boxes so the
+  // Range-API line measurement still works while hidden).
+  if (configHasHiddenSplitText(config)) {
+    css.unshift(
+      `[${TEXT_SPLIT_STATE_ATTR}]:not([${TEXT_SPLIT_STATE_ATTR}="${TEXT_SPLIT_DONE}"]){visibility:hidden}`,
+    );
+  }
 
   return css.join('\n');
 }

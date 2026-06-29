@@ -11,12 +11,14 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         react: path.resolve(__dirname, 'src/react/index.ts'),
+        interact: path.resolve(__dirname, 'src/interact/index.ts'),
       },
       formats: ['es', 'cjs'],
     },
     sourcemap: true,
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      // @wix/interact is a type-only dependency of the /interact entry — never bundle it.
+      external: ['react', 'react-dom', '@wix/interact'],
       output: {
         entryFileNames: '[format]/[name].js',
         compact: true,

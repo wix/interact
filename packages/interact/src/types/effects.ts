@@ -4,6 +4,7 @@ import type {
   ScrubTransitionEasing,
   MotionAnimationOptions,
 } from '@wix/motion';
+import type { SplitTextConfig, SplitTextConfigRef } from './config';
 
 type Fill = 'none' | 'forwards' | 'backwards' | 'both';
 
@@ -85,6 +86,7 @@ export type EffectBase = {
   conditions?: string[];
   selector?: string;
   effectId?: string;
+  splitText?: SplitTextConfig | SplitTextConfigRef;
 };
 
 export type EffectRef = EffectBase & { effectId: string };

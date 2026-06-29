@@ -32,7 +32,13 @@ export type {
   InteractionTrigger,
   Interaction,
   InteractConfig,
+  SplitType,
+  SplitTextConfig,
+  SplitTextConfigRef,
 } from './config';
+
+// SplitText resolver contract
+export type { SplitTextResolver, SplitTextResolverContext } from './splitText';
 
 // Controller
 export type { IInteractionController, IInteractElement } from './controller';

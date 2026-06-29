@@ -18,6 +18,7 @@ import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } 
 import { getInterpolatedKey } from './utilities';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { Interact, getSelector } from './Interact';
+import { applySplitText } from './splitText';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import type { AnimationGroupArgs } from '@wix/motion';
 
@@ -758,6 +759,10 @@ export function add(controller: IInteractionController): boolean {
   const hasTriggers = triggers.length > 0;
 
   instance.setController(key, controller);
+
+  // Split text containers in this element's subtree before any target query
+  // (_getElementsFromData) runs, so the generated spans become valid targets.
+  applySplitText(controller, instance);
 
   triggers.forEach((interaction, index) => {
     const mql = getMediaQuery(interaction.conditions, instance!.dataCache.conditions);

@@ -48,9 +48,22 @@ export class Interact {
   static controllerCache = new Map<string, IInteractionController>();
   static sequenceCache = new Map<string, Sequence>();
   static elementSequenceMap = new WeakMap<HTMLElement, Set<Sequence>>();
+  /**
+   * Global registry of pluggable resolvers (e.g. the splitText resolver from
+   * `@wix/splittext/interact`). Registrations are global plugin wiring — they
+   * are intentionally NOT cleared by `Interact.destroy()`, mirroring how
+   * `registerEffects` registrations persist across configs.
+   */
+  private static resolvers = new Map<string, unknown>();
 
   constructor() {
-    this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
+    this.dataCache = {
+      effects: {},
+      sequences: {},
+      conditions: {},
+      splitText: {},
+      interactions: {},
+    };
     this.addedInteractions = {};
     this.mediaQueryListeners = new Map();
     this.listInteractionsCache = {};
@@ -100,7 +113,13 @@ export class Interact {
     this.addedInteractions = {};
     this.listInteractionsCache = {};
     this.controllers.clear();
-    this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
+    this.dataCache = {
+      effects: {},
+      sequences: {},
+      conditions: {},
+      splitText: {},
+      interactions: {},
+    };
     Interact.instances.splice(Interact.instances.indexOf(this), 1);
   }
 
@@ -245,6 +264,20 @@ export class Interact {
 
   static registerEffects = registerEffects;
 
+  /**
+   * Register a pluggable resolver under `name`. Must be called before
+   * `Interact.create()` for any config that relies on it (e.g. `splitText`).
+   * Registrations are global and persist across `Interact.destroy()`.
+   */
+  static use(name: string, resolver: unknown): void {
+    Interact.resolvers.set(name, resolver);
+  }
+
+  /** Retrieve a previously registered resolver, or `undefined` if none. */
+  static getResolver<T>(name: string): T | undefined {
+    return Interact.resolvers.get(name) as T | undefined;
+  }
+
   static getSequence(
     cacheKey: string,
     sequenceOptions: SequenceOptions,
@@ -379,7 +412,12 @@ function _ensureInteractionEntry(
 }
 
 function parseConfig(config: InteractConfig, useCustomElement: boolean = false): InteractCache {
-  const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {} } = config;
+  const {
+    effects: effectMap = {},
+    sequences: sequenceMap = {},
+    conditions = {},
+    splitText = {},
+  } = config;
   const interactions: InteractCache['interactions'] = {};
 
   config.interactions?.forEach((interaction_) => {
@@ -536,6 +574,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
     effects: effectMap,
     sequences: sequenceMap,
     conditions,
+    splitText,
     interactions,
   };
 }

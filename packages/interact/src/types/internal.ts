@@ -1,5 +1,11 @@
 import type { Effect, EffectRef, StateEffect, TransitionProperty } from './effects';
-import type { Condition, SequenceConfig, Interaction, InteractionTrigger } from './config';
+import type {
+  Condition,
+  SequenceConfig,
+  Interaction,
+  InteractionTrigger,
+  SplitTextConfig,
+} from './config';
 
 export type InteractCache = {
   effects: {
@@ -10,6 +16,9 @@ export type InteractCache = {
   };
   conditions: {
     [conditionId: string]: Condition;
+  };
+  splitText: {
+    [splitId: string]: SplitTextConfig;
   };
   interactions: {
     [path: string]: {
