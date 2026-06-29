@@ -135,8 +135,8 @@ idle pause appended after each cycle.
 
 Cursor-position-driven transforms (`x:0.5, y:0.5` = center). **All share `inverted`
 boolean (`false`)**; where present, `axis` ∈ `both | horizontal | vertical`
-(default `'both'`). Use a scrub effect with `rangeStart`/`rangeEnd` and `fill:
-'both'`; gate with a `(hover: hover)` condition.
+(default `'both'`). Use a scrub effect with `rangeStart`/`rangeEnd` and `fill:'both'`;
+gate with a `(hover: hover)` condition.
 
 | Preset         | Params (default)                                                                                      |
 | :------------- | :---------------------------------------------------------------------------------------------------- |

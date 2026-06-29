@@ -4,14 +4,14 @@ Per-trigger semantics, the playback fields each one needs, and the gotchas that
 break them. Pair this with `config-schema.md` (effect field definitions) and
 `presets.md` (which effect to use).
 
-`TriggerType` = `'hover' | 'click' | 'viewEnter' | 'pageVisible' | 'animationEnd' |
+`TriggerType` = `'hover' | 'click' | 'viewEnter' | 'animationEnd' |
 'viewProgress' | 'pointerMove' | 'activate' | 'interest'`.
 
 The trigger sets _when_; the effect's playback field sets _how it plays_:
 
 - **Time effects** (keyframe/named/custom) on hover/click/viewEnter → `triggerType`.
 - **State effects** (CSS transitions) on hover/click → `stateAction`.
-- **Scrub effects** on viewProgress/pointerMove → `rangeStart`/`rangeEnd` (no triggerType).
+- **Scrub effects** on viewProgress → `rangeStart`/`rangeEnd`; pointerMove → `centeredToTarget`; (no `triggerType`).
 
 Never set both `triggerType` and `stateAction` on the same effect.
 
@@ -35,8 +35,8 @@ Playback is set per effect via `triggerType` (default `'once'`):
 | :----------------- | :------------------------------------------------------ |
 | `'once'` (default) | Play once, the first time it enters. The entrance case. |
 | `'repeat'`         | Replay every time it re-enters.                         |
-| `'alternate'`      | Play in, reverse out.                                   |
-| `'state'`          | Play on enter, hold; reverse on leave.                  |
+| `'alternate'`      | Play forwards in, reverse out.                          |
+| `'state'`          | Play on enter, pause on exit.                           |
 
 **CRITICAL:** when source and target are the **same** element, use **only**
 `'once'`. With `repeat`/`alternate`/`state`, the animation can push the element
@@ -52,9 +52,6 @@ and SKILL.md invariant 3).
     effects: [{ effectId: 'hero-in' }] }],
   effects: { 'hero-in': { duration: 800, easing: 'ease-out', namedEffect: { type: 'FadeIn' }, triggerType: 'once' } } }
 ```
-
-`pageVisible` shares the same handler and defaults to `triggerType: 'once'`; use it
-when you want the entrance to play on page-visible rather than scroll-into-view.
 
 ---
 
@@ -132,7 +129,7 @@ State-effect example (CSS transition toggle):
 { interactions: [{ key: 'card', trigger: 'hover', effects: [{ effectId: 'lift' }] }],
   effects: { lift: { stateAction: 'toggle', transition: {
     duration: 200, easing: 'ease-out',
-    styleProperties: [{ name: 'boxShadow', value: '0 8px 24px rgba(0,0,0,.2)' }, { name: 'transform', value: 'translateY(-4px)' }],
+    styleProperties: [{ name: 'boxShadow', value: '0 8px 24px rgb(0 0 0 / 20%)' }, { name: 'transform', value: 'translateY(-4px)' }],
   } } } }
 ```
 
@@ -171,7 +168,7 @@ see `presets.md`) or a `customEffect`. A `keyframeEffect` only maps a single axi
 - The source element must **not** have `pointer-events: none`.
 - **CRITICAL — hit-area shift:** never use the same element as source and target with `hitArea: 'self'` and a size/position effect — the transform shifts the hit area → jitter. Keep the trigger on the parent and animate a child by putting `selector` (or `key`) on the **effect** (the target) — not on the interaction (that moves the source).
 - **Multiple items (grid of cards):** use `listContainer` so each item becomes its own source with its own pointer tracker — one interaction, not a hand-written list of per-card interactions. Key an ancestor wrapper, point `listContainer` at the cards' container; the effect's `selector` then resolves the target within each card.
-- Gate on touch devices with a `(hover: hover)` media condition; pointerMove behaves differently on touch. Provide a `viewEnter`/`viewProgress` fallback there.
+- Gate on touch devices with a `(hover: hover)` media condition; `pointerMove` behaves differently on touch. Provide a `viewEnter`/`viewProgress` fallback there.
 - `centeredToTarget: true` remaps progress so `0.5` = the target's center — use with `hitArea: 'root'` or when source ≠ target.
 - For independent 2-axis keyframe control, use two interactions (`axis: 'x'` and `axis: 'y'`) with `composite: 'add'`/`'accumulate'` on the second.
 - `transitionDuration` / `transitionEasing` smooth the follow so it doesn't snap to the cursor.

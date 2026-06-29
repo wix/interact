@@ -463,22 +463,24 @@ const config: InteractConfig = {
     {
       key: 'product-list', // single triggering parent
       trigger: 'viewEnter',
-      sequences: [{
-        offset: 100, // Stagger animation for list items
-        effects: [
-          {
-            listContainer: '.products', //multiple target elements
-            keyframeEffect: {
-              name: 'slide-up',
-              keyframes: [
-                { opacity: 0, transform: 'translateY(30px)' },
-                { opacity: 1, transform: 'translateY(0)' },
-              ],
+      sequences: [
+        {
+          offset: 100, // Stagger animation for list items
+          effects: [
+            {
+              listContainer: '.products', //multiple target elements
+              keyframeEffect: {
+                name: 'slide-up',
+                keyframes: [
+                  { opacity: 0, transform: 'translateY(30px)' },
+                  { opacity: 1, transform: 'translateY(0)' },
+                ],
+              },
+              duration: 400,
             },
-            duration: 400,
-          },
-        ],
-      }],
+          ],
+        },
+      ],
     },
   ],
 };

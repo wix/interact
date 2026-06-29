@@ -30,9 +30,10 @@ type InteractConfig = {
 ```
 
 Build the whole config up front and pass it to a single `Interact.create(config)`.
-Each `create()` call makes an **independent** instance — use separate instances for
-isolated component scopes or lazy-loaded sections. All id cross-references must
-resolve to an existing entry; element keys must be stable for the config's lifetime.
+Each `create()` call makes an **independent** instance — prefer a single instance for
+the entire page/app, unless there are special cases for separate creation/cleanup.
+All id cross-references must resolve to an existing entry; element keys must be stable
+for the config's lifetime.
 
 ---
 
@@ -79,7 +80,7 @@ patterns — see [Element resolution](#element-resolution).
 > sequence), or **`listContainer`** on the interaction when each item needs its own
 > trigger (e.g. per-card `hover`/`pointerMove`). See [Element resolution](#element-resolution).
 
-`TriggerType` = `'hover' | 'click' | 'viewEnter' | 'pageVisible' | 'animationEnd' |
+`TriggerType` = `'hover' | 'click' | 'viewEnter' | 'animationEnd' |
 'viewProgress' | 'pointerMove' | 'activate' | 'interest'`. Param shapes and
 per-trigger semantics live in `triggers.md`.
 
@@ -108,6 +109,7 @@ referenced entry and may override any of them (`key`, `duration`, `easing`,
   listItemSelector?: string; // filter children of listContainer
   composite?: 'replace' | 'add' | 'accumulate';   // = CSS animation-composition
   fill?: 'none' | 'forwards' | 'backwards' | 'both';
+  easing?: string;
 }
 ```
 
@@ -136,7 +138,7 @@ names like `easeOutCubic`/`elasticOut` are **not** valid and silently no-op.)
 
 ### Time effect
 
-For `hover`, `click`, `viewEnter`, `pageVisible`, `animationEnd`.
+For `hover`, `click`, `viewEnter`, `animationEnd`.
 
 ```ts
 {
@@ -280,11 +282,10 @@ Named gates that enable/disable interactions, effects, or sequences.
 type Condition = { type: 'media' | 'container' | 'selector'; predicate?: string };
 ```
 
-| Type        | Predicate                                                                                                                  |
-| :---------- | :------------------------------------------------------------------------------------------------------------------------- |
-| `media`     | a media query **without** `@media` — e.g. `'(min-width: 768px)'`, `'(hover: hover)'`, `'(prefers-reduced-motion: reduce)'` |
-| `selector`  | a CSS selector; `&` is replaced by the base element selector — e.g. `':nth-of-type(odd)'`                                  |
-| `container` | a container-query condition                                                                                                |
+| Type       | Predicate                                                                                                                  |
+| :--------- | :------------------------------------------------------------------------------------------------------------------------- |
+| `media`    | a media query **without** `@media` — e.g. `'(min-width: 768px)'`, `'(hover: hover)'`, `'(prefers-reduced-motion: reduce)'` |
+| `selector` | a CSS selector; `&` is replaced by the base element selector — e.g. `':nth-of-type(odd)'`                                  |
 
 Attach with `conditions: ['desktop']` on an interaction (gates the whole trigger),
 an effect (skips just that effect), or a sequence. **All** listed conditions must
@@ -347,42 +348,7 @@ const css = generate(config, true); // true for web; false for vanilla/React
 selectors target `:first-child`; `false` for **vanilla** and **React**. The default
 is `true`, so vanilla/React callers must pass `false` explicitly.
 
-**FOUC prevention** for a `viewEnter` + `triggerType: 'once'` entrance where the
-trigger and the animated element are the **same element** (e.g. a hero that triggers
-on itself) requires **both** the injected `generate()` output **and** the element
-marked initial:
-
-```html
-<interact-element data-interact-key="hero" data-interact-initial="true"
-  ><section>…</section></interact-element
->
-```
-
-```tsx
-<Interaction tagName="section" interactKey="hero" initial>
-  …
-</Interaction>
-```
-
-```html
-<section data-interact-key="hero" data-interact-initial="true">…</section>
-```
-
-`initial` is valid **only** for `viewEnter` + `once` where source and target are the
-**same element**. In every other entrance case you do **not** mark `initial` —
-the injected `generate()` rules already prevent FOUC on their own:
-
-- **Source ≠ target** (the trigger is on a container/parent and the effect animates
-  child elements — e.g. a staggered list where one `viewEnter` fans an effect across
-  cards via `selector`): the items need **no** `data-interact-initial`. The trigger
-  element isn't the hidden one, so the generated initial rules hide the targets
-  without an `initial` marker and without interfering with the trigger. (This is why,
-  in a hero-plus-staggered-cards page, the hero carries `initial` but the cards don't.)
-- **`repeat`/`alternate`/`state`:** don't use `initial` — inline the starting
-  keyframe as a style and use `fill: 'both'`.
-- **`viewProgress`:** needs no `initial`.
-
-The one hard requirement: `generate()` output must actually be injected (ideally at
+**FOUC prevention:** `generate()` output must actually be injected (ideally at
 SSR/build time) for any of this FOUC prevention to work.
 
 For the web entry point, `interact-element { display: contents; }` is **optional** —

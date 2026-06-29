@@ -56,26 +56,22 @@ export const instance = Interact.create(config); // binds <interact-element>s au
   </style>
 </head>
 <body>
-  <interact-element data-interact-key="hero" data-interact-initial="true">
+  <interact-element data-interact-key="hero>
     <section class="hero">Hello, animated world!</section>
   </interact-element>
 </body>
 ```
 
-`data-interact-initial="true"` is the FOUC marker for `viewEnter` + `once` (see
-SKILL.md invariant 3). Each distinct **target** element needs its own
-`<interact-element>`.
-
 ---
 
-## B. CDN / no build step — `@wix/interact/web` via esm.sh
+## B. CDN / no build step — `@wix/interact/web` via [esm.sh](http://esm.sh)
 
 For a static `.html` page with no bundler. Inject `generate()` output and run
 `create()` client-side. Because the CSS is generated _after_ first paint here, an
 entrance can flash before the script runs. For strict FOUC safety, either keep page
-content hidden behind a loader until injection, or **precompile** `generate(config,
-true)` once and paste its output into a static `<style>` in `<head>` (the robust
-option). If you instead hand-write an initial hide rule, it must release on the same
+content hidden behind a loader until injection, or **precompile** `generate(config, true)`
+once and paste its output into a static `<style>` in `<head>` (the robust option).
+If you instead hand-write an initial hide rule, it must release on the same
 signal the runtime uses — gate it with `:not([data-interact-enter])` (interact sets
 `data-interact-enter` on the target once the animation plays) so the element can't
 get stranded hidden.
@@ -91,7 +87,7 @@ get stranded hidden.
     </style>
   </head>
   <body>
-    <interact-element data-interact-key="hero" data-interact-initial="true">
+    <interact-element data-interact-key="hero">
       <section class="hero">Hello, animated world!</section>
     </interact-element>
 
@@ -127,9 +123,12 @@ get stranded hidden.
 
 ## C. React — `@wix/interact/react`
 
-Use the `<Interaction>` component (it handles element binding via a ref) and run `Interact.create()` inside `useEffect` so it never executes during SSR. 
+Use the `<Interaction>` component (it handles element binding via a ref) and run `Interact.create()` inside `useEffect` so it never executes during SSR.
+It is recommended to use `Interact.create()` and `generate()` once in the top level component (e.g. the "App" component).
+It's possible to break down pieces of the Interact Config for separate lazy parts of the UI, and `Interact.create()` them using a separate call.
 
 ```tsx
+// App.tsx
 import { useEffect } from 'react';
 import { Interact, Interaction, generate, type InteractConfig } from '@wix/interact/react';
 import { FadeIn } from '@wix/motion-presets'; // import only what you use (tree-shakes)
@@ -147,7 +146,7 @@ const config: InteractConfig = {
   },
 };
 
-export function Hero() {
+export function App() {
   const interactCSS = generate(config, false); // useFirstChild = false for React
 
   useEffect(() => {
@@ -158,7 +157,20 @@ export function Hero() {
   return (
     <>
       <style>{interactCSS}</style>
-      <Interaction tagName="section" interactKey="hero" initial className="hero">
+      <Hero />
+      /* rest of the app content */
+    </>
+  );
+}
+```
+
+```tsx
+// Hero.tsx
+export function Hero() {
+  return (
+    <>
+      <style>{interactCSS}</style>
+      <Interaction tagName="section" interactKey="hero">
         Hello, animated world!
       </Interaction>
     </>
@@ -167,8 +179,7 @@ export function Hero() {
 ```
 
 `<Interaction>` props: `tagName` (required — the HTML tag to render), `interactKey`
-(required — emitted as `data-interact-key`), `initial?` (emits
-`data-interact-initial="true"` for FOUC), plus `children`, a forwarded `ref`, and any
+(required — emitted as `data-interact-key`), plus `children`, a forwarded `ref`, and any
 valid intrinsic props for `tagName`. For an element you don't want to wrap, use
 `createInteractRef(key)` on a plain element that carries `data-interact-key`.
 
@@ -181,7 +192,7 @@ on the server and keep `Interact.create()` in `useEffect` (client only).
 
 Manual binding — **two steps**: `create(config)` loads the config but binds nothing;
 then call the **standalone** `add(element, key)` for each element once it's in the
-DOM. There is no `instance.add()`.
+DOM.
 
 ```ts
 import { Interact, add, remove, generate, type InteractConfig } from '@wix/interact';
@@ -204,9 +215,7 @@ add(document.querySelector('#hero')!, 'hero'); // 2) bind the element (key optio
 ```
 
 ```html
-<section id="hero" data-interact-key="hero" data-interact-initial="true">
-  Hello, animated world!
-</section>
+<section id="hero" data-interact-key="hero">Hello, animated world!</section>
 ```
 
 ---

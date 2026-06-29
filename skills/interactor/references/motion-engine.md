@@ -10,14 +10,6 @@ yourself.
 `@wix/motion` ships _inside_ `@wix/interact`, so it's already installed. Import from
 `@wix/motion` directly. Single entry point (ESM: `dist/es/motion.js`).
 
-> **Trust the source, not the bundled `docs/`.** The package's `docs/` folder
-> contains several inaccuracies — this file reflects the actual source. In
-> particular: there is **no** `type: 'TimeAnimationOptions'` discriminator field;
-> `getCSSAnimation` returns an **array of descriptor objects**, not a string;
-> `getWebAnimation`/`getCSSAnimation` take a **single** options object (never an
-> array); `easeOutCubic`/`elasticOut` are **not** valid easings; the ESM path is
-> `dist/es/motion.js` (not `dist/esm/index.js`).
-
 ## Public functions
 
 | Function                                                       | Purpose                                                                                  |
@@ -133,7 +125,7 @@ group's delay so all end together.
 - **Reduced motion** (`options.reducedMotion` / `context.reducedMotion`): time-based collapses `duration` to 1ms (single iteration); multi-iteration animations are dropped entirely (returns `[]`).
 - **`customEffect`** is the only path with a rAF loop; it forces `composite: 'add'` and calls `customEffect(target, null)` on cancel (teardown signal).
 - **Effect modules** (`AnimationEffectAPI`): `{ web(options, dom?) => AnimationData[], getNames(options) => string[], style?(options) => AnimationData[], prepare?(options, dom?) }`. Mouse presets instead export a factory `(options) => (target) => instance`.
-- `iterations: 0` or `Infinity` → infinite. Generated animation ids: `${effectId}-${index+1}`. `part` in `AnimationData` targets a sub-element via `[data-motion-part~="…"]`.
+- `iterations: 0` or `Infinity` → infinite. Generated animation ids: `${effectId}-${index+1}`.
 
 ## Registering inline custom effect modules
 
@@ -144,6 +136,7 @@ registerEffects({
     web: (o) => [{ ...o, name: 'MyFade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }],
     style: (o) => [{ ...o, name: 'MyFade', keyframes: [{ opacity: 0 }, { opacity: 1 }] }],
     getNames: () => ['MyFade'],
+    prepare: (o, { measure: () => void, mutate: () => void }) => void,
   },
 });
 // now usable as namedEffect: { type: 'MyFade' } in either motion or interact
