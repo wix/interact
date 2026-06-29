@@ -11,7 +11,7 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 LIB_DIR="$REPO_ROOT/apps/website/assets/lib"
 
-yarn workspaces foreach --all --topological --include 'packages/*' run build
+yarn workspaces foreach --all --topological-dev --include 'packages/*' run build
 
 rm -rf "$LIB_DIR/interact" "$LIB_DIR/motion-presets" "$LIB_DIR/motion"
 
