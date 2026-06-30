@@ -11,7 +11,7 @@
   }
 }
 @keyframes motion-fadeIn {
-  100% {
+  0% {
     opacity: 0;
   }
 }
