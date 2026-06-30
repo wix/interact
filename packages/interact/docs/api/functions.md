@@ -245,14 +245,11 @@ The output covers every CSS-expressible aspect of the configuration:
 
 ### FOUC prevention (viewEnter)
 
-For entrance animations where the source and target are the same element, `generate()` emits an initial rule that hides the element until its animation starts. Two things are required:
-
-1. **Inject the generated CSS** into `<head>` (preferred) or the beginning of `<body>`.
-2. **Mark elements with `initial`** — set `data-interact-initial="true"` on the element, or use `initial={true}` on the React `<Interaction>` component.
+For entrance animations where the source and target are the same element, `generate()` emits an initial rule that hides the element until its animation starts. Inject the generated CSS into `<head>` (preferred) or the beginning of `<body>`.
 
 The initial rule uses `:not([data-interact-enter])` so the element becomes visible once the animation begins. This only applies to `viewEnter` interactions with `triggerType: 'once'` (the default for `viewEnter`).
 
-For `triggerType: 'repeat'`/`'alternate'`/`'state'`, do NOT use `initial`. Instead, manually apply the starting keyframe as inline styles on the target element and use `fill: 'both'`.
+For `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting keyframe as inline styles on the target element and use `fill: 'both'`.
 
 **Generated FOUC CSS with `useFirstChild: false`:**
 
@@ -281,8 +278,6 @@ For `triggerType: 'repeat'`/`'alternate'`/`'state'`, do NOT use `initial`. Inste
 ### Scroll-driven CSS (viewProgress)
 
 For `viewProgress` interactions, `generate()` emits `view-timeline` declarations and `animation-timeline`/`animation-range` custom properties. This produces fully native scroll-driven animations that work before JavaScript loads — the browser drives the animation based on the element's scroll position, with zero JS overhead.
-
-No `initial` attribute is needed for scroll-driven animations.
 
 ### Examples
 
@@ -442,7 +437,7 @@ Elements must have `data-interact-key` matching the interaction key in your conf
 
 - **Custom elements (`<interact-element>`)**: use `generate(config, true)` (the default) so selectors target the first child.
 - **Vanilla JS / React**: use `generate(config, false)` so selectors target the keyed element directly.
-- **FOUC prevention**: for `viewEnter` + `triggerType: 'once'`, also set `data-interact-initial="true"` on the element (or `initial={true}` on the React `<Interaction>` component).
+- **FOUC prevention**: for `viewEnter` + `triggerType: 'once'`, inject `generate()` output into `<head>` before the page paints.
 
 ---
 

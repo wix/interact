@@ -1,0 +1,84 @@
+@keyframes motion-floatIn {
+  0% {
+    transform: translate(var(--motion-translate-x), var(--motion-translate-y))
+      rotate(var(--motion-rotate, 0deg));
+  }
+  100% {
+    transform: translate(0, 0) rotate(var(--motion-rotate, 0deg));
+  }
+}
+@keyframes motion-fadeIn {
+  100% {
+    opacity: 0;
+  }
+}
+[data-interact-key='page-sidebar'] > :first-child {
+  --motion-translate-x: -120px;
+  --motion-translate-y: 0px;
+}
+[data-interact-key='page-sidebar'] > :first-child:not([data-interact-enter]) {
+  visibility: hidden;
+  transform: none;
+  translate: none;
+  scale: none;
+  rotate: none;
+}
+[data-interact-key='page-sidebar'] > :first-child:not([data-interact-enter='done']) {
+  --animation-0-wupdxr47l7:
+    motion-floatIn 700ms 150ms cubic-bezier(0.445, 0.05, 0.55, 0.95) both 1 paused,
+    motion-fadeIn 700ms 150ms cubic-bezier(0.445, 0.05, 0.55, 0.95) both 1 paused;
+  --animation-composition-0-wupdxr47l7: ;
+  --animation-timeline-0-wupdxr47l7: ;
+  --animation-range-0-wupdxr47l7: ;
+}
+[data-interact-key='page-connector'] > :first-child:not([data-interact-enter]) {
+  visibility: hidden;
+  transform: none;
+  translate: none;
+  scale: none;
+  rotate: none;
+}
+[data-interact-key='page-connector'] > :first-child:not([data-interact-enter='done']) {
+  --animation-1-hqa7ygd5uq: motion-fadeIn 500ms 200ms cubic-bezier(0.445, 0.05, 0.55, 0.95) both 1
+    paused;
+  --animation-composition-1-hqa7ygd5uq: replace;
+  --animation-timeline-1-hqa7ygd5uq: auto;
+  --animation-range-1-hqa7ygd5uq: normal;
+}
+[data-interact-key='page-content'] > :first-child {
+  --motion-translate-x: 0px;
+  --motion-translate-y: 120px;
+}
+[data-interact-key='page-content'] > :first-child:not([data-interact-enter]) {
+  visibility: hidden;
+  transform: none;
+  translate: none;
+  scale: none;
+  rotate: none;
+}
+[data-interact-key='page-content'] > :first-child:not([data-interact-enter='done']) {
+  --animation-2-5oj2foskdp:
+    motion-floatIn 700ms 200ms cubic-bezier(0.445, 0.05, 0.55, 0.95) both 1 paused,
+    motion-fadeIn 700ms 200ms cubic-bezier(0.445, 0.05, 0.55, 0.95) both 1 paused;
+  --animation-composition-2-5oj2foskdp: ;
+  --animation-timeline-2-5oj2foskdp: ;
+  --animation-range-2-5oj2foskdp: ;
+}
+[data-interact-key='page-sidebar'] > :first-child {
+  animation: var(--animation-0-wupdxr47l7, none);
+  animation-composition: var(--animation-composition-0-wupdxr47l7, replace);
+  animation-timeline: var(--animation-timeline-0-wupdxr47l7, auto);
+  animation-range: var(--animation-range-0-wupdxr47l7, normal);
+}
+[data-interact-key='page-connector'] > :first-child {
+  animation: var(--animation-1-hqa7ygd5uq, none);
+  animation-composition: var(--animation-composition-1-hqa7ygd5uq, replace);
+  animation-timeline: var(--animation-timeline-1-hqa7ygd5uq, auto);
+  animation-range: var(--animation-range-1-hqa7ygd5uq, normal);
+}
+[data-interact-key='page-content'] > :first-child {
+  animation: var(--animation-2-5oj2foskdp, none);
+  animation-composition: var(--animation-composition-2-5oj2foskdp, replace);
+  animation-timeline: var(--animation-timeline-2-5oj2foskdp, auto);
+  animation-range: var(--animation-range-2-5oj2foskdp, normal);
+}
