@@ -24,4 +24,6 @@ cp "$REPO_ROOT/packages/interact/dist"/index-*.mjs "$LIB_DIR/interact/"
 cp "$REPO_ROOT/packages/motion-presets/dist/es/motion-presets.js" "$LIB_DIR/motion-presets/"
 cp "$REPO_ROOT/packages/motion/dist/es/motion.js" "$LIB_DIR/motion/"
 
+node "$REPO_ROOT/apps/website/scripts/generate-critical-css.mjs"
+
 echo "Landing page libraries copied to apps/website/assets/lib/"

@@ -4,18 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>View Enter</title>
+    <link rel="stylesheet" href="../../css/critical-interact-view-enter.css" />
     <style>
-      /* Critical CSS for viewEnter entrance animations - prevents FOUC */
-      @media (prefers-reduced-motion: no-preference) {
-        [data-interact-initial='true'] > :first-child:not([data-interact-enter]) {
-          visibility: hidden;
-          transform: none;
-          translate: none;
-          scale: none;
-          rotate: none;
-        }
-      }
-
       *,
       *::before,
       *::after {
@@ -90,16 +80,16 @@
   </head>
   <body>
     <div class="scene">
-      <interact-element data-interact-key="circle-top" data-interact-initial="true">
+      <interact-element data-interact-key="circle-top">
         <div class="circle"><div class="fill-circle"></div></div>
       </interact-element>
-      <interact-element data-interact-key="circle-right" data-interact-initial="true">
+      <interact-element data-interact-key="circle-right">
         <div class="circle"><div class="fill-circle"></div></div>
       </interact-element>
-      <interact-element data-interact-key="circle-bottom" data-interact-initial="true">
+      <interact-element data-interact-key="circle-bottom">
         <div class="circle"><div class="fill-circle"></div></div>
       </interact-element>
-      <interact-element data-interact-key="circle-left" data-interact-initial="true">
+      <interact-element data-interact-key="circle-left">
         <div class="circle"><div class="fill-circle"></div></div>
       </interact-element>
     </div>
