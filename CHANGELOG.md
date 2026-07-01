@@ -42,6 +42,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.5.1] - 2026-07-01
+
+#### Changed
+
+- Removed React `initial` prop and `data-interact-initial` FOUC marker; entrance FOUC prevention now relies solely on injecting `generate()` CSS (#247)
+
+#### Fixed
+
+- Single-keyframe effects with an explicit `offset` (e.g. `0`) no longer have their offset overwritten to `1` in `interpolateKeyframesOffsets` (#247)
+
 ### [2.5.0] - 2026-07-01
 
 #### Added
