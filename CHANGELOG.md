@@ -8,7 +8,56 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## @wix/splittext
+
+### [0.1.0] - unreleased
+
+#### Added
+
+- Initial release: lightweight, accessible text splitting for staggered entrance animations (#241)
+- Split by chars, words, lines, or sentences with locale-aware `Intl.Segmenter` segmentation (#241)
+- Range API line detection, lazy evaluation, and `revert()` to restore the original DOM (#241)
+- Nested multi-type splits (`lines → sentences → words → chars`) with `nested: 'flatten'` (#241)
+- CSS stagger hooks (`--char-index`, `--word-index`, etc.) and customizable span wrappers (#241)
+- React entry point: `useSplitText` hook with automatic cleanup on unmount (#241)
+- Optional `autoSplit` to re-split on resize and font load (#241)
+
+---
+
+## @wix/interact-validate
+
+### [1.0.0] - unreleased
+
+#### Added
+
+- Initial release: static schema, referential, and semantic validation for `InteractConfig`, powered by zod (#238)
+- `validateInteractConfig()`, `assertValidInteractConfig()`, and `InteractValidationError` (#238)
+- Exported zod schemas for host-project composition (`InteractConfigSchema`, `Interaction`, `Effect`, etc.) (#238)
+- Structural checks: strict object shapes, enums, numeric bounds, and trigger/effect compatibility (#238)
+- Referential and semantic checks: dangling `effectId`/`sequenceId`/`conditions` references, unused definitions, duplicate keyframe names, and media-query syntax (#238)
+- Configurable severity via `strict`, `max`, and per-category `severityOverrides` (#238)
+- Compile-time type parity guard against `@wix/interact` config types (#238)
+
+---
+
 ## @wix/interact
+
+### [2.5.0] - 2026-07-01
+
+#### Added
+
+- Agent rules (`rules/validate.md`) and docs for validating configs with `@wix/interact-validate` (#238)
+- Export `SequenceOptionsConfig` from public types (#238)
+
+#### Changed
+
+- `Condition.predicate` is now required (#238)
+- Removed `pageVisible` trigger; use `viewEnter` instead (#238)
+- Corrected add/remove interaction rules in `full-lean.md` and `integration.md` (#244)
+
+#### Fixed
+
+- Entrance SSR: split FOUC-prevention CSS into separate rules for `:not([data-interact-enter])` (initial state) and `:not([data-interact-enter="done"])` (animation), so hydration can mark entrance complete without flash (#243)
 
 ### [2.4.0] - 2026-05-29
 
