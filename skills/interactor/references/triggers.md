@@ -44,8 +44,8 @@ out of / back into the viewport and re-trigger forever (or never settle). For th
 use **separate** source and target elements (trigger on a stable wrapper, animate a
 child via `selector`, or point the effect at a different `key`).
 
-**FOUC:** `once` entrances need the three-part FOUC setup (see `config-schema.md`
-and SKILL.md invariant 3).
+**FOUC:** `once` entrances need injected `generate()` CSS before first paint (see
+`config-schema.md` and SKILL.md invariant 3).
 
 ```ts
 { interactions: [{ key: 'hero', trigger: 'viewEnter', params: { threshold: 0.2 },
@@ -226,7 +226,7 @@ element becomes a staggered participant.
 
 **`selector` vs `listContainer` for groups of items** — pick by _who triggers_:
 
-- **One trigger fans an effect/sequence across many targets** (a single `viewEnter` staggering a row of cards): put **`selector`** on the effect to select the items. This is the sequence case above. Here source ≠ target, so the items need **no** `data-interact-initial` — the injected `generate()` rules prevent FOUC on their own (see [viewEnter](#viewenter)).
+- **One trigger fans an effect/sequence across many targets** (a single `viewEnter` staggering a row of cards): put **`selector`** on the effect to select the items. This is the sequence case above. The injected `generate()` rules prevent FOUC on their own (see [viewEnter](#viewenter)).
 - **Each item needs its own trigger** (per-card `hover`/`pointerMove`, one tracker each): put **`listContainer`** on the interaction so each child becomes its own source.
 
 **Two rules that silently break list binding either way:**

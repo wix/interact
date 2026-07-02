@@ -170,19 +170,14 @@ animation no-ops. Apply them every time, even if you don't open a reference file
 
 2. **`generate(config, useFirstChild)` parity** — pass `true` for the **web**
    (`<interact-element>`) entry point, `false` for **vanilla** and **React**.
-   Backwards = the FOUC/initial selectors target the wrong node and break.
+   Backwards = the FOUC-prevention selectors target the wrong node and break.
 
-3. **FOUC prevention — inject `generate()`, and mark `initial` only for
-   same-element entrances.** Always inject the `generate()` output (ideally at
-   SSR/build) — that's the load-bearing half and it carries the rules that hide
-   entrance elements before JS runs. Add `data-interact-initial="true"` / `initial`
-   **only** when a `viewEnter`+`once` entrance triggers on the _same element_ it
-   animates (e.g. a hero). When the trigger and target differ — a container/parent
-   triggers and child elements animate, like a staggered list via `selector` — do
-   **not** mark `initial`; the generated rules hide the targets on their own and the
-   marker would just get in the way. (That's why a hero gets `initial` but the
-   below-it staggered cards don't.) For `repeat`/`alternate`/`state`, also skip
-   `initial` — inline the starting keyframe and use `fill: 'both'`.
+3. **FOUC prevention — inject `generate()` CSS.** Always inject the `generate()` output (ideally at
+   SSR/build) so entrance elements are hidden before JS runs. The generated CSS includes
+   FOUC-prevention rules (gated by `:not([data-interact-enter])`) for `viewEnter`+`once`
+   entrances where source and target are the same element; when source ≠ target (e.g.
+   stagger via `selector`), the generated rules hide the targets on their own. For
+   `repeat`/`alternate`/`state`, inline the starting keyframe and use `fill: 'both'`.
 
 4. **Vanilla binding.** You must then call the **standalone** `add(element, 'key')` for
    each element once it exists in the DOM. For clean up call the `remove('key')` function.
@@ -239,7 +234,7 @@ proxy. Walk the finished config:
 - [ ] Every interaction `key` (and effect `key`) has a **matching element** in the markup (`data-interact-key` / `interactKey`).
 - [ ] Each effect has **exactly one** payload (`namedEffect` xor `keyframeEffect` xor `customEffect` xor `transition`/`transitionProperties`).
 - [ ] `triggerType` and `stateAction` are not both set on the same effect.
-- [ ] `generate()` output is injected and `useFirstChild` matches the entry point; `initial` is only on `viewEnter`+`once` same-element entrances.
+- [ ] `generate()` output is injected and `useFirstChild` matches the entry point.
 - [ ] Child-target effects put `selector`/`key` on the **effect**, not the interaction. Groups of items use one keyed wrapper + a **descendant** match (no duplicate keys): `selector` on the effect for a one-trigger stagger/sequence, `listContainer` on the interaction for per-item triggers.
 - [ ] Invariants 5–7 and 10 hold for the relevant triggers (separate source/target, child targets, `overflow: clip`, unique keys).
 

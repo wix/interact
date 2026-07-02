@@ -2,7 +2,7 @@
 
 The complete `InteractConfig` schema, every effect variant, sequences, conditions,
 element resolution, FOUC, and the static API. This is source-accurate as of
-`@wix/interact` 2.4.0.
+`@wix/interact` 2.5.1.
 
 ## Table of contents
 
@@ -348,8 +348,16 @@ const css = generate(config, true); // true for web; false for vanilla/React
 selectors target `:first-child`; `false` for **vanilla** and **React**. The default
 is `true`, so vanilla/React callers must pass `false` explicitly.
 
-**FOUC prevention:** `generate()` output must actually be injected (ideally at
-SSR/build time) for any of this FOUC prevention to work.
+**FOUC prevention (viewEnter + once):** For entrance animations where source and
+target are the same element, `generate()` emits initial rules that hide the target
+until its animation starts (gated by `:not([data-interact-enter])`). When source ≠
+target (e.g. a `viewEnter` trigger on a wrapper staggering children via `selector`),
+the generated rules hide the child targets on their own — no extra markup on the
+trigger element. For `repeat`/`alternate`/`state`, inline the starting keyframe and
+use `fill: 'both'`. `viewProgress` needs no FOUC rules.
+
+`generate()` output must actually be injected (ideally at SSR/build time) for any of
+this FOUC prevention to work.
 
 For the web entry point, `interact-element { display: contents; }` is **optional** —
 add it if you don't want the custom-element wrapper to participate in layout (the
