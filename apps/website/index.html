@@ -13,18 +13,7 @@
     <!-- Helvetica for the new section -->
     <link href="https://fonts.cdnfonts.com/css/helvetica-neue-55" rel="stylesheet">
 
-    <style>
-        /* Critical CSS for viewEnter entrance animations - prevents FOUC */
-        @media (prefers-reduced-motion: no-preference) {
-            [data-interact-initial='true'] > :first-child:not([data-interact-enter]) {
-                visibility: hidden;
-                transform: none;
-                translate: none;
-                scale: none;
-                rotate: none;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="./assets/css/critical-interact-landing.css" />
 
     <!-- Design tokens + base type (see variables.css / theme.css) -->
     <link rel="stylesheet" href="./assets/css/variables.css">
@@ -41,7 +30,7 @@
 <body>
 
     <nav class="site-nav">
-        <interact-element data-interact-key="nav-logo" data-interact-initial="true">
+        <interact-element data-interact-key="nav-logo">
             <a href="./" class="nav-logo">● Interact</a>
         </interact-element>
         <div class="nav-actions">
@@ -49,7 +38,7 @@
                 <a href="./docs/" class="nav-link">Docs</a>
                 <a href="./examples.html" class="nav-link">Examples</a>
             </div>
-            <interact-element data-interact-key="nav-cta" data-interact-initial="true">
+            <interact-element data-interact-key="nav-cta">
                 <a href="https://github.com/wix/interact" target="_blank" rel="noopener noreferrer" class="nav-cta">Go to Repository ↗</a>
             </interact-element>
         </div>
@@ -69,13 +58,13 @@
             <div class="hero-title-cluster">
                 <interact-element data-interact-key="hero-title" class="perspective-2500">
                     <div class="inline-block">
-                        <interact-element data-interact-key="hero-line-1" data-interact-initial="true">
+                        <interact-element data-interact-key="hero-line-1">
                             <h1 class="text-2xl md:text-3xl lg:text-6xl font-light tracking-tighter text-white mb-2 leading-085">
                                   Interact
                             </h1>
                         </interact-element>
                         
-                        <interact-element data-interact-key="hero-line-2" data-interact-initial="true">
+                        <interact-element data-interact-key="hero-line-2">
                             <h1 class="text-6xl md:text-8xl lg:text-mega font-light tracking-tighter text-white leading-085">
                                 Powers the web with motion.
                             </h1>
@@ -85,7 +74,7 @@
             </div>
 
             <div class="hero-subtitle-col">
-                <interact-element data-interact-key="hero-subtitle" data-interact-initial="true">
+                <interact-element data-interact-key="hero-subtitle">
                     <div class="p-4 md:p-0">
                         <p class="text-xl md:text-3xl font-light text-stroke-black text-gray-400 leading-tight tracking-tight mb-8 ">
 Create high-performance, beautiful web animations with Interact — from simple micro-interactions to complex, scroll-driven storytelling. Designed for designers and developers alike, with a robust, production-ready API
@@ -117,7 +106,7 @@ Create high-performance, beautiful web animations with Interact — from simple 
                     
                     <!-- COLUMN 1: TEXT -->
                     <div class="perf-col-text">
-                        <interact-element data-interact-key="perf-text" data-interact-initial="true">
+                        <interact-element data-interact-key="perf-text">
                             <h3 class="text-6xl md:text-8xl lg:text-giant font-light tracking-tighter text-white leading-085 lg:text-left">
                                 Unleash high performance web motion
                             </h3>
@@ -154,7 +143,7 @@ Interact runs closer to the browser, delivering smooth, GPU-accelerated animatio
                         <!-- COLUMN 1: TEXT -->
                         <!-- Kept lg:pl-12 from previous edit -->
                         <div class="perf-col-text">
-                            <interact-element data-interact-key="perf-text-2" data-interact-initial="true">
+                            <interact-element data-interact-key="perf-text-2">
                                 <h3 class="text-6xl md:text-8xl lg:text-giant font-light tracking-tighter text-white leading-085 lg:text-left">
                                     Motion That Fits Every Screen
                                 </h3>
@@ -536,7 +525,7 @@ Interact comes with a rich and diverse set of named effects, each designed to br
             <div class="max-w-7xl mx-auto">
                 
                 <!-- Title & Description -->
-                <interact-element data-interact-key="tailored-header" data-interact-initial="true">
+                <interact-element data-interact-key="tailored-header">
                     <div class="tailored-head">
                         <h2>Effects. Tailored to Your Vision</h2>
                         <p><br></p>
@@ -550,7 +539,7 @@ Interact comes with a rich and diverse set of named effects, each designed to br
                 <div class="tailored-grid">
                     
                     <!-- Column 1 -->
-                    <interact-element data-interact-key="tailored-col-1" data-interact-initial="true">
+                    <interact-element data-interact-key="tailored-col-1">
                         <div class="tailored-col">
                             <h3>Named Effects <span class="tailored-sub">(Built-In Library)</span></h3>
                             <p>
@@ -560,7 +549,7 @@ Interact comes with a rich and diverse set of named effects, each designed to br
                     </interact-element>
 
                     <!-- Column 2 -->
-                    <interact-element data-interact-key="tailored-col-2" data-interact-initial="true">
+                    <interact-element data-interact-key="tailored-col-2">
                         <div class="tailored-col">
                             <h3>Custom Keyframes</h3>
                             <p> <br> </p>
@@ -571,7 +560,7 @@ Interact comes with a rich and diverse set of named effects, each designed to br
                     </interact-element>
 
                     <!-- Column 3 -->
-                    <interact-element data-interact-key="tailored-col-3" data-interact-initial="true">
+                    <interact-element data-interact-key="tailored-col-3">
                         <div class="tailored-col">
                             <h3>Custom Effects <span class="tailored-sub">(Full Extensibility)</span></h3>
                             <p>
@@ -714,13 +703,13 @@ Interact comes with a rich and diverse set of named effects, each designed to br
     </div>
 
     <footer class="site-footer">
-        <interact-element data-interact-key="footer-brand" data-interact-initial="true">
+        <interact-element data-interact-key="footer-brand">
             <div class="footer-brand">
                 <h2>● Interact</h2>
                 <p>© 2026</p>
             </div>
         </interact-element>
-        <interact-element data-interact-key="footer-link" data-interact-initial="true">
+        <interact-element data-interact-key="footer-link">
             <div class="footer-links">
                 <a href="https://www.npmjs.com/package/@wix/interact" target="_blank" rel="noopener noreferrer" class="footer-link">NPM</a>
                 <a href="https://github.com/wix/interact" target="_blank" rel="noopener noreferrer" class="footer-link">Github</a>

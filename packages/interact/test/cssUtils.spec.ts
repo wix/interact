@@ -44,6 +44,20 @@ describe('interpolateKeyframesOffsets', () => {
     expect(interpolateKeyframesOffsets([])).toEqual([]);
   });
 
+  it('should set keyframes with a single keyframe with offset  0 to 0', () => {
+    const result = interpolateKeyframesOffsets([{ offset: 0, opacity: '0' }]);
+    expect(result[0].offset).toBe(0);
+  });
+
+  it('should set keyframes with offset to the correct offset', () => {
+    const result = interpolateKeyframesOffsets([
+      { offset: 0.5, opacity: '0' },
+      { offset: 0.75, opacity: '1' },
+    ]);
+    expect(result[0].offset).toBe(0.5);
+    expect(result[1].offset).toBe(0.75);
+  });
+
   it('should set first offset to 0 and last to 1 when missing', () => {
     const result = interpolateKeyframesOffsets([{ opacity: '0' }, { opacity: '1' }]);
     expect(result[0].offset).toBe(0);
@@ -207,13 +221,14 @@ describe('CSSRuleToString', () => {
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
-  it('should add :not([data-interact-enter]) when addInitialSelector is true', () => {
+  it('should dataInteractEnterSelector when provided', () => {
     const rule: CSSRuleData = {
       key: 'my-el',
-      addInitialSelector: true,
+      dataInteractEnterSelector: ':not([data-interact-enter="done"])',
       declarations: [{ name: 'opacity', value: '0' }],
     };
-    const expected = '[data-interact-key="my-el"]:not([data-interact-enter]) {\nopacity: 0;\n}';
+    const expected =
+      '[data-interact-key="my-el"]:not([data-interact-enter="done"]) {\nopacity: 0;\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
@@ -253,7 +268,7 @@ describe('CSSRuleToString', () => {
     const rule: CSSRuleData = {
       key: 'my-el',
       childSelector: '.child',
-      addInitialSelector: true,
+      dataInteractEnterSelector: ':not([data-interact-enter="done"])',
       states: ['hover'],
       media: '(min-width: 1024px)',
       declarations: [
@@ -262,7 +277,7 @@ describe('CSSRuleToString', () => {
       ],
     };
     const expected =
-      '@media (min-width: 1024px) {\n[data-interact-key="my-el"]:is(:state(hover), :--hover, [data-interact-effect~="hover"]) .child:not([data-interact-enter]) {\nopacity: 1;\ncolor: blue;\n}\n}';
+      '@media (min-width: 1024px) {\n[data-interact-key="my-el"]:is(:state(hover), :--hover, [data-interact-effect~="hover"]) .child:not([data-interact-enter="done"]) {\nopacity: 1;\ncolor: blue;\n}\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 });

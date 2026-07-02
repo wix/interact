@@ -41,7 +41,7 @@ Each interaction defines a complete cause-and-effect relationship:
 }
 ```
 
-Time-based playback (`once`, `repeat`, `alternate`, `state`) is set with `triggerType` on each time effect, or with `triggerType` on a sequence object when using `sequences`. Optional `params` on the interaction are for observer options (`viewEnter` / `pageVisible`), pointer/`animationEnd` settings, and other non-playback trigger configuration.
+Time-based playback (`once`, `repeat`, `alternate`, `state`) is set with `triggerType` on each time effect, or with `triggerType` on a sequence object when using `sequences`. Optional `params` on the interaction are for observer options (`viewEnter`), pointer/`animationEnd` settings, and other non-playback trigger configuration.
 
 ## Element Selection with Selectors
 

@@ -4,13 +4,12 @@ import React from 'react';
 type InteractionProps<T extends keyof JSX.IntrinsicElements> = {
   tagName: T;
   interactKey: string;
-  initial?: boolean;
   children?: React.ReactNode;
 } & Omit<JSX.IntrinsicElements[T], 'ref'>;
 
 const Interaction = React.forwardRef(function InteractionRender<
   T extends keyof JSX.IntrinsicElements,
->({ tagName, interactKey, initial, children, ...rest }: InteractionProps<T>, ref: React.Ref<any>) {
+>({ tagName, interactKey, children, ...rest }: InteractionProps<T>, ref: React.Ref<any>) {
   const TagName = tagName as any;
   const interactRefCallback = React.useRef<InteractRef | null>(null);
 
@@ -43,12 +42,7 @@ const Interaction = React.forwardRef(function InteractionRender<
   );
 
   return (
-    <TagName
-      data-interact-key={interactKey}
-      data-interact-initial={initial ? 'true' : undefined}
-      {...rest}
-      ref={combinedRef}
-    >
+    <TagName data-interact-key={interactKey} {...rest} ref={combinedRef}>
       {children}
     </TagName>
   );

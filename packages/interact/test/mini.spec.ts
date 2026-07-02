@@ -79,11 +79,12 @@ describe('interact (mini)', () => {
         ],
       },
       {
-        trigger: 'pageVisible',
+        trigger: 'viewEnter',
         key: 'logo-loop',
         effects: [
           {
             key: 'logo-loop',
+            triggerType: 'state',
             effectId: 'logo-poke',
           },
         ],
@@ -938,23 +939,6 @@ describe('interact (mini)', () => {
         exitObserverCallback([{ target: element, isIntersecting: false }]);
         expect(mockAnimation.pause).toHaveBeenCalled();
         expect(mockAnimation.progress).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('pageVisible', () => {
-      it('should add handler for pageVisible trigger', async () => {
-        const { getWebAnimation } = await import('@wix/motion');
-        element = document.createElement('div');
-
-        add(element, 'logo-loop');
-
-        expect(getWebAnimation).toHaveBeenCalledTimes(1);
-        expect(getWebAnimation).toHaveBeenCalledWith(
-          expect.any(HTMLElement),
-          expect.any(Object),
-          undefined,
-          { reducedMotion: false },
-        );
       });
     });
 

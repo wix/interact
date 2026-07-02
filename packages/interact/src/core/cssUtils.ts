@@ -35,11 +35,16 @@ export function interpolateKeyframesOffsets(keyframes: Keyframe[]): Keyframe[] {
 
   const result = keyframes.map((kf) => ({ ...kf }));
 
-  // Set first and last if not present
+  // Set first if not present
   if (result[0].offset === undefined) {
     result[0].offset = 0;
   }
-  if (result[result.length - 1].offset === undefined || result.length === 1) {
+  // Single keyframe without offset defaults to 1; multi-keyframe last defaults to 1 if missing
+  if (result.length === 1) {
+    if (keyframes[0].offset === undefined) {
+      result[0].offset = 1;
+    }
+  } else if (result[result.length - 1].offset === undefined) {
     result[result.length - 1].offset = 1;
   }
 
@@ -102,8 +107,15 @@ export function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
 }
 
 export function CSSRuleToString(rule: CSSRuleData): string {
-  const { key, childSelector, declarations, media, states, selectorCondition, addInitialSelector } =
-    rule;
+  const {
+    key,
+    childSelector,
+    declarations,
+    media,
+    states,
+    selectorCondition,
+    dataInteractEnterSelector,
+  } = rule;
   if (!declarations.length) {
     return '';
   }
@@ -123,8 +135,8 @@ export function CSSRuleToString(rule: CSSRuleData): string {
     selector = `${selector} ${childSelector}`;
   }
 
-  if (addInitialSelector) {
-    selector = `${selector}:not([data-interact-enter])`;
+  if (dataInteractEnterSelector) {
+    selector = `${selector}${dataInteractEnterSelector}`;
   }
 
   // maybe nesting is simpler? -

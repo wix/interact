@@ -706,8 +706,8 @@ const config = {
     // Sponge Tumble (Continuous)
     {
       key: 'sponge',
-      trigger: 'pageVisible',
-      effects: [{ effectId: 'spongeTumble' }],
+      trigger: 'viewEnter',
+      effects: [{ triggerType: 'state', effectId: 'spongeTumble' }],
     },
 
     // Sponge Explode (Hover)
