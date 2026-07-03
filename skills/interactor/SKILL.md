@@ -25,7 +25,7 @@ library does the DOM wiring. You almost never call the motion engine directly.
 | Package               | Role                                                                                                                         | You touch it…                                                                             |
 | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------- |
 | `@wix/interact`       | Declarative layer. Binds **triggers → effects** via an `InteractConfig`. Ships vanilla / React / Web-Component entry points. | Always. This is the API.                                                                  |
-| `@wix/motion-presets` | ~62 ready-made named effects (entrance, scroll, ongoing, mouse). Referenced as `namedEffect: { type: 'FadeIn' }`.            | When you want a prebuilt effect (the common case).                                        |
+| `@wix/motion-presets` | ready-made named effects (entrance, scroll, ongoing, mouse). Referenced as `namedEffect: { type: 'FadeIn' }`.                | When you want a prebuilt effect (the common case).                                        |
 | `@wix/motion`         | The engine (WAAPI, CSS, ViewTimeline, fastdom). Bundled inside interact.                                                     | Rarely — only for programmatic/escape-hatch animation. See `references/motion-engine.md`. |
 
 The whole job is: **pick a trigger, pick an effect, bind it to an element with a
@@ -143,16 +143,16 @@ manual per-item delays — see `references/triggers.md` and the sequences sectio
 
 ## Trigger → use-case quick reference
 
-| Trigger              | Use for                                                         | Effect type & key field                                         | Deep rules               |
-| :------------------- | :-------------------------------------------------------------- | :-------------------------------------------------------------- | :----------------------- |
-| `viewEnter`          | Entrance animations when an element scrolls into view           | Time effect; `triggerType` (default `'once'`)                   | `references/triggers.md` |
-| `viewProgress`       | Scroll-driven (parallax, reveal, scrub tied to scroll position) | Scrub effect; `rangeStart`/`rangeEnd`                           | `references/triggers.md` |
-| `hover` / `interest` | Hover effects (`interest` = hover+focus, accessible)            | Time effect (`triggerType`) **or** State effect (`stateAction`) | `references/triggers.md` |
-| `click` / `activate` | Click toggles (`activate` = click+keyboard, accessible)         | Time effect (`triggerType`) **or** State effect (`stateAction`) | `references/triggers.md` |
-| `pointerMove`        | Cursor-following / tilt / parallax-on-mouse                     | Scrub effect; `params.hitArea`, `params.axis`                   | `references/triggers.md` |
-| `animationEnd`       | Chain one effect after another finishes                         | `params.effectId` of the preceding effect                       | `references/triggers.md` |
+| Trigger              | Use for                                                         | Effect type & key field                                         |
+| :------------------- | :-------------------------------------------------------------- | :-------------------------------------------------------------- |
+| `viewEnter`          | Entrance animations when an element scrolls into view           | Time effect; `triggerType` (default `'once'`)                   |
+| `viewProgress`       | Scroll-driven (parallax, reveal, scrub tied to scroll position) | Scrub effect; `rangeStart`/`rangeEnd`                           |
+| `hover` / `interest` | Hover effects (`interest` = hover+focus, accessible)            | Time effect (`triggerType`) **or** State effect (`stateAction`) |
+| `click` / `activate` | Click toggles (`activate` = click+keyboard, accessible)         | Time effect (`triggerType`) **or** State effect (`stateAction`) |
+| `pointerMove`        | Cursor-following / tilt / parallax-on-mouse                     | Scrub effect; `params.hitArea`, `params.axis`                   |
+| `animationEnd`       | Chain one effect after another finishes                         | `params.effectId` of the preceding effect                       |
 
-Effect catalog (which preset for which look) → **`references/presets.md`**. Full
+Per-trigger deep rules and gotchas → **`references/triggers.md`**. Effect catalog (which preset for which look) → **`references/presets.md`**. Full
 field-by-field schema for every config object → **`references/config-schema.md`**.
 
 ---
@@ -247,6 +247,6 @@ Read the one(s) relevant to the task — they are self-contained and source-accu
 
 - **`references/config-schema.md`** — every config object field-by-field: `InteractConfig`, `Interaction`, all three effect variants, sequences, conditions, element resolution (source vs target), FOUC, and the full `Interact` static API.
 - **`references/triggers.md`** — per-trigger deep rules and gotchas: `viewEnter`, `viewProgress`, `hover`/`click` (+ `triggerType`/`stateAction` tables), `pointerMove`, `animationEnd`, accessibility variants, and sequences/stagger.
-- **`references/presets.md`** — the full 62-preset catalog by category with parameters, defaults, accessibility risk tiers + reduced-motion fallbacks, and an "atmosphere → preset" selection guide.
+- **`references/presets.md`** — the full preset catalog by category with parameters, defaults, accessibility risk tiers + reduced-motion fallbacks, and an "atmosphere → preset" selection guide.
 - **`references/integration-recipes.md`** — complete copy-paste setup per entry point (web / React / vanilla / CDN), with SSR, lifecycle/cleanup, and verification.
 - **`references/motion-engine.md`** — thin escape-hatch reference for calling `@wix/motion` directly (programmatic `getWebAnimation`/`getScrubScene`/`getSequence`), easings, and engine gotchas. Only when the declarative config can't express what's needed.

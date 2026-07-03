@@ -7,7 +7,7 @@ import {
   CSSRuleToString,
   buildListsRule,
 } from '../src/core/cssUtils';
-import type { CSSCoordinatedLists, ListCustomProps, CSSRuleData } from '../types';
+import type { CSSCoordinatedLists, ListCustomProps, CSSRuleData } from '../src/types/css';
 
 describe('keyframePropertyToCSS', () => {
   it('should convert cssFloat to float', () => {

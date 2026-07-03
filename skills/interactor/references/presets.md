@@ -1,6 +1,6 @@
 # Preset catalog (@wix/motion-presets)
 
-The 62 production presets, by category, with parameters and defaults — plus an
+The production presets, by category, with parameters and defaults — plus an
 accessibility risk guide and an "atmosphere → preset" selection map. A preset is
 referenced as `namedEffect: { type: 'Name', ...params }`. The `type` string must
 exactly match a name below (PascalCase). Register presets before use:
@@ -41,7 +41,7 @@ produces silently-wrong output. Never invent a `type`.
 
 ---
 
-## Entrance (19) — for `viewEnter` (time-based)
+## Entrance — for `viewEnter` (time-based)
 
 `triggerType: 'once'` for the classic entrance. Default easing is per-preset.
 
@@ -69,7 +69,7 @@ produces silently-wrong output. Never invent a `type`.
 
 ---
 
-## Scroll (19) — for `viewProgress` (ViewTimeline)
+## Scroll — for `viewProgress` (ViewTimeline)
 
 **All share `range: 'in' | 'out' | 'continuous'`** (in = animate in on enter, out =
 animate out on exit, continuous = pass through idle across the full range; prefer
@@ -107,7 +107,7 @@ range: 'continuous' }`). It is unrelated to the effect-level **`rangeStart`/
 
 ---
 
-## Ongoing (13) — continuous loops, any trigger
+## Ongoing — continuous loops, any trigger
 
 Run with `iterations: Infinity` (or large) for a perpetual loop, or attach to a
 trigger. **All accept `iterationDelay`** (ms, default `0`) inside `namedEffect` — an
@@ -131,7 +131,7 @@ idle pause appended after each cycle.
 
 ---
 
-## Mouse (11) — for `pointerMove`
+## Mouse — for `pointerMove`
 
 Cursor-position-driven transforms (`x:0.5, y:0.5` = center). **All share `inverted`
 boolean (`false`)**; where present, `axis` ∈ `both | horizontal | vertical`

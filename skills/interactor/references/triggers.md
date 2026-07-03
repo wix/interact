@@ -9,7 +9,7 @@ break them. Pair this with `config-schema.md` (effect field definitions) and
 
 The trigger sets _when_; the effect's playback field sets _how it plays_:
 
-- **Time effects** (keyframe/named/custom) on hover/click/viewEnter → `triggerType`.
+- **Time effects** (keyframe/named/custom) on hover/click/viewEnter/animationEnd → `triggerType`.
 - **State effects** (CSS transitions) on hover/click → `stateAction`.
 - **Scrub effects** on viewProgress → `rangeStart`/`rangeEnd`; pointerMove → `centeredToTarget`; (no `triggerType`).
 
