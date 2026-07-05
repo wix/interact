@@ -1,343 +1,77 @@
 # Core Functions
 
-Complete reference for Wix Motion's primary animation creation and management functions.
+Reference for the functions Wix Motion exports to create and drive animations directly — WAAPI, CSS, scroll-driven, and pointer-driven.
 
-## Overview
+> **Gotchas**
+>
+> - There is **no top-level `type` field** on the options object. `AnimationOptions` is discriminated **structurally** by the presence of `keyframeEffect` / `namedEffect` / `customEffect` (`namedEffect.type` is valid — that's the registered preset name).
+> - `getWebAnimation()`, `getScrubScene()`, and `getAnimation()` can all return `null`. Don't type a const as `AnimationGroup` — check the result before calling methods on it.
+> - `getWebAnimation()` takes a **single** `AnimationOptions` object, never an array. To coordinate multiple elements/effects, use `getSequence()`.
+> - `getCSSAnimation()` returns an **array of descriptor objects**, not a string.
+> - `startOffset` / `endOffset` live on the animation **options**, not the trigger. Pointer `axis` lives on the **trigger**, not the effect.
+> - `iterations: 0` means infinite (not just `Infinity`, though that also works).
+> - Named easings are limited to the sets listed under [`getEasing` / `getJsEasing`](#geteasing--getjseasing) below — `cubic-bezier(...)` is hyphenated, not `cubicBezier(...)`.
+>
+> Looking for `getSequence()` or `createAnimationGroups()`? They're documented in [Sequence Creation](./get-sequence.md) rather than duplicated here.
 
-Wix Motion provides four core functions for creating and managing animations:
+## getWebAnimation
 
-- **`getWebAnimation()`** - Create Web Animations API instances
-- **`getScrubScene()`** - Generate scroll/pointer-driven scenes
-- **`getCSSAnimation()`** - Generate CSS animation rules
-- **`prepareAnimation()`** - Pre-calculate measurements where needed for CSS Animations
-
-## getWebAnimation()
-
-Creates Web Animations API instances for time-based and scrub-based animations.
+Creates a WAAPI-backed animation for a single element — time-based, scroll-linked (native `ViewTimeline`), or pointer-driven.
 
 ### Signature
 
 ```typescript
 function getWebAnimation(
   target: HTMLElement | string | null,
-  animationOptions: TimeAnimationOptions | ScrubAnimationOptions,
+  animationOptions: AnimationOptions,
   trigger?: Partial<TriggerVariant> & { element?: HTMLElement },
   options?: Record<string, any>,
   ownerDocument?: Document,
-): AnimationGroup | MouseAnimationInstance;
+): AnimationGroup | MouseAnimationInstance | null;
 ```
 
 ### Parameters
 
-#### `target` (required)
+| Parameter          | Type                                                      | Description                                                                                                                                                                                                              |
+| ------------------ | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target`           | `HTMLElement \| string \| null`                            | Element to animate. A `string` is resolved as an element id or CSS selector.                                                                                                                                             |
+| `animationOptions` | `AnimationOptions`                                         | A single animation configuration — never an array. Discriminated structurally by `keyframeEffect` / `namedEffect` / `customEffect`; see [Type Definitions](./types.md).                                                 |
+| `trigger`          | `Partial<TriggerVariant> & { element?: HTMLElement }`      | Optional. Omitted (or without `trigger.trigger`) produces a time-based animation. `{ trigger: 'view-progress' }` links to a scroll `ViewTimeline`. `{ trigger: 'pointer-move', axis?: 'x' \| 'y' }` drives on pointer movement — `axis` picks which pointer axis feeds a `keyframeEffect`. |
+| `options`          | `Record<string, any>`                                      | Optional. The engine reads `{ reducedMotion }` from this bag. `effectId` is **not** read here — set `animationOptions.effectId` instead.                                                                                 |
+| `ownerDocument`    | `Document`                                                 | Optional. Document context; defaults to `document`.                                                                                                                                                                      |
 
-The element to animate. Can be:
+### Returns
 
-- **HTMLElement** - Direct element reference
-- **string** - Element ID or CSS selector
-- **null** - For measurement-only operations
+`AnimationGroup | MouseAnimationInstance | null`
 
-```typescript
-// Direct element reference
-const element = document.getElementById('myElement');
-getWebAnimation(element, options);
+- Returns `null` when no effect data can be generated — e.g. an unregistered `namedEffect`, reduced motion dropping a multi-iteration animation, or a pointer factory that couldn't be built.
+- Returns `MouseAnimationInstance` only on the `pointer-move` + non-`keyframeEffect` path (i.e. a `namedEffect`/`customEffect` driven by the pointer); every other path returns an `AnimationGroup`.
+- With `{ trigger: 'view-progress' }` and `window.ViewTimeline` present, the animation is linked to a native `ViewTimeline` (`duration: 'auto'`) and plays automatically.
+- With `view-progress` but no `window.ViewTimeline`, the animation is created with a scrubbable `duration: 99.99ms` / `delay: 0.01ms`, meant to be driven via [`getScrubScene()`](#getscrubscene).
 
-// Element ID
-getWebAnimation('myElement', options);
-
-// CSS selector
-getWebAnimation('.my-class', options);
-```
-
-#### `animationOptions` (required)
-
-Animation configuration object. Must be either `TimeAnimationOptions` for time-based animations or `ScrubAnimationOptions` for scrub-based animations.
-
-```typescript
-// Time-based animation
-const timeOptions: TimeAnimationOptions = {
-  type: 'TimeAnimationOptions',
-  namedEffect: { type: 'FadeIn' },
-  duration: 1000,
-  easing: 'easeOut',
-};
-
-// Scrub-based animation
-const scrubOptions: ScrubAnimationOptions = {
-  type: 'ScrubAnimationOptions',
-  namedEffect: { type: 'ParallaxScroll', speed: 0.5 },
-  startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
-  endOffset: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
-};
-```
-
-#### `trigger` (optional)
-
-Trigger configuration for scrub-based animations:
-
-```typescript
-// Scroll trigger
-{
-  trigger: 'view-progress',
-    element: containerElement
-}
-
-// Mouse trigger
-{
-  trigger: 'pointer-move',
-  element: containerElement
-}
-```
-
-#### `options` (optional)
-
-Additional configuration options:
-
-```typescript
-{
-  effectId: 'custom-effect-id',
-  measurementCallback: () => console.log('Measured!')
-}
-```
-
-#### `ownerDocument` (optional)
-
-Document context for the animation (defaults to `document`).
-
-### Return Value
-
-Returns either:
-
-- **`AnimationGroup`** - For time-based animations and scroll animations
-- **`MouseAnimationInstance`** - For mouse-driven animations
-
-### Examples
-
-#### Basic Entrance Animation
+### Example
 
 ```typescript
 import { getWebAnimation } from '@wix/motion';
 
-const animation = getWebAnimation('#hero-title', {
-  type: 'TimeAnimationOptions',
-  namedEffect: {
-    type: 'FadeIn',
+const group = getWebAnimation(document.getElementById('hero'), {
+  keyframeEffect: {
+    name: 'fade-up',
+    keyframes: [
+      { opacity: 0, transform: 'translateY(20px)' },
+      { opacity: 1, transform: 'translateY(0)' },
+    ],
   },
-  duration: 800,
-  easing: 'easeOut',
+  duration: 600,
+  easing: 'ease-out',
 });
 
-// Play the animation
-await animation.play();
+group?.play();
 ```
 
-#### Scroll-Driven Animation
+## getCSSAnimation
 
-```typescript
-const element = document.querySelector('#parallax-element');
-const scrollAnimation = getWebAnimation(
-  element,
-  {
-    type: 'ScrubAnimationOptions',
-    namedEffect: {
-      type: 'ParallaxScroll',
-      speed: 0.3,
-    },
-  },
-  {
-    trigger: 'view-progress',
-    element,
-  },
-);
-
-// Animation automatically responds to scroll
-```
-
-#### Mouse Interaction
-
-```typescript
-const mouseAnimation = getWebAnimation(
-  '#interactive-card',
-  {
-    type: 'ScrubAnimationOptions',
-    namedEffect: {
-      type: 'Tilt3DMouse',
-      angle: 15,
-      perspective: 800,
-    },
-  },
-  {
-    trigger: 'pointer-move',
-    element: document.querySelector('#card-container'),
-  },
-);
-
-// Animation responds to mouse movement
-```
-
-#### Complex Multi-Effect Animation
-
-```typescript
-const multiAnimation = getWebAnimation(
-  '#complex-element',
-  {
-    type: 'TimeAnimationOptions',
-    namedEffect: {
-      type: 'ArcIn',
-      direction: 'bottom',
-    },
-    duration: 1200,
-    delay: 300,
-    easing: 'backOut',
-  },
-  undefined,
-  {
-    effectId: 'hero-entrance',
-  },
-);
-```
-
-## getScrubScene()
-
-Creates scroll or pointer-driven scenes where polyfilling native timelines is necessary.
-
-### Signature
-
-```typescript
-function getScrubScene(
-  target: HTMLElement | string | null,
-  animationOptions: ScrubAnimationOptions,
-  trigger: Partial<TriggerVariant> & { element?: HTMLElement },
-  sceneOptions?: Record<string, any>,
-): ScrubScrollScene[] | ScrubPointerScene;
-```
-
-### Parameters
-
-#### `target` (required)
-
-Element to animate (same as `getWebAnimation`).
-
-#### `animationOptions` (required)
-
-Must be `ScrubAnimationOptions` configuration.
-
-#### `trigger` (required)
-
-Trigger configuration specifying how the animation responds:
-
-```typescript
-// Scroll trigger with viewport element
-{
-  trigger: 'view-progress',
-  element: element,
-  startOffset: { name: 'cover', offset: { value: 20, unit: 'percentage' } },
-  endOffset: { name: 'exit', offset: { value: 0, unit: 'percentage' } }
-}
-
-// Pointer trigger with container
-{
-  trigger: 'pointer-move',
-  element: containerElement
-}
-```
-
-#### `sceneOptions` (optional)
-
-Additional scene configuration:
-
-```typescript
-{
-  groupId: 'scene-group-1',
-  disabled: false,
-  allowActiveEvent: true
-}
-```
-
-### Return Value
-
-Returns either:
-
-- **`ScrubScrollScene[]`** - Array of scroll scenes
-- **`ScrubPointerScene`** - Single pointer scene
-
-### Examples
-
-#### Parallax Scroll Scene
-
-```typescript
-import { getScrubScene } from '@wix/motion';
-
-const element = document.querySelector('#sliding-image');
-const scene = getScrubScene(
-  element,
-  {
-    type: 'ScrubAnimationOptions',
-    namedEffect: {
-      type: 'ParallaxScroll',
-      speed: 0.5,
-    },
-  },
-  {
-    trigger: 'view-progress',
-    element,
-  },
-);
-```
-
-#### Advanced Scroll Range Control
-
-```typescript
-const preciseScene = getScrubScene(
-  '#text-reveal',
-  {
-    type: 'ScrubAnimationOptions',
-    namedEffect: {
-      type: 'RevealScroll',
-      direction: 'bottom',
-      range: 'in',
-    },
-    startOffset: {
-      name: 'entry',
-      offset: { value: 30, unit: 'percentage' },
-    },
-    endOffset: {
-      name: 'cover',
-      offset: { value: 70, unit: 'percentage' },
-    },
-  },
-  {
-    trigger: 'view-progress',
-    element: document.querySelector('#content-section'),
-  },
-);
-```
-
-#### Mouse Scene with Transitions
-
-```typescript
-const mouseScene = getScrubScene(
-  '#hover-element',
-  {
-    type: 'ScrubAnimationOptions',
-    namedEffect: {
-      type: 'ScaleMouse',
-      distance: { value: 100, unit: 'px' },
-      scale: 1.1,
-    },
-    transitionDuration: 200,
-    transitionEasing: 'easeOut',
-  },
-  {
-    trigger: 'pointer-move',
-    element: document.querySelector('#interaction-area'),
-  },
-);
-```
-
-## getCSSAnimation()
-
-Generates CSS animation rules for stylesheet-based animations, optimized for performance.
+Generates CSS animation descriptors for stylesheet-based rendering — the SSR / FOUC-free path.
 
 ### Signature
 
@@ -346,56 +80,196 @@ function getCSSAnimation(
   target: string | null,
   animationOptions: AnimationOptions,
   trigger?: TriggerVariant,
-): string;
+): Array<{
+  target: string;
+  animation: string;
+  composition?: CompositeOperation;
+  custom?: Record<string, string | number | undefined>;
+  name: string;
+  keyframes: Record<string, string | number | undefined>[];
+  id: string | undefined;
+  animationTimeline: string;
+  animationRange: string;
+}>;
 ```
 
 ### Parameters
 
-#### `target` (required)
+| Parameter          | Type                | Description                                                                                                                                                             |
+| ------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `target`           | `string \| null`     | Element id or CSS selector. CSS rules target selectors, so — unlike `getWebAnimation` — an `HTMLElement` reference is not accepted here.                                |
+| `animationOptions` | `AnimationOptions`   | Same shape as `getWebAnimation`.                                                                                                                                          |
+| `trigger`          | `TriggerVariant`     | Optional. `view-progress` animations always resolve to `duration: 'auto'` through this function, regardless of runtime `ViewTimeline` support (the SSR-safe `forCSS` path). |
 
-Element ID (string) or null. Unlike `getWebAnimation`, this only accepts string IDs since CSS rules target selectors.
+### Returns
 
-#### `animationOptions` (required)
+**An array of descriptor objects — never a string.** Each entry describes one `@keyframes` block plus the `animation` shorthand that applies it:
 
-Animation configuration (same as `getWebAnimation`).
+| Field               | Type                                                     | Description                                                                                              |
+| ------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `target`            | `string`                                                   | Selector for the animated element or sub-part, e.g. `"#hero"` or `"#hero[data-motion-part~='icon']"`; `""` if no target resolved. |
+| `animation`         | `string`                                                   | The CSS `animation` shorthand value. **Paused by default** — toggle `animation-play-state` or add a class to start it. |
+| `composition`       | `CompositeOperation \| undefined`                          | Composite operation, if set.                                                                              |
+| `custom`            | `Record<string, string \| number \| undefined> \| undefined` | Custom property values referenced by the keyframes.                                                        |
+| `name`              | `string`                                                   | The `@keyframes` name.                                                                                     |
+| `keyframes`         | `Record<string, string \| number \| undefined>[]`          | Ordered keyframe declarations, rendered as `@keyframes` steps.                                             |
+| `id`                | `string \| undefined`                                      | Effect id, if provided.                                                                                    |
+| `animationTimeline` | `string`                                                   | `` `--${trigger.id}` `` for `view-progress` triggers, else `""`.                                          |
+| `animationRange`    | `string`                                                   | e.g. `"cover 0% cover 100%"` for `view-progress` triggers, else `""`.                                      |
 
-#### `trigger` (optional)
-
-Trigger configuration for scrub-based animations.
-
-### Return Value
-
-Returns a **string** containing CSS rules that can be inserted into a stylesheet.
-
-### Examples
-
-#### Basic CSS Animation
+### Example
 
 ```typescript
 import { getCSSAnimation } from '@wix/motion';
 
-const cssRules = getCSSAnimation('myElement', {
-  type: 'TimeAnimationOptions',
-  namedEffect: { type: 'FadeIn' },
-  duration: 1000,
-  easing: 'ease-out'
+const descriptors = getCSSAnimation('hero', {
+  keyframeEffect: {
+    name: 'fade-up',
+    keyframes: [
+      { opacity: 0, transform: 'translateY(20px)' },
+      { opacity: 1, transform: 'translateY(0)' },
+    ],
+  },
+  duration: 600,
+  easing: 'ease-out',
+});
+// descriptors: Array<{ target, animation, name, keyframes, ... }>
+
+const sheet = new CSSStyleSheet();
+
+descriptors.forEach(({ target, animation, name, keyframes }) => {
+  const steps = keyframes
+    .map((frame, i) => {
+      const percent = (i / (keyframes.length - 1)) * 100;
+      const decls = Object.entries(frame)
+        .map(([prop, value]) => `${prop}: ${value};`)
+        .join(' ');
+      return `${percent}% { ${decls} }`;
+    })
+    .join(' ');
+
+  sheet.insertRule(`@keyframes ${name} { ${steps} }`);
+  sheet.insertRule(`${target || '#hero'} { animation: ${animation}; }`);
 });
 
-// Insert into a stylesheet
-const sheet = new CSSStyleSheet();
-style.insertRule(cssRules);
-document.adoptedStyleSheets.push(sheet);
+document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
 
-// OR render to a style tag on server-side using plain strings
-<sytle>`${cssRules}`</style>
-
-// OR render to a style tag on server-side using a framework (e.g. React)
-<style>{cssRules}</style>
+// Or render to a <style> tag on the server using the same fields:
+// descriptors.map((d) => `@keyframes ${d.name} { ... } ${d.target} { animation: ${d.animation}; }`).join('\n')
 ```
 
-## prepareAnimation()
+## getScrubScene
 
-Pre-calculates measurements and prepares elements for using CSS Animations where additionl measurements are necessary.
+Builds scroll-polyfill or pointer-driven scrub scenes for cases where a native `ViewTimeline` isn't available or driving.
+
+### Signature
+
+```typescript
+function getScrubScene(
+  target: HTMLElement | string | null,
+  animationOptions: AnimationOptions,
+  trigger: Partial<TriggerVariant> & { element?: HTMLElement },
+  sceneOptions?: Record<string, any>,
+): ScrubScrollScene[] | ScrubPointerScene | ScrubPointerScene[] | null;
+```
+
+### Parameters
+
+| Parameter          | Type                                                   | Description                                                                                                                                |
+| ------------------ | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target`           | `HTMLElement \| string \| null`                          | Same resolution as `getWebAnimation`.                                                                                                       |
+| `animationOptions` | `AnimationOptions`                                       | `startOffset` / `endOffset` (the scroll range) live **here**, on the options — not on `trigger`.                                            |
+| `trigger`          | `Partial<TriggerVariant> & { element?: HTMLElement }`    | Required. `{ trigger: 'view-progress' }` or `{ trigger: 'pointer-move', axis?: 'x' \| 'y' }`. Pointer `axis` also lives here, not on the effect. |
+| `sceneOptions`     | `Record<string, any>`                                    | Optional. `{ disabled, allowActiveEvent, ...rest }` — remaining keys are forwarded to the underlying `getWebAnimation` call.                 |
+
+### Returns
+
+`ScrubScrollScene[] | ScrubPointerScene | ScrubPointerScene[] | null`
+
+- `view-progress` with **no** `window.ViewTimeline` → `ScrubScrollScene[]` (one per partial animation). This is the only branch that emits scroll scenes — when `ViewTimeline` is available, use [`getWebAnimation()`](#getwebanimation) for the native path instead.
+- `pointer-move` + `keyframeEffect` → a single `ScrubPointerScene` driving an `AnimationGroup`'s progress.
+- `pointer-move` + `namedEffect` / `customEffect` → a single `ScrubPointerScene` wrapping a `MouseAnimationInstance`.
+- `null` if the underlying animation couldn't be created.
+
+Drive each scene yourself: call `scene.effect(scene, progress)` from your own `IntersectionObserver` / scroll / pointer listener, and `scene.destroy()` to clean up. `@wix/interact` automates this via its bundled scroll polyfill, [`fizban`](https://github.com/wix-incubator/fizban).
+
+### Example
+
+```typescript
+import { getScrubScene } from '@wix/motion';
+
+const scrollRoot = document.getElementById('scrollRoot');
+
+const scenes = getScrubScene(
+  document.getElementById('parallax'),
+  {
+    keyframeEffect: {
+      name: 'parallax',
+      keyframes: [{ transform: 'translateY(80px)' }, { transform: 'translateY(-80px)' }],
+    },
+    startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+    endOffset: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
+  },
+  { trigger: 'view-progress', element: scrollRoot },
+);
+
+if (Array.isArray(scenes)) {
+  scenes.forEach((scene) => {
+    // Drive scene.effect(scene, progress) from your own scroll/IntersectionObserver
+    // listener when ViewTimeline is unavailable, and call scene.destroy() on teardown.
+  });
+}
+```
+
+## getAnimation
+
+Reuses an existing CSS animation on the element if one is present; otherwise falls back to `getWebAnimation()`.
+
+### Signature
+
+```typescript
+function getAnimation(
+  target: HTMLElement | string | null,
+  animationOptions: AnimationOptions,
+  trigger?: Partial<TriggerVariant> & { element?: HTMLElement },
+  reducedMotion?: boolean,
+): AnimationGroup | MouseAnimationInstance | null;
+```
+
+### Parameters
+
+| Parameter          | Type                                                   | Description                                                        |
+| ------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `target`           | `HTMLElement \| string \| null`                          | Same resolution as `getWebAnimation`.                                |
+| `animationOptions` | `AnimationOptions`                                       | Same shape as `getWebAnimation`.                                     |
+| `trigger`          | `Partial<TriggerVariant> & { element?: HTMLElement }`    | Optional. Same shape as `getWebAnimation`.                            |
+| `reducedMotion`    | `boolean`                                                | Optional, default `false`. Forwarded to the CSS/WAAPI creation path.  |
+
+### Returns
+
+`AnimationGroup | MouseAnimationInstance | null`
+
+Checks for an existing CSS animation on the element first (via `getElementCSSAnimation`) — if found, returns that `AnimationGroup`, whose `ready` promise runs `prepareAnimation` internally. Otherwise falls back to `getWebAnimation`, with the same return semantics (including `null`).
+
+### Example
+
+```typescript
+import { getAnimation } from '@wix/motion';
+
+const group = getAnimation(document.getElementById('hero'), {
+  keyframeEffect: {
+    name: 'fade-up',
+    keyframes: [{ opacity: 0 }, { opacity: 1 }],
+  },
+  duration: 600,
+});
+
+group?.play();
+```
+
+## prepareAnimation
+
+Runs an effect's optional `prepare(options, domApi)` hook — measure/mutate via `fastdom` — before an animation plays.
 
 ### Signature
 
@@ -409,218 +283,124 @@ function prepareAnimation(
 
 ### Parameters
 
-#### `target` (required)
+| Parameter   | Type                             | Description                                                            |
+| ----------- | --------------------------------- | -------------------------------------------------------------------------- |
+| `target`    | `HTMLElement \| string \| null`   | Element to prepare (same resolution as `getWebAnimation`).               |
+| `animation` | `AnimationOptions`                | The animation configuration to prepare for.                              |
+| `callback`  | `() => void`                      | Optional. Called inside a `fastdom.mutate` once preparation completes.   |
 
-Element to prepare (same as `getWebAnimation`).
+### Returns
 
-#### `animation` (required)
+`void`
 
-Animation configuration to prepare for.
-
-#### `callback` (optional)
-
-Function called when preparation is complete.
-
-### Examples
-
-#### Basic Preparation
+### Example
 
 ```typescript
-import { prepareAnimation, getElementCSSAnimation } from '@wix/motion';
+import { prepareAnimation } from '@wix/motion';
 
-// Prepare element before animating
 prepareAnimation(
-  '#complex-element',
+  document.getElementById('hero'),
   {
-    type: 'TimeAnimationOptions',
-    namedEffect: {
-      type: 'ArcIn',
-      direction: 'bottom',
+    keyframeEffect: {
+      name: 'fade-up',
+      keyframes: [{ opacity: 0 }, { opacity: 1 }],
     },
   },
   () => {
-    console.log('Element prepared for animation');
-
-    // Now create the animation
-    const animation = getElementCSSAnimation('#complex-element', animationOptions);
-    animation.play();
+    console.log('Prepared — safe to play the CSS animation now');
   },
 );
 ```
 
-#### Batch Preparation for Multiple Elements
+## registerEffects
+
+Merges effect modules into the global registry, keyed by name, so they can be referenced via `namedEffect: { type: '<name>' }`.
+
+### Signature
 
 ```typescript
-const elements = document.querySelectorAll('.animate-on-scroll');
-const preparations = elements.map((element) => {
-  return new Promise((resolve) => {
-    prepareAnimation(
-      element,
+function registerEffects(effects: Record<string, EffectModule>): void;
+```
+
+### Parameters
+
+| Parameter | Type                            | Description                                                                              |
+| --------- | -------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `effects` | `Record<string, EffectModule>`   | Map of effect name → `EffectModule` (`{ web, getNames, style?, prepare? }`). See [Type Definitions](./types.md). |
+
+### Returns
+
+`void`
+
+If a `namedEffect.type` isn't registered, `getRegisteredEffect(name)` logs a warning and returns `null` — which is why an unregistered `namedEffect` makes `getWebAnimation` (and friends) return `null`.
+
+### Example
+
+```typescript
+import { registerEffects } from '@wix/motion';
+
+registerEffects({
+  FadeUp: {
+    getNames: () => ['FadeUp'],
+    web: () => [
       {
-        type: 'ScrubAnimationOptions',
-        namedEffect: {
-          type: 'RevealScroll',
-          direction: 'bottom',
-        },
+        name: 'fade-up',
+        keyframes: [
+          { opacity: 0, transform: 'translateY(20px)' },
+          { opacity: 1, transform: 'translateY(0)' },
+        ],
       },
-      resolve,
-    );
-  });
+    ],
+  },
 });
 
-// Wait for all preparations to complete
-Promise.all(preparations).then(() => {
-  // Create animations after all measurements are done
-  elements.forEach((element) => {
-    getScrubScene(element, animationOptions, trigger);
-  });
-});
+// Now usable anywhere as:
+// getWebAnimation(el, { namedEffect: { type: 'FadeUp' }, duration: 600 });
 ```
 
-#### Performance-Critical Preparation
+`@wix/motion-presets` ships a large catalog of ready-made modules built to this same contract — see its docs for the preset list. Motion only documents the registry contract, not the presets themselves.
+
+## getEasing / getJsEasing
+
+Resolve a named or raw easing value into a CSS easing string or a JS easing function.
+
+### Signature
 
 ```typescript
-// Prepare during idle time
-if ('requestIdleCallback' in window) {
-  requestIdleCallback(() => {
-    prepareAnimation('#hero-element', heroAnimationConfig, () => {
-      // Ready to animate when needed
-    });
-  });
-} else {
-  // Fallback for browsers without requestIdleCallback
-  setTimeout(() => {
-    prepareAnimation('#hero-element', heroAnimationConfig);
-  }, 0);
-}
+function getEasing(easing?: string): string;
+function getJsEasing(easing?: string): ((t: number) => number) | undefined;
 ```
 
-## Common Patterns and Best Practices
+### Parameters
 
-### Animation Lifecycle Management
+| Parameter | Type     | Description                                                                                                                     |
+| --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `easing`  | `string` | Optional. A named easing key, a raw `cubic-bezier(x1, y1, x2, y2)` string (hyphenated), or — for `getJsEasing` only — a CSS `linear(...)` string. |
 
-```typescript
-class AnimationManager {
-  private animations: Map<string, AnimationGroup> = new Map();
+### Returns
 
-  createAnimation(id: string, element: HTMLElement, options: TimeAnimationOptions) {
-    // Clean up existing animation
-    this.destroyAnimation(id);
+- `getEasing(easing?)` → `string` — resolves a named key via the CSS easing map, falling back to the raw string if unresolved, else `'linear'`.
+- `getJsEasing(easing?)` → `((t: number) => number) | undefined` — resolves a named key via the JS easing map, else parses a `cubic-bezier(...)` string, else parses a CSS `linear(...)` string, else falls back to the linear JS easing. Returns `undefined` only when `easing` is falsy.
 
-    // Prepare element
-    prepareAnimation(element, options, () => {
-      // Create new animation
-      const animation = getWebAnimation(element, options);
-      this.animations.set(id, animation);
-    });
-  }
+Valid named keys:
 
-  async playAnimation(id: string) {
-    const animation = this.animations.get(id);
-    if (animation) {
-      await animation.play();
-    }
-  }
+- **JS easings** (Penner functions, usable via `getJsEasing` and as `Sequence`'s `offsetEasing`): `linear`, `sineIn`, `sineOut`, `sineInOut`, `quadIn`, `quadOut`, `quadInOut`, `cubicIn`, `cubicOut`, `cubicInOut`, `quartIn`, `quartOut`, `quartInOut`, `quintIn`, `quintOut`, `quintInOut`, `expoIn`, `expoOut`, `expoInOut`, `circIn`, `circOut`, `circInOut`, `backIn`, `backOut`, `backInOut`.
+- **CSS easings** (usable via `getEasing` and the `easing` option): `linear`, `ease`, `easeIn`, `easeOut`, `easeInOut`, plus every JS key above (except `linear`/`ease*`) mapped to a `cubic-bezier(...)` value.
 
-  destroyAnimation(id: string) {
-    const animation = this.animations.get(id);
-    if (animation) {
-      animation.cancel();
-      this.animations.delete(id);
-    }
-  }
+Names like `easeOutCubic`, `elasticOut`, `bounceOut`, and `bounceIn` don't exist. (`elastic` / `bounce` exist only as `ScrubTransitionEasing` values for pointer smoothing — a different field.)
 
-  destroyAll() {
-    this.animations.forEach((animation) => animation.cancel());
-    this.animations.clear();
-  }
-}
-```
-
-### Responsive Animation Creation
+### Example
 
 ```typescript
-function createResponsiveAnimation(element: HTMLElement) {
-  const isMobile = window.innerWidth < 768;
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+import { getEasing, getJsEasing } from '@wix/motion';
 
-  let options: TimeAnimationOptions;
+getEasing('quadIn'); // → a 'cubic-bezier(...)' string
+getEasing(); // → 'linear' (default)
 
-  if (prefersReducedMotion) {
-    // Minimal animation for accessibility
-    options = {
-      type: 'TimeAnimationOptions',
-      namedEffect: { type: 'FadeIn' },
-      duration: 200,
-    };
-  } else if (isMobile) {
-    // Lighter animation for mobile
-    options = {
-      type: 'TimeAnimationOptions',
-      namedEffect: { type: 'SlideIn', direction: 'bottom' },
-      duration: 600,
-    };
-  } else {
-    // Full animation for desktop
-    options = {
-      type: 'TimeAnimationOptions',
-      namedEffect: { type: 'ArcIn', direction: 'bottom' },
-      duration: 1000,
-      easing: 'backOut',
-    };
-  }
-
-  return getWebAnimation(element, options);
-}
-```
-
-## Performance Considerations
-
-### Function Selection Guidelines
-
-- **Use `getWebAnimation()`** for:
-  - Interactive animations requiring control
-  - Complex timing sequences
-  - Dynamic parameter changes
-  - Event-driven animations
-  - When server-side rendering is not available
-
-- **Use `getCSSAnimation()`** for:
-  - Simple, fire-and-forget animations
-  - Mobile-first applications
-  - Animations that run during page load
-  - Performance-critical scenarios
-  - When server-side rendering is available for a more performent usage
-
-- **Use `getScrubScene()`** for:
-  - Controling pointer-driven animations
-  - Polyfilling ViewTimelines for scroll animations
-  - Custom effects driven by scroll or pointer movement
-
-- **Use `prepareAnimation()`** for:
-  - Preparing CSS animations requiring measurements which are not possible via CSS
-
-### Memory Management
-
-```typescript
-// Always clean up animations when done
-class ComponentWithAnimations {
-  private animations: AnimationGroup[] = [];
-
-  createAnimations() {
-    this.animations.push(getWebAnimation(this.element, options));
-  }
-
-  destroy() {
-    // Clean up all animations
-    this.animations.forEach((animation) => {
-      animation.cancel();
-    });
-    this.animations = [];
-  }
-}
+const ease = getJsEasing('backOut'); // → (t: number) => number
+getJsEasing(); // → undefined (falsy input)
 ```
 
 ---
 
-**Next**: Explore the [AnimationGroup API](animation-group.md) for advanced animation control, or check out [Type Definitions](types.md) for complete TypeScript reference.
+**Next**: See [Sequence Creation](./get-sequence.md) for `getSequence()` / `createAnimationGroups()`, or return to the [API Reference](./README.md).

@@ -1,206 +1,55 @@
 # API Reference
 
-Complete reference for all Wix Motion functions, types, and classes.
+Index of everything `@wix/motion` exports — functions, classes, and types — with links to the full reference for each.
 
-## Core Functions
+## Functions
 
-### [Animation Creation](core-functions.md)
+| Function                    | Purpose                                                                          | Returns                                                              | Reference                                                                      |
+| ---------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `getWebAnimation()`          | Create a WAAPI-backed animation — time-based, scroll-linked, or pointer-driven    | `AnimationGroup \| MouseAnimationInstance \| null`                    | [core-functions.md#getwebanimation](./core-functions.md#getwebanimation)        |
+| `getCSSAnimation()`          | Generate CSS animation descriptors for stylesheet / SSR rendering                | `Array<{ target, animation, name, keyframes, ... }>`                 | [core-functions.md#getcssanimation](./core-functions.md#getcssanimation)        |
+| `getScrubScene()`            | Build scroll-polyfill or pointer-driven scrub scenes                             | `ScrubScrollScene[] \| ScrubPointerScene \| ScrubPointerScene[] \| null` | [core-functions.md#getscrubscene](./core-functions.md#getscrubscene)            |
+| `getAnimation()`             | Reuse an existing CSS animation if present, else fall back to `getWebAnimation()` | `AnimationGroup \| MouseAnimationInstance \| null`                    | [core-functions.md#getanimation](./core-functions.md#getanimation)              |
+| `prepareAnimation()`         | Run an effect's `prepare()` hook (measure/mutate via `fastdom`) before animating  | `void`                                                                | [core-functions.md#prepareanimation](./core-functions.md#prepareanimation)      |
+| `registerEffects()`          | Register named effect modules into the global registry                          | `void`                                                                | [core-functions.md#registereffects](./core-functions.md#registereffects)        |
+| `getEasing()`                | Resolve a named/raw easing to a CSS easing string                               | `string`                                                              | [core-functions.md#geteasing--getjseasing](./core-functions.md#geteasing--getjseasing) |
+| `getJsEasing()`              | Resolve a named/raw easing to a JS easing function                              | `((t: number) => number) \| undefined`                                | [core-functions.md#geteasing--getjseasing](./core-functions.md#geteasing--getjseasing) |
+| `getSequence()`              | Coordinate multiple `AnimationGroup`s with staggered offsets                     | `Sequence`                                                            | [get-sequence.md#getsequence](./get-sequence.md#getsequence)                    |
+| `createAnimationGroups()`    | Build `AnimationGroup`s from target/options pairs without a `Sequence` wrapper   | `AnimationGroup[]`                                                    | [get-sequence.md#createanimationgroups](./get-sequence.md#createanimationgroups) |
 
-- `getWebAnimation()` - Create Web Animations API instances
-- `getScrubScene()` - Generate scroll/pointer-driven scenes
-- `getCSSAnimation()` - Generate CSS animation rules
-- `prepareAnimation()` - Pre-calculate measurements
+## Classes
 
-### [Animation Group](animation-group.md)
+| Class            | Purpose                                                                            | Reference                              |
+| ---------------- | ------------------------------------------------------------------------------------- | --------------------------------------- |
+| `AnimationGroup` | Controls one or more `Animation`s as a unit — play, pause, reverse, cancel, progress   | [animation-group.md](./animation-group.md) |
+| `Sequence`       | Extends `AnimationGroup` to stagger multiple groups using easing-driven delay offsets  | [sequence.md](./sequence.md)            |
 
-- `AnimationGroup` class - Manage multiple related animations
-- Control methods and properties
-- Event handling and callbacks
+## Types
 
-### [Sequence](sequence.md)
+See [Type Definitions](./types.md) for the full `AnimationOptions`, trigger, and scrub-scene type reference.
 
-- `Sequence` class - Coordinate multiple AnimationGroups with staggered delay offsets
-- `addGroups()` / `removeGroups()` for dynamic group management
-- Easing-driven offset calculation
+## Guides
 
-### [Sequence Creation](get-sequence.md)
+- [Custom Effects](../guides/custom-effects.md) — the `registerEffects()` / `EffectModule` contract, authoring `customEffect` callbacks, and driving scrub scenes.
+- [SSR & CSS Generation](../guides/ssr-css.md) — `getCSSAnimation()` descriptors and the FOUC-free rendering contract.
+- [Performance](../guides/performance.md) — `fastdom` batching and choosing between the CSS and WAAPI paths.
 
-- `getSequence()` - Create a Sequence from target/options pairs
-- `createAnimationGroups()` - Build AnimationGroups without a Sequence wrapper
+## Core mental model
 
-### [Type Definitions](types.md)
+> Every `AnimationOptions` object is discriminated **structurally** — there is no top-level `type` field. Pick exactly one effect mode:
+>
+> - **`keyframeEffect: { name, keyframes }`** — inline WAAPI/CSS keyframes, zero registration.
+> - **`customEffect: (element, progress) => void`** — a per-frame JS callback; the only programmatic mode. Called with `progress: null` on cancel.
+> - **`namedEffect: { type, ...params }`** — references an effect registered via `registerEffects()`. `type` here is the *preset name*, not a discriminator on the options object.
+>
+> Combine with a **trigger** (the 3rd argument to `getWebAnimation()` / `getScrubScene()`):
+>
+> - trigger omitted → time-based (`duration` / `easing` / `iterations`).
+> - `{ trigger: 'view-progress' }` → scroll-driven.
+> - `{ trigger: 'pointer-move' }` → pointer-driven.
 
-- Complete TypeScript interfaces
-- Animation option types
-- Named effect definitions
-- Utility types
+## See also
 
-## Quick Reference
-
-### Basic Animation Creation
-
-```typescript
-import { getWebAnimation } from '@wix/motion';
-
-const animation = getWebAnimation(
-  element,           // HTMLElement | string | null
-  animationOptions,  // TimeAnimationOptions | ScrubAnimationOptions
-  trigger?,          // TriggerVariant (for scroll/mouse)
-  options?           // Record<string, any>
-);
-```
-
-### Scroll Scene Creation
-
-```typescript
-import { getScrubScene } from '@wix/motion';
-
-const scene = getScrubScene(
-  element,           // HTMLElement | string | null
-  animationOptions,  // ScrubAnimationOptions
-  trigger,           // TriggerVariant
-  sceneOptions?      // Record<string, any>
-);
-```
-
-### CSS Animation Generation
-
-```typescript
-import { getCSSAnimation } from '@wix/motion';
-
-const cssRules = getCSSAnimation(
-  target,            // string | null (element ID)
-  animationOptions,  // AnimationOptions
-  trigger?           // TriggerVariant
-);
-```
-
-### Animation Preparation
-
-```typescript
-import { prepareAnimation } from '@wix/motion';
-
-prepareAnimation(
-  target,            // HTMLElement | string | null
-  animation,         // AnimationOptions
-  callback?          // () => void
-);
-```
-
-### Sequence Creation
-
-```typescript
-import { getSequence } from '@wix/motion';
-
-const sequence = getSequence(
-  { offset: 200, offsetEasing: 'quadIn' },
-  items.map((el) => ({
-    target: el,
-    options: { name: 'FadeIn', duration: 600 },
-  })),
-);
-sequence.play();
-```
-
-## Types Overview
-
-### Main Interfaces
-
-```typescript
-// Time-based animation options
-interface TimeAnimationOptions {
-  type: 'TimeAnimationOptions';
-  namedEffect?: NamedEffect;
-  keyframeEffect?: MotionKeyframeEffect;
-  customEffect?: CustomEffect;
-  duration?: number;
-  delay?: number;
-  easing?: string;
-  iterations?: number;
-  // ... more properties
-}
-
-// Scroll/mouse-driven animation options
-interface ScrubAnimationOptions {
-  type: 'ScrubAnimationOptions';
-  namedEffect?: NamedEffect;
-  keyframeEffect?: MotionKeyframeEffect;
-  customEffect?: CustomEffect;
-  startOffset?: RangeOffset;
-  endOffset?: RangeOffset;
-  // ... more properties
-}
-
-// Animation control group
-interface AnimationGroup {
-  animations: Animation[];
-  ready: Promise<void>;
-  play(callback?: () => void): Promise<void>;
-  pause(): void;
-  cancel(): void;
-  progress(p: number): void;
-  // ... more methods
-}
-
-// Sequence options
-interface SequenceOptions {
-  delay?: number;
-  offset?: number;
-  offsetEasing?: string | ((p: number) => number);
-}
-
-// Arguments for building animation groups
-interface AnimationGroupArgs {
-  target: HTMLElement | HTMLElement[] | string | null;
-  options: AnimationOptions;
-  context?: Record<string, any>;
-}
-
-// Indexed group for addGroups()
-interface IndexedGroup {
-  index: number;
-  group: AnimationGroup;
-}
-```
-
-### Named Effect Types
-
-```typescript
-// Entrance animations
-type EntranceAnimation = FadeIn | ArcIn | BounceIn | SlideIn | FlipIn | DropIn | ExpandIn | GlideIn;
-// ... all entrance types
-
-// Ongoing animations
-type OngoingAnimation = Pulse | Breathe | Spin | Wiggle | Flash | Bounce | Swing | Poke;
-// ... all ongoing types
-
-// Scroll animations
-type ScrollAnimation =
-  | ParallaxScroll
-  | FadeScroll
-  | GrowScroll
-  | RevealScroll
-  | TiltScroll
-  | MoveScroll;
-// ... all scroll types
-
-// Mouse animations
-type MouseAnimation = TrackMouse | Tilt3DMouse | ScaleMouse | BlurMouse | SwivelMouse | SpinMouse;
-// ... all mouse types
-
-// Background scroll animations
-type BackgroundScrollAnimation =
-  | BgParallax
-  | BgZoom
-  | BgFade
-  | BgRotate
-  | BgPan
-  | BgCloseUp
-  | BgSkew
-  | BgPullBack;
-// ... all background types
-```
-
----
-
-Explore each section for detailed documentation and examples.
+- [Getting Started](../getting-started.md) — install and build your first animation.
+- [Core Concepts](../core-concepts.md) — effect modes, triggers, and the mental model in depth.
+- [Package README](../../README.md) — overview and quick start.
