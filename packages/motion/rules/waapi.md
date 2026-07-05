@@ -30,18 +30,18 @@ function getWebAnimation(
   target: HTMLElement | string | null,
   animationOptions: AnimationOptions,
   trigger?: Partial<TriggerVariant> & { element?: HTMLElement },
-  options?: Record<string, any>,          // engine reads { reducedMotion }
+  options?: Record<string, any>, // engine reads { reducedMotion }
   ownerDocument?: Document,
-): AnimationGroup | MouseAnimationInstance | null
+): AnimationGroup | MouseAnimationInstance | null;
 ```
 
-| Arg | Type | Notes |
-| --- | --- | --- |
-| `target` | `HTMLElement \| string \| null` | A string is treated as an element `id` and resolved via `getElementById` (`ownerDocument` or `document`). |
-| `animationOptions` | `AnimationOptions` | **Single** object — see [Core Mental Model](./motion-main.md#core-mental-model). Never an array; use `getSequence` to coordinate multiple elements/effects. |
-| `trigger?` | `Partial<TriggerVariant> & { element?: HTMLElement }` | `TriggerVariant = { id: string; trigger: 'view-progress' \| 'pointer-move'; componentId: string }` (`../src/types.ts:207-211`). Also read for pointer: `axis?: 'x' \| 'y'`. Omitted/neither value ⇒ time-based. |
-| `options?` | `Record<string, any>` | Engine only reads `{ reducedMotion }` here; passed through to the registered effect's `web()` as its 3rd arg. |
-| `ownerDocument?` | `Document` | Used to resolve a string `target` in a different document (e.g. an iframe). |
+| Arg                | Type                                                  | Notes                                                                                                                                                                                                           |
+| ------------------ | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target`           | `HTMLElement \| string \| null`                       | A string is treated as an element `id` and resolved via `getElementById` (`ownerDocument` or `document`).                                                                                                       |
+| `animationOptions` | `AnimationOptions`                                    | **Single** object — see [Core Mental Model](./motion-main.md#core-mental-model). Never an array; use `getSequence` to coordinate multiple elements/effects.                                                     |
+| `trigger?`         | `Partial<TriggerVariant> & { element?: HTMLElement }` | `TriggerVariant = { id: string; trigger: 'view-progress' \| 'pointer-move'; componentId: string }` (`../src/types.ts:207-211`). Also read for pointer: `axis?: 'x' \| 'y'`. Omitted/neither value ⇒ time-based. |
+| `options?`         | `Record<string, any>`                                 | Engine only reads `{ reducedMotion }` here; passed through to the registered effect's `web()` as its 3rd arg.                                                                                                   |
+| `ownerDocument?`   | `Document`                                            | Used to resolve a string `target` in a different document (e.g. an iframe).                                                                                                                                     |
 
 ## Return Cases
 
@@ -80,16 +80,16 @@ Used when `trigger` is omitted (time-based). `duration`/`delay`/`endDelay` are *
 // ../src/types.ts:143-156
 type TimeAnimationOptions = {
   id?: string;
-  keyframeEffect?: MotionKeyframeEffect;   // see Effect-Definition Modes in motion-main.md
+  keyframeEffect?: MotionKeyframeEffect; // see Effect-Definition Modes in motion-main.md
   namedEffect?: NamedEffect;
   customEffect?: CustomEffect;
-  duration?: number;         // ms
-  delay?: number;            // ms
-  endDelay?: number;         // ms
-  easing?: string;           // named key or CSS easing string — see motion-main.md Easing Reference
-  iterations?: number;       // 0 ⇒ Infinity; undefined ⇒ 1
+  duration?: number; // ms
+  delay?: number; // ms
+  endDelay?: number; // ms
+  easing?: string; // named key or CSS easing string — see motion-main.md Easing Reference
+  iterations?: number; // 0 ⇒ Infinity; undefined ⇒ 1
   alternate?: boolean;
-  fill?: AnimationFillMode;  // 'none' | 'backwards' | 'forwards' | 'both'
+  fill?: AnimationFillMode; // 'none' | 'backwards' | 'forwards' | 'both'
   reversed?: boolean;
 };
 ```
@@ -105,7 +105,7 @@ type ScrubAnimationOptions = {
   keyframeEffect?: MotionKeyframeEffect;
   namedEffect?: NamedEffect;
   customEffect?: CustomEffect;
-  startOffset?: RangeOffset;                 // { name?: 'entry'|'exit'|'contain'|'cover'|'entry-crossing'|'exit-crossing'; offset?: LengthPercentage }
+  startOffset?: RangeOffset; // { name?: 'entry'|'exit'|'contain'|'cover'|'entry-crossing'|'exit-crossing'; offset?: LengthPercentage }
   endOffset?: RangeOffset;
   playbackRate?: number;
   easing?: string;
@@ -113,11 +113,11 @@ type ScrubAnimationOptions = {
   fill?: AnimationFillMode;
   alternate?: boolean;
   reversed?: boolean;
-  transitionDuration?: number;               // pointer smoothing (ms)
+  transitionDuration?: number; // pointer smoothing (ms)
   transitionDelay?: number;
-  transitionEasing?: ScrubTransitionEasing;  // 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce'
+  transitionEasing?: ScrubTransitionEasing; // 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce'
   centeredToTarget?: boolean;
-  duration?: LengthPercentage;               // NOTE: length/percentage, NOT ms — unlike TimeAnimationOptions.duration
+  duration?: LengthPercentage; // NOTE: length/percentage, NOT ms — unlike TimeAnimationOptions.duration
 };
 ```
 
@@ -136,37 +136,37 @@ A wrapper that simulates a WAAPI `GroupEffect` over one or more native `Animatio
 
 **Properties:**
 
-| Property | Type | Notes |
-| --- | --- | --- |
-| `animations` | `(Animation & { start?: RangeOffset; end?: RangeOffset })[]` | The wrapped native animations; `start`/`end` are written for the no-`ViewTimeline` scrub path. |
-| `options?` | `AnimationGroupOptions` | The `AnimationOptions` this group was built from, plus `trigger`/offset-add fields. |
-| `ready` | `Promise<void>` | Resolves once targets are measured/mutated (`fastdom`). `play()`/`reverse()` await this first. |
-| `isCSS` | `boolean` | `true` if `animations[0] instanceof CSSAnimation`. |
-| `longestAnimation` | `Animation` | The animation with the greatest computed `effect.getComputedTiming().endTime`. |
+| Property           | Type                                                         | Notes                                                                                          |
+| ------------------ | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `animations`       | `(Animation & { start?: RangeOffset; end?: RangeOffset })[]` | The wrapped native animations; `start`/`end` are written for the no-`ViewTimeline` scrub path. |
+| `options?`         | `AnimationGroupOptions`                                      | The `AnimationOptions` this group was built from, plus `trigger`/offset-add fields.            |
+| `ready`            | `Promise<void>`                                              | Resolves once targets are measured/mutated (`fastdom`). `play()`/`reverse()` await this first. |
+| `isCSS`            | `boolean`                                                    | `true` if `animations[0] instanceof CSSAnimation`.                                             |
+| `longestAnimation` | `Animation`                                                  | The animation with the greatest computed `effect.getComputedTiming().endTime`.                 |
 
 **Methods:**
 
-| Method | Signature | Behavior |
-| --- | --- | --- |
-| `play` | `async play(callback?: () => void): Promise<void>` | Awaits `ready`, calls `.play()` on every animation, awaits each `animation.ready`, then calls `callback`. **Resolves once playback has STARTED, not when it finishes** (`../src/AnimationGroup.ts:39-53`). |
-| `pause` | `pause(): void` | Calls `.pause()` on every animation. |
-| `reverse` | `async reverse(callback?: () => void): Promise<void>` | Same shape as `play`, but calls `.reverse()`. |
-| `progress` | `progress(p: number): void` | Sets `currentTime` on every animation to `(delay + duration*iterations) * p`, scrubbing all of them to progress `p`. |
-| `cancel` | `cancel(): void` | Calls `.cancel()` on every animation. |
-| `setPlaybackRate` | `setPlaybackRate(rate: number): void` | Sets `playbackRate` on every animation. |
-| `getProgress` | `getProgress(): number` | `longestAnimation.effect.getComputedTiming().progress`, or `0` if unavailable. |
-| `onFinish` | `async onFinish(callback: () => void): Promise<void>` | Awaits `Promise.all(animations.map(a => a.finished))`. On success, if the group isn't CSS, dispatches `new CustomEvent('animationend', { detail: { effectId } })` on the first animation's target, then calls `callback`. On interruption/rejection, logs a warning and does **not** call `callback` (`../src/AnimationGroup.ts:99-119`). |
-| `onAbort` | `async onAbort(callback: () => void): Promise<void>` | Awaits the same `finished` promise; if it rejects with `AbortError`, dispatches `new Event('animationcancel')` on the first non-CSS target and calls `callback` (`../src/AnimationGroup.ts:121-140`). |
-| `hasAnimationName` | `hasAnimationName(name: string): boolean` | `true` if any animation is a `CSSAnimation` with that `animationName`. |
-| `hasAnimationId` | `hasAnimationId(id: string): boolean` | `true` if any animation has that `id`. |
-| `getTimingOptions` | `getTimingOptions(): { delay: number; duration: number; iterations: number }[]` | One entry per animation, read from `effect.getTiming()`. |
+| Method             | Signature                                                                       | Behavior                                                                                                                                                                                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `play`             | `async play(callback?: () => void): Promise<void>`                              | Awaits `ready`, calls `.play()` on every animation, awaits each `animation.ready`, then calls `callback`. **Resolves once playback has STARTED, not when it finishes** (`../src/AnimationGroup.ts:39-53`).                                                                                                                                |
+| `pause`            | `pause(): void`                                                                 | Calls `.pause()` on every animation.                                                                                                                                                                                                                                                                                                      |
+| `reverse`          | `async reverse(callback?: () => void): Promise<void>`                           | Same shape as `play`, but calls `.reverse()`.                                                                                                                                                                                                                                                                                             |
+| `progress`         | `progress(p: number): void`                                                     | Sets `currentTime` on every animation to `(delay + duration*iterations) * p`, scrubbing all of them to progress `p`.                                                                                                                                                                                                                      |
+| `cancel`           | `cancel(): void`                                                                | Calls `.cancel()` on every animation.                                                                                                                                                                                                                                                                                                     |
+| `setPlaybackRate`  | `setPlaybackRate(rate: number): void`                                           | Sets `playbackRate` on every animation.                                                                                                                                                                                                                                                                                                   |
+| `getProgress`      | `getProgress(): number`                                                         | `longestAnimation.effect.getComputedTiming().progress`, or `0` if unavailable.                                                                                                                                                                                                                                                            |
+| `onFinish`         | `async onFinish(callback: () => void): Promise<void>`                           | Awaits `Promise.all(animations.map(a => a.finished))`. On success, if the group isn't CSS, dispatches `new CustomEvent('animationend', { detail: { effectId } })` on the first animation's target, then calls `callback`. On interruption/rejection, logs a warning and does **not** call `callback` (`../src/AnimationGroup.ts:99-119`). |
+| `onAbort`          | `async onAbort(callback: () => void): Promise<void>`                            | Awaits the same `finished` promise; if it rejects with `AbortError`, dispatches `new Event('animationcancel')` on the first non-CSS target and calls `callback` (`../src/AnimationGroup.ts:121-140`).                                                                                                                                     |
+| `hasAnimationName` | `hasAnimationName(name: string): boolean`                                       | `true` if any animation is a `CSSAnimation` with that `animationName`.                                                                                                                                                                                                                                                                    |
+| `hasAnimationId`   | `hasAnimationId(id: string): boolean`                                           | `true` if any animation has that `id`.                                                                                                                                                                                                                                                                                                    |
+| `getTimingOptions` | `getTimingOptions(): { delay: number; duration: number; iterations: number }[]` | One entry per animation, read from `effect.getTiming()`.                                                                                                                                                                                                                                                                                  |
 
 **Getters:**
 
-| Getter | Type | Behavior |
-| --- | --- | --- |
-| `finished` | `Promise<Animation[]>` | `Promise.all(animations.map(a => a.finished))`. **Plural — an array of `Animation`, not a single one.** This (or `onFinish`) is the correct way to observe completion — `await play()` does not. |
-| `playState` | `AnimationPlayState` | `'running'` if **any** wrapped animation is `'running'`; otherwise the first animation's `playState`. |
+| Getter      | Type                   | Behavior                                                                                                                                                                                         |
+| ----------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `finished`  | `Promise<Animation[]>` | `Promise.all(animations.map(a => a.finished))`. **Plural — an array of `Animation`, not a single one.** This (or `onFinish`) is the correct way to observe completion — `await play()` does not. |
+| `playState` | `AnimationPlayState`   | `'running'` if **any** wrapped animation is `'running'`; otherwise the first animation's `playState`.                                                                                            |
 
 ## Gotchas
 

@@ -28,11 +28,11 @@ drive `ScrubScrollScene`s — reach for `@wix/interact` before hand-rolling a dr
 
 ## Package Boundary
 
-| Need | Use |
-| --- | --- |
-| Declarative scroll/pointer triggers, automatic driving via `fizban` | `@wix/interact` |
-| Ready-made scroll/mouse preset catalog | `@wix/motion-presets` (register via `registerEffects`) |
-| Manual scrub-scene driving, custom scroll/pointer loops, SSR fallback for browsers without `ViewTimeline` | `@wix/motion` (this file) |
+| Need                                                                                                      | Use                                                    |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Declarative scroll/pointer triggers, automatic driving via `fizban`                                       | `@wix/interact`                                        |
+| Ready-made scroll/mouse preset catalog                                                                    | `@wix/motion-presets` (register via `registerEffects`) |
+| Manual scrub-scene driving, custom scroll/pointer loops, SSR fallback for browsers without `ViewTimeline` | `@wix/motion` (this file)                              |
 
 This file documents the imperative engine only. It does not document preset params or angle/direction
 conventions — those belong to `@wix/motion-presets`.
@@ -43,19 +43,19 @@ conventions — those belong to `@wix/motion-presets`.
 function getScrubScene(
   target: HTMLElement | string | null,
   animationOptions: AnimationOptions,
-  trigger: Partial<TriggerVariant> & { element?: HTMLElement },   // may also carry `axis`
-  sceneOptions: Record<string, any> = {},   // { disabled, allowActiveEvent, ...rest→getWebAnimation }
-): ScrubScrollScene[] | ScrubPointerScene | ScrubPointerScene[] | null
+  trigger: Partial<TriggerVariant> & { element?: HTMLElement }, // may also carry `axis`
+  sceneOptions: Record<string, any> = {}, // { disabled, allowActiveEvent, ...rest→getWebAnimation }
+): ScrubScrollScene[] | ScrubPointerScene | ScrubPointerScene[] | null;
 ```
 
 (`../src/motion.ts:74-196`)
 
-| Arg | Type | Notes |
-| --- | --- | --- |
-| `target` | `HTMLElement \| string \| null` | An element, an element `id` (resolved via `getElementById`), or `null`. |
-| `animationOptions` | `AnimationOptions` | Same structurally-discriminated options as `getWebAnimation` — `keyframeEffect` \| `namedEffect` \| `customEffect`, **no top-level `type` field**. For a real scrub effect this is typically the `ScrubAnimationOptions` shape (`startOffset`, `endOffset`, `transitionDuration`, `transitionEasing`, `centeredToTarget`, …) — see `./waapi.md` for the full field table. |
-| `trigger` | `Partial<TriggerVariant> & { element?: HTMLElement }` | 3rd arg. Set `trigger: 'view-progress'` or `trigger: 'pointer-move'` to get scrub behavior. Also carries `id`, `componentId`, `element`, and — pointer only — `axis?: 'x' \| 'y'`. |
-| `sceneOptions` | `Record<string, any>` (default `{}`) | Destructured as `{ disabled, allowActiveEvent, ...rest }`. `rest` is forwarded as the 4th arg (`options`) to `getWebAnimation` — e.g. pass `{ reducedMotion: true }` here to respect reduced motion. |
+| Arg                | Type                                                  | Notes                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target`           | `HTMLElement \| string \| null`                       | An element, an element `id` (resolved via `getElementById`), or `null`.                                                                                                                                                                                                                                                                                                   |
+| `animationOptions` | `AnimationOptions`                                    | Same structurally-discriminated options as `getWebAnimation` — `keyframeEffect` \| `namedEffect` \| `customEffect`, **no top-level `type` field**. For a real scrub effect this is typically the `ScrubAnimationOptions` shape (`startOffset`, `endOffset`, `transitionDuration`, `transitionEasing`, `centeredToTarget`, …) — see `./waapi.md` for the full field table. |
+| `trigger`          | `Partial<TriggerVariant> & { element?: HTMLElement }` | 3rd arg. Set `trigger: 'view-progress'` or `trigger: 'pointer-move'` to get scrub behavior. Also carries `id`, `componentId`, `element`, and — pointer only — `axis?: 'x' \| 'y'`.                                                                                                                                                                                        |
+| `sceneOptions`     | `Record<string, any>` (default `{}`)                  | Destructured as `{ disabled, allowActiveEvent, ...rest }`. `rest` is forwarded as the 4th arg (`options`) to `getWebAnimation` — e.g. pass `{ reducedMotion: true }` here to respect reduced motion.                                                                                                                                                                      |
 
 > The declared return type includes `ScrubPointerScene[]`, but the current implementation never actually
 > returns an array of pointer scenes — only a single `ScrubPointerScene`, an array of `ScrubScrollScene`,
@@ -63,13 +63,13 @@ function getScrubScene(
 
 ## Return Cases
 
-| Condition | Returns | Notes |
-| --- | --- | --- |
-| Underlying animation couldn't be built (e.g. unregistered `namedEffect`) | `null` | Always guard for `null` before using the result. |
-| `trigger: 'view-progress'` and `window.ViewTimeline` is **absent** | `ScrubScrollScene[]` — one entry per partial animation in the group | The **only** branch that emits scroll scenes. This is the polyfill path. |
-| `trigger: 'view-progress'` and `window.ViewTimeline` **exists** | a `ScrubPointerScene`-shaped wrapper around the native, timeline-linked `AnimationGroup` | The native `ViewTimeline` already drives this animation on scroll; there is nothing to scrub manually. Use `getWebAnimation` directly for the native path instead of calling `getScrubScene`. |
-| `trigger: 'pointer-move'` and `animationOptions.keyframeEffect` is set | single `ScrubPointerScene` wrapping an `AnimationGroup` | `effect(_, p)` computes `linearProgress = axis === 'x' ? p.x : p.y` and calls `animationGroup.progress(linearProgress)`. |
-| `trigger: 'pointer-move'` and `namedEffect`/`customEffect` is set (no `keyframeEffect`) | single `ScrubPointerScene` wrapping a `MouseAnimationInstance` (or `CustomMouseAnimationInstance` for `customEffect`) | `effect(_, p)` calls the instance's `progress(p)`. |
+| Condition                                                                               | Returns                                                                                                               | Notes                                                                                                                                                                                         |
+| --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Underlying animation couldn't be built (e.g. unregistered `namedEffect`)                | `null`                                                                                                                | Always guard for `null` before using the result.                                                                                                                                              |
+| `trigger: 'view-progress'` and `window.ViewTimeline` is **absent**                      | `ScrubScrollScene[]` — one entry per partial animation in the group                                                   | The **only** branch that emits scroll scenes. This is the polyfill path.                                                                                                                      |
+| `trigger: 'view-progress'` and `window.ViewTimeline` **exists**                         | a `ScrubPointerScene`-shaped wrapper around the native, timeline-linked `AnimationGroup`                              | The native `ViewTimeline` already drives this animation on scroll; there is nothing to scrub manually. Use `getWebAnimation` directly for the native path instead of calling `getScrubScene`. |
+| `trigger: 'pointer-move'` and `animationOptions.keyframeEffect` is set                  | single `ScrubPointerScene` wrapping an `AnimationGroup`                                                               | `effect(_, p)` computes `linearProgress = axis === 'x' ? p.x : p.y` and calls `animationGroup.progress(linearProgress)`.                                                                      |
+| `trigger: 'pointer-move'` and `namedEffect`/`customEffect` is set (no `keyframeEffect`) | single `ScrubPointerScene` wrapping a `MouseAnimationInstance` (or `CustomMouseAnimationInstance` for `customEffect`) | `effect(_, p)` calls the instance's `progress(p)`.                                                                                                                                            |
 
 (`../src/motion.ts:90-195`)
 
@@ -82,7 +82,7 @@ interface ScrubScrollScene {
   viewSource: HTMLElement;
   ready: Promise<void>;
   getProgress(): number;
-  effect(__: any, p: number): void;   // p is 0..1 scroll progress
+  effect(__: any, p: number): void; // p is 0..1 scroll progress
   disabled: boolean;
   destroy(): void;
   groupId?: string;
@@ -113,7 +113,7 @@ interface ScrubScrollScene {
 ```typescript
 type RangeOffset = {
   name?: 'entry' | 'exit' | 'contain' | 'cover' | 'entry-crossing' | 'exit-crossing';
-  offset?: LengthPercentage;   // { value: number; unit: 'px'|'em'|'rem'|'vh'|'vw'|'vmin'|'vmax' } | { value: number; unit: 'percentage' }
+  offset?: LengthPercentage; // { value: number; unit: 'px'|'em'|'rem'|'vh'|'vw'|'vmin'|'vmax' } | { value: number; unit: 'percentage' }
 };
 ```
 
@@ -146,15 +146,15 @@ type Progress = { x: number; y: number; v?: { x: number; y: number }; active?: b
   teardown.**
 - Which optional fields are actually populated depends on which branch produced the scene:
 
-| Field | `keyframeEffect` pointer path | `namedEffect`/`customEffect` pointer path |
-| --- | --- | --- |
-| `target` | `undefined` | the wrapped `MouseAnimationInstance.target` |
-| `centeredToTarget` | from `animationOptions.centeredToTarget` | from `animationOptions.centeredToTarget` |
-| `transitionDuration` | not set | set only if `customEffect` **and** `transitionDuration` are both present |
-| `transitionEasing` | not set | set only in that same case — see gotcha below |
-| `allowActiveEvent` | not set | from `sceneOptions.allowActiveEvent` |
-| `ready` | `animationGroup.ready` | not set (`undefined`) |
-| `getProgress()` | returns an internally-tracked last-driven value | delegates to the wrapped instance's own `getProgress()` |
+| Field                | `keyframeEffect` pointer path                   | `namedEffect`/`customEffect` pointer path                                |
+| -------------------- | ----------------------------------------------- | ------------------------------------------------------------------------ |
+| `target`             | `undefined`                                     | the wrapped `MouseAnimationInstance.target`                              |
+| `centeredToTarget`   | from `animationOptions.centeredToTarget`        | from `animationOptions.centeredToTarget`                                 |
+| `transitionDuration` | not set                                         | set only if `customEffect` **and** `transitionDuration` are both present |
+| `transitionEasing`   | not set                                         | set only in that same case — see gotcha below                            |
+| `allowActiveEvent`   | not set                                         | from `sceneOptions.allowActiveEvent`                                     |
+| `ready`              | `animationGroup.ready`                          | not set (`undefined`)                                                    |
+| `getProgress()`      | returns an internally-tracked last-driven value | delegates to the wrapped instance's own `getProgress()`                  |
 
 - **Gotcha — `transitionEasing` is resolved, not raw**: when set, `scene.transitionEasing` is assigned
   `getJsEasing(transitionEasing)` — a **resolved JS easing function** `(t: number) => number` — despite the
@@ -177,7 +177,7 @@ approximation instead:
 ```javascript
 const scenes = getScrubScene(
   target,
-  animationOptions,               // ScrubAnimationOptions with startOffset/endOffset
+  animationOptions, // ScrubAnimationOptions with startOffset/endOffset
   { trigger: 'view-progress', id, componentId },
 );
 
@@ -214,7 +214,7 @@ if (!scenes) {
 ```javascript
 const scene = getScrubScene(
   target,
-  animationOptions,                // e.g. { keyframeEffect: {...} }
+  animationOptions, // e.g. { keyframeEffect: {...} }
   { trigger: 'pointer-move', axis: 'y' },
 );
 
@@ -252,6 +252,7 @@ if (!scene) {
 
   (`../src/types.ts:131`) — these are **not** the same set as `jsEasings`/`cssEasings` (no `elasticOut`,
   `bounceOut`, etc. — see `./motion-main.md`'s easing reference for the general easing keys).
+
 - **`allowActiveEvent`** — passed via `sceneOptions` (4th arg to `getScrubScene`), not via
   `animationOptions`.
 - **`startOffset` / `endOffset`** — properties of the **`animationOptions`** (`ScrubAnimationOptions`),

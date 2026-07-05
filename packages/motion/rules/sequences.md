@@ -25,11 +25,11 @@ uses it internally for staggered list animations.
 
 ## Package Boundary
 
-| Need | Use |
-| --- | --- |
-| Declarative `sequences` config, list/stagger wiring via triggers | `@wix/interact` |
-| Ready-made preset catalog for the individual effects inside a sequence | `@wix/motion-presets` |
-| Programmatic multi-group stagger orchestration | `@wix/motion` (this file) |
+| Need                                                                   | Use                       |
+| ---------------------------------------------------------------------- | ------------------------- |
+| Declarative `sequences` config, list/stagger wiring via triggers       | `@wix/interact`           |
+| Ready-made preset catalog for the individual effects inside a sequence | `@wix/motion-presets`     |
+| Programmatic multi-group stagger orchestration                         | `@wix/motion` (this file) |
 
 This file documents the imperative engine only — it does not document preset params.
 
@@ -39,8 +39,8 @@ This file documents the imperative engine only — it does not document preset p
 function getSequence(
   options: SequenceOptions,
   animationGroups: AnimationGroupArgs[],
-  context?: Record<string, any>,   // supports { reducedMotion: boolean }
-): Sequence
+  context?: Record<string, any>, // supports { reducedMotion: boolean }
+): Sequence;
 ```
 
 (`../src/motion.ts:261-268`) — resolves every `AnimationGroupArgs` entry into one or more `AnimationGroup`s
@@ -50,7 +50,7 @@ via `createAnimationGroups`, then wraps them in `new Sequence(groups, options)`.
 function createAnimationGroups(
   animationGroupArgs: AnimationGroupArgs[],
   context?: Record<string, any>,
-): AnimationGroup[]
+): AnimationGroup[];
 ```
 
 (`../src/motion.ts:232-256`) — builds groups without wrapping them in a `Sequence`. Used internally by
@@ -62,9 +62,9 @@ to feed some other coordination). Entries whose resolved animation is not an `An
 
 ```typescript
 type SequenceOptions = {
-  delay?: number;                                  // ms base delay, default 0
-  offset?: number;                                 // ms stagger interval, default 0
-  offsetEasing?: string | ((p: number) => number);  // default 'linear'
+  delay?: number; // ms base delay, default 0
+  offset?: number; // ms stagger interval, default 0
+  offsetEasing?: string | ((p: number) => number); // default 'linear'
 };
 ```
 
@@ -89,12 +89,12 @@ type AnimationGroupArgs = {
 
 `AnimationGroupArgs.target` is resolved per entry via `resolveTargets` (`../src/motion.ts:217-227`):
 
-| `target` type | Resolves to | Groups created |
-| --- | --- | --- |
-| `HTMLElement` | `[target]` | one `AnimationGroup` |
-| `HTMLElement[]` | `target` as-is | one `AnimationGroup` per element |
-| `string` | `Array.from(document.querySelectorAll(target))` | one `AnimationGroup` per match (zero if none match — not an error) |
-| `null` | `[null]` | one `AnimationGroup` for an element-less/`null` target, passed through to `getAnimation` |
+| `target` type   | Resolves to                                     | Groups created                                                                           |
+| --------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `HTMLElement`   | `[target]`                                      | one `AnimationGroup`                                                                     |
+| `HTMLElement[]` | `target` as-is                                  | one `AnimationGroup` per element                                                         |
+| `string`        | `Array.from(document.querySelectorAll(target))` | one `AnimationGroup` per match (zero if none match — not an error)                       |
+| `null`          | `[null]`                                        | one `AnimationGroup` for an element-less/`null` target, passed through to `getAnimation` |
 
 ## Stagger Offset Formula
 
@@ -115,10 +115,10 @@ per group so that **all groups share the same total active duration** — this i
 
 Given 5 groups with `offset: 200`:
 
-| Easing | Offsets | Distribution |
-| --- | --- | --- |
-| `linear` | `[0, 200, 400, 600, 800]` | Even spacing |
-| `quadIn` | `[0, 50, 200, 450, 800]` | Slow start, accelerating |
+| Easing    | Offsets                   | Distribution             |
+| --------- | ------------------------- | ------------------------ |
+| `linear`  | `[0, 200, 400, 600, 800]` | Even spacing             |
+| `quadIn`  | `[0, 50, 200, 450, 800]`  | Slow start, accelerating |
 | `sineOut` | `[0, 306, 565, 739, 800]` | Fast start, decelerating |
 
 ### Example
@@ -163,7 +163,7 @@ class Sequence extends AnimationGroup {
 
   addGroups(entries: IndexedGroup[]): void;
   removeGroups(predicate: (group: AnimationGroup) => boolean): AnimationGroup[];
-  async onFinish(callback: () => void): Promise<void>;   // overridden
+  async onFinish(callback: () => void): Promise<void>; // overridden
 
   // inherited from AnimationGroup — see ./waapi.md
   async play(callback?: () => void): Promise<void>;
@@ -209,8 +209,8 @@ type IndexedGroup = { index: number; group: AnimationGroup };
   used as-is; if it's a string, it's resolved via `getJsEasing(string)`; otherwise (or if resolution fails)
   it falls back to the local `linear` easing. Valid string keys are the `jsEasings` set —
   `linear, sineIn, sineOut, sineInOut, quadIn, quadOut, quadInOut, cubicIn, cubicOut, cubicInOut, quartIn,
-  quartOut, quartInOut, quintIn, quintOut, quintInOut, expoIn, expoOut, expoInOut, circIn, circOut,
-  circInOut, backIn, backOut, backInOut`
+quartOut, quartInOut, quintIn, quintOut, quintInOut, expoIn, expoOut, expoInOut, circIn, circOut,
+circInOut, backIn, backOut, backInOut`
   (`../src/easings.ts:187-213`) — or a raw `cubic-bezier(x1, y1, x2, y2)` string, or a custom
   `(p: number) => number` function (`../src/utils.ts:177-187`).
 

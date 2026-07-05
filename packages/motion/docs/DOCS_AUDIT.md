@@ -16,14 +16,14 @@
 ## 1. Executive summary
 
 The `docs/` tree was generated from an early exploration plan (`PLAN_DOCS.md`) that targeted a
-*combined* motion + presets surface ("82+ presets in 5 categories"). The package has since diverged
+_combined_ motion + presets surface ("82+ presets in 5 categories"). The package has since diverged
 substantially, and most of the prose pre-dates the current API. The result:
 
 - **A large fraction of the docs are inaccurate against the current implementation** — most damagingly,
   a fabricated `type: 'TimeAnimationOptions' | 'ScrubAnimationOptions'` discriminator that appears in
   **almost every code sample** and **does not exist in the types**.
 - **A large fraction is out of scope** — the entire `categories/` tree and the "Named Effect Types"
-  section of `api/types.md` document *presets*, which now live in `@wix/motion-presets` and are
+  section of `api/types.md` document _presets_, which now live in `@wix/motion-presets` and are
   documented in `packages/motion-presets/rules/`.
 - **The genuinely good, current material is small and isolated**: the package `README.md`,
   `api/sequence.md`, and `api/get-sequence.md` are accurate and match the code. They are the template
@@ -40,28 +40,28 @@ the `README`, and author a new `packages/motion/rules/` set modeled on
 
 ## 2. Document inventory & verdict
 
-| File | Intended purpose | Accuracy | Verdict |
-| --- | --- | --- | --- |
-| `PLAN_DOCS.md` | Original planning doc | n/a (stale plan) | **Delete** — historical artifact; describes a `presets/` tree that was never built / since removed. |
-| `getting-started.md` | First animation in 10 min | Low | **Rewrite** — pervasive fake `type:` field, wrong easing names, wrong CDN path, misleading `play()` semantics. |
-| `core-concepts.md` | Mental model | Low–Med | **Rewrite & trim** — good Sequence section; rest mixes preset content + fabricated APIs. |
-| `api/README.md` | API index | Med | **Rewrite** — index is fine; embedded type snippets carry the fake `type:` field and fabricated unions. |
-| `api/core-functions.md` | Core function reference | **Low (critical)** | **Rewrite** — `getCSSAnimation` documented as returning a `string` (it returns an array of descriptors); wrong return types; fake `type:` everywhere. |
-| `api/animation-group.md` | `AnimationGroup` class | Med | **Revise** — method docs mostly correct but class surface is incomplete and examples use the fake `type:` field. |
-| `api/sequence.md` | `Sequence` class | **High** | **Keep** (minor fix: `finished` is `Promise<Animation[]>`). Matches code. |
-| `api/get-sequence.md` | `getSequence`/`createAnimationGroups` | **High** | **Keep**. Matches code; uses correct `keyframeEffect` shape. |
-| `api/types.md` | Type reference | **Low (critical)** | **Split**: keep core motion types (rewritten); delete the "Named Effect Types" + fabricated helper sections. |
-| `categories/README.md` | Category overview | Out of scope | **Move/Delete** — presets belong to `@wix/motion-presets`. |
-| `categories/entrance-animations.md` | Entrance presets | Out of scope + inaccurate | **Delete**. |
-| `categories/ongoing-animations.md` | Ongoing presets | Out of scope | **Delete**. |
-| `categories/scroll-animations.md` | Scroll presets | Out of scope | **Delete**. |
-| `categories/mouse-animations.md` | Mouse presets | Out of scope | **Delete**. |
-| `categories/background-scroll-animations.md` | BG-scroll presets | Out of scope + stale category | **Delete** — `background-scroll` is no longer a preset category. |
-| `guides/README.md` | Guide index | Low | **Rewrite/trim** — links to non-existent `testing.md`. |
-| `guides/advanced-patterns.md` | Advanced patterns | Low | **Delete most** — ~1.4k lines of invented framework code (HammerJS controllers, animation pools, state machines) using fabricated APIs. Salvage only the "custom effect authoring" idea (rewritten & corrected). |
-| `guides/framework-integration.md` | React/Vue/Angular | Low | **Trim to React** — Vue/Angular sections are speculative and contain `[TBD]` placeholders. |
-| `guides/performance.md` | Performance | Med | **Trim** — real `fastdom`/CSS guidance is buried under invented profiler/debugger classes; repeats the `getCSSAnimation`-returns-string error. |
-| `examples/README.md` | Examples index | Low | **Rewrite** — links to 3 files that don't exist + `../playground/` that doesn't exist. |
+| File                                         | Intended purpose                      | Accuracy                      | Verdict                                                                                                                                                                                                          |
+| -------------------------------------------- | ------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PLAN_DOCS.md`                               | Original planning doc                 | n/a (stale plan)              | **Delete** — historical artifact; describes a `presets/` tree that was never built / since removed.                                                                                                              |
+| `getting-started.md`                         | First animation in 10 min             | Low                           | **Rewrite** — pervasive fake `type:` field, wrong easing names, wrong CDN path, misleading `play()` semantics.                                                                                                   |
+| `core-concepts.md`                           | Mental model                          | Low–Med                       | **Rewrite & trim** — good Sequence section; rest mixes preset content + fabricated APIs.                                                                                                                         |
+| `api/README.md`                              | API index                             | Med                           | **Rewrite** — index is fine; embedded type snippets carry the fake `type:` field and fabricated unions.                                                                                                          |
+| `api/core-functions.md`                      | Core function reference               | **Low (critical)**            | **Rewrite** — `getCSSAnimation` documented as returning a `string` (it returns an array of descriptors); wrong return types; fake `type:` everywhere.                                                            |
+| `api/animation-group.md`                     | `AnimationGroup` class                | Med                           | **Revise** — method docs mostly correct but class surface is incomplete and examples use the fake `type:` field.                                                                                                 |
+| `api/sequence.md`                            | `Sequence` class                      | **High**                      | **Keep** (minor fix: `finished` is `Promise<Animation[]>`). Matches code.                                                                                                                                        |
+| `api/get-sequence.md`                        | `getSequence`/`createAnimationGroups` | **High**                      | **Keep**. Matches code; uses correct `keyframeEffect` shape.                                                                                                                                                     |
+| `api/types.md`                               | Type reference                        | **Low (critical)**            | **Split**: keep core motion types (rewritten); delete the "Named Effect Types" + fabricated helper sections.                                                                                                     |
+| `categories/README.md`                       | Category overview                     | Out of scope                  | **Move/Delete** — presets belong to `@wix/motion-presets`.                                                                                                                                                       |
+| `categories/entrance-animations.md`          | Entrance presets                      | Out of scope + inaccurate     | **Delete**.                                                                                                                                                                                                      |
+| `categories/ongoing-animations.md`           | Ongoing presets                       | Out of scope                  | **Delete**.                                                                                                                                                                                                      |
+| `categories/scroll-animations.md`            | Scroll presets                        | Out of scope                  | **Delete**.                                                                                                                                                                                                      |
+| `categories/mouse-animations.md`             | Mouse presets                         | Out of scope                  | **Delete**.                                                                                                                                                                                                      |
+| `categories/background-scroll-animations.md` | BG-scroll presets                     | Out of scope + stale category | **Delete** — `background-scroll` is no longer a preset category.                                                                                                                                                 |
+| `guides/README.md`                           | Guide index                           | Low                           | **Rewrite/trim** — links to non-existent `testing.md`.                                                                                                                                                           |
+| `guides/advanced-patterns.md`                | Advanced patterns                     | Low                           | **Delete most** — ~1.4k lines of invented framework code (HammerJS controllers, animation pools, state machines) using fabricated APIs. Salvage only the "custom effect authoring" idea (rewritten & corrected). |
+| `guides/framework-integration.md`            | React/Vue/Angular                     | Low                           | **Trim to React** — Vue/Angular sections are speculative and contain `[TBD]` placeholders.                                                                                                                       |
+| `guides/performance.md`                      | Performance                           | Med                           | **Trim** — real `fastdom`/CSS guidance is buried under invented profiler/debugger classes; repeats the `getCSSAnimation`-returns-string error.                                                                   |
+| `examples/README.md`                         | Examples index                        | Low                           | **Rewrite** — links to 3 files that don't exist + `../playground/` that doesn't exist.                                                                                                                           |
 
 ---
 
@@ -75,12 +75,16 @@ described.
 Nearly every example sets a top-level `type` field on the options object:
 
 ```typescript
-getWebAnimation(el, { type: 'TimeAnimationOptions', namedEffect: { type: 'FadeIn' }, duration: 1000 });
+getWebAnimation(el, {
+  type: 'TimeAnimationOptions',
+  namedEffect: { type: 'FadeIn' },
+  duration: 1000,
+});
 ```
 
 **No such field exists.** `TimeAnimationOptions` (`src/types.ts:143`) and `ScrubAnimationOptions`
 (`src/types.ts:179`) have no `type` property; the union `AnimationOptions` (`src/types.ts:113`) is
-discriminated **structurally** — the engine branches on the *presence* of `keyframeEffect` /
+discriminated **structurally** — the engine branches on the _presence_ of `keyframeEffect` /
 `namedEffect` / `customEffect` (`src/api/common.ts:64-86`) and on the `trigger` argument, never on a
 `type` string. The correct call is:
 
@@ -99,7 +103,10 @@ This single error is the most important thing to fix and is the strongest signal
 returns **an array of descriptor objects**:
 
 ```typescript
-{ target, animation, composition, custom, name, keyframes, id, animationTimeline, animationRange }[]
+{
+  (target, animation, composition, custom, name, keyframes, id, animationTimeline, animationRange);
+}
+[];
 ```
 
 The package `README.md` and `getting-started.md` correctly iterate the array
@@ -152,7 +159,7 @@ const group = getWebAnimation(element, [{ namedEffect: … }, { namedEffect: …
 ```
 
 `getWebAnimation` takes a **single** `AnimationOptions` object (`src/api/webAnimations.ts:60-66`). An
-`AnimationGroup` wraps the multiple `Animation`s produced by *one* options object; you do not pass an
+`AnimationGroup` wraps the multiple `Animation`s produced by _one_ options object; you do not pass an
 array. To coordinate multiple elements/effects use `getSequence(options, AnimationGroupArgs[])`
 (`src/motion.ts:261`).
 
@@ -241,8 +248,8 @@ drift hazard (two sources of truth that disagree — see 3.8).
   form.
 
 `@wix/motion`'s only contract with presets is the **registry** (`registerEffects`, `src/api/registry.ts`)
-and the structural `EffectModule` shape (`src/types.ts:261`). Motion docs should document *that
-contract* and link to the presets package for the catalog — not re-list presets.
+and the structural `EffectModule` shape (`src/types.ts:261`). Motion docs should document _that
+contract_ and link to the presets package for the catalog — not re-list presets.
 
 ### 4.2 Declarative/framework concerns → `@wix/interact`
 
@@ -274,7 +281,7 @@ contract* and link to the presets package for the catalog — not re-list preset
 
 ---
 
-## 6. Missing — what motion docs *should* cover but don't
+## 6. Missing — what motion docs _should_ cover but don't
 
 These are the topics unique to `@wix/motion` that an engineer or agent actually needs, and that are
 currently absent, buried, or wrong. They should anchor the rewrite.
@@ -286,7 +293,7 @@ currently absent, buried, or wrong. They should anchor the rewrite.
      "programmatic" mode and is currently mis-documented.**
    - `namedEffect: { type, …params }` — requires registration.
 2. **`registerEffects` + the `EffectModule` contract** (`src/api/registry.ts`, `src/types.ts:57-66,
-   249-266`): the `{ web, getNames, style?, prepare? }` shape, what each returns (`AnimationData[]`),
+249-266`): the `{ web, getNames, style?, prepare? }` shape, what each returns (`AnimationData[]`),
    and how to author a custom registered effect. (`getting-started.md` shows the object shape correctly;
    the guides show it as loose free functions — reconcile.)
 3. **Scrub-scene driving contract** for the polyfill path: `getScrubScene` returns scenes exposing
@@ -400,7 +407,7 @@ on the two proven in-repo templates:
    stated explicitly because it is counter-intuitive and was the #1 historical error.
 3. **Stay in lane.** Presets → link to `@wix/motion-presets`. Declarative/triggers → link to
    `@wix/interact`. Motion rules cover the imperative engine only.
-4. **Frontmatter routing.** Each file starts with `name` + a `description` that says *when to read it*
+4. **Frontmatter routing.** Each file starts with `name` + a `description` that says _when to read it_
    (so the agent can select the right file), exactly like `presets-main.md`.
 5. **Show the gotchas.** `play()` resolves on start; `getCSSAnimation` returns an array;
    `customEffect` must be a function to do anything; pointer `axis` is on the trigger; `0`→`Infinity`
@@ -412,42 +419,48 @@ on the two proven in-repo templates:
 ### 9.2 Proposed file set & contents
 
 **`rules/motion-main.md`** (entry point / router)
-- Frontmatter: *"Read when working directly with `@wix/motion` — creating WAAPI/CSS/scroll/pointer
+
+- Frontmatter: _"Read when working directly with `@wix/motion` — creating WAAPI/CSS/scroll/pointer
   animations imperatively, driving scrub scenes, building sequences, or generating CSS. For preset
-  selection see `@wix/motion-presets`; for declarative trigger wiring see `@wix/interact`."*
+  selection see `@wix/motion-presets`; for declarative trigger wiring see `@wix/interact`."_
 - ToC + **package boundary** decision table (motion vs presets vs interact).
 - **Core mental model:** options are discriminated structurally (`keyframeEffect` | `namedEffect` |
   `customEffect`) × trigger (`undefined` = time-based, `view-progress`, `pointer-move`). Explicit "there
   is no `type` field."
 - **Function map** table: `getWebAnimation`, `getCSSAnimation`, `getScrubScene`, `getAnimation`,
   `prepareAnimation`, `getSequence`, `createAnimationGroups`, `registerEffects`, `getEasing` — with the
-  *real* signatures and return types (including `| null`).
+  _real_ signatures and return types (including `| null`).
 - **Easing reference:** the exact `jsEasings`/`cssEasings` key list + `cubic-bezier()`/`linear()` parsing.
 - Links to the spoke files below.
 
 **`rules/waapi.md`** — `getWebAnimation` + `AnimationGroup`
+
 - Full `AnimationOptions` field tables (time vs scrub) from `src/types.ts`.
 - Complete `AnimationGroup` surface incl. `onFinish`/`onAbort`, `finished` (`Promise<Animation[]>`),
   `playState` aggregation, dispatched `animationend`/`animationcancel` events.
 - Gotchas: `play()` start-vs-finish; `iterations: 0` ⇒ infinite; `reducedMotion` behavior.
 
 **`rules/scrub-scenes.md`** — `getScrubScene` (the differentiator)
+
 - Native ViewTimeline vs. polyfill branch; when scenes are returned.
 - `ScrubScrollScene` / `ScrubPointerScene` contracts; how to drive `effect(_, progress)`; pointer
   `Progress` payload; `axis` on trigger; `centeredToTarget`, transition smoothing, `allowActiveEvent`;
   cleanup via `destroy()`. Note `@wix/interact` + `fizban` automate this.
 
 **`rules/sequences.md`** — `getSequence` / `Sequence`
+
 - Largely portable from the already-accurate `api/sequence.md` + `api/get-sequence.md`: offset formula
   `easing(i/last) * last * offset | 0`, `addGroups`/`removeGroups`, target resolution, `reducedMotion`
   context.
 
 **`rules/custom-effects.md`** — `registerEffects` + authoring
+
 - `EffectModule` shape `{ web, getNames, style?, prepare? }` and `AnimationData[]` return; the
   `customEffect` callback form (and that the `{ ranges }` form is inert in motion alone);
   `data-motion-part` sub-target targeting.
 
 **`rules/css-generation.md`** — `getCSSAnimation` / SSR
+
 - Descriptor array fields and meanings; `forCSS` forcing `duration: 'auto'`; how the output is injected;
   relationship to `@wix/interact`'s `generate()` and FOUC prevention (link, don't duplicate).
 

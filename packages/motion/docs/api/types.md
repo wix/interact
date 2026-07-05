@@ -19,7 +19,7 @@ type AnimationOptions = (TimeAnimationOptions | ScrubAnimationOptions) & Animati
 > getWebAnimation(el, { namedEffect: { type: 'FadeIn' }, duration: 1000 });
 > ```
 >
-> (`namedEffect.type` *is* real — see [`NamedEffect`](#namedeffect) below. It's the top-level `type` on the options object that doesn't exist.)
+> (`namedEffect.type` _is_ real — see [`NamedEffect`](#namedeffect) below. It's the top-level `type` on the options object that doesn't exist.)
 
 ### `TimeAnimationOptions`
 

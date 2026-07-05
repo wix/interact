@@ -106,7 +106,7 @@ The options object passed to the constructor, stored as-is. `options.effectId` (
 ### `ready`
 
 ```typescript
-ready: Promise<void>
+ready: Promise<void>;
 ```
 
 Resolves once the group's targets have been measured/mutated. Set from `options?.measured`, or `Promise.resolve()` if no `measured` promise was supplied. `play()` and `reverse()` both `await ready` before starting playback.
@@ -114,7 +114,7 @@ Resolves once the group's targets have been measured/mutated. Set from `options?
 ### `isCSS`
 
 ```typescript
-isCSS: boolean
+isCSS: boolean;
 ```
 
 `true` if `animations[0]` is a `CSSAnimation` (i.e. the group wraps an existing CSS `animation` rather than a WAAPI `KeyframeEffect`). Used internally to decide whether `onFinish`/`onAbort` can safely read `effect.target` off a `KeyframeEffect`.
@@ -122,7 +122,7 @@ isCSS: boolean
 ### `longestAnimation`
 
 ```typescript
-longestAnimation: Animation
+longestAnimation: Animation;
 ```
 
 The animation in `animations` with the greatest computed `effect.getComputedTiming().endTime`, computed once in the constructor. `getProgress()` reads from this animation.
@@ -280,7 +280,7 @@ await group.finished; // resolves once every animation in the group has finished
 get playState(): AnimationPlayState
 ```
 
-`'running'` if **any** animation in the group is currently running; otherwise, the `playState` of `animations[0]`. This means a group can report `'running'` even while some of its animations have already finished, and a group with zero running animations reports whatever state the *first* animation happens to be in — it is not a strict aggregate of all animations.
+`'running'` if **any** animation in the group is currently running; otherwise, the `playState` of `animations[0]`. This means a group can report `'running'` even while some of its animations have already finished, and a group with zero running animations reports whatever state the _first_ animation happens to be in — it is not a strict aggregate of all animations.
 
 ## How to observe completion
 

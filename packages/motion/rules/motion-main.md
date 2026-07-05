@@ -28,11 +28,11 @@ Package: `@wix/motion` · ESM entry (`module`): `dist/es/motion.js` · CJS (`mai
 
 ## Package Boundary
 
-| Need | Use |
-| --- | --- |
-| Declarative trigger→effect wiring, config-driven orchestration, React/Web components | `@wix/interact` |
-| Ready-made effect catalog (entrance/scroll/ongoing/mouse presets) | `@wix/motion-presets` (register via `registerEffects`) |
-| Custom render callbacks, manual scrub-scene driving, programmatic sequences, SSR/CSS generation, inline keyframes | `@wix/motion` (this package) |
+| Need                                                                                                              | Use                                                    |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Declarative trigger→effect wiring, config-driven orchestration, React/Web components                              | `@wix/interact`                                        |
+| Ready-made effect catalog (entrance/scroll/ongoing/mouse presets)                                                 | `@wix/motion-presets` (register via `registerEffects`) |
+| Custom render callbacks, manual scrub-scene driving, programmatic sequences, SSR/CSS generation, inline keyframes | `@wix/motion` (this package)                           |
 
 `@wix/motion`'s only contract with presets is the **registry** (`registerEffects`) and the structural
 `EffectModule` shape it accepts. These motion rules document that contract only — they do **not**
@@ -74,18 +74,18 @@ options object (`../src/api/common.ts:64-86`), and separately on the `trigger` a
 
 Exactly one of these three fields drives what actually animates (`../src/api/common.ts:64-86`):
 
-| Mode | Field | Shape | Behavior |
-| --- | --- | --- | --- |
-| Inline keyframes | `keyframeEffect` | `{ name: string; keyframes: Keyframe[] }` (`MotionKeyframeEffect`, `../src/types.ts:138-141`) — **no `type` field** | WAAPI/CSS keyframes with zero registration required. `name` becomes the `@keyframes`/animation name. |
-| Custom JS callback | `customEffect` | `(element: Element \| null, progress: number \| null) => void` | Per-frame callback driven by `CustomAnimation`'s `requestAnimationFrame` loop. The **only** programmatic mode — see the union caveat below. |
-| Registered preset | `namedEffect` | `{ type: string } & Record<string, unknown>` (`NamedEffect`) | References an effect registered via `registerEffects()`. `type` is the registered name; other keys are preset-specific params owned by the preset package. Unregistered ⇒ `getWebAnimation` returns `null`. |
+| Mode               | Field            | Shape                                                                                                               | Behavior                                                                                                                                                                                                    |
+| ------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Inline keyframes   | `keyframeEffect` | `{ name: string; keyframes: Keyframe[] }` (`MotionKeyframeEffect`, `../src/types.ts:138-141`) — **no `type` field** | WAAPI/CSS keyframes with zero registration required. `name` becomes the `@keyframes`/animation name.                                                                                                        |
+| Custom JS callback | `customEffect`   | `(element: Element \| null, progress: number \| null) => void`                                                      | Per-frame callback driven by `CustomAnimation`'s `requestAnimationFrame` loop. The **only** programmatic mode — see the union caveat below.                                                                 |
+| Registered preset  | `namedEffect`    | `{ type: string } & Record<string, unknown>` (`NamedEffect`)                                                        | References an effect registered via `registerEffects()`. `type` is the registered name; other keys are preset-specific params owned by the preset package. Unregistered ⇒ `getWebAnimation` returns `null`. |
 
 `CustomEffect` is itself a union (`../src/types.ts:101-105`):
 
 ```typescript
 type CustomEffect =
-  | { ranges: { name: string; min: number; max: number; step?: number }[] }   // INERT alone — no visible effect
-  | ((element: Element | null, progress: number | null) => void);              // WORKS — the function form
+  | { ranges: { name: string; min: number; max: number; step?: number }[] } // INERT alone — no visible effect
+  | ((element: Element | null, progress: number | null) => void); // WORKS — the function form
 ```
 
 Only the **function** form does anything at runtime in `@wix/motion`; the `{ ranges }` object form is
@@ -98,18 +98,18 @@ All functions below are exported from `@wix/motion`'s root (`../src/index.ts`, r
 `../src/motion.ts:270-281`). Every return type that includes `| null` genuinely returns `null` at
 runtime — type your consts accordingly.
 
-| Function | Signature | Returns | Source |
-| --- | --- | --- | --- |
-| `getWebAnimation` | `(target, animationOptions, trigger?, options?, ownerDocument?)` | `AnimationGroup \| MouseAnimationInstance \| null` | `../src/api/webAnimations.ts:60` |
-| `getCSSAnimation` | `(target, animationOptions, trigger?)` | `Array<{ target, animation, composition?, custom?, name, keyframes, id, animationTimeline, animationRange }>` — **an array of descriptors, never a string** | `../src/api/cssAnimations.ts:51` |
-| `getScrubScene` | `(target, animationOptions, trigger, sceneOptions?)` | `ScrubScrollScene[] \| ScrubPointerScene \| ScrubPointerScene[] \| null` | `../src/motion.ts:74` |
-| `getAnimation` | `(target, animationOptions, trigger?, reducedMotion?)` | `AnimationGroup \| MouseAnimationInstance \| null` | `../src/motion.ts:198` |
-| `prepareAnimation` | `(target, animation, callback?)` | `void` | `../src/api/prepare.ts:5` |
-| `getSequence` | `(options, animationGroups, context?)` | `Sequence` | `../src/motion.ts:261` |
-| `createAnimationGroups` | `(animationGroupArgs, context?)` | `AnimationGroup[]` | `../src/motion.ts:232` |
-| `registerEffects` | `(effects: Record<string, EffectModule>)` | `void` | `../src/api/registry.ts:5` |
-| `getEasing` | `(easing?: string)` | `string` — CSS easing string, default `'linear'` | `../src/utils.ts:7` |
-| `getJsEasing` | `(easing?: string)` | `((t: number) => number) \| undefined` | `../src/utils.ts:177` |
+| Function                | Signature                                                        | Returns                                                                                                                                                     | Source                           |
+| ----------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `getWebAnimation`       | `(target, animationOptions, trigger?, options?, ownerDocument?)` | `AnimationGroup \| MouseAnimationInstance \| null`                                                                                                          | `../src/api/webAnimations.ts:60` |
+| `getCSSAnimation`       | `(target, animationOptions, trigger?)`                           | `Array<{ target, animation, composition?, custom?, name, keyframes, id, animationTimeline, animationRange }>` — **an array of descriptors, never a string** | `../src/api/cssAnimations.ts:51` |
+| `getScrubScene`         | `(target, animationOptions, trigger, sceneOptions?)`             | `ScrubScrollScene[] \| ScrubPointerScene \| ScrubPointerScene[] \| null`                                                                                    | `../src/motion.ts:74`            |
+| `getAnimation`          | `(target, animationOptions, trigger?, reducedMotion?)`           | `AnimationGroup \| MouseAnimationInstance \| null`                                                                                                          | `../src/motion.ts:198`           |
+| `prepareAnimation`      | `(target, animation, callback?)`                                 | `void`                                                                                                                                                      | `../src/api/prepare.ts:5`        |
+| `getSequence`           | `(options, animationGroups, context?)`                           | `Sequence`                                                                                                                                                  | `../src/motion.ts:261`           |
+| `createAnimationGroups` | `(animationGroupArgs, context?)`                                 | `AnimationGroup[]`                                                                                                                                          | `../src/motion.ts:232`           |
+| `registerEffects`       | `(effects: Record<string, EffectModule>)`                        | `void`                                                                                                                                                      | `../src/api/registry.ts:5`       |
+| `getEasing`             | `(easing?: string)`                                              | `string` — CSS easing string, default `'linear'`                                                                                                            | `../src/utils.ts:7`              |
+| `getJsEasing`           | `(easing?: string)`                                              | `((t: number) => number) \| undefined`                                                                                                                      | `../src/utils.ts:177`            |
 
 Also exported (not detailed here): `getElementCSSAnimation`, `getElementAnimation` — look for an
 existing CSS animation already running on an element (used internally by `getAnimation`).

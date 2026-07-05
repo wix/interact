@@ -148,11 +148,11 @@ See [`getSequence` API reference](./api/get-sequence.md) for the full stagger mo
 
 ## Package boundary
 
-| Need | Use |
-| --- | --- |
-| Declarative trigger→effect wiring, config-driven orchestration, React/Web Component bindings | [`@wix/interact`](https://github.com/wix/interact/tree/master/packages/interact) |
-| Ready-made effect catalog (entrance/scroll/ongoing/mouse presets) | [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) — register via `registerEffects()` |
-| Custom render callbacks, manual scrub-scene driving, programmatic sequences, SSR/CSS generation, inline keyframes | `@wix/motion` (this package) |
+| Need                                                                                                              | Use                                                                                                                             |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Declarative trigger→effect wiring, config-driven orchestration, React/Web Component bindings                      | [`@wix/interact`](https://github.com/wix/interact/tree/master/packages/interact)                                                |
+| Ready-made effect catalog (entrance/scroll/ongoing/mouse presets)                                                 | [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) — register via `registerEffects()` |
+| Custom render callbacks, manual scrub-scene driving, programmatic sequences, SSR/CSS generation, inline keyframes | `@wix/motion` (this package)                                                                                                    |
 
 ## Next steps
 

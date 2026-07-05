@@ -33,17 +33,17 @@ function getCSSAnimation(
 rules target selectors, so there's no element reference to accept. One entry is returned per generated
 `@keyframes`/`animation` pair (e.g. one per `data-motion-part` sub-target).
 
-| Field               | Meaning                                                                                                      |
-| ------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Field               | Meaning                                                                                                                         |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `target`            | Selector for the animated element or sub-part, e.g. `"#hero"` or `"#hero[data-motion-part~='icon']"`; `""` if nothing resolved. |
-| `animation`         | The CSS `animation` shorthand value. **Paused by default** — see [below](#paused-by-default).                 |
-| `composition`       | `CompositeOperation`, if the effect set one.                                                                    |
-| `custom`            | Custom property values referenced by the keyframes, if any.                                                     |
-| `name`              | The `@keyframes` name — pair it with `keyframes` to build the `@keyframes` block.                               |
-| `keyframes`         | Ordered keyframe declarations (property-bag objects, not a WAAPI `Keyframe[]`) — the steps of the `@keyframes` block. |
-| `id`                | Effect id, if `animationOptions.effectId` was set.                                                              |
-| `animationTimeline` | `` `--${trigger.id}` `` for `view-progress` triggers, else `""`. Maps to the CSS `animation-timeline` property. |
-| `animationRange`    | e.g. `"cover 0% cover 100%"` for `view-progress` triggers, else `""`. Maps to `animation-range`.                 |
+| `animation`         | The CSS `animation` shorthand value. **Paused by default** — see [below](#paused-by-default).                                   |
+| `composition`       | `CompositeOperation`, if the effect set one.                                                                                    |
+| `custom`            | Custom property values referenced by the keyframes, if any.                                                                     |
+| `name`              | The `@keyframes` name — pair it with `keyframes` to build the `@keyframes` block.                                               |
+| `keyframes`         | Ordered keyframe declarations (property-bag objects, not a WAAPI `Keyframe[]`) — the steps of the `@keyframes` block.           |
+| `id`                | Effect id, if `animationOptions.effectId` was set.                                                                              |
+| `animationTimeline` | `` `--${trigger.id}` `` for `view-progress` triggers, else `""`. Maps to the CSS `animation-timeline` property.                 |
+| `animationRange`    | e.g. `"cover 0% cover 100%"` for `view-progress` triggers, else `""`. Maps to `animation-range`.                                |
 
 ## Building a stylesheet from descriptors
 

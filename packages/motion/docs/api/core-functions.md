@@ -32,13 +32,13 @@ function getWebAnimation(
 
 ### Parameters
 
-| Parameter          | Type                                                      | Description                                                                                                                                                                                                              |
-| ------------------ | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `target`           | `HTMLElement \| string \| null`                            | Element to animate. A `string` is resolved as an element id or CSS selector.                                                                                                                                             |
-| `animationOptions` | `AnimationOptions`                                         | A single animation configuration — never an array. Discriminated structurally by `keyframeEffect` / `namedEffect` / `customEffect`; see [Type Definitions](./types.md).                                                 |
-| `trigger`          | `Partial<TriggerVariant> & { element?: HTMLElement }`      | Optional. Omitted (or without `trigger.trigger`) produces a time-based animation. `{ trigger: 'view-progress' }` links to a scroll `ViewTimeline`. `{ trigger: 'pointer-move', axis?: 'x' \| 'y' }` drives on pointer movement — `axis` picks which pointer axis feeds a `keyframeEffect`. |
-| `options`          | `Record<string, any>`                                      | Optional. The engine reads `{ reducedMotion }` from this bag. `effectId` is **not** read here — set `animationOptions.effectId` instead.                                                                                 |
-| `ownerDocument`    | `Document`                                                 | Optional. Document context; defaults to `document`.                                                                                                                                                                      |
+| Parameter          | Type                                                  | Description                                                                                                                                                                                                                                                                                |
+| ------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `target`           | `HTMLElement \| string \| null`                       | Element to animate. A `string` is resolved as an element id or CSS selector.                                                                                                                                                                                                               |
+| `animationOptions` | `AnimationOptions`                                    | A single animation configuration — never an array. Discriminated structurally by `keyframeEffect` / `namedEffect` / `customEffect`; see [Type Definitions](./types.md).                                                                                                                    |
+| `trigger`          | `Partial<TriggerVariant> & { element?: HTMLElement }` | Optional. Omitted (or without `trigger.trigger`) produces a time-based animation. `{ trigger: 'view-progress' }` links to a scroll `ViewTimeline`. `{ trigger: 'pointer-move', axis?: 'x' \| 'y' }` drives on pointer movement — `axis` picks which pointer axis feeds a `keyframeEffect`. |
+| `options`          | `Record<string, any>`                                 | Optional. The engine reads `{ reducedMotion }` from this bag. `effectId` is **not** read here — set `animationOptions.effectId` instead.                                                                                                                                                   |
+| `ownerDocument`    | `Document`                                            | Optional. Document context; defaults to `document`.                                                                                                                                                                                                                                        |
 
 ### Returns
 
@@ -95,27 +95,27 @@ function getCSSAnimation(
 
 ### Parameters
 
-| Parameter          | Type                | Description                                                                                                                                                             |
-| ------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `target`           | `string \| null`     | Element id or CSS selector. CSS rules target selectors, so — unlike `getWebAnimation` — an `HTMLElement` reference is not accepted here.                                |
-| `animationOptions` | `AnimationOptions`   | Same shape as `getWebAnimation`.                                                                                                                                          |
-| `trigger`          | `TriggerVariant`     | Optional. `view-progress` animations always resolve to `duration: 'auto'` through this function, regardless of runtime `ViewTimeline` support (the SSR-safe `forCSS` path). |
+| Parameter          | Type               | Description                                                                                                                                                                 |
+| ------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target`           | `string \| null`   | Element id or CSS selector. CSS rules target selectors, so — unlike `getWebAnimation` — an `HTMLElement` reference is not accepted here.                                    |
+| `animationOptions` | `AnimationOptions` | Same shape as `getWebAnimation`.                                                                                                                                            |
+| `trigger`          | `TriggerVariant`   | Optional. `view-progress` animations always resolve to `duration: 'auto'` through this function, regardless of runtime `ViewTimeline` support (the SSR-safe `forCSS` path). |
 
 ### Returns
 
 **An array of descriptor objects — never a string.** Each entry describes one `@keyframes` block plus the `animation` shorthand that applies it:
 
-| Field               | Type                                                     | Description                                                                                              |
-| ------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `target`            | `string`                                                   | Selector for the animated element or sub-part, e.g. `"#hero"` or `"#hero[data-motion-part~='icon']"`; `""` if no target resolved. |
-| `animation`         | `string`                                                   | The CSS `animation` shorthand value. **Paused by default** — toggle `animation-play-state` or add a class to start it. |
-| `composition`       | `CompositeOperation \| undefined`                          | Composite operation, if set.                                                                              |
-| `custom`            | `Record<string, string \| number \| undefined> \| undefined` | Custom property values referenced by the keyframes.                                                        |
-| `name`              | `string`                                                   | The `@keyframes` name.                                                                                     |
-| `keyframes`         | `Record<string, string \| number \| undefined>[]`          | Ordered keyframe declarations, rendered as `@keyframes` steps.                                             |
-| `id`                | `string \| undefined`                                      | Effect id, if provided.                                                                                    |
-| `animationTimeline` | `string`                                                   | `` `--${trigger.id}` `` for `view-progress` triggers, else `""`.                                          |
-| `animationRange`    | `string`                                                   | e.g. `"cover 0% cover 100%"` for `view-progress` triggers, else `""`.                                      |
+| Field               | Type                                                         | Description                                                                                                                       |
+| ------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `target`            | `string`                                                     | Selector for the animated element or sub-part, e.g. `"#hero"` or `"#hero[data-motion-part~='icon']"`; `""` if no target resolved. |
+| `animation`         | `string`                                                     | The CSS `animation` shorthand value. **Paused by default** — toggle `animation-play-state` or add a class to start it.            |
+| `composition`       | `CompositeOperation \| undefined`                            | Composite operation, if set.                                                                                                      |
+| `custom`            | `Record<string, string \| number \| undefined> \| undefined` | Custom property values referenced by the keyframes.                                                                               |
+| `name`              | `string`                                                     | The `@keyframes` name.                                                                                                            |
+| `keyframes`         | `Record<string, string \| number \| undefined>[]`            | Ordered keyframe declarations, rendered as `@keyframes` steps.                                                                    |
+| `id`                | `string \| undefined`                                        | Effect id, if provided.                                                                                                           |
+| `animationTimeline` | `string`                                                     | `` `--${trigger.id}` `` for `view-progress` triggers, else `""`.                                                                  |
+| `animationRange`    | `string`                                                     | e.g. `"cover 0% cover 100%"` for `view-progress` triggers, else `""`.                                                             |
 
 ### Example
 
@@ -175,12 +175,12 @@ function getScrubScene(
 
 ### Parameters
 
-| Parameter          | Type                                                   | Description                                                                                                                                |
-| ------------------ | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `target`           | `HTMLElement \| string \| null`                          | Same resolution as `getWebAnimation`.                                                                                                       |
-| `animationOptions` | `AnimationOptions`                                       | `startOffset` / `endOffset` (the scroll range) live **here**, on the options — not on `trigger`.                                            |
-| `trigger`          | `Partial<TriggerVariant> & { element?: HTMLElement }`    | Required. `{ trigger: 'view-progress' }` or `{ trigger: 'pointer-move', axis?: 'x' \| 'y' }`. Pointer `axis` also lives here, not on the effect. |
-| `sceneOptions`     | `Record<string, any>`                                    | Optional. `{ disabled, allowActiveEvent, ...rest }` — remaining keys are forwarded to the underlying `getWebAnimation` call.                 |
+| Parameter          | Type                                                  | Description                                                                                                                                      |
+| ------------------ | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `target`           | `HTMLElement \| string \| null`                       | Same resolution as `getWebAnimation`.                                                                                                            |
+| `animationOptions` | `AnimationOptions`                                    | `startOffset` / `endOffset` (the scroll range) live **here**, on the options — not on `trigger`.                                                 |
+| `trigger`          | `Partial<TriggerVariant> & { element?: HTMLElement }` | Required. `{ trigger: 'view-progress' }` or `{ trigger: 'pointer-move', axis?: 'x' \| 'y' }`. Pointer `axis` also lives here, not on the effect. |
+| `sceneOptions`     | `Record<string, any>`                                 | Optional. `{ disabled, allowActiveEvent, ...rest }` — remaining keys are forwarded to the underlying `getWebAnimation` call.                     |
 
 ### Returns
 
@@ -238,12 +238,12 @@ function getAnimation(
 
 ### Parameters
 
-| Parameter          | Type                                                   | Description                                                        |
-| ------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `target`           | `HTMLElement \| string \| null`                          | Same resolution as `getWebAnimation`.                                |
-| `animationOptions` | `AnimationOptions`                                       | Same shape as `getWebAnimation`.                                     |
-| `trigger`          | `Partial<TriggerVariant> & { element?: HTMLElement }`    | Optional. Same shape as `getWebAnimation`.                            |
-| `reducedMotion`    | `boolean`                                                | Optional, default `false`. Forwarded to the CSS/WAAPI creation path.  |
+| Parameter          | Type                                                  | Description                                                          |
+| ------------------ | ----------------------------------------------------- | -------------------------------------------------------------------- |
+| `target`           | `HTMLElement \| string \| null`                       | Same resolution as `getWebAnimation`.                                |
+| `animationOptions` | `AnimationOptions`                                    | Same shape as `getWebAnimation`.                                     |
+| `trigger`          | `Partial<TriggerVariant> & { element?: HTMLElement }` | Optional. Same shape as `getWebAnimation`.                           |
+| `reducedMotion`    | `boolean`                                             | Optional, default `false`. Forwarded to the CSS/WAAPI creation path. |
 
 ### Returns
 
@@ -283,11 +283,11 @@ function prepareAnimation(
 
 ### Parameters
 
-| Parameter   | Type                             | Description                                                            |
-| ----------- | --------------------------------- | -------------------------------------------------------------------------- |
-| `target`    | `HTMLElement \| string \| null`   | Element to prepare (same resolution as `getWebAnimation`).               |
-| `animation` | `AnimationOptions`                | The animation configuration to prepare for.                              |
-| `callback`  | `() => void`                      | Optional. Called inside a `fastdom.mutate` once preparation completes.   |
+| Parameter   | Type                            | Description                                                            |
+| ----------- | ------------------------------- | ---------------------------------------------------------------------- |
+| `target`    | `HTMLElement \| string \| null` | Element to prepare (same resolution as `getWebAnimation`).             |
+| `animation` | `AnimationOptions`              | The animation configuration to prepare for.                            |
+| `callback`  | `() => void`                    | Optional. Called inside a `fastdom.mutate` once preparation completes. |
 
 ### Returns
 
@@ -324,9 +324,9 @@ function registerEffects(effects: Record<string, EffectModule>): void;
 
 ### Parameters
 
-| Parameter | Type                            | Description                                                                              |
-| --------- | -------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `effects` | `Record<string, EffectModule>`   | Map of effect name → `EffectModule` (`{ web, getNames, style?, prepare? }`). See [Type Definitions](./types.md). |
+| Parameter | Type                           | Description                                                                                                      |
+| --------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `effects` | `Record<string, EffectModule>` | Map of effect name → `EffectModule` (`{ web, getNames, style?, prepare? }`). See [Type Definitions](./types.md). |
 
 ### Returns
 
@@ -373,8 +373,8 @@ function getJsEasing(easing?: string): ((t: number) => number) | undefined;
 
 ### Parameters
 
-| Parameter | Type     | Description                                                                                                                     |
-| --------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Parameter | Type     | Description                                                                                                                                       |
+| --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `easing`  | `string` | Optional. A named easing key, a raw `cubic-bezier(x1, y1, x2, y2)` string (hyphenated), or — for `getJsEasing` only — a CSS `linear(...)` string. |
 
 ### Returns

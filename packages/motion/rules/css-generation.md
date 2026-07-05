@@ -26,11 +26,11 @@ documents only the lower-level `@wix/motion` primitive it is built on.
 
 ## Package Boundary
 
-| Need | Use |
-| --- | --- |
-| Full page CSS incl. FOUC-prevention initial rules, declarative trigger wiring | `@wix/interact`'s `generate()` |
-| Ready-made effect catalog (entrance/scroll/ongoing/mouse presets) | `@wix/motion-presets` (register via `registerEffects`) |
-| The raw per-animation CSS descriptor primitive | `@wix/motion` (this file) |
+| Need                                                                          | Use                                                    |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Full page CSS incl. FOUC-prevention initial rules, declarative trigger wiring | `@wix/interact`'s `generate()`                         |
+| Ready-made effect catalog (entrance/scroll/ongoing/mouse presets)             | `@wix/motion-presets` (register via `registerEffects`) |
+| The raw per-animation CSS descriptor primitive                                | `@wix/motion` (this file)                              |
 
 ## Signature
 
@@ -50,7 +50,7 @@ function getCSSAnimation(
   id: string | undefined;
   animationTimeline: string;
   animationRange: string;
-}>
+}>;
 ```
 
 > **`getCSSAnimation` RETURNS AN ARRAY OF DESCRIPTOR OBJECTS. IT DOES NOT RETURN A STRING.** This was
@@ -67,17 +67,17 @@ One descriptor is produced per `AnimationData` the effect's `web`/`style` return
 [`./custom-effects.md`](./custom-effects.md)), so a multi-part effect yields multiple descriptors —
 one per `part` (`../src/api/cssAnimations.ts:63-79`).
 
-| Field | Meaning |
-| --- | --- |
-| `target` | `#<id>` or `#<id>[data-motion-part~="<part>"]` (see [`./custom-effects.md#data-motion-part-sub-targeting`](./custom-effects.md#data-motion-part-sub-targeting)); `''` if `target` was `null`. |
-| `animation` | The CSS `animation` shorthand: `<name> <duration> <delay> <easing> <fill> <iterations> <direction> <playState>`. **Paused by default** for time-based/pointer animations; **not** paused for `view-progress` (the timeline governs playback instead) — see `getAnimationAsCSS`, `../src/api/cssAnimations.ts:14-32`. |
-| `composition?` | The effect's `CompositeOperation` (`'replace' \| 'add' \| 'accumulate'`), if set — apply as `animation-composition` when building the rule; not embedded in the `animation` shorthand itself. |
-| `custom?` | CSS custom properties the effect needs on the target (e.g. `--motion-rotate`) — apply as inline declarations alongside `animation`. |
-| `name` | The `@keyframes` name — use it both to declare `@keyframes <name> { … }` and it is already embedded in the `animation` shorthand. |
-| `keyframes` | The keyframe list to render into the `@keyframes` block. |
-| `id` | `${effectId}-${index + 1}` if the animation options had an `effectId`, else `undefined`. For tracking the descriptor back to its source effect — not itself required in the emitted CSS. |
-| `animationTimeline` | `--${trigger.id}` when `trigger.trigger === 'view-progress'`, else `''` — apply as `animation-timeline`. |
-| `animationRange` | e.g. `"cover 0% cover 100%"` for `view-progress`, else `''` — apply as `animation-range`. |
+| Field               | Meaning                                                                                                                                                                                                                                                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target`            | `#<id>` or `#<id>[data-motion-part~="<part>"]` (see [`./custom-effects.md#data-motion-part-sub-targeting`](./custom-effects.md#data-motion-part-sub-targeting)); `''` if `target` was `null`.                                                                                                                        |
+| `animation`         | The CSS `animation` shorthand: `<name> <duration> <delay> <easing> <fill> <iterations> <direction> <playState>`. **Paused by default** for time-based/pointer animations; **not** paused for `view-progress` (the timeline governs playback instead) — see `getAnimationAsCSS`, `../src/api/cssAnimations.ts:14-32`. |
+| `composition?`      | The effect's `CompositeOperation` (`'replace' \| 'add' \| 'accumulate'`), if set — apply as `animation-composition` when building the rule; not embedded in the `animation` shorthand itself.                                                                                                                        |
+| `custom?`           | CSS custom properties the effect needs on the target (e.g. `--motion-rotate`) — apply as inline declarations alongside `animation`.                                                                                                                                                                                  |
+| `name`              | The `@keyframes` name — use it both to declare `@keyframes <name> { … }` and it is already embedded in the `animation` shorthand.                                                                                                                                                                                    |
+| `keyframes`         | The keyframe list to render into the `@keyframes` block.                                                                                                                                                                                                                                                             |
+| `id`                | `${effectId}-${index + 1}` if the animation options had an `effectId`, else `undefined`. For tracking the descriptor back to its source effect — not itself required in the emitted CSS.                                                                                                                             |
+| `animationTimeline` | `--${trigger.id}` when `trigger.trigger === 'view-progress'`, else `''` — apply as `animation-timeline`.                                                                                                                                                                                                             |
+| `animationRange`    | e.g. `"cover 0% cover 100%"` for `view-progress`, else `''` — apply as `animation-range`.                                                                                                                                                                                                                            |
 
 ## `forCSS` and `duration: 'auto'`
 
@@ -123,10 +123,22 @@ function keyframesToCss(keyframes: Record<string, string | number | undefined>[]
     .join(' ');
 }
 
-function toCssText(target: string, animationOptions: Parameters<typeof getCSSAnimation>[1]): string {
+function toCssText(
+  target: string,
+  animationOptions: Parameters<typeof getCSSAnimation>[1],
+): string {
   return getCSSAnimation(target, animationOptions)
     .map(
-      ({ target: selector, animation, name, keyframes, custom, composition, animationTimeline, animationRange }) => {
+      ({
+        target: selector,
+        animation,
+        name,
+        keyframes,
+        custom,
+        composition,
+        animationTimeline,
+        animationRange,
+      }) => {
         const customDecls = custom
           ? Object.entries(custom)
               .map(([prop, value]) => `${prop}: ${value};`)
@@ -158,7 +170,7 @@ On the server, write the same `css` string into the rendered HTML's `<head>` ins
 
 ```typescript
 // ../src/api/cssAnimations.ts:30-31
-!iterations || iterations === Infinity ? 'infinite' : iterations
+!iterations || iterations === Infinity ? 'infinite' : iterations;
 ```
 
 By the time this runs, `iterations` has already been normalized by `getEffectsData`

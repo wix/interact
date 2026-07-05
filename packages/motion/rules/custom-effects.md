@@ -27,11 +27,11 @@ itself built on the `registerEffects` contract documented here — see `@wix/mot
 
 ## Package Boundary
 
-| Need | Use |
-| --- | --- |
-| Declarative trigger→effect wiring, config-driven orchestration | `@wix/interact` |
-| Ready-made effect catalog (entrance/scroll/ongoing/mouse presets) — already built on this contract | `@wix/motion-presets` |
-| Authoring a new custom callback or a new registered effect module | `@wix/motion` (this file) |
+| Need                                                                                               | Use                       |
+| -------------------------------------------------------------------------------------------------- | ------------------------- |
+| Declarative trigger→effect wiring, config-driven orchestration                                     | `@wix/interact`           |
+| Ready-made effect catalog (entrance/scroll/ongoing/mouse presets) — already built on this contract | `@wix/motion-presets`     |
+| Authoring a new custom callback or a new registered effect module                                  | `@wix/motion` (this file) |
 
 This file documents the authoring contract only — it does not list presets, preset parameters, or
 angle/direction conventions (a `@wix/motion-presets` concern).
@@ -41,11 +41,11 @@ angle/direction conventions (a `@wix/motion-presets` concern).
 Exactly one of three fields on `AnimationOptions` drives what animates (`../src/api/common.ts:64-86`).
 There is **no top-level `type` field** — see [`./motion-main.md`](./motion-main.md#core-mental-model).
 
-| # | Field | Shape | Registration required? |
-| - | --- | --- | --- |
-| 1 | `keyframeEffect` | `{ name: string; keyframes: Keyframe[] }` | No — see `./motion-main.md` |
-| 2 | `customEffect` | `(element: Element \| null, progress: number \| null) => void` | No — this file |
-| 3 | `namedEffect` | `{ type: string } & Record<string, unknown>` | Yes, via `registerEffects()` — this file |
+| #   | Field            | Shape                                                          | Registration required?                   |
+| --- | ---------------- | -------------------------------------------------------------- | ---------------------------------------- |
+| 1   | `keyframeEffect` | `{ name: string; keyframes: Keyframe[] }`                      | No — see `./motion-main.md`              |
+| 2   | `customEffect`   | `(element: Element \| null, progress: number \| null) => void` | No — this file                           |
+| 3   | `namedEffect`    | `{ type: string } & Record<string, unknown>`                   | Yes, via `registerEffects()` — this file |
 
 This file covers modes 2 and 3.
 
@@ -54,8 +54,8 @@ This file covers modes 2 and 3.
 ```typescript
 // ../src/types.ts:101-105
 type CustomEffect =
-  | { ranges: { name: string; min: number; max: number; step?: number }[] }   // INERT — see gotcha below
-  | ((element: Element | null, progress: number | null) => void);              // the only mode that runs code
+  | { ranges: { name: string; min: number; max: number; step?: number }[] } // INERT — see gotcha below
+  | ((element: Element | null, progress: number | null) => void); // the only mode that runs code
 ```
 
 **MUST:** author `customEffect` as a **function** `(element, progress) => void`. The `{ ranges }`
@@ -101,7 +101,7 @@ group?.play();
 Passing `customEffect: { ranges: [...] }` satisfies the `CustomEffect` type but produces **no
 visible effect on its own**:
 
-- `getNamedEffect` (`../src/api/common.ts:82-84`) turns *any* `customEffect` value — function or
+- `getNamedEffect` (`../src/api/common.ts:82-84`) turns _any_ `customEffect` value — function or
   object — into `[{ ...options, keyframes: [] }]`, i.e. an `AnimationData` with **no keyframes**.
 - Only when `typeof effect.customEffect === 'function'` does `getWebAnimation` build a
   `CustomAnimation` that actually calls your code (`../src/api/webAnimations.ts:145-153`). For the
@@ -128,12 +128,12 @@ type AnimationEffectAPI<Enum extends keyof AnimationOptionsTypes> = {
 };
 ```
 
-| Member | Required | Called from | Returns / does |
-| --- | --- | --- | --- |
-| `web` | Yes | `getWebAnimation` (`../src/api/webAnimations.ts:52-54`) | Builds the `AnimationData[]` used to construct the runtime WAAPI `Animation`(s). Receives a `DomApi` (only when `target` resolves to an `HTMLElement`) for measuring before returning keyframes. |
-| `getNames` | Yes | `getElementCSSAnimation` (`../src/motion.ts:41`) | Returns the `@keyframes`/animation names this effect can produce, so `getAnimation`/`getElementCSSAnimation` can find a matching CSS animation **already running** on the element (by `animationName`) instead of creating a new WAAPI one. |
-| `style` | No | `getCSSAnimation` → `getCSSAnimationEffect` (`../src/api/cssAnimations.ts:39-46`) | Same return shape as `web`, but for the CSS-generation/SSR path — see [`./css-generation.md`](./css-generation.md). If omitted, `getCSSAnimation` produces no descriptors for this effect. |
-| `prepare` | No | `prepareAnimation` (`../src/api/prepare.ts:13-17`) | Runs measure/mutate work (via the `DomApi`) before the animation plays — e.g. reading layout to compute a keyframe value. No return value. |
+| Member     | Required | Called from                                                                       | Returns / does                                                                                                                                                                                                                              |
+| ---------- | -------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `web`      | Yes      | `getWebAnimation` (`../src/api/webAnimations.ts:52-54`)                           | Builds the `AnimationData[]` used to construct the runtime WAAPI `Animation`(s). Receives a `DomApi` (only when `target` resolves to an `HTMLElement`) for measuring before returning keyframes.                                            |
+| `getNames` | Yes      | `getElementCSSAnimation` (`../src/motion.ts:41`)                                  | Returns the `@keyframes`/animation names this effect can produce, so `getAnimation`/`getElementCSSAnimation` can find a matching CSS animation **already running** on the element (by `animationName`) instead of creating a new WAAPI one. |
+| `style`    | No       | `getCSSAnimation` → `getCSSAnimationEffect` (`../src/api/cssAnimations.ts:39-46`) | Same return shape as `web`, but for the CSS-generation/SSR path — see [`./css-generation.md`](./css-generation.md). If omitted, `getCSSAnimation` produces no descriptors for this effect.                                                  |
+| `prepare`  | No       | `prepareAnimation` (`../src/api/prepare.ts:13-17`)                                | Runs measure/mutate work (via the `DomApi`) before the animation plays — e.g. reading layout to compute a keyframe value. No return value.                                                                                                  |
 
 `DomApi` (`../src/types.ts:122-123`):
 
@@ -150,11 +150,11 @@ for reads and `dom.mutate(...)` for writes to avoid layout thrashing.
 ```typescript
 // ../src/types.ts:184-199
 type AnimationData = (TimeAnimationOptions | AnimationDataForScrub) & {
-  name?: string;                                              // @keyframes / animation name
-  keyframes: Record<string, string | number | undefined>[];   // WAAPI-style keyframe list
-  custom?: Record<string, string | number | undefined>;       // CSS custom properties the effect needs
+  name?: string; // @keyframes / animation name
+  keyframes: Record<string, string | number | undefined>[]; // WAAPI-style keyframe list
+  custom?: Record<string, string | number | undefined>; // CSS custom properties the effect needs
   composite?: CompositeOperation;
-  part?: string;                                               // sub-target — see below
+  part?: string; // sub-target — see below
   timing?: Partial<EffectTiming>;
 };
 ```
@@ -170,9 +170,9 @@ effect drives one `AnimationData` per `part`).
 type EffectModule =
   | AnimationEffectAPI<'time'>
   | AnimationEffectAPI<'scrub'>
-  | ScrollEffectModule            // { web(options, dom?): AnimationData[] } — ../src/types.ts:249-251
-  | MouseEffectModule             // { web(options): (element: HTMLElement) => object } — ../src/types.ts:253-255
-  | WebAnimationEffectFactory<'scrub'>;  // bare function, same signature as AnimationEffectAPI.web — ../src/types.ts:68-72
+  | ScrollEffectModule // { web(options, dom?): AnimationData[] } — ../src/types.ts:249-251
+  | MouseEffectModule // { web(options): (element: HTMLElement) => object } — ../src/types.ts:253-255
+  | WebAnimationEffectFactory<'scrub'>; // bare function, same signature as AnimationEffectAPI.web — ../src/types.ts:68-72
 ```
 
 `ScrollEffectModule`/`MouseEffectModule`/`WebAnimationEffectFactory` are lower-level factory shapes
@@ -186,7 +186,7 @@ for a standard authored effect.
 
 ```typescript
 // ../src/api/registry.ts:5-7
-function registerEffects(effects: Record<string, EffectModule>): void
+function registerEffects(effects: Record<string, EffectModule>): void;
 ```
 
 - Merges the given map into a single **global** registry (`Object.assign(registry, effects)`) —
