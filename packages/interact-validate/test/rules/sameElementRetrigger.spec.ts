@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { validateInteractConfig } from '../../src';
 
-// A1 — viewEnter/pageVisible with a re-triggering triggerType ('repeat'/'alternate'/'state')
+// A1 — viewEnter with a re-triggering triggerType ('repeat'/'alternate'/'state')
 // on the SAME source+target element causes re-trigger loops (the observed element leaves/re-enters
 // the viewport as it animates). Source: viewenter.md top CRITICAL + full-lean.md "viewEnter".
 
@@ -26,12 +26,12 @@ describe('sameElementRetrigger — SAME_ELEMENT_RETRIGGER', () => {
     expect(result.valid).toBe(true);
   });
 
-  it('warns for pageVisible with triggerType "state" on the same element', () => {
+  it('warns for viewEnter with triggerType "state" on the same element', () => {
     const result = validateInteractConfig({
       interactions: [
         {
           key: 'el',
-          trigger: 'pageVisible',
+          trigger: 'viewEnter',
           effects: [
             { namedEffect: { type: 'Pulse' }, duration: 400, triggerType: 'state', fill: 'both' },
           ],

@@ -143,14 +143,14 @@ function kebabToCamel(prop: string): string {
 
 type Push = (domainCode: string, path: Path, message: string) => void;
 
-// --- A1: viewEnter/pageVisible same source+target with a re-triggering type ---
+// --- A1: viewEnter same source+target with a re-triggering type ---
 function checkSameElementRetrigger(
   push: Push,
   path: Path,
   effect: AnyEffect,
   owner?: AnyInteraction,
 ): void {
-  if (!owner || (owner.trigger !== 'viewEnter' && owner.trigger !== 'pageVisible')) return;
+  if (!owner || owner.trigger !== 'viewEnter') return;
   if (!effect.triggerType || !RETRIGGER_TYPES.includes(effect.triggerType)) return;
   if (!targetsSameElementAsSource(owner, effect)) return;
   push(
@@ -166,7 +166,7 @@ function checkSequenceRetrigger(
   sequence: AnySequence,
   owner?: AnyInteraction,
 ): void {
-  if (!owner || (owner.trigger !== 'viewEnter' && owner.trigger !== 'pageVisible')) return;
+  if (!owner || owner.trigger !== 'viewEnter') return;
   if (!sequence.triggerType || !RETRIGGER_TYPES.includes(sequence.triggerType)) return;
   const targetsSource = (sequence.effects ?? []).some((e) => targetsSameElementAsSource(owner, e));
   if (!targetsSource) return;

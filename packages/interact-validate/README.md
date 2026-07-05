@@ -201,7 +201,7 @@ These encode statically-detectable authoring pitfalls from the trigger rule file
 | `UNUSED_SEQUENCE`                      | A `config.sequences` entry is never referenced.                                                                         | `UNUSED_DEFINITION`      |
 | `UNUSED_CONDITION`                     | A `config.conditions` entry is never referenced.                                                                        | `UNUSED_DEFINITION`      |
 | `DUPLICATE_KEYFRAME_NAME`              | A `keyframeEffect.name` is reused across effects.                                                                       | `UNIQUE_DEFINITION_IDS`  |
-| `SAME_ELEMENT_RETRIGGER`               | `viewEnter`/`pageVisible` with a non-`once` `triggerType` on the same source+target element.                            | `SAME_ELEMENT_RETRIGGER` |
+| `SAME_ELEMENT_RETRIGGER`               | `viewEnter` with a non-`once` `triggerType` on the same source+target element.                                          | `SAME_ELEMENT_RETRIGGER` |
 | `HIT_AREA_SHIFT`                       | `hover`/`pointerMove` `keyframeEffect` with a `translate`/`scale`/`matrix` transform on the same source+target element. | `HIT_AREA_SHIFT`         |
 | `SCROLL_PRESET_MISSING_RANGE`          | A `*Scroll` `namedEffect` on `viewProgress` omits `range`.                                                              | `SCROLL_RANGE`           |
 | `SCROLL_PRESET_BAD_RANGE`              | A scroll preset `range` is not `'in'`/`'out'`/`'continuous'`.                                                           | `SCROLL_RANGE`           |

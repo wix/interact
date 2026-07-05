@@ -223,7 +223,7 @@ Statically-detectable authoring pitfalls lifted from the trigger rule files. Eac
 
 | Code                                   | What it flags                                                                                                                                         | Rule category            |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `SAME_ELEMENT_RETRIGGER`               | `viewEnter`/`pageVisible` with `triggerType` `repeat`/`alternate`/`state` on the same source+target element (re-trigger loop).                        | `SAME_ELEMENT_RETRIGGER` |
+| `SAME_ELEMENT_RETRIGGER`               | `viewEnter` with `triggerType` `repeat`/`alternate`/`state` on the same source+target element (re-trigger loop).                                      | `SAME_ELEMENT_RETRIGGER` |
 | `HIT_AREA_SHIFT`                       | `hover`/`click`/`interest`/`activate`/`pointerMove` `keyframeEffect` with a `translate`/`scale`/`matrix` transform on the same source+target element. | `HIT_AREA_SHIFT`         |
 | `SCROLL_PRESET_MISSING_RANGE`          | A `*Scroll` `namedEffect` on `viewProgress` omits `range`.                                                                                            | `SCROLL_RANGE`           |
 | `SCROLL_PRESET_BAD_RANGE`              | A scroll preset `range` is not `'in'`/`'out'`/`'continuous'`.                                                                                         | `SCROLL_RANGE`           |
