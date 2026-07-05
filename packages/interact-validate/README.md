@@ -134,22 +134,22 @@ Every issue is `'error'` or `'warning'`. `valid` is `true` **iff** no `'error'` 
 - **`strict: true`** promotes all remaining issues to `'error'`.
 - **`severityOverrides`** is keyed by **rule category**, and only these three categories are registered/overridable:
 
-| Rule category            | Covers codes                                                  | Default severity |
-| ------------------------ | ------------------------------------------------------------- | ---------------- |
-| `UNUSED_DEFINITION`      | `UNUSED_EFFECT`, `UNUSED_SEQUENCE`, `UNUSED_CONDITION`        | warning          |
-| `UNIQUE_DEFINITION_IDS`  | `DUPLICATE_KEYFRAME_NAME`                                     | warning          |
-| `VALID_MEDIA_QUERIES`    | `INVALID_MEDIA_QUERY`                                         | error            |
-| `SAME_ELEMENT_RETRIGGER` | `SAME_ELEMENT_RETRIGGER`                                      | warning          |
-| `HIT_AREA_SHIFT`         | `HIT_AREA_SHIFT`                                              | warning          |
-| `SCROLL_RANGE`           | `SCROLL_PRESET_MISSING_RANGE`, `SCROLL_PRESET_BAD_RANGE`      | warning          |
-| `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE` (warning), `ANIMATION_END_CYCLE` (error) | mixed   |
-| `ELEMENT_SELECTION`      | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER`, `REDUNDANT_SELECTOR_WITH_LIST_ITEM` | warning |
-| `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`    | warning          |
-| `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                       | warning          |
-| `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                        | warning          |
-| `RANGE_OFFSET`           | `RANGE_OFFSET_OUT_OF_RANGE`                                   | warning          |
-| `KEYFRAME_STYLE`         | `KEYFRAME_PROP_NOT_CAMEL_CASE`                                | warning          |
-| `VIEW_INSET`             | `INVALID_INSET`                                               | warning          |
+| Rule category            | Covers codes                                                                | Default severity |
+| ------------------------ | --------------------------------------------------------------------------- | ---------------- |
+| `UNUSED_DEFINITION`      | `UNUSED_EFFECT`, `UNUSED_SEQUENCE`, `UNUSED_CONDITION`                      | warning          |
+| `UNIQUE_DEFINITION_IDS`  | `DUPLICATE_KEYFRAME_NAME`                                                   | warning          |
+| `VALID_MEDIA_QUERIES`    | `INVALID_MEDIA_QUERY`                                                       | error            |
+| `SAME_ELEMENT_RETRIGGER` | `SAME_ELEMENT_RETRIGGER`                                                    | warning          |
+| `HIT_AREA_SHIFT`         | `HIT_AREA_SHIFT`                                                            | warning          |
+| `SCROLL_RANGE`           | `SCROLL_PRESET_MISSING_RANGE`, `SCROLL_PRESET_BAD_RANGE`                    | warning          |
+| `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE` (warning), `ANIMATION_END_CYCLE` (error)     | mixed            |
+| `ELEMENT_SELECTION`      | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER`, `REDUNDANT_SELECTOR_WITH_LIST_ITEM` | warning          |
+| `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                  | warning          |
+| `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                     | warning          |
+| `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                      | warning          |
+| `RANGE_OFFSET`           | `RANGE_OFFSET_OUT_OF_RANGE`                                                 | warning          |
+| `KEYFRAME_STYLE`         | `KEYFRAME_PROP_NOT_CAMEL_CASE`                                              | warning          |
+| `VIEW_INSET`             | `INVALID_INSET`                                                             | warning          |
 
 Set a category to `'off'` to drop those issues, or `'warning'` / `'error'` to set their severity. **All other codes** (every `SCHEMA_*`, numeric, effect-source, and referential code) are not in a category and **cannot** be silenced or re-leveled via `severityOverrides` — they always emit at their built-in severity. Precedence: `'off'` first (drops the issue), then a `'warning'`/`'error'` override, then `strict` (forces the rest to `'error'`).
 
@@ -189,32 +189,32 @@ The single source of truth for every code the validator emits. The agent-facing 
 | `CONDITION_NOT_FOUND`            | A `conditions[]` entry references a key absent from `config.conditions`.                                                                     |
 | `INTERACTION_EMPTY`              | An interaction has neither `effects` nor `sequences`.                                                                                        |
 | `INVALID_MEDIA_QUERY`            | A `media` condition's `predicate` fails static syntax validation. (`VALID_MEDIA_QUERIES` category.)                                          |
-| `ANIMATION_END_CYCLE`            | A cycle of `animationEnd` interactions wait on each other → deadlock. (`ANIMATION_END_GRAPH` category.)                                       |
+| `ANIMATION_END_CYCLE`            | A cycle of `animationEnd` interactions wait on each other → deadlock. (`ANIMATION_END_GRAPH` category.)                                      |
 
 ### Warnings (severity: `warning`)
 
 These encode statically-detectable authoring pitfalls from the trigger rule files. Each belongs to a [rule category](#severity-model), so set the category to `'off'` to silence it or `'error'` to make it fail `valid`.
 
-| Code                                   | Trigger                                                                                       | Rule category            |
-| -------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------ |
-| `UNUSED_EFFECT`                        | A `config.effects` entry is never referenced.                                                 | `UNUSED_DEFINITION`      |
-| `UNUSED_SEQUENCE`                      | A `config.sequences` entry is never referenced.                                               | `UNUSED_DEFINITION`      |
-| `UNUSED_CONDITION`                     | A `config.conditions` entry is never referenced.                                              | `UNUSED_DEFINITION`      |
-| `DUPLICATE_KEYFRAME_NAME`              | A `keyframeEffect.name` is reused across effects.                                             | `UNIQUE_DEFINITION_IDS`  |
-| `SAME_ELEMENT_RETRIGGER`              | `viewEnter`/`pageVisible` with a non-`once` `triggerType` on the same source+target element.  | `SAME_ELEMENT_RETRIGGER` |
-| `HIT_AREA_SHIFT`                       | `hover`/`pointerMove` `keyframeEffect` with a `translate`/`scale`/`matrix` transform on the same source+target element. | `HIT_AREA_SHIFT` |
-| `SCROLL_PRESET_MISSING_RANGE`          | A `*Scroll` `namedEffect` on `viewProgress` omits `range`.                                     | `SCROLL_RANGE`           |
-| `SCROLL_PRESET_BAD_RANGE`              | A scroll preset `range` is not `'in'`/`'out'`/`'continuous'`.                                  | `SCROLL_RANGE`           |
-| `ANIMATION_END_SELF_REFERENCE`         | An `animationEnd` interaction waits on an effect it also produces (never starts).             | `ANIMATION_END_GRAPH`    |
-| `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER` | `listItemSelector` present without `listContainer` (inert).                                    | `ELEMENT_SELECTION`      |
-| `REDUNDANT_SELECTOR_WITH_LIST_ITEM`    | `selector` ignored when `listContainer` + `listItemSelector` are both present.                 | `ELEMENT_SELECTION`      |
-| `EMPTY_STYLE_PROPERTIES`               | A state effect's `transition.styleProperties` / `transitionProperties` is `[]` (toggles nothing). | `STATE_EFFECT`        |
-| `STATE_REMOVE_WITHOUT_EFFECT_ID`       | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                    | `STATE_EFFECT`           |
-| `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`. | `RECOMMENDED_FILL` |
-| `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`). | `POINTER_AXIS` |
-| `RANGE_OFFSET_OUT_OF_RANGE`            | A percentage `RangeOffset.offset.value` is outside `0–100`.                                     | `RANGE_OFFSET`           |
-| `KEYFRAME_PROP_NOT_CAMEL_CASE`         | A `keyframeEffect` property name is kebab-case (not WAAPI camelCase).                           | `KEYFRAME_STYLE`         |
-| `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 CSS lengths/percentages.                                  | `VIEW_INSET`             |
+| Code                                   | Trigger                                                                                                                 | Rule category            |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `UNUSED_EFFECT`                        | A `config.effects` entry is never referenced.                                                                           | `UNUSED_DEFINITION`      |
+| `UNUSED_SEQUENCE`                      | A `config.sequences` entry is never referenced.                                                                         | `UNUSED_DEFINITION`      |
+| `UNUSED_CONDITION`                     | A `config.conditions` entry is never referenced.                                                                        | `UNUSED_DEFINITION`      |
+| `DUPLICATE_KEYFRAME_NAME`              | A `keyframeEffect.name` is reused across effects.                                                                       | `UNIQUE_DEFINITION_IDS`  |
+| `SAME_ELEMENT_RETRIGGER`               | `viewEnter`/`pageVisible` with a non-`once` `triggerType` on the same source+target element.                            | `SAME_ELEMENT_RETRIGGER` |
+| `HIT_AREA_SHIFT`                       | `hover`/`pointerMove` `keyframeEffect` with a `translate`/`scale`/`matrix` transform on the same source+target element. | `HIT_AREA_SHIFT`         |
+| `SCROLL_PRESET_MISSING_RANGE`          | A `*Scroll` `namedEffect` on `viewProgress` omits `range`.                                                              | `SCROLL_RANGE`           |
+| `SCROLL_PRESET_BAD_RANGE`              | A scroll preset `range` is not `'in'`/`'out'`/`'continuous'`.                                                           | `SCROLL_RANGE`           |
+| `ANIMATION_END_SELF_REFERENCE`         | An `animationEnd` interaction waits on an effect it also produces (never starts).                                       | `ANIMATION_END_GRAPH`    |
+| `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER` | `listItemSelector` present without `listContainer` (inert).                                                             | `ELEMENT_SELECTION`      |
+| `REDUNDANT_SELECTOR_WITH_LIST_ITEM`    | `selector` ignored when `listContainer` + `listItemSelector` are both present.                                          | `ELEMENT_SELECTION`      |
+| `EMPTY_STYLE_PROPERTIES`               | A state effect's `transition.styleProperties` / `transitionProperties` is `[]` (toggles nothing).                       | `STATE_EFFECT`           |
+| `STATE_REMOVE_WITHOUT_EFFECT_ID`       | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                                             | `STATE_EFFECT`           |
+| `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.       | `RECOMMENDED_FILL`       |
+| `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).              | `POINTER_AXIS`           |
+| `RANGE_OFFSET_OUT_OF_RANGE`            | A percentage `RangeOffset.offset.value` is outside `0–100`.                                                             | `RANGE_OFFSET`           |
+| `KEYFRAME_PROP_NOT_CAMEL_CASE`         | A `keyframeEffect` property name is kebab-case (not WAAPI camelCase).                                                   | `KEYFRAME_STYLE`         |
+| `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 CSS lengths/percentages.                                                          | `VIEW_INSET`             |
 
 ## Usage recipes
 

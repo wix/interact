@@ -12,7 +12,9 @@ describe('scrollPresetRange', () => {
         {
           key: 'el',
           trigger: 'viewProgress',
-          effects: [{ namedEffect: { type: 'FadeScroll' }, rangeStart: { name: 'cover' }, fill: 'both' }],
+          effects: [
+            { namedEffect: { type: 'FadeScroll' }, rangeStart: { name: 'cover' }, fill: 'both' },
+          ],
         },
       ],
     });
@@ -59,7 +61,9 @@ describe('scrollPresetRange', () => {
           {
             key: 'el',
             trigger: 'viewProgress',
-            effects: [{ namedEffect: { type: 'FadeIn' }, rangeStart: { name: 'cover' }, fill: 'both' }],
+            effects: [
+              { namedEffect: { type: 'FadeIn' }, rangeStart: { name: 'cover' }, fill: 'both' },
+            ],
           },
         ],
       });

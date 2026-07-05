@@ -15,7 +15,10 @@ describe('recommendedFill — RECOMMENDED_FILL_BOTH', () => {
           key: 'el',
           trigger: 'viewProgress',
           effects: [
-            { keyframeEffect: { name: 'p', keyframes: [{ opacity: '0' }, { opacity: '1' }] }, rangeStart: { name: 'cover' } },
+            {
+              keyframeEffect: { name: 'p', keyframes: [{ opacity: '0' }, { opacity: '1' }] },
+              rangeStart: { name: 'cover' },
+            },
           ],
         },
       ],

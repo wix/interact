@@ -168,9 +168,7 @@ function checkSequenceRetrigger(
 ): void {
   if (!owner || (owner.trigger !== 'viewEnter' && owner.trigger !== 'pageVisible')) return;
   if (!sequence.triggerType || !RETRIGGER_TYPES.includes(sequence.triggerType)) return;
-  const targetsSource = (sequence.effects ?? []).some((e) =>
-    targetsSameElementAsSource(owner, e),
-  );
+  const targetsSource = (sequence.effects ?? []).some((e) => targetsSameElementAsSource(owner, e));
   if (!targetsSource) return;
   push(
     'SAME_ELEMENT_RETRIGGER',
@@ -269,7 +267,10 @@ function checkRedundantSelector(
 
 // --- C8: state effect that toggles nothing (empty style arrays) ---
 function checkEmptyStyleProperties(push: Push, path: Path, effect: AnyEffect): void {
-  if (Array.isArray(effect.transition?.styleProperties) && effect.transition.styleProperties.length === 0) {
+  if (
+    Array.isArray(effect.transition?.styleProperties) &&
+    effect.transition.styleProperties.length === 0
+  ) {
     push(
       'EMPTY_STYLE_PROPERTIES',
       [...path, 'transition', 'styleProperties'],
@@ -326,11 +327,14 @@ function checkPointerAxisIgnored(
   owner?: AnyInteraction,
 ): void {
   if (!owner || owner.trigger !== 'pointerMove' || owner.params?.axis === undefined) return;
-  if (effect.namedEffect !== undefined || (effect as { customEffect?: unknown }).customEffect !== undefined) {
+  if (
+    effect.namedEffect !== undefined ||
+    (effect as { customEffect?: unknown }).customEffect !== undefined
+  ) {
     push(
       'POINTER_AXIS_IGNORED',
       [...path],
-      "pointerMove `params.axis` is ignored for `namedEffect`/`customEffect` (both axes are available); it only applies to `keyframeEffect`.",
+      'pointerMove `params.axis` is ignored for `namedEffect`/`customEffect` (both axes are available); it only applies to `keyframeEffect`.',
     );
   }
 }

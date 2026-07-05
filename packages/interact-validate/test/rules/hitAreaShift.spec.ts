@@ -119,7 +119,12 @@ describe('hitAreaShift — HIT_AREA_SHIFT', () => {
             key: 'el',
             trigger: 'hover',
             effects: [
-              { namedEffect: { type: 'Pulse' }, duration: 200, triggerType: 'alternate', fill: 'both' },
+              {
+                namedEffect: { type: 'Pulse' },
+                duration: 200,
+                triggerType: 'alternate',
+                fill: 'both',
+              },
             ],
           },
         ],

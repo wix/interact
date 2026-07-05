@@ -48,7 +48,10 @@ describe('sameElementRetrigger — SAME_ELEMENT_RETRIGGER', () => {
           key: 'el',
           trigger: 'viewEnter',
           sequences: [
-            { triggerType: 'repeat', effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }] },
+            {
+              triggerType: 'repeat',
+              effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
+            },
           ],
         },
       ],
