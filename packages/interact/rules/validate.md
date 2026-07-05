@@ -2,7 +2,7 @@
 
 Rules for using `@wix/interact-validate` — validate an `InteractConfig` before it reaches the runtime.
 
-`@wix/interact-validate` is a standalone, zod-powered validator for the `@wix/interact` `InteractConfig` shape. It runs **statically** (no DOM, no browser, no runtime), so it is safe in build tools, CI, and server-side code. It is a separate package from `@wix/interact` and declares `@wix/interact` as a peer dependency (`^2.4.0`) — its config types come from there, so the two never drift.
+`@wix/interact-validate` is a standalone, zod-powered validator for the `@wix/interact` `InteractConfig` shape. It runs **statically** (no DOM, no browser, no runtime), so it is safe in build tools, CI, and server-side code. It is a separate package from `@wix/interact` and declares `@wix/interact` as a peer dependency — its config types come from there, so the two never drift.
 
 ## Table of Contents
 
@@ -181,7 +181,7 @@ This is the authoritative list of every code the validator emits today. Codes no
 | `NEGATIVE_DELAY`               | `delay` is negative.                                                                                                                                                                                                  |
 | `NEGATIVE_ITERATIONS`          | `iterations` is negative (or, on scroll/pointer effects, `0` / non-integer).                                                                                                                                          |
 | `NEGATIVE_OFFSET`              | A sequence `offset` is negative.                                                                                                                                                                                      |
-| `THRESHOLD_OUT_OF_RANGE`       | `viewEnter` / `pageVisible` `params.threshold` is outside `[0, 1]`.                                                                                                                                                   |
+| `THRESHOLD_OUT_OF_RANGE`       | `viewEnter` `params.threshold` is outside `[0, 1]`.                                                                                                                                                                   |
 | `ITERATIONS_INFINITY_ON_SCRUB` | `iterations: Infinity` on a `viewProgress` / `pointerMove` effect. Scrubbed effects are progress-driven, so an infinite count is invalid. (Time-based effects DO allow `Infinity`, and `0` is treated as `Infinity`.) |
 
 ### Effect-source errors (severity: error)

@@ -11,7 +11,7 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 LIB_DIR="$REPO_ROOT/apps/website/assets/lib"
 
-yarn workspaces foreach --all --topological --include 'packages/*' run build
+yarn workspaces foreach --all --topological-dev --include 'packages/*' run build
 
 rm -rf "$LIB_DIR/interact" "$LIB_DIR/motion-presets" "$LIB_DIR/motion"
 
@@ -23,5 +23,7 @@ cp "$REPO_ROOT/packages/interact/dist/es/web.js" "$LIB_DIR/interact/es/"
 cp "$REPO_ROOT/packages/interact/dist"/index-*.mjs "$LIB_DIR/interact/"
 cp "$REPO_ROOT/packages/motion-presets/dist/es/motion-presets.js" "$LIB_DIR/motion-presets/"
 cp "$REPO_ROOT/packages/motion/dist/es/motion.js" "$LIB_DIR/motion/"
+
+node "$REPO_ROOT/apps/website/scripts/generate-critical-css.mjs"
 
 echo "Landing page libraries copied to apps/website/assets/lib/"

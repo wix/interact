@@ -81,10 +81,10 @@ useEffect(() => {
 **Vanilla JS:**
 
 ```ts
-import { Interact } from '@wix/interact';
+import { Interact, add, remove } from '@wix/interact';
 const instance = Interact.create(config);
-instance.add(element, 'hero'); // bind after element exists in DOM
-instance.remove('hero'); // unregister
+add(element, 'hero'); // bind after element exists in DOM
+remove('hero'); // unregister
 ```
 
 **CDN (no build tools):**
@@ -606,47 +606,18 @@ Inject the result into the `<head>` (preferred), or beginning of `<body>`, so it
 
 **Problem:** Elements with entrance animations (e.g. `viewEnter` + `triggerType: 'once'` with `FadeIn`) start in their final visible state. Before the animation framework initializes and applies the starting keyframe (e.g. `opacity: 0`), the element is briefly visible at full opacity — causing a flash of unstyled/un-animated content (FOUC).
 
-**Solution:** Two things are required — both MUST be present:
-
-1. **Generate CSS** using `generate(config, useFirstChild)` — among all the rules it produces, it includes initial rules that hide entrance-animated elements from the moment the page renders.
-2. **Mark elements with `initial`** — tells the runtime which elements have critical CSS applied so it can coordinate with the generated styles.
-
-**Step 1: Generate CSS** — see above.
-
-**Step 2: Mark elements**
-
-**Web (Custom Elements):**
-
-```html
-<interact-element data-interact-key="hero" data-interact-initial="true">
-  <section class="hero">...</section>
-</interact-element>
-```
-
-**React:**
-
-```tsx
-<Interaction tagName="section" interactKey="hero" initial={true} className="hero">
-  ...
-</Interaction>
-```
-
-**Vanilla:**
-
-```html
-<section data-interact-key="hero" data-interact-initial="true" class="hero">...</section>
-```
+**Solution:** Call `generate(config, useFirstChild)` server-side or at build time and inject the resulting CSS into `<head>`. The generated initial rules hide entrance-animated elements from the moment the page renders.
 
 ### Scroll-driven CSS (viewProgress)
 
 For `viewProgress` interactions, `generate()` emits `view-timeline` declarations and `animation-timeline`/`animation-range` properties.
-No `initial` attribute is needed for scroll-driven animations.
+Scroll-driven animations do not need separate FOUC prevention — the animation is continuously driven by scroll position.
 
 ### Rules
 
 - `generate()` should be called server-side or at build time. Can also be called on client-side if page content is initially hidden (e.g. behind a loader/splash screen).
-- `initial` is only valid for `viewEnter` + `triggerType: 'once'` where source and target are the same element.
-- For `repeat`/`alternate`/`state`, do NOT use `initial`. Instead, manually apply the initial keyframe as inline styles on the target element and use `fill: 'both'`.
+- FOUC initial rules apply only to `viewEnter` + `triggerType: 'once'` where source and target are the same element.
+- For `repeat`/`alternate`/`state`, manually apply the starting keyframe as inline styles on the target element and use `fill: 'both'`.
 
 ---
 

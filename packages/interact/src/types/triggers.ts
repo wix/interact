@@ -8,7 +8,6 @@ export type TriggerType =
   | 'hover'
   | 'click'
   | 'viewEnter'
-  | 'pageVisible'
   | 'animationEnd'
   | 'viewProgress'
   | 'pointerMove'

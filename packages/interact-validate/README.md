@@ -24,7 +24,7 @@ It runs with no DOM and no browser, so it works identically in Node, CI, and the
 npm install @wix/interact-validate
 ```
 
-`@wix/interact` is a **peer dependency** (`^2.4.0`) — the config types come from there, so the validator never drifts from the runtime shape. `zod` (`^4`) is a regular dependency.
+`@wix/interact` is a **peer dependency** — the config types come from there, so the validator never drifts from the runtime shape. `zod` is a regular dependency.
 
 ## Quick start
 
@@ -179,7 +179,7 @@ The single source of truth for every code the validator emits. The agent-facing 
 | `NEGATIVE_DELAY`                 | `delay` is negative.                                                                                                                         |
 | `NEGATIVE_ITERATIONS`            | `iterations` is negative (or `0`/non-integer on a scroll/pointer effect).                                                                    |
 | `NEGATIVE_OFFSET`                | A sequence `offset` is negative.                                                                                                             |
-| `THRESHOLD_OUT_OF_RANGE`         | `viewEnter`/`pageVisible` `params.threshold` outside `[0, 1]`.                                                                               |
+| `THRESHOLD_OUT_OF_RANGE`         | `viewEnter` `params.threshold` outside `[0, 1]`.                                                                                             |
 | `ITERATIONS_INFINITY_ON_SCRUB`   | `iterations: Infinity` on a `viewProgress`/`pointerMove` effect (time effects DO allow `Infinity`).                                          |
 | `MULTIPLE_EFFECT_SOURCES`        | Not exactly one of `namedEffect`/`keyframeEffect`/`customEffect` (surfaces when resolving an `effectId` reference).                          |
 | `MULTIPLE_TRANSITION_SOURCES`    | Not exactly one of `transition`/`transitionProperties` on a state effect.                                                                    |

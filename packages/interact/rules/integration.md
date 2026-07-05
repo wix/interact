@@ -87,10 +87,10 @@ import { Interaction } from '@wix/interact/react';
 ### Vanilla JS
 
 ```typescript
-import { Interact } from '@wix/interact';
+import { Interact, add } from '@wix/interact';
 
 const interact = Interact.create(config);
-interact.add(element, 'hero');
+add(element, 'hero');
 ```
 
 **Rules:**
@@ -281,12 +281,7 @@ const css = generate(config);
 
 **Problem:** Elements with entrance animations (e.g. `FadeIn` on `viewEnter`) are initially visible in their final state. Before the animation framework applies the starting keyframe, the content flashes visibly — a flash of un-animated content (FOUC).
 
-**Solution:** Two things are required — both MUST be present:
-
-1. **Generate CSS** with `generate(config, useFirstChild)` — among all the rules it produces, it includes initial rules that hide entrance-animated elements until the animation starts.
-2. **Mark elements with `initial`** — `data-interact-initial="true"` on `<interact-element>`, or `initial={true}` on `<Interaction>` in React.
-
-Using only one of these has no effect — both are required.
+**Solution:** Call `generate(config, useFirstChild)` server-side or at build time and inject the resulting CSS into `<head>`. The generated initial rules hide entrance-animated elements until the animation starts.
 
 See [viewenter.md](./viewenter.md) for full details.
 
@@ -294,29 +289,7 @@ See [viewenter.md](./viewenter.md) for full details.
 
 - `generate()` should be called server-side or at build time. Can also be called on the client if page content is initially hidden (e.g. behind a loader).
 - `generate()` processes all interactions, not just `viewEnter`.
-- `initial` is only valid for `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
-
-**Web:**
-
-```html
-<interact-element data-interact-key="hero" data-interact-initial="true">
-  <section id="hero">...</section>
-</interact-element>
-```
-
-**React:**
-
-```tsx
-<Interaction tagName="section" interactKey="hero" initial={true} className="hero">
-  ...
-</Interaction>
-```
-
-**Vanilla:**
-
-```html
-<section data-interact-key="hero" data-interact-initial="true" class="hero">...</section>
-```
+- FOUC initial rules apply only to `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
 
 ---
 

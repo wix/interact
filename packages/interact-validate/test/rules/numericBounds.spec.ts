@@ -214,12 +214,12 @@ describe('numericBounds', () => {
       expect(err?.path).toContain('threshold');
     });
 
-    it('emits THRESHOLD_OUT_OF_RANGE for threshold < 0 on pageVisible', () => {
+    it('emits THRESHOLD_OUT_OF_RANGE for threshold < 0 on viewEnter', () => {
       const result = validateInteractConfig({
         interactions: [
           {
             key: 'el',
-            trigger: 'pageVisible',
+            trigger: 'viewEnter',
             params: { threshold: -0.1 },
             effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
           },
