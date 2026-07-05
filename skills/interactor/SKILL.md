@@ -8,8 +8,9 @@ description: >-
   @wix/motion(-presets); wire animations to scroll, viewport-enter, hover, click, or
   mouse-move; build entrance / parallax / stagger / tilt / reveal effects; install
   or set up @wix/interact (vanilla JS, React, or Web Components); or edit an existing
-  interact config. Trigger even on phrasings like "fade in on scroll", "parallax
-  background", "stagger the cards in", "hover-scale the button", or "tilt toward the
+  interact config. Validate every generated InteractConfig with @wix/interact-validate
+  before it reaches generate()/create(). Trigger even on phrasings like "fade in on scroll",
+  "parallax background", "stagger the cards in", "hover-scale the button", or "tilt toward the
   mouse" in a project using these packages. Do NOT use for other animation libraries.
 ---
 
@@ -20,13 +21,14 @@ add or edit interactions on any webpage or web app. It is **interact-first**: yo
 describe _what should animate and when_ as a declarative JSON config, and the
 library does the DOM wiring. You almost never call the motion engine directly.
 
-## Mental model — three packages, one config
+## Mental model — packages and one config
 
-| Package               | Role                                                                                                                         | You touch it…                                                                             |
-| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------- |
-| `@wix/interact`       | Declarative layer. Binds **triggers → effects** via an `InteractConfig`. Ships vanilla / React / Web-Component entry points. | Always. This is the API.                                                                  |
-| `@wix/motion-presets` | ready-made named effects (entrance, scroll, ongoing, mouse). Referenced as `namedEffect: { type: 'FadeIn' }`.                | When you want a prebuilt effect (the common case).                                        |
-| `@wix/motion`         | The engine (WAAPI, CSS, ViewTimeline, fastdom). Bundled inside interact.                                                     | Rarely — only for programmatic/escape-hatch animation. See `references/motion-engine.md`. |
+| Package                  | Role                                                                                                                         | You touch it…                                                                                       |
+| :----------------------- | :--------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------- |
+| `@wix/interact`          | Declarative layer. Binds **triggers → effects** via an `InteractConfig`. Ships vanilla / React / Web-Component entry points. | Always. This is the API.                                                                            |
+| `@wix/motion-presets`    | Ready-made named effects (entrance, scroll, ongoing, mouse). Referenced as `namedEffect: { type: 'FadeIn' }`.                | When you want a prebuilt effect (the common case).                                                  |
+| `@wix/motion`            | The engine (WAAPI, CSS, ViewTimeline, fastdom). Bundled inside interact.                                                     | Rarely — only for programmatic/escape-hatch animation. See `references/motion-engine.md`.           |
+| `@wix/interact-validate` | Static validator for `InteractConfig` shape (schema + referential checks). No DOM.                                           | Agent-side validation always; optional dev/CI guard in user projects. See `references/validate.md`. |
 
 The whole job is: **pick a trigger, pick an effect, bind it to an element with a
 key.** Everything else is detail.
@@ -41,7 +43,7 @@ key.** Everything else is detail.
 
 ## Workflow
 
-Follow three steps in order: **Install → Integrate → Add/Edit interactions.** If
+Follow four steps in order: **Install → Integrate → Add/Edit interactions → Validate.** If
 the project already uses interact (a config and the package exist), skip to
 _Add/Edit_. Read the linked reference files as you reach each step — they hold the
 full schema, the preset catalog, and per-trigger rules. Don't try to hold it all
@@ -57,10 +59,12 @@ Both packages, one command. `@wix/motion` comes transitively inside
 ```bash
 npm install @wix/interact @wix/motion-presets
 # (yarn add / pnpm add work too — match the project's package manager)
+npm install -D @wix/interact-validate   # optional — permanent dev/CI config guard only
 ```
 
 A no-build / plain-HTML site can skip npm and import from a CDN instead — see the
-CDN recipe in `references/integration-recipes.md`.
+CDN recipe in `references/integration-recipes.md`. CDN pages skip the validate
+package install; the agent validates configs without shipping the validator.
 
 ---
 
@@ -131,13 +135,48 @@ To **add** an interaction:
 To **edit** an existing config: read the current config first, find the
 interaction/effect by its `key`/`effectId`, and change _only_ what's asked.
 Preserve the rest (other interactions, ids, markup keys). After editing, re-run
-the validation checklist below — a changed `namedEffect.type` or a new
+validation (Step 4) — a changed `namedEffect.type` or a new
 `viewProgress` effect can silently break if you skip it. If the effect catalog or
 trigger semantics are involved, open `references/presets.md` / `references/triggers.md`.
 
 For multi-target staggering (cards, lists, nav items), use **sequences**, not
 manual per-item delays — see `references/triggers.md` and the sequences section of
 `references/config-schema.md`.
+
+---
+
+### Step 4 — Validate the config
+
+No `InteractConfig` reaches `generate()` / `Interact.create()` unvalidated, and
+**no `@wix/interact-validate` reference ships in the code you deliver** — on any
+entry point, CDN included. How you run validation depends on whether you can
+construct the config statically:
+
+- **Static config** (you authored a literal you can read in full): validate **before
+  emit** in a scratch script — never add validator imports to user files. See
+  `references/validate.md` for per-environment run mechanics.
+- **Dynamic config** (built at runtime from data/props/fetch/loops — you cannot
+  construct it by reading): temporarily inject `assertValidInteractConfig(config)`
+  immediately before `generate()`/`create()`, run so that code path executes, fix
+  every `severity: 'error'`, then **remove** the call, import, any `esm.sh` import,
+  and any temp devDep. Prefer a dev-only validation script when the config builder
+  module is importable in isolation (no removal step). Full loop in
+  `references/validate.md`.
+- **Permanent guard (opt-in, separate):** leaving `assertValidInteractConfig` in
+  shipped code as a devDependency CI gate is only when scaffolding a new project or
+  the user explicitly asks — do not conflate with the temporary injection above.
+
+Fix every issue with `severity: 'error'` before proceeding; prefer fixing warnings
+too. `valid: false` blocks emit.
+
+**Before declaring done**, grep the files you're shipping:
+
+```bash
+grep -REn 'interact-validate|validateInteractConfig|assertValidInteractConfig|InteractValidationError' <shipped files>
+# expect: no matches (unless the user asked for a permanent CI guard)
+```
+
+Then run the semantic checklist below.
 
 ---
 
@@ -222,18 +261,24 @@ animation no-ops. Apply them every time, even if you don't open a reference file
     `listContainer` must match a **descendant** of the keyed element, not the keyed
     element itself.
 
-## Verify your work (run this checklist before declaring done)
+## Verify your work (run before declaring done)
 
 Animations are hard to confirm headlessly, so this static check is your reliable
-proxy. Walk the finished config:
+proxy.
 
-- [ ] Every `effectId` / `sequenceId` / condition id referenced in an interaction **exists** in the top-level `effects` / `sequences` / `conditions` maps.
+### Automated config validation
+
+- [ ] `validateInteractConfig(config)` returns `valid: true` (no `severity: 'error'` issues). See `references/validate.md`.
+- [ ] Shipped files contain **no** `interact-validate`, `validateInteractConfig`, `assertValidInteractConfig`, or `InteractValidationError` references (unless the user explicitly asked for a permanent CI guard).
+
+### Semantic & integration checklist
+
+Items the validator cannot check — walk these after automated validation passes:
+
 - [ ] Every `namedEffect.type` is a **real registered preset** from `references/presets.md` (not `DVD`, not a `Bg*` preset, not invented).
 - [ ] Every `*Scroll` preset used with `viewProgress` has a `range` (except `ParallaxScroll`).
 - [ ] `pointerMove` effects have **no** `rangeStart`/`rangeEnd` (those are `viewProgress`-only).
 - [ ] Every interaction `key` (and effect `key`) has a **matching element** in the markup (`data-interact-key` / `interactKey`).
-- [ ] Each effect has **exactly one** payload (`namedEffect` xor `keyframeEffect` xor `customEffect` xor `transition`/`transitionProperties`).
-- [ ] `triggerType` and `stateAction` are not both set on the same effect.
 - [ ] `generate()` output is injected and `useFirstChild` matches the entry point.
 - [ ] Child-target effects put `selector`/`key` on the **effect**, not the interaction. Groups of items use one keyed wrapper + a **descendant** match (no duplicate keys): `selector` on the effect for a one-trigger stagger/sequence, `listContainer` on the interaction for per-item triggers.
 - [ ] Invariants 5–7 and 10 hold for the relevant triggers (separate source/target, child targets, `overflow: clip`, unique keys).
@@ -249,4 +294,5 @@ Read the one(s) relevant to the task — they are self-contained and source-accu
 - **`references/triggers.md`** — per-trigger deep rules and gotchas: `viewEnter`, `viewProgress`, `hover`/`click` (+ `triggerType`/`stateAction` tables), `pointerMove`, `animationEnd`, accessibility variants, and sequences/stagger.
 - **`references/presets.md`** — the full preset catalog by category with parameters, defaults, accessibility risk tiers + reduced-motion fallbacks, and an "atmosphere → preset" selection guide.
 - **`references/integration-recipes.md`** — complete copy-paste setup per entry point (web / React / vanilla / CDN), with SSR, lifecycle/cleanup, and verification.
+- **`references/validate.md`** — how to run `@wix/interact-validate` (static scratch script vs temporary injection for dynamic configs), options, limitations, and what the validator does not check.
 - **`references/motion-engine.md`** — thin escape-hatch reference for calling `@wix/motion` directly (programmatic `getWebAnimation`/`getScrubScene`/`getSequence`), easings, and engine gotchas. Only when the declarative config can't express what's needed.

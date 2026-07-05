@@ -11,6 +11,7 @@ Shared rules that apply to **every** recipe:
 - `generate(config, useFirstChild)`: `true` for **web**, `false` for **vanilla/React**.
 - Inject the generated CSS into `<head>` (or top of `<body>`) so it applies before JS.
 - Keep the instance reference; call `instance.destroy()` on teardown (route change / unmount).
+- Validate the config with `@wix/interact-validate` before `generate()` / `create()` — agent-side always; see `references/validate.md`. Shipped files must contain no validator reference unless the user asked for a permanent CI guard.
 
 ---
 
@@ -43,6 +44,8 @@ export const config: InteractConfig = {
 export const interactCSS = generate(config, true); // useFirstChild = true for web
 export const instance = Interact.create(config); // binds <interact-element>s automatically
 ```
+
+> **Validation:** static config → validate in a scratch script before writing files. Dynamic config (e.g. built from fetched data) → temporarily inject `assertValidInteractConfig(config)` before `generate()`/`create()`, run, fix, **remove**. An optional _permanent_ dev/CI guard may stay as a devDependency (opt-in only) — see `references/validate.md`.
 
 ```html
 <head>
@@ -119,6 +122,8 @@ get stranded hidden.
 </html>
 ```
 
+> **Validation — shipped page must never import validate.** Static config → agent validates in a scratch script before writing the file. Dynamic config built in-page → agent may _temporarily_ add an `https://esm.sh/@wix/interact-validate` import + `assertValidInteractConfig(config)` call, run validation, then **must remove both** before finishing (verify with the grep in `references/validate.md`).
+
 ---
 
 ## C. React — `@wix/interact/react`
@@ -186,6 +191,8 @@ valid intrinsic props for `tagName`. For an element you don't want to wrap, use
 For SSR frameworks (Next, Remix), render the `<style>{generate(config, false)}</style>`
 on the server and keep `Interact.create()` in `useEffect` (client only).
 
+> **Validation:** static config → scratch script before emit. Dynamic config (e.g. built from props or a `cards.map(...)`) → temporarily inject `assertValidInteractConfig(config)` before `generate()`/`create()`, run so the path executes, fix, **remove**. Optional permanent dev/CI guard is opt-in — see `references/validate.md`.
+
 ---
 
 ## D. Vanilla JS — `@wix/interact`
@@ -218,12 +225,15 @@ add(document.querySelector('#hero')!, 'hero'); // 2) bind the element (key optio
 <section id="hero" data-interact-key="hero">Hello, animated world!</section>
 ```
 
+> **Validation:** same as recipe A — static scratch script or temporary inject→run→fix→remove for dynamic configs. See `references/validate.md`.
+
 ---
 
 ## Verifying the integration
 
-1. **Console is clean** — no `"… not found in registry"` warnings (means a `namedEffect.type` wasn't registered or is misspelled).
-2. **Entrance elements aren't flashing** — with the FOUC setup correct, `once` entrances start hidden and animate in.
-3. **Scroll animations track scroll** — if a `viewProgress` effect doesn't move, check for `overflow: hidden` on an ancestor (must be `overflow: clip`).
-4. **Run the validation checklist** in SKILL.md against the final config.
-5. If a dev server exists, load the page and watch the effect actually play. Animations are hard to assert headlessly, so the static checklist is the primary proxy and the live load is confirmation.
+1. **Config passes validation** — `validateInteractConfig(config)` returns no errors; shipped files contain no `@wix/interact-validate` reference (grep check in `references/validate.md`).
+2. **Semantic checklist** — run the checklist in SKILL.md (presets, FOUC, markup keys, overflow, etc.).
+3. **Console is clean** — no `"… not found in registry"` warnings (means a `namedEffect.type` wasn't registered or is misspelled).
+4. **Entrance elements aren't flashing** — with the FOUC setup correct, `once` entrances start hidden and animate in.
+5. **Scroll animations track scroll** — if a `viewProgress` effect doesn't move, check for `overflow: hidden` on an ancestor (must be `overflow: clip`).
+6. If a dev server exists, load the page and watch the effect actually play. Animations are hard to assert headlessly, so the static checks are the primary proxy and the live load is confirmation.

@@ -4,16 +4,16 @@ overview: 'Add `@wix/interact-validate` guidance to the interactor skill: valida
 todos:
   - id: skill-md-validation
     content: 'Update SKILL.md: mental model, workflow step, static-vs-dynamic validation decision rule, deduplicated checklist, reference link, description'
-    status: pending
+    status: completed
   - id: validate-reference
     content: 'Create references/validate.md (trimmed agent-focused guide: how to actually RUN the validator per environment, static scratch-script path, temporary-injection loop for dynamic configs with removal + runtime-reachability caveat, limitations, link to full rules)'
-    status: pending
+    status: completed
   - id: integration-recipes
-    content: 'Update integration-recipes.md shared rules, per-recipe CDN/bundled notes incl. temp-injection-then-remove, verification section'
-    status: pending
+    content: Update integration-recipes.md shared rules, per-recipe CDN/bundled notes incl. temp-injection-then-remove, verification section
+    status: completed
   - id: evals-assertions
     content: 'Add validation assertions to evals.json: config would pass validateInteractConfig; shipped output contains NO @wix/interact-validate reference (all evals); add a dynamic-config eval exercising the temp-injection-then-remove loop'
-    status: pending
+    status: completed
 isProject: false
 ---
 
