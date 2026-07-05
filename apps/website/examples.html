@@ -27,18 +27,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/theme/material-darker.min.css"
     />
     <link rel="stylesheet" href="assets/css/examples.css" />
-    <style>
-      /* Critical CSS for viewEnter entrance animations - prevents FOUC */
-      @media (prefers-reduced-motion: no-preference) {
-        [data-interact-initial='true'] > :first-child:not([data-interact-enter]) {
-          visibility: hidden;
-          transform: none;
-          translate: none;
-          scale: none;
-          rotate: none;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="assets/css/critical-interact-examples.css" />
   </head>
   <body>
     <nav class="site-nav">
@@ -61,7 +50,7 @@
     <!-- Main Layout -->
     <div class="main-layout">
       <!-- Sidebar -->
-      <interact-element data-interact-key="page-sidebar" data-interact-initial="true">
+      <interact-element data-interact-key="page-sidebar">
         <div class="sidebar-wrapper">
           <div class="sidebar">
             <div class="sidebar-arrow">→</div>
@@ -73,12 +62,12 @@
       </interact-element>
 
       <!-- Connector -->
-      <interact-element data-interact-key="page-connector" data-interact-initial="true">
+      <interact-element data-interact-key="page-connector">
         <div class="connector"></div>
       </interact-element>
 
       <!-- Main Content -->
-      <interact-element data-interact-key="page-content" data-interact-initial="true">
+      <interact-element data-interact-key="page-content">
         <div class="content-container">
           <div class="content-scroll" id="contentScroll"></div>
         </div>

@@ -191,6 +191,6 @@ Inject the resulting CSS into `<head>` so scroll-driven animations are ready bef
 - **No DOM references needed.** CSS attribute selectors (`[data-interact-key]`) bind to elements reactively as they appear in the DOM. No `querySelector`, no cached references, no lifecycle management.
 - **Instant first paint.** Animations work as soon as CSS is parsed, before JS loads or hydrates.
 
-No `initial` attribute is needed for scroll-driven animations — unlike `viewEnter` FOUC prevention, there is no flash-of-content concern since the animation is continuously driven by scroll position.
+Scroll-driven animations do not need separate FOUC prevention — unlike `viewEnter` entrances, there is no flash-of-content concern since the animation is continuously driven by scroll position.
 
 > **Note:** `generate()` processes all interactions in the config, not just `viewProgress`. If your config also includes `viewEnter`, `hover`, `click`, or other triggers, CSS for those is generated too.

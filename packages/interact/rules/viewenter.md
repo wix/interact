@@ -21,14 +21,9 @@ This document contains rules for generating interactions that respond to element
 
 **Problem:** Elements with entrance animations (e.g. `FadeIn`) start in their final visible state (e.g. `opacity: 1`). Before the animation framework initializes and applies the starting keyframe (e.g. `opacity: 0`), the element is briefly visible at full opacity — a flash of un-animated content.
 
-**Solution:** Two things are required — **both** MUST be present for FOUC prevention to work:
+**Solution:** Call `generate(config, useFirstChild)` server-side or at build time and inject the resulting CSS into the document `<head>` (or at the beginning of `<body>`) so it loads before the page content is painted. Among all the CSS it produces, `generate()` includes initial rules that hide entrance-animated elements from the moment the page renders, before JavaScript runs. The rules use `:not([data-interact-enter])` so elements become visible once the animation starts.
 
-1. **Generate CSS** using `generate(config)` — among all the CSS it produces, it includes initial rules that hide entrance-animated elements from the moment the page renders, before JavaScript runs.
-2. **Mark elements with `initial`** — set `data-interact-initial="true"` on `<interact-element>`, or `initial={true}` on the `<Interaction>` React component. This tells the runtime which elements have critical CSS applied.
-
-If only one of these is present, FOUC prevention will **not** work. Both the CSS and the `initial` attribute are required.
-
-### Step 1: Generate CSS and inject into `<head>` (preferred), or beginning of `<body>`
+### Generate CSS and inject into `<head>` (preferred), or beginning of `<body>`
 
 Call `generate(config)` server-side or at build time. Inject the resulting CSS into the document `<head>` (or in `<body>` before your content) so it loads before the page content is painted:
 
@@ -51,7 +46,7 @@ const config: InteractConfig = {
   ],
 };
 
-const css = generate(config);
+const css = generate(config, useFirstChild);
 ```
 
 **Append to `<head>` or beginning of `<body>`:**
@@ -62,36 +57,12 @@ const css = generate(config);
 </style>
 ```
 
-### Step 2: Mark elements with `initial`
-
-**Web (Custom Elements):**
-
-```html
-<interact-element data-interact-key="[SOURCE_KEY]" data-interact-initial="true">
-  <section>...</section>
-</interact-element>
-```
-
-**React:**
-
-```tsx
-<Interaction tagName="section" interactKey="[SOURCE_KEY]" initial={true}>
-  ...
-</Interaction>
-```
-
-**Vanilla:**
-
-```html
-<section data-interact-key="[SOURCE_KEY]" data-interact-initial="true">...</section>
-```
-
 ### Rules
 
 - `generate()` should be called server-side or at build time. Can also be called on the client if the page content is initially hidden (e.g. behind a loader/splash screen).
-- `initial` is only valid for `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
-- Do NOT use `initial` for `viewEnter` with `triggerType: 'repeat'`/`'alternate'`/`'state'`. For those, manually apply the initial keyframe as inline styles on the target element and use `fill: 'both'`.
-- `generate(config)` processes all interactions in the config, not just `viewEnter`. Set `initial` only on the relevant `viewEnter` + `triggerType: 'once'` elements.
+- FOUC initial rules apply only to `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
+- For `viewEnter` with `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting keyframe as inline styles on the target element and use `fill: 'both'`.
+- `generate(config)` processes all interactions in the config, not just `viewEnter`.
 
 ## Rule 1: keyframeEffect / namedEffect (TimeEffect)
 
