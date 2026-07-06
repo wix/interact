@@ -180,8 +180,9 @@ Motion is the engine layer. The other packages in this repo build on top of it:
 - [Getting Started](https://github.com/wix/interact/blob/master/packages/motion/docs/getting-started.md)
 - [Core Concepts](https://github.com/wix/interact/blob/master/packages/motion/docs/core-concepts.md)
 - [API Reference](https://github.com/wix/interact/blob/master/packages/motion/docs/api/README.md)
-- [Category Guides](https://github.com/wix/interact/blob/master/packages/motion/docs/categories/README.md)
-- [Advanced Patterns](https://github.com/wix/interact/blob/master/packages/motion/docs/guides/README.md)
+- [Guides](https://github.com/wix/interact/blob/master/packages/motion/docs/guides/README.md) — custom effects, SSR/CSS generation, performance
+
+For the ready-made effect catalog (entrance, ongoing, scroll, mouse presets), see [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets).
 
 ## License
 
