@@ -103,9 +103,9 @@ interact-element.--hover-active .my-element {
 }
 ```
 
-### State Toggle Methods
+### State Toggle Actions
 
-The element provides methods to manage states:
+The element provides actions to manage states:
 
 1. `add`: adds a state named by `effectId`
 2. `remove`: removes a state named by `effectId`
@@ -164,16 +164,16 @@ export default {
 ```javascript
 // Create element programmatically
 function createInteractiveElement(id, content) {
-  const wixElement = document.createElement('interact-element');
-  wixElement.dataset.wixPath = id;
+  const interactElement = document.createElement('interact-element');
+  interactElement.dataset.interactKey = id;
 
   const childElement = document.createElement('div');
   childElement.id = id;
   childElement.innerHTML = content;
 
-  wixElement.appendChild(childElement);
+  interactElement.appendChild(childElement);
 
-  return wixElement;
+  return interactElement;
 }
 
 // Usage
@@ -218,12 +218,12 @@ You can change the key dynamically:
 const element = document.querySelector('interact-element');
 
 // Remove old interactions
-if (element.dataset.wixPath) {
-  remove(element.dataset.wixPath);
+if (element.dataset.interactKey) {
+  remove(element.dataset.interactKey);
 }
 
 // Update key
-element.dataset.wixPath = 'new-target';
+element.dataset.interactKey = 'new-target';
 
 // Reconnect with new key
 element.connect('new-target');
@@ -303,7 +303,7 @@ console.log('interact-element registered:', customElements.get('interact-element
 ```javascript
 const element = document.querySelector('interact-element');
 console.log('Connected:', element.connected);
-console.log('Key:', element.dataset.wixPath);
+console.log('Key:', element.dataset.interactKey);
 console.log('Has child:', element.firstElementChild !== null);
 ```
 
