@@ -39,7 +39,7 @@ class Sequence extends AnimationGroup {
   getProgress(): number;
   progress(p: number): void;
   setPlaybackRate(rate: number): void;
-  get finished(): Promise<Animation>;
+  get finished(): Promise<Animation[]>;
   get playState(): AnimationPlayState;
 }
 ```
@@ -336,10 +336,10 @@ Returns the current playback state from the first animation (`'idle'`, `'running
 ### `finished`
 
 ```typescript
-get finished(): Promise<Animation>
+get finished(): Promise<Animation[]>
 ```
 
-Promise that resolves when the last animation completes.
+Promise that resolves (via `Promise.all`) when every animation across all child groups completes.
 
 ---
 
