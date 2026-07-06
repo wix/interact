@@ -1,342 +1,186 @@
-# Getting Started with Wix Motion
+# Getting Started
 
-Welcome to Wix Motion! This guide will get you up and running with your first animation in under 10 minutes.
+`@wix/motion` is a low-level animation engine built directly on the Web Animations API and CSS Animations. This guide gets you from install to a working animation in each of its four modes.
 
-## Prerequisites
-
-- Node.js 16+ and npm/yarn
-- Basic knowledge of JavaScript/TypeScript
-- A web project with DOM access
-
-## Installation
-
-### Option 1: NPM/Yarn
+## Install
 
 ```bash
 npm install @wix/motion
-# or
-yarn add @wix/motion
 ```
 
-### Option 2: Script Tag (for quick prototyping)
+Requires Node.js `>=18`.
 
-```html
-<script type="module">
-  import { getWebAnimation } from 'https://unpkg.com/@wix/motion@latest/dist/esm/index.js';
-</script>
-```
+## Your first animation
 
-### Installing Animation Presets
-
-`@wix/motion` provides core animation utilities and an effects registry, while `@wix/motion-presets` provides ready-to-use effect modules you can register and reference via `namedEffect`.
-
-```bash
-npm install @wix/motion-presets
-```
-
-Before using named effects like `FadeIn`, you need to register the presets:
-
-```typescript
-import { registerEffects } from '@wix/motion';
-import { FadeIn } from '@wix/motion-presets';
-
-// Register preset
-registerEffects({ FadeIn });
-```
-
-You can also register a custom-made effect module (as long as it matches the expected module shape):
-
-```typescript
-import { registerEffects } from '@wix/motion';
-
-registerEffects({
-  CustomFadeIn: {
-    web: (options) => [
-      { ...options, name: 'CustomFadeIn', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
-    ],
-    getNames: () => ['CustomFadeIn'],
-    style: (options) => [
-      { ...options, name: 'CustomFadeIn', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
-    ],
-  },
-});
-```
-
-## Your First Animation
-
-Let's create a simple fade-in animation for an element:
-
-### 1. HTML Setup
-
-```html
-<div id="myElement">Hello, Motion!</div>
-<button id="animateBtn">Animate!</button>
-```
-
-### 2. JavaScript Implementation
+The fastest path is a time-based Web Animations API (WAAPI) animation, driven by `getWebAnimation()` with an inline `keyframeEffect` — no preset registration required.
 
 ```typescript
 import { getWebAnimation } from '@wix/motion';
 
-// Get the element to animate
-const element = document.getElementById('myElement');
-const button = document.getElementById('animateBtn');
+const element = document.getElementById('hero');
 
-// Create the animation
-const fadeInAnimation = getWebAnimation(element, {
-  type: 'TimeAnimationOptions',
-  namedEffect: { type: 'FadeIn' },
-  duration: 1000,
-  easing: 'easeOutCubic',
-});
-
-// Play animation on button click
-button.addEventListener('click', async () => {
-  await fadeInAnimation.play();
-  console.log('Animation completed!');
-});
-```
-
-🎉 **That's it!** You've created your first Wix Motion animation.
-
-## Understanding the Code
-
-Let's break down what happened:
-
-### 1. `getWebAnimation()` Function
-
-This is the main function for creating time-based animations using the Web Animations API.
-
-```typescript
-getWebAnimation(
-  target,           // DOM element to animate
-  animationOptions, // Configuration object
-  trigger?,         // Optional trigger settings
-  options?          // Additional options
-)
-```
-
-### 2. Animation Options Object
-
-```typescript
-{
-  type: 'TimeAnimationOptions',  // Animation type
-  namedEffect: { type: 'FadeIn' }, // Preset animation
-  duration: 1000,                // Duration in milliseconds
-  easing: 'easeOutCubic'         // Easing function
-}
-```
-
-### 3. Named Effects
-
-Instead of defining keyframes manually, you use predefined animation presets:
-
-- `FadeIn` - Simple opacity transition
-- `SlideIn` - Slide from a direction
-- `BounceIn` - Spring-based entrance
-- [See all presets →](categories/README.md)
-
-## Try More Animations
-
-### Slide In Animation
-
-```typescript
-const slideAnimation = getWebAnimation(element, {
-  type: 'TimeAnimationOptions',
-  namedEffect: {
-    type: 'SlideIn',
-    direction: 'left',
+const animation = getWebAnimation(element, {
+  keyframeEffect: {
+    name: 'fade-up',
+    keyframes: [
+      { opacity: 0, transform: 'translateY(20px)' },
+      { opacity: 1, transform: 'translateY(0)' },
+    ],
   },
-  duration: 800,
-});
-```
-
-### Bounce In Animation
-
-```typescript
-const bounceAnimation = getWebAnimation(element, {
-  type: 'TimeAnimationOptions',
-  namedEffect: {
-    type: 'BounceIn',
-    direction: 'bottom',
-  },
-  duration: 1200,
-});
-```
-
-### Spin Animation (Ongoing)
-
-```typescript
-const spinAnimation = getWebAnimation(element, {
-  type: 'TimeAnimationOptions',
-  namedEffect: {
-    type: 'Spin',
-    direction: 'clockwise',
-  },
-  duration: 2000,
-  iterations: Infinity, // Loop forever
-});
-```
-
-## Scroll-Driven Animations
-
-For animations that respond to scroll position:
-
-```typescript
-import { getScrubScene } from '@wix/motion';
-
-const scrollAnimation = getScrubScene(
-  element,
-  {
-    type: 'ScrubAnimationOptions',
-    namedEffect: {
-      type: 'ParallaxScroll',
-      speed: 0.5,
-    },
-  },
-  {
-    trigger: 'view-progress',
-    element: document.body, // Scroll container
-  },
-);
-```
-
-## Animation Control
-
-All animations return an `AnimationGroup` with control methods:
-
-```typescript
-const animation = getWebAnimation(element, options);
-
-// Control playback
-await animation.play();
-animation.pause();
-animation.cancel();
-
-// Set playback rate
-animation.setPlaybackRate(2); // 2x speed
-
-// Set progress manually (0-1)
-animation.progress(0.5); // 50% complete
-
-// Listen for completion
-animation.onFinish(() => {
-  console.log('Animation finished!');
+  duration: 600,
+  easing: 'ease-out',
 });
 
-// Check current state
-console.log(animation.playState); // 'running', 'paused', 'finished'
+// getWebAnimation can return null (e.g. an unregistered namedEffect, or a
+// multi-iteration animation dropped by reduced motion) — always guard it.
+animation?.play();
 ```
 
-## CSS Integration
+`play()` resolves once playback has **started**, not once the animation finishes. See [Observing completion](#observing-completion) below for how to react when it's actually done.
 
-Wix Motion can also generate CSS animations for better performance in some scenarios:
+## Generating CSS instead
+
+For simple, fire-and-forget effects you can generate CSS `@keyframes`/`animation` descriptors instead of driving WAAPI directly. `getCSSAnimation()` returns an **array** of descriptors — not a string — so you inject them into a stylesheet yourself:
 
 ```typescript
 import { getCSSAnimation } from '@wix/motion';
 
-const cssAnimations = getCSSAnimation('myElementId', {
-  type: 'TimeAnimationOptions',
-  namedEffect: { type: 'FadeIn' },
-  duration: 1000,
+const cssAnimations = getCSSAnimation('hero', {
+  keyframeEffect: {
+    name: 'fade-up',
+    keyframes: [
+      { opacity: 0, transform: 'translateY(20px)' },
+      { opacity: 1, transform: 'translateY(0)' },
+    ],
+  },
+  duration: 600,
+  easing: 'ease-out',
 });
 
-// Apply to stylesheet
-cssAnimations.forEach(({ target, animation, keyframes }) => {
-  // Insert CSS rules for the animation
+const style = document.createElement('style');
+
+style.textContent = cssAnimations
+  .map(({ target, animation, name, keyframes }) => {
+    const steps = keyframes
+      .map((keyframe, i) => {
+        const percent = (i / (keyframes.length - 1)) * 100;
+        const declarations = Object.entries(keyframe)
+          .map(([property, value]) => `${property}: ${value};`)
+          .join(' ');
+        return `${percent}% { ${declarations} }`;
+      })
+      .join('\n');
+
+    return `@keyframes ${name} { ${steps} }\n${target} { animation: ${animation}; }`;
+  })
+  .join('\n');
+
+document.head.appendChild(style);
+```
+
+Generated `animation` shorthand values are paused by default — toggle `animation-play-state` (e.g. by adding a class) when you want the animation to run.
+
+## Scroll-driven animations
+
+Pass a `view-progress` trigger as the third argument to link an animation to scroll. When `window.ViewTimeline` is available, `getWebAnimation()` returns a WAAPI animation linked directly to the timeline — it plays automatically, no `.play()` call needed:
+
+```typescript
+import { getWebAnimation } from '@wix/motion';
+
+const scrollRoot = document.getElementById('scrollRoot');
+const parallax = document.getElementById('parallax');
+
+getWebAnimation(
+  parallax,
+  {
+    keyframeEffect: {
+      name: 'parallax',
+      keyframes: [{ transform: 'translateY(80px)' }, { transform: 'translateY(-80px)' }],
+    },
+    startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+    endOffset: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
+  },
+  { trigger: 'view-progress', element: scrollRoot },
+);
+```
+
+`startOffset`/`endOffset` live on the animation options, not the trigger.
+
+### Without `ViewTimeline` (polyfill)
+
+When `window.ViewTimeline` isn't available, use `getScrubScene()` instead. With a `view-progress` trigger it returns `ScrubScrollScene[]` — plain objects you drive yourself from an `IntersectionObserver` or scroll listener:
+
+```typescript
+import { getScrubScene } from '@wix/motion';
+
+const scenes = getScrubScene(
+  parallax,
+  {
+    keyframeEffect: {
+      name: 'parallax',
+      keyframes: [{ transform: 'translateY(80px)' }, { transform: 'translateY(-80px)' }],
+    },
+    startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+    endOffset: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
+  },
+  { trigger: 'view-progress', element: scrollRoot },
+);
+
+// Drive each scene yourself from a scroll/IntersectionObserver listener,
+// then clean up with `scene.destroy()` when you're done.
+scenes?.forEach((scene) => {
+  scene.effect(scene, getScrollProgressFor(scene)); // your own 0..1 progress calculation
 });
 ```
 
-## TypeScript Support
+If you're using `@wix/interact`, its bundled scroll polyfill, [`fizban`](https://github.com/wix-incubator/fizban), drives this automatically.
 
-Wix Motion is built with TypeScript and provides excellent IntelliSense:
+## Pointer-driven animations
 
-```typescript
-import type { TimeAnimationOptions, EntranceAnimation, AnimationGroup } from '@wix/motion';
-
-// Type-safe animation options
-const options: TimeAnimationOptions = {
-  type: 'TimeAnimationOptions',
-  namedEffect: { type: 'FadeIn' } as EntranceAnimation,
-  duration: 1000,
-};
-
-// Typed return value
-const animation: AnimationGroup = getWebAnimation(element, options);
-```
-
-## Common Patterns
-
-### Sequential Animations
+Pass a `pointer-move` trigger to map cursor position to an effect. The axis to read (`'x'` or `'y'`) is set on the **trigger**, not on the effect options:
 
 ```typescript
-async function sequentialAnimations() {
-  await fadeInAnimation.play();
-  await slideAnimation.play();
-  await bounceAnimation.play();
-}
+import { getScrubScene } from '@wix/motion';
+
+const card = document.getElementById('card');
+
+const scene = getScrubScene(
+  card,
+  {
+    keyframeEffect: {
+      name: 'tilt',
+      keyframes: [{ transform: 'rotate(-6deg)' }, { transform: 'rotate(6deg)' }],
+    },
+    transitionDuration: 200,
+    transitionEasing: 'easeOut',
+  },
+  { trigger: 'pointer-move', axis: 'x', element: card },
+);
+
+card?.addEventListener('pointermove', (event) => {
+  const rect = card.getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width;
+  scene?.effect(scene, { x, y: 0 });
+});
 ```
 
-### Parallel Animations
+## Observing completion
+
+`await animation.play()` only tells you playback has started. To react when an animation actually finishes, use `onFinish()` or await the `finished` promise:
 
 ```typescript
-async function parallelAnimations() {
-  await Promise.all([fadeInAnimation.play(), slideAnimation.play(), bounceAnimation.play()]);
-}
+animation?.onFinish(() => {
+  console.log('animation finished');
+});
+
+// or:
+await animation?.finished; // resolves with Animation[]
+console.log('animation finished');
 ```
 
-### Animation Chaining
+## Next steps
 
-```typescript
-fadeInAnimation
-  .play()
-  .then(() => slideAnimation.play())
-  .then(() => bounceAnimation.play());
-```
-
-## Performance Tips
-
-1. **Prepare animations** for better performance:
-
-```typescript
-import { prepareAnimation } from '@wix/motion';
-
-prepareAnimation(element, animationOptions);
-```
-
-2. **Use appropriate animation types**:
-   - `TimeAnimationOptions` for time-based animations
-   - `ScrubAnimationOptions` for scroll/mouse-driven animations
-
-3. **Prefer CSS animations** for simple effects on mobile devices
-
-## Next Steps
-
-Now that you've created your first animation, explore more:
-
-- **[Core Concepts](core-concepts.md)** - Understand the animation system architecture
-- **[Animation Categories](categories/)** - Discover all 82+ animation presets
-- **[API Reference](api/)** - Deep dive into all available functions
-- **[Advanced Patterns](guides/advanced-patterns.md)** - Learn performance optimization and complex scenarios
-
-## Troubleshooting
-
-### Animation Not Playing?
-
-- Check that the element exists in the DOM
-- Ensure the element is visible (not `display: none`)
-- Verify animation options are correctly formatted
-
-### Performance Issues?
-
-- Consider CSS animations for simple effects
-- Avoid creating animations in tight loops
-
-### TypeScript Errors?
-
-- Ensure you're importing types correctly
-- Check that animation options match the expected interface
-
----
-
-**Ready for more?** Check out our [interactive playground](../playground/) to experiment with all animations in real-time!
+- [Core Concepts](./core-concepts.md) — the options shape, effect-definition modes, triggers, and easing system.
+- [API Reference](./api/README.md) — full function signatures and types.
+- Ready-made effects live in [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets); register them with `registerEffects()` and reference them via `namedEffect`.
+- For declarative, config-driven trigger→effect wiring (including React and Web Component bindings), see [`@wix/interact`](https://github.com/wix/interact/tree/master/packages/interact).
