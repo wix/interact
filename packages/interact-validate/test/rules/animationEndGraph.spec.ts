@@ -30,7 +30,7 @@ describe('animationEndGraph', () => {
     });
   });
 
-  describe('ANIMATION_END_CYCLE (error)', () => {
+  describe('ANIMATION_END_CYCLE (warning)', () => {
     it('errors when two animationEnd interactions wait on each other', () => {
       const result = validateInteractConfig({
         effects: {
@@ -52,10 +52,10 @@ describe('animationEndGraph', () => {
           },
         ],
       });
-      expect(result.valid).toBe(false);
+      expect(result.valid).toBe(true);
       const errs = result.errors.filter((e) => e.code === 'ANIMATION_END_CYCLE');
       expect(errs.length).toBeGreaterThan(0);
-      expect(errs.every((e) => e.severity === 'error')).toBe(true);
+      expect(errs.every((e) => e.severity === 'warning')).toBe(true);
       expect(errs.some((e) => e.path.includes('params'))).toBe(true);
     });
   });

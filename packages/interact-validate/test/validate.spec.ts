@@ -131,38 +131,6 @@ describe('ValidateOptions', () => {
     expect(result.errors.every((e) => e.severity === 'error')).toBe(true);
   });
 
-  it('severityOverrides can demote the ANIMATION_END_CYCLE error to a warning', () => {
-    const cyclic = {
-      effects: {
-        e1: { namedEffect: { type: 'Pulse' }, duration: 300 },
-        e2: { namedEffect: { type: 'Spin' }, duration: 300 },
-      },
-      interactions: [
-        {
-          key: 'a',
-          trigger: 'animationEnd',
-          params: { effectId: 'e2' },
-          effects: [{ effectId: 'e1' }],
-        },
-        {
-          key: 'b',
-          trigger: 'animationEnd',
-          params: { effectId: 'e1' },
-          effects: [{ effectId: 'e2' }],
-        },
-      ],
-    };
-    const errored = validateInteractConfig(cyclic);
-    expect(errored.valid).toBe(false);
-
-    const demoted = validateInteractConfig(cyclic, {
-      severityOverrides: { ANIMATION_END_GRAPH: 'warning' },
-    });
-    expect(demoted.errors.some((e) => e.code === 'ANIMATION_END_CYCLE')).toBe(true);
-    expect(demoted.errors.every((e) => e.severity !== 'error')).toBe(true);
-    expect(demoted.valid).toBe(true);
-  });
-
   it('max truncates the returned error list', () => {
     const config = {
       effects: {

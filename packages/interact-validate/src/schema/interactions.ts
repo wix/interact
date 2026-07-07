@@ -13,12 +13,9 @@ import {
   exactlyOne,
 } from './effects';
 import { SequenceConfig, SequenceConfigRef } from './sequences';
-import {
-  walkConfig,
-  findAnimationEndCycles,
-  collectSemanticWarnings,
-  type SemanticIssue,
-} from '../semantic';
+import type { Path, SemanticIssue } from '../errors';
+import { walkConfig } from '../walkConfig';
+import { collectSemanticWarnings } from '../semantic';
 
 export const TriggerType = z.enum([
   'hover',
@@ -151,7 +148,7 @@ export const Interaction = z.discriminatedUnion('trigger', [
   DiscreteInteraction,
 ]);
 
-function validateEffectSource(ctx: z.RefinementCtx, path: (string | number)[], effect: any): void {
+function validateEffectSource(ctx: z.RefinementCtx, path: Path, effect: any): void {
   const { transition, transitionProperties, namedEffect, keyframeEffect, customEffect } = effect;
   if (
     !exactlyOne({ transition, transitionProperties, namedEffect, keyframeEffect, customEffect })
@@ -167,7 +164,7 @@ function validateEffectSource(ctx: z.RefinementCtx, path: (string | number)[], e
 
 function validateEffectReference(
   ctx: z.RefinementCtx,
-  path: (string | number)[],
+  path: Path,
   effect: { effectId?: string },
   configEffects: Record<string, any>,
 ): void {
@@ -185,7 +182,7 @@ type WarningIssue = SemanticIssue;
 
 function collectEffectKeyframeNames(
   warnings: WarningIssue[],
-  path: (string | number)[],
+  path: Path,
   keyframeNames: Set<string>,
   keyframeEffect?: { name: string },
 ): void {
@@ -204,7 +201,7 @@ function collectEffectKeyframeNames(
 
 function validateConditionReferences(
   ctx: z.RefinementCtx,
-  path: (string | number)[],
+  path: Path,
   configConditions: Record<string, any>,
   conditions?: string[],
 ): void {
@@ -269,16 +266,6 @@ export const InteractConfigSchema = z
           } as any);
         }
       },
-    });
-
-    // animationEnd waits-for cycle → deadlock (error)
-    findAnimationEndCycles(config).forEach(({ path, message }) => {
-      ctx.addIssue({
-        code: 'custom',
-        path,
-        message,
-        params: { domainCode: 'ANIMATION_END_CYCLE' },
-      } as any);
     });
   })
   .transform((config) => {

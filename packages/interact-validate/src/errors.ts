@@ -1,9 +1,19 @@
-export type Severity = 'error' | 'warning';
+export type Severity = 'error' | 'warning' | 'info';
+
+export type Path = (string | number)[];
+
+export type SemanticIssue = {
+  code: 'custom';
+  path: Path;
+  message: string;
+  params: { domainCode: string };
+  severity?: Severity;
+};
 
 export type ValidationError = {
   code: string;
   message: string;
-  path: (string | number)[];
+  path: Path[];
   severity: Severity;
   hint?: string;
 };

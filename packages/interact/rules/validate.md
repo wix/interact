@@ -134,10 +134,10 @@ Severity is one of `'error' | 'warning'`. There are exactly two levers:
 | `SAME_ELEMENT_RETRIGGER` | `SAME_ELEMENT_RETRIGGER`                                                    | warning          |
 | `HIT_AREA_SHIFT`         | `HIT_AREA_SHIFT`                                                            | warning          |
 | `SCROLL_RANGE`           | `SCROLL_PRESET_MISSING_RANGE`, `SCROLL_PRESET_BAD_RANGE`                    | warning          |
-| `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE` (warning), `ANIMATION_END_CYCLE` (error)     | mixed            |
+| `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE`, `ANIMATION_END_CYCLE`                       | warning          |
 | `ELEMENT_SELECTION`      | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER`, `REDUNDANT_SELECTOR_WITH_LIST_ITEM` | warning          |
 | `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                  | warning          |
-| `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                     | warning          |
+| `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                     | info             |
 | `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                      | warning          |
 | `RANGE_OFFSET`           | `RANGE_OFFSET_OUT_OF_RANGE`                                                 | warning          |
 | `KEYFRAME_STYLE`         | `KEYFRAME_PROP_NOT_CAMEL_CASE`                                              | warning          |
@@ -195,7 +195,6 @@ This is the authoritative list of every code the validator emits today. Codes no
 
 | Code                             | What it flags                                                                  |
 | -------------------------------- | ------------------------------------------------------------------------------ |
-| `EFFECT_ID_NOT_FOUND`            | An effect's `effectId` references a key absent from `config.effects`.          |
 | `ANIMATION_END_EFFECT_NOT_FOUND` | An `animationEnd` interaction's `params.effectId` references a missing effect. |
 | `SEQUENCE_ID_NOT_FOUND`          | A `sequenceId` references a key absent from `config.sequences`.                |
 | `CONDITION_NOT_FOUND`            | A `conditions[]` entry references a key absent from `config.conditions`.       |
@@ -216,6 +215,7 @@ This is the authoritative list of every code the validator emits today. Codes no
 | `UNUSED_SEQUENCE`         | A `config.sequences` entry is defined but never referenced.                  | `UNUSED_DEFINITION`     |
 | `UNUSED_CONDITION`        | A `config.conditions` entry is defined but never referenced.                 | `UNUSED_DEFINITION`     |
 | `DUPLICATE_KEYFRAME_NAME` | A `keyframeEffect.name` is reused across effects in the same config.         | `UNIQUE_DEFINITION_IDS` |
+| `EFFECT_ID_NOT_FOUND`     | An effect's `effectId` references a key absent from `config.effects`.        | `ID_NOT_FOUND`          |
 
 ### Rule-derived semantic warnings (severity: warning)
 

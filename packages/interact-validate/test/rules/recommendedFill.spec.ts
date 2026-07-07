@@ -25,7 +25,7 @@ describe('recommendedFill — RECOMMENDED_FILL_BOTH', () => {
     });
     const err = result.errors.find((e) => e.code === CODE);
     expect(err).toBeDefined();
-    expect(err?.severity).toBe('warning');
+    expect(err?.severity).toBe('info');
     expect(err?.path).toEqual(['interactions', 0, 'effects', 0, 'fill']);
     expect(result.valid).toBe(true);
   });

@@ -142,10 +142,10 @@ Every issue is `'error'` or `'warning'`. `valid` is `true` **iff** no `'error'` 
 | `SAME_ELEMENT_RETRIGGER` | `SAME_ELEMENT_RETRIGGER`                                                    | warning          |
 | `HIT_AREA_SHIFT`         | `HIT_AREA_SHIFT`                                                            | warning          |
 | `SCROLL_RANGE`           | `SCROLL_PRESET_MISSING_RANGE`, `SCROLL_PRESET_BAD_RANGE`                    | warning          |
-| `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE` (warning), `ANIMATION_END_CYCLE` (error)     | mixed            |
+| `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE`, `ANIMATION_END_CYCLE`                       | warning          |
 | `ELEMENT_SELECTION`      | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER`, `REDUNDANT_SELECTOR_WITH_LIST_ITEM` | warning          |
 | `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                  | warning          |
-| `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                     | warning          |
+| `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                     | info             |
 | `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                      | warning          |
 | `RANGE_OFFSET`           | `RANGE_OFFSET_OUT_OF_RANGE`                                                 | warning          |
 | `KEYFRAME_STYLE`         | `KEYFRAME_PROP_NOT_CAMEL_CASE`                                              | warning          |

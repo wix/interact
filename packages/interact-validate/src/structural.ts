@@ -4,6 +4,7 @@ import type { InteractConfig } from '@wix/interact';
 import {
   finalize,
   InteractValidationError,
+  type Path,
   type ValidationError,
   type ValidateOptions,
   type ValidationResult,
@@ -59,7 +60,7 @@ export function validateStructural(input: unknown): {
   const errors: ValidationError[] = result.error.issues.map((issue: ZodIssue) => ({
     code: mapZodCode(issue),
     message: issue.message,
-    path: [...issue.path] as (string | number)[],
+    path: [...issue.path] as Path,
     severity: 'error',
   }));
   return { ok: false, errors };
@@ -76,8 +77,8 @@ export function validateInteractConfig(
     const warnings: ValidationError[] = rawWarnings.map((w) => ({
       code: w?.params?.domainCode ?? 'SCHEMA_INVALID',
       message: w?.message ?? '',
-      path: (w?.path ?? []) as (string | number)[],
-      severity: 'warning' as const,
+      path: (w?.path ?? []) as Path,
+      severity: w?.severity ?? 'warning',
     }));
     return finalize([...errors, ...warnings], options);
   }
