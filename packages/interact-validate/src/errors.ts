@@ -1,23 +1,4 @@
-export type Severity = 'error' | 'warning';
-
-export type ValidationError = {
-  code: string;
-  message: string;
-  path: (string | number)[];
-  severity: Severity;
-  hint?: string;
-};
-
-export type ValidationResult = {
-  valid: boolean;
-  errors: ValidationError[];
-};
-
-export type ValidateOptions = {
-  strict?: boolean;
-  max?: number;
-  severityOverrides?: Record<string, Severity | 'off'>;
-};
+import type { Severity, ValidationError, ValidateOptions, ValidationResult } from './types';
 
 export class InteractValidationError extends Error {
   readonly errors: ValidationError[];
@@ -36,6 +17,21 @@ const RULE_CODE_MAP: Record<string, string> = {
   UNUSED_CONDITION: 'UNUSED_DEFINITION',
   DUPLICATE_KEYFRAME_NAME: 'UNIQUE_DEFINITION_IDS',
   INVALID_MEDIA_QUERY: 'VALID_MEDIA_QUERIES',
+  // Rule-derived semantic checks (see packages/interact/rules/*.md).
+  SAME_ELEMENT_RETRIGGER: 'SAME_ELEMENT_RETRIGGER',
+  HIT_AREA_SHIFT: 'HIT_AREA_SHIFT',
+  SCROLL_PRESET_MISSING_RANGE: 'SCROLL_RANGE',
+  SCROLL_PRESET_BAD_RANGE: 'SCROLL_RANGE',
+  ANIMATION_END_SELF_REFERENCE: 'ANIMATION_END_GRAPH',
+  ANIMATION_END_CYCLE: 'ANIMATION_END_GRAPH',
+  LIST_ITEM_SELECTOR_WITHOUT_CONTAINER: 'ELEMENT_SELECTION',
+  REDUNDANT_SELECTOR_WITH_LIST_ITEM: 'ELEMENT_SELECTION',
+  EMPTY_STYLE_PROPERTIES: 'STATE_EFFECT',
+  STATE_REMOVE_WITHOUT_EFFECT_ID: 'STATE_EFFECT',
+  RECOMMENDED_FILL_BOTH: 'RECOMMENDED_FILL',
+  POINTER_AXIS_IGNORED: 'POINTER_AXIS',
+  KEYFRAME_PROP_NOT_CAMEL_CASE: 'KEYFRAME_STYLE',
+  INVALID_INSET: 'VIEW_INSET',
 };
 
 export function finalize(

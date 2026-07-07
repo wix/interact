@@ -17,6 +17,9 @@ describe('discrete trigger effects (hover/click/activate/interest)', () => {
             trigger: 'hover',
             effects: [
               {
+                // target a child via `selector` so the size/position transform does
+                // not shift the hover hit area (see HIT_AREA_SHIFT).
+                selector: '.inner',
                 triggerType: 'alternate',
                 duration: 200,
                 fill: 'both',
