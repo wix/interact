@@ -1,5 +1,4 @@
-import type { Path, SemanticIssue } from '../errors';
-import type { AnyEffect, AnyInteraction } from '../types';
+import type { Path, SemanticIssue, AnyEffect, AnyInteraction } from '../types';
 
 // camelCase guidance: a keyframe property containing `-` is invalid for WAAPI
 // (e.g. `background-color`). CSS custom properties (`--*`) are allowed as-is.

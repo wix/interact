@@ -1,33 +1,4 @@
-export type Severity = 'error' | 'warning' | 'info';
-
-export type Path = (string | number)[];
-
-export type SemanticIssue = {
-  code: 'custom';
-  path: Path;
-  message: string;
-  params: { domainCode: string };
-  severity?: Severity;
-};
-
-export type ValidationError = {
-  code: string;
-  message: string;
-  path: Path[];
-  severity: Severity;
-  hint?: string;
-};
-
-export type ValidationResult = {
-  valid: boolean;
-  errors: ValidationError[];
-};
-
-export type ValidateOptions = {
-  strict?: boolean;
-  max?: number;
-  severityOverrides?: Record<string, Severity | 'off'>;
-};
+import type { Severity, ValidationError, ValidateOptions, ValidationResult } from './types';
 
 export class InteractValidationError extends Error {
   readonly errors: ValidationError[];

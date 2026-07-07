@@ -1,6 +1,35 @@
-import type { Path } from './errors';
-
 export const RETRIGGER_TYPES = ['repeat', 'alternate', 'state'];
+
+export type Severity = 'error' | 'warning' | 'info';
+
+export type Path = (string | number)[];
+
+export type SemanticIssue = {
+  code: 'custom';
+  path: Path;
+  message: string;
+  params: { domainCode: string };
+  severity?: Severity;
+};
+
+export type ValidationError = {
+  code: string;
+  message: string;
+  path: Path;
+  severity: Severity;
+  hint?: string;
+};
+
+export type ValidationResult = {
+  valid: boolean;
+  errors: ValidationError[];
+};
+
+export type ValidateOptions = {
+  strict?: boolean;
+  max?: number;
+  severityOverrides?: Record<string, Severity | 'off'>;
+};
 
 export type AnyEffect = {
   key?: string;

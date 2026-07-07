@@ -13,7 +13,7 @@ import {
   exactlyOne,
 } from './effects';
 import { SequenceConfig, SequenceConfigRef } from './sequences';
-import type { Path, SemanticIssue } from '../errors';
+import type { Path, SemanticIssue } from '../types';
 import { walkConfig } from '../walkConfig';
 import { collectSemanticWarnings } from '../semantic';
 

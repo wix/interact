@@ -1,5 +1,4 @@
-import type { Path, SemanticIssue } from '../errors';
-import type { AnyEffect, AnyInteraction } from '../types';
+import type { Path, SemanticIssue, AnyEffect, AnyInteraction } from '../types';
 import { RETRIGGER_TYPES } from '../types';
 
 // recommended `fill: 'both'` for scrubbed and toggling effects

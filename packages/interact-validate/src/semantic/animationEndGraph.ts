@@ -1,5 +1,4 @@
-import type { SemanticIssue } from '../errors';
-import type { AnyConfig } from '../types';
+import type { SemanticIssue, AnyConfig } from '../types';
 
 // Build the animationEnd waits-for graph and find self-references and cycles.
 // An animationEnd interaction A "waits-for" the effect named by `params.effectId`;

@@ -1,13 +1,8 @@
 import type { ZodIssue } from 'zod';
 import { InteractConfigSchema } from './schema';
 import type { InteractConfig } from '@wix/interact';
-import {
-  finalize,
-  InteractValidationError,
-  type ValidationError,
-  type ValidateOptions,
-  type ValidationResult,
-} from './errors';
+import { finalize, InteractValidationError } from './errors';
+import type { Path, ValidationError, ValidateOptions, ValidationResult } from './types';
 
 // Map Zod issue codes → domain error codes.
 // Custom issues carry their domain code in `params.domainCode`.
@@ -59,7 +54,7 @@ export function validateStructural(input: unknown): {
   const errors: ValidationError[] = result.error.issues.map((issue: ZodIssue) => ({
     code: mapZodCode(issue),
     message: issue.message,
-    path: [...issue.path] as (number | string)[],
+    path: [...issue.path] as Path,
     severity: 'error',
   }));
   return { ok: false, errors };
@@ -76,7 +71,7 @@ export function validateInteractConfig(
     const warnings: ValidationError[] = rawWarnings.map((w) => ({
       code: w?.params?.domainCode ?? 'SCHEMA_INVALID',
       message: w?.message ?? '',
-      path: (w?.path ?? []) as (number | string)[],
+      path: (w?.path ?? []) as Path,
       severity: w?.severity ?? 'warning',
     }));
     return finalize([...errors, ...warnings], options);

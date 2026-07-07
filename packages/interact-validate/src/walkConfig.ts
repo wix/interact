@@ -1,5 +1,4 @@
-import type { Path } from './errors';
-import type { AnyConfig, Visitors } from './types';
+import type { Path, AnyConfig, Visitors } from './types';
 
 // Single traversal of top-level registry effects/sequences and per-interaction
 // effects/sequences, supplying each node's `path`, whether it is a top-level

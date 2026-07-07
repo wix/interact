@@ -1,5 +1,4 @@
-import type { Path, SemanticIssue } from '../errors';
-import type { AnyEffect, AnySequence, AnyInteraction } from '../types';
+import type { Path, SemanticIssue, AnyEffect, AnySequence, AnyInteraction } from '../types';
 import { RETRIGGER_TYPES } from '../types';
 
 // Mirrors the documented Element-Resolution priority (full-lean.md "Element

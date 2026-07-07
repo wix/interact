@@ -3,8 +3,7 @@
 // inspect the parsed config shape only. Warning/info checks are collected by
 // `collectSemanticWarnings` (consumed by the schema `transform`).
 
-import type { Path, SemanticIssue } from '../errors';
-import type { AnyConfig, Visitors } from '../types';
+import type { Path, SemanticIssue, AnyConfig, Visitors } from '../types';
 import { checkKeyframePropCamelCase, checkInvalidInset } from './cssSyntax';
 import { checkSameElementRetrigger, checkHitAreaShift } from './fouc';
 import {
