@@ -654,7 +654,7 @@ The target element is what the effect animates. Resolved in priority order:
 | `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `create`.                                                |
 | `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                             |
 | `Interact.forceReducedMotion`       | `boolean` (default: `false`) — force reduced-motion behavior regardless of OS setting.                        |
-| `Interact.allowA11yTriggers`        | `boolean` (default: `false`) — enable accessibility trigger variants (`interest`, `activate`).                |
+| `Interact.allowA11yTriggers`        | `boolean` (default: `true`) — enable accessibility trigger variants (`interest`, `activate`).                 |
 | `Interact.setup(options)`           | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below. |
 
 **`Interact.setup(options)`** — optional configuration object:

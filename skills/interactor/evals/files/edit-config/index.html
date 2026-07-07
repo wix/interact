@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acme — Landing</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: system-ui, sans-serif; color: #111; }
+    interact-element { display: contents; }
+    .hero { min-height: 90vh; display: grid; place-content: center; text-align: center; padding: 2rem; background: #f5f5f7; }
+    .hero h1 { font-size: clamp(2rem, 6vw, 4rem); }
+    .features { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; padding: 6rem 2rem; }
+    .feature-card { padding: 2rem; border-radius: 12px; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+  </style>
+</head>
+<body>
+  <interact-element data-interact-key="hero">
+    <section class="hero">
+      <h1>Build something great</h1>
+    </section>
+  </interact-element>
+
+  <section class="features">
+    <div class="feature-grid" style="display: contents;">
+      <div class="feature-card"><h3>Fast</h3><p>Ships in milliseconds.</p></div>
+      <div class="feature-card"><h3>Simple</h3><p>One config, done.</p></div>
+      <div class="feature-card"><h3>Accessible</h3><p>Reduced-motion aware.</p></div>
+      <div class="feature-card"><h3>Tiny</h3><p>No runtime bloat.</p></div>
+    </div>
+  </section>
+
+  <script type="module" src="./interactions.js"></script>
+</body>
+</html>

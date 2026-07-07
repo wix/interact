@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product cards</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: system-ui, sans-serif; color: #111; padding: 2rem; }
+    interact-element { display: contents; }
+    .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 960px; margin: 0 auto; }
+    .card { padding: 1.5rem; border-radius: 12px; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+    .card h2 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="card-grid" id="card-grid"></div>
+  <script type="module" src="./interactions.js"></script>
+</body>
+</html>
