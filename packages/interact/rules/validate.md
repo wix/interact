@@ -139,7 +139,6 @@ Severity is one of `'error' | 'warning'`. There are exactly two levers:
 | `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                  | warning          |
 | `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                     | info             |
 | `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                      | warning          |
-| `RANGE_OFFSET`           | `RANGE_OFFSET_OUT_OF_RANGE`                                                 | warning          |
 | `KEYFRAME_STYLE`         | `KEYFRAME_PROP_NOT_CAMEL_CASE`                                              | warning          |
 | `VIEW_INSET`             | `INVALID_INSET`                                                             | warning          |
 
@@ -234,7 +233,6 @@ Statically-detectable authoring pitfalls lifted from the trigger rule files. Eac
 | `STATE_REMOVE_WITHOUT_EFFECT_ID`       | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                                                                           | `STATE_EFFECT`           |
 | `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.                                     | `RECOMMENDED_FILL`       |
 | `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).                                            | `POINTER_AXIS`           |
-| `RANGE_OFFSET_OUT_OF_RANGE`            | A percentage `RangeOffset.offset.value` is outside `0–100`.                                                                                           | `RANGE_OFFSET`           |
 | `KEYFRAME_PROP_NOT_CAMEL_CASE`         | A `keyframeEffect` property name is kebab-case (not WAAPI camelCase).                                                                                 | `KEYFRAME_STYLE`         |
 | `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 whitespace-separated CSS lengths/percentages.                                                                   | `VIEW_INSET`             |
 
