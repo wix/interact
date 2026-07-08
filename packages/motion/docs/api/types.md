@@ -1,633 +1,155 @@
-# Type Definitions
+# Types
 
-Complete TypeScript type reference for Wix Motion's animation system. This guide covers all interfaces, types, and enums used throughout the library.
+TypeScript reference for the types `@wix/motion` itself defines and exports (`src/types.ts`). These are the shapes accepted by `getWebAnimation()`, `getCSSAnimation()`, `getScrubScene()`, `getSequence()`, `createAnimationGroups()`, and `registerEffects()`.
 
-## Overview
+## Animation options
 
-Wix Motion provides comprehensive TypeScript support with detailed type definitions for:
+### `AnimationOptions`
 
-- **Core Configuration Types** - Animation options and parameters
-- **Named Effect Types** - All 82+ animation presets with their specific options
-- **Animation Control Types** - Return types and control interfaces
-- **Utility Types** - Measurements, directions, and helper types
-- **Advanced Types** - Custom effects and trigger configurations
+The options object accepted by `getWebAnimation`, `getCSSAnimation`, `getScrubScene`, `getAnimation`, and used inside `AnimationGroupArgs`.
 
-## Core Configuration Types
+```typescript
+type AnimationOptions = (TimeAnimationOptions | ScrubAnimationOptions) & AnimationExtraOptions;
+```
+
+> **No top-level `type` field.** `AnimationOptions` is a union of `TimeAnimationOptions` and `ScrubAnimationOptions`, but the engine never reads a discriminant string off it. Which branch applies is determined **structurally**: by which of `keyframeEffect` / `namedEffect` / `customEffect` is present, and by whether a scroll/pointer `trigger` argument was passed. Do not add a `type: 'TimeAnimationOptions'` (or similar) field — it is ignored.
+>
+> ```typescript
+> // ✅ correct — no top-level `type`
+> getWebAnimation(el, { namedEffect: { type: 'FadeIn' }, duration: 1000 });
+> ```
+>
+> (`namedEffect.type` _is_ real — see [`NamedEffect`](#namedeffect) below. It's the top-level `type` on the options object that doesn't exist.)
 
 ### `TimeAnimationOptions`
 
-Configuration for time-based animations (entrance and ongoing animations).
+Options for a time-based (duration/delay-driven) animation — used when no scroll/pointer trigger is given.
 
 ```typescript
-interface TimeAnimationOptions {
-  type: 'TimeAnimationOptions';
-  keyframeEffect?: MotionKeyframeEffect; // Native KeyframeEffects
-  namedEffect?: NamedEffect; // Pre-registered named effects
-  customEffect?: CustomEffect; // JS-based custom effect
-  duration?: number; // Milliseconds
-  delay?: number; // Milliseconds
-  endDelay?: number; // Milliseconds
-  easing?: string; // CSS or JS easing function
-  iterations?: number; // Number of repeats (Infinity or 0 for infinite)
-  alternate?: boolean; // Alternating effect direction on each iteration
-  fill?: AnimationFillMode; // 'none' | 'backwards' | 'forwards' | 'both'
-  reversed?: boolean; // Play in reverse
-}
-```
-
-#### Examples
-
-```typescript
-// Basic entrance animation
-const fadeInOptions: TimeAnimationOptions = {
-  type: 'TimeAnimationOptions',
-  namedEffect: { type: 'FadeIn' },
-  duration: 800,
-  easing: 'easeOut',
-  fill: 'backwards',
-};
-
-// Complex bounce animation
-const bounceOptions: TimeAnimationOptions = {
-  type: 'TimeAnimationOptions',
-  namedEffect: {
-    type: 'BounceIn',
-    direction: 'bottom',
-  },
-  duration: 1200,
-  delay: 300,
-  easing: 'backOut',
-  fill: 'backwards',
-};
-
-// Infinite pulse animation
-const pulseOptions: TimeAnimationOptions = {
-  type: 'TimeAnimationOptions',
-  namedEffect: {
-    type: 'Pulse',
-    intensity: 0.8,
-  },
-  duration: 2000,
-  iterations: Infinity,
-  alternate: true,
-};
-```
-
-### `ScrubAnimationOptions`
-
-Configuration for scrub-based animations (scroll, mouse, and background scroll).
-
-```typescript
-interface ScrubAnimationOptions {
-  type: 'ScrubAnimationOptions';
+type TimeAnimationOptions = {
+  id?: string;
   keyframeEffect?: MotionKeyframeEffect;
   namedEffect?: NamedEffect;
   customEffect?: CustomEffect;
-  startOffset?: RangeOffset; // animation-range-start for usage with view() timelines
-  endOffset?: RangeOffset; // animation-range-end for usage with view() timelines
-  playbackRate?: number; // Speed multiplier
-  easing?: string; // Transition easing
-  iterations?: number; // Usually 1 for scrub animations
+  duration?: number; // ms
+  delay?: number; // ms
+  endDelay?: number; // ms
+  easing?: string; // named key or CSS easing string
+  iterations?: number; // 0 ⇒ Infinity; undefined ⇒ 1
+  alternate?: boolean;
+  fill?: AnimationFillMode; // 'none' | 'backwards' | 'forwards' | 'both'
+  reversed?: boolean;
+};
+```
+
+- `keyframeEffect`, `namedEffect`, and `customEffect` are mutually exclusive ways to describe what animates — see [Effects](#effects).
+- `duration`, `delay`, and `endDelay` are all in **milliseconds**.
+- `iterations: 0` means infinite repeats; an omitted `iterations` means `1`.
+
+### `ScrubAnimationOptions`
+
+Options for a scrub-driven animation — used when a `view-progress` (scroll) or `pointer-move` trigger is passed.
+
+```typescript
+type ScrubAnimationOptions = {
+  id?: string;
+  keyframeEffect?: MotionKeyframeEffect;
+  namedEffect?: NamedEffect;
+  customEffect?: CustomEffect;
+  startOffset?: RangeOffset;
+  endOffset?: RangeOffset;
+  playbackRate?: number;
+  easing?: string;
+  iterations?: number;
   fill?: AnimationFillMode;
   alternate?: boolean;
   reversed?: boolean;
-  transitionDuration?: number; // For mouse animations (ms)
-  transitionDelay?: number; // For mouse animations (ms)
-  transitionEasing?: ScrubTransitionEasing;
-  centeredToTarget?: boolean; // For mouse animations
-  duration?: LengthPercentage; // Scroll-based duration
-}
-```
-
-#### Examples
-
-```typescript
-// Scroll parallax animation
-const parallaxOptions: ScrubAnimationOptions = {
-  type: 'ScrubAnimationOptions',
-  namedEffect: {
-    type: 'ParallaxScroll',
-    speed: 0.3,
-  },
-  startOffset: { name: 'cover' },
-  endOffset: { name: 'exit' },
-};
-
-// Mouse tilt animation
-const mouseOptions: ScrubAnimationOptions = {
-  type: 'ScrubAnimationOptions',
-  namedEffect: {
-    type: 'Tilt3DMouse',
-    angle: 15,
-    perspective: 800,
-  },
-  transitionDuration: 200,
-  transitionEasing: 'easeOut',
-};
-
-// Background zoom animation
-const bgOptions: ScrubAnimationOptions = {
-  type: 'ScrubAnimationOptions',
-  namedEffect: {
-    type: 'BgZoom',
-    direction: 'in',
-    zoom: 40,
-  },
-};
-```
-
-## Named Effect Types
-
-### Entrance Animations
-
-Time-based animations for element reveals and transitions.
-
-#### Base Interface
-
-```typescript
-type BaseDataItemLike<Type extends string = string> = {
-  id?: string;
-  type: Type;
-};
-```
-
-#### Common Types
-
-```typescript
-// Simple fade entrance
-type FadeIn = BaseDataItemLike<'FadeIn'>;
-
-// Directional arc entrance
-type ArcIn = BaseDataItemLike<'ArcIn'> & {
-  direction: EffectFourDirections; // 'top' | 'right' | 'bottom' | 'left'
-};
-
-// Bouncing entrance
-type BounceIn = BaseDataItemLike<'BounceIn'> & {
-  direction: EffectFourDirections | 'center';
-  distanceFactor?: number;
-};
-
-// Custom directional entrance
-type GlideIn = BaseDataItemLike<'GlideIn'> & {
-  direction: number; // Angle in degrees
-  distance: UnitLengthPercentage; // Movement distance
-  startFromOffScreen?: boolean;
-};
-```
-
-#### Examples
-
-```typescript
-// Simple fade
-const fadeIn: FadeIn = { type: 'FadeIn' };
-
-// Arc from right
-const arcIn: ArcIn = {
-  type: 'ArcIn',
-  direction: 'right',
-};
-
-// Bounce from bottom
-const bounceIn: BounceIn = {
-  type: 'BounceIn',
-  direction: 'bottom',
-};
-
-// Custom glide at 45 degrees
-const glideIn: GlideIn = {
-  type: 'GlideIn',
-  direction: 45,
-  distance: { value: 100, unit: 'px' },
-};
-```
-
-### Ongoing Animations
-
-Continuous looping animations for attention and ambient motion.
-
-#### Common Types
-
-```typescript
-// Pulsing scale effect
-type Pulse = BaseDataItemLike<'Pulse'> & {
-  intensity?: number; // 0.1 - 2.0 multiplier
-};
-
-// Breathing movement
-type Breathe = BaseDataItemLike<'Breathe'> & {
-  direction: 'vertical' | 'horizontal' | 'center';
-  distance: UnitLengthPercentage;
-};
-
-// Spinning rotation
-type Spin = BaseDataItemLike<'Spin'> & {
-  direction: 'clockwise' | 'counter-clockwise';
-};
-
-// Directional poking
-type Poke = BaseDataItemLike<'Poke'> & {
-  direction: EffectFourDirections;
-  intensity?: number;
-};
-```
-
-#### Examples
-
-```typescript
-// Soft pulse
-const pulse: Pulse = {
-  type: 'Pulse',
-  intensity: 0.6,
-};
-
-// Vertical breathing
-const breathe: Breathe = {
-  type: 'Breathe',
-  direction: 'vertical',
-  distance: { value: 10, unit: 'px' },
-};
-
-// Clockwise spinning
-const spin: Spin = {
-  type: 'Spin',
-  direction: 'clockwise',
-};
-```
-
-### Scroll Animations
-
-Scroll-driven effects synchronized to viewport position.
-
-#### Common Types
-
-```typescript
-// Basic parallax scrolling
-type ParallaxScroll = BaseDataItemLike<'ParallaxScroll'> & {
-  speed: number; // Movement speed multiplier
-  range?: EffectScrollRange; // 'in' | 'out' | 'continuous'
-};
-
-// Fade based on scroll
-type FadeScroll = BaseDataItemLike<'FadeScroll'> & {
-  range: EffectScrollRange;
-  opacity: number; // Target opacity
-};
-
-// Movement on scroll
-type MoveScroll = BaseDataItemLike<'MoveScroll'> & {
-  angle: number; // Movement direction
-  range?: EffectScrollRange;
-  distance?: UnitLengthPercentage;
-};
-
-// Scaling on scroll
-type GrowScroll = BaseDataItemLike<'GrowScroll'> & {
-  direction: EffectNineDirections; // Includes corners + center
-  range?: EffectScrollRange;
-  scale?: number;
-  speed?: number; // Y-axis movement
-};
-```
-
-#### Examples
-
-```typescript
-// Slow parallax background
-const parallax: ParallaxScroll = {
-  type: 'ParallaxScroll',
-  speed: 0.3,
-};
-
-// Fade in on scroll
-const fadeScroll: FadeScroll = {
-  type: 'FadeScroll',
-  range: 'in',
-  opacity: 1,
-};
-
-// Move diagonally
-const moveScroll: MoveScroll = {
-  type: 'MoveScroll',
-  angle: 225,
-  distance: { value: 200, unit: 'px' },
-  range: 'in',
-};
-```
-
-### Mouse Animations
-
-Interactive pointer-driven effects.
-
-#### Common Types
-
-```typescript
-// Element following mouse
-type TrackMouse = BaseDataItemLike<'TrackMouse'> & {
-  distance?: UnitLengthPercentage;
-  axis?: MouseEffectAxis; // 'both' | 'horizontal' | 'vertical'
-  inverted?: boolean;
-};
-
-// 3D tilt based on mouse
-type Tilt3DMouse = BaseDataItemLike<'Tilt3DMouse'> & {
-  angle?: number; // Maximum tilt angle
-  perspective?: number; // 3D perspective distance
-  inverted?: boolean;
-};
-
-// Scale based on mouse proximity
-type ScaleMouse = BaseDataItemLike<'ScaleMouse'> & {
-  distance?: UnitLengthPercentage;
-  axis?: MouseEffectAxis;
-  scale?: number; // Maximum scale
-  scaleDirection: EffectScaleDirection; // 'up' | 'down'
-  inverted?: boolean;
-};
-```
-
-#### Examples
-
-```typescript
-// Track mouse movement
-const trackMouse: TrackMouse = {
-  type: 'TrackMouse',
-  distance: { value: 50, unit: 'px' },
-  axis: 'both',
-};
-
-// 3D tilt effect
-const tiltMouse: Tilt3DMouse = {
-  type: 'Tilt3DMouse',
-  angle: 15,
-  perspective: 800,
-};
-
-// Scale on hover
-const scaleMouse: ScaleMouse = {
-  type: 'ScaleMouse',
-  scale: 1.1,
-  scaleDirection: 'up',
-};
-```
-
-### Background Scroll Animations
-
-Specialized effects for background media elements.
-
-#### Common Types
-
-```typescript
-// Background parallax
-type BgParallax = BaseDataItemLike<'BgParallax'> & {
-  speed?: number;
-};
-
-// Background zoom
-type BgZoom = BaseDataItemLike<'BgZoom'> & {
-  direction: 'in' | 'out';
-  zoom?: number; // Zoom intensity
-};
-
-// Background fade
-type BgFade = BaseDataItemLike<'BgFade'> & {
-  range: 'in' | 'out';
-};
-
-// Complex 3D background effect
-type BgFake3D = BaseDataItemLike<'BgFake3D'> & {
-  stretch?: number; // Y-axis stretch
-  zoom?: number; // 3D zoom distance
-};
-```
-
-#### Examples
-
-```typescript
-// Background parallax
-const bgParallax: BgParallax = {
-  type: 'BgParallax',
-  speed: 0.5,
-};
-
-// Zoom in effect
-const bgZoom: BgZoom = {
-  type: 'BgZoom',
-  direction: 'in',
-  zoom: 30,
-};
-
-// Complex 3D effect
-const bg3D: BgFake3D = {
-  type: 'BgFake3D',
-  stretch: 1.3,
-  zoom: 20,
-};
-```
-
-## Utility Types
-
-### Measurements and Units
-
-```typescript
-// Length with unit
-type Length = {
-  value: number;
-  unit: 'px' | 'em' | 'rem' | 'vh' | 'vw' | 'vmin' | 'vmax';
-};
-
-// Percentage
-type Percentage = {
-  value: number;
-  unit: 'percentage';
-};
-
-// Combined length/percentage
-type LengthPercentage = Length | Percentage;
-type UnitLengthPercentage = LengthPercentage;
-
-// 2D point
-type Point = [number, number];
-```
-
-#### Examples
-
-```typescript
-// Different measurement types
-const pixelDistance: Length = { value: 100, unit: 'px' };
-const remDistance: Length = { value: 2, unit: 'rem' };
-const viewportDistance: Length = { value: 50, unit: 'vh' };
-const percentDistance: Percentage = { value: 75, unit: 'percentage' };
-
-// Points for coordinates
-const centerPoint: Point = [0.5, 0.5];
-const topLeft: Point = [0, 0];
-```
-
-### Directions and Positions
-
-```typescript
-// Four main directions
-type EffectFourDirections = 'top' | 'right' | 'bottom' | 'left';
-
-// Eight directions (includes corners)
-type EffectEightDirections =
-  | EffectFourDirections
-  | 'top-right'
-  | 'top-left'
-  | 'bottom-right'
-  | 'bottom-left';
-
-// Nine directions (includes center)
-type EffectNineDirections = EffectEightDirections | 'center';
-
-// Two-way directions
-type EffectTwoSides = 'left' | 'right';
-
-// Corner positions
-type EffectFourCorners = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-
-// Scroll ranges
-type EffectScrollRange = 'in' | 'out' | 'continuous';
-
-// Scale directions
-type EffectScaleDirection = 'up' | 'down';
-```
-
-### Mouse-Specific Types
-
-```typescript
-// Mouse effect axes
-type MouseEffectAxis = 'both' | 'horizontal' | 'vertical';
-
-// Mouse pivot points
-type MousePivotAxis = 'top' | 'bottom' | 'right' | 'left' | 'center-horizontal' | 'center-vertical';
-
-// Mouse progress information
-type Progress = {
-  x: number; // Normalized X position (0-1)
-  y: number; // Normalized Y position (0-1)
-  v?: { x: number; y: number }; // Velocity vector
-  active?: boolean; // Is interaction active
-};
-```
-
-## Animation Control Types
-
-### `AnimationGroup`
-
-Main control interface returned by `getWebAnimation()`.
-
-```typescript
-interface AnimationGroup {
-  animations: (Animation & {
-    start?: RangeOffset;
-    end?: RangeOffset;
-  })[];
-  options?: AnimationGroupOptions;
-  ready: Promise<void>;
-
-  // Control methods
-  getProgress(): number;
-  play(callback?: () => void): Promise<void>;
-  pause(): void;
-  reverse(callback?: () => void): Promise<void>;
-  progress(p: number): void;
-  cancel(): void;
-  setPlaybackRate(rate: number): void;
-  onFinish(callback: () => void): Promise<void>;
-
-  // State properties
-  get finished(): Promise<Animation>;
-  get playState(): AnimationPlayState;
-}
-```
-
-### Mouse Animation Interfaces
-
-```typescript
-// Basic mouse animation interface
-interface MouseAnimationInstance {
-  target: HTMLElement;
-  play(): void;
-  progress(progress: Progress): void;
-  cancel(): void;
-}
-
-// Extended interface for custom mouse animations
-interface CustomMouseAnimationInstance extends MouseAnimationInstance {
-  getProgress(): Progress;
-}
-
-// Factory function type
-type MouseAnimationFactory = (element: HTMLElement) => MouseAnimationInstance;
-```
-
-### Scroll Scene Interfaces
-
-```typescript
-// Scroll-driven scene
-interface ScrubScrollScene {
-  start: RangeOffset;
-  end: RangeOffset;
-  viewSource: HTMLElement;
-  ready: Promise<void>;
-  getProgress(): number;
-  effect(timestamp: any, progress: number): void;
-  disabled: boolean;
-  destroy(): void;
-  groupId?: string;
-}
-
-// Pointer-driven scene
-interface ScrubPointerScene {
-  target?: HTMLElement;
+  transitionDuration?: number; // pointer smoothing (ms)
+  transitionDelay?: number;
+  transitionEasing?: ScrubTransitionEasing; // 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce'
   centeredToTarget?: boolean;
-  transitionDuration?: number;
-  transitionEasing?: ScrubTransitionEasing;
-  getProgress(): Progress;
-  effect(progress: Progress): void;
-  disabled: boolean;
-  destroy(): void;
-  allowActiveEvent?: boolean;
-}
+  duration?: LengthPercentage; // NOTE: length/percentage, not ms
+};
 ```
 
-## Advanced Configuration Types
+- **`duration` here is a [`LengthPercentage`](#length--percentage--lengthpercentage), not a millisecond number** — unlike `TimeAnimationOptions.duration`. It expresses a portion of the scroll/scrub range.
+- `startOffset` / `endOffset` live on these options, not on the trigger.
+- `transitionDuration` / `transitionDelay` / `transitionEasing` / `centeredToTarget` only apply to pointer-driven (`pointer-move`) scrubbing.
 
-### Range Offsets
+### `AnimationExtraOptions`
 
-Precise control over scroll animation timing.
+Mixed into both `TimeAnimationOptions` and `ScrubAnimationOptions` to form `AnimationOptions`.
 
 ```typescript
-type RangeOffset = {
-  name?: 'entry' | 'exit' | 'contain' | 'cover' | 'entry-crossing' | 'exit-crossing';
-  offset?: LengthPercentage;
+type AnimationExtraOptions = {
+  effectId?: string;
+  effect?: (progress: () => number | { x: number | undefined; y: number | undefined }) => void;
+  measures?: Record<string, string | number>;
 };
 ```
 
-#### Examples
+- `effectId` — an id surfaced on the `animationend` `CustomEvent` dispatched by `AnimationGroup.onFinish` (see [`animation-group.md`](./animation-group.md)).
+- `effect` — an optional per-frame progress reader, given a function that returns the current progress.
+- `measures` — arbitrary measured values an effect's `prepare()` hook can stash for `web()`/`style()` to consume.
+
+## Effects
+
+`keyframeEffect`, `namedEffect`, and `customEffect` are the three mutually-exclusive ways to describe what an `AnimationOptions` object actually animates.
+
+### `NamedEffect`
+
+References a preset registered via `registerEffects()`.
 
 ```typescript
-// Start when element is 20% visible
-const startOffset: RangeOffset = {
-  name: 'entry',
-  offset: { value: 20, unit: 'percentage' },
-};
-
-// End 100px before element exits
-const endOffset: RangeOffset = {
-  name: 'exit',
-  offset: { value: 100, unit: 'px' },
-};
-
-// Cover entire viewport interaction
-const coverRange: RangeOffset = { name: 'cover' };
+type NamedEffect = { type: string } & Record<string, unknown>;
 ```
 
-### Trigger Variants
+`type` here **is** a real field — it's the registered preset name (e.g. `'FadeIn'`). This is the one place in motion's option types where a `type` string is meaningful; it is unrelated to the (non-existent) top-level `type` field discussed under [`AnimationOptions`](#animationoptions). Everything else on a `NamedEffect` is preset-specific and defined by whichever package registered it (see [Types owned elsewhere](#types-owned-elsewhere)).
 
-Configuration for how animations are triggered.
+### `CustomEffect`
+
+```typescript
+type CustomEffect =
+  | { ranges: { name: string; min: number; max: number; step?: number }[] }
+  | ((element: Element | null, progress: number | null) => void);
+```
+
+`CustomEffect` is a union of two shapes, but only the **function** form does anything at runtime in `@wix/motion`:
+
+- **Function form (primary)** — `(element, progress) => void`. Wrapped in a `CustomAnimation` that runs a `requestAnimationFrame` loop, calling your function whenever computed progress changes. On cancellation it is called once with `progress === null` — handle this as a reset/cleanup signal.
+
+  ```typescript
+  const customEffect: CustomEffect = (element, progress) => {
+    if (progress === null) {
+      // cancelled — reset any applied styles here
+      return;
+    }
+    if (element instanceof HTMLElement) {
+      element.style.setProperty('opacity', String(progress));
+    }
+  };
+  ```
+
+- **`{ ranges }` object form** — accepted by the type, but **inert** when used with `@wix/motion` alone; it produces no visible effect on its own. Don't rely on it unless a higher-level package (e.g. `@wix/interact`) interprets it.
+
+### `MotionKeyframeEffect`
+
+Inline WAAPI/CSS keyframes — no registration required.
+
+```typescript
+type MotionKeyframeEffect = {
+  name: string;
+  keyframes: Keyframe[];
+};
+```
+
+No `type` field. `name` becomes the animation/`@keyframes` name; `keyframes` is a standard WAAPI `Keyframe[]`.
+
+## Triggers & scrub
+
+### `TriggerVariant`
+
+The shape of the (optional) 3rd argument to `getWebAnimation` / `getScrubScene` / `getAnimation`.
 
 ```typescript
 type TriggerVariant = {
@@ -637,245 +159,81 @@ type TriggerVariant = {
 };
 ```
 
-#### Examples
+- Callers actually pass `Partial<TriggerVariant> & { element?: HTMLElement }` — and for pointer triggers, `axis?: PointerMoveAxis` as well. `element` and `axis` are **not** fields of `TriggerVariant` itself; they're read directly off the object passed as the trigger argument.
+- Omitting `trigger` (or passing neither `'view-progress'` nor `'pointer-move'`) produces a time-based animation.
+
+### `RangeOffset`
 
 ```typescript
-// Scroll trigger
-const scrollTrigger: TriggerVariant = {
-  id: 'scroll-animation-1',
-  trigger: 'view-progress',
-  componentId: 'hero-section',
-};
-
-// Mouse trigger
-const mouseTrigger: TriggerVariant = {
-  id: 'mouse-animation-1',
-  trigger: 'pointer-move',
-  componentId: 'interactive-card',
+type RangeOffset = {
+  name?: 'entry' | 'exit' | 'contain' | 'cover' | 'entry-crossing' | 'exit-crossing';
+  offset?: LengthPercentage;
 };
 ```
 
-### Custom Effects
+Used for `startOffset` / `endOffset` on `ScrubAnimationOptions`, and shows up on `AnimationGroup.animations[i].start` / `.end` for scroll-driven groups.
 
-For creating completely custom animations.
-
-```typescript
-type CustomEffect = {
-  ranges: {
-    name: string;
-    min: number;
-    max: number;
-    step?: number;
-  }[];
-};
-
-type MotionKeyframeEffect = BaseDataItemLike<'KeyframeEffect'> & {
-  name: string;
-  keyframes: Keyframe[];
-};
-```
-
-#### Examples
+### `ScrubTransitionEasing`
 
 ```typescript
-// Custom progress ranges
-const customEffect: CustomEffect = {
-  ranges: [
-    { name: 'opacity', min: 0, max: 1, step: 0.01 },
-    { name: 'scale', min: 0.5, max: 1.5, step: 0.01 },
-    { name: 'rotation', min: 0, max: 360, step: 1 },
-  ],
-};
-
-// Custom keyframe effect
-const keyframeEffect: MotionKeyframeEffect = {
-  type: 'KeyframeEffect',
-  name: 'customBounce',
-  keyframes: [
-    { transform: 'scale(0) rotate(0deg)', opacity: 0 },
-    { transform: 'scale(1.2) rotate(180deg)', opacity: 0.8 },
-    { transform: 'scale(1) rotate(360deg)', opacity: 1 },
-  ],
-};
-```
-
-### Easing Types
-
-```typescript
-// Scrub transition easing options
 type ScrubTransitionEasing = 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce';
-
-// Animation fill modes
-type AnimationFillMode = 'none' | 'backwards' | 'forwards' | 'both';
 ```
 
-## Union Types
+Named easing curves for smoothing pointer-driven scrub transitions (`transitionEasing` on `ScrubAnimationOptions`). These are a distinct, closed set from the general `easing` string — `'elastic'` and `'bounce'` exist only here, not as named JS/CSS easings.
 
-### Combined Named Effects
+### `PointerMoveAxis`
 
 ```typescript
-// All entrance animations
-type EntranceAnimation = FadeIn | ArcIn | BounceIn | SlideIn | FlipIn |
-  DropIn | ExpandIn | GlideIn | SpinIn | PunchIn | /* ... and more */;
-
-// All ongoing animations
-type OngoingAnimation = Pulse | Breathe | Spin | Wiggle | Flash |
-  Bounce | Swing | Poke | /* ... and more */;
-
-// All scroll animations
-type ScrollAnimation = ParallaxScroll | FadeScroll | MoveScroll |
-  GrowScroll | RevealScroll | /* ... and more */;
-
-// All mouse animations
-type MouseAnimation = TrackMouse | Tilt3DMouse | ScaleMouse |
-  BlurMouse | /* ... and more */;
-
-// All background scroll animations
-type BackgroundScrollAnimation = BgParallax | BgZoom | BgFade |
-  BgRotate | /* ... and more */;
-
-// Union of all named effects
-type NamedEffect = EntranceAnimation | OngoingAnimation | ScrollAnimation |
-  MouseAnimation | BackgroundScrollAnimation;
+type PointerMoveAxis = 'x' | 'y';
 ```
 
-### Animation Options Union
+Set on the **trigger** object (e.g. `{ trigger: 'pointer-move', axis: 'y' }`), not on the effect or options. It selects whether a keyframe pointer effect reads `progress.x` or `progress.y`.
+
+### `Progress`
 
 ```typescript
-// Main options type
-type AnimationOptions = (TimeAnimationOptions | ScrubAnimationOptions) & AnimationExtraOptions;
-
-// Extra options for custom behavior
-type AnimationExtraOptions = {
-  effectId?: string;
-  effect?: (
-    progress: () =>
-      | number
-      | {
-          x: number | undefined;
-          y: number | undefined;
-        },
-  ) => void;
-};
+type Progress = { x: number; y: number; v?: { x: number; y: number }; active?: boolean };
 ```
 
-## Type Guards and Utilities
+The payload driving pointer-based scrubbing: normalized `x`/`y` position, an optional velocity vector `v`, and whether the interaction is currently `active`.
 
-### Type Guard Functions
+### `MouseAnimationInstance` / `CustomMouseAnimationInstance`
+
+Returned by `getWebAnimation` on the `pointer-move` + non-`keyframeEffect` path (instead of an `AnimationGroup`).
 
 ```typescript
-// Check if options are time-based
-function isTimeAnimation(options: AnimationOptions): options is TimeAnimationOptions {
-  return options.type === 'TimeAnimationOptions';
+interface MouseAnimationInstance {
+  target: HTMLElement;
+  play: () => void;
+  progress: (progress: Progress) => void;
+  cancel: () => void;
 }
 
-// Check if options are scrub-based
-function isScrubAnimation(options: AnimationOptions): options is ScrubAnimationOptions {
-  return options.type === 'ScrubAnimationOptions';
-}
-
-// Check if effect is entrance animation
-function isEntranceAnimation(effect: NamedEffect): effect is EntranceAnimation {
-  return ['FadeIn', 'ArcIn', 'BounceIn', 'SlideIn' /* ... */].includes(effect.type);
+interface CustomMouseAnimationInstance extends MouseAnimationInstance {
+  getProgress: () => Progress;
 }
 ```
 
-### Utility Type Functions
+- `play()` arms the instance; `progress(p)` feeds it a `Progress` sample (typically from a pointer-move listener); `cancel()` tears it down.
+- `CustomMouseAnimationInstance` adds `getProgress()` for reading back the last-applied `Progress`.
 
-```typescript
-// Extract effect type from options
-type ExtractEffectType<T extends AnimationOptions> = T extends { namedEffect: infer E } ? E : never;
-
-// Create typed animation options
-function createTimeAnimation<T extends EntranceAnimation | OngoingAnimation>(
-  namedEffect: T,
-  options?: Partial<Omit<TimeAnimationOptions, 'type' | 'namedEffect'>>,
-): TimeAnimationOptions {
-  return {
-    type: 'TimeAnimationOptions',
-    namedEffect,
-    duration: 1000,
-    ...options,
-  };
-}
-
-function createScrubAnimation<
-  T extends ScrollAnimation | MouseAnimation | BackgroundScrollAnimation,
->(
-  namedEffect: T,
-  options?: Partial<Omit<ScrubAnimationOptions, 'type' | 'namedEffect'>>,
-): ScrubAnimationOptions {
-  return {
-    type: 'ScrubAnimationOptions',
-    namedEffect,
-    ...options,
-  };
-}
-```
-
-#### Usage Examples
-
-```typescript
-// Type-safe entrance animation
-const fadeAnimation = createTimeAnimation({ type: 'FadeIn' }, { duration: 800, easing: 'easeOut' });
-
-// Type-safe scroll animation
-const parallaxAnimation = createScrubAnimation(
-  { type: 'ParallaxScroll', speed: 0.3 },
-  { startOffset: { name: 'cover' } },
-);
-
-// Type guards in use
-function handleAnimation(options: AnimationOptions) {
-  if (isTimeAnimation(options)) {
-    // TypeScript knows this is TimeAnimationOptions
-    console.log('Duration:', options.duration);
-  } else if (isScrubAnimation(options)) {
-    // TypeScript knows this is ScrubAnimationOptions
-    console.log('Start offset:', options.startOffset);
-  }
-}
-```
-
-## Sequence Types
+## Sequences
 
 ### `SequenceOptions`
 
-Configuration for stagger timing when creating a `Sequence`.
+Constructor options for `Sequence` / the first argument to `getSequence()`. See [`sequence.md`](./sequence.md) for the full stagger-offset formula and examples.
 
 ```typescript
 type SequenceOptions = {
-  delay?: number; // Base delay (ms) for all groups. Default: 0
-  offset?: number; // Stagger interval (ms) between groups. Default: 0
-  offsetEasing?: string | ((p: number) => number); // Easing for offset distribution. Default: linear
-};
-```
-
-Named easing strings (`'quadIn'`, `'sineOut'`, `'cubicBezier(0.4, 0, 0.2, 1)'`, etc.) are resolved to JS functions via `getJsEasing()`. Invalid strings fall back to `linear`.
-
-#### Examples
-
-```typescript
-// Linear 200ms stagger
-const linearOpts: SequenceOptions = { offset: 200 };
-
-// Quadratic-in stagger with base delay
-const quadOpts: SequenceOptions = {
-  delay: 100,
-  offset: 200,
-  offsetEasing: 'quadIn',
-};
-
-// Custom cubic easing function
-const customOpts: SequenceOptions = {
-  offset: 300,
-  offsetEasing: (p) => p * p * p,
+  delay?: number; // ms base delay, default 0
+  offset?: number; // ms stagger interval, default 0
+  offsetEasing?: string | ((p: number) => number);
 };
 ```
 
 ### `AnimationGroupArgs`
 
-Declarative target/options pair used by `getSequence()` and `createAnimationGroups()` to build `AnimationGroup` instances.
+One entry in the array passed to `getSequence()` / `createAnimationGroups()`.
 
 ```typescript
 type AnimationGroupArgs = {
@@ -885,64 +243,152 @@ type AnimationGroupArgs = {
 };
 ```
 
-**Properties:**
+- `target` — element(s) to animate. `HTMLElement[]` and `string` selectors expand to one group per matched element.
+- `options` — the `AnimationOptions` to apply to that target.
+- `context` — forwarded to animation creation (e.g. `{ reducedMotion: true }`).
 
-- `target` — Element(s) to animate. `HTMLElement[]` and `string` selectors expand to one group per element.
-- `options` — Animation configuration (`TimeAnimationOptions` or `ScrubAnimationOptions`).
-- `context` — Optional context forwarded to animation creation (e.g. `{ reducedMotion: true }`).
+## Units & fill mode
 
-### `IndexedGroup`
-
-Specifies a group and its insertion position for `Sequence.addGroups()`.
+### `Length` / `Percentage` / `LengthPercentage`
 
 ```typescript
-type IndexedGroup = {
-  index: number;
-  group: AnimationGroup;
+type Length = { value: number; unit: 'px' | 'em' | 'rem' | 'vh' | 'vw' | 'vmin' | 'vmax' };
+type Percentage = { value: number; unit: 'percentage' };
+type LengthPercentage = Length | Percentage;
+```
+
+Used anywhere motion needs a dimension that could be either an absolute length or a percentage — e.g. `RangeOffset.offset` and `ScrubAnimationOptions.duration`.
+
+### `AnimationFillMode`
+
+```typescript
+type AnimationFillMode = 'none' | 'backwards' | 'forwards' | 'both';
+```
+
+Standard WAAPI fill mode, used by both `TimeAnimationOptions.fill` and `ScrubAnimationOptions.fill`.
+
+## Authoring / effect modules
+
+These types define the contract for writing and registering your own effect modules via `registerEffects()`. Most consumers of `@wix/motion` won't need them unless they're authoring presets.
+
+### `AnimationData`
+
+The shape an effect module's `web()` / `style()` hook returns — one entry per animated part/property group.
+
+```typescript
+type AnimationData = (TimeAnimationOptions | AnimationDataForScrub) & {
+  name?: string;
+  keyframes: Record<string, string | number | undefined>[];
+  custom?: Record<string, string | number | undefined>;
+  composite?: CompositeOperation;
+  part?: string;
+  timing?: Partial<EffectTiming>;
 };
 ```
 
-**Properties:**
+- `keyframes` — plain property-bag keyframes (not a WAAPI `Keyframe[]`) that motion turns into a `KeyframeEffect` or CSS `@keyframes` block.
+- `part` — targets a sub-element via `[data-motion-part~="<part>"]` instead of the root target.
+- `AnimationDataForScrub` mirrors `ScrubAnimationOptions`'s fields, with `duration?: LengthPercentage | number` plus internal `startOffsetAdd` / `endOffsetAdd` string fields.
 
-- `index` — Position in the `animationGroups` array where the group should be inserted.
-- `group` — The `AnimationGroup` instance to insert.
+### `AnimationEffectAPI`
 
-## Advanced Type Patterns
-
-### Generic Animation Factory
+The primary contract for a registered effect module.
 
 ```typescript
-interface AnimationFactory<T extends NamedEffect> {
-  create(effect: T, options?: Partial<AnimationOptions>): AnimationGroup;
-  getDefaults(effect: T): Partial<AnimationOptions>;
-}
+type AnimationOptionsTypes = {
+  time: TimeAnimationOptions & AnimationExtraOptions;
+  scrub: ScrubAnimationOptions & AnimationExtraOptions;
+};
 
-class TypedAnimationFactory<T extends NamedEffect> implements AnimationFactory<T> {
-  create(effect: T, options: Partial<AnimationOptions> = {}): AnimationGroup {
-    const animationOptions: AnimationOptions = {
-      type: this.getAnimationType(effect),
-      namedEffect: effect,
-      ...this.getDefaults(effect),
-      ...options,
-    } as AnimationOptions;
+type AnimationEffectAPI<Enum extends keyof AnimationOptionsTypes> = {
+  web: (
+    animationOptions: AnimationOptionsTypes[Enum],
+    dom?: DomApi,
+    options?: Record<string, any>,
+  ) => AnimationData[];
+  getNames: (animationOptions: AnimationOptionsTypes[Enum]) => string[];
+  style?: (options: AnimationOptionsTypes[Enum]) => AnimationData[]; // enables the CSS path (getCSSAnimation)
+  prepare?: (options: AnimationOptionsTypes[Enum], dom?: DomApi) => void; // measure/mutate before animating
+};
+```
 
-    return getWebAnimation(this.target, animationOptions);
-  }
+- `Enum` (`'time'` or `'scrub'`) selects which options shape the module handles.
+- `web` builds the `AnimationData[]` used for WAAPI playback; `style`, if present, enables `getCSSAnimation`'s CSS-generation path; `prepare` runs a measure/mutate step via `fastdom` before animating.
 
-  private getAnimationType(effect: T): 'TimeAnimationOptions' | 'ScrubAnimationOptions' {
-    // Implementation would check effect type and return appropriate type
-    return isEntranceAnimation(effect) || isOngoingAnimation(effect)
-      ? 'TimeAnimationOptions'
-      : 'ScrubAnimationOptions';
-  }
+### `DomApi` / `MeasureCallback`
 
-  getDefaults(effect: T): Partial<AnimationOptions> {
-    // Return sensible defaults based on effect type
-    return {};
-  }
+Passed to an effect module's `web`/`style`/`prepare` hooks for batched, layout-thrash-free DOM access.
+
+```typescript
+type MeasureCallback = (fn: (target: HTMLElement | null) => void) => void;
+type DomApi = { measure: MeasureCallback; mutate: MeasureCallback };
+```
+
+Both `measure` and `mutate` schedule `fn` through `fastdom`'s read/write batching.
+
+### `EffectModule`
+
+The union of shapes `registerEffects()` accepts.
+
+```typescript
+type EffectModule =
+  | AnimationEffectAPI<'time'>
+  | AnimationEffectAPI<'scrub'>
+  | ScrollEffectModule // { web(options, dom?): AnimationData[] }
+  | MouseEffectModule // { web(options): (el: HTMLElement) => object }
+  | WebAnimationEffectFactory<'scrub'>;
+```
+
+Most presets implement `AnimationEffectAPI`; `ScrollEffectModule` and `MouseEffectModule` are narrower shapes for scroll-only / mouse-only modules.
+
+### `ScrubScrollScene`
+
+One entry of the array returned by `getScrubScene()` on the polyfilled (no `window.ViewTimeline`) scroll path.
+
+```typescript
+interface ScrubScrollScene {
+  start: RangeOffset;
+  end: RangeOffset;
+  viewSource: HTMLElement;
+  ready: Promise<void>;
+  getProgress(): number;
+  effect(__: any, p: number): void; // p is 0..1 scroll progress
+  disabled: boolean;
+  destroy(): void;
+  groupId?: string;
 }
 ```
 
+Callers drive `effect(_, progress)` from their own scroll/IntersectionObserver logic (`@wix/interact` does this via its bundled [`fizban`](https://github.com/wix-incubator/fizban) polyfill) and call `destroy()` to clean up.
+
+### `ScrubPointerScene`
+
+Returned by `getScrubScene()` on the `pointer-move` path.
+
+```typescript
+interface ScrubPointerScene {
+  target?: HTMLElement;
+  centeredToTarget?: boolean;
+  transitionDuration?: number;
+  transitionEasing?: ScrubTransitionEasing;
+  getProgress(): Progress | number;
+  effect(__: any, p: Progress): void; // p is the pointer Progress payload
+  disabled: boolean;
+  destroy(): void;
+  allowActiveEvent?: boolean;
+  ready?: Promise<void>;
+}
+```
+
+Callers drive `effect(_, progress)` from their own `pointermove`/`mousemove` listener with a `Progress` sample.
+
+## Types owned elsewhere
+
+`@wix/motion` only defines the types above. It does **not** own:
+
+- **Per-effect/preset types** (e.g. entrance, ongoing, scroll, mouse, or background-scroll preset option shapes) — those belong to `@wix/motion-presets`, which registers them via `registerEffects()`.
+- **Declarative config types** (trigger→effect wiring, component/interaction config) — those belong to `@wix/interact`.
+
 ---
 
-**Complete**: You now have comprehensive TypeScript type definitions for Wix Motion. Return to the [API Overview](README.md) or explore [Advanced Usage Patterns](../guides/advanced-patterns.md) for implementation examples.
+Return to [API Reference](./README.md).

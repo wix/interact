@@ -55,7 +55,7 @@ if (!result.valid) {
 - `valid` is `true` when no remaining issue has severity `'error'`. **Warnings alone do not make `valid: false`.**
 - `errors` holds **all** surfaced issues — both `'error'` and `'warning'` severities. Filter on `severity` to separate them.
 - Issues are sorted lexicographically by `path`.
-- Validation runs in two layers: a **structural** zod parse first (produces `SCHEMA_*` and numeric/threshold codes); if that succeeds, **referential + semantic** checks run (dangling references, unused definitions, duplicate keyframe names, media-query syntax). If the structural parse fails, the semantic layer is skipped.
+- Validation runs in two layers: a **structural** zod parse first (produces `SCHEMA_*` and numeric/threshold codes); if that succeeds, **referential + semantic** checks run (dangling references, unused definitions, duplicate keyframe names, media-query syntax, and the rule-derived semantic warnings — same-element re-trigger, hit-area shift, scroll-preset `range`, `animationEnd` graph cycles, element-selection coherence, `fill`/`inset`/keyframe-camelCase nudges). If the structural parse fails, the semantic layer is skipped.
 
 ### assertValidInteractConfig
 
@@ -124,13 +124,23 @@ try {
 Severity is one of `'error' | 'warning'`. There are exactly two levers:
 
 1. **`strict: true`** — promotes all remaining issues to `'error'`, so any warning fails the config.
-2. **`severityOverrides`** — keyed by **rule category**, not by individual code. Only the following three categories are registered and overridable:
+2. **`severityOverrides`** — keyed by **rule category**, not by individual code. Only the following categories are registered and overridable:
 
-| Rule category           | Covers codes                                           | Default severity |
-| ----------------------- | ------------------------------------------------------ | ---------------- |
-| `UNUSED_DEFINITION`     | `UNUSED_EFFECT`, `UNUSED_SEQUENCE`, `UNUSED_CONDITION` | warning          |
-| `UNIQUE_DEFINITION_IDS` | `DUPLICATE_KEYFRAME_NAME`                              | warning          |
-| `VALID_MEDIA_QUERIES`   | `INVALID_MEDIA_QUERY`                                  | error            |
+| Rule category            | Covers codes                                                                | Default severity |
+| ------------------------ | --------------------------------------------------------------------------- | ---------------- |
+| `UNUSED_DEFINITION`      | `UNUSED_EFFECT`, `UNUSED_SEQUENCE`, `UNUSED_CONDITION`                      | warning          |
+| `UNIQUE_DEFINITION_IDS`  | `DUPLICATE_KEYFRAME_NAME`                                                   | warning          |
+| `VALID_MEDIA_QUERIES`    | `INVALID_MEDIA_QUERY`                                                       | error            |
+| `SAME_ELEMENT_RETRIGGER` | `SAME_ELEMENT_RETRIGGER`                                                    | warning          |
+| `HIT_AREA_SHIFT`         | `HIT_AREA_SHIFT`                                                            | warning          |
+| `SCROLL_RANGE`           | `SCROLL_PRESET_MISSING_RANGE`, `SCROLL_PRESET_BAD_RANGE`                    | warning          |
+| `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE`, `ANIMATION_END_CYCLE`                       | warning          |
+| `ELEMENT_SELECTION`      | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER`, `REDUNDANT_SELECTOR_WITH_LIST_ITEM` | warning          |
+| `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                  | warning          |
+| `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                     | info             |
+| `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                      | warning          |
+| `KEYFRAME_STYLE`         | `KEYFRAME_PROP_NOT_CAMEL_CASE`                                              | warning          |
+| `VIEW_INSET`             | `INVALID_INSET`                                                             | warning          |
 
 For each category, set `'off'` to drop those issues entirely, `'warning'` / `'error'` to set their severity:
 
@@ -184,17 +194,17 @@ This is the authoritative list of every code the validator emits today. Codes no
 
 | Code                             | What it flags                                                                  |
 | -------------------------------- | ------------------------------------------------------------------------------ |
-| `EFFECT_ID_NOT_FOUND`            | An effect's `effectId` references a key absent from `config.effects`.          |
 | `ANIMATION_END_EFFECT_NOT_FOUND` | An `animationEnd` interaction's `params.effectId` references a missing effect. |
 | `SEQUENCE_ID_NOT_FOUND`          | A `sequenceId` references a key absent from `config.sequences`.                |
 | `CONDITION_NOT_FOUND`            | A `conditions[]` entry references a key absent from `config.conditions`.       |
 
 ### Other structural errors (severity: error)
 
-| Code                  | What it flags                                                                                                                                                                 |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `INTERACTION_EMPTY`   | An interaction has neither `effects` nor `sequences`. (`viewProgress`/`pointerMove` require a non-empty `effects` array and instead surface `SCHEMA_TOO_SMALL`.)              |
-| `INVALID_MEDIA_QUERY` | A `media` condition's `predicate` fails static media-query syntax validation (balanced parentheses + allowed characters). Belongs to the `VALID_MEDIA_QUERIES` rule category. |
+| Code                  | What it flags                                                                                                                                                                       |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `INTERACTION_EMPTY`   | An interaction has neither `effects` nor `sequences`. (`viewProgress`/`pointerMove` require a non-empty `effects` array and instead surface `SCHEMA_TOO_SMALL`.)                    |
+| `INVALID_MEDIA_QUERY` | A `media` condition's `predicate` fails static media-query syntax validation (balanced parentheses + allowed characters). Belongs to the `VALID_MEDIA_QUERIES` rule category.       |
+| `ANIMATION_END_CYCLE` | A cycle of `animationEnd` interactions wait on each other's effects → deadlock; none can start. Belongs to the `ANIMATION_END_GRAPH` rule category (so it can be demoted/silenced). |
 
 ### Best-practice warnings (severity: warning)
 
@@ -204,6 +214,27 @@ This is the authoritative list of every code the validator emits today. Codes no
 | `UNUSED_SEQUENCE`         | A `config.sequences` entry is defined but never referenced.                  | `UNUSED_DEFINITION`     |
 | `UNUSED_CONDITION`        | A `config.conditions` entry is defined but never referenced.                 | `UNUSED_DEFINITION`     |
 | `DUPLICATE_KEYFRAME_NAME` | A `keyframeEffect.name` is reused across effects in the same config.         | `UNIQUE_DEFINITION_IDS` |
+| `EFFECT_ID_NOT_FOUND`     | An effect's `effectId` references a key absent from `config.effects`.        | `ID_NOT_FOUND`          |
+
+### Rule-derived semantic warnings (severity: warning)
+
+Statically-detectable authoring pitfalls lifted from the trigger rule files. Each belongs to its own rule category, so `severityOverrides` can silence (`'off'`) or escalate (`'error'`) it. `strict: true` promotes all of these to `error`.
+
+| Code                                   | What it flags                                                                                                                                         | Rule category            |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `SAME_ELEMENT_RETRIGGER`               | `viewEnter` with `triggerType` `repeat`/`alternate`/`state` on the same source+target element (re-trigger loop).                                      | `SAME_ELEMENT_RETRIGGER` |
+| `HIT_AREA_SHIFT`                       | `hover`/`click`/`interest`/`activate`/`pointerMove` `keyframeEffect` with a `translate`/`scale`/`matrix` transform on the same source+target element. | `HIT_AREA_SHIFT`         |
+| `SCROLL_PRESET_MISSING_RANGE`          | A `*Scroll` `namedEffect` on `viewProgress` omits `range`.                                                                                            | `SCROLL_RANGE`           |
+| `SCROLL_PRESET_BAD_RANGE`              | A scroll preset `range` is not `'in'`/`'out'`/`'continuous'`.                                                                                         | `SCROLL_RANGE`           |
+| `ANIMATION_END_SELF_REFERENCE`         | An `animationEnd` interaction waits for an effect it also produces → it can never start.                                                              | `ANIMATION_END_GRAPH`    |
+| `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER` | `listItemSelector` present without `listContainer` (inert) — on an interaction or an effect.                                                          | `ELEMENT_SELECTION`      |
+| `REDUNDANT_SELECTOR_WITH_LIST_ITEM`    | `selector` is ignored when both `listContainer` and `listItemSelector` are present.                                                                   | `ELEMENT_SELECTION`      |
+| `EMPTY_STYLE_PROPERTIES`               | A state effect's `transition.styleProperties` / `transitionProperties` is `[]` (toggles nothing).                                                     | `STATE_EFFECT`           |
+| `STATE_REMOVE_WITHOUT_EFFECT_ID`       | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                                                                           | `STATE_EFFECT`           |
+| `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.                                     | `RECOMMENDED_FILL`       |
+| `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).                                            | `POINTER_AXIS`           |
+| `KEYFRAME_PROP_NOT_CAMEL_CASE`         | A `keyframeEffect` property name is kebab-case (not WAAPI camelCase).                                                                                 | `KEYFRAME_STYLE`         |
+| `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 whitespace-separated CSS lengths/percentages.                                                                   | `VIEW_INSET`             |
 
 ---
 
@@ -263,9 +294,10 @@ The validator is **static**. It cannot see the DOM, the browser, or the preset r
 - **DOM-dependent issues** — element existence for a `key`/`selector`, `overflow: hidden` ancestors breaking `viewProgress`, `pointer-events: none` on a source, `:first-child` presence.
 - **Preset correctness** — only the config shape is checked, never whether a `namedEffect.type` is a registered preset or whether its options are valid. See [scroll-presets and other preset rules](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/presets-main.md).
 - **Documented authoring pitfalls with no static signal**, which the trigger rule files cover instead:
-  - Same source+target on `viewEnter` with a non-`once` `triggerType` → [viewenter.md](https://wix.github.io/interact/rules/viewenter.md).
-  - Hit-area shift from animating size/position on `hover` / `pointerMove` → [hover.md](https://wix.github.io/interact/rules/hover.md), [pointermove.md](https://wix.github.io/interact/rules/pointermove.md).
-  - Scroll presets needing a `range` / `rangeStart` / `rangeEnd` → [viewprogress.md](https://wix.github.io/interact/rules/viewprogress.md).
-  - `fill: 'both'` recommendations for `alternate` / `repeat` / `state` → [full-lean.md](https://wix.github.io/interact/rules/full-lean.md).
+  - `overflow: hidden` ancestors breaking `viewProgress` → [viewprogress.md](https://wix.github.io/interact/rules/viewprogress.md).
+  - Whether a `keyframeEffect`/`namedEffect` actually changes size/position when it cannot be introspected (e.g. `namedEffect` options) — only inline `keyframeEffect` transforms are scanned for `HIT_AREA_SHIFT`.
+  - Reduced-motion alternatives, perspective usage, and other authoring guidance with no static signal.
+
+> **Note:** Several pitfalls that previously had "no static signal" are now flagged as **warnings** (see the rule-derived semantic warnings above): same source+target on `viewEnter` with a non-`once` `triggerType` (`SAME_ELEMENT_RETRIGGER`), hit-area shift from inline `keyframeEffect` transforms on `hover`/`pointerMove` (`HIT_AREA_SHIFT`), scroll presets missing/invalid `range` (`SCROLL_PRESET_*`), and missing `fill: 'both'` (`RECOMMENDED_FILL_BOTH`). These are heuristic and conservative (they skip ambiguous cases to avoid false positives), so the trigger rule files remain the authoritative guidance.
 
 For the full API, usage recipes, and the same catalogue in package form, see the [`@wix/interact-validate` README](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md).

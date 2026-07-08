@@ -13,6 +13,9 @@ import {
   exactlyOne,
 } from './effects';
 import { SequenceConfig, SequenceConfigRef } from './sequences';
+import type { Path, SemanticIssue } from '../types';
+import { walkConfig } from '../walkConfig';
+import { collectSemanticWarnings } from '../semantic';
 
 export const TriggerType = z.enum([
   'hover',
@@ -145,7 +148,7 @@ export const Interaction = z.discriminatedUnion('trigger', [
   DiscreteInteraction,
 ]);
 
-function validateEffectSource(ctx: z.RefinementCtx, path: (string | number)[], effect: any): void {
+function validateEffectSource(ctx: z.RefinementCtx, path: Path, effect: any): void {
   const { transition, transitionProperties, namedEffect, keyframeEffect, customEffect } = effect;
   if (
     !exactlyOne({ transition, transitionProperties, namedEffect, keyframeEffect, customEffect })
@@ -161,7 +164,7 @@ function validateEffectSource(ctx: z.RefinementCtx, path: (string | number)[], e
 
 function validateEffectReference(
   ctx: z.RefinementCtx,
-  path: (string | number)[],
+  path: Path,
   effect: { effectId?: string },
   configEffects: Record<string, any>,
 ): void {
@@ -175,16 +178,11 @@ function validateEffectReference(
   }
 }
 
-type WarningIssue = {
-  code: 'custom';
-  path: (string | number)[];
-  message: string;
-  params: { domainCode: string };
-};
+type WarningIssue = SemanticIssue;
 
 function collectEffectKeyframeNames(
   warnings: WarningIssue[],
-  path: (string | number)[],
+  path: Path,
   keyframeNames: Set<string>,
   keyframeEffect?: { name: string },
 ): void {
@@ -203,7 +201,7 @@ function collectEffectKeyframeNames(
 
 function validateConditionReferences(
   ctx: z.RefinementCtx,
-  path: (string | number)[],
+  path: Path,
   configConditions: Record<string, any>,
   conditions?: string[],
 ): void {
@@ -216,49 +214,6 @@ function validateConditionReferences(
         params: { domainCode: 'CONDITION_NOT_FOUND' },
       } as any);
     }
-  });
-}
-
-type Path = (string | number)[];
-
-function walkConfig(
-  config: {
-    effects?: Record<string, any>;
-    sequences?: Record<string, any>;
-    interactions: any[];
-  },
-  visitors: {
-    onInteraction?: (path: Path, interaction: any) => void;
-    onEffect: (path: Path, effect: any, isTopLevel: boolean) => void;
-    onSequence: (path: Path, sequence: any, isTopLevel: boolean) => void;
-  },
-): void {
-  const { onInteraction, onEffect, onSequence } = visitors;
-
-  Object.entries(config.effects ?? {}).forEach(([id, effect]) => {
-    onEffect(['effects', id], effect, true);
-  });
-
-  Object.entries(config.sequences ?? {}).forEach(([id, sequence]) => {
-    onSequence(['sequences', id], sequence, true);
-    sequence.effects.forEach((effect: any, ei: number) => {
-      onEffect(['sequences', id, 'effects', ei], effect, false);
-    });
-  });
-
-  config.interactions.forEach((interaction: any, i: number) => {
-    onInteraction?.(['interactions', i], interaction);
-    const { effects, sequences } = interaction as { effects?: any[]; sequences?: any[] };
-    effects?.forEach((effect, ei) => {
-      onEffect(['interactions', i, 'effects', ei], effect, false);
-    });
-    sequences?.forEach((sequence, si) => {
-      const seqPath: Path = ['interactions', i, 'sequences', si];
-      onSequence(seqPath, sequence, false);
-      sequence.effects?.forEach((effect: any, ei: number) => {
-        onEffect([...seqPath, 'effects', ei], effect, false);
-      });
-    });
   });
 }
 
@@ -375,6 +330,9 @@ export const InteractConfigSchema = z
         params: { domainCode: 'UNUSED_CONDITION' },
       });
     });
+
+    // Append the rule-derived semantic warnings/info nudges (A/C/D + animationEnd self-reference).
+    warnings.push(...collectSemanticWarnings(config));
 
     return { ...config, warnings };
   });

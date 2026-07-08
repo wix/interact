@@ -111,10 +111,14 @@ describe('numericBounds', () => {
             trigger: 'viewEnter',
             effects: [
               {
+                // viewEnter + 'state' requires a separate target and fill: 'both'
+                // (see SAME_ELEMENT_RETRIGGER / RECOMMENDED_FILL_BOTH).
+                key: 'target',
                 namedEffect: { type: 'Pulse' },
                 duration: 400,
                 triggerType: 'state',
                 iterations: Infinity,
+                fill: 'both',
               },
             ],
           },
