@@ -1,17 +1,6 @@
 ---
 name: interactor
-description: >-
-  Install, integrate, and configure Interact — @wix/interact —
-  declarative interactions library — to add or edit hover/click/view triggered, scroll-driven, and
-  pointer-driven animations on a webpage or web app. Use whenever the user wants to
-  add or change web animations/interactions with @wix/interact or
-  @wix/motion(-presets); wire animations to scroll, viewport-enter, hover, click, or
-  mouse-move; build entrance / parallax / stagger / tilt / reveal effects; install
-  or set up @wix/interact (vanilla JS, React, or Web Components); or edit an existing
-  interact config. Validate every generated InteractConfig with @wix/interact-validate
-  before it reaches generate()/create(). Trigger even on phrasings like "fade in on scroll",
-  "parallax background", "stagger the cards in", "hover-scale the button", or "tilt toward the
-  mouse" in a project using these packages. Do NOT use for other animation libraries.
+description: 'Install, integrate, and configure Interact — @wix/interact — declarative interactions library — to add or edit hover/click/view triggered, scroll-driven, and pointer-driven animations on a webpage or web app. Use whenever the user wants to add or change web animations/interactions with @wix/interact or @wix/motion(-presets); wire animations to scroll, viewport-enter, hover, click, or mouse-move; build entrance / parallax / stagger / tilt / reveal effects; install or set up @wix/interact (vanilla JS, React, or Web Components); or edit an existing interact config. Validate every generated InteractConfig with @wix/interact-validate before it reaches generate()/create(). Trigger even on phrasings like "fade in on scroll", "parallax background", "stagger the cards in", "hover-scale the button", or "tilt toward the mouse" in a project using these packages. Do NOT use for other animation libraries.'
 ---
 
 # Interactor — build interactions with @wix/interact
@@ -105,7 +94,14 @@ Mark up target elements with a **key** that matches the config:
 <Interaction tagName="section" interactKey="hero">…</Interaction>
 <!-- vanilla -->
 <section data-interact-key="hero">…</section>
-+ add(el, 'hero')
+```
+
+```js
+// for vanilla - add the following
+import { add } from '@wix/interact';
+
+const el = document.querySelector('[data-interact-key="hero"]');
+add(el);
 ```
 
 ---
