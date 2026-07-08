@@ -19,6 +19,19 @@ Declarative, configuration-driven interaction library — web-native, AI-ready, 
 - **Preset ecosystem** — Plug in [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) for 75+ ready-made effects.
 - **Accessible** — Built-in `activate` (click + keyboard) and `interest` (hover + focus) trigger variants
 
+## Coding-agent skill: Interactor
+
+Working with an AI coding agent (Claude Code, Cursor, and others)? Install the **Interactor** skill so your agent can install, wire up, and configure `@wix/interact` for you — creating beautiful interations and validating them by the agent.
+
+Install it via the [`skills`](https://www.npmjs.com/package/skills) CLI (runs through `npx`, nothing to install globally):
+
+```bash
+npx skills add wix/interact               # add to the current project
+npx skills add wix/interact --global     # or install for every project
+```
+
+Run interactively, the CLI prompts for the agent and scope; pass `-a claude-code` (also `cursor`, `opencode`, or `-a '*'` for all) to pick up-front. Then just describe the interaction you want in plain language and the agent builds and validates the config.
+
 ## Install
 
 ```bash

@@ -38,6 +38,28 @@ Web-native animation and interaction libraries — declarative, AI-ready, framew
 @wix/splittext (standalone — pairs with @wix/motion for staggered animations)
 ```
 
+## Coding-agent skill: Interactor
+
+Building with Interact through an AI coding agent (Claude Code, Cursor, and others)? Install the **Interactor** skill — it teaches your agent to install, wire up, and configure `@wix/interact` end to end, and validate before shipping.
+
+Install it with the [`skills`](https://www.npmjs.com/package/skills) CLI — nothing to install globally, it runs through `npx`:
+
+```bash
+# Add to the current project (e.g. ./.claude/skills/interactor for Claude Code)
+npx skills add wix/interact
+
+# ...or install for every project (e.g. ~/.claude/skills/interactor)
+npx skills add wix/interact --global
+```
+
+Run interactively, the CLI detects your installed agents and asks which to target; pass `-a` to pick up-front (and for use in scripts):
+
+```bash
+npx skills add wix/interact -a claude-code   # also: -a cursor, -a opencode, -a '*' for all
+```
+
+Then just describe what you want in plain language — "fade the hero in on scroll", "stagger the cards in", "tilt the card toward the mouse" — and the agent generates and validates the config for you.
+
 ## Quick Start
 
 Install the interaction layer and presets (presets are required when using `namedEffect`):
