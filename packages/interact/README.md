@@ -21,7 +21,9 @@ Declarative, configuration-driven interaction library — web-native, AI-ready, 
 
 ## Coding-agent skill: Interactor
 
-Working with an AI coding agent (Claude Code, Cursor, and others)? Install the **Interactor** skill so your agent can install, wire up, and configure `@wix/interact` for you — creating beautiful interations and validating them by the agent.
+Working with an AI coding agent (Claude Code, Cursor, and others)? Install the **Interactor** skill so your agent can install, wire up, and configure `@wix/interact` for you — creating beautiful interactions and validating them before shipping.
+
+### Install
 
 Install it via the [`skills`](https://www.npmjs.com/package/skills) CLI (runs through `npx`, nothing to install globally):
 
@@ -30,7 +32,19 @@ npx skills add wix/interact               # add to the current project
 npx skills add wix/interact --global     # or install for every project
 ```
 
-Run interactively, the CLI prompts for the agent and scope; pass `-a claude-code` (also `cursor`, `opencode`, or `-a '*'` for all) to pick up-front. Then just describe the interaction you want in plain language and the agent builds and validates the config.
+Run interactively, the CLI prompts for the agent and scope; pass `-a cursor` (also `claude-code`, `opencode`, or `-a '*'` for all) to pick up-front.
+
+### Use it
+
+In **Cursor** or **Claude Code**, invoke the skill from chat with `/interactor` and describe what you want:
+
+```
+/interactor fade the hero in when it scrolls into view
+/interactor stagger these cards in on entrance
+/interactor add a subtle 3D tilt toward the cursor on the product cards
+```
+
+The agent follows the skill workflow: detects your stack (React, Web Components, or vanilla JS), installs packages if needed, generates an `InteractConfig`, validates it with `@wix/interact-validate`, and injects `generate()` CSS.
 
 ## Install
 
