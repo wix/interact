@@ -6,7 +6,7 @@ Wire `@wix/splittext` into `@wix/interact` declaratively, via a **resolver regis
 
 - **Config types** for `splitText` live in `@wix/interact` (zero bundle cost when unused; full type safety).
 - **Implementation** is provided by `@wix/splittext/interact` as a resolver, registered through `Interact.use('splitText', splitTextResolver)` before `Interact.create()`.
-- The resolver is a **pre-processing DOM-mutation step**: it splits the target text into `<span>` wrappers *before* Interact's normal target resolution runs. After the split, the existing targeting props (`selector`, `listContainer`, …) query the now-mutated DOM and find the generated spans as animation targets.
+- The resolver is a **pre-processing DOM-mutation step**: it splits the target text into `<span>` wrappers _before_ Interact's normal target resolution runs. After the split, the existing targeting props (`selector`, `listContainer`, …) query the now-mutated DOM and find the generated spans as animation targets.
 - On disconnect, the resolver **reverts** the container to its original content.
 
 Plus the explicitly-requested addition (§9): a `hide` boolean on `SplitTextConfig` that hides the original container (via an agreed `data-text-split` state attribute + CSS) until splitting completes, to prevent FOUC.
@@ -28,18 +28,18 @@ If `splitText` appears in a config but no resolver is registered, Interact throw
 
 ## 2. Architecture findings (verified against current source)
 
-| Concern | Location | Notes |
-| --- | --- | --- |
-| `Interact` class, static caches, lifecycle | `packages/interact/src/core/Interact.ts` | **No plugin/resolver registry exists today** — must be added. |
-| Config parse → `dataCache: InteractCache` | `Interact.ts` `parseConfig()` (L381) | `...rest` spread preserves unknown trigger fields onto cached triggers; effects/sequence-effects keep their own fields. So `splitText` props survive on triggers/effects automatically. |
-| Element connect → build interactions | `core/add.ts` `add(controller)` (L745) | Runs when an element connects. **This is the hook point** for splitting (root = `controller.element`). |
-| Target resolution | `add.ts` `_getElementsFromData()` (L43) — `root.querySelector(listContainer)` / `root.querySelectorAll(selector)` | Called from `_addInteraction`, `addEffectsForTarget`, and `_buildAnimationGroupArgsFromSequence`. Must run **after** the split. |
-| Cross-element / either-order connect | `_addInteraction` (source side) + `addEffectsForTarget` (target side) | An effect targeting another key is processed from whichever side connects; the other side bails until both are connected. The split must run when the element **containing the container** connects. |
-| Disconnect / cleanup | `core/InteractionController.ts` `disconnect()` (L53) → `core/remove.ts` `remove()` | **Revert hook point.** `remove()` queries `selectors` (which already include split-span selectors like `.split-c`) to tear down handlers. |
-| Static CSS generation (SSR) | `core/css.ts` `generate()` (L547) | Already uses the `data-interact-enter` + `visibility:hidden` pattern (`DEFAULT_INITIAL`, L26) to prevent entrance FOUC — we mirror it for `hide` (§9). |
-| splitText public API | `packages/splittext/src/splitText.ts` `splitText(target, options)` → `SplitTextResult` | Eager split when `type` is provided. `result.revert()` restores `originalHTML`. Default wrapper classes: `split-c`/`split-w`/`split-l`/`split-s` (`src/wrappers.ts` L4). `autoSplit` attaches `ResizeObserver` + `fonts.ready`. `onSplit(result)` callback fires after every (re)split. |
+| Concern                                    | Location                                                                                                          | Notes                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Interact` class, static caches, lifecycle | `packages/interact/src/core/Interact.ts`                                                                          | **No plugin/resolver registry exists today** — must be added.                                                                                                                                                                                                                           |
+| Config parse → `dataCache: InteractCache`  | `Interact.ts` `parseConfig()` (L381)                                                                              | `...rest` spread preserves unknown trigger fields onto cached triggers; effects/sequence-effects keep their own fields. So `splitText` props survive on triggers/effects automatically.                                                                                                 |
+| Element connect → build interactions       | `core/add.ts` `add(controller)` (L745)                                                                            | Runs when an element connects. **This is the hook point** for splitting (root = `controller.element`).                                                                                                                                                                                  |
+| Target resolution                          | `add.ts` `_getElementsFromData()` (L43) — `root.querySelector(listContainer)` / `root.querySelectorAll(selector)` | Called from `_addInteraction`, `addEffectsForTarget`, and `_buildAnimationGroupArgsFromSequence`. Must run **after** the split.                                                                                                                                                         |
+| Cross-element / either-order connect       | `_addInteraction` (source side) + `addEffectsForTarget` (target side)                                             | An effect targeting another key is processed from whichever side connects; the other side bails until both are connected. The split must run when the element **containing the container** connects.                                                                                    |
+| Disconnect / cleanup                       | `core/InteractionController.ts` `disconnect()` (L53) → `core/remove.ts` `remove()`                                | **Revert hook point.** `remove()` queries `selectors` (which already include split-span selectors like `.split-c`) to tear down handlers.                                                                                                                                               |
+| Static CSS generation (SSR)                | `core/css.ts` `generate()` (L547)                                                                                 | Already uses the `data-interact-enter` + `visibility:hidden` pattern (`DEFAULT_INITIAL`, L26) to prevent entrance FOUC — we mirror it for `hide` (§9).                                                                                                                                  |
+| splitText public API                       | `packages/splittext/src/splitText.ts` `splitText(target, options)` → `SplitTextResult`                            | Eager split when `type` is provided. `result.revert()` restores `originalHTML`. Default wrapper classes: `split-c`/`split-w`/`split-l`/`split-s` (`src/wrappers.ts` L4). `autoSplit` attaches `ResizeObserver` + `fonts.ready`. `onSplit(result)` callback fires after every (re)split. |
 
-**Key consequence:** because Interact captures concrete `HTMLElement` references into sequences at `add()` time, the split MUST complete *before* `add()` resolves targets. Running it at the very top of `add(controller)` satisfies this for both interaction-level and effect-level (cross-element) splits, since the container always lives inside the connecting controller's element subtree.
+**Key consequence:** because Interact captures concrete `HTMLElement` references into sequences at `add()` time, the split MUST complete _before_ `add()` resolves targets. Running it at the very top of `add(controller)` satisfies this for both interaction-level and effect-level (cross-element) splits, since the container always lives inside the connecting controller's element subtree.
 
 ---
 
@@ -51,15 +51,15 @@ If `splitText` appears in a config but no resolver is registered, Interact throw
 export type SplitType = 'chars' | 'words' | 'lines' | 'sentences';
 
 export type SplitTextConfig = {
-  container: string;                         // selector for the element to split, relative to root
+  container: string; // selector for the element to split, relative to root
   type: SplitType | SplitType[];
   splitId?: string;
   wrapperClass?: string;
   wrapperStyle?: Record<string, string>;
   wrapperAttrs?: Record<string, string>;
   autoSplit?: boolean;
-  aria?: 'auto' | 'none';                    // aligned to splitText (see §11 decision D1)
-  hide?: boolean;                            // §9 — hide container until split (FOUC guard)
+  aria?: 'auto' | 'none'; // aligned to splitText (see §11 decision D1)
+  hide?: boolean; // §9 — hide container until split (FOUC guard)
 };
 
 export type SplitTextConfigRef = {
@@ -117,8 +117,8 @@ In the new `src/core/splitText.ts` (§7), export constants and re-export them pu
 
 ```ts
 export const TEXT_SPLIT_STATE_ATTR = 'data-text-split';
-export const TEXT_SPLIT_PENDING = 'pending';   // hidden by CSS
-export const TEXT_SPLIT_DONE = 'split';         // revealed
+export const TEXT_SPLIT_PENDING = 'pending'; // hidden by CSS
+export const TEXT_SPLIT_DONE = 'split'; // revealed
 ```
 
 The resolver references the **interface only** (`import type`), so the agreed string lives in interact and the splittext bundle stays free of interact runtime code.
@@ -150,7 +150,12 @@ static getResolver<T>(name: string): T | undefined {
 
 - Destructure `splitText` from `config` and pass it through to the returned `InteractCache` (so `applySplitText` can resolve `splitId` refs):
   ```ts
-  const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {}, splitText = {} } = config;
+  const {
+    effects: effectMap = {},
+    sequences: sequenceMap = {},
+    conditions = {},
+    splitText = {},
+  } = config;
   // ...
   return { effects: effectMap, sequences: sequenceMap, conditions, splitText, interactions };
   ```
@@ -167,7 +172,7 @@ At the **top of `add(controller)`**, right after `instance.setController(key, co
 applySplitText(controller, instance);
 ```
 
-This guarantees every connecting element splits its in-subtree containers before any target query (`_getElementsFromData`) runs against it — covering interaction-level, same-element effect-level, and cross-element effect-level splits (the latter resolve when the *target* element connects).
+This guarantees every connecting element splits its in-subtree containers before any target query (`_getElementsFromData`) runs against it — covering interaction-level, same-element effect-level, and cross-element effect-level splits (the latter resolve when the _target_ element connects).
 
 `addListItems()` (L789) — splitText inside dynamically-added list items is **out of scope for v1** (§10); document the limitation. (Optionally call `applySplitText` there too in a later iteration.)
 
@@ -198,7 +203,7 @@ const splitsByController = new WeakMap<IInteractionController, SplitEntry[]>();
 1. **Gather** every `SplitTextConfig | SplitTextConfigRef` relevant to `controller.key`, with `root = controller.element`:
    - `data = instance.get(key)`.
    - Interaction-level: each `data.triggers[i].splitText`.
-   - Same-element effect-level: each `data.triggers[i].effects[j].splitText` **where that effect's resolved target === key** (skip effects targeting other keys — they split when *their* target connects).
+   - Same-element effect-level: each `data.triggers[i].effects[j].splitText` **where that effect's resolved target === key** (skip effects targeting other keys — they split when _their_ target connects).
    - Cross-element effect-level (this key is the target): each `data.effects[interactionId][n].effect.splitText`.
    - Sequence effects: same rule, from `data.triggers[i].sequences[*].effects[*].splitText` (target===key) and `data.sequences[seqId][n].sequence.effects[*].splitText`.
 2. **Early exit** if none gathered.
@@ -240,6 +245,7 @@ Order rationale: tear down handlers/sequences on the existing spans first, then 
 **Mechanism — mirrors the existing `data-interact-enter` entrance pattern:** an agreed state attribute on the container drives a CSS hide rule until the split completes.
 
 State machine on the container element:
+
 - `data-text-split="pending"` → hidden by CSS.
 - `data-text-split="split"` → revealed.
 - attribute absent → no effect.
@@ -250,10 +256,12 @@ Three cooperating layers:
 
 2. **Runtime toggle (interact, §7.1):** when `hide` is set, the container gets `pending` before `resolver.resolve()` and `split` immediately after. This prevents FOUC for any time between hydration start and split completion. Reverted on disconnect.
 
-3. **SSR / static CSS (full FOUC guard — covers first paint *before* hydration):**
+3. **SSR / static CSS (full FOUC guard — covers first paint _before_ hydration):**
    - `generate()` (`src/core/css.ts`) emits, **once**, when the config contains any `splitText` with `hide: true` (scan `config.splitText` + interaction/effect-level configs):
      ```css
-     [data-text-split]:not([data-text-split="split"]){visibility:hidden}
+     [data-text-split]:not([data-text-split='split']) {
+       visibility: hidden;
+     }
      ```
    - The SSR HTML for a `hide` container must be rendered with `data-text-split="pending"`. That stamping is the platform/SSR layer's responsibility (same as it already stamps `data-interact-*`). **Document the contract**; optionally provide a tiny helper `markSplitTextHidden(el)` exported from interact for consumers that build DOM imperatively.
 
@@ -279,9 +287,9 @@ Three cooperating layers:
 
 ## 11. Open decisions
 
-- **D1 — `aria` values:** align `SplitTextConfig.aria` to splitText's `'auto' | 'none'` (recommended) rather than introducing a `'hidden'` value the engine doesn't support. *(Plan assumes D1 = align.)*
-- **D2 — `@wix/interact` dependency direction for the resolver:** ~~originally: add `@wix/interact` as a peerDependency (+ devDependency) of `@wix/splittext` and use `import type` exclusively.~~ **Superseded:** even a type-only dependency defeats the point of a resolver *registry* — any third-party splitText-alike plugin would be forced to depend on `@wix/interact` too. Instead, `@wix/splittext/interact` declares a **locally-owned, structurally-identical copy** of `SplitTextConfig`/`SplitTextResolverContext`/`SplitTextResolver` and imports nothing from `@wix/interact`. TypeScript's structural typing satisfies `Interact.use('splitText', resolver)` (which accepts `unknown`) without any cross-package import. No build cycle either direction; no dependency either direction.
-- **D3 — autoSplit re-resolve wiring:** ship the `onResplit → controller.update()` wiring in v1 (recommended) vs. defer. *(Plan assumes v1 wiring, behind the `context` callback.)*
+- **D1 — `aria` values:** align `SplitTextConfig.aria` to splitText's `'auto' | 'none'` (recommended) rather than introducing a `'hidden'` value the engine doesn't support. _(Plan assumes D1 = align.)_
+- **D2 — `@wix/interact` dependency direction for the resolver:** ~~originally: add `@wix/interact` as a peerDependency (+ devDependency) of `@wix/splittext` and use `import type` exclusively.~~ **Superseded:** even a type-only dependency defeats the point of a resolver _registry_ — any third-party splitText-alike plugin would be forced to depend on `@wix/interact` too. Instead, `@wix/splittext/interact` declares a **locally-owned, structurally-identical copy** of `SplitTextConfig`/`SplitTextResolverContext`/`SplitTextResolver` and imports nothing from `@wix/interact`. TypeScript's structural typing satisfies `Interact.use('splitText', resolver)` (which accepts `unknown`) without any cross-package import. No build cycle either direction; no dependency either direction.
+- **D3 — autoSplit re-resolve wiring:** ship the `onResplit → controller.update()` wiring in v1 (recommended) vs. defer. _(Plan assumes v1 wiring, behind the `context` callback.)_
 
 ---
 
@@ -296,8 +304,12 @@ import type { SplitTextResult } from '../types';
 // Locally-owned mirror of @wix/interact's contract types — NOT imported from
 // @wix/interact. Kept structurally identical by hand so `Interact.use(...)`
 // (which types its `resolver` param as `unknown`) accepts this at the call site.
-type SplitTextConfig = { /* container, type, wrapperClass, ... — see @wix/interact's SplitTextConfig */ };
-type SplitTextResolverContext = { /* key, selector, onResplit?, ... */ };
+type SplitTextConfig = {
+  /* container, type, wrapperClass, ... — see @wix/interact's SplitTextConfig */
+};
+type SplitTextResolverContext = {
+  /* key, selector, onResplit?, ... */
+};
 type SplitTextResolver = {
   resolve(root: HTMLElement, config: SplitTextConfig, context: SplitTextResolverContext): void;
   revert(root: HTMLElement, container: string): void;
@@ -340,7 +352,7 @@ export const splitTextResolver: SplitTextResolver = {
 };
 ```
 
-*(If D3 ships: thread `context.onResplit` into `splitText({ ...opts, onSplit: () => context.onResplit?.() })`.)*
+_(If D3 ships: thread `context.onResplit` into `splitText({ ...opts, onSplit: () => context.onResplit?.() })`.)_
 
 ### 12.2 Packaging — `packages/splittext/package.json`
 
@@ -362,6 +374,7 @@ export const splitTextResolver: SplitTextResolver = {
 ## 13. File-by-file checklist
 
 **`@wix/interact`**
+
 - [ ] `src/types/config.ts` — add `SplitType`, `SplitTextConfig` (+`hide`), `SplitTextConfigRef` (+`hide`); add `splitText?` to `InteractConfig` and `InteractionTrigger`.
 - [ ] `src/types/effects.ts` — add `splitText?` to `EffectBase`.
 - [ ] `src/types/splitText.ts` (new) — `SplitTextResolver`, `SplitTextResolverContext`.
@@ -376,6 +389,7 @@ export const splitTextResolver: SplitTextResolver = {
 - [ ] `src/index.ts` — re-export `TEXT_SPLIT_STATE_ATTR`/`TEXT_SPLIT_PENDING`/`TEXT_SPLIT_DONE` (+ optional `markSplitTextHidden`).
 
 **`@wix/splittext`**
+
 - [ ] `src/interact/index.ts` (new) — locally-mirrored contract types + `splitTextResolver` + config→options mapping + WeakMap. No import from `@wix/interact`.
 - [ ] `package.json` — `./interact` export; **no** `@wix/interact` peer/dev dep (see D2).
 - [ ] `vite.config.ts` — `interact` entry (no `@wix/interact` external needed).
@@ -385,6 +399,7 @@ export const splitTextResolver: SplitTextResolver = {
 ## 14. Tests
 
 **interact (unit/jsdom)**
+
 - Registry: `use`/`getResolver` round-trip; persists across `Interact.destroy()`.
 - `parseConfig` caches `splitText` defs; `splitId` ref merge (config-level + inline override).
 - `applySplitText`: calls resolver with correct `root`, merged `config`, and `context` for interaction-level, same-element effect-level, and cross-element effect-level cases; dedupes by container; **throws** when resolver missing.
@@ -393,9 +408,11 @@ export const splitTextResolver: SplitTextResolver = {
 - `generate()` emits the hide rule iff a `hide` config is present.
 
 **splittext (unit)**
+
 - `splitTextResolver.resolve` maps config→options, splits eagerly, is idempotent; `revert` restores via WeakMap; container-not-found warns without throwing.
 
 **e2e (extends existing `interact_e2e` plan)**
+
 - Visual: `hide` container is not painted until split completes (no FOUC); `lines` split still measures correctly while hidden (`visibility:hidden`).
 
 ---
