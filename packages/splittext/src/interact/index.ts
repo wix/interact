@@ -1,7 +1,40 @@
 import { splitText } from '../splitText';
-import type { SplitTextResult } from '../types';
-// Type-only dependency: keeps the runtime bundle free of @wix/interact.
-import type { SplitTextResolver, SplitTextConfig, SplitTextResolverContext } from '@wix/interact';
+import type { SplitTextResult, SplitType } from '../types';
+
+/**
+ * Local mirror of `@wix/interact`'s `SplitTextConfig`. Deliberately **not**
+ * imported from `@wix/interact` — this package has no dependency on it, so
+ * any Interact resolver plugin (this one or a third-party alternative) can be
+ * registered via `Interact.use('splitText', resolver)` without requiring
+ * `@wix/interact` to be installed. The shapes are kept in sync by hand.
+ */
+export type SplitTextConfig = {
+  container: string;
+  type: SplitType | SplitType[];
+  splitId?: string;
+  wrapperClass?: string;
+  wrapperStyle?: Record<string, string>;
+  wrapperAttrs?: Record<string, string>;
+  autoSplit?: boolean;
+  aria?: 'auto' | 'none';
+  hide?: boolean;
+};
+
+/** Local mirror of `@wix/interact`'s `SplitTextResolverContext`. */
+export type SplitTextResolverContext = {
+  key: string;
+  listContainer?: string;
+  listItemSelector?: string;
+  conditions?: string[];
+  selector?: string;
+  onResplit?: () => void;
+};
+
+/** Local mirror of `@wix/interact`'s `SplitTextResolver` contract. */
+export type SplitTextResolver = {
+  resolve(root: HTMLElement, config: SplitTextConfig, context: SplitTextResolverContext): void;
+  revert(root: HTMLElement, container: string): void;
+};
 
 const results = new WeakMap<HTMLElement, SplitTextResult>();
 

@@ -17,8 +17,7 @@ export default defineConfig({
     },
     sourcemap: true,
     rollupOptions: {
-      // @wix/interact is a type-only dependency of the /interact entry — never bundle it.
-      external: ['react', 'react-dom', '@wix/interact'],
+      external: ['react', 'react-dom'],
       output: {
         entryFileNames: '[format]/[name].js',
         compact: true,

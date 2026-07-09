@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { splitTextResolver } from '../src/interact';
-import type { SplitTextResolverContext } from '@wix/interact';
+import type { SplitTextResolverContext } from '../src/interact';
 
 // ---------------------------------------------------------------------------
 // Helpers

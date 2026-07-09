@@ -363,6 +363,12 @@ Range-API line measurement used by `type: 'lines'`.
   content.
 - Splitting inside dynamically-added **list items** (`listContainer`) is out of
   scope for now.
+- **Bringing your own resolver:** `Interact.use('splitText', resolver)` accepts
+  any object shaped like `{ resolve(root, config, context), revert(root, container) }`
+  — `@wix/splittext/interact` is just the built-in implementation. Your resolver
+  package does **not** need `@wix/interact` as a dependency; it only has to match
+  the shape structurally (`SplitTextResolver` above is documented for reference,
+  not required as an import).
 
 ## Recipes
 

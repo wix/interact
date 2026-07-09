@@ -142,10 +142,14 @@ const config = {
 `data-text-split` attribute + a generated CSS rule) until splitting completes.
 On disconnect the resolver reverts the container to its original content.
 
-> This entry point has a **type-only** dependency on `@wix/interact`; it adds
-> no interact code to your runtime bundle. The full config surface
-> (`SplitTextConfig`, levels, the `hide` SSR contract) is documented in the
-> `@wix/interact` README.
+> This entry point has **no dependency on `@wix/interact`** — not even at the
+> type level. `Interact.use(name, resolver)` accepts any object shaped like
+> `{ resolve(root, config, context), revert(root, container) }`; `splitTextResolver`
+> just happens to satisfy it structurally. That's intentional: it keeps this
+> package a swappable Interact plugin, so any alternative splitText-alike
+> implementation can register the same way without adding `@wix/interact` as a
+> dependency. The full config surface (`SplitTextConfig`, levels, the `hide`
+> SSR contract) is documented in the `@wix/interact` README.
 
 ## API
 

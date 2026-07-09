@@ -38,7 +38,7 @@ A monorepo for Wix's web animation and interaction libraries, built on the nativ
 @wix/splittext            ← standalone text splitting utility (no @wix/motion dependency)
 ```
 
-`@wix/splittext/interact` has a **type-only** dependency on `@wix/interact` (declared as an optional peer; imported with `import type` and externalized at build, so the runtime bundle stays free of interact). `@wix/interact` never imports `@wix/splittext`, so there is no build cycle.
+`@wix/splittext/interact` has **no dependency on `@wix/interact`**, not even at the type level — it locally mirrors the `SplitTextResolver` contract shape and relies on structural typing to satisfy it. This is deliberate: `Interact.use('splitText', resolver)` accepts any object matching that shape, so splittext is just one interchangeable implementation of an Interact plugin. Any third-party splitText-alike package can register the same way without depending on `@wix/interact` at all. `@wix/interact` never imports `@wix/splittext` either, so there is no coupling in either direction.
 
 ### Motion (`@wix/motion`)
 

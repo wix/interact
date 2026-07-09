@@ -280,7 +280,7 @@ Three cooperating layers:
 ## 11. Open decisions
 
 - **D1 — `aria` values:** align `SplitTextConfig.aria` to splitText's `'auto' | 'none'` (recommended) rather than introducing a `'hidden'` value the engine doesn't support. *(Plan assumes D1 = align.)*
-- **D2 — `@wix/interact` dependency direction for the resolver:** the resolver needs interact's *types only*. Add `@wix/interact` as a **peerDependency** (+ devDependency) of `@wix/splittext` and use `import type` exclusively, keeping the splittext runtime bundle free of interact. No build cycle (interact never imports splittext). *(Plan assumes D2 = peer + import type.)*
+- **D2 — `@wix/interact` dependency direction for the resolver:** ~~originally: add `@wix/interact` as a peerDependency (+ devDependency) of `@wix/splittext` and use `import type` exclusively.~~ **Superseded:** even a type-only dependency defeats the point of a resolver *registry* — any third-party splitText-alike plugin would be forced to depend on `@wix/interact` too. Instead, `@wix/splittext/interact` declares a **locally-owned, structurally-identical copy** of `SplitTextConfig`/`SplitTextResolverContext`/`SplitTextResolver` and imports nothing from `@wix/interact`. TypeScript's structural typing satisfies `Interact.use('splitText', resolver)` (which accepts `unknown`) without any cross-package import. No build cycle either direction; no dependency either direction.
 - **D3 — autoSplit re-resolve wiring:** ship the `onResplit → controller.update()` wiring in v1 (recommended) vs. defer. *(Plan assumes v1 wiring, behind the `context` callback.)*
 
 ---
@@ -292,7 +292,16 @@ Three cooperating layers:
 ```ts
 import { splitText } from '../splitText';
 import type { SplitTextResult } from '../types';
-import type { SplitTextResolver, SplitTextConfig } from '@wix/interact'; // import type only
+
+// Locally-owned mirror of @wix/interact's contract types — NOT imported from
+// @wix/interact. Kept structurally identical by hand so `Interact.use(...)`
+// (which types its `resolver` param as `unknown`) accepts this at the call site.
+type SplitTextConfig = { /* container, type, wrapperClass, ... — see @wix/interact's SplitTextConfig */ };
+type SplitTextResolverContext = { /* key, selector, onResplit?, ... */ };
+type SplitTextResolver = {
+  resolve(root: HTMLElement, config: SplitTextConfig, context: SplitTextResolverContext): void;
+  revert(root: HTMLElement, container: string): void;
+};
 
 const results = new WeakMap<HTMLElement, SplitTextResult>();
 
@@ -343,10 +352,10 @@ export const splitTextResolver: SplitTextResolver = {
     "require": "./dist/cjs/interact.js"
   }
   ```
-- Add `"@wix/interact": "^2.4.0"` to `peerDependencies` and `devDependencies` (types only).
-- `vite.config.ts`: add `interact: path.resolve(__dirname, 'src/interact/index.ts')` to `build.lib.entry`; add `@wix/interact` to `rollupOptions.external` (never bundle it — it's type-only anyway).
+- Do **not** add `@wix/interact` anywhere in `package.json` (no peerDependency, no devDependency) — see D2.
+- `vite.config.ts`: add `interact: path.resolve(__dirname, 'src/interact/index.ts')` to `build.lib.entry`. No `@wix/interact` external entry needed — nothing imports it.
 - `tsconfig.build.json` already includes `src`, so declarations emit automatically.
-- Update CLAUDE.md dependency graph note: `@wix/splittext/interact` has a **type-only** dependency on `@wix/interact`.
+- Update CLAUDE.md dependency graph note: `@wix/splittext/interact` has **no dependency** on `@wix/interact` (structural typing against a locally-mirrored contract).
 
 ---
 
@@ -367,9 +376,9 @@ export const splitTextResolver: SplitTextResolver = {
 - [ ] `src/index.ts` — re-export `TEXT_SPLIT_STATE_ATTR`/`TEXT_SPLIT_PENDING`/`TEXT_SPLIT_DONE` (+ optional `markSplitTextHidden`).
 
 **`@wix/splittext`**
-- [ ] `src/interact/index.ts` (new) — `splitTextResolver` + config→options mapping + WeakMap.
-- [ ] `package.json` — `./interact` export; `@wix/interact` peer + dev dep.
-- [ ] `vite.config.ts` — `interact` entry + external.
+- [ ] `src/interact/index.ts` (new) — locally-mirrored contract types + `splitTextResolver` + config→options mapping + WeakMap. No import from `@wix/interact`.
+- [ ] `package.json` — `./interact` export; **no** `@wix/interact` peer/dev dep (see D2).
+- [ ] `vite.config.ts` — `interact` entry (no `@wix/interact` external needed).
 
 ---
 
