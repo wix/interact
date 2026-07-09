@@ -3,7 +3,7 @@ import type { Effect, EffectRef, EffectProperty, TimeAnimationTriggerType } from
 
 export type Condition = {
   type: 'media' | 'container' | 'selector';
-  predicate?: string;
+  predicate: string;
 };
 
 export type SequenceOptionsConfig = {

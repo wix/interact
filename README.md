@@ -24,18 +24,53 @@ Web-native animation and interaction libraries — declarative, AI-ready, framew
 
 ## Packages
 
-| Package                                                                                      | Description                                  | Links                                                                                                                                    |
-| -------------------------------------------------------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@wix/interact`](https://github.com/wix/interact/blob/master/packages/interact/)            | Declarative interaction layer (main package) | [README](https://github.com/wix/interact/blob/master/packages/interact/README.md) · [npm](https://www.npmjs.com/package/@wix/interact)   |
-| [`@wix/motion`](https://github.com/wix/interact/blob/master/packages/motion/)                | Low-level animation engine                   | [README](https://github.com/wix/interact/blob/master/packages/motion/README.md) · [npm](https://www.npmjs.com/package/@wix/motion)       |
-| [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) | Ready-made animation presets                 | [npm](https://www.npmjs.com/package/@wix/motion-presets)                                                                                 |
-| [`@wix/splittext`](https://github.com/wix/interact/blob/master/packages/splittext/)          | Accessible text splitting for animations     | [README](https://github.com/wix/interact/blob/master/packages/splittext/README.md) · [npm](https://www.npmjs.com/package/@wix/splittext) |
+| Package                                                                                            | Description                                  | Links                                                                                                                                                    |
+| -------------------------------------------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@wix/interact`](https://github.com/wix/interact/blob/master/packages/interact/)                  | Declarative interaction layer (main package) | [README](https://github.com/wix/interact/blob/master/packages/interact/README.md) · [npm](https://www.npmjs.com/package/@wix/interact)                   |
+| [`@wix/motion`](https://github.com/wix/interact/blob/master/packages/motion/)                      | Low-level animation engine                   | [README](https://github.com/wix/interact/blob/master/packages/motion/README.md) · [npm](https://www.npmjs.com/package/@wix/motion)                       |
+| [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets)       | Ready-made animation presets                 | [README](https://github.com/wix/interact/blob/master/packages/motion-presets/README.md) [npm](https://www.npmjs.com/package/@wix/motion-presets)         |
+| [`@wix/interact-validate`](https://github.com/wix/interact/tree/master/packages/interact-validate) | Static validation for `InteractConfig`       | [README](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md) · [npm](https://www.npmjs.com/package/@wix/interact-validate) |
+| [`@wix/splittext`](https://github.com/wix/interact/blob/master/packages/splittext/)                | Accessible text splitting for animations     | [README](https://github.com/wix/interact/blob/master/packages/splittext/README.md) · [npm](https://www.npmjs.com/package/@wix/splittext)                 |
 
 ```
 @wix/motion ← @wix/interact (declarative layer)
 @wix/motion ← @wix/motion-presets (ready-made effects)
 @wix/splittext (standalone — pairs with @wix/motion for staggered animations)
 ```
+
+## Coding-agent skill: Interactor
+
+Building with Interact through an AI coding agent (Claude Code, Cursor, and others)? Install the **Interactor** skill — it teaches your agent to install, wire up, and configure `@wix/interact` end to end, and validate before shipping.
+
+### Install
+
+Install it with the [`skills`](https://www.npmjs.com/package/skills) CLI — nothing to install globally, it runs through `npx`:
+
+```bash
+# Add to the current project (e.g. ./.claude/skills/interactor for Claude Code)
+npx skills add wix/interact
+
+# ...or install for every project (e.g. ~/.cursor/skills/interactor)
+npx skills add wix/interact --global
+```
+
+Run interactively, the CLI detects your installed agents and asks which to target; pass `-a` to pick up-front (and for use in scripts):
+
+```bash
+npx skills add wix/interact -a cursor        # also: -a claude-code, -a opencode, -a '*' for all
+```
+
+### Use it
+
+In **Cursor** or **Claude Code**, invoke the skill from chat with `/interactor` and describe what you want:
+
+```
+/interactor fade the hero in when it scrolls into view
+/interactor stagger these cards in on entrance
+/interactor add a subtle 3D tilt toward the cursor on the product cards
+```
+
+The agent follows the skill workflow: detects your stack (React, Web Components, or vanilla JS), installs `@wix/interact` and `@wix/motion-presets` if needed, generates an `InteractConfig`, validates it with `@wix/interact-validate`, and injects `generate()` CSS.
 
 ## Quick Start
 
@@ -349,6 +384,7 @@ AI agents can discover @wix/interact documentation through:
 
 - [`integration.md`](https://wix.github.io/interact/rules/integration.md) — entry points, FOUC, static API
 - [`full-lean.md`](https://wix.github.io/interact/rules/full-lean.md) — complete config spec
+- [`validate.md`](https://wix.github.io/interact/rules/validate.md) — validating configs with `@wix/interact-validate`
 - [`viewenter.md`](https://wix.github.io/interact/rules/viewenter.md)
 - [`hover.md`](https://wix.github.io/interact/rules/hover.md)
 - [`click.md`](https://wix.github.io/interact/rules/click.md)
@@ -368,6 +404,7 @@ AI agents can discover @wix/interact documentation through:
 - Call `generate(config)` at build time or on the server and inject CSS into `<head>`
 - `effects` at the config top level is a reusable `Record<string, Effect>`
 - `<interact-element>` should wrap exactly one child (the library targets `.firstElementChild` by default).
+- Validate every generated config with [`@wix/interact-validate`](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md) (`validateInteractConfig`) and fix all errors before emitting
 
 ### Repository agent context for dev
 

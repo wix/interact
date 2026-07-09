@@ -1358,7 +1358,7 @@ __metadata:
     "@types/react": "npm:^18.3.2"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    "@wix/interact": "npm:^2.4.0"
+    "@wix/interact": "npm:^2.5.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     typescript: "npm:^5.9.3"
@@ -1373,7 +1373,7 @@ __metadata:
     "@types/react": "npm:^18.3.2"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    "@wix/interact": "npm:^2.4.0"
+    "@wix/interact": "npm:^2.5.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-markdown: "npm:^9.0.1"
@@ -1389,10 +1389,26 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@wix/interact-playground@workspace:apps/playground"
   dependencies:
-    "@wix/interact": "npm:^2.4.0"
+    "@wix/interact": "npm:^2.5.1"
     "@wix/motion-presets": "npm:^1.0.3"
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@wix/interact-validate@workspace:packages/interact-validate":
+  version: 0.0.0-use.local
+  resolution: "@wix/interact-validate@workspace:packages/interact-validate"
+  dependencies:
+    "@vitest/coverage-v8": "npm:^4.0.14"
+    "@wix/interact": "npm:^2.5.1"
+    rimraf: "npm:^6.0.1"
+    typescript: "npm:^5.9.3"
+    vite: "npm:^7.2.2"
+    vitest: "npm:^4.0.14"
+    zod: "npm:^4.0.0"
+  peerDependencies:
+    "@wix/interact": ^2.5.1
   languageName: unknown
   linkType: soft
 
@@ -1402,7 +1418,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/interact@npm:^2.4.0, @wix/interact@workspace:packages/interact":
+"@wix/interact@npm:^2.5.1, @wix/interact@workspace:packages/interact":
   version: 0.0.0-use.local
   resolution: "@wix/interact@workspace:packages/interact"
   dependencies:
@@ -6355,6 +6371,13 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: 10/f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"zod@npm:^4.0.0":
+  version: 4.4.3
+  resolution: "zod@npm:4.4.3"
+  checksum: 10/804b9a42aa8f35f2b3c5a8dff906291cb749115f83ee2afe3576d70b5b5c53c965365c7f4967690647a9c54af9838ff232a85ff9577a0a36c44b68bc6cdefe36
   languageName: node
   linkType: hard
 

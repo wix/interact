@@ -7,7 +7,7 @@ import {
   CSSRuleToString,
   buildListsRule,
 } from '../src/core/cssUtils';
-import type { CSSCoordinatedLists, ListCustomProps, CSSRuleData } from '../types';
+import type { CSSCoordinatedLists, ListCustomProps, CSSRuleData } from '../src/types/css';
 
 describe('keyframePropertyToCSS', () => {
   it('should convert cssFloat to float', () => {
@@ -42,6 +42,20 @@ describe('keyframePropertyToCSS', () => {
 describe('interpolateKeyframesOffsets', () => {
   it('should return empty array for empty input', () => {
     expect(interpolateKeyframesOffsets([])).toEqual([]);
+  });
+
+  it('should set keyframes with a single keyframe with offset  0 to 0', () => {
+    const result = interpolateKeyframesOffsets([{ offset: 0, opacity: '0' }]);
+    expect(result[0].offset).toBe(0);
+  });
+
+  it('should set keyframes with offset to the correct offset', () => {
+    const result = interpolateKeyframesOffsets([
+      { offset: 0.5, opacity: '0' },
+      { offset: 0.75, opacity: '1' },
+    ]);
+    expect(result[0].offset).toBe(0.5);
+    expect(result[1].offset).toBe(0.75);
   });
 
   it('should set first offset to 0 and last to 1 when missing', () => {

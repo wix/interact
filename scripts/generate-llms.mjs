@@ -6,6 +6,7 @@ const BASE_URL = 'https://wix.github.io/interact';
 const KNOWN_ORDER = [
   'full-lean.md',
   'integration.md',
+  'validate.md',
   'click.md',
   'hover.md',
   'pointermove.md',
@@ -15,6 +16,7 @@ const KNOWN_ORDER = [
 const DOCS_LINK_TITLES = new Map([
   ['full-lean.md', 'Full Reference'],
   ['integration.md', 'Integration Guide'],
+  ['validate.md', 'Validation Guide'],
 ]);
 
 const STATIC_BODY = [

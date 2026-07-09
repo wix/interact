@@ -38,7 +38,6 @@ export default {
     add: withEventTriggerConfig('click'),
     remove: eventTrigger.remove,
   },
-  pageVisible: viewEnterHandler,
   animationEnd: animationEndHandler,
   viewProgress: viewProgressHandler,
   pointerMove: pointerMoveHandler,

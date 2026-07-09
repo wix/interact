@@ -8,3 +8,5 @@ package-lock.json
 **/build/**
 index.html
 .yarnrc.yml
+# auto-generated interact website styles
+/apps/website/assets/css/critical-interact-*.css

@@ -27,6 +27,7 @@ export type {
 // Config
 export type {
   Condition,
+  SequenceOptionsConfig,
   SequenceConfig,
   SequenceConfigRef,
   InteractionTrigger,

@@ -1,412 +1,142 @@
 # Core Concepts
 
-Understanding the fundamental concepts of Wix Motion will help you make the most of its 82+ animation presets and powerful API.
+The mental model behind `@wix/motion`: how it decides what to build from the options you pass in, and how effects, triggers, and easings fit together. Start with [Getting Started](./getting-started.md) if you haven't run your first animation yet.
 
-## Animation Architecture
+## The options shape
 
-Wix Motion is built around several key concepts that work together to provide a flexible and powerful animation system.
-
-### Animation Types
-
-There are two main animation types in Wix Motion:
-
-#### 1. Time-Based Animations (`TimeAnimationOptions`)
-
-These are traditional animations that run for a specific duration:
-
-- **Entrance animations** - Elements appearing on screen
-- **Ongoing animations** - Continuous looping effects
+`AnimationOptions` is a union of two shapes — there is **no top-level `type` field** to discriminate between them. The engine branches structurally: on which effect-definition field is present (`keyframeEffect` / `namedEffect` / `customEffect`) and on whether a `trigger` argument was passed.
 
 ```typescript
-{
+// ✅ correct
+getWebAnimation(element, {
+  namedEffect: { type: 'FadeIn' },
+  duration: 1000,
+});
+
+// ❌ wrong — there is no top-level `type` on the options object
+getWebAnimation(element, {
   type: 'TimeAnimationOptions',
   namedEffect: { type: 'FadeIn' },
-  duration: 1000,      // Duration in milliseconds
-  easing: 'easeOut',   // Timing function
-  iterations: 1,       // How many times to repeat
-  delay: 0             // Start delay
-}
-```
-
-#### 2. Scrub-Based Animations (`ScrubAnimationOptions`)
-
-These animations are driven by external progress (scroll, mouse movement):
-
-- **Scroll animations** - Respond to scroll position
-- **Mouse animations** - Follow pointer movement
-- **Background scroll animations** - Specialized for background media
-
-```typescript
-{
-  type: 'ScrubAnimationOptions',
-  namedEffect: { type: 'ParallaxScroll', speed: 0.5 },
-  startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
-  endOffset: { name: 'cover', offset: { value: 100, unit: 'percentage' } }
-}
-```
-
-## Animation Categories
-
-### 🎭 Entrance Animations
-
-**Purpose**: Reveal elements with impact and style
-**Duration**: Typically 300-1500ms
-**Use Cases**: Page loads, modal openings, content reveals
-
-**Common Patterns**:
-
-- **Directional**: `top`, `right`, `bottom`, `left`, `center`
-- **Scale-based**: Start from different sizes
-- **3D transforms**: Perspective and rotation effects
-
-```typescript
-// Example: Arc entrance from the right
-{
-  type: 'TimeAnimationOptions',
-  namedEffect: {
-    type: 'ArcIn',
-    direction: 'right'
-  },
-  duration: 800
-}
-```
-
-### 🔄 Ongoing Animations
-
-**Purpose**: Continuous effects for attention and life
-**Duration**: Usually 1-4 seconds with infinite iterations
-**Use Cases**: Call-to-action emphasis, breathing UI, ambient motion
-
-**Common Patterns**:
-
-- **Intensity control**: Scale the effect strength
-- **Bidirectional**: Many support `alternate` for back-and-forth motion
-
-```typescript
-// Example: Gentle pulsing effect
-{
-  type: 'TimeAnimationOptions',
-  namedEffect: {
-    type: 'Pulse',
-    intensity: 0.8
-  },
-  duration: 2000,
-  iterations: Infinity,
-  alternate: true
-}
-```
-
-### 📜 Scroll Animations
-
-**Purpose**: Scroll-synchronized effects for storytelling
-**Triggers**: `view-progress` with ViewTimeline API
-**Use Cases**: Parallax, reveal-on-scroll, progressive disclosure
-
-**Common Patterns**:
-
-- **Range control**: `in`, `out`, `continuous`
-- **Speed modifiers**: Control animation rate relative to scroll
-- **Viewport binding**: Animations tied to element visibility
-
-```typescript
-// Example: Parallax background movement
-{
-  type: 'ScrubAnimationOptions',
-  namedEffect: {
-    type: 'ParallaxScroll',
-    speed: 0.3,
-    range: 'continuous'
-  }
-}
-```
-
-### 🖱️ Mouse Animations
-
-**Purpose**: Interactive pointer-driven effects
-**Triggers**: `pointer-move` events
-**Use Cases**: Hover effects, cursor following, 3D interactions
-
-**Common Patterns**:
-
-- **Distance control**: How far effects extend from pointer
-- **Axis constraints**: `horizontal`, `vertical`, `both`
-- **Inversion**: Opposite direction movement
-
-```typescript
-// Example: 3D tilt following mouse
-{
-  type: 'ScrubAnimationOptions',
-  namedEffect: {
-    type: 'Tilt3DMouse',
-    angle: 15,
-    perspective: 800
-  }
-}
-```
-
-### 🖼️ Background Scroll Animations
-
-**Purpose**: Specialized effects for background media
-**Targets**: Elements with `data-motion-part` attributes
-**Use Cases**: Hero sections, full-screen backgrounds, video overlays
-
-**Common Patterns**:
-
-- **Multi-layer**: Target different background layers
-- **Measurement-aware**: Auto-calculate component dimensions
-- **Perspective effects**: Advanced 3D transformations
-
-```typescript
-// Example: Background zoom on scroll
-{
-  type: 'ScrubAnimationOptions',
-  namedEffect: {
-    type: 'BgZoom',
-    direction: 'in',
-    zoom: 40
-  }
-}
-```
-
-## Configuration Patterns
-
-### Named Effects vs Custom Effects
-
-#### Named Effects (Recommended)
-
-Use predefined animation presets:
-
-```typescript
-namedEffect: {
-  type: 'BounceIn',
-  direction: 'bottom'
-}
-```
-
-#### Custom Keyframe Effects
-
-Define your own keyframes:
-
-```typescript
-keyframeEffect: {
-  name: 'myCustomAnimation',
-  keyframes: [
-    { opacity: 0, transform: 'scale(0)' },
-    { opacity: 1, transform: 'scale(1)' }
-  ]
-}
-```
-
-#### Custom Script Effects
-
-Full programmatic control:
-
-```typescript
-customEffect: {
-  ranges: [
-    { name: 'opacity', min: 0, max: 1 },
-    { name: 'scale', min: 0, max: 1.2 },
-  ];
-}
-```
-
-### Easing Functions
-
-Wix Motion provides both CSS and JavaScript easing functions:
-
-#### CSS Easings (Performance Optimized)
-
-```typescript
-easing: 'easeInOut'; // CSS cubic-bezier
-easing: 'linear'; // No acceleration
-easing: 'backOut'; // Overshoot effect
-easing: 'elasticOut'; // Bounce effect
-```
-
-#### JavaScript Easings (Full Control)
-
-```typescript
-easing: 'quintInOut'; // Smooth acceleration/deceleration
-easing: 'circOut'; // Circular motion feel
-easing: 'expoIn'; // Exponential acceleration
-```
-
-### Units and Measurements
-
-Wix Motion supports multiple unit types:
-
-```typescript
-// Distance units
-distance: { value: 100, unit: 'px' }
-distance: { value: 50, unit: 'percentage' }
-distance: { value: 2, unit: 'em' }
-distance: { value: 100, unit: 'vh' }
-
-// Angles (always in degrees)
-angle: 45
-direction: 270  // 0° = up, 90° = right, 180° = down, 270° = left
-
-// Duration (milliseconds for time, percentage for scrub)
-duration: 1000                          // Time-based
-duration: { value: 50, unit: 'percentage' } // Scrub-based
-```
-
-## Rendering Modes
-
-### Web Animations API (Default)
-
-High-performance, JavaScript-controlled animations:
-
-```typescript
-import { getWebAnimation } from '@wix/motion';
-
-const animation = getWebAnimation(element, options);
-await animation.play();
-```
-
-**Advantages**:
-
-- Fine-grained control
-- Precise timing
-- Dynamic modifications
-- Event callbacks
-
-**Use When**:
-
-- Need animation control
-- Complex timing requirements
-- Interactive animations
-
-### CSS Animations
-
-Stylesheet-based animations for maximum performance:
-
-```typescript
-import { getCSSAnimation } from '@wix/motion';
-
-const cssRules = getCSSAnimation('elementId', options);
-// Insert rules into stylesheet
-```
-
-**Advantages**:
-
-- GPU acceleration
-- Better mobile performance
-- Runs on compositor thread
-- Survives JavaScript freezes
-
-**Use When**:
-
-- Simple, fire-and-forget animations
-- Mobile-first applications
-- Performance is critical
-
-## Advanced Concepts
-
-### Animation Groups
-
-Multiple related animations managed together:
-
-```typescript
-const group = getWebAnimation(element, [
-  { namedEffect: { type: 'FadeIn' }, duration: 500 },
-  { namedEffect: { type: 'SlideIn' }, duration: 800, delay: 200 },
-]);
-
-// Control all animations together
-await group.play();
-group.pause();
-group.setPlaybackRate(2);
-```
-
-### Measurement and Preparation
-
-Pre-calculate layout for better performance:
-
-```typescript
-import { prepareAnimation } from '@wix/motion';
-
-// Measure element dimensions before animating
-prepareAnimation(element, animationOptions, () => {
-  // Callback when measurements complete
-  console.log('Ready to animate!');
+  duration: 1000,
 });
 ```
 
-### Scroll Ranges and Offsets
+`namedEffect` itself **does** have a `type` field — that's the registered preset name. It's only the top-level options object that has none.
 
-Fine-tune when scroll animations trigger:
+**Time-based options** (used when no `trigger` is passed): `duration` (ms), `delay`, `endDelay`, `easing`, `iterations` (`0` ⇒ `Infinity`, `undefined` ⇒ `1`), `alternate`, `fill`, `reversed` — plus one of the three effect fields below.
+
+**Scrub options** (used with a `view-progress` or `pointer-move` trigger): `startOffset` / `endOffset` (scroll range), `playbackRate`, `transitionDuration` / `transitionDelay` / `transitionEasing` / `centeredToTarget` (pointer smoothing), `easing`, `iterations`, `fill`, `alternate`, `reversed` — plus one of the three effect fields. Note `duration` here is a `{ value, unit }` length/percentage, not milliseconds.
+
+## The three effect-definition modes
+
+Exactly one of these fields tells the engine what to animate:
+
+1. **`keyframeEffect: { name, keyframes }`** — inline WAAPI/CSS keyframes. Zero registration.
+
+   ```typescript
+   { keyframeEffect: { name: 'fade-up', keyframes: [{ opacity: 0 }, { opacity: 1 }] } }
+   ```
+
+2. **`customEffect: (element, progress) => void`** — a per-frame JS callback, run on a `requestAnimationFrame` loop. This is the only programmatic mode. On cancel, the callback is invoked with `progress === null`, so handle it:
+
+   ```typescript
+   {
+     customEffect: (element, progress) => {
+       if (progress === null) {
+         // cancelled — reset/cleanup here
+         return;
+       }
+       element.style.opacity = String(progress);
+     },
+   }
+   ```
+
+   > `CustomEffect`'s type also allows a `{ ranges: [...] }` object form, but only the function form does anything — the object form is inert on its own.
+
+3. **`namedEffect: { type, ...params }`** — references an effect registered via `registerEffects()`. If the name isn't registered, `getWebAnimation` returns `null`.
+
+   ```typescript
+   import { registerEffects } from '@wix/motion';
+   import { FadeIn } from '@wix/motion-presets';
+
+   registerEffects({ FadeIn });
+
+   getWebAnimation(element, { namedEffect: { type: 'FadeIn' }, duration: 600 });
+   ```
+
+   `@wix/motion` only owns the registry contract (`registerEffects()` and the structural `EffectModule` shape) — the effect catalog itself lives in [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets). See the [Custom Effects guide](./guides/custom-effects.md) for authoring your own registered effects.
+
+## Triggers
+
+The trigger is the third argument to `getWebAnimation()` / `getScrubScene()`:
 
 ```typescript
-{
-  type: 'ScrubAnimationOptions',
-  namedEffect: { type: 'FadeScroll' },
-  startOffset: {
-    name: 'cover',                    // Viewport intersection
-    offset: { value: 20, unit: 'percentage' }  // Start at 20% intersection
-  },
-  endOffset: {
-    name: 'exit-crossing',            // Element leaving viewport
-    offset: { value: 0, unit: 'percentage' }   // End immediately
-  }
-}
+{ trigger?: 'view-progress' | 'pointer-move', id?: string, componentId?: string, element?: HTMLElement, axis?: 'x' | 'y' }
 ```
 
-### CSS Custom Properties
+- **Omitted** (or neither value) → time-based animation.
+- **`'view-progress'`** → scroll-driven; paired with scrub options. `startOffset`/`endOffset` live on the **options**, not the trigger.
+- **`'pointer-move'`** → pointer-driven; the `axis` (`'x' | 'y'`) to read lives on the **trigger**, not on the effect options.
 
-Dynamic values through CSS variables:
+## Native ViewTimeline vs. the scrub polyfill
+
+`view-progress` behaves differently depending on browser support:
+
+- **`window.ViewTimeline` available** — `getWebAnimation()` returns a WAAPI animation linked directly to a `ViewTimeline` (`duration: 'auto'`). It auto-plays as the element scrolls through view; you don't call `.play()`.
+- **Not available** — the underlying animation gets `duration: 99.99ms` / `delay: 0.01ms` so its progress is externally scrubbable. `getScrubScene()` is what turns that into `ScrubScrollScene[]` — plain objects (`start`, `end`, `effect(scene, progress)`, `destroy()`) that you drive from your own `IntersectionObserver`/scroll listener.
+- **`getCSSAnimation()`** always generates `duration: 'auto'` for `view-progress`, regardless of runtime `ViewTimeline` support — it's the SSR/FOUC-free path.
+
+If you're using `@wix/interact`, its bundled scroll polyfill, [`fizban`](https://github.com/wix-incubator/fizban), automates driving the polyfill path.
+
+## Easing system
+
+`getEasing` and `getJsEasing` are exported from `@wix/motion`:
 
 ```typescript
-// Animation generates:
-// --motion-scale: 1.2
-// --motion-rotate: 45deg
-// --motion-translate-x: 100px
-
-// Use in your CSS:
-.my-element {
-  transform:
-    scale(var(--motion-scale, 1))
-    rotate(var(--motion-rotate, 0deg))
-    translateX(var(--motion-translate-x, 0px));
-}
+function getEasing(easing?: string): string; // CSS easing string, default 'linear'
+function getJsEasing(easing?: string): ((t: number) => number) | undefined; // JS easing fn
 ```
 
-### Sequences & Staggering
+- **JS easings** (Penner functions — used by `getJsEasing` and as a `Sequence`'s `offsetEasing`): `linear`, `sineIn`, `sineOut`, `sineInOut`, `quadIn`, `quadOut`, `quadInOut`, `cubicIn`, `cubicOut`, `cubicInOut`, `quartIn`, `quartOut`, `quartInOut`, `quintIn`, `quintOut`, `quintInOut`, `expoIn`, `expoOut`, `expoInOut`, `circIn`, `circOut`, `circInOut`, `backIn`, `backOut`, `backInOut`.
+- **CSS easings** (used by `getEasing` / the `easing` option): `linear`, `ease`, `easeIn`, `easeOut`, `easeInOut`, plus every JS key above (except `linear`/`ease*`) resolving to a `cubic-bezier(...)` string.
+- Both also accept a raw `cubic-bezier(x1, y1, x2, y2)` string (hyphenated — not `cubicBezier(...)`), and `getJsEasing` additionally parses CSS `linear(...)` strings.
+- Standard CSS timing-function keywords (like `ease-out`) work as-is wherever `easing` is accepted — they don't need to match one of the named keys above.
 
-Sequences coordinate multiple AnimationGroups as a single timeline with easing-driven stagger delays. Instead of manually calculating `delay` offsets for each animation, a Sequence distributes timing automatically.
+There is no `easeOutCubic`, `elasticOut`, `bounceOut`, or `bounceIn` — those names don't exist. (`elastic`/`bounce` exist only as `transitionEasing` values for pointer smoothing, a separate field.)
 
-#### Offset Model
+## Reduced motion
 
-The stagger offset for each group is calculated with:
+Pass `{ reducedMotion: true }` as the 4th argument to `getWebAnimation()` (or `context.reducedMotion` for `getAnimation()`/`getSequence()`). It only affects **time-based** (non-scrub) animations:
 
+```typescript
+// single-iteration → collapsed to duration: 1 (still runs, effectively instant)
+getWebAnimation(element, { namedEffect: { type: 'FadeIn' }, duration: 600 }, undefined, {
+  reducedMotion: true,
+});
+
+// multi-iteration → dropped entirely, returns null
+getWebAnimation(
+  element,
+  { namedEffect: { type: 'Spin' }, duration: 2000, iterations: 0 },
+  undefined,
+  { reducedMotion: true },
+); // → null
 ```
-offset[i] = easing(i / last) * last * offsetMs
-```
 
-Where `i` is the group index, `last` is the final group's index, and `offsetMs` is the configured stagger interval. This produces:
+## Sequences
 
-- **Linear** — even spacing (0, 200, 400, 600, 800)
-- **quadIn** — slow start then rapid (0, 50, 200, 450, 800)
-- **sineOut** — fast start then gradual (0, 306, 565, 739, 800)
+`getSequence()` coordinates multiple `AnimationGroup`s under one staggered timeline, distributing start-time offsets across the group with an easing function:
 
 ```typescript
 import { getSequence } from '@wix/motion';
 
-const items = document.querySelectorAll('.card');
-
 const sequence = getSequence(
   { offset: 150, offsetEasing: 'quadIn' },
-  Array.from(items).map((el) => ({
+  Array.from(document.querySelectorAll('.card')).map((el) => ({
     target: el,
     options: {
       duration: 600,
-      keyframeEffect: {
-        name: 'fade-up',
-        keyframes: [
-          { opacity: 0, transform: 'translateY(20px)' },
-          { opacity: 1, transform: 'translateY(0)' },
-        ],
-      },
+      keyframeEffect: { name: 'fade-up', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
     },
   })),
 );
@@ -414,68 +144,18 @@ const sequence = getSequence(
 sequence.play();
 ```
 
-#### Dynamic Groups
+See [`getSequence` API reference](./api/get-sequence.md) for the full stagger model.
 
-Groups can be added or removed at runtime. Both operations trigger automatic offset recalculation:
+## Package boundary
 
-- **`addGroups(entries)`** — inserts groups at specified indices (e.g. when new list items appear)
-- **`removeGroups(predicate)`** — removes matching groups, cancels their animations, and returns them (e.g. when DOM elements are removed)
+| Need                                                                                                              | Use                                                                                                                             |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Declarative trigger→effect wiring, config-driven orchestration, React/Web Component bindings                      | [`@wix/interact`](https://github.com/wix/interact/tree/master/packages/interact)                                                |
+| Ready-made effect catalog (entrance/scroll/ongoing/mouse presets)                                                 | [`@wix/motion-presets`](https://github.com/wix/interact/tree/master/packages/motion-presets) — register via `registerEffects()` |
+| Custom render callbacks, manual scrub-scene driving, programmatic sequences, SSR/CSS generation, inline keyframes | `@wix/motion` (this package)                                                                                                    |
 
-#### Relationship to AnimationGroup
+## Next steps
 
-`Sequence` extends `AnimationGroup`, inheriting all playback controls (`play`, `pause`, `reverse`, `cancel`, `progress`, `setPlaybackRate`). The child `AnimationGroup` instances are stored in `animationGroups`, while the flattened `Animation` array is available via the inherited `animations` property.
-
-## Performance Considerations
-
-### Animation Lifecycle
-
-1. **Preparation** - Measure elements, calculate values
-2. **Creation** - Generate keyframes and effects
-3. **Execution** - Run animations with optimal timing
-4. **Cleanup** - Remove event listeners and references
-
-### Best Practices
-
-- Prefer CSS animations for simple, non-interactive effects
-- Batch DOM measurements using `fastdom`
-- Avoid creating animations in render loops
-- Clean up animations when components unmount
-
-### Browser Compatibility
-
-- **Web Animations API**: Baseline - Wide Availability
-- **ViewTimeline API**: Chrome 115+, Firefox/Safari with polyfill
-- **CSS Animations**: Baseline - Wide Availability
-
-## TypeScript Integration
-
-Wix Motion is built with TypeScript and provides comprehensive type safety:
-
-```typescript
-import type {
-  TimeAnimationOptions,
-  ScrubAnimationOptions,
-  EntranceAnimation,
-  ScrollAnimation,
-  AnimationGroup,
-} from '@wix/motion';
-
-// Type-safe configuration
-const config: TimeAnimationOptions = {
-  type: 'TimeAnimationOptions',
-  namedEffect: { type: 'FadeIn' } as EntranceAnimation,
-  duration: 1000,
-};
-
-// Typed return values
-const animation: AnimationGroup = getWebAnimation(element, config);
-```
-
-## Next Steps
-
-Now that you understand the core concepts:
-
-- **[Explore Categories](categories/)** - Dive deep into each animation category
-- **[API Reference](api/)** - Complete function documentation
-- **[Performance Guide](guides/performance.md)** - Optimization techniques
-- **[Advanced Patterns](guides/advanced-patterns.md)** - Complex animation scenarios
+- [Getting Started](./getting-started.md) — install and run your first animations.
+- [API Reference](./api/README.md) — full function signatures and types.
+- [Custom Effects guide](./guides/custom-effects.md) — the `registerEffects()`/`EffectModule` contract, authoring `customEffect` callbacks, and driving scrub scenes.

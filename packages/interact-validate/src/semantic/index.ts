@@ -1,0 +1,1 @@
+export { collectSemanticWarnings } from './collectSemanticWarnings';

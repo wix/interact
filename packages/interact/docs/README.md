@@ -21,6 +21,7 @@ Welcome to the complete documentation for the `@wix/interact` package - a powerf
   - [Custom Element](api/interact-element.md) - `<interact-element>` API
   - [Element Selection](api/element-selection.md) - Selection priority and patterns
 - [**Type Definitions**](api/types.md) - TypeScript interfaces and types
+- [**Config Validation**](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md) - `@wix/interact-validate`: static schema, referential, and semantic validation for `InteractConfig`
 
 ### **Guides**
 
