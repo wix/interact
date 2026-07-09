@@ -59,7 +59,7 @@ export const instance = Interact.create(config); // binds <interact-element>s au
   </style>
 </head>
 <body>
-  <interact-element data-interact-key="hero>
+  <interact-element data-interact-key="hero">
     <section class="hero">Hello, animated world!</section>
   </interact-element>
 </body>
@@ -67,7 +67,7 @@ export const instance = Interact.create(config); // binds <interact-element>s au
 
 ---
 
-## B. CDN / no build step — `@wix/interact/web` via [esm.sh](http://esm.sh)
+## B. CDN / no build step — `@wix/interact/web` via [esm.sh](https://esm.sh)
 
 For a static `.html` page with no bundler. Inject `generate()` output and run
 `create()` client-side. Because the CSS is generated _after_ first paint here, an
@@ -174,7 +174,6 @@ export function App() {
 export function Hero() {
   return (
     <>
-      <style>{interactCSS}</style>
       <Interaction tagName="section" interactKey="hero">
         Hello, animated world!
       </Interaction>
