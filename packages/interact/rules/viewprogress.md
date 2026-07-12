@@ -164,7 +164,7 @@ Call `generate(config, useFirstChild)` at build/generation time to produce nativ
 scroll-driven CSS for `viewProgress` interactions. The generated output includes
 `view-timeline` declarations, `animation-timeline`/`animation-range` custom
 properties, and `@keyframes` — everything the browser needs to run scroll-driven
-animations without any JavaScript.
+animations without any JS.
 
 ```typescript
 import { generate } from '@wix/interact';
