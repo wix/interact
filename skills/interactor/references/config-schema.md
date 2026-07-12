@@ -80,6 +80,14 @@ patterns — see [Element resolution](#element-resolution).
 > sequence), or **`listContainer`** on the interaction when each item needs its own
 > trigger (e.g. per-card `hover`/`pointerMove`). See [Element resolution](#element-resolution).
 
+> **Layers that animate as one → one container, not one effect per layer.** A single
+> visual element built from stacked layers (hero: background + overlay + content;
+> card: image + heading + text) that should enter/animate **together** belongs on
+> **one** keyed wrapper with **one** effect — not the same effect copied onto every
+> layer, which spins up N controllers that drift out of sync and cost N× per frame.
+> This is the opposite of scroll parallax, where you deliberately give each layer its
+> own effect at a different rate. See invariant 11 in `SKILL.md`.
+
 `TriggerType` = `'hover' | 'click' | 'viewEnter' | 'animationEnd' |
 'viewProgress' | 'pointerMove' | 'activate' | 'interest'`. Param shapes and
 per-trigger semantics live in `triggers.md`.

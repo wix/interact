@@ -153,7 +153,11 @@ To **add** an interaction:
 1. Choose the **trigger** (see decision table below).
 2. Choose the **effect**: prefer a `namedEffect` preset (browse `references/presets.md`); fall back to inline `keyframeEffect` for custom keyframes, or `customEffect` for non-CSS (SVG/canvas/text).
 3. Set the **playback field** the trigger needs: `triggerType` for time effects on hover/click/viewEnter; `stateAction` for CSS-state (transition) effects; `rangeStart`/`rangeEnd` for `viewProgress`. Never set both `triggerType` and `stateAction` on one effect.
-4. Bind it: give the target element the matching `key` in the markup.
+4. Bind it: give the target element the matching `key` in the markup. If the thing
+   you're animating is a stack of layers that should move together (hero
+   background + overlay + content, card image + text), key the **one container**
+   that wraps them and put a single effect on it — don't repeat the effect on each
+   layer (invariant 11).
 
 To **edit** an existing config: read the current config first, find the
 interaction/effect by its `key`/`effectId`, and change _only_ what's asked.
@@ -292,6 +296,21 @@ animation no-ops. Apply them every time, even if you don't open a reference file
     `listContainer` must match a **descendant** of the keyed element, not the keyed
     element itself.
 
+11. **Layers that move as one → one keyed container, not the same effect on each
+    layer.** When an element is composed of stacked layers meant to animate
+    **together** — a hero of background image + gradient overlay + content block, a
+    card of image + heading + text + button — put the trigger and **one** effect on
+    the wrapper that holds them and key that wrapper. Copying the same
+    `FadeIn`/`SlideIn` onto each layer is the common wrong turn: N layers become N
+    controllers that have to stay in sync (they visibly drift on slower devices), N
+    keys to wire, and N× the per-frame work for a motion the eye reads as a single
+    move. Collapse them onto the container. This is **not** the same as two cases
+    where separate targets are deliberate: scroll **parallax**, where layers move at
+    _different_ rates on purpose (a `ParallaxScroll` per layer — keep those
+    separate), and **hit-area-safe child targeting** (invariant 6 — trigger on the
+    parent, animate one child). Litmus test: same trigger, same effect, same timing
+    across the layers ⇒ they belong on one keyed container.
+
 ## Verify your work (run before declaring done)
 
 Animations are hard to confirm headlessly, so this static check is your reliable
@@ -313,7 +332,8 @@ Items the validator cannot check — walk these after automated validation passe
 - [ ] All CSS that can be generated statically is embedded in the HTML output (`<style>` or linked `.css` in `<head>`, or `blocking="render"` at start of `<body>`), and `useFirstChild` matches the entry point.
 - [ ] Runtime-dependent interactions use a separate config where practical; otherwise runtime generation is documented as the fallback and occurs before `Interact.create()`.
 - [ ] Child-target effects put `selector`/`key` on the **effect**, not the interaction. Groups of items use one keyed wrapper + a **descendant** match (no duplicate keys): `selector` on the effect for a one-trigger stagger/sequence, `listContainer` on the interaction for per-item triggers.
-- [ ] Invariants 5–7 and 10 hold for the relevant triggers (separate source/target, child targets, `overflow: clip`, unique keys).
+- [ ] Composite elements whose layers animate as one unit are keyed on a **single container** with one effect — the same effect is not copied onto each layer (distinct from intentional per-layer parallax, which uses different rates, or child-targeting to avoid hit-area shift).
+- [ ] Invariants 5–7, 10, and 11 hold for the relevant triggers (separate source/target, child targets, `overflow: clip`, unique keys, layers collapsed to one container).
 
 If a dev server is available, load the page and confirm the animation runs and the
 browser console is free of "not found in registry" warnings.

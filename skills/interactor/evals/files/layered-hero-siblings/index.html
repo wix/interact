@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Summit — the trail app</title>
+    <style>
+      * { margin: 0; box-sizing: border-box; }
+      body { font-family: system-ui, sans-serif; color: #fff; }
+
+      /* The hero is three SEPARATE, full-screen layers stacked with z-index.
+         They are siblings in <body> — there is no wrapper element around them. */
+      .bg-photo {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background: url("https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1600&q=80")
+          center / cover no-repeat;
+      }
+      .tint {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        background: linear-gradient(180deg, rgba(8, 10, 18, 0.2), rgba(8, 10, 18, 0.8));
+      }
+      .hero-copy {
+        position: relative;
+        z-index: 2;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 2rem;
+      }
+      .hero-copy h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.05; }
+      .hero-copy p { margin: 1rem 0 2rem; font-size: 1.25rem; opacity: 0.9; }
+      .hero-copy a {
+        display: inline-block;
+        padding: 0.9rem 1.8rem;
+        border-radius: 999px;
+        background: #38bdf8;
+        color: #06263a;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .content {
+        position: relative;
+        z-index: 2;
+        background: #0b0f17;
+        padding: 6rem 1.5rem;
+      }
+      .content .wrap { max-width: 60rem; margin: 0 auto; }
+      .content h2 { font-size: 2rem; margin-bottom: 1rem; }
+    </style>
+  </head>
+  <body>
+    <!-- Hero layer 1: background photo -->
+    <div class="bg-photo"></div>
+    <!-- Hero layer 2: dark tint over the photo -->
+    <div class="tint"></div>
+    <!-- Hero layer 3: the headline, subtext and CTA -->
+    <div class="hero-copy">
+      <div>
+        <h1>Every trail, one app</h1>
+        <p>Offline maps, live conditions, and trip reports from people who actually hiked it.</p>
+        <a href="#get">Get the app</a>
+      </div>
+    </div>
+
+    <section class="content">
+      <div class="wrap">
+        <h2>Built for the backcountry</h2>
+        <p>Download a region and everything works with no signal — maps, routes, and your saved trips.</p>
+      </div>
+    </section>
+  </body>
+</html>

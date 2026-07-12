@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Northwind — field-ready gear</title>
+    <style>
+      * { margin: 0; box-sizing: border-box; }
+      body { font-family: system-ui, sans-serif; color: #fff; }
+
+      .hero {
+        position: relative;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      .hero__bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .hero__overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(10, 12, 20, 0.25), rgba(10, 12, 20, 0.75));
+      }
+      .hero__content {
+        position: relative;
+        text-align: center;
+        max-width: 40rem;
+        padding: 2rem;
+      }
+      .hero__content h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.05; }
+      .hero__content p { margin: 1rem 0 2rem; font-size: 1.25rem; opacity: 0.9; }
+      .hero__cta {
+        display: inline-block;
+        padding: 0.9rem 1.8rem;
+        border-radius: 999px;
+        background: #f2b705;
+        color: #1a1a1a;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .about { padding: 6rem 1.5rem; max-width: 60rem; margin: 0 auto; color: #1a1a1a; }
+      .about h2 { font-size: 2rem; margin-bottom: 1rem; }
+    </style>
+  </head>
+  <body>
+    <!-- Hero is built from three stacked layers: a full-bleed photo,
+         a dark gradient overlay, and the text/CTA content on top. -->
+    <section class="hero">
+      <img
+        class="hero__bg"
+        src="https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=1600&q=80"
+        alt="A mountain ridge at dawn"
+      />
+      <div class="hero__overlay"></div>
+      <div class="hero__content">
+        <h1>Gear that goes where you do</h1>
+        <p>Packs, shells, and tools built for the backcountry — tested by the people who make them.</p>
+        <a class="hero__cta" href="#shop">Start your kit</a>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2>Built in the field</h2>
+      <p>
+        Every product ships after a season of real use. No focus groups, no
+        vanity features — just gear that earns its place in your pack.
+      </p>
+    </section>
+  </body>
+</html>
