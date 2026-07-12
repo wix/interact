@@ -1,6 +1,6 @@
 ---
 name: interactor
-description: 'Install, integrate, and configure Interact — @wix/interact — declarative interactions library — to add or edit hover/click/view triggered, scroll-driven, and pointer-driven animations on a webpage or web app. Use whenever the user wants to add or change web animations/interactions with @wix/interact or @wix/motion(-presets); wire animations to scroll, viewport-enter, hover, click, or mouse-move; build entrance / parallax / stagger / tilt / reveal effects; install or set up @wix/interact (vanilla JS, React, or Web Components); or edit an existing interact config. Validate every generated InteractConfig with @wix/interact-validate before it reaches generate()/create(). Trigger even on phrasings like "fade in on scroll", "parallax background", "stagger the cards in", "hover-scale the button", or "tilt toward the mouse" in a project using these packages. Do NOT use for other animation libraries.'
+description: 'Install, integrate, and configure Interact — @wix/interact — declarative interactions library — to add or edit hover/click/view triggered, scroll-driven, and pointer-driven animations on a webpage or web app. Use whenever the user wants to add or change animations, in general, or with @wix/interact or @wix/motion(-presets); wire animations to scroll, viewport-enter, hover, click, or mouse-move; build entrance / parallax / stagger / tilt / reveal effects; install or set up @wix/interact (vanilla JS, React, or Web Components); or edit an existing interact config. Trigger even on phrasings like "fade in on scroll", "parallax background", "stagger the cards in", "hover-scale the button", or "tilt toward the mouse" in a project using these packages. Do NOT use for other animation libraries.'
 ---
 
 # Interactor — build interactions with @wix/interact
@@ -38,6 +38,13 @@ _Add/Edit_. Read the linked reference files as you reach each step — they hold
 full schema, the preset catalog, and per-trigger rules. Don't try to hold it all
 in your head; the references are the source of truth.
 
+For static or pre-rendered output (agent-authored HTML, SSG, static export),
+prefer generating all CSS after validation at generation/build time and embedding
+it in the shipped HTML. If only part of the config is available then, split the
+config: generate and embed the static part at generation time, and generate the
+runtime-dependent part in the browser. If splitting is impractical, generating
+the complete CSS at runtime is an acceptable fallback.
+
 ---
 
 ### Step 1 — Install
@@ -51,8 +58,11 @@ npm install @wix/interact @wix/motion-presets
 npm install -D @wix/interact-validate   # optional — permanent dev/CI config guard only
 ```
 
-A no-build / plain-HTML site can skip npm and import from a CDN instead — see the
-CDN recipe in `references/integration-recipes.md`. CDN pages skip the validate
+A no-build / plain-HTML site can skip npm and import Interact from a CDN for
+runtime wiring — see the CDN recipe in `references/integration-recipes.md`.
+Prefer producing CSS from `generate()` at **generation time** (Node scratch
+script) and embedding it before deploy. Split out runtime-dependent interactions
+when necessary, or fall back to runtime generation. CDN pages skip the validate
 package install; the agent validates configs without shipping the validator.
 
 ---
@@ -63,27 +73,44 @@ package install; the agent validates configs without shipping the validator.
 import and a couple of flags). Decision procedure:
 
 1. **React / Next / any JSX project** (a `package.json` with `react`, `.jsx`/`.tsx` files) → use `@wix/interact/react` with the `<Interaction>` component.
-2. **Plain HTML, no bundler** (static `.html`, no build step) → use `@wix/interact/web` with `<interact-element>` custom elements, imported from a CDN.
-3. **Bundled vanilla JS / other framework** (Vite/Webpack but no React, or Vue/Svelte/Angular) → use `@wix/interact/web` (Web Components are framework-agnostic) **or** the base `@wix/interact` vanilla API. Prefer `/web` unless the user wants to control binding manually.
+2. **Static / pre-rendered HTML** (agent-generated `.html`, SSG export, Astro/Eleventy/Hugo output) → use `@wix/interact/web` with `<interact-element>`. Prefer running `generate()` in a build/generation script and embedding CSS in the HTML output. Split static and runtime-dependent config when needed; fall back to runtime generation if it cannot be pre-generated.
+3. **Plain HTML, no bundler** (hand-edited static `.html`, CDN runtime) → same as (2): pre-bake as much CSS as possible at generation time; use the CDN at runtime for `create()` and any CSS that could not be generated earlier.
+4. **Bundled vanilla JS / other framework** (Vite/Webpack but no React, or Vue/Svelte/Angular) → use `@wix/interact/web` (Web Components are framework-agnostic) **or** the base `@wix/interact` vanilla API. Prefer `/web` unless the user wants to control binding manually.
 
 If you can't tell, ask the user which framework the page uses. The full
 copy-paste setup for each entry point — including SSR, cleanup, and a verification
 snippet — is in **`references/integration-recipes.md`**. Read it now for the entry
 point you chose.
 
-The shape is the same everywhere:
+Prefer two phases — **generation/build** (all CSS possible) and **runtime**
+(trigger wiring plus any runtime-dependent CSS):
 
 ```ts
-import { Interact, generate } from '@wix/interact/web'; // or /react, or '@wix/interact'
-import { FadeIn } from '@wix/motion-presets'; // import only what you use (tree-shakes)
+// Generation/build script (Node, SSG, agent scratch)
+import { generate } from '@wix/interact/web'; // or /react, or '@wix/interact'
+import { FadeIn } from '@wix/motion-presets';
 
-Interact.registerEffects({ FadeIn }); // BEFORE generate()/create() — see invariants
-const css = generate(config, /* useFirstChild */ true); // inject into <head>
-const instance = Interact.create(config); // wire it up
+Interact.registerEffects({ FadeIn }); // BEFORE generate() — see invariants
+const css = generate(config, /* useFirstChild */ true); // true=web, false=react/vanilla
+// Write css into the HTML output — see CSS delivery below
 ```
 
-(For CDN/quick-start, `import * as presets` + `registerEffects(presets)` is fine —
-selective imports just keep bundled apps lean. See `references/presets.md`.)
+```ts
+// Runtime (browser bundle / CDN module)
+import { Interact } from '@wix/interact/web';
+
+// If needed, generate and inject CSS for the runtime-only config before create().
+const instance = Interact.create(config); // wire triggers
+```
+
+**CSS delivery** — embed the `generate()` string in the shipped HTML using one of:
+
+- `<style>…css…</style>` in `<head>` (preferred)
+- `<link rel="stylesheet" href="interact.css">` in `<head>` (write `interact.css` as a separate file)
+- `<style blocking="render">…css…</style>` or `<link rel="stylesheet" href="interact.css" blocking="render">` at the **start of `<body>`** when render-blocking is needed to prevent FOUC
+
+(For CDN/quick-start, `import * as presets` + `registerEffects(presets)` is fine at
+generation time — selective imports just keep bundled apps lean. See `references/presets.md`.)
 
 Mark up target elements with a **key** that matches the config:
 
@@ -157,7 +184,9 @@ construct the config statically:
   every `severity: 'error'`, then **remove** the call, import, any `esm.sh` import,
   and any temp devDep. Prefer a dev-only validation script when the config builder
   module is importable in isolation (no removal step). Full loop in
-  `references/validate.md`.
+  `references/validate.md`. For static site output where config is derivable at
+  build time (per-page data, CMS at build), run `generate()` in the build step —
+  not in the browser bundle.
 - **Permanent guard (opt-in, separate):** leaving `assertValidInteractConfig` in
   shipped code as a devDependency CI gate is only when scaffolding a new project or
   the user explicitly asks — do not conflate with the temporary injection above.
@@ -207,16 +236,22 @@ animation no-ops. Apply them every time, even if you don't open a reference file
    (`<interact-element>`) entry point, `false` for **vanilla** and **React**.
    Backwards = the FOUC-prevention selectors target the wrong node and break.
 
-3. **FOUC prevention — inject `generate()` CSS.** Always inject the `generate()` output (ideally at
-   SSR/build) so entrance elements are hidden before JS runs. The generated CSS includes
-   FOUC-prevention rules (gated by `:not([data-interact-enter])`) for `viewEnter`+`once`
-   entrances where source and target are the same element; when source ≠ target (e.g.
-   stagger via `selector`), the generated rules hide the targets on their own. For
+3. **FOUC prevention — prefer pre-rendered `generate()` CSS.** For static/pre-rendered
+   sites, generate and embed as much CSS as possible at build/generation time — in
+   `<head>` (`<style>` or linked `.css`) or at the start of `<body>` with
+   `blocking="render"`. If some interactions depend on runtime-only data, split them
+   into a separate config and generate/inject that CSS before calling
+   `Interact.create()` for it. If the config cannot be split, generate all CSS at
+   runtime as a fallback and arrange for it to apply before content is revealed.
+   The generated CSS includes FOUC-prevention rules (gated by
+   `:not([data-interact-enter])`) for `viewEnter`+`once` entrances where source and
+   target are the same element; when source ≠ target (e.g. stagger via `selector`),
+   the generated rules hide the targets on their own. For
    `repeat`/`alternate`/`state`, inline the starting keyframe and use `fill: 'both'`.
 
 4. **Vanilla binding.** You must then call the **standalone** `add(element, 'key')` for
    each element once it exists in the DOM. For clean up call the `remove('key')` function.
-   `add`/`remove` are functions importedfrom the package.
+   `add`/`remove` are functions imported from the package.
 
 5. **`viewEnter` with same source & target → only `triggerType: 'once'`.** For
    `repeat`/`alternate`/`state`, the animation can move the element out of/into the
@@ -275,7 +310,8 @@ Items the validator cannot check — walk these after automated validation passe
 - [ ] Every `*Scroll` preset used with `viewProgress` has a `range` (except `ParallaxScroll`).
 - [ ] `pointerMove` effects have **no** `rangeStart`/`rangeEnd` (those are `viewProgress`-only).
 - [ ] Every interaction `key` (and effect `key`) has a **matching element** in the markup (`data-interact-key` / `interactKey`).
-- [ ] `generate()` output is injected and `useFirstChild` matches the entry point.
+- [ ] All CSS that can be generated statically is embedded in the HTML output (`<style>` or linked `.css` in `<head>`, or `blocking="render"` at start of `<body>`), and `useFirstChild` matches the entry point.
+- [ ] Runtime-dependent interactions use a separate config where practical; otherwise runtime generation is documented as the fallback and occurs before `Interact.create()`.
 - [ ] Child-target effects put `selector`/`key` on the **effect**, not the interaction. Groups of items use one keyed wrapper + a **descendant** match (no duplicate keys): `selector` on the effect for a one-trigger stagger/sequence, `listContainer` on the interaction for per-item triggers.
 - [ ] Invariants 5–7 and 10 hold for the relevant triggers (separate source/target, child targets, `overflow: clip`, unique keys).
 

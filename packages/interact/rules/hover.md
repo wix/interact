@@ -2,6 +2,14 @@
 
 This document contains rules for generating hover-triggered interactions in `@wix/interact`.
 
+**Static site CSS:** For static or pre-rendered sites, prefer including all hover
+interactions in `generate(config, useFirstChild)` at build/generation time and
+embedding the CSS in the HTML output (`<style>` or linked `.css` in `<head>`, or
+`blocking="render"` at the start of `<body>`). Split runtime-dependent hover
+interactions into a separate config where practical; otherwise generate the
+complete CSS at runtime before `Interact.create()`.
+See [full-lean.md](./full-lean.md#css-generation--fouc-prevention).
+
 **CRITICAL — Accessible hover**: Use `trigger: 'interest'` instead of `trigger: 'hover'` to also respond to keyboard focus.
 
 - **CRITICAL**: MUST AVOID using the same element as both trigger source and effect target with effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.

@@ -19,6 +19,9 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 
 **Use Case**: Scroll-driven CSS-based effects.
 
+For static sites, pre-render CSS via `generate()` at build time — see
+[Pre-rendering Scroll-driven CSS with generate()](#pre-rendering-scroll-driven-css-with-generate).
+
 **Multiple effects:** The `effects` array can contain multiple effects — all are driven by the same scroll progress. Use this to animate different targets or properties in sync with the same scroll position.
 
 ### Template
@@ -148,10 +151,26 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 
 ## Pre-rendering Scroll-driven CSS with generate()
 
-Call `generate(config)` server-side or at build time to produce native scroll-driven CSS for `viewProgress` interactions. The generated output includes `view-timeline` declarations, `animation-timeline`/`animation-range` custom properties, and `@keyframes` — everything the browser needs to run scroll-driven animations without any JavaScript.
+**Static site policy:** For static or pre-rendered HTML, prefer calling
+`generate()` for the complete config at build/generation time and embedding the
+CSS in the shipped HTML. If some interactions depend on runtime-only data, split
+them into a separate config: pre-generate the static config and generate/inject
+the runtime config in the browser before its `Interact.create()` call. If
+splitting is impractical, generating the complete CSS at runtime is an acceptable
+fallback. Call `registerEffects()` before each `generate()` when using
+`namedEffect` scroll presets.
+
+Call `generate(config, useFirstChild)` at build/generation time to produce native
+scroll-driven CSS for `viewProgress` interactions. The generated output includes
+`view-timeline` declarations, `animation-timeline`/`animation-range` custom
+properties, and `@keyframes` — everything the browser needs to run scroll-driven
+animations without any JavaScript.
 
 ```typescript
 import { generate } from '@wix/interact';
+import { ParallaxScroll } from '@wix/motion-presets';
+
+Interact.registerEffects({ ParallaxScroll });
 
 const config = {
   interactions: [
@@ -174,15 +193,33 @@ const config = {
   effects: {},
 };
 
-const css = generate(config, false);
+const css = generate(config, false); // false for react/vanilla; true for web
 ```
 
-Inject the resulting CSS into `<head>` so scroll-driven animations are ready before JS loads:
+**Embed the CSS** using one of:
 
 ```html
-<style>
-  ${css}
-</style>
+<!-- Option 1: inline in <head> (preferred) -->
+<head>
+  <style>
+    …generated css…
+  </style>
+</head>
+
+<!-- Option 2: linked stylesheet in <head> -->
+<head>
+  <link rel="stylesheet" href="interact.css" />
+</head>
+
+<!-- Option 3: render-blocking at start of <body> -->
+<body>
+  <style blocking="render">
+    …generated css…
+  </style>
+  <!-- or -->
+  <link rel="stylesheet" href="interact.css" blocking="render" />
+  …
+</body>
 ```
 
 **Benefits:**

@@ -2,6 +2,14 @@
 
 This document contains rules for generating click-triggered interactions in `@wix/interact`.
 
+**Static site CSS:** For static or pre-rendered sites, prefer including all click
+interactions in `generate(config, useFirstChild)` at build/generation time and
+embedding the CSS in the HTML output (`<style>` or linked `.css` in `<head>`, or
+`blocking="render"` at the start of `<body>`). Split runtime-dependent click
+interactions into a separate config where practical; otherwise generate the
+complete CSS at runtime before `Interact.create()`.
+See [full-lean.md](./full-lean.md#css-generation--fouc-prevention).
+
 **CRITICAL — Accessible click**: Use `trigger: 'activate'` instead of `trigger: 'click'` to also respond to keyboard activation (Enter / Space).
 
 ## Table of Contents
