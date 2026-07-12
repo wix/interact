@@ -31,8 +31,12 @@ npm install @wix/interact @wix/motion-presets
 ### Web (Custom Elements)
 
 ```typescript
-import { Interact } from '@wix/interact/web';
+import { Interact, generate } from '@wix/interact/web';
+import { FadeIn } from '@wix/motion-presets';
 
+Interact.registerEffects({ FadeIn });
+const css = generate(config, true); // useFirstChild = true for web
+// Embed css in HTML — see CSS Generation & FOUC Prevention
 Interact.create(config);
 ```
 
@@ -53,12 +57,16 @@ Wrap target elements with `<interact-element>`:
 
 ### React
 
+- Call `generate(config, false)` during SSR/build and embed the CSS in document `<head>` (`<style>` or a linked `.css` file).
 - Wrap the `Interact.create()` call in a `useEffect` hook to prevent it from running on server-side.
 - Store the returned instance, and call its `.destroy()` method on the effect's cleanup function.
 
 ```typescript
 import { useEffect } from 'react';
-import { Interact } from '@wix/interact/react';
+import { Interact, generate } from '@wix/interact/react';
+
+const css = generate(config, false); // useFirstChild = false for React
+// Embed css in <head> during SSR/build
 
 useEffect(() => {
   const instance = Interact.create(config);
@@ -87,9 +95,13 @@ import { Interaction } from '@wix/interact/react';
 ### Vanilla JS
 
 ```typescript
-import { Interact, add } from '@wix/interact';
+import { Interact, add, generate } from '@wix/interact';
+import { FadeIn } from '@wix/motion-presets';
 
-const interact = Interact.create(config);
+Interact.registerEffects({ FadeIn });
+const css = generate(config, false); // useFirstChild = false for vanilla
+// Embed css in HTML — see CSS Generation & FOUC Prevention
+Interact.create(config);
 add(element, 'hero');
 ```
 
@@ -102,7 +114,7 @@ add(element, 'hero');
 
 ## Named Effects & registerEffects
 
-To use `namedEffect` presets from `@wix/motion-presets`, register them before calling `Interact.create`. For full effect type syntax (`keyframeEffect`, `customEffect`, `StateEffect`, `ScrubEffect`), see `full-lean.md`.
+To use `namedEffect` presets from `@wix/motion-presets`, register them before calling `generate()` or `Interact.create()`. For full effect type syntax (`keyframeEffect`, `customEffect`, `StateEffect`, `ScrubEffect`), see `full-lean.md`.
 
 **Install:**
 
@@ -261,33 +273,68 @@ Define reusable sequences in `InteractConfig.sequences` and reference by `sequen
 
 ## CSS Generation & FOUC Prevention
 
-`generate(config, useFirstChild)` produces complete CSS for **all** interactions in the config — `@keyframes`, animation/transition custom properties, `view-timeline` declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules. Call it server-side or at build time and inject the result into `<head>`.
-The `useFirstChild` argument is a boolean flag which tells Interact whether to render `:first-child` selectors when using custom element (`web`) integration.
+`generate(config, useFirstChild)` produces complete CSS for **all** interactions in the config — `@keyframes`, animation/transition custom properties, `view-timeline` declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules.
+
+**Static site policy:** For static or pre-rendered HTML (agent-generated pages,
+SSG, static export), prefer calling `generate()` for the complete config at
+build/generation time and embedding the CSS in the shipped HTML. If some
+interactions depend on runtime-only data, split them into a separate config:
+pre-generate the static config and generate/inject the runtime config in the
+browser before its `Interact.create()` call. If splitting is impractical,
+generating the complete CSS at runtime is an acceptable fallback. Call
+`registerEffects()` before each `generate()` when using `namedEffect`.
+
+The `useFirstChild` argument tells Interact whether to render `:first-child` selectors for custom-element (`web`) integration: `true` for **web**, `false` for **react** and **vanilla**.
 
 ```javascript
 import { generate } from '@wix/interact/web';
-const css = generate(config);
+import { FadeIn } from '@wix/motion-presets';
+
+Interact.registerEffects({ FadeIn });
+const css = generate(config, true); // true for web; false for react/vanilla
 ```
 
-**Append to `<head>` or beginning of `<body>`:**
+**Embed the CSS** in the HTML output using one of:
 
 ```html
-<style>
-  ${css}
-</style>
+<!-- Option 1: inline in <head> (preferred) -->
+<head>
+  <style>
+    …generated css…
+  </style>
+</head>
+
+<!-- Option 2: linked stylesheet in <head> -->
+<head>
+  <link rel="stylesheet" href="interact.css" />
+</head>
+
+<!-- Option 3: render-blocking at start of <body> (prevents FOUC) -->
+<body>
+  <style blocking="render">
+    …generated css…
+  </style>
+  <!-- or -->
+  <link rel="stylesheet" href="interact.css" blocking="render" />
+  …
+</body>
 ```
 
 ### FOUC Prevention (viewEnter + once)
 
 **Problem:** Elements with entrance animations (e.g. `FadeIn` on `viewEnter`) are initially visible in their final state. Before the animation framework applies the starting keyframe, the content flashes visibly — a flash of un-animated content (FOUC).
 
-**Solution:** Call `generate(config, useFirstChild)` server-side or at build time and inject the resulting CSS into `<head>`. The generated initial rules hide entrance-animated elements until the animation starts.
+**Solution:** Call `generate(config, useFirstChild)` at build/generation time and embed the resulting CSS before first paint. The generated initial rules hide entrance-animated elements until the animation starts.
 
 See [viewenter.md](./viewenter.md) for full details.
 
 **Rules:**
 
-- `generate()` should be called server-side or at build time. Can also be called on the client if page content is initially hidden (e.g. behind a loader).
+- For static/pre-rendered sites, prefer generating all possible CSS at
+  build/generation time. Split runtime-dependent interactions into a separate
+  config where practical, or fall back to generating the full config at runtime.
+- Inject runtime-generated CSS before the corresponding `Interact.create()` call
+  and before revealing initially hidden content to minimize FOUC.
 - `generate()` processes all interactions, not just `viewEnter`.
 - FOUC initial rules apply only to `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
 
@@ -299,8 +346,9 @@ Each `Interact.create(config)` call returns an instance. Keep a reference if you
 
 | Method / Property                   | Description                                                                                  |
 | :---------------------------------- | :------------------------------------------------------------------------------------------- |
+| `generate(config, useFirstChild?)`  | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML.     |
 | `Interact.create(config)`           | Initialize with a config. Returns the instance. Multiple configs create separate instances.  |
-| `Interact.registerEffects(presets)` | Register named effect presets before `create`. Required for `namedEffect` usage.             |
+| `Interact.registerEffects(presets)` | Register named effect presets before `generate()` and `create`. Required for `namedEffect`.  |
 | `Interact.destroy()`                | Tear down all instances.                                                                     |
 | `Interact.forceReducedMotion`       | `boolean` — force reduced-motion behavior regardless of OS setting. Default: `false`.        |
 | `Interact.allowA11yTriggers`        | `boolean` — enable accessibility triggers (`interest`, `activate`). Default: `false`.        |

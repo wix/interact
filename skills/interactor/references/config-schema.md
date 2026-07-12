@@ -80,6 +80,14 @@ patterns — see [Element resolution](#element-resolution).
 > sequence), or **`listContainer`** on the interaction when each item needs its own
 > trigger (e.g. per-card `hover`/`pointerMove`). See [Element resolution](#element-resolution).
 
+> **Layers that animate as one → one container, not one effect per layer.** A single
+> visual element built from stacked layers (hero: background + overlay + content;
+> card: image + heading + text) that should enter/animate **together** belongs on
+> **one** keyed wrapper with **one** effect — not the same effect copied onto every
+> layer, which spins up N controllers that drift out of sync and cost N× per frame.
+> This is the opposite of scroll parallax, where you deliberately give each layer its
+> own effect at a different rate. See invariant 11 in `SKILL.md`.
+
 `TriggerType` = `'hover' | 'click' | 'viewEnter' | 'animationEnd' |
 'viewProgress' | 'pointerMove' | 'activate' | 'interest'`. Param shapes and
 per-trigger semantics live in `triggers.md`.
@@ -336,13 +344,26 @@ container.
 `generate(config, useFirstChild = true)` returns a complete CSS string for **all**
 interactions: `@keyframes`, animation/transition custom properties, native
 `view-timeline` declarations for `viewProgress`, state-selector rules, coordinated
-list aggregation, and FOUC initial rules. Call it server-side / at build time and
-inject into `<head>` (or the top of `<body>`) so styles apply before JS loads.
+list aggregation, and FOUC initial rules.
+
+**Static site policy:** For static or pre-rendered HTML, prefer calling
+`generate()` for the complete config at build/generation time and embedding the
+CSS in the shipped HTML. If some interactions depend on runtime-only data, split
+them into a separate config: pre-generate the static config and generate/inject
+the runtime config in the browser before its `Interact.create()` call. If
+splitting is impractical, generating the complete CSS at runtime is an acceptable
+fallback.
 
 ```ts
 import { generate } from '@wix/interact/web';
 const css = generate(config, true); // true for web; false for vanilla/React
 ```
+
+**Embed the CSS** using one of:
+
+- `<style>…css…</style>` in `<head>` (preferred)
+- `<link rel="stylesheet" href="interact.css">` in `<head>` (write `interact.css` as a separate file)
+- `<style blocking="render">…css…</style>` or `<link rel="stylesheet" href="interact.css" blocking="render">` at the **start of `<body>`** when render-blocking is needed to prevent FOUC
 
 **`useFirstChild`:** `true` for the **web** (`<interact-element>`) entry point —
 selectors target `:first-child`; `false` for **vanilla** and **React**. The default
@@ -356,8 +377,10 @@ the generated rules hide the child targets on their own — no extra markup on t
 trigger element. For `repeat`/`alternate`/`state`, inline the starting keyframe and
 use `fill: 'both'`. `viewProgress` needs no FOUC rules.
 
-`generate()` output must actually be injected (ideally at SSR/build time) for any of
-this FOUC prevention to work.
+FOUC prevention works best when `generate()` output is embedded in the HTML at
+build/generation time. For runtime-generated portions, inject the CSS before the
+corresponding `Interact.create()` call and before revealing initially hidden
+content.
 
 For the web entry point, `interact-element { display: contents; }` is **optional** —
 add it if you don't want the custom-element wrapper to participate in layout (the
