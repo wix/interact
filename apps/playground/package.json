@@ -10,7 +10,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@wix/interact": "^2.5.2",
+    "@wix/interact": "^2.5.3",
     "@wix/motion-presets": "^1.0.3"
   },
   "devDependencies": {
