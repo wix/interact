@@ -1,0 +1,255 @@
+# Shape Scroll
+
+Six full-viewport image panels stack on top of each other; as the user scrolls, each successive panel is revealed from nothing via an expanding circular clip-path, driven by invisible scroll-trigger elements.
+
+**Tags:** viewProgress, sticky, clip-path, reveal, stagger, parallax
+
+## Markup
+
+```html
+<main class="animation-section">
+
+  <interact-element data-interact-key="#trigger-2">
+    <div id="trigger-2" class="trigger-area" style="top: 25%; height: 6.25%;"></div>
+  </interact-element>
+  <interact-element data-interact-key="#trigger-3">
+    <div id="trigger-3" class="trigger-area" style="top: 37.5%; height: 6.25%;"></div>
+  </interact-element>
+  <interact-element data-interact-key="#trigger-4">
+    <div id="trigger-4" class="trigger-area" style="top: 50%; height: 6.25%;"></div>
+  </interact-element>
+  <interact-element data-interact-key="#trigger-5">
+    <div id="trigger-5" class="trigger-area" style="top: 62.5%; height: 6.25%;"></div>
+  </interact-element>
+  <interact-element data-interact-key="#trigger-6">
+    <div id="trigger-6" class="trigger-area" style="top: 75%; height: 6.25%;"></div>
+  </interact-element>
+
+  <interact-element data-interact-key="#container-1">
+    <div id="container-1" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop');">
+      <div class="text-center w-full pt-32 pb-20 z-10">
+        <h1>Container 1</h1>
+        <p>This is the starting point.</p>
+      </div>
+    </div>
+  </interact-element>
+
+  <interact-element data-interact-key="#container-2">
+    <div id="container-2" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2070&auto=format&fit=crop');">
+      <div class="text-center w-full pt-32 pb-20 z-10">
+        <h1>Container 2</h1>
+        <p>Revealed by scrolling.</p>
+      </div>
+    </div>
+  </interact-element>
+
+  <interact-element data-interact-key="#container-3">
+    <div id="container-3" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2070&auto=format&fit=crop');">
+      <div class="text-center w-full pt-32 pb-20 z-10">
+        <h1>Container 3</h1>
+        <p>And another one.</p>
+      </div>
+    </div>
+  </interact-element>
+
+  <interact-element data-interact-key="#container-4">
+    <div id="container-4" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?q=80&w=2070&auto=format&fit=crop');">
+      <div class="text-center w-full pt-32 pb-20 z-10">
+        <h1>Container 4</h1>
+        <p>Keep scrolling...</p>
+      </div>
+    </div>
+  </interact-element>
+
+  <interact-element data-interact-key="#container-5">
+    <div id="container-5" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=2070&auto=format&fit=crop');">
+      <div class="text-center w-full pt-32 pb-20 z-10">
+        <h1>Container 5</h1>
+        <p>Almost there.</p>
+      </div>
+    </div>
+  </interact-element>
+
+  <interact-element data-interact-key="#container-6">
+    <div id="container-6" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=2073&auto=format&fit=crop');">
+      <div class="text-center w-full pt-32 pb-20 z-10">
+        <h1>Container 6</h1>
+        <p>The final reveal.</p>
+      </div>
+    </div>
+  </interact-element>
+
+</main>
+```
+
+## Essential styles
+
+```css
+:root {
+    --pw: 100;
+    --ph: 100;
+    --panel-radius: 0px;
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+}
+
+#container-2, #container-3, #container-4, #container-5, #container-6 {
+    clip-path: circle(0% at center);
+}
+
+#container-1 { z-index: 1; }
+#container-2 { z-index: 2; }
+#container-3 { z-index: 3; }
+#container-4 { z-index: 4; }
+#container-5 { z-index: 5; }
+#container-6 { z-index: 6; }
+
+.trigger-area {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.animation-section {
+    position: relative;
+    width: 100%;
+    height: 800vh;
+}
+
+.content-panel {
+    position: sticky;
+    top: calc((100 - var(--ph)) * 0.5vh);
+    width: calc(var(--pw) * 1vw);
+    height: calc(var(--ph) * 1vh);
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: clip;
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--panel-radius);
+}
+
+.content-panel::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.content-panel > div {
+    transform: scale(calc(min(var(--pw), var(--ph)) / 100));
+    transform-origin: center bottom;
+    background: none !important;
+}
+```
+
+## Interact config
+
+```js
+{
+    interactions: [
+        {
+            key: '#trigger-2',
+            trigger: 'viewProgress',
+            effects: [{
+                key: '#container-2',
+                keyframeEffect: {
+                    name: 'reveal-circle-2',
+                    keyframes: [
+                        { clipPath: 'circle(0% at center)' },
+                        { clipPath: 'circle(80% at center)' }
+                    ]
+                },
+                rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+                rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+                easing: 'linear',
+                fill: 'both'
+            }]
+        },
+        {
+            key: '#trigger-3',
+            trigger: 'viewProgress',
+            effects: [{
+                key: '#container-3',
+                keyframeEffect: {
+                    name: 'reveal-circle-3',
+                    keyframes: [
+                        { clipPath: 'circle(0% at center)' },
+                        { clipPath: 'circle(80% at center)' }
+                    ]
+                },
+                rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+                rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+                easing: 'linear',
+                fill: 'both'
+            }]
+        },
+        {
+            key: '#trigger-4',
+            trigger: 'viewProgress',
+            effects: [{
+                key: '#container-4',
+                keyframeEffect: {
+                    name: 'reveal-circle-4',
+                    keyframes: [
+                        { clipPath: 'circle(0% at center)' },
+                        { clipPath: 'circle(80% at center)' }
+                    ]
+                },
+                rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+                rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+                easing: 'linear',
+                fill: 'both'
+            }]
+        },
+        {
+            key: '#trigger-5',
+            trigger: 'viewProgress',
+            effects: [{
+                key: '#container-5',
+                keyframeEffect: {
+                    name: 'reveal-circle-5',
+                    keyframes: [
+                        { clipPath: 'circle(0% at center)' },
+                        { clipPath: 'circle(80% at center)' }
+                    ]
+                },
+                rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+                rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+                easing: 'linear',
+                fill: 'both'
+            }]
+        },
+        {
+            key: '#trigger-6',
+            trigger: 'viewProgress',
+            effects: [{
+                key: '#container-6',
+                keyframeEffect: {
+                    name: 'reveal-circle-6',
+                    keyframes: [
+                        { clipPath: 'circle(0% at center)' },
+                        { clipPath: 'circle(80% at center)' }
+                    ]
+                },
+                rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+                rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+                easing: 'linear',
+                fill: 'both'
+            }]
+        }
+    ]
+}
+```

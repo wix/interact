@@ -1,0 +1,227 @@
+# Digital Jukebox
+
+A vertical snap-scrolling list of album art cards that rotate and zoom through 3D perspective as they pass through the viewport, while a fixed info panel updates the artist and song title for whichever card is centered.
+
+**Tags:** viewProgress, scroll, list, gallery, opacity, transform, 3d, snap, stagger
+
+## Markup
+
+```html
+<div class="screen">
+  <interact-element data-interact-key="scroll-container">
+    <div class="scroll-view" id="scroll-view">
+      <div class="item-list" id="item-list">
+        <interact-element data-interact-key="item-0">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_5a41dd4ed9284d6dacf0d2ec84697472~mv2.jpg)"></div>
+        </interact-element>
+        <interact-element data-interact-key="item-1">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_fcb77553ba6842bc80afe7b8cae070a6~mv2.jpg)"></div>
+        </interact-element>
+        <interact-element data-interact-key="item-2">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_46273f3267014f7c800436bbc8b3ad83~mv2.jpg)"></div>
+        </interact-element>
+        <interact-element data-interact-key="item-3">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_ff88830ded7e417cae47c905e83d7722~mv2.jpg)"></div>
+        </interact-element>
+        <interact-element data-interact-key="item-4">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_e6d98be6268347e48cff39f5c20fb0f8~mv2.jpg)"></div>
+        </interact-element>
+        <interact-element data-interact-key="item-5">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_55aad4d241374a2b827d4b00554b24ae~mv2.jpg)"></div>
+        </interact-element>
+        <interact-element data-interact-key="item-6">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_f4bbbb8da30b4951b24924aad5dbfed2~mv2.jpg)"></div>
+        </interact-element>
+        <interact-element data-interact-key="item-7">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_099bae5648814dce8bb05379af044ecc~mv2.jpg)"></div>
+        </interact-element>
+        <interact-element data-interact-key="item-8">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_6b14cf5bce1044db9a807dd3c5cc9028~mv2.jpg)"></div>
+        </interact-element>
+        <interact-element data-interact-key="item-9">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_565eb438708548da92653669027017a8~mv2.webp)"></div>
+        </interact-element>
+        <interact-element data-interact-key="item-10">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_cb4b664a75934f89ac680625002ab076~mv2.jpg)"></div>
+        </interact-element>
+        <interact-element data-interact-key="item-11">
+          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_76de18515def47789ddab891e3ce12fa~mv2.jpg)"></div>
+        </interact-element>
+      </div>
+    </div>
+  </interact-element>
+
+  <div class="info-panel">
+    <h2 id="artist-name">Teebs</h2>
+    <p id="song-title">The Tropics</p>
+  </div>
+</div>
+```
+
+## Essential styles
+
+```css
+:root {
+    --item-width: 800px;
+    --item-height: 512px;
+    --item-radius: 12px;
+    --item-gap: 32px;
+}
+
+body {
+    margin: 0;
+    background-color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+}
+
+.screen {
+    width: 100vw;
+    height: 100vh;
+    background-color: #ffffff;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.scroll-view {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    perspective: 500px;
+    position: relative;
+    scroll-snap-type: y proximity;
+}
+
+.scroll-view::-webkit-scrollbar {
+    display: none;
+}
+
+.scroll-view {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.item-list {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-style: preserve-3d;
+    padding: calc(50vh - var(--item-height) / 2) 0;
+}
+
+.list-item {
+    width: var(--item-width);
+    max-width: 90vw;
+    height: var(--item-height);
+    background-color: #f0f0f0;
+    border-radius: var(--item-radius);
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    margin: 0 auto var(--item-gap);
+    scroll-snap-align: center;
+    will-change: transform, opacity;
+}
+
+.info-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 60px 20px 30px;
+    text-align: center;
+    color: #333;
+    background: linear-gradient(to top, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0));
+    pointer-events: none;
+    z-index: 10;
+}
+
+.info-panel h2 {
+    margin: 0 0 6px 0;
+    font-size: 32px;
+    font-weight: 600;
+}
+
+.info-panel p {
+    margin: 0;
+    font-size: 16px;
+    color: #666;
+}
+```
+
+## Interact config
+
+```js
+const itemsData = [
+    { artist: "Teebs", title: "The Tropics" },
+    { artist: "Astrid Sonne", title: "Boost" },
+    { artist: "ML Buch", title: "Boarding" },
+    { artist: "Burial", title: "Archangel" },
+    { artist: "Aphex Twin", title: "Avril 14th" },
+    { artist: "Four Tet", title: "Two Thousand and Seventeen" },
+    { artist: "Bonobo", title: "Cirrus" },
+    { artist: "Tycho", title: "Awake" },
+    { artist: "Floating Points", title: "Nespole" },
+    { artist: "Caribou", title: "Odessa" },
+    { artist: "Jon Hopkins", title: "Emerald Rush" },
+    { artist: "Boards of Canada", title: "Roygbiv" },
+];
+
+const scroll3DEffect = {
+    name: 'scroll-3d-transform',
+    keyframes: [
+        { offset: 0,   opacity: 0.2, transform: 'perspective(500px) rotateX(25deg) translateZ(-350px)' },
+        { offset: 0.5, opacity: 1,   transform: 'perspective(500px) rotateX(0deg) translateZ(0px)' },
+        { offset: 1,   opacity: 0.2, transform: 'perspective(500px) rotateX(-25deg) translateZ(-350px)' }
+    ]
+};
+
+const itemInteractions = itemsData.map((_, index) => ({
+    key: `item-${index}`,
+    trigger: 'viewProgress',
+    effects: [
+        {
+            key: `item-${index}`,
+            keyframeEffect: scroll3DEffect,
+            easing: 'linear',
+            fill: 'both'
+        }
+    ]
+}));
+
+const infoPanelInteraction = {
+    key: 'scroll-container',
+    trigger: 'viewProgress',
+    effects: [
+        {
+            key: 'scroll-container',
+            customEffect: (element, progress) => {
+                const artistEl = document.getElementById('artist-name');
+                const songEl = document.getElementById('song-title');
+                const totalItems = itemsData.length;
+                let closestIndex = Math.round(progress * (totalItems - 1));
+                closestIndex = Math.max(0, Math.min(totalItems - 1, closestIndex));
+                const currentData = itemsData[closestIndex];
+                if (artistEl.textContent !== currentData.artist) {
+                    artistEl.textContent = currentData.artist;
+                }
+                if (songEl.textContent !== currentData.title) {
+                    songEl.textContent = currentData.title;
+                }
+            },
+            rangeStart: { name: 'contain', offset: { unit: 'percentage', value: 0 } },
+            rangeEnd:   { name: 'contain', offset: { unit: 'percentage', value: 100 } }
+        }
+    ]
+};
+
+{
+    interactions: [
+        ...itemInteractions,
+        infoPanelInteraction
+    ]
+}
+```

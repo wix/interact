@@ -1,0 +1,208 @@
+# Mindshift Transition
+
+Two white theatrical panels slide in from opposite sides as the page scrolls, concealing the bold uppercase headline while revealing a softer serif subtext beneath.
+
+**Tags:** viewProgress, sticky, opacity, transform, reveal, fade, stagger
+
+## Markup
+
+```html
+<div class="scroll-hint">Scroll down</div>
+
+<interact-element data-interact-key="scroll-stage">
+  <div class="sticky-container">
+
+    <interact-element data-interact-key="mask-l">
+      <div class="mask mask-left"></div>
+    </interact-element>
+
+    <interact-element data-interact-key="mask-r">
+      <div class="mask mask-right"></div>
+    </interact-element>
+
+    <div class="text-container">
+      <interact-element data-interact-key="text-main">
+        <div class="text text-1">
+          CHANGE<br>MINDS.
+        </div>
+      </interact-element>
+
+      <interact-element data-interact-key="text-sub">
+        <div class="text text-2">
+          Start with<br>your own.
+        </div>
+      </interact-element>
+    </div>
+
+  </div>
+</interact-element>
+```
+
+## Essential styles
+
+```css
+:root {
+    --bg-color: #000000;
+    --mask-color: #ffffff;
+    --text-primary: #ffffff;
+    --text-secondary: #000000;
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg-color);
+    height: 300vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+.sticky-container {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: var(--bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: clip;
+}
+
+.mask {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 90%;
+    background-color: var(--mask-color);
+    z-index: 10;
+}
+
+.mask-left {
+    left: 0;
+    border-radius: 0 50% 50% 0;
+}
+
+.mask-right {
+    right: 0;
+    border-radius: 50% 0 0 50%;
+}
+
+.text-container {
+    position: relative;
+    z-index: 20;
+    text-align: center;
+    width: 95%;
+    max-width: 1400px;
+}
+
+.text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    pointer-events: none;
+}
+
+.text-1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(2.5rem, 12vw, 9rem);
+    line-height: 0.85;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    letter-spacing: -0.04em;
+}
+
+.text-2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.2rem, 5vw, 3.5rem);
+    color: var(--text-secondary);
+    line-height: 1.1;
+    font-weight: 400;
+}
+
+.scroll-hint {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    z-index: 30;
+}
+```
+
+## Interact config
+
+```js
+{
+    interactions: [
+        {
+            key: 'scroll-stage',
+            trigger: 'viewProgress',
+            effects: [
+                {
+                    key: 'mask-l',
+                    fill: 'both',
+                    rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+                    rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } },
+                    keyframeEffect: {
+                        name: 'mask-slide-left',
+                        keyframes: [
+                            { transform: 'translateX(-120%)', offset: 0 },
+                            { transform: 'translateX(-120%)', offset: 0.2 },
+                            { transform: 'translateX(-10%)', offset: 1 }
+                        ]
+                    }
+                },
+                {
+                    key: 'mask-r',
+                    fill: 'both',
+                    rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+                    rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } },
+                    keyframeEffect: {
+                        name: 'mask-slide-right',
+                        keyframes: [
+                            { transform: 'translateX(120%)', offset: 0 },
+                            { transform: 'translateX(120%)', offset: 0.2 },
+                            { transform: 'translateX(10%)', offset: 1 }
+                        ]
+                    }
+                },
+                {
+                    key: 'text-main',
+                    fill: 'both',
+                    rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+                    rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } },
+                    keyframeEffect: {
+                        name: 'fade-out-main',
+                        keyframes: [
+                            { opacity: 1, transform: 'translate(-50%, -50%)', offset: 0 },
+                            { opacity: 1, transform: 'translate(-50%, -50%)', offset: 0.4 },
+                            { opacity: 0, transform: 'translate(-50%, calc(-50% - 40px))', offset: 0.7 },
+                            { opacity: 0, transform: 'translate(-50%, calc(-50% - 40px))', offset: 1 }
+                        ]
+                    }
+                },
+                {
+                    key: 'text-sub',
+                    fill: 'both',
+                    rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+                    rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } },
+                    keyframeEffect: {
+                        name: 'fade-in-sub',
+                        keyframes: [
+                            { opacity: 0, transform: 'translate(-50%, calc(-50% + 20px))', offset: 0 },
+                            { opacity: 0, transform: 'translate(-50%, calc(-50% + 20px))', offset: 0.6 },
+                            { opacity: 1, transform: 'translate(-50%, -50%)', offset: 0.95 },
+                            { opacity: 1, transform: 'translate(-50%, -50%)', offset: 1 }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
+```

@@ -1,0 +1,410 @@
+# Text Cards Slide In
+
+Cards containing typographic step content slide in from alternating sides with a 3D perspective transform as the user scrolls through dedicated trigger sections, while a hero title and subtitle fade up on initial view entry.
+
+**Tags:** viewProgress, viewEnter, opacity, transform, 3d, stagger, reveal, fixed, fade
+
+## Markup
+
+```html
+<div class="hero">
+  <interact-element data-interact-key="hero-title">
+    <h1>The Journey</h1>
+  </interact-element>
+  <interact-element data-interact-key="hero-subtitle">
+    <p>From idea to completion</p>
+  </interact-element>
+</div>
+<div class="hero-spacer"></div>
+
+<div class="card-stage">
+
+  <interact-element data-interact-key="card-1" class="card-wrapper">
+    <div class="card">
+      <div class="card-icon" style="background: linear-gradient(135deg, #1d1d1f, #3a3a3c);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </div>
+      <span class="card-label">Step 01</span>
+      <h2 class="card-heading">Design</h2>
+      <p class="card-subtitle">Crafting the vision</p>
+      <p class="card-body">Every great product begins with a clear, thoughtful design. We shape ideas into blueprints that inspire and endure.</p>
+    </div>
+  </interact-element>
+
+  <interact-element data-interact-key="card-2" class="card-wrapper">
+    <div class="card">
+      <div class="card-icon" style="background: linear-gradient(135deg, #1d1d1f, #3a3a3c);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+      </div>
+      <span class="card-label">Step 02</span>
+      <h2 class="card-heading">Build</h2>
+      <p class="card-subtitle">Engineering excellence</p>
+      <p class="card-body">With precision and care, we transform designs into robust, scalable systems built to last.</p>
+    </div>
+  </interact-element>
+
+  <interact-element data-interact-key="card-3" class="card-wrapper">
+    <div class="card">
+      <div class="card-icon" style="background: linear-gradient(135deg, #1d1d1f, #3a3a3c);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+          <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+          <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 3 0 3 0"/>
+          <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-3 0-3"/>
+        </svg>
+      </div>
+      <span class="card-label">Step 03</span>
+      <h2 class="card-heading">Launch</h2>
+      <p class="card-subtitle">Into the world</p>
+      <p class="card-body">The moment of truth. We deploy with confidence, ensuring every detail is polished and ready.</p>
+    </div>
+  </interact-element>
+
+  <interact-element data-interact-key="card-4" class="card-wrapper">
+    <div class="card">
+      <div class="card-icon" style="background: linear-gradient(135deg, #1d1d1f, #3a3a3c);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <span class="card-label">Step 04</span>
+      <h2 class="card-heading">Complete</h2>
+      <p class="card-subtitle">Mission accomplished</p>
+      <p class="card-body">Success is measured in impact. We celebrate milestones and prepare for the next chapter ahead.</p>
+    </div>
+  </interact-element>
+
+</div>
+
+<div class="scroll-canvas">
+  <interact-element data-interact-key="trigger-1">
+    <div class="scroll-section"></div>
+  </interact-element>
+  <interact-element data-interact-key="trigger-2">
+    <div class="scroll-section"></div>
+  </interact-element>
+  <interact-element data-interact-key="trigger-3">
+    <div class="scroll-section"></div>
+  </interact-element>
+  <interact-element data-interact-key="trigger-4">
+    <div class="scroll-section"></div>
+  </interact-element>
+  <div class="scroll-section"></div>
+</div>
+```
+
+## Essential styles
+
+```css
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+interact-element {
+  display: block;
+}
+
+.hero-spacer {
+  height: 100vh;
+}
+
+.hero {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 5;
+}
+
+.hero h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  opacity: 0;
+}
+
+.hero p {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  color: #86868b;
+  font-weight: 400;
+  opacity: 0;
+}
+
+.card-stage {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.card-wrapper {
+  position: absolute;
+  width: 630px;
+  aspect-ratio: 4 / 3.2;
+}
+
+.card-wrapper:nth-child(1) { z-index: 1; }
+.card-wrapper:nth-child(2) { z-index: 2; }
+.card-wrapper:nth-child(3) { z-index: 3; }
+.card-wrapper:nth-child(4) { z-index: 4; }
+
+.card {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: 36px;
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  opacity: 0;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.02),
+    0 8px 16px rgba(0, 0, 0, 0.04),
+    0 20px 40px rgba(0, 0, 0, 0.06),
+    0 40px 80px rgba(0, 0, 0, 0.08);
+}
+
+.card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.card-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.card-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #86868b;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+
+.card-heading {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.5rem;
+  font-weight: 400;
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.card-subtitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1d1d1f;
+}
+
+.card-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #86868b;
+  max-width: 340px;
+}
+
+.scroll-canvas {
+  position: relative;
+  z-index: 0;
+}
+
+.scroll-section {
+  height: 100vh;
+}
+
+@media (max-width: 750px) {
+  .card-wrapper { width: calc(100% - 20px); }
+  .card {
+    padding: 36px 28px;
+    border-radius: 28px;
+  }
+  .card-heading { font-size: 1.6rem; }
+  .card-body { font-size: 0.85rem; }
+}
+
+@media (max-width: 390px) {
+  .card-wrapper { width: calc(100% - 20px); }
+  .card {
+    padding: 28px 20px;
+    border-radius: 24px;
+  }
+  .card-heading { font-size: 1.4rem; }
+  .card-subtitle { font-size: 0.9rem; }
+  .card-body {
+    font-size: 0.8rem;
+    max-width: 220px;
+  }
+}
+```
+
+## Interact config
+
+```js
+const entryRange = {
+  rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+  rangeEnd:   { name: 'entry', offset: { value: 100, unit: 'percentage' } },
+};
+
+{
+  conditions: {
+    'full-motion': {
+      type: 'media',
+      predicate: '(prefers-reduced-motion: no-preference)',
+    },
+    'reduced-motion': {
+      type: 'media',
+      predicate: '(prefers-reduced-motion: reduce)',
+    },
+  },
+
+  effects: {
+    'enter-from-left': {
+      keyframeEffect: {
+        name: 'enter-left',
+        keyframes: [
+          { opacity: -0.6, transform: 'perspective(800px) translateX(-120vw) rotateX(-6deg) rotateY(14deg)' },
+          { opacity: 1, transform: 'perspective(800px) translateX(0) rotateX(0) rotateY(0)' },
+        ],
+      },
+      fill: 'both',
+      easing: 'ease-out',
+      ...entryRange,
+    },
+    'enter-from-right': {
+      keyframeEffect: {
+        name: 'enter-right',
+        keyframes: [
+          { opacity: -0.6, transform: 'perspective(800px) translateX(120vw) rotateX(-6deg) rotateY(-14deg)' },
+          { opacity: 1, transform: 'perspective(800px) translateX(0) rotateX(0) rotateY(0)' },
+        ],
+      },
+      fill: 'both',
+      easing: 'ease-out',
+      ...entryRange,
+    },
+    'fade-center': {
+      keyframeEffect: {
+        name: 'fade-center',
+        keyframes: [
+          { opacity: 0 },
+          { opacity: 1 },
+        ],
+      },
+      fill: 'both',
+      easing: 'ease-out',
+      ...entryRange,
+    },
+  },
+
+  interactions: [
+    {
+      key: 'hero-title',
+      trigger: 'viewEnter',
+      params: { type: 'once' },
+      effects: [{
+        keyframeEffect: {
+          name: 'hero-title-fade',
+          keyframes: [
+            { opacity: 0, transform: 'translateY(16px)' },
+            { opacity: 1, transform: 'translateY(0)' },
+          ],
+        },
+        duration: 800,
+        easing: 'ease-out',
+        fill: 'forwards',
+      }],
+    },
+    {
+      key: 'hero-subtitle',
+      trigger: 'viewEnter',
+      params: { type: 'once' },
+      effects: [{
+        keyframeEffect: {
+          name: 'hero-sub-fade',
+          keyframes: [
+            { opacity: 0, transform: 'translateY(16px)' },
+            { opacity: 1, transform: 'translateY(0)' },
+          ],
+        },
+        duration: 800,
+        delay: 400,
+        easing: 'ease-out',
+        fill: 'forwards',
+      }],
+    },
+    {
+      key: 'trigger-1',
+      trigger: 'viewProgress',
+      effects: [
+        { key: 'card-1', effectId: 'enter-from-left',  conditions: ['full-motion'] },
+        { key: 'card-1', effectId: 'fade-center',      conditions: ['reduced-motion'] },
+      ],
+    },
+    {
+      key: 'trigger-2',
+      trigger: 'viewProgress',
+      effects: [
+        { key: 'card-2', effectId: 'enter-from-right', conditions: ['full-motion'] },
+        { key: 'card-2', effectId: 'fade-center',      conditions: ['reduced-motion'] },
+      ],
+    },
+    {
+      key: 'trigger-3',
+      trigger: 'viewProgress',
+      effects: [
+        { key: 'card-3', effectId: 'enter-from-left',  conditions: ['full-motion'] },
+        { key: 'card-3', effectId: 'fade-center',      conditions: ['reduced-motion'] },
+      ],
+    },
+    {
+      key: 'trigger-4',
+      trigger: 'viewProgress',
+      effects: [
+        { key: 'card-4', effectId: 'enter-from-right', conditions: ['full-motion'] },
+        { key: 'card-4', effectId: 'fade-center',      conditions: ['reduced-motion'] },
+      ],
+    },
+  ],
+}
+```

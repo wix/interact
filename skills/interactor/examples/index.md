@@ -1,157 +1,139 @@
 # Examples Index
 
-This index lists curated animation demos that serve as inspiration and reference patterns. Each demo is a cohesive unit — the interact config, HTML structure, and CSS layout are designed to work together to produce a polished animation. Treat each demo as a whole: adapt all three parts together rather than lifting any single piece in isolation.
-
----
-
-## Gallery and Carousel
-
-**3DSmallCarousel.md** — Scroll-driven gallery items in a sticky section with filter, transform, and opacity transitions. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: filter, transform, opacity
-
-**3D_Parallax_Gallery.md** — Hover and pointer-driven gallery with opacity and transform for a 3D parallax depth effect. Tags: trigger: hover, pointerMove; layout: grid/gallery, 3D scene; motion: opacity, transform
-
-**AccordionScrollHorizontal.md** — Hover-triggered expandable panels that animate width, opacity, and transform in a carousel layout. Tags: trigger: hover; layout: grid/gallery, flex/carousel; motion: width, opacity, transform
-
-**AccordionScrollVertical.md** — Hover-triggered vertical expandable panels using opacity and transform. Tags: trigger: hover; layout: grid/gallery, flex/carousel; motion: opacity, transform
-
-**BlurFocus_Gallery.md** — Hover-triggered gallery where items use layered transforms for blur-focus effects. Tags: trigger: hover; layout: grid/gallery, layered composition; motion: custom animation
-
-**CardSpread.md** — Scroll-driven cards in a sticky section that spread using height and transform. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: height, transform
-
-**CardSpreadByHover.md** — Hover-triggered cards that spread using transform in a gallery/carousel layout. Tags: trigger: hover; layout: grid/gallery, flex/carousel; motion: transform
-
-**CardSpread_7.md** — Scroll-driven card spread with transform in a sticky scroll carousel. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: transform
-
-**CasperGallery.md** — Pointer-driven gallery with layered transforms and 3D perspective. Tags: trigger: mousemove; layout: grid/gallery, 3D scene; motion: custom animation
-
-**ClassicHorizontalScroll.md** — Scroll-driven horizontal scroll of layered visual elements using transform. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: transform
-
-**CornerFoldScrollAnimation.md** — Scroll-driven clip-path and transform animation creating a corner-fold reveal effect. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: clip-path, transform
-
-**Cornergallery01.md** — Page-load and click-triggered gallery with layered transform animations. Tags: trigger: pageVisible, click; layout: grid/gallery, flex/carousel; motion: custom animation
-
-**CursorTrail.md** — Page-load animation with pointer-responsive elements using opacity in a 3D layered composition. Tags: trigger: pageVisible; layout: layered composition, 3D scene; motion: opacity
-
-**DiagonalShuffle.md** — Scroll-driven shuffle of layered elements with transform and opacity in a 3D scene. Tags: trigger: viewProgress; layout: sticky scroll section, 3D scene; motion: transform, opacity
-
-**DigitalJukebox.md** — Scroll-driven carousel/list gallery using opacity and transform. Tags: trigger: viewProgress; layout: flex/carousel, list/repeater; motion: opacity, transform
-
-**DolphinAnimation.md** — Page-load and pointer-driven animation that morphs width and height in a 3D layered layout. Tags: trigger: pageVisible, mousemove; layout: flex/carousel, 3D scene; motion: width, height
-
-**EndlessParallax.md** — Click and animationEnd-triggered layered parallax with opacity, transform, and filter. Tags: trigger: click, animationEnd; layout: grid/gallery, flex/carousel; motion: opacity, transform, filter
-
-**ExpandingHorizontalScroll.md** — Viewport-entry and scroll-driven expanding horizontal scroll with opacity, transform, and left. Tags: trigger: viewEnter, viewProgress; layout: sticky scroll section, flex/carousel; motion: opacity, transform, left
-
-**FadeInGallery.md** — Viewport-entry and hover-triggered gallery with FadeIn preset and transform. Tags: trigger: viewEnter, hover; layout: grid/gallery; motion: FadeIn, transform
-
-**FerrisWheel.md** — Page-load rotational animation of gallery items using transform in a carousel layout. Tags: trigger: pageVisible; layout: flex/carousel, list/repeater; motion: transform
-
-**HorizontalAndVerticalScroll.md** — Scroll-driven dual-axis scroll animation with transform in a sticky carousel. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: transform
-
-**HorizontalCarouselPerspective.md** — Scroll-driven carousel with perspective using width, transform, and opacity. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: width, transform, opacity
-
-**HorizontalLanes.md** — Viewport-entry gallery with staggered lane entrance using transform. Tags: trigger: viewEnter; layout: grid/gallery, flex/carousel; motion: transform
-
-**HorizontallyScrollingGallery.md** — Hover-triggered horizontally scrolling gallery with layered transforms. Tags: trigger: hover; layout: grid/gallery, flex/carousel; motion: custom animation
-
-**Interactive_Rotating_Gallery_Grid.md** — Hover and pointer-driven rotating gallery grid with opacity and transform. Tags: trigger: hover, pointerMove; layout: grid/gallery, flex/carousel; motion: opacity, transform
-
-**LoopedTabsWithPerspective.md** — Hover and page-load tabs with 3D perspective transform in a carousel. Tags: trigger: hover, pageVisible; layout: flex/carousel, 3D scene; motion: transform
-
-**Looping_Sphere_Gallery.md** — Scroll-driven gallery items arranged in a sphere using transform and opacity. Tags: trigger: viewProgress; layout: grid/gallery, flex/carousel; motion: transform, opacity
-
-**MantaRay.md** — Viewport-entry, mouseenter/mouseleave 3D transform animation with flowing organic motion. Tags: trigger: viewEnter, hover, mouseenter, mouseleave; layout: grid/gallery, 3D scene; motion: transform
-
-**Mirror_Hover_Galery.md** — Hover-triggered gallery with mirrored transform and opacity effects. Tags: trigger: hover; layout: grid/gallery, layered composition; motion: transform, opacity
-
-**Mouse track infinite gallery.md** — Hover-triggered infinite gallery driven by mouse tracking with layered transforms. Tags: trigger: hover; layout: grid/gallery, flex/carousel; motion: custom animation
-
-**Paragraph_Reaveal.md** — Scroll-driven paragraph reveal using opacity in a sticky scroll layout. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: opacity
-
-**Scroll_3D_Animation.md** — Scroll-driven 3D transform animation in a layered carousel layout. Tags: trigger: viewProgress; layout: flex/carousel, 3D scene; motion: transform
-
-**ShapeScroll.md** — Scroll-driven clip-path animation on image and background layers in a sticky section. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: clip-path
-
-**SmallCarousel.md** — Mouseenter/mouseleave and click-triggered 3D carousel with transform and opacity. Tags: trigger: mouseenter, mouseleave, click; layout: flex/carousel, 3D scene; motion: transform, opacity
-
-**SnakeAnimation.md** — Custom JS-driven snake animation with opacity and transform in a 3D gallery. Tags: trigger: custom; layout: grid/gallery, 3D scene; motion: opacity, transform
-
-**SpecimenCardGallery.md** — Scroll-driven cards with opacity, filter, and transform in a sticky grid/carousel. Tags: trigger: viewProgress; layout: sticky scroll section, grid/gallery; motion: opacity, filter, transform
-
-**StickyRepeaterStack.md** — Scroll-driven stacked sticky elements using transform in a carousel layout. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: transform
-
-**TitleFoldsScrollAnimation.md** — Scroll-driven title folding animation using transform in a sticky section. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: transform
-
-**VerticalLanes.md** — Viewport-entry gallery with staggered vertical lane entrance using transform. Tags: trigger: viewEnter; layout: grid/gallery, flex/carousel; motion: transform
-
-**WheelCarousel.md** — Page-load and hover-triggered wheel/spinner carousel using transform. Tags: trigger: pageVisible, hover; layout: flex/carousel; motion: transform
-
-**WindowScroll.md** — Scroll-driven layered elements with opacity and transform in a sticky grid. Tags: trigger: viewProgress; layout: sticky scroll section, grid/gallery; motion: opacity, transform
-
----
-
-## Lists
-
-**Column_Shutters.md** — Viewport-entry and click-triggered expandable column panels using transform. Tags: trigger: viewEnter, click; layout: grid/gallery, flex/carousel, list/repeater; motion: transform
-
-**Flex_Cards.md** — Viewport-entry, scroll, and click-triggered cards with width, transform, and opacity. Tags: trigger: viewEnter, viewProgress, click; layout: grid/gallery, flex/carousel, list/repeater; motion: width, transform, opacity
-
-**Horizontal_parting_list.md** — Scroll-driven list items that part horizontally using width, height, border-radius, opacity, and transform. Tags: trigger: viewProgress; layout: list/repeater; motion: width, height, border-radius, opacity, transform
-
-**Icon_Pill_Slider.md** — Hover, click, and viewport-entry animation for pill-shaped items using transform, clip-path, and width. Tags: trigger: hover, click, viewEnter; layout: grid/gallery, list/repeater; motion: transform, clip-path, width
-
-**Icon_Pill_Slider_Scroll.md** — Scroll-driven pill slider using width and transform in a list layout. Tags: trigger: viewProgress; layout: grid/gallery, list/repeater; motion: width, transform
-
-**MouseTrack_Parting_List.md** — Pointer-driven list items that part based on mouse position using width and transform. Tags: trigger: pointerMove; layout: list/repeater; motion: width, transform
-
-**Parting_List.md** — Scroll-driven list items that part open using width, height, border-radius, opacity, and transform. Tags: trigger: viewProgress; layout: list/repeater; motion: width, height, border-radius, opacity, transform
-
-**Product_Stroll_List.md** — Scroll-driven product list with transform, clip-path, opacity, and width in a sticky layout. Tags: trigger: viewProgress; layout: sticky scroll section, list/repeater; motion: transform, clip-path, opacity, width
-
-**Split_Screen_Scroll.md** — Scroll-driven split-screen with two panels animating via transform and filter. Tags: trigger: viewProgress; layout: sticky scroll section, list/repeater; motion: transform, filter
-
-**Word_Cloud_List.md** — Hover-triggered word cloud list with layered transforms. Tags: trigger: hover; layout: flex/carousel, list/repeater; motion: custom animation
-
----
-
-## Image and Background
-
-**3d-blinds-flip-reveal.md** — Scroll and viewport-entry 3D blinds flip reveal using transform, opacity, and filter. Tags: trigger: viewProgress, viewEnter; layout: grid/gallery, flex/carousel; motion: transform, opacity, filter
-
-**BG_Image_ShapeMask_Gallery.md** — Scroll-driven background image gallery with clip-path, transform, and filter shape masking. Tags: trigger: viewProgress; layout: sticky scroll section, grid/gallery; motion: clip-path, transform, filter
-
-**BG_image_ShapeMask.md** — Scroll-driven background image with transform and clip-path shape mask. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: transform, clip-path
-
-**Diagonal_Slideshow.md** — Scroll and click-triggered diagonal slideshow using transform, opacity, and top. Tags: trigger: viewProgress, click; layout: flex/carousel; motion: transform, opacity, top
-
-**Kinetic 155 Horizon.md** — Scroll, pointer, and hover-triggered animation combining Tilt3DMouse, transform, and opacity in a sticky layout. Tags: trigger: viewProgress, pointerMove, hover; layout: sticky scroll section, flex/carousel; motion: Tilt3DMouse, transform, opacity
-
-**TextMask2Image.md** — Scroll-driven text mask revealing an image using transform and opacity in a sticky section. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: transform, opacity
-
-**auto-shape-cycle.md** — Page-load animation cycling through shape states using opacity in a 3D layered layout. Tags: trigger: pageVisible; layout: flex/carousel, 3D scene; motion: opacity
-
-**column-squeeze-reveal.md** — Scroll-driven column squeeze reveal using width and transform in a sticky section. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: width, transform
-
-**horizontal-stripe-cascade-reveal.md** — Scroll and viewport-entry cascade reveal of horizontal stripes using transform, opacity, and filter. Tags: trigger: viewProgress, viewEnter; layout: grid/gallery, flex/carousel; motion: transform, opacity, filter
-
-**left-panel-3d-door-reveal.md** — Scroll-driven 3D door-hinge reveal of a left panel using transform and opacity. Tags: trigger: viewProgress; layout: flex/carousel, 3D scene; motion: transform, opacity
-
-**left-panel-slide-out-reveal.md** — Scroll-driven left panel slide-out reveal using opacity, transform, and filter. Tags: trigger: viewProgress; layout: flex/carousel; motion: opacity, transform, filter
-
-**lumina-orbit-scroll.md** — Scroll-driven orbiting background layers with transform, border-radius, filter, and opacity. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: transform, border-radius, filter, opacity
-
-**manifest-expand-scroll.md** — Viewport-entry and scroll-driven expanding image reveal using opacity, transform, top, and right. Tags: trigger: viewEnter, viewProgress; layout: sticky scroll section, flex/carousel; motion: opacity, transform, top, right
-
-**manifest-expand-scroll_02.md** — Variant of manifest-expand-scroll with the same expanding image reveal pattern. Tags: trigger: viewEnter, viewProgress; layout: sticky scroll section, flex/carousel; motion: opacity, transform, top, right
-
-**rift-slit-reveal.md** — Viewport-entry and scroll-driven slit/rift reveal splitting an image using transform, opacity, and positional properties. Tags: trigger: viewEnter, viewProgress; layout: sticky scroll section; motion: transform, opacity, top, right, bottom, left
-
-**rift-slit-reveal-02.md** — Variant rift slit reveal with additional positional properties for a different split direction. Tags: trigger: viewEnter, viewProgress; layout: sticky scroll section; motion: opacity, transform, top, right, bottom, left
-
-**scroll-shape-morph.md** — Scroll-driven shape morphing of image/background layers using opacity in a sticky section. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: opacity
-
-**scroll-shape-shift-interior.md** — Scroll-driven interior shape shift of image/background layers using opacity. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: opacity
-
-**staggered-stripes-reveal.md** — Scroll and viewport-entry staggered stripe reveal using transform, opacity, and filter. Tags: trigger: viewProgress, viewEnter; layout: grid/gallery, flex/carousel; motion: transform, opacity, filter
-
-**sticky-perspective-shrink.md** — Scroll-driven sticky element that shrinks with perspective using transform, border-radius, and filter. Tags: trigger: viewProgress; layout: sticky scroll section, flex/carousel; motion: transform, border-radius, filter
+Use this table of contents to find polished, cohesive examples by interaction, layout, or motion tag. Each linked demo contains its own markup, essential styles, Interact config, and any required JavaScript; adapt those parts together.
+
+## Contents
+
+- [Gallery](#gallery) — 28 demos
+- [Carousel](#carousel) — 6 demos
+- [Image and background](#image-and-background) — 18 demos
+- [Text animations](#text-animations) — 25 demos
+- [Text and image](#text-and-image) — 9 demos
+- [UI components](#ui-components) — 11 demos
+
+## Gallery
+
+| Demo | Summary | Tags |
+| --- | --- | --- |
+| [Accordion Scroll Horizontal](examples/gallery/AccordionScrollHorizontal.md) | Hover over any panel to expand it — vertically on mobile, horizontally on desktop — while a title and subtitle fade up from the bottom. | `hover, gallery, flex, accordion, responsive, height, transform, opacity, reveal, stagger` |
+| [Accordion Scroll Vertical](examples/gallery/AccordionScrollVertical.md) | Each panel in a vertical stack expands its height and reveals an overlay text label on hover, then collapses when the pointer leaves. | `hover, click, gallery, flex, height, opacity, transform, fade, stagger` |
+| [Blur Focus Gallery](examples/gallery/BlurFocus_Gallery.md) | A grid of image cards where hovering any card blurs all others via CSS `:has()`, while the hovered card scales up and reveals its title caption. | `hover, grid, gallery, filter, blur, opacity, transform, scale` |
+| [Card Spread](examples/gallery/CardSpread.md) | Five photo cards start stacked at center and fan out horizontally across the viewport as the user scrolls, with a sticky container pinning the cards while a tall scroll section drives the viewProgress interaction; on mobile the cards slide in sequentially from below instead. | `viewProgress, scroll, sticky, gallery, transform, height, stagger, reveal` |
+| [Card Spread By Hover](examples/gallery/CardSpreadByHover.md) | Five stacked image cards fan out horizontally when the collection is hovered, revealing each card from behind the stack with a spring easing. | `hover, gallery, transform, reveal` |
+| [7-Card Fan Spread](examples/gallery/CardSpread_7.md) | Seven stacked cards fan out from a tight cluster into a full spread as the user scrolls, using a sticky container to hold the deck in view throughout a 600 vh scroll section. | `viewProgress, scroll, sticky, gallery, transform, rotate, stagger, fan` |
+| [Classic Horizontal Scroll](examples/gallery/ClassicHorizontalScroll.md) | Eight full-viewport panels translate horizontally as the user scrolls vertically, driven by a `viewProgress` trigger on a tall sticky section that maps scroll progress to `translateX` on the panel track. | `viewProgress, sticky, flex, transform, horizontal-scroll` |
+| [Corner Fold Scroll Animation](examples/gallery/CornerFoldScrollAnimation.md) | Five fullscreen sticky panels sequentially slide up from below and expand their images from the bottom-right corner using clip-path, triggered by dedicated scroll sections as the user scrolls down the page. | `viewProgress, sticky, clip-path, transform, reveal, stagger` |
+| [Corner Gallery](examples/gallery/Cornergallery01.md) | Fullscreen images reveal by scaling from a random corner on click or wheel scroll, with a slow Ken Burns pan-zoom effect and a film-grain projector overlay; text details fade in on hover. | `click, hover, gallery, opacity, transform, scale, kenburns, sequential, reveal` |
+| [Diagonal Shuffle](examples/gallery/DiagonalShuffle.md) | Five image cards stacked at the viewport center fly in from alternating diagonal corners as you scroll, each rotating and scaling into a slightly tilted resting position one after another. | `viewProgress, sticky, gallery, transform, rotate, scale, opacity, stagger, reveal, 3d` |
+| [Endless Parallax](examples/gallery/EndlessParallax.md) | An endless floating image gallery where tiles drift and wrap continuously across a full-viewport canvas driven by mouse cursor position, with subtle parallax depth layering per tile; clicking a tile opens a modal with a gallery blur-in animation. | `click, pointerMove, gallery, fixed, opacity, transform, filter, parallax, blur, loop` |
+| [Expanding Horizontal Scroll](examples/gallery/ExpandingHorizontalScroll.md) | Four full-viewport colored panels are stacked offscreen to the right inside a 700vh sticky section; as the user scrolls, each panel slides horizontally to fill the screen in sequence while its thumbnail image scales up dramatically, driven entirely by `viewProgress`. | `viewProgress, viewEnter, sticky, transform, opacity, scale, stagger, reveal` |
+| [Fade In Gallery](examples/gallery/FadeInGallery.md) | Full-screen background images cycle in every 2 seconds with a scale-from-zero entrance on viewEnter; hovering the bottom half of the screen fades in a text overlay and pauses the cycling. | `hover, viewEnter, gallery, opacity, transform, fade, scale, loop` |
+| [Horizontal and Vertical Scroll](examples/gallery/HorizontalAndVerticalScroll.md) | Six image cards rise up from below the viewport in a staggered sequence as the user scrolls, then the entire row slides horizontally to reveal remaining cards — all driven by a single viewProgress trigger on a tall sticky section. | `viewProgress, sticky, transform, stagger, scroll, gallery` |
+| [Horizontally Scrolling Gallery](examples/gallery/HorizontallyScrollingGallery.md) | Six portrait gallery items in a horizontal flex row reveal an ellipse-clipped, counter-rotated image and a fade-in label on hover, while a GSAP ticker drives edge-based auto-scroll when the cursor moves into the left or right 15% of the container. | `hover, gallery, flex, transform, clip-path, opacity, reveal, fade, rotate` |
+| [Looping Sphere Gallery](examples/gallery/Looping_Sphere_Gallery.md) | A 3D sphere composed of image cards rotates continuously via CSS animation while scrolling drives a camera zoom that flies through the sphere, with an overlay fade keyed to scroll progress. | `viewProgress, hover, gallery, 3d, loop, transform, opacity, rotate, scale` |
+| [Manta Ray](examples/gallery/MantaRay.md) | A horizontal overlapping gallery where each image breathes with a continuous vertical float loop triggered on view enter, and scales up on hover, with staggered per-item delays and seeded random size variation. | `hover, viewEnter, gallery, flex, transform, scale, opacity, loop, stagger` |
+| [Mirror Hover Gallery](examples/gallery/Mirror_Hover_Galery.md) | A grid of nature image cards where hovering any card zooms it, darkens its overlay, and reveals text while simultaneously mirroring that card's background image across the entire grid with a Chebyshev-distance stagger. | `hover, grid, gallery, transform, opacity, stagger, scale, reveal, background` |
+| [Mouse Track Infinite Gallery](examples/gallery/Mouse_track_infinite_gallery.md) | An infinite, wrapping grid of images that pans continuously in the direction of the mouse cursor using momentum physics; hovering an individual item blurs its image and fades its caption. | `hover, pointerMove, gallery, infinite, loop, filter, blur, transform, scale, opacity, parallax` |
+| [Paragraph Reveal](examples/gallery/Paragraph_Reaveal.md) | Inline images hidden between words in a paragraph expand from zero width into the text flow as the user scrolls through a tall sticky section, staggered evenly across the scroll range using viewProgress keyframe animations. | `viewProgress, sticky, opacity, reveal, stagger` |
+| [Scroll 3D Animation](examples/gallery/Scroll_3D_Animation.md) | Seven landscape panels arranged in a 3D z-depth stack rotate into view as the user scrolls, then fan out horizontally across the screen. | `viewProgress, 3d, rotate, transform, stagger, parallax, scroll` |
+| [Shape Scroll](examples/gallery/ShapeScroll.md) | Six full-viewport image panels stack on top of each other; as the user scrolls, each successive panel is revealed from nothing via an expanding circular clip-path, driven by invisible scroll-trigger elements. | `viewProgress, sticky, clip-path, reveal, stagger, parallax` |
+| [Snake Animation](examples/gallery/SnakeAnimation.md) | Images arranged in a sinusoidal wave across the screen animate sequentially into view, converge to a full-screen lightbox on click, and cycle through the gallery with @wix/interact fade transitions; clicking the backdrop returns to the snake layout. | `click, gallery, opacity, transform, scale, fade, stagger, backdrop` |
+| [Specimen Card Gallery](examples/gallery/SpecimenCardGallery.md) | Five specimen cards fan out from a spread, blurred, and 3D-rotated state and converge into a flat centered row as the user scrolls through a sticky container driven by viewProgress. | `viewProgress, sticky, flex, gallery, opacity, transform, filter, blur, stagger, reveal, 3d` |
+| [Sticky Repeater Stack](examples/gallery/StickyRepeaterStack.md) | Five gradient cards stack using sticky positioning and scale down to 0.8 as each subsequent card scrolls over the previous one, driven by viewProgress with cover-range offsets computed from viewport geometry. | `viewProgress, sticky, stack, stagger, scale, transform, scroll, cards` |
+| [Title Folds Scroll Animation](examples/gallery/TitleFoldsScrollAnimation.md) | Sticky cards scale up from 75% as they enter the viewport, with the heading, line, top-right stack, and content container each revealing independently via scroll-driven viewProgress animations. | `viewProgress, sticky, flex, transform, scale, reveal, stagger` |
+| [Vertical Lanes](examples/gallery/VerticalLanes.md) | Four vertical image columns auto-scroll continuously in alternating directions when they enter the viewport, each column looping at a different speed for a parallax-lane effect; hovering an image reveals a title and gradient overlay. | `viewEnter, hover, gallery, flex, transform, loop, parallax, stagger` |
+| [Window Scroll](examples/gallery/WindowScroll.md) | Six colored panels stacked in a sticky viewport each fly in from depth with a 3D rotateX + translateZ perspective transform, sequenced across a 1200vh scroll wrapper so each panel occupies an equal slice of the scroll range. | `viewProgress, sticky, transform, opacity, 3d, stagger` |
+
+## Carousel
+
+| Demo | Summary | Tags |
+| --- | --- | --- |
+| [3D Small Carousel](examples/rarousel/3DSmallCarousel.md) | A sticky 3D carousel of 8 photo cards arranged in a circular ring spins 720° around the Y-axis as the user scrolls, with each card's brightness driven by its angular proximity to the front face. | `viewProgress, scroll, carousel, sticky, 3d, rotate, transform, filter, opacity` |
+| [Digital Jukebox](examples/rarousel/DigitalJukebox.md) | A vertical snap-scrolling list of album art cards that rotate and zoom through 3D perspective as they pass through the viewport, while a fixed info panel updates the artist and song title for whichever card is centered. | `viewProgress, scroll, list, gallery, opacity, transform, 3d, snap, stagger` |
+| [Horizontal Carousel Perspective](examples/rarousel/HorizontalCarouselPerspective.md) | Cards fly through a sticky 3D stage driven by page scroll, each one sweeping in from the side, centering with full depth, then receding away — paired with a fading title that syncs to whichever card is front and center. | `viewProgress, sticky, carousel, 3d, transform, opacity, stagger, perspective, scroll` |
+| [Horizontal Lanes](examples/rarousel/HorizontalLanes.md) | Four horizontal image rows loop continuously left and right at different speeds, each starting its infinite scroll animation when the row enters the viewport. | `viewEnter, carousel, flex, loop, transform, gallery, stagger` |
+| [Small Carousel](examples/rarousel/SmallCarousel.md) | A 3D perspective carousel of space nebula cards arranged in depth with rotateY offsets; hovering any card scales its image and fades in a text overlay, while clicking the front card expands it fullscreen over a blurred backdrop that dismisses on click. | `hover, click, carousel, 3d, scale, opacity, transform, rotate, fade, blur` |
+| [Wheel Carousel](examples/rarousel/WheelCarousel.md) | 12 image cards arranged in a circle spin continuously on `viewEnter`, while hovering any card scales its image up slightly. | `viewEnter, hover, carousel, loop, rotate, scale, transform` |
+
+## Image and background
+
+| Demo | Summary | Tags |
+| --- | --- | --- |
+| [3D Blinds Flip Reveal](examples/image-background/3d-blinds-flip-reveal.md) | Ten horizontal blinds fold open in a staggered cascade driven by scroll progress, revealing a white content section over a fixed hero image that simultaneously zooms, blurs, and darkens. | `viewProgress, viewEnter, fixed, opacity, transform, filter, reveal, stagger, 3d, blur, scale, fade` |
+| [Background Image Shape Mask Gallery](examples/image-background/BG_Image_ShapeMask_Gallery.md) | A sticky full-viewport section where three background images circle-reveal sequentially as the user scrolls, each scaling in while the previous blurs out. | `viewProgress, sticky, gallery, clip-path, transform, filter, blur, reveal, scale` |
+| [BG Image Shape Mask](examples/image-background/BG_image_ShapeMask.md) | A background image zooms out while a black overlay circle-reveals over it as the user scrolls through a tall sticky section, transitioning from a lush photograph to a solid dark background. | `viewProgress, sticky, clip-path, transform, scale, reveal, parallax` |
+| [Diagonal Slideshow](examples/image-background/Diagonal_Slideshow.md) | Scroll-driven slideshow where each slide title travels diagonally from a small top-left genesis position through a large centered hold to a small bottom-right exit, while background images wipe in from below using a clip-path reveal. | `viewProgress, fixed, gallery, opacity, transform, clip-path, reveal, scale, stagger` |
+| [Kinetic 155 Horizon](examples/image-background/Kinetic_155_Horizon.md) | A white content card rotates 155 degrees on the Y axis as the user scrolls, while simultaneously responding to pointer movement with a 3D tilt and expanding 5% on hover. | `viewProgress, pointerMove, hover, sticky, transform, 3d, rotate, scale, opacity` |
+| [Text Mask to Image](examples/image-background/TextMask2Image.md) | As the page is scrolled through a tall sticky section, bold uppercase text scales exponentially via a CSS custom property and mix-blend-mode screen to unmask a background landscape image through the letterforms, while a subtitle fades and slides up from below the viewport. | `viewProgress, sticky, transform, opacity, scale, reveal, fade` |
+| [Column Squeeze Reveal](examples/image-background/column-squeeze-reveal.md) | A sticky two-column layout where scrolling squeezes the dark left text column from 22vw to 9vw, scales the rotated hero typography down, and simultaneously zooms the full-bleed background image — together revealing progressively more of the photograph behind. | `viewProgress, sticky, transform, scale, reveal, parallax` |
+| [Horizontal Stripe Cascade Reveal](examples/image-background/horizontal-stripe-cascade-reveal.md) | On scroll, 20 alternating horizontal white stripes slide in from opposite sides to cover the hero image, while the image zooms and blurs, then a second section fades up into view. | `viewProgress, viewEnter, stagger, reveal, opacity, transform, filter, blur, fade, fixed` |
+| [Left Panel Slide Out Reveal](examples/image-background/left-panel-slide-out-reveal.md) | A white square panel overlays a blurred hero image at page load; as the user scrolls, the panel slides left off screen while the panel's text fades out and the hero image simultaneously sharpens and zooms back to full size. | `viewProgress, fixed, opacity, transform, filter, reveal, fade, blur, scale` |
+| [Lumina Orbit Scroll](examples/image-background/lumina-orbit-scroll.md) | A full-viewport hero image shrinks, tilts in 3D, and fades out as the user scrolls through a sticky 500vh track, while the overlaid title and subtitle softly recede upward. | `viewProgress, sticky, transform, filter, opacity, border-radius, scale, rotate, 3d, fade, reveal, parallax` |
+| [Manifest Expand Scroll](examples/image-background/manifest-expand-scroll.md) | A sticky image panel expands from a small bottom-left corner position to fill the full viewport as the user scrolls, while the title, text columns, and image fade up individually on page entry. | `viewProgress, viewEnter, sticky, opacity, transform, reveal, scale, stagger, fade` |
+| [Manifest Expand Scroll](examples/image-background/manifest-expand-scroll_02.md) | A sticky hero section where the title and text columns fade up on view enter, while the full-bleed image progressively shrinks and shifts to the top-left corner as the user scrolls through the track. | `viewEnter, viewProgress, opacity, transform, stagger, reveal, fade, scale, sticky` |
+| [Rift Slit Reveal 02](examples/image-background/rift-slit-reveal-02.md) | A full-viewport sticky image panel fades in on enter and then slits closed — collapsing inward from all sides into a thin vertical line at the center — as the user scrolls through a 500vh track, while the image simultaneously zooms in. | `viewProgress, viewEnter, sticky, reveal, fade, scale, opacity, transform` |
+| [Rift Slit Reveal](examples/image-background/rift-slit-reveal.md) | A sticky scroll sequence where a centered image expands from a thin horizontal slit to fill the viewport as the user scrolls, while title letters animate up from a clipped overflow on entry and a subtitle fades in below. | `viewProgress, viewEnter, sticky, reveal, stagger, fade, scale, opacity, transform` |
+| [Scroll Shape Morph](examples/image-background/scroll-shape-morph.md) | Five SVG mask shapes fade in and out sequentially over a sticky text card as the page scrolls, morphing the card's visible silhouette through rectangle, rounded-corner, oval, L-shape, and jagged geometric forms. | `viewProgress, sticky, opacity, reveal, stagger, fade` |
+| [Scroll Shape Shift Interior](examples/image-background/scroll-shape-shift-interior.md) | As the page scrolls through a 500vh sticky section, five background interior photographs and five white SVG shape masks (rectangle, asymmetric rounded corner, circle, L-notch, star chevron) fade in and out sequentially, shifting the visible center frame shape while crossfading the background image. | `viewProgress, sticky, fixed, opacity, reveal, shape` |
+| [Staggered Stripes Reveal](examples/image-background/staggered-stripes-reveal.md) | Sixteen vertical white stripes slide up from below in a left-to-right stagger driven by scroll progress, revealing a dark content section while the hero image zooms and blurs behind them. | `viewProgress, viewEnter, fixed, flex, opacity, transform, filter, stagger, reveal, fade, blur` |
+| [Sticky Perspective Shrink](examples/image-background/sticky-perspective-shrink.md) | A full-viewport image stays sticky while the user scrolls, shrinking and tilting in 3D perspective before settling flat and fading to grayscale. | `viewProgress, sticky, transform, filter, border-radius, scale, 3d, parallax` |
+
+## Text animations
+
+| Demo | Summary | Tags |
+| --- | --- | --- |
+| [3D Rolodex Flip](examples/text-animations/3D-Rolodex-Flip.md) | Each full-viewport text card flips into view from below with a 3D rotateX and scale, holds centered, then flips upward as the user scrolls past, driven entirely by scroll progress. | `viewProgress, list, transform, opacity, 3d, rotate, scale, stagger, scroll` |
+| [Accelerated 3D Spin](examples/text-animations/Accelerated3DSpin.md) | A large headline text continuously rotates on the Y-axis in a slow idle loop when it enters the viewport, then accelerates dramatically as the user scrolls, using composite layering to blend the idle spin and scroll-driven boost into a single accelerating 3D flip effect. | `viewEnter, viewProgress, rotate, 3d, loop, transform, sticky, scroll-driven` |
+| [Aura Stack](examples/text-animations/Aura_Stack.md) | Three sticky typographic slides stack over a long scroll container and each transitions through a blur-fade-scale lifecycle — the first slides exits upward with blur, while the second and third fade in from below with staggered content reveals. | `viewProgress, sticky, opacity, transform, filter, blur, stagger, reveal, fade, parallax` |
+| [Blurry Transition](examples/text-animations/Blurry_Transition.md) | Three stacked text pairs are revealed sequentially as the user scrolls, each fading and unblurring in through a sticky 600vh timeline driven by viewProgress, with the first pair triggering automatically on viewEnter. | `viewProgress, viewEnter, opacity, filter, blur, fade, stagger, sticky` |
+| [Editorial Text Reveal](examples/text-animations/Editorial_Text_Reveal.md) | Three editorial slides sequence through a sticky viewport as the user scrolls — the cover scales and blurs out while subsequent slides push in horizontally from the right, with internal content and staggered columns rising up driven by scroll progress. | `viewProgress, sticky, opacity, transform, filter, reveal, stagger, fade, scale, blur` |
+| [Gooey Text](examples/text-animations/Gooey_text.md) | A blurred circle continuously sweeps across bold text inside a high-contrast filter container, creating a gooey ink-spreading effect that fades in when the scene enters view. | `viewEnter, loop, blur, filter, opacity, fade` |
+| [Headline Images Overlay](examples/text-animations/Headline_Images_Overlay.md) | Six image panels in geometric shapes cycle one by one in an infinite looping sequence, triggered when the section enters the viewport, overlaid on large headline text using mix-blend-mode difference. | `viewEnter, opacity, clip-path, stagger, fade, loop` |
+| [IconText Pro Gallery](examples/text-animations/IconText_Pro_gallery.md) | On hover, each narrow card in a horizontal flex gallery expands its width, the centered icon slides toward the top-left corner, and a title and description fade up into view. | `hover, flex, gallery, opacity, transform, scale, reveal` |
+| [Mindshift Transition](examples/text-animations/Mindshift_Transition.md) | Two white theatrical panels slide in from opposite sides as the page scrolls, concealing the bold uppercase headline while revealing a softer serif subtext beneath. | `viewProgress, sticky, opacity, transform, reveal, fade, stagger` |
+| [Paragraph Mask Scroll](examples/text-animations/Paragraph_mask_scroll.md) | Seven stacked rows of "IMMERSIVE REALITY" appear on view entry; the six duplicate rows flicker out character by character (staggered by row distance and character position) leaving the centre row visible, then a description paragraph slides up from below. | `viewEnter, stagger, opacity, transform, fade, reveal` |
+| [Ripple Hover](examples/text-animations/Ripple_Hover.md) | A stacked heading ripples masked copies of itself upward and downward on hover, creating a liquid echo wave around the main word; on mobile the ripple plays once on scroll into view. | `hover, viewEnter, transform, stagger, reveal, typography, responsive` |
+| [Rise Of The Dead](examples/text-animations/RiseOfTheDead.md) | Individual letters in "RISING DEAD" each rotate up from below the text baseline with a 3D flip effect as the user scrolls, with randomised stagger offsets so each character rises independently. | `viewProgress, stagger, 3d, rotate, opacity, transform, sticky, scroll` |
+| [Scroll Mask Reveal](examples/text-animations/Scroll_Mask_Reveal.md) | As the page scrolls, inline image thumbnails embedded within a sticky text block reveal horizontally by animating their `max-width`, `margin-right`, and `opacity` from hidden to visible, creating a staggered masked photo-reveal effect woven between words. | `viewProgress, sticky, opacity, reveal, stagger, mask, inline-image` |
+| [Scroll Paragraph Fade](examples/text-animations/Scroll_Paragraph_Fade.md) | Each word in a sticky text block fades, rises, and unblurs into view one by one as the user scrolls, creating a staggered word-reveal effect driven by scroll progress. | `viewProgress, stagger, fade, blur, opacity, transform, filter` |
+| [Scroll Paragraph Reveal](examples/text-animations/Scroll_Paragraph_Reveal.md) | Words in a paragraph and eyebrow headline are individually revealed with a staggered scroll-driven animation — each word rises up, fades in, and deblurs as the user scrolls through a tall sticky section. | `viewProgress, opacity, transform, filter, reveal, stagger, blur, sticky` |
+| [Scroll Skew](examples/text-animations/Scroll_Skew.md) | Eleven stacked ghost layers of large display text progressively skew along the X axis as they scroll through the viewport, creating a depth-gradient warp effect that straightens at mid-scroll. | `viewProgress, transform, stagger, typography, parallax, rotate` |
+| [Strobe Headline](examples/text-animations/Strobe_Headline.md) | Stacked duplicate rows of a bold headline strobe and flicker per character on view enter, with each character's timing staggered by its row's distance from the solid center row and its position in the word, then a subtitle slides up after all flickers resolve. | `viewEnter, opacity, transform, stagger, flicker, reveal, fade` |
+| [Tech Glitch](examples/text-animations/Tech_Glitch.md) | Words split into individual interact-elements that reveal on viewEnter with a stepped glitch effect — randomized clip-path wipe directions, skewX jitter, and chromatic aberration text-shadow create a digital data-corruption aesthetic. | `viewEnter, clip-path, transform, stagger, reveal, typography, stepped-easing` |
+| [The Iris Gate](examples/text-animations/The_Iris_Gate.md) | Four triangular white mask panels slide inward from all four edges as the user scrolls, closing like an iris shutter to obscure the initial bold headline and reveal a softer italic message underneath. | `viewProgress, sticky, clip-path, transform, opacity, reveal, stagger` |
+| [V Shape Headline](examples/text-animations/Vshape_Headline.md) | Letters of the word "INTERACT" bounce in from below in a V-curve formation on viewport enter, then flatten to a straight baseline as the user scrolls through a sticky section. | `viewEnter, viewProgress, stagger, transform, opacity, sticky, typography, 3d` |
+| [Cards Peel Off Scroll](examples/text-animations/cards-peel-off-scroll.md) | Stacked content cards animate in sequence as the user scrolls — each card peels off the stack with a rotational fade-out on exit, while the hero title and final card fade in on view entry. | `viewProgress, viewEnter, sticky, opacity, transform, rotate, stagger, reveal` |
+| [Stacked Text Cards Scroll](examples/text-animations/stacked-text-cards-scroll.md) | Four sticky content cards stack on top of each other as the user scrolls, each new card rotating into place from alternating counter-clockwise and clockwise angles via viewProgress, while a hero heading and subtitle fade up on viewEnter. | `viewProgress, viewEnter, sticky, rotate, transform, opacity, fade, stagger, reveal` |
+| [Text Cards Slide In](examples/text-animations/text-cards-slide-in.md) | Cards containing typographic step content slide in from alternating sides with a 3D perspective transform as the user scrolls through dedicated trigger sections, while a hero title and subtitle fade up on initial view entry. | `viewProgress, viewEnter, opacity, transform, 3d, stagger, reveal, fixed, fade` |
+| [Text Fade 3D Perspective](examples/text-animations/text-fade-3d-perspective.md) | Three stacked full-screen text sections animate in and out with scroll-driven 3D perspective tilts and opacity fades as the page scrolls through a 700vh sticky container. | `viewProgress, sticky, opacity, transform, 3d, fade, stagger, reveal, perspective` |
+| [Text Fold Transition](examples/text-animations/textFoldTransition.md) | Three full-screen text pairs are stacked in a fixed overlay; scrolling through snap-point sections drives each pair's lines sliding up and out while the next pair's lines slide in from below, using masked overflow to create a clean fold reveal. | `viewProgress, pageVisible, scroll, transform, opacity, stagger, reveal, sticky, fixed, clip-path` |
+
+## Text and image
+
+| Demo | Summary | Tags |
+| --- | --- | --- |
+| [BG Color Invert](examples/text-image/BG_Color_Invert.md) | A tall "About Us" section where the background flips from white to black mid-scroll, simultaneously inverting all text colors while four portrait images and parallax inner layers slide up in staggered phases driven by viewProgress. | `viewProgress, parallax, stagger, fade, opacity, transform, reveal` |
+| [Image Stroll](examples/text-image/Image_Stroll.md) | As the page scrolls, a portrait image travels from a small inset position to fill half the viewport while bio text words fade and rise into view one by one, all scroll-driven across a tall sticky about-section. | `viewProgress, sticky, grid, parallax, stagger, fade, reveal, transform, opacity` |
+| [Pointer Scale Scroll Blur](examples/text-image/pointer-scale-scroll-blur.md) | A portrait image scales toward the mouse pointer via the ScaleMouse preset on pointer movement and blurs out progressively as the page scrolls, while a call-to-action link brightens on hover. | `pointerMove, viewProgress, hover, scale, blur, filter, sticky, transform, opacity` |
+| [Pointer Track Scroll Fade](examples/text-image/pointer-track-scroll-fade.md) | A portrait photo tracks the mouse pointer via the TrackMouse preset while fading out as the user scrolls through a sticky section, with a hover color transition on the bottom link. | `pointerMove, viewProgress, hover, sticky, opacity, transform, fade, parallax` |
+| [Scroll Blur Split Layout](examples/text-image/scroll-blur-split-layout.md) | A sticky split-screen layout where scrolling progressively blurs the hero portrait and headline text, with a subtle hover transition on the navigation link. | `viewProgress, hover, sticky, flex, filter, blur` |
+| [Scroll Perspective Hero](examples/text-image/scroll-perspective-hero.md) | A hero image animates through a 3D perspective rotation and scale as the user scrolls, while a giant backdrop headline and bottom content panel fade in, all driven by a sticky scroll container. | `viewProgress, sticky, parallax, 3d, transform, opacity, scale, rotate, fade` |
+| [Scroll Tilt Reveal](examples/text-image/scroll-tilt-reveal.md) | A split-screen layout where text elements (heading, paragraph, button) fade up with staggered delays on viewEnter, while the hero image tilts through a 3D Y-axis rotation driven by scroll progress. | `viewProgress, viewEnter, sticky, flex, opacity, transform, 3d, reveal, stagger, fade` |
+| [Shape Mask Parallax](examples/text-image/shape-mask-parallax.md) | As the page scrolls through a 500vh sticky section, a single image is revealed through five different SVG shape masks that swap in sequence — rectangle, organic curves, abstract blobs, rounded-square grid, and polygon arrow. | `viewProgress, sticky, opacity, fade, reveal` |
+| [Single Screen Parallax](examples/text-image/single-screen-parallax.md) | A sticky scroll section where a giant background headline translates horizontally and a hero image scales to zero as the user scrolls, with subtle pointer-tracking parallax on the hero image when hovered. | `viewProgress, pointerMove, parallax, sticky, transform, scale, text, opacity` |
+
+## UI components
+
+| Demo | Summary | Tags |
+| --- | --- | --- |
+| [Dropdown Light](examples/ui-components/dropdown-light.md) | A capsule-shaped dropdown menu where hovering the trigger button highlights it in gold and hovering each option scales its icon with a slight tilt, while opening and closing the menu is driven by click with staggered CSS transitions on the option rows. | `hover, click, opacity, transform, scale, rotate, stagger, flex` |
+| [Capsule Dropdown](examples/ui-components/dropdown.md) | A pill-shaped dropdown button that opens a staggered menu on click, with hover effects that highlight the button and individual options in gold. | `hover, click, flex, opacity, transform, fade, stagger` |
+| [Label](examples/ui-components/label.md) | Accessible pill-shaped checkbox labels that scale and highlight on hover, with a checkmark icon revealed via CSS transition when toggled. | `hover, click, transform, opacity, scale` |
+| [Lock Toggle](examples/ui-components/lock-toggle.md) | A pill-shaped toggle button animates on click, sliding the thumb across the track, swapping background colors, and transitioning the icon face and label text between locked and unlocked states. | `click, toggle, opacity, transform, flex` |
+| [On Off Toggle](examples/ui-components/on-off-toggle.md) | A sun/moon day-night toggle button that slides its thumb across the track on click, swapping background colors and fading between sun and moon icons to indicate the active state. | `click, opacity, transform, toggle, button, flex` |
+| [Password Input](examples/ui-components/password-input.md) | A password input with a toggle eye button that animates its lid, pupil, and lashes on click to show or hide the password, scales on hover, and tracks the mouse cursor with a smooth blinking pupil while the eye is open. | `hover, click, pageVisible, pointerMove, opacity, transform, toggle, scale, customEffect, input, button` |
+| [Radio Buttons](examples/ui-components/radio-buttons.md) | A radio button group where clicking a button springs the selection dot in with a bouncy keyframe animation, and hovering scales the indicator ring while brightening the label. | `click, hover, transform, scale, flex, list` |
+| [Search Input Light](examples/ui-components/search-input-light.md) | A collapsed search pill icon that expands into a full input bar on click, revealing a staggered suggestion list with hover transitions on both the pill and each suggestion item. | `click, hover, opacity, transform, reveal, stagger, fade, border-radius` |
+| [Search Input](examples/ui-components/search-input.md) | A collapsed pill-shaped search button that expands into a full input field on click, with a spinning icon animation, input reveal, border glow, and staggered suggestion items that appear below. | `click, hover, opacity, transform, reveal, stagger, fade, border-radius` |
+| [Smiley Nav Light](examples/ui-components/smiley-nav-light.md) | A dark navigation bar with four tabs that hover-reveals a multi-column dropdown panel, using Interact hover transitions for color/border highlighting and vanilla JS class-toggling for panel slide-in with staggered link fade-up. | `hover, flex, opacity, transform, stagger, fade, reveal` |
+| [Smiley Nav](examples/ui-components/smiley-nav.md) | A navigation bar with tab hover color transitions and an animated dropdown panel that reveals staggered link items when hovering over tabs, using Interact-driven CSS transitions for nav elements and dropdown links. | `hover, flex, opacity, transform, stagger, fade` |
