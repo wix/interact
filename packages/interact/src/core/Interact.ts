@@ -515,7 +515,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
 
         if (target !== source) {
           const targetEntry = _ensureInteractionEntry(interactions, target);
-          const seqInteractionId = `${target}::seq::${sequenceId}::${interactionIdx}`;
+          const seqInteractionId = `${source}::${target}::seq::${sequenceId}::${interactionIdx}`;
 
           if (!targetEntry.sequences[seqInteractionId]) {
             targetEntry.sequences[seqInteractionId] = [];
