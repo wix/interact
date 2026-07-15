@@ -7,7 +7,7 @@ Stacked duplicate rows of a bold headline strobe and flicker per character on vi
 ## Markup
 
 ```html
-<div class="visualizer-container" id="stack-container">
+<interact-element data-interact-key="stack" class="visualizer-container" id="stack-container">
   <div class="row duplicate">
     <interact-element data-interact-key="char-0-0"><span class="char">I</span></interact-element>
     <interact-element data-interact-key="char-0-1"><span class="char">M</span></interact-element>
@@ -125,7 +125,7 @@ Stacked duplicate rows of a bold headline strobe and flicker per character on vi
     <interact-element data-interact-key="char-6-15"><span class="char">T</span></interact-element>
     <interact-element data-interact-key="char-6-16"><span class="char">Y</span></interact-element>
   </div>
-</div>
+</interact-element>
 
 <div class="desc-container">
   <interact-element data-interact-key="hero-desc">
@@ -226,75 +226,78 @@ body {
 ## Interact config
 
 ```js
-const ROWS = 7;
-const TEXT = "IMMERSIVE REALITY";
-const MIDDLE_INDEX = Math.floor(ROWS / 2);
-
-const maxRowDist = Math.abs(0 - MIDDLE_INDEX);
-const maxCharIndex = TEXT.length - 1;
-const lastLetterStartDelay = (maxRowDist * 100) + (maxCharIndex * 40);
+const duplicateRows = [0, 1, 2, 4, 5, 6];
+const firstWordColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+const secondWordColumns = [10, 11, 12, 13, 14, 15, 16];
 const animationDuration = 1200;
-const buffer = 400;
-const paragraphDelay = lastLetterStartDelay + animationDuration + buffer;
+const paragraphDelay = (3 * 100) + (16 * 40) + animationDuration + 400;
 
-const interactions = [];
+const effectsFor = (row, columns) =>
+    columns.map(column => ({ key: `char-${row}-${column}`, effectId: 'flicker' }));
 
-for (let r = 0; r < ROWS; r++) {
-    if (r === MIDDLE_INDEX) continue;
-    const dist = Math.abs(r - MIDDLE_INDEX);
-    for (let c = 0; c < TEXT.length; c++) {
-        if (TEXT[c] === ' ') continue;
-        const key = `char-${r}-${c}`;
-        const delay = (dist * 100) + (c * 40);
-        interactions.push({
-            key,
-            trigger: 'viewEnter',
-            effects: [
-                {
-                    keyframeEffect: {
-                        name: `flicker-${r}-${c}`,
-                        keyframes: [
-                            { offset: 0.0, opacity: 1 },
-                            { offset: 0.1, opacity: 0 },
-                            { offset: 0.2, opacity: 1 },
-                            { offset: 0.3, opacity: 0 },
-                            { offset: 0.5, opacity: 1 },
-                            { offset: 0.6, opacity: 0 },
-                            { offset: 0.8, opacity: 1 },
-                            { offset: 1.0, opacity: 0 },
-                        ],
-                    },
-                    triggerType: 'once',
-                    duration: animationDuration,
-                    delay,
-                    easing: 'linear',
-                    fill: 'forwards',
-                },
-            ],
-        });
-    }
-}
-
-interactions.push({
-    key: 'hero-desc',
-    trigger: 'viewEnter',
-    effects: [
+const rowSequences = duplicateRows.flatMap(row => {
+    const rowDelay = Math.abs(row - 3) * 100;
+    return [
         {
-            keyframeEffect: {
-                name: 'hero-desc-reveal',
-                keyframes: [
-                    { transform: 'translateY(110%)', opacity: 0 },
-                    { transform: 'translateY(0%)', opacity: 1 },
-                ],
-            },
+            delay: rowDelay,
+            offset: 40,
             triggerType: 'once',
-            duration: 800,
-            delay: paragraphDelay,
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            fill: 'both',
+            effects: effectsFor(row, firstWordColumns),
         },
-    ],
+        {
+            delay: rowDelay + 400,
+            offset: 40,
+            triggerType: 'once',
+            effects: effectsFor(row, secondWordColumns),
+        },
+    ];
 });
 
-{ interactions }
+{
+    effects: {
+        flicker: {
+            keyframeEffect: {
+                name: 'flicker',
+                keyframes: [
+                    { offset: 0.0, opacity: 1 },
+                    { offset: 0.1, opacity: 0 },
+                    { offset: 0.2, opacity: 1 },
+                    { offset: 0.3, opacity: 0 },
+                    { offset: 0.5, opacity: 1 },
+                    { offset: 0.6, opacity: 0 },
+                    { offset: 0.8, opacity: 1 },
+                    { offset: 1.0, opacity: 0 },
+                ],
+            },
+            duration: animationDuration,
+            easing: 'linear',
+            fill: 'forwards',
+        },
+    },
+    interactions: [
+        {
+            key: 'stack',
+            trigger: 'viewEnter',
+            sequences: rowSequences,
+        },
+        {
+            key: 'hero-desc',
+            trigger: 'viewEnter',
+            effects: [{
+                keyframeEffect: {
+                    name: 'hero-desc-reveal',
+                    keyframes: [
+                        { transform: 'translateY(110%)', opacity: 0 },
+                        { transform: 'translateY(0%)', opacity: 1 },
+                    ],
+                },
+                triggerType: 'once',
+                duration: 800,
+                delay: paragraphDelay,
+                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                fill: 'both',
+            }],
+        },
+    ],
+}
 ```

@@ -170,63 +170,53 @@ body::after {
 {
   interactions: [
     {
-      key: 'title',
+      key: 'page',
       trigger: 'viewEnter',
-      effects: [
-        {
-          triggerType: 'once',
-          keyframeEffect: {
-            name: 'title-in',
-            keyframes: [
-              { opacity: '0', transform: 'translateY(40px)', offset: 0 },
-              { opacity: '1', transform: 'translateY(0)', offset: 1 },
-            ],
+      sequences: [{
+        offset: 225,
+        triggerType: 'once',
+        effects: [
+          {
+            key: 'title',
+            keyframeEffect: {
+              name: 'title-in',
+              keyframes: [
+                { opacity: '0', transform: 'translateY(40px)', offset: 0 },
+                { opacity: '1', transform: 'translateY(0)', offset: 1 },
+              ],
+            },
+            duration: 1000,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'both',
           },
-          duration: 1000,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          fill: 'both',
-        },
-      ],
-    },
-    {
-      key: 'text-cols',
-      trigger: 'viewEnter',
-      effects: [
-        {
-          triggerType: 'once',
-          keyframeEffect: {
-            name: 'text-in',
-            keyframes: [
-              { opacity: '0', transform: 'translateY(30px)', offset: 0 },
-              { opacity: '1', transform: 'translateY(0)', offset: 1 },
-            ],
+          {
+            key: 'text-cols',
+            keyframeEffect: {
+              name: 'text-in',
+              keyframes: [
+                { opacity: '0', transform: 'translateY(30px)', offset: 0 },
+                { opacity: '1', transform: 'translateY(0)', offset: 1 },
+              ],
+            },
+            duration: 900,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'both',
           },
-          duration: 900,
-          delay: 250,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          fill: 'both',
-        },
-      ],
-    },
-    {
-      key: 'image-box',
-      trigger: 'viewEnter',
-      effects: [
-        {
-          triggerType: 'once',
-          keyframeEffect: {
-            name: 'image-in',
-            keyframes: [
-              { opacity: '0', transform: 'translateY(60px)', offset: 0 },
-              { opacity: '1', transform: 'translateY(0)', offset: 1 },
-            ],
+          {
+            key: 'image-box',
+            keyframeEffect: {
+              name: 'image-in',
+              keyframes: [
+                { opacity: '0', transform: 'translateY(60px)', offset: 0 },
+                { opacity: '1', transform: 'translateY(0)', offset: 1 },
+              ],
+            },
+            duration: 1100,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'both',
           },
-          duration: 1100,
-          delay: 450,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          fill: 'both',
-        },
-      ],
+        ],
+      }],
     },
     {
       key: 'page',

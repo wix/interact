@@ -165,59 +165,59 @@ body::after {
 {
   interactions: [
     {
-      key: 'title',
+      key: 'page',
       trigger: 'viewEnter',
-      sequences: [{
-        delay: 100,
-        offset: 80,
-        triggerType: 'once',
-        effects: [{
-          selector: '.letter',
-          keyframeEffect: { name: 'letter-in', keyframes: [
-            { transform: 'translateY(120%)', offset: 0 },
-            { transform: 'translateY(0)', offset: 1 },
-          ]},
-          duration: 900,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          fill: 'both',
-        }],
-      }],
-    },
-    {
-      key: 'subtitle',
-      trigger: 'viewEnter',
-      effects: [{
-        keyframeEffect: {
-          name: 'sub-in',
-          keyframes: [
-            { opacity: '0', transform: 'translateY(-15px) scale(0.9)', offset: 0 },
-            { opacity: '1', transform: 'translateY(0) scale(1)', offset: 1 },
+      sequences: [
+        {
+          delay: 100,
+          offset: 80,
+          triggerType: 'once',
+          effects: [{
+            key: 'title',
+            selector: '.letter',
+            keyframeEffect: { name: 'letter-in', keyframes: [
+              { transform: 'translateY(120%)', offset: 0 },
+              { transform: 'translateY(0)', offset: 1 },
+            ]},
+            duration: 900,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'both',
+          }],
+        },
+        {
+          delay: 500,
+          offset: 100,
+          triggerType: 'once',
+          effects: [
+            {
+              key: 'rift',
+              keyframeEffect: {
+                name: 'rift-in',
+                keyframes: [
+                  { opacity: '0', offset: 0 },
+                  { opacity: '1', offset: 1 },
+                ],
+              },
+              duration: 1200,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'both',
+            },
+            {
+              key: 'subtitle',
+              keyframeEffect: {
+                name: 'sub-in',
+                keyframes: [
+                  { opacity: '0', transform: 'translateY(-15px) scale(0.9)', offset: 0 },
+                  { opacity: '1', transform: 'translateY(0) scale(1)', offset: 1 },
+                ],
+              },
+              duration: 800,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'both',
+            },
           ],
         },
-        duration: 800,
-        delay: 600,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'both',
-        triggerType: 'once',
-      }],
-    },
-    {
-      key: 'rift',
-      trigger: 'viewEnter',
-      effects: [{
-        keyframeEffect: {
-          name: 'rift-in',
-          keyframes: [
-            { opacity: '0', offset: 0 },
-            { opacity: '1', offset: 1 },
-          ],
-        },
-        duration: 1200,
-        delay: 500,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'both',
-        triggerType: 'once',
-      }],
+      ],
     },
     {
       key: 'page',
