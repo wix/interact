@@ -129,9 +129,9 @@ add(el);
 **Before designing the config, draw on the example library for inspiration and reference patterns:**
 
 1. Read `examples/index.md` (this file is a lightweight index — it lists all demos with a short summary and tags).
-2. Based on the user's request, identify 2–5 demos whose trigger type, layout, motion properties, or overall feel best match what's being built. Match on tags like `trigger: viewProgress`, `layout: sticky scroll section`, `motion: clip-path`, etc.
+2. Based on the user's request, identify 2–4 demos whose trigger type, layout, motion properties, or overall feel best match what's being built. Match on tags like `trigger: viewProgress`, `layout: sticky scroll section`, `motion: clip-path`, etc.
 3. Read those demo files from `examples/minimalDemos/<Category>/<name>.md` (categories: `Gallery-and-Carousel`, `Lists`, `Image_Background`).
-4. Use the demos as inspiration for the interact config, HTML structure, and CSS layout — adapt their patterns, keyframes, and effect structures to the user's context.
+4. Treat each demo as a cohesive unit — the interact config, HTML structure, and CSS layout are designed to work together. Adapt all three parts to the user's context rather than lifting any single piece in isolation.
 
 This step is especially useful for: picking the right trigger/effect combination, handling complex layered compositions, and producing configs that feel polished rather than generic.
 

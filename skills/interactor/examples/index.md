@@ -1,11 +1,6 @@
 # Examples Index
 
-This index lists curated animation demos that serve as inspiration and reference patterns. Each demo contains a working interact config, HTML structure, and CSS layout — all useful as inspiration.
-
-**How to use:**
-1. Read this index and identify 1–3 demos most relevant to the user's request — match on trigger type, layout, motion properties, or overall feel.
-2. Read those files from `minimalDemos/<Category>/<name>.md`.
-3. Use them as both visual inspiration and config reference when building the interact config.
+This index lists curated animation demos that serve as inspiration and reference patterns. Each demo is a cohesive unit — the interact config, HTML structure, and CSS layout are designed to work together to produce a polished animation. Treat each demo as a whole: adapt all three parts together rather than lifting any single piece in isolation.
 
 ---
 
