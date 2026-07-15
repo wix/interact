@@ -20,7 +20,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-1">
           <div id="card-1" class="card">
-            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80" alt="Alpine peaks">
+            <img src="">
             <div class="card-label">
               <span>01 — Landscape</span>
               <h3>Alpine Peaks</h3>
@@ -30,7 +30,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-2">
           <div id="card-2" class="card">
-            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80" alt="Tropical shore">
+            <img src="">
             <div class="card-label">
               <span>02 — Ocean</span>
               <h3>Tropical Shore</h3>
@@ -40,7 +40,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-3">
           <div id="card-3" class="card">
-            <img src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=600&q=80" alt="Northern lights">
+            <img src="">
             <div class="card-label">
               <span>03 — Sky</span>
               <h3>Northern Lights</h3>
@@ -50,7 +50,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-4">
           <div id="card-4" class="card">
-            <img src="https://images.unsplash.com/photo-1462275646964-a0e3c11f18a6?w=600&q=80" alt="Cherry blossoms">
+            <img src="">
             <div class="card-label">
               <span>04 — Flora</span>
               <h3>Cherry Blossoms</h3>
@@ -60,7 +60,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-5">
           <div id="card-5" class="card">
-            <img src="https://images.unsplash.com/photo-1488197047962-b48492212cda?w=600&q=80" alt="Sand dunes">
+            <img src="">
             <div class="card-label">
               <span>05 — Desert</span>
               <h3>Sand Dunes</h3>
@@ -70,7 +70,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-6">
           <div id="card-6" class="card">
-            <img src="https://images.unsplash.com/photo-1432405972618-c6b0cfba8428?w=600&q=80" alt="Waterfall">
+            <img src="">
             <div class="card-label">
               <span>06 — Water</span>
               <h3>Misty Waterfall</h3>
@@ -80,7 +80,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-7">
           <div id="card-7" class="card">
-            <img src="https://images.unsplash.com/photo-1514565131-fce0801e5785?w=600&q=80" alt="City skyline">
+            <img src="">
             <div class="card-label">
               <span>07 — Urban</span>
               <h3>City Lights</h3>

@@ -13,7 +13,6 @@ Three full-screen text pairs are stacked in a fixed overlay; scrolling through s
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text Fold Transition</title>
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-white text-black font-sans m-0">
 
@@ -162,14 +161,18 @@ const T2_START = 51; const T2_END = 72;
     interactions: [
         {
             key: 'scroll-track',
-            trigger: 'pageVisible',
-            effects: [
-                { key: 'p1-h1-l1', duration: 1000, delay: 0,   keyframeEffect: { name: 'in', keyframes: ENTER_LOAD }, fill: 'both', composite: 'add' },
-                { key: 'p1-h1-l2', duration: 1000, delay: 100, keyframeEffect: { name: 'in', keyframes: ENTER_LOAD }, fill: 'both', composite: 'add' },
-                { key: 'p1-l1',    duration: 1000, delay: 200, keyframeEffect: { name: 'in', keyframes: ENTER_LOAD }, fill: 'both', composite: 'add' },
-                { key: 'p1-l2',    duration: 1000, delay: 300, keyframeEffect: { name: 'in', keyframes: ENTER_LOAD }, fill: 'both', composite: 'add' },
-                { key: 'p1-l3',    duration: 1000, delay: 400, keyframeEffect: { name: 'in', keyframes: ENTER_LOAD }, fill: 'both', composite: 'add' }
-            ]
+            trigger: 'viewEnter',
+            sequences: [{
+                offset: 100,
+                triggerType: 'once',
+                effects: [
+                    { key: 'p1-h1-l1', duration: 1000, keyframeEffect: { name: 'in', keyframes: ENTER_LOAD }, fill: 'both', composite: 'add' },
+                    { key: 'p1-h1-l2', duration: 1000, keyframeEffect: { name: 'in', keyframes: ENTER_LOAD }, fill: 'both', composite: 'add' },
+                    { key: 'p1-l1',    duration: 1000, keyframeEffect: { name: 'in', keyframes: ENTER_LOAD }, fill: 'both', composite: 'add' },
+                    { key: 'p1-l2',    duration: 1000, keyframeEffect: { name: 'in', keyframes: ENTER_LOAD }, fill: 'both', composite: 'add' },
+                    { key: 'p1-l3',    duration: 1000, keyframeEffect: { name: 'in', keyframes: ENTER_LOAD }, fill: 'both', composite: 'add' }
+                ]
+            }]
         },
         {
             key: 'scroll-track',

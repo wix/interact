@@ -11,7 +11,7 @@ Five stacked image cards fan out horizontally when the collection is hovered, re
   <div id="cards-collection">
     <interact-element data-interact-key="#card-1">
       <div id="card-1" class="card">
-        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop" alt="Misty mountains">
+        <img src="">
         <div class="card-content">
           <h2>Serene Peaks</h2>
           <p>Find your calm</p>
@@ -20,7 +20,7 @@ Five stacked image cards fan out horizontally when the collection is hovered, re
     </interact-element>
     <interact-element data-interact-key="#card-2">
       <div id="card-2" class="card">
-        <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=2475&auto=format&fit=crop" alt="Green hills">
+        <img src="">
         <div class="card-content">
           <h2>Rolling Hills</h2>
           <p>Explore the landscape</p>
@@ -29,7 +29,7 @@ Five stacked image cards fan out horizontally when the collection is hovered, re
     </interact-element>
     <interact-element data-interact-key="#card-3">
       <div id="card-3" class="card">
-        <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2070&auto=format&fit=crop" alt="Mountain lake">
+        <img src="">
         <div class="card-content">
           <h2>Alpine Lake</h2>
           <p>Reflect and relax</p>
@@ -38,7 +38,7 @@ Five stacked image cards fan out horizontally when the collection is hovered, re
     </interact-element>
     <interact-element data-interact-key="#card-4">
       <div id="card-4" class="card">
-        <img src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=1974&auto=format&fit=crop" alt="Waterfall">
+        <img src="">
         <div class="card-content">
           <h2>Hidden Falls</h2>
           <p>Discover nature's power</p>
@@ -47,7 +47,7 @@ Five stacked image cards fan out horizontally when the collection is hovered, re
     </interact-element>
     <interact-element data-interact-key="#card-5">
       <div id="card-5" class="card">
-        <img src="https://images.unsplash.com/photo-1511884642898-4c92249e20b6?q=80&w=2070&auto=format&fit=crop" alt="Forest from above">
+        <img src="">
         <div class="card-content">
           <h2>Forest Canopy</h2>
           <p>Breathe the fresh air</p>

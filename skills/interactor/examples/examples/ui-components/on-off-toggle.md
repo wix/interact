@@ -60,8 +60,6 @@ A sun/moon day-night toggle button that slides its thumb across the track on cli
 ## Essential styles
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {

@@ -17,7 +17,7 @@ A tall "About Us" section where the background flips from white to black mid-scr
     <interact-element data-interact-key="img1" class="img-pos img-1-pos">
       <div class="scroll-image">
         <interact-element data-interact-key="img1-inner" class="img-inner">
-          <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=90" alt="" />
+          <img src="" />
         </interact-element>
       </div>
     </interact-element>
@@ -25,7 +25,7 @@ A tall "About Us" section where the background flips from white to black mid-scr
     <interact-element data-interact-key="img2" class="img-pos img-2-pos">
       <div class="scroll-image">
         <interact-element data-interact-key="img2-inner" class="img-inner">
-          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=90" alt="" />
+          <img src="" />
         </interact-element>
       </div>
     </interact-element>
@@ -33,7 +33,7 @@ A tall "About Us" section where the background flips from white to black mid-scr
     <interact-element data-interact-key="img3" class="img-pos img-3-pos">
       <div class="scroll-image">
         <interact-element data-interact-key="img3-inner" class="img-inner">
-          <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=90" alt="" />
+          <img src="" />
         </interact-element>
       </div>
     </interact-element>
@@ -41,7 +41,7 @@ A tall "About Us" section where the background flips from white to black mid-scr
     <interact-element data-interact-key="img4" class="img-pos img-4-pos">
       <div class="scroll-image">
         <interact-element data-interact-key="img4-inner" class="img-inner">
-          <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1920&q=90" alt="" />
+          <img src="" />
         </interact-element>
       </div>
     </interact-element>

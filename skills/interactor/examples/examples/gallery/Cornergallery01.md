@@ -11,21 +11,21 @@ Fullscreen images reveal by scaling from a random corner on click or wheel scrol
   <div id="collage-container">
     <div id="projector-overlay"></div>
     <div class="fragment" style="transform-origin: 0 0; transform: scale(1); transition: transform 0.9s cubic-bezier(0.25,1,0.5,1);">
-      <div class="content-image kenburns kenburns-tr" style="background-image: url(IMAGE_URL)"></div>
+      <div class="content-image kenburns kenburns-tr" style="background-image: url('')"></div>
       <div class="text-overlay">
         <h1>Explore Vistas</h1>
         <p>Click or Scroll to discover new images.</p>
       </div>
     </div>
     <div class="fragment" style="transform-origin: 100% 100%; transform: scale(0); transition: transform 1.1s cubic-bezier(0.25,1,0.5,1);">
-      <div class="content-image kenburns kenburns-bl" style="background-image: url(IMAGE_URL)"></div>
+      <div class="content-image kenburns kenburns-bl" style="background-image: url('')"></div>
       <div class="text-overlay">
         <h1>Explore Vistas</h1>
         <p>Click or Scroll to discover new images.</p>
       </div>
     </div>
     <div class="fragment" style="transform-origin: 50% 0; transform: scale(0); transition: transform 1.0s cubic-bezier(0.25,1,0.5,1);">
-      <div class="content-image kenburns kenburns-br" style="background-image: url(IMAGE_URL)"></div>
+      <div class="content-image kenburns kenburns-br" style="background-image: url('')"></div>
       <div class="text-overlay">
         <h1>Explore Vistas</h1>
         <p>Click or Scroll to discover new images.</p>
@@ -175,7 +175,7 @@ html, body {
     pointer-events: none;
     z-index: 5;
     opacity: 1;
-    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4d5eXlzc3OLi4ubm5uVlZWPj4+NjY19fX2JiYl/f39ra2uRkZGZmZlpaWmXl5dvb29xcXGTk5NnZ2c8TV1mAAAAG3RSTlNAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAvEOwtAAAAYklEQVRIx+3MyQEAIAwDMCVKO6z0/xMch93N+FN2k5EZM2XM2DG/PF2MYy49Ey0W8UismsdwMv9QIMATEUo3NcvdMzS3PZcC0VY9PNc5BII8Pwdo6w5zDoRQGOeulVoSAAAAAElFTkSuQmCC');
+    background: url('');
     animation: flicker 0.15s infinite alternate;
 }
 
@@ -188,144 +188,50 @@ html, body {
 ## Interact config
 
 ```js
-const container = document.getElementById('collage-container');
-const progressIndicator = document.getElementById('progress-indicator');
-const imageHistory = [];
-let currentIndex = -1;
-let canAnimate = true;
-const throttleTime = 400;
-let autoAdvanceTimer = null;
-
-const getRealImageUrl = () => `https://picsum.photos/1200/800?random=${Math.random()}`;
-const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-function createFragment(imageUrl) {
-    const fragment = document.createElement('div');
-    fragment.className = 'fragment';
-    const origins = ['0 0', '50% 0', '100% 0', '0 50%', '100% 50%', '0 100%', '50% 100%', '100% 100%'];
-    const duration = (Math.random() * 0.5 + 0.8).toFixed(2);
-    const easing = 'cubic-bezier(0.25, 1, 0.5, 1)';
-    fragment.style.transformOrigin = getRandomItem(origins);
-    fragment.style.transform = 'scale(0)';
-    fragment.style.transition = `transform ${duration}s ${easing}`;
-    const content = document.createElement('div');
-    content.className = 'content-image kenburns ' + getRandomItem(['kenburns-tr', 'kenburns-br', 'kenburns-tl', 'kenburns-bl']);
-    content.style.backgroundImage = `url(${imageUrl})`;
-    fragment.appendChild(content);
-    const textOverlay = document.createElement('div');
-    textOverlay.className = 'text-overlay';
-    textOverlay.innerHTML = `<h1>Explore Vistas</h1><p>Click or Scroll to discover new images.</p>`;
-    fragment.appendChild(textOverlay);
-    return fragment;
-}
-
-function displayImage(imageUrl) {
-    const preloader = new Image();
-    preloader.onload = () => {
-        const oldFragments = container.querySelectorAll('.fragment');
-        setTimeout(() => oldFragments.forEach(node => node.remove()), 1500);
-        const fragment = createFragment(imageUrl);
-        container.appendChild(fragment);
-        setTimeout(() => fragment.style.transform = 'scale(1)', 20);
-    };
-    preloader.src = imageUrl;
-}
-
-function updateProgressIndicator() {
-    progressIndicator.innerHTML = '';
-    imageHistory.forEach((_, index) => {
-        const dot = document.createElement('div');
-        dot.className = 'progress-dot';
-        dot.dataset.index = index;
-        if (index === currentIndex) dot.classList.add('active');
-        dot.addEventListener('click', handleDotClick);
-        progressIndicator.appendChild(dot);
-    });
-}
-
-function resetAutoAdvanceTimer() {
-    clearTimeout(autoAdvanceTimer);
-    autoAdvanceTimer = setTimeout(() => {
-        if (canAnimate) doNextImage();
-        else resetAutoAdvanceTimer();
-    }, 4000);
-}
-
-function doInitialLoad() {
-    const firstImageUrl = getRealImageUrl();
-    imageHistory.push(firstImageUrl);
-    currentIndex = 0;
-    displayImage(firstImageUrl);
-    updateProgressIndicator();
-    resetAutoAdvanceTimer();
-}
-
-function doNextImage() {
-    if (!canAnimate) return;
-    canAnimate = false;
-    if (currentIndex < imageHistory.length - 1) {
-        currentIndex++;
-    } else {
-        const newImageUrl = getRealImageUrl();
-        imageHistory.push(newImageUrl);
-        currentIndex++;
-    }
-    displayImage(imageHistory[currentIndex]);
-    updateProgressIndicator();
-    resetAutoAdvanceTimer();
-    setTimeout(() => canAnimate = true, throttleTime);
-}
-
-function doPreviousImage() {
-    if (!canAnimate || currentIndex <= 0) return;
-    canAnimate = false;
-    currentIndex--;
-    displayImage(imageHistory[currentIndex]);
-    updateProgressIndicator();
-    resetAutoAdvanceTimer();
-    setTimeout(() => canAnimate = true, throttleTime);
-}
-
-function doGoToImage(index) {
-    if (!canAnimate || index === currentIndex) return;
-    canAnimate = false;
-    currentIndex = index;
-    displayImage(imageHistory[currentIndex]);
-    updateProgressIndicator();
-    resetAutoAdvanceTimer();
-    setTimeout(() => canAnimate = true, throttleTime);
-}
-
-function handleDotClick(event) {
-    const clickedIndex = parseInt(event.target.dataset.index, 10);
-    doGoToImage(clickedIndex);
-}
-
-function handleScroll(event) {
-    if (event.deltaY > 0) doNextImage();
-    else if (event.deltaY < 0) doPreviousImage();
-}
-
-window.addEventListener('wheel', handleScroll, { passive: true });
-
 {
-    interactions: [
-        {
-            key: 'container',
-            trigger: 'pageVisible',
-            effects: [{
-                triggerType: 'once',
-                customEffect: () => doInitialLoad()
-            }]
-        },
-        {
-            key: 'container',
-            trigger: 'click',
-            effects: [{
-                triggerType: 'repeat',
-                customEffect: () => doNextImage()
-            }]
-        }
-    ]
+  interactions: [
+    {
+      key: 'container',
+      trigger: 'pageVisible',
+      effects: [{
+        triggerType: 'once',
+        customEffect: initializeExistingGallery,
+      }],
+    },
+    {
+      key: 'container',
+      trigger: 'click',
+      effects: [{
+        triggerType: 'repeat',
+        customEffect: showNextExistingFragment,
+      }],
+    },
+  ],
 }
+```
+
+## Integration pseudocode
+
+The custom effects are application integration hooks. They update only the fragments and progress dots already declared in the markup.
+
+```text
+fragments = select the existing .fragment elements
+dots = select the existing .progress-dot elements
+activeIndex = 0
+
+initializeExistingGallery:
+  mark fragment 0 as visible
+  mark dot 0 as active
+
+show fragment at index:
+  scale the previously active fragment to 0
+  scale the requested existing fragment to 1
+  move the active class from the previous existing dot to the requested dot
+  update activeIndex
+
+showNextExistingFragment:
+  show fragment at (activeIndex + 1) wrapped by the number of existing fragments
+
+on wheel or progress-dot activation:
+  call the same show-fragment operation with the appropriate existing index
 ```

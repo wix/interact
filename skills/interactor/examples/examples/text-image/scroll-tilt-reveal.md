@@ -24,7 +24,7 @@ A split-screen layout where text elements (heading, paragraph, button) fade up w
 
     <div class="image-area">
       <interact-element data-interact-key="hero-image" class="hero-image">
-        <img src="IMAGE_URL" alt="Landscape">
+        <img src="">
       </interact-element>
     </div>
 
@@ -185,57 +185,53 @@ interact-element {
 {
   interactions: [
     {
-      key: 'text-title',
+      key: 'scroll-driver',
       trigger: 'viewEnter',
-      effects: [{
-        triggerType: 'once',
-        keyframeEffect: {
-          name: 'float-in-title',
-          keyframes: [
-            { opacity: 0, transform: 'translateY(50px)' },
-            { opacity: 1, transform: 'translateY(0)' }
-          ]
-        },
-        duration: 800,
+      sequences: [{
         delay: 500,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'forwards'
-      }]
-    },
-    {
-      key: 'text-desc',
-      trigger: 'viewEnter',
-      effects: [{
+        offset: 300,
         triggerType: 'once',
-        keyframeEffect: {
-          name: 'float-in-desc',
-          keyframes: [
-            { opacity: 0, transform: 'translateY(40px)' },
-            { opacity: 1, transform: 'translateY(0)' }
-          ]
-        },
-        duration: 800,
-        delay: 800,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'forwards'
-      }]
-    },
-    {
-      key: 'text-btn',
-      trigger: 'viewEnter',
-      effects: [{
-        triggerType: 'once',
-        keyframeEffect: {
-          name: 'float-in-btn',
-          keyframes: [
-            { opacity: 0, transform: 'translateY(40px)' },
-            { opacity: 1, transform: 'translateY(0)' }
-          ]
-        },
-        duration: 800,
-        delay: 1100,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'forwards'
+        effects: [
+          {
+            key: 'text-title',
+            keyframeEffect: {
+              name: 'float-in-title',
+              keyframes: [
+                { opacity: 0, transform: 'translateY(50px)' },
+                { opacity: 1, transform: 'translateY(0)' }
+              ]
+            },
+            duration: 800,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'forwards'
+          },
+          {
+            key: 'text-desc',
+            keyframeEffect: {
+              name: 'float-in-desc',
+              keyframes: [
+                { opacity: 0, transform: 'translateY(40px)' },
+                { opacity: 1, transform: 'translateY(0)' }
+              ]
+            },
+            duration: 800,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'forwards'
+          },
+          {
+            key: 'text-btn',
+            keyframeEffect: {
+              name: 'float-in-btn',
+              keyframes: [
+                { opacity: 0, transform: 'translateY(40px)' },
+                { opacity: 1, transform: 'translateY(0)' }
+              ]
+            },
+            duration: 800,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'forwards'
+          }
+        ]
       }]
     },
     {

@@ -17,8 +17,7 @@ On scroll, 20 alternating horizontal white stripes slide in from opposite sides 
     <div class="hero__img-wrap">
       <img
         class="hero__img"
-        src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1920&q=80"
-        alt=""
+        src=""
       />
     </div>
   </interact-element>

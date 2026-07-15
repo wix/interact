@@ -10,7 +10,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
 <section class="grid-container">
   <interact-element data-interact-key="card-1">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/forest/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 1</h3>
@@ -20,7 +20,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
   </interact-element>
   <interact-element data-interact-key="card-2">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/mountain/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 2</h3>
@@ -30,7 +30,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
   </interact-element>
   <interact-element data-interact-key="card-3">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/river/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 3</h3>
@@ -40,7 +40,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
   </interact-element>
   <interact-element data-interact-key="card-4">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/wild/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 4</h3>
@@ -50,7 +50,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
   </interact-element>
   <interact-element data-interact-key="card-5">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/jungle/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 5</h3>
@@ -60,7 +60,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
   </interact-element>
   <interact-element data-interact-key="card-6">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/desert/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 6</h3>

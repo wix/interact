@@ -17,37 +17,37 @@ Six image panels in geometric shapes cycle one by one in an infinite looping seq
 
     <interact-element data-interact-key="mask-1">
       <div class="mask-item shape-square" style="--x: 5vw; --y: 10vh; --w: 75vmin; --h: 75vmin;">
-        <img src="https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=800&auto=format&fit=crop" class="mask-bg" alt="">
+        <img src="" class="mask-bg">
       </div>
     </interact-element>
 
     <interact-element data-interact-key="mask-2">
       <div class="mask-item shape-rect" style="--x: 82vw; --y: 0vh; --w: 18vw; --h: 100vh;">
-        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800&auto=format&fit=crop" class="mask-bg" alt="">
+        <img src="" class="mask-bg">
       </div>
     </interact-element>
 
     <interact-element data-interact-key="mask-3">
       <div class="mask-item shape-pentagon" style="--x: -5vw; --y: 55vh; --w: 50vmin; --h: 50vmin;">
-        <img src="https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=800&auto=format&fit=crop" class="mask-bg" alt="">
+        <img src="" class="mask-bg">
       </div>
     </interact-element>
 
     <interact-element data-interact-key="mask-4">
       <div class="mask-item shape-circle" style="--x: 50vw; --y: -5vh; --w: 45vmin; --h: 45vmin;">
-        <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=800&auto=format&fit=crop" class="mask-bg" alt="">
+        <img src="" class="mask-bg">
       </div>
     </interact-element>
 
     <interact-element data-interact-key="mask-5">
       <div class="mask-item shape-arch" style="--x: 35vw; --y: 25vh; --w: 35vmin; --h: 50vmin;">
-        <img src="https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=800&auto=format&fit=crop" class="mask-bg" alt="">
+        <img src="" class="mask-bg">
       </div>
     </interact-element>
 
     <interact-element data-interact-key="mask-6">
       <div class="mask-item shape-oval" style="--x: 15vw; --y: 65vh; --w: 70vw; --h: 35vh;">
-        <img src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?q=80&w=800&auto=format&fit=crop" class="mask-bg" alt="">
+        <img src="" class="mask-bg">
       </div>
     </interact-element>
 
@@ -58,8 +58,6 @@ Six image panels in geometric shapes cycle one by one in an infinite looping seq
 ## Essential styles
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Xanh+Mono:ital@0;1&family=Liter:ital,wght@0,400;1,400&family=Oswald:wght@700&display=swap');
-
 :root {
     --grayscale: 100%;
     --mask-scale: 1;

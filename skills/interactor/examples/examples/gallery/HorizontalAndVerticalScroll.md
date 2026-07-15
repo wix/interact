@@ -17,7 +17,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
 
           <interact-element data-interact-key="#card-1">
             <div id="card-1" class="card relative flex flex-col justify-end text-white overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1554941829-202a0b2403b8?q=80&w=2940&auto=format&fit=crop" alt="Abstract architectural design">
+              <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Discovery</h2>
                 <p class="text-base md:text-lg">Every scroll reveals something new.</p>
@@ -27,7 +27,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
 
           <interact-element data-interact-key="#card-2">
             <div id="card-2" class="card relative flex flex-col justify-end text-white overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=2787&auto=format&fit=crop" alt="Smooth flowing abstract shapes">
+              <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Progression</h2>
                 <p class="text-base md:text-lg">Building momentum with each frame.</p>
@@ -37,7 +37,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
 
           <interact-element data-interact-key="#card-3">
             <div id="card-3" class="card relative flex flex-col justify-end text-white overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1579546929662-711aa81148cf?q=80&w=2940&auto=format&fit=crop" alt="Colorful pastel abstract background">
+              <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Harmony</h2>
                 <p class="text-base md:text-lg">Where design and motion align.</p>
@@ -47,7 +47,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
 
           <interact-element data-interact-key="#card-4">
             <div id="card-4" class="card relative flex flex-col justify-end text-white overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=2940&auto=format&fit=crop" alt="Vibrant liquid paint mixing">
+              <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Energy</h2>
                 <p class="text-base md:text-lg">A dynamic visual experience.</p>
@@ -57,7 +57,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
 
           <interact-element data-interact-key="#card-5">
             <div id="card-5" class="card relative flex flex-col justify-end text-white overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?q=80&w=2854&auto=format&fit=crop" alt="Subtle watercolor texture">
+              <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Clarity</h2>
                 <p class="text-base md:text-lg">The story becomes clear.</p>
@@ -67,7 +67,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
 
           <interact-element data-interact-key="#card-6">
             <div id="card-6" class="card relative flex flex-col justify-end text-white overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2940&auto=format&fit=crop" alt="Bright blend of abstract colors">
+              <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Finale</h2>
                 <p class="text-base md:text-lg">The final view unfolds.</p>

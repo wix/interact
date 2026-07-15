@@ -17,7 +17,7 @@ Each panel in a vertical stack expands its height and reveals an overlay text la
             <h2 class="feature-bottom-title">Serene Lakes</h2>
           </div>
         </interact-element>
-        <img src="https://images.unsplash.com/photo-1439853949127-fa647821eba0?q=80&w=1974&auto=format=fit=crop" alt="A serene lake with mountains in the background" class="feature-image">
+        <img src="" class="feature-image">
       </div>
     </interact-element>
     <interact-element data-interact-key="#column-2">
@@ -28,7 +28,7 @@ Each panel in a vertical stack expands its height and reveals an overlay text la
             <h2 class="feature-bottom-title">Vast Deserts</h2>
           </div>
         </interact-element>
-        <img src="https://images.unsplash.com/photo-1488197047962-b48492212cda?q=80&w=2070&auto=format=fit=crop" alt="Sand dunes in a vast desert under a clear sky" class="feature-image">
+        <img src="" class="feature-image">
       </div>
     </interact-element>
     <interact-element data-interact-key="#column-3">
@@ -39,7 +39,7 @@ Each panel in a vertical stack expands its height and reveals an overlay text la
             <h2 class="feature-bottom-title">Lush Rainforests</h2>
           </div>
         </interact-element>
-        <img src="https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?q=80&w=1974&auto=format=fit=crop" alt="A dense rainforest with sunlight filtering through the canopy" class="feature-image">
+        <img src="" class="feature-image">
       </div>
     </interact-element>
     <interact-element data-interact-key="#column-4">
@@ -50,7 +50,7 @@ Each panel in a vertical stack expands its height and reveals an overlay text la
             <h2 class="feature-bottom-title">Ocean Cliffs</h2>
           </div>
         </interact-element>
-        <img src="https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1974&auto=format=fit=crop" alt="Dramatic ocean cliffs with waves crashing below" class="feature-image">
+        <img src="" class="feature-image">
       </div>
     </interact-element>
   </div>

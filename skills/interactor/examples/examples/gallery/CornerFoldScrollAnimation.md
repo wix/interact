@@ -16,7 +16,7 @@ Five fullscreen sticky panels sequentially slide up from below and expand their 
           <interact-element data-interact-key="#image-container-1">
             <div id="image-container-1" class="image-container">
               <interact-element data-interact-key="#image-1">
-                <img id="image-1" src="https://static.wixstatic.com/media/9eca39_4175bf73f46448989a6ed6cd2aa65142~mv2.jpg" class="animated-image" alt="Abstract architectural building with curves">
+                <img id="image-1" src="" class="animated-image">
               </interact-element>
             </div>
           </interact-element>
@@ -29,7 +29,7 @@ Five fullscreen sticky panels sequentially slide up from below and expand their 
           <interact-element data-interact-key="#image-container-2">
             <div id="image-container-2" class="image-container">
               <interact-element data-interact-key="#image-2">
-                <img id="image-2" src="https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?q=80&w=2670&auto=format&fit=crop" class="animated-image" alt="Vast desert landscape with mountains">
+                <img id="image-2" src="" class="animated-image">
               </interact-element>
             </div>
           </interact-element>
@@ -42,7 +42,7 @@ Five fullscreen sticky panels sequentially slide up from below and expand their 
           <interact-element data-interact-key="#image-container-3">
             <div id="image-container-3" class="image-container">
               <interact-element data-interact-key="#image-3">
-                <img id="image-3" src="https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?q=80&w=2670&auto=format&fit=crop" class="animated-image" alt="Night view of a sprawling city with lights">
+                <img id="image-3" src="" class="animated-image">
               </interact-element>
             </div>
           </interact-element>
@@ -55,7 +55,7 @@ Five fullscreen sticky panels sequentially slide up from below and expand their 
           <interact-element data-interact-key="#image-container-4">
             <div id="image-container-4" class="image-container">
               <interact-element data-interact-key="#image-4">
-                <img id="image-4" src="https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2670&auto=format&fit=crop" class="animated-image" alt="Sunlight filtering through a dense forest canopy">
+                <img id="image-4" src="" class="animated-image">
               </interact-element>
             </div>
           </interact-element>
@@ -68,7 +68,7 @@ Five fullscreen sticky panels sequentially slide up from below and expand their 
           <interact-element data-interact-key="#image-container-5">
             <div id="image-container-5" class="image-container">
               <interact-element data-interact-key="#image-5">
-                <img id="image-5" src="https://static.wixstatic.com/media/9eca39_2bfcffd0d1e3491a9b025401acf0e3d0~mv2.jpg" class="animated-image" alt="Turquoise ocean waves crashing on a sandy beach">
+                <img id="image-5" src="" class="animated-image">
               </interact-element>
             </div>
           </interact-element>

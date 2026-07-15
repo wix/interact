@@ -26,7 +26,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   </interact-element>
 
   <interact-element data-interact-key="#container-1">
-    <div id="container-1" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop');">
+    <div id="container-1" class="content-panel" style="background-image: url('');">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 1</h1>
         <p>This is the starting point.</p>
@@ -35,7 +35,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   </interact-element>
 
   <interact-element data-interact-key="#container-2">
-    <div id="container-2" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2070&auto=format&fit=crop');">
+    <div id="container-2" class="content-panel" style="background-image: url('');">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 2</h1>
         <p>Revealed by scrolling.</p>
@@ -44,7 +44,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   </interact-element>
 
   <interact-element data-interact-key="#container-3">
-    <div id="container-3" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2070&auto=format&fit=crop');">
+    <div id="container-3" class="content-panel" style="background-image: url('');">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 3</h1>
         <p>And another one.</p>
@@ -53,7 +53,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   </interact-element>
 
   <interact-element data-interact-key="#container-4">
-    <div id="container-4" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?q=80&w=2070&auto=format&fit=crop');">
+    <div id="container-4" class="content-panel" style="background-image: url('');">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 4</h1>
         <p>Keep scrolling...</p>
@@ -62,7 +62,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   </interact-element>
 
   <interact-element data-interact-key="#container-5">
-    <div id="container-5" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=2070&auto=format&fit=crop');">
+    <div id="container-5" class="content-panel" style="background-image: url('');">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 5</h1>
         <p>Almost there.</p>
@@ -71,7 +71,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   </interact-element>
 
   <interact-element data-interact-key="#container-6">
-    <div id="container-6" class="content-panel" style="background-image: url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=2073&auto=format&fit=crop');">
+    <div id="container-6" class="content-panel" style="background-image: url('');">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 6</h1>
         <p>The final reveal.</p>

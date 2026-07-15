@@ -7,8 +7,6 @@ Hover over any panel to expand it — vertically on mobile, horizontally on desk
 ## Markup
 
 ```html
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-
 <main id="feature-container" class="feature-container">
 
     <interact-element data-interact-key="col-1">
@@ -19,7 +17,7 @@ Hover over any panel to expand it — vertically on mobile, horizontally on desk
                     <h2 class="feature-bottom-title">Serene Lakes</h2>
                 </div>
             </interact-element>
-            <img src="https://images.unsplash.com/photo-1439853949127-fa647821eba0?auto=format&fit=crop&w=1200&q=80" alt="Lake" class="feature-image">
+            <img src="" class="feature-image">
         </div>
     </interact-element>
 
@@ -31,7 +29,7 @@ Hover over any panel to expand it — vertically on mobile, horizontally on desk
                     <h2 class="feature-bottom-title">Vast Deserts</h2>
                 </div>
             </interact-element>
-            <img src="https://images.unsplash.com/photo-1488197047962-b48492212cda?auto=format&fit=crop&w=1200&q=80" alt="Desert" class="feature-image">
+            <img src="" class="feature-image">
         </div>
     </interact-element>
 
@@ -43,7 +41,7 @@ Hover over any panel to expand it — vertically on mobile, horizontally on desk
                     <h2 class="feature-bottom-title">Lush Rainforests</h2>
                 </div>
             </interact-element>
-            <img src="https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?auto=format&fit=crop&w=1200&q=80" alt="Rainforest" class="feature-image">
+            <img src="" class="feature-image">
         </div>
     </interact-element>
 
@@ -55,7 +53,7 @@ Hover over any panel to expand it — vertically on mobile, horizontally on desk
                     <h2 class="feature-bottom-title">Ocean Cliffs</h2>
                 </div>
             </interact-element>
-            <img src="https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80" alt="Cliffs" class="feature-image">
+            <img src="" class="feature-image">
         </div>
     </interact-element>
 
@@ -67,7 +65,7 @@ Hover over any panel to expand it — vertically on mobile, horizontally on desk
                     <h2 class="feature-bottom-title">Urban Landscapes</h2>
                 </div>
             </interact-element>
-            <img src="https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&q=80" alt="City" class="feature-image">
+            <img src="" class="feature-image">
         </div>
     </interact-element>
 
@@ -79,7 +77,7 @@ Hover over any panel to expand it — vertically on mobile, horizontally on desk
                     <h2 class="feature-bottom-title">The Aurora</h2>
                 </div>
             </interact-element>
-            <img src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1200&q=80" alt="Aurora" class="feature-image">
+            <img src="" class="feature-image">
         </div>
     </interact-element>
 

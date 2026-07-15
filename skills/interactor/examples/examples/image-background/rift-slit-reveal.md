@@ -30,7 +30,7 @@ A sticky scroll sequence where a centered image expands from a thin horizontal s
       <interact-element data-interact-key="rift" data-interact-initial="true">
         <div class="rift-wrap">
           <div class="rift-container">
-            <img src="IMAGE_URL" alt="Sculpture" />
+            <img src="" />
           </div>
         </div>
       </interact-element>
@@ -61,7 +61,7 @@ body::after {
   z-index: 9999;
   pointer-events: none;
   opacity: 0.045;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url('');
 }
 
 .sticky-track {
@@ -167,56 +167,21 @@ body::after {
     {
       key: 'title',
       trigger: 'viewEnter',
-      effects: [
-        {
-          selector: '.letter:nth-child(1)',
-          keyframeEffect: { name: 'l1', keyframes: [
+      sequences: [{
+        delay: 100,
+        offset: 80,
+        triggerType: 'once',
+        effects: [{
+          selector: '.letter',
+          keyframeEffect: { name: 'letter-in', keyframes: [
             { transform: 'translateY(120%)', offset: 0 },
             { transform: 'translateY(0)', offset: 1 },
           ]},
           duration: 900,
-          delay: 100,
           easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
           fill: 'both',
-          triggerType: 'once',
-        },
-        {
-          selector: '.letter:nth-child(2)',
-          keyframeEffect: { name: 'l2', keyframes: [
-            { transform: 'translateY(120%)', offset: 0 },
-            { transform: 'translateY(0)', offset: 1 },
-          ]},
-          duration: 900,
-          delay: 180,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          fill: 'both',
-          triggerType: 'once',
-        },
-        {
-          selector: '.letter:nth-child(3)',
-          keyframeEffect: { name: 'l3', keyframes: [
-            { transform: 'translateY(120%)', offset: 0 },
-            { transform: 'translateY(0)', offset: 1 },
-          ]},
-          duration: 900,
-          delay: 260,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          fill: 'both',
-          triggerType: 'once',
-        },
-        {
-          selector: '.letter:nth-child(4)',
-          keyframeEffect: { name: 'l4', keyframes: [
-            { transform: 'translateY(120%)', offset: 0 },
-            { transform: 'translateY(0)', offset: 1 },
-          ]},
-          duration: 900,
-          delay: 340,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          fill: 'both',
-          triggerType: 'once',
-        },
-      ],
+        }],
+      }],
     },
     {
       key: 'subtitle',

@@ -17,7 +17,7 @@ A sticky 3D carousel of 8 photo cards arranged in a circular ring spins 720° ar
 
                         <interact-element data-interact-key="card-0">
                             <div class="card" style="transform: rotateY(0deg) translateZ(380px)">
-                                <img class="card-image" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&h=900&fit=crop" alt="Yosemite Valley" draggable="false">
+                                <img class="card-image" src="" draggable="false">
                                 <div class="card-overlay"></div>
                                 <div class="card-content">
                                     <div class="card-title">Yosemite Valley</div>
@@ -28,7 +28,7 @@ A sticky 3D carousel of 8 photo cards arranged in a circular ring spins 720° ar
 
                         <interact-element data-interact-key="card-1">
                             <div class="card" style="transform: rotateY(45deg) translateZ(380px)">
-                                <img class="card-image" src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600&h=900&fit=crop" alt="Alpine Sunrise" draggable="false">
+                                <img class="card-image" src="" draggable="false">
                                 <div class="card-overlay"></div>
                                 <div class="card-content">
                                     <div class="card-title">Alpine Sunrise</div>
@@ -39,7 +39,7 @@ A sticky 3D carousel of 8 photo cards arranged in a circular ring spins 720° ar
 
                         <interact-element data-interact-key="card-2">
                             <div class="card" style="transform: rotateY(90deg) translateZ(380px)">
-                                <img class="card-image" src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&h=900&fit=crop" alt="Mirror Lake" draggable="false">
+                                <img class="card-image" src="" draggable="false">
                                 <div class="card-overlay"></div>
                                 <div class="card-content">
                                     <div class="card-title">Mirror Lake</div>
@@ -50,7 +50,7 @@ A sticky 3D carousel of 8 photo cards arranged in a circular ring spins 720° ar
 
                         <interact-element data-interact-key="card-3">
                             <div class="card" style="transform: rotateY(135deg) translateZ(380px)">
-                                <img class="card-image" src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=600&h=900&fit=crop" alt="Forest Mist" draggable="false">
+                                <img class="card-image" src="" draggable="false">
                                 <div class="card-overlay"></div>
                                 <div class="card-content">
                                     <div class="card-title">Forest Mist</div>
@@ -61,7 +61,7 @@ A sticky 3D carousel of 8 photo cards arranged in a circular ring spins 720° ar
 
                         <interact-element data-interact-key="card-4">
                             <div class="card" style="transform: rotateY(180deg) translateZ(380px)">
-                                <img class="card-image" src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600&h=900&fit=crop" alt="Starry Peaks" draggable="false">
+                                <img class="card-image" src="" draggable="false">
                                 <div class="card-overlay"></div>
                                 <div class="card-content">
                                     <div class="card-title">Starry Peaks</div>
@@ -72,7 +72,7 @@ A sticky 3D carousel of 8 photo cards arranged in a circular ring spins 720° ar
 
                         <interact-element data-interact-key="card-5">
                             <div class="card" style="transform: rotateY(225deg) translateZ(380px)">
-                                <img class="card-image" src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=600&h=900&fit=crop" alt="Hidden Falls" draggable="false">
+                                <img class="card-image" src="" draggable="false">
                                 <div class="card-overlay"></div>
                                 <div class="card-content">
                                     <div class="card-title">Hidden Falls</div>
@@ -83,7 +83,7 @@ A sticky 3D carousel of 8 photo cards arranged in a circular ring spins 720° ar
 
                         <interact-element data-interact-key="card-6">
                             <div class="card" style="transform: rotateY(270deg) translateZ(380px)">
-                                <img class="card-image" src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=600&h=900&fit=crop" alt="Golden Hour" draggable="false">
+                                <img class="card-image" src="" draggable="false">
                                 <div class="card-overlay"></div>
                                 <div class="card-content">
                                     <div class="card-title">Golden Hour</div>
@@ -94,7 +94,7 @@ A sticky 3D carousel of 8 photo cards arranged in a circular ring spins 720° ar
 
                         <interact-element data-interact-key="card-7">
                             <div class="card" style="transform: rotateY(315deg) translateZ(380px)">
-                                <img class="card-image" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=900&fit=crop" alt="Coastal Dusk" draggable="false">
+                                <img class="card-image" src="" draggable="false">
                                 <div class="card-overlay"></div>
                                 <div class="card-content">
                                     <div class="card-title">Coastal Dusk</div>

@@ -130,8 +130,6 @@ A navigation bar with tab hover color transitions and an animated dropdown panel
 ## Essential styles
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@100;200;300;400;500&display=swap');
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 interact-element { display: contents; }

@@ -15,38 +15,38 @@ A 3D sphere composed of image cards rotates continuously via CSS animation while
       <div class="sphere">
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(0.0px) translateY(500.0px) translateZ(0.0px) rotateY(0.0deg) rotateX(-90.0deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('https://picsum.photos/seed/801/600/400')"><div class="overlay"></div><h3>CYBER CORE</h3></div>
-            <div class="face back" style="background-image:url('https://picsum.photos/seed/801/600/400')"><div class="overlay"></div><h3>SYSTEM 00</h3></div>
+            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>CYBER CORE</h3></div>
+            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 00</h3></div>
           </div>
         </div>
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(242.6px) translateY(409.1px) translateZ(-154.3px) rotateY(122.5deg) rotateX(-54.9deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('https://picsum.photos/seed/806/600/400')"><div class="overlay"></div><h3>ABSTRACT A</h3></div>
-            <div class="face back" style="background-image:url('https://picsum.photos/seed/806/600/400')"><div class="overlay"></div><h3>SYSTEM 05</h3></div>
+            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>ABSTRACT A</h3></div>
+            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 05</h3></div>
           </div>
         </div>
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(163.5px) translateY(318.2px) translateZ(-349.3px) rotateY(154.9deg) rotateX(-39.5deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('https://picsum.photos/seed/811/600/400')"><div class="overlay"></div><h3>DATA MESH</h3></div>
-            <div class="face back" style="background-image:url('https://picsum.photos/seed/811/600/400')"><div class="overlay"></div><h3>SYSTEM 10</h3></div>
+            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>DATA MESH</h3></div>
+            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 10</h3></div>
           </div>
         </div>
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(-169.2px) translateY(-9.1px) translateZ(-470.4px) rotateY(-160.2deg) rotateX(1.0deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('https://picsum.photos/seed/805/600/400')"><div class="overlay"></div><h3>DEEP SPACE</h3></div>
-            <div class="face back" style="background-image:url('https://picsum.photos/seed/805/600/400')"><div class="overlay"></div><h3>SYSTEM 28</h3></div>
+            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>DEEP SPACE</h3></div>
+            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 28</h3></div>
           </div>
         </div>
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(-334.3px) translateY(-336.4px) translateZ(-158.4px) rotateY(-115.4deg) rotateX(42.3deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('https://picsum.photos/seed/811/600/400')"><div class="overlay"></div><h3>DATA MESH</h3></div>
-            <div class="face back" style="background-image:url('https://picsum.photos/seed/811/600/400')"><div class="overlay"></div><h3>SYSTEM 46</h3></div>
+            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>DATA MESH</h3></div>
+            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 46</h3></div>
           </div>
         </div>
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(0.0px) translateY(-500.0px) translateZ(0.0px) rotateY(0.0deg) rotateX(90.0deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('https://picsum.photos/seed/808/600/400')"><div class="overlay"></div><h3>NATURE X</h3></div>
-            <div class="face back" style="background-image:url('https://picsum.photos/seed/808/600/400')"><div class="overlay"></div><h3>SYSTEM 55</h3></div>
+            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>NATURE X</h3></div>
+            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 55</h3></div>
           </div>
         </div>
       </div>

@@ -7,14 +7,14 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
 ## Markup
 
 ```html
-<section class="hero">
+<interact-element data-interact-key="hero" class="hero">
   <interact-element data-interact-key="hero-title">
     <h1>The Journey</h1>
   </interact-element>
   <interact-element data-interact-key="hero-subtitle">
     <p>From idea to completion</p>
   </interact-element>
-</section>
+</interact-element>
 
 <section class="card-section first">
   <div class="card-wrap">
@@ -282,36 +282,37 @@ const heroEnter = {
 
   interactions: [
     {
-      key: 'hero-title',
+      key: 'hero',
       trigger: 'viewEnter',
-      effects: [{
-        keyframeEffect: {
-          name: 'hero-title-fade',
-          keyframes: [
-            { opacity: 0, transform: 'translateY(16px)' },
-            { opacity: 1, transform: 'translateY(0)' },
-          ],
-        },
+      sequences: [{
+        offset: 300,
         triggerType: 'once',
-        duration: 1200,
-        ...heroEnter,
-      }],
-    },
-    {
-      key: 'hero-subtitle',
-      trigger: 'viewEnter',
-      effects: [{
-        keyframeEffect: {
-          name: 'hero-sub-fade',
-          keyframes: [
-            { opacity: 0, transform: 'translateY(16px)' },
-            { opacity: 1, transform: 'translateY(0)' },
-          ],
-        },
-        triggerType: 'once',
-        duration: 1000,
-        delay: 300,
-        ...heroEnter,
+        effects: [
+          {
+            key: 'hero-title',
+            keyframeEffect: {
+              name: 'hero-title-fade',
+              keyframes: [
+                { opacity: 0, transform: 'translateY(16px)' },
+                { opacity: 1, transform: 'translateY(0)' },
+              ],
+            },
+            duration: 1200,
+            ...heroEnter,
+          },
+          {
+            key: 'hero-subtitle',
+            keyframeEffect: {
+              name: 'hero-sub-fade',
+              keyframes: [
+                { opacity: 0, transform: 'translateY(16px)' },
+                { opacity: 1, transform: 'translateY(0)' },
+              ],
+            },
+            duration: 1000,
+            ...heroEnter,
+          },
+        ],
       }],
     },
 

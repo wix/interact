@@ -19,7 +19,7 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
             <span>text 2</span>
           </div>
           <div class="content-container">
-            <img class="main-image" src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1200&q=80" alt="Modern Architecture">
+            <img class="main-image" src="">
             <div class="bottom-text-stack">
               <span class="small-text">Small Text</span>
               <span class="big-text">Big Text</span>
@@ -40,7 +40,7 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
             <span>text 2</span>
           </div>
           <div class="content-container">
-            <img class="main-image" src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80" alt="Modern Interior">
+            <img class="main-image" src="">
             <div class="bottom-text-stack">
               <span class="small-text">Small Text</span>
               <span class="big-text">Big Text</span>
@@ -61,7 +61,7 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
             <span>text 2</span>
           </div>
           <div class="content-container">
-            <img class="main-image" src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1200&q=80" alt="Cityscape">
+            <img class="main-image" src="">
             <div class="bottom-text-stack">
               <span class="small-text">Small Text</span>
               <span class="big-text">Big Text</span>
@@ -82,7 +82,7 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
             <span>text 2</span>
           </div>
           <div class="content-container">
-            <img class="main-image" src="https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=1200&q=80" alt="Abstract Gradient">
+            <img class="main-image" src="">
             <div class="bottom-text-stack">
               <span class="small-text">Small Text</span>
               <span class="big-text">Big Text</span>
@@ -103,7 +103,7 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
             <span>text 2</span>
           </div>
           <div class="content-container">
-            <img class="main-image" src="https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1200&q=80" alt="Aerial Nature">
+            <img class="main-image" src="">
             <div class="bottom-text-stack">
               <span class="small-text">Small Text</span>
               <span class="big-text">Big Text</span>

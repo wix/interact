@@ -24,18 +24,10 @@ A hero image animates through a 3D perspective rotation and scale as the user sc
           <div class="hero-frame">
             <img
               class="hero-img"
-              src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80"
-              srcset="
-                https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=480&q=80 480w,
-                https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=720&q=80 720w,
-                https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80 900w
-              "
-              sizes="(max-width: 480px) 58vw, (max-width: 768px) 52vw, 320px"
-              alt="City at night — Unsplash"
+              src=""
               width="900"
               height="1200"
-              loading="eager"
-              decoding="async"
+
             >
           </div>
         </interact-element>

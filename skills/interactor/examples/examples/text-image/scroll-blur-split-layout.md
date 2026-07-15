@@ -24,8 +24,7 @@ A sticky split-screen layout where scrolling progressively blurs the hero portra
           <div class="right-image">
             <div class="image-wrapper">
               <img
-                src="https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?w=800&q=80"
-                alt="Portrait"
+                src=""
               />
             </div>
           </div>

@@ -63,8 +63,6 @@ Each full-viewport text card flips into view from below with a 3D rotateX and sc
 ## Essential styles
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap');
-
 :root {
   --bg-color: #050505;
   --text-color: #f0f0f0;

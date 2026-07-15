@@ -7,7 +7,7 @@ A pill-shaped toggle button animates on click, sliding the thumb across the trac
 ## Markup
 
 ```html
-<interact-element data-interact-key="toggle-btn" data-state="unlocked">
+<interact-element data-interact-key="toggle-btn">
   <div class="toggle-group">
     <button type="button" class="toggle-track" aria-pressed="false" aria-label="Toggle availability">
       <interact-element data-interact-key="slider">
@@ -42,8 +42,6 @@ A pill-shaped toggle button animates on click, sliding the thumb across the trac
 ## Essential styles
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500&display=swap');
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {

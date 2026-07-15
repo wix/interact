@@ -17,8 +17,7 @@ Ten horizontal blinds fold open in a staggered cascade driven by scroll progress
     <div class="hero__img-wrap">
       <img
         class="hero__img"
-        src="IMAGE_URL"
-        alt=""
+        src=""
       />
     </div>
   </interact-element>

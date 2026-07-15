@@ -20,7 +20,7 @@ Inline images hidden between words in a paragraph expand from zero width into th
                 <span>storytelling</span>
                 <interact-element data-interact-key="mask-1">
                     <div class="image-mask">
-                        <img src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?q=80&w=400&auto=format&fit=crop" alt="">
+                        <img src="">
                     </div>
                 </interact-element>
                 <span>creates</span>
@@ -28,7 +28,7 @@ Inline images hidden between words in a paragraph expand from zero width into th
                 <span>deep</span>
                 <interact-element data-interact-key="mask-2">
                     <div class="image-mask">
-                        <img src="https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?q=80&w=400&auto=format&fit=crop" alt="">
+                        <img src="">
                     </div>
                 </interact-element>
                 <span>and</span>
@@ -36,7 +36,7 @@ Inline images hidden between words in a paragraph expand from zero width into th
                 <span>impact</span>
                 <interact-element data-interact-key="mask-3">
                     <div class="image-mask">
-                        <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=400&auto=format&fit=crop" alt="">
+                        <img src="">
                     </div>
                 </interact-element>
                 <span>on</span>
@@ -46,7 +46,7 @@ Inline images hidden between words in a paragraph expand from zero width into th
                 <span>design</span>
                 <interact-element data-interact-key="mask-4">
                     <div class="image-mask">
-                        <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=400&auto=format&fit=crop" alt="">
+                        <img src="">
                     </div>
                 </interact-element>
                 <span>moves</span>
@@ -54,7 +54,7 @@ Inline images hidden between words in a paragraph expand from zero width into th
                 <span>forward,</span>
                 <interact-element data-interact-key="mask-5">
                     <div class="image-mask">
-                        <img src="https://images.unsplash.com/photo-1533158326339-7f3cf2404354?q=80&w=400&auto=format&fit=crop" alt="">
+                        <img src="">
                     </div>
                 </interact-element>
                 <span>while</span>
@@ -62,7 +62,7 @@ Inline images hidden between words in a paragraph expand from zero width into th
                 <span>guides</span>
                 <interact-element data-interact-key="mask-6">
                     <div class="image-mask">
-                        <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=400&auto=format&fit=crop" alt="">
+                        <img src="">
                     </div>
                 </interact-element>
                 <span>the</span>
@@ -70,7 +70,7 @@ Inline images hidden between words in a paragraph expand from zero width into th
                 <span>Every</span>
                 <interact-element data-interact-key="mask-7">
                     <div class="image-mask">
-                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" alt="">
+                        <img src="">
                     </div>
                 </interact-element>
                 <span>pixel</span>
@@ -80,7 +80,7 @@ Inline images hidden between words in a paragraph expand from zero width into th
                 <span>end</span>
                 <interact-element data-interact-key="mask-8">
                     <div class="image-mask">
-                        <img src="https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=400&auto=format&fit=crop" alt="">
+                        <img src="">
                     </div>
                 </interact-element>
                 <span>result.</span>

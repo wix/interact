@@ -166,8 +166,6 @@ Seven stacked rows of "IMMERSIVE REALITY" appear on view entry; the six duplicat
 ## Essential styles
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap');
-
 body {
     margin: 0;
     padding: 0;

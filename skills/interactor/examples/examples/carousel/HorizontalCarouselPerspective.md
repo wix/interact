@@ -15,43 +15,43 @@ Cards fly through a sticky 3D stage driven by page scroll, each one sweeping in 
         <div class="animation-viewport">
           <interact-element data-interact-key="#card-1">
             <div id="card-1" class="card">
-              <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2414" class="card-image" alt="Cosmic Landscape">
+              <img src="" class="card-image">
             </div>
           </interact-element>
 
           <interact-element data-interact-key="#card-2">
             <div id="card-2" class="card">
-              <img src="https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?q=80&w=2670" class="card-image" alt="Galaxy View">
+              <img src="" class="card-image">
             </div>
           </interact-element>
 
           <interact-element data-interact-key="#card-3">
             <div id="card-3" class="card">
-              <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=2672" class="card-image" alt="Earth from Space">
+              <img src="" class="card-image">
             </div>
           </interact-element>
 
           <interact-element data-interact-key="#card-4">
             <div id="card-4" class="card">
-              <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2414" class="card-image" alt="Nebula">
+              <img src="" class="card-image">
             </div>
           </interact-element>
 
           <interact-element data-interact-key="#card-5">
             <div id="card-5" class="card">
-              <img src="https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?q=80&w=2670" class="card-image" alt="Lunar Surface">
+              <img src="" class="card-image">
             </div>
           </interact-element>
 
           <interact-element data-interact-key="#card-6">
             <div id="card-6" class="card">
-              <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2414" class="card-image" alt="Aurora Borealis">
+              <img src="" class="card-image">
             </div>
           </interact-element>
 
           <interact-element data-interact-key="#card-7">
             <div id="card-7" class="card">
-              <img src="https://images.unsplash.com/photo-1454789548928-9efd52dc4031?q=80&w=2680" class="card-image" alt="Astronaut">
+              <img src="" class="card-image">
             </div>
           </interact-element>
         </div>

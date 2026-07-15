@@ -12,40 +12,40 @@ A vertical snap-scrolling list of album art cards that rotate and zoom through 3
     <div class="scroll-view" id="scroll-view">
       <div class="item-list" id="item-list">
         <interact-element data-interact-key="item-0">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_5a41dd4ed9284d6dacf0d2ec84697472~mv2.jpg)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
         <interact-element data-interact-key="item-1">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_fcb77553ba6842bc80afe7b8cae070a6~mv2.jpg)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
         <interact-element data-interact-key="item-2">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_46273f3267014f7c800436bbc8b3ad83~mv2.jpg)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
         <interact-element data-interact-key="item-3">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_ff88830ded7e417cae47c905e83d7722~mv2.jpg)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
         <interact-element data-interact-key="item-4">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_e6d98be6268347e48cff39f5c20fb0f8~mv2.jpg)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
         <interact-element data-interact-key="item-5">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_55aad4d241374a2b827d4b00554b24ae~mv2.jpg)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
         <interact-element data-interact-key="item-6">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_f4bbbb8da30b4951b24924aad5dbfed2~mv2.jpg)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
         <interact-element data-interact-key="item-7">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_099bae5648814dce8bb05379af044ecc~mv2.jpg)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
         <interact-element data-interact-key="item-8">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_6b14cf5bce1044db9a807dd3c5cc9028~mv2.jpg)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
         <interact-element data-interact-key="item-9">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_565eb438708548da92653669027017a8~mv2.webp)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
         <interact-element data-interact-key="item-10">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_cb4b664a75934f89ac680625002ab076~mv2.jpg)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
         <interact-element data-interact-key="item-11">
-          <div class="list-item" style="background-image: url(https://static.wixstatic.com/media/9eca39_76de18515def47789ddab891e3ce12fa~mv2.jpg)"></div>
+          <div class="list-item" style="background-image: url('')"></div>
         </interact-element>
       </div>
     </div>

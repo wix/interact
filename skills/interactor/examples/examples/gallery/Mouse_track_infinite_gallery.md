@@ -16,7 +16,7 @@ An infinite, wrapping grid of images that pans continuously in the direction of 
           <div class="img-wrapper">
             <div class="parallax-layer" id="parallax-0">
               <interact-element data-interact-key="img-0">
-                <img src="https://picsum.photos/seed/88/1200/1500" class="gallery-img" alt="Gallery item 0" loading="lazy" />
+                <img src="" class="gallery-img" />
               </interact-element>
             </div>
           </div>
@@ -35,7 +35,7 @@ An infinite, wrapping grid of images that pans continuously in the direction of 
           <div class="img-wrapper">
             <div class="parallax-layer" id="parallax-1">
               <interact-element data-interact-key="img-1">
-                <img src="https://picsum.photos/seed/89/1200/1500" class="gallery-img" alt="Gallery item 1" loading="lazy" />
+                <img src="" class="gallery-img" />
               </interact-element>
             </div>
           </div>
@@ -54,7 +54,7 @@ An infinite, wrapping grid of images that pans continuously in the direction of 
           <div class="img-wrapper">
             <div class="parallax-layer" id="parallax-2">
               <interact-element data-interact-key="img-2">
-                <img src="https://picsum.photos/seed/90/1200/1500" class="gallery-img" alt="Gallery item 2" loading="lazy" />
+                <img src="" class="gallery-img" />
               </interact-element>
             </div>
           </div>
@@ -73,7 +73,7 @@ An infinite, wrapping grid of images that pans continuously in the direction of 
           <div class="img-wrapper">
             <div class="parallax-layer" id="parallax-3">
               <interact-element data-interact-key="img-3">
-                <img src="https://picsum.photos/seed/91/1200/1500" class="gallery-img" alt="Gallery item 3" loading="lazy" />
+                <img src="" class="gallery-img" />
               </interact-element>
             </div>
           </div>
@@ -92,7 +92,7 @@ An infinite, wrapping grid of images that pans continuously in the direction of 
           <div class="img-wrapper">
             <div class="parallax-layer" id="parallax-4">
               <interact-element data-interact-key="img-4">
-                <img src="https://picsum.photos/seed/92/1200/1500" class="gallery-img" alt="Gallery item 4" loading="lazy" />
+                <img src="" class="gallery-img" />
               </interact-element>
             </div>
           </div>

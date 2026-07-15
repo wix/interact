@@ -7,8 +7,6 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
 ## Markup
 
 ```html
-<script src="https://cdn.tailwindcss.com"></script>
-
 <interact-element data-interact-key="scroll-trigger">
   <div class="relative" style="height: 700vh;">
 

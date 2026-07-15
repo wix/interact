@@ -82,11 +82,11 @@ body {
   background: rgba(12, 12, 12, 0.55);
 }
 
-.bg-1 { background-image: url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=1800'); }
-.bg-2 { background-image: url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=1800'); }
-.bg-3 { background-image: url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=1800'); }
-.bg-4 { background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&q=80&w=1800'); }
-.bg-5 { background-image: url('https://images.unsplash.com/photo-1631679706909-1844bbd07221?auto=format&fit=crop&q=80&w=1800'); }
+.bg-1 { background-image: url(''); }
+.bg-2 { background-image: url(''); }
+.bg-3 { background-image: url(''); }
+.bg-4 { background-image: url(''); }
+.bg-5 { background-image: url(''); }
 
 .scroll-driver { height: 500vh; position: relative; }
 

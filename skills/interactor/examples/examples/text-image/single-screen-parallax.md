@@ -31,9 +31,7 @@ A sticky scroll section where a giant background headline translates horizontall
         <interact-element data-interact-key="hero-image">
           <div class="hero-image-scaler">
             <div class="hero-image-wrap">
-              <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80"
-                srcset="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=480&q=80 480w, https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=720&q=80 720w, https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80 900w"
-                sizes="(max-width: 768px) 96vw, 720px" alt="City at night — Unsplash" width="900" height="1200" loading="eager" decoding="async">
+              <img src="" width="900" height="1200">
             </div>
           </div>
         </interact-element>

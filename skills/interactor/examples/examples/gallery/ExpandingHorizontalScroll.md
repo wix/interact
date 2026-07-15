@@ -16,7 +16,7 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
   <div id="scroll-section">
     <div id="sticky-container">
       <h1 class="static-title">
-        <interact-element data-interact-key=".title-letter-0"><span class="title-letter title-letter-0">T</span></interact-element><interact-element data-interact-key=".title-letter-1"><span class="title-letter title-letter-1">h</span></interact-element><interact-element data-interact-key=".title-letter-2"><span class="title-letter title-letter-2">e</span></interact-element><interact-element data-interact-key=".title-letter-3"><span class="title-letter title-letter-3">&nbsp;</span></interact-element><interact-element data-interact-key=".title-letter-4"><span class="title-letter title-letter-4">S</span></interact-element><interact-element data-interact-key=".title-letter-5"><span class="title-letter title-letter-5">t</span></interact-element><interact-element data-interact-key=".title-letter-6"><span class="title-letter title-letter-6">o</span></interact-element><interact-element data-interact-key=".title-letter-7"><span class="title-letter title-letter-7">r</span></interact-element><interact-element data-interact-key=".title-letter-8"><span class="title-letter title-letter-8">y</span></interact-element><interact-element data-interact-key=".title-letter-9"><span class="title-letter title-letter-9">&nbsp;</span></interact-element><interact-element data-interact-key=".title-letter-10"><span class="title-letter title-letter-10">o</span></interact-element><interact-element data-interact-key=".title-letter-11"><span class="title-letter title-letter-11">f</span></interact-element><interact-element data-interact-key=".title-letter-12"><span class="title-letter title-letter-12">&nbsp;</span></interact-element><interact-element data-interact-key=".title-letter-13"><span class="title-letter title-letter-13">P</span></interact-element><interact-element data-interact-key=".title-letter-14"><span class="title-letter title-letter-14">a</span></interact-element><interact-element data-interact-key=".title-letter-15"><span class="title-letter title-letter-15">n</span></interact-element><interact-element data-interact-key=".title-letter-16"><span class="title-letter title-letter-16">e</span></interact-element><interact-element data-interact-key=".title-letter-17"><span class="title-letter title-letter-17">l</span></interact-element><interact-element data-interact-key=".title-letter-18"><span class="title-letter title-letter-18">s</span></interact-element>
+        <span class="title-letter">T</span><span class="title-letter">h</span><span class="title-letter">e</span><span class="title-letter">&nbsp;</span><span class="title-letter">S</span><span class="title-letter">t</span><span class="title-letter">o</span><span class="title-letter">r</span><span class="title-letter">y</span><span class="title-letter">&nbsp;</span><span class="title-letter">o</span><span class="title-letter">f</span><span class="title-letter">&nbsp;</span><span class="title-letter">P</span><span class="title-letter">a</span><span class="title-letter">n</span><span class="title-letter">e</span><span class="title-letter">l</span><span class="title-letter">s</span>
       </h1>
 
       <interact-element data-interact-key="#dynamic-paragraph">
@@ -26,7 +26,7 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
       <interact-element data-interact-key="#box4">
         <div id="box4" class="box box4" style="left: 90vw; z-index: 40;">
           <interact-element data-interact-key="#image4">
-            <img id="image4" src="IMAGE_URL" alt="Image 4" class="panel-image">
+            <img id="image4" src="" class="panel-image">
           </interact-element>
         </div>
       </interact-element>
@@ -34,7 +34,7 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
       <interact-element data-interact-key="#box3">
         <div id="box3" class="box box3" style="left: 80vw; z-index: 30;">
           <interact-element data-interact-key="#image3">
-            <img id="image3" src="IMAGE_URL" alt="Image 3" class="panel-image">
+            <img id="image3" src="" class="panel-image">
           </interact-element>
         </div>
       </interact-element>
@@ -42,7 +42,7 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
       <interact-element data-interact-key="#box2">
         <div id="box2" class="box box2" style="left: 70vw; z-index: 20;">
           <interact-element data-interact-key="#image2">
-            <img id="image2" src="IMAGE_URL" alt="Image 2" class="panel-image">
+            <img id="image2" src="" class="panel-image">
           </interact-element>
         </div>
       </interact-element>
@@ -50,7 +50,7 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
       <interact-element data-interact-key="#box1">
         <div id="box1" class="box box1" style="left: 60vw; z-index: 10;">
           <interact-element data-interact-key="#image1">
-            <img id="image1" src="IMAGE_URL" alt="Image 1" class="panel-image">
+            <img id="image1" src="" class="panel-image">
           </interact-element>
         </div>
       </interact-element>
@@ -210,37 +210,30 @@ function updateText(el, newText) {
   }
 }
 
-function buildStaggeredTitle() {
-  const letterCount = 19;
-  const interactions = [];
-  for (let i = 0; i < letterCount; i++) {
-    interactions.push({
+{
+  interactions: [
+    {
       key: '#scroll-section',
       trigger: 'viewEnter',
       params: { threshold: 0.05 },
-      effects: [{
-        key: `.title-letter-${i}`,
+      sequences: [{
+        offset: 50,
         triggerType: 'once',
-        keyframeEffect: {
-          name: `title-letter-in-${i}`,
-          keyframes: [
-            { opacity: 0, transform: 'translateY(20px)' },
-            { opacity: 1, transform: 'translateY(0px)' }
-          ]
-        },
-        duration: 400,
-        easing: 'ease-out',
-        delay: i * 50,
-        fill: 'both'
+        effects: [{
+          selector: '.title-letter',
+          keyframeEffect: {
+            name: 'title-letter-in',
+            keyframes: [
+              { opacity: 0, transform: 'translateY(20px)' },
+              { opacity: 1, transform: 'translateY(0px)' }
+            ]
+          },
+          duration: 400,
+          easing: 'ease-out',
+          fill: 'both'
+        }]
       }]
-    });
-  }
-  return interactions;
-}
-
-{
-  interactions: [
-    ...buildStaggeredTitle(),
+    },
 
     {
       key: '#scroll-section',

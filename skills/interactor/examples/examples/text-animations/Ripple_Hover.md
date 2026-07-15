@@ -77,8 +77,6 @@ A stacked heading ripples masked copies of itself upward and downward on hover, 
 ## Essential styles
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap');
-
 body {
   background-color: #0f0f11;
   color: #ffffff;
@@ -196,15 +194,27 @@ const revealDownKeyframes = [
   { transform: 'translateY(-0.02em)' }
 ];
 
-const rippleEffects = [
-  { key: 'h1-u1', effectId: 'reveal-up', delay: 0 },
-  { key: 'h1-u2', effectId: 'reveal-up', delay: 54 },
-  { key: 'h1-u3', effectId: 'reveal-up', delay: 108 },
-  { key: 'h1-u4', effectId: 'reveal-up', delay: 162 },
-  { key: 'h1-d1', effectId: 'reveal-down', delay: 0 },
-  { key: 'h1-d2', effectId: 'reveal-down', delay: 54 },
-  { key: 'h1-d3', effectId: 'reveal-down', delay: 108 },
-  { key: 'h1-d4', effectId: 'reveal-down', delay: 162 }
+const rippleSequences = (triggerType) => [
+  {
+    offset: 54,
+    triggerType,
+    effects: [
+      { key: 'h1-u1', effectId: 'reveal-up' },
+      { key: 'h1-u2', effectId: 'reveal-up' },
+      { key: 'h1-u3', effectId: 'reveal-up' },
+      { key: 'h1-u4', effectId: 'reveal-up' }
+    ]
+  },
+  {
+    offset: 54,
+    triggerType,
+    effects: [
+      { key: 'h1-d1', effectId: 'reveal-down' },
+      { key: 'h1-d2', effectId: 'reveal-down' },
+      { key: 'h1-d3', effectId: 'reveal-down' },
+      { key: 'h1-d4', effectId: 'reveal-down' }
+    ]
+  }
 ];
 
 function getInteractions(isMobile) {
@@ -213,8 +223,8 @@ function getInteractions(isMobile) {
       {
         key: 'h1-trigger',
         trigger: 'viewEnter',
-        params: { type: 'once', threshold: 0.5 },
-        effects: rippleEffects
+        params: { threshold: 0.5 },
+        sequences: rippleSequences('once')
       },
       {
         key: 'hero-text',
@@ -227,7 +237,7 @@ function getInteractions(isMobile) {
       {
         key: 'h1-trigger',
         trigger: 'hover',
-        effects: rippleEffects
+        sequences: rippleSequences('alternate')
       },
       {
         key: 'hero-text',

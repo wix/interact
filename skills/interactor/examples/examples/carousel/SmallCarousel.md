@@ -10,8 +10,8 @@ A 3D perspective carousel of space nebula cards arranged in depth with rotateY o
 <div class="carousel-container" id="carousel-container">
     <div class="carousel" id="carousel">
         <interact-element data-interact-key="#card-0">
-            <div class="card active" id="card-0" data-index="0">
-                <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=600&h=1000&fit=crop&q=80" alt="Orion Nebula" class="card-image" draggable="false">
+            <div class="card active" id="card-0">
+                <img src="" class="card-image" draggable="false">
                 <div class="card-content">
                     <div class="card-artist font-cinzel">Orion Nebula</div>
                     <div class="card-keywords">Stellar Nursery • Cosmic Clouds • New Stars</div>
@@ -19,8 +19,8 @@ A 3D perspective carousel of space nebula cards arranged in depth with rotateY o
             </div>
         </interact-element>
         <interact-element data-interact-key="#card-1">
-            <div class="card right-1" id="card-1" data-index="1">
-                <img src="https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=600&h=1000&fit=crop&q=80" alt="Carina Nebula" class="card-image" draggable="false">
+            <div class="card right-1" id="card-1">
+                <img src="" class="card-image" draggable="false">
                 <div class="card-content">
                     <div class="card-artist font-cinzel">Carina Nebula</div>
                     <div class="card-keywords">Cosmic Reef • Massive Stars • Destruction</div>
@@ -28,8 +28,8 @@ A 3D perspective carousel of space nebula cards arranged in depth with rotateY o
             </div>
         </interact-element>
         <interact-element data-interact-key="#card-2">
-            <div class="card right-2" id="card-2" data-index="2">
-                <img src="https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?w=600&h=1000&fit=crop&q=80" alt="Eagle Nebula" class="card-image" draggable="false">
+            <div class="card right-2" id="card-2">
+                <img src="" class="card-image" draggable="false">
                 <div class="card-content">
                     <div class="card-artist font-cinzel">Eagle Nebula</div>
                     <div class="card-keywords">Creation • Destruction • Pillars of Gas</div>
@@ -37,8 +37,8 @@ A 3D perspective carousel of space nebula cards arranged in depth with rotateY o
             </div>
         </interact-element>
         <interact-element data-interact-key="#card-3">
-            <div class="card right-3" id="card-3" data-index="3">
-                <img src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=600&h=1000&fit=crop&q=80" alt="Veil Nebula" class="card-image" draggable="false">
+            <div class="card right-3" id="card-3">
+                <img src="" class="card-image" draggable="false">
                 <div class="card-content">
                     <div class="card-artist font-cinzel">Veil Nebula</div>
                     <div class="card-keywords">Supernova Remnant • Wisps • Ethereal</div>
@@ -46,8 +46,8 @@ A 3D perspective carousel of space nebula cards arranged in depth with rotateY o
             </div>
         </interact-element>
         <interact-element data-interact-key="#card-4">
-            <div class="card left-2" id="card-4" data-index="4">
-                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&h=1000&fit=crop&q=80" alt="Rosette Nebula" class="card-image" draggable="false">
+            <div class="card left-2" id="card-4">
+                <img src="" class="card-image" draggable="false">
                 <div class="card-content">
                     <div class="card-artist font-cinzel">Rosette Nebula</div>
                     <div class="card-keywords">Stellar Cluster • Rose • Ionized Hydrogen</div>
@@ -55,8 +55,8 @@ A 3D perspective carousel of space nebula cards arranged in depth with rotateY o
             </div>
         </interact-element>
         <interact-element data-interact-key="#card-5">
-            <div class="card left-1" id="card-5" data-index="5">
-                <img src="https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=600&h=1000&fit=crop&q=80" alt="Horsehead Nebula" class="card-image" draggable="false">
+            <div class="card left-1" id="card-5">
+                <img src="" class="card-image" draggable="false">
                 <div class="card-content">
                     <div class="card-artist font-cinzel">Horsehead Nebula</div>
                     <div class="card-keywords">Dark Nebula • Cosmic Dust • Silhouette</div>

@@ -18,37 +18,37 @@ Seven landscape panels arranged in a 3D z-depth stack rotate into view as the us
       <div class="panel-wrapper">
         <interact-element data-interact-key="#panel-0">
           <div class="panel" id="panel-0" style="width: 45vw; height: 30vw; translate: 0 0 0;">
-            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" alt="Landscape 1">
+            <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-1">
           <div class="panel" id="panel-1" style="width: 48.3vw; height: 32vw; translate: 0 0 calc(var(--panel-gap) * -1 * 1px);">
-            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80" alt="Landscape 2">
+            <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-2">
           <div class="panel" id="panel-2" style="width: 51.7vw; height: 34vw; translate: 0 0 calc(var(--panel-gap) * -2 * 1px);">
-            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&w=800&q=80" alt="Landscape 3">
+            <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-3">
           <div class="panel" id="panel-3" style="width: 55vw; height: 36vw; translate: 0 0 calc(var(--panel-gap) * -3 * 1px);">
-            <img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&w=800&q=80" alt="Landscape 4">
+            <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-4">
           <div class="panel" id="panel-4" style="width: 58.3vw; height: 38vw; translate: 0 0 calc(var(--panel-gap) * -4 * 1px);">
-            <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&w=800&q=80" alt="Landscape 5">
+            <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-5">
           <div class="panel" id="panel-5" style="width: 61.7vw; height: 40vw; translate: 0 0 calc(var(--panel-gap) * -5 * 1px);">
-            <img src="https://images.unsplash.com/photo-1482192596544-9eb780fc7f66?auto=format&w=800&q=80" alt="Landscape 6">
+            <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-6">
           <div class="panel" id="panel-6" style="width: 65vw; height: 42vw; translate: 0 0 calc(var(--panel-gap) * -6 * 1px);">
-            <img src="https://images.unsplash.com/photo-1496483353456-90997957cf99?auto=format&w=800&q=80" alt="Landscape 7">
+            <img src="">
           </div>
         </interact-element>
       </div>

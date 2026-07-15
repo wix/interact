@@ -10,19 +10,19 @@ Full-screen background images cycle in every 2 seconds with a scale-from-zero en
 <div id="collage-container">
   <interact-element data-interact-key="collage-fragment-wrapper" class="collage-fragment-wrapper">
     <div class="fragment">
-      <div class="content-image" style="background-image: url(IMAGE_URL)"></div>
+      <div class="content-image" style="background-image: url('')"></div>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="collage-fragment-wrapper" class="collage-fragment-wrapper">
     <div class="fragment">
-      <div class="content-image" style="background-image: url(IMAGE_URL)"></div>
+      <div class="content-image" style="background-image: url('')"></div>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="collage-fragment-wrapper" class="collage-fragment-wrapper">
     <div class="fragment">
-      <div class="content-image" style="background-image: url(IMAGE_URL)"></div>
+      <div class="content-image" style="background-image: url('')"></div>
     </div>
   </interact-element>
 

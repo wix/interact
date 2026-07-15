@@ -17,8 +17,7 @@ A full-viewport image stays sticky while the user scrolls, shrinking and tilting
     </div>
     <div class="sticky-frame">
       <img
-        src="IMAGE_URL"
-        alt="Modern Architecture"
+        src=""
       />
     </div>
   </section>

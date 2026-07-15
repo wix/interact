@@ -13,7 +13,7 @@
       <interact-element data-interact-key="#card-1">
         <div id="card-1" class="card">
           <interact-element data-interact-key="#card-1-img">
-            <img id="card-1-img" src="https://images.pexels.com/photos/3781523/pexels-photo-3781523.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 1" />
+            <img id="card-1-img" src="" />
           </interact-element>
         </div>
       </interact-element>
@@ -21,7 +21,7 @@
       <interact-element data-interact-key="#card-2">
         <div id="card-2" class="card">
           <interact-element data-interact-key="#card-2-img">
-            <img id="card-2-img" src="https://images.pexels.com/photos/1037992/pexels-photo-1037992.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 2" />
+            <img id="card-2-img" src="" />
           </interact-element>
         </div>
       </interact-element>
@@ -29,7 +29,7 @@
       <interact-element data-interact-key="#card-3">
         <div id="card-3" class="card">
           <interact-element data-interact-key="#card-3-img">
-            <img id="card-3-img" src="https://images.pexels.com/photos/3587478/pexels-photo-3587478.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 3" />
+            <img id="card-3-img" src="" />
           </interact-element>
         </div>
       </interact-element>
@@ -37,7 +37,7 @@
       <interact-element data-interact-key="#card-4">
         <div id="card-4" class="card">
           <interact-element data-interact-key="#card-4-img">
-            <img id="card-4-img" src="https://images.pexels.com/photos/205926/pexels-photo-205926.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 4" />
+            <img id="card-4-img" src="" />
           </interact-element>
         </div>
       </interact-element>
@@ -45,7 +45,7 @@
       <interact-element data-interact-key="#card-5">
         <div id="card-5" class="card">
           <interact-element data-interact-key="#card-5-img">
-            <img id="card-5-img" src="https://images.pexels.com/photos/788946/pexels-photo-788946.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 5" />
+            <img id="card-5-img" src="" />
           </interact-element>
         </div>
       </interact-element>
@@ -53,7 +53,7 @@
       <interact-element data-interact-key="#card-6">
         <div id="card-6" class="card">
           <interact-element data-interact-key="#card-6-img">
-            <img id="card-6-img" src="https://images.pexels.com/photos/3945659/pexels-photo-3945659.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 6" />
+            <img id="card-6-img" src="" />
           </interact-element>
         </div>
       </interact-element>
@@ -61,7 +61,7 @@
       <interact-element data-interact-key="#card-7">
         <div id="card-7" class="card">
           <interact-element data-interact-key="#card-7-img">
-            <img id="card-7-img" src="https://images.pexels.com/photos/4009621/pexels-photo-4009621.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 7" />
+            <img id="card-7-img" src="" />
           </interact-element>
         </div>
       </interact-element>
@@ -69,7 +69,7 @@
       <interact-element data-interact-key="#card-8">
         <div id="card-8" class="card">
           <interact-element data-interact-key="#card-8-img">
-            <img id="card-8-img" src="https://images.pexels.com/photos/5081403/pexels-photo-5081403.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 8" />
+            <img id="card-8-img" src="" />
           </interact-element>
         </div>
       </interact-element>
@@ -77,7 +77,7 @@
       <interact-element data-interact-key="#card-9">
         <div id="card-9" class="card">
           <interact-element data-interact-key="#card-9-img">
-            <img id="card-9-img" src="https://images.pexels.com/photos/1649771/pexels-photo-1649771.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 9" />
+            <img id="card-9-img" src="" />
           </interact-element>
         </div>
       </interact-element>
@@ -85,7 +85,7 @@
       <interact-element data-interact-key="#card-10">
         <div id="card-10" class="card">
           <interact-element data-interact-key="#card-10-img">
-            <img id="card-10-img" src="https://images.pexels.com/photos/1279813/pexels-photo-1279813.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 10" />
+            <img id="card-10-img" src="" />
           </interact-element>
         </div>
       </interact-element>
@@ -93,7 +93,7 @@
       <interact-element data-interact-key="#card-11">
         <div id="card-11" class="card">
           <interact-element data-interact-key="#card-11-img">
-            <img id="card-11-img" src="https://images.pexels.com/photos/1154039/pexels-photo-1154039.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 11" />
+            <img id="card-11-img" src="" />
           </interact-element>
         </div>
       </interact-element>
@@ -101,7 +101,7 @@
       <interact-element data-interact-key="#card-12">
         <div id="card-12" class="card">
           <interact-element data-interact-key="#card-12-img">
-            <img id="card-12-img" src="https://images.pexels.com/photos/374630/pexels-photo-374630.jpeg?auto=compress&cs=tinysrgb&w=600" alt="carousel image 12" />
+            <img id="card-12-img" src="" />
           </interact-element>
         </div>
       </interact-element>

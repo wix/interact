@@ -7,14 +7,14 @@ Four sticky content cards stack on top of each other as the user scrolls, each n
 ## Markup
 
 ```html
-<section class="hero">
+<interact-element data-interact-key="hero" class="hero">
   <interact-element data-interact-key="hero-title">
     <h1>The Journey</h1>
   </interact-element>
   <interact-element data-interact-key="hero-subtitle">
     <p>From idea to completion</p>
   </interact-element>
-</section>
+</interact-element>
 
 <section class="card-section first">
   <div class="card-wrap">
@@ -305,38 +305,39 @@ const entryRange = {
 
   interactions: [
     {
-      key: 'hero-title',
+      key: 'hero',
       trigger: 'viewEnter',
-      effects: [{
-        keyframeEffect: {
-          name: 'hero-title-fade',
-          keyframes: [
-            { opacity: 0, transform: 'translateY(16px)' },
-            { opacity: 1, transform: 'translateY(0)' },
-          ],
-        },
-        duration: 1200,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'forwards',
+      sequences: [{
+        offset: 300,
         triggerType: 'once',
-      }],
-    },
-    {
-      key: 'hero-subtitle',
-      trigger: 'viewEnter',
-      effects: [{
-        keyframeEffect: {
-          name: 'hero-sub-fade',
-          keyframes: [
-            { opacity: 0, transform: 'translateY(16px)' },
-            { opacity: 1, transform: 'translateY(0)' },
-          ],
-        },
-        duration: 1000,
-        delay: 300,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'forwards',
-        triggerType: 'once',
+        effects: [
+          {
+            key: 'hero-title',
+            keyframeEffect: {
+              name: 'hero-title-fade',
+              keyframes: [
+                { opacity: 0, transform: 'translateY(16px)' },
+                { opacity: 1, transform: 'translateY(0)' },
+              ],
+            },
+            duration: 1200,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'forwards',
+          },
+          {
+            key: 'hero-subtitle',
+            keyframeEffect: {
+              name: 'hero-sub-fade',
+              keyframes: [
+                { opacity: 0, transform: 'translateY(16px)' },
+                { opacity: 1, transform: 'translateY(0)' },
+              ],
+            },
+            duration: 1000,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'forwards',
+          },
+        ],
       }],
     },
     {

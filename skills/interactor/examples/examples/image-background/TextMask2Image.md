@@ -54,7 +54,7 @@ body { font-family: 'Inter', 'Arial Black', sans-serif; background: #fff; }
   inset: 0;
   background:
     linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
-    url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920&q=80')
+    url('')
     center / cover no-repeat;
   background-size: cover;
   background-position: center;

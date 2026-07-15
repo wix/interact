@@ -13,35 +13,35 @@ Eight full-viewport panels translate horizontally as the user scrolls vertically
       <interact-element data-interact-key="#horizontal-track">
         <div id="horizontal-track">
           <div class="panel">
-            <img src="https://images.unsplash.com/photo-1439405326854-014607f694d7?q=80&w=1920&auto=format&fit=crop" alt="Ocean View" class="panel-background">
+            <img src="" class="panel-background">
             <div class="panel-content">
               <h2>Panel One</h2>
               <p>As you scroll down, the panels will slide horizontally from right to left.</p>
             </div>
           </div>
           <div class="panel">
-            <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1920&auto=format&fit=crop" alt="Misty Lake" class="panel-background">
+            <img src="" class="panel-background">
             <div class="panel-content">
               <h2>Panel Two</h2>
               <p>This effect is powered by the @wix/interact library using a viewProgress trigger.</p>
             </div>
           </div>
           <div class="panel">
-            <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=1920&auto=format&fit=crop" alt="Forest" class="panel-background">
+            <img src="" class="panel-background">
             <div class="panel-content">
               <h2>Panel Three</h2>
               <p>The entire animation is defined declaratively, with no manual scroll event listeners.</p>
             </div>
           </div>
           <div class="panel">
-            <img src="https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?q=80&w=1920&auto=format&fit=crop" alt="Meadow" class="panel-background">
+            <img src="" class="panel-background">
             <div class="panel-content">
               <h2>Panel Four</h2>
               <p>The contain range maps scroll progress within a sticky section perfectly.</p>
             </div>
           </div>
           <div class="panel">
-            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1920&auto=format&fit=crop" alt="Misty Mountains" class="panel-background">
+            <img src="" class="panel-background">
             <div class="panel-content">
               <h2>Panel Five</h2>
               <p>Linear easing ensures a direct 1:1 relationship between vertical scroll and horizontal movement.</p>
@@ -57,8 +57,6 @@ Eight full-viewport panels translate horizontally as the user scrolls vertically
 ## Essential styles
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-
 :root {
     --panel-w: 100vw;
     --panel-h: 100vh;

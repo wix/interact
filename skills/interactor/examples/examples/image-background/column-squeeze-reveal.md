@@ -169,7 +169,7 @@ body {
 .bg-image {
   width: 100%;
   height: 100%;
-  background-image: url('IMAGE_URL');
+  background-image: url('');
   background-size: cover;
   background-position: center top;
   position: relative;

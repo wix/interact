@@ -17,8 +17,7 @@ A white square panel overlays a blurred hero image at page load; as the user scr
     <div class="hero__img-wrap">
       <img
         class="hero__img"
-        src="IMAGE_URL"
-        alt=""
+        src=""
       />
     </div>
   </interact-element>

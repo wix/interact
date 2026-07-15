@@ -1,12 +1,12 @@
 # Examples Index
 
-Use this table of contents to find polished, cohesive examples by interaction, layout, or motion tag. Each linked demo contains its own markup, essential styles, Interact config, and any required JavaScript; adapt those parts together.
+Use this table of contents to find polished, cohesive examples by interaction, layout, or motion tag. Each linked demo contains its own markup, essential styles, Interact config, and any required JavaScript; adapt those parts together. Asset slots use empty HTML or CSS sources instead of placeholder tokens or external URLs.
 
 ## Contents
 
-- [Gallery](#gallery) — 28 demos
+- [Gallery](#gallery) — 27 demos
 - [Carousel](#carousel) — 6 demos
-- [Image and background](#image-and-background) — 18 demos
+- [Image and background](#image-and-background) — 17 demos
 - [Text animations](#text-animations) — 25 demos
 - [Text and image](#text-and-image) — 9 demos
 - [UI components](#ui-components) — 11 demos
@@ -29,7 +29,6 @@ Use this table of contents to find polished, cohesive examples by interaction, l
 | [Expanding Horizontal Scroll](examples/gallery/ExpandingHorizontalScroll.md) | Four full-viewport colored panels are stacked offscreen to the right inside a 700vh sticky section; as the user scrolls, each panel slides horizontally to fill the screen in sequence while its thumbnail image scales up dramatically, driven entirely by `viewProgress`. | `viewProgress, viewEnter, sticky, transform, opacity, scale, stagger, reveal` |
 | [Fade In Gallery](examples/gallery/FadeInGallery.md) | Full-screen background images cycle in every 2 seconds with a scale-from-zero entrance on viewEnter; hovering the bottom half of the screen fades in a text overlay and pauses the cycling. | `hover, viewEnter, gallery, opacity, transform, fade, scale, loop` |
 | [Horizontal and Vertical Scroll](examples/gallery/HorizontalAndVerticalScroll.md) | Six image cards rise up from below the viewport in a staggered sequence as the user scrolls, then the entire row slides horizontally to reveal remaining cards — all driven by a single viewProgress trigger on a tall sticky section. | `viewProgress, sticky, transform, stagger, scroll, gallery` |
-| [Horizontally Scrolling Gallery](examples/gallery/HorizontallyScrollingGallery.md) | Six portrait gallery items in a horizontal flex row reveal an ellipse-clipped, counter-rotated image and a fade-in label on hover, while a GSAP ticker drives edge-based auto-scroll when the cursor moves into the left or right 15% of the container. | `hover, gallery, flex, transform, clip-path, opacity, reveal, fade, rotate` |
 | [Looping Sphere Gallery](examples/gallery/Looping_Sphere_Gallery.md) | A 3D sphere composed of image cards rotates continuously via CSS animation while scrolling drives a camera zoom that flies through the sphere, with an overlay fade keyed to scroll progress. | `viewProgress, hover, gallery, 3d, loop, transform, opacity, rotate, scale` |
 | [Manta Ray](examples/gallery/MantaRay.md) | A horizontal overlapping gallery where each image breathes with a continuous vertical float loop triggered on view enter, and scales up on hover, with staggered per-item delays and seeded random size variation. | `hover, viewEnter, gallery, flex, transform, scale, opacity, loop, stagger` |
 | [Mirror Hover Gallery](examples/gallery/Mirror_Hover_Galery.md) | A grid of nature image cards where hovering any card zooms it, darkens its overlay, and reveals text while simultaneously mirroring that card's background image across the entire grid with a Chebyshev-distance stagger. | `hover, grid, gallery, transform, opacity, stagger, scale, reveal, background` |
@@ -62,7 +61,6 @@ Use this table of contents to find polished, cohesive examples by interaction, l
 | [3D Blinds Flip Reveal](examples/image-background/3d-blinds-flip-reveal.md) | Ten horizontal blinds fold open in a staggered cascade driven by scroll progress, revealing a white content section over a fixed hero image that simultaneously zooms, blurs, and darkens. | `viewProgress, viewEnter, fixed, opacity, transform, filter, reveal, stagger, 3d, blur, scale, fade` |
 | [Background Image Shape Mask Gallery](examples/image-background/BG_Image_ShapeMask_Gallery.md) | A sticky full-viewport section where three background images circle-reveal sequentially as the user scrolls, each scaling in while the previous blurs out. | `viewProgress, sticky, gallery, clip-path, transform, filter, blur, reveal, scale` |
 | [BG Image Shape Mask](examples/image-background/BG_image_ShapeMask.md) | A background image zooms out while a black overlay circle-reveals over it as the user scrolls through a tall sticky section, transitioning from a lush photograph to a solid dark background. | `viewProgress, sticky, clip-path, transform, scale, reveal, parallax` |
-| [Diagonal Slideshow](examples/image-background/Diagonal_Slideshow.md) | Scroll-driven slideshow where each slide title travels diagonally from a small top-left genesis position through a large centered hold to a small bottom-right exit, while background images wipe in from below using a clip-path reveal. | `viewProgress, fixed, gallery, opacity, transform, clip-path, reveal, scale, stagger` |
 | [Kinetic 155 Horizon](examples/image-background/Kinetic_155_Horizon.md) | A white content card rotates 155 degrees on the Y axis as the user scrolls, while simultaneously responding to pointer movement with a 3D tilt and expanding 5% on hover. | `viewProgress, pointerMove, hover, sticky, transform, 3d, rotate, scale, opacity` |
 | [Text Mask to Image](examples/image-background/TextMask2Image.md) | As the page is scrolled through a tall sticky section, bold uppercase text scales exponentially via a CSS custom property and mix-blend-mode screen to unmask a background landscape image through the letterforms, while a subtitle fades and slides up from below the viewport. | `viewProgress, sticky, transform, opacity, scale, reveal, fade` |
 | [Column Squeeze Reveal](examples/image-background/column-squeeze-reveal.md) | A sticky two-column layout where scrolling squeezes the dark left text column from 22vw to 9vw, scales the rotated hero typography down, and simultaneously zooms the full-bleed background image — together revealing progressively more of the photograph behind. | `viewProgress, sticky, transform, scale, reveal, parallax` |

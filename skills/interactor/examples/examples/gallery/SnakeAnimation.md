@@ -8,12 +8,12 @@ Images arranged in a sinusoidal wave across the screen animate sequentially into
 
 ```html
 <div id="image-snake" class="absolute inset-0 w-full h-full">
-  <img src="https://picsum.photos/seed/1/800/600" alt="Abstract View 1" class="snake-image" style="width:190px;height:143px;left:8px;top:289px;" />
-  <img src="https://picsum.photos/seed/3/800/600" alt="Abstract View 3" class="snake-image" style="width:210px;height:158px;left:195px;top:353px;" />
-  <img src="https://picsum.photos/seed/5/800/600" alt="Abstract View 5" class="snake-image" style="width:175px;height:131px;left:388px;top:368px;" />
-  <img src="https://picsum.photos/seed/7/800/600" alt="Abstract View 7" class="snake-image" style="width:200px;height:150px;left:582px;top:298px;" />
-  <img src="https://picsum.photos/seed/9/800/600" alt="Abstract View 9" class="snake-image" style="width:185px;height:139px;left:778px;top:219px;" />
-  <img src="https://picsum.photos/seed/11/800/600" alt="Abstract View 11" class="snake-image" style="width:220px;height:165px;left:960px;top:204px;" />
+  <img src="" class="snake-image" style="width:190px;height:143px;left:8px;top:289px;" />
+  <img src="" class="snake-image" style="width:210px;height:158px;left:195px;top:353px;" />
+  <img src="" class="snake-image" style="width:175px;height:131px;left:388px;top:368px;" />
+  <img src="" class="snake-image" style="width:200px;height:150px;left:582px;top:298px;" />
+  <img src="" class="snake-image" style="width:185px;height:139px;left:778px;top:219px;" />
+  <img src="" class="snake-image" style="width:220px;height:165px;left:960px;top:204px;" />
 </div>
 
 <interact-element data-interact-key="#backdrop" id="backdrop-wrapper">
@@ -22,7 +22,7 @@ Images arranged in a sinusoidal wave across the screen animate sequentially into
 
 <interact-element data-interact-key="#main-image-container" id="main-image-wrapper">
   <div id="main-image-container">
-    <img src="IMAGE_URL" alt="" />
+    <img src="" />
   </div>
 </interact-element>
 

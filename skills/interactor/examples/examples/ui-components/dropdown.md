@@ -32,7 +32,7 @@ A pill-shaped dropdown button that opens a staggered menu on click, with hover e
     aria-hidden="true"
   >
     <interact-element data-interact-key="opt-1-trigger">
-      <div class="dropdown-option" role="option" data-value="Design" tabindex="-1">
+      <div class="dropdown-option" role="option" tabindex="-1">
         <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="13.5" cy="6.5" r="2.5" />
           <path d="M17.5 10.5l3-3" />
@@ -43,7 +43,7 @@ A pill-shaped dropdown button that opens a staggered menu on click, with hover e
       </div>
     </interact-element>
     <interact-element data-interact-key="opt-2-trigger">
-      <div class="dropdown-option" role="option" data-value="Engineering" tabindex="-1">
+      <div class="dropdown-option" role="option" tabindex="-1">
         <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="16 18 22 12 16 6" />
           <polyline points="8 6 2 12 8 18" />
@@ -52,7 +52,7 @@ A pill-shaped dropdown button that opens a staggered menu on click, with hover e
       </div>
     </interact-element>
     <interact-element data-interact-key="opt-3-trigger">
-      <div class="dropdown-option" role="option" data-value="Marketing" tabindex="-1">
+      <div class="dropdown-option" role="option" tabindex="-1">
         <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
           <polyline points="17 6 23 6 23 12" />
@@ -61,7 +61,7 @@ A pill-shaped dropdown button that opens a staggered menu on click, with hover e
       </div>
     </interact-element>
     <interact-element data-interact-key="opt-4-trigger">
-      <div class="dropdown-option" role="option" data-value="Analytics" tabindex="-1">
+      <div class="dropdown-option" role="option" tabindex="-1">
         <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="20" x2="18" y2="10" />
           <line x1="12" y1="20" x2="12" y2="4" />
@@ -71,7 +71,7 @@ A pill-shaped dropdown button that opens a staggered menu on click, with hover e
       </div>
     </interact-element>
     <interact-element data-interact-key="opt-5-trigger">
-      <div class="dropdown-option" role="option" data-value="Support" tabindex="-1">
+      <div class="dropdown-option" role="option" tabindex="-1">
         <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
           <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
@@ -86,8 +86,6 @@ A pill-shaped dropdown button that opens a staggered menu on click, with hover e
 ## Essential styles
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 interact-element { display: contents; }

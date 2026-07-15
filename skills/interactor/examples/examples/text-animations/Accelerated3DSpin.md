@@ -62,8 +62,6 @@ A large headline text continuously rotates on the Y-axis in a slow idle loop whe
 ## Essential styles
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap');
-
 body {
     background-color: black;
     color: white;

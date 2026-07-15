@@ -111,7 +111,7 @@ body {
 .masked-image {
   width: 100%;
   height: 100%;
-  background-image: url('https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=1400');
+  background-image: url('');
   background-size: cover;
   background-position: center;
   -webkit-mask-size: contain;
@@ -238,7 +238,7 @@ const maskShapes = [
 
 maskShapes.forEach(m => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${m.viewBox}"><path d="${m.path}" fill="white"/></svg>`;
-  const uri = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  const uri = 'url("")';
   document.querySelectorAll(m.selector).forEach(el => {
     el.style.maskImage = uri;
     el.style.webkitMaskImage = uri;

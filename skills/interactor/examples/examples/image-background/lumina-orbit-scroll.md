@@ -11,7 +11,7 @@ A full-viewport hero image shrinks, tilts in 3D, and fades out as the user scrol
   <section class="sticky-track">
     <div class="sticky-frame">
       <div class="image-wrapper">
-        <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=2074&auto=format&fit=crop" alt="Golden Landscape" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <img src="" />
         <div class="hero-content">
           <h1>Ethereal</h1>
           <p>Between silence and light</p>

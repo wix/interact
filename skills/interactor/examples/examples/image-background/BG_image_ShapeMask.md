@@ -76,7 +76,7 @@ body {
 
 .bg-image {
   z-index: 0;
-  background-image: url('IMAGE_URL');
+  background-image: url('');
 }
 
 .bg-black {

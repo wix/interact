@@ -84,24 +84,24 @@ body {
 
 .bg-idle {
   z-index: 0;
-  background-image: url('./idle-bg.png');
+  background-image: url('');
 }
 
 .bg-education {
   z-index: 1;
-  background-image: url('https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1920&q=80');
+  background-image: url('');
   clip-path: circle(0% at 50% 50%);
 }
 
 .bg-conservation {
   z-index: 2;
-  background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80');
+  background-image: url('');
   clip-path: circle(0% at 50% 50%);
 }
 
 .bg-agriculture {
   z-index: 3;
-  background-image: url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1920&q=80');
+  background-image: url('');
   clip-path: circle(0% at 50% 50%);
 }
 

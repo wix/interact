@@ -15,8 +15,8 @@ Five image cards stacked at the viewport center fly in from alternating diagonal
 
             <interact-element data-interact-key="#card-1">
                 <div id="card-1" class="card">
-                    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=500"
-                         alt="Misty Mountains" class="card-img">
+                    <img src=""
+ class="card-img">
                     <div class="card-content">
                         <h2 class="card-title">Misty Mountains</h2>
                         <p class="card-description">A journey through ethereal landscapes.</p>
@@ -26,8 +26,8 @@ Five image cards stacked at the viewport center fly in from alternating diagonal
 
             <interact-element data-interact-key="#card-2">
                 <div id="card-2" class="card">
-                    <img src="https://images.unsplash.com/photo-1511884642898-4c92249e20b6?w=500"
-                         alt="Forest Canopy" class="card-img">
+                    <img src=""
+ class="card-img">
                     <div class="card-content">
                         <h2 class="card-title">Forest Canopy</h2>
                         <p class="card-description">Overhead view of a dense, green forest.</p>
@@ -37,8 +37,8 @@ Five image cards stacked at the viewport center fly in from alternating diagonal
 
             <interact-element data-interact-key="#card-3">
                 <div id="card-3" class="card">
-                    <img src="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=500"
-                         alt="Alpine Lake" class="card-img">
+                    <img src=""
+ class="card-img">
                     <div class="card-content">
                         <h2 class="card-title">Alpine Lake</h2>
                         <p class="card-description">Crystal clear water reflecting the peaks.</p>
@@ -48,8 +48,8 @@ Five image cards stacked at the viewport center fly in from alternating diagonal
 
             <interact-element data-interact-key="#card-4">
                 <div id="card-4" class="card">
-                    <img src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=500"
-                         alt="Hidden Waterfall" class="card-img">
+                    <img src=""
+ class="card-img">
                     <div class="card-content">
                         <h2 class="card-title">Hidden Waterfall</h2>
                         <p class="card-description">Nature's raw and untamed power.</p>
@@ -59,8 +59,8 @@ Five image cards stacked at the viewport center fly in from alternating diagonal
 
             <interact-element data-interact-key="#card-5">
                 <div id="card-5" class="card">
-                    <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=500"
-                         alt="Rolling Hills" class="card-img">
+                    <img src=""
+ class="card-img">
                     <div class="card-content">
                         <h2 class="card-title">Rolling Hills</h2>
                         <p class="card-description">Endless green fields under a summer sky.</p>

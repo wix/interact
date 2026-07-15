@@ -10,42 +10,42 @@ A grid of image cards where hovering any card blurs all others via CSS `:has()`,
 <section class="grid-container">
   <interact-element data-interact-key="card-1">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/forest/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 1</h3><p>Hover to see info</p></div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-2">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/mountain/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 2</h3><p>Hover to see info</p></div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-3">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/river/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 3</h3><p>Hover to see info</p></div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-4">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/jungle/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 4</h3><p>Hover to see info</p></div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-5">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/desert/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 5</h3><p>Hover to see info</p></div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-6">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('https://picsum.photos/seed/waterfall/600/400')"></div>
+      <div class="card-bg" style="background-image: url('')"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 6</h3><p>Hover to see info</p></div>
     </div>

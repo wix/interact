@@ -19,8 +19,7 @@ A portrait image scales toward the mouse pointer via the ScaleMouse preset on po
           <interact-element data-interact-key="photo">
             <div class="image-wrapper">
               <img
-                src="https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?w=800&q=80"
-                alt="Portrait"
+                src=""
               />
             </div>
           </interact-element>

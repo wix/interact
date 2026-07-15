@@ -24,7 +24,7 @@ As the page scrolls, a portrait image travels from a small inset position to fil
       <div class="image-sticky">
         <interact-element data-interact-key="person-image">
           <div class="person-image">
-            <img src="IMAGE_URL" alt="Black-and-white portrait">
+            <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="image-overlay">

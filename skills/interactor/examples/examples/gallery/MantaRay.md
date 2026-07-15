@@ -8,26 +8,28 @@ A horizontal overlapping gallery where each image breathes with a continuous ver
 
 ```html
 <section class="min-h-screen flex items-center justify-center py-12 px-[10px] overflow-hidden">
-  <div id="gallery-container" class="flex flex-nowrap justify-center items-center w-full gallery-wrapper">
-    <interact-element data-interact-key="img-wrapper-0" class="pointer-events-auto cursor-pointer" style="--rnd-off: 0.20">
-      <img src="https://static.wixstatic.com/media/9eca39_2fa2f1a0c40e452d8daa09d09459e275~mv2.jpg" alt="Crimson Bloom" class="w-full h-auto shadow-md rounded-sm">
-    </interact-element>
-    <interact-element data-interact-key="img-wrapper-1" class="pointer-events-auto cursor-pointer" style="--rnd-off: -0.62">
-      <img src="https://static.wixstatic.com/media/9eca39_ebda7ab78f9c4009af3bba3ed53ff151~mv2.jpg" alt="Azure Waves" class="w-full h-auto shadow-md rounded-sm">
-    </interact-element>
-    <interact-element data-interact-key="img-wrapper-2" class="pointer-events-auto cursor-pointer" style="--rnd-off: 0.84">
-      <img src="https://static.wixstatic.com/media/9eca39_efb67cf117ae4ddea9f2b0bc134c26d0~mv2.jpg" alt="Golden Fields" class="w-full h-auto shadow-md rounded-sm">
-    </interact-element>
-    <interact-element data-interact-key="img-wrapper-3" class="pointer-events-auto cursor-pointer" style="--rnd-off: -0.30">
-      <img src="https://static.wixstatic.com/media/9eca39_37834a42d48547658ca5d3ca0046250a~mv2.webp" alt="Forest Deep" class="w-full h-auto shadow-md rounded-sm">
-    </interact-element>
-    <interact-element data-interact-key="img-wrapper-4" class="pointer-events-auto cursor-pointer" style="--rnd-off: 0.56">
-      <img src="https://static.wixstatic.com/media/9eca39_565eb438708548da92653669027017a8~mv2.webp" alt="Urban Lines" class="w-full h-auto shadow-md rounded-sm">
-    </interact-element>
-    <interact-element data-interact-key="img-wrapper-5" class="pointer-events-auto cursor-pointer" style="--rnd-off: -0.78">
-      <img src="https://static.wixstatic.com/media/9eca39_5a41dd4ed9284d6dacf0d2ec84697472~mv2.jpg" alt="Pastel Sky" class="w-full h-auto shadow-md rounded-sm">
-    </interact-element>
-  </div>
+  <interact-element data-interact-key="gallery">
+    <div id="gallery-container" class="flex flex-nowrap justify-center items-center w-full gallery-wrapper">
+      <interact-element data-interact-key="img-wrapper-0" class="pointer-events-auto cursor-pointer" style="--rnd-off: 0.20">
+        <img src="" class="w-full h-auto shadow-md rounded-sm">
+      </interact-element>
+      <interact-element data-interact-key="img-wrapper-1" class="pointer-events-auto cursor-pointer" style="--rnd-off: -0.62">
+        <img src="" class="w-full h-auto shadow-md rounded-sm">
+      </interact-element>
+      <interact-element data-interact-key="img-wrapper-2" class="pointer-events-auto cursor-pointer" style="--rnd-off: 0.84">
+        <img src="" class="w-full h-auto shadow-md rounded-sm">
+      </interact-element>
+      <interact-element data-interact-key="img-wrapper-3" class="pointer-events-auto cursor-pointer" style="--rnd-off: -0.30">
+        <img src="" class="w-full h-auto shadow-md rounded-sm">
+      </interact-element>
+      <interact-element data-interact-key="img-wrapper-4" class="pointer-events-auto cursor-pointer" style="--rnd-off: 0.56">
+        <img src="" class="w-full h-auto shadow-md rounded-sm">
+      </interact-element>
+      <interact-element data-interact-key="img-wrapper-5" class="pointer-events-auto cursor-pointer" style="--rnd-off: -0.78">
+        <img src="" class="w-full h-auto shadow-md rounded-sm">
+      </interact-element>
+    </div>
+  </interact-element>
 </section>
 
 <interact-element data-interact-key="tooltip-wrapper" class="fixed bottom-4 left-4 pointer-events-none z-[99999]">
@@ -53,6 +55,10 @@ interact-element:not(:defined) { opacity: 0; }
 
 .gallery-wrapper {
     perspective: 1000px;
+}
+
+interact-element[data-interact-key="gallery"] {
+    display: contents;
 }
 
 interact-element[data-interact-key^="img-wrapper-"] {
@@ -123,26 +129,26 @@ const interactConfig = {
             fill: 'both'
         }
     },
-    interactions: []
+    interactions: [
+        {
+            key: 'gallery',
+            trigger: 'viewEnter',
+            params: { threshold: 0 },
+            sequences: [{
+                offset: 150,
+                triggerType: 'once',
+                effects: [{
+                    selector: '#gallery-container > interact-element > img',
+                    effectId: 'breathe-vertical',
+                    composite: 'add'
+                }]
+            }]
+        }
+    ]
 };
 
 imageData.forEach((data, index) => {
     const wrapperId = `img-wrapper-${index}`;
-
-    interactConfig.interactions.push({
-        key: wrapperId,
-        trigger: 'viewEnter',
-        params: { threshold: 0 },
-        effects: [
-            {
-                key: wrapperId,
-                effectId: 'breathe-vertical',
-                triggerType: 'once',
-                delay: index * 150,
-                composite: 'add'
-            }
-        ]
-    });
 
     interactConfig.interactions.push({
         key: wrapperId,

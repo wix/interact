@@ -10,7 +10,7 @@ A radio button group where clicking a button springs the selection dot in with a
 <div class="radio-group" role="radiogroup" aria-label="Notification preferences">
   <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:300;color:#ffd78266;letter-spacing:0.08em;text-transform:uppercase;padding:0 4px 10px;">Notifications</span>
   <interact-element data-interact-key="radio-1">
-    <button type="button" class="radio-btn selected" role="radio" aria-checked="true" data-value="all">
+    <button type="button" class="radio-btn selected" role="radio" aria-checked="true">
       <div class="radio-indicator">
         <div class="ring"></div>
         <svg class="ring-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></svg>
@@ -20,7 +20,7 @@ A radio button group where clicking a button springs the selection dot in with a
     </button>
   </interact-element>
   <interact-element data-interact-key="radio-2">
-    <button type="button" class="radio-btn" role="radio" aria-checked="false" data-value="important">
+    <button type="button" class="radio-btn" role="radio" aria-checked="false">
       <div class="radio-indicator">
         <div class="ring"></div>
         <svg class="ring-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></svg>
@@ -30,7 +30,7 @@ A radio button group where clicking a button springs the selection dot in with a
     </button>
   </interact-element>
   <interact-element data-interact-key="radio-3">
-    <button type="button" class="radio-btn" role="radio" aria-checked="false" data-value="mentions">
+    <button type="button" class="radio-btn" role="radio" aria-checked="false">
       <div class="radio-indicator">
         <div class="ring"></div>
         <svg class="ring-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></svg>
@@ -40,7 +40,7 @@ A radio button group where clicking a button springs the selection dot in with a
     </button>
   </interact-element>
   <interact-element data-interact-key="radio-4">
-    <button type="button" class="radio-btn" role="radio" aria-checked="false" data-value="direct">
+    <button type="button" class="radio-btn" role="radio" aria-checked="false">
       <div class="radio-indicator">
         <div class="ring"></div>
         <svg class="ring-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></svg>
@@ -50,7 +50,7 @@ A radio button group where clicking a button springs the selection dot in with a
     </button>
   </interact-element>
   <interact-element data-interact-key="radio-5">
-    <button type="button" class="radio-btn" role="radio" aria-checked="false" data-value="none">
+    <button type="button" class="radio-btn" role="radio" aria-checked="false">
       <div class="radio-indicator">
         <div class="ring"></div>
         <svg class="ring-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></svg>
@@ -65,8 +65,6 @@ A radio button group where clicking a button springs the selection dot in with a
 ## Essential styles
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=JetBrains+Mono:wght@100;200;300;400;500&display=swap');
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 interact-element { display: contents; }

@@ -73,57 +73,68 @@ interact-element.track-wrapper {
 
 ```js
 const text = "INTERACT";
-const interactions = [];
+const enterLeft = [];
+const enterRight = [];
+const flattenEffects = [];
 
-text.split('').forEach((char, index) => {
+text.split('').forEach((_, index) => {
     const key = `letter-${index}`;
     const distFromCenter = Math.abs(index - (text.length - 1) / 2);
 
     const curveOffset = distFromCenter * distFromCenter * -12;
-    const staggerDelay = distFromCenter * 60;
     const fixOffset = -1 * curveOffset;
 
-    interactions.push({
+    const enterEffect = {
         key,
-        trigger: 'viewEnter',
-        params: { threshold: 0.1 },
-        effects: [{
-            triggerType: 'once',
-            keyframeEffect: {
-                name: `bounce-in-${index}`,
-                keyframes: [
-                    { opacity: 0, transform: 'translateY(50vh)' },
-                    { opacity: 1, offset: 0.6 },
-                    { opacity: 1, transform: `translateY(${curveOffset}px)` }
-                ]
-            },
-            duration: 1000,
-            delay: staggerDelay,
-            easing: 'cubic-bezier(0.18, 1.25, 0.4, 1)',
-            fill: 'both',
-            composite: 'replace'
-        }]
-    });
+        keyframeEffect: {
+            name: `bounce-in-${index}`,
+            keyframes: [
+                { opacity: 0, transform: 'translateY(50vh)' },
+                { opacity: 1, offset: 0.6 },
+                { opacity: 1, transform: `translateY(${curveOffset}px)` }
+            ]
+        },
+        duration: 1000,
+        easing: 'cubic-bezier(0.18, 1.25, 0.4, 1)',
+        fill: 'both',
+        composite: 'replace'
+    };
 
-    interactions.push({
-        key: 'scroll-track',
-        trigger: 'viewProgress',
-        effects: [{
-            key,
-            keyframeEffect: {
-                name: `flatten-${index}`,
-                keyframes: [
-                    { transform: 'translateY(0px)' },
-                    { transform: `translateY(${fixOffset}px)` }
-                ]
-            },
-            rangeStart: { name: 'contain', offset: { value: 10, unit: 'percentage' } },
-            rangeEnd: { name: 'contain', offset: { value: 90, unit: 'percentage' } },
-            fill: 'both',
-            composite: 'add'
-        }]
+    if (index < text.length / 2) enterLeft.unshift(enterEffect);
+    else enterRight.push(enterEffect);
+
+    flattenEffects.push({
+        key,
+        keyframeEffect: {
+            name: `flatten-${index}`,
+            keyframes: [
+                { transform: 'translateY(0px)' },
+                { transform: `translateY(${fixOffset}px)` }
+            ]
+        },
+        rangeStart: { name: 'contain', offset: { value: 10, unit: 'percentage' } },
+        rangeEnd: { name: 'contain', offset: { value: 90, unit: 'percentage' } },
+        fill: 'both',
+        composite: 'add'
     });
 });
 
-const config = { interactions };
+const config = {
+    interactions: [
+        {
+            key: 'scroll-track',
+            trigger: 'viewEnter',
+            params: { threshold: 0.1 },
+            sequences: [
+                { delay: 30, offset: 60, triggerType: 'once', effects: enterLeft },
+                { delay: 30, offset: 60, triggerType: 'once', effects: enterRight }
+            ]
+        },
+        {
+            key: 'scroll-track',
+            trigger: 'viewProgress',
+            effects: flattenEffects
+        }
+    ]
+};
 ```

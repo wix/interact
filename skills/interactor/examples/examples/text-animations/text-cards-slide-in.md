@@ -7,14 +7,14 @@ Cards containing typographic step content slide in from alternating sides with a
 ## Markup
 
 ```html
-<div class="hero">
+<interact-element data-interact-key="hero" class="hero">
   <interact-element data-interact-key="hero-title">
     <h1>The Journey</h1>
   </interact-element>
   <interact-element data-interact-key="hero-subtitle">
     <p>From idea to completion</p>
   </interact-element>
-</div>
+</interact-element>
 <div class="hero-spacer"></div>
 
 <div class="card-stage">
@@ -339,38 +339,39 @@ const entryRange = {
 
   interactions: [
     {
-      key: 'hero-title',
+      key: 'hero',
       trigger: 'viewEnter',
-      params: { type: 'once' },
-      effects: [{
-        keyframeEffect: {
-          name: 'hero-title-fade',
-          keyframes: [
-            { opacity: 0, transform: 'translateY(16px)' },
-            { opacity: 1, transform: 'translateY(0)' },
-          ],
-        },
-        duration: 800,
-        easing: 'ease-out',
-        fill: 'forwards',
-      }],
-    },
-    {
-      key: 'hero-subtitle',
-      trigger: 'viewEnter',
-      params: { type: 'once' },
-      effects: [{
-        keyframeEffect: {
-          name: 'hero-sub-fade',
-          keyframes: [
-            { opacity: 0, transform: 'translateY(16px)' },
-            { opacity: 1, transform: 'translateY(0)' },
-          ],
-        },
-        duration: 800,
-        delay: 400,
-        easing: 'ease-out',
-        fill: 'forwards',
+      sequences: [{
+        offset: 400,
+        triggerType: 'once',
+        effects: [
+          {
+            key: 'hero-title',
+            keyframeEffect: {
+              name: 'hero-title-fade',
+              keyframes: [
+                { opacity: 0, transform: 'translateY(16px)' },
+                { opacity: 1, transform: 'translateY(0)' },
+              ],
+            },
+            duration: 800,
+            easing: 'ease-out',
+            fill: 'forwards',
+          },
+          {
+            key: 'hero-subtitle',
+            keyframeEffect: {
+              name: 'hero-sub-fade',
+              keyframes: [
+                { opacity: 0, transform: 'translateY(16px)' },
+                { opacity: 1, transform: 'translateY(0)' },
+              ],
+            },
+            duration: 800,
+            easing: 'ease-out',
+            fill: 'forwards',
+          },
+        ],
       }],
     },
     {

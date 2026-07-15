@@ -9,8 +9,7 @@ A white content card rotates 155 degrees on the Y axis as the user scrolls, whil
 ```html
 <div class="fixed inset-0 z-0 pointer-events-none">
   <img
-    src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070&auto=format&fit=crop"
-    alt="Epic cinematic mountain landscape"
+    src=""
     class="w-full h-full object-cover grayscale contrast-[1.1] brightness-[0.75]"
   />
   <div class="absolute inset-0 bg-black/5"></div>

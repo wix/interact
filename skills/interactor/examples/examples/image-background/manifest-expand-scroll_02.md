@@ -35,7 +35,7 @@ A sticky hero section where the title and text columns fade up on view enter, wh
       <interact-element data-interact-key="image-box" data-interact-initial="true">
         <div class="image-wrap">
           <div class="image-container">
-            <img src="IMAGE_URL" alt="Classical Bust" />
+            <img src="" />
           </div>
         </div>
       </interact-element>
@@ -66,7 +66,7 @@ body::after {
   z-index: 9999;
   pointer-events: none;
   opacity: 0.045;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url('');
 }
 
 .sticky-track {

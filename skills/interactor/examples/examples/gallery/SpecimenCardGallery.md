@@ -28,7 +28,7 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
               <span class="card-arrow">→</span>
             </div>
             <div class="card-image">
-              <img src="https://www.figma.com/api/mcp/asset/01c907d1-c122-44f5-a8f0-1bbf033158d1" alt="Specimen 1">
+              <img src="">
             </div>
           </div>
         </interact-element>
@@ -44,7 +44,7 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
               <span class="card-arrow">→</span>
             </div>
             <div class="card-image">
-              <img src="https://www.figma.com/api/mcp/asset/ead08c30-07bf-4588-86b7-e14f6408ad9a" alt="Specimen 2">
+              <img src="">
             </div>
           </div>
         </interact-element>
@@ -60,7 +60,7 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
               <span class="card-arrow">→</span>
             </div>
             <div class="card-image">
-              <img src="https://www.figma.com/api/mcp/asset/2160dc18-a424-42c7-a960-0e9c5945ae0d" alt="Specimen 3">
+              <img src="">
             </div>
           </div>
         </interact-element>
@@ -76,7 +76,7 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
               <span class="card-arrow">→</span>
             </div>
             <div class="card-image">
-              <img src="https://www.figma.com/api/mcp/asset/f0b3db04-65f8-45b7-bcc2-e87f6efa3287" alt="Specimen 4">
+              <img src="">
             </div>
           </div>
         </interact-element>
@@ -92,7 +92,7 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
               <span class="card-arrow">→</span>
             </div>
             <div class="card-image">
-              <img src="https://www.figma.com/api/mcp/asset/5cc8424a-a801-41be-a725-19518683b553" alt="Specimen 5">
+              <img src="">
             </div>
           </div>
         </interact-element>
