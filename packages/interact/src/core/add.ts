@@ -359,6 +359,47 @@ function _buildAnimationGroupArgsFromSequence(
   return animationGroupArgs.length > 0 ? animationGroupArgs : null;
 }
 
+function _resolveSourceElements(
+  interaction: Interaction,
+  sourceController: IInteractionController,
+  elements?: HTMLElement[],
+): HTMLElement | HTMLElement[] | null {
+  if (elements) {
+    return _queryItemElement(interaction, elements);
+  }
+
+  return _getElementsFromData(
+    interaction,
+    sourceController.element,
+    sourceController.useFirstChild,
+  );
+}
+
+function _attachSequenceTriggers(
+  interaction: Interaction,
+  sequenceConfig: SequenceConfig,
+  sourceElements: HTMLElement | HTMLElement[],
+  sequence: ReturnType<typeof Interact.getSequence>,
+  selectorCondition?: string,
+) {
+  const sources = Array.isArray(sourceElements) ? sourceElements : [sourceElements];
+
+  sources.forEach((sourceEl) => {
+    (TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as any)?.add(
+      sourceEl,
+      sourceEl,
+      { triggerType: sequenceConfig.triggerType } as Effect,
+      interaction.params || {},
+      {
+        reducedMotion: Interact.forceReducedMotion,
+        selectorCondition,
+        animation: sequence,
+        allowA11yTriggers: Interact.allowA11yTriggers,
+      },
+    );
+  });
+}
+
 function _resolveListItemIndices(
   controller: IInteractionController,
   listContainer: string,
@@ -436,6 +477,27 @@ function _processSequences(
         reducedMotion: Interact.forceReducedMotion,
       });
 
+      const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
+        reducedMotion: Interact.forceReducedMotion,
+      });
+
+      const selectorCondition = getSelectorCondition(
+        interaction.conditions || [],
+        instance.dataCache.conditions,
+      );
+
+      const sourceElements = _resolveSourceElements(interaction, sourceController, elements);
+
+      if (sourceElements) {
+        _attachSequenceTriggers(
+          interaction,
+          sequenceConfig,
+          sourceElements,
+          sequence,
+          selectorCondition,
+        );
+      }
+
       return;
     }
 
@@ -450,17 +512,16 @@ function _processSequences(
       instance.dataCache.conditions,
     );
 
-    (TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as any)?.add(
-      sourceController.element,
-      sourceController.element,
-      { triggerType: sequenceConfig.triggerType } as Effect,
-      interaction.params || {},
-      {
-        reducedMotion: Interact.forceReducedMotion,
-        selectorCondition,
-        animation: sequence,
-        allowA11yTriggers: Interact.allowA11yTriggers,
-      },
+    const sourceElements = _resolveSourceElements(interaction, sourceController, elements);
+
+    if (!sourceElements) return;
+
+    _attachSequenceTriggers(
+      interaction,
+      sequenceConfig,
+      sourceElements,
+      sequence,
+      selectorCondition,
     );
   });
 }
@@ -540,17 +601,16 @@ function _processSequencesForTarget(
         instance.dataCache.conditions,
       );
 
-      (TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as any)?.add(
-        sourceController.element,
-        sourceController.element,
-        { triggerType: sequenceConfig.triggerType } as Effect,
-        interaction.params || {},
-        {
-          reducedMotion: Interact.forceReducedMotion,
-          selectorCondition,
-          animation: sequence,
-          allowA11yTriggers: Interact.allowA11yTriggers,
-        },
+      const sourceElements = _resolveSourceElements(interaction, sourceController);
+
+      if (!sourceElements) return true;
+
+      _attachSequenceTriggers(
+        interaction,
+        sequenceConfig,
+        sourceElements,
+        sequence,
+        selectorCondition,
       );
 
       return true;
