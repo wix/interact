@@ -26,26 +26,20 @@ A full-viewport hero image shrinks, tilts in 3D, and fades out as the user scrol
 ## Essential styles
 
 ```css
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 interact-element {
   display: block;
 }
 
 .sticky-track {
-  height: 500vh;
   position: relative;
+  height: 500vh;
 }
 
 .sticky-frame {
   position: sticky;
   top: 0;
-  height: 100vh;
   display: flex;
+  height: 100vh;
   align-items: center;
   justify-content: center;
   overflow: clip;
@@ -53,76 +47,44 @@ interact-element {
 
 .image-wrapper {
   position: relative;
+  z-index: 1;
+  display: flex;
   width: 100vw;
   height: 100vh;
-  display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
 }
 
 .image-wrapper img {
   position: relative;
+  z-index: 1;
   display: block;
   width: 100vw;
   height: 100vh;
   object-fit: cover;
-  z-index: 1;
 }
 
 .hero-content {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 10;
   pointer-events: none;
-  gap: 12px;
-}
-
-.hero-content h1 {
-  font-size: clamp(3rem, 10vw, 7.5rem);
-  font-weight: 400;
-  letter-spacing: 0.12em;
-  line-height: 0.95;
-}
-
-.hero-content p {
-  font-size: clamp(0.75rem, 1.2vw, 0.95rem);
-  font-weight: 300;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
 }
 
 .cta-btn {
   display: inline-block;
-  margin-top: 16px;
-  padding: 11px 40px;
-  font-size: clamp(0.7rem, 1vw, 0.85rem);
-  font-weight: 400;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  border: 1px solid;
-  border-radius: 0;
-  cursor: pointer;
   pointer-events: auto;
-  transition: all 0.4s ease;
-}
-
-.cta-btn:hover {
-  letter-spacing: 0.38em;
 }
 ```
 
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'track',
@@ -171,7 +133,7 @@ interact-element {
             ],
           },
           rangeStart: { name: 'contain', offset: { value: 0, unit: 'percentage' } },
-          rangeEnd:   { name: 'contain', offset: { value: 100, unit: 'percentage' } },
+          rangeEnd: { name: 'contain', offset: { value: 100, unit: 'percentage' } },
           fill: 'both',
         },
         {
@@ -185,7 +147,7 @@ interact-element {
             ],
           },
           rangeStart: { name: 'contain', offset: { value: 0, unit: 'percentage' } },
-          rangeEnd:   { name: 'contain', offset: { value: 100, unit: 'percentage' } },
+          rangeEnd: { name: 'contain', offset: { value: 100, unit: 'percentage' } },
           fill: 'both',
         },
         {
@@ -199,11 +161,11 @@ interact-element {
             ],
           },
           rangeStart: { name: 'contain', offset: { value: 0, unit: 'percentage' } },
-          rangeEnd:   { name: 'contain', offset: { value: 100, unit: 'percentage' } },
+          rangeEnd: { name: 'contain', offset: { value: 100, unit: 'percentage' } },
           fill: 'both',
         },
       ],
     },
   ],
-}
+};
 ```

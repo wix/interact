@@ -16,9 +16,7 @@ Individual letters in "RISING DEAD" each rotate up from below the text baseline 
     <div
       class="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden"
     >
-      <h1
-        class="font-instrument text-6xl md:text-9xl text-center leading-tight mb-12 uppercase tracking-tighter w-full"
-      >
+      <h1 class="text-6xl md:text-9xl text-center leading-tight mb-12 w-full">
         <span class="sr-only">RISING DEAD</span>
         <div class="block whitespace-nowrap text-center" aria-hidden="true">
           <span class="char-perspective"
@@ -94,7 +92,7 @@ Individual letters in "RISING DEAD" each rotate up from below the text baseline 
 
 ```css
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .char-perspective {
@@ -175,13 +173,13 @@ const effects = letterKeys.map((letterKey, index) => {
   };
 });
 
-{
+const config = {
   interactions: [
     {
       key: 'scroll-track',
       trigger: 'viewProgress',
       effects: effects,
     },
-  ];
-}
+  ],
+};
 ```

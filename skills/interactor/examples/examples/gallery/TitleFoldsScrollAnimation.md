@@ -195,7 +195,6 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
 ```css
 body {
   margin: 0;
-  overscroll-behavior-y: none;
 }
 
 .scroll-section {
@@ -219,9 +218,8 @@ interact-element {
 .card {
   width: 100%;
   height: 95vh;
-  overflow: hidden;
+  overflow: clip;
   transform-origin: bottom center;
-  border-radius: 24px;
 }
 
 .card-content {
@@ -243,10 +241,7 @@ interact-element {
   position: absolute;
   top: 20px;
   left: 20px;
-  font-size: 80px;
-  font-weight: bold;
   margin: 0;
-  line-height: 1;
   transform-origin: top left;
 }
 
@@ -261,26 +256,19 @@ interact-element {
   transform-origin: top right;
 }
 
-.top-right-stack span {
-  font-size: 14px;
-  opacity: 0.8;
-}
-
 .content-container {
   position: absolute;
   top: 120px;
   left: 20px;
   right: 20px;
   bottom: 20px;
-  border-radius: 12px;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .main-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 12px;
 }
 
 .bottom-text-stack {
@@ -289,16 +277,6 @@ interact-element {
   left: 20px;
   display: flex;
   flex-direction: column;
-}
-
-.small-text {
-  font-size: 16px;
-  opacity: 0.7;
-}
-
-.big-text {
-  font-size: 24px;
-  font-weight: 500;
 }
 
 .arrow-icon {
@@ -315,11 +293,6 @@ interact-element {
   align-items: center;
   justify-content: center;
 }
-
-.next-section p {
-  font-size: 32px;
-  font-weight: bold;
-}
 ```
 
 ## Interact config
@@ -328,91 +301,106 @@ interact-element {
 const CARD_SCALE_START = 0.75;
 
 const commonRange = {
-    rangeStart: { name: 'entry', offset: { unit: 'percentage', value: 0 } },
-    rangeEnd: { name: 'entry', offset: { unit: 'percentage', value: 100 } },
-    easing: 'linear',
-    fill: 'both'
+  rangeStart: { name: 'entry', offset: { unit: 'percentage', value: 0 } },
+  rangeEnd: { name: 'entry', offset: { unit: 'percentage', value: 100 } },
+  easing: 'linear',
+  fill: 'both',
 };
 
-{
-    effects: {
-        'card-scale': {
-            keyframeEffect: { name: 'card-scale-effect', keyframes: [{ transform: `scale(${CARD_SCALE_START})` }, { transform: 'scale(1)' }] },
-            ...commonRange
-        },
-        'heading-scale': {
-            keyframeEffect: { name: 'heading-scale-effect', keyframes: [{ transform: 'scale(2.0)' }, { transform: 'scale(1)' }] },
-            ...commonRange
-        },
-        'line-reveal': {
-            keyframeEffect: { name: 'line-reveal-effect', keyframes: [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }] },
-            ...commonRange
-        },
-        'top-stack-reveal': {
-            keyframeEffect: { name: 'top-stack-reveal-effect', keyframes: [{ transform: 'scale(0.3)' }, { transform: 'scale(1)' }] },
-            ...commonRange
-        },
-        'content-slide-up': {
-            keyframeEffect: { name: 'content-slide-up-effect', keyframes: [{ transform: 'translateY(400px)' }, { transform: 'translateY(0px)' }] },
-            ...commonRange
-        }
+const config = {
+  effects: {
+    'card-scale': {
+      keyframeEffect: {
+        name: 'card-scale-effect',
+        keyframes: [{ transform: `scale(${CARD_SCALE_START})` }, { transform: 'scale(1)' }],
+      },
+      ...commonRange,
     },
-    interactions: [
-        {
-            key: '#card-1',
-            trigger: 'viewProgress',
-            effects: [
-                { key: '#card-1', effectId: 'card-scale' },
-                { key: '#card-1 .heading-text', effectId: 'heading-scale' },
-                { key: '#card-1 .horizontal-line', effectId: 'line-reveal' },
-                { key: '#card-1 .top-right-stack', effectId: 'top-stack-reveal' },
-                { key: '#card-1 .content-container', effectId: 'content-slide-up' }
-            ]
-        },
-        {
-            key: '#card-2',
-            trigger: 'viewProgress',
-            effects: [
-                { key: '#card-2', effectId: 'card-scale' },
-                { key: '#card-2 .heading-text', effectId: 'heading-scale' },
-                { key: '#card-2 .horizontal-line', effectId: 'line-reveal' },
-                { key: '#card-2 .top-right-stack', effectId: 'top-stack-reveal' },
-                { key: '#card-2 .content-container', effectId: 'content-slide-up' }
-            ]
-        },
-        {
-            key: '#card-3',
-            trigger: 'viewProgress',
-            effects: [
-                { key: '#card-3', effectId: 'card-scale' },
-                { key: '#card-3 .heading-text', effectId: 'heading-scale' },
-                { key: '#card-3 .horizontal-line', effectId: 'line-reveal' },
-                { key: '#card-3 .top-right-stack', effectId: 'top-stack-reveal' },
-                { key: '#card-3 .content-container', effectId: 'content-slide-up' }
-            ]
-        },
-        {
-            key: '#card-4',
-            trigger: 'viewProgress',
-            effects: [
-                { key: '#card-4', effectId: 'card-scale' },
-                { key: '#card-4 .heading-text', effectId: 'heading-scale' },
-                { key: '#card-4 .horizontal-line', effectId: 'line-reveal' },
-                { key: '#card-4 .top-right-stack', effectId: 'top-stack-reveal' },
-                { key: '#card-4 .content-container', effectId: 'content-slide-up' }
-            ]
-        },
-        {
-            key: '#card-5',
-            trigger: 'viewProgress',
-            effects: [
-                { key: '#card-5', effectId: 'card-scale' },
-                { key: '#card-5 .heading-text', effectId: 'heading-scale' },
-                { key: '#card-5 .horizontal-line', effectId: 'line-reveal' },
-                { key: '#card-5 .top-right-stack', effectId: 'top-stack-reveal' },
-                { key: '#card-5 .content-container', effectId: 'content-slide-up' }
-            ]
-        }
-    ]
-}
+    'heading-scale': {
+      keyframeEffect: {
+        name: 'heading-scale-effect',
+        keyframes: [{ transform: 'scale(2.0)' }, { transform: 'scale(1)' }],
+      },
+      ...commonRange,
+    },
+    'line-reveal': {
+      keyframeEffect: {
+        name: 'line-reveal-effect',
+        keyframes: [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
+      },
+      ...commonRange,
+    },
+    'top-stack-reveal': {
+      keyframeEffect: {
+        name: 'top-stack-reveal-effect',
+        keyframes: [{ transform: 'scale(0.3)' }, { transform: 'scale(1)' }],
+      },
+      ...commonRange,
+    },
+    'content-slide-up': {
+      keyframeEffect: {
+        name: 'content-slide-up-effect',
+        keyframes: [{ transform: 'translateY(400px)' }, { transform: 'translateY(0px)' }],
+      },
+      ...commonRange,
+    },
+  },
+  interactions: [
+    {
+      key: '#card-1',
+      trigger: 'viewProgress',
+      effects: [
+        { key: '#card-1', effectId: 'card-scale' },
+        { key: '#card-1', selector: '.heading-text', effectId: 'heading-scale' },
+        { key: '#card-1', selector: '.horizontal-line', effectId: 'line-reveal' },
+        { key: '#card-1', selector: '.top-right-stack', effectId: 'top-stack-reveal' },
+        { key: '#card-1', selector: '.content-container', effectId: 'content-slide-up' },
+      ],
+    },
+    {
+      key: '#card-2',
+      trigger: 'viewProgress',
+      effects: [
+        { key: '#card-2', effectId: 'card-scale' },
+        { key: '#card-2', selector: '.heading-text', effectId: 'heading-scale' },
+        { key: '#card-2', selector: '.horizontal-line', effectId: 'line-reveal' },
+        { key: '#card-2', selector: '.top-right-stack', effectId: 'top-stack-reveal' },
+        { key: '#card-2', selector: '.content-container', effectId: 'content-slide-up' },
+      ],
+    },
+    {
+      key: '#card-3',
+      trigger: 'viewProgress',
+      effects: [
+        { key: '#card-3', effectId: 'card-scale' },
+        { key: '#card-3', selector: '.heading-text', effectId: 'heading-scale' },
+        { key: '#card-3', selector: '.horizontal-line', effectId: 'line-reveal' },
+        { key: '#card-3', selector: '.top-right-stack', effectId: 'top-stack-reveal' },
+        { key: '#card-3', selector: '.content-container', effectId: 'content-slide-up' },
+      ],
+    },
+    {
+      key: '#card-4',
+      trigger: 'viewProgress',
+      effects: [
+        { key: '#card-4', effectId: 'card-scale' },
+        { key: '#card-4', selector: '.heading-text', effectId: 'heading-scale' },
+        { key: '#card-4', selector: '.horizontal-line', effectId: 'line-reveal' },
+        { key: '#card-4', selector: '.top-right-stack', effectId: 'top-stack-reveal' },
+        { key: '#card-4', selector: '.content-container', effectId: 'content-slide-up' },
+      ],
+    },
+    {
+      key: '#card-5',
+      trigger: 'viewProgress',
+      effects: [
+        { key: '#card-5', effectId: 'card-scale' },
+        { key: '#card-5', selector: '.heading-text', effectId: 'heading-scale' },
+        { key: '#card-5', selector: '.horizontal-line', effectId: 'line-reveal' },
+        { key: '#card-5', selector: '.top-right-stack', effectId: 'top-stack-reveal' },
+        { key: '#card-5', selector: '.content-container', effectId: 'content-slide-up' },
+      ],
+    },
+  ],
+};
 ```

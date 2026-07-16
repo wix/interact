@@ -10,7 +10,6 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
 <section class="hero">
   <h1>Ammonoidea</h1>
   <p>[ scroll to reveal the collection ]</p>
-  <div class="scroll-hint"></div>
 </section>
 
 <interact-element data-interact-key="scroll-wrapper">
@@ -110,8 +109,6 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
 
 ```css
 :root {
-  --card-radius: 8px;
-  --image-radius: 4px;
   --card-width: 260px;
 }
 
@@ -132,35 +129,6 @@ interact-element {
   justify-content: center;
   flex-direction: column;
   gap: 1rem;
-}
-
-.hero h1 {
-  font-size: clamp(3rem, 8vw, 6rem);
-  font-weight: 500;
-  letter-spacing: -0.03em;
-}
-
-.hero p {
-  font-size: 1rem;
-  font-weight: 300;
-  letter-spacing: 0.05em;
-}
-
-.hero .scroll-hint {
-  margin-top: 3rem;
-  width: 1px;
-  height: 60px;
-  animation: pulse-hint 2s ease-in-out infinite;
-}
-
-@keyframes pulse-hint {
-  0%,
-  100% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 1;
-  }
 }
 
 #scroll-wrapper {
@@ -188,8 +156,7 @@ interact-element {
 
 .card {
   width: var(--card-width);
-  border-radius: var(--card-radius);
-  overflow: hidden;
+  overflow: clip;
   flex-shrink: 0;
   padding: 10px 10px 10px;
   opacity: 0;
@@ -202,15 +169,6 @@ interact-element {
   margin-bottom: 2px;
 }
 
-.card-label {
-  font-size: 0.6rem;
-}
-
-.card-code {
-  font-size: 0.5rem;
-  font-weight: 300;
-}
-
 .card-title-row {
   display: flex;
   justify-content: space-between;
@@ -218,22 +176,10 @@ interact-element {
   margin-bottom: 8px;
 }
 
-.card-name {
-  font-size: 0.95rem;
-  font-weight: 500;
-  text-transform: capitalize;
-}
-
-.card-arrow {
-  font-weight: 300;
-  font-size: 1rem;
-}
-
 .card-image {
   width: 100%;
   aspect-ratio: 36 / 50;
-  border-radius: var(--image-radius);
-  overflow: hidden;
+  overflow: clip;
 }
 
 .card-image img {
@@ -249,17 +195,12 @@ interact-element {
   align-items: center;
   justify-content: center;
 }
-
-.end-section p {
-  font-size: 0.85rem;
-  font-weight: 300;
-}
 ```
 
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'scroll-wrapper',
@@ -422,6 +363,6 @@ interact-element {
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

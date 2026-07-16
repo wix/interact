@@ -1,337 +1,120 @@
 # Label
 
-Accessible pill-shaped checkbox labels that scale and highlight on hover, with a checkmark icon revealed via CSS transition when toggled.
+Native checkbox labels reveal a checkmark when selected, while Interact scales their inner content on hover or focus.
 
-**Tags:** hover, click, transform, opacity, scale
+**Tags:** interest, hover, checkbox, transform, scale
 
 ## Markup
 
 ```html
-<nav aria-label="Skill selection" class="pill-container">
-  <div class="pill-wrapper">
-    <input type="checkbox" id="pill-0" class="hidden-checkbox" checked aria-hidden="true" />
-    <interact-element data-interact-key="pill-0">
-      <label
-        for="pill-0"
-        class="pill"
-        tabindex="0"
-        role="button"
-        aria-pressed="true"
-        aria-label="Toggle Web Design"
-      >
-        <span class="pill-inner">
-          <svg
-            class="check-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          Web Design
-        </span>
+<fieldset class="choices">
+  <legend>Skills</legend>
+  <div class="choice">
+    <input class="choice-input" id="design" name="skills" type="checkbox" checked />
+    <interact-element data-interact-key="choice-design">
+      <label class="choice-label" for="design">
+        <span class="choice-inner"
+          ><span class="check-icon" aria-hidden="true">✓</span>Web design</span
+        >
       </label>
     </interact-element>
   </div>
-  <div class="pill-wrapper">
-    <input type="checkbox" id="pill-1" class="hidden-checkbox" aria-hidden="true" />
-    <interact-element data-interact-key="pill-1">
-      <label
-        for="pill-1"
-        class="pill"
-        tabindex="0"
-        role="button"
-        aria-pressed="false"
-        aria-label="Toggle App Development"
-      >
-        <span class="pill-inner">
-          <svg
-            class="check-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          App Development
-        </span>
+  <div class="choice">
+    <input class="choice-input" id="development" name="skills" type="checkbox" />
+    <interact-element data-interact-key="choice-development">
+      <label class="choice-label" for="development">
+        <span class="choice-inner"
+          ><span class="check-icon" aria-hidden="true">✓</span>App development</span
+        >
       </label>
     </interact-element>
   </div>
-  <div class="pill-wrapper">
-    <input type="checkbox" id="pill-2" class="hidden-checkbox" aria-hidden="true" />
-    <interact-element data-interact-key="pill-2">
-      <label
-        for="pill-2"
-        class="pill"
-        tabindex="0"
-        role="button"
-        aria-pressed="false"
-        aria-label="Toggle UI/UX"
-      >
-        <span class="pill-inner">
-          <svg
-            class="check-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          UI/UX
-        </span>
+  <div class="choice">
+    <input class="choice-input" id="illustration" name="skills" type="checkbox" />
+    <interact-element data-interact-key="choice-illustration">
+      <label class="choice-label" for="illustration">
+        <span class="choice-inner"
+          ><span class="check-icon" aria-hidden="true">✓</span>Illustration</span
+        >
       </label>
     </interact-element>
   </div>
-  <div class="pill-wrapper">
-    <input type="checkbox" id="pill-3" class="hidden-checkbox" aria-hidden="true" />
-    <interact-element data-interact-key="pill-3">
-      <label
-        for="pill-3"
-        class="pill"
-        tabindex="0"
-        role="button"
-        aria-pressed="false"
-        aria-label="Toggle Branding &amp; Logo"
-      >
-        <span class="pill-inner">
-          <svg
-            class="check-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          Branding &amp; Logo
-        </span>
-      </label>
-    </interact-element>
-  </div>
-  <div class="pill-wrapper">
-    <input type="checkbox" id="pill-4" class="hidden-checkbox" checked aria-hidden="true" />
-    <interact-element data-interact-key="pill-4">
-      <label
-        for="pill-4"
-        class="pill"
-        tabindex="0"
-        role="button"
-        aria-pressed="true"
-        aria-label="Toggle Illustration"
-      >
-        <span class="pill-inner">
-          <svg
-            class="check-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          Illustration
-        </span>
-      </label>
-    </interact-element>
-  </div>
-  <div class="pill-wrapper">
-    <input type="checkbox" id="pill-5" class="hidden-checkbox" aria-hidden="true" />
-    <interact-element data-interact-key="pill-5">
-      <label
-        for="pill-5"
-        class="pill"
-        tabindex="0"
-        role="button"
-        aria-pressed="false"
-        aria-label="Toggle Motion Graphics"
-      >
-        <span class="pill-inner">
-          <svg
-            class="check-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          Motion Graphics
-        </span>
-      </label>
-    </interact-element>
-  </div>
-</nav>
+</fieldset>
 ```
 
 ## Essential styles
 
 ```css
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  list-style: none;
-}
-
-body {
-  font-weight: 400;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow-x: hidden;
-  padding: 20px;
-}
-
 interact-element {
-  display: inline-flex;
+  display: contents;
 }
 
-.pill-container {
-  max-width: 820px;
-  width: 100%;
+.choices {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  padding: 24px 16px;
-  justify-content: center;
+  gap: 0.75rem;
 }
 
-@media (min-width: 640px) {
-  .pill-container {
-    gap: 12px;
-    padding: 40px;
-  }
-}
-
-.pill-wrapper {
-  display: flex;
-  flex: 0 0 auto;
-}
-
-.hidden-checkbox {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  width: 0;
-  height: 0;
-}
-
-.pill {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  height: 48px;
-  padding: 0 30px;
-  border-radius: 9999px;
+.choice {
   position: relative;
-  user-select: none;
-  border: 1.5px solid transparent;
-  transform-style: preserve-3d;
-  transition: border-color 0.3s ease;
-  outline: none;
 }
 
-@media (min-width: 640px) {
-  .pill {
-    height: 56px;
-    padding: 0 40px;
-  }
+.choice-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
 }
 
-.hidden-checkbox:checked + interact-element .pill {
-  border-width: 0.5px;
-}
-
-.pill-inner {
+.choice-label {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0;
-  font-size: 14px;
-  font-weight: 400;
-  white-space: nowrap;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  cursor: pointer;
 }
 
-@media (min-width: 640px) {
-  .pill-inner {
-    font-size: 16px;
-  }
+.choice-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transform: scale(1);
 }
 
 .check-icon {
-  width: 0;
-  height: 13px;
   opacity: 0;
-  overflow: hidden;
-  flex-shrink: 0;
-  transition:
-    width 0.3s ease,
-    opacity 0.25s ease,
-    margin 0.3s ease;
 }
 
-.hidden-checkbox:checked + interact-element .check-icon {
-  width: 13px;
+.choice-input:checked + interact-element .check-icon {
   opacity: 1;
-  margin-right: 6px;
-  transition-delay: 0.08s;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .pill,
-  .check-icon {
-    transition: none !important;
-  }
+.choice-input:focus-visible + interact-element .choice-label {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
 ```
 
 ## Interact config
 
 ```js
-const pillKeys = ['pill-0', 'pill-1', 'pill-2', 'pill-3', 'pill-4', 'pill-5'];
+const choiceKeys = ['choice-design', 'choice-development', 'choice-illustration'];
 
-{
-  interactions: pillKeys.flatMap((key) => [
-    {
-      key,
-      trigger: 'hover',
-      effects: [
-        {
-          stateAction: 'toggle',
-          transition: {
-            duration: 250,
-            easing: 'ease-out',
-            styleProperties: [{ name: 'transform', value: 'scale(1.04)' }],
-          },
+const config = {
+  interactions: choiceKeys.map((key) => ({
+    key,
+    trigger: 'interest',
+    effects: [
+      {
+        selector: '.choice-inner',
+        stateAction: 'toggle',
+        transition: {
+          duration: 200,
+          easing: 'ease-out',
+          styleProperties: [{ name: 'transform', value: 'scale(1.04)' }],
         },
-      ],
-    },
-  ]);
-}
+      },
+    ],
+  })),
+};
 ```

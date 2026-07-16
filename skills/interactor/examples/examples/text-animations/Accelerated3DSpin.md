@@ -28,20 +28,16 @@ A large headline text continuously rotates on the Y-axis in a slow idle loop whe
       <interact-element data-interact-key="main-title">
         <div id="headline-container" class="rotating-card">
           <div class="card-face front">
-            <h1 class="text-7xl md:text-9xl font-black uppercase tracking-tighter leading-none">
-              HEAVIES
-            </h1>
+            <h1 class="text-7xl md:text-9xl leading-none">HEAVIES</h1>
           </div>
           <div class="card-face back">
-            <h1 class="text-7xl md:text-9xl font-black uppercase tracking-tighter leading-none">
-              HEAVIES
-            </h1>
+            <h1 class="text-7xl md:text-9xl leading-none">HEAVIES</h1>
           </div>
         </div>
       </interact-element>
     </main>
 
-    <footer class="poster-grid opacity-70">
+    <footer class="poster-grid">
       <div>
         <p class="info-label">Featuring</p>
         <p class="info-value">Abigail Deville<br />Xaviera Simmons<br />Rosa-Johan Uddoh</p>
@@ -60,8 +56,10 @@ A large headline text continuously rotates on the Y-axis in a slow idle loop whe
 
 <interact-element
   data-interact-key="scroll-observer"
-  style="position: absolute;top: 0;left: 0;width: 100%;height: 500vh;pointer-events: none;z-index: -1"
-></interact-element>
+  style="display: block;position: absolute;top: 0;left: 0;width: 100%;height: 500vh;pointer-events: none;z-index: -1"
+>
+  <div class="scroll-observer-track"></div>
+</interact-element>
 ```
 
 ## Essential styles
@@ -69,22 +67,17 @@ A large headline text continuously rotates on the Y-axis in a slow idle loop whe
 ```css
 body {
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .info-label {
   font-size: 0.6rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
   margin-bottom: 4px;
-  font-weight: 400;
 }
 
 .info-value {
   font-size: 0.8rem;
   line-height: 1.1;
-  font-weight: 400;
-  text-transform: none;
 }
 
 .main-container {
@@ -124,6 +117,11 @@ body {
 
 .scroll-wrapper {
   height: 500vh;
+}
+
+.scroll-observer-track {
+  width: 100%;
+  height: 100%;
 }
 
 .sticky-section {
@@ -183,7 +181,7 @@ body {
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'main-title',
@@ -226,6 +224,6 @@ body {
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

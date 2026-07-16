@@ -10,7 +10,7 @@ A sticky image panel expands from a small bottom-left corner position to fill th
 <interact-element data-interact-key="page">
   <section class="sticky-track">
     <div class="sticky-frame">
-      <interact-element data-interact-key="title" data-interact-initial="true">
+      <interact-element data-interact-key="title">
         <div class="title-wrap">
           <div class="title-area">
             <h1>MANIFEST<sup>®</sup></h1>
@@ -18,7 +18,7 @@ A sticky image panel expands from a small bottom-left corner position to fill th
         </div>
       </interact-element>
 
-      <interact-element data-interact-key="text-cols" data-interact-initial="true">
+      <interact-element data-interact-key="text-cols">
         <div class="text-wrap">
           <div class="text-columns">
             <div class="text-col">
@@ -31,7 +31,7 @@ A sticky image panel expands from a small bottom-left corner position to fill th
         </div>
       </interact-element>
 
-      <interact-element data-interact-key="image-box" data-interact-initial="true">
+      <interact-element data-interact-key="image-box">
         <div class="image-wrap">
           <div class="image-container">
             <img src="" />
@@ -46,35 +46,20 @@ A sticky image panel expands from a small bottom-left corner position to fill th
 ## Essential styles
 
 ```css
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 interact-element {
   display: block;
 }
 
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.045;
-}
-
 .sticky-track {
-  height: 400vh;
   position: relative;
+  height: 400vh;
 }
 
 .sticky-frame {
   position: sticky;
   top: 0;
-  height: 100vh;
   width: 100vw;
+  height: 100vh;
   overflow: clip;
 }
 
@@ -85,25 +70,21 @@ body::after {
   z-index: 10;
 }
 
-.title-area h1 {
-  font-size: clamp(6rem, 18vw, 16rem);
-  font-weight: 400;
-  line-height: 0.85;
-  letter-spacing: 0.03em;
-}
-
-.title-area h1 sup {
-  font-size: 0.12em;
-  vertical-align: super;
-  letter-spacing: 0;
-  font-weight: 300;
+[data-interact-key='title'] {
+  opacity: 0;
+  transform: translateY(40px);
 }
 
 .text-wrap {
   position: absolute;
-  top: calc(40px + clamp(6rem, 18vw, 16rem) * 0.85 + 24px);
+  top: 25vh;
   left: 40px;
   z-index: 10;
+}
+
+[data-interact-key='text-cols'] {
+  opacity: 0;
+  transform: translateY(30px);
 }
 
 .text-columns {
@@ -115,14 +96,6 @@ body::after {
   max-width: 140px;
 }
 
-.text-col p {
-  font-size: 0.55rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  line-height: 1.7;
-}
-
 .image-wrap {
   position: absolute;
   top: calc(60% - 24px);
@@ -131,83 +104,81 @@ body::after {
   left: 24px;
 }
 
+[data-interact-key='image-box'] {
+  opacity: 0;
+  transform: translateY(60px);
+}
+
 .image-container {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: clip;
-  border-radius: 3px;
-}
-
-.image-container::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
 }
 
 .image-container img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
-  filter: grayscale(1) brightness(0.65) contrast(1.25);
 }
 ```
 
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'page',
       trigger: 'viewEnter',
-      sequences: [{
-        offset: 225,
-        triggerType: 'once',
-        effects: [
-          {
-            key: 'title',
-            keyframeEffect: {
-              name: 'title-in',
-              keyframes: [
-                { opacity: '0', transform: 'translateY(40px)', offset: 0 },
-                { opacity: '1', transform: 'translateY(0)', offset: 1 },
-              ],
+      sequences: [
+        {
+          offset: 225,
+          triggerType: 'once',
+          effects: [
+            {
+              key: 'title',
+              keyframeEffect: {
+                name: 'title-in',
+                keyframes: [
+                  { opacity: '0', transform: 'translateY(40px)', offset: 0 },
+                  { opacity: '1', transform: 'translateY(0)', offset: 1 },
+                ],
+              },
+              duration: 1000,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'both',
             },
-            duration: 1000,
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            fill: 'both',
-          },
-          {
-            key: 'text-cols',
-            keyframeEffect: {
-              name: 'text-in',
-              keyframes: [
-                { opacity: '0', transform: 'translateY(30px)', offset: 0 },
-                { opacity: '1', transform: 'translateY(0)', offset: 1 },
-              ],
+            {
+              key: 'text-cols',
+              keyframeEffect: {
+                name: 'text-in',
+                keyframes: [
+                  { opacity: '0', transform: 'translateY(30px)', offset: 0 },
+                  { opacity: '1', transform: 'translateY(0)', offset: 1 },
+                ],
+              },
+              duration: 900,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'both',
             },
-            duration: 900,
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            fill: 'both',
-          },
-          {
-            key: 'image-box',
-            keyframeEffect: {
-              name: 'image-in',
-              keyframes: [
-                { opacity: '0', transform: 'translateY(60px)', offset: 0 },
-                { opacity: '1', transform: 'translateY(0)', offset: 1 },
-              ],
+            {
+              key: 'image-box',
+              keyframeEffect: {
+                name: 'image-in',
+                keyframes: [
+                  { opacity: '0', transform: 'translateY(60px)', offset: 0 },
+                  { opacity: '1', transform: 'translateY(0)', offset: 1 },
+                ],
+              },
+              duration: 1100,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'both',
             },
-            duration: 1100,
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            fill: 'both',
-          },
-        ],
-      }],
+          ],
+        },
+      ],
     },
     {
       key: 'page',
@@ -245,5 +216,5 @@ body::after {
       ],
     },
   ],
-}
+};
 ```

@@ -21,7 +21,7 @@ A sticky scroll sequence where a centered image expands from a thin horizontal s
         </div>
       </interact-element>
 
-      <interact-element data-interact-key="subtitle" data-interact-initial="true">
+      <interact-element data-interact-key="subtitle">
         <div class="sub-wrap">
           <div class="sub-area">
             <p>Between the seen &amp; unseen<br />A study in negative space &amp; form — 2026</p>
@@ -29,7 +29,7 @@ A sticky scroll sequence where a centered image expands from a thin horizontal s
         </div>
       </interact-element>
 
-      <interact-element data-interact-key="rift" data-interact-initial="true">
+      <interact-element data-interact-key="rift">
         <div class="rift-wrap">
           <div class="rift-container">
             <img src="" />
@@ -44,35 +44,20 @@ A sticky scroll sequence where a centered image expands from a thin horizontal s
 ## Essential styles
 
 ```css
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 interact-element {
   display: block;
 }
 
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.045;
-}
-
 .sticky-track {
-  height: 500vh;
   position: relative;
+  height: 500vh;
 }
 
 .sticky-frame {
   position: sticky;
   top: 0;
-  height: 100vh;
   width: 100vw;
+  height: 100vh;
   overflow: clip;
 }
 
@@ -80,22 +65,13 @@ body::after {
   position: absolute;
   bottom: calc(50% + 16px);
   left: 0;
-  width: 100%;
-  text-align: center;
   z-index: 10;
+  width: 100%;
   pointer-events: none;
 }
 
 .title-area {
   overflow: clip;
-  padding-bottom: 0.1em;
-}
-
-.title-area h1 {
-  font-size: clamp(5rem, 16vw, 15rem);
-  font-weight: 400;
-  line-height: 0.85;
-  letter-spacing: 0.1em;
 }
 
 .title-area .letter {
@@ -107,27 +83,24 @@ body::after {
   position: absolute;
   top: calc(50% + 20px);
   left: 0;
-  width: 100%;
-  text-align: center;
   z-index: 10;
+  width: 100%;
   pointer-events: none;
 }
 
-.sub-area p {
-  font-size: 0.7rem;
-  font-weight: 300;
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  line-height: 2.4;
+[data-interact-key='subtitle'] {
+  opacity: 0;
+  transform: translateY(-15px) scale(0.9);
 }
 
 .rift-wrap {
   position: absolute;
-  top: 50%;
-  right: 20%;
-  bottom: 50%;
-  left: 20%;
+  inset: 50% 20%;
   z-index: 5;
+}
+
+[data-interact-key='rift'] {
+  opacity: 0;
 }
 
 .rift-container {
@@ -137,27 +110,18 @@ body::after {
   overflow: clip;
 }
 
-.rift-container::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-}
-
 .rift-container img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
-  filter: grayscale(1) brightness(0.7) contrast(1.2);
 }
 ```
 
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'page',
@@ -167,17 +131,22 @@ body::after {
           delay: 100,
           offset: 80,
           triggerType: 'once',
-          effects: [{
-            key: 'title',
-            selector: '.letter',
-            keyframeEffect: { name: 'letter-in', keyframes: [
-              { transform: 'translateY(120%)', offset: 0 },
-              { transform: 'translateY(0)', offset: 1 },
-            ]},
-            duration: 900,
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            fill: 'both',
-          }],
+          effects: [
+            {
+              key: 'title',
+              selector: '.letter',
+              keyframeEffect: {
+                name: 'letter-in',
+                keyframes: [
+                  { transform: 'translateY(120%)', offset: 0 },
+                  { transform: 'translateY(0)', offset: 1 },
+                ],
+              },
+              duration: 900,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'both',
+            },
+          ],
         },
         {
           delay: 500,
@@ -250,5 +219,5 @@ body::after {
       ],
     },
   ],
-}
+};
 ```

@@ -17,35 +17,30 @@ Three editorial slides sequence through a sticky viewport as the user scrolls â€
             <div class="absolute top-8 right-8 label-text">Display</div>
             <div class="absolute bottom-8 left-8 label-text">2025</div>
             <div class="absolute bottom-8 right-8 label-text">Interact</div>
-            <h1 class="mega-text text-center tracking-tighter">Origin.</h1>
-            <div class="mt-8 px-5 py-2 border border-white/30 rounded-full label-text">
-              The Beginning of Motion
-            </div>
+            <h1 class="mega-text text-center">Origin.</h1>
+            <div class="mt-8 px-5 py-2 label-text">The Beginning of Motion</div>
           </div>
         </interact-element>
 
         <interact-element data-interact-key="slide-2">
           <div class="slide slide-2">
-            <div class="bg-number">02</div>
             <interact-element data-interact-key="s2-content">
               <div class="relative z-10 w-full max-w-7xl px-4 md:px-8 flex flex-col gap-12">
-                <div class="border-b pb-8">
+                <div class="pb-8">
                   <div class="flex justify-between items-end mb-4">
                     <span class="label-text">Design Philosophy</span>
                     <span class="label-text">Fig. A</span>
                   </div>
-                  <h2 class="text-7xl md:text-9xl font-semibold tracking-tighter leading-[0.9]">
-                    Essentialism.
-                  </h2>
+                  <h2 class="text-7xl md:text-9xl leading-[0.9]">Essentialism.</h2>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-start">
                   <div>
-                    <p class="text-3xl md:text-4xl font-medium leading-tight tracking-tight">
+                    <p class="text-3xl md:text-4xl leading-tight">
                       Sample text provides enough length to demonstrate this animated content
                       layout.
                     </p>
                   </div>
-                  <div class="flex flex-col gap-6 text-lg leading-relaxed font-normal">
+                  <div class="flex flex-col gap-6 text-lg leading-relaxed">
                     <p>
                       Sample text provides enough length to demonstrate this animated content
                       layout.
@@ -54,11 +49,9 @@ Three editorial slides sequence through a sticky viewport as the user scrolls â€
                       Sample text provides enough length to demonstrate this animated content
                       layout.
                     </p>
-                    <div class="mt-6 flex items-center gap-3 opacity-60">
+                    <div class="mt-6 flex items-center gap-3">
                       <div class="w-8 h-px"></div>
-                      <span class="text-xs font-bold uppercase tracking-wider"
-                        >Read the Manifesto</span
-                      >
+                      <span class="text-xs">Read the Manifesto</span>
                     </div>
                   </div>
                 </div>
@@ -105,7 +98,7 @@ Three editorial slides sequence through a sticky viewport as the user scrolls â€
   </div>
 </interact-element>
 
-<footer class="h-[50vh] flex items-center justify-center border-t">
+<footer class="h-[50vh] flex items-center justify-center">
   <p class="label-text">End of Sequence</p>
 </footer>
 ```
@@ -116,14 +109,14 @@ Three editorial slides sequence through a sticky viewport as the user scrolls â€
 body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .slides-stack {
   position: relative;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  overflow: clip;
   perspective: 1000px;
 }
 
@@ -146,8 +139,6 @@ body {
 .mega-text {
   font-size: clamp(5rem, 18vw, 20rem);
   line-height: 1;
-  letter-spacing: -0.04em;
-  font-weight: 600;
 }
 
 .slide-2 {
@@ -157,24 +148,11 @@ body {
   justify-content: center;
   padding: 4vw;
   box-sizing: border-box;
-  overflow: hidden;
-}
-
-.bg-number {
-  position: absolute;
-  bottom: -10%;
-  right: -5%;
-  font-size: 35vw;
-  font-weight: 700;
-  line-height: 1;
-  z-index: 0;
-  pointer-events: none;
-  letter-spacing: -0.05em;
+  overflow: clip;
 }
 
 .slide-3 {
   z-index: 2;
-  border-left: 1px solid;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -193,40 +171,30 @@ body {
 .typo-col {
   flex: 1;
   height: 100%;
-  border-top: 1px solid;
   padding-top: 2rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.3s ease;
 }
 
 .col-number {
   font-size: 5rem;
-  font-weight: 500;
   line-height: 1;
-  letter-spacing: -0.02em;
 }
 
 .col-title {
   font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
   margin-bottom: 0.5rem;
 }
 
 .col-desc {
   font-size: 1.05rem;
   line-height: 1.5;
-  font-weight: 400;
   max-width: 240px;
 }
 
 .label-text {
   font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   opacity: 0.7;
 }
 ```
@@ -234,7 +202,7 @@ body {
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'scroll-container',
@@ -339,6 +307,6 @@ body {
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

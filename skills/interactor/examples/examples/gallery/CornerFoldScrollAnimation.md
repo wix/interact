@@ -137,7 +137,7 @@ Five fullscreen sticky panels sequentially slide up from below and expand their 
 .overflow-clipper {
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: clip;
   position: relative;
 }
 
@@ -162,15 +162,19 @@ Five fullscreen sticky panels sequentially slide up from below and expand their 
 #panel-1 {
   z-index: 1;
 }
+
 #panel-2 {
   z-index: 2;
 }
+
 #panel-3 {
   z-index: 3;
 }
+
 #panel-4 {
   z-index: 4;
 }
+
 #panel-5 {
   z-index: 5;
 }
@@ -183,16 +187,12 @@ Five fullscreen sticky panels sequentially slide up from below and expand their 
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  border-top: 1px solid;
-  border-bottom: 1px solid;
   z-index: 20;
 }
 
 .animated-title p {
-  font-weight: 500;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: clip;
 }
 
 .image-container {

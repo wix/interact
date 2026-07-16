@@ -1,8 +1,8 @@
 # Mirror Hover Gallery
 
-A grid of nature image cards where hovering any card zooms it, darkens its overlay, and reveals text while simultaneously mirroring that card's background image across the entire grid with a Chebyshev-distance stagger.
+A responsive grid where hovering a card scales it and reveals its overlay and text through Interact effects.
 
-**Tags:** hover, grid, gallery, transform, opacity, stagger, scale, reveal, background
+**Tags:** hover, grid, gallery, transform, opacity, scale, reveal
 
 ## Markup
 
@@ -79,6 +79,7 @@ body {
   padding: 40px;
   overflow-x: hidden;
 }
+
 .grid-container {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
@@ -86,21 +87,21 @@ body {
   gap: 40px;
   width: 100%;
 }
+
 interact-element {
   display: block;
   position: relative;
-  overflow: hidden;
+  overflow: clip;
   width: 100%;
   height: 100%;
-  border-radius: 5px;
-  cursor: pointer;
 }
+
 .card-inner {
   width: 100%;
   height: 100%;
   position: relative;
-  border-radius: 5px;
 }
+
 .card-bg {
   position: absolute;
   top: 0;
@@ -108,12 +109,13 @@ interact-element {
   width: 100%;
   height: 100%;
 }
+
 .card-overlay {
   position: absolute;
   inset: 0;
   z-index: 1;
-  border-radius: 5px;
 }
+
 .card-content {
   position: absolute;
   bottom: 12px;
@@ -122,22 +124,23 @@ interact-element {
   opacity: 0;
   transform: translateY(10px);
   z-index: 2;
-  line-height: 1.2;
   pointer-events: none;
 }
+
 .card-content h3 {
   margin: 0 0 3px 0;
-  font-size: 1rem;
 }
+
 .card-content p {
   margin: 0;
-  font-size: 0.85rem;
 }
+
 @media (max-width: 1200px) {
   .grid-container {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
 @media (max-width: 800px) {
   .grid-container {
     grid-template-columns: repeat(2, 1fr);
@@ -148,12 +151,7 @@ interact-element {
 ## Interact config
 
 ```js
-const COLS = 8;
-const allCards = Array.from(document.querySelectorAll('interact-element'));
-const allBgs = Array.from(document.querySelectorAll('.card-bg'));
-const CARD_COUNT = allCards.length;
-const originalImages = allBgs.map((bg) => bg.style.backgroundImage);
-
+const CARD_COUNT = 6;
 const interactions = [];
 
 for (let i = 1; i <= CARD_COUNT; i++) {
@@ -194,62 +192,12 @@ for (let i = 1; i <= CARD_COUNT; i++) {
       {
         transition: {
           duration: 0,
-          styleProperties: [{ name: 'z-index', value: '10' }],
+          styleProperties: [{ name: 'zIndex', value: '10' }],
         },
       },
     ],
   });
 }
 
-// { interactions }
-
-// Global background mirror effect with Chebyshev-distance stagger
-let lastHoveredIndex = 0;
-
-allCards.forEach((el, elIndex) => {
-  el.addEventListener('mouseenter', () => {
-    lastHoveredIndex = elIndex;
-    const hoverImage = el.querySelector('.card-bg').style.backgroundImage;
-    const hoveredRow = Math.floor(elIndex / COLS);
-    const hoveredCol = elIndex % COLS;
-    const stagger =
-      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--stagger-delay')) ||
-      0;
-
-    const hoveredBg = allBgs[elIndex];
-    hoveredBg.style.transition = 'none';
-    hoveredBg.style.transitionDelay = '0ms';
-    hoveredBg.style.backgroundImage = hoverImage;
-    hoveredBg.offsetHeight;
-    hoveredBg.style.transition = '';
-
-    allBgs.forEach((cardBg, index) => {
-      if (index === elIndex) return;
-      const row = Math.floor(index / COLS);
-      const col = index % COLS;
-      const dist = Math.max(Math.abs(row - hoveredRow), Math.abs(col - hoveredCol));
-      cardBg.style.transitionDelay = `${dist * stagger}ms`;
-      cardBg.style.backgroundImage = hoverImage;
-    });
-  });
-
-  el.addEventListener('mouseleave', () => {
-    const hoveredRow = Math.floor(lastHoveredIndex / COLS);
-    const hoveredCol = lastHoveredIndex % COLS;
-    const stagger =
-      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--stagger-delay')) ||
-      0;
-
-    allCards.forEach((cardEl, index) => {
-      const cardBg = cardEl.querySelector('.card-bg');
-      if (cardBg) {
-        const row = Math.floor(index / COLS);
-        const col = index % COLS;
-        const dist = Math.max(Math.abs(row - hoveredRow), Math.abs(col - hoveredCol));
-        cardBg.style.transitionDelay = `${dist * stagger}ms`;
-        cardBg.style.backgroundImage = originalImages[index];
-      }
-    });
-  });
-});
+const config = { interactions };
 ```

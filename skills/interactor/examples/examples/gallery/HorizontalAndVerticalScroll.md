@@ -8,7 +8,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
 
 ```html
 <interact-element data-interact-key="#scroll-section">
-  <section id="scroll-section" class="relative" style="height: 900vh">
+  <section id="scroll-section" class="relative" style="height:900vh;">
     <div class="sticky-wrap">
       <interact-element data-interact-key="#stack">
         <div id="stack" class="flex w-max">
@@ -85,11 +85,6 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
   --hvs-gap: 4;
   --hvs-card-w: 33.3;
   --hvs-card-h: 75;
-  --hvs-radius: 16;
-}
-
-html {
-  scroll-behavior: smooth;
 }
 
 .sticky-wrap {
@@ -97,7 +92,7 @@ html {
   top: calc((100 - var(--hvs-card-h)) / 2 * 1vh);
   height: calc(var(--hvs-card-h) * 1vh);
   width: 100%;
-  overflow: hidden;
+  overflow: clip;
 }
 
 #stack {
@@ -106,11 +101,8 @@ html {
 
 .card {
   transform: translateY(100vh);
-  will-change: transform;
-  border: 1px solid;
   width: 80vw;
   height: calc(var(--hvs-card-h) * 1vh);
-  border-radius: calc(var(--hvs-radius) * 1px);
 }
 
 @media (min-width: 768px) {

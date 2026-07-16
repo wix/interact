@@ -17,9 +17,7 @@ Eleven stacked ghost layers of large display text progressively skew along the X
   <div class="grid place-items-center w-full relative perspective-1000">
     <div class="stack-cell z-0 pointer-events-none">
       <interact-element data-interact-key="header-ghost-10">
-        <h1
-          class="text-6xl md:text-8xl font-black tracking-tighter leading-tight whitespace-nowrap text-center"
-        >
+        <h1 class="text-6xl md:text-8xl leading-tight whitespace-nowrap text-center">
           WARPING<br />REALITY
         </h1>
       </interact-element>
@@ -27,9 +25,7 @@ Eleven stacked ghost layers of large display text progressively skew along the X
 
     <div class="stack-cell z-0 pointer-events-none">
       <interact-element data-interact-key="header-ghost-9">
-        <h1
-          class="text-6xl md:text-8xl font-black tracking-tighter leading-tight whitespace-nowrap text-center"
-        >
+        <h1 class="text-6xl md:text-8xl leading-tight whitespace-nowrap text-center">
           WARPING<br />REALITY
         </h1>
       </interact-element>
@@ -37,9 +33,7 @@ Eleven stacked ghost layers of large display text progressively skew along the X
 
     <div class="stack-cell z-0 pointer-events-none">
       <interact-element data-interact-key="header-ghost-8">
-        <h1
-          class="text-6xl md:text-8xl font-black tracking-tighter leading-tight whitespace-nowrap text-center"
-        >
+        <h1 class="text-6xl md:text-8xl leading-tight whitespace-nowrap text-center">
           WARPING<br />REALITY
         </h1>
       </interact-element>
@@ -47,9 +41,7 @@ Eleven stacked ghost layers of large display text progressively skew along the X
 
     <div class="stack-cell z-0 pointer-events-none">
       <interact-element data-interact-key="header-ghost-7">
-        <h1
-          class="text-6xl md:text-8xl font-black tracking-tighter leading-tight whitespace-nowrap text-center"
-        >
+        <h1 class="text-6xl md:text-8xl leading-tight whitespace-nowrap text-center">
           WARPING<br />REALITY
         </h1>
       </interact-element>
@@ -57,9 +49,7 @@ Eleven stacked ghost layers of large display text progressively skew along the X
 
     <div class="stack-cell z-0 pointer-events-none">
       <interact-element data-interact-key="header-ghost-6">
-        <h1
-          class="text-6xl md:text-8xl font-black tracking-tighter leading-tight whitespace-nowrap text-center"
-        >
+        <h1 class="text-6xl md:text-8xl leading-tight whitespace-nowrap text-center">
           WARPING<br />REALITY
         </h1>
       </interact-element>
@@ -67,9 +57,7 @@ Eleven stacked ghost layers of large display text progressively skew along the X
 
     <div class="stack-cell z-0 pointer-events-none">
       <interact-element data-interact-key="header-ghost-5">
-        <h1
-          class="text-6xl md:text-8xl font-black tracking-tighter leading-tight whitespace-nowrap text-center"
-        >
+        <h1 class="text-6xl md:text-8xl leading-tight whitespace-nowrap text-center">
           WARPING<br />REALITY
         </h1>
       </interact-element>
@@ -77,9 +65,7 @@ Eleven stacked ghost layers of large display text progressively skew along the X
 
     <div class="stack-cell z-0 pointer-events-none">
       <interact-element data-interact-key="header-ghost-4">
-        <h1
-          class="text-6xl md:text-8xl font-black tracking-tighter leading-tight whitespace-nowrap text-center"
-        >
+        <h1 class="text-6xl md:text-8xl leading-tight whitespace-nowrap text-center">
           WARPING<br />REALITY
         </h1>
       </interact-element>
@@ -87,9 +73,7 @@ Eleven stacked ghost layers of large display text progressively skew along the X
 
     <div class="stack-cell z-10 pointer-events-none">
       <interact-element data-interact-key="header-ghost-3">
-        <h1
-          class="text-6xl md:text-8xl font-black tracking-tighter leading-tight whitespace-nowrap text-center"
-        >
+        <h1 class="text-6xl md:text-8xl leading-tight whitespace-nowrap text-center">
           WARPING<br />REALITY
         </h1>
       </interact-element>
@@ -97,9 +81,7 @@ Eleven stacked ghost layers of large display text progressively skew along the X
 
     <div class="stack-cell z-20 pointer-events-none">
       <interact-element data-interact-key="header-ghost-2">
-        <h1
-          class="text-6xl md:text-8xl font-black tracking-tighter leading-tight whitespace-nowrap text-center"
-        >
+        <h1 class="text-6xl md:text-8xl leading-tight whitespace-nowrap text-center">
           WARPING<br />REALITY
         </h1>
       </interact-element>
@@ -107,9 +89,7 @@ Eleven stacked ghost layers of large display text progressively skew along the X
 
     <div class="stack-cell z-30 pointer-events-none">
       <interact-element data-interact-key="header-ghost-1">
-        <h1
-          class="text-6xl md:text-8xl font-black tracking-tighter leading-tight whitespace-nowrap text-center"
-        >
+        <h1 class="text-6xl md:text-8xl leading-tight whitespace-nowrap text-center">
           WARPING<br />REALITY
         </h1>
       </interact-element>
@@ -117,9 +97,7 @@ Eleven stacked ghost layers of large display text progressively skew along the X
 
     <div class="stack-cell z-40">
       <interact-element data-interact-key="skew-header">
-        <h1
-          class="text-6xl md:text-8xl font-black tracking-tighter leading-tight whitespace-nowrap text-center"
-        >
+        <h1 class="text-6xl md:text-8xl leading-tight whitespace-nowrap text-center">
           WARPING<br />REALITY
         </h1>
       </interact-element>
@@ -145,7 +123,7 @@ html {
   scroll-behavior: smooth;
 }
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 .stack-cell {
   grid-column: 1 / -1;
@@ -156,7 +134,7 @@ body {
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'skew-header',
@@ -380,6 +358,6 @@ body {
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

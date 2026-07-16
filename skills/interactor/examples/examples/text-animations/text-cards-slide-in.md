@@ -141,9 +141,7 @@ Cards containing typographic step content slide in from alternating sides with a
 ## Essential styles
 
 ```css
-*,
-*::before,
-*::after {
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -173,15 +171,12 @@ interact-element {
 
 .hero h1 {
   font-size: clamp(3rem, 8vw, 7rem);
-  font-weight: 400;
-  letter-spacing: -0.02em;
   line-height: 1.05;
   opacity: 0;
 }
 
 .hero p {
   font-size: clamp(1rem, 2vw, 1.5rem);
-  font-weight: 400;
   opacity: 0;
 }
 
@@ -220,7 +215,6 @@ interact-element {
 .card {
   width: 100%;
   height: 100%;
-  border-radius: 36px;
   padding: 48px 40px;
   display: flex;
   flex-direction: column;
@@ -228,48 +222,6 @@ interact-element {
   justify-content: center;
   text-align: center;
   opacity: 0;
-}
-
-.card-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.card-icon svg {
-  width: 28px;
-  height: 28px;
-}
-
-.card-label {
-  font-size: 0.8rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-  font-weight: 600;
-}
-
-.card-heading {
-  font-size: 2.5rem;
-  font-weight: 400;
-  margin-bottom: 10px;
-  line-height: 1.2;
-}
-
-.card-subtitle {
-  font-size: 1.15rem;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.card-body {
-  font-size: 1rem;
-  line-height: 1.6;
-  max-width: 340px;
 }
 
 .scroll-canvas {
@@ -287,13 +239,6 @@ interact-element {
   }
   .card {
     padding: 36px 28px;
-    border-radius: 28px;
-  }
-  .card-heading {
-    font-size: 1.6rem;
-  }
-  .card-body {
-    font-size: 0.85rem;
   }
 }
 
@@ -303,17 +248,6 @@ interact-element {
   }
   .card {
     padding: 28px 20px;
-    border-radius: 24px;
-  }
-  .card-heading {
-    font-size: 1.4rem;
-  }
-  .card-subtitle {
-    font-size: 0.9rem;
-  }
-  .card-body {
-    font-size: 0.8rem;
-    max-width: 220px;
   }
 }
 ```
@@ -323,10 +257,10 @@ interact-element {
 ```js
 const entryRange = {
   rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
-  rangeEnd:   { name: 'entry', offset: { value: 100, unit: 'percentage' } },
+  rangeEnd: { name: 'entry', offset: { value: 100, unit: 'percentage' } },
 };
 
-{
+const config = {
   conditions: {
     'full-motion': {
       type: 'media',
@@ -343,7 +277,10 @@ const entryRange = {
       keyframeEffect: {
         name: 'enter-left',
         keyframes: [
-          { opacity: -0.6, transform: 'perspective(800px) translateX(-120vw) rotateX(-6deg) rotateY(14deg)' },
+          {
+            opacity: 0,
+            transform: 'perspective(800px) translateX(-120vw) rotateX(-6deg) rotateY(14deg)',
+          },
           { opacity: 1, transform: 'perspective(800px) translateX(0) rotateX(0) rotateY(0)' },
         ],
       },
@@ -355,7 +292,10 @@ const entryRange = {
       keyframeEffect: {
         name: 'enter-right',
         keyframes: [
-          { opacity: -0.6, transform: 'perspective(800px) translateX(120vw) rotateX(-6deg) rotateY(-14deg)' },
+          {
+            opacity: 0,
+            transform: 'perspective(800px) translateX(120vw) rotateX(-6deg) rotateY(-14deg)',
+          },
           { opacity: 1, transform: 'perspective(800px) translateX(0) rotateX(0) rotateY(0)' },
         ],
       },
@@ -366,10 +306,7 @@ const entryRange = {
     'fade-center': {
       keyframeEffect: {
         name: 'fade-center',
-        keyframes: [
-          { opacity: 0 },
-          { opacity: 1 },
-        ],
+        keyframes: [{ opacity: 0 }, { opacity: 1 }],
       },
       fill: 'both',
       easing: 'ease-out',
@@ -381,45 +318,47 @@ const entryRange = {
     {
       key: 'hero',
       trigger: 'viewEnter',
-      sequences: [{
-        offset: 400,
-        triggerType: 'once',
-        effects: [
-          {
-            key: 'hero-title',
-            keyframeEffect: {
-              name: 'hero-title-fade',
-              keyframes: [
-                { opacity: 0, transform: 'translateY(16px)' },
-                { opacity: 1, transform: 'translateY(0)' },
-              ],
+      sequences: [
+        {
+          offset: 400,
+          triggerType: 'once',
+          effects: [
+            {
+              key: 'hero-title',
+              keyframeEffect: {
+                name: 'hero-title-fade',
+                keyframes: [
+                  { opacity: 0, transform: 'translateY(16px)' },
+                  { opacity: 1, transform: 'translateY(0)' },
+                ],
+              },
+              duration: 800,
+              easing: 'ease-out',
+              fill: 'forwards',
             },
-            duration: 800,
-            easing: 'ease-out',
-            fill: 'forwards',
-          },
-          {
-            key: 'hero-subtitle',
-            keyframeEffect: {
-              name: 'hero-sub-fade',
-              keyframes: [
-                { opacity: 0, transform: 'translateY(16px)' },
-                { opacity: 1, transform: 'translateY(0)' },
-              ],
+            {
+              key: 'hero-subtitle',
+              keyframeEffect: {
+                name: 'hero-sub-fade',
+                keyframes: [
+                  { opacity: 0, transform: 'translateY(16px)' },
+                  { opacity: 1, transform: 'translateY(0)' },
+                ],
+              },
+              duration: 800,
+              easing: 'ease-out',
+              fill: 'forwards',
             },
-            duration: 800,
-            easing: 'ease-out',
-            fill: 'forwards',
-          },
-        ],
-      }],
+          ],
+        },
+      ],
     },
     {
       key: 'trigger-1',
       trigger: 'viewProgress',
       effects: [
-        { key: 'card-1', effectId: 'enter-from-left',  conditions: ['full-motion'] },
-        { key: 'card-1', effectId: 'fade-center',      conditions: ['reduced-motion'] },
+        { key: 'card-1', effectId: 'enter-from-left', conditions: ['full-motion'] },
+        { key: 'card-1', effectId: 'fade-center', conditions: ['reduced-motion'] },
       ],
     },
     {
@@ -427,15 +366,15 @@ const entryRange = {
       trigger: 'viewProgress',
       effects: [
         { key: 'card-2', effectId: 'enter-from-right', conditions: ['full-motion'] },
-        { key: 'card-2', effectId: 'fade-center',      conditions: ['reduced-motion'] },
+        { key: 'card-2', effectId: 'fade-center', conditions: ['reduced-motion'] },
       ],
     },
     {
       key: 'trigger-3',
       trigger: 'viewProgress',
       effects: [
-        { key: 'card-3', effectId: 'enter-from-left',  conditions: ['full-motion'] },
-        { key: 'card-3', effectId: 'fade-center',      conditions: ['reduced-motion'] },
+        { key: 'card-3', effectId: 'enter-from-left', conditions: ['full-motion'] },
+        { key: 'card-3', effectId: 'fade-center', conditions: ['reduced-motion'] },
       ],
     },
     {
@@ -443,9 +382,9 @@ const entryRange = {
       trigger: 'viewProgress',
       effects: [
         { key: 'card-4', effectId: 'enter-from-right', conditions: ['full-motion'] },
-        { key: 'card-4', effectId: 'fade-center',      conditions: ['reduced-motion'] },
+        { key: 'card-4', effectId: 'fade-center', conditions: ['reduced-motion'] },
       ],
     },
   ],
-}
+};
 ```

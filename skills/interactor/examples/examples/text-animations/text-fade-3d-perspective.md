@@ -78,10 +78,8 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               <interact-element data-interact-key="s3-card-1">
                 <div class="glass-card p-6 md:p-10 h-full">
-                  <div class="text-4xl md:text-6xl font-extralight mb-6 md:mb-10 leading-none">
-                    01
-                  </div>
-                  <h3 class="text-lg font-semibold mb-4">Space</h3>
+                  <div class="text-4xl md:text-6xl mb-6 md:mb-10 leading-none">01</div>
+                  <h3 class="text-lg mb-4">Space</h3>
                   <p class="text-sm leading-relaxed">
                     Sample text provides enough length to demonstrate this animated content layout.
                   </p>
@@ -89,10 +87,8 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
               </interact-element>
               <interact-element data-interact-key="s3-card-2">
                 <div class="glass-card p-6 md:p-10 h-full">
-                  <div class="text-4xl md:text-6xl font-extralight mb-6 md:mb-10 leading-none">
-                    02
-                  </div>
-                  <h3 class="text-lg font-semibold mb-4">Rhythm</h3>
+                  <div class="text-4xl md:text-6xl mb-6 md:mb-10 leading-none">02</div>
+                  <h3 class="text-lg mb-4">Rhythm</h3>
                   <p class="text-sm leading-relaxed">
                     Typography, spacing, motion. The invisible grid that makes everything feel
                     inevitable.
@@ -101,10 +97,8 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
               </interact-element>
               <interact-element data-interact-key="s3-card-3">
                 <div class="glass-card p-6 md:p-10 h-full">
-                  <div class="text-4xl md:text-6xl font-extralight mb-6 md:mb-10 leading-none">
-                    03
-                  </div>
-                  <h3 class="text-lg font-semibold mb-4">Finish</h3>
+                  <div class="text-4xl md:text-6xl mb-6 md:mb-10 leading-none">03</div>
+                  <h3 class="text-lg mb-4">Finish</h3>
                   <p class="text-sm leading-relaxed">
                     Sample text provides enough length to demonstrate this animated content layout.
                   </p>
@@ -125,7 +119,7 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
 body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .sticky-container {
@@ -157,50 +151,34 @@ body {
 .hero-text {
   font-size: clamp(3.5rem, 18vw, 20rem);
   line-height: 1;
-  letter-spacing: -0.06em;
-  font-weight: 800;
 }
 
 .section-title {
   font-size: clamp(2.5rem, 10vw, 10rem);
   line-height: 1.05;
-  letter-spacing: -0.05em;
-  font-weight: 800;
 }
 
 .sub-headline {
   font-size: clamp(1.2rem, 3vw, 3rem);
   line-height: 1.2;
-  letter-spacing: -0.03em;
-  font-weight: 600;
 }
 
 .label {
   font-size: 0.65rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
 }
 
 .body-text {
   font-size: 1.05rem;
   line-height: 1.7;
-  font-weight: 400;
 }
 
 .thin-rule {
   height: 1px;
 }
 
-.glass-card {
-  border: 1px solid;
-  border-radius: 24px;
-}
-
 .bg-glyph {
   position: absolute;
   font-size: 42vw;
-  font-weight: 900;
   line-height: 1;
   pointer-events: none;
 }

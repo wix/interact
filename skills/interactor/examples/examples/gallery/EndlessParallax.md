@@ -42,9 +42,6 @@ An endless floating image gallery where tiles drift and wrap continuously across
         </div>
       </div>
     </div>
-
-    <button id="openModalTrigger" style="display:none"></button>
-    <button id="closeModalTrigger" style="display:none"></button>
   </div>
 </interact-element>
 ```
@@ -58,15 +55,13 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: clip;
 }
 
 #gallery-container {
   position: fixed;
   inset: 0;
-  overflow: hidden;
-  cursor: grab;
-  transition: filter 0.4s ease-out;
+  overflow: clip;
 }
 
 .gallery-tile {
@@ -74,18 +69,14 @@ body {
   top: 0;
   left: 0;
   opacity: 0;
-  border-radius: 8px;
-  will-change: transform, opacity;
   backface-visibility: hidden;
   contain: layout paint;
-  overflow: hidden;
-  cursor: pointer;
+  overflow: clip;
 }
 
 .gallery-tile:focus-visible {
   outline: 3px solid;
   outline-offset: 4px;
-  border-radius: 8px;
 }
 
 .gallery-tile img {
@@ -93,13 +84,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 8px;
   pointer-events: none;
-  transition: transform 0.3s ease-out;
-}
-
-.gallery-tile:hover img {
-  transform: scale(1.05);
 }
 
 .gallery-tile-title {
@@ -109,19 +94,7 @@ body {
   right: 0;
   padding: 2rem 1rem 1rem;
   text-align: center;
-  font-weight: 700;
-  font-size: 1rem;
-  opacity: 0;
-  transform: translateY(10px);
-  transition:
-    opacity 0.3s ease-out,
-    transform 0.3s ease-out;
   pointer-events: none;
-}
-
-.gallery-tile:hover .gallery-tile-title {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 #modal {
@@ -139,7 +112,6 @@ body {
   position: relative;
   max-width: 90vw;
   max-height: 90vh;
-  border-radius: 8px;
   transform: scale(0.8);
 }
 
@@ -147,7 +119,6 @@ body {
   display: block;
   max-width: 100%;
   max-height: 90vh;
-  border-radius: 8px;
 }
 
 .modal-text-overlay {
@@ -156,34 +127,23 @@ body {
   right: 0;
   bottom: 0;
   padding: 60px 30px 30px;
-  border-radius: 0 0 8px 8px;
   box-sizing: border-box;
 }
 
 .modal-text-overlay h1 {
   margin: 0 0 10px;
-  font-size: 2rem;
-  font-weight: 700;
 }
 
 .modal-text-overlay p {
   margin: 0;
-  font-size: 1.1rem;
-  opacity: 0.9;
 }
 
 .modal-close {
-  border: none;
   padding: 0;
-  font: inherit;
   position: absolute;
   top: 20px;
   right: 20px;
-  font-size: 2rem;
-  cursor: pointer;
-  line-height: 1;
   z-index: 1001;
-  border-radius: 50%;
 }
 
 .modal-close:focus-visible {
@@ -200,7 +160,7 @@ const tileState = tiles.map((tile, index) => ({
   tile,
   image: tile.querySelector('img'),
   title: tile.querySelector('.gallery-tile-title'),
-  motion: undefined // Look up application-owned motion metadata for index.
+  motion: undefined, // Look up application-owned motion metadata for index.
 }));
 
 function updateCameraFromPointer(event) {
@@ -218,73 +178,115 @@ function tickInfiniteGallery() {
 function openTileModal(tile) {
   // Copy the tile's existing image and title into #modalImage and #modalTitle.
   // Look up any optional modal description by tile index.
-  // Activate #openModalTrigger so Interact plays the modal effects.
 }
 
-function closeTileModal() {
-  // Activate #closeModalTrigger.
-}
-
-{
+const config = {
   effects: {
     'modal-fade-out': {
       keyframeEffect: {
         name: 'modal-hide',
-        keyframes: [{ opacity: 1 }, { opacity: 0 }]
+        keyframes: [
+          { opacity: 1, visibility: 'visible' },
+          { opacity: 0, visibility: 'hidden' },
+        ],
       },
       duration: 400,
       easing: 'ease-out',
-      fill: 'forwards'
+      fill: 'both',
+      triggerType: 'repeat',
     },
   },
   interactions: [
     {
-      key: '#page-container', trigger: 'viewEnter',
-      effects: [{ triggerType: 'once', duration: 0, customEffect: tickInfiniteGallery }]
+      key: '#page-container',
+      trigger: 'viewEnter',
+      effects: [{ triggerType: 'once', duration: 0, customEffect: tickInfiniteGallery }],
     },
     {
-      key: '#page-container', trigger: 'pointerMove',
-      effects: [{ customEffect: updateCameraFromPointer }]
+      key: '#page-container',
+      trigger: 'pointerMove',
+      effects: [{ customEffect: updateCameraFromPointer, fill: 'both' }],
     },
     {
-      key: '.gallery-tile', trigger: 'click',
-      effects: [{ triggerType: 'repeat', duration: 0, customEffect: openTileModal }]
-    },
-    {
-      key: '#modalClose', trigger: 'click',
-      effects: [{ triggerType: 'repeat', duration: 0, customEffect: closeTileModal }]
-    },
-    {
-      key: '#openModalTrigger', trigger: 'click',
+      key: '#page-container',
+      trigger: 'click',
+      listContainer: '#gallery-container',
+      listItemSelector: '.gallery-tile',
       effects: [
-        { key: '#modal', keyframeEffect: { name: 'modal-show',
-            keyframes: [{ offset: 0, visibility: 'visible', opacity: 0 }, { offset: 1, opacity: 1 }] },
-            duration: 400, easing: 'ease-out', fill: 'forwards' },
-        { key: '.modal-content', keyframeEffect: { name: 'modal-content-scale-in',
-            keyframes: [{ transform: 'scale(0.8)' }, { transform: 'scale(1)' }] },
-            duration: 400, easing: 'cubic-bezier(0.175,0.885,0.32,1.275)', fill: 'forwards' },
-        { key: '#gallery-container', keyframeEffect: { name: 'canvas-blur-in',
-            keyframes: [{ filter: 'blur(0px)' }, { filter: 'blur(8px)' }] },
-            duration: 400, easing: 'ease-out', fill: 'forwards' },
-      ]
+        { triggerType: 'repeat', duration: 0, fill: 'both', customEffect: openTileModal },
+        {
+          key: '#page-container',
+          selector: '#modal',
+          triggerType: 'repeat',
+          keyframeEffect: {
+            name: 'modal-show',
+            keyframes: [
+              { offset: 0, visibility: 'visible', opacity: 0 },
+              { offset: 1, opacity: 1 },
+            ],
+          },
+          duration: 400,
+          easing: 'ease-out',
+          fill: 'both',
+        },
+        {
+          key: '#page-container',
+          selector: '.modal-content',
+          triggerType: 'repeat',
+          keyframeEffect: {
+            name: 'modal-content-scale-in',
+            keyframes: [{ transform: 'scale(0.8)' }, { transform: 'scale(1)' }],
+          },
+          duration: 400,
+          easing: 'cubic-bezier(0.175,0.885,0.32,1.275)',
+          fill: 'both',
+        },
+        {
+          key: '#page-container',
+          selector: '#gallery-container',
+          triggerType: 'repeat',
+          keyframeEffect: {
+            name: 'canvas-blur-in',
+            keyframes: [{ filter: 'blur(0px)' }, { filter: 'blur(8px)' }],
+          },
+          duration: 400,
+          easing: 'ease-out',
+          fill: 'both',
+        },
+      ],
     },
     {
-      key: '#closeModalTrigger', trigger: 'click',
+      key: '#page-container',
+      selector: '#modalClose',
+      trigger: 'click',
       effects: [
-        { key: '#modal', effectId: 'modal-fade-out' },
-        { key: '.modal-content', keyframeEffect: { name: 'modal-content-scale-out',
-            keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(0.8)' }] },
-            duration: 400, easing: 'ease-out', fill: 'forwards' },
-        { key: '#gallery-container', keyframeEffect: { name: 'canvas-blur-out',
-            keyframes: [{ filter: 'blur(8px)' }, { filter: 'blur(0px)' }] },
-            duration: 400, easing: 'ease-out', fill: 'forwards' },
-      ]
+        { key: '#page-container', selector: '#modal', effectId: 'modal-fade-out' },
+        {
+          key: '#page-container',
+          selector: '.modal-content',
+          triggerType: 'repeat',
+          keyframeEffect: {
+            name: 'modal-content-scale-out',
+            keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(0.8)' }],
+          },
+          duration: 400,
+          easing: 'ease-out',
+          fill: 'both',
+        },
+        {
+          key: '#page-container',
+          selector: '#gallery-container',
+          triggerType: 'repeat',
+          keyframeEffect: {
+            name: 'canvas-blur-out',
+            keyframes: [{ filter: 'blur(8px)' }, { filter: 'blur(0px)' }],
+          },
+          duration: 400,
+          easing: 'ease-out',
+          fill: 'both',
+        },
+      ],
     },
-    {
-      key: '#modal', trigger: 'animationEnd', params: { effectId: 'modal-fade-out' },
-      effects: [{ keyframeEffect: { name: 'set-modal-hidden',
-        keyframes: [{ visibility: 'hidden' }] }, duration: 0, fill: 'forwards' }]
-    },
-  ]
-}
+  ],
+};
 ```

@@ -68,7 +68,7 @@ body::-webkit-scrollbar {
   display: flex;
   align-items: center;
   padding: 0 5rem;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .text-wrapper {
@@ -80,9 +80,6 @@ body::-webkit-scrollbar {
 }
 
 .eyebrow {
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   margin-bottom: 1.5rem;
   display: flex;
   flex-wrap: wrap;
@@ -92,7 +89,6 @@ body::-webkit-scrollbar {
 
 .main-text {
   font-size: clamp(2rem, 5vw, 3.75rem);
-  font-weight: 700;
   display: flex;
   flex-wrap: wrap;
   column-gap: 0.75rem;

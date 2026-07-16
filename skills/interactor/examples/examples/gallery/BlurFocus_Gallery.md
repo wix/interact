@@ -1,8 +1,8 @@
 # Blur Focus Gallery
 
-A grid of image cards where hovering any card blurs all others via CSS `:has()`, while the hovered card scales up and reveals its title caption.
+A responsive image grid where hovering a card scales it and reveals its overlay and caption through Interact transitions.
 
-**Tags:** hover, grid, gallery, filter, blur, opacity, transform, scale
+**Tags:** hover, grid, gallery, opacity, transform, scale
 
 ## Markup
 
@@ -74,14 +74,12 @@ A grid of image cards where hovering any card blurs all others via CSS `:has()`,
 ## Essential styles
 
 ```css
-:root {
-  --blur-intensity: 12px;
-}
 body {
   margin: 0;
   padding: 40px;
   overflow-x: hidden;
 }
+
 .grid-container {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
@@ -89,43 +87,36 @@ body {
   gap: 40px;
   width: 100%;
 }
+
 interact-element {
   display: block;
   position: relative;
-  overflow: hidden;
+  overflow: clip;
   width: 100%;
   height: 100%;
-  border-radius: 2px;
-  cursor: pointer;
   z-index: 1;
 }
+
 .card-inner {
   width: 100%;
   height: 100%;
   position: relative;
-  border-radius: 2px;
 }
+
 .card-bg {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  transition: filter 300ms ease;
-  will-change: filter;
 }
-.grid-container:has(interact-element:hover) .card-bg {
-  filter: blur(var(--blur-intensity));
-}
-interact-element:hover .card-bg {
-  filter: none !important;
-}
+
 .card-overlay {
   position: absolute;
   inset: 0;
   z-index: 1;
-  border-radius: 2px;
 }
+
 .card-content {
   position: absolute;
   bottom: 12px;
@@ -134,22 +125,22 @@ interact-element:hover .card-bg {
   opacity: 0;
   transform: translateY(10px);
   z-index: 2;
-  line-height: 1.2;
-  will-change: opacity, transform;
 }
+
 .card-content h3 {
   margin: 0 0 3px 0;
-  font-size: 1rem;
 }
+
 .card-content p {
   margin: 0;
-  font-size: 0.85rem;
 }
+
 @media (max-width: 1200px) {
   .grid-container {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
 @media (max-width: 800px) {
   .grid-container {
     grid-template-columns: repeat(2, 1fr);
@@ -206,7 +197,7 @@ for (let i = 1; i <= CARD_COUNT; i++) {
     key: `card-${i}`,
     transition: {
       duration: 0,
-      styleProperties: [{ name: 'z-index', value: '999' }],
+      styleProperties: [{ name: 'zIndex', value: '999' }],
     },
   });
 
@@ -217,7 +208,5 @@ for (let i = 1; i <= CARD_COUNT; i++) {
   });
 }
 
-{
-  interactions;
-}
+const config = { interactions };
 ```

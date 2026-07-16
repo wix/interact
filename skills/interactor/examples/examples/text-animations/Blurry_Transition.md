@@ -44,18 +44,12 @@ html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
   width: 100%;
-  overflow: hidden;
+  overflow-x: clip;
 }
 
 .main-scroll-wrapper {
-  height: 100vh;
-  width: 100vw;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-  overscroll-behavior: none;
+  width: 100%;
 }
 
 .timeline-container {
@@ -71,7 +65,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: clip;
 }
 
 interact-element {
@@ -96,14 +90,11 @@ interact-element {
 h1 {
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
-  font-weight: normal;
-  letter-spacing: 2px;
 }
 
 p {
   font-size: 1.25rem;
   line-height: 1.6;
-  letter-spacing: 1px;
 }
 ```
 

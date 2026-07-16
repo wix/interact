@@ -25,7 +25,7 @@ Four full-viewport panels are stacked offscreen to the right inside a 700vh stic
       </interact-element>
 
       <interact-element data-interact-key="#box4">
-        <div id="box4" class="box box4" style="left: 90vw;z-index: 40">
+        <div id="box4" class="box box4" style="left:90vw;z-index:40;">
           <interact-element data-interact-key="#image4">
             <img id="image4" src="" class="panel-image" />
           </interact-element>
@@ -33,7 +33,7 @@ Four full-viewport panels are stacked offscreen to the right inside a 700vh stic
       </interact-element>
 
       <interact-element data-interact-key="#box3">
-        <div id="box3" class="box box3" style="left: 80vw;z-index: 30">
+        <div id="box3" class="box box3" style="left:80vw;z-index:30;">
           <interact-element data-interact-key="#image3">
             <img id="image3" src="" class="panel-image" />
           </interact-element>
@@ -41,7 +41,7 @@ Four full-viewport panels are stacked offscreen to the right inside a 700vh stic
       </interact-element>
 
       <interact-element data-interact-key="#box2">
-        <div id="box2" class="box box2" style="left: 70vw;z-index: 20">
+        <div id="box2" class="box box2" style="left:70vw;z-index:20;">
           <interact-element data-interact-key="#image2">
             <img id="image2" src="" class="panel-image" />
           </interact-element>
@@ -49,7 +49,7 @@ Four full-viewport panels are stacked offscreen to the right inside a 700vh stic
       </interact-element>
 
       <interact-element data-interact-key="#box1">
-        <div id="box1" class="box box1" style="left: 60vw;z-index: 10">
+        <div id="box1" class="box box1" style="left:60vw;z-index:10;">
           <interact-element data-interact-key="#image1">
             <img id="image1" src="" class="panel-image" />
           </interact-element>
@@ -69,7 +69,7 @@ Four full-viewport panels are stacked offscreen to the right inside a 700vh stic
 ```css
 body {
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .intro-section,
@@ -87,8 +87,6 @@ body {
 
 .intro-section h1,
 .outro-section h2 {
-  font-size: clamp(3rem, 7vw, 5rem);
-  font-weight: 700;
   margin: 0;
 }
 
@@ -103,7 +101,7 @@ body {
   top: 0;
   height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .box {
@@ -131,8 +129,6 @@ body {
   position: absolute;
   top: 10vh;
   left: 5vw;
-  font-size: 2.5rem;
-  font-weight: 700;
   z-index: 50;
 }
 
@@ -146,7 +142,6 @@ body {
   position: absolute;
   top: 20vh;
   left: 5vw;
-  font-size: 1.25rem;
   z-index: 50;
   max-width: 300px;
   opacity: 1;
@@ -167,21 +162,7 @@ const box4Left = 100 - imageWidthVW + 'vw'; // '90vw'
 const finalImageLeftVW = Math.max(5, 45 - imageWidthVW * maxScale); // 5
 
 const storyTexts = ['Intro', 'Panel one', 'Panel two', 'Panel three', 'Panel four'];
-let currentText = '';
-
-function updateText(el, newText) {
-  if (newText !== currentText) {
-    el.style.transition = 'opacity 0.3s ease-in-out';
-    el.style.opacity = '0';
-    setTimeout(() => {
-      el.textContent = newText;
-      currentText = newText;
-      el.style.opacity = '1';
-    }, 300);
-  }
-}
-
-{
+const config = {
   interactions: [
     {
       key: '#scroll-section',
@@ -417,7 +398,7 @@ function updateText(el, newText) {
             } else {
               textIndex = 0;
             }
-            updateText(el, storyTexts[textIndex]);
+            el.textContent = storyTexts[textIndex];
           },
           rangeStart: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
           rangeEnd: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
@@ -425,6 +406,6 @@ function updateText(el, newText) {
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

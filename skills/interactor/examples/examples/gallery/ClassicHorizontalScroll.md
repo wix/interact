@@ -72,7 +72,7 @@ Eight full-viewport panels translate horizontally as the user scrolls vertically
 
 body {
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 #scroll-container {
@@ -85,7 +85,7 @@ body {
   top: 0;
   height: 100vh;
   width: 100%;
-  overflow: hidden;
+  overflow: clip;
   display: flex;
   align-items: center;
   padding-block: var(--outer-pad);
@@ -98,7 +98,6 @@ body {
   height: var(--panel-h);
   width: calc(var(--panel-w) * 8 + var(--panel-gap) * 7);
   padding-inline: var(--outer-pad);
-  will-change: transform;
 }
 
 .panel {
@@ -113,7 +112,7 @@ body {
   box-sizing: border-box;
   text-align: left;
   position: relative;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .panel-background {
@@ -138,15 +137,12 @@ body {
 }
 
 .panel h2 {
-  font-size: clamp(1.5rem, calc(var(--panel-w) * 0.03), 4rem);
   margin: 0;
 }
 
 .panel p {
-  font-size: clamp(0.875rem, calc(var(--panel-w) * 0.0125), 1.5rem);
   max-width: 60%;
   width: auto;
-  opacity: 0.9;
   margin-top: 1rem;
 }
 
@@ -160,21 +156,13 @@ body {
     width: calc(100% + 4rem);
     padding: 4rem 2rem 2rem 2rem;
   }
-
-  .panel h2 {
-    font-size: 2.5rem;
-  }
-
-  .panel p {
-    font-size: 1.125rem;
-  }
 }
 ```
 
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: '#scroll-container',
@@ -196,6 +184,6 @@ body {
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

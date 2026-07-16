@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/splittext
 
-### [1.0.0] - unreleased
+### [0.1.2] - 2026-07-14
 
 #### Added
 
@@ -26,7 +26,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact-validate
 
-### [1.0.0] - unreleased
+### [0.1.1] - 2026-07-14
+
+#### Added
+
+- Extended semantic validation derived from `packages/interact/rules/*.md`: `animationEnd` graph warnings, FOUC/same-element retrigger checks, CSS syntax, ignored properties, partial-data guards, and recommended patterns (#252)
+- `walkConfig()` traversal helper for semantic rule visitors (#252)
+
+#### Changed
+
+- Expanded README with severity model, rule catalog, and integration examples (#252)
+
+### [0.1.0] - 2026-07-07
 
 #### Added
 
@@ -41,6 +52,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact
+
+### [2.5.4] - 2026-07-16
+
+#### Fixed
+
+- Sequence triggers now resolve the interaction's `source` selector (including list items) and mark interactions as added only after elements resolve, so unresolved sources can be retried on later passes (#272)
+
+### [2.5.3] - 2026-07-13
+
+#### Changed
+
+- Interaction rules updated to recommend build-time CSS generation via `generate()` for `viewEnter`, `viewProgress`, `hover`, and `click` integrations (#262)
+
+### [2.5.2] - 2026-07-10
+
+#### Added
+
+- Coding agents instructions in package `README.md` (#257)
+
+#### Changed
+
+- Improved interactor usage documentation in `README.md` (#258)
+- Updated `rules/validate.md` for extended `@wix/interact-validate` semantic checks (#252)
+- React and custom-elements integration docs refreshed for interactor skill workflows (#242)
 
 ### [2.5.1] - 2026-07-01
 

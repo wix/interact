@@ -1,285 +1,128 @@
 # Smiley Nav
 
-A two-tab navigation bar with hover transitions and an animated dropdown panel that reveals staggered links.
+Two native disclosure menus with Interact motion on their labels and links.
 
-**Tags:** hover, flex, opacity, transform, stagger, fade
+**Tags:** details, interest, hover, navigation, transform
 
 ## Markup
 
 ```html
-<div class="nav-wrapper">
-  <interact-element data-interact-key="nav-bar">
-    <div class="nav-bar" id="nav-bar">
-      <div class="nav-tabs">
-        <interact-element data-interact-key="tab-features">
-          <button type="button" class="nav-tab" data-tab="features">
-            Features
-            <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
-          </button>
-        </interact-element>
-        <interact-element data-interact-key="tab-services">
-          <button type="button" class="nav-tab" data-tab="services">
-            Services
-            <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
-          </button>
-        </interact-element>
+<nav class="nav-tabs" aria-label="Primary">
+  <interact-element data-interact-key="nav-features">
+    <details class="nav-menu">
+      <summary><span class="tab-label">Features</span></summary>
+      <div class="menu">
+        <a href="#"><span class="link-label">Item A</span></a>
+        <a href="#"><span class="link-label">Item B</span></a>
       </div>
-    </div>
+    </details>
   </interact-element>
-
-  <div class="dropdown-panel" id="dropdown-panel">
-    <div class="dropdown-content" data-content="features">
-      <div>
-        <div class="dropdown-col-header">Group A</div>
-        <interact-element data-interact-key="d-0"
-          ><button class="dropdown-link" style="--i:0">Item A</button></interact-element
-        >
-        <interact-element data-interact-key="d-1"
-          ><button class="dropdown-link" style="--i:1">Item B</button></interact-element
-        >
-        <interact-element data-interact-key="d-2"
-          ><button class="dropdown-link" style="--i:2">Item C</button></interact-element
-        >
+  <interact-element data-interact-key="nav-services">
+    <details class="nav-menu">
+      <summary><span class="tab-label">Services</span></summary>
+      <div class="menu">
+        <a href="#"><span class="link-label">Item C</span></a>
+        <a href="#"><span class="link-label">Item D</span></a>
       </div>
-    </div>
-
-    <div class="dropdown-content" data-content="services">
-      <div>
-        <div class="dropdown-col-header">Group B</div>
-        <interact-element data-interact-key="d-3"
-          ><button class="dropdown-link" style="--i:0">Item D</button></interact-element
-        >
-        <interact-element data-interact-key="d-4"
-          ><button class="dropdown-link" style="--i:1">Item E</button></interact-element
-        >
-        <interact-element data-interact-key="d-5"
-          ><button class="dropdown-link" style="--i:2">Item F</button></interact-element
-        >
-      </div>
-    </div>
-  </div>
-</div>
+    </details>
+  </interact-element>
+</nav>
 ```
 
 ## Essential styles
 
 ```css
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 interact-element {
   display: contents;
 }
 
-body {
-  min-height: 100vh;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 80px 24px 24px;
-}
-
-.nav-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.nav-bar {
-  display: flex;
-  align-items: center;
-  height: 60px;
-  padding: 0 8px;
-  border-radius: 24px;
-  border: 0.5px solid;
-}
-
 .nav-tabs {
   display: flex;
-  align-items: center;
+  gap: 1rem;
 }
 
-.nav-tab {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 40px;
-  padding: 0 44px;
-  border: none;
-  font-size: 15px;
-  font-weight: 400;
+.nav-menu {
+  position: relative;
+}
+
+.nav-menu summary {
+  min-height: 2.75rem;
+  padding: 0.75rem;
   cursor: pointer;
-  outline: none;
-  border-radius: 15px;
-  white-space: nowrap;
 }
 
-.nav-tab .chevron {
-  width: 12px;
-  height: 12px;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transform: rotate(0deg);
-}
-
-.nav-tab.active .chevron {
-  transform: rotate(180deg);
-}
-
-.dropdown-panel {
+.menu {
   position: absolute;
-  top: calc(100% + 10px);
+  top: 100%;
   left: 0;
-  right: 0;
-  border-radius: 24px;
-  border: 0.5px solid;
-  padding: 28px 40px;
+  z-index: 1;
+  display: flex;
+  min-width: 10rem;
+  flex-direction: column;
+}
+
+.nav-menu:not([open]) .menu {
   visibility: hidden;
   pointer-events: none;
-  opacity: 0;
-  min-height: 180px;
 }
 
-.dropdown-panel.open {
-  visibility: visible;
-  pointer-events: auto;
-  opacity: 1;
+.menu a {
+  min-height: 2.5rem;
+  padding: 0.5rem;
 }
 
-.dropdown-panel::before {
-  content: '';
-  position: absolute;
-  top: -14px;
-  left: 0;
-  right: 0;
-  height: 14px;
+.nav-menu summary:focus-visible,
+.menu a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
 
-.dropdown-content {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0 40px;
-  position: absolute;
-  inset: 28px 40px;
-  opacity: 0;
-  transform: translateX(-20px);
-  pointer-events: none;
-  transition:
-    opacity 350ms ease-out,
-    transform 350ms ease-out;
-}
-
-.dropdown-content.active {
-  opacity: 1;
-  transform: translateX(0);
-  pointer-events: auto;
-}
-
-.dropdown-content.slide-left {
-  transform: translateX(20px);
-}
-
-.dropdown-col-header {
-  font-size: 11px;
-  font-weight: 300;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 0 12px 12px;
-}
-
-.dropdown-link {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 38px;
-  padding: 0 12px;
-  border: none;
-  font-size: 14px;
-  font-weight: 400;
-  text-align: left;
-  cursor: pointer;
-  outline: none;
-  border-radius: 12px;
-  opacity: 0;
-  transform: translateY(-4px);
-  transition:
-    opacity 180ms ease-out calc(var(--i, 0) * 40ms),
-    transform 180ms ease-out calc(var(--i, 0) * 40ms);
-}
-
-.dropdown-panel.open .dropdown-link {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dropdown-link,
-  .dropdown-content {
-    transition: none !important;
-  }
+.tab-label,
+.link-label {
+  display: inline-block;
+  transform: translate(0);
 }
 ```
 
 ## Interact config
 
 ```js
-const TOTAL_LINKS = 6;
-const linkHovers = Array.from({ length: TOTAL_LINKS }, (_, i) => ({
-  key: `d-${i}`,
-  trigger: 'hover',
-  effects: [
-    {
-      stateAction: 'toggle',
-      transition: {
-        duration: 200,
-        easing: 'ease-out',
-        styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
-      },
-    },
-  ],
-}));
+const menuKeys = ['nav-features', 'nav-services'];
 
-{
-  interactions: [
+const config = {
+  interactions: menuKeys.flatMap((key) => [
     {
-      key: 'nav-bar',
-      trigger: 'hover',
+      key,
+      selector: 'summary',
+      trigger: 'interest',
       effects: [
         {
+          selector: '.tab-label',
           stateAction: 'toggle',
           transition: {
-            duration: 300,
-            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-            styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
-          },
-        },
-      ],
-    },
-    ...['features', 'services'].map((name) => ({
-      key: `tab-${name}`,
-      trigger: 'hover',
-      effects: [
-        {
-          stateAction: 'toggle',
-          transition: {
-            duration: 250,
+            duration: 200,
             easing: 'ease-out',
             styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
           },
         },
       ],
-    })),
-    ...linkHovers,
-  ];
-}
+    },
+    {
+      key,
+      trigger: 'interest',
+      listContainer: '.menu',
+      effects: [
+        {
+          selector: '.link-label',
+          stateAction: 'toggle',
+          transition: {
+            duration: 160,
+            easing: 'ease-out',
+            styleProperties: [{ name: 'transform', value: 'translateX(4px)' }],
+          },
+        },
+      ],
+    },
+  ]),
+};
 ```

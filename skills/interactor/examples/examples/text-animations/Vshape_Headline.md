@@ -8,16 +8,13 @@ Letters of the word "INTERACT" bounce in from below in a V-curve formation on vi
 
 ```html
 <div class="min-h-[500vh]">
-  <div class="h-[80vh] flex items-center justify-center opacity-50">
+  <div class="h-[80vh] flex items-center justify-center">
     <p>Scroll Down ↓</p>
   </div>
 
   <interact-element data-interact-key="scroll-track" class="track-wrapper h-[300vh] relative">
     <div class="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
-      <h1
-        aria-label="INTERACT"
-        class="font-spicy text-6xl md:text-9xl uppercase mb-8 flex gap-2 perspective-1000"
-      >
+      <h1 aria-label="INTERACT" class="text-6xl md:text-9xl mb-8 flex gap-2 perspective-1000">
         <interact-element data-interact-key="letter-0" aria-hidden="true"
           ><span class="letter-span">I</span></interact-element
         >
@@ -50,7 +47,7 @@ Letters of the word "INTERACT" bounce in from below in a V-curve formation on vi
     </div>
   </interact-element>
 
-  <div class="h-screen flex items-center justify-center opacity-50">
+  <div class="h-screen flex items-center justify-center">
     <p>End of Section</p>
   </div>
 </div>

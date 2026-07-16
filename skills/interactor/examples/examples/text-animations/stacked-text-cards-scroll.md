@@ -107,9 +107,7 @@ Four sticky content cards stack on top of each other as the user scrolls, each n
 ## Essential styles
 
 ```css
-*,
-*::before,
-*::after {
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -120,7 +118,7 @@ interact-element {
 }
 
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .hero {
@@ -139,16 +137,12 @@ body {
 
 .hero h1 {
   font-size: clamp(2.75rem, 6vw, 4.25rem);
-  font-weight: 400;
-  letter-spacing: -0.02em;
   margin-bottom: 0.75rem;
   opacity: 0;
 }
 
 .hero p {
   font-size: 1.2rem;
-  font-weight: 400;
-  letter-spacing: 0.01em;
   opacity: 0;
 }
 
@@ -202,60 +196,12 @@ body {
 .card {
   width: 72vh;
   aspect-ratio: 4 / 3.2;
-  border-radius: 36px;
   padding: 4rem 3.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-}
-
-.card-icon {
-  width: 56px;
-  height: 56px;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 18px;
-}
-
-.card-icon svg {
-  width: 28px;
-  height: 28px;
-}
-
-.card .label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-}
-
-.card h2 {
-  font-size: 2.75rem;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
-  margin-bottom: 1rem;
-}
-
-.card .subtitle {
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: 1.5;
-  letter-spacing: -0.01em;
-  max-width: 85%;
-}
-
-.card .body {
-  font-size: 1rem;
-  line-height: 1.7;
-  font-weight: 400;
-  margin-top: 1.5rem;
-  max-width: 80%;
 }
 
 @media (max-width: 750px) {
@@ -271,15 +217,6 @@ body {
   .card {
     width: min(72vh, calc(100vw - 40px));
     padding: 3rem 2rem;
-  }
-  .card h2 {
-    font-size: 2.25rem;
-  }
-  .card .subtitle {
-    font-size: 1.05rem;
-  }
-  .card .body {
-    font-size: 0.9rem;
   }
 }
 
@@ -299,18 +236,14 @@ body {
 ```js
 const entryRange = {
   rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
-  rangeEnd:   { name: 'entry', offset: { value: 100, unit: 'percentage' } },
+  rangeEnd: { name: 'entry', offset: { value: 100, unit: 'percentage' } },
 };
 
-{
+const config = {
   conditions: {
     'full-motion': {
       type: 'media',
       predicate: '(prefers-reduced-motion: no-preference)',
-    },
-    'reduced-motion': {
-      type: 'media',
-      predicate: '(prefers-reduced-motion: reduce)',
     },
   },
 
@@ -318,10 +251,7 @@ const entryRange = {
     'enter-ccw': {
       keyframeEffect: {
         name: 'enter-ccw',
-        keyframes: [
-          { transform: 'rotate(-8deg)' },
-          { transform: 'rotate(0deg)' },
-        ],
+        keyframes: [{ transform: 'rotate(-8deg)' }, { transform: 'rotate(0deg)' }],
       },
       fill: 'both',
       easing: 'ease-out',
@@ -330,10 +260,7 @@ const entryRange = {
     'enter-cw': {
       keyframeEffect: {
         name: 'enter-cw',
-        keyframes: [
-          { transform: 'rotate(8deg)' },
-          { transform: 'rotate(0deg)' },
-        ],
+        keyframes: [{ transform: 'rotate(8deg)' }, { transform: 'rotate(0deg)' }],
       },
       fill: 'both',
       easing: 'ease-out',
@@ -345,63 +272,59 @@ const entryRange = {
     {
       key: 'hero',
       trigger: 'viewEnter',
-      sequences: [{
-        offset: 300,
-        triggerType: 'once',
-        effects: [
-          {
-            key: 'hero-title',
-            keyframeEffect: {
-              name: 'hero-title-fade',
-              keyframes: [
-                { opacity: 0, transform: 'translateY(16px)' },
-                { opacity: 1, transform: 'translateY(0)' },
-              ],
+      sequences: [
+        {
+          offset: 300,
+          triggerType: 'once',
+          effects: [
+            {
+              key: 'hero-title',
+              keyframeEffect: {
+                name: 'hero-title-fade',
+                keyframes: [
+                  { opacity: 0, transform: 'translateY(16px)' },
+                  { opacity: 1, transform: 'translateY(0)' },
+                ],
+              },
+              duration: 1200,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'forwards',
             },
-            duration: 1200,
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            fill: 'forwards',
-          },
-          {
-            key: 'hero-subtitle',
-            keyframeEffect: {
-              name: 'hero-sub-fade',
-              keyframes: [
-                { opacity: 0, transform: 'translateY(16px)' },
-                { opacity: 1, transform: 'translateY(0)' },
-              ],
+            {
+              key: 'hero-subtitle',
+              keyframeEffect: {
+                name: 'hero-sub-fade',
+                keyframes: [
+                  { opacity: 0, transform: 'translateY(16px)' },
+                  { opacity: 1, transform: 'translateY(0)' },
+                ],
+              },
+              duration: 1000,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'forwards',
             },
-            duration: 1000,
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            fill: 'forwards',
-          },
-        ],
-      }],
+          ],
+        },
+      ],
     },
     {
       key: 'card-2',
       trigger: 'viewProgress',
       conditions: ['full-motion'],
-      effects: [
-        { effectId: 'enter-ccw' },
-      ],
+      effects: [{ effectId: 'enter-ccw' }],
     },
     {
       key: 'card-3',
       trigger: 'viewProgress',
       conditions: ['full-motion'],
-      effects: [
-        { effectId: 'enter-cw' },
-      ],
+      effects: [{ effectId: 'enter-cw' }],
     },
     {
       key: 'card-4',
       trigger: 'viewProgress',
       conditions: ['full-motion'],
-      effects: [
-        { effectId: 'enter-ccw' },
-      ],
+      effects: [{ effectId: 'enter-ccw' }],
     },
   ],
-}
+};
 ```

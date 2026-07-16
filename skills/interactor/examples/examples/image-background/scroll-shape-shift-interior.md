@@ -93,16 +93,10 @@ As the page scrolls through a 500vh sticky section, five background interior pho
 ## Essential styles
 
 ```css
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 interact-element {
   display: block;
 }
+
 html,
 body {
   height: 100%;
@@ -117,36 +111,43 @@ body {
 .bg-wrap > div {
   position: absolute;
   inset: 0;
-  background-size: cover;
   background-position: center;
-}
-
-.bg-wrap > div::after {
-  content: '';
-  position: absolute;
-  inset: 0;
+  background-size: cover;
 }
 
 .bg-1 {
   background-image: url('');
 }
+
 .bg-2 {
   background-image: url('');
 }
 
+.bg-3 {
+  background-image: url('');
+}
+
+.bg-4 {
+  background-image: url('');
+}
+
+.bg-5 {
+  background-image: url('');
+}
+
 .scroll-driver {
-  height: 500vh;
   position: relative;
+  height: 500vh;
 }
 
 .sticky-stage {
   position: sticky;
   top: 0;
-  height: 100vh;
-  overflow: clip;
   display: flex;
+  height: 100vh;
   align-items: center;
   justify-content: center;
+  overflow: clip;
 }
 
 .center-container {
@@ -160,10 +161,8 @@ body {
   position: absolute;
   inset: -5%;
 }
-.shape-wrap > div {
-  width: 100%;
-  height: 100%;
-}
+
+.shape-wrap > div,
 .shape-wrap svg {
   width: 100%;
   height: 100%;
@@ -175,34 +174,8 @@ body {
 }
 
 .text-inner {
-  text-align: center;
   pointer-events: auto;
   padding: clamp(3rem, 6vw, 6rem) clamp(3rem, 7vw, 8rem);
-}
-
-.label {
-  font-size: clamp(0.55rem, 0.7vw, 0.75rem);
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  font-weight: 500;
-  margin-bottom: clamp(0.8rem, 1.5vw, 1.5rem);
-}
-
-.title {
-  font-size: clamp(2rem, 4.2vw, 5rem);
-  line-height: 1;
-  font-weight: 400;
-  margin-bottom: clamp(0.6rem, 1.2vw, 1.2rem);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.description {
-  font-size: clamp(0.7rem, 0.95vw, 0.95rem);
-  line-height: 1.8;
-  font-weight: 300;
-  max-width: clamp(200px, 28vw, 400px);
-  margin: 0 auto;
 }
 ```
 
@@ -222,7 +195,7 @@ function slice(key, start, end) {
   return { key, keyframeEffect: { name: key, keyframes: kf }, fill: 'both', ...range };
 }
 
-{
+const config = {
   interactions: [
     {
       key: 'scroll-driver',
@@ -241,6 +214,6 @@ function slice(key, start, end) {
         slice('bg-5', 0.8, 1),
       ],
     },
-  ];
-}
+  ],
+};
 ```

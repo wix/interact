@@ -30,16 +30,12 @@ Three full-screen text pairs are stacked in a fixed overlay; scrolling through s
         <div class="mb-8" aria-hidden="true">
           <span class="text-mask">
             <interact-element data-interact-key="p1-h1-l1">
-              <span class="text-6xl md:text-9xl uppercase font-normal tracking-tighter line-content"
-                >First</span
-              >
+              <span class="text-6xl md:text-9xl line-content">First</span>
             </interact-element>
           </span>
           <span class="text-mask">
             <interact-element data-interact-key="p1-h1-l2">
-              <span class="text-6xl md:text-9xl uppercase font-normal tracking-tighter line-content"
-                >Impression</span
-              >
+              <span class="text-6xl md:text-9xl line-content">Impression</span>
             </interact-element>
           </span>
         </div>
@@ -79,16 +75,12 @@ Three full-screen text pairs are stacked in a fixed overlay; scrolling through s
         <div class="mb-8" aria-hidden="true">
           <span class="text-mask">
             <interact-element data-interact-key="p2-h1-l1">
-              <span class="text-6xl md:text-9xl uppercase font-normal tracking-tighter line-content"
-                >Seamless</span
-              >
+              <span class="text-6xl md:text-9xl line-content">Seamless</span>
             </interact-element>
           </span>
           <span class="text-mask">
             <interact-element data-interact-key="p2-h1-l2">
-              <span class="text-6xl md:text-9xl uppercase font-normal tracking-tighter line-content"
-                >Motion</span
-              >
+              <span class="text-6xl md:text-9xl line-content">Motion</span>
             </interact-element>
           </span>
         </div>
@@ -128,16 +120,12 @@ Three full-screen text pairs are stacked in a fixed overlay; scrolling through s
         <div class="mb-8" aria-hidden="true">
           <span class="text-mask">
             <interact-element data-interact-key="p3-h1-l1">
-              <span class="text-6xl md:text-9xl uppercase font-normal tracking-tighter line-content"
-                >Final</span
-              >
+              <span class="text-6xl md:text-9xl line-content">Final</span>
             </interact-element>
           </span>
           <span class="text-mask">
             <interact-element data-interact-key="p3-h1-l2">
-              <span class="text-6xl md:text-9xl uppercase font-normal tracking-tighter line-content"
-                >Impact</span
-              >
+              <span class="text-6xl md:text-9xl line-content">Impact</span>
             </interact-element>
           </span>
         </div>
@@ -190,7 +178,7 @@ body {
 }
 
 .text-mask {
-  overflow: hidden;
+  overflow: clip;
   display: block;
   line-height: 1.1;
   padding-bottom: 0.2em;
@@ -238,7 +226,7 @@ const T1_END = 48;
 const T2_START = 51;
 const T2_END = 72;
 
-{
+const config = {
   interactions: [
     {
       key: 'scroll-track',
@@ -456,6 +444,6 @@ const T2_END = 72;
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

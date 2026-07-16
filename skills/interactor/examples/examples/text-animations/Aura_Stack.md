@@ -16,10 +16,8 @@ Three sticky typographic slides stack over a long scroll container and each tran
           <div class="absolute bottom-12 right-12 label-text">Scroll to Explore</div>
           <div class="text-center px-6">
             <interact-element data-interact-key="s1-content">
-              <h1 class="mega-text tracking-tighter">Origin.</h1>
-              <div class="mt-10 inline-block px-8 py-3 glass-pill rounded-full label-text">
-                The Foundation of Motion
-              </div>
+              <h1 class="mega-text">Origin.</h1>
+              <div class="mt-10 inline-block px-8 py-3 label-text">The Foundation of Motion</div>
             </interact-element>
           </div>
         </div>
@@ -27,24 +25,20 @@ Three sticky typographic slides stack over a long scroll container and each tran
 
       <interact-element data-interact-key="slide-2">
         <div class="slide slide-2">
-          <interact-element data-interact-key="s2-bg-num">
-            <div class="bg-number">02</div>
-          </interact-element>
+          <interact-element data-interact-key="s2-bg-num"> </interact-element>
           <div class="relative z-10 w-full max-w-7xl px-10">
             <interact-element data-interact-key="s2-header">
-              <div class="border-b border-black/10 pb-10 mb-16">
+              <div class="pb-10 mb-16">
                 <div class="flex justify-between items-end mb-4">
                   <span class="label-text">Chapter Two</span>
                   <span class="label-text">Philosophy</span>
                 </div>
-                <h2 class="text-6xl md:text-9xl font-bold tracking-tighter leading-none">
-                  Essentialism.
-                </h2>
+                <h2 class="text-6xl md:text-9xl leading-none">Essentialism.</h2>
               </div>
             </interact-element>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-20">
               <interact-element data-interact-key="s2-body-left">
-                <p class="text-3xl md:text-5xl font-medium tracking-tight leading-tight">
+                <p class="text-3xl md:text-5xl leading-tight">
                   Clarity through restraint. By curating the essential, we amplify every detail.
                 </p>
               </interact-element>
@@ -53,7 +47,7 @@ Three sticky typographic slides stack over a long scroll container and each tran
                   <p class="text-xl leading-relaxed max-w-lg">
                     Sample text provides enough length to demonstrate this animated content layout.
                   </p>
-                  <div class="w-16 h-px opacity-20"></div>
+                  <div class="w-16 h-px"></div>
                 </div>
               </interact-element>
             </div>
@@ -63,26 +57,22 @@ Three sticky typographic slides stack over a long scroll container and each tran
 
       <interact-element data-interact-key="slide-3">
         <div class="slide slide-3">
-          <interact-element data-interact-key="s3-bg-num">
-            <div class="bg-number">03</div>
-          </interact-element>
+          <interact-element data-interact-key="s3-bg-num"> </interact-element>
           <div class="relative z-10 w-full max-w-7xl px-10">
             <interact-element data-interact-key="s3-header">
-              <div class="border-b border-black/10 pb-10 mb-16">
+              <div class="pb-10 mb-16">
                 <div class="flex justify-between items-end mb-4">
                   <span class="label-text">Chapter Three</span>
                   <span class="label-text">Architecture</span>
                 </div>
-                <h2 class="text-6xl md:text-9xl font-bold tracking-tighter leading-none">
-                  Structure.
-                </h2>
+                <h2 class="text-6xl md:text-9xl leading-none">Structure.</h2>
               </div>
             </interact-element>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-16">
               <interact-element data-interact-key="s3-col-1">
                 <div class="flex flex-col gap-6">
-                  <span class="text-5xl font-bold opacity-10">01</span>
-                  <h3 class="text-2xl font-bold">Rhythm</h3>
+                  <span class="text-5xl">01</span>
+                  <h3 class="text-2xl">Rhythm</h3>
                   <p class="leading-relaxed">
                     The underlying grid defines the tempo of the entire visual journey.
                   </p>
@@ -90,8 +80,8 @@ Three sticky typographic slides stack over a long scroll container and each tran
               </interact-element>
               <interact-element data-interact-key="s3-col-2">
                 <div class="flex flex-col gap-6">
-                  <span class="text-5xl font-bold opacity-10">02</span>
-                  <h3 class="text-2xl font-bold">Hierarchy</h3>
+                  <span class="text-5xl">02</span>
+                  <h3 class="text-2xl">Hierarchy</h3>
                   <p class="leading-relaxed">
                     Intentional scale creates immediate points of interest for the eye.
                   </p>
@@ -99,8 +89,8 @@ Three sticky typographic slides stack over a long scroll container and each tran
               </interact-element>
               <interact-element data-interact-key="s3-col-3">
                 <div class="flex flex-col gap-6">
-                  <span class="text-5xl font-bold opacity-10">03</span>
-                  <h3 class="text-2xl font-bold">Balance</h3>
+                  <span class="text-5xl">03</span>
+                  <h3 class="text-2xl">Balance</h3>
                   <p class="leading-relaxed">
                     Negative space provides the breathing room necessary for focus.
                   </p>
@@ -114,10 +104,10 @@ Three sticky typographic slides stack over a long scroll container and each tran
   </div>
 </interact-element>
 
-<footer class="h-screen flex flex-col items-center justify-center p-12 border-t border-gray-100">
+<footer class="h-screen flex flex-col items-center justify-center p-12">
   <div class="text-center">
     <p class="label-text mb-6">Sequence Complete</p>
-    <h2 class="text-5xl font-bold tracking-tight">Design Lab.</h2>
+    <h2 class="text-5xl">Design Lab.</h2>
     <p class="mt-8 max-w-md mx-auto">
       Explore the boundaries of digital interaction and refined aesthetics.
     </p>
@@ -131,7 +121,7 @@ Three sticky typographic slides stack over a long scroll container and each tran
 body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .sticky-container {
@@ -139,7 +129,7 @@ body {
   top: 0;
   height: 100vh;
   width: 100%;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .slide {
@@ -164,31 +154,11 @@ body {
 .mega-text {
   font-size: clamp(4rem, 15vw, 18rem);
   line-height: 0.95;
-  letter-spacing: -0.04em;
-  font-weight: 700;
-}
-
-.bg-number {
-  position: absolute;
-  bottom: -5%;
-  right: -5%;
-  font-size: 38vw;
-  font-weight: 800;
-  line-height: 1;
-  pointer-events: none;
-  will-change: transform;
 }
 
 .label-text {
   font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   opacity: 0.5;
-}
-
-.glass-pill {
-  border: 1px solid;
 }
 ```
 

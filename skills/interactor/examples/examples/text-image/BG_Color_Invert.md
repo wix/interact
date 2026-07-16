@@ -15,32 +15,32 @@ A tall "About Us" section where the background flips from white to black mid-scr
 
     <interact-element data-interact-key="img1" class="img-pos img-1-pos">
       <div class="scroll-image">
-        <interact-element data-interact-key="img1-inner" class="img-inner">
-          <img src="" />
+        <interact-element data-interact-key="img1-inner">
+          <div class="img-inner"><img src="" alt="" /></div>
         </interact-element>
       </div>
     </interact-element>
 
     <interact-element data-interact-key="img2" class="img-pos img-2-pos">
       <div class="scroll-image">
-        <interact-element data-interact-key="img2-inner" class="img-inner">
-          <img src="" />
+        <interact-element data-interact-key="img2-inner">
+          <div class="img-inner"><img src="" alt="" /></div>
         </interact-element>
       </div>
     </interact-element>
 
     <interact-element data-interact-key="img3" class="img-pos img-3-pos">
       <div class="scroll-image">
-        <interact-element data-interact-key="img3-inner" class="img-inner">
-          <img src="" />
+        <interact-element data-interact-key="img3-inner">
+          <div class="img-inner"><img src="" alt="" /></div>
         </interact-element>
       </div>
     </interact-element>
 
     <interact-element data-interact-key="img4" class="img-pos img-4-pos">
       <div class="scroll-image">
-        <interact-element data-interact-key="img4-inner" class="img-inner">
-          <img src="" />
+        <interact-element data-interact-key="img4-inner">
+          <div class="img-inner"><img src="" alt="" /></div>
         </interact-element>
       </div>
     </interact-element>
@@ -71,28 +71,8 @@ A tall "About Us" section where the background flips from white to black mid-scr
 ## Essential styles
 
 ```css
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 interact-element {
   display: block;
-}
-
-interact-element[data-interact-key='text1'] {
-  margin-top: -10vh;
-}
-
-interact-element[data-interact-key='text2'] {
-  margin-top: calc(35vh + 120px);
-}
-
-interact-element[data-interact-key='big-text'] {
-  margin-top: calc(60vh - 30px);
 }
 
 .about-section {
@@ -109,120 +89,77 @@ interact-element[data-interact-key='big-text'] {
 
 .img-pos {
   position: absolute;
-  pointer-events: none;
   top: 0;
   aspect-ratio: 3 / 4;
+  pointer-events: none;
 }
 
 .img-1-pos {
   right: 6vw;
   width: 21vw;
 }
+
 .img-2-pos {
-  left: calc(7vw + 30px);
+  left: 7vw;
   width: 26vw;
 }
+
 .img-3-pos {
   right: 14vw;
   width: 34vw;
 }
+
 .img-4-pos {
   left: 10vw;
   width: 28vw;
 }
 
 .scroll-image {
+  position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 0;
   overflow: clip;
-  position: relative;
-}
-
-.scroll-image::after {
-  content: '';
-  position: absolute;
-  inset: 0;
 }
 
 .img-inner {
-  display: block;
   width: 100%;
   height: 250%;
 }
 
 .scroll-image img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
 .text-layer {
   position: relative;
   min-height: 180vh;
-  padding: 0;
   display: flex;
   flex-direction: column;
 }
 
-.small-text-left {
-  margin-left: 120px;
+interact-element[data-interact-key='text2'] {
+  margin-top: 35vh;
 }
 
-.small-text-left p {
-  font-size: clamp(1.25rem, 1.48vw, 1.43rem);
-  line-height: 1.19;
-  font-weight: 400;
-  max-width: 380px;
+interact-element[data-interact-key='big-text'] {
+  margin-top: 60vh;
 }
 
 .small-text-right {
   margin-left: auto;
-  margin-right: 150px;
-  width: fit-content;
-}
-
-.small-text-right p {
-  font-size: clamp(1.25rem, 1.48vw, 1.43rem);
-  line-height: 1.19;
-  font-weight: 400;
-  max-width: 380px;
 }
 
 @media (max-width: 768px) {
-  .img-1-pos {
-    width: 34.1vw;
-  }
-  .img-2-pos {
-    width: 42.3vw;
-  }
-  .img-3-pos {
-    width: 44.2vw;
-    top: -350px;
-  }
-  .img-4-pos {
-    width: 36.4vw;
-    top: calc(51vh - 550px);
-  }
-
-  .small-text-left {
-    margin-left: 0;
-  }
-  .small-text-right {
-    margin-right: 0;
+  .img-pos {
+    width: 42vw;
   }
 
   interact-element[data-interact-key='big-text'] {
-    margin-top: calc(45vh - 22px);
+    margin-top: 45vh;
   }
-}
-
-.big-text-area p {
-  font-size: clamp(1.9rem, 4.2vw, 3.6rem);
-  font-weight: 400;
-  line-height: 1.18;
-  letter-spacing: -0.01em;
 }
 ```
 

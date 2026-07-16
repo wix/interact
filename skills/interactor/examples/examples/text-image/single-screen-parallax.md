@@ -11,14 +11,12 @@ A sticky scroll section where a giant background headline translates horizontall
   <section class="scroll-section">
     <div class="sticky-stage">
       <header class="site-header">
-        <div class="header-block">
-          <span class="search-dot" aria-hidden="true"></span><span>SEARCH</span>
-        </div>
+        <div class="header-block">SEARCH</div>
         <nav class="site-nav" aria-label="Primary">
           <a href="#">Books</a><a href="#">Audiobooks</a><a href="#">Noname's Book Club</a>
           <a href="#">Home + Apparel</a><a href="#">Gift Cards</a><a href="#">All</a>
         </nav>
-        <div class="header-block header-block--right"><span>CART (1)</span></div>
+        <div class="header-block header-block--right">CART (1)</div>
       </header>
 
       <interact-element data-interact-key="bg-text">
@@ -35,7 +33,7 @@ A sticky scroll section where a giant background headline translates horizontall
         <interact-element data-interact-key="hero-image">
           <div class="hero-image-scaler">
             <div class="hero-image-wrap">
-              <img src="" width="900" height="1200" />
+              <img src="" alt="" width="900" height="1200" />
             </div>
           </div>
         </interact-element>
@@ -48,19 +46,6 @@ A sticky scroll section where a giant background headline translates horizontall
 ## Essential styles
 
 ```css
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  overflow-x: clip;
-}
-
 interact-element {
   display: contents;
 }
@@ -87,28 +72,14 @@ interact-element {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 1rem;
-  border-bottom: 2px solid;
 }
 
 .header-block {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   width: 6rem;
-  font-size: 0.875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
 
 .header-block--right {
-  justify-content: flex-end;
-}
-
-.search-dot {
-  width: 0.75rem;
-  height: 0.75rem;
-  flex-shrink: 0;
+  text-align: right;
 }
 
 .site-nav {
@@ -117,7 +88,6 @@ interact-element {
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  font-size: 15px;
 }
 
 .bg-text-layer {
@@ -127,21 +97,15 @@ interact-element {
   display: flex;
   align-items: center;
   pointer-events: none;
-  user-select: none;
 }
 
 .bg-text {
   margin: 0;
   padding: 0 4vw;
   font-size: min(50vw, 780px);
-  font-weight: 900;
-  line-height: 1;
-  opacity: 0.95;
-  letter-spacing: -0.02em;
   white-space: nowrap;
   transform: translateX(0) scaleY(1.4);
   transform-origin: left center;
-  will-change: transform;
 }
 
 .bg-text-sub {
@@ -151,10 +115,6 @@ interact-element {
   z-index: 21;
   max-width: 34rem;
   margin: 0;
-  font-size: clamp(0.6875rem, 1.15vw, 0.8125rem);
-  line-height: 1.9;
-  letter-spacing: 0.22em;
-  text-transform: lowercase;
   pointer-events: none;
 }
 
@@ -172,7 +132,6 @@ interact-element {
   pointer-events: auto;
   transform: scale(1);
   transform-origin: center center;
-  will-change: transform;
 }
 
 .hero-image-wrap {
@@ -183,7 +142,6 @@ interact-element {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  will-change: transform;
 }
 
 .hero-image-wrap img {

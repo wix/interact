@@ -33,22 +33,16 @@ As the page is scrolled through a tall sticky section, bold uppercase text scale
   initial-value: 1;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 .scroll-section {
-  height: 600vh;
   position: relative;
+  height: 600vh;
 }
 
 .sticky-container {
   position: sticky;
   top: 0;
-  height: 100vh;
   width: 100%;
+  height: 100vh;
   overflow: clip;
 }
 
@@ -56,9 +50,8 @@ As the page is scrolled through a tall sticky section, bold uppercase text scale
   position: absolute;
   inset: 0;
   background-image: url('');
-  background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .text-layer {
@@ -67,40 +60,33 @@ As the page is scrolled through a tall sticky section, bold uppercase text scale
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: #fff;
   mix-blend-mode: screen;
 }
 
 .mask-text {
+  color: #000;
   font-size: clamp(1rem, 4vw, 5rem);
   font-weight: 900;
-  color: black;
-  text-transform: uppercase;
-  white-space: nowrap;
   line-height: 1;
-  letter-spacing: -0.03em;
+  white-space: nowrap;
   transform: scale(var(--text-scale));
 }
 
 .subtitle {
   position: absolute;
   inset: 0;
+  z-index: 20;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 38vh;
-  font-size: clamp(0.875rem, 2vw, 1.5rem);
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  z-index: 20;
 }
 ```
 
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'scroll-section',
@@ -111,11 +97,11 @@ As the page is scrolled through a tall sticky section, bold uppercase text scale
           keyframeEffect: {
             name: 'text-zoom',
             keyframes: [
-              { '--text-scale': '1',   offset: 0 },
+              { '--text-scale': '1', offset: 0 },
               { '--text-scale': '2.5', offset: 0.1 },
-              { '--text-scale': '7',   offset: 0.2 },
-              { '--text-scale': '20',  offset: 0.3 },
-              { '--text-scale': '55',  offset: 0.4 },
+              { '--text-scale': '7', offset: 0.2 },
+              { '--text-scale': '20', offset: 0.3 },
+              { '--text-scale': '55', offset: 0.4 },
               { '--text-scale': '150', offset: 0.5 },
               { '--text-scale': '400', offset: 0.6 },
               { '--text-scale': '800', offset: 0.7 },
@@ -123,7 +109,7 @@ As the page is scrolled through a tall sticky section, bold uppercase text scale
             ],
           },
           rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
-          rangeEnd:   { name: 'exit',  offset: { value: 0, unit: 'percentage' } },
+          rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } },
           fill: 'both',
         },
         {
@@ -134,16 +120,16 @@ As the page is scrolled through a tall sticky section, bold uppercase text scale
               { transform: 'translateY(50vh)', opacity: 0, offset: 0 },
               { transform: 'translateY(50vh)', opacity: 0, offset: 0.7 },
               { transform: 'translateY(15vh)', opacity: 1, offset: 0.8 },
-              { transform: 'translateY(0)',    opacity: 1, offset: 0.9 },
-              { transform: 'translateY(0)',    opacity: 1, offset: 1 },
+              { transform: 'translateY(0)', opacity: 1, offset: 0.9 },
+              { transform: 'translateY(0)', opacity: 1, offset: 1 },
             ],
           },
           rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
-          rangeEnd:   { name: 'exit',  offset: { value: 0, unit: 'percentage' } },
+          rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } },
           fill: 'both',
         },
       ],
     },
   ],
-}
+};
 ```

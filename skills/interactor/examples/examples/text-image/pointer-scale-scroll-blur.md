@@ -1,6 +1,6 @@
 # Pointer Scale Scroll Blur
 
-A portrait image scales toward the mouse pointer via the ScaleMouse preset on pointer movement and blurs out progressively as the page scrolls, while a call-to-action link brightens on hover.
+A portrait image scales toward the pointer, blurs as the page scrolls, and shifts its call-to-action link on hover.
 
 **Tags:** pointerMove, viewProgress, hover, scale, blur, filter, sticky, transform, opacity
 
@@ -18,7 +18,7 @@ A portrait image scales toward the mouse pointer via the ScaleMouse preset on po
         <div class="photo-container">
           <interact-element data-interact-key="photo">
             <div class="image-wrapper">
-              <img src="" />
+              <img src="" alt="" />
             </div>
           </interact-element>
         </div>
@@ -34,12 +34,6 @@ A portrait image scales toward the mouse pointer via the ScaleMouse preset on po
 ## Essential styles
 
 ```css
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 interact-element {
   display: block;
 }
@@ -51,7 +45,6 @@ interact-element {
 .section {
   position: sticky;
   top: 0;
-  width: 100vw;
   height: 100vh;
   display: flex;
   align-items: center;
@@ -60,20 +53,10 @@ interact-element {
 }
 
 .left-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   max-width: 50%;
 }
 
 .hero-text {
-  font-weight: 300;
-  font-size: clamp(2.8rem, 5vw, 5rem);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.05;
-  text-align: left;
-  user-select: none;
   pointer-events: none;
 }
 
@@ -81,39 +64,24 @@ interact-element {
   position: absolute;
   top: 40px;
   left: 8vw;
-  font-size: 1rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
 }
 
 .bottom-link {
   position: absolute;
   bottom: 40px;
   left: 8vw;
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.bottom-link a {
-  border-bottom: 1px solid;
-  padding-bottom: 2px;
 }
 
 .image-wrapper {
-  position: relative;
   width: clamp(200px, 22vw, 274px);
   aspect-ratio: 274 / 342;
-  border-radius: 0;
-  overflow: visible;
 }
 
 .image-wrapper img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top center;
-  display: block;
 }
 
 @media (max-width: 768px) {
@@ -121,16 +89,11 @@ interact-element {
     flex-direction: column;
     justify-content: center;
     gap: 2rem;
-    padding: 0 24px;
+    padding-inline: 24px;
   }
 
   .left-content {
     max-width: 100%;
-  }
-
-  .hero-text {
-    font-size: clamp(2.5rem, 9vw, 4rem);
-    text-align: center;
   }
 
   .header {
@@ -138,7 +101,6 @@ interact-element {
     left: 0;
     width: 100%;
     text-align: center;
-    font-size: 0.75rem;
   }
 
   .bottom-link {
@@ -146,22 +108,10 @@ interact-element {
     left: 0;
     width: 100%;
     text-align: center;
-    font-size: 0.75rem;
   }
 
   .image-wrapper {
     width: clamp(140px, 38vw, 200px);
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-text {
-    font-size: clamp(2rem, 8vw, 3rem);
-  }
-
-  .header {
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
   }
 }
 ```
@@ -169,17 +119,22 @@ interact-element {
 ## Interact config
 
 ```js
-{
+const config = {
+  conditions: {
+    hoverDevice: { type: 'media', predicate: '(hover: hover) and (pointer: fine)' },
+  },
   interactions: [
     {
       key: 'scroll-area',
       trigger: 'pointerMove',
       params: { hitArea: 'root' },
+      conditions: ['hoverDevice'],
       effects: [
         {
           key: 'photo',
           namedEffect: { type: 'ScaleMouse' },
           easing: 'ease-out',
+          fill: 'both',
         },
       ],
     },
@@ -210,13 +165,11 @@ interact-element {
           transition: {
             duration: 300,
             easing: 'ease',
-            styleProperties: [
-            { name: 'transform', value: 'translateY(-2px)' }
-          ],
+            styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
           },
         },
       ],
     },
   ],
-}
+};
 ```

@@ -23,7 +23,7 @@ A split-screen layout where text elements (heading, paragraph, button) fade up w
 
     <div class="image-area">
       <interact-element data-interact-key="hero-image" class="hero-image">
-        <img src="" />
+        <img src="" alt="" />
       </interact-element>
     </div>
   </div>
@@ -33,11 +33,6 @@ A split-screen layout where text elements (heading, paragraph, button) fade up w
 ## Essential styles
 
 ```css
-body {
-  margin: 0;
-  overflow-x: clip;
-}
-
 interact-element {
   display: block;
 }
@@ -59,7 +54,7 @@ interact-element {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 4rem 6%;
+  padding: 6%;
 }
 
 .image-area {
@@ -69,30 +64,16 @@ interact-element {
   align-items: center;
 }
 
-.text-block h1 {
-  font-size: clamp(3.5rem, 7vw, 6rem);
-  font-weight: 900;
-  line-height: 1.02;
-  margin-bottom: 2.2rem;
-  letter-spacing: -0.03em;
-}
-
-.text-block p {
-  font-size: clamp(0.9rem, 1.1vw, 1.05rem);
-  line-height: 1.8;
-  font-weight: 300;
-  margin-bottom: 3rem;
-}
-
 .text-block .btn {
-  display: inline-block;
-  padding: 0.9rem 2.2rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border: none;
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.text-block .btn:focus-visible {
+  outline: 2px solid;
+  outline-offset: 3px;
 }
 
 .hero-image {
@@ -116,10 +97,7 @@ interact-element {
 
 @media (max-width: 1024px) {
   .text-block {
-    padding: 3rem 5%;
-  }
-  .text-block h1 {
-    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    padding: 5%;
   }
 }
 
@@ -129,29 +107,14 @@ interact-element {
   }
   .text-block {
     flex: 0 0 55%;
-    text-align: left;
-    padding: 2rem 1.5rem 2.5rem;
+    padding: 1.5rem;
     justify-content: center;
   }
+
   .image-area {
     flex: 0 0 45%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
-  .text-block h1 {
-    font-size: clamp(2rem, 8vw, 3rem);
-    margin-bottom: 0.8rem;
-  }
-  .text-block p {
-    font-size: 0.875rem;
-    margin-bottom: 1.5rem;
-    line-height: 1.7;
-  }
-  .text-block .btn {
-    padding: 0.75rem 1.8rem;
-    font-size: 0.8rem;
-  }
+
   .hero-image {
     height: 38vh;
     width: 35%;
@@ -163,7 +126,7 @@ interact-element {
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'scroll-driver',
@@ -185,7 +148,7 @@ interact-element {
               },
               duration: 800,
               easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-              fill: 'forwards',
+              fill: 'both',
             },
             {
               key: 'text-desc',
@@ -198,7 +161,7 @@ interact-element {
               },
               duration: 800,
               easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-              fill: 'forwards',
+              fill: 'both',
             },
             {
               key: 'text-btn',
@@ -211,7 +174,7 @@ interact-element {
               },
               duration: 800,
               easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-              fill: 'forwards',
+              fill: 'both',
             },
           ],
         },
@@ -238,6 +201,6 @@ interact-element {
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

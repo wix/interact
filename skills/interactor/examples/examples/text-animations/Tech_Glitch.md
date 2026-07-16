@@ -8,7 +8,7 @@ Words split into individual interact-elements that reveal on viewEnter with a st
 
 ```html
 <div class="h-screen flex items-center justify-center text-center px-4">
-  <div class="opacity-50">
+  <div>
     <p class="mb-4 text-base">SYSTEM_STATUS: ONLINE</p>
     <p class="text-sm">SCROLL_DOWN_TO_INITIATE_DATA_STREAM</p>
   </div>
@@ -16,7 +16,7 @@ Words split into individual interact-elements that reveal on viewEnter with a st
 
 <main class="max-w-7xl mx-auto px-12 pb-80 space-y-96">
   <div class="flex flex-col items-start w-full max-w-3xl">
-    <h1 aria-label="01_CRITICAL_FAILURE" class="text-2xl uppercase tracking-tighter mb-5">
+    <h1 aria-label="01_CRITICAL_FAILURE" class="text-2xl mb-5">
       <interact-element
         data-interact-key="h1-01-w-0"
         aria-hidden="true"
@@ -27,10 +27,7 @@ Words split into individual interact-elements that reveal on viewEnter with a st
         >
       </interact-element>
     </h1>
-    <p
-      aria-label="Data corruption detected in sector"
-      class="text-base leading-relaxed uppercase font-light"
-    >
+    <p aria-label="Data corruption detected in sector" class="text-base leading-relaxed">
       <interact-element
         data-interact-key="p-01-w-0"
         aria-hidden="true"
@@ -56,7 +53,7 @@ Words split into individual interact-elements that reveal on viewEnter with a st
   </div>
 
   <div class="flex flex-col items-end text-right w-full ml-auto max-w-3xl">
-    <h1 aria-label="02_SYNTAX_ERROR" class="text-2xl uppercase tracking-tighter mb-5">
+    <h1 aria-label="02_SYNTAX_ERROR" class="text-2xl mb-5">
       <interact-element
         data-interact-key="h1-02-w-0"
         aria-hidden="true"
@@ -67,10 +64,7 @@ Words split into individual interact-elements that reveal on viewEnter with a st
         >
       </interact-element>
     </h1>
-    <p
-      aria-label="Unexpected token in input stream"
-      class="text-base leading-relaxed uppercase font-light"
-    >
+    <p aria-label="Unexpected token in input stream" class="text-base leading-relaxed">
       <interact-element
         data-interact-key="p-02-w-0"
         aria-hidden="true"
@@ -103,7 +97,7 @@ Words split into individual interact-elements that reveal on viewEnter with a st
 
 ```css
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
   min-height: 100vh;
 }
 
@@ -116,7 +110,6 @@ body {
 }
 
 .glitch-word {
-  opacity: 0;
   display: inline-block;
   white-space: pre;
   will-change: transform, clip-path;
@@ -127,8 +120,6 @@ body {
     opacity: 1 !important;
     clip-path: inset(0 0 0 0) !important;
     transform: none !important;
-    animation: none !important;
-    transition: none !important;
   }
 }
 ```
@@ -241,7 +232,5 @@ const interactions = wordEntries.map(({ key, dir }) => ({
   ],
 }));
 
-{
-  interactions;
-}
+const config = { interactions };
 ```

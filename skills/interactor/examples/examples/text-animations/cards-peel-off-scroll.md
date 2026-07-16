@@ -40,7 +40,7 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
 <section class="card-section second">
   <div class="card-wrap">
     <interact-element data-interact-key="card-2">
-      <div class="card dark">
+      <div class="card">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2L2 7l10 5 10-5-10-5z" />
@@ -85,7 +85,7 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
 <section class="card-section fourth">
   <div class="card-wrap">
     <interact-element data-interact-key="card-4">
-      <div class="card dark">
+      <div class="card">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -107,9 +107,7 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
 ## Essential styles
 
 ```css
-*,
-*::before,
-*::after {
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -120,7 +118,7 @@ interact-element {
 }
 
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .hero {
@@ -137,15 +135,13 @@ body {
 
 .hero h1 {
   font-size: clamp(2.75rem, 6vw, 4.25rem);
-  font-weight: 400;
-  letter-spacing: -0.02em;
   margin-bottom: 0.75rem;
+  opacity: 0;
 }
 
 .hero p {
   font-size: 1.2rem;
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  opacity: 0;
 }
 
 .card-section {
@@ -185,14 +181,12 @@ body {
   --tilt: 0deg;
   width: 57.6dvh;
   aspect-ratio: 5 / 4;
-  border-radius: 4px;
   padding: 3.5rem 3rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  border: 1px solid;
   transform: rotate(var(--tilt));
 }
 
@@ -209,58 +203,6 @@ body {
   --tilt: 2.5deg;
 }
 
-.card-icon {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 1.75rem;
-  display: grid;
-  place-items: center;
-  border: 1px solid;
-  border-radius: 2px;
-}
-
-.card-icon svg {
-  width: 22px;
-  height: 22px;
-  stroke-width: 1.5;
-}
-
-.card .label {
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  margin-bottom: 1.25rem;
-}
-
-.card h2 {
-  font-size: 2.75rem;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
-  margin-bottom: 0.75rem;
-}
-
-.card .subtitle {
-  font-size: 1.1rem;
-  font-weight: 400;
-  line-height: 1.6;
-  letter-spacing: -0.01em;
-  max-width: 85%;
-}
-
-.card .body {
-  font-size: 0.9rem;
-  line-height: 1.8;
-  font-weight: 400;
-  margin-top: 1.25rem;
-  max-width: 80%;
-}
-
-.card.dark .card-icon svg {
-  stroke-width: 1.5;
-}
-
 @media (max-width: 750px) {
   .card-wrap {
     padding: max(10rem, 27dvh) 20px 20px;
@@ -268,15 +210,6 @@ body {
   .card {
     width: min(57.6dvh, calc(100vw - 40px));
     padding: 2.5rem 1.5rem;
-  }
-  .card h2 {
-    font-size: 2rem;
-  }
-  .card .subtitle {
-    font-size: 1rem;
-  }
-  .card .body {
-    font-size: 0.85rem;
   }
 }
 
@@ -292,15 +225,15 @@ body {
 ```js
 const exitRange = {
   rangeStart: { name: 'exit', offset: { value: 0, unit: 'percentage' } },
-  rangeEnd:   { name: 'exit', offset: { value: 100, unit: 'percentage' } },
+  rangeEnd: { name: 'exit', offset: { value: 100, unit: 'percentage' } },
 };
 
 const heroEnter = {
   easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-  fill: 'forwards',
+  fill: 'both',
 };
 
-{
+const config = {
   conditions: {
     'full-motion': {
       type: 'media',
@@ -312,110 +245,117 @@ const heroEnter = {
     {
       key: 'hero',
       trigger: 'viewEnter',
-      sequences: [{
-        offset: 300,
-        triggerType: 'once',
-        effects: [
-          {
-            key: 'hero-title',
-            keyframeEffect: {
-              name: 'hero-title-fade',
-              keyframes: [
-                { opacity: 0, transform: 'translateY(16px)' },
-                { opacity: 1, transform: 'translateY(0)' },
-              ],
+      sequences: [
+        {
+          offset: 300,
+          triggerType: 'once',
+          effects: [
+            {
+              key: 'hero-title',
+              keyframeEffect: {
+                name: 'hero-title-fade',
+                keyframes: [
+                  { opacity: 0, transform: 'translateY(16px)' },
+                  { opacity: 1, transform: 'translateY(0)' },
+                ],
+              },
+              duration: 1200,
+              ...heroEnter,
             },
-            duration: 1200,
-            ...heroEnter,
-          },
-          {
-            key: 'hero-subtitle',
-            keyframeEffect: {
-              name: 'hero-sub-fade',
-              keyframes: [
-                { opacity: 0, transform: 'translateY(16px)' },
-                { opacity: 1, transform: 'translateY(0)' },
-              ],
+            {
+              key: 'hero-subtitle',
+              keyframeEffect: {
+                name: 'hero-sub-fade',
+                keyframes: [
+                  { opacity: 0, transform: 'translateY(16px)' },
+                  { opacity: 1, transform: 'translateY(0)' },
+                ],
+              },
+              duration: 1000,
+              ...heroEnter,
             },
-            duration: 1000,
-            ...heroEnter,
-          },
-        ],
-      }],
+          ],
+        },
+      ],
     },
 
     {
       key: 'card-1',
       trigger: 'viewProgress',
       conditions: ['full-motion'],
-      effects: [{
-        keyframeEffect: {
-          name: 'card-1-exit',
-          keyframes: [
-            { transform: 'rotate(-4deg)', opacity: 1 },
-            { transform: 'rotate(-10deg)', opacity: 0 },
-          ],
+      effects: [
+        {
+          keyframeEffect: {
+            name: 'card-1-exit',
+            keyframes: [
+              { transform: 'rotate(-4deg)', opacity: 1 },
+              { transform: 'rotate(-10deg)', opacity: 0 },
+            ],
+          },
+          fill: 'both',
+          easing: 'ease-in',
+          ...exitRange,
         },
-        fill: 'both',
-        easing: 'ease-in',
-        ...exitRange,
-      }],
+      ],
     },
 
     {
       key: 'card-2',
       trigger: 'viewProgress',
       conditions: ['full-motion'],
-      effects: [{
-        keyframeEffect: {
-          name: 'card-2-exit',
-          keyframes: [
-            { transform: 'rotate(5deg)', opacity: 1 },
-            { transform: 'rotate(11deg)', opacity: 0 },
-          ],
+      effects: [
+        {
+          keyframeEffect: {
+            name: 'card-2-exit',
+            keyframes: [
+              { transform: 'rotate(5deg)', opacity: 1 },
+              { transform: 'rotate(11deg)', opacity: 0 },
+            ],
+          },
+          fill: 'both',
+          easing: 'ease-in',
+          ...exitRange,
         },
-        fill: 'both',
-        easing: 'ease-in',
-        ...exitRange,
-      }],
+      ],
     },
 
     {
       key: 'card-3',
       trigger: 'viewProgress',
       conditions: ['full-motion'],
-      effects: [{
-        keyframeEffect: {
-          name: 'card-3-exit',
-          keyframes: [
-            { transform: 'rotate(-3.5deg)', opacity: 1 },
-            { transform: 'rotate(-9.5deg)', opacity: 0 },
-          ],
+      effects: [
+        {
+          keyframeEffect: {
+            name: 'card-3-exit',
+            keyframes: [
+              { transform: 'rotate(-3.5deg)', opacity: 1 },
+              { transform: 'rotate(-9.5deg)', opacity: 0 },
+            ],
+          },
+          fill: 'both',
+          easing: 'ease-in',
+          ...exitRange,
         },
-        fill: 'both',
-        easing: 'ease-in',
-        ...exitRange,
-      }],
+      ],
     },
 
     {
       key: 'card-4',
       trigger: 'viewEnter',
       conditions: ['full-motion'],
-      effects: [{
-        keyframeEffect: {
-          name: 'card-4-enter',
-          keyframes: [
-            { transform: 'rotate(0deg)' },
-            { transform: 'rotate(2.5deg)' },
-          ],
+      effects: [
+        {
+          keyframeEffect: {
+            name: 'card-4-enter',
+            keyframes: [{ transform: 'rotate(0deg)' }, { transform: 'rotate(2.5deg)' }],
+          },
+          triggerType: 'once',
+          duration: 600,
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          fill: 'forwards',
         },
-        triggerType: 'once',
-        duration: 600,
-        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-        fill: 'forwards',
-      }],
+      ],
     },
   ],
-}
+};
 ```

@@ -11,31 +11,18 @@ As the page scrolls, a portrait image travels from a small inset position to fil
 
 <interact-element data-interact-key="about-section">
   <section class="about">
-    <div class="lines-layer">
-      <div class="lines-sticky">
-        <div class="grid-line line-1"></div>
-        <div class="grid-line line-2"></div>
-        <div class="grid-line line-3"></div>
-      </div>
-    </div>
-
     <div class="image-layer">
       <div class="image-sticky">
         <interact-element data-interact-key="person-image">
           <div class="person-image">
-            <img src="" />
+            <img src="" alt="" />
           </div>
-        </interact-element>
-        <interact-element data-interact-key="image-overlay">
-          <div class="image-overlay" aria-hidden="true"></div>
         </interact-element>
       </div>
     </div>
 
     <div class="text-container">
       <div class="text-sticky">
-        <div class="h-line h-line-top"></div>
-        <div class="h-line h-line-bottom"></div>
         <div class="intro-grid">
           <div class="grid-heading">
             <h2>Hi, I'm Jane</h2>
@@ -75,9 +62,7 @@ As the page scrolls, a portrait image travels from a small inset position to fil
           <div class="detail-text-cell">
             <p>Sample text provides enough length to demonstrate this animated content layout.</p>
             <div class="detail-cta-wrap">
-              <a class="detail-cta" href="#"
-                >Explore <span class="arrow" aria-hidden="true">→</span></a
-              >
+              <a class="detail-cta" href="#">Explore</a>
             </div>
           </div>
         </div>
@@ -86,65 +71,22 @@ As the page scrolls, a portrait image travels from a small inset position to fil
   </section>
 </interact-element>
 
-<div class="spacer" style="height: 100vh"></div>
+<div class="spacer"></div>
 ```
 
 ## Essential styles
 
 ```css
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  overflow-x: clip;
-}
-
 .spacer {
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .about {
   height: 300vh;
   position: relative;
-}
-
-.lines-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  pointer-events: none;
-}
-
-.lines-sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-}
-
-.grid-line {
-  position: absolute;
-  top: 0;
-  width: 1px;
-  height: 100%;
-}
-
-.line-1 {
-  left: 25%;
-}
-.line-2 {
-  left: 50%;
-}
-.line-3 {
-  display: none;
 }
 
 .image-layer {
@@ -163,7 +105,6 @@ body {
 .person-image {
   position: absolute;
   overflow: clip;
-  pointer-events: auto;
   left: 50%;
   top: 0;
   width: 50%;
@@ -175,23 +116,11 @@ body {
   outline-offset: 3px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .bio-text .word {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-
-.image-overlay {
-  display: none;
-}
-
 .person-image img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
-  filter: grayscale(1);
 }
 
 .text-container {
@@ -210,8 +139,7 @@ body {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   height: 100%;
-  align-items: start;
-  padding-top: calc(8vh + 15px);
+  padding-top: 8vh;
 }
 
 .grid-heading {
@@ -219,23 +147,9 @@ body {
   padding: 0 1.5rem;
 }
 
-.grid-heading h2 {
-  font-size: 39px;
-  font-weight: 300;
-  letter-spacing: 1px;
-  line-height: 0.91;
-}
-
 .grid-bio {
   grid-column: 5 / 9;
   padding: 0 1.5rem;
-}
-
-.bio-text {
-  font-size: 39px;
-  line-height: 1.19;
-  letter-spacing: 1px;
-  font-weight: 300;
 }
 
 .bio-text .word {
@@ -267,57 +181,15 @@ body {
   justify-content: space-between;
 }
 
-.detail-text-cell p {
-  font-size: 47px;
-  line-height: 1.25;
-  letter-spacing: 1px;
-  font-weight: 300;
-  text-indent: 3em;
-}
-
-.h-line {
-  position: absolute;
-  left: 0;
-  width: 100vw;
-  height: 1px;
-  z-index: 3;
-  pointer-events: none;
-}
-
-.h-line-top {
-  top: 8vh;
-}
-.h-line-bottom {
-  top: 54vh;
-}
-
 .detail-cta-wrap {
   padding-top: 1.5rem;
-  padding-bottom: 1rem;
 }
 
 .detail-cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.4em;
-  font-size: 24px;
-  font-weight: 300;
-  letter-spacing: 1px;
-  cursor: pointer;
-  border: 1px solid;
-  border-radius: 999px;
-  padding: 0.55em 1.4em;
-  transition: border-color 0.3s ease;
-}
-
-.detail-cta .arrow {
-  font-size: 0.85em;
-  display: inline-block;
-  transition: transform 0.3s ease;
-}
-
-.detail-cta:hover .arrow {
-  transform: translateX(4px);
+  min-width: 44px;
+  min-height: 44px;
 }
 
 @media (max-width: 768px) {
@@ -352,49 +224,26 @@ body {
 
   .intro-grid {
     display: block;
-    padding-top: 0;
   }
+
   .grid-heading,
   .grid-bio {
-    display: block;
-    grid-column: auto;
     padding: 0 1.25rem;
   }
+
   .grid-heading {
     margin-bottom: 33vh;
     width: calc(50% - 15px);
     margin-left: calc(50% + 15px);
   }
-  .grid-heading h2 {
-    font-size: 25px;
-    line-height: 1.05;
-    letter-spacing: 0.5px;
-  }
-  .bio-text {
-    font-size: 25px;
-    line-height: 1.35;
-    letter-spacing: 0.3px;
-  }
 
   .detail-grid {
     display: block;
   }
+
   .detail-text-cell {
-    grid-column: auto;
     padding: 0 1.25rem;
     gap: 1.5rem;
-  }
-  .detail-text-cell p {
-    font-size: 25px;
-    line-height: 1.35;
-    text-indent: 0;
-    letter-spacing: 0.3px;
-  }
-  .detail-cta {
-    font-size: 25px;
-  }
-  .detail-cta-wrap {
-    padding-top: 1.25rem;
   }
 
   .person-image {
@@ -404,52 +253,12 @@ body {
     height: 32vh;
   }
 
-  .image-overlay {
-    display: block;
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 1;
-  }
-
   .text-container {
-    position: relative;
     z-index: 1;
   }
+
   .detail-container {
-    position: relative;
     z-index: 7;
-  }
-
-  .h-line {
-    display: none;
-  }
-  .lines-layer {
-    z-index: 10;
-  }
-  .line-1 {
-    left: 1.25rem;
-  }
-  .line-2 {
-    left: 50%;
-  }
-  .line-3 {
-    display: block;
-    left: auto;
-    right: 1.25rem;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .person-image {
-      left: 0 !important;
-      top: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-    }
-    .image-overlay {
-      opacity: 0.45;
-    }
   }
 }
 ```
@@ -468,8 +277,14 @@ const IMAGE_END = IMAGE_START + 20;
 const wordEffects = Array.from({ length: WORD_COUNT }, (_, i) => ({
   key: 'bio-text',
   selector: `[data-i="${i}"]`,
-  rangeStart: { name: 'cover', offset: { value: WORD_START + i * WORD_STAGGER, unit: 'percentage' } },
-  rangeEnd: { name: 'cover', offset: { value: WORD_START + i * WORD_STAGGER + WORD_DURATION, unit: 'percentage' } },
+  rangeStart: {
+    name: 'cover',
+    offset: { value: WORD_START + i * WORD_STAGGER, unit: 'percentage' },
+  },
+  rangeEnd: {
+    name: 'cover',
+    offset: { value: WORD_START + i * WORD_STAGGER + WORD_DURATION, unit: 'percentage' },
+  },
   fill: 'both',
   easing: 'ease-out',
   keyframeEffect: {
@@ -485,29 +300,14 @@ const imageMovementMobile = {
   key: 'person-image',
   conditions: ['is-mobile'],
   rangeStart: { name: 'cover', offset: { value: 44, unit: 'percentage' } },
-  rangeEnd:   { name: 'cover', offset: { value: 58, unit: 'percentage' } },
+  rangeEnd: { name: 'cover', offset: { value: 58, unit: 'percentage' } },
   fill: 'both',
   easing: 'linear',
   keyframeEffect: {
     name: 'image-travel-grow-mobile',
     keyframes: [
       { left: '1.25rem', top: '8vh', width: 'calc(50% - 1.25rem)', height: '32vh' },
-      { left: '0',       top: '0',   width: '100%',               height: '100%' },
-    ],
-  },
-};
-
-const overlayFadeMobile = {
-  conditions: ['is-mobile'],
-  key: 'image-overlay',
-  rangeStart: { name: 'cover', offset: { value: 50, unit: 'percentage' } },
-  rangeEnd:   { name: 'cover', offset: { value: 58, unit: 'percentage' } },
-  fill: 'both',
-  keyframeEffect: {
-    name: 'overlay-fade',
-    keyframes: [
-      { opacity: '0' },
-      { opacity: '0.45' },
+      { left: '0', top: '0', width: '100%', height: '100%' },
     ],
   },
 };
@@ -535,17 +335,14 @@ const imageParallax = {
   fill: 'both',
   keyframeEffect: {
     name: 'image-parallax',
-    keyframes: [
-      { transform: 'scale(1)' },
-      { transform: 'scale(1.3)' },
-    ],
+    keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(1.3)' }],
   },
 };
 
-{
+const config = {
   conditions: {
-    'motion-ok':  { type: 'media', predicate: '(prefers-reduced-motion: no-preference)' },
-    'is-mobile':  { type: 'media', predicate: '(max-width: 768px)' },
+    'motion-ok': { type: 'media', predicate: '(prefers-reduced-motion: no-preference)' },
+    'is-mobile': { type: 'media', predicate: '(max-width: 768px)' },
     'is-desktop': { type: 'media', predicate: '(min-width: 769px)' },
   },
   interactions: [
@@ -553,14 +350,8 @@ const imageParallax = {
       key: 'about-section',
       trigger: 'viewProgress',
       conditions: ['motion-ok'],
-      effects: [
-        ...wordEffects,
-        imageMovement,
-        imageMovementMobile,
-        overlayFadeMobile,
-        imageParallax,
-      ],
+      effects: [...wordEffects, imageMovement, imageMovementMobile, imageParallax],
     },
   ],
-}
+};
 ```

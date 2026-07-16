@@ -1,21 +1,19 @@
 # Looping Sphere Gallery
 
-A 3D sphere composed of image cards rotates continuously via CSS animation while scrolling drives a camera zoom that flies through the sphere, with an overlay fade keyed to scroll progress.
+A sphere of positioned image cards moves through 3D space as scroll progress zooms the scene and fades its overlays.
 
-**Tags:** viewProgress, hover, gallery, 3d, loop, transform, opacity, rotate, scale
+**Tags:** viewProgress, gallery, 3d, transform, opacity, scale
 
 ## Markup
 
 ```html
-<div class="hint">SCROLL TO ZOOM · HOVER TO INSPECT</div>
-
 <div class="viewport">
   <interact-element data-interact-key="scene">
     <div class="scene">
       <div class="sphere">
         <div
           class="item"
-          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(0.0px) translateY(500.0px) translateZ(0.0px) rotateY(0.0deg) rotateX(-90.0deg)"
+          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(0.0px) translateY(500.0px) translateZ(0.0px) rotateY(0.0deg) rotateX(-90.0deg);"
         >
           <div class="item-content">
             <div class="face front">
@@ -30,7 +28,7 @@ A 3D sphere composed of image cards rotates continuously via CSS animation while
         </div>
         <div
           class="item"
-          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(242.6px) translateY(409.1px) translateZ(-154.3px) rotateY(122.5deg) rotateX(-54.9deg)"
+          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(242.6px) translateY(409.1px) translateZ(-154.3px) rotateY(122.5deg) rotateX(-54.9deg);"
         >
           <div class="item-content">
             <div class="face front">
@@ -45,7 +43,7 @@ A 3D sphere composed of image cards rotates continuously via CSS animation while
         </div>
         <div
           class="item"
-          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(163.5px) translateY(318.2px) translateZ(-349.3px) rotateY(154.9deg) rotateX(-39.5deg)"
+          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(163.5px) translateY(318.2px) translateZ(-349.3px) rotateY(154.9deg) rotateX(-39.5deg);"
         >
           <div class="item-content">
             <div class="face front">
@@ -60,7 +58,7 @@ A 3D sphere composed of image cards rotates continuously via CSS animation while
         </div>
         <div
           class="item"
-          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(-169.2px) translateY(-9.1px) translateZ(-470.4px) rotateY(-160.2deg) rotateX(1.0deg)"
+          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(-169.2px) translateY(-9.1px) translateZ(-470.4px) rotateY(-160.2deg) rotateX(1.0deg);"
         >
           <div class="item-content">
             <div class="face front">
@@ -75,7 +73,7 @@ A 3D sphere composed of image cards rotates continuously via CSS animation while
         </div>
         <div
           class="item"
-          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(-334.3px) translateY(-336.4px) translateZ(-158.4px) rotateY(-115.4deg) rotateX(42.3deg)"
+          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(-334.3px) translateY(-336.4px) translateZ(-158.4px) rotateY(-115.4deg) rotateX(42.3deg);"
         >
           <div class="item-content">
             <div class="face front">
@@ -90,7 +88,7 @@ A 3D sphere composed of image cards rotates continuously via CSS animation while
         </div>
         <div
           class="item"
-          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(0.0px) translateY(-500.0px) translateZ(0.0px) rotateY(0.0deg) rotateX(90.0deg)"
+          style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(0.0px) translateY(-500.0px) translateZ(0.0px) rotateY(0.0deg) rotateX(90.0deg);"
         >
           <div class="item-content">
             <div class="face front">
@@ -119,11 +117,6 @@ A 3D sphere composed of image cards rotates continuously via CSS animation while
 html,
 body {
   margin: 0;
-  scrollbar-width: none;
-}
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  display: none;
 }
 
 .viewport {
@@ -161,46 +154,22 @@ interact-element[data-interact-key='zoom-track'] {
   transform-style: preserve-3d;
   width: 0;
   height: 0;
-  animation: spinSphere 40s linear infinite;
-}
-
-@keyframes spinSphere {
-  from {
-    transform: rotateY(0deg);
-  }
-  to {
-    transform: rotateY(360deg);
-  }
-}
-
-.sphere:has(.item:hover) {
-  animation-play-state: paused;
 }
 
 .item {
   position: absolute;
   transform-style: preserve-3d;
-  cursor: pointer;
   pointer-events: auto;
 }
 
-.item:hover {
-  z-index: 10;
-}
-
 .item-content {
+  transform: scale(0.5);
   width: 200%;
   height: 200%;
   position: absolute;
   left: -50%;
   top: -50%;
   transform-style: preserve-3d;
-  scale: 0.5;
-  transition: scale 0.3s ease-out;
-}
-
-.item:hover .item-content {
-  scale: 0.575;
 }
 
 .face {
@@ -213,7 +182,7 @@ interact-element[data-interact-key='zoom-track'] {
   align-items: center;
   justify-content: flex-end;
   text-align: center;
-  overflow: hidden;
+  overflow: clip;
   padding-bottom: 16px;
 }
 
@@ -224,27 +193,6 @@ interact-element[data-interact-key='zoom-track'] {
   width: 100%;
   height: 50%;
   pointer-events: none;
-  transition: height 0.3s;
-}
-
-.item:hover .face.front .overlay {
-  height: 80%;
-}
-
-.face.front h3 {
-  position: relative;
-  z-index: 2;
-  margin: 0;
-  font-size: 24px;
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 2px;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.item:hover .face h3 {
-  opacity: 1;
 }
 
 .face.back {
@@ -256,40 +204,12 @@ interact-element[data-interact-key='zoom-track'] {
   inset: 0;
   pointer-events: none;
 }
-
-.face.back h3 {
-  position: relative;
-  z-index: 2;
-  margin: 0;
-  font-size: 20px;
-  letter-spacing: 4px;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.hint {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  font-size: 12px;
-  pointer-events: none;
-  z-index: 100;
-}
-
-@media (max-width: 600px) {
-  .hud-controls {
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 90%;
-    gap: 10px;
-  }
-}
 ```
 
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'zoom-track',
@@ -326,6 +246,6 @@ interact-element[data-interact-key='zoom-track'] {
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

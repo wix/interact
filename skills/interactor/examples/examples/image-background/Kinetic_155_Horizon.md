@@ -9,7 +9,6 @@ A white content card rotates 155 degrees on the Y axis as the user scrolls, whil
 ```html
 <div class="fixed inset-0 z-0 pointer-events-none">
   <img src="" class="w-full h-full object-cover grayscale contrast-[1.1] brightness-[0.75]" />
-  <div class="absolute inset-0"></div>
 </div>
 
 <interact-element data-interact-key="scroll-trigger" class="relative z-10 block h-[500vh]">
@@ -44,22 +43,9 @@ A white content card rotates 155 degrees on the Y axis as the user scrolls, whil
 ## Essential styles
 
 ```css
-body {
-  margin: 0;
-  overflow-x: clip;
-}
-
-body::-webkit-scrollbar {
-  display: none;
-}
-body {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
 .preserve-3d {
-  transform-style: preserve-3d;
   backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
 .scene-container {
@@ -72,19 +58,17 @@ interact-element {
 }
 
 .beauty-card-ui {
-  border: 1px solid;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  text-align: center;
-  user-select: none;
+  background: #fff;
 }
 ```
 
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'scroll-trigger',
@@ -116,7 +100,8 @@ interact-element {
           key: 'mouse-layer',
           namedEffect: { type: 'Tilt3DMouse' },
           transitionDuration: 600,
-          easing: 'ease-out',
+          transitionEasing: 'easeOut',
+          fill: 'both',
         },
       ],
     },
@@ -125,6 +110,7 @@ interact-element {
       trigger: 'hover',
       effects: [
         {
+          selector: '.beauty-card-ui',
           stateAction: 'toggle',
           transition: {
             duration: 400,
@@ -134,6 +120,6 @@ interact-element {
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```
