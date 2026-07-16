@@ -23,22 +23,57 @@ A password input with a toggle eye button that animates its lid, pupil, and lash
       <div class="mask" id="mask" aria-hidden="true"></div>
     </div>
     <interact-element data-interact-key="eye-btn">
-      <button type="button" class="eye-btn" id="eye-btn" aria-label="Hide password" aria-pressed="false" aria-controls="input">
-        <svg class="eye-svg" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <button
+        type="button"
+        class="eye-btn"
+        id="eye-btn"
+        aria-label="Hide password"
+        aria-pressed="false"
+        aria-controls="input"
+      >
+        <svg
+          class="eye-svg"
+          viewBox="0 0 36 40"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
           <defs>
             <clipPath id="eye-clip">
-              <path d="M6 20C6 20 11 13 18 13C25 13 30 20 30 20C30 20 25 27 18 27C11 27 6 20 6 20Z"/>
+              <path
+                d="M6 20C6 20 11 13 18 13C25 13 30 20 30 20C30 20 25 27 18 27C11 27 6 20 6 20Z"
+              />
             </clipPath>
           </defs>
-          <path class="eye-lid" d="M6 20C6 20 11 13 18 13C25 13 30 20 30 20C30 20 25 27 18 27C11 27 6 20 6 20Z" fill="currentColor"/>
-          <path class="eye-curve" d="M6 20C6 20 11 27 18 27C25 27 30 20 30 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path
+            class="eye-lid"
+            d="M6 20C6 20 11 13 18 13C25 13 30 20 30 20C30 20 25 27 18 27C11 27 6 20 6 20Z"
+            fill="currentColor"
+          />
+          <path
+            class="eye-curve"
+            d="M6 20C6 20 11 27 18 27C25 27 30 20 30 20"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
           <g clip-path="url(#eye-clip)">
-            <circle class="eye-pupil" cx="18" cy="20" r="5" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <circle
+              class="eye-pupil"
+              cx="18"
+              cy="20"
+              r="5"
+              fill="currentColor"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linejoin="round"
+            />
           </g>
           <g class="eyelashes">
-            <path d="M10 9.5L11 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M26 9.5L25 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M18 7V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M10 9.5L11 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path d="M26 9.5L25 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path d="M18 7V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </g>
         </svg>
       </button>
@@ -46,9 +81,9 @@ A password input with a toggle eye button that animates its lid, pupil, and lash
   </div>
   <div class="lang-warning" id="lang-warning">
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
-      <path d="M8 4.5v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="8" cy="11.5" r="0.75" fill="currentColor"/>
+      <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5" />
+      <path d="M8 4.5v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      <circle cx="8" cy="11.5" r="0.75" fill="currentColor" />
     </svg>
     <span>Switch to English</span>
   </div>
@@ -58,7 +93,13 @@ A password input with a toggle eye button that animates its lid, pupil, and lash
 ## Essential styles
 
 ```css
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   min-height: 100vh;
@@ -68,7 +109,9 @@ body {
   padding: 24px;
 }
 
-interact-element { display: contents; }
+interact-element {
+  display: contents;
+}
 
 .pill {
   position: relative;
@@ -80,7 +123,8 @@ interact-element { display: contents; }
   border-radius: 9999px;
   border: 0.5px solid;
   transition:
-    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease;
 }
 
 .pill:hover,
@@ -122,7 +166,9 @@ interact-element { display: contents; }
   letter-spacing: 0;
 }
 
-.mask.active { display: flex; }
+.mask.active {
+  display: flex;
+}
 
 .mask .dot {
   width: 1ch;
@@ -138,7 +184,10 @@ interact-element { display: contents; }
   height: 0.45em;
   border-radius: 50%;
 }
-.mask .space { display: inline-block; width: 1ch; }
+.mask .space {
+  display: inline-block;
+  width: 1ch;
+}
 
 .eye-btn {
   flex-shrink: 0;
@@ -160,9 +209,15 @@ interact-element { display: contents; }
   overflow: visible;
 }
 
-.eye-lid { transform-origin: 18px 20px; }
-.eyelashes { transform-origin: 18px 20px; }
-.eye-curve { opacity: 0; }
+.eye-lid {
+  transform-origin: 18px 20px;
+}
+.eyelashes {
+  transform-origin: 18px 20px;
+}
+.eye-curve {
+  opacity: 0;
+}
 
 .wrapper {
   position: relative;
@@ -179,7 +234,9 @@ interact-element { display: contents; }
   font-weight: 400;
   opacity: 0;
   transform: translateY(-6px);
-  transition: opacity 350ms cubic-bezier(0.22, 1, 0.36, 1), transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    opacity 350ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .lang-warning.visible {
@@ -194,10 +251,16 @@ interact-element { display: contents; }
 }
 
 .sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
-
 ```
 
 ## Interact config

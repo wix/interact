@@ -11,7 +11,6 @@ As the page scrolls, a portrait image travels from a small inset position to fil
 
 <interact-element data-interact-key="about-section">
   <section class="about">
-
     <div class="lines-layer">
       <div class="lines-sticky">
         <div class="grid-line line-1"></div>
@@ -24,7 +23,7 @@ As the page scrolls, a portrait image travels from a small inset position to fil
       <div class="image-sticky">
         <interact-element data-interact-key="person-image">
           <div class="person-image">
-            <img src="">
+            <img src="" />
           </div>
         </interact-element>
         <interact-element data-interact-key="image-overlay">
@@ -76,13 +75,14 @@ As the page scrolls, a portrait image travels from a small inset position to fil
           <div class="detail-text-cell">
             <p>Sample text provides enough length to demonstrate this animated content layout.</p>
             <div class="detail-cta-wrap">
-              <a class="detail-cta" href="#">Explore <span class="arrow" aria-hidden="true">→</span></a>
+              <a class="detail-cta" href="#"
+                >Explore <span class="arrow" aria-hidden="true">→</span></a
+              >
             </div>
           </div>
         </div>
       </div>
     </div>
-
   </section>
 </interact-element>
 
@@ -92,7 +92,11 @@ As the page scrolls, a portrait image travels from a small inset position to fil
 ## Essential styles
 
 ```css
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
   overflow-x: clip;
@@ -133,9 +137,15 @@ body {
   height: 100%;
 }
 
-.line-1 { left: 25%; }
-.line-2 { left: 50%; }
-.line-3 { display: none; }
+.line-1 {
+  left: 25%;
+}
+.line-2 {
+  left: 50%;
+}
+.line-3 {
+  display: none;
+}
 
 .image-layer {
   position: absolute;
@@ -166,10 +176,15 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bio-text .word { opacity: 1 !important; transform: none !important; }
+  .bio-text .word {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
-.image-overlay { display: none; }
+.image-overlay {
+  display: none;
+}
 
 .person-image img {
   width: 100%;
@@ -269,8 +284,12 @@ body {
   pointer-events: none;
 }
 
-.h-line-top { top: 8vh; }
-.h-line-bottom { top: 54vh; }
+.h-line-top {
+  top: 8vh;
+}
+.h-line-bottom {
+  top: 54vh;
+}
 
 .detail-cta-wrap {
   padding-top: 1.5rem;
@@ -302,13 +321,25 @@ body {
 }
 
 @media (max-width: 768px) {
-  .about { height: 510vh; }
+  .about {
+    height: 510vh;
+  }
 
-  .text-sticky { position: sticky; top: 0; height: 100vh; padding-top: 8vh; }
+  .text-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding-top: 8vh;
+  }
 
-  .text-container { height: 260vh; margin-bottom: 20vh; }
+  .text-container {
+    height: 260vh;
+    margin-bottom: 20vh;
+  }
 
-  .detail-container { height: 180vh; }
+  .detail-container {
+    height: 180vh;
+  }
   .detail-sticky {
     position: sticky;
     top: 0;
@@ -319,17 +350,52 @@ body {
     justify-content: flex-start;
   }
 
-  .intro-grid { display: block; padding-top: 0; }
-  .grid-heading, .grid-bio { display: block; grid-column: auto; padding: 0 1.25rem; }
-  .grid-heading { margin-bottom: 33vh; width: calc(50% - 15px); margin-left: calc(50% + 15px); }
-  .grid-heading h2 { font-size: 25px; line-height: 1.05; letter-spacing: 0.5px; }
-  .bio-text { font-size: 25px; line-height: 1.35; letter-spacing: 0.3px; }
+  .intro-grid {
+    display: block;
+    padding-top: 0;
+  }
+  .grid-heading,
+  .grid-bio {
+    display: block;
+    grid-column: auto;
+    padding: 0 1.25rem;
+  }
+  .grid-heading {
+    margin-bottom: 33vh;
+    width: calc(50% - 15px);
+    margin-left: calc(50% + 15px);
+  }
+  .grid-heading h2 {
+    font-size: 25px;
+    line-height: 1.05;
+    letter-spacing: 0.5px;
+  }
+  .bio-text {
+    font-size: 25px;
+    line-height: 1.35;
+    letter-spacing: 0.3px;
+  }
 
-  .detail-grid { display: block; }
-  .detail-text-cell { grid-column: auto; padding: 0 1.25rem; gap: 1.5rem; }
-  .detail-text-cell p { font-size: 25px; line-height: 1.35; text-indent: 0; letter-spacing: 0.3px; }
-  .detail-cta { font-size: 25px; }
-  .detail-cta-wrap { padding-top: 1.25rem; }
+  .detail-grid {
+    display: block;
+  }
+  .detail-text-cell {
+    grid-column: auto;
+    padding: 0 1.25rem;
+    gap: 1.5rem;
+  }
+  .detail-text-cell p {
+    font-size: 25px;
+    line-height: 1.35;
+    text-indent: 0;
+    letter-spacing: 0.3px;
+  }
+  .detail-cta {
+    font-size: 25px;
+  }
+  .detail-cta-wrap {
+    padding-top: 1.25rem;
+  }
 
   .person-image {
     left: 1.25rem;
@@ -347,24 +413,45 @@ body {
     z-index: 1;
   }
 
-  .text-container   { position: relative; z-index: 1; }
-  .detail-container { position: relative; z-index: 7; }
+  .text-container {
+    position: relative;
+    z-index: 1;
+  }
+  .detail-container {
+    position: relative;
+    z-index: 7;
+  }
 
-  .h-line { display: none; }
-  .lines-layer { z-index: 10; }
-  .line-1 { left: 1.25rem; }
-  .line-2 { left: 50%; }
-  .line-3 { display: block; left: auto; right: 1.25rem; }
+  .h-line {
+    display: none;
+  }
+  .lines-layer {
+    z-index: 10;
+  }
+  .line-1 {
+    left: 1.25rem;
+  }
+  .line-2 {
+    left: 50%;
+  }
+  .line-3 {
+    display: block;
+    left: auto;
+    right: 1.25rem;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .person-image {
-      left: 0 !important; top: 0 !important;
-      width: 100% !important; height: 100% !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
     }
-    .image-overlay { opacity: 0.45; }
+    .image-overlay {
+      opacity: 0.45;
+    }
   }
 }
-
 ```
 
 ## Interact config

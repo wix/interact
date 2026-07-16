@@ -11,7 +11,9 @@ A sticky scroll section where a giant background headline translates horizontall
   <section class="scroll-section">
     <div class="sticky-stage">
       <header class="site-header">
-        <div class="header-block"><span class="search-dot" aria-hidden="true"></span><span>SEARCH</span></div>
+        <div class="header-block">
+          <span class="search-dot" aria-hidden="true"></span><span>SEARCH</span>
+        </div>
         <nav class="site-nav" aria-label="Primary">
           <a href="#">Books</a><a href="#">Audiobooks</a><a href="#">Noname's Book Club</a>
           <a href="#">Home + Apparel</a><a href="#">Gift Cards</a><a href="#">All</a>
@@ -25,13 +27,15 @@ A sticky scroll section where a giant background headline translates horizontall
         </div>
       </interact-element>
 
-      <p class="bg-text-sub">Sample text provides enough length to demonstrate this animated content layout.</p>
+      <p class="bg-text-sub">
+        Sample text provides enough length to demonstrate this animated content layout.
+      </p>
 
       <main class="hero-main">
         <interact-element data-interact-key="hero-image">
           <div class="hero-image-scaler">
             <div class="hero-image-wrap">
-              <img src="" width="900" height="1200">
+              <img src="" width="900" height="1200" />
             </div>
           </div>
         </interact-element>
@@ -44,17 +48,26 @@ A sticky scroll section where a giant background headline translates horizontall
 ## Essential styles
 
 ```css
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   overflow-x: clip;
 }
 
-interact-element { display: contents; }
+interact-element {
+  display: contents;
+}
 
-.scroll-section { height: 220vh; }
+.scroll-section {
+  height: 220vh;
+}
 
 .sticky-stage {
   position: sticky;
@@ -88,7 +101,9 @@ interact-element { display: contents; }
   letter-spacing: 0.08em;
 }
 
-.header-block--right { justify-content: flex-end; }
+.header-block--right {
+  justify-content: flex-end;
+}
 
 .search-dot {
   width: 0.75rem;
@@ -182,9 +197,15 @@ interact-element { display: contents; }
 }
 
 @media (min-width: 768px) {
-  .header-block { width: 8rem; }
-  .site-nav { display: flex; }
-  .hero-image-wrap { aspect-ratio: 5 / 4; }
+  .header-block {
+    width: 8rem;
+  }
+  .site-nav {
+    display: flex;
+  }
+  .hero-image-wrap {
+    aspect-ratio: 5 / 4;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -193,39 +214,103 @@ interact-element { display: contents; }
     bottom: 1.25rem;
   }
 }
-
 ```
 
 ## Interact config
 
 ```js
-const pct = (value) => ({ value, unit: "percentage" });
-const cover = (a, b) => ({ rangeStart: { name: "cover", offset: pct(a) }, rangeEnd: { name: "cover", offset: pct(b) } });
+const pct = (value) => ({ value, unit: 'percentage' });
+const cover = (a, b) => ({
+  rangeStart: { name: 'cover', offset: pct(a) },
+  rangeEnd: { name: 'cover', offset: pct(b) },
+});
 
 const trackX = (px) => ({
-  key: "hero-image", trigger: "pointerMove", params: { hitArea: "self", axis: "x" }, conditions: ["hoverDevice", "motionOk"],
-  effects: [{ key: "hero-image", selector: ".hero-image-wrap", keyframeEffect: { name: `image-track-x-${px}`, keyframes: [{ transform: `translate3d(-${px}px,0,0)` }, { transform: `translate3d(${px}px,0,0)` }] }, transitionDuration: 160, transitionEasing: "easeOut", fill: "both" }],
+  key: 'hero-image',
+  trigger: 'pointerMove',
+  params: { hitArea: 'self', axis: 'x' },
+  conditions: ['hoverDevice', 'motionOk'],
+  effects: [
+    {
+      key: 'hero-image',
+      selector: '.hero-image-wrap',
+      keyframeEffect: {
+        name: `image-track-x-${px}`,
+        keyframes: [
+          { transform: `translate3d(-${px}px,0,0)` },
+          { transform: `translate3d(${px}px,0,0)` },
+        ],
+      },
+      transitionDuration: 160,
+      transitionEasing: 'easeOut',
+      fill: 'both',
+    },
+  ],
 });
 
 const trackY = (px) => ({
-  key: "hero-image", trigger: "pointerMove", params: { hitArea: "self", axis: "y" }, conditions: ["hoverDevice", "motionOk"],
-  effects: [{ key: "hero-image", selector: ".hero-image-wrap", composite: "accumulate", keyframeEffect: { name: `image-track-y-${px}`, keyframes: [{ transform: `translate3d(0,-${px}px,0)` }, { transform: `translate3d(0,${px}px,0)` }] }, transitionDuration: 160, transitionEasing: "easeOut", fill: "both" }],
+  key: 'hero-image',
+  trigger: 'pointerMove',
+  params: { hitArea: 'self', axis: 'y' },
+  conditions: ['hoverDevice', 'motionOk'],
+  effects: [
+    {
+      key: 'hero-image',
+      selector: '.hero-image-wrap',
+      composite: 'accumulate',
+      keyframeEffect: {
+        name: `image-track-y-${px}`,
+        keyframes: [
+          { transform: `translate3d(0,-${px}px,0)` },
+          { transform: `translate3d(0,${px}px,0)` },
+        ],
+      },
+      transitionDuration: 160,
+      transitionEasing: 'easeOut',
+      fill: 'both',
+    },
+  ],
 });
 
 const config = {
   conditions: {
-    motionOk: { type: "media", predicate: "(prefers-reduced-motion: no-preference)" },
-    hoverDevice: { type: "media", predicate: "(hover: hover) and (pointer: fine)" },
+    motionOk: { type: 'media', predicate: '(prefers-reduced-motion: no-preference)' },
+    hoverDevice: { type: 'media', predicate: '(hover: hover) and (pointer: fine)' },
   },
   interactions: [
     trackX(180),
     trackY(140),
     {
-      key: "scroll-section",
-      trigger: "viewProgress",
+      key: 'scroll-section',
+      trigger: 'viewProgress',
       effects: [
-        { key: "bg-text", selector: ".bg-text", conditions: ["motionOk"], keyframeEffect: { name: "text-parallax", keyframes: [{ transform: "translateX(0) scaleY(1.4)" }, { transform: "translateX(calc(-100% + 100vw)) scaleY(1.4)" }] }, ...cover(0, 100), easing: "linear", fill: "both" },
-        { key: "hero-image", selector: ".hero-image-scaler", conditions: ["motionOk"], keyframeEffect: { name: "image-scale-scroll", keyframes: [{ transform: "scale(1)" }, { transform: "scale(0)" }] }, ...cover(0, 100), easing: "linear", fill: "both" },
+        {
+          key: 'bg-text',
+          selector: '.bg-text',
+          conditions: ['motionOk'],
+          keyframeEffect: {
+            name: 'text-parallax',
+            keyframes: [
+              { transform: 'translateX(0) scaleY(1.4)' },
+              { transform: 'translateX(calc(-100% + 100vw)) scaleY(1.4)' },
+            ],
+          },
+          ...cover(0, 100),
+          easing: 'linear',
+          fill: 'both',
+        },
+        {
+          key: 'hero-image',
+          selector: '.hero-image-scaler',
+          conditions: ['motionOk'],
+          keyframeEffect: {
+            name: 'image-scale-scroll',
+            keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(0)' }],
+          },
+          ...cover(0, 100),
+          easing: 'linear',
+          fill: 'both',
+        },
       ],
     },
   ],

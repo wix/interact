@@ -15,10 +15,7 @@ Sixteen vertical white stripes slide up from below in a left-to-right stagger dr
 <section class="hero">
   <interact-element data-interact-key="hero-img">
     <div class="hero__img-wrap">
-      <img
-        class="hero__img"
-        src=""
-      />
+      <img class="hero__img" src="" />
     </div>
   </interact-element>
   <div class="hero__gradient"></div>
@@ -35,8 +32,16 @@ Sixteen vertical white stripes slide up from below in a left-to-right stagger dr
   <interact-element data-interact-key="hero-scroll">
     <div class="hero__scroll">
       <span>Scroll</span>
-      <svg class="hero__scroll-arrow" viewBox="0 0 14 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M1 1l6 6 6-6"/>
+      <svg
+        class="hero__scroll-arrow"
+        viewBox="0 0 14 8"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M1 1l6 6 6-6" />
       </svg>
     </div>
   </interact-element>
@@ -71,14 +76,16 @@ Sixteen vertical white stripes slide up from below in a left-to-right stagger dr
   <interact-element data-interact-key="s2-title">
     <div class="section-two__left">
       <p class="section-two__label">Why Nexus</p>
-      <h2 class="section-two__title">Built<br/>Different.</h2>
+      <h2 class="section-two__title">Built<br />Different.</h2>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="s2-subtitles">
     <div class="section-two__right">
       <p class="section-two__intro">Performance without compromise. Architecture without limits.</p>
-      <p class="section-two__line">Sample text provides enough length to demonstrate this animated content layout.</p>
+      <p class="section-two__line">
+        Sample text provides enough length to demonstrate this animated content layout.
+      </p>
     </div>
   </interact-element>
 </section>
@@ -87,13 +94,21 @@ Sixteen vertical white stripes slide up from below in a left-to-right stagger dr
 ## Essential styles
 
 ```css
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
   overflow-x: hidden;
 }
 
-interact-element { display: block; }
+interact-element {
+  display: block;
+}
 
 .header {
   position: fixed;
@@ -201,9 +216,13 @@ interact-element { display: block; }
   line-height: 1.05;
 }
 
-.spacer { height: 100vh; }
+.spacer {
+  height: 100vh;
+}
 
-.driver { height: 120vh; }
+.driver {
+  height: 120vh;
+}
 
 .stripes {
   position: fixed;
@@ -235,7 +254,9 @@ interact-element { display: block; }
   pointer-events: none;
 }
 
-.section-two a { pointer-events: auto; }
+.section-two a {
+  pointer-events: auto;
+}
 
 .section-two__left {
   display: flex;
@@ -285,16 +306,33 @@ interact-element { display: block; }
 }
 
 @media (max-width: 1024px) {
-  .section-two { gap: 48px; }
-  .section-two__title { font-size: clamp(2.8rem, 6vw, 4.5rem); }
+  .section-two {
+    gap: 48px;
+  }
+  .section-two__title {
+    font-size: clamp(2.8rem, 6vw, 4.5rem);
+  }
 }
 
 @media (max-width: 768px) {
-  .header { padding: 20px 20px; }
-  .header__logo { font-size: 1.3rem; }
-  .hero__scroll { bottom: 28px; }
-  .hero__content { left: 20px; right: 20px; bottom: 100px; max-width: none; }
-  .hero__title { font-size: clamp(2.2rem, 8vw, 3.5rem); }
+  .header {
+    padding: 20px 20px;
+  }
+  .header__logo {
+    font-size: 1.3rem;
+  }
+  .hero__scroll {
+    bottom: 28px;
+  }
+  .hero__content {
+    left: 20px;
+    right: 20px;
+    bottom: 100px;
+    max-width: none;
+  }
+  .hero__title {
+    font-size: clamp(2.2rem, 8vw, 3.5rem);
+  }
   .section-two {
     padding: 18vh 24px 0;
     grid-template-columns: 1fr;
@@ -305,20 +343,41 @@ interact-element { display: block; }
     padding-bottom: 24px;
     border-bottom: 1px solid;
   }
-  .section-two__right { padding-left: 0; padding-top: 24px; }
-  .section-two__title { font-size: clamp(2.5rem, 10vw, 3.5rem); }
-  .section-two__intro { font-size: 1.05rem; }
-  .section-two__line { font-size: 0.85rem; }
+  .section-two__right {
+    padding-left: 0;
+    padding-top: 24px;
+  }
+  .section-two__title {
+    font-size: clamp(2.5rem, 10vw, 3.5rem);
+  }
+  .section-two__intro {
+    font-size: 1.05rem;
+  }
+  .section-two__line {
+    font-size: 0.85rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .header { padding: 16px 16px; }
-  .hero__content { left: 16px; right: 16px; bottom: 80px; }
-  .section-two { padding: 16vh 16px 0; }
-  .section-two__label { margin-bottom: 16px; }
-  .section-two__line { font-size: 0.8rem; line-height: 1.7; }
+  .header {
+    padding: 16px 16px;
+  }
+  .hero__content {
+    left: 16px;
+    right: 16px;
+    bottom: 80px;
+  }
+  .section-two {
+    padding: 16vh 16px 0;
+  }
+  .section-two__label {
+    margin-bottom: 16px;
+  }
+  .section-two__line {
+    font-size: 0.8rem;
+    line-height: 1.7;
+  }
 }
-
 ```
 
 ## Interact config
@@ -330,13 +389,10 @@ const stripeEffect = (key, startPct, endPct) => ({
   key,
   keyframeEffect: {
     name: `${key}-up`,
-    keyframes: [
-      { transform: 'translateY(100%)' },
-      { transform: 'translateY(11vh)' },
-    ],
+    keyframes: [{ transform: 'translateY(100%)' }, { transform: 'translateY(11vh)' }],
   },
   rangeStart: { name: 'entry', offset: { value: startPct, unit: 'percentage' } },
-  rangeEnd:   { name: 'entry', offset: { value: endPct,   unit: 'percentage' } },
+  rangeEnd: { name: 'entry', offset: { value: endPct, unit: 'percentage' } },
   easing: EASE_OUT,
   fill: 'both',
 });
@@ -354,20 +410,17 @@ const config = {
             keyframes: [{ opacity: 1 }, { opacity: 0 }],
           },
           rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 12, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 12, unit: 'percentage' } },
           fill: 'both',
         },
         {
           key: 'hero-img',
           keyframeEffect: {
             name: 'img-zoom',
-            keyframes: [
-              { transform: 'scale(1)' },
-              { transform: 'scale(1.15)' },
-            ],
+            keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(1.15)' }],
           },
           rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 100, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 100, unit: 'percentage' } },
           easing: 'ease-out',
           fill: 'both',
         },
@@ -375,13 +428,10 @@ const config = {
           key: 'hero-img',
           keyframeEffect: {
             name: 'img-blur',
-            keyframes: [
-              { filter: 'blur(0px)' },
-              { filter: 'blur(6px)' },
-            ],
+            keyframes: [{ filter: 'blur(0px)' }, { filter: 'blur(6px)' }],
           },
           rangeStart: { name: 'entry', offset: { value: 10, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 70, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 70, unit: 'percentage' } },
           easing: 'ease-out',
           fill: 'both',
           composite: 'add',
@@ -390,25 +440,22 @@ const config = {
           key: 'hero-darken',
           keyframeEffect: {
             name: 'darken-in',
-            keyframes: [
-              { opacity: 0 },
-              { opacity: 0.55 },
-            ],
+            keyframes: [{ opacity: 0 }, { opacity: 0.55 }],
           },
           rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 60, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 60, unit: 'percentage' } },
           easing: 'ease-out',
           fill: 'both',
         },
-        stripeEffect('s1',   0.0, 62),
-        stripeEffect('s2',   2.5, 64),
-        stripeEffect('s3',   5.0, 67),
-        stripeEffect('s4',   7.5, 69),
-        stripeEffect('s5',  10.0, 72),
-        stripeEffect('s6',  12.5, 74),
-        stripeEffect('s7',  15.0, 77),
-        stripeEffect('s8',  17.5, 79),
-        stripeEffect('s9',  20.0, 82),
+        stripeEffect('s1', 0.0, 62),
+        stripeEffect('s2', 2.5, 64),
+        stripeEffect('s3', 5.0, 67),
+        stripeEffect('s4', 7.5, 69),
+        stripeEffect('s5', 10.0, 72),
+        stripeEffect('s6', 12.5, 74),
+        stripeEffect('s7', 15.0, 77),
+        stripeEffect('s8', 17.5, 79),
+        stripeEffect('s9', 20.0, 82),
         stripeEffect('s10', 22.5, 84),
         stripeEffect('s11', 25.0, 87),
         stripeEffect('s12', 27.5, 89),
@@ -429,8 +476,8 @@ const config = {
           keyframeEffect: {
             name: 'arrow-bounce',
             keyframes: [
-              { transform: 'translateY(0)',    opacity: 0.3 },
-              { transform: 'translateY(6px)',  opacity: 1 },
+              { transform: 'translateY(0)', opacity: 0.3 },
+              { transform: 'translateY(6px)', opacity: 1 },
               { transform: 'translateY(12px)', opacity: 0.3 },
             ],
           },
@@ -474,7 +521,7 @@ const config = {
             keyframes: [{ opacity: 1 }, { opacity: 0 }],
           },
           rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 15, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 15, unit: 'percentage' } },
           fill: 'both',
         },
       ],
@@ -494,7 +541,7 @@ const config = {
             ],
           },
           rangeStart: { name: 'entry', offset: { value: 65, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 95, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 95, unit: 'percentage' } },
           easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
           fill: 'both',
         },
@@ -508,7 +555,7 @@ const config = {
             ],
           },
           rangeStart: { name: 'entry', offset: { value: 75, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 100, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 100, unit: 'percentage' } },
           easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
           fill: 'both',
         },

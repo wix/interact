@@ -10,7 +10,6 @@ A sticky hero section where the title and text columns fade up on view enter, wh
 <interact-element data-interact-key="page">
   <section class="sticky-track">
     <div class="sticky-frame">
-
       <interact-element data-interact-key="title" data-interact-initial="true">
         <div class="title-wrap">
           <div class="title-area">
@@ -23,10 +22,10 @@ A sticky hero section where the title and text columns fade up on view enter, wh
         <div class="text-wrap">
           <div class="text-columns">
             <div class="text-col">
-              <p>Design studio<br>focused on brand<br>identity & digital<br>experiences</p>
+              <p>Design studio<br />focused on brand<br />identity & digital<br />experiences</p>
             </div>
             <div class="text-col">
-              <p>Founded 2019<br>New York, Paris<br>& Tokyo</p>
+              <p>Founded 2019<br />New York, Paris<br />& Tokyo</p>
             </div>
           </div>
         </div>
@@ -39,7 +38,6 @@ A sticky hero section where the title and text columns fade up on view enter, wh
           </div>
         </div>
       </interact-element>
-
     </div>
   </section>
 </interact-element>
@@ -48,9 +46,15 @@ A sticky hero section where the title and text columns fade up on view enter, wh
 ## Essential styles
 
 ```css
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-interact-element { display: block; }
+interact-element {
+  display: block;
+}
 
 body::after {
   content: '';

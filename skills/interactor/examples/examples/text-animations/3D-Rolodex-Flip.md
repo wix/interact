@@ -10,15 +10,15 @@ Each full-viewport text card flips into view from below with a 3D rotateX and sc
 <div class="layout-grid">
   <div class="col">
     <div>Featuring</div>
-    <div>Abigail DeVille<br>Xaviera Simmons<br>Rosa-Johan Uddoh</div>
+    <div>Abigail DeVille<br />Xaviera Simmons<br />Rosa-Johan Uddoh</div>
   </div>
   <div class="col" style="border-right: 1px solid var(--grid-color)">
     <div style="text-align: center">Curated By</div>
-    <div style="text-align: center">Racquel Chevremont<br>Mickalene Thomas</div>
+    <div style="text-align: center">Racquel Chevremont<br />Mickalene Thomas</div>
   </div>
   <div class="col">
     <div style="text-align: right">Presented By</div>
-    <div style="text-align: right">Pioneer Works<br>04.02-06.20.21<br>Brooklyn, NY</div>
+    <div style="text-align: right">Pioneer Works<br />04.02-06.20.21<br />Brooklyn, NY</div>
   </div>
 </div>
 
@@ -26,7 +26,7 @@ Each full-viewport text card flips into view from below with a 3D rotateX and sc
   <interact-element data-interact-key="item-1">
     <div>
       <div class="meta-info">Exhibition 01</div>
-      <h1 class="hero-text">Xaviera<br>Simmons</h1>
+      <h1 class="hero-text">Xaviera<br />Simmons</h1>
     </div>
   </interact-element>
 
@@ -40,21 +40,21 @@ Each full-viewport text card flips into view from below with a 3D rotateX and sc
   <interact-element data-interact-key="item-3">
     <div>
       <div class="meta-info">Exhibition 03</div>
-      <h1 class="hero-text">Rosa-Johan<br>Uddoh</h1>
+      <h1 class="hero-text">Rosa-Johan<br />Uddoh</h1>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="item-4">
     <div>
       <div class="meta-info">Exhibition 04</div>
-      <h1 class="hero-text">Abigail<br>DeVille</h1>
+      <h1 class="hero-text">Abigail<br />DeVille</h1>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="item-5">
     <div>
       <div class="meta-info">Exhibition 05</div>
-      <h1 class="hero-text">Pioneer<br>Works</h1>
+      <h1 class="hero-text">Pioneer<br />Works</h1>
     </div>
   </interact-element>
 </div>
@@ -170,7 +170,6 @@ interact-element {
     font-size: 18vw;
   }
 }
-
 ```
 
 ## Interact config
@@ -188,23 +187,23 @@ const createScrollInteraction = (id) => ({
         keyframes: [
           {
             transform: 'perspective(1000px) rotateX(-90deg) scale(0.6)',
-            opacity: 0
+            opacity: 0,
           },
           {
             transform: 'perspective(1000px) rotateX(0deg) scale(1)',
             opacity: 1,
-            offset: 0.5
+            offset: 0.5,
           },
           {
             transform: 'perspective(1000px) rotateX(90deg) scale(0.6)',
-            opacity: 0
-          }
-        ]
+            opacity: 0,
+          },
+        ],
       },
       fill: 'both',
-      composite: 'replace'
-    }
-  ]
+      composite: 'replace',
+    },
+  ],
 });
 
 const config = {
@@ -213,7 +212,7 @@ const config = {
     createScrollInteraction('item-2'),
     createScrollInteraction('item-3'),
     createScrollInteraction('item-4'),
-    createScrollInteraction('item-5')
-  ]
+    createScrollInteraction('item-5'),
+  ],
 };
 ```

@@ -18,7 +18,15 @@ A capsule-shaped dropdown menu where hovering the trigger button highlights it i
       id="dropdown-trigger"
     >
       <span class="btn-label">Select Team</span>
-      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        class="chevron"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <polyline points="6 9 12 15 18 9" />
       </svg>
     </button>
@@ -33,7 +41,15 @@ A capsule-shaped dropdown menu where hovering the trigger button highlights it i
   >
     <interact-element data-interact-key="opt-1-trigger">
       <div class="dropdown-option" role="option" tabindex="-1">
-        <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          class="option-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <circle cx="13.5" cy="6.5" r="2.5" />
           <path d="M17.5 10.5l3-3" />
           <path d="M3 21.5l8.5-8.5" />
@@ -44,7 +60,15 @@ A capsule-shaped dropdown menu where hovering the trigger button highlights it i
     </interact-element>
     <interact-element data-interact-key="opt-2-trigger">
       <div class="dropdown-option" role="option" tabindex="-1">
-        <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          class="option-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <polyline points="16 18 22 12 16 6" />
           <polyline points="8 6 2 12 8 18" />
         </svg>
@@ -53,7 +77,15 @@ A capsule-shaped dropdown menu where hovering the trigger button highlights it i
     </interact-element>
     <interact-element data-interact-key="opt-3-trigger">
       <div class="dropdown-option" role="option" tabindex="-1">
-        <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          class="option-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
           <polyline points="17 6 23 6 23 12" />
         </svg>
@@ -62,7 +94,15 @@ A capsule-shaped dropdown menu where hovering the trigger button highlights it i
     </interact-element>
     <interact-element data-interact-key="opt-4-trigger">
       <div class="dropdown-option" role="option" tabindex="-1">
-        <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          class="option-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <line x1="18" y1="20" x2="18" y2="10" />
           <line x1="12" y1="20" x2="12" y2="4" />
           <line x1="6" y1="20" x2="6" y2="14" />
@@ -72,9 +112,19 @@ A capsule-shaped dropdown menu where hovering the trigger button highlights it i
     </interact-element>
     <interact-element data-interact-key="opt-5-trigger">
       <div class="dropdown-option" role="option" tabindex="-1">
-        <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          class="option-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+          <path
+            d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
+          />
         </svg>
         Support
       </div>
@@ -86,9 +136,17 @@ A capsule-shaped dropdown menu where hovering the trigger button highlights it i
 ## Essential styles
 
 ```css
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-interact-element { display: contents; }
+interact-element {
+  display: contents;
+}
 
 body {
   min-height: 100vh;
@@ -142,7 +200,10 @@ body {
   opacity: 0;
   visibility: hidden;
   transform: translateY(-6px);
-  transition: opacity 220ms ease, visibility 220ms ease, transform 220ms ease;
+  transition:
+    opacity 220ms ease,
+    visibility 220ms ease,
+    transform 220ms ease;
   z-index: 100;
   padding: 8px;
   display: flex;
@@ -156,11 +217,21 @@ body {
   transform: translateY(0);
 }
 
-.dropdown-menu > interact-element { --i: 0; }
-.dropdown-menu > interact-element:nth-child(2) { --i: 1; }
-.dropdown-menu > interact-element:nth-child(3) { --i: 2; }
-.dropdown-menu > interact-element:nth-child(4) { --i: 3; }
-.dropdown-menu > interact-element:nth-child(5) { --i: 4; }
+.dropdown-menu > interact-element {
+  --i: 0;
+}
+.dropdown-menu > interact-element:nth-child(2) {
+  --i: 1;
+}
+.dropdown-menu > interact-element:nth-child(3) {
+  --i: 2;
+}
+.dropdown-menu > interact-element:nth-child(4) {
+  --i: 3;
+}
+.dropdown-menu > interact-element:nth-child(5) {
+  --i: 4;
+}
 
 .dropdown-option {
   display: flex;
@@ -178,7 +249,9 @@ body {
   border-radius: 16px;
   opacity: 0;
   transform: translateY(-4px);
-  transition: opacity 180ms ease-out calc(var(--i) * 40ms), transform 180ms ease-out calc(var(--i) * 40ms);
+  transition:
+    opacity 180ms ease-out calc(var(--i) * 40ms),
+    transform 180ms ease-out calc(var(--i) * 40ms);
 }
 
 .dropdown.open .dropdown-option {
@@ -193,14 +266,17 @@ body {
   opacity: 0.5;
 }
 
-.dropdown-option[aria-selected="true"] .option-icon {
+.dropdown-option[aria-selected='true'] .option-icon {
   opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dropdown-menu, .dropdown-option, .chevron { transition: none !important; }
+  .dropdown-menu,
+  .dropdown-option,
+  .chevron {
+    transition: none !important;
+  }
 }
-
 ```
 
 ## Interact config
@@ -217,10 +293,8 @@ body {
           transition: {
             duration: 300,
             easing: 'ease',
-            styleProperties: [
-              { name: 'transform', value: 'translateY(-6px)' }
-            ]
-          }
+            styleProperties: [{ name: 'transform', value: 'translateY(-6px)' }],
+          },
         },
         {
           stateAction: 'toggle',
@@ -228,14 +302,12 @@ body {
           transition: {
             duration: 300,
             easing: 'ease',
-            styleProperties: [
-            { name: 'transform', value: 'translateY(-2px)' }
-          ]
-          }
-        }
-      ]
+            styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
+          },
+        },
+      ],
     },
-    ...['opt-1', 'opt-2', 'opt-3', 'opt-4', 'opt-5'].map(id => ({
+    ...['opt-1', 'opt-2', 'opt-3', 'opt-4', 'opt-5'].map((id) => ({
       key: `${id}-trigger`,
       trigger: 'hover',
       effects: [
@@ -244,10 +316,8 @@ body {
           transition: {
             duration: 200,
             easing: 'ease-out',
-            styleProperties: [
-            { name: 'transform', value: 'translateY(-2px)' }
-          ]
-          }
+            styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
+          },
         },
         {
           stateAction: 'toggle',
@@ -257,12 +327,12 @@ body {
             easing: 'ease',
             styleProperties: [
               { name: 'opacity', value: '1' },
-              { name: 'transform', value: 'scale(1.2) rotate(-8deg)' }
-            ]
-          }
-        }
-      ]
+              { name: 'transform', value: 'scale(1.2) rotate(-8deg)' },
+            ],
+          },
+        },
+      ],
     })),
-  ]
+  ];
 }
 ```

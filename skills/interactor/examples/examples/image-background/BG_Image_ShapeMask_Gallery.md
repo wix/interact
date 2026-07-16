@@ -10,7 +10,6 @@ A sticky full-viewport section where three background images circle-reveal seque
 <interact-element data-interact-key="scroll-section">
   <section class="scroll-section" role="region" aria-labelledby="about-heading">
     <div class="sticky-container">
-
       <interact-element data-interact-key="bg-idle" aria-hidden="true">
         <div class="bg-layer bg-idle"></div>
       </interact-element>
@@ -33,16 +32,15 @@ A sticky full-viewport section where three background images circle-reveal seque
         <h2 id="about-heading" class="label">About Us</h2>
         <div class="text-wrap">
           <p class="about-text">
-            We build resilient communities<br>
-            through <span class="highlight">education</span>, environmental<br>
-            <span class="highlight">conservation</span>, and sustainable<br>
-            <span class="highlight">agriculture</span> — working alongside<br>
+            We build resilient communities<br />
+            through <span class="highlight">education</span>, environmental<br />
+            <span class="highlight">conservation</span>, and sustainable<br />
+            <span class="highlight">agriculture</span> — working alongside<br />
             local leaders across 34 countries.
           </p>
         </div>
         <p class="org-name">Green Horizons Foundation</p>
       </div>
-
     </div>
   </section>
 </interact-element>
@@ -51,7 +49,11 @@ A sticky full-viewport section where three background images circle-reveal seque
 ## Essential styles
 
 ```css
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 .scroll-section {
   height: 500vh;
@@ -115,7 +117,9 @@ A sticky full-viewport section where three background images circle-reveal seque
 }
 
 @media (min-width: 768px) {
-  .content { padding-left: 5vw; }
+  .content {
+    padding-left: 5vw;
+  }
 }
 
 .label {
@@ -175,7 +179,6 @@ A sticky full-viewport section where three background images circle-reveal seque
   letter-spacing: 0.02em;
   padding-bottom: 0.5rem;
 }
-
 ```
 
 ## Interact config

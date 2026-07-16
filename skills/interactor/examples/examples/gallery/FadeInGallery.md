@@ -42,7 +42,8 @@ Full-screen background images cycle in every 2 seconds with a scale-from-zero en
 ## Essential styles
 
 ```css
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;

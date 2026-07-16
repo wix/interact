@@ -8,7 +8,10 @@ A radio button group where clicking a button springs the selection dot in with a
 
 ```html
 <div class="radio-group" role="radiogroup" aria-label="Notification preferences">
-  <span style="font-size:12px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;padding:0 4px 10px">Notifications</span>
+  <span
+    style="font-size:12px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;padding:0 4px 10px"
+    >Notifications</span
+  >
   <interact-element data-interact-key="radio-1">
     <button type="button" class="radio-btn selected" role="radio" aria-checked="true">
       <div class="radio-indicator">
@@ -65,9 +68,17 @@ A radio button group where clicking a button springs the selection dot in with a
 ## Essential styles
 
 ```css
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-interact-element { display: contents; }
+interact-element {
+  display: contents;
+}
 
 body {
   min-height: 100vh;
@@ -158,9 +169,13 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .label, .ring, .ring-svg circle, .dot { transition: none !important; }
+  .label,
+  .ring,
+  .ring-svg circle,
+  .dot {
+    transition: none !important;
+  }
 }
-
 ```
 
 ## Interact config

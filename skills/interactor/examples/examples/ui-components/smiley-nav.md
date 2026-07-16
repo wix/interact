@@ -31,18 +31,30 @@ A two-tab navigation bar with hover transitions and an animated dropdown panel t
     <div class="dropdown-content" data-content="features">
       <div>
         <div class="dropdown-col-header">Group A</div>
-        <interact-element data-interact-key="d-0"><button class="dropdown-link" style="--i:0">Item A</button></interact-element>
-        <interact-element data-interact-key="d-1"><button class="dropdown-link" style="--i:1">Item B</button></interact-element>
-        <interact-element data-interact-key="d-2"><button class="dropdown-link" style="--i:2">Item C</button></interact-element>
+        <interact-element data-interact-key="d-0"
+          ><button class="dropdown-link" style="--i:0">Item A</button></interact-element
+        >
+        <interact-element data-interact-key="d-1"
+          ><button class="dropdown-link" style="--i:1">Item B</button></interact-element
+        >
+        <interact-element data-interact-key="d-2"
+          ><button class="dropdown-link" style="--i:2">Item C</button></interact-element
+        >
       </div>
     </div>
 
     <div class="dropdown-content" data-content="services">
       <div>
         <div class="dropdown-col-header">Group B</div>
-        <interact-element data-interact-key="d-3"><button class="dropdown-link" style="--i:0">Item D</button></interact-element>
-        <interact-element data-interact-key="d-4"><button class="dropdown-link" style="--i:1">Item E</button></interact-element>
-        <interact-element data-interact-key="d-5"><button class="dropdown-link" style="--i:2">Item F</button></interact-element>
+        <interact-element data-interact-key="d-3"
+          ><button class="dropdown-link" style="--i:0">Item D</button></interact-element
+        >
+        <interact-element data-interact-key="d-4"
+          ><button class="dropdown-link" style="--i:1">Item E</button></interact-element
+        >
+        <interact-element data-interact-key="d-5"
+          ><button class="dropdown-link" style="--i:2">Item F</button></interact-element
+        >
       </div>
     </div>
   </div>
@@ -52,9 +64,17 @@ A two-tab navigation bar with hover transitions and an animated dropdown panel t
 ## Essential styles
 
 ```css
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-interact-element { display: contents; }
+interact-element {
+  display: contents;
+}
 
 body {
   min-height: 100vh;
@@ -154,7 +174,9 @@ body {
   opacity: 0;
   transform: translateX(-20px);
   pointer-events: none;
-  transition: opacity 350ms ease-out, transform 350ms ease-out;
+  transition:
+    opacity 350ms ease-out,
+    transform 350ms ease-out;
 }
 
 .dropdown-content.active {
@@ -190,7 +212,9 @@ body {
   border-radius: 12px;
   opacity: 0;
   transform: translateY(-4px);
-  transition: opacity 180ms ease-out calc(var(--i, 0) * 40ms), transform 180ms ease-out calc(var(--i, 0) * 40ms);
+  transition:
+    opacity 180ms ease-out calc(var(--i, 0) * 40ms),
+    transform 180ms ease-out calc(var(--i, 0) * 40ms);
 }
 
 .dropdown-panel.open .dropdown-link {
@@ -199,9 +223,11 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dropdown-link, .dropdown-content { transition: none !important; }
+  .dropdown-link,
+  .dropdown-content {
+    transition: none !important;
+  }
 }
-
 ```
 
 ## Interact config
@@ -211,16 +237,16 @@ const TOTAL_LINKS = 6;
 const linkHovers = Array.from({ length: TOTAL_LINKS }, (_, i) => ({
   key: `d-${i}`,
   trigger: 'hover',
-  effects: [{
-    stateAction: 'toggle',
-    transition: {
-      duration: 200,
-      easing: 'ease-out',
-      styleProperties: [
-            { name: 'transform', value: 'translateY(-2px)' }
-          ]
-    }
-  }]
+  effects: [
+    {
+      stateAction: 'toggle',
+      transition: {
+        duration: 200,
+        easing: 'ease-out',
+        styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
+      },
+    },
+  ],
 }));
 
 {
@@ -228,32 +254,32 @@ const linkHovers = Array.from({ length: TOTAL_LINKS }, (_, i) => ({
     {
       key: 'nav-bar',
       trigger: 'hover',
-      effects: [{
-        stateAction: 'toggle',
-        transition: {
-          duration: 300,
-          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-          styleProperties: [
-            { name: 'transform', value: 'translateY(-2px)' }
-          ]
-        }
-      }]
+      effects: [
+        {
+          stateAction: 'toggle',
+          transition: {
+            duration: 300,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
+          },
+        },
+      ],
     },
-    ...['features', 'services'].map(name => ({
+    ...['features', 'services'].map((name) => ({
       key: `tab-${name}`,
       trigger: 'hover',
-      effects: [{
-        stateAction: 'toggle',
-        transition: {
-          duration: 250,
-          easing: 'ease-out',
-          styleProperties: [
-            { name: 'transform', value: 'translateY(-2px)' }
-          ]
-        }
-      }]
+      effects: [
+        {
+          stateAction: 'toggle',
+          transition: {
+            duration: 250,
+            easing: 'ease-out',
+            styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
+          },
+        },
+      ],
     })),
-    ...linkHovers
-  ]
+    ...linkHovers,
+  ];
 }
 ```

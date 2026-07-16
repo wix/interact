@@ -19,12 +19,26 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
             <span>text 2</span>
           </div>
           <div class="content-container">
-            <img class="main-image" src="">
+            <img class="main-image" src="" />
             <div class="bottom-text-stack">
               <span class="small-text">Small Text</span>
               <span class="big-text">Big Text</span>
             </div>
-            <svg class="arrow-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="23.5" stroke="white"/><path d="M24 16V32M24 32L30 26M24 32L18 26" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg
+              class="arrow-icon"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="24" cy="24" r="23.5" stroke="white" />
+              <path
+                d="M24 16V32M24 32L30 26M24 32L18 26"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </div>
         </div>
       </div>
@@ -40,12 +54,26 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
             <span>text 2</span>
           </div>
           <div class="content-container">
-            <img class="main-image" src="">
+            <img class="main-image" src="" />
             <div class="bottom-text-stack">
               <span class="small-text">Small Text</span>
               <span class="big-text">Big Text</span>
             </div>
-            <svg class="arrow-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="23.5" stroke="white"/><path d="M24 16V32M24 32L30 26M24 32L18 26" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg
+              class="arrow-icon"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="24" cy="24" r="23.5" stroke="white" />
+              <path
+                d="M24 16V32M24 32L30 26M24 32L18 26"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </div>
         </div>
       </div>
@@ -61,12 +89,26 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
             <span>text 2</span>
           </div>
           <div class="content-container">
-            <img class="main-image" src="">
+            <img class="main-image" src="" />
             <div class="bottom-text-stack">
               <span class="small-text">Small Text</span>
               <span class="big-text">Big Text</span>
             </div>
-            <svg class="arrow-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="23.5" stroke="white"/><path d="M24 16V32M24 32L30 26M24 32L18 26" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg
+              class="arrow-icon"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="24" cy="24" r="23.5" stroke="white" />
+              <path
+                d="M24 16V32M24 32L30 26M24 32L18 26"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </div>
         </div>
       </div>
@@ -82,12 +124,26 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
             <span>text 2</span>
           </div>
           <div class="content-container">
-            <img class="main-image" src="">
+            <img class="main-image" src="" />
             <div class="bottom-text-stack">
               <span class="small-text">Small Text</span>
               <span class="big-text">Big Text</span>
             </div>
-            <svg class="arrow-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="23.5" stroke="white"/><path d="M24 16V32M24 32L30 26M24 32L18 26" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg
+              class="arrow-icon"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="24" cy="24" r="23.5" stroke="white" />
+              <path
+                d="M24 16V32M24 32L30 26M24 32L18 26"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </div>
         </div>
       </div>
@@ -103,12 +159,26 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
             <span>text 2</span>
           </div>
           <div class="content-container">
-            <img class="main-image" src="">
+            <img class="main-image" src="" />
             <div class="bottom-text-stack">
               <span class="small-text">Small Text</span>
               <span class="big-text">Big Text</span>
             </div>
-            <svg class="arrow-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="23.5" stroke="white"/><path d="M24 16V32M24 32L30 26M24 32L18 26" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg
+              class="arrow-icon"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="24" cy="24" r="23.5" stroke="white" />
+              <path
+                d="M24 16V32M24 32L30 26M24 32L18 26"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </div>
         </div>
       </div>
@@ -124,131 +194,131 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
 
 ```css
 body {
-    margin: 0;
-    overscroll-behavior-y: none;
+  margin: 0;
+  overscroll-behavior-y: none;
 }
 
 .scroll-section {
-    height: 6300px;
-    position: relative;
+  height: 6300px;
+  position: relative;
 }
 
 interact-element {
-    display: block;
-    position: sticky;
-    top: 0;
+  display: block;
+  position: sticky;
+  top: 0;
 }
 
 .cards-repeater {
-    display: flex;
-    flex-direction: column;
-    gap: 500px;
-    padding-top: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 500px;
+  padding-top: 100vh;
 }
 
 .card {
-    width: 100%;
-    height: 95vh;
-    overflow: hidden;
-    transform-origin: bottom center;
-    border-radius: 24px;
+  width: 100%;
+  height: 95vh;
+  overflow: hidden;
+  transform-origin: bottom center;
+  border-radius: 24px;
 }
 
 .card-content {
-    position: relative;
-    width: 100%;
-    height: 100%;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .horizontal-line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 6px;
-    transform-origin: left;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  transform-origin: left;
 }
 
 .heading-text {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    font-size: 80px;
-    font-weight: bold;
-    margin: 0;
-    line-height: 1;
-    transform-origin: top left;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 80px;
+  font-weight: bold;
+  margin: 0;
+  line-height: 1;
+  transform-origin: top left;
 }
 
 .top-right-stack {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-    transform-origin: top right;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  transform-origin: top right;
 }
 
 .top-right-stack span {
-    font-size: 14px;
-    opacity: 0.8;
+  font-size: 14px;
+  opacity: 0.8;
 }
 
 .content-container {
-    position: absolute;
-    top: 120px;
-    left: 20px;
-    right: 20px;
-    bottom: 20px;
-    border-radius: 12px;
-    overflow: hidden;
+  position: absolute;
+  top: 120px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .main-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 12px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
 }
 
 .bottom-text-stack {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    display: flex;
-    flex-direction: column;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .small-text {
-    font-size: 16px;
-    opacity: 0.7;
+  font-size: 16px;
+  opacity: 0.7;
 }
 
 .big-text {
-    font-size: 24px;
-    font-weight: 500;
+  font-size: 24px;
+  font-weight: 500;
 }
 
 .arrow-icon {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 48px;
-    height: 48px;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
 }
 
 .next-section {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .next-section p {
-    font-size: 32px;
-    font-weight: bold;
+  font-size: 32px;
+  font-weight: bold;
 }
 ```
 

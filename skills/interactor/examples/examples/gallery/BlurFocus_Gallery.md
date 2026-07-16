@@ -12,42 +12,60 @@ A grid of image cards where hovering any card blurs all others via CSS `:has()`,
     <div class="card-inner">
       <div class="card-bg"></div>
       <div class="card-overlay"></div>
-      <div class="card-content"><h3>Card 1</h3><p>Hover to see info</p></div>
+      <div class="card-content">
+        <h3>Card 1</h3>
+        <p>Hover to see info</p>
+      </div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-2">
     <div class="card-inner">
       <div class="card-bg"></div>
       <div class="card-overlay"></div>
-      <div class="card-content"><h3>Card 2</h3><p>Hover to see info</p></div>
+      <div class="card-content">
+        <h3>Card 2</h3>
+        <p>Hover to see info</p>
+      </div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-3">
     <div class="card-inner">
       <div class="card-bg"></div>
       <div class="card-overlay"></div>
-      <div class="card-content"><h3>Card 3</h3><p>Hover to see info</p></div>
+      <div class="card-content">
+        <h3>Card 3</h3>
+        <p>Hover to see info</p>
+      </div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-4">
     <div class="card-inner">
       <div class="card-bg"></div>
       <div class="card-overlay"></div>
-      <div class="card-content"><h3>Card 4</h3><p>Hover to see info</p></div>
+      <div class="card-content">
+        <h3>Card 4</h3>
+        <p>Hover to see info</p>
+      </div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-5">
     <div class="card-inner">
       <div class="card-bg"></div>
       <div class="card-overlay"></div>
-      <div class="card-content"><h3>Card 5</h3><p>Hover to see info</p></div>
+      <div class="card-content">
+        <h3>Card 5</h3>
+        <p>Hover to see info</p>
+      </div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-6">
     <div class="card-inner">
       <div class="card-bg"></div>
       <div class="card-overlay"></div>
-      <div class="card-content"><h3>Card 6</h3><p>Hover to see info</p></div>
+      <div class="card-content">
+        <h3>Card 6</h3>
+        <p>Hover to see info</p>
+      </div>
     </div>
   </interact-element>
 </section>
@@ -119,10 +137,24 @@ interact-element:hover .card-bg {
   line-height: 1.2;
   will-change: opacity, transform;
 }
-.card-content h3 { margin: 0 0 3px 0; font-size: 1rem; }
-.card-content p { margin: 0; font-size: 0.85rem; }
-@media (max-width: 1200px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
-@media (max-width: 800px) { .grid-container { grid-template-columns: repeat(2, 1fr); } }
+.card-content h3 {
+  margin: 0 0 3px 0;
+  font-size: 1rem;
+}
+.card-content p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+@media (max-width: 1200px) {
+  .grid-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 800px) {
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 ```
 
 ## Interact config
@@ -143,8 +175,8 @@ for (let i = 1; i <= CARD_COUNT; i++) {
     transition: {
       duration: DURATION,
       easing: EASING,
-      styleProperties: [{ name: 'transform', value: 'scale(1.05)' }]
-    }
+      styleProperties: [{ name: 'transform', value: 'scale(1.05)' }],
+    },
   });
 
   effects.push({
@@ -153,8 +185,8 @@ for (let i = 1; i <= CARD_COUNT; i++) {
     transition: {
       duration: DURATION,
       easing: EASING,
-      styleProperties: [{ name: 'background', value: 'rgba(0,0,0,0.35)' }]
-    }
+      styleProperties: [{ name: 'background', value: 'rgba(0,0,0,0.35)' }],
+    },
   });
 
   effects.push({
@@ -165,25 +197,27 @@ for (let i = 1; i <= CARD_COUNT; i++) {
       easing: EASING,
       styleProperties: [
         { name: 'opacity', value: '1' },
-        { name: 'transform', value: 'translateY(0)' }
-      ]
-    }
+        { name: 'transform', value: 'translateY(0)' },
+      ],
+    },
   });
 
   effects.push({
     key: `card-${i}`,
     transition: {
       duration: 0,
-      styleProperties: [{ name: 'z-index', value: '999' }]
-    }
+      styleProperties: [{ name: 'z-index', value: '999' }],
+    },
   });
 
   interactions.push({
     key: `card-${i}`,
     trigger: 'hover',
-    effects
+    effects,
   });
 }
 
-{ interactions }
+{
+  interactions;
+}
 ```

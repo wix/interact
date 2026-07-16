@@ -33,7 +33,11 @@ As the page is scrolled through a tall sticky section, bold uppercase text scale
   initial-value: 1;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 .scroll-section {
   height: 600vh;

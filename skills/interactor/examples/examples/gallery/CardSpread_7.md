@@ -17,10 +17,9 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
   <div id="scroll-wrapper">
     <div class="sticky-container">
       <div class="deck">
-
         <interact-element data-interact-key="#card-1">
           <div id="card-1" class="card">
-            <img src="">
+            <img src="" />
             <div class="card-label">
               <span>01 — Landscape</span>
               <h3>Alpine Peaks</h3>
@@ -30,7 +29,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-2">
           <div id="card-2" class="card">
-            <img src="">
+            <img src="" />
             <div class="card-label">
               <span>02 — Ocean</span>
               <h3>Tropical Shore</h3>
@@ -40,7 +39,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-3">
           <div id="card-3" class="card">
-            <img src="">
+            <img src="" />
             <div class="card-label">
               <span>03 — Sky</span>
               <h3>Northern Lights</h3>
@@ -50,7 +49,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-4">
           <div id="card-4" class="card">
-            <img src="">
+            <img src="" />
             <div class="card-label">
               <span>04 — Flora</span>
               <h3>Cherry Blossoms</h3>
@@ -60,7 +59,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-5">
           <div id="card-5" class="card">
-            <img src="">
+            <img src="" />
             <div class="card-label">
               <span>05 — Desert</span>
               <h3>Sand Dunes</h3>
@@ -70,7 +69,7 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-6">
           <div id="card-6" class="card">
-            <img src="">
+            <img src="" />
             <div class="card-label">
               <span>06 — Water</span>
               <h3>Misty Waterfall</h3>
@@ -80,14 +79,13 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
         <interact-element data-interact-key="#card-7">
           <div id="card-7" class="card">
-            <img src="">
+            <img src="" />
             <div class="card-label">
               <span>07 — Urban</span>
               <h3>City Lights</h3>
             </div>
           </div>
         </interact-element>
-
       </div>
     </div>
   </div>
@@ -107,7 +105,13 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
   --section-height: 600vh;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 .intro {
   height: 100vh;
@@ -145,8 +149,15 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 }
 
 @keyframes hint-bounce {
-  0%, 100% { transform: rotate(45deg) translate(0, 0); opacity: 0.4; }
-  50% { transform: rotate(45deg) translate(6px, 6px); opacity: 0.8; }
+  0%,
+  100% {
+    transform: rotate(45deg) translate(0, 0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: rotate(45deg) translate(6px, 6px);
+    opacity: 0.8;
+  }
 }
 
 #scroll-wrapper {
@@ -218,13 +229,27 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
   line-height: 1.3;
 }
 
-#card-1 { z-index: 1; }
-#card-2 { z-index: 2; }
-#card-3 { z-index: 3; }
-#card-4 { z-index: 4; }
-#card-5 { z-index: 5; }
-#card-6 { z-index: 6; }
-#card-7 { z-index: 7; }
+#card-1 {
+  z-index: 1;
+}
+#card-2 {
+  z-index: 2;
+}
+#card-3 {
+  z-index: 3;
+}
+#card-4 {
+  z-index: 4;
+}
+#card-5 {
+  z-index: 5;
+}
+#card-6 {
+  z-index: 6;
+}
+#card-7 {
+  z-index: 7;
+}
 
 .outro {
   height: 100vh;
@@ -240,8 +265,9 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
   text-transform: uppercase;
 }
 
-interact-element { display: contents; }
-
+interact-element {
+  display: contents;
+}
 ```
 
 ## Interact config
@@ -264,21 +290,23 @@ for (let i = 0; i < CARDS; i++) {
       name: `fan-${i + 1}`,
       keyframes: [
         { transform: `rotate(${startAngle}deg)` },
-        { transform: `rotate(${endAngle}deg)` }
-      ]
+        { transform: `rotate(${endAngle}deg)` },
+      ],
     },
     rangeStart: { name: 'contain', offset: { value: 0, unit: 'percentage' } },
     rangeEnd: { name: 'contain', offset: { value: 55, unit: 'percentage' } },
     easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-    fill: 'both'
+    fill: 'both',
   });
 }
 
 {
-  interactions: [{
-    key: '#scroll-wrapper',
-    trigger: 'viewProgress',
-    effects: fanEffects
-  }]
+  interactions: [
+    {
+      key: '#scroll-wrapper',
+      trigger: 'viewProgress',
+      effects: fanEffects,
+    },
+  ];
 }
 ```

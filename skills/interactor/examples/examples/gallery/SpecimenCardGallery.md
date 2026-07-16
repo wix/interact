@@ -28,7 +28,7 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
               <span class="card-arrow">→</span>
             </div>
             <div class="card-image">
-              <img src="">
+              <img src="" />
             </div>
           </div>
         </interact-element>
@@ -44,7 +44,7 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
               <span class="card-arrow">→</span>
             </div>
             <div class="card-image">
-              <img src="">
+              <img src="" />
             </div>
           </div>
         </interact-element>
@@ -60,7 +60,7 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
               <span class="card-arrow">→</span>
             </div>
             <div class="card-image">
-              <img src="">
+              <img src="" />
             </div>
           </div>
         </interact-element>
@@ -76,7 +76,7 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
               <span class="card-arrow">→</span>
             </div>
             <div class="card-image">
-              <img src="">
+              <img src="" />
             </div>
           </div>
         </interact-element>
@@ -92,7 +92,7 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
               <span class="card-arrow">→</span>
             </div>
             <div class="card-image">
-              <img src="">
+              <img src="" />
             </div>
           </div>
         </interact-element>
@@ -115,9 +115,15 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
   --card-width: 260px;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-interact-element { display: contents; }
+interact-element {
+  display: contents;
+}
 
 .hero {
   height: 100vh;
@@ -148,8 +154,13 @@ interact-element { display: contents; }
 }
 
 @keyframes pulse-hint {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 #scroll-wrapper {
@@ -249,86 +260,168 @@ interact-element { display: contents; }
 
 ```js
 {
-  interactions: [{
-    key: 'scroll-wrapper',
-    trigger: 'viewProgress',
-    effects: [
-      {
-        key: 'card-1',
-        keyframeEffect: {
-          name: 'card-1-spread',
-          keyframes: [
-            { opacity: 0, filter: 'blur(12px)', transform: 'translateX(560px) translateY(60px) perspective(1200px) rotateY(15deg) scale(0.7)' },
-            { opacity: 1, filter: 'blur(0px)', transform: 'translateX(280px) translateY(0px) perspective(1200px) rotateY(4.5deg) scale(0.88)', offset: 0.45 },
-            { opacity: 1, filter: 'blur(0px)', transform: 'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(1)' }
-          ]
+  interactions: [
+    {
+      key: 'scroll-wrapper',
+      trigger: 'viewProgress',
+      effects: [
+        {
+          key: 'card-1',
+          keyframeEffect: {
+            name: 'card-1-spread',
+            keyframes: [
+              {
+                opacity: 0,
+                filter: 'blur(12px)',
+                transform:
+                  'translateX(560px) translateY(60px) perspective(1200px) rotateY(15deg) scale(0.7)',
+              },
+              {
+                opacity: 1,
+                filter: 'blur(0px)',
+                transform:
+                  'translateX(280px) translateY(0px) perspective(1200px) rotateY(4.5deg) scale(0.88)',
+                offset: 0.45,
+              },
+              {
+                opacity: 1,
+                filter: 'blur(0px)',
+                transform:
+                  'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(1)',
+              },
+            ],
+          },
+          rangeStart: { name: 'contain', offset: { value: 15, unit: 'percentage' } },
+          rangeEnd: { name: 'contain', offset: { value: 85, unit: 'percentage' } },
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both',
         },
-        rangeStart: { name: 'contain', offset: { value: 15, unit: 'percentage' } },
-        rangeEnd: { name: 'contain', offset: { value: 85, unit: 'percentage' } },
-        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        fill: 'both'
-      },
-      {
-        key: 'card-2',
-        keyframeEffect: {
-          name: 'card-2-spread',
-          keyframes: [
-            { opacity: 0, filter: 'blur(12px)', transform: 'translateX(280px) translateY(60px) perspective(1200px) rotateY(9deg) scale(0.7)' },
-            { opacity: 1, filter: 'blur(0px)', transform: 'translateX(140px) translateY(0px) perspective(1200px) rotateY(2.7deg) scale(0.88)', offset: 0.45 },
-            { opacity: 1, filter: 'blur(0px)', transform: 'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(1)' }
-          ]
+        {
+          key: 'card-2',
+          keyframeEffect: {
+            name: 'card-2-spread',
+            keyframes: [
+              {
+                opacity: 0,
+                filter: 'blur(12px)',
+                transform:
+                  'translateX(280px) translateY(60px) perspective(1200px) rotateY(9deg) scale(0.7)',
+              },
+              {
+                opacity: 1,
+                filter: 'blur(0px)',
+                transform:
+                  'translateX(140px) translateY(0px) perspective(1200px) rotateY(2.7deg) scale(0.88)',
+                offset: 0.45,
+              },
+              {
+                opacity: 1,
+                filter: 'blur(0px)',
+                transform:
+                  'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(1)',
+              },
+            ],
+          },
+          rangeStart: { name: 'contain', offset: { value: 10, unit: 'percentage' } },
+          rangeEnd: { name: 'contain', offset: { value: 72, unit: 'percentage' } },
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both',
         },
-        rangeStart: { name: 'contain', offset: { value: 10, unit: 'percentage' } },
-        rangeEnd: { name: 'contain', offset: { value: 72, unit: 'percentage' } },
-        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        fill: 'both'
-      },
-      {
-        key: 'card-3',
-        keyframeEffect: {
-          name: 'card-3-spread',
-          keyframes: [
-            { opacity: 0, filter: 'blur(12px)', transform: 'translateX(0px) translateY(60px) perspective(1200px) rotateY(0deg) scale(0.7)' },
-            { opacity: 1, filter: 'blur(0px)', transform: 'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(0.88)', offset: 0.45 },
-            { opacity: 1, filter: 'blur(0px)', transform: 'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(1)' }
-          ]
+        {
+          key: 'card-3',
+          keyframeEffect: {
+            name: 'card-3-spread',
+            keyframes: [
+              {
+                opacity: 0,
+                filter: 'blur(12px)',
+                transform:
+                  'translateX(0px) translateY(60px) perspective(1200px) rotateY(0deg) scale(0.7)',
+              },
+              {
+                opacity: 1,
+                filter: 'blur(0px)',
+                transform:
+                  'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(0.88)',
+                offset: 0.45,
+              },
+              {
+                opacity: 1,
+                filter: 'blur(0px)',
+                transform:
+                  'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(1)',
+              },
+            ],
+          },
+          rangeStart: { name: 'contain', offset: { value: 0, unit: 'percentage' } },
+          rangeEnd: { name: 'contain', offset: { value: 58, unit: 'percentage' } },
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both',
         },
-        rangeStart: { name: 'contain', offset: { value: 0, unit: 'percentage' } },
-        rangeEnd: { name: 'contain', offset: { value: 58, unit: 'percentage' } },
-        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        fill: 'both'
-      },
-      {
-        key: 'card-4',
-        keyframeEffect: {
-          name: 'card-4-spread',
-          keyframes: [
-            { opacity: 0, filter: 'blur(12px)', transform: 'translateX(-280px) translateY(60px) perspective(1200px) rotateY(-9deg) scale(0.7)' },
-            { opacity: 1, filter: 'blur(0px)', transform: 'translateX(-140px) translateY(0px) perspective(1200px) rotateY(-2.7deg) scale(0.88)', offset: 0.45 },
-            { opacity: 1, filter: 'blur(0px)', transform: 'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(1)' }
-          ]
+        {
+          key: 'card-4',
+          keyframeEffect: {
+            name: 'card-4-spread',
+            keyframes: [
+              {
+                opacity: 0,
+                filter: 'blur(12px)',
+                transform:
+                  'translateX(-280px) translateY(60px) perspective(1200px) rotateY(-9deg) scale(0.7)',
+              },
+              {
+                opacity: 1,
+                filter: 'blur(0px)',
+                transform:
+                  'translateX(-140px) translateY(0px) perspective(1200px) rotateY(-2.7deg) scale(0.88)',
+                offset: 0.45,
+              },
+              {
+                opacity: 1,
+                filter: 'blur(0px)',
+                transform:
+                  'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(1)',
+              },
+            ],
+          },
+          rangeStart: { name: 'contain', offset: { value: 10, unit: 'percentage' } },
+          rangeEnd: { name: 'contain', offset: { value: 72, unit: 'percentage' } },
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both',
         },
-        rangeStart: { name: 'contain', offset: { value: 10, unit: 'percentage' } },
-        rangeEnd: { name: 'contain', offset: { value: 72, unit: 'percentage' } },
-        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        fill: 'both'
-      },
-      {
-        key: 'card-5',
-        keyframeEffect: {
-          name: 'card-5-spread',
-          keyframes: [
-            { opacity: 0, filter: 'blur(12px)', transform: 'translateX(-560px) translateY(60px) perspective(1200px) rotateY(-15deg) scale(0.7)' },
-            { opacity: 1, filter: 'blur(0px)', transform: 'translateX(-280px) translateY(0px) perspective(1200px) rotateY(-4.5deg) scale(0.88)', offset: 0.45 },
-            { opacity: 1, filter: 'blur(0px)', transform: 'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(1)' }
-          ]
+        {
+          key: 'card-5',
+          keyframeEffect: {
+            name: 'card-5-spread',
+            keyframes: [
+              {
+                opacity: 0,
+                filter: 'blur(12px)',
+                transform:
+                  'translateX(-560px) translateY(60px) perspective(1200px) rotateY(-15deg) scale(0.7)',
+              },
+              {
+                opacity: 1,
+                filter: 'blur(0px)',
+                transform:
+                  'translateX(-280px) translateY(0px) perspective(1200px) rotateY(-4.5deg) scale(0.88)',
+                offset: 0.45,
+              },
+              {
+                opacity: 1,
+                filter: 'blur(0px)',
+                transform:
+                  'translateX(0px) translateY(0px) perspective(1200px) rotateY(0deg) scale(1)',
+              },
+            ],
+          },
+          rangeStart: { name: 'contain', offset: { value: 15, unit: 'percentage' } },
+          rangeEnd: { name: 'contain', offset: { value: 85, unit: 'percentage' } },
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both',
         },
-        rangeStart: { name: 'contain', offset: { value: 15, unit: 'percentage' } },
-        rangeEnd: { name: 'contain', offset: { value: 85, unit: 'percentage' } },
-        easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        fill: 'both'
-      }
-    ]
-  }]
+      ],
+    },
+  ];
 }
 ```

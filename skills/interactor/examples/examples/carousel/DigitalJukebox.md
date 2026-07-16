@@ -38,83 +38,83 @@ A vertical snap-scrolling list of album art cards that rotate and zoom through 3
 
 ```css
 :root {
-    --item-width: 800px;
-    --item-height: 512px;
-    --item-radius: 12px;
-    --item-gap: 32px;
+  --item-width: 800px;
+  --item-height: 512px;
+  --item-radius: 12px;
+  --item-gap: 32px;
 }
 
 body {
-    margin: 0;
-    overflow: hidden;
+  margin: 0;
+  overflow: hidden;
 }
 
 .screen {
-    width: 100vw;
-    height: 100vh;
-    position: relative;
-    display: flex;
-    justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .scroll-view {
-    width: 100%;
-    height: 100%;
-    overflow-y: scroll;
-    perspective: 500px;
-    position: relative;
-    scroll-snap-type: y proximity;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  perspective: 500px;
+  position: relative;
+  scroll-snap-type: y proximity;
 }
 
 .scroll-view::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 .scroll-view {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .item-list {
-    position: relative;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transform-style: preserve-3d;
-    padding: calc(50vh - var(--item-height) / 2) 0;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-style: preserve-3d;
+  padding: calc(50vh - var(--item-height) / 2) 0;
 }
 
 .list-item {
-    width: var(--item-width);
-    max-width: 90vw;
-    height: var(--item-height);
-    border-radius: var(--item-radius);
-    margin: 0 auto var(--item-gap);
-    scroll-snap-align: center;
-    will-change: transform, opacity;
+  width: var(--item-width);
+  max-width: 90vw;
+  height: var(--item-height);
+  border-radius: var(--item-radius);
+  margin: 0 auto var(--item-gap);
+  scroll-snap-align: center;
+  will-change: transform, opacity;
 }
 
 .info-panel {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 60px 20px 30px;
-    text-align: center;
-    pointer-events: none;
-    z-index: 10;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 60px 20px 30px;
+  text-align: center;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .info-panel h2 {
-    margin: 0 0 6px 0;
-    font-size: 32px;
-    font-weight: 600;
+  margin: 0 0 6px 0;
+  font-size: 32px;
+  font-weight: 600;
 }
 
 .info-panel p {
-    margin: 0;
-    font-size: 16px;
+  margin: 0;
+  font-size: 16px;
 }
 ```
 
@@ -122,64 +122,61 @@ body {
 
 ```js
 const itemsData = [
-    { artist: "Artist A", title: "Track A" },
-    { artist: "Artist B", title: "Track B" },
-    { artist: "Artist C", title: "Track C" },
-    { artist: "Artist D", title: "Track D" },
+  { artist: 'Artist A', title: 'Track A' },
+  { artist: 'Artist B', title: 'Track B' },
+  { artist: 'Artist C', title: 'Track C' },
+  { artist: 'Artist D', title: 'Track D' },
 ];
 
 const scroll3DEffect = {
-    name: 'scroll-3d-transform',
-    keyframes: [
-        { offset: 0,   opacity: 0.2, transform: 'perspective(500px) rotateX(25deg) translateZ(-350px)' },
-        { offset: 0.5, opacity: 1,   transform: 'perspective(500px) rotateX(0deg) translateZ(0px)' },
-        { offset: 1,   opacity: 0.2, transform: 'perspective(500px) rotateX(-25deg) translateZ(-350px)' }
-    ]
+  name: 'scroll-3d-transform',
+  keyframes: [
+    { offset: 0, opacity: 0.2, transform: 'perspective(500px) rotateX(25deg) translateZ(-350px)' },
+    { offset: 0.5, opacity: 1, transform: 'perspective(500px) rotateX(0deg) translateZ(0px)' },
+    { offset: 1, opacity: 0.2, transform: 'perspective(500px) rotateX(-25deg) translateZ(-350px)' },
+  ],
 };
 
 const itemInteractions = itemsData.map((_, index) => ({
-    key: `item-${index}`,
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: `item-${index}`,
-            keyframeEffect: scroll3DEffect,
-            easing: 'linear',
-            fill: 'both'
-        }
-    ]
+  key: `item-${index}`,
+  trigger: 'viewProgress',
+  effects: [
+    {
+      key: `item-${index}`,
+      keyframeEffect: scroll3DEffect,
+      easing: 'linear',
+      fill: 'both',
+    },
+  ],
 }));
 
 const infoPanelInteraction = {
-    key: 'scroll-container',
-    trigger: 'viewProgress',
-    effects: [
-        {
-            key: 'scroll-container',
-            customEffect: (element, progress) => {
-                const artistEl = document.getElementById('artist-name');
-                const songEl = document.getElementById('song-title');
-                const totalItems = itemsData.length;
-                let closestIndex = Math.round(progress * (totalItems - 1));
-                closestIndex = Math.max(0, Math.min(totalItems - 1, closestIndex));
-                const currentData = itemsData[closestIndex];
-                if (artistEl.textContent !== currentData.artist) {
-                    artistEl.textContent = currentData.artist;
-                }
-                if (songEl.textContent !== currentData.title) {
-                    songEl.textContent = currentData.title;
-                }
-            },
-            rangeStart: { name: 'contain', offset: { unit: 'percentage', value: 0 } },
-            rangeEnd:   { name: 'contain', offset: { unit: 'percentage', value: 100 } }
+  key: 'scroll-container',
+  trigger: 'viewProgress',
+  effects: [
+    {
+      key: 'scroll-container',
+      customEffect: (element, progress) => {
+        const artistEl = document.getElementById('artist-name');
+        const songEl = document.getElementById('song-title');
+        const totalItems = itemsData.length;
+        let closestIndex = Math.round(progress * (totalItems - 1));
+        closestIndex = Math.max(0, Math.min(totalItems - 1, closestIndex));
+        const currentData = itemsData[closestIndex];
+        if (artistEl.textContent !== currentData.artist) {
+          artistEl.textContent = currentData.artist;
         }
-    ]
+        if (songEl.textContent !== currentData.title) {
+          songEl.textContent = currentData.title;
+        }
+      },
+      rangeStart: { name: 'contain', offset: { unit: 'percentage', value: 0 } },
+      rangeEnd: { name: 'contain', offset: { unit: 'percentage', value: 100 } },
+    },
+  ],
 };
 
 {
-    interactions: [
-        ...itemInteractions,
-        infoPanelInteraction
-    ]
+  interactions: [...itemInteractions, infoPanelInteraction];
 }
 ```

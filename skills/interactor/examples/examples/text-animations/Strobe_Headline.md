@@ -66,7 +66,12 @@ Stacked duplicate rows of a bold headline strobe and flicker per character on vi
     <interact-element data-interact-key="char-2-16"><span class="char">Y</span></interact-element>
   </div>
   <h1 class="row middle">
-    <span class="char">I</span><span class="char">M</span><span class="char">M</span><span class="char">E</span><span class="char">R</span><span class="char">S</span><span class="char">I</span><span class="char">V</span><span class="char">E</span><span class="space"></span><span class="char">R</span><span class="char">E</span><span class="char">A</span><span class="char">L</span><span class="char">I</span><span class="char">T</span><span class="char">Y</span>
+    <span class="char">I</span><span class="char">M</span><span class="char">M</span
+    ><span class="char">E</span><span class="char">R</span><span class="char">S</span
+    ><span class="char">I</span><span class="char">V</span><span class="char">E</span
+    ><span class="space"></span><span class="char">R</span><span class="char">E</span
+    ><span class="char">A</span><span class="char">L</span><span class="char">I</span
+    ><span class="char">T</span><span class="char">Y</span>
   </h1>
   <div class="row duplicate">
     <interact-element data-interact-key="char-4-0"><span class="char">I</span></interact-element>
@@ -131,7 +136,7 @@ Stacked duplicate rows of a bold headline strobe and flicker per character on vi
   <interact-element data-interact-key="hero-desc">
     <div id="hero-desc">
       <p style="margin: 0">
-        Experience the harmony of sound and vision.<br>
+        Experience the harmony of sound and vision.<br />
         An interactive journey powered by code.
       </p>
     </div>
@@ -143,79 +148,79 @@ Stacked duplicate rows of a bold headline strobe and flicker per character on vi
 
 ```css
 body {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .visualizer-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    line-height: 0.85;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  line-height: 0.85;
 }
 
 .row {
-    display: flex;
-    justify-content: center;
-    white-space: nowrap;
-    mix-blend-mode: screen;
-    user-select: none;
+  display: flex;
+  justify-content: center;
+  white-space: nowrap;
+  mix-blend-mode: screen;
+  user-select: none;
 }
 
 .row.middle {
-    z-index: 10;
-    cursor: text;
-    user-select: text;
+  z-index: 10;
+  cursor: text;
+  user-select: text;
 }
 
 .row.duplicate {
-    pointer-events: none;
+  pointer-events: none;
 }
 
 .char {
-    display: inline-block;
-    font-weight: 900;
-    font-size: 5.5vw;
-    letter-spacing: -0.05em;
+  display: inline-block;
+  font-weight: 900;
+  font-size: 5.5vw;
+  letter-spacing: -0.05em;
 }
 
 .space {
-    display: inline-block;
-    width: 2vw;
+  display: inline-block;
+  width: 2vw;
 }
 
 .desc-container {
-    margin-top: 3rem;
-    height: 6rem;
-    overflow: hidden;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    width: 100%;
+  margin-top: 3rem;
+  height: 6rem;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
 }
 
 #hero-desc {
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    text-align: center;
-    line-height: 1.625;
-    max-width: 32rem;
-    opacity: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+  line-height: 1.625;
+  max-width: 32rem;
+  opacity: 0;
 }
 
 @media (min-width: 768px) {
-    #hero-desc {
-        font-size: 1rem;
-    }
+  #hero-desc {
+    font-size: 1rem;
+  }
 }
 ```
 
@@ -226,74 +231,76 @@ const duplicateRows = [0, 1, 2, 4, 5, 6];
 const firstWordColumns = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 const secondWordColumns = [10, 11, 12, 13, 14, 15, 16];
 const animationDuration = 1200;
-const paragraphDelay = (3 * 100) + (16 * 40) + animationDuration + 400;
+const paragraphDelay = 3 * 100 + 16 * 40 + animationDuration + 400;
 
 const effectsFor = (row, columns) =>
-    columns.map(column => ({ key: `char-${row}-${column}`, effectId: 'flicker' }));
+  columns.map((column) => ({ key: `char-${row}-${column}`, effectId: 'flicker' }));
 
-const rowSequences = duplicateRows.flatMap(row => {
-    const rowDelay = Math.abs(row - 3) * 100;
-    return [
-        {
-            delay: rowDelay,
-            offset: 40,
-            triggerType: 'once',
-            effects: effectsFor(row, firstWordColumns),
-        },
-        {
-            delay: rowDelay + 400,
-            offset: 40,
-            triggerType: 'once',
-            effects: effectsFor(row, secondWordColumns),
-        },
-    ];
+const rowSequences = duplicateRows.flatMap((row) => {
+  const rowDelay = Math.abs(row - 3) * 100;
+  return [
+    {
+      delay: rowDelay,
+      offset: 40,
+      triggerType: 'once',
+      effects: effectsFor(row, firstWordColumns),
+    },
+    {
+      delay: rowDelay + 400,
+      offset: 40,
+      triggerType: 'once',
+      effects: effectsFor(row, secondWordColumns),
+    },
+  ];
 });
 
 const config = {
-    effects: {
-        flicker: {
-            keyframeEffect: {
-                name: 'flicker',
-                keyframes: [
-                    { offset: 0.0, opacity: 1 },
-                    { offset: 0.1, opacity: 0 },
-                    { offset: 0.2, opacity: 1 },
-                    { offset: 0.3, opacity: 0 },
-                    { offset: 0.5, opacity: 1 },
-                    { offset: 0.6, opacity: 0 },
-                    { offset: 0.8, opacity: 1 },
-                    { offset: 1.0, opacity: 0 },
-                ],
-            },
-            duration: animationDuration,
-            easing: 'linear',
-            fill: 'forwards',
-        },
+  effects: {
+    flicker: {
+      keyframeEffect: {
+        name: 'flicker',
+        keyframes: [
+          { offset: 0.0, opacity: 1 },
+          { offset: 0.1, opacity: 0 },
+          { offset: 0.2, opacity: 1 },
+          { offset: 0.3, opacity: 0 },
+          { offset: 0.5, opacity: 1 },
+          { offset: 0.6, opacity: 0 },
+          { offset: 0.8, opacity: 1 },
+          { offset: 1.0, opacity: 0 },
+        ],
+      },
+      duration: animationDuration,
+      easing: 'linear',
+      fill: 'forwards',
     },
-    interactions: [
+  },
+  interactions: [
+    {
+      key: 'stack',
+      trigger: 'viewEnter',
+      sequences: rowSequences,
+    },
+    {
+      key: 'hero-desc',
+      trigger: 'viewEnter',
+      effects: [
         {
-            key: 'stack',
-            trigger: 'viewEnter',
-            sequences: rowSequences,
+          keyframeEffect: {
+            name: 'hero-desc-reveal',
+            keyframes: [
+              { transform: 'translateY(110%)', opacity: 0 },
+              { transform: 'translateY(0%)', opacity: 1 },
+            ],
+          },
+          triggerType: 'once',
+          duration: 800,
+          delay: paragraphDelay,
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          fill: 'both',
         },
-        {
-            key: 'hero-desc',
-            trigger: 'viewEnter',
-            effects: [{
-                keyframeEffect: {
-                    name: 'hero-desc-reveal',
-                    keyframes: [
-                        { transform: 'translateY(110%)', opacity: 0 },
-                        { transform: 'translateY(0%)', opacity: 1 },
-                    ],
-                },
-                triggerType: 'once',
-                duration: 800,
-                delay: paragraphDelay,
-                easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                fill: 'both',
-            }],
-        },
-    ],
+      ],
+    },
+  ],
 };
 ```

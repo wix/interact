@@ -32,188 +32,188 @@ Six image cards arranged in a circle spin continuously on `viewEnter`, while hov
 
 ```css
 :root {
-    --r: 65;
-    --cs: 20;
-    --cr: 16px;
+  --r: 65;
+  --cs: 20;
+  --cr: 16px;
 }
 
 * {
-    box-sizing: border-box;
-    margin: 0;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 body {
-    overflow-x: hidden;
-    min-height: 100vh;
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 .arc-viewport {
-    position: relative;
-    width: 100%;
-    height: 68vh;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+  position: relative;
+  width: 100%;
+  height: 68vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .arc-viewport::before,
 .arc-viewport::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    width: 14%;
-    height: 100%;
-    z-index: 10;
-    pointer-events: none;
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 14%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
 }
 .arc-viewport::before {
-    left: 0;
+  left: 0;
 }
 .arc-viewport::after {
-    right: 0;
+  right: 0;
 }
 
 .fade-bottom {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 45%;
-    z-index: 10;
-    pointer-events: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 45%;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .wheel {
-    position: relative;
-    width: calc(var(--r) * 2vmin + var(--cs) * 1vmin);
-    height: calc(var(--r) * 2vmin + var(--cs) * 1vmin);
-    transform-origin: center center;
-    margin-top: 10vh;
-    flex-shrink: 0;
+  position: relative;
+  width: calc(var(--r) * 2vmin + var(--cs) * 1vmin);
+  height: calc(var(--r) * 2vmin + var(--cs) * 1vmin);
+  transform-origin: center center;
+  margin-top: 10vh;
+  flex-shrink: 0;
 }
 
 interact-element {
-    display: contents;
+  display: contents;
 }
 
 .card {
-    position: absolute;
-    width: calc(var(--cs) * 1vmin);
-    height: calc(var(--cs) * 1vmin);
-    left: 50%;
-    top: 50%;
-    border-radius: var(--cr);
-    overflow: hidden;
-    transform-origin: center center;
+  position: absolute;
+  width: calc(var(--cs) * 1vmin);
+  height: calc(var(--cs) * 1vmin);
+  left: 50%;
+  top: 50%;
+  border-radius: var(--cr);
+  overflow: hidden;
+  transform-origin: center center;
 }
 
 .card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 #card-1 {
-    margin-left: calc((var(--r) * 1 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * 0 - var(--cs) / 2) * 1vmin);
-    z-index: 100;
+  margin-left: calc((var(--r) * 1 - var(--cs) / 2) * 1vmin);
+  margin-top: calc((var(--r) * 0 - var(--cs) / 2) * 1vmin);
+  z-index: 100;
 }
 #card-2 {
-    margin-left: calc((var(--r) * 0.5 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * 0.866 - var(--cs) / 2) * 1vmin);
-    z-index: 187;
+  margin-left: calc((var(--r) * 0.5 - var(--cs) / 2) * 1vmin);
+  margin-top: calc((var(--r) * 0.866 - var(--cs) / 2) * 1vmin);
+  z-index: 187;
 }
 #card-3 {
-    margin-left: calc((var(--r) * -0.5 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * 0.866 - var(--cs) / 2) * 1vmin);
-    z-index: 187;
+  margin-left: calc((var(--r) * -0.5 - var(--cs) / 2) * 1vmin);
+  margin-top: calc((var(--r) * 0.866 - var(--cs) / 2) * 1vmin);
+  z-index: 187;
 }
 #card-4 {
-    margin-left: calc((var(--r) * -1 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * 0 - var(--cs) / 2) * 1vmin);
-    z-index: 100;
+  margin-left: calc((var(--r) * -1 - var(--cs) / 2) * 1vmin);
+  margin-top: calc((var(--r) * 0 - var(--cs) / 2) * 1vmin);
+  z-index: 100;
 }
 #card-5 {
-    margin-left: calc((var(--r) * -0.5 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * -0.866 - var(--cs) / 2) * 1vmin);
-    z-index: 13;
+  margin-left: calc((var(--r) * -0.5 - var(--cs) / 2) * 1vmin);
+  margin-top: calc((var(--r) * -0.866 - var(--cs) / 2) * 1vmin);
+  z-index: 13;
 }
 #card-6 {
-    margin-left: calc((var(--r) * 0.5 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * -0.866 - var(--cs) / 2) * 1vmin);
-    z-index: 13;
+  margin-left: calc((var(--r) * 0.5 - var(--cs) / 2) * 1vmin);
+  margin-top: calc((var(--r) * -0.866 - var(--cs) / 2) * 1vmin);
+  z-index: 13;
 }
 
 .copy {
-    text-align: center;
-    padding: 0 1.5rem 5rem;
-    position: relative;
-    z-index: 20;
-    margin-top: -10vh;
+  text-align: center;
+  padding: 0 1.5rem 5rem;
+  position: relative;
+  z-index: 20;
+  margin-top: -10vh;
 }
 
 .headline {
-    font-size: clamp(26px, 4.5vw, 56px);
-    font-weight: 300;
-    letter-spacing: -0.01em;
-    line-height: 1.15;
+  font-size: clamp(26px, 4.5vw, 56px);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 
 .sub {
-    opacity: 0.55;
-    margin-top: 12px;
-    font-size: clamp(13px, 1.6vw, 17px);
-    font-weight: 400;
+  opacity: 0.55;
+  margin-top: 12px;
+  font-size: clamp(13px, 1.6vw, 17px);
+  font-weight: 400;
 }
 
 .cta {
-    display: inline-block;
-    margin-top: 24px;
-    padding: 14px 26px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 15px;
-    transition: transform 0.15s ease;
+  display: inline-block;
+  margin-top: 24px;
+  padding: 14px 26px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: transform 0.15s ease;
 }
 .cta:hover {
-    transform: translateY(-1px);
+  transform: translateY(-1px);
 }
 .cta:active {
-    transform: translateY(1px);
+  transform: translateY(1px);
 }
 
 @media (max-width: 768px) {
-    :root {
-        --r: 22;
-        --cs: 12;
-    }
-    .arc-viewport {
-        height: 58vh;
-    }
-    .wheel {
-        margin-top: 8vh;
-    }
-    .copy {
-        margin-top: -8vh;
-    }
+  :root {
+    --r: 22;
+    --cs: 12;
+  }
+  .arc-viewport {
+    height: 58vh;
+  }
+  .wheel {
+    margin-top: 8vh;
+  }
+  .copy {
+    margin-top: -8vh;
+  }
 }
 
 @media (max-width: 480px) {
-    :root {
-        --r: 18;
-        --cs: 10;
-    }
-    .arc-viewport {
-        height: 50vh;
-    }
-    .wheel {
-        margin-top: 6vh;
-    }
-    .copy {
-        margin-top: -5vh;
-    }
+  :root {
+    --r: 18;
+    --cs: 10;
+  }
+  .arc-viewport {
+    height: 50vh;
+  }
+  .wheel {
+    margin-top: 6vh;
+  }
+  .copy {
+    margin-top: -5vh;
+  }
 }
 ```
 

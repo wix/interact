@@ -9,7 +9,6 @@ A sticky two-column layout where scrolling squeezes the left text column from 22
 ```html
 <interact-element data-interact-key="scroll-driver" class="scroll-driver">
   <div class="sticky-stage">
-
     <div class="right-col">
       <interact-element data-interact-key="bg-image" class="bg-image-el">
         <div class="bg-image"></div>
@@ -34,7 +33,6 @@ A sticky two-column layout where scrolling squeezes the left text column from 22
       <span class="scroll-cue-label">Explore</span>
       <div class="scroll-cue-arrow"></div>
     </div>
-
   </div>
 </interact-element>
 ```
@@ -42,7 +40,9 @@ A sticky two-column layout where scrolling squeezes the left text column from 22
 ## Essential styles
 
 ```css
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -52,7 +52,8 @@ interact-element {
   display: block;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   overflow-x: clip;
 }
@@ -194,8 +195,15 @@ html, body {
 }
 
 @keyframes scroll-pulse {
-  0%, 100% { opacity: 0.2; transform: scaleY(0.6); }
-  50% { opacity: 0.7; transform: scaleY(1); }
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scaleY(0.6);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scaleY(1);
+  }
 }
 
 @media (max-width: 750px) {
@@ -284,48 +292,39 @@ html, body {
           selector: '.left-inner',
           keyframeEffect: {
             name: 'squeeze-left',
-            keyframes: [
-              { width: '22vw' },
-              { width: '9vw' }
-            ]
+            keyframes: [{ width: '22vw' }, { width: '9vw' }],
           },
           rangeStart: { name: 'entry', offset: { value: 100, unit: 'percentage' } },
-          rangeEnd:   { name: 'exit',  offset: { value: 0,   unit: 'percentage' } },
+          rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } },
           fill: 'both',
-          easing: 'ease-in-out'
+          easing: 'ease-in-out',
         },
         {
           key: 'hero-text',
           selector: '.hero-text-inner',
           keyframeEffect: {
             name: 'scale-text',
-            keyframes: [
-              { transform: 'scale(1)' },
-              { transform: 'scale(0.41)' }
-            ]
+            keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(0.41)' }],
           },
           rangeStart: { name: 'entry', offset: { value: 100, unit: 'percentage' } },
-          rangeEnd:   { name: 'exit',  offset: { value: 0,   unit: 'percentage' } },
+          rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } },
           fill: 'both',
-          easing: 'ease-in-out'
+          easing: 'ease-in-out',
         },
         {
           key: 'bg-image',
           selector: '.bg-image',
           keyframeEffect: {
             name: 'zoom-image',
-            keyframes: [
-              { transform: 'scale(1)' },
-              { transform: 'scale(1.4)' }
-            ]
+            keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(1.4)' }],
           },
           rangeStart: { name: 'entry', offset: { value: 100, unit: 'percentage' } },
-          rangeEnd:   { name: 'exit',  offset: { value: 0,   unit: 'percentage' } },
+          rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } },
           fill: 'both',
-          easing: 'ease-in-out'
-        }
-      ]
-    }
-  ]
+          easing: 'ease-in-out',
+        },
+      ],
+    },
+  ];
 }
 ```

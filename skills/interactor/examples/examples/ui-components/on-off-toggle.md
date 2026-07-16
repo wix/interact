@@ -8,20 +8,55 @@ A sun/moon day-night toggle button that slides its thumb across the track on cli
 
 ```html
 <interact-element data-interact-key="toggle-btn">
-  <button type="button" class="toggle-track is-on" aria-pressed="true" aria-label="Toggle day/night mode">
+  <button
+    type="button"
+    class="toggle-track is-on"
+    aria-pressed="true"
+    aria-label="Toggle day/night mode"
+  >
     <span class="label-bg label-bg-on" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision">
-        <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/>
-        <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        shape-rendering="geometricPrecision"
+      >
+        <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none" />
+        <path d="M12 2v2" />
+        <path d="M12 20v2" />
+        <path d="m4.93 4.93 1.41 1.41" />
+        <path d="m17.66 17.66 1.41 1.41" />
+        <path d="M2 12h2" />
+        <path d="M20 12h2" />
+        <path d="m6.34 17.66-1.41 1.41" />
+        <path d="m19.07 4.93-1.41 1.41" />
       </svg>
     </span>
     <interact-element data-interact-key="slider">
       <div class="slider">
         <div class="slider-icon-stack">
           <span class="slider-icon icon-sun">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" shape-rendering="geometricPrecision">
-              <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/>
-              <path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              shape-rendering="geometricPrecision"
+            >
+              <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none" />
+              <path d="M12 2v2" />
+              <path d="M12 20v2" />
+              <path d="m4.93 4.93 1.41 1.41" />
+              <path d="m17.66 17.66 1.41 1.41" />
+              <path d="M2 12h2" />
+              <path d="M20 12h2" />
+              <path d="m6.34 17.66-1.41 1.41" />
+              <path d="m19.07 4.93-1.41 1.41" />
             </svg>
           </span>
           <span class="slider-icon icon-moon">
@@ -33,7 +68,15 @@ A sun/moon day-night toggle button that slides its thumb across the track on cli
               </defs>
               <circle cx="12" cy="12" r="7.8" fill="currentColor" stroke="none" />
               <g clip-path="url(#moon-clip-slider)">
-                <circle class="moon-shadow-layer" cx="12" cy="12" r="12" fill="#000000" stroke="none" transform="translate(11, 0)" />
+                <circle
+                  class="moon-shadow-layer"
+                  cx="12"
+                  cy="12"
+                  r="12"
+                  fill="#000000"
+                  stroke="none"
+                  transform="translate(11, 0)"
+                />
               </g>
             </svg>
           </span>
@@ -49,7 +92,14 @@ A sun/moon day-night toggle button that slides its thumb across the track on cli
         </defs>
         <circle cx="12" cy="12" r="7.8" fill="currentColor" stroke="none" />
         <g clip-path="url(#moon-clip-bg)">
-          <circle cx="12" cy="12" r="12" fill="#000000" stroke="none" transform="translate(11, 0)" />
+          <circle
+            cx="12"
+            cy="12"
+            r="12"
+            fill="#000000"
+            stroke="none"
+            transform="translate(11, 0)"
+          />
         </g>
       </svg>
     </span>
@@ -60,7 +110,13 @@ A sun/moon day-night toggle button that slides its thumb across the track on cli
 ## Essential styles
 
 ```css
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   min-height: 100vh;
@@ -69,7 +125,9 @@ body {
   justify-content: center;
 }
 
-interact-element { display: contents; }
+interact-element {
+  display: contents;
+}
 
 .toggle-track {
   position: relative;
@@ -86,7 +144,9 @@ interact-element { display: contents; }
   transition: transform 0.2s ease-out;
 }
 
-.toggle-track:hover { transform: scale(1.02); }
+.toggle-track:hover {
+  transform: scale(1.02);
+}
 
 .slider {
   position: absolute;
@@ -101,7 +161,9 @@ interact-element { display: contents; }
   justify-content: center;
 }
 
-.slider:active { transform: scale(0.99); }
+.slider:active {
+  transform: scale(0.99);
+}
 
 .slider-icon-stack {
   position: relative;
@@ -123,7 +185,9 @@ interact-element { display: contents; }
   overflow: visible;
 }
 
-.icon-moon { opacity: 0; }
+.icon-moon {
+  opacity: 0;
+}
 
 .label-bg {
   position: absolute;
@@ -152,24 +216,54 @@ interact-element { display: contents; }
 }
 
 @keyframes sun-pulse-rotate {
-  0%    { transform: rotate(0deg) scale(1.15); }
-  12.5% { transform: rotate(45deg) scale(1); }
-  25%   { transform: rotate(90deg) scale(1.15); }
-  37.5% { transform: rotate(135deg) scale(1); }
-  50%   { transform: rotate(180deg) scale(1.15); }
-  62.5% { transform: rotate(225deg) scale(1); }
-  75%   { transform: rotate(270deg) scale(1.15); }
-  87.5% { transform: rotate(315deg) scale(1); }
-  100%  { transform: rotate(360deg) scale(1.15); }
+  0% {
+    transform: rotate(0deg) scale(1.15);
+  }
+  12.5% {
+    transform: rotate(45deg) scale(1);
+  }
+  25% {
+    transform: rotate(90deg) scale(1.15);
+  }
+  37.5% {
+    transform: rotate(135deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.15);
+  }
+  62.5% {
+    transform: rotate(225deg) scale(1);
+  }
+  75% {
+    transform: rotate(270deg) scale(1.15);
+  }
+  87.5% {
+    transform: rotate(315deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1.15);
+  }
 }
 
 @keyframes moon-horizontal-loop {
-  0%     { transform: translate(11px, 0); }
-  25%    { transform: translate(24px, 0); }
-  25.01% { transform: translate(-24px, 0); }
-  50%    { transform: translate(-11px, 0); }
-  75%    { transform: translate(0, 0); }
-  100%   { transform: translate(11px, 0); }
+  0% {
+    transform: translate(11px, 0);
+  }
+  25% {
+    transform: translate(24px, 0);
+  }
+  25.01% {
+    transform: translate(-24px, 0);
+  }
+  50% {
+    transform: translate(-11px, 0);
+  }
+  75% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(11px, 0);
+  }
 }
 
 .toggle-track.is-on:hover .icon-sun svg {
@@ -179,7 +273,6 @@ interact-element { display: contents; }
 .toggle-track.is-off:hover .moon-shadow-layer {
   animation: moon-horizontal-loop 6s linear infinite;
 }
-
 ```
 
 ## Interact config

@@ -10,11 +10,13 @@ A sticky scroll sequence where a centered image expands from a thin horizontal s
 <interact-element data-interact-key="page">
   <section class="sticky-track">
     <div class="sticky-frame">
-
       <interact-element data-interact-key="title">
         <div class="title-wrap">
           <div class="title-area">
-            <h1><span class="letter">R</span><span class="letter">I</span><span class="letter">F</span><span class="letter">T</span></h1>
+            <h1>
+              <span class="letter">R</span><span class="letter">I</span><span class="letter">F</span
+              ><span class="letter">T</span>
+            </h1>
           </div>
         </div>
       </interact-element>
@@ -22,7 +24,7 @@ A sticky scroll sequence where a centered image expands from a thin horizontal s
       <interact-element data-interact-key="subtitle" data-interact-initial="true">
         <div class="sub-wrap">
           <div class="sub-area">
-            <p>Between the seen &amp; unseen<br>A study in negative space &amp; form — 2026</p>
+            <p>Between the seen &amp; unseen<br />A study in negative space &amp; form — 2026</p>
           </div>
         </div>
       </interact-element>
@@ -34,7 +36,6 @@ A sticky scroll sequence where a centered image expands from a thin horizontal s
           </div>
         </div>
       </interact-element>
-
     </div>
   </section>
 </interact-element>
@@ -43,9 +44,15 @@ A sticky scroll sequence where a centered image expands from a thin horizontal s
 ## Essential styles
 
 ```css
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-interact-element { display: block; }
+interact-element {
+  display: block;
+}
 
 body::after {
   content: '';

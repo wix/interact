@@ -9,19 +9,38 @@ A pill-shaped toggle button animates on click, sliding the thumb across the trac
 ```html
 <interact-element data-interact-key="toggle-btn">
   <div class="toggle-group">
-    <button type="button" class="toggle-track" aria-pressed="false" aria-label="Toggle availability">
+    <button
+      type="button"
+      class="toggle-track"
+      aria-pressed="false"
+      aria-label="Toggle availability"
+    >
       <interact-element data-interact-key="slider">
         <div class="slider">
           <div class="icon-stack">
             <span class="face-icon icon-happy">
-              <svg viewBox="6 6 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                viewBox="6 6 12 12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M8 14s1.5 2 4 2 4-2 4-2" />
                 <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.3" />
                 <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.3" />
               </svg>
             </span>
             <span class="face-icon icon-sad">
-              <svg viewBox="6 6 12 12" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                viewBox="6 6 12 12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
                 <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.3" />
                 <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.3" />
@@ -42,7 +61,13 @@ A pill-shaped toggle button animates on click, sliding the thumb across the trac
 ## Essential styles
 
 ```css
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   min-height: 100vh;
@@ -51,7 +76,9 @@ body {
   justify-content: center;
 }
 
-interact-element { display: contents; }
+interact-element {
+  display: contents;
+}
 
 .toggle-group {
   display: flex;
@@ -103,7 +130,9 @@ interact-element { display: contents; }
   height: 100%;
 }
 
-.icon-happy { opacity: 0; }
+.icon-happy {
+  opacity: 0;
+}
 
 .label-container {
   display: grid;
@@ -124,9 +153,12 @@ interact-element { display: contents; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .slider, .toggle-track, .toggle-label { transition: none !important; }
+  .slider,
+  .toggle-track,
+  .toggle-label {
+    transition: none !important;
+  }
 }
-
 ```
 
 ## Interact config

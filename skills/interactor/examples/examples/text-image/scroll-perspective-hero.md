@@ -10,25 +10,18 @@ A hero image animates through a 3D perspective rotation and scale as the user sc
 <interact-element data-interact-key="scroll-driver">
   <div class="scroll-driver">
     <div class="sticky-stage">
-
       <div class="bg-universe"></div>
 
       <interact-element data-interact-key="giant-type">
         <div class="giant-type">
-          <h1>BEYOND<br>REAL</h1>
+          <h1>BEYOND<br />REAL</h1>
         </div>
       </interact-element>
 
       <div class="hero-zone">
         <interact-element data-interact-key="hero-image">
           <div class="hero-frame">
-            <img
-              class="hero-img"
-              src=""
-              width="900"
-              height="1200"
-
-            >
+            <img class="hero-img" src="" width="900" height="1200" />
           </div>
         </interact-element>
       </div>
@@ -39,14 +32,13 @@ A hero image animates through a 3D perspective rotation and scale as the user sc
 
       <div class="content-panel">
         <div class="panel-left">
-          <h2>Design<br><span>Without</span> Limits</h2>
+          <h2>Design<br /><span>Without</span> Limits</h2>
           <p>Sample text provides enough length to demonstrate this animated content layout.</p>
         </div>
         <div class="panel-right">
           <a href="#" class="cta">Launch Experience →</a>
         </div>
       </div>
-
     </div>
   </div>
 </interact-element>
@@ -55,7 +47,11 @@ A hero image animates through a 3D perspective rotation and scale as the user sc
 ## Essential styles
 
 ```css
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 :root {
   --space-x: clamp(1rem, 4vw, 2.5rem);
@@ -78,7 +74,9 @@ body {
   overflow-x: clip;
 }
 
-interact-element { display: contents; }
+interact-element {
+  display: contents;
+}
 
 .hero-frame {
   position: relative;
@@ -103,7 +101,9 @@ interact-element { display: contents; }
   visibility: visible;
 }
 
-.scroll-driver { height: var(--scroll-height); }
+.scroll-driver {
+  height: var(--scroll-height);
+}
 
 .sticky-stage {
   position: sticky;
@@ -148,10 +148,7 @@ interact-element { display: contents; }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding:
-    clamp(3.5rem, 12vh, 5rem)
-    var(--space-x)
-    clamp(10rem, 28vh, 12rem);
+  padding: clamp(3.5rem, 12vh, 5rem) var(--space-x) clamp(10rem, 28vh, 12rem);
   z-index: 5;
   perspective: var(--perspective);
   perspective-origin: 50% 50%;
@@ -168,10 +165,8 @@ interact-element { display: contents; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding:
-    calc(var(--space-top) + env(safe-area-inset-top, 0px))
-    calc(var(--space-x) + env(safe-area-inset-right, 0px))
-    var(--space-top)
+  padding: calc(var(--space-top) + env(safe-area-inset-top, 0px))
+    calc(var(--space-x) + env(safe-area-inset-right, 0px)) var(--space-top)
     calc(var(--space-x) + env(safe-area-inset-left, 0px));
 }
 
@@ -187,9 +182,7 @@ interact-element { display: contents; }
   left: 0;
   right: 0;
   z-index: 8;
-  padding:
-    0
-    calc(var(--space-x) + env(safe-area-inset-right, 0px))
+  padding: 0 calc(var(--space-x) + env(safe-area-inset-right, 0px))
     calc(var(--space-bottom) + env(safe-area-inset-bottom, 0px))
     calc(var(--space-x) + env(safe-area-inset-left, 0px));
   display: grid;
@@ -326,7 +319,6 @@ interact-element { display: contents; }
     gap: 0.75rem;
   }
 }
-
 ```
 
 ## Interact config

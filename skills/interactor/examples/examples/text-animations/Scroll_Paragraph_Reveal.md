@@ -17,7 +17,10 @@ Words in a paragraph and eyebrow headline are individually revealed with a stagg
           <span class="word" aria-hidden="true">The</span>
           <span class="word" aria-hidden="true">Philosophy</span>
         </h2>
-        <h1 class="text-content main-text" aria-label="Designing interactions shouldn't be a struggle. We want text that flows like water, rising from the depths as you scroll.">
+        <h1
+          class="text-content main-text"
+          aria-label="Designing interactions shouldn't be a struggle. We want text that flows like water, rising from the depths as you scroll."
+        >
           <span class="word" aria-hidden="true">Designing</span>
           <span class="word" aria-hidden="true">interactions</span>
           <span class="word" aria-hidden="true">shouldn't</span>
@@ -42,7 +45,9 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-body::-webkit-scrollbar { width: 0; }
+body::-webkit-scrollbar {
+  width: 0;
+}
 
 .spacer {
   height: 100vh;
@@ -108,50 +113,50 @@ body::-webkit-scrollbar { width: 0; }
 
 ```js
 const wordRevealEffect = (element, progress) => {
-    const wordElements = element.querySelectorAll('.word');
-    const totalWords = wordElements.length;
+  const wordElements = element.querySelectorAll('.word');
+  const totalWords = wordElements.length;
 
-    const finishAt = 0.8;
-    const effectiveProgress = Math.min(progress / finishAt, 1.0);
+  const finishAt = 0.8;
+  const effectiveProgress = Math.min(progress / finishAt, 1.0);
 
-    const entrySpeed = 0.1;
+  const entrySpeed = 0.1;
 
-    wordElements.forEach((word, index) => {
-        const start = (index / totalWords) * (1 - entrySpeed);
-        const end = start + entrySpeed;
+  wordElements.forEach((word, index) => {
+    const start = (index / totalWords) * (1 - entrySpeed);
+    const end = start + entrySpeed;
 
-        let localProgress = (effectiveProgress - start) / (end - start);
+    let localProgress = (effectiveProgress - start) / (end - start);
 
-        if (localProgress < 0) localProgress = 0;
-        if (localProgress > 1) localProgress = 1;
+    if (localProgress < 0) localProgress = 0;
+    if (localProgress > 1) localProgress = 1;
 
-        const eased = 1 - Math.pow(1 - localProgress, 3);
+    const eased = 1 - Math.pow(1 - localProgress, 3);
 
-        const y = 40 - (40 * eased);
-        const alpha = Math.max(0.1, eased);
-        const blur = 10 - (10 * eased);
+    const y = 40 - 40 * eased;
+    const alpha = Math.max(0.1, eased);
+    const blur = 10 - 10 * eased;
 
-        word.style.transform = `translate3d(0, ${y}px, 0)`;
-        word.style.opacity = alpha;
-        word.style.filter = `blur(${blur}px)`;
-    });
+    word.style.transform = `translate3d(0, ${y}px, 0)`;
+    word.style.opacity = alpha;
+    word.style.filter = `blur(${blur}px)`;
+  });
 };
 
 const config = {
-    interactions: [
+  interactions: [
+    {
+      key: 'scroll-track',
+      trigger: 'viewProgress',
+      effects: [
         {
-            key: 'scroll-track',
-            trigger: 'viewProgress',
-            effects: [
-                {
-                    customEffect: wordRevealEffect,
-                    fill: 'both',
-                    composite: 'replace',
-                    rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
-                    rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } }
-                }
-            ]
-        }
-    ]
+          customEffect: wordRevealEffect,
+          fill: 'both',
+          composite: 'replace',
+          rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
+          rangeEnd: { name: 'exit', offset: { value: 0, unit: 'percentage' } },
+        },
+      ],
+    },
+  ],
 };
 ```

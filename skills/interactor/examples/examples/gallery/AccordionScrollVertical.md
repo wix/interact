@@ -17,7 +17,7 @@ Each panel in a vertical stack expands its height and reveals an overlay text la
             <h2 class="feature-bottom-title">Serene Lakes</h2>
           </div>
         </interact-element>
-        <img src="" class="feature-image">
+        <img src="" class="feature-image" />
       </div>
     </interact-element>
     <interact-element data-interact-key="#column-2">
@@ -28,7 +28,7 @@ Each panel in a vertical stack expands its height and reveals an overlay text la
             <h2 class="feature-bottom-title">Vast Deserts</h2>
           </div>
         </interact-element>
-        <img src="" class="feature-image">
+        <img src="" class="feature-image" />
       </div>
     </interact-element>
     <interact-element data-interact-key="#column-3">
@@ -39,7 +39,7 @@ Each panel in a vertical stack expands its height and reveals an overlay text la
             <h2 class="feature-bottom-title">Lush Rainforests</h2>
           </div>
         </interact-element>
-        <img src="" class="feature-image">
+        <img src="" class="feature-image" />
       </div>
     </interact-element>
     <interact-element data-interact-key="#column-4">
@@ -50,7 +50,7 @@ Each panel in a vertical stack expands its height and reveals an overlay text la
             <h2 class="feature-bottom-title">Ocean Cliffs</h2>
           </div>
         </interact-element>
-        <img src="" class="feature-image">
+        <img src="" class="feature-image" />
       </div>
     </interact-element>
   </div>

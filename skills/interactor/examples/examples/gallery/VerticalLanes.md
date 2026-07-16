@@ -13,37 +13,37 @@ Four vertical image columns auto-scroll continuously in alternating directions w
       <div class="animation-wrapper" id="wrapper-1">
         <div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Spiral Staircase</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Geometric Facade</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Atrium View</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Modern Interior</div>
           </div>
         </div>
         <div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Spiral Staircase</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Geometric Facade</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Atrium View</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Modern Interior</div>
           </div>
         </div>
@@ -56,37 +56,37 @@ Four vertical image columns auto-scroll continuously in alternating directions w
       <div class="animation-wrapper" id="wrapper-2">
         <div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Night Cityscape</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Flowing Lines</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Abstract Lines</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Bright Living Room</div>
           </div>
         </div>
         <div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Night Cityscape</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Flowing Lines</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Abstract Lines</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Bright Living Room</div>
           </div>
         </div>
@@ -99,37 +99,37 @@ Four vertical image columns auto-scroll continuously in alternating directions w
       <div class="animation-wrapper" id="wrapper-3">
         <div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Symmetrical Hallway</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Glass Ceiling</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Industrial Interior</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Suspension Bridge</div>
           </div>
         </div>
         <div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Symmetrical Hallway</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Glass Ceiling</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Industrial Interior</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Suspension Bridge</div>
           </div>
         </div>
@@ -142,37 +142,37 @@ Four vertical image columns auto-scroll continuously in alternating directions w
       <div class="animation-wrapper" id="wrapper-4">
         <div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Modern Museum</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Skyscraper Reflection</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Cozy Nook</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Library Rows</div>
           </div>
         </div>
         <div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Modern Museum</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Skyscraper Reflection</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Cozy Nook</div>
           </div>
           <div class="image-container">
-            <img src="" class="gallery-image">
+            <img src="" class="gallery-image" />
             <div class="image-title">Library Rows</div>
           </div>
         </div>
@@ -225,7 +225,8 @@ body {
   width: 100%;
 }
 
-#wrapper-1, #wrapper-3 {
+#wrapper-1,
+#wrapper-3 {
   transform: translateY(-50%);
 }
 
@@ -267,7 +268,8 @@ body {
   left: var(--img-padding);
   right: var(--img-padding);
   height: 50%;
-  border-radius: 0 0 calc(var(--img-border-radius) - var(--img-padding)) calc(var(--img-border-radius) - var(--img-padding));
+  border-radius: 0 0 calc(var(--img-border-radius) - var(--img-padding))
+    calc(var(--img-border-radius) - var(--img-padding));
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -280,7 +282,8 @@ body {
 }
 
 @media (max-width: 768px) {
-  .gallery-column:nth-child(3), .gallery-column:nth-child(4) {
+  .gallery-column:nth-child(3),
+  .gallery-column:nth-child(4) {
     display: none;
   }
 }
@@ -294,63 +297,71 @@ body {
     {
       key: '#wrapper-1',
       trigger: 'viewEnter',
-      effects: [{
-        key: '#wrapper-1',
-        triggerType: 'state',
-        keyframeEffect: {
-          name: 'scroll-down',
-          keyframes: [{ transform: 'translateY(-50%)' }, { transform: 'translateY(0)' }]
+      effects: [
+        {
+          key: '#wrapper-1',
+          triggerType: 'state',
+          keyframeEffect: {
+            name: 'scroll-down',
+            keyframes: [{ transform: 'translateY(-50%)' }, { transform: 'translateY(0)' }],
+          },
+          duration: 40000,
+          easing: 'linear',
+          iterations: Infinity,
         },
-        duration: 40000,
-        easing: 'linear',
-        iterations: Infinity
-      }]
+      ],
     },
     {
       key: '#wrapper-2',
       trigger: 'viewEnter',
-      effects: [{
-        key: '#wrapper-2',
-        triggerType: 'state',
-        keyframeEffect: {
-          name: 'scroll-up',
-          keyframes: [{ transform: 'translateY(0)' }, { transform: 'translateY(-50%)' }]
+      effects: [
+        {
+          key: '#wrapper-2',
+          triggerType: 'state',
+          keyframeEffect: {
+            name: 'scroll-up',
+            keyframes: [{ transform: 'translateY(0)' }, { transform: 'translateY(-50%)' }],
+          },
+          duration: 50000,
+          easing: 'linear',
+          iterations: Infinity,
         },
-        duration: 50000,
-        easing: 'linear',
-        iterations: Infinity
-      }]
+      ],
     },
     {
       key: '#wrapper-3',
       trigger: 'viewEnter',
-      effects: [{
-        key: '#wrapper-3',
-        triggerType: 'state',
-        keyframeEffect: {
-          name: 'scroll-down-fast',
-          keyframes: [{ transform: 'translateY(-50%)' }, { transform: 'translateY(0)' }]
+      effects: [
+        {
+          key: '#wrapper-3',
+          triggerType: 'state',
+          keyframeEffect: {
+            name: 'scroll-down-fast',
+            keyframes: [{ transform: 'translateY(-50%)' }, { transform: 'translateY(0)' }],
+          },
+          duration: 45000,
+          easing: 'linear',
+          iterations: Infinity,
         },
-        duration: 45000,
-        easing: 'linear',
-        iterations: Infinity
-      }]
+      ],
     },
     {
       key: '#wrapper-4',
       trigger: 'viewEnter',
-      effects: [{
-        key: '#wrapper-4',
-        triggerType: 'state',
-        keyframeEffect: {
-          name: 'scroll-up-fast',
-          keyframes: [{ transform: 'translateY(0)' }, { transform: 'translateY(-50%)' }]
+      effects: [
+        {
+          key: '#wrapper-4',
+          triggerType: 'state',
+          keyframeEffect: {
+            name: 'scroll-up-fast',
+            keyframes: [{ transform: 'translateY(0)' }, { transform: 'translateY(-50%)' }],
+          },
+          duration: 55000,
+          easing: 'linear',
+          iterations: Infinity,
         },
-        duration: 55000,
-        easing: 'linear',
-        iterations: Infinity
-      }]
-    }
-  ]
+      ],
+    },
+  ];
 }
 ```

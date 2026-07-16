@@ -22,14 +22,16 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
       <div class="card">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 6v6l4 2"/>
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6l4 2" />
           </svg>
         </div>
         <span class="label">Step 01</span>
         <h2>Design</h2>
         <p class="subtitle">Every great product begins with intention</p>
-        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
+        <p class="body">
+          Sample text provides enough length to demonstrate this animated content layout.
+        </p>
       </div>
     </interact-element>
   </div>
@@ -41,14 +43,16 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
       <div class="card dark">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-            <path d="M2 17l10 5 10-5"/>
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
           </svg>
         </div>
         <span class="label">Step 02</span>
         <h2>Build</h2>
         <p class="subtitle">Craft with precision and care</p>
-        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
+        <p class="body">
+          Sample text provides enough length to demonstrate this animated content layout.
+        </p>
       </div>
     </interact-element>
   </div>
@@ -60,15 +64,19 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
       <div class="card">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-            <line x1="12" y1="22.08" x2="12" y2="12"/>
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+            />
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+            <line x1="12" y1="22.08" x2="12" y2="12" />
           </svg>
         </div>
         <span class="label">Step 03</span>
         <h2>Launch</h2>
         <p class="subtitle">Bring your vision to the world</p>
-        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
+        <p class="body">
+          Sample text provides enough length to demonstrate this animated content layout.
+        </p>
       </div>
     </interact-element>
   </div>
@@ -80,14 +88,16 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
       <div class="card dark">
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
           </svg>
         </div>
         <span class="label">Step 04</span>
         <h2>Complete</h2>
         <p class="subtitle">All layers aligned, scroll ends here</p>
-        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
+        <p class="body">
+          Sample text provides enough length to demonstrate this animated content layout.
+        </p>
       </div>
     </interact-element>
   </div>
@@ -97,9 +107,17 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
 ## Essential styles
 
 ```css
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-interact-element { display: block; }
+interact-element {
+  display: block;
+}
 
 body {
   overflow-x: hidden;
@@ -130,12 +148,29 @@ body {
   letter-spacing: 0.01em;
 }
 
-.card-section { position: relative; }
+.card-section {
+  position: relative;
+}
 
-.card-section.first  { min-height: 280dvh; z-index: 4; }
-.card-section.second { min-height: 440dvh; margin-top: -280dvh; z-index: 3; }
-.card-section.third  { min-height: 600dvh; margin-top: -440dvh; z-index: 2; }
-.card-section.fourth { min-height: 700dvh; margin-top: -600dvh; z-index: 1; }
+.card-section.first {
+  min-height: 280dvh;
+  z-index: 4;
+}
+.card-section.second {
+  min-height: 440dvh;
+  margin-top: -280dvh;
+  z-index: 3;
+}
+.card-section.third {
+  min-height: 600dvh;
+  margin-top: -440dvh;
+  z-index: 2;
+}
+.card-section.fourth {
+  min-height: 700dvh;
+  margin-top: -600dvh;
+  z-index: 1;
+}
 
 .card-wrap {
   position: sticky;
@@ -161,10 +196,18 @@ body {
   transform: rotate(var(--tilt));
 }
 
-.card-section.first  .card { --tilt: -4deg; }
-.card-section.second .card { --tilt: 5deg; }
-.card-section.third  .card { --tilt: -3.5deg; }
-.card-section.fourth .card { --tilt: 2.5deg; }
+.card-section.first .card {
+  --tilt: -4deg;
+}
+.card-section.second .card {
+  --tilt: 5deg;
+}
+.card-section.third .card {
+  --tilt: -3.5deg;
+}
+.card-section.fourth .card {
+  --tilt: 2.5deg;
+}
 
 .card-icon {
   width: 48px;
@@ -214,23 +257,34 @@ body {
   max-width: 80%;
 }
 
-.card.dark .card-icon svg { stroke-width: 1.5; }
+.card.dark .card-icon svg {
+  stroke-width: 1.5;
+}
 
 @media (max-width: 750px) {
-  .card-wrap { padding: max(10rem, 27dvh) 20px 20px; }
+  .card-wrap {
+    padding: max(10rem, 27dvh) 20px 20px;
+  }
   .card {
     width: min(57.6dvh, calc(100vw - 40px));
     padding: 2.5rem 1.5rem;
   }
-  .card h2 { font-size: 2rem; }
-  .card .subtitle { font-size: 1rem; }
-  .card .body { font-size: 0.85rem; }
+  .card h2 {
+    font-size: 2rem;
+  }
+  .card .subtitle {
+    font-size: 1rem;
+  }
+  .card .body {
+    font-size: 0.85rem;
+  }
 }
 
 @media (max-width: 390px) {
-  .card { padding: 2rem 1.25rem; }
+  .card {
+    padding: 2rem 1.25rem;
+  }
 }
-
 ```
 
 ## Interact config

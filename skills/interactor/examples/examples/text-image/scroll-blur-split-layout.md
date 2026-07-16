@@ -23,9 +23,7 @@ A sticky split-screen layout where scrolling progressively blurs the hero portra
         <interact-element data-interact-key="photo">
           <div class="right-image">
             <div class="image-wrapper">
-              <img
-                src=""
-              />
+              <img src="" />
             </div>
           </div>
         </interact-element>
@@ -38,9 +36,15 @@ A sticky split-screen layout where scrolling progressively blurs the hero portra
 ## Essential styles
 
 ```css
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-interact-element { display: block; }
+interact-element {
+  display: block;
+}
 
 .scroll-area {
   height: 200vh;
@@ -176,7 +180,6 @@ interact-element { display: block; }
     font-size: clamp(1.5rem, 6vw, 2.2rem);
   }
 }
-
 ```
 
 ## Interact config

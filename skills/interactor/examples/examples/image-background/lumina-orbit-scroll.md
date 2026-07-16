@@ -26,9 +26,15 @@ A full-viewport hero image shrinks, tilts in 3D, and fades out as the user scrol
 ## Essential styles
 
 ```css
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-interact-element { display: block; }
+interact-element {
+  display: block;
+}
 
 .sticky-track {
   height: 500vh;
@@ -111,7 +117,6 @@ interact-element { display: block; }
 .cta-btn:hover {
   letter-spacing: 0.38em;
 }
-
 ```
 
 ## Interact config

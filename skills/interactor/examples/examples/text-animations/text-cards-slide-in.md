@@ -18,69 +18,107 @@ Cards containing typographic step content slide in from alternating sides with a
 <div class="hero-spacer"></div>
 
 <div class="card-stage">
-
   <interact-element data-interact-key="card-1" class="card-wrapper">
     <div class="card">
       <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 20h9"/>
-          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
         </svg>
       </div>
       <span class="card-label">Step 01</span>
       <h2 class="card-heading">Design</h2>
       <p class="card-subtitle">Crafting the vision</p>
-      <p class="card-body">Sample text provides enough length to demonstrate this animated content layout.</p>
+      <p class="card-body">
+        Sample text provides enough length to demonstrate this animated content layout.
+      </p>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="card-2" class="card-wrapper">
     <div class="card">
       <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="16 18 22 12 16 6"/>
-          <polyline points="8 6 2 12 8 18"/>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="16 18 22 12 16 6" />
+          <polyline points="8 6 2 12 8 18" />
         </svg>
       </div>
       <span class="card-label">Step 02</span>
       <h2 class="card-heading">Build</h2>
       <p class="card-subtitle">Engineering excellence</p>
-      <p class="card-body">Sample text provides enough length to demonstrate this animated content layout.</p>
+      <p class="card-body">
+        Sample text provides enough length to demonstrate this animated content layout.
+      </p>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="card-3" class="card-wrapper">
     <div class="card">
       <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-          <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-          <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 3 0 3 0"/>
-          <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-3 0-3"/>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"
+          />
+          <path
+            d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"
+          />
+          <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 3 0 3 0" />
+          <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-3 0-3" />
         </svg>
       </div>
       <span class="card-label">Step 03</span>
       <h2 class="card-heading">Launch</h2>
       <p class="card-subtitle">Into the world</p>
-      <p class="card-body">Sample text provides enough length to demonstrate this animated content layout.</p>
+      <p class="card-body">
+        Sample text provides enough length to demonstrate this animated content layout.
+      </p>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="card-4" class="card-wrapper">
     <div class="card">
       <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
       </div>
       <span class="card-label">Step 04</span>
       <h2 class="card-heading">Complete</h2>
       <p class="card-subtitle">Mission accomplished</p>
-      <p class="card-body">Sample text provides enough length to demonstrate this animated content layout.</p>
+      <p class="card-body">
+        Sample text provides enough length to demonstrate this animated content layout.
+      </p>
     </div>
   </interact-element>
-
 </div>
 
 <div class="scroll-canvas">
@@ -103,7 +141,9 @@ Cards containing typographic step content slide in from alternating sides with a
 ## Essential styles
 
 ```css
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -164,10 +204,18 @@ interact-element {
   aspect-ratio: 4 / 3.2;
 }
 
-.card-wrapper:nth-child(1) { z-index: 1; }
-.card-wrapper:nth-child(2) { z-index: 2; }
-.card-wrapper:nth-child(3) { z-index: 3; }
-.card-wrapper:nth-child(4) { z-index: 4; }
+.card-wrapper:nth-child(1) {
+  z-index: 1;
+}
+.card-wrapper:nth-child(2) {
+  z-index: 2;
+}
+.card-wrapper:nth-child(3) {
+  z-index: 3;
+}
+.card-wrapper:nth-child(4) {
+  z-index: 4;
+}
 
 .card {
   width: 100%;
@@ -234,23 +282,35 @@ interact-element {
 }
 
 @media (max-width: 750px) {
-  .card-wrapper { width: calc(100% - 20px); }
+  .card-wrapper {
+    width: calc(100% - 20px);
+  }
   .card {
     padding: 36px 28px;
     border-radius: 28px;
   }
-  .card-heading { font-size: 1.6rem; }
-  .card-body { font-size: 0.85rem; }
+  .card-heading {
+    font-size: 1.6rem;
+  }
+  .card-body {
+    font-size: 0.85rem;
+  }
 }
 
 @media (max-width: 390px) {
-  .card-wrapper { width: calc(100% - 20px); }
+  .card-wrapper {
+    width: calc(100% - 20px);
+  }
   .card {
     padding: 28px 20px;
     border-radius: 24px;
   }
-  .card-heading { font-size: 1.4rem; }
-  .card-subtitle { font-size: 0.9rem; }
+  .card-heading {
+    font-size: 1.4rem;
+  }
+  .card-subtitle {
+    font-size: 0.9rem;
+  }
   .card-body {
     font-size: 0.8rem;
     max-width: 220px;

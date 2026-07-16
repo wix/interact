@@ -18,9 +18,7 @@ A portrait image scales toward the mouse pointer via the ScaleMouse preset on po
         <div class="photo-container">
           <interact-element data-interact-key="photo">
             <div class="image-wrapper">
-              <img
-                src=""
-              />
+              <img src="" />
             </div>
           </interact-element>
         </div>
@@ -36,9 +34,15 @@ A portrait image scales toward the mouse pointer via the ScaleMouse preset on po
 ## Essential styles
 
 ```css
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-interact-element { display: block; }
+interact-element {
+  display: block;
+}
 
 .scroll-area {
   height: 200vh;
@@ -160,7 +164,6 @@ interact-element { display: block; }
     letter-spacing: 0.1em;
   }
 }
-
 ```
 
 ## Interact config

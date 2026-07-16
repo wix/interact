@@ -16,9 +16,7 @@ A full-viewport image stays sticky while the user scrolls, shrinking and tilting
       </div>
     </div>
     <div class="sticky-frame">
-      <img
-        src=""
-      />
+      <img src="" />
     </div>
   </section>
 </interact-element>
@@ -27,9 +25,15 @@ A full-viewport image stays sticky while the user scrolls, shrinking and tilting
 ## Essential styles
 
 ```css
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-interact-element { display: block; }
+interact-element {
+  display: block;
+}
 
 body {
   overflow-x: hidden;

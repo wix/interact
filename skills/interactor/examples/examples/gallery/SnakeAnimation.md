@@ -28,7 +28,11 @@ Images arranged in a sinusoidal wave across the screen animate sequentially into
 
 <div class="absolute inset-0 flex items-center justify-start pointer-events-none">
   <interact-element data-interact-key="#text-container">
-    <div id="text-container" class="w-full max-w-2xl px-8 text-left flex flex-col justify-center" style="height:20rem;z-index:110">
+    <div
+      id="text-container"
+      class="w-full max-w-2xl px-8 text-left flex flex-col justify-center"
+      style="height:20rem;z-index:110"
+    >
       <h1 id="main-title" class="text-3xl font-bold mb-2"></h1>
       <h2 id="main-subtitle" class="text-lg font-light"></h2>
     </div>

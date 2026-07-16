@@ -18,37 +18,61 @@ Seven landscape panels arranged in a 3D z-depth stack rotate into view as the us
       <div class="panel-wrapper">
         <interact-element data-interact-key="#panel-0">
           <div class="panel" id="panel-0" style="width: 45vw;height: 30vw;translate: 0 0 0">
-            <img src="">
+            <img src="" />
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-1">
-          <div class="panel" id="panel-1" style="width: 48.3vw;height: 32vw;translate: 0 0 calc(var(--panel-gap) * -1 * 1px)">
-            <img src="">
+          <div
+            class="panel"
+            id="panel-1"
+            style="width: 48.3vw;height: 32vw;translate: 0 0 calc(var(--panel-gap) * -1 * 1px)"
+          >
+            <img src="" />
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-2">
-          <div class="panel" id="panel-2" style="width: 51.7vw;height: 34vw;translate: 0 0 calc(var(--panel-gap) * -2 * 1px)">
-            <img src="">
+          <div
+            class="panel"
+            id="panel-2"
+            style="width: 51.7vw;height: 34vw;translate: 0 0 calc(var(--panel-gap) * -2 * 1px)"
+          >
+            <img src="" />
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-3">
-          <div class="panel" id="panel-3" style="width: 55vw;height: 36vw;translate: 0 0 calc(var(--panel-gap) * -3 * 1px)">
-            <img src="">
+          <div
+            class="panel"
+            id="panel-3"
+            style="width: 55vw;height: 36vw;translate: 0 0 calc(var(--panel-gap) * -3 * 1px)"
+          >
+            <img src="" />
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-4">
-          <div class="panel" id="panel-4" style="width: 58.3vw;height: 38vw;translate: 0 0 calc(var(--panel-gap) * -4 * 1px)">
-            <img src="">
+          <div
+            class="panel"
+            id="panel-4"
+            style="width: 58.3vw;height: 38vw;translate: 0 0 calc(var(--panel-gap) * -4 * 1px)"
+          >
+            <img src="" />
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-5">
-          <div class="panel" id="panel-5" style="width: 61.7vw;height: 40vw;translate: 0 0 calc(var(--panel-gap) * -5 * 1px)">
-            <img src="">
+          <div
+            class="panel"
+            id="panel-5"
+            style="width: 61.7vw;height: 40vw;translate: 0 0 calc(var(--panel-gap) * -5 * 1px)"
+          >
+            <img src="" />
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-6">
-          <div class="panel" id="panel-6" style="width: 65vw;height: 42vw;translate: 0 0 calc(var(--panel-gap) * -6 * 1px)">
-            <img src="">
+          <div
+            class="panel"
+            id="panel-6"
+            style="width: 65vw;height: 42vw;translate: 0 0 calc(var(--panel-gap) * -6 * 1px)"
+          >
+            <img src="" />
           </div>
         </interact-element>
       </div>
@@ -60,7 +84,9 @@ Seven landscape panels arranged in a 3D z-depth stack rotate into view as the us
 ## Essential styles
 
 ```css
-:root { --panel-gap: 120; }
+:root {
+  --panel-gap: 120;
+}
 
 body {
   margin: 0;
@@ -163,37 +189,39 @@ panels.forEach((panel, i) => {
       name: `panel-move-${i}`,
       keyframes: [
         { transform: `translateX(-50%) translateX(0px) ${baseTransform}` },
-        { transform: `translateX(-50%) translateX(${xEnd}px) ${baseTransform}` }
-      ]
+        { transform: `translateX(-50%) translateX(${xEnd}px) ${baseTransform}` },
+      ],
     },
     rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
     rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
     easing: 'linear',
-    fill: 'both'
+    fill: 'both',
   });
 });
 
 const config = {
-  interactions: [{
-    key: 'intro-section',
-    trigger: 'viewProgress',
-    effects: [
-      {
-        key: 'panel-wrapper',
-        keyframeEffect: {
-          name: 'wrapper-rotation',
-          keyframes: [
-            { transform: 'translateY(-50%) rotateY(-180deg)' },
-            { transform: 'translateY(-50%) rotateY(0deg)' }
-          ]
+  interactions: [
+    {
+      key: 'intro-section',
+      trigger: 'viewProgress',
+      effects: [
+        {
+          key: 'panel-wrapper',
+          keyframeEffect: {
+            name: 'wrapper-rotation',
+            keyframes: [
+              { transform: 'translateY(-50%) rotateY(-180deg)' },
+              { transform: 'translateY(-50%) rotateY(0deg)' },
+            ],
+          },
+          rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+          rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 50 } },
+          easing: 'ease-out',
+          fill: 'both',
         },
-        rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
-        rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 50 } },
-        easing: 'ease-out',
-        fill: 'both'
-      },
-      ...panelEffects
-    ]
-  }]
+        ...panelEffects,
+      ],
+    },
+  ],
 };
 ```

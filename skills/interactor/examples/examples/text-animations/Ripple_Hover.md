@@ -9,7 +9,6 @@ A stacked heading ripples masked copies of itself upward and downward on hover, 
 ```html
 <div class="ripple-wrapper">
   <div class="ripple-container">
-
     <div class="static-mask mask-tiny mask-top">
       <interact-element data-interact-key="h1-u4">
         <div class="h1-copy" style="transform: translateY(105%)">LIQUIDITY</div>
@@ -63,7 +62,6 @@ A stacked heading ripples masked copies of itself upward and downward on hover, 
         <div class="h1-copy" style="transform: translateY(-105%)">LIQUIDITY</div>
       </interact-element>
     </div>
-
   </div>
 
   <interact-element data-interact-key="hero-text">
@@ -125,8 +123,12 @@ body {
   align-items: center;
 }
 
-.mask-top { align-items: flex-start; }
-.mask-bottom { align-items: flex-end; }
+.mask-top {
+  align-items: flex-start;
+}
+.mask-bottom {
+  align-items: flex-end;
+}
 
 .mask-full {
   height: 0.75em;
@@ -148,10 +150,18 @@ body {
   transform: translateY(105%);
 }
 
-.mask-tiny  { height: 0.06em; }
-.mask-small { height: 0.175em; }
-.mask-med   { height: 0.3125em; }
-.mask-large { height: 0.45em; }
+.mask-tiny {
+  height: 0.06em;
+}
+.mask-small {
+  height: 0.175em;
+}
+.mask-med {
+  height: 0.3125em;
+}
+.mask-large {
+  height: 0.45em;
+}
 
 .content-block {
   max-width: 600px;
@@ -175,17 +185,14 @@ const revealBase = {
   duration: 900,
   easing: 'cubic-bezier(0.05, 1, 0.15, 1)',
   fill: 'both',
-  composite: 'replace'
+  composite: 'replace',
 };
 
-const revealUpKeyframes = [
-  { transform: 'translateY(105%)' },
-  { transform: 'translateY(-0.02em)' }
-];
+const revealUpKeyframes = [{ transform: 'translateY(105%)' }, { transform: 'translateY(-0.02em)' }];
 
 const revealDownKeyframes = [
   { transform: 'translateY(-105%)' },
-  { transform: 'translateY(-0.02em)' }
+  { transform: 'translateY(-0.02em)' },
 ];
 
 const rippleSequences = (triggerType) => [
@@ -196,8 +203,8 @@ const rippleSequences = (triggerType) => [
       { key: 'h1-u1', effectId: 'reveal-up' },
       { key: 'h1-u2', effectId: 'reveal-up' },
       { key: 'h1-u3', effectId: 'reveal-up' },
-      { key: 'h1-u4', effectId: 'reveal-up' }
-    ]
+      { key: 'h1-u4', effectId: 'reveal-up' },
+    ],
   },
   {
     offset: 54,
@@ -206,49 +213,55 @@ const rippleSequences = (triggerType) => [
       { key: 'h1-d1', effectId: 'reveal-down' },
       { key: 'h1-d2', effectId: 'reveal-down' },
       { key: 'h1-d3', effectId: 'reveal-down' },
-      { key: 'h1-d4', effectId: 'reveal-down' }
-    ]
-  }
+      { key: 'h1-d4', effectId: 'reveal-down' },
+    ],
+  },
 ];
 
 const config = {
   conditions: {
     desktop: { type: 'media', predicate: '(min-width: 769px)' },
-    mobile: { type: 'media', predicate: '(max-width: 768px)' }
+    mobile: { type: 'media', predicate: '(max-width: 768px)' },
   },
   effects: {
     'reveal-up': {
       keyframeEffect: { name: 'reveal-up', keyframes: revealUpKeyframes },
-      ...revealBase
+      ...revealBase,
     },
     'reveal-down': {
       keyframeEffect: { name: 'reveal-down', keyframes: revealDownKeyframes },
-      ...revealBase
+      ...revealBase,
     },
     'fade-up': {
-      namedEffect: { type: 'SlideIn', direction: 'bottom', distance: '30px', duration: 1000, easing: 'ease-out' },
-      fill: 'both'
-    }
+      namedEffect: {
+        type: 'SlideIn',
+        direction: 'bottom',
+        distance: '30px',
+        duration: 1000,
+        easing: 'ease-out',
+      },
+      fill: 'both',
+    },
   },
   interactions: [
     {
       key: 'h1-trigger',
       trigger: 'hover',
       conditions: ['desktop'],
-      sequences: rippleSequences('alternate')
+      sequences: rippleSequences('alternate'),
     },
     {
       key: 'h1-trigger',
       trigger: 'viewEnter',
       conditions: ['mobile'],
       params: { threshold: 0.5 },
-      sequences: rippleSequences('once')
+      sequences: rippleSequences('once'),
     },
     {
       key: 'hero-text',
       trigger: 'viewEnter',
-      effects: [{ effectId: 'fade-up', delay: 400 }]
-    }
-  ]
+      effects: [{ effectId: 'fade-up', delay: 400 }],
+    },
+  ],
 };
 ```

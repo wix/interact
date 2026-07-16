@@ -125,13 +125,23 @@ interact-element {
   line-height: 1.2;
   pointer-events: none;
 }
-.card-content h3 { margin: 0 0 3px 0; font-size: 1rem; }
-.card-content p { margin: 0; font-size: 0.85rem; }
+.card-content h3 {
+  margin: 0 0 3px 0;
+  font-size: 1rem;
+}
+.card-content p {
+  margin: 0;
+  font-size: 0.85rem;
+}
 @media (max-width: 1200px) {
-  .grid-container { grid-template-columns: repeat(4, 1fr); }
+  .grid-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 @media (max-width: 800px) {
-  .grid-container { grid-template-columns: repeat(2, 1fr); }
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 ```
 
@@ -142,7 +152,7 @@ const COLS = 8;
 const allCards = Array.from(document.querySelectorAll('interact-element'));
 const allBgs = Array.from(document.querySelectorAll('.card-bg'));
 const CARD_COUNT = allCards.length;
-const originalImages = allBgs.map(bg => bg.style.backgroundImage);
+const originalImages = allBgs.map((bg) => bg.style.backgroundImage);
 
 const interactions = [];
 
@@ -155,39 +165,39 @@ for (let i = 1; i <= CARD_COUNT; i++) {
         selector: '.card-inner',
         keyframeEffect: {
           name: `card-zoom-${i}`,
-          keyframes: [{ transform: 'scale(1.05)' }]
+          keyframes: [{ transform: 'scale(1.05)' }],
         },
         duration: 300,
         easing: 'ease-out',
         fill: 'both',
-        triggerType: 'alternate'
+        triggerType: 'alternate',
       },
       {
         selector: '.card-overlay',
         transition: {
           duration: 300,
           easing: 'ease-out',
-          styleProperties: [{ name: 'background', value: 'rgba(0,0,0,0.45)' }]
-        }
+          styleProperties: [{ name: 'background', value: 'rgba(0,0,0,0.45)' }],
+        },
       },
       {
         selector: '.card-content',
         keyframeEffect: {
           name: `text-reveal-${i}`,
-          keyframes: [{ opacity: 1, transform: 'translateY(0)' }]
+          keyframes: [{ opacity: 1, transform: 'translateY(0)' }],
         },
         duration: 300,
         easing: 'ease-out',
         fill: 'both',
-        triggerType: 'alternate'
+        triggerType: 'alternate',
       },
       {
         transition: {
           duration: 0,
-          styleProperties: [{ name: 'z-index', value: '10' }]
-        }
-      }
-    ]
+          styleProperties: [{ name: 'z-index', value: '10' }],
+        },
+      },
+    ],
   });
 }
 
@@ -202,7 +212,9 @@ allCards.forEach((el, elIndex) => {
     const hoverImage = el.querySelector('.card-bg').style.backgroundImage;
     const hoveredRow = Math.floor(elIndex / COLS);
     const hoveredCol = elIndex % COLS;
-    const stagger = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--stagger-delay')) || 0;
+    const stagger =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--stagger-delay')) ||
+      0;
 
     const hoveredBg = allBgs[elIndex];
     hoveredBg.style.transition = 'none';
@@ -224,7 +236,9 @@ allCards.forEach((el, elIndex) => {
   el.addEventListener('mouseleave', () => {
     const hoveredRow = Math.floor(lastHoveredIndex / COLS);
     const hoveredCol = lastHoveredIndex % COLS;
-    const stagger = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--stagger-delay')) || 0;
+    const stagger =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--stagger-delay')) ||
+      0;
 
     allCards.forEach((cardEl, index) => {
       const cardBg = cardEl.querySelector('.card-bg');

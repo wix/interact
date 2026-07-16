@@ -10,41 +10,35 @@ Four triangular white mask panels slide inward from all four edges as the user s
 <div class="scroll-hint">Scroll down for symmetry</div>
 
 <interact-element data-interact-key="scroll-scene">
-    <div class="scroll-wrapper">
-        <div class="sticky-container">
+  <div class="scroll-wrapper">
+    <div class="sticky-container">
+      <interact-element data-interact-key="center-dot">
+        <div class="center-fix"></div>
+      </interact-element>
 
-            <interact-element data-interact-key="center-dot">
-                <div class="center-fix"></div>
-            </interact-element>
+      <interact-element data-interact-key="mask-L">
+        <div class="mask mask-left"></div>
+      </interact-element>
+      <interact-element data-interact-key="mask-R">
+        <div class="mask mask-right"></div>
+      </interact-element>
+      <interact-element data-interact-key="mask-T">
+        <div class="mask mask-top"></div>
+      </interact-element>
+      <interact-element data-interact-key="mask-B">
+        <div class="mask mask-bottom"></div>
+      </interact-element>
 
-            <interact-element data-interact-key="mask-L">
-                <div class="mask mask-left"></div>
-            </interact-element>
-            <interact-element data-interact-key="mask-R">
-                <div class="mask mask-right"></div>
-            </interact-element>
-            <interact-element data-interact-key="mask-T">
-                <div class="mask mask-top"></div>
-            </interact-element>
-            <interact-element data-interact-key="mask-B">
-                <div class="mask mask-bottom"></div>
-            </interact-element>
-
-            <div class="text-container">
-                <interact-element data-interact-key="primary-text">
-                    <div class="text text-1">
-                        CHANGE<br>MINDS.
-                    </div>
-                </interact-element>
-                <interact-element data-interact-key="secondary-text">
-                    <div class="text text-2">
-                        Start with<br>your own.
-                    </div>
-                </interact-element>
-            </div>
-
-        </div>
+      <div class="text-container">
+        <interact-element data-interact-key="primary-text">
+          <div class="text text-1">CHANGE<br />MINDS.</div>
+        </interact-element>
+        <interact-element data-interact-key="secondary-text">
+          <div class="text text-2">Start with<br />your own.</div>
+        </interact-element>
+      </div>
     </div>
+  </div>
 </interact-element>
 ```
 
@@ -52,103 +46,111 @@ Four triangular white mask panels slide inward from all four edges as the user s
 
 ```css
 :root {
-    --mask-size: 160vmax;
+  --mask-size: 160vmax;
 }
 
 body {
-    margin: 0;
-    overflow-x: clip;
+  margin: 0;
+  overflow-x: clip;
 }
 
 .scroll-wrapper {
-    height: 1200vh;
-    position: relative;
+  height: 1200vh;
+  position: relative;
 }
 
 .sticky-container {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: clip;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: clip;
 }
 
 .center-fix {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    z-index: 15;
-    border-radius: 50%;
-    opacity: 0;
-    pointer-events: none;
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  z-index: 15;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .mask {
-    position: absolute;
-    width: var(--mask-size);
-    height: var(--mask-size);
-    z-index: 10;
-    top: 50%;
-    left: 50%;
-    margin-left: calc(var(--mask-size) / -2);
-    margin-top: calc(var(--mask-size) / -2);
-    outline: 1px solid transparent;
-    pointer-events: none;
-    will-change: transform;
+  position: absolute;
+  width: var(--mask-size);
+  height: var(--mask-size);
+  z-index: 10;
+  top: 50%;
+  left: 50%;
+  margin-left: calc(var(--mask-size) / -2);
+  margin-top: calc(var(--mask-size) / -2);
+  outline: 1px solid transparent;
+  pointer-events: none;
+  will-change: transform;
 }
 
-.mask-left { clip-path: polygon(0% 0%, 50% 50%, 0% 100%); }
-.mask-right { clip-path: polygon(100% 0%, 100% 100%, 50% 50%); }
-.mask-top { clip-path: polygon(0% 0%, 100% 0%, 50% 50%); }
-.mask-bottom { clip-path: polygon(0% 100%, 50% 50%, 100% 100%); }
+.mask-left {
+  clip-path: polygon(0% 0%, 50% 50%, 0% 100%);
+}
+.mask-right {
+  clip-path: polygon(100% 0%, 100% 100%, 50% 50%);
+}
+.mask-top {
+  clip-path: polygon(0% 0%, 100% 0%, 50% 50%);
+}
+.mask-bottom {
+  clip-path: polygon(0% 100%, 50% 50%, 100% 100%);
+}
 
 .text-container {
-    position: relative;
-    z-index: 20;
-    text-align: center;
-    width: 85%;
-    max-width: 1200px;
+  position: relative;
+  z-index: 20;
+  text-align: center;
+  width: 85%;
+  max-width: 1200px;
 }
 
 .text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    pointer-events: none;
-    will-change: opacity, transform;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  pointer-events: none;
+  will-change: opacity, transform;
 }
 
 .text-1 {
-    font-size: clamp(2.5rem, 14vw, 10rem);
-    line-height: 0.85;
-    text-transform: uppercase;
-    letter-spacing: -0.04em;
+  font-size: clamp(2.5rem, 14vw, 10rem);
+  line-height: 0.85;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
 }
 
 .text-2 {
-    font-size: clamp(1.25rem, 6vw, 4.5rem);
-    line-height: 1.1;
-    font-weight: 400;
-    opacity: 0;
+  font-size: clamp(1.25rem, 6vw, 4.5rem);
+  line-height: 1.1;
+  font-weight: 400;
+  opacity: 0;
 }
 
 .scroll-hint {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.7rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    z-index: 50;
-    pointer-events: none;
-    text-align: center;
-    width: 100%;
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  z-index: 50;
+  pointer-events: none;
+  text-align: center;
+  width: 100%;
 }
 ```
 

@@ -12,14 +12,25 @@ A collapsed search pill icon that expands into a full input bar on click, reveal
     <div class="search-pill" id="search-pill">
       <interact-element data-interact-key="search-icon">
         <button type="button" class="search-icon-btn" id="search-icon-btn" aria-label="Search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
         </button>
       </interact-element>
       <div class="input-wrap" id="input-wrap">
-        <label for="search-input" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Search</label>
+        <label
+          for="search-input"
+          style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)"
+          >Search</label
+        >
         <input
           type="search"
           class="search-input"
@@ -34,14 +45,44 @@ A collapsed search pill icon that expands into a full input bar on click, reveal
   </interact-element>
 
   <div class="suggestions" id="suggestions">
-    <interact-element data-interact-key="sug-0"><button type="button" class="suggestion-item" style="--i:0">Getting started</button></interact-element>
-    <interact-element data-interact-key="sug-1"><button type="button" class="suggestion-item" style="--i:1">API reference</button></interact-element>
-    <interact-element data-interact-key="sug-2"><button type="button" class="suggestion-item" style="--i:2">Configuration guide</button></interact-element>
-    <interact-element data-interact-key="sug-3"><button type="button" class="suggestion-item" style="--i:3">Troubleshooting</button></interact-element>
-    <interact-element data-interact-key="sug-4"><button type="button" class="suggestion-item" style="--i:4">Animation examples</button></interact-element>
-    <interact-element data-interact-key="sug-5"><button type="button" class="suggestion-item" style="--i:5">Migration guide</button></interact-element>
-    <interact-element data-interact-key="sug-6"><button type="button" class="suggestion-item" style="--i:6">Keyboard shortcuts</button></interact-element>
-    <interact-element data-interact-key="sug-7"><button type="button" class="suggestion-item" style="--i:7">FAQ</button></interact-element>
+    <interact-element data-interact-key="sug-0"
+      ><button type="button" class="suggestion-item" style="--i:0">
+        Getting started
+      </button></interact-element
+    >
+    <interact-element data-interact-key="sug-1"
+      ><button type="button" class="suggestion-item" style="--i:1">
+        API reference
+      </button></interact-element
+    >
+    <interact-element data-interact-key="sug-2"
+      ><button type="button" class="suggestion-item" style="--i:2">
+        Configuration guide
+      </button></interact-element
+    >
+    <interact-element data-interact-key="sug-3"
+      ><button type="button" class="suggestion-item" style="--i:3">
+        Troubleshooting
+      </button></interact-element
+    >
+    <interact-element data-interact-key="sug-4"
+      ><button type="button" class="suggestion-item" style="--i:4">
+        Animation examples
+      </button></interact-element
+    >
+    <interact-element data-interact-key="sug-5"
+      ><button type="button" class="suggestion-item" style="--i:5">
+        Migration guide
+      </button></interact-element
+    >
+    <interact-element data-interact-key="sug-6"
+      ><button type="button" class="suggestion-item" style="--i:6">
+        Keyboard shortcuts
+      </button></interact-element
+    >
+    <interact-element data-interact-key="sug-7"
+      ><button type="button" class="suggestion-item" style="--i:7">FAQ</button></interact-element
+    >
     <div class="no-results" id="no-results">No results</div>
   </div>
 </div>
@@ -50,9 +91,17 @@ A collapsed search pill icon that expands into a full input bar on click, reveal
 ## Essential styles
 
 ```css
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-interact-element { display: contents; }
+interact-element {
+  display: contents;
+}
 
 body {
   min-height: 100vh;
@@ -156,7 +205,9 @@ body {
   border-radius: 12px;
   opacity: 0;
   transform: translateY(-6px);
-  transition: opacity 220ms ease-out calc(var(--i, 0) * 45ms), transform 220ms ease-out calc(var(--i, 0) * 45ms);
+  transition:
+    opacity 220ms ease-out calc(var(--i, 0) * 45ms),
+    transform 220ms ease-out calc(var(--i, 0) * 45ms);
 }
 
 .suggestions.visible .suggestion-item:not(.hidden) {
@@ -183,9 +234,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .suggestion-item { transition: none !important; }
+  .suggestion-item {
+    transition: none !important;
+  }
 }
-
 ```
 
 ## Interact config

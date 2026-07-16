@@ -23,76 +23,76 @@ A blurred circle continuously sweeps across bold text inside a high-contrast fil
 
 ```css
 body {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
 .scene {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .scene-root {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    inset: 0;
-    z-index: 10;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  z-index: 10;
 }
 
 interact-element {
-    display: contents;
+  display: contents;
 }
 
 .gooey-filter {
-    filter: contrast(50);
-    overflow: hidden;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  filter: contrast(50);
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .gooey-text {
-    filter: blur(8px);
-    letter-spacing: -0.05em;
-    user-select: text;
-    cursor: text;
-    z-index: 10;
-    position: relative;
-    font-size: 13rem;
-    font-weight: 900;
-    line-height: 1;
+  filter: blur(8px);
+  letter-spacing: -0.05em;
+  user-select: text;
+  cursor: text;
+  z-index: 10;
+  position: relative;
+  font-size: 13rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .moving-circle {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 175px;
-    height: 175px;
-    border-radius: 50%;
-    pointer-events: none;
-    filter: blur(30px);
-    transform: translateY(-50%);
-    z-index: 20;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 175px;
+  height: 175px;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(30px);
+  transform: translateY(-50%);
+  z-index: 20;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .moving-circle {
-        display: none;
-    }
+  .moving-circle {
+    display: none;
+  }
 }
 ```
 

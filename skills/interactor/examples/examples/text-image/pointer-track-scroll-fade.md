@@ -14,9 +14,7 @@ A portrait photo tracks the mouse pointer via the TrackMouse preset while fading
       <span class="hero-text">SAMPLE TEXT FOR THE ANIMATED LAYOUT.</span>
       <interact-element data-interact-key="photo">
         <div class="image-wrapper">
-          <img
-            src=""
-          />
+          <img src="" />
         </div>
       </interact-element>
       <interact-element data-interact-key="link">
@@ -30,9 +28,15 @@ A portrait photo tracks the mouse pointer via the TrackMouse preset while fading
 ## Essential styles
 
 ```css
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-interact-element { display: block; }
+interact-element {
+  display: block;
+}
 
 .scroll-area {
   height: 200vh;
@@ -137,7 +141,6 @@ interact-element { display: block; }
     letter-spacing: 0.1em;
   }
 }
-
 ```
 
 ## Interact config

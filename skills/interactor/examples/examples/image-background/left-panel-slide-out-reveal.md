@@ -15,10 +15,7 @@ A white square panel overlays a blurred hero image at page load; as the user scr
 <section class="hero">
   <interact-element data-interact-key="hero-img">
     <div class="hero__img-wrap">
-      <img
-        class="hero__img"
-        src=""
-      />
+      <img class="hero__img" src="" />
     </div>
   </interact-element>
   <div class="hero__gradient"></div>
@@ -43,14 +40,16 @@ A white square panel overlays a blurred hero image at page load; as the user scr
   <interact-element data-interact-key="s2-title">
     <div>
       <p class="section-two__label">Why Nexus</p>
-      <h2 class="section-two__title">Built<br/>Different.</h2>
+      <h2 class="section-two__title">Built<br />Different.</h2>
     </div>
   </interact-element>
 
   <div class="section-two__rule"></div>
 
   <interact-element data-interact-key="s2-subtitles">
-    <p class="section-two__intro">Sample text provides enough length to demonstrate this animated content layout.</p>
+    <p class="section-two__intro">
+      Sample text provides enough length to demonstrate this animated content layout.
+    </p>
   </interact-element>
 </section>
 ```
@@ -58,13 +57,21 @@ A white square panel overlays a blurred hero image at page load; as the user scr
 ## Essential styles
 
 ```css
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
   overflow-x: clip;
 }
 
-interact-element { display: block; }
+interact-element {
+  display: block;
+}
 
 .header {
   position: fixed;
@@ -138,9 +145,13 @@ interact-element { display: block; }
   opacity: 0;
 }
 
-.spacer { height: 100vh; }
+.spacer {
+  height: 100vh;
+}
 
-.driver { height: 120vh; }
+.driver {
+  height: 120vh;
+}
 
 .circle-wrap {
   position: fixed;
@@ -185,7 +196,9 @@ interact-element { display: block; }
   pointer-events: none;
 }
 
-.section-two a { pointer-events: auto; }
+.section-two a {
+  pointer-events: auto;
+}
 
 .section-two__label {
   font-size: 0.6rem;
@@ -218,16 +231,33 @@ interact-element { display: block; }
 }
 
 @media (max-width: 1024px) {
-  .section-two__title { font-size: clamp(2.5rem, 6vh, 4.5rem); }
-  .section-two { padding: 6vh; }
+  .section-two__title {
+    font-size: clamp(2.5rem, 6vh, 4.5rem);
+  }
+  .section-two {
+    padding: 6vh;
+  }
 }
 
 @media (max-width: 768px) {
-  .header { padding: 20px 20px; }
-  .header__logo { font-size: 1.3rem; }
-  .circle-wrap { justify-content: center; padding-left: 0; }
-  .circle-wrap interact-element { justify-content: center; }
-  .circle { width: 88vw; height: 88vw; transform-origin: center center; }
+  .header {
+    padding: 20px 20px;
+  }
+  .header__logo {
+    font-size: 1.3rem;
+  }
+  .circle-wrap {
+    justify-content: center;
+    padding-left: 0;
+  }
+  .circle-wrap interact-element {
+    justify-content: center;
+  }
+  .circle {
+    width: 88vw;
+    height: 88vw;
+    transform-origin: center center;
+  }
   .section-two {
     left: 50%;
     transform: translate(-50%, -50%);
@@ -235,17 +265,38 @@ interact-element { display: block; }
     height: 88vw;
     padding: 7vw;
   }
-  .section-two__title { font-size: clamp(2.2rem, 8vw, 3.5rem); }
-  .section-two__intro { font-size: 0.95rem; max-width: none; }
+  .section-two__title {
+    font-size: clamp(2.2rem, 8vw, 3.5rem);
+  }
+  .section-two__intro {
+    font-size: 0.95rem;
+    max-width: none;
+  }
 }
 
 @media (max-width: 480px) {
-  .header { padding: 16px 16px; }
-  .circle { width: 92vw; height: 92vw; }
-  .section-two { width: 92vw; height: 92vw; padding: 6vw; }
-  .section-two__title { font-size: clamp(2rem, 9vw, 3rem); }
-  .section-two__intro { font-size: 0.85rem; line-height: 1.65; }
-  .section-two__label { margin-bottom: 2vh; }
+  .header {
+    padding: 16px 16px;
+  }
+  .circle {
+    width: 92vw;
+    height: 92vw;
+  }
+  .section-two {
+    width: 92vw;
+    height: 92vw;
+    padding: 6vw;
+  }
+  .section-two__title {
+    font-size: clamp(2rem, 9vw, 3rem);
+  }
+  .section-two__intro {
+    font-size: 0.85rem;
+    line-height: 1.65;
+  }
+  .section-two__label {
+    margin-bottom: 2vh;
+  }
 }
 ```
 
@@ -270,7 +321,7 @@ const config = {
             ],
           },
           rangeStart: { name: 'entry', offset: { value: 0, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 18, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 18, unit: 'percentage' } },
           easing: 'ease-in',
           fill: 'both',
         },
@@ -284,7 +335,7 @@ const config = {
             ],
           },
           rangeStart: { name: 'entry', offset: { value: 5, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 25, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 25, unit: 'percentage' } },
           easing: 'ease-in',
           fill: 'both',
         },
@@ -299,7 +350,7 @@ const config = {
             ],
           },
           rangeStart: { name: 'entry', offset: { value: 15, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 85, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 85, unit: 'percentage' } },
           easing: EASE_OUT,
           fill: 'both',
         },
@@ -307,13 +358,10 @@ const config = {
           key: 'hero-img',
           keyframeEffect: {
             name: 'img-settle',
-            keyframes: [
-              { transform: 'scale(1.1)' },
-              { transform: 'scale(1)' },
-            ],
+            keyframes: [{ transform: 'scale(1.1)' }, { transform: 'scale(1)' }],
           },
           rangeStart: { name: 'entry', offset: { value: 30, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 100, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 100, unit: 'percentage' } },
           easing: 'ease-out',
           fill: 'both',
         },
@@ -321,13 +369,10 @@ const config = {
           key: 'hero-img',
           keyframeEffect: {
             name: 'img-unblur',
-            keyframes: [
-              { filter: 'blur(14px)' },
-              { filter: 'blur(0px)' },
-            ],
+            keyframes: [{ filter: 'blur(14px)' }, { filter: 'blur(0px)' }],
           },
           rangeStart: { name: 'entry', offset: { value: 10, unit: 'percentage' } },
-          rangeEnd:   { name: 'entry', offset: { value: 80, unit: 'percentage' } },
+          rangeEnd: { name: 'entry', offset: { value: 80, unit: 'percentage' } },
           easing: 'ease-out',
           fill: 'both',
           composite: 'add',

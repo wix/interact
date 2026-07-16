@@ -11,23 +11,23 @@ An endless floating image gallery where tiles drift and wrap continuously across
   <div id="page-container">
     <div id="gallery-container">
       <div class="gallery-tile" tabindex="0">
-        <img src="">
+        <img src="" />
         <div class="gallery-tile-title">Vibrant Gradient</div>
       </div>
       <div class="gallery-tile" tabindex="0">
-        <img src="">
+        <img src="" />
         <div class="gallery-tile-title">Cool Tones</div>
       </div>
       <div class="gallery-tile" tabindex="0">
-        <img src="">
+        <img src="" />
         <div class="gallery-tile-title">Pastel Rainbow</div>
       </div>
       <div class="gallery-tile" tabindex="0">
-        <img src="">
+        <img src="" />
         <div class="gallery-tile-title">Marble Swirl</div>
       </div>
       <div class="gallery-tile" tabindex="0">
-        <img src="">
+        <img src="" />
         <div class="gallery-tile-title">Liquid Abstract</div>
       </div>
     </div>
@@ -35,7 +35,7 @@ An endless floating image gallery where tiles drift and wrap continuously across
     <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <button class="modal-close" id="modalClose" aria-label="Close enlarged view">&times;</button>
       <div class="modal-content">
-        <img id="modalImage" src="">
+        <img id="modalImage" src="" />
         <div class="modal-text-overlay">
           <h1 id="modalTitle"></h1>
           <p id="modalDescription"></p>
@@ -52,9 +52,12 @@ An endless floating image gallery where tiles drift and wrap continuously across
 ## Essential styles
 
 ```css
-html, body {
-  margin: 0; padding: 0;
-  width: 100%; height: 100%;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -68,7 +71,8 @@ html, body {
 
 .gallery-tile {
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   opacity: 0;
   border-radius: 8px;
   will-change: transform, opacity;
@@ -86,7 +90,8 @@ html, body {
 
 .gallery-tile img {
   display: block;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   border-radius: 8px;
   pointer-events: none;
@@ -108,7 +113,9 @@ html, body {
   font-size: 1rem;
   opacity: 0;
   transform: translateY(10px);
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  transition:
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out;
   pointer-events: none;
 }
 
@@ -130,7 +137,8 @@ html, body {
 
 .modal-content {
   position: relative;
-  max-width: 90vw; max-height: 90vh;
+  max-width: 90vw;
+  max-height: 90vh;
   border-radius: 8px;
   transform: scale(0.8);
 }
@@ -144,7 +152,9 @@ html, body {
 
 .modal-text-overlay {
   position: absolute;
-  left: 0; right: 0; bottom: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   padding: 60px 30px 30px;
   border-radius: 0 0 8px 8px;
   box-sizing: border-box;
@@ -152,22 +162,34 @@ html, body {
 
 .modal-text-overlay h1 {
   margin: 0 0 10px;
-  font-size: 2rem; font-weight: 700;
+  font-size: 2rem;
+  font-weight: 700;
 }
 
 .modal-text-overlay p {
-  margin: 0; font-size: 1.1rem;
+  margin: 0;
+  font-size: 1.1rem;
   opacity: 0.9;
 }
 
-.modal-close { border: none; padding: 0; font: inherit;
-  position: absolute; top: 20px; right: 20px;
-  font-size: 2rem; cursor: pointer; line-height: 1;
-  z-index: 1001; border-radius: 50%;
+.modal-close {
+  border: none;
+  padding: 0;
+  font: inherit;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 2rem;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 1001;
+  border-radius: 50%;
 }
 
-.modal-close:focus-visible { outline: 3px solid; outline-offset: 2px; }
-
+.modal-close:focus-visible {
+  outline: 3px solid;
+  outline-offset: 2px;
+}
 ```
 
 ## Interact config

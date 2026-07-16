@@ -8,7 +8,6 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
 
 ```html
 <main class="animation-section">
-
   <interact-element data-interact-key="#trigger-2">
     <div id="trigger-2" class="trigger-area" style="top: 25%;height: 6.25%"></div>
   </interact-element>
@@ -78,7 +77,6 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
       </div>
     </div>
   </interact-element>
-
 </main>
 ```
 
@@ -86,63 +84,79 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
 
 ```css
 :root {
-    --pw: 100;
-    --ph: 100;
-    --panel-radius: 0px;
+  --pw: 100;
+  --ph: 100;
+  --panel-radius: 0px;
 }
 
-#container-2, #container-3, #container-4, #container-5, #container-6 {
-    clip-path: circle(0% at center);
+#container-2,
+#container-3,
+#container-4,
+#container-5,
+#container-6 {
+  clip-path: circle(0% at center);
 }
 
-#container-1 { z-index: 1; }
-#container-2 { z-index: 2; }
-#container-3 { z-index: 3; }
-#container-4 { z-index: 4; }
-#container-5 { z-index: 5; }
-#container-6 { z-index: 6; }
+#container-1 {
+  z-index: 1;
+}
+#container-2 {
+  z-index: 2;
+}
+#container-3 {
+  z-index: 3;
+}
+#container-4 {
+  z-index: 4;
+}
+#container-5 {
+  z-index: 5;
+}
+#container-6 {
+  z-index: 6;
+}
 
 .trigger-area {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    opacity: 0;
-    pointer-events: none;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .animation-section {
-    position: relative;
-    width: 100%;
-    height: 800vh;
+  position: relative;
+  width: 100%;
+  height: 800vh;
 }
 
 .content-panel {
-    position: sticky;
-    top: calc((100 - var(--ph)) * 0.5vh);
-    width: calc(var(--pw) * 1vw);
-    height: calc(var(--ph) * 1vh);
-    margin: 0 auto;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    overflow: clip;
-    border-radius: var(--panel-radius);
+  position: sticky;
+  top: calc((100 - var(--ph)) * 0.5vh);
+  width: calc(var(--pw) * 1vw);
+  height: calc(var(--ph) * 1vh);
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: clip;
+  border-radius: var(--panel-radius);
 }
 
 .content-panel::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40%;
-    z-index: 1;
-    pointer-events: none;
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .content-panel > div {
-    transform: scale(calc(min(var(--pw), var(--ph)) / 100));
-    transform-origin: center bottom;
+  transform: scale(calc(min(var(--pw), var(--ph)) / 100));
+  transform-origin: center bottom;
 }
 ```
 
@@ -150,97 +164,107 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
 
 ```js
 {
-    interactions: [
+  interactions: [
+    {
+      key: '#trigger-2',
+      trigger: 'viewProgress',
+      effects: [
         {
-            key: '#trigger-2',
-            trigger: 'viewProgress',
-            effects: [{
-                key: '#container-2',
-                keyframeEffect: {
-                    name: 'reveal-circle-2',
-                    keyframes: [
-                        { clipPath: 'circle(0% at center)' },
-                        { clipPath: 'circle(80% at center)' }
-                    ]
-                },
-                rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
-                rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
-                easing: 'linear',
-                fill: 'both'
-            }]
+          key: '#container-2',
+          keyframeEffect: {
+            name: 'reveal-circle-2',
+            keyframes: [
+              { clipPath: 'circle(0% at center)' },
+              { clipPath: 'circle(80% at center)' },
+            ],
+          },
+          rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+          rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+          easing: 'linear',
+          fill: 'both',
         },
+      ],
+    },
+    {
+      key: '#trigger-3',
+      trigger: 'viewProgress',
+      effects: [
         {
-            key: '#trigger-3',
-            trigger: 'viewProgress',
-            effects: [{
-                key: '#container-3',
-                keyframeEffect: {
-                    name: 'reveal-circle-3',
-                    keyframes: [
-                        { clipPath: 'circle(0% at center)' },
-                        { clipPath: 'circle(80% at center)' }
-                    ]
-                },
-                rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
-                rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
-                easing: 'linear',
-                fill: 'both'
-            }]
+          key: '#container-3',
+          keyframeEffect: {
+            name: 'reveal-circle-3',
+            keyframes: [
+              { clipPath: 'circle(0% at center)' },
+              { clipPath: 'circle(80% at center)' },
+            ],
+          },
+          rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+          rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+          easing: 'linear',
+          fill: 'both',
         },
+      ],
+    },
+    {
+      key: '#trigger-4',
+      trigger: 'viewProgress',
+      effects: [
         {
-            key: '#trigger-4',
-            trigger: 'viewProgress',
-            effects: [{
-                key: '#container-4',
-                keyframeEffect: {
-                    name: 'reveal-circle-4',
-                    keyframes: [
-                        { clipPath: 'circle(0% at center)' },
-                        { clipPath: 'circle(80% at center)' }
-                    ]
-                },
-                rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
-                rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
-                easing: 'linear',
-                fill: 'both'
-            }]
+          key: '#container-4',
+          keyframeEffect: {
+            name: 'reveal-circle-4',
+            keyframes: [
+              { clipPath: 'circle(0% at center)' },
+              { clipPath: 'circle(80% at center)' },
+            ],
+          },
+          rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+          rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+          easing: 'linear',
+          fill: 'both',
         },
+      ],
+    },
+    {
+      key: '#trigger-5',
+      trigger: 'viewProgress',
+      effects: [
         {
-            key: '#trigger-5',
-            trigger: 'viewProgress',
-            effects: [{
-                key: '#container-5',
-                keyframeEffect: {
-                    name: 'reveal-circle-5',
-                    keyframes: [
-                        { clipPath: 'circle(0% at center)' },
-                        { clipPath: 'circle(80% at center)' }
-                    ]
-                },
-                rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
-                rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
-                easing: 'linear',
-                fill: 'both'
-            }]
+          key: '#container-5',
+          keyframeEffect: {
+            name: 'reveal-circle-5',
+            keyframes: [
+              { clipPath: 'circle(0% at center)' },
+              { clipPath: 'circle(80% at center)' },
+            ],
+          },
+          rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+          rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+          easing: 'linear',
+          fill: 'both',
         },
+      ],
+    },
+    {
+      key: '#trigger-6',
+      trigger: 'viewProgress',
+      effects: [
         {
-            key: '#trigger-6',
-            trigger: 'viewProgress',
-            effects: [{
-                key: '#container-6',
-                keyframeEffect: {
-                    name: 'reveal-circle-6',
-                    keyframes: [
-                        { clipPath: 'circle(0% at center)' },
-                        { clipPath: 'circle(80% at center)' }
-                    ]
-                },
-                rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
-                rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
-                easing: 'linear',
-                fill: 'both'
-            }]
-        }
-    ]
+          key: '#container-6',
+          keyframeEffect: {
+            name: 'reveal-circle-6',
+            keyframes: [
+              { clipPath: 'circle(0% at center)' },
+              { clipPath: 'circle(80% at center)' },
+            ],
+          },
+          rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
+          rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
+          easing: 'linear',
+          fill: 'both',
+        },
+      ],
+    },
+  ];
 }
 ```

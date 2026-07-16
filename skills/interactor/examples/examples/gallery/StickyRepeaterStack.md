@@ -50,7 +50,8 @@ body {
   overflow-x: hidden;
 }
 
-.intro-section, .outro-section {
+.intro-section,
+.outro-section {
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -60,7 +61,8 @@ body {
   padding: 0 2rem;
 }
 
-.intro-section h1, .outro-section h1 {
+.intro-section h1,
+.outro-section h1 {
   font-size: clamp(2rem, 5vw, 4rem);
   margin-bottom: 1rem;
 }
@@ -83,9 +85,19 @@ body {
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0) rotate(-45deg); }
-  40% { transform: translateY(-10px) rotate(-45deg); }
-  60% { transform: translateY(-5px) rotate(-45deg); }
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0) rotate(-45deg);
+  }
+  40% {
+    transform: translateY(-10px) rotate(-45deg);
+  }
+  60% {
+    transform: translateY(-5px) rotate(-45deg);
+  }
 }
 
 .scroll-section {
@@ -129,50 +141,50 @@ const SCROLL_SPEED = 1;
 const NUM = 5;
 const vh = window.innerHeight;
 const padTopPx = 0.15 * vh;
-const cardHPx = 0.40 * vh;
+const cardHPx = 0.4 * vh;
 const stickyTopPx = 0.35 * vh;
 const gapPx = Math.round(STACK_GAP / SCROLL_SPEED);
 
 const cardTops = [];
 for (let i = 0; i < NUM; i++) {
-    cardTops.push(padTopPx + i * (cardHPx + gapPx));
+  cardTops.push(padTopPx + i * (cardHPx + gapPx));
 }
 
 const lastStickScroll = vh + cardTops[NUM - 1] - stickyTopPx;
 const sectionPx = Math.round(lastStickScroll + cardHPx + gapPx);
 const totalCover = sectionPx + vh;
-const perCardSpan = (cardHPx + gapPx) / totalCover * 100;
+const perCardSpan = ((cardHPx + gapPx) / totalCover) * 100;
 
 document.querySelector('.scroll-section').style.height = sectionPx + 'px';
 document.querySelector('.repeater-wrapper').style.gap = gapPx + 'px';
 
 const effects = [];
 for (let i = 0; i < NUM; i++) {
-    const stickScroll = vh + cardTops[i] - stickyTopPx;
-    const startPct = stickScroll / totalCover * 100;
-    const endPct = (i < NUM - 1)
-        ? startPct + perCardSpan - 1
-        : sectionPx / totalCover * 100;
+  const stickScroll = vh + cardTops[i] - stickyTopPx;
+  const startPct = (stickScroll / totalCover) * 100;
+  const endPct = i < NUM - 1 ? startPct + perCardSpan - 1 : (sectionPx / totalCover) * 100;
 
-    effects.push({
-        key: 'card-' + (i + 1),
-        keyframeEffect: {
-            name: 'card-' + (i + 1) + '-scale',
-            keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(0.8)' }]
-        },
-        rangeStart: { name: 'cover', offset: { unit: 'percentage', value: Math.round(startPct) } },
-        rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: Math.round(endPct) } },
-        fill: 'both',
-        composite: 'add',
-        easing: 'linear'
-    });
+  effects.push({
+    key: 'card-' + (i + 1),
+    keyframeEffect: {
+      name: 'card-' + (i + 1) + '-scale',
+      keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(0.8)' }],
+    },
+    rangeStart: { name: 'cover', offset: { unit: 'percentage', value: Math.round(startPct) } },
+    rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: Math.round(endPct) } },
+    fill: 'both',
+    composite: 'add',
+    easing: 'linear',
+  });
 }
 
 {
-    interactions: [{
-        key: 'scroll-section',
-        trigger: 'viewProgress',
-        effects: effects
-    }]
+  interactions: [
+    {
+      key: 'scroll-section',
+      trigger: 'viewProgress',
+      effects: effects,
+    },
+  ];
 }
 ```

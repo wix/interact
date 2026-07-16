@@ -9,10 +9,9 @@ A split-screen layout where text elements (heading, paragraph, button) fade up w
 ```html
 <interact-element data-interact-key="scroll-driver" class="scroll-driver">
   <div class="sticky-stage">
-
     <div class="text-block">
       <interact-element data-interact-key="text-title">
-        <h1>Built By<br>Real People</h1>
+        <h1>Built By<br />Real People</h1>
       </interact-element>
       <interact-element data-interact-key="text-desc">
         <p>Sample text provides enough length to demonstrate this animated content layout.</p>
@@ -24,10 +23,9 @@ A split-screen layout where text elements (heading, paragraph, button) fade up w
 
     <div class="image-area">
       <interact-element data-interact-key="hero-image" class="hero-image">
-        <img src="">
+        <img src="" />
       </interact-element>
     </div>
-
   </div>
 </interact-element>
 ```
@@ -109,9 +107,9 @@ interact-element {
   display: block;
 }
 
-[data-interact-key="text-title"] > *,
-[data-interact-key="text-desc"] > *,
-[data-interact-key="text-btn"] > * {
+[data-interact-key='text-title'] > *,
+[data-interact-key='text-desc'] > *,
+[data-interact-key='text-btn'] > * {
   opacity: 0;
   transform: translateY(40px);
 }
@@ -170,52 +168,54 @@ interact-element {
     {
       key: 'scroll-driver',
       trigger: 'viewEnter',
-      sequences: [{
-        delay: 500,
-        offset: 300,
-        triggerType: 'once',
-        effects: [
-          {
-            key: 'text-title',
-            keyframeEffect: {
-              name: 'float-in-title',
-              keyframes: [
-                { opacity: 0, transform: 'translateY(50px)' },
-                { opacity: 1, transform: 'translateY(0)' }
-              ]
+      sequences: [
+        {
+          delay: 500,
+          offset: 300,
+          triggerType: 'once',
+          effects: [
+            {
+              key: 'text-title',
+              keyframeEffect: {
+                name: 'float-in-title',
+                keyframes: [
+                  { opacity: 0, transform: 'translateY(50px)' },
+                  { opacity: 1, transform: 'translateY(0)' },
+                ],
+              },
+              duration: 800,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'forwards',
             },
-            duration: 800,
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            fill: 'forwards'
-          },
-          {
-            key: 'text-desc',
-            keyframeEffect: {
-              name: 'float-in-desc',
-              keyframes: [
-                { opacity: 0, transform: 'translateY(40px)' },
-                { opacity: 1, transform: 'translateY(0)' }
-              ]
+            {
+              key: 'text-desc',
+              keyframeEffect: {
+                name: 'float-in-desc',
+                keyframes: [
+                  { opacity: 0, transform: 'translateY(40px)' },
+                  { opacity: 1, transform: 'translateY(0)' },
+                ],
+              },
+              duration: 800,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'forwards',
             },
-            duration: 800,
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            fill: 'forwards'
-          },
-          {
-            key: 'text-btn',
-            keyframeEffect: {
-              name: 'float-in-btn',
-              keyframes: [
-                { opacity: 0, transform: 'translateY(40px)' },
-                { opacity: 1, transform: 'translateY(0)' }
-              ]
+            {
+              key: 'text-btn',
+              keyframeEffect: {
+                name: 'float-in-btn',
+                keyframes: [
+                  { opacity: 0, transform: 'translateY(40px)' },
+                  { opacity: 1, transform: 'translateY(0)' },
+                ],
+              },
+              duration: 800,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              fill: 'forwards',
             },
-            duration: 800,
-            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-            fill: 'forwards'
-          }
-        ]
-      }]
+          ],
+        },
+      ],
     },
     {
       key: 'scroll-driver',
@@ -228,16 +228,16 @@ interact-element {
             keyframes: [
               { transform: 'perspective(350px) rotateY(55deg)' },
               { transform: 'perspective(350px) rotateY(0deg)' },
-              { transform: 'perspective(350px) rotateY(-55deg)' }
-            ]
+              { transform: 'perspective(350px) rotateY(-55deg)' },
+            ],
           },
-          rangeStart: { name: 'cover', offset: { value: 0, unit: 'percentage' }},
-          rangeEnd:   { name: 'cover', offset: { value: 100, unit: 'percentage' }},
+          rangeStart: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+          rangeEnd: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
           easing: 'linear',
-          fill: 'both'
-        }
-      ]
-    }
-  ]
+          fill: 'both',
+        },
+      ],
+    },
+  ];
 }
 ```
