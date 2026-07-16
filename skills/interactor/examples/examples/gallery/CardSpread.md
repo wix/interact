@@ -212,11 +212,16 @@ body, html {
 ## Interact config
 
 ```js
-const desktopConfig = {
+const config = {
+  conditions: {
+    desktop: { type: 'media', predicate: '(min-width: 769px)' },
+    mobile: { type: 'media', predicate: '(max-width: 768px)' }
+  },
   interactions: [
     {
       key: '.scroll-section',
       trigger: 'viewProgress',
+      conditions: ['desktop'],
       effects: [
         {
           key: '.card',
@@ -261,15 +266,11 @@ const desktopConfig = {
           easing: 'cubic-bezier(0.42, 0, 0.58, 1)', fill: 'both'
         }
       ]
-    }
-  ]
-};
-
-const mobileConfig = {
-  interactions: [
+    },
     {
       key: '.scroll-section',
       trigger: 'viewProgress',
+      conditions: ['mobile'],
       effects: [
         {
           key: '#card-2',
@@ -303,6 +304,4 @@ const mobileConfig = {
     }
   ]
 };
-
-const config = window.innerWidth < 768 ? mobileConfig : desktopConfig;
 ```
