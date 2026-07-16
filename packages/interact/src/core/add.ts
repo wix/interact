@@ -364,15 +364,13 @@ function _resolveSourceElements(
   sourceController: IInteractionController,
   elements?: HTMLElement[],
 ): HTMLElement | HTMLElement[] | null {
-  if (elements) {
-    return _queryItemElement(interaction, elements);
-  }
+  const resolved = elements
+    ? _queryItemElement(interaction, elements)
+    : _getElementsFromData(interaction, sourceController.element, sourceController.useFirstChild);
 
-  return _getElementsFromData(
-    interaction,
-    sourceController.element,
-    sourceController.useFirstChild,
-  );
+  // Treat an empty array as "no elements" so callers' null-guards bail instead of
+  // marking the interaction added while attaching zero triggers.
+  return Array.isArray(resolved) && resolved.length === 0 ? null : resolved;
 }
 
 function _attachSequenceTriggers(
@@ -505,8 +503,6 @@ function _processSequences(
       reducedMotion: Interact.forceReducedMotion,
     });
 
-    instance.addedInteractions[cacheKey] = true;
-
     const selectorCondition = getSelectorCondition(
       interaction.conditions || [],
       instance.dataCache.conditions,
@@ -515,6 +511,10 @@ function _processSequences(
     const sourceElements = _resolveSourceElements(interaction, sourceController, elements);
 
     if (!sourceElements) return;
+
+    // Mark added only after the source resolves, so an unresolved element can be
+    // retried on a later pass instead of being permanently disabled by the guard above.
+    instance.addedInteractions[cacheKey] = true;
 
     _attachSequenceTriggers(
       interaction,
@@ -594,8 +594,6 @@ function _processSequencesForTarget(
         reducedMotion: Interact.forceReducedMotion,
       });
 
-      instance.addedInteractions[cacheKey] = true;
-
       const selectorCondition = getSelectorCondition(
         interaction.conditions || [],
         instance.dataCache.conditions,
@@ -604,6 +602,10 @@ function _processSequencesForTarget(
       const sourceElements = _resolveSourceElements(interaction, sourceController);
 
       if (!sourceElements) return true;
+
+      // Mark added only after the source resolves, so an unresolved element can be
+      // retried on a later pass instead of being permanently disabled by the guard above.
+      instance.addedInteractions[cacheKey] = true;
 
       _attachSequenceTriggers(
         interaction,
