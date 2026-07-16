@@ -2,26 +2,26 @@
 
 Six full-viewport image panels stack on top of each other; as the user scrolls, each successive panel is revealed from nothing via an expanding circular clip-path, driven by invisible scroll-trigger elements.
 
-**Tags:** viewProgress, sticky, clip-path, reveal, stagger, parallax
+**Tags:** viewProgress, sticky, clip-path, reveal, stagger
 
 ## Markup
 
 ```html
 <main class="animation-section">
   <interact-element data-interact-key="#trigger-2">
-    <div id="trigger-2" class="trigger-area" style="top: 25%;height: 6.25%"></div>
+    <div id="trigger-2" class="trigger-area" style="top:25%;height:6.25%;"></div>
   </interact-element>
   <interact-element data-interact-key="#trigger-3">
-    <div id="trigger-3" class="trigger-area" style="top: 37.5%;height: 6.25%"></div>
+    <div id="trigger-3" class="trigger-area" style="top:37.5%;height:6.25%;"></div>
   </interact-element>
   <interact-element data-interact-key="#trigger-4">
-    <div id="trigger-4" class="trigger-area" style="top: 50%;height: 6.25%"></div>
+    <div id="trigger-4" class="trigger-area" style="top:50%;height:6.25%;"></div>
   </interact-element>
   <interact-element data-interact-key="#trigger-5">
-    <div id="trigger-5" class="trigger-area" style="top: 62.5%;height: 6.25%"></div>
+    <div id="trigger-5" class="trigger-area" style="top:62.5%;height:6.25%;"></div>
   </interact-element>
   <interact-element data-interact-key="#trigger-6">
-    <div id="trigger-6" class="trigger-area" style="top: 75%;height: 6.25%"></div>
+    <div id="trigger-6" class="trigger-area" style="top:75%;height:6.25%;"></div>
   </interact-element>
 
   <interact-element data-interact-key="#container-1">
@@ -86,7 +86,6 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
 :root {
   --pw: 100;
   --ph: 100;
-  --panel-radius: 0px;
 }
 
 #container-2,
@@ -100,18 +99,23 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
 #container-1 {
   z-index: 1;
 }
+
 #container-2 {
   z-index: 2;
 }
+
 #container-3 {
   z-index: 3;
 }
+
 #container-4 {
   z-index: 4;
 }
+
 #container-5 {
   z-index: 5;
 }
+
 #container-6 {
   z-index: 6;
 }
@@ -120,7 +124,6 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   position: absolute;
   left: 0;
   width: 100%;
-  opacity: 0;
   pointer-events: none;
 }
 
@@ -140,22 +143,9 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   align-items: flex-end;
   justify-content: center;
   overflow: clip;
-  border-radius: var(--panel-radius);
-}
-
-.content-panel::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 40%;
-  z-index: 1;
-  pointer-events: none;
 }
 
 .content-panel > div {
-  transform: scale(calc(min(var(--pw), var(--ph)) / 100));
   transform-origin: center bottom;
 }
 ```
@@ -163,7 +153,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: '#trigger-2',
@@ -265,6 +255,6 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

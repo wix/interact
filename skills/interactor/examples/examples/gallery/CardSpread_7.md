@@ -10,7 +10,6 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 <section class="intro">
   <h1>The Collection</h1>
   <p>Scroll to reveal</p>
-  <div class="scroll-hint"></div>
 </section>
 
 <interact-element data-interact-key="#scroll-wrapper">
@@ -105,14 +104,6 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
   --section-height: 600vh;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 .intro {
   height: 100vh;
   display: flex;
@@ -123,41 +114,8 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
   padding: 2rem;
 }
 
-.intro h1 {
-  font-size: clamp(2.5rem, 7vw, 5.5rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-}
-
 .intro p {
   margin-top: 1.2rem;
-  font-size: 0.85rem;
-  opacity: 0.35;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
-.scroll-hint {
-  margin-top: 3rem;
-  width: 24px;
-  height: 24px;
-  border-right: 2px solid;
-  border-bottom: 2px solid;
-  transform: rotate(45deg);
-  animation: hint-bounce 2s ease-in-out infinite;
-}
-
-@keyframes hint-bounce {
-  0%,
-  100% {
-    transform: rotate(45deg) translate(0, 0);
-    opacity: 0.4;
-  }
-  50% {
-    transform: rotate(45deg) translate(6px, 6px);
-    opacity: 0.8;
-  }
 }
 
 #scroll-wrapper {
@@ -186,16 +144,8 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
   position: absolute;
   width: var(--card-w);
   height: var(--card-h);
-  border-radius: 20px;
-  overflow: hidden;
+  overflow: clip;
   transform-origin: center 140%;
-  cursor: pointer;
-  will-change: transform;
-  transition: filter 0.3s ease;
-}
-
-.card:hover {
-  filter: brightness(1.12);
 }
 
 .card img {
@@ -215,38 +165,33 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 
 .card-label span {
   display: block;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0.5;
   margin-bottom: 0.35rem;
-}
-
-.card-label h3 {
-  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
-  font-weight: 700;
-  line-height: 1.3;
 }
 
 #card-1 {
   z-index: 1;
 }
+
 #card-2 {
   z-index: 2;
 }
+
 #card-3 {
   z-index: 3;
 }
+
 #card-4 {
   z-index: 4;
 }
+
 #card-5 {
   z-index: 5;
 }
+
 #card-6 {
   z-index: 6;
 }
+
 #card-7 {
   z-index: 7;
 }
@@ -256,13 +201,6 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.outro p {
-  font-size: 1rem;
-  opacity: 0.15;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
 }
 
 interact-element {
@@ -300,13 +238,13 @@ for (let i = 0; i < CARDS; i++) {
   });
 }
 
-{
+const config = {
   interactions: [
     {
       key: '#scroll-wrapper',
       trigger: 'viewProgress',
       effects: fanEffects,
     },
-  ];
-}
+  ],
+};
 ```

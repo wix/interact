@@ -1,6 +1,6 @@
 # Mindshift Transition
 
-Two white theatrical panels slide in from opposite sides as the page scrolls, concealing the bold uppercase headline while revealing a softer serif subtext beneath.
+Two theatrical panels slide in from opposite sides as the page scrolls, concealing the headline while revealing subtext beneath.
 
 **Tags:** viewProgress, sticky, opacity, transform, reveal, fade, stagger
 
@@ -38,7 +38,7 @@ Two white theatrical panels slide in from opposite sides as the page scrolls, co
 body {
   margin: 0;
   height: 300vh;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .sticky-container {
@@ -90,14 +90,11 @@ body {
 .text-1 {
   font-size: clamp(2.5rem, 12vw, 9rem);
   line-height: 0.85;
-  text-transform: uppercase;
-  letter-spacing: -0.04em;
 }
 
 .text-2 {
   font-size: clamp(1.2rem, 5vw, 3.5rem);
   line-height: 1.1;
-  font-weight: 400;
 }
 
 .scroll-hint {
@@ -106,8 +103,6 @@ body {
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.7rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
   z-index: 30;
 }
 ```
@@ -115,7 +110,7 @@ body {
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'scroll-stage',
@@ -181,6 +176,6 @@ body {
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

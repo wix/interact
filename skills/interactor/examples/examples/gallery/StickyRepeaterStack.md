@@ -12,7 +12,6 @@ Five cards stack using sticky positioning and scale down to 0.8 as each subseque
     <h1>Repeater Stack Effect</h1>
     <p>Scroll down to experience a scroll-driven stacking animation.</p>
   </div>
-  <div class="scroll-down-arrow"></div>
 </section>
 
 <interact-element data-interact-key="scroll-section">
@@ -47,7 +46,7 @@ Five cards stack using sticky positioning and scale down to 0.8 as each subseque
 ```css
 body {
   margin: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .intro-section,
@@ -63,49 +62,21 @@ body {
 
 .intro-section h1,
 .outro-section h1 {
-  font-size: clamp(2rem, 5vw, 4rem);
   margin-bottom: 1rem;
 }
 
 .intro-section p {
-  font-size: clamp(1rem, 2vw, 1.2rem);
   max-width: 600px;
-  line-height: 1.6;
-}
-
-.scroll-down-arrow {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  border-left: 2px solid white;
-  border-bottom: 2px solid white;
-  width: 24px;
-  height: 24px;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
-    transform: translateY(0) rotate(-45deg);
-  }
-  40% {
-    transform: translateY(-10px) rotate(-45deg);
-  }
-  60% {
-    transform: translateY(-5px) rotate(-45deg);
-  }
 }
 
 .scroll-section {
   position: relative;
+  height: calc(300vh + 1250px);
 }
 
 .repeater-wrapper {
   display: flex;
+  gap: 250px;
   flex-direction: column;
   align-items: center;
   padding-top: 15vh;
@@ -122,12 +93,9 @@ interact-element {
   height: 40vh;
   position: sticky;
   top: 35vh;
-  border-radius: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 2rem;
-  font-weight: bold;
   backface-visibility: hidden;
   transform-style: preserve-3d;
 }
@@ -155,9 +123,6 @@ const sectionPx = Math.round(lastStickScroll + cardHPx + gapPx);
 const totalCover = sectionPx + vh;
 const perCardSpan = ((cardHPx + gapPx) / totalCover) * 100;
 
-document.querySelector('.scroll-section').style.height = sectionPx + 'px';
-document.querySelector('.repeater-wrapper').style.gap = gapPx + 'px';
-
 const effects = [];
 for (let i = 0; i < NUM; i++) {
   const stickScroll = vh + cardTops[i] - stickyTopPx;
@@ -178,13 +143,13 @@ for (let i = 0; i < NUM; i++) {
   });
 }
 
-{
+const config = {
   interactions: [
     {
       key: 'scroll-section',
       trigger: 'viewProgress',
       effects: effects,
     },
-  ];
-}
+  ],
+};
 ```

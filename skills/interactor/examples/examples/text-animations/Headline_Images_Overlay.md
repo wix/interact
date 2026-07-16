@@ -67,14 +67,14 @@ html {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: clip;
 }
 
 #header-section {
   position: relative;
   width: 100%;
   height: 100vh;
-  overflow: hidden;
+  overflow: clip;
   isolation: isolate;
 }
 
@@ -97,7 +97,6 @@ html {
 .text-common {
   font-size: clamp(2.7rem, 8.8vw, 7.5rem);
   line-height: 0.95;
-  letter-spacing: -2px;
 }
 
 .text-top {
@@ -123,7 +122,7 @@ html {
   clip-path: var(--clip);
   -webkit-mask-image: var(--mask);
   mask-image: var(--mask);
-  overflow: hidden;
+  overflow: clip;
   z-index: 20;
   opacity: 0;
   will-change: opacity;

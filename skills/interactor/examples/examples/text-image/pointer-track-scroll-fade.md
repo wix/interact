@@ -1,6 +1,6 @@
 # Pointer Track Scroll Fade
 
-A portrait photo tracks the mouse pointer via the TrackMouse preset while fading out as the user scrolls through a sticky section, with a hover color transition on the bottom link.
+A portrait photo tracks the pointer while fading out on scroll, and the bottom link shifts on hover.
 
 **Tags:** pointerMove, viewProgress, hover, sticky, opacity, transform, fade, parallax
 
@@ -14,7 +14,7 @@ A portrait photo tracks the mouse pointer via the TrackMouse preset while fading
       <span class="hero-text">SAMPLE TEXT FOR THE ANIMATED LAYOUT.</span>
       <interact-element data-interact-key="photo">
         <div class="image-wrapper">
-          <img src="" />
+          <img src="" alt="" />
         </div>
       </interact-element>
       <interact-element data-interact-key="link">
@@ -28,12 +28,6 @@ A portrait photo tracks the mouse pointer via the TrackMouse preset while fading
 ## Essential styles
 
 ```css
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 interact-element {
   display: block;
 }
@@ -45,7 +39,6 @@ interact-element {
 .section {
   position: sticky;
   top: 0;
-  width: 100vw;
   height: 100vh;
   display: flex;
   align-items: center;
@@ -54,14 +47,8 @@ interact-element {
 
 .hero-text {
   position: absolute;
-  font-weight: 300;
-  font-size: clamp(2.8rem, 7vw, 6rem);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.05;
   text-align: center;
   max-width: 80vw;
-  user-select: none;
   pointer-events: none;
 }
 
@@ -71,9 +58,6 @@ interact-element {
   left: 0;
   width: 100%;
   text-align: center;
-  font-size: 1rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
 }
 
 .bottom-link {
@@ -82,63 +66,38 @@ interact-element {
   left: 0;
   width: 100%;
   text-align: center;
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.bottom-link a {
-  border-bottom: 1px solid;
-  padding-bottom: 2px;
 }
 
 .image-wrapper {
-  position: relative;
   width: clamp(200px, 22vw, 274px);
   aspect-ratio: 274 / 342;
-  border-radius: 0;
   overflow: clip;
 }
 
 .image-wrapper img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top center;
-  display: block;
 }
 
 @media (max-width: 768px) {
   .hero-text {
-    font-size: clamp(3rem, 10vw, 5rem);
     max-width: 90vw;
-    padding: 0 20px;
+    padding-inline: 20px;
   }
 
   .header {
     top: 24px;
-    font-size: 0.75rem;
-    padding: 0 20px;
+    padding-inline: 20px;
   }
 
   .bottom-link {
     bottom: 24px;
-    font-size: 0.75rem;
   }
 
   .image-wrapper {
     width: clamp(140px, 38vw, 200px);
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-text {
-    font-size: clamp(2.5rem, 9vw, 4rem);
-  }
-
-  .header {
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
   }
 }
 ```
@@ -146,17 +105,22 @@ interact-element {
 ## Interact config
 
 ```js
-{
+const config = {
+  conditions: {
+    hoverDevice: { type: 'media', predicate: '(hover: hover) and (pointer: fine)' },
+  },
   interactions: [
     {
       key: 'scroll-area',
       trigger: 'pointerMove',
       params: { hitArea: 'root' },
+      conditions: ['hoverDevice'],
       effects: [
         {
           key: 'photo',
           namedEffect: { type: 'TrackMouse' },
           easing: 'ease-out',
+          fill: 'both',
         },
       ],
     },
@@ -187,13 +151,11 @@ interact-element {
           transition: {
             duration: 300,
             easing: 'ease',
-            styleProperties: [
-            { name: 'transform', value: 'translateY(-2px)' }
-          ],
+            styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
           },
         },
       ],
     },
   ],
-}
+};
 ```

@@ -82,7 +82,7 @@ Cards fly through a sticky 3D stage driven by page scroll, each one sweeping in 
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .animation-layout-container {
@@ -115,9 +115,6 @@ Cards fly through a sticky 3D stage driven by page scroll, each one sweeping in 
   max-width: 70vw;
   top: 50%;
   left: 50%;
-  border-radius: 1.5rem;
-  overflow: hidden;
-  will-change: transform, opacity;
   transform: translate(-50%, -50%);
 }
 
@@ -132,26 +129,12 @@ Cards fly through a sticky 3D stage driven by page scroll, each one sweeping in 
 
 #dynamic-title-container {
   z-index: 10;
-  padding: 0 2rem;
-  box-sizing: border-box;
-  text-align: center;
   pointer-events: none;
 }
 
 #dynamic-title-text {
   display: inline-block;
   opacity: 0;
-}
-
-#dynamic-title-text h2 {
-  font-size: 2.25rem;
-  line-height: 2.5rem;
-  font-weight: 700;
-}
-
-#dynamic-title-text p {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
 }
 
 @media (max-width: 768px) {
@@ -167,7 +150,6 @@ Cards fly through a sticky 3D stage driven by page scroll, each one sweeping in 
   .text-viewport {
     width: 40%;
     height: 100vh;
-    padding: 1rem;
     align-items: center;
     justify-content: flex-start;
   }
@@ -176,21 +158,6 @@ Cards fly through a sticky 3D stage driven by page scroll, each one sweeping in 
     width: 250px;
     height: 350px;
     max-width: 90vw;
-  }
-
-  #dynamic-title-container {
-    text-align: left;
-  }
-
-  #dynamic-title-text h2 {
-    font-size: 1.5rem;
-    line-height: 1.75rem;
-  }
-
-  #dynamic-title-text p {
-    font-size: 1rem;
-    line-height: 1.25rem;
-    margin-top: 0.5rem;
   }
 }
 ```

@@ -172,7 +172,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .visualizer-container {
@@ -188,13 +188,10 @@ body {
   justify-content: center;
   white-space: nowrap;
   mix-blend-mode: screen;
-  user-select: none;
 }
 
 .row.middle {
   z-index: 10;
-  cursor: text;
-  user-select: text;
 }
 
 .row.duplicate {
@@ -203,9 +200,7 @@ body {
 
 .char {
   display: inline-block;
-  font-weight: 900;
   font-size: 5.5vw;
-  letter-spacing: -0.05em;
 }
 
 .space {
@@ -216,7 +211,7 @@ body {
 .desc-container {
   margin-top: 3rem;
   height: 6rem;
-  overflow: hidden;
+  overflow: clip;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -225,9 +220,6 @@ body {
 
 #hero-desc {
   font-size: 0.875rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   text-align: center;
   line-height: 1.625;
   max-width: 32rem;
@@ -271,7 +263,7 @@ const rowSequences = duplicateRows.flatMap((row) => {
   ];
 });
 
-({
+const config = {
   effects: {
     flicker: {
       keyframeEffect: {
@@ -319,5 +311,5 @@ const rowSequences = duplicateRows.flatMap((row) => {
       ],
     },
   ],
-});
+};
 ```

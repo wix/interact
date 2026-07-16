@@ -76,7 +76,7 @@ body {
   display: flex;
   align-items: center;
   padding: 0 5rem;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .content-block {
@@ -89,9 +89,6 @@ body {
 
 .eyebrow {
   font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   margin-bottom: 1.5rem;
   display: flex;
   flex-wrap: wrap;
@@ -100,7 +97,6 @@ body {
 
 .headline {
   font-size: 3.75rem;
-  font-weight: 700;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 0.75rem;

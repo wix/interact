@@ -7,18 +7,12 @@ On scroll, 20 alternating horizontal white stripes slide in from opposite sides 
 ## Markup
 
 ```html
-<header class="header">
-  <div class="header__logo">Nexus</div>
-  <div class="header__actions"></div>
-</header>
-
 <section class="hero">
   <interact-element data-interact-key="hero-img">
     <div class="hero__img-wrap">
       <img class="hero__img" src="" />
     </div>
   </interact-element>
-  <div class="hero__gradient"></div>
   <interact-element data-interact-key="hero-darken">
     <div class="hero__darken"></div>
   </interact-element>
@@ -60,6 +54,20 @@ On scroll, 20 alternating horizontal white stripes slide in from opposite sides 
   <interact-element data-interact-key="h4"><div class="stripe"></div></interact-element>
   <interact-element data-interact-key="h5"><div class="stripe"></div></interact-element>
   <interact-element data-interact-key="h6"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h7"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h8"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h9"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h10"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h11"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h12"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h13"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h14"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h15"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h16"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h17"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h18"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h19"><div class="stripe"></div></interact-element>
+  <interact-element data-interact-key="h20"><div class="stripe"></div></interact-element>
 </div>
 
 <section class="section-two">
@@ -84,11 +92,7 @@ On scroll, 20 alternating horizontal white stripes slide in from opposite sides 
 ## Essential styles
 
 ```css
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
+* {
   box-sizing: border-box;
 }
 
@@ -98,36 +102,6 @@ body {
 
 interact-element {
   display: block;
-}
-
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 32px 52px;
-  mix-blend-mode: difference;
-}
-
-.header__logo {
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.header__actions {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
 }
 
 .hero {
@@ -146,32 +120,25 @@ interact-element {
   height: 100%;
   object-fit: cover;
   object-position: center 15%;
-  transform-origin: center center;
-}
-
-.hero__gradient {
-  position: absolute;
-  inset: 0;
+  transform-origin: center;
 }
 
 .hero__darken {
   position: absolute;
   inset: 0;
   opacity: 0;
+  background: #000;
 }
 
 .hero__scroll {
   position: absolute;
   bottom: 52px;
   left: 50%;
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  font-size: 0.55rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
+  transform: translateX(-50%);
 }
 
 .hero__scroll-arrow {
@@ -187,11 +154,9 @@ interact-element {
   max-width: 680px;
 }
 
-.hero__title {
-  font-size: clamp(3.2rem, 7vw, 5.5rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.05;
+[data-interact-key='hero-content'] {
+  opacity: 0;
+  transform: translateY(40px);
 }
 
 .spacer {
@@ -208,8 +173,8 @@ interact-element {
   z-index: 2;
   display: flex;
   flex-direction: column;
-  pointer-events: none;
   overflow: clip;
+  pointer-events: none;
 }
 
 .stripes interact-element {
@@ -220,142 +185,35 @@ interact-element {
 .stripe {
   width: 100%;
   height: 100%;
+  background: #fff;
 }
 
 .section-two {
   position: fixed;
   inset: 0;
   z-index: 4;
-  padding: 14vh 52px 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
   align-content: center;
   pointer-events: none;
 }
 
-.section-two a {
-  pointer-events: auto;
-}
-
-.section-two__left {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding-top: 8px;
-  padding-right: 64px;
-  border-right: 1px solid;
-}
-
-.section-two__label {
-  font-size: 0.55rem;
-  font-weight: 500;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  margin-bottom: 24px;
-}
-
-.section-two__title {
-  font-size: clamp(3.5rem, 7vw, 6.5rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.05;
-}
-
+.section-two__left,
 .section-two__right {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  padding-top: 44px;
-  padding-left: 64px;
-}
-
-.section-two__intro {
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: 1.6;
-  margin-bottom: 24px;
-  letter-spacing: -0.01em;
-}
-
-.section-two__line {
-  font-size: 0.92rem;
-  font-weight: 400;
-  line-height: 1.85;
-  margin-bottom: 0;
-}
-
-@media (max-width: 1024px) {
-  .section-two {
-    gap: 48px;
-  }
-  .section-two__title {
-    font-size: clamp(2.8rem, 6vw, 4.5rem);
-  }
 }
 
 @media (max-width: 768px) {
-  .header {
-    padding: 20px 20px;
-  }
-  .header__logo {
-    font-size: 1.3rem;
-  }
-  .hero__scroll {
-    bottom: 28px;
-  }
   .hero__content {
-    left: 20px;
     right: 20px;
     bottom: 100px;
+    left: 20px;
     max-width: none;
   }
-  .hero__title {
-    font-size: clamp(2.2rem, 8vw, 3.5rem);
-  }
-  .section-two {
-    padding: 18vh 24px 0;
-    grid-template-columns: 1fr;
-  }
-  .section-two__left {
-    border-right: none;
-    padding-right: 0;
-    padding-bottom: 24px;
-    border-bottom: 1px solid;
-  }
-  .section-two__right {
-    padding-left: 0;
-    padding-top: 24px;
-  }
-  .section-two__title {
-    font-size: clamp(2.5rem, 10vw, 3.5rem);
-  }
-  .section-two__intro {
-    font-size: 1.05rem;
-  }
-  .section-two__line {
-    font-size: 0.85rem;
-  }
-}
 
-@media (max-width: 480px) {
-  .header {
-    padding: 16px 16px;
-  }
-  .hero__content {
-    left: 16px;
-    right: 16px;
-    bottom: 80px;
-  }
   .section-two {
-    padding: 16vh 16px 0;
-  }
-  .section-two__label {
-    margin-bottom: 16px;
-  }
-  .section-two__line {
-    font-size: 0.8rem;
-    line-height: 1.7;
+    grid-template-columns: 1fr;
   }
 }
 ```
@@ -518,7 +376,7 @@ const config = {
           },
           duration: 1000,
           easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          fill: 'forwards',
+          fill: 'both',
           triggerType: 'once',
         },
       ],

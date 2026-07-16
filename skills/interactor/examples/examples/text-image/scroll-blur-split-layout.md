@@ -1,6 +1,6 @@
 # Scroll Blur Split Layout
 
-A sticky split-screen layout where scrolling progressively blurs the hero portrait and headline text, with a subtle hover transition on the navigation link.
+A sticky split-screen layout where scrolling progressively blurs the hero portrait and headline while the link shifts on hover.
 
 **Tags:** viewProgress, hover, sticky, flex, filter, blur
 
@@ -23,7 +23,7 @@ A sticky split-screen layout where scrolling progressively blurs the hero portra
         <interact-element data-interact-key="photo">
           <div class="right-image">
             <div class="image-wrapper">
-              <img src="" />
+              <img src="" alt="" />
             </div>
           </div>
         </interact-element>
@@ -36,12 +36,6 @@ A sticky split-screen layout where scrolling progressively blurs the hero portra
 ## Essential styles
 
 ```css
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 interact-element {
   display: block;
 }
@@ -53,7 +47,6 @@ interact-element {
 .section {
   position: sticky;
   top: 0;
-  width: 100vw;
   height: 100vh;
   display: flex;
   align-items: stretch;
@@ -71,41 +64,20 @@ interact-element {
   position: absolute;
   top: 40px;
   left: 8vw;
-  font-size: 1rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
-.hero-text {
-  font-weight: 400;
-  font-size: clamp(2.8rem, 5vw, 5rem);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.05;
-  text-align: left;
 }
 
 .bottom-link {
   position: absolute;
   bottom: 40px;
   left: 8vw;
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.bottom-link a {
-  border-bottom: 1px solid;
-  padding-bottom: 2px;
 }
 
 .photo-wrap {
-  width: 50vw;
-  height: 100vh;
+  width: 50%;
 }
 
 .right-image {
-  width: 50vw;
+  width: 100%;
   height: 100vh;
 }
 
@@ -116,11 +88,10 @@ interact-element {
 }
 
 .image-wrapper img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center center;
-  display: block;
 }
 
 @media (max-width: 768px) {
@@ -137,7 +108,6 @@ interact-element {
     left: auto;
     width: 100%;
     text-align: center;
-    font-size: 0.7rem;
     padding: 20px 24px 0;
   }
 
@@ -155,12 +125,6 @@ interact-element {
   .left-content {
     width: 100%;
     padding: 1.5rem 24px;
-    justify-content: flex-start;
-  }
-
-  .hero-text {
-    font-size: clamp(1.8rem, 7vw, 2.8rem);
-    text-align: center;
   }
 
   .bottom-link {
@@ -170,14 +134,7 @@ interact-element {
     bottom: auto;
     width: 100%;
     text-align: center;
-    font-size: 0.75rem;
     padding: 0 24px 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-text {
-    font-size: clamp(1.5rem, 6vw, 2.2rem);
   }
 }
 ```
@@ -185,7 +142,7 @@ interact-element {
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'scroll-area',
@@ -227,13 +184,11 @@ interact-element {
           transition: {
             duration: 300,
             easing: 'ease',
-            styleProperties: [
-            { name: 'transform', value: 'translateY(-2px)' }
-          ],
+            styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
           },
         },
       ],
     },
   ],
-}
+};
 ```

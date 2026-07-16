@@ -9,12 +9,6 @@ A full-viewport image stays sticky while the user scrolls, shrinking and tilting
 ```html
 <interact-element data-interact-key="track">
   <section class="sticky-track">
-    <div class="hero-copy">
-      <div class="hero-copy-inner">
-        <h1>Structure</h1>
-        <p>Where light meets form</p>
-      </div>
-    </div>
     <div class="sticky-frame">
       <img src="" />
     </div>
@@ -25,30 +19,24 @@ A full-viewport image stays sticky while the user scrolls, shrinking and tilting
 ## Essential styles
 
 ```css
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 interact-element {
   display: block;
 }
 
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .sticky-track {
-  height: 500vh;
   position: relative;
+  height: 500vh;
 }
 
 .sticky-frame {
   position: sticky;
   top: 0;
-  height: 100vh;
   display: flex;
+  height: 100vh;
   align-items: center;
   justify-content: center;
   overflow: clip;
@@ -60,47 +48,12 @@ body {
   height: 100vh;
   object-fit: cover;
 }
-
-.hero-copy {
-  position: sticky;
-  top: 0;
-  height: 0;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.hero-copy-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  gap: 20px;
-  text-align: center;
-  padding: 0 24px;
-}
-
-.hero-copy h1 {
-  font-size: clamp(3.5rem, 10vw, 9rem);
-  font-weight: 300;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.hero-copy p {
-  font-size: clamp(1.125rem, 2.2vw, 1.5rem);
-  font-weight: 400;
-  letter-spacing: 0.12em;
-  line-height: 1.6;
-  text-transform: uppercase;
-}
 ```
 
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: 'track',
@@ -138,11 +91,11 @@ body {
             ],
           },
           rangeStart: { name: 'contain', offset: { value: 0, unit: 'percentage' } },
-          rangeEnd:   { name: 'contain', offset: { value: 100, unit: 'percentage' } },
+          rangeEnd: { name: 'contain', offset: { value: 100, unit: 'percentage' } },
           fill: 'both',
         },
       ],
     },
   ],
-}
+};
 ```

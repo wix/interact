@@ -7,20 +7,11 @@ A white square panel overlays a blurred hero image at page load; as the user scr
 ## Markup
 
 ```html
-<header class="header">
-  <div class="header__logo">Nexus</div>
-  <div class="header__actions"></div>
-</header>
-
 <section class="hero">
   <interact-element data-interact-key="hero-img">
     <div class="hero__img-wrap">
       <img class="hero__img" src="" />
     </div>
-  </interact-element>
-  <div class="hero__gradient"></div>
-  <interact-element data-interact-key="hero-darken">
-    <div class="hero__darken"></div>
   </interact-element>
 </section>
 
@@ -57,11 +48,7 @@ A white square panel overlays a blurred hero image at page load; as the user scr
 ## Essential styles
 
 ```css
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
+* {
   box-sizing: border-box;
 }
 
@@ -71,48 +58,6 @@ body {
 
 interact-element {
   display: block;
-}
-
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 32px 52px;
-  mix-blend-mode: difference;
-}
-
-.header__logo {
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.header__actions {
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.header__search {
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.header__search svg {
-  width: 17px;
-  height: 17px;
 }
 
 .hero {
@@ -131,18 +76,7 @@ interact-element {
   height: 100%;
   object-fit: cover;
   object-position: center 15%;
-  transform-origin: center center;
-}
-
-.hero__gradient {
-  position: absolute;
-  inset: 0;
-}
-
-.hero__darken {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
+  transform-origin: center;
 }
 
 .spacer {
@@ -160,14 +94,12 @@ interact-element {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding-left: 5vh;
   pointer-events: none;
 }
 
 .circle-wrap interact-element {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
   width: 100%;
   height: 100%;
 }
@@ -177,125 +109,43 @@ interact-element {
   height: 80vh;
   aspect-ratio: 1;
   flex-shrink: 0;
-  border-radius: 0;
   transform-origin: left center;
+  background: #fff;
 }
 
 .section-two {
   position: fixed;
-  z-index: 4;
   top: 50%;
-  left: 5vh;
-  transform: translateY(-50%);
+  left: 0;
+  z-index: 4;
+  display: flex;
   width: 80vh;
   height: 80vh;
-  display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 8vh;
   pointer-events: none;
-}
-
-.section-two a {
-  pointer-events: auto;
-}
-
-.section-two__label {
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  margin-bottom: 3vh;
-}
-
-.section-two__title {
-  font-size: clamp(3rem, 7.5vh, 6.5rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  margin-bottom: 4vh;
-}
-
-.section-two__rule {
-  width: 40px;
-  height: 1px;
-  margin-bottom: 4vh;
-}
-
-.section-two__intro {
-  font-size: clamp(0.95rem, 1.7vh, 1.2rem);
-  font-weight: 400;
-  line-height: 1.8;
-  max-width: 48ch;
-  letter-spacing: 0.005em;
-}
-
-@media (max-width: 1024px) {
-  .section-two__title {
-    font-size: clamp(2.5rem, 6vh, 4.5rem);
-  }
-  .section-two {
-    padding: 6vh;
-  }
+  transform: translateY(-50%);
 }
 
 @media (max-width: 768px) {
-  .header {
-    padding: 20px 20px;
-  }
-  .header__logo {
-    font-size: 1.3rem;
-  }
-  .circle-wrap {
-    justify-content: center;
-    padding-left: 0;
-  }
+  .circle-wrap,
   .circle-wrap interact-element {
     justify-content: center;
   }
-  .circle {
+
+  .circle,
+  .section-two {
     width: 88vw;
     height: 88vw;
-    transform-origin: center center;
   }
+
+  .circle {
+    transform-origin: center;
+  }
+
   .section-two {
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 88vw;
-    height: 88vw;
-    padding: 7vw;
-  }
-  .section-two__title {
-    font-size: clamp(2.2rem, 8vw, 3.5rem);
-  }
-  .section-two__intro {
-    font-size: 0.95rem;
-    max-width: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .header {
-    padding: 16px 16px;
-  }
-  .circle {
-    width: 92vw;
-    height: 92vw;
-  }
-  .section-two {
-    width: 92vw;
-    height: 92vw;
-    padding: 6vw;
-  }
-  .section-two__title {
-    font-size: clamp(2rem, 9vw, 3rem);
-  }
-  .section-two__intro {
-    font-size: 0.85rem;
-    line-height: 1.65;
-  }
-  .section-two__label {
-    margin-bottom: 2vh;
   }
 }
 ```

@@ -81,7 +81,7 @@ html {
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow: hidden;
+  overflow: clip;
 }
 
 #cards-collection {
@@ -95,14 +95,10 @@ html {
   position: absolute;
   width: 20vw;
   height: 100vh;
-  border-radius: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 5rem;
-  font-weight: bold;
-  overflow: hidden;
-  will-change: transform, height, opacity;
+  overflow: clip;
   transform: translateX(0);
 }
 
@@ -127,29 +123,29 @@ html {
 }
 
 .card-content h2 {
-  font-size: 2rem;
-  font-weight: 700;
   margin: 0 0 0.5rem 0;
 }
 
 .card-content p {
-  font-size: 1rem;
-  font-weight: 400;
   margin: 0;
 }
 
 #card-1 {
   z-index: 3;
 }
+
 #card-2 {
   z-index: 4;
 }
+
 #card-3 {
   z-index: 5;
 }
+
 #card-4 {
   z-index: 2;
 }
+
 #card-5 {
   z-index: 1;
 }
@@ -169,7 +165,6 @@ html {
     left: 0;
     top: 12.5vh;
     transform: translateY(0);
-    will-change: transform;
   }
 
   #card-2,
@@ -184,26 +179,22 @@ html {
     padding: 1.5rem;
   }
 
-  .card-content h2 {
-    font-size: 1.5rem;
-  }
-
-  .card-content p {
-    font-size: 0.9rem;
-  }
-
   #card-1 {
     z-index: 1;
   }
+
   #card-2 {
     z-index: 2;
   }
+
   #card-3 {
     z-index: 3;
   }
+
   #card-4 {
     z-index: 4;
   }
+
   #card-5 {
     z-index: 5;
   }
@@ -213,25 +204,29 @@ html {
   .card {
     transform: none !important;
     height: 100vh !important;
-    opacity: 1 !important;
   }
 
   @media (min-width: 769px) {
     .card {
       height: 85vh !important;
     }
+
     #card-1 {
       transform: translateX(-40vw) !important;
     }
+
     #card-2 {
       transform: translateX(-20vw) !important;
     }
+
     #card-3 {
       transform: translateX(0) !important;
     }
+
     #card-4 {
       transform: translateX(20vw) !important;
     }
+
     #card-5 {
       transform: translateX(40vw) !important;
     }
@@ -264,7 +259,8 @@ const config = {
       conditions: ['desktop'],
       effects: [
         {
-          key: '.card',
+          key: '#cards-collection',
+          selector: '.card',
           keyframeEffect: {
             name: 'card-shrink',
             keyframes: [{ height: '100vh' }, { height: '85vh' }],

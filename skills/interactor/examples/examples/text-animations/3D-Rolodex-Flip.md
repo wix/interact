@@ -12,7 +12,7 @@ Each full-viewport text card flips into view from below with a 3D rotateX and sc
     <div>Featuring</div>
     <div>Abigail DeVille<br />Xaviera Simmons<br />Rosa-Johan Uddoh</div>
   </div>
-  <div class="col" style="border-right: 1px solid var(--grid-color)">
+  <div class="col">
     <div style="text-align: center">Curated By</div>
     <div style="text-align: center">Racquel Chevremont<br />Mickalene Thomas</div>
   </div>
@@ -70,7 +70,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .layout-grid {
@@ -86,18 +86,11 @@ body {
 }
 
 .col {
-  border-right: 1px solid var(--grid-color);
   padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.col:last-child {
-  border-right: none;
 }
 
 .content-scroll {
@@ -126,8 +119,6 @@ interact-element {
   font-size: 12vw;
   line-height: 0.9;
   text-align: center;
-  text-transform: uppercase;
-  font-weight: 700;
   margin: 0;
   transform-origin: center center;
 }
@@ -137,7 +128,6 @@ interact-element {
   opacity: 0.6;
   margin-bottom: 10px;
   text-align: center;
-  text-transform: uppercase;
 }
 
 @media (max-width: 768px) {
@@ -146,20 +136,13 @@ interact-element {
     height: auto;
     min-height: auto;
     grid-template-columns: 1fr;
-    border-bottom: 1px solid var(--grid-color);
   }
 
   .col {
-    border-right: none;
-    border-bottom: 1px solid var(--grid-color);
     flex-direction: row;
     align-items: center;
     gap: 15px;
     padding: 15px;
-  }
-
-  .col:last-child {
-    border-bottom: none;
   }
 
   .col div {
@@ -183,7 +166,7 @@ const createScrollInteraction = (id) => ({
       rangeStart: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
       rangeEnd: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
       keyframeEffect: {
-        name: '3D-Rolodex-Flip',
+        name: `3D-Rolodex-Flip-${id}`,
         keyframes: [
           {
             transform: 'perspective(1000px) rotateX(-90deg) scale(0.6)',

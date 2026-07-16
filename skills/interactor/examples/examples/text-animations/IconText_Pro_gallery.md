@@ -173,7 +173,7 @@ On hover, each narrow card in a horizontal flex gallery expands its width, the c
 }
 
 html {
-  overflow-x: hidden;
+  overflow-x: clip;
   margin: 0;
   padding: 0;
 }
@@ -181,7 +181,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .gallery-header {
@@ -189,12 +189,6 @@ body {
   text-align: center;
   padding: 2.5rem 1rem;
   z-index: 20;
-}
-
-.gallery-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
 }
 
 .feature-container {
@@ -217,10 +211,9 @@ interact-element {
     height: auto;
     min-height: 420px;
     padding: 3rem 2rem;
-    overflow: hidden;
+    overflow: clip;
     position: relative;
     z-index: 1;
-    border-radius: 2.2rem;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -242,29 +235,6 @@ interact-element {
   }
 }
 
-.feature-bottom-subtitle {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  margin-bottom: 0.5rem;
-}
-
-.feature-bottom-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-.feature-description {
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.5;
-  max-width: 100%;
-}
-
 .feature-icon {
   width: 42px;
   height: 42px;
@@ -277,11 +247,7 @@ interact-element {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-  }
-
-  .gallery-header h1 {
-    font-size: 3.5rem;
+    overflow: clip;
   }
 
   .feature-container {
@@ -305,9 +271,8 @@ interact-element {
     width: var(--panel-default-width, 180px);
     height: 100%;
     flex-shrink: 0;
-    overflow: hidden;
+    overflow: clip;
     position: relative;
-    border-radius: 2.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -329,24 +294,12 @@ interact-element {
     left: 3.5rem;
     width: calc(var(--panel-open-width, 700px) - 100px);
     max-height: calc(100% - 3rem);
-    overflow: hidden;
+    overflow: clip;
     opacity: 0;
     transform: translateY(20px);
     z-index: 10;
     pointer-events: none;
     text-align: left;
-  }
-
-  .feature-bottom-subtitle {
-    font-size: 0.75rem;
-  }
-
-  .feature-bottom-title {
-    font-size: 2.8rem;
-  }
-
-  .feature-description {
-    font-size: 1rem;
   }
 }
 ```
@@ -354,103 +307,100 @@ interact-element {
 ## Interact config
 
 ```js
-{
-    conditions: {
-        'desktop': { type: 'media', predicate: '(min-width: 769px)' }
+const config = {
+  conditions: {
+    desktop: { type: 'media', predicate: '(min-width: 769px)' },
+  },
+  effects: {
+    'h-expand': {
+      keyframeEffect: {
+        name: 'h-exp',
+        keyframes: [{ width: '180px' }, { width: '700px', zIndex: 10 }],
+      },
+      triggerType: 'alternate',
+      duration: 800,
+      easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+      fill: 'both',
     },
-    effects: {
-        'h-expand': {
-            keyframeEffect: {
-                name: 'h-exp',
-                keyframes: [
-                    { width: '180px' },
-                    { width: '700px', zIndex: 10 }
-                ]
-            },
-            triggerType: 'alternate',
-            duration: 800,
-            easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
-            fill: 'both'
-        },
-        'reveal': {
-            keyframeEffect: {
-                name: 't-rev',
-                keyframes: [
-                    { opacity: 0, transform: 'translateY(20px)' },
-                    { opacity: 1, transform: 'translateY(0)' }
-                ]
-            },
-            triggerType: 'alternate',
-            duration: 400,
-            delay: 250,
-            easing: 'ease-out',
-            fill: 'both'
-        },
-        'icon-move': {
-            keyframeEffect: {
-                name: 'i-mov',
-                keyframes: [
-                    { transform: 'translate(0, 0) scale(1)', opacity: 0.8 },
-                    { transform: 'translate(-280px, -170px) scale(0.9)', opacity: 1 }
-                ]
-            },
-            triggerType: 'alternate',
-            duration: 800,
-            easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
-            fill: 'both'
-        }
+    reveal: {
+      keyframeEffect: {
+        name: 't-rev',
+        keyframes: [
+          { opacity: 0, transform: 'translateY(20px)' },
+          { opacity: 1, transform: 'translateY(0)' },
+        ],
+      },
+      triggerType: 'alternate',
+      duration: 400,
+      delay: 250,
+      easing: 'ease-out',
+      fill: 'both',
     },
-    interactions: [
-        {
-            key: 'col-1',
-            trigger: 'hover',
-            conditions: ['desktop'],
-            effects: [
-                { key: 'col-1', selector: '#col-1-card', effectId: 'h-expand' },
-                { key: 'col-1', selector: '#col-1-card .feature-text-group', effectId: 'reveal' },
-                { key: 'col-1', selector: '#col-1-card .icon-wrapper', effectId: 'icon-move' }
-            ]
-        },
-        {
-            key: 'col-2',
-            trigger: 'hover',
-            conditions: ['desktop'],
-            effects: [
-                { key: 'col-2', selector: '#col-2-card', effectId: 'h-expand' },
-                { key: 'col-2', selector: '#col-2-card .feature-text-group', effectId: 'reveal' },
-                { key: 'col-2', selector: '#col-2-card .icon-wrapper', effectId: 'icon-move' }
-            ]
-        },
-        {
-            key: 'col-3',
-            trigger: 'hover',
-            conditions: ['desktop'],
-            effects: [
-                { key: 'col-3', selector: '#col-3-card', effectId: 'h-expand' },
-                { key: 'col-3', selector: '#col-3-card .feature-text-group', effectId: 'reveal' },
-                { key: 'col-3', selector: '#col-3-card .icon-wrapper', effectId: 'icon-move' }
-            ]
-        },
-        {
-            key: 'col-4',
-            trigger: 'hover',
-            conditions: ['desktop'],
-            effects: [
-                { key: 'col-4', selector: '#col-4-card', effectId: 'h-expand' },
-                { key: 'col-4', selector: '#col-4-card .feature-text-group', effectId: 'reveal' },
-                { key: 'col-4', selector: '#col-4-card .icon-wrapper', effectId: 'icon-move' }
-            ]
-        },
-        {
-            key: 'col-5',
-            trigger: 'hover',
-            conditions: ['desktop'],
-            effects: [
-                { key: 'col-5', selector: '#col-5-card', effectId: 'h-expand' },
-                { key: 'col-5', selector: '#col-5-card .feature-text-group', effectId: 'reveal' },
-                { key: 'col-5', selector: '#col-5-card .icon-wrapper', effectId: 'icon-move' }
-            ]
-        }
-    ]
-}
+    'icon-move': {
+      keyframeEffect: {
+        name: 'i-mov',
+        keyframes: [
+          { transform: 'translate(0, 0) scale(1)', opacity: 0.8 },
+          { transform: 'translate(-280px, -170px) scale(0.9)', opacity: 1 },
+        ],
+      },
+      triggerType: 'alternate',
+      duration: 800,
+      easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+      fill: 'both',
+    },
+  },
+  interactions: [
+    {
+      key: 'col-1',
+      trigger: 'hover',
+      conditions: ['desktop'],
+      effects: [
+        { key: 'col-1', selector: '#col-1-card', effectId: 'h-expand' },
+        { key: 'col-1', selector: '#col-1-card .feature-text-group', effectId: 'reveal' },
+        { key: 'col-1', selector: '#col-1-card .icon-wrapper', effectId: 'icon-move' },
+      ],
+    },
+    {
+      key: 'col-2',
+      trigger: 'hover',
+      conditions: ['desktop'],
+      effects: [
+        { key: 'col-2', selector: '#col-2-card', effectId: 'h-expand' },
+        { key: 'col-2', selector: '#col-2-card .feature-text-group', effectId: 'reveal' },
+        { key: 'col-2', selector: '#col-2-card .icon-wrapper', effectId: 'icon-move' },
+      ],
+    },
+    {
+      key: 'col-3',
+      trigger: 'hover',
+      conditions: ['desktop'],
+      effects: [
+        { key: 'col-3', selector: '#col-3-card', effectId: 'h-expand' },
+        { key: 'col-3', selector: '#col-3-card .feature-text-group', effectId: 'reveal' },
+        { key: 'col-3', selector: '#col-3-card .icon-wrapper', effectId: 'icon-move' },
+      ],
+    },
+    {
+      key: 'col-4',
+      trigger: 'hover',
+      conditions: ['desktop'],
+      effects: [
+        { key: 'col-4', selector: '#col-4-card', effectId: 'h-expand' },
+        { key: 'col-4', selector: '#col-4-card .feature-text-group', effectId: 'reveal' },
+        { key: 'col-4', selector: '#col-4-card .icon-wrapper', effectId: 'icon-move' },
+      ],
+    },
+    {
+      key: 'col-5',
+      trigger: 'hover',
+      conditions: ['desktop'],
+      effects: [
+        { key: 'col-5', selector: '#col-5-card', effectId: 'h-expand' },
+        { key: 'col-5', selector: '#col-5-card .feature-text-group', effectId: 'reveal' },
+        { key: 'col-5', selector: '#col-5-card .icon-wrapper', effectId: 'icon-move' },
+      ],
+    },
+  ],
+};
 ```

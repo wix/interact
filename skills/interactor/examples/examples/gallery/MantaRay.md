@@ -45,10 +45,6 @@ A horizontal overlapping gallery where images enter as a staggered sequence, bre
 ## Essential styles
 
 ```css
-interact-element:not(:defined) {
-  opacity: 0;
-}
-
 :root {
   --base-size: 12;
   --overlap-ratio: 0.67;
@@ -74,11 +70,6 @@ interact-element[data-interact-key^='img-wrapper-'] {
 interact-element {
   position: relative;
   z-index: 1;
-  transition: z-index 0s;
-}
-
-interact-element:hover {
-  z-index: 9999 !important;
 }
 ```
 
@@ -89,7 +80,7 @@ const HOVER_SCALE = 2.5;
 
 const imageKeys = ['img-wrapper-0', 'img-wrapper-1', 'img-wrapper-2', 'img-wrapper-3'];
 
-const interactConfig = {
+const config = {
   effects: {
     'breathe-vertical': {
       keyframeEffect: {
@@ -122,7 +113,7 @@ const interactConfig = {
           triggerType: 'once',
           effects: [
             {
-              selector: '#gallery-container > interact-element > img',
+              selector: 'interact-element > img',
               effectId: 'breathe-vertical',
               composite: 'add',
             },
@@ -134,7 +125,7 @@ const interactConfig = {
 };
 
 imageKeys.forEach((wrapperId) => {
-  interactConfig.interactions.push({
+  config.interactions.push({
     key: wrapperId,
     trigger: 'hover',
     effects: [

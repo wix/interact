@@ -1,6 +1,6 @@
 # Gooey Text
 
-A blurred circle continuously sweeps across bold text inside a high-contrast filter container, creating a gooey ink-spreading effect that fades in when the scene enters view.
+A blurred circle continuously sweeps across text inside a high-contrast filter container, creating a gooey ink-spreading effect that fades in when the scene enters view.
 
 **Tags:** viewEnter, loop, blur, filter, opacity, fade
 
@@ -29,7 +29,7 @@ body {
   justify-content: center;
   height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .scene {
@@ -55,7 +55,7 @@ interact-element {
 
 .gooey-filter {
   filter: contrast(50);
-  overflow: hidden;
+  overflow: clip;
   position: relative;
   width: 100%;
   height: 100%;
@@ -66,13 +66,9 @@ interact-element {
 
 .gooey-text {
   filter: blur(8px);
-  letter-spacing: -0.05em;
-  user-select: text;
-  cursor: text;
   z-index: 10;
   position: relative;
   font-size: 13rem;
-  font-weight: 900;
   line-height: 1;
 }
 
@@ -99,38 +95,36 @@ interact-element {
 ## Interact config
 
 ```js
-{
-    conditions: {
-        "motion-ok": { type: "media", predicate: "(prefers-reduced-motion: no-preference)" }
-    },
-    interactions: [
+const config = {
+  conditions: {
+    'motion-ok': { type: 'media', predicate: '(prefers-reduced-motion: no-preference)' },
+  },
+  interactions: [
+    {
+      key: 'scene-root',
+      trigger: 'viewEnter',
+      effects: [
         {
-            key: 'scene-root',
-            trigger: 'viewEnter',
-            effects: [
-                {
-                    key: 'auto-circle',
-                    keyframeEffect: {
-                        name: 'PassThrough',
-                        keyframes: [
-                            { left: '-20%' },
-                            { left: '120%' }
-                        ]
-                    },
-                    duration: 4000,
-                    easing: 'ease-in-out',
-                    iterations: Infinity,
-                    fill: 'both',
-                    composite: 'replace',
-                    conditions: ['motion-ok']
-                },
-                {
-                    key: 'scene-root',
-                    namedEffect: { type: 'FadeIn', duration: 1000 },
-                    fill: 'both'
-                }
-            ]
-        }
-    ]
-}
+          key: 'auto-circle',
+          keyframeEffect: {
+            name: 'PassThrough',
+            keyframes: [{ left: '-20%' }, { left: '120%' }],
+          },
+          duration: 4000,
+          easing: 'ease-in-out',
+          iterations: Infinity,
+          fill: 'both',
+          composite: 'replace',
+          conditions: ['motion-ok'],
+        },
+        {
+          key: 'scene-root',
+          namedEffect: { type: 'FadeIn' },
+          duration: 1000,
+          fill: 'both',
+        },
+      ],
+    },
+  ],
+};
 ```

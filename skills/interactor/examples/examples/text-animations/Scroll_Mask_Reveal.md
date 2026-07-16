@@ -15,7 +15,7 @@ As the page scrolls, inline image thumbnails embedded within a sticky text block
       </p>
 
       <article class="text-block" aria-hidden="true">
-        <span class="italic-text">Visual</span>
+        <span>Visual</span>
         <span>storytelling</span>
         <interact-element data-interact-key="mask-1">
           <div class="image-mask">
@@ -57,7 +57,7 @@ As the page scrolls, inline image thumbnails embedded within a sticky text block
           </div>
         </interact-element>
         <span>while</span>
-        <span class="italic-text">rhythm</span>
+        <span>rhythm</span>
         <span>guides</span>
         <interact-element data-interact-key="mask-6">
           <div class="image-mask">
@@ -94,8 +94,7 @@ As the page scrolls, inline image thumbnails embedded within a sticky text block
 ```css
 body {
   margin: 0;
-  font-weight: 300;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .sr-only {
@@ -104,10 +103,9 @@ body {
   height: 1px;
   padding: 0;
   margin: -1px;
-  overflow: hidden;
+  overflow: clip;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
-  border-width: 0;
 }
 
 .track {
@@ -124,7 +122,7 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  overflow: hidden;
+  overflow: clip;
   padding-top: 15vh;
   padding-left: 5vw;
   padding-right: 5vw;
@@ -136,7 +134,6 @@ body {
   text-align: left;
   font-size: max(30px, 3.5vw);
   line-height: 1.6;
-  letter-spacing: 0.02em;
   max-width: 100%;
 }
 
@@ -152,17 +149,13 @@ body {
   display: inline-block;
 }
 
-.italic-text {
-  font-weight: 300;
-}
-
 interact-element {
   display: inline;
 }
 
 .image-mask {
   height: 1.2em;
-  overflow: hidden;
+  overflow: clip;
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
@@ -186,7 +179,6 @@ interact-element {
     opacity: 1 !important;
     margin-right: 0.4em !important;
     max-width: 125px !important;
-    transition: none !important;
   }
 
   @media (max-width: 768px) {

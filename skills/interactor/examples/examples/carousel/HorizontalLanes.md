@@ -188,12 +188,10 @@ Four horizontal image rows loop continuously left and right at different speeds,
 :root {
   --row-height: 25vh;
   --img-padding: 15px;
-  --img-border-radius: 24px;
 }
 
 body {
   margin: 0;
-  padding: 0;
   overflow: hidden;
 }
 
@@ -214,7 +212,6 @@ body {
   flex-direction: row;
   height: 100%;
   width: max-content;
-  will-change: transform;
 }
 
 .animation-wrapper > div {
@@ -232,7 +229,6 @@ body {
   position: relative;
   height: 100%;
   flex-shrink: 0;
-  cursor: pointer;
 }
 
 .gallery-image {
@@ -241,7 +237,6 @@ body {
   object-fit: cover;
   padding: var(--img-padding);
   box-sizing: border-box;
-  border-radius: var(--img-border-radius);
   display: block;
 }
 
@@ -250,33 +245,8 @@ body {
   bottom: calc(var(--img-padding) + 15px);
   left: calc(var(--img-padding) + 15px);
   right: calc(var(--img-padding) + 15px);
-  text-align: center;
-  font-size: clamp(0.5rem, calc((var(--row-height) - 2 * var(--img-padding)) * 0.12), 1.5rem);
-  line-height: 1.2;
-  opacity: 0;
-  transition: opacity 0.3s ease;
   pointer-events: none;
   z-index: 2;
-}
-
-.image-container::after {
-  content: '';
-  position: absolute;
-  bottom: var(--img-padding);
-  left: var(--img-padding);
-  right: var(--img-padding);
-  height: 50%;
-  border-radius: 0 0 calc(var(--img-border-radius) - var(--img-padding))
-    calc(var(--img-border-radius) - var(--img-padding));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.image-container:hover .image-title,
-.image-container:hover::after {
-  opacity: 1;
 }
 
 @media (max-width: 768px) {
@@ -290,7 +260,7 @@ body {
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: '#wrapper-1',
@@ -305,7 +275,6 @@ body {
           duration: 40000,
           easing: 'linear',
           iterations: Infinity,
-          triggerType: 'state',
         },
       ],
     },
@@ -322,7 +291,6 @@ body {
           duration: 50000,
           easing: 'linear',
           iterations: Infinity,
-          triggerType: 'state',
         },
       ],
     },
@@ -339,7 +307,6 @@ body {
           duration: 45000,
           easing: 'linear',
           iterations: Infinity,
-          triggerType: 'state',
         },
       ],
     },
@@ -356,10 +323,9 @@ body {
           duration: 55000,
           easing: 'linear',
           iterations: Infinity,
-          triggerType: 'state',
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

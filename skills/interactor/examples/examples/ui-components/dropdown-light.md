@@ -1,317 +1,94 @@
 # Dropdown Light
 
-A capsule-shaped dropdown menu where hovering the trigger button highlights it in gold and hovering each option scales its icon with a slight tilt, while opening and closing the menu is driven by click with staggered CSS transitions on the option rows.
+A native disclosure menu with Interact motion on its summary and options.
 
-**Tags:** hover, click, opacity, transform, scale, rotate, stagger, flex
+**Tags:** details, interest, hover, transform, menu
 
 ## Markup
 
 ```html
-<div class="dropdown" id="dropdown">
-  <interact-element data-interact-key="btn-trigger">
-    <button
-      type="button"
-      class="dropdown-btn"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-controls="dropdown-listbox"
-      id="dropdown-trigger"
-    >
-      <span class="btn-label">Select Team</span>
-      <svg
-        class="chevron"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <polyline points="6 9 12 15 18 9" />
-      </svg>
-    </button>
-  </interact-element>
-
-  <div
-    class="dropdown-menu"
-    role="listbox"
-    id="dropdown-listbox"
-    aria-labelledby="dropdown-trigger"
-    aria-hidden="true"
-  >
-    <interact-element data-interact-key="opt-1-trigger">
-      <div class="dropdown-option" role="option" tabindex="-1">
-        <svg
-          class="option-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="13.5" cy="6.5" r="2.5" />
-          <path d="M17.5 10.5l3-3" />
-          <path d="M3 21.5l8.5-8.5" />
-          <path d="M11.5 13L15 9.5" />
-        </svg>
-        Design
-      </div>
-    </interact-element>
-    <interact-element data-interact-key="opt-2-trigger">
-      <div class="dropdown-option" role="option" tabindex="-1">
-        <svg
-          class="option-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="16 18 22 12 16 6" />
-          <polyline points="8 6 2 12 8 18" />
-        </svg>
-        Engineering
-      </div>
-    </interact-element>
-    <interact-element data-interact-key="opt-3-trigger">
-      <div class="dropdown-option" role="option" tabindex="-1">
-        <svg
-          class="option-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-          <polyline points="17 6 23 6 23 12" />
-        </svg>
-        Marketing
-      </div>
-    </interact-element>
-    <interact-element data-interact-key="opt-4-trigger">
-      <div class="dropdown-option" role="option" tabindex="-1">
-        <svg
-          class="option-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="18" y1="20" x2="18" y2="10" />
-          <line x1="12" y1="20" x2="12" y2="4" />
-          <line x1="6" y1="20" x2="6" y2="14" />
-        </svg>
-        Analytics
-      </div>
-    </interact-element>
-    <interact-element data-interact-key="opt-5-trigger">
-      <div class="dropdown-option" role="option" tabindex="-1">
-        <svg
-          class="option-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-          <path
-            d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
-          />
-        </svg>
-        Support
-      </div>
-    </interact-element>
-  </div>
-</div>
+<interact-element data-interact-key="team-dropdown">
+  <details class="dropdown">
+    <summary>
+      <span class="summary-label">Select team</span>
+    </summary>
+    <div class="dropdown-menu">
+      <button type="button"><span class="option-label">Design</span></button>
+      <button type="button"><span class="option-label">Engineering</span></button>
+      <button type="button"><span class="option-label">Support</span></button>
+    </div>
+  </details>
+</interact-element>
 ```
 
 ## Essential styles
 
 ```css
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 interact-element {
   display: contents;
 }
 
-body {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
 .dropdown {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 17rem;
 }
 
-.dropdown-btn {
+.dropdown summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  width: 280px;
-  height: 60px;
-  padding: 0 24px;
-  border: 1px solid;
-  border-radius: 9999px;
-  font-size: 15px;
-  font-weight: 400;
+  min-height: 3rem;
+  padding: 0 0.75rem;
   cursor: pointer;
-  text-align: left;
-}
-
-.chevron {
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  transition: transform 300ms ease;
-}
-
-.dropdown.open .chevron {
-  transform: rotate(180deg);
+  list-style: none;
 }
 
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 10px);
+  top: 100%;
   left: 0;
-  right: 0;
-  border: 1px solid;
-  border-radius: 24px;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-6px);
-  transition:
-    opacity 220ms ease,
-    visibility 220ms ease,
-    transform 220ms ease;
-  z-index: 100;
-  padding: 8px;
+  z-index: 1;
   display: flex;
-  flex-direction: column;
-  gap: 1.5px;
-}
-
-.dropdown.open .dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.dropdown-menu > interact-element {
-  --i: 0;
-}
-.dropdown-menu > interact-element:nth-child(2) {
-  --i: 1;
-}
-.dropdown-menu > interact-element:nth-child(3) {
-  --i: 2;
-}
-.dropdown-menu > interact-element:nth-child(4) {
-  --i: 3;
-}
-.dropdown-menu > interact-element:nth-child(5) {
-  --i: 4;
-}
-
-.dropdown-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   width: 100%;
-  height: 38px;
-  padding: 0 12px;
-  border: none;
-  font-size: 14px;
-  font-weight: 400;
+  flex-direction: column;
+}
+
+.dropdown:not([open]) .dropdown-menu {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.dropdown-menu button {
+  min-height: 2.5rem;
   text-align: left;
   cursor: pointer;
-  outline: none;
-  border-radius: 16px;
-  opacity: 0;
-  transform: translateY(-4px);
-  transition:
-    opacity 180ms ease-out calc(var(--i) * 40ms),
-    transform 180ms ease-out calc(var(--i) * 40ms);
 }
 
-.dropdown.open .dropdown-option {
-  opacity: 1;
-  transform: translateY(0);
+.dropdown summary:focus-visible,
+.dropdown-menu button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
 
-.dropdown-option .option-icon {
-  flex-shrink: 0;
-  width: 17px;
-  height: 17px;
-  opacity: 0.5;
-}
-
-.dropdown-option[aria-selected='true'] .option-icon {
-  opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dropdown-menu,
-  .dropdown-option,
-  .chevron {
-    transition: none !important;
-  }
+.summary-label,
+.option-label {
+  display: inline-block;
+  transform: translate(0);
 }
 ```
 
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
-      key: 'btn-trigger',
-      trigger: 'hover',
+      key: 'team-dropdown',
+      selector: 'summary',
+      trigger: 'interest',
       effects: [
         {
-          stateAction: 'toggle',
-          transition: {
-            duration: 300,
-            easing: 'ease',
-            styleProperties: [{ name: 'transform', value: 'translateY(-6px)' }],
-          },
-        },
-        {
-          stateAction: 'toggle',
-          selector: '.chevron',
-          transition: {
-            duration: 300,
-            easing: 'ease',
-            styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
-          },
-        },
-      ],
-    },
-    ...['opt-1', 'opt-2', 'opt-3', 'opt-4', 'opt-5'].map((id) => ({
-      key: `${id}-trigger`,
-      trigger: 'hover',
-      effects: [
-        {
+          selector: '.summary-label',
           stateAction: 'toggle',
           transition: {
             duration: 200,
@@ -319,20 +96,24 @@ body {
             styleProperties: [{ name: 'transform', value: 'translateY(-2px)' }],
           },
         },
+      ],
+    },
+    {
+      key: 'team-dropdown',
+      trigger: 'interest',
+      listContainer: '.dropdown-menu',
+      effects: [
         {
+          selector: '.option-label',
           stateAction: 'toggle',
-          selector: '.option-icon',
           transition: {
-            duration: 200,
-            easing: 'ease',
-            styleProperties: [
-              { name: 'opacity', value: '1' },
-              { name: 'transform', value: 'scale(1.2) rotate(-8deg)' },
-            ],
+            duration: 160,
+            easing: 'ease-out',
+            styleProperties: [{ name: 'transform', value: 'translateX(4px)' }],
           },
         },
       ],
-    })),
-  ];
-}
+    },
+  ],
+};
 ```

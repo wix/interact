@@ -51,7 +51,6 @@ Six panels stacked in a sticky viewport each fly in from depth with a 3D rotateX
 ```css
 body {
   margin: 0;
-  overscroll-behavior-y: none;
 }
 
 .spacer {
@@ -60,11 +59,6 @@ body {
   place-items: center;
   text-align: center;
   padding: 0 2rem;
-}
-
-.spacer h1 {
-  font-size: 3rem;
-  font-weight: 700;
 }
 
 #scroll-wrapper {
@@ -77,7 +71,7 @@ body {
   top: 0;
   height: 100vh;
   width: 100%;
-  overflow: hidden;
+  overflow: clip;
   perspective: 1000px;
   transform-style: preserve-3d;
 }
@@ -90,14 +84,10 @@ body {
   height: 100%;
   display: grid;
   place-items: center;
-  border-radius: 1.5rem;
   opacity: 0;
-  font-size: 2.5rem;
-  font-weight: 700;
   padding: 2rem;
   box-sizing: border-box;
   text-align: center;
-  border: 1px solid;
 }
 
 interact-element {
@@ -110,18 +100,22 @@ interact-element {
 ```js
 const panel3DKeyframes = [
   {
+    offset: 0,
     opacity: 0,
     transform: 'perspective(1000px) rotateX(45deg) translateZ(-500px)',
   },
   {
+    offset: 0.33,
     opacity: 1,
     transform: 'perspective(1000px) rotateX(0deg) translateZ(0px)',
   },
   {
+    offset: 0.66,
     opacity: 1,
     transform: 'perspective(1000px) rotateX(0deg) translateZ(0px)',
   },
   {
+    offset: 1,
     opacity: 0,
     transform: 'perspective(1000px) rotateX(-45deg) translateZ(500px)',
   },
@@ -138,7 +132,6 @@ const config = {
           keyframeEffect: {
             name: 'panel-1-3d-scroll',
             keyframes: panel3DKeyframes,
-            offset: [0, 0.33, 0.66, 1.0],
           },
           rangeStart: { name: 'contain', offset: { unit: 'percentage', value: 0 } },
           rangeEnd: { name: 'contain', offset: { unit: 'percentage', value: 16.67 } },
@@ -150,7 +143,6 @@ const config = {
           keyframeEffect: {
             name: 'panel-2-3d-scroll',
             keyframes: panel3DKeyframes,
-            offset: [0, 0.33, 0.66, 1.0],
           },
           rangeStart: { name: 'contain', offset: { unit: 'percentage', value: 16.67 } },
           rangeEnd: { name: 'contain', offset: { unit: 'percentage', value: 33.33 } },
@@ -162,7 +154,6 @@ const config = {
           keyframeEffect: {
             name: 'panel-3-3d-scroll',
             keyframes: panel3DKeyframes,
-            offset: [0, 0.33, 0.66, 1.0],
           },
           rangeStart: { name: 'contain', offset: { unit: 'percentage', value: 33.33 } },
           rangeEnd: { name: 'contain', offset: { unit: 'percentage', value: 50 } },
@@ -174,7 +165,6 @@ const config = {
           keyframeEffect: {
             name: 'panel-4-3d-scroll',
             keyframes: panel3DKeyframes,
-            offset: [0, 0.33, 0.66, 1.0],
           },
           rangeStart: { name: 'contain', offset: { unit: 'percentage', value: 50 } },
           rangeEnd: { name: 'contain', offset: { unit: 'percentage', value: 66.67 } },
@@ -186,7 +176,6 @@ const config = {
           keyframeEffect: {
             name: 'panel-5-3d-scroll',
             keyframes: panel3DKeyframes,
-            offset: [0, 0.33, 0.66, 1.0],
           },
           rangeStart: { name: 'contain', offset: { unit: 'percentage', value: 66.67 } },
           rangeEnd: { name: 'contain', offset: { unit: 'percentage', value: 83.33 } },
@@ -198,7 +187,6 @@ const config = {
           keyframeEffect: {
             name: 'panel-6-3d-scroll',
             keyframes: panel3DKeyframes,
-            offset: [0, 0.33, 0.66, 1.0],
           },
           rangeStart: { name: 'contain', offset: { unit: 'percentage', value: 83.33 } },
           rangeEnd: { name: 'contain', offset: { unit: 'percentage', value: 100 } },

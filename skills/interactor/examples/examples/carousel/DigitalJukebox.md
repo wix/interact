@@ -40,7 +40,6 @@ A vertical snap-scrolling list of album art cards that rotate and zoom through 3
 :root {
   --item-width: 800px;
   --item-height: 512px;
-  --item-radius: 12px;
   --item-gap: 32px;
 }
 
@@ -61,27 +60,14 @@ body {
   width: 100%;
   height: 100%;
   overflow-y: scroll;
-  perspective: 500px;
-  position: relative;
   scroll-snap-type: y proximity;
 }
 
-.scroll-view::-webkit-scrollbar {
-  display: none;
-}
-
-.scroll-view {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
 .item-list {
-  position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transform-style: preserve-3d;
   padding: calc(50vh - var(--item-height) / 2) 0;
 }
 
@@ -89,10 +75,8 @@ body {
   width: var(--item-width);
   max-width: 90vw;
   height: var(--item-height);
-  border-radius: var(--item-radius);
   margin: 0 auto var(--item-gap);
   scroll-snap-align: center;
-  will-change: transform, opacity;
 }
 
 .info-panel {
@@ -100,21 +84,8 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 60px 20px 30px;
-  text-align: center;
   pointer-events: none;
   z-index: 10;
-}
-
-.info-panel h2 {
-  margin: 0 0 6px 0;
-  font-size: 32px;
-  font-weight: 600;
-}
-
-.info-panel p {
-  margin: 0;
-  font-size: 16px;
 }
 ```
 
@@ -143,9 +114,7 @@ const itemInteractions = itemsData.map((_, index) => ({
   effects: [
     {
       key: `item-${index}`,
-      keyframeEffect: scroll3DEffect,
-      easing: 'linear',
-      fill: 'both',
+      effectId: 'scroll-3d-transform',
     },
   ],
 }));
@@ -172,11 +141,19 @@ const infoPanelInteraction = {
       },
       rangeStart: { name: 'contain', offset: { unit: 'percentage', value: 0 } },
       rangeEnd: { name: 'contain', offset: { unit: 'percentage', value: 100 } },
+      fill: 'both',
     },
   ],
 };
 
-{
-  interactions: [...itemInteractions, infoPanelInteraction];
-}
+const config = {
+  effects: {
+    'scroll-3d-transform': {
+      keyframeEffect: scroll3DEffect,
+      easing: 'linear',
+      fill: 'both',
+    },
+  },
+  interactions: [...itemInteractions, infoPanelInteraction],
+};
 ```

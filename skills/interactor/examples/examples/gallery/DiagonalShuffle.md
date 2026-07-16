@@ -70,7 +70,7 @@ Five image cards stacked at the viewport center fly in from alternating diagonal
 
 ```css
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .intro-spacer {
@@ -87,7 +87,7 @@ body {
   top: 0;
   height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  overflow: clip;
   perspective: 1200px;
 }
 
@@ -98,11 +98,9 @@ body {
   width: 90vw;
   max-width: 400px;
   aspect-ratio: 3 / 4;
-  border-radius: 1rem;
   opacity: 0;
-  will-change: transform, opacity;
   transform-style: preserve-3d;
-  overflow: hidden;
+  overflow: clip;
 }
 
 .card-img {
@@ -122,14 +120,7 @@ body {
   z-index: 10;
 }
 
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
 .card-description {
-  font-size: 0.875rem;
-  opacity: 0.8;
   margin-top: 0.25rem;
 }
 
@@ -137,14 +128,9 @@ body {
   .card {
     aspect-ratio: 4 / 3;
   }
+
   .card-content {
     padding: 1.5rem;
-  }
-  .card-title {
-    font-size: 1.5rem;
-  }
-  .card-description {
-    font-size: 0.9rem;
   }
 }
 ```
@@ -152,7 +138,7 @@ body {
 ## Interact config
 
 ```js
-{
+const config = {
   interactions: [
     {
       key: '#scroll-section',
@@ -284,6 +270,6 @@ body {
         },
       ],
     },
-  ];
-}
+  ],
+};
 ```

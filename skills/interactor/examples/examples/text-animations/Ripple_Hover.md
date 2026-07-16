@@ -76,7 +76,7 @@ A stacked heading ripples masked copies of itself upward and downward on hover, 
 
 ```css
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -104,12 +104,8 @@ body {
 .h1-base {
   font-size: 1em;
   line-height: 0.75;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
   margin: 0;
   padding: 0;
-  cursor: default;
   display: block;
   transform: translateY(-0.02em);
 }
@@ -117,7 +113,7 @@ body {
 .static-mask {
   position: relative;
   width: 100%;
-  overflow: hidden;
+  overflow: clip;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -140,9 +136,6 @@ body {
 .h1-copy {
   font-size: 1em;
   line-height: 0.75;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
   margin: 0;
   padding: 0;
   display: block;
@@ -236,10 +229,10 @@ const config = {
       namedEffect: {
         type: 'SlideIn',
         direction: 'bottom',
-        distance: '30px',
-        duration: 1000,
-        easing: 'ease-out',
+        initialTranslate: 0.3,
       },
+      duration: 1000,
+      easing: 'ease-out',
       fill: 'both',
     },
   },
