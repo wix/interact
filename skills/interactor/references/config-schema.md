@@ -122,8 +122,8 @@ referenced entry and may override any of them (`key`, `duration`, `easing`,
 ```
 
 **`fill` guidance:** use `'both'` for scroll/pointer-driven and for toggling
-hover/click (`alternate`/`repeat`/`state`). Use `'backwards'` for `once` entrances
-when the element's own CSS already matches the final keyframe.
+hover/click (`alternate`/`repeat`/`state`). Use `'backwards'` for `viewEnter` +
+`once` entrances when source ≠ target (see [CSS generation & FOUC](#css-generation--fouc)).
 
 **`composite`:** `'replace'` (default) overwrites prior values; `'add'`
 concatenates transform/filter functions; `'accumulate'` sums matching function args
@@ -276,7 +276,7 @@ case; `listContainer` is for when each item needs its _own_ trigger, like per-ca
     key: 'cards', trigger: 'viewEnter',
     sequences: [{ offset: 120, offsetEasing: 'quadOut', effects: [{ effectId: 'card-in', selector: '.card' }] }],
   }],
-  effects: { 'card-in': { duration: 600, easing: 'ease-out', namedEffect: { type: 'FadeIn' }, triggerType: 'once' } },
+  effects: { 'card-in': { duration: 600, easing: 'ease-out', fill: 'backwards', namedEffect: { type: 'FadeIn' }, triggerType: 'once' } },
 }
 ```
 
@@ -360,12 +360,12 @@ selectors target `:first-child`; `false` for **vanilla** and **React**. The defa
 is `true`, so vanilla/React callers must pass `false` explicitly.
 
 **FOUC prevention (viewEnter + once):** For entrance animations where source and
-target are the same element, `generate()` emits initial rules that hide the target
-until its animation starts (gated by `:not([data-interact-enter])`). When source ≠
-target (e.g. a `viewEnter` trigger on a wrapper staggering children via `selector`),
-the generated rules hide the child targets on their own — no extra markup on the
-trigger element. For `repeat`/`alternate`/`state`, inline the starting keyframe and
-use `fill: 'both'`. `viewProgress` needs no FOUC rules.
+target are the **same** element, `generate()` emits initial rules that hide the
+target until its animation starts (gated by `:not([data-interact-enter])`). When
+source ≠ target, `generate()` emits **no** hiding rules for the targets — so set
+`fill: 'backwards'` on the effect to prevent FOUC. This matters most with motion-presets
+`namedEffect`s. For `repeat`/`alternate`/`state`, inline the
+starting keyframe and use `fill: 'both'`. `viewProgress` needs no FOUC rules.
 
 For when and where to emit this CSS, follow the canonical static/pre-rendered
 policy in `references/integration-recipes.md`.
