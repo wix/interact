@@ -25,6 +25,7 @@ Rules for using `@wix/interact-validate` — validate an `InteractConfig` before
 
 - **In CI / at build time** — gate a build on a clean config.
 - **Before `Interact.create()` / `generate()`** — fail fast on a malformed config instead of debugging at runtime.
+- **After validation, for static site output** — run `generate(config, useFirstChild)` in the build step and embed the CSS in the HTML (`<style>` or linked `.css` in `<head>`, or `blocking="render"` at start of `<body>`). Validation alone does not produce styles.
 - **On LLM-generated configs** — run the validator on any config an agent produces and fix every `error` (ideally every `warning`) before emitting it.
 
 ---
@@ -283,7 +284,14 @@ const ExperienceSchema = z.object({
 
 - After generating a config, run `validateInteractConfig(config)` and **fix every `error`** before emitting. Prefer to fix `warning`s too.
 - For a hard gate, use `assertValidInteractConfig(config)` or `validateInteractConfig(config, { strict: true })`.
-- Mirror the core generation rules: do not invent `namedEffect` types, do not attach DOM listeners manually, use `overflow: clip` (not `hidden`) on scroll-tracked ancestors, and pre-render CSS with `generate(config)`. See [full-lean.md](https://wix.github.io/interact/rules/full-lean.md).
+- For static/pre-rendered site output, prefer: validate → `registerEffects()` →
+  `generate(config, useFirstChild)` at build/generation time → embed CSS in
+  `<head>` (`<style>` or linked `.css`) or at the start of `<body>` with
+  `blocking="render"`. If only part of the config is available then, validate and
+  generate the static and runtime-dependent configs separately. If splitting is
+  impractical, validate and generate the complete config at runtime before
+  `Interact.create()`.
+- Mirror the core generation rules: do not invent `namedEffect` types, do not attach DOM listeners manually, use `overflow: clip` (not `hidden`) on scroll-tracked ancestors. See [full-lean.md](https://wix.github.io/interact/rules/full-lean.md).
 
 ---
 

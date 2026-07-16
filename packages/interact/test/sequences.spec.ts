@@ -651,9 +651,9 @@ describe('interact sequences', () => {
 
       const interactionCall = clickAddSpy.mock.calls.find((call) => call[4]?.animation);
       expect(interactionCall).toBeDefined();
-      // Source and target are both the sourceController.element
-      expect(interactionCall?.[0]).toBe(source.element);
-      expect(interactionCall?.[1]).toBe(source.element);
+      // Source resolves via interaction (useFirstChild → first child of keyed element)
+      expect(interactionCall?.[0]).toBe(source.child);
+      expect(interactionCall?.[1]).toBe(source.child);
       expect(interactionCall?.[4]).toEqual(
         expect.objectContaining({
           animation: mockSequence,
@@ -691,6 +691,78 @@ describe('interact sequences', () => {
           selectorCondition: ':is(.is-active &)',
         }),
       );
+    });
+
+    test('resolves interaction selector as trigger source, matching effects', () => {
+      const clickAddSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.click, 'add');
+      const config = createBaseConfig();
+      config.interactions = [
+        {
+          trigger: 'click',
+          key: 'source-key',
+          selector: '.trigger-button',
+          sequences: [
+            { sequenceId: 'selector-source-seq', effects: [{ effectId: 'effect-source' }] },
+          ],
+        },
+      ];
+
+      Interact.create(config, { useCustomElement: true });
+      const source = createInteractElement();
+      const triggerButton = document.createElement('button');
+      triggerButton.className = 'trigger-button';
+      source.child.append(triggerButton);
+      addElement(source.element, 'source-key');
+
+      const interactionCall = clickAddSpy.mock.calls.find((call) => call[4]?.animation);
+      expect(interactionCall).toBeDefined();
+      expect(interactionCall?.[0]).toBe(triggerButton);
+      expect(interactionCall?.[1]).toBe(triggerButton);
+    });
+
+    test('attaches trigger to each list item when interaction has listContainer', () => {
+      const clickAddSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.click, 'add');
+      const config = createBaseConfig();
+      config.effects = {
+        'list-effect': {
+          key: 'source-key',
+          listContainer: '#my-list',
+          keyframeEffect: {
+            name: 'listFade',
+            keyframes: [{ opacity: 0 }, { opacity: 1 }],
+          },
+          duration: 200,
+        },
+      };
+      config.interactions = [
+        {
+          trigger: 'click',
+          key: 'source-key',
+          listContainer: '#my-list',
+          sequences: [
+            {
+              sequenceId: 'list-source-seq',
+              effects: [{ effectId: 'list-effect', key: 'source-key', listContainer: '#my-list' }],
+            },
+          ],
+        },
+      ];
+
+      Interact.create(config, { useCustomElement: true });
+      const element = document.createElement('interact-element') as HTMLElement;
+      const child = document.createElement('div');
+      const list = document.createElement('ul');
+      list.id = 'my-list';
+      const items = Array.from({ length: 2 }, () => document.createElement('li'));
+      items.forEach((li) => list.append(li));
+      child.append(list);
+      element.append(child);
+
+      addElement(element, 'source-key');
+
+      const sequenceCalls = clickAddSpy.mock.calls.filter((call) => call[4]?.animation);
+      expect(sequenceCalls).toHaveLength(2);
+      expect(sequenceCalls.map((call) => call[0])).toEqual(items);
     });
 
     test('silently skips unresolved sequenceId reference at runtime', () => {
@@ -909,8 +981,8 @@ describe('interact sequences', () => {
 
       const interactionCall = clickAddSpy.mock.calls.find((call) => call[4]?.animation);
       expect(interactionCall).toBeDefined();
-      expect(interactionCall?.[0]).toBe(source.element);
-      expect(interactionCall?.[1]).toBe(source.element);
+      expect(interactionCall?.[0]).toBe(source.child);
+      expect(interactionCall?.[1]).toBe(source.child);
       expect(interactionCall?.[4]).toEqual(expect.objectContaining({ animation: mockSequence }));
     });
 

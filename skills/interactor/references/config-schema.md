@@ -80,6 +80,14 @@ patterns — see [Element resolution](#element-resolution).
 > sequence), or **`listContainer`** on the interaction when each item needs its own
 > trigger (e.g. per-card `hover`/`pointerMove`). See [Element resolution](#element-resolution).
 
+> **Layers that animate as one → one container, not one effect per layer.** A single
+> visual element built from stacked layers (hero: background + overlay + content;
+> card: image + heading + text) that should enter/animate **together** belongs on
+> **one** keyed wrapper with **one** effect — not the same effect copied onto every
+> layer, which spins up N controllers that drift out of sync and cost N× per frame.
+> This is the opposite of scroll parallax, where you deliberately give each layer its
+> own effect at a different rate. See invariant 11 in `SKILL.md`.
+
 `TriggerType` = `'hover' | 'click' | 'viewEnter' | 'animationEnd' |
 'viewProgress' | 'pointerMove' | 'activate' | 'interest'`. Param shapes and
 per-trigger semantics live in `triggers.md`.
@@ -114,8 +122,8 @@ referenced entry and may override any of them (`key`, `duration`, `easing`,
 ```
 
 **`fill` guidance:** use `'both'` for scroll/pointer-driven and for toggling
-hover/click (`alternate`/`repeat`/`state`). Use `'backwards'` for `once` entrances
-when the element's own CSS already matches the final keyframe.
+hover/click (`alternate`/`repeat`/`state`). Use `'backwards'` for `viewEnter` +
+`once` entrances when source ≠ target (see [CSS generation & FOUC](#css-generation--fouc)).
 
 **`composite`:** `'replace'` (default) overwrites prior values; `'add'`
 concatenates transform/filter functions; `'accumulate'` sums matching function args
@@ -268,7 +276,7 @@ case; `listContainer` is for when each item needs its _own_ trigger, like per-ca
     key: 'cards', trigger: 'viewEnter',
     sequences: [{ offset: 120, offsetEasing: 'quadOut', effects: [{ effectId: 'card-in', selector: '.card' }] }],
   }],
-  effects: { 'card-in': { duration: 600, easing: 'ease-out', namedEffect: { type: 'FadeIn' }, triggerType: 'once' } },
+  effects: { 'card-in': { duration: 600, easing: 'ease-out', fill: 'backwards', namedEffect: { type: 'FadeIn' }, triggerType: 'once' } },
 }
 ```
 
@@ -336,8 +344,11 @@ container.
 `generate(config, useFirstChild = true)` returns a complete CSS string for **all**
 interactions: `@keyframes`, animation/transition custom properties, native
 `view-timeline` declarations for `viewProgress`, state-selector rules, coordinated
-list aggregation, and FOUC initial rules. Call it server-side / at build time and
-inject into `<head>` (or the top of `<body>`) so styles apply before JS loads.
+list aggregation, and FOUC initial rules.
+
+**Static site policy:** Follow the canonical policy in
+`references/integration-recipes.md` under
+“CSS generation policy for static and pre-rendered output.”
 
 ```ts
 import { generate } from '@wix/interact/web';
@@ -349,15 +360,15 @@ selectors target `:first-child`; `false` for **vanilla** and **React**. The defa
 is `true`, so vanilla/React callers must pass `false` explicitly.
 
 **FOUC prevention (viewEnter + once):** For entrance animations where source and
-target are the same element, `generate()` emits initial rules that hide the target
-until its animation starts (gated by `:not([data-interact-enter])`). When source ≠
-target (e.g. a `viewEnter` trigger on a wrapper staggering children via `selector`),
-the generated rules hide the child targets on their own — no extra markup on the
-trigger element. For `repeat`/`alternate`/`state`, inline the starting keyframe and
-use `fill: 'both'`. `viewProgress` needs no FOUC rules.
+target are the **same** element, `generate()` emits initial rules that hide the
+target until its animation starts (gated by `:not([data-interact-enter])`). When
+source ≠ target, `generate()` emits **no** hiding rules for the targets — so set
+`fill: 'backwards'` on the effect to prevent FOUC. This matters most with motion-presets
+`namedEffect`s. For `repeat`/`alternate`/`state`, inline the
+starting keyframe and use `fill: 'both'`. `viewProgress` needs no FOUC rules.
 
-`generate()` output must actually be injected (ideally at SSR/build time) for any of
-this FOUC prevention to work.
+For when and where to emit this CSS, follow the canonical static/pre-rendered
+policy in `references/integration-recipes.md`.
 
 For the web entry point, `interact-element { display: contents; }` is **optional** —
 add it if you don't want the custom-element wrapper to participate in layout (the

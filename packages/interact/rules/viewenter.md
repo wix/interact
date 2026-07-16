@@ -21,14 +21,21 @@ This document contains rules for generating interactions that respond to element
 
 **Problem:** Elements with entrance animations (e.g. `FadeIn`) start in their final visible state (e.g. `opacity: 1`). Before the animation framework initializes and applies the starting keyframe (e.g. `opacity: 0`), the element is briefly visible at full opacity — a flash of un-animated content.
 
-**Solution:** Call `generate(config, useFirstChild)` server-side or at build time and inject the resulting CSS into the document `<head>` (or at the beginning of `<body>`) so it loads before the page content is painted. Among all the CSS it produces, `generate()` includes initial rules that hide entrance-animated elements from the moment the page renders, before JavaScript runs. The rules use `:not([data-interact-enter])` so elements become visible once the animation starts.
+**Solution:** Call `generate(config, useFirstChild)` at build/generation time and embed the resulting CSS before first paint. Among all the CSS it produces, `generate()` includes initial rules that hide entrance-animated elements from the moment the page renders, before JS runs. The rules use `:not([data-interact-enter])` so elements become visible once the animation starts.
 
-### Generate CSS and inject into `<head>` (preferred), or beginning of `<body>`
+### Generate CSS at build time and embed in HTML
 
-Call `generate(config)` server-side or at build time. Inject the resulting CSS into the document `<head>` (or in `<body>` before your content) so it loads before the page content is painted:
+Prefer running this for the complete config in a **build/generation script**
+(Node, SSG, agent scratch) and embedding the resulting CSS in the HTML output.
+If some entrances depend on runtime-only data, split them into a separate config
+and generate/inject that CSS in the browser before its `Interact.create()` call.
+If splitting is impractical, generate the complete CSS at runtime as a fallback:
 
 ```typescript
 import { generate } from '@wix/interact';
+import { FadeIn } from '@wix/motion-presets';
+
+Interact.registerEffects({ FadeIn });
 
 const config: InteractConfig = {
   interactions: [
@@ -46,25 +53,50 @@ const config: InteractConfig = {
   ],
 };
 
-const css = generate(config, useFirstChild);
+const css = generate(config, useFirstChild); // true for web; false for react/vanilla
 ```
 
-**Append to `<head>` or beginning of `<body>`:**
+**Embed the CSS** using one of:
 
 ```html
-<style>
-  ${css}
-</style>
+<!-- Option 1: inline in <head> (preferred) -->
+<head>
+  <style>
+    …generated css…
+  </style>
+</head>
+
+<!-- Option 2: linked stylesheet in <head> -->
+<head>
+  <link rel="stylesheet" href="interact.css" />
+</head>
+
+<!-- Option 3: render-blocking at start of <body> (prevents FOUC) -->
+<body>
+  <style blocking="render">
+    …generated css…
+  </style>
+  <!-- or -->
+  <link rel="stylesheet" href="interact.css" blocking="render" />
+  …
+</body>
 ```
 
 ### Rules
 
-- `generate()` should be called server-side or at build time. Can also be called on the client if the page content is initially hidden (e.g. behind a loader/splash screen).
+- For static/pre-rendered sites, prefer generating all possible CSS at
+  build/generation time. Split runtime-dependent interactions into a separate
+  config where practical, or fall back to generating the full config at runtime.
+- Inject runtime-generated CSS before the corresponding `Interact.create()` call
+  and before revealing initially hidden content to minimize FOUC.
 - FOUC initial rules apply only to `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
 - For `viewEnter` with `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting keyframe as inline styles on the target element and use `fill: 'both'`.
 - `generate(config)` processes all interactions in the config, not just `viewEnter`.
 
 ## Rule 1: keyframeEffect / namedEffect (TimeEffect)
+
+For static sites, include this interaction in the config passed to `generate()` at
+build time (see [FOUC section](#preventing-flash-of-unstyled-content-fouc)).
 
 Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animation (CSS or WAAPI). Set `triggerType` on each effect to control playback behavior. Use `params` only for observer configuration (`threshold`, `inset`).
 

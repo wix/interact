@@ -9,9 +9,28 @@ Shared rules that apply to **every** recipe:
 
 - `Interact.registerEffects(presets)` runs **before** `generate()` / `create()`.
 - `generate(config, useFirstChild)`: `true` for **web**, `false` for **vanilla/React**.
-- Inject the generated CSS into `<head>` (or top of `<body>`) so it applies before JS.
+- For static or pre-rendered output, follow the canonical
+  [CSS generation policy](#css-generation-policy-for-static-and-pre-rendered-output).
 - Keep the instance reference; call `instance.destroy()` on teardown (route change / unmount).
 - Validate the config with `@wix/interact-validate` before `generate()` / `create()` — agent-side always; see `references/validate.md`. Shipped files must contain no validator reference unless the user asked for a permanent CI guard.
+
+## CSS generation policy for static and pre-rendered output
+
+Prefer calling `generate(config, useFirstChild)` for the complete config at
+build/generation time and embedding the resulting CSS in the shipped HTML. Embed
+it with one of:
+
+- `<style>…css…</style>` in `<head>` (preferred)
+- `<link rel="stylesheet" href="interact.css">` in `<head>`
+- `<style blocking="render">…css…</style>` or
+  `<link rel="stylesheet" href="interact.css" blocking="render">` at the
+  **start of `<body>`** when render-blocking is needed to prevent FOUC
+
+If some interactions depend on runtime-only data, split them into a separate
+config: pre-generate the static config, then generate and inject the
+runtime-dependent config in the browser before its `Interact.create()` call. If
+splitting is impractical, generating the complete CSS at runtime is an acceptable
+fallback; apply it before revealing initially hidden content.
 
 ---
 
@@ -55,11 +74,11 @@ export const instance = Interact.create(config); // binds <interact-element>s au
     interact-element {
       display: contents;
     }
-    /* inject interactCSS here (build-time or via the <script> below) */
+    /* paste interactCSS here — generated at build time */
   </style>
 </head>
 <body>
-  <interact-element data-interact-key="hero>
+  <interact-element data-interact-key="hero">
     <section class="hero">Hello, animated world!</section>
   </interact-element>
 </body>
@@ -67,17 +86,11 @@ export const instance = Interact.create(config); // binds <interact-element>s au
 
 ---
 
-## B. CDN / no build step — `@wix/interact/web` via [esm.sh](http://esm.sh)
+## B. CDN / no build step — `@wix/interact/web` via [esm.sh](https://esm.sh)
 
-For a static `.html` page with no bundler. Inject `generate()` output and run
-`create()` client-side. Because the CSS is generated _after_ first paint here, an
-entrance can flash before the script runs. For strict FOUC safety, either keep page
-content hidden behind a loader until injection, or **precompile** `generate(config, true)`
-once and paste its output into a static `<style>` in `<head>` (the robust option).
-If you instead hand-write an initial hide rule, it must release on the same
-signal the runtime uses — gate it with `:not([data-interact-enter])` (interact sets
-`data-interact-enter` on the target once the animation plays) so the element can't
-get stranded hidden.
+For a static `.html` page with no bundler, follow the
+[canonical CSS generation policy](#css-generation-policy-for-static-and-pre-rendered-output);
+a Node scratch script can pre-generate the CSS before deploy.
 
 ```html
 <!DOCTYPE html>
@@ -87,6 +100,7 @@ get stranded hidden.
       interact-element {
         display: contents;
       }
+      /* …paste pre-generated css from generate(config, true)… */
     </style>
   </head>
   <body>
@@ -95,7 +109,7 @@ get stranded hidden.
     </interact-element>
 
     <script type="module">
-      import { Interact, generate } from 'https://esm.sh/@wix/interact/web';
+      import { Interact } from 'https://esm.sh/@wix/interact/web';
       import * as presets from 'https://esm.sh/@wix/motion-presets';
 
       Interact.registerEffects(presets);
@@ -112,10 +126,6 @@ get stranded hidden.
         },
       };
 
-      const style = document.createElement('style');
-      style.textContent = generate(config, true);
-      document.head.appendChild(style);
-
       Interact.create(config);
     </script>
   </body>
@@ -128,8 +138,14 @@ get stranded hidden.
 
 ## C. React — `@wix/interact/react`
 
-Use the `<Interaction>` component (it handles element binding via a ref) and run `Interact.create()` inside `useEffect` so it never executes during SSR.
-It is recommended to use `Interact.create()` and `generate()` once in the top level component (e.g. the "App" component).
+Use the `<Interaction>` component (it handles element binding via a ref) and run
+`Interact.create()` inside `useEffect` so it never executes during SSR. Prefer
+calling `generate()` for the complete config during SSR/build and embedding the
+CSS in document `<head>`. If some config depends on client-only props or data,
+split it and generate that portion before its client-side `Interact.create()`;
+fall back to generating the complete config client-side if splitting is
+impractical. It is recommended to use `Interact.create()` and `generate()` once
+in the top-level component (e.g. the "App" component).
 It's possible to break down pieces of the Interact Config for separate lazy parts of the UI, and `Interact.create()` them using a separate call.
 
 ```tsx
@@ -174,7 +190,6 @@ export function App() {
 export function Hero() {
   return (
     <>
-      <style>{interactCSS}</style>
       <Interaction tagName="section" interactKey="hero">
         Hello, animated world!
       </Interaction>
@@ -188,8 +203,10 @@ export function Hero() {
 valid intrinsic props for `tagName`. For an element you don't want to wrap, use
 `createInteractRef(key)` on a plain element that carries `data-interact-key`.
 
-For SSR frameworks (Next, Remix), render the `<style>{generate(config, false)}</style>`
-on the server and keep `Interact.create()` in `useEffect` (client only).
+For SSR frameworks (Next, Remix), follow the
+[canonical CSS generation policy](#css-generation-policy-for-static-and-pre-rendered-output)
+with `generate(config, false)`. Keep `Interact.create()` in `useEffect` (client
+only).
 
 > **Validation:** static config → scratch script before emit. Dynamic config (e.g. built from props or a `cards.map(...)`) → temporarily inject `assertValidInteractConfig(config)` before `generate()`/`create()`, run so the path executes, fix, **remove**. Optional permanent dev/CI guard is opt-in — see `references/validate.md`.
 
@@ -199,7 +216,9 @@ on the server and keep `Interact.create()` in `useEffect` (client only).
 
 Manual binding — **two steps**: `create(config)` loads the config but binds nothing;
 then call the **standalone** `add(element, key)` for each element once it's in the
-DOM.
+DOM. Follow the
+[canonical CSS generation policy](#css-generation-policy-for-static-and-pre-rendered-output)
+with `generate(config, false)`.
 
 ```ts
 import { Interact, add, remove, generate, type InteractConfig } from '@wix/interact';
@@ -212,10 +231,21 @@ const config: InteractConfig = {
   effects: { 'hero-in': { duration: 800, namedEffect: { type: 'FadeIn' }, triggerType: 'once' } },
 };
 
-const style = document.createElement('style');
-style.textContent = generate(config, false); // useFirstChild = false for vanilla
-document.head.appendChild(style);
+// Build/generation script — write css into HTML <head> or interact.css
+export const interactCSS = generate(config, false); // useFirstChild = false for vanilla
+```
 
+```html
+<head>
+  <style>
+    …interactCSS…
+  </style>
+  <!-- or: <link rel="stylesheet" href="interact.css" /> -->
+</head>
+```
+
+```ts
+// Runtime (browser bundle)
 Interact.create(config); // 1) load config
 add(document.querySelector('#hero')!, 'hero'); // 2) bind the element (key optional if it has data-interact-key)
 // later: remove('hero');

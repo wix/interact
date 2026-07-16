@@ -1358,7 +1358,7 @@ __metadata:
     "@types/react": "npm:^18.3.2"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    "@wix/interact": "npm:^2.5.1"
+    "@wix/interact": "npm:^2.5.4"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     typescript: "npm:^5.9.3"
@@ -1373,7 +1373,7 @@ __metadata:
     "@types/react": "npm:^18.3.2"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    "@wix/interact": "npm:^2.5.1"
+    "@wix/interact": "npm:^2.5.4"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-markdown: "npm:^9.0.1"
@@ -1389,7 +1389,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@wix/interact-playground@workspace:apps/playground"
   dependencies:
-    "@wix/interact": "npm:^2.5.1"
+    "@wix/interact": "npm:^2.5.4"
     "@wix/motion-presets": "npm:^1.0.3"
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
@@ -1401,14 +1401,14 @@ __metadata:
   resolution: "@wix/interact-validate@workspace:packages/interact-validate"
   dependencies:
     "@vitest/coverage-v8": "npm:^4.0.14"
-    "@wix/interact": "npm:^2.5.1"
+    "@wix/interact": "npm:^2.5.4"
     rimraf: "npm:^6.0.1"
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
     vitest: "npm:^4.0.14"
     zod: "npm:^4.0.0"
   peerDependencies:
-    "@wix/interact": ^2.5.1
+    "@wix/interact": ^2.5.4
   languageName: unknown
   linkType: soft
 
@@ -1418,7 +1418,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/interact@npm:^2.5.1, @wix/interact@workspace:packages/interact":
+"@wix/interact@npm:^2.5.4, @wix/interact@workspace:packages/interact":
   version: 0.0.0-use.local
   resolution: "@wix/interact@workspace:packages/interact"
   dependencies:

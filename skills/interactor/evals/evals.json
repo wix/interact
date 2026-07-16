@@ -4,20 +4,21 @@
     {
       "id": 1,
       "name": "plain-html-add-entrance-and-hover",
-      "prompt": "I have a plain static HTML landing page — no build tools, no framework, I just edit index.html and open it in the browser. I want to add some motion: make the hero section fade in when it scrolls into view, and make the 'Get Started' CTA button grow a little when you hover it. I'd like to use Wix's @wix/interact library for this. Walk me through it and give me the code.",
+      "prompt": "I have a plain static HTML landing page \u2014 no build tools, no framework, I just edit index.html and open it in the browser. I want to add some motion: make the hero section fade in when it scrolls into view, and make the 'Get Started' CTA button grow a little when you hover it. I'd like to use Wix's @wix/interact library for this. Walk me through it and give me the code.",
       "expected_output": "Sets up @wix/interact via the /web (custom-element) entry point loaded from a CDN (no build step). Registers presets with Interact.registerEffects before create/generate. Hero: viewEnter trigger + FadeIn namedEffect with triggerType:'once', wrapped in <interact-element data-interact-key=...>, with FOUC handled correctly (injected generate(config, true) output). CTA hover-grow avoids the hit-area-shift pitfall (animates a child via selector, or uses a state/transition effect, or targets a separate key) rather than scaling the same hovered element. generate() called with useFirstChild=true for the web entry point. Config validated with validateInteractConfig before emit (scratch script); no @wix/interact-validate in shipped index.html. No invented preset names; no Bg*/DVD presets.",
       "files": [],
       "assertions": [
         "Uses @wix/interact correctly: imports the Interact API and calls Interact.create(config) with a valid InteractConfig.",
         "Config is structurally valid: would pass validateInteractConfig with no errors.",
-        "Shipped output contains no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference.",
+        "Shipped output contains no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference \u2014 scope: shipped CODE files only (a mention in EXPLANATION.md/docs is fine).",
         "Registers presets before use: Interact.registerEffects(...) is called BEFORE create/generate when a namedEffect is used.",
         "Hero entrance correct: trigger 'viewEnter' + FadeIn namedEffect with triggerType:'once'.",
         "FOUC handled: generate() output injected.",
         "generate() useFirstChild matches the entry point (true for /web custom elements, false for vanilla).",
         "Hover-grow avoids hit-area shift: scales a child/separate target or uses a state/transition effect, not the same hovered element.",
         "No invented or forbidden presets (no Bg*/ImageParallax/DVD/made-up names).",
-        "Runnable with no build step: index.html is self-contained (CDN/module import)."
+        "Runnable with no build step: index.html is self-contained (CDN/module import).",
+        "Static CSS at generation time: the interaction CSS is embedded in index.html as a literal <style> block (or linked .css) pre-generated while authoring, rather than only being produced by a generate() call that runs in the browser at load time."
       ]
     },
     {
@@ -29,14 +30,14 @@
       "assertions": [
         "Uses the React entry point: imports from @wix/interact/react and uses <Interaction> with tagName + interactKey.",
         "Config is structurally valid: would pass validateInteractConfig with no errors.",
-        "Shipped source contains no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference (unless user explicitly asked for a CI guard).",
+        "Shipped source contains no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference (unless user explicitly asked for a CI guard) \u2014 scope: shipped CODE files only (a mention in EXPLANATION.md/docs is fine).",
         "Correct React lifecycle: Interact.create inside useEffect with instance.destroy() cleanup.",
         "generate() uses useFirstChild=false (correct for React).",
         "Registers presets before create/generate.",
-        "Tilt correct: pointerMove + Tilt3DMouse/Track3DMouse scrub effect with rangeStart/rangeEnd and fill:'both'.",
+        "Tilt correct: pointerMove + Tilt3DMouse/Track3DMouse effect with fill:'both' and NO rangeStart/rangeEnd (those are viewProgress-only).",
         "Tilt gated for touch with a (hover: hover) media condition.",
         "Tilt avoids hit-area shift: animates a child wrapper, not the same element with hitArea:'self' + transform.",
-        "Parallax uses the public ParallaxScroll with viewProgress — not BgParallax/ImageParallax/invented.",
+        "Parallax uses the public ParallaxScroll with viewProgress \u2014 not BgParallax/ImageParallax/invented.",
         "Mentions overflow:hidden -> overflow:clip for viewProgress to work.",
         "No invented or forbidden presets anywhere."
       ]
@@ -45,7 +46,7 @@
       "id": 3,
       "name": "edit-existing-config-slide-and-stagger",
       "prompt": "Attached is my current setup (index.html + interactions.js). Right now the hero just fades in when it enters the viewport. I want two changes: (1) make the hero slide in from the left instead of fading, and (2) make the four feature cards stagger-fade in one after another as they scroll into view. Please update my files and keep the existing setup working.",
-      "expected_output": "EDITS the existing files in place. Hero: FadeIn -> SlideIn with direction:'left', preserving effectId 'hero-in', key 'hero', viewEnter, triggerType:'once'. Cards: staggered entrance via a sequence (offset + offsetEasing) with a viewEnter trigger and listContainer pointing at .feature-grid/cards — not per-card delays; adds the needed key/markup so the container is bound. Preserves registerEffects, generate(config, true), Interact.create and the web entry point. Edited config validated with validateInteractConfig; no validator reference left in edited files. Targeted edit, valid references.",
+      "expected_output": "EDITS the existing files in place. Hero: FadeIn -> SlideIn with direction:'left', preserving effectId 'hero-in', key 'hero', viewEnter, triggerType:'once'. Cards: staggered entrance via a sequence (offset + offsetEasing) fired by a single viewEnter trigger, with the sequence's effect carrying a selector that picks the .feature-card items (one trigger fanning across the cards \u2014 the selector case, not per-card listContainer) \u2014 not per-card delays; keys a single wrapper (the grid/section) so the cards bind. Because the cards are source \u2260 target (trigger on the wrapper, effect's selector fans across the cards), generate() emits no FOUC-hiding rules for them, so the card entrance effect sets fill:'backwards' to hold each card in its first-keyframe state before it enters. Preserves registerEffects, generate(config, true), Interact.create and the web entry point. Edited config validated with validateInteractConfig; no validator reference left in edited files. Targeted edit, valid references.",
       "files": [
         "skills/interactor/evals/files/edit-config/index.html",
         "skills/interactor/evals/files/edit-config/interactions.js"
@@ -54,11 +55,12 @@
         "Hero switched to SlideIn from the left (namedEffect SlideIn, direction:'left', replacing FadeIn).",
         "Hero identity preserved: effectId 'hero-in', key 'hero', trigger 'viewEnter', triggerType:'once'.",
         "Edited config is structurally valid: would pass validateInteractConfig; all effectId/sequenceId references resolve.",
-        "Shipped edited files contain no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference.",
-        "Cards stagger via a sequence (offset + offsetEasing) over the list/container — not per-card delays or duplicate interactions.",
+        "Shipped edited files contain no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference \u2014 scope: shipped CODE files only (a mention in EXPLANATION.md/docs is fine).",
+        "Cards stagger via a sequence (offset; offsetEasing optional) whose effect uses a selector to fan across the cards (the one-trigger stagger case, not per-card listContainer).",
         "Cards use the viewEnter trigger.",
-        "Cards actually bound: adds key/markup (interact-element/data-interact-key + listContainer) matching the cards.",
-        "Existing setup preserved: registerEffects, generate(config, true), Interact.create, /web entry point intact.",
+        "Cards actually bound: keys a single wrapper (interact-element/data-interact-key on the grid/section) and the sequence effect's selector matches the .feature-card items.",
+        "Card entrance effect sets fill:'backwards' (source ≠ target, so generate() emits no FOUC-hiding rules for the cards).",
+        "Existing setup preserved: registerEffects, generate(config, true) (at generation/build time or runtime), Interact.create, and the /web entry point intact.",
         "Targeted edit, not a rewrite: unrelated structure preserved.",
         "No invented or forbidden presets (SlideIn/FadeIn are real)."
       ]
@@ -66,20 +68,76 @@
     {
       "id": 4,
       "name": "dynamic-config-runtime-built",
-      "prompt": "Attached is my product card page (index.html + interactions.js). The InteractConfig is built at runtime by buildConfig(products) from a products array — it's not a static literal. I want each card to fade in with viewEnter when it scrolls into view. Please wire up the animations and make sure the dynamic config is correct.",
-      "expected_output": "Keeps the runtime buildConfig(products) pattern. Each product gets its own key, viewEnter interaction, and FadeIn effect with triggerType:'once'. registerEffects before generate/create. generate(config, true) for web entry. Agent validates the runtime-built config (temporary assertValidInteractConfig injection or dev-only validation script importing buildConfig) — not just eyeballed. Final shipped files contain NO @wix/interact-validate reference; any temporary injection removed. No invented presets.",
+      "prompt": "Attached is my product card page (index.html + interactions.js). The InteractConfig is built at runtime by buildConfig(products) from a products array \u2014 it's not a static literal. I want each card to fade in with viewEnter when it scrolls into view. Please wire up the animations and make sure the dynamic config is correct.",
+      "expected_output": "Keeps the runtime buildConfig(products) pattern. Each product gets its own key, viewEnter interaction, and FadeIn effect with triggerType:'once'. registerEffects before generate/create. generate(config, true) for web entry. Agent validates the runtime-built config (temporary assertValidInteractConfig injection or dev-only validation script importing buildConfig) \u2014 not just eyeballed. Final shipped files contain NO @wix/interact-validate reference; any temporary injection removed. No invented presets.",
       "files": [
         "skills/interactor/evals/files/dynamic-config/index.html",
         "skills/interactor/evals/files/dynamic-config/interactions.js"
       ],
       "assertions": [
-        "Keeps runtime config building via buildConfig(products) or equivalent — not replaced with a static literal.",
+        "Keeps runtime config building via buildConfig(products) or equivalent \u2014 not replaced with a static literal.",
         "Each product/card has a viewEnter interaction with FadeIn namedEffect and triggerType:'once'.",
         "Dynamic config is structurally valid: would pass validateInteractConfig (references resolve, one payload per effect, valid trigger/effect pairing).",
-        "Agent validated the runtime-built config (temporary injection or dev-only validation script) — not just eyeballed.",
-        "Final shipped files contain no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference.",
+        "Agent validated the runtime-built config (temporary injection or dev-only validation script) \u2014 not just eyeballed.",
+        "Final shipped files contain no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference \u2014 scope: shipped CODE files only (a mention in EXPLANATION.md/docs is fine).",
         "registerEffects, generate(config, true), Interact.create preserved; web entry point intact.",
         "No invented or forbidden presets (FadeIn is real)."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "layered-hero-single-container",
+      "prompt": "Attached is my landing page (index.html) \u2014 plain static HTML, I pull libraries from a CDN, no build tooling. I want the hero to make an entrance as it scrolls into view. The hero is built from a full-bleed background photo, a dark gradient overlay on top of it, and the headline + subtext + 'Start your kit' button. I'd like the whole hero to fade in and rise up a little, all together, the first time it comes into view. Please wire this up with @wix/interact and give me the updated index.html.",
+      "expected_output": "Binds ONE entrance effect to the single container that wraps the hero layers (the .hero section, or one wrapper around it) \u2014 NOT the same FadeIn/rise effect duplicated onto the background image, the overlay, and the content block separately. The whole hero animates as one unit: one interaction, one key, one effect. Uses the /web entry point (<interact-element data-interact-key='hero'> around the hero, Interact.create). Entrance is a real registered preset (FadeIn, or a rise/slide entrance) on viewEnter with triggerType:'once'. registerEffects before generate/create; generate(config, true); FOUC handled. Config validated before emit (scratch script); no @wix/interact-validate reference in shipped index.html. No invented/forbidden presets.",
+      "files": ["skills/interactor/evals/files/layered-hero/index.html"],
+      "assertions": [
+        "The hero animates as ONE unit: a single interaction with a single effect is bound to one container that wraps the layers (the .hero section or a single wrapper element), keyed once.",
+        "The same entrance effect is NOT duplicated across the separate hero layers (background image, overlay, content block are not each given their own copy of the FadeIn/rise effect).",
+        "Hero entrance uses a real registered preset (FadeIn, or a rise/slide entrance such as SlideIn/FloatIn) on trigger 'viewEnter' with triggerType:'once'.",
+        "Uses the /web entry point: <interact-element data-interact-key=...> markup wrapping the hero + Interact.create(config).",
+        "Registers presets before use: Interact.registerEffects(...) is called BEFORE generate/create.",
+        "FOUC handled: generate() output embedded/injected and useFirstChild=true (correct for /web).",
+        "Shipped index.html contains no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference.",
+        "No invented or forbidden presets (no Bg*/ImageParallax/DVD/made-up names)."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "build-time-static-css",
+      "prompt": "Attached is my static site (package.json, build.mjs, src/page.html). Running `npm run build` executes build.mjs, which writes dist/index.html from the template. I want to add a fade-in-on-scroll to the hero using @wix/interact. Important: generate the interaction CSS at build time and bake it into the built HTML so there is no flash of unstyled content \u2014 I don't want the CSS created in the browser at runtime. Update my build so the output ships with the CSS already embedded.",
+      "expected_output": "Extends build.mjs to import { generate } (and registerEffects) from @wix/interact/web plus FadeIn from @wix/motion-presets, build the InteractConfig, call generate(config, true) AT BUILD TIME, and inject the resulting CSS string into dist/index.html as a <style> block (or write a linked .css). The shipped/runtime code only wires triggers via Interact.create() \u2014 it does NOT call generate() in the browser. Hero wrapped in <interact-element data-interact-key='hero'>, viewEnter + FadeIn namedEffect + triggerType:'once'. registerEffects before generate. Config validated (scratch/dev), no validator reference in shipped dist. Real presets only. `npm run build` succeeds and produces dist/index.html with the CSS embedded.",
+      "files": [
+        "skills/interactor/evals/files/build-time/package.json",
+        "skills/interactor/evals/files/build-time/build.mjs",
+        "skills/interactor/evals/files/build-time/src/page.html"
+      ],
+      "assertions": [
+        "CSS generated at build time: build.mjs imports and calls generate(config, true) and writes the resulting CSS into the built HTML output (not deferred to the browser).",
+        "The built/shipped dist/index.html contains the interaction CSS embedded as literal <style> text (or a linked stylesheet) \u2014 pre-baked, not produced by a generate() call running in the browser.",
+        "The runtime/browser code calls Interact.create(config) to wire triggers but does NOT call generate() at runtime.",
+        "Registers presets before use: registerEffects(...) is called BEFORE generate()/create().",
+        "generate() uses useFirstChild=true (correct for the /web entry point).",
+        "Hero wired correctly: <interact-element data-interact-key='hero'>, trigger 'viewEnter', FadeIn namedEffect, triggerType:'once'.",
+        "Shipped output (dist and any runtime JS) contains no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference.",
+        "No invented or forbidden presets (FadeIn is real).",
+        "`npm run build` runs successfully and produces dist/index.html with the interaction CSS embedded."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "layered-hero-siblings-no-wrapper",
+      "prompt": "Attached is my landing page (index.html) \u2014 plain static HTML, CDN, no build tools. At the top there's a hero made of three separate full-screen layers stacked with z-index: a background photo (.bg-photo), a dark tint over it (.tint), and the headline + subtext + 'Get the app' button (.hero-copy). They are siblings in <body>, not nested in any wrapper. I want the hero to animate in as the page loads \u2014 the photo, the tint, and the copy should fade in and drift up together as one entrance. Wire it up with @wix/interact and give me the updated index.html.",
+      "expected_output": "Introduces ONE container around the three sibling layers (a single <interact-element data-interact-key='hero'> or one wrapper element) and binds a SINGLE viewEnter entrance effect to it (FadeIn/FloatIn/SlideIn, triggerType:'once') so the whole hero animates as one unit \u2014 NOT the same effect duplicated across .bg-photo, .tint, and .hero-copy as three separate keys/effects/interact-elements. Layout of the stacked layers is preserved. Uses the /web entry, registerEffects before generate/create, generate(config,true), FOUC handled with pre-baked embedded CSS, no @wix/interact-validate reference in shipped code, real presets only.",
+      "files": ["skills/interactor/evals/files/layered-hero-siblings/index.html"],
+      "assertions": [
+        "The three hero layers animate as ONE unit: the agent introduces a single wrapping container (one <interact-element> or wrapper element) around the .bg-photo, .tint, and .hero-copy siblings and binds ONE effect to it.",
+        "The same entrance effect is NOT applied separately to each of the three layers (there are NOT three per-layer keys/effects/interact-elements duplicating the entrance).",
+        "The config has a single hero-entrance interaction with one effect (one key) \u2014 not one interaction/effect per layer.",
+        "Entrance uses a real registered preset (FadeIn / FloatIn / a SlideIn variant) on trigger 'viewEnter' with triggerType:'once'.",
+        "Uses the /web entry point (<interact-element data-interact-key=...>) + Interact.create(config); registerEffects called before generate/create.",
+        "FOUC handled: generate() output embedded and useFirstChild=true; the stacked-layer layout is preserved (introducing the wrapper does not break the full-bleed positioning).",
+        "Shipped CODE files contain no @wix/interact-validate / validateInteractConfig / assertValidInteractConfig / InteractValidationError reference (a mention in EXPLANATION.md/docs is fine).",
+        "No invented or forbidden presets (no Bg*/ImageParallax/DVD/made-up names)."
       ]
     }
   ]

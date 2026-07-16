@@ -1,17 +1,6 @@
 ---
 name: interactor
-description: >-
-  Install, integrate, and configure Interact — @wix/interact —
-  declarative interactions library — to add or edit hover/click/view triggered, scroll-driven, and
-  pointer-driven animations on a webpage or web app. Use whenever the user wants to
-  add or change web animations/interactions with @wix/interact or
-  @wix/motion(-presets); wire animations to scroll, viewport-enter, hover, click, or
-  mouse-move; build entrance / parallax / stagger / tilt / reveal effects; install
-  or set up @wix/interact (vanilla JS, React, or Web Components); or edit an existing
-  interact config. Validate every generated InteractConfig with @wix/interact-validate
-  before it reaches generate()/create(). Trigger even on phrasings like "fade in on scroll",
-  "parallax background", "stagger the cards in", "hover-scale the button", or "tilt toward the
-  mouse" in a project using these packages. Do NOT use for other animation libraries.
+description: 'Use when user asks to add/edit motion without specific library, or with @wix/interact - hover, click, view/scroll triggered, scroll-driven, and pointer-driven animations for web. Wire animations to user interactions; install or set up @wix/interact; or edit an existing interact config. Do NOT use for other animation libraries.'
 ---
 
 # Interactor — build interactions with @wix/interact
@@ -49,6 +38,10 @@ _Add/Edit_. Read the linked reference files as you reach each step — they hold
 full schema, the preset catalog, and per-trigger rules. Don't try to hold it all
 in your head; the references are the source of truth.
 
+For static or pre-rendered output (agent-authored HTML, SSG, static export),
+follow the canonical CSS generation policy in
+`references/integration-recipes.md`.
+
 ---
 
 ### Step 1 — Install
@@ -62,9 +55,10 @@ npm install @wix/interact @wix/motion-presets
 npm install -D @wix/interact-validate   # optional — permanent dev/CI config guard only
 ```
 
-A no-build / plain-HTML site can skip npm and import from a CDN instead — see the
-CDN recipe in `references/integration-recipes.md`. CDN pages skip the validate
-package install; the agent validates configs without shipping the validator.
+A no-build / plain-HTML site can skip npm and import Interact from a CDN for
+runtime wiring — see the CDN recipe in `references/integration-recipes.md`.
+CDN pages skip the validate package install; the agent validates configs without
+shipping the validator.
 
 ---
 
@@ -74,27 +68,40 @@ package install; the agent validates configs without shipping the validator.
 import and a couple of flags). Decision procedure:
 
 1. **React / Next / any JSX project** (a `package.json` with `react`, `.jsx`/`.tsx` files) → use `@wix/interact/react` with the `<Interaction>` component.
-2. **Plain HTML, no bundler** (static `.html`, no build step) → use `@wix/interact/web` with `<interact-element>` custom elements, imported from a CDN.
-3. **Bundled vanilla JS / other framework** (Vite/Webpack but no React, or Vue/Svelte/Angular) → use `@wix/interact/web` (Web Components are framework-agnostic) **or** the base `@wix/interact` vanilla API. Prefer `/web` unless the user wants to control binding manually.
+2. **Static / pre-rendered HTML** (agent-generated `.html`, SSG export, Astro/Eleventy/Hugo output) → use `@wix/interact/web` with `<interact-element>` and follow the canonical CSS policy in `references/integration-recipes.md`.
+3. **Plain HTML, no bundler** (hand-edited static `.html`, CDN runtime) → same as (2), using the CDN recipe for runtime wiring.
+4. **Bundled vanilla JS / other framework** (Vite/Webpack but no React, or Vue/Svelte/Angular) → use `@wix/interact/web` (Web Components are framework-agnostic) **or** the base `@wix/interact` vanilla API. Prefer `/web` unless the user wants to control binding manually.
 
 If you can't tell, ask the user which framework the page uses. The full
 copy-paste setup for each entry point — including SSR, cleanup, and a verification
 snippet — is in **`references/integration-recipes.md`**. Read it now for the entry
 point you chose.
 
-The shape is the same everywhere:
+Prefer two phases — **generation/build** (all CSS possible) and **runtime**
+(trigger wiring plus any runtime-dependent CSS):
 
 ```ts
+// Generation/build script (Node, SSG, agent scratch)
 import { Interact, generate } from '@wix/interact/web'; // or /react, or '@wix/interact'
-import { FadeIn } from '@wix/motion-presets'; // import only what you use (tree-shakes)
+import { FadeIn } from '@wix/motion-presets';
 
-Interact.registerEffects({ FadeIn }); // BEFORE generate()/create() — see invariants
-const css = generate(config, /* useFirstChild */ true); // inject into <head>
-const instance = Interact.create(config); // wire it up
+Interact.registerEffects({ FadeIn }); // BEFORE generate() — see invariants
+const css = generate(config, /* useFirstChild */ true); // true=web, false=react/vanilla
+// Deliver css according to the canonical policy in integration-recipes.md
 ```
 
-(For CDN/quick-start, `import * as presets` + `registerEffects(presets)` is fine —
-selective imports just keep bundled apps lean. See `references/presets.md`.)
+```ts
+// Runtime (browser bundle / CDN module)
+import { Interact } from '@wix/interact/web';
+
+const instance = Interact.create(config); // wire triggers
+```
+
+For CSS delivery and runtime-only configs, follow the canonical policy in
+`references/integration-recipes.md`.
+
+(For CDN/quick-start, `import * as presets` + `registerEffects(presets)` is fine at
+generation time — selective imports just keep bundled apps lean. See `references/presets.md`.)
 
 Mark up target elements with a **key** that matches the config:
 
@@ -105,12 +112,30 @@ Mark up target elements with a **key** that matches the config:
 <Interaction tagName="section" interactKey="hero">…</Interaction>
 <!-- vanilla -->
 <section data-interact-key="hero">…</section>
-+ add(el, 'hero')
+```
+
+```js
+// for vanilla - add the following
+import { add } from '@wix/interact';
+
+const el = document.querySelector('[data-interact-key="hero"]');
+add(el);
 ```
 
 ---
 
 ### Step 3 — Add / edit interactions
+
+**Before designing the config, draw on the example library for inspiration and reference patterns:**
+
+1. Read `examples/index.md` (this file is the table of contents — it lists every demo with its summary and tags).
+2. Based on the user's request, identify 2–4 demos whose trigger type, layout, motion properties, or overall feel best match what's being built. Match on tags such as `viewProgress`, `pointerMove`, `sticky`, `stagger`, `3d`, or `clip-path`.
+3. Read those demo files from `examples/examples/<category>/<name>.md`. Use the index rather than guessing paths; the categories are `gallery`, `carousel`, `image-background`, `text-animations`, `text-image`, and `ui-components`.
+4. Treat each demo as a cohesive unit — the interact config, HTML structure, and CSS layout are designed to work together. Adapt all three parts to the user's context rather than lifting any single piece in isolation.
+
+This step is especially useful for: picking the right trigger/effect combination, handling complex layered compositions, and producing configs that feel polished rather than generic.
+
+---
 
 This is where most work happens. An `InteractConfig` is:
 
@@ -130,7 +155,11 @@ To **add** an interaction:
 1. Choose the **trigger** (see decision table below).
 2. Choose the **effect**: prefer a `namedEffect` preset (browse `references/presets.md`); fall back to inline `keyframeEffect` for custom keyframes, or `customEffect` for non-CSS (SVG/canvas/text).
 3. Set the **playback field** the trigger needs: `triggerType` for time effects on hover/click/viewEnter; `stateAction` for CSS-state (transition) effects; `rangeStart`/`rangeEnd` for `viewProgress`. Never set both `triggerType` and `stateAction` on one effect.
-4. Bind it: give the target element the matching `key` in the markup.
+4. Bind it: give the target element the matching `key` in the markup. If the thing
+   you're animating is a stack of layers that should move together (hero
+   background + overlay + content, card image + text), key the **one container**
+   that wraps them and put a single effect on it — don't repeat the effect on each
+   layer (invariant 11).
 
 To **edit** an existing config: read the current config first, find the
 interaction/effect by its `key`/`effectId`, and change _only_ what's asked.
@@ -161,7 +190,8 @@ construct the config statically:
   every `severity: 'error'`, then **remove** the call, import, any `esm.sh` import,
   and any temp devDep. Prefer a dev-only validation script when the config builder
   module is importable in isolation (no removal step). Full loop in
-  `references/validate.md`.
+  `references/validate.md`. For static site output, follow the canonical CSS
+  generation policy in `references/integration-recipes.md`.
 - **Permanent guard (opt-in, separate):** leaving `assertValidInteractConfig` in
   shipped code as a devDependency CI gate is only when scaffolding a new project or
   the user explicitly asks — do not conflate with the temporary injection above.
@@ -211,16 +241,16 @@ animation no-ops. Apply them every time, even if you don't open a reference file
    (`<interact-element>`) entry point, `false` for **vanilla** and **React**.
    Backwards = the FOUC-prevention selectors target the wrong node and break.
 
-3. **FOUC prevention — inject `generate()` CSS.** Always inject the `generate()` output (ideally at
-   SSR/build) so entrance elements are hidden before JS runs. The generated CSS includes
-   FOUC-prevention rules (gated by `:not([data-interact-enter])`) for `viewEnter`+`once`
-   entrances where source and target are the same element; when source ≠ target (e.g.
-   stagger via `selector`), the generated rules hide the targets on their own. For
-   `repeat`/`alternate`/`state`, inline the starting keyframe and use `fill: 'both'`.
+3. **FOUC prevention.** Follow the canonical CSS generation policy in
+   `references/integration-recipes.md`. For the generated initial-rule behavior
+   and trigger-specific exceptions, see “CSS generation & FOUC” in
+   `references/config-schema.md`. For `viewEnter` + `once` where source ≠ target,
+   `generate()` emits no hiding rules — set `fill: 'backwards'` on the effect so
+   targets don't flash before the trigger.
 
 4. **Vanilla binding.** You must then call the **standalone** `add(element, 'key')` for
    each element once it exists in the DOM. For clean up call the `remove('key')` function.
-   `add`/`remove` are functions importedfrom the package.
+   `add`/`remove` are functions imported from the package.
 
 5. **`viewEnter` with same source & target → only `triggerType: 'once'`.** For
    `repeat`/`alternate`/`state`, the animation can move the element out of/into the
@@ -261,6 +291,21 @@ animation no-ops. Apply them every time, even if you don't open a reference file
     `listContainer` must match a **descendant** of the keyed element, not the keyed
     element itself.
 
+11. **Layers that move as one → one keyed container, not the same effect on each
+    layer.** When an element is composed of stacked layers meant to animate
+    **together** — a hero of background image + gradient overlay + content block, a
+    card of image + heading + text + button — put the trigger and **one** effect on
+    the wrapper that holds them and key that wrapper. Copying the same
+    `FadeIn`/`SlideIn` onto each layer is the common wrong turn: N layers become N
+    controllers that have to stay in sync (they visibly drift on slower devices), N
+    keys to wire, and N× the per-frame work for a motion the eye reads as a single
+    move. Collapse them onto the container. This is **not** the same as two cases
+    where separate targets are deliberate: scroll **parallax**, where layers move at
+    _different_ rates on purpose (a `ParallaxScroll` per layer — keep those
+    separate), and **hit-area-safe child targeting** (invariant 6 — trigger on the
+    parent, animate one child). Litmus test: same trigger, same effect, same timing
+    across the layers ⇒ they belong on one keyed container.
+
 ## Verify your work (run before declaring done)
 
 Animations are hard to confirm headlessly, so this static check is your reliable
@@ -279,9 +324,11 @@ Items the validator cannot check — walk these after automated validation passe
 - [ ] Every `*Scroll` preset used with `viewProgress` has a `range` (except `ParallaxScroll`).
 - [ ] `pointerMove` effects have **no** `rangeStart`/`rangeEnd` (those are `viewProgress`-only).
 - [ ] Every interaction `key` (and effect `key`) has a **matching element** in the markup (`data-interact-key` / `interactKey`).
-- [ ] `generate()` output is injected and `useFirstChild` matches the entry point.
+- [ ] Static/pre-rendered CSS follows the canonical policy in `references/integration-recipes.md`.
+- [ ] `useFirstChild` matches the entry point.
 - [ ] Child-target effects put `selector`/`key` on the **effect**, not the interaction. Groups of items use one keyed wrapper + a **descendant** match (no duplicate keys): `selector` on the effect for a one-trigger stagger/sequence, `listContainer` on the interaction for per-item triggers.
-- [ ] Invariants 5–7 and 10 hold for the relevant triggers (separate source/target, child targets, `overflow: clip`, unique keys).
+- [ ] Composite elements whose layers animate as one unit are keyed on a **single container** with one effect — the same effect is not copied onto each layer (distinct from intentional per-layer parallax, which uses different rates, or child-targeting to avoid hit-area shift).
+- [ ] Invariants 5–7, 10, and 11 hold for the relevant triggers (separate source/target, child targets, `overflow: clip`, unique keys, layers collapsed to one container).
 
 If a dev server is available, load the page and confirm the animation runs and the
 browser console is free of "not found in registry" warnings.
@@ -290,6 +337,7 @@ browser console is free of "not found in registry" warnings.
 
 Read the one(s) relevant to the task — they are self-contained and source-accurate:
 
+- **`examples/index.md`** — table of contents for the curated demo library, with summaries, tags, and exact file links across all example categories.
 - **`references/config-schema.md`** — every config object field-by-field: `InteractConfig`, `Interaction`, all three effect variants, sequences, conditions, element resolution (source vs target), FOUC, and the full `Interact` static API.
 - **`references/triggers.md`** — per-trigger deep rules and gotchas: `viewEnter`, `viewProgress`, `hover`/`click` (+ `triggerType`/`stateAction` tables), `pointerMove`, `animationEnd`, accessibility variants, and sequences/stagger.
 - **`references/presets.md`** — the full preset catalog by category with parameters, defaults, accessibility risk tiers + reduced-motion fallbacks, and an "atmosphere → preset" selection guide.
