@@ -1,6 +1,6 @@
 {
   "name": "@wix/interact-validate",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Schema + referential + semantic validation for @wix/interact's InteractConfig.",
   "license": "MIT",
   "main": "dist/cjs/index.js",
@@ -49,11 +49,11 @@
     "zod": "^4.0.0"
   },
   "peerDependencies": {
-    "@wix/interact": "^2.5.3"
+    "@wix/interact": "^2.5.4"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.14",
-    "@wix/interact": "^2.5.3",
+    "@wix/interact": "^2.5.4",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.3",
     "vite": "^7.2.2",

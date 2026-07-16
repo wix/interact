@@ -1,6 +1,6 @@
 {
   "name": "@wix/splittext",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Lightweight, accessible text splitting utility for creating staggered animations on characters, words, and lines.",
   "license": "MIT",
   "main": "dist/cjs/index.js",
