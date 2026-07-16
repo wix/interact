@@ -45,7 +45,9 @@ use **separate** source and target elements (trigger on a stable wrapper, animat
 child via `selector`, or point the effect at a different `key`).
 
 **FOUC:** `once` entrances need injected `generate()` CSS before first paint (see
-`config-schema.md` and SKILL.md invariant 3).
+`config-schema.md` and SKILL.md invariant 3). When source ≠ target (staggering
+children via `selector`) `generate()` emits no hiding rules for those targets — also
+set `fill: 'backwards'` on the effect so they don't flash before the trigger.
 
 ```ts
 { interactions: [{ key: 'hero', trigger: 'viewEnter', params: { threshold: 0.2 },
@@ -215,7 +217,7 @@ element becomes a staggered participant.
 { interactions: [{ key: 'features', trigger: 'viewEnter',
     sequences: [{ offset: 120, offsetEasing: 'quadOut',
       effects: [{ effectId: 'card-in', selector: '.feature-card' }] }] }],
-  effects: { 'card-in': { duration: 600, easing: 'ease-out', namedEffect: { type: 'SlideIn', direction: 'bottom' }, triggerType: 'once' } } }
+  effects: { 'card-in': { duration: 600, easing: 'ease-out', fill: 'backwards', namedEffect: { type: 'SlideIn', direction: 'bottom' }, triggerType: 'once' } } }
 ```
 
 - `offset` = ms between consecutive items' starts.
@@ -226,7 +228,7 @@ element becomes a staggered participant.
 
 **`selector` vs `listContainer` for groups of items** — pick by _who triggers_:
 
-- **One trigger fans an effect/sequence across many targets** (a single `viewEnter` staggering a row of cards): put **`selector`** on the effect to select the items. This is the sequence case above. The injected `generate()` rules prevent FOUC on their own (see [viewEnter](#viewenter)).
+- **One trigger fans an effect/sequence across many targets** (a single `viewEnter` staggering a row of cards): put **`selector`** on the effect to select the items. This is the sequence case above. Here source ≠ target, so `generate()` emits **no** FOUC-hiding rules for the items — set **`fill: 'backwards'`** on the effect so each target holds its first-keyframe state before the trigger fires (see [viewEnter](#viewenter) and “CSS generation & FOUC” in `config-schema.md`).
 - **Each item needs its own trigger** (per-card `hover`/`pointerMove`, one tracker each): put **`listContainer`** on the interaction so each child becomes its own source.
 
 **Two rules that silently break list binding either way:**
