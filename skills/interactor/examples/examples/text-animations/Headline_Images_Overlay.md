@@ -16,37 +16,37 @@ Six image panels in geometric shapes cycle one by one in an infinite looping seq
     </div>
 
     <interact-element data-interact-key="mask-1">
-      <div class="mask-item shape-square" style="--x: 5vw; --y: 10vh; --w: 75vmin; --h: 75vmin;">
+      <div class="mask-item shape-square" style="--x: 5vw;--y: 10vh;--w: 75vmin;--h: 75vmin">
         <img src="" class="mask-bg">
       </div>
     </interact-element>
 
     <interact-element data-interact-key="mask-2">
-      <div class="mask-item shape-rect" style="--x: 82vw; --y: 0vh; --w: 18vw; --h: 100vh;">
+      <div class="mask-item shape-rect" style="--x: 82vw;--y: 0vh;--w: 18vw;--h: 100vh">
         <img src="" class="mask-bg">
       </div>
     </interact-element>
 
     <interact-element data-interact-key="mask-3">
-      <div class="mask-item shape-pentagon" style="--x: -5vw; --y: 55vh; --w: 50vmin; --h: 50vmin;">
+      <div class="mask-item shape-pentagon" style="--x: -5vw;--y: 55vh;--w: 50vmin;--h: 50vmin">
         <img src="" class="mask-bg">
       </div>
     </interact-element>
 
     <interact-element data-interact-key="mask-4">
-      <div class="mask-item shape-circle" style="--x: 50vw; --y: -5vh; --w: 45vmin; --h: 45vmin;">
+      <div class="mask-item shape-circle" style="--x: 50vw;--y: -5vh;--w: 45vmin;--h: 45vmin">
         <img src="" class="mask-bg">
       </div>
     </interact-element>
 
     <interact-element data-interact-key="mask-5">
-      <div class="mask-item shape-arch" style="--x: 35vw; --y: 25vh; --w: 35vmin; --h: 50vmin;">
+      <div class="mask-item shape-arch" style="--x: 35vw;--y: 25vh;--w: 35vmin;--h: 50vmin">
         <img src="" class="mask-bg">
       </div>
     </interact-element>
 
     <interact-element data-interact-key="mask-6">
-      <div class="mask-item shape-oval" style="--x: 15vw; --y: 65vh; --w: 70vw; --h: 35vh;">
+      <div class="mask-item shape-oval" style="--x: 15vw;--y: 65vh;--w: 70vw;--h: 35vh">
         <img src="" class="mask-bg">
       </div>
     </interact-element>
@@ -69,7 +69,6 @@ body, html {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #000000;
 }
 
 #header-section {
@@ -100,11 +99,9 @@ body, html {
     font-size: clamp(2.7rem, 8.8vw, 7.5rem);
     line-height: 0.95;
     letter-spacing: -2px;
-    color: #e6e6e6;
 }
 
 .text-top {
-    font-family: 'Liter', serif;
     text-align: left;
     align-self: flex-start;
     max-width: 14ch;
@@ -112,7 +109,6 @@ body, html {
 }
 
 .text-bottom {
-    font-family: 'Liter', serif;
     text-align: right;
     align-self: flex-end;
     max-width: 12ch;
@@ -132,7 +128,6 @@ body, html {
     z-index: 20;
     opacity: 0;
     will-change: opacity;
-    background-color: #f3f4f6;
     transform: scale(var(--mask-scale));
     transform-origin: center;
 }

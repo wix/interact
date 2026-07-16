@@ -24,7 +24,6 @@ A blurred circle continuously sweeps across bold text inside a high-contrast fil
 ```css
 body {
     margin: 0;
-    background-color: #f3f4f6;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -56,7 +55,6 @@ interact-element {
 
 .gooey-filter {
     filter: contrast(50);
-    background-color: #fff;
     overflow: hidden;
     position: relative;
     width: 100%;
@@ -68,9 +66,7 @@ interact-element {
 
 .gooey-text {
     filter: blur(8px);
-    font-variation-settings: 'wght' 900;
     letter-spacing: -0.05em;
-    color: black;
     user-select: text;
     cursor: text;
     z-index: 10;
@@ -78,11 +74,6 @@ interact-element {
     font-size: 13rem;
     font-weight: 900;
     line-height: 1;
-}
-
-.gooey-text::selection {
-    background: #ff0055;
-    color: white;
 }
 
 .moving-circle {
@@ -93,8 +84,6 @@ interact-element {
     height: 175px;
     border-radius: 50%;
     pointer-events: none;
-    background-color: black;
-    box-shadow: -15px 0px 0px #00ffff, 15px 0px 0px #ff00ff;
     filter: blur(30px);
     transform: translateY(-50%);
     z-index: 20;

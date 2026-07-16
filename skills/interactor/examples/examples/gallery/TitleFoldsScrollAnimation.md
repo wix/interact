@@ -123,19 +123,8 @@ Sticky cards scale up from 75% as they enter the viewport, with the heading, lin
 ## Essential styles
 
 ```css
-:root {
-    --background-color: #111;
-    --card-background: #1a1a1a;
-    --text-color: #fff;
-    --line-color: #fff;
-    --font-family: 'Helvetica', 'Arial', sans-serif;
-}
-
 body {
     margin: 0;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    font-family: var(--font-family);
     overscroll-behavior-y: none;
 }
 
@@ -160,7 +149,6 @@ interact-element {
 .card {
     width: 100%;
     height: 95vh;
-    background-color: var(--card-background);
     overflow: hidden;
     transform-origin: bottom center;
     border-radius: 24px;
@@ -178,7 +166,6 @@ interact-element {
     left: 0;
     width: 100%;
     height: 6px;
-    background-color: var(--line-color);
     transform-origin: left;
 }
 

@@ -1,6 +1,6 @@
 # Expanding Horizontal Scroll
 
-Four full-viewport colored panels are stacked offscreen to the right inside a 700vh sticky section; as the user scrolls, each panel slides horizontally to fill the screen in sequence while its thumbnail image scales up dramatically, driven entirely by `viewProgress`.
+Four full-viewport panels are stacked offscreen to the right inside a 700vh sticky section; as the user scrolls, each panel slides horizontally to fill the screen in sequence while its thumbnail image scales up, driven entirely by `viewProgress`.
 
 **Tags:** viewProgress, viewEnter, sticky, transform, opacity, scale, stagger, reveal
 
@@ -8,15 +8,14 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
 
 ```html
 <div class="intro-section">
-  <h1>Scroll Down</h1>
-  <p>An animation will begin.</p>
+  <h1>Scroll</h1>
 </div>
 
 <interact-element data-interact-key="#scroll-section">
   <div id="scroll-section">
     <div id="sticky-container">
       <h1 class="static-title">
-        <span class="title-letter">T</span><span class="title-letter">h</span><span class="title-letter">e</span><span class="title-letter">&nbsp;</span><span class="title-letter">S</span><span class="title-letter">t</span><span class="title-letter">o</span><span class="title-letter">r</span><span class="title-letter">y</span><span class="title-letter">&nbsp;</span><span class="title-letter">o</span><span class="title-letter">f</span><span class="title-letter">&nbsp;</span><span class="title-letter">P</span><span class="title-letter">a</span><span class="title-letter">n</span><span class="title-letter">e</span><span class="title-letter">l</span><span class="title-letter">s</span>
+        <span class="title-letter">P</span><span class="title-letter">a</span><span class="title-letter">n</span><span class="title-letter">e</span><span class="title-letter">l</span><span class="title-letter">s</span>
       </h1>
 
       <interact-element data-interact-key="#dynamic-paragraph">
@@ -24,7 +23,7 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
       </interact-element>
 
       <interact-element data-interact-key="#box4">
-        <div id="box4" class="box box4" style="left: 90vw; z-index: 40;">
+        <div id="box4" class="box box4" style="left: 90vw;z-index: 40">
           <interact-element data-interact-key="#image4">
             <img id="image4" src="" class="panel-image">
           </interact-element>
@@ -32,7 +31,7 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
       </interact-element>
 
       <interact-element data-interact-key="#box3">
-        <div id="box3" class="box box3" style="left: 80vw; z-index: 30;">
+        <div id="box3" class="box box3" style="left: 80vw;z-index: 30">
           <interact-element data-interact-key="#image3">
             <img id="image3" src="" class="panel-image">
           </interact-element>
@@ -40,7 +39,7 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
       </interact-element>
 
       <interact-element data-interact-key="#box2">
-        <div id="box2" class="box box2" style="left: 70vw; z-index: 20;">
+        <div id="box2" class="box box2" style="left: 70vw;z-index: 20">
           <interact-element data-interact-key="#image2">
             <img id="image2" src="" class="panel-image">
           </interact-element>
@@ -48,7 +47,7 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
       </interact-element>
 
       <interact-element data-interact-key="#box1">
-        <div id="box1" class="box box1" style="left: 60vw; z-index: 10;">
+        <div id="box1" class="box box1" style="left: 60vw;z-index: 10">
           <interact-element data-interact-key="#image1">
             <img id="image1" src="" class="panel-image">
           </interact-element>
@@ -59,8 +58,7 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
 </interact-element>
 
 <div class="outro-section">
-  <h2>Animation Complete</h2>
-  <p>You have scrolled through 600vh.</p>
+  <h2>Done</h2>
 </div>
 ```
 
@@ -69,10 +67,7 @@ Four full-viewport colored panels are stacked offscreen to the right inside a 70
 ```css
 body {
   margin: 0;
-  font-family: "Inter", sans-serif;
   overflow-x: hidden;
-  background-color: #111827;
-  color: #f3f4f6;
 }
 
 .intro-section,
@@ -92,15 +87,7 @@ body {
 .outro-section h2 {
   font-size: clamp(3rem, 7vw, 5rem);
   font-weight: 700;
-  color: white;
   margin: 0;
-}
-
-.intro-section p,
-.outro-section p {
-  font-size: 1.25rem;
-  color: #d1d5db;
-  margin-top: 1rem;
 }
 
 #scroll-section {
@@ -126,15 +113,7 @@ body {
   justify-content: flex-end;
   align-items: flex-start;
   padding-bottom: 10vh;
-  font-size: 6rem;
-  font-weight: 700;
-  color: white;
 }
-
-.box1 { background-color: #BE123C; }
-.box2 { background-color: #DB2777; }
-.box3 { background-color: #7E22CE; }
-.box4 { background-color: #4338CA; }
 
 .panel-image {
   position: absolute;
@@ -143,8 +122,6 @@ body {
   width: 10vw;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3),
-    0 4px 6px -4px rgb(0 0 0 / 0.3);
   transform-origin: left bottom;
 }
 
@@ -154,7 +131,6 @@ body {
   left: 5vw;
   font-size: 2.5rem;
   font-weight: 700;
-  color: white;
   z-index: 50;
 }
 
@@ -169,7 +145,6 @@ body {
   top: 20vh;
   left: 5vw;
   font-size: 1.25rem;
-  color: #d1d5db;
   z-index: 50;
   max-width: 300px;
   opacity: 1;
@@ -190,11 +165,11 @@ const box4Left = (100 - imageWidthVW) + 'vw';     // '90vw'
 const finalImageLeftVW = Math.max(5, 45 - (imageWidthVW * maxScale)); // 5
 
 const storyTexts = [
-  "The story begins with a blank canvas, a space of pure potential before the first element arrives.",
-  "This is the first panel. It introduces our journey with a bold statement.",
-  "The second panel builds on the first, adding complexity and a new layer of color.",
-  "Our third panel shifts the mood, introducing a cooler, more introspective tone.",
-  "Finally, the fourth panel concludes the story, bringing all the elements into a final, cohesive view.",
+  "Intro",
+  "Panel one",
+  "Panel two",
+  "Panel three",
+  "Panel four",
 ];
 let currentText = "";
 

@@ -29,7 +29,7 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
         <span class="label">Step 01</span>
         <h2>Design</h2>
         <p class="subtitle">Every great product begins with intention</p>
-        <p class="body">The first card anchors in place. As you scroll, each new card will stack on top, creating a layered experience that guides the eye.</p>
+        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
       </div>
     </interact-element>
   </div>
@@ -48,7 +48,7 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
         <span class="label">Step 02</span>
         <h2>Build</h2>
         <p class="subtitle">Craft with precision and care</p>
-        <p class="body">This card scrolls in and stops directly on top of the first. The stacking creates depth and draws attention to the journey.</p>
+        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
       </div>
     </interact-element>
   </div>
@@ -68,7 +68,7 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
         <span class="label">Step 03</span>
         <h2>Launch</h2>
         <p class="subtitle">Bring your vision to the world</p>
-        <p class="body">Three cards now stacked. Each layer represents a phase of the process, building toward the final result.</p>
+        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
       </div>
     </interact-element>
   </div>
@@ -87,7 +87,7 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
         <span class="label">Step 04</span>
         <h2>Complete</h2>
         <p class="subtitle">All layers aligned, scroll ends here</p>
-        <p class="body">The full stack is now visible. Four cards, one story. This is where the scroll stops and the experience concludes.</p>
+        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
       </div>
     </interact-element>
   </div>
@@ -102,11 +102,7 @@ Stacked content cards animate in sequence as the user scrolls — each card peel
 interact-element { display: block; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', sans-serif;
-  background: #f5f5f7;
-  color: #1d1d1f;
   overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
 }
 
 .hero {
@@ -122,7 +118,6 @@ body {
 }
 
 .hero h1 {
-  font-family: 'DM Serif Display', Georgia, serif;
   font-size: clamp(2.75rem, 6vw, 4.25rem);
   font-weight: 400;
   letter-spacing: -0.02em;
@@ -130,7 +125,6 @@ body {
 }
 
 .hero p {
-  color: #6e6e73;
   font-size: 1.2rem;
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -156,7 +150,6 @@ body {
   --tilt: 0deg;
   width: 57.6dvh;
   aspect-ratio: 5 / 4;
-  background: #fff;
   border-radius: 4px;
   padding: 3.5rem 3rem;
   display: flex;
@@ -164,8 +157,7 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 24px 80px rgba(0,0,0,.07);
-  border: 1px solid rgba(0,0,0,.06);
+  border: 1px solid;
   transform: rotate(var(--tilt));
 }
 
@@ -180,14 +172,13 @@ body {
   margin-bottom: 1.75rem;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(0,0,0,.1);
+  border: 1px solid;
   border-radius: 2px;
 }
 
 .card-icon svg {
   width: 22px;
   height: 22px;
-  color: #1d1d1f;
   stroke-width: 1.5;
 }
 
@@ -196,12 +187,10 @@ body {
   font-weight: 500;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: #a1a1a6;
   margin-bottom: 1.25rem;
 }
 
 .card h2 {
-  font-family: 'DM Serif Display', Georgia, serif;
   font-size: 2.75rem;
   font-weight: 400;
   letter-spacing: -0.02em;
@@ -210,7 +199,6 @@ body {
 }
 
 .card .subtitle {
-  color: #1d1d1f;
   font-size: 1.1rem;
   font-weight: 400;
   line-height: 1.6;
@@ -219,7 +207,6 @@ body {
 }
 
 .card .body {
-  color: #86868b;
   font-size: 0.9rem;
   line-height: 1.8;
   font-weight: 400;
@@ -227,21 +214,7 @@ body {
   max-width: 80%;
 }
 
-.card.dark {
-  background: #1d1d1f;
-  color: #f5f5f7;
-  border-color: rgba(255,255,255,.08);
-  box-shadow: 0 1px 2px rgba(0,0,0,.2), 0 24px 80px rgba(0,0,0,.3);
-}
-
-.card.dark .card-icon {
-  border-color: rgba(255,255,255,.12);
-}
-
-.card.dark .card-icon svg { color: #f5f5f7; stroke-width: 1.5; }
-.card.dark .label { color: #636366; }
-.card.dark .subtitle { color: #e5e5ea; }
-.card.dark .body { color: #8e8e93; }
+.card.dark .card-icon svg { stroke-width: 1.5; }
 
 @media (max-width: 750px) {
   .card-wrap { padding: max(10rem, 27dvh) 20px 20px; }
@@ -257,6 +230,7 @@ body {
 @media (max-width: 390px) {
   .card { padding: 2rem 1.25rem; }
 }
+
 ```
 
 ## Interact config

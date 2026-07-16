@@ -67,18 +67,9 @@ Five photo cards start stacked at center and fan out horizontally across the vie
 ## Essential styles
 
 ```css
-:root {
-  --bg-color: #f0f0f0;
-  --text-color: #111;
-  --card-title-color: #ffffff;
-}
-
 body, html {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-color);
 }
 
 .scroll-section {
@@ -110,7 +101,6 @@ body, html {
   font-size: 5rem;
   font-weight: bold;
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.8);
   will-change: transform, height, opacity;
   transform: translateX(0);
 }
@@ -133,8 +123,6 @@ body, html {
   padding: 2rem;
   z-index: 2;
   text-align: center;
-  color: var(--card-title-color);
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
 }
 
 .card-content h2 {

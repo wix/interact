@@ -13,7 +13,7 @@ A sticky split-screen layout where scrolling progressively blurs the hero portra
       <span class="header">Marcus Elijah — Visual Artist & Creative Director</span>
       <div class="left-content">
         <interact-element data-interact-key="text">
-          <span class="hero-text">MARCUS ELIJAH — A JOURNEY THROUGH LIGHT SHADOW AND THE QUIET POWER OF SELF EXPRESSION</span>
+          <span class="hero-text">SAMPLE TEXT FOR THE ANIMATED LAYOUT.</span>
         </interact-element>
       </div>
       <interact-element data-interact-key="link">
@@ -42,11 +42,6 @@ A sticky split-screen layout where scrolling progressively blurs the hero portra
 
 interact-element { display: block; }
 
-body {
-  background: #ffffff;
-  font-family: system-ui, -apple-system, sans-serif;
-}
-
 .scroll-area {
   height: 200vh;
 }
@@ -72,20 +67,15 @@ body {
   position: absolute;
   top: 40px;
   left: 8vw;
-  font-family: 'Instrument Serif', Georgia, serif;
   font-size: 1rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.9);
 }
 
 .hero-text {
-  font-family: 'Instrument Serif', Georgia, serif;
   font-weight: 400;
   font-size: clamp(2.8rem, 5vw, 5rem);
   text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.85);
-  -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.85);
   letter-spacing: 0.02em;
   line-height: 1.05;
   text-align: left;
@@ -95,16 +85,13 @@ body {
   position: absolute;
   bottom: 40px;
   left: 8vw;
-  font-family: 'Instrument Serif', Georgia, serif;
   font-size: 0.85rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .bottom-link a {
-  color: rgba(0, 0, 0, 0.7);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid;
   padding-bottom: 2px;
 }
 
@@ -189,6 +176,7 @@ body {
     font-size: clamp(1.5rem, 6vw, 2.2rem);
   }
 }
+
 ```
 
 ## Interact config
@@ -237,9 +225,8 @@ body {
             duration: 300,
             easing: 'ease',
             styleProperties: [
-              { name: 'color', value: 'rgba(0, 0, 0, 1)' },
-              { name: 'border-color', value: 'rgba(0, 0, 0, 0.8)' },
-            ],
+            { name: 'transform', value: 'translateY(-2px)' }
+          ],
           },
         },
       ],

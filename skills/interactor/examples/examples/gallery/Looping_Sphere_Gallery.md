@@ -15,38 +15,38 @@ A 3D sphere composed of image cards rotates continuously via CSS animation while
       <div class="sphere">
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(0.0px) translateY(500.0px) translateZ(0.0px) rotateY(0.0deg) rotateX(-90.0deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>CYBER CORE</h3></div>
-            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 00</h3></div>
+            <div class="face front"><div class="overlay"></div><h3>CYBER CORE</h3></div>
+            <div class="face back"><div class="overlay"></div><h3>SYSTEM 00</h3></div>
           </div>
         </div>
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(242.6px) translateY(409.1px) translateZ(-154.3px) rotateY(122.5deg) rotateX(-54.9deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>ABSTRACT A</h3></div>
-            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 05</h3></div>
+            <div class="face front"><div class="overlay"></div><h3>ABSTRACT A</h3></div>
+            <div class="face back"><div class="overlay"></div><h3>SYSTEM 05</h3></div>
           </div>
         </div>
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(163.5px) translateY(318.2px) translateZ(-349.3px) rotateY(154.9deg) rotateX(-39.5deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>DATA MESH</h3></div>
-            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 10</h3></div>
+            <div class="face front"><div class="overlay"></div><h3>DATA MESH</h3></div>
+            <div class="face back"><div class="overlay"></div><h3>SYSTEM 10</h3></div>
           </div>
         </div>
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(-169.2px) translateY(-9.1px) translateZ(-470.4px) rotateY(-160.2deg) rotateX(1.0deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>DEEP SPACE</h3></div>
-            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 28</h3></div>
+            <div class="face front"><div class="overlay"></div><h3>DEEP SPACE</h3></div>
+            <div class="face back"><div class="overlay"></div><h3>SYSTEM 28</h3></div>
           </div>
         </div>
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(-334.3px) translateY(-336.4px) translateZ(-158.4px) rotateY(-115.4deg) rotateX(42.3deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>DATA MESH</h3></div>
-            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 46</h3></div>
+            <div class="face front"><div class="overlay"></div><h3>DATA MESH</h3></div>
+            <div class="face back"><div class="overlay"></div><h3>SYSTEM 46</h3></div>
           </div>
         </div>
         <div class="item" style="width:149.7px;height:106.9px;left:-74.8px;top:-53.5px;transform:translateX(0.0px) translateY(-500.0px) translateZ(0.0px) rotateY(0.0deg) rotateX(90.0deg)">
           <div class="item-content">
-            <div class="face front" style="background-image:url('')"><div class="overlay"></div><h3>NATURE X</h3></div>
-            <div class="face back" style="background-image:url('')"><div class="overlay"></div><h3>SYSTEM 55</h3></div>
+            <div class="face front"><div class="overlay"></div><h3>NATURE X</h3></div>
+            <div class="face back"><div class="overlay"></div><h3>SYSTEM 55</h3></div>
           </div>
         </div>
       </div>
@@ -67,11 +67,6 @@ html, body {
     scrollbar-width: none;
 }
 html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
-body {
-    background: #000;
-    font-family: Helvetica, sans-serif;
-    color: white;
-}
 
 .viewport {
     position: fixed;
@@ -156,34 +151,24 @@ interact-element[data-interact-key="zoom-track"] {
     align-items: center;
     justify-content: flex-end;
     text-align: center;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
     overflow: hidden;
     padding-bottom: 16px;
-}
-
-.face.front {
-    background-color: #000;
-    background-size: cover;
-    background-position: center;
 }
 
 .face.front .overlay {
     position: absolute;
     bottom: 0; left: 0; width: 100%; height: 50%;
-    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
     pointer-events: none;
-    transition: background 0.3s, height 0.3s;
+    transition: height 0.3s;
 }
 
 .item:hover .face.front .overlay {
     height: 80%;
-    background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
 }
 
 .face.front h3 {
     position: relative;
     z-index: 2;
-    color: #fff;
     margin: 0;
     font-size: 24px;
     text-transform: uppercase;
@@ -196,23 +181,18 @@ interact-element[data-interact-key="zoom-track"] {
 .item:hover .face h3 { opacity: 1; }
 
 .face.back {
-    background-color: #1a0b0e;
-    background-size: cover;
-    background-position: center;
     transform: rotateY(180deg);
 }
 
 .face.back .overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.7);
     pointer-events: none;
 }
 
 .face.back h3 {
     position: relative;
     z-index: 2;
-    color: #fff;
     margin: 0;
     font-size: 20px;
     letter-spacing: 4px;
@@ -224,7 +204,6 @@ interact-element[data-interact-key="zoom-track"] {
     position: fixed;
     top: 20px;
     left: 20px;
-    color: rgba(255,255,255,0.4);
     font-size: 12px;
     pointer-events: none;
     z-index: 100;

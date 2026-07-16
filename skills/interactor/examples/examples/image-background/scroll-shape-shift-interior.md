@@ -41,7 +41,7 @@ As the page scrolls through a 500vh sticky section, five background interior pho
         <div class="text-inner">
           <p class="label">Architecture Studio</p>
           <h2 class="title">Shaping<br>Space & Light</h2>
-          <p class="description">We design buildings that move people. Every project begins with listening — to the site, the purpose, and the people who will inhabit it. <a href="#">Start a project</a></p>
+          <p class="description">Sample text provides enough length to demonstrate this animated content layout. <a href="#">Start a project</a></p>
         </div>
       </div>
 
@@ -56,12 +56,6 @@ As the page scrolls through a 500vh sticky section, five background interior pho
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 interact-element { display: block; }
 html, body { height: 100%; overflow-x: clip; }
-
-body {
-  background: #0c0c0c;
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
 
 .bg-wrap {
   position: fixed;
@@ -79,14 +73,10 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(12, 12, 12, 0.55);
 }
 
 .bg-1 { background-image: url(''); }
 .bg-2 { background-image: url(''); }
-.bg-3 { background-image: url(''); }
-.bg-4 { background-image: url(''); }
-.bg-5 { background-image: url(''); }
 
 .scroll-driver { height: 500vh; position: relative; }
 
@@ -124,39 +114,24 @@ body {
   letter-spacing: 0.3em;
   text-transform: uppercase;
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.4);
   margin-bottom: clamp(0.8rem, 1.5vw, 1.5rem);
 }
 
 .title {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(2rem, 4.2vw, 5rem);
   line-height: 1;
   font-weight: 400;
   margin-bottom: clamp(0.6rem, 1.2vw, 1.2rem);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #0c0c0c;
 }
 
 .description {
   font-size: clamp(0.7rem, 0.95vw, 0.95rem);
   line-height: 1.8;
   font-weight: 300;
-  color: rgba(0, 0, 0, 0.55);
   max-width: clamp(200px, 28vw, 400px);
   margin: 0 auto;
-}
-
-.description a {
-  color: rgba(0, 0, 0, 0.85);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: rgba(0, 0, 0, 0.3);
-}
-
-.description a:hover {
-  text-decoration-color: rgba(0, 0, 0, 0.85);
 }
 ```
 

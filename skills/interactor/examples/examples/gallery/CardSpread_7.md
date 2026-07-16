@@ -104,18 +104,10 @@ Seven stacked cards fan out from a tight cluster into a full spread as the user 
 :root {
   --card-w: 280px;
   --card-h: 400px;
-  --spread-angle: 12;
   --section-height: 600vh;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: #08080e;
-  color: #eee;
-  -webkit-font-smoothing: antialiased;
-}
 
 .intro {
   height: 100vh;
@@ -132,10 +124,6 @@ body {
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.1;
-  background: linear-gradient(135deg, #a78bfa 0%, #ec4899 50%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .intro p {
@@ -150,8 +138,8 @@ body {
   margin-top: 3rem;
   width: 24px;
   height: 24px;
-  border-right: 2px solid rgba(255,255,255,0.25);
-  border-bottom: 2px solid rgba(255,255,255,0.25);
+  border-right: 2px solid;
+  border-bottom: 2px solid;
   transform: rotate(45deg);
   animation: hint-bounce 2s ease-in-out infinite;
 }
@@ -192,19 +180,11 @@ body {
   transform-origin: center 140%;
   cursor: pointer;
   will-change: transform;
-  box-shadow:
-    0 2px 4px rgba(0,0,0,0.2),
-    0 12px 40px rgba(0,0,0,0.45),
-    inset 0 1px 0 rgba(255,255,255,0.08);
-  transition: filter 0.3s ease, box-shadow 0.3s ease;
+  transition: filter 0.3s ease;
 }
 
 .card:hover {
   filter: brightness(1.12);
-  box-shadow:
-    0 2px 4px rgba(0,0,0,0.2),
-    0 20px 60px rgba(0,0,0,0.55),
-    inset 0 1px 0 rgba(255,255,255,0.12);
 }
 
 .card img {
@@ -220,7 +200,6 @@ body {
   left: 0;
   right: 0;
   padding: 2.5rem 1.4rem 1.4rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.35) 65%, transparent 100%);
 }
 
 .card-label span {
@@ -262,6 +241,7 @@ body {
 }
 
 interact-element { display: contents; }
+
 ```
 
 ## Interact config

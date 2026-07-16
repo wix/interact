@@ -50,7 +50,7 @@ A white square panel overlays a blurred hero image at page load; as the user scr
   <div class="section-two__rule"></div>
 
   <interact-element data-interact-key="s2-subtitles">
-    <p class="section-two__intro">Performance without compromise. Architecture without limits. Next-generation silicon delivering unprecedented power per watt — unified memory, silent thermals, and all-day battery. Every component engineered to disappear so all you experience is absolute focus.</p>
+    <p class="section-two__intro">Sample text provides enough length to demonstrate this animated content layout.</p>
   </interact-element>
 </section>
 ```
@@ -61,10 +61,6 @@ A white square panel overlays a blurred hero image at page load; as the user scr
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  background: #000;
-  color: #fff;
-  -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
 
@@ -81,7 +77,6 @@ interact-element { display: block; }
   justify-content: space-between;
   padding: 32px 52px;
   mix-blend-mode: difference;
-  color: #fff;
 }
 
 .header__logo {
@@ -102,9 +97,7 @@ interact-element { display: block; }
 }
 
 .header__search {
-  background: none;
   border: none;
-  color: inherit;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -137,15 +130,11 @@ interact-element { display: block; }
 .hero__gradient {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 30%),
-    linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.35) 100%);
 }
 
 .hero__darken {
   position: absolute;
   inset: 0;
-  background: #000;
   opacity: 0;
 }
 
@@ -178,7 +167,6 @@ interact-element { display: block; }
   aspect-ratio: 1;
   flex-shrink: 0;
   border-radius: 0;
-  background: #fff;
   transform-origin: left center;
 }
 
@@ -190,7 +178,6 @@ interact-element { display: block; }
   transform: translateY(-50%);
   width: 80vh;
   height: 80vh;
-  color: #000;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -205,7 +192,6 @@ interact-element { display: block; }
   font-weight: 500;
   letter-spacing: 0.35em;
   text-transform: uppercase;
-  color: #999;
   margin-bottom: 3vh;
 }
 
@@ -214,14 +200,12 @@ interact-element { display: block; }
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1;
-  color: #000;
   margin-bottom: 4vh;
 }
 
 .section-two__rule {
   width: 40px;
   height: 1px;
-  background: rgba(0,0,0,0.15);
   margin-bottom: 4vh;
 }
 
@@ -229,7 +213,6 @@ interact-element { display: block; }
   font-size: clamp(0.95rem, 1.7vh, 1.2rem);
   font-weight: 400;
   line-height: 1.8;
-  color: #555;
   max-width: 48ch;
   letter-spacing: 0.005em;
 }

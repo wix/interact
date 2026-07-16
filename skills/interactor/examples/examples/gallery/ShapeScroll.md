@@ -10,23 +10,23 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
 <main class="animation-section">
 
   <interact-element data-interact-key="#trigger-2">
-    <div id="trigger-2" class="trigger-area" style="top: 25%; height: 6.25%;"></div>
+    <div id="trigger-2" class="trigger-area" style="top: 25%;height: 6.25%"></div>
   </interact-element>
   <interact-element data-interact-key="#trigger-3">
-    <div id="trigger-3" class="trigger-area" style="top: 37.5%; height: 6.25%;"></div>
+    <div id="trigger-3" class="trigger-area" style="top: 37.5%;height: 6.25%"></div>
   </interact-element>
   <interact-element data-interact-key="#trigger-4">
-    <div id="trigger-4" class="trigger-area" style="top: 50%; height: 6.25%;"></div>
+    <div id="trigger-4" class="trigger-area" style="top: 50%;height: 6.25%"></div>
   </interact-element>
   <interact-element data-interact-key="#trigger-5">
-    <div id="trigger-5" class="trigger-area" style="top: 62.5%; height: 6.25%;"></div>
+    <div id="trigger-5" class="trigger-area" style="top: 62.5%;height: 6.25%"></div>
   </interact-element>
   <interact-element data-interact-key="#trigger-6">
-    <div id="trigger-6" class="trigger-area" style="top: 75%; height: 6.25%;"></div>
+    <div id="trigger-6" class="trigger-area" style="top: 75%;height: 6.25%"></div>
   </interact-element>
 
   <interact-element data-interact-key="#container-1">
-    <div id="container-1" class="content-panel" style="background-image: url('');">
+    <div id="container-1" class="content-panel">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 1</h1>
         <p>This is the starting point.</p>
@@ -35,7 +35,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   </interact-element>
 
   <interact-element data-interact-key="#container-2">
-    <div id="container-2" class="content-panel" style="background-image: url('');">
+    <div id="container-2" class="content-panel">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 2</h1>
         <p>Revealed by scrolling.</p>
@@ -44,7 +44,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   </interact-element>
 
   <interact-element data-interact-key="#container-3">
-    <div id="container-3" class="content-panel" style="background-image: url('');">
+    <div id="container-3" class="content-panel">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 3</h1>
         <p>And another one.</p>
@@ -53,7 +53,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   </interact-element>
 
   <interact-element data-interact-key="#container-4">
-    <div id="container-4" class="content-panel" style="background-image: url('');">
+    <div id="container-4" class="content-panel">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 4</h1>
         <p>Keep scrolling...</p>
@@ -62,7 +62,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   </interact-element>
 
   <interact-element data-interact-key="#container-5">
-    <div id="container-5" class="content-panel" style="background-image: url('');">
+    <div id="container-5" class="content-panel">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 5</h1>
         <p>Almost there.</p>
@@ -71,7 +71,7 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
   </interact-element>
 
   <interact-element data-interact-key="#container-6">
-    <div id="container-6" class="content-panel" style="background-image: url('');">
+    <div id="container-6" class="content-panel">
       <div class="text-center w-full pt-32 pb-20 z-10">
         <h1>Container 6</h1>
         <p>The final reveal.</p>
@@ -89,11 +89,6 @@ Six full-viewport image panels stack on top of each other; as the user scrolls, 
     --pw: 100;
     --ph: 100;
     --panel-radius: 0px;
-}
-
-body {
-    background-color: #000;
-    color: #fff;
 }
 
 #container-2, #container-3, #container-4, #container-5, #container-6 {
@@ -131,8 +126,6 @@ body {
     align-items: flex-end;
     justify-content: center;
     overflow: clip;
-    background-size: cover;
-    background-position: center;
     border-radius: var(--panel-radius);
 }
 
@@ -143,7 +136,6 @@ body {
     left: 0;
     right: 0;
     height: 40%;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
     z-index: 1;
     pointer-events: none;
 }
@@ -151,7 +143,6 @@ body {
 .content-panel > div {
     transform: scale(calc(min(var(--pw), var(--ph)) / 100));
     transform-origin: center bottom;
-    background: none !important;
 }
 ```
 

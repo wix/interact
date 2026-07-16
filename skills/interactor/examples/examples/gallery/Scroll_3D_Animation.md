@@ -17,37 +17,37 @@ Seven landscape panels arranged in a 3D z-depth stack rotate into view as the us
     <interact-element data-interact-key="panel-wrapper">
       <div class="panel-wrapper">
         <interact-element data-interact-key="#panel-0">
-          <div class="panel" id="panel-0" style="width: 45vw; height: 30vw; translate: 0 0 0;">
+          <div class="panel" id="panel-0" style="width: 45vw;height: 30vw;translate: 0 0 0">
             <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-1">
-          <div class="panel" id="panel-1" style="width: 48.3vw; height: 32vw; translate: 0 0 calc(var(--panel-gap) * -1 * 1px);">
+          <div class="panel" id="panel-1" style="width: 48.3vw;height: 32vw;translate: 0 0 calc(var(--panel-gap) * -1 * 1px)">
             <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-2">
-          <div class="panel" id="panel-2" style="width: 51.7vw; height: 34vw; translate: 0 0 calc(var(--panel-gap) * -2 * 1px);">
+          <div class="panel" id="panel-2" style="width: 51.7vw;height: 34vw;translate: 0 0 calc(var(--panel-gap) * -2 * 1px)">
             <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-3">
-          <div class="panel" id="panel-3" style="width: 55vw; height: 36vw; translate: 0 0 calc(var(--panel-gap) * -3 * 1px);">
+          <div class="panel" id="panel-3" style="width: 55vw;height: 36vw;translate: 0 0 calc(var(--panel-gap) * -3 * 1px)">
             <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-4">
-          <div class="panel" id="panel-4" style="width: 58.3vw; height: 38vw; translate: 0 0 calc(var(--panel-gap) * -4 * 1px);">
+          <div class="panel" id="panel-4" style="width: 58.3vw;height: 38vw;translate: 0 0 calc(var(--panel-gap) * -4 * 1px)">
             <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-5">
-          <div class="panel" id="panel-5" style="width: 61.7vw; height: 40vw; translate: 0 0 calc(var(--panel-gap) * -5 * 1px);">
+          <div class="panel" id="panel-5" style="width: 61.7vw;height: 40vw;translate: 0 0 calc(var(--panel-gap) * -5 * 1px)">
             <img src="">
           </div>
         </interact-element>
         <interact-element data-interact-key="#panel-6">
-          <div class="panel" id="panel-6" style="width: 65vw; height: 42vw; translate: 0 0 calc(var(--panel-gap) * -6 * 1px);">
+          <div class="panel" id="panel-6" style="width: 65vw;height: 42vw;translate: 0 0 calc(var(--panel-gap) * -6 * 1px)">
             <img src="">
           </div>
         </interact-element>
@@ -64,9 +64,6 @@ Seven landscape panels arranged in a 3D z-depth stack rotate into view as the us
 
 body {
   margin: 0;
-  background: black;
-  color: white;
-  font-family: 'Inter', sans-serif;
   overflow-x: hidden;
 }
 
@@ -112,7 +109,6 @@ body {
   object-fit: cover;
   display: block;
   border-radius: 10px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
 
 interact-element {

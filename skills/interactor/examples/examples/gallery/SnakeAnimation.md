@@ -8,12 +8,12 @@ Images arranged in a sinusoidal wave across the screen animate sequentially into
 
 ```html
 <div id="image-snake" class="absolute inset-0 w-full h-full">
-  <img src="" class="snake-image" style="width:190px;height:143px;left:8px;top:289px;" />
-  <img src="" class="snake-image" style="width:210px;height:158px;left:195px;top:353px;" />
-  <img src="" class="snake-image" style="width:175px;height:131px;left:388px;top:368px;" />
-  <img src="" class="snake-image" style="width:200px;height:150px;left:582px;top:298px;" />
-  <img src="" class="snake-image" style="width:185px;height:139px;left:778px;top:219px;" />
-  <img src="" class="snake-image" style="width:220px;height:165px;left:960px;top:204px;" />
+  <img src="" class="snake-image" style="width:190px;height:143px;left:8px;top:289px" />
+  <img src="" class="snake-image" style="width:210px;height:158px;left:195px;top:353px" />
+  <img src="" class="snake-image" style="width:175px;height:131px;left:388px;top:368px" />
+  <img src="" class="snake-image" style="width:200px;height:150px;left:582px;top:298px" />
+  <img src="" class="snake-image" style="width:185px;height:139px;left:778px;top:219px" />
+  <img src="" class="snake-image" style="width:220px;height:165px;left:960px;top:204px" />
 </div>
 
 <interact-element data-interact-key="#backdrop" id="backdrop-wrapper">
@@ -28,9 +28,9 @@ Images arranged in a sinusoidal wave across the screen animate sequentially into
 
 <div class="absolute inset-0 flex items-center justify-start pointer-events-none">
   <interact-element data-interact-key="#text-container">
-    <div id="text-container" class="w-full max-w-2xl px-8 text-left flex flex-col justify-center" style="height:20rem;z-index:110;">
-      <h1 id="main-title" class="text-3xl font-bold text-white mb-2" style="text-shadow:2px 2px 8px rgba(0,0,0,0.7);"></h1>
-      <h2 id="main-subtitle" class="text-lg font-light text-white" style="text-shadow:1px 1px 4px rgba(0,0,0,0.7);"></h2>
+    <div id="text-container" class="w-full max-w-2xl px-8 text-left flex flex-col justify-center" style="height:20rem;z-index:110">
+      <h1 id="main-title" class="text-3xl font-bold mb-2"></h1>
+      <h2 id="main-subtitle" class="text-lg font-light"></h2>
     </div>
   </interact-element>
 </div>
@@ -40,15 +40,12 @@ Images arranged in a sinusoidal wave across the screen animate sequentially into
 
 ```css
 body {
-  font-family: 'Assistant', sans-serif;
   overflow: hidden;
 }
 .snake-image {
   position: absolute;
   border-radius: 0.75rem;
   transition: all 0.6s ease-in-out;
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-  background-color: #333;
   object-fit: cover;
   cursor: pointer;
 }
@@ -63,7 +60,6 @@ body {
   height: 100%;
   border-radius: 0.75rem;
   object-fit: cover;
-  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.75);
 }
 #text-container {
   opacity: 0;
@@ -71,7 +67,6 @@ body {
 #backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
   opacity: 0;
   z-index: 50;
   pointer-events: none;

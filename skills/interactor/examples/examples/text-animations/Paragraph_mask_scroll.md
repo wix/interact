@@ -154,7 +154,7 @@ Seven stacked rows of "IMMERSIVE REALITY" appear on view entry; the six duplicat
 <div class="desc-container">
   <interact-element data-interact-key="hero-desc">
     <div id="hero-desc">
-      <p style="margin: 0;">
+      <p style="margin: 0">
         Experience the harmony of sound and vision.<br>
         An interactive journey powered by code.
       </p>
@@ -169,9 +169,6 @@ Seven stacked rows of "IMMERSIVE REALITY" appear on view entry; the six duplicat
 body {
     margin: 0;
     padding: 0;
-    background-color: #000000;
-    color: #ffffff;
-    font-family: 'Inter', sans-serif;
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -229,7 +226,6 @@ body {
 }
 
 #hero-desc {
-    color: #d1d5db;
     font-size: 0.875rem;
     font-weight: 500;
     text-transform: uppercase;

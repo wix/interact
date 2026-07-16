@@ -10,7 +10,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
 <section class="grid-container">
   <interact-element data-interact-key="card-1">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 1</h3>
@@ -20,7 +20,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
   </interact-element>
   <interact-element data-interact-key="card-2">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 2</h3>
@@ -30,7 +30,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
   </interact-element>
   <interact-element data-interact-key="card-3">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 3</h3>
@@ -40,7 +40,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
   </interact-element>
   <interact-element data-interact-key="card-4">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 4</h3>
@@ -50,7 +50,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
   </interact-element>
   <interact-element data-interact-key="card-5">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 5</h3>
@@ -60,7 +60,7 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
   </interact-element>
   <interact-element data-interact-key="card-6">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content">
         <h3>Title 6</h3>
@@ -74,15 +74,9 @@ A grid of nature image cards where hovering any card zooms it, darkens its overl
 ## Essential styles
 
 ```css
-:root {
-  --stagger-delay: 0;
-}
 body {
   margin: 0;
   padding: 40px;
-  background: #111;
-  font-family: 'Inter', sans-serif;
-  color: white;
   overflow-x: hidden;
 }
 .grid-container {
@@ -113,14 +107,10 @@ interact-element {
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: center;
-  transition: background-image 0.3s ease;
 }
 .card-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.2);
   z-index: 1;
   border-radius: 5px;
 }
@@ -133,7 +123,6 @@ interact-element {
   transform: translateY(10px);
   z-index: 2;
   line-height: 1.2;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
   pointer-events: none;
 }
 .card-content h3 { margin: 0 0 3px 0; font-size: 1rem; }

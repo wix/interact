@@ -1,8 +1,8 @@
 # Tech Glitch
 
-Words split into individual interact-elements that reveal on viewEnter with a stepped glitch effect — randomized clip-path wipe directions, skewX jitter, and chromatic aberration text-shadow create a digital data-corruption aesthetic.
+Words split into individual interact-elements that reveal on viewEnter with a stepped glitch effect using clip-path wipe directions, skewX jitter, and chromatic text-shadow.
 
-**Tags:** viewEnter, clip-path, transform, stagger, reveal, typography, stepped-easing
+**Tags:** viewEnter, clip-path, transform, text-shadow, reveal, typography, stepped-easing
 
 ## Markup
 
@@ -17,12 +17,12 @@ Words split into individual interact-elements that reveal on viewEnter with a st
 <main class="max-w-7xl mx-auto px-12 pb-80 space-y-96">
 
   <div class="flex flex-col items-start w-full max-w-3xl">
-    <h1 aria-label="01_CRITICAL_FAILURE" class="text-2xl uppercase tracking-tighter text-[#e0e0e0]/70 mb-5">
+    <h1 aria-label="01_CRITICAL_FAILURE" class="text-2xl uppercase tracking-tighter mb-5">
       <interact-element data-interact-key="h1-01-w-0" aria-hidden="true" style="display:inline-block;margin-right:0.3em">
         <span class="glitch-word" style="opacity:1;clip-path:inset(0 100% 0 0)">01_CRITICAL_FAILURE</span>
       </interact-element>
     </h1>
-    <p aria-label="Data corruption detected in sector" class="text-base leading-relaxed text-[#e0e0e0]/70 uppercase font-light">
+    <p aria-label="Data corruption detected in sector" class="text-base leading-relaxed uppercase font-light">
       <interact-element data-interact-key="p-01-w-0" aria-hidden="true" style="display:inline-block;margin-right:0.3em">
         <span class="glitch-word" style="opacity:1;clip-path:inset(0 0 0 100%)">Data</span>
       </interact-element>
@@ -36,12 +36,12 @@ Words split into individual interact-elements that reveal on viewEnter with a st
   </div>
 
   <div class="flex flex-col items-end text-right w-full ml-auto max-w-3xl">
-    <h1 aria-label="02_SYNTAX_ERROR" class="text-2xl uppercase tracking-tighter text-[#e0e0e0]/70 mb-5">
+    <h1 aria-label="02_SYNTAX_ERROR" class="text-2xl uppercase tracking-tighter mb-5">
       <interact-element data-interact-key="h1-02-w-0" aria-hidden="true" style="display:inline-block;margin-right:0.3em">
         <span class="glitch-word" style="opacity:1;clip-path:inset(0 0 100% 0)">02_SYNTAX_ERROR</span>
       </interact-element>
     </h1>
-    <p aria-label="Unexpected token in input stream" class="text-base leading-relaxed text-[#e0e0e0]/70 uppercase font-light">
+    <p aria-label="Unexpected token in input stream" class="text-base leading-relaxed uppercase font-light">
       <interact-element data-interact-key="p-02-w-0" aria-hidden="true" style="display:inline-block;margin-right:0.3em">
         <span class="glitch-word" style="opacity:1;clip-path:inset(0 100% 0 0)">Unexpected</span>
       </interact-element>
@@ -63,9 +63,6 @@ Words split into individual interact-elements that reveal on viewEnter with a st
 
 ```css
 body {
-    background-color: #141414;
-    color: #e0e0e0;
-    font-family: 'Space Mono', monospace;
     overflow-x: hidden;
     min-height: 100vh;
 }
@@ -90,7 +87,6 @@ body {
         opacity: 1 !important;
         clip-path: inset(0 0 0 0) !important;
         transform: none !important;
-        text-shadow: none !important;
         animation: none !important;
         transition: none !important;
     }
@@ -109,16 +105,16 @@ const getGlitchKeyframes = (direction) => {
         case 3: startClip = 'inset(0 0 100% 0)'; break;
     }
     const red = 'rgba(255,0,0,0.7)';
-    const blue = 'rgba(0,255,255,0.7)';
+    const cyan = 'rgba(0,255,255,0.7)';
     return [
-        { offset: 0,   clipPath: startClip,                        transform: 'skewX(10deg) translateX(-5px)',  textShadow: `2px 0 ${red}, -2px 0 ${blue}` },
-        { offset: 0.1, clipPath: startClip.replace('100%', '80%'), transform: 'skewX(-10deg) translateX(3px)', textShadow: `-2px 0 ${red}, 2px 0 ${blue}` },
-        { offset: 0.2, clipPath: startClip.replace('100%', '90%'), transform: 'skewX(20deg) translateX(-2px)', textShadow: `1px 1px ${red}, -1px -1px ${blue}` },
-        { offset: 0.3, clipPath: startClip.replace('100%', '40%'), transform: 'skewX(-5deg) translateX(2px)',  textShadow: `0px 2px ${red}, 0px -2px ${blue}` },
-        { offset: 0.5, clipPath: startClip.replace('100%', '60%'), transform: 'skewX(0deg) translateX(0px)',   textShadow: `3px 0 ${red}, -3px 0 ${blue}` },
-        { offset: 0.7, clipPath: startClip.replace('100%', '20%'), transform: 'skewX(5deg) translateX(-1px)',  textShadow: `-1px 0 ${red}, 1px 0 ${blue}` },
-        { offset: 0.8, clipPath: 'inset(0 0 0 0)',                 transform: 'skewX(-2deg) translateX(1px)',  textShadow: `0px 0px ${red}, 0px 0px ${blue}` },
-        { offset: 0.9, clipPath: startClip.replace('100%', '10%'), transform: 'skewX(0deg) translateX(0px)',   textShadow: `1px 0 ${red}, -1px 0 ${blue}` },
+        { offset: 0,   clipPath: startClip,                        transform: 'skewX(10deg) translateX(-5px)',  textShadow: `2px 0 ${red}, -2px 0 ${cyan}` },
+        { offset: 0.1, clipPath: startClip.replace('100%', '80%'), transform: 'skewX(-10deg) translateX(3px)', textShadow: `-2px 0 ${red}, 2px 0 ${cyan}` },
+        { offset: 0.2, clipPath: startClip.replace('100%', '90%'), transform: 'skewX(20deg) translateX(-2px)', textShadow: `1px 1px ${red}, -1px -1px ${cyan}` },
+        { offset: 0.3, clipPath: startClip.replace('100%', '40%'), transform: 'skewX(-5deg) translateX(2px)',  textShadow: `0px 2px ${red}, 0px -2px ${cyan}` },
+        { offset: 0.5, clipPath: startClip.replace('100%', '60%'), transform: 'skewX(0deg) translateX(0px)',   textShadow: `3px 0 ${red}, -3px 0 ${cyan}` },
+        { offset: 0.7, clipPath: startClip.replace('100%', '20%'), transform: 'skewX(5deg) translateX(-1px)',  textShadow: `-1px 0 ${red}, 1px 0 ${cyan}` },
+        { offset: 0.8, clipPath: 'inset(0 0 0 0)',                 transform: 'skewX(-2deg) translateX(1px)',  textShadow: `0px 0px ${red}, 0px 0px ${cyan}` },
+        { offset: 0.9, clipPath: startClip.replace('100%', '10%'), transform: 'skewX(0deg) translateX(0px)',   textShadow: `1px 0 ${red}, -1px 0 ${cyan}` },
         { offset: 1,   clipPath: 'inset(0 0 0 0)',                 transform: 'skewX(0deg) translateX(0px)',   textShadow: 'none' }
     ];
 };
@@ -144,9 +140,8 @@ const interactions = wordEntries.map(({ key, dir }) => ({
             name: `glitch-${key}`,
             keyframes: getGlitchKeyframes(dir)
         },
-        duration: 600 + Math.random() * 400,
-        delay: 200 + Math.random() * 800,
-        easing: `steps(${4 + Math.floor(Math.random() * 6)}, end)`,
+        duration: 700,
+        easing: 'steps(6, end)',
         fill: 'both'
     }]
 }));

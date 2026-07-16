@@ -67,9 +67,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e0e0e0;
-  font-family: 'Inter', system-ui, sans-serif;
-  transition: background-color 0.4s ease;
 }
 
 interact-element { display: contents; }
@@ -79,11 +76,9 @@ interact-element { display: contents; }
   width: 140px;
   height: 60px;
   border-radius: 50px;
-  border: 1px solid #ffd7823f;
-  background-color: #000;
+  border: 1px solid;
   cursor: pointer;
   user-select: none;
-  -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -100,12 +95,10 @@ interact-element { display: contents; }
   left: 6px;
   right: 86px;
   border-radius: 40px;
-  background-color: #FFD882;
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #000;
 }
 
 .slider:active { transform: scale(0.99); }
@@ -122,7 +115,6 @@ interact-element { display: contents; }
   display: flex;
   align-items: center;
   justify-content: center;
-  color: inherit;
 }
 
 .slider-icon svg {
@@ -151,13 +143,11 @@ interact-element { display: contents; }
 
 .label-bg-on {
   left: 22px;
-  color: rgba(0,0,0,0.4);
   opacity: 0;
 }
 
 .label-bg-off {
   right: 22px;
-  color: rgba(255,255,255,0.3);
   opacity: 1;
 }
 
@@ -189,6 +179,7 @@ interact-element { display: contents; }
 .toggle-track.is-off:hover .moon-shadow-layer {
   animation: moon-horizontal-loop 6s linear infinite;
 }
+
 ```
 
 ## Interact config

@@ -10,22 +10,22 @@ Fullscreen images reveal by scaling from a random corner on click or wheel scrol
 <interact-element data-interact-key="container">
   <div id="collage-container">
     <div id="projector-overlay"></div>
-    <div class="fragment" style="transform-origin: 0 0; transform: scale(1); transition: transform 0.9s cubic-bezier(0.25,1,0.5,1);">
-      <div class="content-image kenburns kenburns-tr" style="background-image: url('')"></div>
+    <div class="fragment" style="transform-origin: 0 0;transform: scale(1);transition: transform 0.9s cubic-bezier(0.25,1,0.5,1)">
+      <div class="content-image kenburns kenburns-tr"></div>
       <div class="text-overlay">
         <h1>Explore Vistas</h1>
         <p>Click or Scroll to discover new images.</p>
       </div>
     </div>
-    <div class="fragment" style="transform-origin: 100% 100%; transform: scale(0); transition: transform 1.1s cubic-bezier(0.25,1,0.5,1);">
-      <div class="content-image kenburns kenburns-bl" style="background-image: url('')"></div>
+    <div class="fragment" style="transform-origin: 100% 100%;transform: scale(0);transition: transform 1.1s cubic-bezier(0.25,1,0.5,1)">
+      <div class="content-image kenburns kenburns-bl"></div>
       <div class="text-overlay">
         <h1>Explore Vistas</h1>
         <p>Click or Scroll to discover new images.</p>
       </div>
     </div>
-    <div class="fragment" style="transform-origin: 50% 0; transform: scale(0); transition: transform 1.0s cubic-bezier(0.25,1,0.5,1);">
-      <div class="content-image kenburns kenburns-br" style="background-image: url('')"></div>
+    <div class="fragment" style="transform-origin: 50% 0;transform: scale(0);transition: transform 1.0s cubic-bezier(0.25,1,0.5,1)">
+      <div class="content-image kenburns kenburns-br"></div>
       <div class="text-overlay">
         <h1>Explore Vistas</h1>
         <p>Click or Scroll to discover new images.</p>
@@ -50,8 +50,6 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background-color: #000;
-    font-family: 'Inter', sans-serif;
 }
 
 #collage-container {
@@ -68,15 +66,11 @@ html, body {
     height: 100%;
     left: 0;
     top: 0;
-    background-color: #111;
 }
 
 .fragment .content-image {
     width: 100%;
     height: 100%;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
 }
 
 .text-overlay {
@@ -86,11 +80,8 @@ html, body {
     width: 100%;
     padding: 20px 40px;
     box-sizing: border-box;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-    color: #fff;
     opacity: 0;
     transition: opacity 0.4s ease-in-out;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
     pointer-events: none;
 }
 
@@ -155,14 +146,12 @@ html, body {
 .progress-dot {
     width: 8px;
     height: 8px;
-    background-color: rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     cursor: pointer;
 }
 
 .progress-dot.active {
-    background-color: #ffffff;
     transform: scale(1.5);
 }
 
@@ -175,7 +164,6 @@ html, body {
     pointer-events: none;
     z-index: 5;
     opacity: 1;
-    background: url('');
     animation: flicker 0.15s infinite alternate;
 }
 

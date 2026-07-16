@@ -12,48 +12,24 @@ A vertical snap-scrolling list of album art cards that rotate and zoom through 3
     <div class="scroll-view" id="scroll-view">
       <div class="item-list" id="item-list">
         <interact-element data-interact-key="item-0">
-          <div class="list-item" style="background-image: url('')"></div>
+          <div class="list-item"></div>
         </interact-element>
         <interact-element data-interact-key="item-1">
-          <div class="list-item" style="background-image: url('')"></div>
+          <div class="list-item"></div>
         </interact-element>
         <interact-element data-interact-key="item-2">
-          <div class="list-item" style="background-image: url('')"></div>
+          <div class="list-item"></div>
         </interact-element>
         <interact-element data-interact-key="item-3">
-          <div class="list-item" style="background-image: url('')"></div>
-        </interact-element>
-        <interact-element data-interact-key="item-4">
-          <div class="list-item" style="background-image: url('')"></div>
-        </interact-element>
-        <interact-element data-interact-key="item-5">
-          <div class="list-item" style="background-image: url('')"></div>
-        </interact-element>
-        <interact-element data-interact-key="item-6">
-          <div class="list-item" style="background-image: url('')"></div>
-        </interact-element>
-        <interact-element data-interact-key="item-7">
-          <div class="list-item" style="background-image: url('')"></div>
-        </interact-element>
-        <interact-element data-interact-key="item-8">
-          <div class="list-item" style="background-image: url('')"></div>
-        </interact-element>
-        <interact-element data-interact-key="item-9">
-          <div class="list-item" style="background-image: url('')"></div>
-        </interact-element>
-        <interact-element data-interact-key="item-10">
-          <div class="list-item" style="background-image: url('')"></div>
-        </interact-element>
-        <interact-element data-interact-key="item-11">
-          <div class="list-item" style="background-image: url('')"></div>
+          <div class="list-item"></div>
         </interact-element>
       </div>
     </div>
   </interact-element>
 
   <div class="info-panel">
-    <h2 id="artist-name">Teebs</h2>
-    <p id="song-title">The Tropics</p>
+    <h2 id="artist-name">Artist A</h2>
+    <p id="song-title">Track A</p>
   </div>
 </div>
 ```
@@ -70,15 +46,12 @@ A vertical snap-scrolling list of album art cards that rotate and zoom through 3
 
 body {
     margin: 0;
-    background-color: #ffffff;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     overflow: hidden;
 }
 
 .screen {
     width: 100vw;
     height: 100vh;
-    background-color: #ffffff;
     position: relative;
     display: flex;
     justify-content: center;
@@ -116,11 +89,7 @@ body {
     width: var(--item-width);
     max-width: 90vw;
     height: var(--item-height);
-    background-color: #f0f0f0;
     border-radius: var(--item-radius);
-    background-size: cover;
-    background-position: center;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
     margin: 0 auto var(--item-gap);
     scroll-snap-align: center;
     will-change: transform, opacity;
@@ -133,8 +102,6 @@ body {
     right: 0;
     padding: 60px 20px 30px;
     text-align: center;
-    color: #333;
-    background: linear-gradient(to top, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0));
     pointer-events: none;
     z-index: 10;
 }
@@ -148,7 +115,6 @@ body {
 .info-panel p {
     margin: 0;
     font-size: 16px;
-    color: #666;
 }
 ```
 
@@ -156,18 +122,10 @@ body {
 
 ```js
 const itemsData = [
-    { artist: "Teebs", title: "The Tropics" },
-    { artist: "Astrid Sonne", title: "Boost" },
-    { artist: "ML Buch", title: "Boarding" },
-    { artist: "Burial", title: "Archangel" },
-    { artist: "Aphex Twin", title: "Avril 14th" },
-    { artist: "Four Tet", title: "Two Thousand and Seventeen" },
-    { artist: "Bonobo", title: "Cirrus" },
-    { artist: "Tycho", title: "Awake" },
-    { artist: "Floating Points", title: "Nespole" },
-    { artist: "Caribou", title: "Odessa" },
-    { artist: "Jon Hopkins", title: "Emerald Rush" },
-    { artist: "Boards of Canada", title: "Roygbiv" },
+    { artist: "Artist A", title: "Track A" },
+    { artist: "Artist B", title: "Track B" },
+    { artist: "Artist C", title: "Track C" },
+    { artist: "Artist D", title: "Track D" },
 ];
 
 const scroll3DEffect = {

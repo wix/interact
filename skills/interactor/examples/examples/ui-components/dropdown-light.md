@@ -95,8 +95,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e0e0e0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 24px;
 }
 
@@ -115,41 +113,22 @@ body {
   width: 280px;
   height: 60px;
   padding: 0 24px;
-  border: 1px solid #ffd7823f;
+  border: 1px solid;
   border-radius: 9999px;
-  background: #000;
-  color: rgba(255,255,255,0.55);
-  font-family: inherit;
   font-size: 15px;
   font-weight: 400;
   cursor: pointer;
   text-align: left;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.dropdown-btn:focus-visible {
-  box-shadow: 0 0 0 3px #ffd782;
-}
-
-.dropdown.open .dropdown-btn {
-  border-color: #ffd78255;
-  color: #ffd782;
-}
-
-.dropdown.has-selection .dropdown-btn {
-  color: #ffd782;
 }
 
 .chevron {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  color: #ffd78266;
   transition: transform 300ms ease;
 }
 
 .dropdown.open .chevron {
-  color: #ffd782;
   transform: rotate(180deg);
 }
 
@@ -158,9 +137,8 @@ body {
   top: calc(100% + 10px);
   left: 0;
   right: 0;
-  border: 1px solid #ffd7823f;
+  border: 1px solid;
   border-radius: 24px;
-  background: #000;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-6px);
@@ -192,20 +170,15 @@ body {
   height: 38px;
   padding: 0 12px;
   border: none;
-  background: transparent;
-  color: rgba(255,255,255,0.55);
-  font-family: inherit;
   font-size: 14px;
   font-weight: 400;
   text-align: left;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
   outline: none;
   border-radius: 16px;
   opacity: 0;
   transform: translateY(-4px);
-  transition: opacity 180ms ease-out calc(var(--i) * 40ms),
-              transform 180ms ease-out calc(var(--i) * 40ms);
+  transition: opacity 180ms ease-out calc(var(--i) * 40ms), transform 180ms ease-out calc(var(--i) * 40ms);
 }
 
 .dropdown.open .dropdown-option {
@@ -213,31 +186,21 @@ body {
   transform: translateY(0);
 }
 
-.dropdown-option:focus-visible {
-  box-shadow: inset 0 0 0 2px #ffd782;
-}
-
 .dropdown-option .option-icon {
   flex-shrink: 0;
   width: 17px;
   height: 17px;
-  color: rgba(255,255,255,0.7);
   opacity: 0.5;
 }
 
-.dropdown-option[aria-selected="true"] {
-  background: #ffd78215;
-  color: #ffd782;
-}
-
 .dropdown-option[aria-selected="true"] .option-icon {
-  color: #ffd782;
   opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .dropdown-menu, .dropdown-option, .chevron { transition: none !important; }
 }
+
 ```
 
 ## Interact config
@@ -255,8 +218,6 @@ body {
             duration: 300,
             easing: 'ease',
             styleProperties: [
-              { name: 'border-color', value: '#ffd78255' },
-              { name: 'color', value: '#ffd782' },
               { name: 'transform', value: 'translateY(-6px)' }
             ]
           }
@@ -268,8 +229,8 @@ body {
             duration: 300,
             easing: 'ease',
             styleProperties: [
-              { name: 'color', value: '#ffd782' }
-            ]
+            { name: 'transform', value: 'translateY(-2px)' }
+          ]
           }
         }
       ]
@@ -284,9 +245,8 @@ body {
             duration: 200,
             easing: 'ease-out',
             styleProperties: [
-              { name: 'background-color', value: '#ffd78215' },
-              { name: 'color', value: '#ffd782' }
-            ]
+            { name: 'transform', value: 'translateY(-2px)' }
+          ]
           }
         },
         {
@@ -296,7 +256,6 @@ body {
             duration: 200,
             easing: 'ease',
             styleProperties: [
-              { name: 'color', value: '#ffd782' },
               { name: 'opacity', value: '1' },
               { name: 'transform', value: 'scale(1.2) rotate(-8deg)' }
             ]

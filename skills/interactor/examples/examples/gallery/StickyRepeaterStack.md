@@ -1,6 +1,6 @@
 # Sticky Repeater Stack
 
-Five gradient cards stack using sticky positioning and scale down to 0.8 as each subsequent card scrolls over the previous one, driven by viewProgress with cover-range offsets computed from viewport geometry.
+Five cards stack using sticky positioning and scale down to 0.8 as each subsequent card scrolls over the previous one, driven by viewProgress with cover-range offsets computed from viewport geometry.
 
 **Tags:** viewProgress, sticky, stack, stagger, scale, transform, scroll, cards
 
@@ -45,19 +45,8 @@ Five gradient cards stack using sticky positioning and scale down to 0.8 as each
 ## Essential styles
 
 ```css
-:root {
-  --card-bg-1: linear-gradient(135deg, #007BFF, #00BFFF);
-  --card-bg-2: linear-gradient(135deg, #8A2BE2, #4B0082);
-  --card-bg-3: linear-gradient(135deg, #32CD32, #008000);
-  --card-bg-4: linear-gradient(135deg, #FF4500, #FF8C00);
-  --card-bg-5: linear-gradient(135deg, #FF1493, #C71585);
-}
-
 body {
   margin: 0;
-  background-color: #111;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
   overflow-x: hidden;
 }
 
@@ -79,7 +68,6 @@ body {
 .intro-section p {
   font-size: clamp(1rem, 2vw, 1.2rem);
   max-width: 600px;
-  color: #aaa;
   line-height: 1.6;
 }
 
@@ -128,16 +116,9 @@ interact-element {
   align-items: center;
   font-size: 2rem;
   font-weight: bold;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   backface-visibility: hidden;
   transform-style: preserve-3d;
 }
-
-#card-1 { background: var(--card-bg-1); }
-#card-2 { background: var(--card-bg-2); }
-#card-3 { background: var(--card-bg-3); }
-#card-4 { background: var(--card-bg-4); }
-#card-5 { background: var(--card-bg-5); }
 ```
 
 ## Interact config

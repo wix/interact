@@ -34,7 +34,6 @@ As the page is scrolled through a tall sticky section, bold uppercase text scale
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Inter', 'Arial Black', sans-serif; background: #fff; }
 
 .scroll-section {
   height: 600vh;
@@ -52,12 +51,10 @@ body { font-family: 'Inter', 'Arial Black', sans-serif; background: #fff; }
 .bg-image {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
-    url('')
-    center / cover no-repeat;
+  background-image: url('');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .text-layer {
@@ -88,7 +85,6 @@ body { font-family: 'Inter', 'Arial Black', sans-serif; background: #fff; }
   align-items: flex-start;
   justify-content: center;
   padding-top: 38vh;
-  color: white;
   font-size: clamp(0.875rem, 2vw, 1.5rem);
   font-weight: 600;
   letter-spacing: 0.15em;

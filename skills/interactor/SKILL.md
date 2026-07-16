@@ -132,7 +132,6 @@ add(el);
 2. Based on the user's request, identify 2–4 demos whose trigger type, layout, motion properties, or overall feel best match what's being built. Match on tags such as `viewProgress`, `pointerMove`, `sticky`, `stagger`, `3d`, or `clip-path`.
 3. Read those demo files from `examples/examples/<category>/<name>.md`. Use the index rather than guessing paths; the categories are `gallery`, `carousel`, `image-background`, `text-animations`, `text-image`, and `ui-components`.
 4. Treat each demo as a cohesive unit — the interact config, HTML structure, and CSS layout are designed to work together. Adapt all three parts to the user's context rather than lifting any single piece in isolation.
-5. Fill empty asset sources (`src=""` or `url('')`) with project-owned assets. Keep placeholder tokens, remote asset URLs, embedded data URLs, external font imports, responsive source lists, and nonfunctional image metadata out of the example library. Preserve only attributes used by Interact, CSS, accessibility behavior, or the example's integration pseudocode.
 
 This step is especially useful for: picking the right trigger/effect combination, handling complex layered compositions, and producing configs that feel polished rather than generic.
 

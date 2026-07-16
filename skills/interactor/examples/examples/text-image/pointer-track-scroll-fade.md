@@ -11,7 +11,7 @@ A portrait photo tracks the mouse pointer via the TrackMouse preset while fading
   <div class="scroll-area">
     <section class="section">
       <span class="header">Marcus Elijah — Visual Artist & Creative Director</span>
-      <span class="hero-text">MARCUS ELIJAH — A JOURNEY THROUGH LIGHT SHADOW AND THE QUIET POWER OF SELF EXPRESSION</span>
+      <span class="hero-text">SAMPLE TEXT FOR THE ANIMATED LAYOUT.</span>
       <interact-element data-interact-key="photo">
         <div class="image-wrapper">
           <img
@@ -34,11 +34,6 @@ A portrait photo tracks the mouse pointer via the TrackMouse preset while fading
 
 interact-element { display: block; }
 
-body {
-  background: #ffffff;
-  font-family: system-ui, sans-serif;
-}
-
 .scroll-area {
   height: 200vh;
 }
@@ -55,11 +50,9 @@ body {
 
 .hero-text {
   position: absolute;
-  font-family: 'Instrument Serif', Georgia, serif;
   font-weight: 300;
   font-size: clamp(2.8rem, 7vw, 6rem);
   text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.85);
   letter-spacing: 0.02em;
   line-height: 1.05;
   text-align: center;
@@ -74,11 +67,9 @@ body {
   left: 0;
   width: 100%;
   text-align: center;
-  font-family: 'Instrument Serif', Georgia, serif;
   font-size: 1rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.9);
 }
 
 .bottom-link {
@@ -87,16 +78,13 @@ body {
   left: 0;
   width: 100%;
   text-align: center;
-  font-family: 'Instrument Serif', Georgia, serif;
   font-size: 0.85rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .bottom-link a {
-  color: rgba(0, 0, 0, 0.7);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid;
   padding-bottom: 2px;
 }
 
@@ -106,7 +94,6 @@ body {
   aspect-ratio: 274 / 342;
   border-radius: 0;
   overflow: clip;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
 .image-wrapper img {
@@ -150,6 +137,7 @@ body {
     letter-spacing: 0.1em;
   }
 }
+
 ```
 
 ## Interact config
@@ -197,9 +185,8 @@ body {
             duration: 300,
             easing: 'ease',
             styleProperties: [
-              { name: 'color', value: 'rgba(0, 0, 0, 1)' },
-              { name: 'border-color', value: 'rgba(0, 0, 0, 0.8)' },
-            ],
+            { name: 'transform', value: 'translateY(-2px)' }
+          ],
           },
         },
       ],

@@ -7,7 +7,7 @@ Letters of the word "INTERACT" bounce in from below in a V-curve formation on vi
 ## Markup
 
 ```html
-<div class="bg-neutral-900 text-white font-sans min-h-[500vh]">
+<div class="min-h-[500vh]">
 
   <div class="h-[80vh] flex items-center justify-center opacity-50">
     <p>Scroll Down ↓</p>
@@ -27,10 +27,9 @@ Letters of the word "INTERACT" bounce in from below in a V-curve formation on vi
         <interact-element data-interact-key="letter-7" aria-hidden="true"><span class="letter-span">T</span></interact-element>
       </h1>
 
-      <div class="max-w-md text-center text-neutral-400 px-6 z-10 mt-12 font-sans">
+      <div class="max-w-md text-center px-6 z-10 mt-12">
         <p>
-          The letters bounce in from the bottom, creating a playful curve that draws the eye immediately.
-          As you continue to scroll down the page, the characters gently align to a perfect flat baseline.
+          Sample text provides enough length to demonstrate this animated content layout.
         </p>
       </div>
 
@@ -62,10 +61,6 @@ interact-element.track-wrapper {
     display: inline-block;
     will-change: transform;
     opacity: 0;
-}
-
-.font-spicy {
-    font-family: 'Spicy Rice', serif;
 }
 ```
 

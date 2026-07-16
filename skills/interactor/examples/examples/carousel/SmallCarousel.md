@@ -72,14 +72,7 @@ A 3D perspective carousel of space nebula cards arranged in depth with rotateY o
 
 ```css
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: #110f1a;
-    color: #f0eefc;
     overflow: hidden;
-}
-
-.font-cinzel {
-    font-family: 'Cinzel', serif;
 }
 
 .carousel-container {
@@ -104,19 +97,17 @@ body {
     position: absolute;
     width: 300px;
     height: 500px;
-    background: #1a1a2e;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
     padding: 0;
-    transition: transform 0.5s cubic-bezier(0.33, 1, 0.68, 1), filter 0.5s ease, box-shadow 0.5s ease;
+    transition: transform 0.5s cubic-bezier(0.33, 1, 0.68, 1), filter 0.5s ease;
     cursor: pointer;
     user-select: none;
-    border: 2px solid rgba(120, 120, 180, 0.4);
+    border: 2px solid;
     will-change: transform, filter;
 }
 
@@ -136,8 +127,6 @@ body {
     width: 100%;
     text-align: center;
     padding: 2rem 1.25rem 1.5rem;
-    color: white;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
     opacity: 0;
 }
 
@@ -146,7 +135,6 @@ body {
     font-weight: 700;
     letter-spacing: 0.05em;
     margin-bottom: 0.35rem;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
 }
 
 .card-keywords {
@@ -154,14 +142,12 @@ body {
     font-weight: 300;
     letter-spacing: 0.03em;
     opacity: 0.8;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 
 .card.active {
     transform: translateX(0) translateZ(0) rotateY(0deg) scale(1);
     filter: brightness(1);
     z-index: 10;
-    box-shadow: 0 12px 40px rgba(80, 80, 200, 0.25), 0 0 60px rgba(100, 100, 220, 0.1);
 }
 .card.left-1  { transform: translateX(-60%)  translateZ(-200px) rotateY(35deg)  scale(0.9); filter: brightness(0.75); z-index: 5; }
 .card.right-1 { transform: translateX(60%)   translateZ(-200px) rotateY(-35deg) scale(0.9); filter: brightness(0.75); z-index: 5; }
@@ -178,7 +164,6 @@ body {
     z-index: 1001;
     cursor: default;
     filter: brightness(1);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
 }
 .card.fly-out .card-content {
     opacity: 1;
@@ -190,15 +175,14 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.75);
     z-index: 1000;
     opacity: 0;
     pointer-events: none;
-    backdrop-filter: blur(4px);
 }
 .backdrop.visible {
     pointer-events: auto;
 }
+
 ```
 
 ## Interact config

@@ -12,7 +12,7 @@ A white content card rotates 155 degrees on the Y axis as the user scrolls, whil
     src=""
     class="w-full h-full object-cover grayscale contrast-[1.1] brightness-[0.75]"
   />
-  <div class="absolute inset-0 bg-black/5"></div>
+  <div class="absolute inset-0"></div>
 </div>
 
 <interact-element data-interact-key="scroll-trigger" class="relative z-10 block h-[500vh]">
@@ -21,10 +21,10 @@ A white content card rotates 155 degrees on the Y axis as the user scrolls, whil
       <interact-element data-interact-key="mouse-layer" class="preserve-3d">
         <interact-element data-interact-key="hover-layer" class="preserve-3d">
           <div class="beauty-card-ui p-12 md:p-24 w-[85vw] md:w-full max-w-lg aspect-[4/5] md:aspect-square">
-            <h3 class="text-4xl md:text-7xl font-bold leading-[1.05] mb-4 md:mb-8 text-[#1d1d1f] tracking-tighter">
+            <h3 class="text-4xl md:text-7xl font-bold leading-[1.05] mb-4 md:mb-8 tracking-tighter">
               Untamed<br/>Beauty.
             </h3>
-            <p class="text-lg md:text-2xl font-medium leading-relaxed text-[#86868b] max-w-[280px] md:max-w-xs mx-auto">
+            <p class="text-lg md:text-2xl font-medium leading-relaxed max-w-[280px] md:max-w-xs mx-auto">
               In every walk with nature one receives far more than he seeks.
             </p>
           </div>
@@ -34,15 +34,13 @@ A white content card rotates 155 degrees on the Y axis as the user scrolls, whil
   </interact-element>
 </interact-element>
 
-<div class="h-[20vh] bg-transparent"></div>
+<div class="h-[20vh]"></div>
 ```
 
 ## Essential styles
 
 ```css
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: black;
     margin: 0;
     overflow-x: clip;
 }
@@ -65,15 +63,14 @@ interact-element {
 }
 
 .beauty-card-ui {
-    background-color: white;
-    box-shadow: 0 100px 200px -50px rgba(0,0,0,0.85);
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid;
     display: flex;
     flex-direction: column;
     justify-content: center;
     text-align: center;
     user-select: none;
 }
+
 ```
 
 ## Interact config

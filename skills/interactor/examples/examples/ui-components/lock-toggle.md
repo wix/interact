@@ -14,14 +14,14 @@ A pill-shaped toggle button animates on click, sliding the thumb across the trac
         <div class="slider">
           <div class="icon-stack">
             <span class="face-icon icon-happy">
-              <svg viewBox="6 6 12 12" fill="none" stroke="#FFD882" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+              <svg viewBox="6 6 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M8 14s1.5 2 4 2 4-2 4-2" />
                 <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.3" />
                 <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.3" />
               </svg>
             </span>
             <span class="face-icon icon-sad">
-              <svg viewBox="6 6 12 12" fill="none" stroke="#000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <svg viewBox="6 6 12 12" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
                 <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.3" />
                 <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.3" />
@@ -49,8 +49,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0b0b0b;
-  font-family: 'Inter', system-ui, sans-serif;
 }
 
 interact-element { display: contents; }
@@ -66,17 +64,11 @@ interact-element { display: contents; }
   width: 100px;
   height: 50px;
   border-radius: 9999px;
-  border: 1px solid #ffd7823f;
-  background-color: #000;
+  border: 1px solid;
   cursor: pointer;
   user-select: none;
-  -webkit-tap-highlight-color: transparent;
   outline: none;
   flex-shrink: 0;
-}
-
-.toggle-track:focus-visible {
-  box-shadow: 0 0 0 3px #ffd782;
 }
 
 .slider {
@@ -86,7 +78,6 @@ interact-element { display: contents; }
   left: 5px;
   right: 57px;
   border-radius: 9999px;
-  background-color: #FFD882;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -121,19 +112,13 @@ interact-element { display: contents; }
 
 .toggle-label {
   grid-area: 1 / 1;
-  font-family: 'Inter', sans-serif;
   font-weight: 300;
   font-size: 20px;
   line-height: 1.5;
   white-space: nowrap;
 }
 
-.label-available {
-  color: #a3a3a3;
-}
-
 .label-unavailable {
-  color: #ffd782;
   opacity: 0;
   transform: translateY(100%);
 }
@@ -141,6 +126,7 @@ interact-element { display: contents; }
 @media (prefers-reduced-motion: reduce) {
   .slider, .toggle-track, .toggle-label { transition: none !important; }
 }
+
 ```
 
 ## Interact config

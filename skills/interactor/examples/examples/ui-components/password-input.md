@@ -30,15 +30,15 @@ A password input with a toggle eye button that animates its lid, pupil, and lash
               <path d="M6 20C6 20 11 13 18 13C25 13 30 20 30 20C30 20 25 27 18 27C11 27 6 20 6 20Z"/>
             </clipPath>
           </defs>
-          <path class="eye-lid" d="M6 20C6 20 11 13 18 13C25 13 30 20 30 20C30 20 25 27 18 27C11 27 6 20 6 20Z" fill="#ffd782"/>
-          <path class="eye-curve" d="M6 20C6 20 11 27 18 27C25 27 30 20 30 20" stroke="#ffd782" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path class="eye-lid" d="M6 20C6 20 11 13 18 13C25 13 30 20 30 20C30 20 25 27 18 27C11 27 6 20 6 20Z" fill="currentColor"/>
+          <path class="eye-curve" d="M6 20C6 20 11 27 18 27C25 27 30 20 30 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <g clip-path="url(#eye-clip)">
-            <circle class="eye-pupil" cx="18" cy="20" r="5" fill="#0b0b0b" stroke="#ffd782" stroke-width="2" stroke-linejoin="round"/>
+            <circle class="eye-pupil" cx="18" cy="20" r="5" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
           </g>
           <g class="eyelashes">
-            <path d="M10 9.5L11 11" stroke="#ffd782" stroke-width="2" stroke-linecap="round"/>
-            <path d="M26 9.5L25 11" stroke="#ffd782" stroke-width="2" stroke-linecap="round"/>
-            <path d="M18 7V10" stroke="#ffd782" stroke-width="2" stroke-linecap="round"/>
+            <path d="M10 9.5L11 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M26 9.5L25 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M18 7V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           </g>
         </svg>
       </button>
@@ -65,8 +65,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0b0b0b;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 24px;
 }
 
@@ -80,20 +78,14 @@ interact-element { display: contents; }
   height: 60px;
   padding: 0 8px 0 24px;
   border-radius: 9999px;
-  background: #000;
-  border: 0.5px solid #ffd7823f;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  border: 0.5px solid;
   transition:
-    box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.3s ease;
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
 }
 
 .pill:hover,
 .pill:focus-within {
   border-width: 1.3px;
-  border-color: #ffd78255;
-  box-shadow: 0 4px 20px rgba(10, 10, 10, 0.5), 0 0px 5px rgba(255,215,130,0.04);
 }
 
 .input-wrap {
@@ -109,24 +101,15 @@ interact-element { display: contents; }
   min-width: 0;
   height: 100%;
   border: none;
-  background: transparent;
-  color: #ffd782;
-  font-family: inherit;
   font-size: clamp(14px, 1.5vw + 10px, 16px);
   font-weight: 500;
   outline: none;
   letter-spacing: 0.03em;
   padding: 0;
 }
-
-.input-field::placeholder { color: #ffd78244; }
 .input-field.masked {
-  color: transparent;
-  caret-color: #ffd782;
-  font-family: 'Courier New', Courier, monospace;
   letter-spacing: 0;
 }
-.input-field.masked::placeholder { color: transparent; }
 
 .mask {
   position: absolute;
@@ -135,7 +118,6 @@ interact-element { display: contents; }
   align-items: center;
   pointer-events: none;
   user-select: none;
-  font-family: 'Courier New', Courier, monospace;
   font-size: clamp(14px, 1.5vw + 10px, 16px);
   letter-spacing: 0;
 }
@@ -156,9 +138,6 @@ interact-element { display: contents; }
   height: 0.45em;
   border-radius: 50%;
 }
-
-.dot-filled::after { background: #ffd782; }
-.dot-placeholder::after { background: #ffd78230; }
 .mask .space { display: inline-block; width: 1ch; }
 
 .eye-btn {
@@ -167,17 +146,13 @@ interact-element { display: contents; }
   height: 48px;
   padding: 4px;
   border: none;
-  background: transparent;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  -webkit-tap-highlight-color: transparent;
   outline: none;
 }
-
-.eye-btn:focus-visible { background: #2a2a2a; }
 
 .eye-svg {
   width: 100%;
@@ -202,11 +177,9 @@ interact-element { display: contents; }
   gap: 6px;
   font-size: 13px;
   font-weight: 400;
-  color: #f87171;
   opacity: 0;
   transform: translateY(-6px);
-  transition: opacity 350ms cubic-bezier(0.22, 1, 0.36, 1),
-              transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 350ms cubic-bezier(0.22, 1, 0.36, 1), transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .lang-warning.visible {
@@ -224,6 +197,7 @@ interact-element { display: contents; }
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
+
 ```
 
 ## Interact config
@@ -339,7 +313,7 @@ interact-element { display: contents; }
                 { opacity: 1, offset: 1 }
               ], { duration: 150 });
             }
-            setTimeout(blink, Math.random() < 0.22 ? 200 : 2000 + Math.random() * 4000);
+            setTimeout(blink, 2400);
           }, 2000);
         }
       }]

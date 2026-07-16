@@ -41,19 +41,10 @@ Two white theatrical panels slide in from opposite sides as the page scrolls, co
 ## Essential styles
 
 ```css
-:root {
-    --bg-color: #000000;
-    --mask-color: #ffffff;
-    --text-primary: #ffffff;
-    --text-secondary: #000000;
-}
-
 body {
     margin: 0;
-    background-color: var(--bg-color);
     height: 300vh;
     overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
 }
 
 .sticky-container {
@@ -61,7 +52,6 @@ body {
     top: 0;
     width: 100%;
     height: 100vh;
-    background-color: var(--bg-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -73,7 +63,6 @@ body {
     top: 0;
     bottom: 0;
     width: 90%;
-    background-color: var(--mask-color);
     z-index: 10;
 }
 
@@ -105,18 +94,14 @@ body {
 }
 
 .text-1 {
-    font-family: 'Oswald', sans-serif;
     font-size: clamp(2.5rem, 12vw, 9rem);
     line-height: 0.85;
     text-transform: uppercase;
-    color: var(--text-primary);
     letter-spacing: -0.04em;
 }
 
 .text-2 {
-    font-family: 'Playfair Display', serif;
     font-size: clamp(1.2rem, 5vw, 3.5rem);
-    color: var(--text-secondary);
     line-height: 1.1;
     font-weight: 400;
 }
@@ -129,7 +114,6 @@ body {
     font-size: 0.7rem;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
     z-index: 30;
 }
 ```

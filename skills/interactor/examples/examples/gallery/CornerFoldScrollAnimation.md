@@ -91,12 +91,6 @@ Five fullscreen sticky panels sequentially slide up from below and expand their 
 ## Essential styles
 
 ```css
-body {
-    background-color: #000;
-    color: #FFA500;
-    font-family: 'Inter', sans-serif;
-}
-
 .fullscreen-section {
     height: 100vh;
     width: 100vw;
@@ -157,14 +151,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    background-color: #000;
-    border-top: 1px solid #FFA500;
-    border-bottom: 1px solid #FFA500;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
     z-index: 20;
 }
 
 .animated-title p {
-    color: #FFA500;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
@@ -191,6 +183,7 @@ body {
 .animated-image {
     clip-path: inset(0% 0% 100% 100%);
 }
+
 ```
 
 ## Interact config

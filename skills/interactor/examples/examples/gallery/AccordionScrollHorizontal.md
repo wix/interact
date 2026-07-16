@@ -89,8 +89,6 @@ Hover over any panel to expand it — vertically on mobile, horizontally on desk
 ```css
 :root {
     --panel-default-width: 220px;
-    --panel-open-width: 600px;
-    --panel-speed: 1;
 }
 
 html {
@@ -100,8 +98,6 @@ html {
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: #f8f9fa;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
@@ -123,9 +119,7 @@ body {
     position: relative;
     z-index: 1;
     cursor: pointer;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     border-radius: 1.5rem;
-    background: #eee;
 }
 
 .feature-image {
@@ -148,7 +142,6 @@ body {
     opacity: 0;
     transform: translateY(20px);
     z-index: 10;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     line-height: 1.2;
     pointer-events: none;
 }
@@ -156,7 +149,6 @@ body {
 .feature-bottom-subtitle {
     font-size: 0.75rem;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.8);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: 0.25rem;
@@ -165,7 +157,6 @@ body {
 .feature-bottom-title {
     font-size: 1.75rem;
     font-weight: 700;
-    color: white;
     white-space: nowrap;
 }
 
@@ -173,7 +164,6 @@ body {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
     opacity: 0;
     transition: opacity 0.5s ease;
     pointer-events: none;

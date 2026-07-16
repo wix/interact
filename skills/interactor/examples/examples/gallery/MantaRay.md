@@ -1,6 +1,6 @@
 # Manta Ray
 
-A horizontal overlapping gallery where each image breathes with a continuous vertical float loop triggered on view enter, and scales up on hover, with staggered per-item delays and seeded random size variation.
+A horizontal overlapping gallery where images enter as a staggered sequence, breathe with a continuous vertical loop, and scale up on hover.
 
 **Tags:** hover, viewEnter, gallery, flex, transform, scale, opacity, loop, stagger
 
@@ -10,46 +10,30 @@ A horizontal overlapping gallery where each image breathes with a continuous ver
 <section class="min-h-screen flex items-center justify-center py-12 px-[10px] overflow-hidden">
   <interact-element data-interact-key="gallery">
     <div id="gallery-container" class="flex flex-nowrap justify-center items-center w-full gallery-wrapper">
-      <interact-element data-interact-key="img-wrapper-0" class="pointer-events-auto cursor-pointer" style="--rnd-off: 0.20">
-        <img src="" class="w-full h-auto shadow-md rounded-sm">
+      <interact-element data-interact-key="img-wrapper-0" class="pointer-events-auto cursor-pointer">
+        <img src="" class="w-full h-auto rounded-sm">
       </interact-element>
-      <interact-element data-interact-key="img-wrapper-1" class="pointer-events-auto cursor-pointer" style="--rnd-off: -0.62">
-        <img src="" class="w-full h-auto shadow-md rounded-sm">
+      <interact-element data-interact-key="img-wrapper-1" class="pointer-events-auto cursor-pointer">
+        <img src="" class="w-full h-auto rounded-sm">
       </interact-element>
-      <interact-element data-interact-key="img-wrapper-2" class="pointer-events-auto cursor-pointer" style="--rnd-off: 0.84">
-        <img src="" class="w-full h-auto shadow-md rounded-sm">
+      <interact-element data-interact-key="img-wrapper-2" class="pointer-events-auto cursor-pointer">
+        <img src="" class="w-full h-auto rounded-sm">
       </interact-element>
-      <interact-element data-interact-key="img-wrapper-3" class="pointer-events-auto cursor-pointer" style="--rnd-off: -0.30">
-        <img src="" class="w-full h-auto shadow-md rounded-sm">
-      </interact-element>
-      <interact-element data-interact-key="img-wrapper-4" class="pointer-events-auto cursor-pointer" style="--rnd-off: 0.56">
-        <img src="" class="w-full h-auto shadow-md rounded-sm">
-      </interact-element>
-      <interact-element data-interact-key="img-wrapper-5" class="pointer-events-auto cursor-pointer" style="--rnd-off: -0.78">
-        <img src="" class="w-full h-auto shadow-md rounded-sm">
+      <interact-element data-interact-key="img-wrapper-3" class="pointer-events-auto cursor-pointer">
+        <img src="" class="w-full h-auto rounded-sm">
       </interact-element>
     </div>
   </interact-element>
 </section>
-
-<interact-element data-interact-key="tooltip-wrapper" class="fixed bottom-4 left-4 pointer-events-none z-[99999]">
-  <div id="image-tooltip" class="text-black opacity-0 transform translate-y-4 transition-all duration-300 ease-out">
-    <h3 id="tooltip-title" class="font-extrabold text-2xl text-gray-900">Crimson Bloom</h3>
-    <p id="tooltip-subtitle" class="text-lg text-gray-600">By Artist Name 1</p>
-  </div>
-</interact-element>
 ```
 
 ## Essential styles
 
 ```css
-body { font-family: 'Inter', sans-serif; }
-
 interact-element:not(:defined) { opacity: 0; }
 
 :root {
     --base-size: 12;
-    --size-variation: 0;
     --overlap-ratio: 0.67;
 }
 
@@ -62,10 +46,7 @@ interact-element[data-interact-key="gallery"] {
 }
 
 interact-element[data-interact-key^="img-wrapper-"] {
-    width: max(
-        calc(var(--base-size) * 0.3 * 1vw),
-        calc((var(--base-size) + var(--rnd-off, 0) * var(--size-variation) * var(--base-size) * 1.5) * 1vw)
-    );
+    width: calc(var(--base-size) * 1vw);
     flex-shrink: 0;
 }
 
@@ -83,8 +64,6 @@ interact-element:hover {
     z-index: 9999 !important;
 }
 
-.tooltip-visible { opacity: 1 !important; transform: translateY(0) !important; }
-.tooltip-hidden { opacity: 0 !important; transform: translateY(16px) !important; }
 ```
 
 ## Interact config
@@ -92,14 +71,7 @@ interact-element:hover {
 ```js
 const HOVER_SCALE = 2.5;
 
-const imageData = [
-    { title: "Crimson Bloom", sub: "By Artist Name 1" },
-    { title: "Azure Waves", sub: "By Artist Name 2" },
-    { title: "Golden Fields", sub: "By Artist Name 3" },
-    { title: "Forest Deep", sub: "By Artist Name 4" },
-    { title: "Urban Lines", sub: "By Artist Name 5" },
-    { title: "Pastel Sky", sub: "By Artist Name 6" }
-];
+const imageKeys = ['img-wrapper-0', 'img-wrapper-1', 'img-wrapper-2', 'img-wrapper-3'];
 
 const interactConfig = {
     effects: {
@@ -147,9 +119,7 @@ const interactConfig = {
     ]
 };
 
-imageData.forEach((data, index) => {
-    const wrapperId = `img-wrapper-${index}`;
-
+imageKeys.forEach(wrapperId => {
     interactConfig.interactions.push({
         key: wrapperId,
         trigger: 'hover',

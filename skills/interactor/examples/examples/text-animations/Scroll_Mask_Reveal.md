@@ -12,9 +12,7 @@ As the page scrolls, inline image thumbnails embedded within a sticky text block
         <section class="sticky-content">
 
             <p class="sr-only">
-                Visual storytelling creates a deep and lasting impact on the soul.
-                Good design moves us forward, while rhythm guides the eye.
-                Every pixel matters in the end result.
+                Sample text provides enough length to demonstrate this animated content layout.
             </p>
 
             <article class="text-block" aria-hidden="true">
@@ -99,9 +97,6 @@ As the page scrolls, inline image thumbnails embedded within a sticky text block
 ```css
 body {
     margin: 0;
-    background-color: #ffffff;
-    color: #000;
-    font-family: 'Fraunces', serif;
     font-weight: 300;
     overflow-x: hidden;
 }
@@ -133,7 +128,6 @@ body {
     justify-content: flex-start;
     align-items: flex-start;
     overflow: hidden;
-    background: linear-gradient(to bottom right, #ffffff, #e0f2fe);
     padding-top: 15vh;
     padding-left: 5vw;
     padding-right: 5vw;
@@ -162,7 +156,6 @@ body {
 }
 
 .italic-text {
-    font-style: italic;
     font-weight: 300;
 }
 

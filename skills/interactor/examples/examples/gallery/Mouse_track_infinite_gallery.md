@@ -119,9 +119,6 @@ An infinite, wrapping grid of images that pans continuously in the direction of 
 body {
     margin: 0;
     overflow: hidden;
-    background-color: #ffffff;
-    color: black;
-    font-family: 'Helvetica Neue', sans-serif;
     user-select: none;
 }
 
@@ -163,9 +160,7 @@ body {
     height: var(--item-size);
     border-radius: 4px;
     overflow: hidden;
-    background: #1a1a1a;
     position: relative;
-    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.2);
 }
 
 .parallax-layer {
@@ -196,7 +191,6 @@ body {
 .gallery-text {
     font-size: 14px;
     font-weight: 500;
-    color: #111111;
     letter-spacing: 0.5px;
     transform-origin: top left;
     display: inline-block;

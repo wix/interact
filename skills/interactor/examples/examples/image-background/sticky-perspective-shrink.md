@@ -32,11 +32,6 @@ A full-viewport image stays sticky while the user scrolls, shrinking and tilting
 interact-element { display: block; }
 
 body {
-  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  background: #000;
-  color: #fff;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
@@ -53,7 +48,6 @@ body {
   align-items: center;
   justify-content: center;
   overflow: clip;
-  background: #000;
 }
 
 .sticky-frame img {
@@ -87,20 +81,15 @@ body {
   font-weight: 300;
   letter-spacing: 0.04em;
   line-height: 1;
-  color: #fff;
   text-transform: uppercase;
-  text-shadow: 0 4px 60px rgba(0, 0, 0, 0.9);
 }
 
 .hero-copy p {
   font-size: clamp(1.125rem, 2.2vw, 1.5rem);
   font-weight: 400;
-  font-style: italic;
   letter-spacing: 0.12em;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.85);
   text-transform: uppercase;
-  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.9);
 }
 ```
 

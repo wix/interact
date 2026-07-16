@@ -16,7 +16,7 @@ A background image zooms out while a black overlay circle-reveals over it as the
       </interact-element>
 
       <interact-element data-interact-key="bg-black" aria-hidden="true">
-        <div class="bg-layer bg-black"></div>
+        <div class="bg-layer"></div>
       </interact-element>
 
       <div class="overlay" aria-hidden="true"></div>
@@ -44,13 +44,6 @@ A background image zooms out while a black overlay circle-reveals over it as the
 
 ```css
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
-  background: #0a0a0a;
-  color: #fff;
-  -webkit-font-smoothing: antialiased;
-}
 
 .scroll-section {
   height: 225vh;
@@ -88,7 +81,6 @@ body {
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
   z-index: 5;
 }
 
@@ -107,12 +99,9 @@ body {
 }
 
 .label {
-  font-family: 'Lora', Georgia, serif;
-  font-style: italic;
   font-size: 1rem;
   font-weight: 400;
   letter-spacing: 0.02em;
-  color: #fff;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -121,7 +110,7 @@ body {
   padding-left: 8vw;
   padding-right: 3rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  border-bottom: 1px solid;
 }
 
 @media (min-width: 768px) {
@@ -138,7 +127,6 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #fff;
   flex-shrink: 0;
 }
 
@@ -153,27 +141,21 @@ body {
   font-weight: 300;
   line-height: 1.14;
   letter-spacing: -0.01em;
-  color: rgba(255, 255, 255, 0.85);
   max-width: 1200px;
 }
 
 .highlight {
   display: inline;
-  font-family: 'Lora', Georgia, serif;
-  font-style: italic;
   font-weight: 400;
-  color: #fff;
 }
 
 .org-name {
-  font-family: 'Lora', Georgia, serif;
-  font-style: italic;
   font-size: 1rem;
   font-weight: 400;
   letter-spacing: 0.02em;
-  color: #fff;
   padding-bottom: 0.5rem;
 }
+
 ```
 
 ## Interact config

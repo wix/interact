@@ -16,7 +16,7 @@ Eight full-viewport panels translate horizontally as the user scrolls vertically
             <img src="" class="panel-background">
             <div class="panel-content">
               <h2>Panel One</h2>
-              <p>As you scroll down, the panels will slide horizontally from right to left.</p>
+              <p>Sample text provides enough length to demonstrate this animated content layout.</p>
             </div>
           </div>
           <div class="panel">
@@ -44,7 +44,7 @@ Eight full-viewport panels translate horizontally as the user scrolls vertically
             <img src="" class="panel-background">
             <div class="panel-content">
               <h2>Panel Five</h2>
-              <p>Linear easing ensures a direct 1:1 relationship between vertical scroll and horizontal movement.</p>
+              <p>Sample text provides enough length to demonstrate this animated content layout.</p>
             </div>
           </div>
         </div>
@@ -67,9 +67,6 @@ Eight full-viewport panels translate horizontally as the user scrolls vertically
 
 body {
     margin: 0;
-    font-family: 'Inter', sans-serif;
-    background-color: #1a1a1a;
-    color: #f0f2f5;
     overflow-x: hidden;
 }
 
@@ -127,8 +124,6 @@ body {
 .panel-content {
     position: relative;
     z-index: 2;
-    color: #ffffff;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 60%);
     padding: 2rem;
     margin: -4rem;
     padding-top: 6rem;
@@ -140,7 +135,6 @@ body {
 .panel h2 {
     font-size: clamp(1.5rem, calc(var(--panel-w) * 0.03), 4rem);
     margin: 0;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .panel p {
@@ -149,7 +143,6 @@ body {
     width: auto;
     opacity: 0.9;
     margin-top: 1rem;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 768px) {

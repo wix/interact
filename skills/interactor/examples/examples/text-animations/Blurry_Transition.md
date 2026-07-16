@@ -16,21 +16,21 @@ Three stacked text pairs are revealed sequentially as the user scrolls, each fad
         <interact-element data-interact-key="pair-1">
           <div class="text-pair">
             <h1>First Principle</h1>
-            <p>We begin with the foundation. The idea emerges from the void, blurry at first, then sharpening into clarity as we focus our attention upon it.</p>
+            <p>Sample text provides enough length to demonstrate this animated content layout.</p>
           </div>
         </interact-element>
 
         <interact-element data-interact-key="pair-2">
           <div class="text-pair">
             <h1>Second Thought</h1>
-            <p>As the first idea fades into memory, a new perspective takes its place. It replaces what came before, offering a counterpoint to the original thesis.</p>
+            <p>Sample text provides enough length to demonstrate this animated content layout.</p>
           </div>
         </interact-element>
 
         <interact-element data-interact-key="pair-3">
           <div class="text-pair">
             <h1>Final Conclusion</h1>
-            <p>Finally, we arrive at the synthesis. The journey concludes here, with the last thought remaining visible as we complete the passage.</p>
+            <p>Sample text provides enough length to demonstrate this animated content layout.</p>
           </div>
         </interact-element>
 
@@ -47,9 +47,6 @@ Three stacked text pairs are revealed sequentially as the user scrolls, each fad
 html, body {
     margin: 0;
     padding: 0;
-    background-color: #ffffff;
-    font-family: 'Goudy Bookletter 1911', serif;
-    color: #1a1a1a;
     height: 100%;
     width: 100%;
     overflow: hidden;
@@ -104,14 +101,12 @@ h1 {
     margin-bottom: 1.5rem;
     font-weight: normal;
     letter-spacing: 2px;
-    color: #666666;
 }
 
 p {
     font-size: 1.25rem;
     line-height: 1.6;
     letter-spacing: 1px;
-    color: #1a1a1a;
 }
 ```
 

@@ -21,7 +21,7 @@ Cards containing typographic step content slide in from alternating sides with a
 
   <interact-element data-interact-key="card-1" class="card-wrapper">
     <div class="card">
-      <div class="card-icon" style="background: linear-gradient(135deg, #1d1d1f, #3a3a3c);">
+      <div class="card-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 20h9"/>
           <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
@@ -30,13 +30,13 @@ Cards containing typographic step content slide in from alternating sides with a
       <span class="card-label">Step 01</span>
       <h2 class="card-heading">Design</h2>
       <p class="card-subtitle">Crafting the vision</p>
-      <p class="card-body">Every great product begins with a clear, thoughtful design. We shape ideas into blueprints that inspire and endure.</p>
+      <p class="card-body">Sample text provides enough length to demonstrate this animated content layout.</p>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="card-2" class="card-wrapper">
     <div class="card">
-      <div class="card-icon" style="background: linear-gradient(135deg, #1d1d1f, #3a3a3c);">
+      <div class="card-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="16 18 22 12 16 6"/>
           <polyline points="8 6 2 12 8 18"/>
@@ -45,13 +45,13 @@ Cards containing typographic step content slide in from alternating sides with a
       <span class="card-label">Step 02</span>
       <h2 class="card-heading">Build</h2>
       <p class="card-subtitle">Engineering excellence</p>
-      <p class="card-body">With precision and care, we transform designs into robust, scalable systems built to last.</p>
+      <p class="card-body">Sample text provides enough length to demonstrate this animated content layout.</p>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="card-3" class="card-wrapper">
     <div class="card">
-      <div class="card-icon" style="background: linear-gradient(135deg, #1d1d1f, #3a3a3c);">
+      <div class="card-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
           <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
@@ -62,13 +62,13 @@ Cards containing typographic step content slide in from alternating sides with a
       <span class="card-label">Step 03</span>
       <h2 class="card-heading">Launch</h2>
       <p class="card-subtitle">Into the world</p>
-      <p class="card-body">The moment of truth. We deploy with confidence, ensuring every detail is polished and ready.</p>
+      <p class="card-body">Sample text provides enough length to demonstrate this animated content layout.</p>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="card-4" class="card-wrapper">
     <div class="card">
-      <div class="card-icon" style="background: linear-gradient(135deg, #1d1d1f, #3a3a3c);">
+      <div class="card-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
           <polyline points="22 4 12 14.01 9 11.01"/>
@@ -77,7 +77,7 @@ Cards containing typographic step content slide in from alternating sides with a
       <span class="card-label">Step 04</span>
       <h2 class="card-heading">Complete</h2>
       <p class="card-subtitle">Mission accomplished</p>
-      <p class="card-body">Success is measured in impact. We celebrate milestones and prepare for the next chapter ahead.</p>
+      <p class="card-body">Sample text provides enough length to demonstrate this animated content layout.</p>
     </div>
   </interact-element>
 
@@ -109,14 +109,6 @@ Cards containing typographic step content slide in from alternating sides with a
   box-sizing: border-box;
 }
 
-body {
-  background: #f5f5f7;
-  color: #1d1d1f;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 interact-element {
   display: block;
 }
@@ -140,7 +132,6 @@ interact-element {
 }
 
 .hero h1 {
-  font-family: 'DM Serif Display', serif;
   font-size: clamp(3rem, 8vw, 7rem);
   font-weight: 400;
   letter-spacing: -0.02em;
@@ -150,7 +141,6 @@ interact-element {
 
 .hero p {
   font-size: clamp(1rem, 2vw, 1.5rem);
-  color: #86868b;
   font-weight: 400;
   opacity: 0;
 }
@@ -182,7 +172,6 @@ interact-element {
 .card {
   width: 100%;
   height: 100%;
-  background: #fff;
   border-radius: 36px;
   padding: 48px 40px;
   display: flex;
@@ -191,11 +180,6 @@ interact-element {
   justify-content: center;
   text-align: center;
   opacity: 0;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.02),
-    0 8px 16px rgba(0, 0, 0, 0.04),
-    0 20px 40px rgba(0, 0, 0, 0.06),
-    0 40px 80px rgba(0, 0, 0, 0.08);
 }
 
 .card-icon {
@@ -217,13 +201,11 @@ interact-element {
   font-size: 0.8rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #86868b;
   margin-bottom: 14px;
   font-weight: 600;
 }
 
 .card-heading {
-  font-family: 'DM Serif Display', serif;
   font-size: 2.5rem;
   font-weight: 400;
   margin-bottom: 10px;
@@ -234,13 +216,11 @@ interact-element {
   font-size: 1.15rem;
   font-weight: 600;
   margin-bottom: 16px;
-  color: #1d1d1f;
 }
 
 .card-body {
   font-size: 1rem;
   line-height: 1.6;
-  color: #86868b;
   max-width: 340px;
 }
 

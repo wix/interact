@@ -52,18 +52,12 @@ Four triangular white mask panels slide inward from all four edges as the user s
 
 ```css
 :root {
-    --bg-color: #000000;
-    --mask-color: #ffffff;
-    --text-primary: #ffffff;
-    --text-secondary: #000000;
     --mask-size: 160vmax;
 }
 
 body {
     margin: 0;
-    background-color: var(--bg-color);
     overflow-x: clip;
-    -webkit-font-smoothing: antialiased;
 }
 
 .scroll-wrapper {
@@ -80,14 +74,12 @@ body {
     justify-content: center;
     align-items: center;
     overflow: clip;
-    background-color: var(--bg-color);
 }
 
 .center-fix {
     position: absolute;
     width: 12px;
     height: 12px;
-    background: var(--mask-color);
     z-index: 15;
     border-radius: 50%;
     opacity: 0;
@@ -98,7 +90,6 @@ body {
     position: absolute;
     width: var(--mask-size);
     height: var(--mask-size);
-    background-color: var(--mask-color);
     z-index: 10;
     top: 50%;
     left: 50%;
@@ -133,21 +124,16 @@ body {
 }
 
 .text-1 {
-    font-family: 'Oswald', sans-serif;
     font-size: clamp(2.5rem, 14vw, 10rem);
     line-height: 0.85;
     text-transform: uppercase;
-    color: var(--text-primary);
     letter-spacing: -0.04em;
 }
 
 .text-2 {
-    font-family: 'Playfair Display', serif;
     font-size: clamp(1.25rem, 6vw, 4.5rem);
-    color: var(--text-secondary);
     line-height: 1.1;
     font-weight: 400;
-    font-style: italic;
     opacity: 0;
 }
 
@@ -159,10 +145,8 @@ body {
     font-size: 0.7rem;
     letter-spacing: 0.3em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.3);
     z-index: 50;
     pointer-events: none;
-    font-family: sans-serif;
     text-align: center;
     width: 100%;
 }

@@ -34,7 +34,7 @@ As the page scrolls through a 500vh sticky section, a single image is revealed t
           <div class="text-inner">
             <p class="label">About Me</p>
             <h2 class="title">The <em>Person</em><br>Behind It All</h2>
-            <p class="description">I'm a designer and creative thinker with a passion for crafting visual experiences that leave an impression. My work lives at the intersection of bold ideas and refined execution — always exploring, always evolving. <a href="#">Get in touch</a></p>
+            <p class="description">Sample text provides enough length to demonstrate this animated content layout. <a href="#">Get in touch</a></p>
           </div>
         </interact-element>
       </div>
@@ -60,13 +60,6 @@ interact-element {
 html, body {
   height: 100%;
   overflow-x: clip;
-}
-
-body {
-  background: #0c0c0c;
-  color: #f0ece6;
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
 }
 
 .scroll-driver {
@@ -134,22 +127,16 @@ body {
   letter-spacing: 0.25em;
   text-transform: uppercase;
   font-weight: 500;
-  color: rgba(240, 236, 230, 0.35);
   margin-bottom: 2rem;
 }
 
 .title {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(3rem, 6vw, 6.5rem);
   line-height: 1.05;
   font-weight: 400;
   margin-bottom: 1.5rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-}
-
-.title em {
-  font-style: normal;
 }
 
 .divider {
@@ -160,20 +147,7 @@ body {
   font-size: 0.95rem;
   line-height: 1.8;
   font-weight: 300;
-  color: rgba(240, 236, 230, 0.55);
   max-width: 500px;
-}
-
-.description a {
-  color: rgba(240, 236, 230, 0.85);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: rgba(240, 236, 230, 0.3);
-  transition: text-decoration-color 0.3s ease;
-}
-
-.description a:hover {
-  text-decoration-color: rgba(240, 236, 230, 0.85);
 }
 
 @media (max-width: 900px) {

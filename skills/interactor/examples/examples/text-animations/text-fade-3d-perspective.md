@@ -8,7 +8,7 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
 
 ```html
 <interact-element data-interact-key="scroll-trigger">
-  <div class="relative" style="height: 700vh;">
+  <div class="relative" style="height: 700vh">
 
     <div class="sticky-container">
 
@@ -17,8 +17,8 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
         <div class="slide slide-1">
           <interact-element data-interact-key="s1-content">
             <div class="text-center px-6">
-              <h1 class="hero-text" style="color: #ffffff;">Design.</h1>
-              <p class="mt-16 md:mt-20 sub-headline max-w-2xl mx-auto" style="color: #ffffff;">
+              <h1 class="hero-text">Design.</h1>
+              <p class="mt-16 md:mt-20 sub-headline max-w-2xl mx-auto">
                 Not what it looks like.<br>What it feels like.
               </p>
             </div>
@@ -30,7 +30,7 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
       <interact-element data-interact-key="slide-2">
         <div class="slide slide-2">
           <interact-element data-interact-key="s2-bg">
-            <div class="bg-glyph" style="bottom: -12%; right: -8%;">Less</div>
+            <div class="bg-glyph" style="bottom: -12%;right: -8%">Less</div>
           </interact-element>
 
           <div class="relative z-10 w-full max-w-5xl px-5 md:px-10">
@@ -52,7 +52,7 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
               <interact-element data-interact-key="s2-right">
                 <div class="flex flex-col gap-8 pt-2">
                   <p class="body-text">
-                    Simplicity is not the absence of complexity. It is the result of mastering it. Every surface, every transition, every moment of silence — designed with absolute intention.
+                    Sample text provides enough length to demonstrate this animated content layout.
                   </p>
                   <p class="body-text">
                     When you remove the unnecessary, the necessary speaks.
@@ -68,7 +68,7 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
       <interact-element data-interact-key="slide-3">
         <div class="slide slide-3">
           <interact-element data-interact-key="s3-bg">
-            <div class="bg-glyph" style="top: -8%; left: -6%;">Detail</div>
+            <div class="bg-glyph" style="top: -8%;left: -6%">Detail</div>
           </interact-element>
 
           <div class="relative z-10 w-full max-w-5xl px-5 md:px-10">
@@ -82,23 +82,23 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               <interact-element data-interact-key="s3-card-1">
                 <div class="glass-card p-6 md:p-10 h-full">
-                  <div class="text-4xl md:text-6xl font-extralight text-white/[0.18] mb-6 md:mb-10 leading-none">01</div>
-                  <h3 class="text-lg font-semibold mb-4 text-white/90">Space</h3>
-                  <p class="text-sm text-white/30 leading-relaxed">What you leave empty defines what matters. Negative space is not absence — it is architecture.</p>
+                  <div class="text-4xl md:text-6xl font-extralight mb-6 md:mb-10 leading-none">01</div>
+                  <h3 class="text-lg font-semibold mb-4">Space</h3>
+                  <p class="text-sm leading-relaxed">Sample text provides enough length to demonstrate this animated content layout.</p>
                 </div>
               </interact-element>
               <interact-element data-interact-key="s3-card-2">
                 <div class="glass-card p-6 md:p-10 h-full">
-                  <div class="text-4xl md:text-6xl font-extralight text-white/[0.18] mb-6 md:mb-10 leading-none">02</div>
-                  <h3 class="text-lg font-semibold mb-4 text-white/90">Rhythm</h3>
-                  <p class="text-sm text-white/30 leading-relaxed">Typography, spacing, motion. The invisible grid that makes everything feel inevitable.</p>
+                  <div class="text-4xl md:text-6xl font-extralight mb-6 md:mb-10 leading-none">02</div>
+                  <h3 class="text-lg font-semibold mb-4">Rhythm</h3>
+                  <p class="text-sm leading-relaxed">Typography, spacing, motion. The invisible grid that makes everything feel inevitable.</p>
                 </div>
               </interact-element>
               <interact-element data-interact-key="s3-card-3">
                 <div class="glass-card p-6 md:p-10 h-full">
-                  <div class="text-4xl md:text-6xl font-extralight text-white/[0.18] mb-6 md:mb-10 leading-none">03</div>
-                  <h3 class="text-lg font-semibold mb-4 text-white/90">Finish</h3>
-                  <p class="text-sm text-white/30 leading-relaxed">The last 1% is what separates good from extraordinary. Corners, shadows, curves — perfected.</p>
+                  <div class="text-4xl md:text-6xl font-extralight mb-6 md:mb-10 leading-none">03</div>
+                  <h3 class="text-lg font-semibold mb-4">Finish</h3>
+                  <p class="text-sm leading-relaxed">Sample text provides enough length to demonstrate this animated content layout.</p>
                 </div>
               </interact-element>
             </div>
@@ -117,10 +117,6 @@ Three stacked full-screen text sections animate in and out with scroll-driven 3D
 body {
     margin: 0;
     padding: 0;
-    background: #000;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    color: #ffffff;
     overflow-x: hidden;
 }
 
@@ -140,16 +136,15 @@ body {
     justify-content: center;
 }
 
-.slide-1 { z-index: 3; background: #000; }
-.slide-2 { z-index: 2; background: #000; }
-.slide-3 { z-index: 1; background: #000; }
+.slide-1 { z-index: 3; }
+.slide-2 { z-index: 2; }
+.slide-3 { z-index: 1; }
 
 .hero-text {
     font-size: clamp(3.5rem, 18vw, 20rem);
     line-height: 1;
     letter-spacing: -0.06em;
     font-weight: 800;
-    color: #fff;
 }
 
 .section-title {
@@ -157,7 +152,6 @@ body {
     line-height: 1.05;
     letter-spacing: -0.05em;
     font-weight: 800;
-    color: #fff;
 }
 
 .sub-headline {
@@ -165,7 +159,6 @@ body {
     line-height: 1.2;
     letter-spacing: -0.03em;
     font-weight: 600;
-    color: #fff;
 }
 
 .label {
@@ -173,24 +166,20 @@ body {
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    color: rgba(255,255,255,0.25);
 }
 
 .body-text {
     font-size: 1.05rem;
     line-height: 1.7;
-    color: rgba(255,255,255,0.4);
     font-weight: 400;
 }
 
 .thin-rule {
     height: 1px;
-    background: rgba(255,255,255,0.1);
 }
 
 .glass-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid;
     border-radius: 24px;
 }
 
@@ -198,10 +187,10 @@ body {
     position: absolute;
     font-size: 42vw;
     font-weight: 900;
-    color: rgba(255,255,255,0.015);
     line-height: 1;
     pointer-events: none;
 }
+
 ```
 
 ## Interact config

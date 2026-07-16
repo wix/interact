@@ -68,7 +68,7 @@ On scroll, 20 alternating horizontal white stripes slide in from opposite sides 
   <interact-element data-interact-key="s2-subtitles">
     <div class="section-two__right">
       <p class="section-two__intro">Performance without compromise. Architecture without limits.</p>
-      <p class="section-two__line">Next-generation ARM silicon delivering unprecedented performance per watt — unified memory eliminates every bottleneck between CPU, GPU, and Neural Engine for seamless real-time rendering and multitasking. Silent thermal design and all-day battery, every component engineered to disappear so all you experience is absolute focus.</p>
+      <p class="section-two__line">Sample text provides enough length to demonstrate this animated content layout.</p>
     </div>
   </interact-element>
 </section>
@@ -80,10 +80,6 @@ On scroll, 20 alternating horizontal white stripes slide in from opposite sides 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  background: #000;
-  color: #fff;
-  -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
 
@@ -100,7 +96,6 @@ interact-element { display: block; }
   justify-content: space-between;
   padding: 32px 52px;
   mix-blend-mode: difference;
-  color: #fff;
 }
 
 .header__logo {
@@ -142,15 +137,11 @@ interact-element { display: block; }
 .hero__gradient {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg, rgba(0,0,0,0.2) 0%, transparent 30%),
-    linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.35) 100%);
 }
 
 .hero__darken {
   position: absolute;
   inset: 0;
-  background: #000;
   opacity: 0;
 }
 
@@ -166,13 +157,11 @@ interact-element { display: block; }
   font-size: 0.55rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.5);
 }
 
 .hero__scroll-arrow {
   width: 14px;
   height: 8px;
-  color: rgba(255,255,255,0.5);
 }
 
 .hero__content {
@@ -188,7 +177,6 @@ interact-element { display: block; }
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1.05;
-  color: #fff;
 }
 
 .spacer { height: 100vh; }
@@ -213,14 +201,12 @@ interact-element { display: block; }
 .stripe {
   width: 100%;
   height: 100%;
-  background: #fff;
 }
 
 .section-two {
   position: fixed;
   inset: 0;
   z-index: 4;
-  color: #000;
   padding: 14vh 52px 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -237,7 +223,7 @@ interact-element { display: block; }
   justify-content: flex-start;
   padding-top: 8px;
   padding-right: 64px;
-  border-right: 1px solid rgba(0,0,0,0.08);
+  border-right: 1px solid;
 }
 
 .section-two__label {
@@ -245,7 +231,6 @@ interact-element { display: block; }
   font-weight: 500;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: #aaa;
   margin-bottom: 24px;
 }
 
@@ -254,7 +239,6 @@ interact-element { display: block; }
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1.05;
-  color: #000;
 }
 
 .section-two__right {
@@ -269,7 +253,6 @@ interact-element { display: block; }
   font-size: 1.2rem;
   font-weight: 500;
   line-height: 1.6;
-  color: #000;
   margin-bottom: 24px;
   letter-spacing: -0.01em;
 }
@@ -278,7 +261,6 @@ interact-element { display: block; }
   font-size: 0.92rem;
   font-weight: 400;
   line-height: 1.85;
-  color: #777;
   margin-bottom: 0;
 }
 
@@ -301,7 +283,7 @@ interact-element { display: block; }
     border-right: none;
     padding-right: 0;
     padding-bottom: 24px;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    border-bottom: 1px solid;
   }
   .section-two__right { padding-left: 0; padding-top: 24px; }
   .section-two__title { font-size: clamp(2.5rem, 10vw, 3.5rem); }
@@ -316,6 +298,7 @@ interact-element { display: block; }
   .section-two__label { margin-bottom: 16px; }
   .section-two__line { font-size: 0.8rem; line-height: 1.7; }
 }
+
 ```
 
 ## Interact config

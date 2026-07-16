@@ -1,6 +1,6 @@
 # Wheel Carousel
 
-12 image cards arranged in a circle spin continuously on `viewEnter`, while hovering any card scales its image up slightly.
+Six image cards arranged in a circle spin continuously on `viewEnter`, while hovering any card scales its image up slightly.
 
 **Tags:** viewEnter, hover, carousel, loop, rotate, scale, transform
 
@@ -10,110 +10,21 @@
 <section class="arc-viewport">
   <interact-element data-interact-key="#wheel">
     <div id="wheel" class="wheel">
-      <interact-element data-interact-key="#card-1">
-        <div id="card-1" class="card">
-          <interact-element data-interact-key="#card-1-img">
-            <img id="card-1-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
-
-      <interact-element data-interact-key="#card-2">
-        <div id="card-2" class="card">
-          <interact-element data-interact-key="#card-2-img">
-            <img id="card-2-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
-
-      <interact-element data-interact-key="#card-3">
-        <div id="card-3" class="card">
-          <interact-element data-interact-key="#card-3-img">
-            <img id="card-3-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
-
-      <interact-element data-interact-key="#card-4">
-        <div id="card-4" class="card">
-          <interact-element data-interact-key="#card-4-img">
-            <img id="card-4-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
-
-      <interact-element data-interact-key="#card-5">
-        <div id="card-5" class="card">
-          <interact-element data-interact-key="#card-5-img">
-            <img id="card-5-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
-
-      <interact-element data-interact-key="#card-6">
-        <div id="card-6" class="card">
-          <interact-element data-interact-key="#card-6-img">
-            <img id="card-6-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
-
-      <interact-element data-interact-key="#card-7">
-        <div id="card-7" class="card">
-          <interact-element data-interact-key="#card-7-img">
-            <img id="card-7-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
-
-      <interact-element data-interact-key="#card-8">
-        <div id="card-8" class="card">
-          <interact-element data-interact-key="#card-8-img">
-            <img id="card-8-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
-
-      <interact-element data-interact-key="#card-9">
-        <div id="card-9" class="card">
-          <interact-element data-interact-key="#card-9-img">
-            <img id="card-9-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
-
-      <interact-element data-interact-key="#card-10">
-        <div id="card-10" class="card">
-          <interact-element data-interact-key="#card-10-img">
-            <img id="card-10-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
-
-      <interact-element data-interact-key="#card-11">
-        <div id="card-11" class="card">
-          <interact-element data-interact-key="#card-11-img">
-            <img id="card-11-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
-
-      <interact-element data-interact-key="#card-12">
-        <div id="card-12" class="card">
-          <interact-element data-interact-key="#card-12-img">
-            <img id="card-12-img" src="" />
-          </interact-element>
-        </div>
-      </interact-element>
+      <div id="card-1" class="card"><img src="" /></div>
+      <div id="card-2" class="card"><img src="" /></div>
+      <div id="card-3" class="card"><img src="" /></div>
+      <div id="card-4" class="card"><img src="" /></div>
+      <div id="card-5" class="card"><img src="" /></div>
+      <div id="card-6" class="card"><img src="" /></div>
     </div>
   </interact-element>
   <div class="fade-bottom"></div>
 </section>
 
 <section class="copy">
-  <div class="headline">25% Off All<br />Top Rated Headphones</div>
-  <div class="sub">Explore Limited Time Offers</div>
-  <a class="cta" href="#">Get Started</a>
+  <div class="headline">Sample heading</div>
+  <div class="sub">Sample text</div>
+  <a class="cta" href="#">Action</a>
 </section>
 ```
 
@@ -132,9 +43,6 @@
 }
 
 body {
-    background: #0a0a0f;
-    color: #f0f0f5;
-    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     overflow-x: hidden;
     min-height: 100vh;
 }
@@ -161,11 +69,9 @@ body {
 }
 .arc-viewport::before {
     left: 0;
-    background: linear-gradient(to right, #0a0a0f, transparent);
 }
 .arc-viewport::after {
     right: 0;
-    background: linear-gradient(to left, #0a0a0f, transparent);
 }
 
 .fade-bottom {
@@ -174,7 +80,6 @@ body {
     left: 0;
     width: 100%;
     height: 45%;
-    background: linear-gradient(to top, #0a0a0f 8%, transparent);
     z-index: 10;
     pointer-events: none;
 }
@@ -200,7 +105,6 @@ interact-element {
     top: 50%;
     border-radius: var(--cr);
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 12px 40px rgba(0, 0, 0, 0.25);
     transform-origin: center center;
 }
 
@@ -217,59 +121,29 @@ interact-element {
     z-index: 100;
 }
 #card-2 {
-    margin-left: calc((var(--r) * 0.866 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * 0.5 - var(--cs) / 2) * 1vmin);
-    z-index: 150;
+    margin-left: calc((var(--r) * 0.5 - var(--cs) / 2) * 1vmin);
+    margin-top: calc((var(--r) * 0.866 - var(--cs) / 2) * 1vmin);
+    z-index: 187;
 }
 #card-3 {
-    margin-left: calc((var(--r) * 0.5 - var(--cs) / 2) * 1vmin);
+    margin-left: calc((var(--r) * -0.5 - var(--cs) / 2) * 1vmin);
     margin-top: calc((var(--r) * 0.866 - var(--cs) / 2) * 1vmin);
     z-index: 187;
 }
 #card-4 {
-    margin-left: calc((var(--r) * 0 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * 1 - var(--cs) / 2) * 1vmin);
-    z-index: 200;
-}
-#card-5 {
-    margin-left: calc((var(--r) * -0.5 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * 0.866 - var(--cs) / 2) * 1vmin);
-    z-index: 187;
-}
-#card-6 {
-    margin-left: calc((var(--r) * -0.866 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * 0.5 - var(--cs) / 2) * 1vmin);
-    z-index: 150;
-}
-#card-7 {
     margin-left: calc((var(--r) * -1 - var(--cs) / 2) * 1vmin);
     margin-top: calc((var(--r) * 0 - var(--cs) / 2) * 1vmin);
     z-index: 100;
 }
-#card-8 {
-    margin-left: calc((var(--r) * -0.866 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * -0.5 - var(--cs) / 2) * 1vmin);
-    z-index: 50;
-}
-#card-9 {
+#card-5 {
     margin-left: calc((var(--r) * -0.5 - var(--cs) / 2) * 1vmin);
     margin-top: calc((var(--r) * -0.866 - var(--cs) / 2) * 1vmin);
     z-index: 13;
 }
-#card-10 {
-    margin-left: calc((var(--r) * 0 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * -1 - var(--cs) / 2) * 1vmin);
-    z-index: 0;
-}
-#card-11 {
+#card-6 {
     margin-left: calc((var(--r) * 0.5 - var(--cs) / 2) * 1vmin);
     margin-top: calc((var(--r) * -0.866 - var(--cs) / 2) * 1vmin);
     z-index: 13;
-}
-#card-12 {
-    margin-left: calc((var(--r) * 0.866 - var(--cs) / 2) * 1vmin);
-    margin-top: calc((var(--r) * -0.5 - var(--cs) / 2) * 1vmin);
-    z-index: 50;
 }
 
 .copy {
@@ -298,17 +172,13 @@ interact-element {
     display: inline-block;
     margin-top: 24px;
     padding: 14px 26px;
-    background: #34d399;
-    color: #042;
     border-radius: 12px;
     font-weight: 600;
     font-size: 15px;
-    text-decoration: none;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.15s ease;
 }
 .cta:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(52, 211, 153, 0.3);
 }
 .cta:active {
     transform: translateY(1px);
@@ -395,79 +265,14 @@ interact-element {
             trigger: "viewEnter",
             effects: [
                 { key: "#wheel", effectId: "wheel-spin" },
-                { key: "#card-1", effectId: "card-counter" },
-                { key: "#card-2", effectId: "card-counter" },
-                { key: "#card-3", effectId: "card-counter" },
-                { key: "#card-4", effectId: "card-counter" },
-                { key: "#card-5", effectId: "card-counter" },
-                { key: "#card-6", effectId: "card-counter" },
-                { key: "#card-7", effectId: "card-counter" },
-                { key: "#card-8", effectId: "card-counter" },
-                { key: "#card-9", effectId: "card-counter" },
-                { key: "#card-10", effectId: "card-counter" },
-                { key: "#card-11", effectId: "card-counter" },
-                { key: "#card-12", effectId: "card-counter" },
+                { selector: ".card", effectId: "card-counter" },
             ],
         },
         {
-            key: "#card-1",
+            key: "#wheel",
             trigger: "hover",
-            effects: [{ key: "#card-1-img", effectId: "img-hover", triggerType: "alternate" }],
-        },
-        {
-            key: "#card-2",
-            trigger: "hover",
-            effects: [{ key: "#card-2-img", effectId: "img-hover", triggerType: "alternate" }],
-        },
-        {
-            key: "#card-3",
-            trigger: "hover",
-            effects: [{ key: "#card-3-img", effectId: "img-hover", triggerType: "alternate" }],
-        },
-        {
-            key: "#card-4",
-            trigger: "hover",
-            effects: [{ key: "#card-4-img", effectId: "img-hover", triggerType: "alternate" }],
-        },
-        {
-            key: "#card-5",
-            trigger: "hover",
-            effects: [{ key: "#card-5-img", effectId: "img-hover", triggerType: "alternate" }],
-        },
-        {
-            key: "#card-6",
-            trigger: "hover",
-            effects: [{ key: "#card-6-img", effectId: "img-hover", triggerType: "alternate" }],
-        },
-        {
-            key: "#card-7",
-            trigger: "hover",
-            effects: [{ key: "#card-7-img", effectId: "img-hover", triggerType: "alternate" }],
-        },
-        {
-            key: "#card-8",
-            trigger: "hover",
-            effects: [{ key: "#card-8-img", effectId: "img-hover", triggerType: "alternate" }],
-        },
-        {
-            key: "#card-9",
-            trigger: "hover",
-            effects: [{ key: "#card-9-img", effectId: "img-hover", triggerType: "alternate" }],
-        },
-        {
-            key: "#card-10",
-            trigger: "hover",
-            effects: [{ key: "#card-10-img", effectId: "img-hover", triggerType: "alternate" }],
-        },
-        {
-            key: "#card-11",
-            trigger: "hover",
-            effects: [{ key: "#card-11-img", effectId: "img-hover", triggerType: "alternate" }],
-        },
-        {
-            key: "#card-12",
-            trigger: "hover",
-            effects: [{ key: "#card-12-img", effectId: "img-hover", triggerType: "alternate" }],
+            listContainer: ".card",
+            effects: [{ selector: "img", effectId: "img-hover", triggerType: "alternate" }],
         },
     ],
 }

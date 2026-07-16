@@ -95,10 +95,7 @@ Accessible pill-shaped checkbox labels that scale and highlight on hover, with a
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; list-style: none; }
 
 body {
-    font-family: 'Inter', sans-serif;
     font-weight: 400;
-    background-color: #0b0b0b;
-    color: #ffffff;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -147,24 +144,17 @@ interact-element { display: inline-flex; }
     position: relative;
     user-select: none;
     border: 1.5px solid transparent;
-    background-color: #1a1a1a;
-    color: #a3a3a3;
     transform-style: preserve-3d;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    transition: border-color 0.3s ease;
     outline: none;
 }
-
-.pill:focus-visible { box-shadow: 0 0 0 3px #fff; }
 
 @media (min-width: 640px) {
     .pill { height: 56px; padding: 0 40px; }
 }
 
 .hidden-checkbox:checked + interact-element .pill {
-    border-color: #ffd7823f;
     border-width: 0.5px;
-    background-color: #ffd78202;
-    color: #ffd782;
 }
 
 .pill-inner {
@@ -200,6 +190,7 @@ interact-element { display: inline-flex; }
 @media (prefers-reduced-motion: reduce) {
     .pill, .check-icon { transition: none !important; }
 }
+
 ```
 
 ## Interact config
@@ -218,8 +209,6 @@ const pillKeys = ['pill-0', 'pill-1', 'pill-2', 'pill-3', 'pill-4', 'pill-5'];
           duration: 250,
           easing: 'ease-out',
           styleProperties: [
-            { name: 'background-color', value: '#2a2a2a' },
-            { name: 'color', value: '#ffffff' },
             { name: 'transform', value: 'scale(1.04)' }
           ]
         }

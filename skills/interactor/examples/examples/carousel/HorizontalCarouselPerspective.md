@@ -76,12 +76,6 @@ Cards fly through a sticky 3D stage driven by page scroll, each one sweeping in 
 ## Essential styles
 
 ```css
-body {
-    background-color: #ffffff;
-    font-family: 'Inter', sans-serif;
-    color: #f3f4f6;
-}
-
 .scroll-section {
     height: 1000vh;
 }
@@ -125,8 +119,6 @@ body {
     left: 50%;
     border-radius: 1.5rem;
     overflow: hidden;
-    background: #1f2937;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
     will-change: transform, opacity;
     transform: translate(-50%, -50%);
 }
@@ -144,7 +136,6 @@ body {
     z-index: 10;
     padding: 0 2rem;
     box-sizing: border-box;
-    color: #000000;
     text-align: center;
     pointer-events: none;
 }
@@ -163,7 +154,6 @@ body {
 #dynamic-title-text p {
     font-size: 1.25rem;
     line-height: 1.75rem;
-    color: #000000;
 }
 
 @media (max-width: 768px) {

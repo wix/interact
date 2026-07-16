@@ -10,42 +10,42 @@ A grid of image cards where hovering any card blurs all others via CSS `:has()`,
 <section class="grid-container">
   <interact-element data-interact-key="card-1">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 1</h3><p>Hover to see info</p></div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-2">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 2</h3><p>Hover to see info</p></div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-3">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 3</h3><p>Hover to see info</p></div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-4">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 4</h3><p>Hover to see info</p></div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-5">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 5</h3><p>Hover to see info</p></div>
     </div>
   </interact-element>
   <interact-element data-interact-key="card-6">
     <div class="card-inner">
-      <div class="card-bg" style="background-image: url('')"></div>
+      <div class="card-bg"></div>
       <div class="card-overlay"></div>
       <div class="card-content"><h3>Card 6</h3><p>Hover to see info</p></div>
     </div>
@@ -62,9 +62,6 @@ A grid of image cards where hovering any card blurs all others via CSS `:has()`,
 body {
   margin: 0;
   padding: 40px;
-  background: #111;
-  font-family: 'Inter', sans-serif;
-  color: white;
   overflow-x: hidden;
 }
 .grid-container {
@@ -96,8 +93,6 @@ interact-element {
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: center;
   transition: filter 300ms ease;
   will-change: filter;
 }
@@ -110,7 +105,6 @@ interact-element:hover .card-bg {
 .card-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.2);
   z-index: 1;
   border-radius: 2px;
 }
@@ -123,7 +117,6 @@ interact-element:hover .card-bg {
   transform: translateY(10px);
   z-index: 2;
   line-height: 1.2;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
   will-change: opacity, transform;
 }
 .card-content h3 { margin: 0 0 3px 0; font-size: 1rem; }

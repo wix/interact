@@ -43,8 +43,8 @@ An endless floating image gallery where tiles drift and wrap continuously across
       </div>
     </div>
 
-    <button id="openModalTrigger" style="display:none;"></button>
-    <button id="closeModalTrigger" style="display:none;"></button>
+    <button id="openModalTrigger" style="display:none"></button>
+    <button id="closeModalTrigger" style="display:none"></button>
   </div>
 </interact-element>
 ```
@@ -52,18 +52,10 @@ An endless floating image gallery where tiles drift and wrap continuously across
 ## Essential styles
 
 ```css
-:root {
-  --drift-speed: 1;
-  --tile-scale: 1;
-  --num-tiles: 100;
-}
-
 html, body {
   margin: 0; padding: 0;
   width: 100%; height: 100%;
   overflow: hidden;
-  background: #f8f5ee;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 #gallery-container {
@@ -79,7 +71,6 @@ html, body {
   top: 0; left: 0;
   opacity: 0;
   border-radius: 8px;
-  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
   will-change: transform, opacity;
   backface-visibility: hidden;
   contain: layout paint;
@@ -88,7 +79,7 @@ html, body {
 }
 
 .gallery-tile:focus-visible {
-  outline: 3px solid #007bff;
+  outline: 3px solid;
   outline-offset: 4px;
   border-radius: 8px;
 }
@@ -112,11 +103,9 @@ html, body {
   left: 0;
   right: 0;
   padding: 2rem 1rem 1rem;
-  color: white;
   text-align: center;
   font-weight: 700;
   font-size: 1rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.3s ease-out, transform 0.3s ease-out;
@@ -134,7 +123,6 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.7);
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
@@ -142,10 +130,8 @@ html, body {
 
 .modal-content {
   position: relative;
-  background: transparent;
   max-width: 90vw; max-height: 90vh;
   border-radius: 8px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
   transform: scale(0.8);
 }
 
@@ -160,8 +146,6 @@ html, body {
   position: absolute;
   left: 0; right: 0; bottom: 0;
   padding: 60px 30px 30px;
-  color: #fff;
-  background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
   border-radius: 0 0 8px 8px;
   box-sizing: border-box;
 }
@@ -169,24 +153,21 @@ html, body {
 .modal-text-overlay h1 {
   margin: 0 0 10px;
   font-size: 2rem; font-weight: 700;
-  text-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
 .modal-text-overlay p {
   margin: 0; font-size: 1.1rem;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
   opacity: 0.9;
 }
 
-.modal-close {
-  background: none; border: none; padding: 0; font: inherit;
+.modal-close { border: none; padding: 0; font: inherit;
   position: absolute; top: 20px; right: 20px;
-  font-size: 2rem; color: #fff; cursor: pointer; line-height: 1;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  font-size: 2rem; cursor: pointer; line-height: 1;
   z-index: 1001; border-radius: 50%;
 }
 
-.modal-close:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.modal-close:focus-visible { outline: 3px solid; outline-offset: 2px; }
+
 ```
 
 ## Interact config

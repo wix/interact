@@ -117,12 +117,6 @@ Five specimen cards fan out from a spread, blurred, and 3D-rotated state and con
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: #000;
-  color: #fff;
-}
-
 interact-element { display: contents; }
 
 .hero {
@@ -138,15 +132,10 @@ interact-element { display: contents; }
   font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 500;
   letter-spacing: -0.03em;
-  background: linear-gradient(180deg, #fff 40%, rgba(255,255,255,0.3));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .hero p {
   font-size: 1rem;
-  color: rgba(255,255,255,0.35);
-  font-family: 'JetBrains Mono', monospace;
   font-weight: 300;
   letter-spacing: 0.05em;
 }
@@ -155,7 +144,6 @@ interact-element { display: contents; }
   margin-top: 3rem;
   width: 1px;
   height: 60px;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
   animation: pulse-hint 2s ease-in-out infinite;
 }
 
@@ -189,14 +177,11 @@ interact-element { display: contents; }
 
 .card {
   width: var(--card-width);
-  background: #fff;
   border-radius: var(--card-radius);
   overflow: hidden;
   flex-shrink: 0;
-  color: #000;
   padding: 10px 10px 10px;
   opacity: 0;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 
 .card-meta {
@@ -208,15 +193,11 @@ interact-element { display: contents; }
 
 .card-label {
   font-size: 0.6rem;
-  font-family: 'Inter', sans-serif;
-  color: #333;
 }
 
 .card-code {
   font-size: 0.5rem;
-  font-family: 'JetBrains Mono', monospace;
   font-weight: 300;
-  color: #666;
 }
 
 .card-title-row {
@@ -233,16 +214,13 @@ interact-element { display: contents; }
 }
 
 .card-arrow {
-  font-family: 'JetBrains Mono', monospace;
   font-weight: 300;
   font-size: 1rem;
-  color: #333;
 }
 
 .card-image {
   width: 100%;
   aspect-ratio: 36 / 50;
-  background: #0a0a0a;
   border-radius: var(--image-radius);
   overflow: hidden;
 }
@@ -263,8 +241,6 @@ interact-element { display: contents; }
 
 .end-section p {
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.2);
-  font-family: 'JetBrains Mono', monospace;
   font-weight: 300;
 }
 ```

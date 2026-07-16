@@ -1,6 +1,6 @@
 # Vertical Lanes
 
-Four vertical image columns auto-scroll continuously in alternating directions when they enter the viewport, each column looping at a different speed for a parallax-lane effect; hovering an image reveals a title and gradient overlay.
+Four vertical image columns auto-scroll continuously in alternating directions when they enter the viewport, each column looping at a different speed for a parallax-lane effect; hovering an image reveals its title and overlay.
 
 **Tags:** viewEnter, hover, gallery, flex, transform, loop, parallax, stagger
 
@@ -194,8 +194,6 @@ Four vertical image columns auto-scroll continuously in alternating directions w
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', sans-serif;
-  background-color: #f4f1eb;
   overflow: hidden;
 }
 
@@ -253,7 +251,6 @@ body {
   bottom: calc(var(--img-padding) + 15px);
   left: calc(var(--img-padding) + 15px);
   right: calc(var(--img-padding) + 15px);
-  color: white;
   text-align: center;
   font-size: clamp(0.5rem, calc((var(--col-width) - 2 * var(--img-padding)) * 0.12), 1.5rem);
   line-height: 1.2;
@@ -270,7 +267,6 @@ body {
   left: var(--img-padding);
   right: var(--img-padding);
   height: 50%;
-  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
   border-radius: 0 0 calc(var(--img-border-radius) - var(--img-padding)) calc(var(--img-border-radius) - var(--img-padding));
   opacity: 0;
   transition: opacity 0.3s ease;

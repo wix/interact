@@ -37,21 +37,18 @@ Words in a paragraph and eyebrow headline are individually revealed with a stagg
 
 ```css
 body {
-  background: black;
-  color: white;
   min-height: 100vh;
   margin: 0;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-body::-webkit-scrollbar { width: 0; background: transparent; }
+body::-webkit-scrollbar { width: 0; }
 
 .spacer {
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
 }
 
 .scroll-track {
@@ -74,13 +71,10 @@ body::-webkit-scrollbar { width: 0; background: transparent; }
 }
 
 .text-content {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   line-height: 1.2;
-  font-kerning: none;
 }
 
 .eyebrow {
-  color: #60a5fa;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;

@@ -120,9 +120,6 @@ A sticky 3D carousel of 8 photo cards arranged in a circular ring spins 720° ar
 * { margin: 0; box-sizing: border-box; }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background: #08080c;
-    color: #eeeef2;
     overflow-x: hidden;
 }
 
@@ -147,10 +144,6 @@ interact-element { display: contents; }
 .bg-glow {
     position: absolute;
     inset: 0;
-    background:
-        radial-gradient(ellipse 60% 50% at 50% 45%, rgba(99, 102, 241, 0.08) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 40% at 30% 60%, rgba(168, 85, 247, 0.05) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 40% at 70% 55%, rgba(59, 130, 246, 0.05) 0%, transparent 60%);
     pointer-events: none;
 }
 
@@ -172,9 +165,6 @@ interact-element { display: contents; }
     height: 420px;
     border-radius: 20px;
     overflow: hidden;
-    box-shadow:
-        0 8px 40px rgba(0, 0, 0, 0.55),
-        0 0 0 1px rgba(255, 255, 255, 0.06);
     user-select: none;
 }
 
@@ -194,12 +184,6 @@ interact-element { display: contents; }
 .card-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        to top,
-        rgba(0, 0, 0, 0.65) 0%,
-        rgba(0, 0, 0, 0.15) 35%,
-        transparent 100%
-    );
     z-index: 1;
 }
 
@@ -221,7 +205,6 @@ interact-element { display: contents; }
 }
 
 .card-title {
-    font-family: 'DM Serif Display', serif;
     font-size: 1.25rem;
     line-height: 1.3;
 }
@@ -229,7 +212,6 @@ interact-element { display: contents; }
 .card-subtitle {
     font-size: 0.65rem;
     font-weight: 300;
-    color: rgba(255, 255, 255, 0.55);
     margin-top: 0.35rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -241,7 +223,6 @@ interact-element { display: contents; }
     left: 50%;
     transform: translateX(-50%);
     font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.25);
     letter-spacing: 0.18em;
     text-transform: uppercase;
     z-index: 2;
@@ -253,7 +234,6 @@ interact-element { display: contents; }
     display: block;
     width: 1px;
     height: 20px;
-    background: rgba(255, 255, 255, 0.15);
     margin: 0.6rem auto 0;
     animation: scrollPulse 2s ease-in-out infinite;
 }

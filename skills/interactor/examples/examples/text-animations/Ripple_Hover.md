@@ -78,9 +78,6 @@ A stacked heading ripples masked copies of itself upward and downward on hover, 
 
 ```css
 body {
-  background-color: #0f0f11;
-  color: #ffffff;
-  font-family: 'Orbitron', sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
   display: flex;
@@ -114,7 +111,6 @@ body {
   letter-spacing: 0.02em;
   margin: 0;
   padding: 0;
-  color: white;
   cursor: default;
   display: block;
   transform: translateY(-0.02em);
@@ -145,7 +141,6 @@ body {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  color: #ffffff;
   margin: 0;
   padding: 0;
   display: block;
@@ -168,7 +163,6 @@ body {
 }
 
 .hint {
-  color: #9ca3af;
   font-size: 1.125rem;
   line-height: 1.625;
 }
@@ -250,7 +244,7 @@ function getInteractions(isMobile) {
 
 const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
-{
+const config = {
   effects: {
     'reveal-up': {
       keyframeEffect: { name: 'reveal-up', keyframes: revealUpKeyframes },
@@ -266,5 +260,5 @@ const isMobile = window.matchMedia('(max-width: 768px)').matches;
     }
   },
   interactions: getInteractions(isMobile)
-}
+};
 ```

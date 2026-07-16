@@ -14,7 +14,7 @@ Three full-screen text pairs are stacked in a fixed overlay; scrolling through s
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text Fold Transition</title>
 </head>
-<body class="bg-white text-black font-sans m-0">
+<body class="m-0">
 
     <div id="visual-layer" class="visual-layer fixed inset-0 flex items-center justify-center pointer-events-none z-20">
 
@@ -22,7 +22,7 @@ Three full-screen text pairs are stacked in a fixed overlay; scrolling through s
         <div class="absolute inset-0 flex flex-col items-center justify-center px-6 max-w-5xl mx-auto text-center">
             <div class="sr-only">
                 <h1>First Impression</h1>
-                <p>In the digital realm, your design serves as the silent ambassador of your brand, articulating values and intent long before a single word is read.</p>
+                <p>Sample text provides enough length to demonstrate this animated content layout.</p>
             </div>
             <div class="mb-8" aria-hidden="true">
                 <span class="text-mask">
@@ -47,7 +47,7 @@ Three full-screen text pairs are stacked in a fixed overlay; scrolling through s
         <div class="absolute inset-0 flex flex-col items-center justify-center px-6 max-w-5xl mx-auto text-center">
             <div class="sr-only">
                 <h1>Seamless Motion</h1>
-                <p>Animation transforms static interfaces into living ecosystems, providing critical context and guiding the user's eye through a fluid narrative.</p>
+                <p>Sample text provides enough length to demonstrate this animated content layout.</p>
             </div>
             <div class="mb-8" aria-hidden="true">
                 <span class="text-mask">
@@ -72,7 +72,7 @@ Three full-screen text pairs are stacked in a fixed overlay; scrolling through s
         <div class="absolute inset-0 flex flex-col items-center justify-center px-6 max-w-5xl mx-auto text-center">
             <div class="sr-only">
                 <h1>Final Impact</h1>
-                <p>The final impression is the one that lingers, creating a resonant memory that persists after the browser tab is closed forever.</p>
+                <p>Sample text provides enough length to demonstrate this animated content layout.</p>
             </div>
             <div class="mb-8" aria-hidden="true">
                 <span class="text-mask">

@@ -74,7 +74,7 @@ As the page scrolls, a portrait image travels from a small inset position to fil
       <div class="detail-sticky">
         <div class="detail-grid">
           <div class="detail-text-cell">
-            <p>&ldquo;With roots in built space, print, and screen, Jane brings a rare mix of craft and vision to each project. Her work has been noted by Awwwards, Comm Arts, and the Type Club &mdash; and shaped by a drive to make things that feel as good as they look.&rdquo;</p>
+            <p>Sample text provides enough length to demonstrate this animated content layout.</p>
             <div class="detail-cta-wrap">
               <a class="detail-cta" href="#">Explore <span class="arrow" aria-hidden="true">→</span></a>
             </div>
@@ -86,7 +86,7 @@ As the page scrolls, a portrait image travels from a small inset position to fil
   </section>
 </interact-element>
 
-<div class="spacer" style="height: 100vh;"></div>
+<div class="spacer" style="height: 100vh"></div>
 ```
 
 ## Essential styles
@@ -95,10 +95,6 @@ As the page scrolls, a portrait image travels from a small inset position to fil
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Instrument Sans', system-ui, sans-serif;
-  background: #000;
-  color: #fff;
-  -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
 
@@ -107,7 +103,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.15);
   font-size: 0.8rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -136,7 +131,6 @@ body {
   top: 0;
   width: 1px;
   height: 100%;
-  background: rgba(255, 255, 255, 0.2);
 }
 
 .line-1 { left: 25%; }
@@ -167,7 +161,7 @@ body {
 }
 
 .detail-cta:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid;
   outline-offset: 3px;
 }
 
@@ -226,7 +220,6 @@ body {
   font-size: 39px;
   line-height: 1.19;
   letter-spacing: 1px;
-  color: #fff;
   font-weight: 300;
 }
 
@@ -263,7 +256,6 @@ body {
   font-size: 47px;
   line-height: 1.25;
   letter-spacing: 1px;
-  color: #fff;
   font-weight: 300;
   text-indent: 3em;
 }
@@ -273,7 +265,6 @@ body {
   left: 0;
   width: 100vw;
   height: 1px;
-  background: rgba(255, 255, 255, 0.2);
   z-index: 3;
   pointer-events: none;
 }
@@ -293,18 +284,11 @@ body {
   font-size: 24px;
   font-weight: 300;
   letter-spacing: 1px;
-  color: #fff;
-  text-decoration: none;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid;
   border-radius: 999px;
   padding: 0.55em 1.4em;
-  transition: border-color 0.3s ease, background 0.3s ease;
-}
-
-.detail-cta:hover {
-  border-color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  transition: border-color 0.3s ease;
 }
 
 .detail-cta .arrow {
@@ -358,7 +342,6 @@ body {
     display: block;
     position: absolute;
     inset: 0;
-    background: #000;
     opacity: 0;
     pointer-events: none;
     z-index: 1;
@@ -381,6 +364,7 @@ body {
     .image-overlay { opacity: 0.45; }
   }
 }
+
 ```
 
 ## Interact config

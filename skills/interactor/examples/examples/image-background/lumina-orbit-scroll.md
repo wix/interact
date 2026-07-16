@@ -30,13 +30,6 @@ A full-viewport hero image shrinks, tilts in 3D, and fades out as the user scrol
 
 interact-element { display: block; }
 
-body {
-  font-family: 'Outfit', sans-serif;
-  background: #000;
-  color: #fff;
-  -webkit-font-smoothing: antialiased;
-}
-
 .sticky-track {
   height: 500vh;
   position: relative;
@@ -87,50 +80,38 @@ body {
 }
 
 .hero-content h1 {
-  font-family: 'Playfair Display', serif;
   font-size: clamp(3rem, 10vw, 7.5rem);
   font-weight: 400;
-  font-style: italic;
   letter-spacing: 0.12em;
   line-height: 0.95;
-  color: #fff;
-  text-shadow: 0 2px 40px rgba(0, 0, 0, 0.3);
 }
 
 .hero-content p {
-  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: clamp(0.75rem, 1.2vw, 0.95rem);
   font-weight: 300;
   letter-spacing: 0.35em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
 }
 
 .cta-btn {
   display: inline-block;
   margin-top: 16px;
   padding: 11px 40px;
-  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: clamp(0.7rem, 1vw, 0.85rem);
   font-weight: 400;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  text-decoration: none;
-  color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid;
   border-radius: 0;
-  background: transparent;
   cursor: pointer;
   pointer-events: auto;
   transition: all 0.4s ease;
 }
 
 .cta-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.6);
   letter-spacing: 0.38em;
 }
+
 ```
 
 ## Interact config

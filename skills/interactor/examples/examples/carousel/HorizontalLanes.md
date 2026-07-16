@@ -194,8 +194,6 @@ Four horizontal image rows loop continuously left and right at different speeds,
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', sans-serif;
-    background-color: #f4f1eb;
     overflow: hidden;
 }
 
@@ -251,7 +249,6 @@ body {
     bottom: calc(var(--img-padding) + 15px);
     left: calc(var(--img-padding) + 15px);
     right: calc(var(--img-padding) + 15px);
-    color: white;
     text-align: center;
     font-size: clamp(0.5rem, calc((var(--row-height) - 2 * var(--img-padding)) * 0.12), 1.5rem);
     line-height: 1.2;
@@ -268,7 +265,6 @@ body {
     left: var(--img-padding);
     right: var(--img-padding);
     height: 50%;
-    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
     border-radius: 0 0 calc(var(--img-border-radius) - var(--img-padding)) calc(var(--img-border-radius) - var(--img-padding));
     opacity: 0;
     transition: opacity 0.3s ease;

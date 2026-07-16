@@ -34,10 +34,8 @@ Individual letters in "RISING DEAD" each rotate up from below the text baseline 
             </h1>
 
             <div class="max-w-2xl px-6 text-center">
-                <p class="text-lg md:text-xl text-gray-400 leading-relaxed">
-                    The ancient crypts have opened. As you scroll through the timeline of history,
-                    the characters rise from their slumber to greet the modern world.
-                    This text remains static, observing the chaos above.
+                <p class="text-lg md:text-xl leading-relaxed">
+                    Sample text provides enough length to demonstrate this animated content layout.
                 </p>
             </div>
 
@@ -54,13 +52,7 @@ Individual letters in "RISING DEAD" each rotate up from below the text baseline 
 
 ```css
 body {
-    background-color: #0f0f11;
-    color: #ececec;
     overflow-x: hidden;
-}
-
-.font-instrument {
-    font-family: 'Instrument Serif', serif;
 }
 
 .char-perspective {
@@ -91,8 +83,6 @@ interact-element[data-interact-key="scroll-track"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #444;
-    font-family: monospace;
 }
 ```
 
@@ -104,8 +94,8 @@ const letterKeys = [
     'char-1-0', 'char-1-1', 'char-1-2', 'char-1-3'
 ];
 
-const effects = letterKeys.map((letterKey) => {
-    const startDelayVH = Math.floor(Math.random() * 250);
+const effects = letterKeys.map((letterKey, index) => {
+    const startDelayVH = index * 20;
     const durationVH = 50;
 
     return {

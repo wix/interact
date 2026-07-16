@@ -12,13 +12,13 @@ Each full-viewport text card flips into view from below with a 3D rotateX and sc
     <div>Featuring</div>
     <div>Abigail DeVille<br>Xaviera Simmons<br>Rosa-Johan Uddoh</div>
   </div>
-  <div class="col" style="border-right: 1px solid var(--grid-color);">
-    <div style="text-align: center;">Curated By</div>
-    <div style="text-align: center;">Racquel Chevremont<br>Mickalene Thomas</div>
+  <div class="col" style="border-right: 1px solid var(--grid-color)">
+    <div style="text-align: center">Curated By</div>
+    <div style="text-align: center">Racquel Chevremont<br>Mickalene Thomas</div>
   </div>
   <div class="col">
-    <div style="text-align: right;">Presented By</div>
-    <div style="text-align: right;">Pioneer Works<br>04.02-06.20.21<br>Brooklyn, NY</div>
+    <div style="text-align: right">Presented By</div>
+    <div style="text-align: right">Pioneer Works<br>04.02-06.20.21<br>Brooklyn, NY</div>
   </div>
 </div>
 
@@ -63,12 +63,6 @@ Each full-viewport text card flips into view from below with a 3D rotateX and sc
 ## Essential styles
 
 ```css
-:root {
-  --bg-color: #050505;
-  --text-color: #f0f0f0;
-  --grid-color: #333;
-}
-
 html {
   scroll-snap-type: y mandatory;
 }
@@ -76,9 +70,6 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  font-family: 'Oswald', sans-serif;
   overflow-x: hidden;
 }
 
@@ -138,7 +129,6 @@ interact-element {
   text-transform: uppercase;
   font-weight: 700;
   margin: 0;
-  color: white;
   transform-origin: center center;
 }
 
@@ -157,7 +147,6 @@ interact-element {
     min-height: auto;
     grid-template-columns: 1fr;
     border-bottom: 1px solid var(--grid-color);
-    background: var(--bg-color);
   }
 
   .col {
@@ -181,6 +170,7 @@ interact-element {
     font-size: 18vw;
   }
 }
+
 ```
 
 ## Interact config

@@ -61,18 +61,9 @@ Five stacked image cards fan out horizontally when the collection is hovered, re
 ## Essential styles
 
 ```css
-:root {
-    --bg-color: #f0f0f0;
-    --text-color: #111;
-    --card-title-color: #ffffff;
-}
-
 body, html {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
     height: 100%;
     width: 100%;
 }
@@ -102,7 +93,6 @@ body {
     font-size: 5rem;
     font-weight: bold;
     overflow: hidden;
-    color: rgba(255, 255, 255, 0.8);
     will-change: transform;
     transform: translateX(0);
 }
@@ -125,8 +115,6 @@ body {
     padding: 2rem;
     z-index: 2;
     text-align: center;
-    color: var(--card-title-color);
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
 }
 
 .card-content h2 {

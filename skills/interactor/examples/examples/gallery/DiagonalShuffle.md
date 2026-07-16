@@ -77,9 +77,6 @@ Five image cards stacked at the viewport center fly in from alternating diagonal
 
 ```css
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: #ffffff;
-    color: #000;
     overflow-x: hidden;
 }
 
@@ -109,7 +106,6 @@ body {
     max-width: 400px;
     aspect-ratio: 3 / 4;
     border-radius: 1rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
     opacity: 0;
     will-change: transform, opacity;
     transform-style: preserve-3d;
@@ -130,8 +126,6 @@ body {
     left: 0;
     right: 0;
     padding: 1rem;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-    color: white;
     z-index: 10;
 }
 

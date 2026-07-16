@@ -15,7 +15,7 @@ A split-screen layout where text elements (heading, paragraph, button) fade up w
         <h1>Built By<br>Real People</h1>
       </interact-element>
       <interact-element data-interact-key="text-desc">
-        <p>I'm a designer and creative thinker with a passion for crafting visual experiences that leave an impression. My work lives at the intersection of bold ideas and refined execution — always exploring, always evolving. With over a decade of experience across branding, digital products, and art direction, I bring a unique perspective to every project I touch.</p>
+        <p>Sample text provides enough length to demonstrate this animated content layout.</p>
       </interact-element>
       <interact-element data-interact-key="text-btn">
         <div><a href="#" class="btn">Learn More</a></div>
@@ -37,9 +37,6 @@ A split-screen layout where text elements (heading, paragraph, button) fade up w
 ```css
 body {
   margin: 0;
-  background: black;
-  color: white;
-  font-family: 'Inter', sans-serif;
   overflow-x: clip;
 }
 
@@ -61,8 +58,6 @@ interact-element {
 
 .text-block {
   flex: 0 0 50%;
-  background: white;
-  color: #111;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -71,7 +66,6 @@ interact-element {
 
 .image-area {
   flex: 0 0 50%;
-  background: black;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -83,13 +77,11 @@ interact-element {
   line-height: 1.02;
   margin-bottom: 2.2rem;
   letter-spacing: -0.03em;
-  color: #000;
 }
 
 .text-block p {
   font-size: clamp(0.9rem, 1.1vw, 1.05rem);
   line-height: 1.8;
-  color: rgba(0, 0, 0, 0.6);
   font-weight: 300;
   margin-bottom: 3rem;
 }
@@ -97,20 +89,12 @@ interact-element {
 .text-block .btn {
   display: inline-block;
   padding: 0.9rem 2.2rem;
-  background: #000;
-  color: #fff;
   font-size: 0.85rem;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-decoration: none;
   border: none;
   cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.text-block .btn:hover {
-  background: #333;
 }
 
 .hero-image {
@@ -147,7 +131,6 @@ interact-element {
   }
   .text-block {
     flex: 0 0 55%;
-    background: white;
     text-align: left;
     padding: 2rem 1.5rem 2.5rem;
     justify-content: center;

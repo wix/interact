@@ -10,7 +10,7 @@ Three editorial slides sequence through a sticky viewport as the user scrolls â€
 <interact-element data-interact-key="scroll-container">
     <div class="relative h-[350vh]">
 
-        <div class="sticky top-0 h-screen overflow-hidden bg-black">
+        <div class="sticky top-0 h-screen overflow-hidden">
             <div class="slides-stack">
 
                 <interact-element data-interact-key="slide-1">
@@ -22,7 +22,7 @@ Three editorial slides sequence through a sticky viewport as the user scrolls â€
                         <h1 class="mega-text text-center tracking-tighter">
                             Origin.
                         </h1>
-                        <div class="mt-8 px-5 py-2 border border-white/30 rounded-full label-text backdrop-blur-md">
+                        <div class="mt-8 px-5 py-2 border border-white/30 rounded-full label-text">
                             The Beginning of Motion
                         </div>
                     </div>
@@ -33,30 +33,30 @@ Three editorial slides sequence through a sticky viewport as the user scrolls â€
                         <div class="bg-number">02</div>
                         <interact-element data-interact-key="s2-content">
                             <div class="relative z-10 w-full max-w-7xl px-4 md:px-8 flex flex-col gap-12">
-                                <div class="border-b border-[#1d1d1f]/20 pb-8">
+                                    <div class="border-b pb-8">
                                     <div class="flex justify-between items-end mb-4">
-                                        <span class="label-text text-[#86868b]">Design Philosophy</span>
-                                        <span class="label-text text-[#86868b]">Fig. A</span>
+                                        <span class="label-text">Design Philosophy</span>
+                                        <span class="label-text">Fig. A</span>
                                     </div>
-                                    <h2 class="text-7xl md:text-9xl font-semibold tracking-tighter text-[#1d1d1f] leading-[0.9]">
+                                    <h2 class="text-7xl md:text-9xl font-semibold tracking-tighter leading-[0.9]">
                                         Essentialism.
                                     </h2>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-start">
                                     <div>
-                                        <p class="text-3xl md:text-4xl font-medium leading-tight text-[#1d1d1f] tracking-tight">
-                                            We believe in the power of restraint. By removing the non-essential, we amplify what remains.
+                                        <p class="text-3xl md:text-4xl font-medium leading-tight tracking-tight">
+                                            Sample text provides enough length to demonstrate this animated content layout.
                                         </p>
                                     </div>
-                                    <div class="flex flex-col gap-6 text-[#1d1d1f]/80 text-lg leading-relaxed font-normal">
+                                    <div class="flex flex-col gap-6 text-lg leading-relaxed font-normal">
                                         <p>
-                                            Every element on the screen must serve a distinct purpose. Decoration is distraction. We strip away the layers of noise to reveal the core function, ensuring that the user's focus is never divided.
+                                            Sample text provides enough length to demonstrate this animated content layout.
                                         </p>
                                         <p>
-                                            This is not minimalism for the sake of style, but for the sake of clarity. It is an intentional curation of experience where typography becomes the interface itself.
+                                            Sample text provides enough length to demonstrate this animated content layout.
                                         </p>
                                         <div class="mt-6 flex items-center gap-3 opacity-60">
-                                            <div class="w-8 h-px bg-[#1d1d1f]"></div>
+                                            <div class="w-8 h-px"></div>
                                             <span class="text-xs font-bold uppercase tracking-wider">Read the Manifesto</span>
                                         </div>
                                     </div>
@@ -79,7 +79,7 @@ Three editorial slides sequence through a sticky viewport as the user scrolls â€
                                 </div>
                             </interact-element>
                             <interact-element data-interact-key="col-2">
-                                <div class="typo-col" style="border-top-color: #86868b;">
+                                <div class="typo-col">
                                     <div class="col-number">02</div>
                                     <div>
                                         <div class="col-title">Scale</div>
@@ -88,7 +88,7 @@ Three editorial slides sequence through a sticky viewport as the user scrolls â€
                                 </div>
                             </interact-element>
                             <interact-element data-interact-key="col-3">
-                                <div class="typo-col" style="border-top-color: #d2d2d7;">
+                                <div class="typo-col">
                                     <div class="col-number">03</div>
                                     <div>
                                         <div class="col-title">Space</div>
@@ -105,8 +105,8 @@ Three editorial slides sequence through a sticky viewport as the user scrolls â€
     </div>
 </interact-element>
 
-<footer class="h-[50vh] bg-white flex items-center justify-center border-t border-[#d2d2d7]">
-    <p class="label-text text-[#86868b]">End of Sequence</p>
+<footer class="h-[50vh] flex items-center justify-center border-t">
+    <p class="label-text">End of Sequence</p>
 </footer>
 ```
 
@@ -117,11 +117,6 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    background-color: #000;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    color: #1d1d1f;
 }
 
 .slides-stack {
@@ -129,7 +124,6 @@ body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    background-color: #000;
     perspective: 1000px;
 }
 
@@ -147,8 +141,6 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #000;
-    color: #f5f5f7;
 }
 
 .mega-text {
@@ -160,8 +152,6 @@ body {
 
 .slide-2 {
     z-index: 2;
-    background: #f5f5f7;
-    box-shadow: -40px 0 80px rgba(0,0,0,0.4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -176,7 +166,6 @@ body {
     right: -5%;
     font-size: 35vw;
     font-weight: 700;
-    color: #ffffff;
     line-height: 1;
     z-index: 0;
     pointer-events: none;
@@ -185,8 +174,7 @@ body {
 
 .slide-3 {
     z-index: 2;
-    background: #ffffff;
-    border-left: 1px solid #d2d2d7;
+    border-left: 1px solid;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -205,12 +193,11 @@ body {
 .typo-col {
     flex: 1;
     height: 100%;
-    border-top: 1px solid #1d1d1f;
+    border-top: 1px solid;
     padding-top: 2rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: transparent;
     transition: transform 0.3s ease;
 }
 
@@ -233,17 +220,16 @@ body {
     line-height: 1.5;
     font-weight: 400;
     max-width: 240px;
-    color: #86868b;
 }
 
 .label-text {
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     opacity: 0.7;
 }
+
 ```
 
 ## Interact config

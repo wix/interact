@@ -40,7 +40,7 @@ A hero image animates through a 3D perspective rotation and scale as the user sc
       <div class="content-panel">
         <div class="panel-left">
           <h2>Design<br><span>Without</span> Limits</h2>
-          <p>Scroll to warp reality — where dimension, color, and motion collapse into a single cinematic breath.</p>
+          <p>Sample text provides enough length to demonstrate this animated content layout.</p>
         </div>
         <div class="panel-right">
           <a href="#" class="cta">Launch Experience →</a>
@@ -73,14 +73,8 @@ A hero image animates through a 3D perspective rotation and scale as the user sc
   --scroll-height: 520vh;
 }
 
-html, body {
-  background: #000;
-}
-
 body {
   margin: 0;
-  color: #fff;
-  font-family: 'Outfit', sans-serif;
   overflow-x: clip;
 }
 
@@ -123,7 +117,6 @@ interact-element { display: contents; }
   position: absolute;
   inset: 0;
   overflow: clip;
-  background: #000;
 }
 
 .giant-type {
@@ -138,7 +131,6 @@ interact-element { display: contents; }
 }
 
 .giant-type h1 {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: var(--type-size);
   font-weight: 400;
   line-height: 0.85;
@@ -147,10 +139,6 @@ interact-element { display: contents; }
   padding: 0 var(--space-x);
   width: 100%;
   max-width: 100%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
   transform-origin: center center;
 }
 
@@ -191,7 +179,6 @@ interact-element { display: contents; }
   font-size: var(--brand-size);
   letter-spacing: clamp(0.28em, 1.2vw, 0.4em);
   text-transform: uppercase;
-  color: rgba(255,255,255,0.45);
 }
 
 .content-panel {
@@ -212,7 +199,6 @@ interact-element { display: contents; }
 }
 
 .panel-left h2 {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: var(--heading-size);
   font-weight: 400;
   line-height: 0.95;
@@ -220,15 +206,10 @@ interact-element { display: contents; }
   margin: 0 0 clamp(0.5rem, 2vw, 0.75rem);
 }
 
-.panel-left h2 span {
-  color: #fff;
-}
-
 .panel-left p {
   font-size: var(--body-size);
   font-weight: 300;
   line-height: 1.75;
-  color: rgba(255,255,255,0.55);
   max-width: min(22rem, 100%);
   margin: 0;
 }
@@ -246,22 +227,13 @@ interact-element { display: contents; }
   gap: clamp(0.4rem, 1.5vw, 0.6rem);
   min-height: 2.75rem;
   padding: clamp(0.75rem, 2vw, 0.9rem) clamp(1.25rem, 4vw, 1.8rem);
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid;
   border-radius: 999px;
-  color: #fff;
   font-size: var(--cta-size);
   letter-spacing: clamp(0.12em, 0.4vw, 0.18em);
   text-transform: uppercase;
-  text-decoration: none;
-  backdrop-filter: blur(12px);
-  background: rgba(255,255,255,0.05);
-  transition: border-color 0.3s, background 0.3s;
+  transition: border-color 0.3s;
   white-space: nowrap;
-}
-
-.cta:hover {
-  border-color: #ff006e;
-  background: rgba(255, 0, 110, 0.12);
 }
 
 .giant-type h1,
@@ -354,6 +326,7 @@ interact-element { display: contents; }
     gap: 0.75rem;
   }
 }
+
 ```
 
 ## Interact config

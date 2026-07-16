@@ -10,19 +10,19 @@ Full-screen background images cycle in every 2 seconds with a scale-from-zero en
 <div id="collage-container">
   <interact-element data-interact-key="collage-fragment-wrapper" class="collage-fragment-wrapper">
     <div class="fragment">
-      <div class="content-image" style="background-image: url('')"></div>
+      <div class="content-image"></div>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="collage-fragment-wrapper" class="collage-fragment-wrapper">
     <div class="fragment">
-      <div class="content-image" style="background-image: url('')"></div>
+      <div class="content-image"></div>
     </div>
   </interact-element>
 
   <interact-element data-interact-key="collage-fragment-wrapper" class="collage-fragment-wrapper">
     <div class="fragment">
-      <div class="content-image" style="background-image: url('')"></div>
+      <div class="content-image"></div>
     </div>
   </interact-element>
 
@@ -48,8 +48,6 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #000;
-  font-family: 'Inter', sans-serif;
 }
 
 #collage-container {
@@ -70,15 +68,11 @@ interact-element {
   height: 100%;
   left: 0;
   top: 0;
-  background-color: #111;
 }
 
 .fragment .content-image {
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
 }
 
 .text-overlay {
@@ -87,9 +81,7 @@ interact-element {
   left: 0;
   padding: max(20px, 4vw);
   box-sizing: border-box;
-  color: #fff;
   opacity: 0;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
   z-index: 5;
 }
 

@@ -49,19 +49,19 @@ A tall "About Us" section where the background flips from white to black mid-scr
     <div class="text-layer">
       <interact-element data-interact-key="text1">
         <div class="small-text-left">
-          <p>What started as a small idea in a cramped studio apartment has grown into something we never could have imagined.</p>
+          <p>Sample text provides enough length to demonstrate this animated content layout.</p>
         </div>
       </interact-element>
 
       <interact-element data-interact-key="text2">
         <div class="small-text-right">
-          <p>Founded in 2012, our company was born out of a simple belief: that great design and thoughtful technology could reshape the way people experience everyday life.</p>
+          <p>Sample text provides enough length to demonstrate this animated content layout.</p>
         </div>
       </interact-element>
 
       <interact-element data-interact-key="big-text">
         <div class="big-text-area">
-          <p>In those early days, it was just three of us — sketching wireframes on napkins, debating pixels over cold coffee, and chasing a vision that most people said was too ambitious. We didn't have investors or a roadmap. What we had was conviction.</p>
+          <p>Sample text provides enough length to demonstrate this animated content layout.</p>
         </div>
       </interact-element>
     </div>
@@ -74,13 +74,6 @@ A tall "About Us" section where the background flips from white to black mid-scr
 
 ```css
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-    font-family: 'Vend Sans', sans-serif;
-    background: #ffffff;
-    color: #000000;
-    -webkit-font-smoothing: antialiased;
-}
 
 interact-element { display: block; }
 
@@ -106,7 +99,6 @@ interact-element[data-interact-key="big-text"] {
 .bg-layer {
     position: absolute;
     inset: 0;
-    background-color: #ffffff;
 }
 
 .img-pos {
@@ -133,7 +125,6 @@ interact-element[data-interact-key="big-text"] {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.18);
 }
 
 .img-inner {
@@ -196,7 +187,6 @@ interact-element[data-interact-key="big-text"] {
 }
 
 .big-text-area p {
-    font-family: 'Vend Sans', sans-serif;
     font-size: clamp(1.9rem, 4.2vw, 3.6rem);
     font-weight: 400;
     line-height: 1.18;

@@ -43,12 +43,10 @@ Each word in a sticky text block fades, rises, and unblurs into view one by one 
 ## Essential styles
 
 ```css
-::-webkit-scrollbar { width: 0px; background: transparent; }
+::-webkit-scrollbar { width: 0px; }
 body {
   -ms-overflow-style: none;
   scrollbar-width: none;
-  background: #000;
-  color: #fff;
   min-height: 100vh;
   margin: 0;
 }
@@ -58,7 +56,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
 }
 
 .scroll-track {
@@ -81,13 +78,10 @@ body {
 }
 
 .text-content {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   line-height: 1.2;
-  font-kerning: none;
 }
 
 .eyebrow {
-  color: #60a5fa;
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.1em;

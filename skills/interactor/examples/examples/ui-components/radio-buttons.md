@@ -1,6 +1,6 @@
 # Radio Buttons
 
-A radio button group where clicking a button springs the selection dot in with a bouncy keyframe animation, and hovering scales the indicator ring while brightening the label.
+A radio button group where clicking a button springs the selection dot in with a bouncy keyframe animation, and hovering scales the indicator.
 
 **Tags:** click, hover, transform, scale, flex, list
 
@@ -8,7 +8,7 @@ A radio button group where clicking a button springs the selection dot in with a
 
 ```html
 <div class="radio-group" role="radiogroup" aria-label="Notification preferences">
-  <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:300;color:#ffd78266;letter-spacing:0.08em;text-transform:uppercase;padding:0 4px 10px;">Notifications</span>
+  <span style="font-size:12px;font-weight:300;letter-spacing:0.08em;text-transform:uppercase;padding:0 4px 10px">Notifications</span>
   <interact-element data-interact-key="radio-1">
     <button type="button" class="radio-btn selected" role="radio" aria-checked="true">
       <div class="radio-indicator">
@@ -74,8 +74,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0b0b0b;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 24px;
 }
 
@@ -93,26 +91,17 @@ body {
   width: 100%;
   padding: 15px 4px;
   border: none;
-  background: transparent;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
   outline: none;
 }
 
 .radio-btn:focus-visible {
-  box-shadow: 0 0 0 2px #ffd782;
   border-radius: 8px;
 }
 
 .radio-btn .label {
   font-size: 17px;
   font-weight: 400;
-  color: #a3a3a3;
-  transition: color 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.radio-btn.selected .label {
-  color: #ffd782;
 }
 
 .radio-indicator {
@@ -128,13 +117,9 @@ body {
 .radio-indicator .ring {
   position: absolute;
   inset: 0;
-  border: 1.5px solid #ffd78225;
+  border: 1.5px solid;
   border-radius: 50%;
   transition: border-color 0.75s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.radio-btn.selected .radio-indicator .ring {
-  border-color: #ffd782;
 }
 
 .radio-indicator .ring-svg {
@@ -148,7 +133,7 @@ body {
 
 .radio-indicator .ring-svg circle {
   fill: none;
-  stroke: #ffd782;
+  stroke: currentColor;
   stroke-width: 1.5;
   stroke-dasharray: 63;
   stroke-dashoffset: 63;
@@ -163,7 +148,6 @@ body {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #ffd782;
   transform: scale(0);
   transform-origin: center;
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
@@ -176,6 +160,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .label, .ring, .ring-svg circle, .dot { transition: none !important; }
 }
+
 ```
 
 ## Interact config
@@ -200,24 +185,6 @@ const keys = ['radio-1', 'radio-2', 'radio-3', 'radio-4', 'radio-5'];
       easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
       fill: 'none'
     },
-    'hover-label': {
-      transition: {
-        duration: 250,
-        easing: 'ease-out',
-        styleProperties: [
-          { name: 'color', value: '#d4d4d8' }
-        ]
-      }
-    },
-    'hover-ring': {
-      transition: {
-        duration: 250,
-        easing: 'ease-out',
-        styleProperties: [
-          { name: 'border-color', value: '#ffd78250' }
-        ]
-      }
-    },
     'hover-indicator': {
       transition: {
         duration: 250,
@@ -234,8 +201,6 @@ const keys = ['radio-1', 'radio-2', 'radio-3', 'radio-4', 'radio-5'];
         key,
         trigger: 'hover',
         effects: [
-          { selector: '.label', effectId: 'hover-label', stateAction: 'toggle' },
-          { selector: '.ring', effectId: 'hover-ring', stateAction: 'toggle' },
           { selector: '.radio-indicator', effectId: 'hover-indicator', stateAction: 'toggle' }
         ]
       },

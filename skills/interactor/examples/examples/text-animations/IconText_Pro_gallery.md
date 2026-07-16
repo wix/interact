@@ -21,7 +21,7 @@ On hover, each narrow card in a horizontal flex gallery expands its width, the c
             <div class="feature-text-group">
                 <p class="feature-bottom-subtitle">Monolithic Peaks</p>
                 <h2 class="feature-bottom-title">The High Alps</h2>
-                <p class="feature-description">Experience the sheer scale of the mountains. A minimalist journey through the highest reaches of the world, redefined in shadows and unparalleled depth.</p>
+                <p class="feature-description">Sample text provides enough length to demonstrate this animated content layout.</p>
             </div>
         </div>
     </interact-element>
@@ -34,7 +34,7 @@ On hover, each narrow card in a horizontal flex gallery expands its width, the c
             <div class="feature-text-group">
                 <p class="feature-bottom-subtitle">Stark Silhouettes</p>
                 <h2 class="feature-bottom-title">Desert Sands</h2>
-                <p class="feature-description">The geometry of shadows. Discover the profound silence of the dunes where light carves paths through infinite, gray sand.</p>
+                <p class="feature-description">Sample text provides enough length to demonstrate this animated content layout.</p>
             </div>
         </div>
     </interact-element>
@@ -47,7 +47,7 @@ On hover, each narrow card in a horizontal flex gallery expands its width, the c
             <div class="feature-text-group">
                 <p class="feature-bottom-subtitle">Natural Textures</p>
                 <h2 class="feature-bottom-title">Wild Forests</h2>
-                <p class="feature-description">A symphony of form and organic growth. Navigate the intricate patterns of nature's most pure ecosystems.</p>
+                <p class="feature-description">Sample text provides enough length to demonstrate this animated content layout.</p>
             </div>
         </div>
     </interact-element>
@@ -60,7 +60,7 @@ On hover, each narrow card in a horizontal flex gallery expands its width, the c
             <div class="feature-text-group">
                 <p class="feature-bottom-subtitle">Timeless Tides</p>
                 <h2 class="feature-bottom-title">Deep Waters</h2>
-                <p class="feature-description">The relentless motion of the sea. Explore where the infinite ocean crashes against the stoic architecture of the rocky coast.</p>
+                <p class="feature-description">Sample text provides enough length to demonstrate this animated content layout.</p>
             </div>
         </div>
     </interact-element>
@@ -73,7 +73,7 @@ On hover, each narrow card in a horizontal flex gallery expands its width, the c
             <div class="feature-text-group">
                 <p class="feature-bottom-subtitle">Urban Density</p>
                 <h2 class="feature-bottom-title">Steel Grids</h2>
-                <p class="feature-description">The infrastructure of progress. A detailed study of angles and perspectives in the heart of the modern metropolitan landscape.</p>
+                <p class="feature-description">Sample text provides enough length to demonstrate this animated content layout.</p>
             </div>
         </div>
     </interact-element>
@@ -87,23 +87,18 @@ On hover, each narrow card in a horizontal flex gallery expands its width, the c
 :root {
     --panel-default-width: 180px;
     --panel-open-width: 700px;
-    --panel-speed: 1;
 }
 
 html {
     overflow-x: hidden;
     margin: 0;
     padding: 0;
-    -webkit-font-smoothing: antialiased;
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: #000000;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    color: #ffffff;
 }
 
 .gallery-header {
@@ -117,7 +112,6 @@ body {
     font-size: 2.5rem;
     font-weight: 700;
     letter-spacing: -0.03em;
-    color: #ffffff !important;
 }
 
 .feature-container {
@@ -143,13 +137,11 @@ interact-element {
         overflow: hidden;
         position: relative;
         z-index: 1;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
         border-radius: 2.2rem;
         display: flex;
         flex-direction: column;
         align-items: flex-start;
         justify-content: flex-start;
-        background-color: #f5f5f7;
         box-sizing: border-box;
     }
 
@@ -170,7 +162,6 @@ interact-element {
 .feature-bottom-subtitle {
     font-size: 0.75rem;
     font-weight: 700;
-    color: rgba(0, 0, 0, 0.45);
     text-transform: uppercase;
     letter-spacing: 0.15em;
     margin-bottom: 0.5rem;
@@ -179,7 +170,6 @@ interact-element {
 .feature-bottom-title {
     font-size: 2rem;
     font-weight: 700;
-    color: #1d1d1f;
     margin-bottom: 0.75rem;
     letter-spacing: -0.02em;
     line-height: 1.1;
@@ -188,7 +178,6 @@ interact-element {
 .feature-description {
     font-size: 1rem;
     font-weight: 400;
-    color: rgba(0, 0, 0, 0.6);
     line-height: 1.5;
     max-width: 100%;
 }
@@ -196,7 +185,6 @@ interact-element {
 .feature-icon {
     width: 42px;
     height: 42px;
-    color: #1d1d1f;
 }
 
 @media (min-width: 769px) {
@@ -240,8 +228,6 @@ interact-element {
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #f5f5f7;
-        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
     }
 
     .icon-wrapper {

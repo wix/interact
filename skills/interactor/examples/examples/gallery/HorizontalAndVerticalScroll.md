@@ -8,7 +8,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
 
 ```html
 <interact-element data-interact-key="#scroll-section">
-  <section id="scroll-section" class="relative" style="height: 900vh;">
+  <section id="scroll-section" class="relative" style="height: 900vh">
 
     <div class="sticky-wrap">
 
@@ -16,7 +16,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
         <div id="stack" class="flex w-max">
 
           <interact-element data-interact-key="#card-1">
-            <div id="card-1" class="card relative flex flex-col justify-end text-white overflow-hidden">
+            <div id="card-1" class="card relative flex flex-col justify-end overflow-hidden">
               <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Discovery</h2>
@@ -26,7 +26,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
           </interact-element>
 
           <interact-element data-interact-key="#card-2">
-            <div id="card-2" class="card relative flex flex-col justify-end text-white overflow-hidden">
+            <div id="card-2" class="card relative flex flex-col justify-end overflow-hidden">
               <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Progression</h2>
@@ -36,7 +36,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
           </interact-element>
 
           <interact-element data-interact-key="#card-3">
-            <div id="card-3" class="card relative flex flex-col justify-end text-white overflow-hidden">
+            <div id="card-3" class="card relative flex flex-col justify-end overflow-hidden">
               <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Harmony</h2>
@@ -46,7 +46,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
           </interact-element>
 
           <interact-element data-interact-key="#card-4">
-            <div id="card-4" class="card relative flex flex-col justify-end text-white overflow-hidden">
+            <div id="card-4" class="card relative flex flex-col justify-end overflow-hidden">
               <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Energy</h2>
@@ -56,7 +56,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
           </interact-element>
 
           <interact-element data-interact-key="#card-5">
-            <div id="card-5" class="card relative flex flex-col justify-end text-white overflow-hidden">
+            <div id="card-5" class="card relative flex flex-col justify-end overflow-hidden">
               <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Clarity</h2>
@@ -66,7 +66,7 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
           </interact-element>
 
           <interact-element data-interact-key="#card-6">
-            <div id="card-6" class="card relative flex flex-col justify-end text-white overflow-hidden">
+            <div id="card-6" class="card relative flex flex-col justify-end overflow-hidden">
               <img src="">
               <div class="card-content p-6 md:p-8">
                 <h2 class="text-3xl md:text-4xl font-bold">Finale</h2>
@@ -94,12 +94,6 @@ Six image cards rise up from below the viewport in a staggered sequence as the u
     --hvs-radius: 16;
 }
 
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #f8f9fa;
-    color: #1a202c;
-}
-
 html {
     scroll-behavior: smooth;
 }
@@ -119,7 +113,7 @@ html {
 .card {
     transform: translateY(100vh);
     will-change: transform;
-    border: 1px solid #e2e8f0;
+    border: 1px solid;
     width: 80vw;
     height: calc(var(--hvs-card-h) * 1vh);
     border-radius: calc(var(--hvs-radius) * 1px);
@@ -144,8 +138,8 @@ html {
 .card .card-content {
     position: relative;
     z-index: 2;
-    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
 }
+
 ```
 
 ## Interact config

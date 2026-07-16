@@ -1,6 +1,6 @@
 # Column Squeeze Reveal
 
-A sticky two-column layout where scrolling squeezes the dark left text column from 22vw to 9vw, scales the rotated hero typography down, and simultaneously zooms the full-bleed background image — together revealing progressively more of the photograph behind.
+A sticky two-column layout where scrolling squeezes the left text column from 22vw to 9vw, scales the rotated hero typography down, and simultaneously zooms the full-bleed background image.
 
 **Tags:** viewProgress, sticky, transform, scale, reveal, parallax
 
@@ -19,7 +19,7 @@ A sticky two-column layout where scrolling squeezes the dark left text column fr
     <interact-element data-interact-key="left-col" class="left-col">
       <div class="left-inner">
         <div class="elegant-blurb">
-          <p>Every wall holds a quiet conversation between shadow and intention. Spaces designed not to be filled, but to breathe, to let the light in and shape the silence around us.</p>
+          <p>Sample text provides enough length to demonstrate this animated content layout.</p>
         </div>
         <interact-element data-interact-key="hero-text" class="hero-text-wrap">
           <div class="hero-text-inner">
@@ -57,14 +57,6 @@ html, body {
   overflow-x: clip;
 }
 
-body {
-  background: #0a0a0a;
-  color: #fff;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 .scroll-driver {
   height: 300vh;
 }
@@ -87,13 +79,11 @@ body {
   z-index: 2;
   overflow: clip;
   padding-right: 12px;
-  background: #0a0a0a;
 }
 
 .left-inner {
   width: 22vw;
   height: 100%;
-  background: #0a0a0a;
   position: relative;
   overflow: clip;
 }
@@ -107,11 +97,9 @@ body {
 }
 
 .elegant-blurb p {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: clamp(0.62rem, 0.78vw, 0.75rem);
   font-weight: 300;
   line-height: 1.8;
-  color: #fff;
   letter-spacing: 0.01em;
   text-wrap: pretty;
 }
@@ -132,13 +120,11 @@ body {
 .hero-word {
   position: absolute;
   bottom: 0;
-  font-family: 'Anton', sans-serif;
   font-weight: 400;
   text-transform: uppercase;
   white-space: nowrap;
   line-height: 0.88;
   letter-spacing: -0.01em;
-  color: #fff;
   transform-origin: left bottom;
 }
 
@@ -179,7 +165,6 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.1);
   pointer-events: none;
 }
 
@@ -197,18 +182,14 @@ body {
 }
 
 .scroll-cue-label {
-  font-family: 'Cormorant Garamond', serif;
   font-size: 0.7rem;
   font-weight: 300;
-  font-style: italic;
   letter-spacing: 0.25em;
-  color: rgba(255, 255, 255, 0.3);
 }
 
 .scroll-cue-arrow {
   width: 1px;
   height: 2rem;
-  background: linear-gradient(to bottom, rgba(201, 169, 110, 0.5), transparent);
   animation: scroll-pulse 2.2s ease-in-out infinite;
 }
 
@@ -234,14 +215,12 @@ body {
     bottom: 0;
     z-index: 2;
     padding-right: 0;
-    background: transparent;
     pointer-events: none;
   }
 
   .left-inner {
     width: 100% !important;
     height: 100%;
-    background: transparent;
   }
 
   .elegant-blurb {
@@ -253,8 +232,6 @@ body {
 
   .elegant-blurb p {
     font-size: 0.72rem;
-    color: rgba(255, 255, 255, 0.85);
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
   }
 
   .hero-word {
@@ -285,11 +262,6 @@ body {
   .hero-w2 {
     font-size: 16vw;
     line-height: 0.92;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-  }
-
-  .bg-image::after {
-    background: rgba(0, 0, 0, 0.35);
   }
 
   .scroll-cue {

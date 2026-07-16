@@ -56,16 +56,13 @@ A large headline text continuously rotates on the Y-axis in a slow idle loop whe
   </div>
 </div>
 
-<interact-element data-interact-key="scroll-observer" style="position: absolute; top: 0; left: 0; width: 100%; height: 500vh; pointer-events: none; z-index: -1;"></interact-element>
+<interact-element data-interact-key="scroll-observer" style="position: absolute;top: 0;left: 0;width: 100%;height: 500vh;pointer-events: none;z-index: -1"></interact-element>
 ```
 
 ## Essential styles
 
 ```css
 body {
-    background-color: black;
-    color: white;
-    font-family: 'Inter', sans-serif;
     margin: 0;
     overflow-x: hidden;
 }
@@ -74,7 +71,6 @@ body {
     font-size: 0.6rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: #999;
     margin-bottom: 4px;
     font-weight: 400;
 }

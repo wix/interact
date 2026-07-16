@@ -1,6 +1,6 @@
 # Window Scroll
 
-Six colored panels stacked in a sticky viewport each fly in from depth with a 3D rotateX + translateZ perspective transform, sequenced across a 1200vh scroll wrapper so each panel occupies an equal slice of the scroll range.
+Six panels stacked in a sticky viewport each fly in from depth with a 3D rotateX + translateZ perspective transform, sequenced across a 1200vh scroll wrapper so each panel occupies an equal slice of the scroll range.
 
 **Tags:** viewProgress, sticky, transform, opacity, 3d, stagger
 
@@ -50,10 +50,7 @@ Six colored panels stacked in a sticky viewport each fly in from depth with a 3D
 
 ```css
 body {
-    font-family: 'Inter', sans-serif;
     margin: 0;
-    background-color: #111827;
-    color: #f3f4f6;
     overscroll-behavior-y: none;
 }
 
@@ -100,20 +97,13 @@ body {
     padding: 2rem;
     box-sizing: border-box;
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid;
 }
-
-#panel-1 { background-color: #3b82f6; }
-#panel-2 { background-color: #10b981; }
-#panel-3 { background-color: #ef4444; }
-#panel-4 { background-color: #f59e0b; }
-#panel-5 { background-color: #8b5cf6; }
-#panel-6 { background-color: #ec4899; }
 
 interact-element {
     display: contents;
 }
+
 ```
 
 ## Interact config

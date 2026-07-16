@@ -47,13 +47,6 @@ A sticky scroll sequence where a centered image expands from a thin horizontal s
 
 interact-element { display: block; }
 
-body {
-  background: #000;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
 body::after {
   content: '';
   position: fixed;
@@ -61,7 +54,6 @@ body::after {
   z-index: 9999;
   pointer-events: none;
   opacity: 0.045;
-  background-image: url('');
 }
 
 .sticky-track {
@@ -93,12 +85,10 @@ body::after {
 }
 
 .title-area h1 {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(5rem, 16vw, 15rem);
   font-weight: 400;
   line-height: 0.85;
   letter-spacing: 0.1em;
-  color: #fff;
 }
 
 .title-area .letter {
@@ -121,7 +111,6 @@ body::after {
   font-weight: 300;
   text-transform: uppercase;
   letter-spacing: 0.3em;
-  color: #fff;
   line-height: 2.4;
 }
 
@@ -145,7 +134,6 @@ body::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.12);
   pointer-events: none;
   z-index: 2;
 }

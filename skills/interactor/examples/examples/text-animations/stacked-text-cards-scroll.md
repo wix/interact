@@ -29,7 +29,7 @@ Four sticky content cards stack on top of each other as the user scrolls, each n
         <span class="label">Step 01</span>
         <h2>Design</h2>
         <p class="subtitle">Every great product begins with intention</p>
-        <p class="body">The first card anchors in place. As you scroll, each new card will stack on top, creating a layered experience that guides the eye.</p>
+        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
       </div>
     </interact-element>
   </div>
@@ -48,7 +48,7 @@ Four sticky content cards stack on top of each other as the user scrolls, each n
         <span class="label">Step 02</span>
         <h2>Build</h2>
         <p class="subtitle">Craft with precision and care</p>
-        <p class="body">This card scrolls in and stops directly on top of the first. The stacking creates depth and draws attention to the journey.</p>
+        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
       </div>
     </interact-element>
   </div>
@@ -68,7 +68,7 @@ Four sticky content cards stack on top of each other as the user scrolls, each n
         <span class="label">Step 03</span>
         <h2>Launch</h2>
         <p class="subtitle">Bring your vision to the world</p>
-        <p class="body">Three cards now stacked. Each layer represents a phase of the process, building toward the final result.</p>
+        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
       </div>
     </interact-element>
   </div>
@@ -87,7 +87,7 @@ Four sticky content cards stack on top of each other as the user scrolls, each n
         <span class="label">Step 04</span>
         <h2>Complete</h2>
         <p class="subtitle">All layers aligned, scroll ends here</p>
-        <p class="body">The full stack is now visible. Four cards, one story. This is where the scroll stops and the experience concludes.</p>
+        <p class="body">Sample text provides enough length to demonstrate this animated content layout.</p>
       </div>
     </interact-element>
   </div>
@@ -102,11 +102,7 @@ Four sticky content cards stack on top of each other as the user scrolls, each n
 interact-element { display: block; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', sans-serif;
-  background: #f5f5f7;
-  color: #1d1d1f;
   overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
 }
 
 .hero {
@@ -124,7 +120,6 @@ body {
 }
 
 .hero h1 {
-  font-family: 'DM Serif Display', Georgia, serif;
   font-size: clamp(2.75rem, 6vw, 4.25rem);
   font-weight: 400;
   letter-spacing: -0.02em;
@@ -133,7 +128,6 @@ body {
 }
 
 .hero p {
-  color: #6e6e73;
   font-size: 1.2rem;
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -170,7 +164,6 @@ body {
 .card {
   width: 72vh;
   aspect-ratio: 4 / 3.2;
-  background: #fff;
   border-radius: 36px;
   padding: 4rem 3.5rem;
   display: flex;
@@ -178,7 +171,6 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04), 0 48px 160px rgba(0,0,0,0.08);
 }
 
 .card-icon {
@@ -188,14 +180,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%);
   border-radius: 18px;
 }
 
 .card-icon svg {
   width: 28px;
   height: 28px;
-  color: #1d1d1f;
 }
 
 .card .label {
@@ -203,12 +193,10 @@ body {
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #86868b;
   margin-bottom: 1rem;
 }
 
 .card h2 {
-  font-family: 'DM Serif Display', Georgia, serif;
   font-size: 2.75rem;
   font-weight: 400;
   letter-spacing: -0.02em;
@@ -217,7 +205,6 @@ body {
 }
 
 .card .subtitle {
-  color: #1d1d1f;
   font-size: 1.2rem;
   font-weight: 500;
   line-height: 1.5;
@@ -226,7 +213,6 @@ body {
 }
 
 .card .body {
-  color: #6e6e73;
   font-size: 1rem;
   line-height: 1.7;
   font-weight: 400;

@@ -52,13 +52,6 @@ A sticky hero section where the title and text columns fade up on view enter, wh
 
 interact-element { display: block; }
 
-body {
-  background: #000;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
 body::after {
   content: '';
   position: fixed;
@@ -66,7 +59,6 @@ body::after {
   z-index: 9999;
   pointer-events: none;
   opacity: 0.045;
-  background-image: url('');
 }
 
 .sticky-track {
@@ -90,19 +82,16 @@ body::after {
 }
 
 .title-area h1 {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(6rem, 18vw, 16rem);
   font-weight: 400;
   line-height: 0.85;
   letter-spacing: 0.03em;
-  color: #fff;
 }
 
 .title-area h1 sup {
   font-size: 0.12em;
   vertical-align: super;
   letter-spacing: 0;
-  font-family: 'Inter', sans-serif;
   font-weight: 300;
 }
 
@@ -128,7 +117,6 @@ body::after {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.4);
 }
 
 .image-wrap {
@@ -151,7 +139,6 @@ body::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.15);
   pointer-events: none;
 }
 

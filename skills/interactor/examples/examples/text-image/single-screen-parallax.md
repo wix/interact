@@ -25,7 +25,7 @@ A sticky scroll section where a giant background headline translates horizontall
         </div>
       </interact-element>
 
-      <p class="bg-text-sub">A curated home for print, sound, and culture — independent books, audiobooks, apparel, and community programs rooted in care, resistance, and the work of building what comes next.</p>
+      <p class="bg-text-sub">Sample text provides enough length to demonstrate this animated content layout.</p>
 
       <main class="hero-main">
         <interact-element data-interact-key="hero-image">
@@ -49,9 +49,6 @@ A sticky scroll section where a giant background headline translates horizontall
 html, body {
   margin: 0;
   padding: 0;
-  background: #151515;
-  color: #111;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   overflow-x: clip;
 }
 
@@ -65,7 +62,6 @@ interact-element { display: contents; }
   height: 100dvh;
   min-height: 100vh;
   overflow: clip;
-  background: #151515;
 }
 
 .site-header {
@@ -78,8 +74,7 @@ interact-element { display: contents; }
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 1rem;
-  background: #e4fc3a;
-  border-bottom: 2px solid #000;
+  border-bottom: 2px solid;
 }
 
 .header-block {
@@ -98,7 +93,6 @@ interact-element { display: contents; }
 .search-dot {
   width: 0.75rem;
   height: 0.75rem;
-  background: #000;
   flex-shrink: 0;
 }
 
@@ -109,11 +103,6 @@ interact-element { display: contents; }
   align-items: center;
   gap: 1rem;
   font-size: 15px;
-}
-
-.site-nav a {
-  color: #111;
-  text-decoration: none;
 }
 
 .bg-text-layer {
@@ -132,7 +121,6 @@ interact-element { display: contents; }
   font-size: min(50vw, 780px);
   font-weight: 900;
   line-height: 1;
-  color: #fff;
   opacity: 0.95;
   letter-spacing: -0.02em;
   white-space: nowrap;
@@ -148,11 +136,9 @@ interact-element { display: contents; }
   z-index: 21;
   max-width: 34rem;
   margin: 0;
-  color: rgba(255, 255, 255, 0.55);
   font-size: clamp(0.6875rem, 1.15vw, 0.8125rem);
   line-height: 1.9;
   letter-spacing: 0.22em;
-  font-variant: small-caps;
   text-transform: lowercase;
   pointer-events: none;
 }
@@ -179,7 +165,6 @@ interact-element { display: contents; }
   max-width: 720px;
   aspect-ratio: 4 / 3;
   overflow: clip;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -208,6 +193,7 @@ interact-element { display: contents; }
     bottom: 1.25rem;
   }
 }
+
 ```
 
 ## Interact config

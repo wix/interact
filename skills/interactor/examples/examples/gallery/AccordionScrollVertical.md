@@ -62,14 +62,10 @@ Each panel in a vertical stack expands its height and reveals an overlay text la
 ```css
 :root {
   --panel-default-height: 20vh;
-  --panel-open-height: 50vh;
-  --panel-speed: 1;
   --panel-gap: 1.5rem;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: #ffffff;
   overscroll-behavior-y: contain;
   min-height: 100vh;
   display: flex;
@@ -92,7 +88,6 @@ body {
   position: relative;
   z-index: 1;
   cursor: pointer;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
   border-radius: 1rem;
 }
 
@@ -109,7 +104,6 @@ body {
   opacity: 0;
   transform: translateY(20px);
   z-index: 10;
-  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.6);
   line-height: 1.2;
   user-select: none;
   pointer-events: none;
@@ -118,14 +112,12 @@ body {
 .feature-bottom-subtitle {
   font-size: 0.875rem;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.9);
   white-space: nowrap;
 }
 
 .feature-bottom-title {
   font-size: 1.875rem;
   font-weight: 700;
-  color: white;
   white-space: nowrap;
 }
 
