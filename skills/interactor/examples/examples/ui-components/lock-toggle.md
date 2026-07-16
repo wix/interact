@@ -1,0 +1,272 @@
+# Lock Toggle
+
+A pill-shaped toggle button animates on click, sliding the thumb across the track, swapping background colors, and transitioning the icon face and label text between locked and unlocked states.
+
+**Tags:** click, toggle, opacity, transform, flex
+
+## Markup
+
+```html
+<interact-element data-interact-key="toggle-btn">
+  <div class="toggle-group">
+    <button
+      type="button"
+      class="toggle-track"
+      aria-pressed="false"
+      aria-label="Toggle availability"
+    >
+      <interact-element data-interact-key="slider">
+        <div class="slider">
+          <div class="icon-stack">
+            <span class="face-icon icon-happy">
+              <svg
+                viewBox="6 6 12 12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.3" />
+                <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.3" />
+              </svg>
+            </span>
+            <span class="face-icon icon-sad">
+              <svg
+                viewBox="6 6 12 12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
+                <line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.3" />
+                <line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.3" />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </interact-element>
+    </button>
+    <div class="label-container">
+      <span class="toggle-label label-available">Unavailable</span>
+      <span class="toggle-label label-unavailable">Available</span>
+    </div>
+  </div>
+</interact-element>
+```
+
+## Essential styles
+
+```css
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+interact-element {
+  display: contents;
+}
+
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.toggle-track {
+  position: relative;
+  width: 100px;
+  height: 50px;
+  border-radius: 9999px;
+  border: 1px solid;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.slider {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  right: 57px;
+  border-radius: 9999px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-stack {
+  position: relative;
+  width: 22px;
+  height: 22px;
+}
+
+.face-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.face-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.icon-happy {
+  opacity: 0;
+}
+
+.label-container {
+  display: grid;
+  overflow: hidden;
+}
+
+.toggle-label {
+  grid-area: 1 / 1;
+  font-weight: 300;
+  font-size: 20px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.label-unavailable {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slider,
+  .toggle-track,
+  .toggle-label {
+    transition: none !important;
+  }
+}
+```
+
+## Interact config
+
+```js
+{
+  effects: {
+    'slider-move': {
+      keyframeEffect: {
+        name: 'slider-move',
+        keyframes: [
+          { left: '5px', right: '57px', offset: 0 },
+          { left: '5px', right: '44px', offset: 0.12 },
+          { left: '44px', right: '5px', offset: 0.88 },
+          { left: '57px', right: '5px', offset: 1 }
+        ]
+      },
+      duration: 500,
+      easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+      fill: 'both'
+    },
+    'slider-bg': {
+      keyframeEffect: {
+        name: 'slider-bg',
+        keyframes: [
+          { backgroundColor: '#FFD882', offset: 0 },
+          { backgroundColor: '#000000', offset: 1 }
+        ]
+      },
+      duration: 500,
+      easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      fill: 'both'
+    },
+    'track-bg': {
+      keyframeEffect: {
+        name: 'track-bg',
+        keyframes: [
+          { backgroundColor: '#000000', offset: 0 },
+          { backgroundColor: '#FFD882', offset: 1 }
+        ]
+      },
+      duration: 500,
+      easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      fill: 'both'
+    },
+    'icon-happy': {
+      keyframeEffect: {
+        name: 'icon-happy',
+        keyframes: [
+          { opacity: 0, offset: 0 },
+          { opacity: 1, offset: 1 }
+        ]
+      },
+      duration: 400,
+      easing: 'ease',
+      fill: 'both'
+    },
+    'icon-sad': {
+      keyframeEffect: {
+        name: 'icon-sad',
+        keyframes: [
+          { opacity: 1, offset: 0 },
+          { opacity: 0, offset: 1 }
+        ]
+      },
+      duration: 400,
+      easing: 'ease',
+      fill: 'both'
+    },
+    'label-avail': {
+      keyframeEffect: {
+        name: 'label-avail',
+        keyframes: [
+          { opacity: 1, transform: 'translateY(0)', offset: 0 },
+          { opacity: 0, transform: 'translateY(-100%)', offset: 1 }
+        ]
+      },
+      duration: 400,
+      easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+      fill: 'both'
+    },
+    'label-unavail': {
+      keyframeEffect: {
+        name: 'label-unavail',
+        keyframes: [
+          { opacity: 0, transform: 'translateY(100%)', offset: 0 },
+          { opacity: 1, transform: 'translateY(0)', offset: 1 }
+        ]
+      },
+      duration: 400,
+      easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+      fill: 'both'
+    }
+  },
+  interactions: [
+    {
+      key: 'toggle-btn',
+      trigger: 'click',
+      effects: [
+        { key: 'slider', effectId: 'slider-move', triggerType: 'alternate' },
+        { key: 'slider', effectId: 'slider-bg', triggerType: 'alternate' },
+        { key: 'toggle-btn', effectId: 'track-bg', selector: '.toggle-track', triggerType: 'alternate' },
+        { key: 'toggle-btn', effectId: 'icon-happy', selector: '.icon-happy', triggerType: 'alternate' },
+        { key: 'toggle-btn', effectId: 'icon-sad', selector: '.icon-sad', triggerType: 'alternate' },
+        { key: 'toggle-btn', effectId: 'label-avail', selector: '.label-available', triggerType: 'alternate' },
+        { key: 'toggle-btn', effectId: 'label-unavail', selector: '.label-unavailable', triggerType: 'alternate' }
+      ]
+    }
+  ]
+}
+```
