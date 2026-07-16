@@ -145,29 +145,23 @@ html {
 ## Interact config
 
 ```js
-const isMobile = window.innerWidth < 768;
 const numCards = 6;
 
 const root = getComputedStyle(document.documentElement);
 const gap = parseFloat(root.getPropertyValue('--hvs-gap'));
 const cardH = parseFloat(root.getPropertyValue('--hvs-card-h'));
-
-let horizontalScrollEnd;
-if (isMobile) {
-    const mobileCardW = 80;
-    const scrollVW = numCards * mobileCardW - 100;
-    const scrollGapPX = (numCards - 1) * gap;
-    horizontalScrollEnd = `translateX(calc(-${scrollVW}vw - ${scrollGapPX}px))`;
-} else {
-    const cardW = parseFloat(root.getPropertyValue('--hvs-card-w'));
-    const scrollVW = numCards * cardW - 100;
-    const scrollGapPX = (numCards - 1) * gap;
-    horizontalScrollEnd = `translateX(calc(-${scrollVW}vw - ${scrollGapPX}px))`;
-}
+const cardW = parseFloat(root.getPropertyValue('--hvs-card-w'));
+const scrollGapPX = (numCards - 1) * gap;
+const mobileScrollEnd = `translateX(calc(-${numCards * 80 - 100}vw - ${scrollGapPX}px))`;
+const desktopScrollEnd = `translateX(calc(-${numCards * cardW - 100}vw - ${scrollGapPX}px))`;
 
 const entryOffset = Math.max(cardH + 10, 100);
 
 const config = {
+    conditions: {
+        desktop: { type: 'media', predicate: '(min-width: 768px)' },
+        mobile: { type: 'media', predicate: '(max-width: 767px)' }
+    },
     interactions: [
         {
             key: '#scroll-section',
@@ -175,11 +169,27 @@ const config = {
             effects: [
                 {
                     key: '#stack',
+                    conditions: ['desktop'],
                     keyframeEffect: {
-                        name: 'stack-scroll-effect',
+                        name: 'stack-scroll-desktop',
                         keyframes: [
                             { transform: 'translateX(0vw)' },
-                            { transform: horizontalScrollEnd }
+                            { transform: desktopScrollEnd }
+                        ],
+                    },
+                    rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 50 } },
+                    rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 90 } },
+                    easing: 'linear',
+                    fill: 'both'
+                },
+                {
+                    key: '#stack',
+                    conditions: ['mobile'],
+                    keyframeEffect: {
+                        name: 'stack-scroll-mobile',
+                        keyframes: [
+                            { transform: 'translateX(0vw)' },
+                            { transform: mobileScrollEnd }
                         ],
                     },
                     rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 50 } },

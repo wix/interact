@@ -197,14 +197,16 @@ interact-element[data-interact-key="big-text"] {
 ## Interact config
 
 ```js
-const isMobile = window.matchMedia('(max-width: 768px)').matches;
-
 const cover = (s, e) => ({
     rangeStart: { name: 'cover', offset: { value: s, unit: 'percentage' } },
     rangeEnd:   { name: 'cover', offset: { value: e, unit: 'percentage' } }
 });
 
 const config = {
+    conditions: {
+        desktop: { type: 'media', predicate: '(min-width: 769px)' },
+        mobile: { type: 'media', predicate: '(max-width: 768px)' }
+    },
     interactions: [
         {
             key: 'section',
@@ -320,9 +322,10 @@ const config = {
                 },
                 {
                     key: 'img4',
+                    conditions: ['mobile'],
                     keyframeEffect: {
-                        name: 'p4',
-                        keyframes: isMobile ? [
+                        name: 'p4-mobile',
+                        keyframes: [
                             { opacity: 0, transform: 'translateY(300vh)',  offset: 0 },
                             { opacity: 0, transform: 'translateY(300vh)',  offset: 0.54 },
                             { opacity: 0, transform: 'translateY(262vh)',  offset: 0.65 },
@@ -330,7 +333,17 @@ const config = {
                             { opacity: 1, transform: 'translateY(245vh)',  offset: 0.70 },
                             { opacity: 1, transform: 'translateY(231vh)',  offset: 0.74 },
                             { opacity: 1, transform: 'translateY(231vh)',  offset: 1 }
-                        ] : [
+                        ]
+                    },
+                    fill: 'both',
+                    ...cover(0, 100)
+                },
+                {
+                    key: 'img4',
+                    conditions: ['desktop'],
+                    keyframeEffect: {
+                        name: 'p4-desktop',
+                        keyframes: [
                             { opacity: 0, transform: 'translateY(300vh)',  offset: 0 },
                             { opacity: 0, transform: 'translateY(300vh)',  offset: 0.54 },
                             { opacity: 0, transform: 'translateY(271vh)',  offset: 0.59 },

@@ -210,12 +210,14 @@ interact-element {
 const REVEAL_WIDTH = 125;
 const IMAGE_COUNT = 8;
 
-const isMobile = window.innerWidth < 768;
-const revealWidth = isMobile ? '25px' : REVEAL_WIDTH + 'px';
-
-const leftRevealKeyframes = [
+const desktopRevealKeyframes = [
     { maxWidth: '0px', marginRight: '0px', opacity: 0 },
-    { maxWidth: revealWidth, marginRight: '0.4em', opacity: 1 }
+    { maxWidth: REVEAL_WIDTH + 'px', marginRight: '0.4em', opacity: 1 }
+];
+
+const mobileRevealKeyframes = [
+    { maxWidth: '0px', marginRight: '0px', opacity: 0 },
+    { maxWidth: '25px', marginRight: '0.4em', opacity: 1 }
 ];
 
 const TOTAL_MASKS = 8;
@@ -244,17 +246,33 @@ for (let j = 0; j < count; j++) {
     const e = Math.round(Math.min(s + effectWidth, endCover) * 10) / 10;
     effects.push({
         key: 'mask-' + (idx + 1),
+        conditions: ['desktop'],
         fill: 'both',
         rangeStart: { name: 'cover', offset: { unit: 'percentage', value: s } },
         rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: e } },
         keyframeEffect: {
-            name: 'reveal-mask-' + (idx + 1),
-            keyframes: leftRevealKeyframes
+            name: 'reveal-mask-' + (idx + 1) + '-desktop',
+            keyframes: desktopRevealKeyframes
+        }
+    });
+    effects.push({
+        key: 'mask-' + (idx + 1),
+        conditions: ['mobile'],
+        fill: 'both',
+        rangeStart: { name: 'cover', offset: { unit: 'percentage', value: s } },
+        rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: e } },
+        keyframeEffect: {
+            name: 'reveal-mask-' + (idx + 1) + '-mobile',
+            keyframes: mobileRevealKeyframes
         }
     });
 }
 
 {
+    conditions: {
+        desktop: { type: 'media', predicate: '(min-width: 769px)' },
+        mobile: { type: 'media', predicate: '(max-width: 768px)' }
+    },
     interactions: [{
         key: 'scroll-track',
         trigger: 'viewProgress',

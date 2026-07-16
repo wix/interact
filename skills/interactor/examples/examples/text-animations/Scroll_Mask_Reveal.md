@@ -211,39 +211,54 @@ interact-element {
 ## Interact config
 
 ```js
-const isMobile = window.innerWidth < 768;
-const revealWidth = isMobile ? '25px' : '125px';
-
-const leftRevealKeyframes = [
+const desktopRevealKeyframes = [
     { maxWidth: '0px', marginRight: '0px', opacity: 0 },
-    { maxWidth: revealWidth, marginRight: '0.4em', opacity: 1 }
+    { maxWidth: '125px', marginRight: '0.4em', opacity: 1 }
 ];
 
-const createEffect = (key, startOffset, endOffset) => ({
+const mobileRevealKeyframes = [
+    { maxWidth: '0px', marginRight: '0px', opacity: 0 },
+    { maxWidth: '25px', marginRight: '0.4em', opacity: 1 }
+];
+
+const createEffect = (key, startOffset, endOffset, conditions, keyframes) => ({
     key,
+    conditions,
     fill: 'both',
     rangeStart: { name: 'cover', offset: { value: startOffset, unit: 'percentage' } },
     rangeEnd: { name: 'cover', offset: { value: endOffset, unit: 'percentage' } },
     keyframeEffect: {
-        name: `reveal-${key}`,
-        keyframes: leftRevealKeyframes
+        name: `reveal-${key}-${conditions[0]}`,
+        keyframes
     }
 });
 
 const config = {
+    conditions: {
+        desktop: { type: 'media', predicate: '(min-width: 769px)' },
+        mobile: { type: 'media', predicate: '(max-width: 768px)' }
+    },
     interactions: [
         {
             key: 'scroll-track',
             trigger: 'viewProgress',
             effects: [
-                createEffect('mask-1', 15, 25),
-                createEffect('mask-2', 23, 33),
-                createEffect('mask-3', 31, 41),
-                createEffect('mask-4', 39, 49),
-                createEffect('mask-5', 47, 57),
-                createEffect('mask-6', 55, 65),
-                createEffect('mask-7', 63, 73),
-                createEffect('mask-8', 71, 81)
+                createEffect('mask-1', 15, 25, ['desktop'], desktopRevealKeyframes),
+                createEffect('mask-2', 23, 33, ['desktop'], desktopRevealKeyframes),
+                createEffect('mask-3', 31, 41, ['desktop'], desktopRevealKeyframes),
+                createEffect('mask-4', 39, 49, ['desktop'], desktopRevealKeyframes),
+                createEffect('mask-5', 47, 57, ['desktop'], desktopRevealKeyframes),
+                createEffect('mask-6', 55, 65, ['desktop'], desktopRevealKeyframes),
+                createEffect('mask-7', 63, 73, ['desktop'], desktopRevealKeyframes),
+                createEffect('mask-8', 71, 81, ['desktop'], desktopRevealKeyframes),
+                createEffect('mask-1', 15, 25, ['mobile'], mobileRevealKeyframes),
+                createEffect('mask-2', 23, 33, ['mobile'], mobileRevealKeyframes),
+                createEffect('mask-3', 31, 41, ['mobile'], mobileRevealKeyframes),
+                createEffect('mask-4', 39, 49, ['mobile'], mobileRevealKeyframes),
+                createEffect('mask-5', 47, 57, ['mobile'], mobileRevealKeyframes),
+                createEffect('mask-6', 55, 65, ['mobile'], mobileRevealKeyframes),
+                createEffect('mask-7', 63, 73, ['mobile'], mobileRevealKeyframes),
+                createEffect('mask-8', 71, 81, ['mobile'], mobileRevealKeyframes)
             ]
         }
     ]

@@ -200,8 +200,6 @@ Cards fly through a sticky 3D stage driven by page scroll, each one sweeping in 
 ## Interact config
 
 ```js
-const isMobile = window.matchMedia("(max-width: 768px)").matches;
-
 const cardCount = 7;
 const effects = [];
 
@@ -220,8 +218,6 @@ const mobileAnimationKeyframes = [
     { offset: 0.7, transform: 'translate(-50%, -50%) translateY(-60%) translateZ(-300px) rotateX(-30deg)', opacity: 1 },
     { offset: 1,   transform: 'translate(-50%, -50%) translateY(-150%) translateZ(-900px) rotateX(-60deg)', opacity: 0 }
 ];
-
-const animationKeyframes = isMobile ? mobileAnimationKeyframes : desktopAnimationKeyframes;
 
 const titles = [
     { title: "Stellar Nurseries", subtitle: "Where Stars Are Born" },
@@ -243,9 +239,23 @@ for (let i = 1; i <= cardCount; i++) {
     effects.push({
         key: `#card-${i}`,
         keyframeEffect: {
-            name: `card-move-${i}`,
-            keyframes: animationKeyframes
+            name: `card-move-desktop-${i}`,
+            keyframes: desktopAnimationKeyframes
         },
+        conditions: ['desktop'],
+        rangeStart: { name: 'cover', offset: { unit: 'percentage', value: start * 100 } },
+        rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: end * 100 } },
+        easing: 'linear',
+        fill: 'both'
+    });
+
+    effects.push({
+        key: `#card-${i}`,
+        keyframeEffect: {
+            name: `card-move-mobile-${i}`,
+            keyframes: mobileAnimationKeyframes
+        },
+        conditions: ['mobile'],
         rangeStart: { name: 'cover', offset: { unit: 'percentage', value: start * 100 } },
         rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: end * 100 } },
         easing: 'linear',
@@ -307,6 +317,10 @@ effects.push({
 });
 
 const config = {
+    conditions: {
+        desktop: { type: 'media', predicate: '(min-width: 769px)' },
+        mobile: { type: 'media', predicate: '(max-width: 768px)' }
+    },
     interactions: [{
         key: '.sticky-wrapper',
         trigger: 'viewProgress',

@@ -188,11 +188,16 @@ body {
 ## Interact config
 
 ```js
-const desktopConfig = {
+const config = {
+    conditions: {
+        desktop: { type: 'media', predicate: '(min-width: 769px)' },
+        mobile: { type: 'media', predicate: '(max-width: 768px)' }
+    },
     interactions: [
         {
             key: '#cards-collection',
             trigger: 'hover',
+            conditions: ['desktop'],
             effects: [
                 {
                     key: '#card-1',
@@ -265,15 +270,11 @@ const desktopConfig = {
                     fill: 'both'
                 }
             ]
-        }
-    ]
-};
-
-const mobileConfig = {
-    interactions: [
+        },
         {
             key: '#cards-collection',
             trigger: 'hover',
+            conditions: ['mobile'],
             effects: [
                 {
                     key: '#card-1',
@@ -349,6 +350,4 @@ const mobileConfig = {
         }
     ]
 };
-
-const config = window.innerWidth < 768 ? mobileConfig : desktopConfig;
 ```

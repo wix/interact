@@ -211,40 +211,11 @@ const rippleSequences = (triggerType) => [
   }
 ];
 
-function getInteractions(isMobile) {
-  if (isMobile) {
-    return [
-      {
-        key: 'h1-trigger',
-        trigger: 'viewEnter',
-        params: { threshold: 0.5 },
-        sequences: rippleSequences('once')
-      },
-      {
-        key: 'hero-text',
-        trigger: 'viewEnter',
-        effects: [{ effectId: 'fade-up', delay: 400 }]
-      }
-    ];
-  } else {
-    return [
-      {
-        key: 'h1-trigger',
-        trigger: 'hover',
-        sequences: rippleSequences('alternate')
-      },
-      {
-        key: 'hero-text',
-        trigger: 'viewEnter',
-        effects: [{ effectId: 'fade-up', delay: 400 }]
-      }
-    ];
-  }
-}
-
-const isMobile = window.matchMedia('(max-width: 768px)').matches;
-
 const config = {
+  conditions: {
+    desktop: { type: 'media', predicate: '(min-width: 769px)' },
+    mobile: { type: 'media', predicate: '(max-width: 768px)' }
+  },
   effects: {
     'reveal-up': {
       keyframeEffect: { name: 'reveal-up', keyframes: revealUpKeyframes },
@@ -259,6 +230,25 @@ const config = {
       fill: 'both'
     }
   },
-  interactions: getInteractions(isMobile)
+  interactions: [
+    {
+      key: 'h1-trigger',
+      trigger: 'hover',
+      conditions: ['desktop'],
+      sequences: rippleSequences('alternate')
+    },
+    {
+      key: 'h1-trigger',
+      trigger: 'viewEnter',
+      conditions: ['mobile'],
+      params: { threshold: 0.5 },
+      sequences: rippleSequences('once')
+    },
+    {
+      key: 'hero-text',
+      trigger: 'viewEnter',
+      effects: [{ effectId: 'fade-up', delay: 400 }]
+    }
+  ]
 };
 ```
