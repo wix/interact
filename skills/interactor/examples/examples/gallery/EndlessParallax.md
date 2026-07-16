@@ -173,71 +173,96 @@ html, body {
 ## Interact config
 
 ```js
+const tiles = /* select existing '.gallery-tile' elements */ [];
+const tileState = tiles.map((tile, index) => ({
+  tile,
+  image: tile.querySelector('img'),
+  title: tile.querySelector('.gallery-tile-title'),
+  motion: undefined // Look up application-owned motion metadata for index.
+}));
+
+function updateCameraFromPointer(event) {
+  // Update camera velocity from pointer position.
+}
+
+function tickInfiniteGallery() {
+  // Advance and damp the camera.
+  // For each tileState entry:
+  // - wrap its coordinates inside the virtual world;
+  // - update only the existing tile transform and opacity.
+  // Request the next animation frame.
+}
+
+function openTileModal(tile) {
+  // Copy the tile's existing image and title into #modalImage and #modalTitle.
+  // Look up any optional modal description by tile index.
+  // Activate #openModalTrigger so Interact plays the modal effects.
+}
+
+function closeTileModal() {
+  // Activate #closeModalTrigger.
+}
+
 {
+  effects: {
+    'modal-fade-out': {
+      keyframeEffect: {
+        name: 'modal-hide',
+        keyframes: [{ opacity: 1 }, { opacity: 0 }]
+      },
+      duration: 400,
+      easing: 'ease-out',
+      fill: 'forwards'
+    },
+  },
   interactions: [
+    {
+      key: '#page-container', trigger: 'viewEnter',
+      effects: [{ triggerType: 'once', duration: 0, customEffect: tickInfiniteGallery }]
+    },
+    {
+      key: '#page-container', trigger: 'pointerMove',
+      effects: [{ customEffect: updateCameraFromPointer }]
+    },
+    {
+      key: '.gallery-tile', trigger: 'click',
+      effects: [{ triggerType: 'repeat', duration: 0, customEffect: openTileModal }]
+    },
+    {
+      key: '#modalClose', trigger: 'click',
+      effects: [{ triggerType: 'repeat', duration: 0, customEffect: closeTileModal }]
+    },
     {
       key: '#openModalTrigger', trigger: 'click',
       effects: [
         { key: '#modal', keyframeEffect: { name: 'modal-show',
-            keyframes: [{ offset: 0, visibility: 'visible', opacity: 0 }, { offset: 1, opacity: 1 }],
-            duration: 400, easing: 'ease-out', fill: 'forwards' } },
+            keyframes: [{ offset: 0, visibility: 'visible', opacity: 0 }, { offset: 1, opacity: 1 }] },
+            duration: 400, easing: 'ease-out', fill: 'forwards' },
         { key: '.modal-content', keyframeEffect: { name: 'modal-content-scale-in',
-            keyframes: [{ transform: 'scale(0.8)' }, { transform: 'scale(1)' }],
-            duration: 400, easing: 'cubic-bezier(0.175,0.885,0.32,1.275)', fill: 'forwards' } },
+            keyframes: [{ transform: 'scale(0.8)' }, { transform: 'scale(1)' }] },
+            duration: 400, easing: 'cubic-bezier(0.175,0.885,0.32,1.275)', fill: 'forwards' },
         { key: '#gallery-container', keyframeEffect: { name: 'canvas-blur-in',
-            keyframes: [{ filter: 'blur(0px)' }, { filter: 'blur(8px)' }],
-            duration: 400, easing: 'ease-out', fill: 'forwards' } },
+            keyframes: [{ filter: 'blur(0px)' }, { filter: 'blur(8px)' }] },
+            duration: 400, easing: 'ease-out', fill: 'forwards' },
       ]
     },
     {
       key: '#closeModalTrigger', trigger: 'click',
       effects: [
-        { key: '#modal', effectId: 'modal-fade-out', keyframeEffect: { name: 'modal-hide',
-            keyframes: [{ opacity: 1 }, { opacity: 0 }],
-            duration: 400, easing: 'ease-out', fill: 'forwards' } },
+        { key: '#modal', effectId: 'modal-fade-out' },
         { key: '.modal-content', keyframeEffect: { name: 'modal-content-scale-out',
-            keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(0.8)' }],
-            duration: 400, easing: 'ease-out', fill: 'forwards' } },
-        { key: '#gallery-container', effectId: 'canvas-unblur', keyframeEffect: { name: 'canvas-blur-out',
-            keyframes: [{ filter: 'blur(8px)' }, { filter: 'blur(0px)' }],
-            duration: 400, easing: 'ease-out', fill: 'forwards' } },
+            keyframes: [{ transform: 'scale(1)' }, { transform: 'scale(0.8)' }] },
+            duration: 400, easing: 'ease-out', fill: 'forwards' },
+        { key: '#gallery-container', keyframeEffect: { name: 'canvas-blur-out',
+            keyframes: [{ filter: 'blur(8px)' }, { filter: 'blur(0px)' }] },
+            duration: 400, easing: 'ease-out', fill: 'forwards' },
       ]
     },
     {
       key: '#modal', trigger: 'animationEnd', params: { effectId: 'modal-fade-out' },
       effects: [{ keyframeEffect: { name: 'set-modal-hidden',
-        keyframes: [{ visibility: 'hidden' }], duration: 0, fill: 'forwards' } }]
+        keyframes: [{ visibility: 'hidden' }] }, duration: 0, fill: 'forwards' }]
     },
   ]
 }
-```
-
-## Integration pseudocode
-
-The infinite wrapping motion is application-specific. Operate only on the tiles already declared in the markup; do not generate, clone, append, or replace DOM nodes.
-
-```text
-tiles = select all existing .gallery-tile elements
-
-for each tile with its declared index:
-  read its image and title from the existing children
-  look up application-owned motion metadata by index
-  cache the existing img and tile element
-  measure the image after it loads
-
-on pointer move:
-  update the camera velocity
-
-on each animation frame:
-  advance and damp the camera
-  wrap each cached tile's coordinates inside the virtual world
-  update only that existing tile's transform and opacity
-
-on tile activation:
-  copy the tile's existing image and title into the predeclared modal fields
-  look up any optional modal description by index
-  activate #openModalTrigger so Interact plays the modal effects
-
-on modal close, backdrop activation, or Escape:
-  activate #closeModalTrigger
 ```

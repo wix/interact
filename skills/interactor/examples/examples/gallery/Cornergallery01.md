@@ -176,13 +176,37 @@ html, body {
 ## Interact config
 
 ```js
+const fragments = /* select existing '.fragment' elements */ [];
+const dots = /* select existing '.progress-dot' elements */ [];
+let activeIndex = 0;
+
+function initializeExistingGallery() {
+  // Mark fragments[0] as visible.
+  // Mark dots[0] as active.
+}
+
+function showExistingFragment(index) {
+  // Scale fragments[activeIndex] to 0.
+  // Scale fragments[index] to 1.
+  // Move active class from dots[activeIndex] to dots[index].
+  activeIndex = index;
+}
+
+function showNextExistingFragment() {
+  showExistingFragment((activeIndex + 1) % fragments.length);
+}
+
+// Optional app handlers:
+// on wheel or progress-dot activation, call showExistingFragment(index).
+
 {
   interactions: [
     {
       key: 'container',
-      trigger: 'pageVisible',
+      trigger: 'viewEnter',
       effects: [{
         triggerType: 'once',
+        duration: 0,
         customEffect: initializeExistingGallery,
       }],
     },
@@ -191,35 +215,10 @@ html, body {
       trigger: 'click',
       effects: [{
         triggerType: 'repeat',
+        duration: 0,
         customEffect: showNextExistingFragment,
       }],
     },
   ],
 }
-```
-
-## Integration pseudocode
-
-The custom effects are application integration hooks. They update only the fragments and progress dots already declared in the markup.
-
-```text
-fragments = select the existing .fragment elements
-dots = select the existing .progress-dot elements
-activeIndex = 0
-
-initializeExistingGallery:
-  mark fragment 0 as visible
-  mark dot 0 as active
-
-show fragment at index:
-  scale the previously active fragment to 0
-  scale the requested existing fragment to 1
-  move the active class from the previous existing dot to the requested dot
-  update activeIndex
-
-showNextExistingFragment:
-  show fragment at (activeIndex + 1) wrapped by the number of existing fragments
-
-on wheel or progress-dot activation:
-  call the same show-fragment operation with the appropriate existing index
 ```
