@@ -46,7 +46,7 @@
       "id": 3,
       "name": "edit-existing-config-slide-and-stagger",
       "prompt": "Attached is my current setup (index.html + interactions.js). Right now the hero just fades in when it enters the viewport. I want two changes: (1) make the hero slide in from the left instead of fading, and (2) make the four feature cards stagger-fade in one after another as they scroll into view. Please update my files and keep the existing setup working.",
-      "expected_output": "EDITS the existing files in place. Hero: FadeIn -> SlideIn with direction:'left', preserving effectId 'hero-in', key 'hero', viewEnter, triggerType:'once'. Cards: staggered entrance via a sequence (offset + offsetEasing) with a viewEnter trigger and listContainer pointing at .feature-grid/cards \u2014 not per-card delays; adds the needed key/markup so the container is bound. Preserves registerEffects, generate(config, true), Interact.create and the web entry point. Edited config validated with validateInteractConfig; no validator reference left in edited files. Targeted edit, valid references.",
+      "expected_output": "EDITS the existing files in place. Hero: FadeIn -> SlideIn with direction:'left', preserving effectId 'hero-in', key 'hero', viewEnter, triggerType:'once'. Cards: staggered entrance via a sequence (offset + offsetEasing) fired by a single viewEnter trigger, with the sequence's effect carrying a selector that picks the .feature-card items (one trigger fanning across the cards \u2014 the selector case, not per-card listContainer) \u2014 not per-card delays; keys a single wrapper (the grid/section) so the cards bind. Because the cards are source \u2260 target (trigger on the wrapper, effect's selector fans across the cards), generate() emits no FOUC-hiding rules for them, so the card entrance effect sets fill:'backwards' to hold each card in its first-keyframe state before it enters. Preserves registerEffects, generate(config, true), Interact.create and the web entry point. Edited config validated with validateInteractConfig; no validator reference left in edited files. Targeted edit, valid references.",
       "files": [
         "skills/interactor/evals/files/edit-config/index.html",
         "skills/interactor/evals/files/edit-config/interactions.js"
@@ -56,9 +56,10 @@
         "Hero identity preserved: effectId 'hero-in', key 'hero', trigger 'viewEnter', triggerType:'once'.",
         "Edited config is structurally valid: would pass validateInteractConfig; all effectId/sequenceId references resolve.",
         "Shipped edited files contain no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference \u2014 scope: shipped CODE files only (a mention in EXPLANATION.md/docs is fine).",
-        "Cards stagger via a sequence (offset; offsetEasing optional) over the list/container",
+        "Cards stagger via a sequence (offset; offsetEasing optional) whose effect uses a selector to fan across the cards (the one-trigger stagger case, not per-card listContainer).",
         "Cards use the viewEnter trigger.",
-        "Cards actually bound: adds key/markup (interact-element/data-interact-key + listContainer) matching the cards.",
+        "Cards actually bound: keys a single wrapper (interact-element/data-interact-key on the grid/section) and the sequence effect's selector matches the .feature-card items.",
+        "Card entrance effect sets fill:'backwards' (source ≠ target, so generate() emits no FOUC-hiding rules for the cards).",
         "Existing setup preserved: registerEffects, generate(config, true) (at generation/build time or runtime), Interact.create, and the /web entry point intact.",
         "Targeted edit, not a rewrite: unrelated structure preserved.",
         "No invented or forbidden presets (SlideIn/FadeIn are real)."

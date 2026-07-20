@@ -431,6 +431,45 @@ function _buildAnimationGroupArgsFromSequence(
   return animationGroupArgs.length > 0 ? animationGroupArgs : null;
 }
 
+function _resolveSourceElements(
+  interaction: Interaction,
+  sourceController: IInteractionController,
+  elements?: HTMLElement[],
+): HTMLElement | HTMLElement[] | null {
+  const resolved = elements
+    ? _queryItemElement(interaction, elements)
+    : _getElementsFromData(interaction, sourceController.element, sourceController.useFirstChild);
+
+  // Treat an empty array as "no elements" so callers' null-guards bail instead of
+  // marking the interaction added while attaching zero triggers.
+  return Array.isArray(resolved) && resolved.length === 0 ? null : resolved;
+}
+
+function _attachSequenceTriggers(
+  interaction: Interaction,
+  sequenceConfig: SequenceConfig,
+  sourceElements: HTMLElement | HTMLElement[],
+  sequence: ReturnType<typeof Interact.getSequence>,
+  selectorCondition?: string,
+) {
+  const sources = Array.isArray(sourceElements) ? sourceElements : [sourceElements];
+
+  sources.forEach((sourceEl) => {
+    (TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as any)?.add(
+      sourceEl,
+      sourceEl,
+      { triggerType: sequenceConfig.triggerType } as Effect,
+      interaction.params || {},
+      {
+        reducedMotion: Interact.forceReducedMotion,
+        selectorCondition,
+        animation: sequence,
+        allowA11yTriggers: Interact.allowA11yTriggers,
+      },
+    );
+  });
+}
+
 function _resolveListItemIndices(
   controller: IInteractionController,
   listContainer: string,
@@ -508,6 +547,27 @@ function _processSequences(
         reducedMotion: Interact.forceReducedMotion,
       });
 
+      const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
+        reducedMotion: Interact.forceReducedMotion,
+      });
+
+      const selectorCondition = getSelectorCondition(
+        interaction.conditions || [],
+        instance.dataCache.conditions,
+      );
+
+      const sourceElements = _resolveSourceElements(interaction, sourceController, elements);
+
+      if (sourceElements) {
+        _attachSequenceTriggers(
+          interaction,
+          sequenceConfig,
+          sourceElements,
+          sequence,
+          selectorCondition,
+        );
+      }
+
       return;
     }
 
@@ -515,24 +575,25 @@ function _processSequences(
       reducedMotion: Interact.forceReducedMotion,
     });
 
-    instance.addedInteractions[cacheKey] = true;
-
     const selectorCondition = getSelectorCondition(
       interaction.conditions || [],
       instance.dataCache.conditions,
     );
 
-    (TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as any)?.add(
-      sourceController.element,
-      sourceController.element,
-      { triggerType: sequenceConfig.triggerType } as Effect,
-      interaction.params || {},
-      {
-        reducedMotion: Interact.forceReducedMotion,
-        selectorCondition,
-        animation: sequence,
-        allowA11yTriggers: Interact.allowA11yTriggers,
-      },
+    const sourceElements = _resolveSourceElements(interaction, sourceController, elements);
+
+    if (!sourceElements) return;
+
+    // Mark added only after the source resolves, so an unresolved element can be
+    // retried on a later pass instead of being permanently disabled by the guard above.
+    instance.addedInteractions[cacheKey] = true;
+
+    _attachSequenceTriggers(
+      interaction,
+      sequenceConfig,
+      sourceElements,
+      sequence,
+      selectorCondition,
     );
   });
 }
@@ -605,24 +666,25 @@ function _processSequencesForTarget(
         reducedMotion: Interact.forceReducedMotion,
       });
 
-      instance.addedInteractions[cacheKey] = true;
-
       const selectorCondition = getSelectorCondition(
         interaction.conditions || [],
         instance.dataCache.conditions,
       );
 
-      (TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as any)?.add(
-        sourceController.element,
-        sourceController.element,
-        { triggerType: sequenceConfig.triggerType } as Effect,
-        interaction.params || {},
-        {
-          reducedMotion: Interact.forceReducedMotion,
-          selectorCondition,
-          animation: sequence,
-          allowA11yTriggers: Interact.allowA11yTriggers,
-        },
+      const sourceElements = _resolveSourceElements(interaction, sourceController);
+
+      if (!sourceElements) return true;
+
+      // Mark added only after the source resolves, so an unresolved element can be
+      // retried on a later pass instead of being permanently disabled by the guard above.
+      instance.addedInteractions[cacheKey] = true;
+
+      _attachSequenceTriggers(
+        interaction,
+        sequenceConfig,
+        sourceElements,
+        sequence,
+        selectorCondition,
       );
 
       return true;

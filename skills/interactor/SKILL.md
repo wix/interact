@@ -126,6 +126,17 @@ add(el);
 
 ### Step 3 — Add / edit interactions
 
+**Before designing the config, draw on the example library for inspiration and reference patterns:**
+
+1. Read `examples/index.md` (this file is the table of contents — it lists every demo with its summary and tags).
+2. Based on the user's request, identify 2–4 demos whose trigger type, layout, motion properties, or overall feel best match what's being built. Match on tags such as `viewProgress`, `pointerMove`, `sticky`, `stagger`, `3d`, or `clip-path`.
+3. Read those demo files from `examples/examples/<category>/<name>.md`. Use the index rather than guessing paths; the categories are `gallery`, `carousel`, `image-background`, `text-animations`, `text-image`, and `ui-components`.
+4. Treat each demo as a cohesive unit — the interact config, HTML structure, and CSS layout are designed to work together. Adapt all three parts to the user's context rather than lifting any single piece in isolation.
+
+This step is especially useful for: picking the right trigger/effect combination, handling complex layered compositions, and producing configs that feel polished rather than generic.
+
+---
+
 This is where most work happens. An `InteractConfig` is:
 
 ```ts
@@ -233,7 +244,9 @@ animation no-ops. Apply them every time, even if you don't open a reference file
 3. **FOUC prevention.** Follow the canonical CSS generation policy in
    `references/integration-recipes.md`. For the generated initial-rule behavior
    and trigger-specific exceptions, see “CSS generation & FOUC” in
-   `references/config-schema.md`.
+   `references/config-schema.md`. For `viewEnter` + `once` where source ≠ target,
+   `generate()` emits no hiding rules — set `fill: 'backwards'` on the effect so
+   targets don't flash before the trigger.
 
 4. **Vanilla binding.** You must then call the **standalone** `add(element, 'key')` for
    each element once it exists in the DOM. For clean up call the `remove('key')` function.
@@ -324,6 +337,7 @@ browser console is free of "not found in registry" warnings.
 
 Read the one(s) relevant to the task — they are self-contained and source-accurate:
 
+- **`examples/index.md`** — table of contents for the curated demo library, with summaries, tags, and exact file links across all example categories.
 - **`references/config-schema.md`** — every config object field-by-field: `InteractConfig`, `Interaction`, all three effect variants, sequences, conditions, element resolution (source vs target), FOUC, and the full `Interact` static API.
 - **`references/triggers.md`** — per-trigger deep rules and gotchas: `viewEnter`, `viewProgress`, `hover`/`click` (+ `triggerType`/`stateAction` tables), `pointerMove`, `animationEnd`, accessibility variants, and sequences/stagger.
 - **`references/presets.md`** — the full preset catalog by category with parameters, defaults, accessibility risk tiers + reduced-motion fallbacks, and an "atmosphere → preset" selection guide.
