@@ -187,7 +187,7 @@ function collectFieldPluginStyles(
   const rules = [];
   for (const pluginName of Object.keys(plugins)) {
     const pluginField = `${PLUGIN_FIELD_PREFIX}${pluginName}`;
-    if (!(pluginField in Object.keys(source))) {
+    if (!(pluginField in source)) {
       continue;
     }
 
