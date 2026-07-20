@@ -23,5 +23,5 @@ export type CSSRuleData = {
   media?: string;
   states?: string[];
   selectorCondition?: string;
-  dataInteractEnterSelector?: string;
+  selectorSuffix?: string;
 };

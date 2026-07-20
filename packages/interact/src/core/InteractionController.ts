@@ -1,4 +1,4 @@
-import type { IInteractElement, StateAction } from '../types';
+import type { IInteractElement, InteractPluginCleanup, StateAction } from '../types';
 import { add, addListItems } from './add';
 import { remove, removeListItems } from './remove';
 
@@ -11,6 +11,8 @@ export class InteractionController {
   sheet: CSSStyleSheet | null;
   useFirstChild: boolean;
   _observers: WeakMap<HTMLElement, MutationObserver>;
+  _pluginCleanups: InteractPluginCleanup[];
+  _appliedPlugins: WeakSet<object>;
 
   constructor(element: HTMLElement, key?: string, options?: { useFirstChild?: boolean }) {
     this.element = element;
@@ -18,6 +20,8 @@ export class InteractionController {
     this.connected = false;
     this.sheet = null;
     this._observers = new WeakMap();
+    this._pluginCleanups = [];
+    this._appliedPlugins = new WeakSet();
     this.useFirstChild = options?.useFirstChild ?? false;
   }
 
@@ -56,6 +60,20 @@ export class InteractionController {
     if (key) {
       remove(this, removeFromCache);
     }
+
+    // Run plugin cleanups after `remove()` has torn down animations on the (possibly
+    // plugin-generated) elements, then revert the plugins' DOM mutations.
+    if (this._pluginCleanups.length) {
+      for (const cleanup of this._pluginCleanups) {
+        try {
+          cleanup();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      this._pluginCleanups = [];
+    }
+    this._appliedPlugins = new WeakSet();
 
     if (this.sheet) {
       const rootNode = this.element?.getRootNode() as ShadowRoot | Document;

@@ -114,7 +114,7 @@ export function CSSRuleToString(rule: CSSRuleData): string {
     media,
     states,
     selectorCondition,
-    dataInteractEnterSelector,
+    selectorSuffix,
   } = rule;
   if (!declarations.length) {
     return '';
@@ -135,8 +135,8 @@ export function CSSRuleToString(rule: CSSRuleData): string {
     selector = `${selector} ${childSelector}`;
   }
 
-  if (dataInteractEnterSelector) {
-    selector = `${selector}${dataInteractEnterSelector}`;
+  if (selectorSuffix) {
+    selector = `${selector}${selectorSuffix}`;
   }
 
   // maybe nesting is simpler? -

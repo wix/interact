@@ -13,6 +13,7 @@ import {
   exactlyOne,
 } from './effects';
 import { SequenceConfig, SequenceConfigRef } from './sequences';
+import { withPluginFields } from './plugins';
 import type { Path, SemanticIssue } from '../types';
 import { walkConfig } from '../walkConfig';
 import { collectSemanticWarnings } from '../semantic';
@@ -62,16 +63,15 @@ const InteractionBase = {
 const hasEffectsOrSequences = (interaction: { effects?: unknown[]; sequences?: unknown[] }) =>
   (interaction.effects?.length ?? 0) > 0 || (interaction.sequences?.length ?? 0) > 0;
 
-export const AnimationEndInteraction = z
-  .object({
+export const AnimationEndInteraction = withPluginFields(
+  z.object({
     ...InteractionBase,
     trigger: z.literal('animationEnd'),
     params: AnimationEndParams,
     effects: z.array(z.union([TimeEffect, TimeEffectRef])).optional(),
     sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
-  })
-  .strict()
-  .superRefine((interaction, ctx) => {
+  }),
+).superRefine((interaction, ctx) => {
     if (!hasEffectsOrSequences(interaction)) {
       ctx.addIssue({
         code: 'custom',
@@ -81,16 +81,15 @@ export const AnimationEndInteraction = z
     }
   });
 
-export const ViewEnterInteraction = z
-  .object({
+export const ViewEnterInteraction = withPluginFields(
+  z.object({
     ...InteractionBase,
     trigger: z.literal('viewEnter'),
     params: ViewEnterParams.optional(),
     effects: z.array(z.union([TimeEffect, TimeEffectRef])).optional(),
     sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
-  })
-  .strict()
-  .superRefine((interaction, ctx) => {
+  }),
+).superRefine((interaction, ctx) => {
     if (!hasEffectsOrSequences(interaction)) {
       ctx.addIssue({
         code: 'custom',
@@ -100,37 +99,36 @@ export const ViewEnterInteraction = z
     }
   });
 
-export const ViewProgressInteraction = z
-  .object({
+export const ViewProgressInteraction = withPluginFields(
+  z.object({
     ...InteractionBase,
     trigger: z.literal('viewProgress'),
     effects: z.array(z.union([ViewProgressEffect, ViewProgressEffectRef])).min(1),
-  })
-  .strict();
+  }),
+);
 
-export const PointerMoveInteraction = z
-  .object({
+export const PointerMoveInteraction = withPluginFields(
+  z.object({
     ...InteractionBase,
     trigger: z.literal('pointerMove'),
     params: PointerMoveParams.optional(),
     effects: z.array(z.union([PointerMoveEffect, PointerMoveEffectRef])).min(1),
-  })
-  .strict();
+  }),
+);
 
 export const ScrubInteraction = z.discriminatedUnion('trigger', [
   ViewProgressInteraction,
   PointerMoveInteraction,
 ]);
 
-export const DiscreteInteraction = z
-  .object({
+export const DiscreteInteraction = withPluginFields(
+  z.object({
     ...InteractionBase,
     trigger: z.enum(['hover', 'click', 'activate', 'interest']),
     effects: z.array(z.union([TimeEffect, TimeEffectRef, StateEffect, StateEffectRef])).optional(),
     sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
-  })
-  .strict()
-  .superRefine((interaction, ctx) => {
+  }),
+).superRefine((interaction, ctx) => {
     if (!hasEffectsOrSequences(interaction)) {
       ctx.addIssue({
         code: 'custom',

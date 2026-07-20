@@ -31,6 +31,9 @@ class Interact {
   }): void;
   static registerEffects(effects: Record<string, NamedEffect>): void;
   static getController(key: string | undefined): IInteractionController | undefined;
+  static use(name: string, plugin: InteractPlugin): void;
+  static getPlugin(name: string): InteractPlugin | undefined;
+  static hasPlugins(): boolean;
 
   // Instance methods
   init(config: InteractConfig, options?: { useCustomElement?: boolean }): void;
@@ -229,6 +232,38 @@ Interact.registerEffects({
 
 - Effects must be registered before calling `Interact.create()` with configurations that reference them
 - Registration is global — once registered, effects are available to all Interact instances
+
+### `Interact.use(name, plugin)`
+
+Registers a plugin under a name. When an interaction or effect carries a `$<name>` field, Interact invokes the plugin with that field's value and a context. Interact is agnostic to what the plugin does — see the [Plugins guide](../guides/plugins.md).
+
+**Parameters:**
+
+- `name: string` - The plugin name, matched against `$<name>` config fields
+- `plugin: InteractPlugin` - `(value, context) => void | (() => void)`; the returned cleanup runs on disconnect/teardown
+
+**Example:**
+
+```typescript
+import { Interact } from '@wix/interact';
+import { splitTextPlugin } from './splitTextPlugin';
+
+Interact.use('splitText', splitTextPlugin);
+Interact.create(config); // configs may now use a `$splitText: { ... }` field
+```
+
+**Notes:**
+
+- Register plugins **before** `Interact.create()`.
+- Registration is global. A `$<name>` field naming an unregistered plugin throws at connect time.
+
+### `Interact.getPlugin(name)`
+
+Returns the plugin registered under `name`, or `undefined`.
+
+### `Interact.hasPlugins()`
+
+Returns `true` if any plugin has been registered.
 
 ### `Interact.getController(key)`
 

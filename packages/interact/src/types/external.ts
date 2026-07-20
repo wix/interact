@@ -40,3 +40,15 @@ export type { IInteractionController, IInteractElement } from './controller';
 
 // Options
 export type { InteractOptions } from './handlers';
+
+// Plugins
+export type {
+  InteractPlugin,
+  InteractPluginContext,
+  InteractPluginCleanup,
+  InteractPluginConfigMap,
+  InteractPluginStyleContext,
+  InteractPluginStyleGenerator,
+  InteractPluginStyles,
+  PluginFields,
+} from './plugins';

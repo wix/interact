@@ -162,6 +162,37 @@ When `preserveText` is `false`, `aria-label` is set on the container instead of 
 
 Screen readers and crawlers see the original text; the split spans are hidden from the accessibility tree. `result.revert()` restores `originalHTML` captured at construction time. On re-split (`autoSplit`), plain text is re-read from the element so content changes are picked up.
 
+## Using with `@wix/interact`
+
+`@wix/splittext` is standalone and has **no** dependency on `@wix/interact`. To drive it declaratively through an `InteractConfig`, register a small adapter as an Interact plugin — the adapter (in your app) is the only code that imports both packages:
+
+```ts
+import { Interact } from '@wix/interact';
+import { splitText } from '@wix/splittext';
+
+Interact.use('splitText', (value, { root }) => {
+  const { container, ...options } = value;
+  const el = root.querySelector(container);
+  if (!el) return;
+  const result = splitText(el, options);
+  return () => result.revert(); // Interact reverts on teardown
+});
+
+Interact.create({
+  effects: { 'char-fade-up': { namedEffect: { type: 'FadeIn' }, duration: 400 } },
+  interactions: [
+    {
+      key: 'hero',
+      trigger: 'viewEnter',
+      $splitText: { container: '.title', type: 'chars' },
+      sequences: [{ offset: 30, effects: [{ effectId: 'char-fade-up', selector: '.split-c' }] }],
+    },
+  ],
+});
+```
+
+See the `@wix/interact` [Plugins guide](../interact/docs/guides/plugins.md) for the full contract.
+
 ## License
 
 [MIT](https://github.com/wix/interact/blob/master/LICENSE)

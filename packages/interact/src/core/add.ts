@@ -14,6 +14,7 @@ import type {
   AnimationEndParams,
   AnimationOptions,
 } from '../types';
+import { PLUGIN_FIELD_PREFIX } from '../types';
 import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
 import { getInterpolatedKey } from './utilities';
 import { effectToAnimationOptions } from '../handlers/utilities';
@@ -39,6 +40,58 @@ type ListElements = {
   listContainer: string;
   elements: HTMLElement[];
 };
+
+/**
+ * Generic plugin bridge. For every `$`-prefixed field on an interaction or effect (e.g. `$splitText`
+ * → the `splitText` plugin), look up the plugin registered via `Interact.use()` and invoke it with
+ * the raw field value and a context. Any returned cleanup is stored on the owning controller and
+ * run on disconnect. Interact never inspects what a plugin does — it only routes config → plugin.
+ *
+ * Plugins run BEFORE target resolution (`_getElementsFromData`), so any DOM they produce (e.g.
+ * split `<span>`s) is visible to the selectors that follow. Each distinct plugin value object is
+ * applied at most once per connect — the field values are shared by reference across resolution
+ * passes, so identity is a stable dedup key.
+ */
+function _applyPlugins(
+  owner: IInteractionController,
+  root: HTMLElement,
+  config: object,
+  key: string,
+  scope: 'interaction' | 'effect',
+): void {
+  const fields = config as Record<string, unknown>;
+
+  for (const field of Object.keys(fields)) {
+    if (field.length <= PLUGIN_FIELD_PREFIX.length || !field.startsWith(PLUGIN_FIELD_PREFIX)) {
+      continue;
+    }
+
+    const name = field.slice(PLUGIN_FIELD_PREFIX.length);
+    const value = fields[field];
+
+    if (value !== null && typeof value === 'object') {
+      if (owner._appliedPlugins.has(value)) {
+        continue;
+      }
+      owner._appliedPlugins.add(value);
+    }
+
+    const plugin = Interact.getPlugin(name);
+
+    if (!plugin) {
+      throw new Error(
+        `Interact: config uses plugin field "${field}" but no plugin is registered under ` +
+          `"${name}". Call Interact.use('${name}', plugin) before Interact.create().`,
+      );
+    }
+
+    const cleanup = plugin(value, { root, key, scope, config: fields });
+
+    if (typeof cleanup === 'function') {
+      owner._pluginCleanups.push(cleanup);
+    }
+  }
+}
 
 function _getElementsFromData(
   data: Interaction | Effect,
@@ -216,6 +269,15 @@ function _addInteraction(
         targetController = sourceController;
       }
 
+      // Effect-level plugins act on the effect's target element before it is resolved.
+      _applyPlugins(
+        targetController,
+        targetController.element,
+        effectOptions,
+        target || interaction.key,
+        'effect',
+      );
+
       const [sourceElements, targetElements] = _getInteractionElements(
         interaction,
         effectOptions,
@@ -329,6 +391,16 @@ function _buildAnimationGroupArgsFromSequence(
     }
 
     const resolvedTargetKey = target || sourceKey;
+
+    // Effect-level plugins act on the effect's target element before it is resolved.
+    _applyPlugins(
+      targetController,
+      targetController.element,
+      effectOptions,
+      resolvedTargetKey,
+      'effect',
+    );
+
     let targetElement: HTMLElement | HTMLElement[] | null;
 
     if (
@@ -623,6 +695,15 @@ function addEffectsForTarget(
           return true;
         }
 
+        // Effect-level plugins act on the effect's target element before it is resolved.
+        _applyPlugins(
+          targetController,
+          targetController.element,
+          effectOptions,
+          targetKey,
+          'effect',
+        );
+
         if (effectOptions.listContainer) {
           targetController.watchChildList(effectOptions.listContainer);
         }
@@ -770,6 +851,10 @@ export function add(controller: IInteractionController): boolean {
     }
 
     if (!mql || mql.matches) {
+      // Run interaction-level plugins before target resolution / list observation so any DOM they
+      // create is visible to the selectors and MutationObservers that follow.
+      _applyPlugins(controller, controller.element, interaction, key, 'interaction');
+
       if (interaction.listContainer) {
         controller.watchChildList(interaction.listContainer);
       }

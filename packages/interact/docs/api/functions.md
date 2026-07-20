@@ -16,7 +16,7 @@ import { add, remove, generate } from '@wix/interact';
 | ------------ | -------------------------------------------------------------------------------- | -------------------------- | -------- |
 | `add()`      | Add interactions to an element                                                   | `element`, `key?`          | `void`   |
 | `remove()`   | Remove interactions from an element                                              | `key`                      | `void`   |
-| `generate()` | Generate complete CSS for all animations, transitions, and scroll-driven effects | `config`, `useFirstChild?` | `string` |
+| `generate()` | Generate complete CSS for all animations, transitions, and scroll-driven effects | `config`, `useFirstChild?`, `plugins?` | `string` |
 
 ---
 
@@ -196,14 +196,18 @@ console.log('Interactions removed for hero');
 
 ---
 
-## `generate(config, useFirstChild?)`
+## `generate(config, useFirstChild?, plugins?)`
 
 Generates a complete CSS string from an `InteractConfig`. The output includes `@keyframes`, animation and transition custom properties, view-timeline declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules — everything the browser needs to run the configured animations and transitions natively, without waiting for JavaScript.
 
 ### Signature
 
 ```typescript
-function generate(config: InteractConfig, useFirstChild?: boolean): string;
+function generate(
+  config: InteractConfig,
+  useFirstChild?: boolean,
+  plugins?: InteractPluginStyles,
+): string;
 ```
 
 ### Parameters
@@ -211,6 +215,8 @@ function generate(config: InteractConfig, useFirstChild?: boolean): string;
 **`config: InteractConfig`** - The full interaction configuration. Every interaction in the config is processed — not just `viewEnter`.
 
 **`useFirstChild?: boolean`** - When `true` (the default), generated selectors target the first child of each keyed element (e.g. `[data-interact-key="hero"] > :first-child`). This is the correct mode for `<interact-element>` custom elements. Pass `false` when the keyed element itself is the animation target (vanilla JS or React `<Interaction>`).
+
+**`plugins?: InteractPluginStyles`** - Optional map of plugin name → SSR style generator. For every `$<name>` field in the config, the matching generator is called with the field's (opaque) value and a context, and its returned CSS data is appended to the output. Used to emit build-time styling on a plugin's behalf — e.g. hiding pre-split text for FOUC prevention. Like `create()`/`use()`, `generate()` never inspects the field value. See [Plugins → SSR styling](../guides/plugins.md#ssr-styling-foouc-prevention).
 
 ### Returns
 

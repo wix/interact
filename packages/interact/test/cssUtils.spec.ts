@@ -221,10 +221,10 @@ describe('CSSRuleToString', () => {
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
-  it('should dataInteractEnterSelector when provided', () => {
+  it('should selectorSuffix when provided', () => {
     const rule: CSSRuleData = {
       key: 'my-el',
-      dataInteractEnterSelector: ':not([data-interact-enter="done"])',
+      selectorSuffix: ':not([data-interact-enter="done"])',
       declarations: [{ name: 'opacity', value: '0' }],
     };
     const expected =
@@ -268,7 +268,7 @@ describe('CSSRuleToString', () => {
     const rule: CSSRuleData = {
       key: 'my-el',
       childSelector: '.child',
-      dataInteractEnterSelector: ':not([data-interact-enter="done"])',
+      selectorSuffix: ':not([data-interact-enter="done"])',
       states: ['hover'],
       media: '(min-width: 1024px)',
       declarations: [

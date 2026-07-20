@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Keyframe, RangeOffset } from './primitives';
+import { withPluginFields } from './plugins';
 
 export const StateActionType = z.enum(['add', 'remove', 'toggle', 'clear']);
 export const TimeTriggerType = z.enum(['once', 'repeat', 'alternate', 'state']);
@@ -132,19 +133,19 @@ const EffectBase = {
   conditions: z.array(z.string().min(1)).optional(),
 };
 
-export const StateEffect = TransitionEffectSourceBase.extend({
-  ...EffectBase,
-  stateAction: StateActionType.optional(),
-})
-  .strict()
-  .check(checkExactlyOneTransition);
-export const StateEffectRef = TransitionEffectSourceBase.extend({
-  ...EffectBase,
-  effectId: z.string().min(1),
-  stateAction: StateActionType.optional(),
-})
-  .strict()
-  .check(checkAtMostOneTransition);
+export const StateEffect = withPluginFields(
+  TransitionEffectSourceBase.extend({
+    ...EffectBase,
+    stateAction: StateActionType.optional(),
+  }),
+).check(checkExactlyOneTransition);
+export const StateEffectRef = withPluginFields(
+  TransitionEffectSourceBase.extend({
+    ...EffectBase,
+    effectId: z.string().min(1),
+    stateAction: StateActionType.optional(),
+  }),
+).check(checkAtMostOneTransition);
 
 const AnimationEffectBase = {
   ...EffectBase,
@@ -167,57 +168,57 @@ const pointerMoveEffectFields = {
   transitionEasing: z.enum(['linear', 'hardBackOut', 'easeOut', 'elastic', 'bounce']).optional(),
 };
 
-export const TimeEffect = EffectSourceBase.extend({
-  ...AnimationEffectBase,
-  iterations: TimeIterations,
-  duration: z.number().nonnegative(),
-  delay: z.number().nonnegative().optional(),
-  triggerType: TimeTriggerType.optional(),
-})
-  .strict()
-  .check(checkExactlyOneEffectSource);
-export const TimeEffectRef = EffectSourceBase.extend({
-  ...AnimationEffectBase,
-  iterations: TimeIterations,
-  effectId: z.string().min(1),
-  duration: z.number().nonnegative().optional(),
-  delay: z.number().nonnegative().optional(),
-  triggerType: TimeTriggerType.optional(),
-})
-  .strict()
-  .check(checkAtMostOneEffectSource);
+export const TimeEffect = withPluginFields(
+  EffectSourceBase.extend({
+    ...AnimationEffectBase,
+    iterations: TimeIterations,
+    duration: z.number().nonnegative(),
+    delay: z.number().nonnegative().optional(),
+    triggerType: TimeTriggerType.optional(),
+  }),
+).check(checkExactlyOneEffectSource);
+export const TimeEffectRef = withPluginFields(
+  EffectSourceBase.extend({
+    ...AnimationEffectBase,
+    iterations: TimeIterations,
+    effectId: z.string().min(1),
+    duration: z.number().nonnegative().optional(),
+    delay: z.number().nonnegative().optional(),
+    triggerType: TimeTriggerType.optional(),
+  }),
+).check(checkAtMostOneEffectSource);
 
-export const ViewProgressEffect = EffectSourceBase.extend({
-  ...AnimationEffectBase,
-  iterations: ScrubIterations,
-  ...viewProgressEffectFields,
-})
-  .strict()
-  .check(checkExactlyOneEffectSource);
-export const ViewProgressEffectRef = EffectSourceBase.extend({
-  ...AnimationEffectBase,
-  iterations: ScrubIterations,
-  effectId: z.string().min(1),
-  ...viewProgressEffectFields,
-})
-  .strict()
-  .check(checkAtMostOneEffectSource);
+export const ViewProgressEffect = withPluginFields(
+  EffectSourceBase.extend({
+    ...AnimationEffectBase,
+    iterations: ScrubIterations,
+    ...viewProgressEffectFields,
+  }),
+).check(checkExactlyOneEffectSource);
+export const ViewProgressEffectRef = withPluginFields(
+  EffectSourceBase.extend({
+    ...AnimationEffectBase,
+    iterations: ScrubIterations,
+    effectId: z.string().min(1),
+    ...viewProgressEffectFields,
+  }),
+).check(checkAtMostOneEffectSource);
 
-export const PointerMoveEffect = EffectSourceBase.extend({
-  ...AnimationEffectBase,
-  iterations: ScrubIterations,
-  ...pointerMoveEffectFields,
-})
-  .strict()
-  .check(checkExactlyOneEffectSource);
-export const PointerMoveEffectRef = EffectSourceBase.extend({
-  ...AnimationEffectBase,
-  iterations: ScrubIterations,
-  effectId: z.string().min(1),
-  ...pointerMoveEffectFields,
-})
-  .strict()
-  .check(checkAtMostOneEffectSource);
+export const PointerMoveEffect = withPluginFields(
+  EffectSourceBase.extend({
+    ...AnimationEffectBase,
+    iterations: ScrubIterations,
+    ...pointerMoveEffectFields,
+  }),
+).check(checkExactlyOneEffectSource);
+export const PointerMoveEffectRef = withPluginFields(
+  EffectSourceBase.extend({
+    ...AnimationEffectBase,
+    iterations: ScrubIterations,
+    effectId: z.string().min(1),
+    ...pointerMoveEffectFields,
+  }),
+).check(checkAtMostOneEffectSource);
 
 export const ScrubEffect = z.union([ViewProgressEffect, PointerMoveEffect]);
 export const ScrubEffectRef = z.union([ViewProgressEffectRef, PointerMoveEffectRef]);
