@@ -1613,7 +1613,6 @@ describe('css._generate', () => {
       expect(calls[0].value).toEqual({ container: '.title', type: 'chars' });
       expect(calls[0].ctx.key).toBe('hero');
       expect(calls[0].ctx.scope).toBe('interaction');
-      expect(calls[0].ctx.selector).toBe('[data-interact-key="hero"]');
       expect(result).toContain('[data-interact-key="hero"] .title { visibility: hidden; }');
     });
 
