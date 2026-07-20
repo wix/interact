@@ -72,14 +72,14 @@ export const AnimationEndInteraction = withPluginFields(
     sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
   }),
 ).superRefine((interaction, ctx) => {
-    if (!hasEffectsOrSequences(interaction)) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Interaction must have at least one effect or sequence',
-        params: { domainCode: 'INTERACTION_EMPTY' },
-      } as any);
-    }
-  });
+  if (!hasEffectsOrSequences(interaction)) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Interaction must have at least one effect or sequence',
+      params: { domainCode: 'INTERACTION_EMPTY' },
+    } as any);
+  }
+});
 
 export const ViewEnterInteraction = withPluginFields(
   z.object({
@@ -90,14 +90,14 @@ export const ViewEnterInteraction = withPluginFields(
     sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
   }),
 ).superRefine((interaction, ctx) => {
-    if (!hasEffectsOrSequences(interaction)) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Interaction must have at least one effect or sequence',
-        params: { domainCode: 'INTERACTION_EMPTY' },
-      } as any);
-    }
-  });
+  if (!hasEffectsOrSequences(interaction)) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Interaction must have at least one effect or sequence',
+      params: { domainCode: 'INTERACTION_EMPTY' },
+    } as any);
+  }
+});
 
 export const ViewProgressInteraction = withPluginFields(
   z.object({
@@ -129,14 +129,14 @@ export const DiscreteInteraction = withPluginFields(
     sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
   }),
 ).superRefine((interaction, ctx) => {
-    if (!hasEffectsOrSequences(interaction)) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Interaction must have at least one effect or sequence',
-        params: { domainCode: 'INTERACTION_EMPTY' },
-      } as any);
-    }
-  });
+  if (!hasEffectsOrSequences(interaction)) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Interaction must have at least one effect or sequence',
+      params: { domainCode: 'INTERACTION_EMPTY' },
+    } as any);
+  }
+});
 
 export const Interaction = z.discriminatedUnion('trigger', [
   AnimationEndInteraction,

@@ -107,15 +107,8 @@ export function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
 }
 
 export function CSSRuleToString(rule: CSSRuleData): string {
-  const {
-    key,
-    childSelector,
-    declarations,
-    media,
-    states,
-    selectorCondition,
-    selectorSuffix,
-  } = rule;
+  const { key, childSelector, declarations, media, states, selectorCondition, selectorSuffix } =
+    rule;
   if (!declarations.length) {
     return '';
   }

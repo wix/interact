@@ -64,7 +64,12 @@ describe('splitText through the Interact plugin bridge (real @wix/splittext)', (
           trigger: 'hover',
           $splitText: { container: '.title', type: 'chars', hideUntilReady: true },
           effects: [
-            { key: 'hero', selector: '.split-c', namedEffect: { type: 'FadeIn' } as never, duration: 300 },
+            {
+              key: 'hero',
+              selector: '.split-c',
+              namedEffect: { type: 'FadeIn' } as never,
+              duration: 300,
+            },
           ],
         },
       ],
@@ -102,7 +107,9 @@ describe('splitText through the Interact plugin bridge (real @wix/splittext)', (
           key: 'hero',
           trigger: 'viewEnter',
           $splitText: { container: '.title', type: 'chars' },
-          sequences: [{ offset: 30, effects: [{ effectId: 'char-fade-up', selector: '.split-c' }] }],
+          sequences: [
+            { offset: 30, effects: [{ effectId: 'char-fade-up', selector: '.split-c' }] },
+          ],
         },
       ],
     };

@@ -69,10 +69,12 @@ export const splitTextStyle: InteractPluginStyleGenerator = (value, _) => {
     return [];
   }
 
-  return [{
-    declarations: [{ name: 'visibility', value: 'hidden' }],
-    selectorSuffix: ` ${container}:not([${READY_ATTR}])`,
-  }];
+  return [
+    {
+      declarations: [{ name: 'visibility', value: 'hidden' }],
+      selectorSuffix: ` ${container}:not([${READY_ATTR}])`,
+    },
+  ];
 };
 
 // Type the `$splitText` value so configs get autocomplete + checking.

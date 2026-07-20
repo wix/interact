@@ -435,9 +435,7 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      const initialRule = cssRules.find(
-        (r) => r.selectorSuffix === ':not([data-interact-enter])',
-      )!;
+      const initialRule = cssRules.find((r) => r.selectorSuffix === ':not([data-interact-enter])')!;
       expect(initialRule).toBeDefined();
 
       DEFAULT_INITIAL.forEach(({ name, value }) => {
@@ -1602,10 +1600,12 @@ describe('css._generate', () => {
         splitText: (value, ctx) => {
           calls.push({ value, ctx });
           const { container } = value as { container: string };
-          return [{
-            declarations: [{ name: 'visibility', value: 'hidden' }],
-            selectorSuffix: ` ${container}`
-          }];
+          return [
+            {
+              declarations: [{ name: 'visibility', value: 'hidden' }],
+              selectorSuffix: ` ${container}`,
+            },
+          ];
         },
       });
 
@@ -1635,10 +1635,12 @@ describe('css._generate', () => {
     });
 
     it('skips $-fields with no matching generator', () => {
-      const splitText = vi.fn(() => ([{
-        declarations: [{ name: 'name', value: 'value' }],
-        selectorSuffix: '.x'
-      }]));
+      const splitText = vi.fn(() => [
+        {
+          declarations: [{ name: 'name', value: 'value' }],
+          selectorSuffix: '.x',
+        },
+      ]);
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -1657,7 +1659,7 @@ describe('css._generate', () => {
     });
 
     it('routes effect-level $-fields with the resolved target key and effect scope', () => {
-      const seen: Array<{ key: string; scope: string; }> = [];
+      const seen: Array<{ key: string; scope: string }> = [];
       const config: InteractConfig = {
         effects: {},
         interactions: [

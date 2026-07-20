@@ -1003,7 +1003,7 @@ A plugin's **build-time** styling callback, passed in the `plugins` argument of 
 type InteractPluginStyleGenerator = (
   value: unknown,
   context: InteractPluginStyleContext,
-) => { declarations: { name: string; value: string | number; }[]; selectorSuffix?: string; }[];
+) => { declarations: { name: string; value: string | number }[]; selectorSuffix?: string }[];
 ```
 
 ### `InteractPluginStyleContext`

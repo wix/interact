@@ -12,10 +12,10 @@ import { add, remove, generate } from '@wix/interact';
 
 ## Functions Overview
 
-| Function     | Purpose                                                                          | Parameters                 | Returns  |
-| ------------ | -------------------------------------------------------------------------------- | -------------------------- | -------- |
-| `add()`      | Add interactions to an element                                                   | `element`, `key?`          | `void`   |
-| `remove()`   | Remove interactions from an element                                              | `key`                      | `void`   |
+| Function     | Purpose                                                                          | Parameters                             | Returns  |
+| ------------ | -------------------------------------------------------------------------------- | -------------------------------------- | -------- |
+| `add()`      | Add interactions to an element                                                   | `element`, `key?`                      | `void`   |
+| `remove()`   | Remove interactions from an element                                              | `key`                                  | `void`   |
 | `generate()` | Generate complete CSS for all animations, transitions, and scroll-driven effects | `config`, `useFirstChild?`, `plugins?` | `string` |
 
 ---

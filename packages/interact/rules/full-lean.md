@@ -731,19 +731,19 @@ const config = {
       key: 'hero',
       trigger: 'viewEnter',
       $splitText: { container: '.title', type: 'chars' },
-      sequences: [
-        { offset: 30, effects: [{ effectId: 'char-fade-up', selector: '.split-c' }] },
-      ],
+      sequences: [{ offset: 30, effects: [{ effectId: 'char-fade-up', selector: '.split-c' }] }],
     },
   ],
 };
 
 const css = Interact.generate(config, /* useFirstChild */ true, {
   splitText: (value, _) => {
-    return [{
-      declarations: [{ name: 'visibility', value: 'hidden' }],
-      selectorSuffix: ` ${value.container ?? ''}:not([data-splittext-ready])`
-    }];
+    return [
+      {
+        declarations: [{ name: 'visibility', value: 'hidden' }],
+        selectorSuffix: ` ${value.container ?? ''}:not([data-splittext-ready])`,
+      },
+    ];
   },
 });
 // Embed css in HTML — see CSS Generation & FOUC Prevention
@@ -764,16 +764,16 @@ Default split wrapper classes: `.split-c` (chars), `.split-w` (words), `.split-l
 
 ## Static API
 
-| Method / Property                   | Description                                                                                                   |
-| :---------------------------------- | :------------------------------------------------------------------------------------------------------------ |
+| Method / Property                            | Description                                                                                                                                                     |
+| :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `generate(config, useFirstChild?, plugins?)` | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML. `plugins` = per-plugin SSR style generators (see [Plugins](#plugins)). |
-| `Interact.create(config)`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                   |
-| `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `generate()` and `create`.                               |
-| `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                             |
-| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — force reduced-motion behavior regardless of OS setting.                        |
-| `Interact.allowA11yTriggers`        | `boolean` (default: `true`) — enable accessibility trigger variants (`interest`, `activate`).                 |
-| `Interact.setup(options)`           | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below. |
-| `Interact.use(name, plugin)`        | Register an external plugin by name (see [Plugins](#plugins)). Call before `create`.                          |
+| `Interact.create(config)`                    | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                                                                     |
+| `Interact.registerEffects(presets)`          | Register named effect presets. MUST be called before `generate()` and `create`.                                                                                 |
+| `Interact.destroy()`                         | Tear down all instances. Call on unmount or route change to prevent memory leaks.                                                                               |
+| `Interact.forceReducedMotion`                | `boolean` (default: `false`) — force reduced-motion behavior regardless of OS setting.                                                                          |
+| `Interact.allowA11yTriggers`                 | `boolean` (default: `true`) — enable accessibility trigger variants (`interest`, `activate`).                                                                   |
+| `Interact.setup(options)`                    | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below.                                                   |
+| `Interact.use(name, plugin)`                 | Register an external plugin by name (see [Plugins](#plugins)). Call before `create`.                                                                            |
 
 **`Interact.setup(options)`** — optional configuration object:
 

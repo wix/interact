@@ -8,7 +8,7 @@
  * Interact runs on disconnect/teardown.
  */
 
-import { CSSRuleData } from "./css";
+import { CSSRuleData } from './css';
 
 /**
  * Prefix that marks a config field as plugin config. A field named `$<name>` routes its value to

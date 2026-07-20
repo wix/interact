@@ -191,11 +191,13 @@ function collectFieldPluginStyles(
       continue;
     }
 
-    rules.push(...plugins[pluginName](source[pluginField], {
-      key,
-      scope,
-      config: source,
-    }).map((data) => ({...data, key, media})));
+    rules.push(
+      ...plugins[pluginName](source[pluginField], {
+        key,
+        scope,
+        config: source,
+      }).map((data) => ({ ...data, key, media })),
+    );
   }
   return rules;
 }
@@ -242,15 +244,7 @@ function effectToCSS(
   let usedProperties: ListPropertyName[] = [];
 
   if (plugins) {
-    rules.push(
-      ...collectFieldPluginStyles(
-        'effect',
-        effect,
-        key,
-        media,
-        plugins
-      )
-    );
+    rules.push(...collectFieldPluginStyles('effect', effect, key, media, plugins));
   }
 
   if (namedEffect || keyframeEffect) {
@@ -499,14 +493,15 @@ function parseInteraction(
     .map((effect) => resolveEffectForCSS(effect, interaction, config))
     .filter((effect) => effect !== null);
 
-  const cssRules = plugins ?
-    collectFieldPluginStyles(
-      'interaction',
-      interaction,
-      key,
-      getFullPredicateByType(conditions, configConditions, 'media'),
-      plugins
-    ) : [];
+  const cssRules = plugins
+    ? collectFieldPluginStyles(
+        'interaction',
+        interaction,
+        key,
+        getFullPredicateByType(conditions, configConditions, 'media'),
+        plugins,
+      )
+    : [];
 
   const { trigger } = interaction;
   const motionTrigger = {
@@ -528,7 +523,7 @@ function parseInteraction(
       keyframesMap,
       motionTrigger,
       useFirstChild,
-      plugins
+      plugins,
     );
     cssRules.push(...rules);
 
@@ -550,7 +545,7 @@ function parseInteraction(
         motionTrigger,
         useFirstChild,
         targetUsedProperties,
-        plugins
+        plugins,
       ),
     ),
   );

@@ -1,6 +1,6 @@
 # Plugins
 
-`@wix/interact` can route parts of your config to **plugins** — external code registered at runtime. Interact acts purely as a bridge: it knows a plugin's *name*, and when an interaction or effect carries a field named `$<name>` it hands that field's value to the plugin. Interact never knows what the plugin does.
+`@wix/interact` can route parts of your config to **plugins** — external code registered at runtime. Interact acts purely as a bridge: it knows a plugin's _name_, and when an interaction or effect carries a field named `$<name>` it hands that field's value to the plugin. Interact never knows what the plugin does.
 
 This keeps Interact free of any plugin-specific code, and keeps plugins (like [`@wix/splittext`](https://www.npmjs.com/package/@wix/splittext)) free of any Interact-specific code. Neither package depends on the other — the glue lives in your app.
 
@@ -45,12 +45,12 @@ If a `$`-prefixed field names a plugin that was never registered, Interact throw
 type InteractPlugin = (
   value: unknown,
   context: {
-    root: HTMLElement;              // the interaction's (or effect target's) root element
-    key: string;                    // the interaction/effect key
+    root: HTMLElement; // the interaction's (or effect target's) root element
+    key: string; // the interaction/effect key
     scope: 'interaction' | 'effect';
     config: Record<string, unknown>; // the interaction/effect object the field was on
   },
-) => void | (() => void);            // optionally return a cleanup function
+) => void | (() => void); // optionally return a cleanup function
 ```
 
 - Plugins run at **connect** time (when the element enters the DOM / is added).
@@ -152,7 +152,7 @@ A `$`-prefixed field can also sit on an individual effect, using that effect's *
 
 ## SSR styling (FOUC prevention)
 
-A plugin often needs initial CSS *before* it runs — e.g. hiding the un-split text so an entrance animation doesn't flash the raw content. That's a build-time concern, so it lives in [`generate()`](../api/functions.md#generateconfig-usefirstchild-plugins), not in the runtime `use()` callback.
+A plugin often needs initial CSS _before_ it runs — e.g. hiding the un-split text so an entrance animation doesn't flash the raw content. That's a build-time concern, so it lives in [`generate()`](../api/functions.md#generateconfig-usefirstchild-plugins), not in the runtime `use()` callback.
 
 Pass a **second, separate callback per plugin** as `generate()`'s third argument. For every `$<name>` field, `generate()` calls the matching generator with the field's (opaque) value and a context, and appends the returned CSS. Like `create()`, `generate()` never looks inside the value — the plugin decides what to emit (and defines its own selectors under `selectorSuffix`).
 
@@ -164,7 +164,7 @@ type InteractPluginStyleGenerator = (
     scope: 'interaction' | 'effect';
     config: Record<string, unknown>;
   },
-) => { declarations: { name: string; value: string | number; }[]; selectorSuffix?: string }[];
+) => { declarations: { name: string; value: string | number }[]; selectorSuffix?: string }[];
 ```
 
 `selectorSuffix` is concatenated to the base selector (`[data-interact-key="<key>"]`), to refine the target for the styling.
@@ -198,10 +198,12 @@ export const splitTextPlugin: InteractPlugin = (value, { root }) => {
 export const splitTextStyle: InteractPluginStyleGenerator = (value, _) => {
   const { container, hideUntilReady } = value as { container: string; hideUntilReady?: boolean };
   if (!hideUntilReady) return;
-  return [{
-    declarations: [{name: 'visibility', value: 'hidden'}],
-    selectorSuffix: ` ${container}:not([${READY_ATTR}])`,
-  }];
+  return [
+    {
+      declarations: [{ name: 'visibility', value: 'hidden' }],
+      selectorSuffix: ` ${container}:not([${READY_ATTR}])`,
+    },
+  ];
 };
 ```
 
