@@ -96,15 +96,15 @@ This boundary ensures that:
 
 ### Recommended v1 scope
 
-| Input | Support | Behavior |
-|---|---|---|
-| Static `.svg` | Supported | Imported without motion; animation may be added in the Editor |
-| SVG with SMIL | Supported subset | Extract `<animate attributeName="d">` |
-| SVG with embedded CSS | Supported subset | Extract local `@keyframes` that animate `d` |
-| `.svgz` | Conditional | Decompress with strict size and compression-ratio limits, then use the SVG pipeline |
-| JavaScript-driven SVG | Static only | Remove scripts and report that motion could not be imported |
-| Lottie JSON / dotLottie | Later phase | Add a separate path-only importer |
-| Raster, GIF, APNG, video | Unsupported | Cannot become editable path morph tracks |
+| Input                    | Support          | Behavior                                                                            |
+| ------------------------ | ---------------- | ----------------------------------------------------------------------------------- |
+| Static `.svg`            | Supported        | Imported without motion; animation may be added in the Editor                       |
+| SVG with SMIL            | Supported subset | Extract `<animate attributeName="d">`                                               |
+| SVG with embedded CSS    | Supported subset | Extract local `@keyframes` that animate `d`                                         |
+| `.svgz`                  | Conditional      | Decompress with strict size and compression-ratio limits, then use the SVG pipeline |
+| JavaScript-driven SVG    | Static only      | Remove scripts and report that motion could not be imported                         |
+| Lottie JSON / dotLottie  | Later phase      | Add a separate path-only importer                                                   |
+| Raster, GIF, APNG, video | Unsupported      | Cannot become editable path morph tracks                                            |
 
 ### Supported SMIL subset
 
@@ -246,37 +246,33 @@ An illustrative schema:
 
 ```ts
 type MorphSetV1 = {
-  version: 1
-  defaultAnimationId?: string
+  version: 1;
+  defaultAnimationId?: string;
 
   animations: Array<{
-    id: string
-    name: string
-    source: "upload" | "editor"
+    id: string;
+    name: string;
+    source: 'upload' | 'editor';
 
-    durationMs: number
-    iterations: number | "infinite"
-    direction:
-      | "normal"
-      | "reverse"
-      | "alternate"
-      | "alternate-reverse"
-    fill: "none" | "forwards" | "backwards" | "both"
+    durationMs: number;
+    iterations: number | 'infinite';
+    direction: 'normal' | 'reverse' | 'alternate' | 'alternate-reverse';
+    fill: 'none' | 'forwards' | 'backwards' | 'both';
 
     tracks: Array<{
-      targetId: string
-      topology: string
-      offsets: number[]
-      easings: string[]
-      frames: Array<"$base" | number[]>
-    }>
+      targetId: string;
+      topology: string;
+      offsets: number[];
+      easings: string[];
+      frames: Array<'$base' | number[]>;
+    }>;
 
     importMetadata?: {
-      format: "smil" | "css" | "editor"
-      warnings: string[]
-    }
-  }>
-}
+      format: 'smil' | 'css' | 'editor';
+      warnings: string[];
+    };
+  }>;
+};
 ```
 
 ### Timing model
@@ -299,27 +295,27 @@ Per-path repeat counts and unrelated time containers should remain outside the v
 
 ```ts
 type SVGImageMorphState = {
-  version: 1
+  version: 1;
 
-  defaultAnimationId?: string
-  selectedAnimationId?: string
+  defaultAnimationId?: string;
+  selectedAnimationId?: string;
 
   animations: Array<{
-    id: string
-    definitionRef?: string
-    inlineDefinition?: MorphSetV1
-  }>
+    id: string;
+    definitionRef?: string;
+    inlineDefinition?: MorphSetV1;
+  }>;
 
   defaultPose: {
-    animationId?: string
-    progress: 0
-  }
-}
+    animationId?: string;
+    progress: 0;
+  };
+};
 
 type SVGImage = {
-  assetRef: string
-  morph?: SVGImageMorphState
-}
+  assetRef: string;
+  morph?: SVGImageMorphState;
+};
 ```
 
 The component logically owns:
@@ -334,7 +330,7 @@ Large imported geometry does not need to be physically duplicated on every compo
 An uploaded animated SVG should produce:
 
 ```ts
-svgImage.morph.defaultAnimationId = importedAnimation.id
+svgImage.morph.defaultAnimationId = importedAnimation.id;
 ```
 
 This identifies the default animation but does not cause it to play in the Editor.
@@ -349,20 +345,17 @@ Expose a single logical handle even when the implementation contains many path a
 
 ```ts
 interface MorphPlayer {
-  readonly backend: "waapi-d" | "smil-d" | "static"
-  readonly ready: Promise<void>
+  readonly backend: 'waapi-d' | 'smil-d' | 'static';
+  readonly ready: Promise<void>;
 
-  play(options?: {
-    from?: number
-    direction?: 1 | -1
-  }): void
+  play(options?: { from?: number; direction?: 1 | -1 }): void;
 
-  pause(): void
-  seek(progress: number): void
-  setPlaybackRate(rate: number): void
-  finish(): void
-  cancel(): void
-  destroy(): void
+  pause(): void;
+  seek(progress: number): void;
+  setPlaybackRate(rate: number): void;
+  finish(): void;
+  cancel(): void;
+  destroy(): void;
 }
 ```
 
@@ -389,7 +382,7 @@ const effect = new KeyframeEffect(
   frames.map((frame, index) => ({
     d: `path("${serialize(frame)}")`,
     offset: offsets[index],
-    easing: easings[index] ?? "linear",
+    easing: easings[index] ?? 'linear',
   })),
   {
     duration: durationMs,
@@ -397,9 +390,9 @@ const effect = new KeyframeEffect(
     direction,
     fill,
   },
-)
+);
 
-const animation = new Animation(effect, document.timeline)
+const animation = new Animation(effect, document.timeline);
 ```
 
 Using `new Animation(...)` keeps the animation idle until the engine explicitly plays or seeks it. `Element.animate()` begins playback immediately.
@@ -460,7 +453,7 @@ This is a generated fallback backend, not a general CSS-to-SMIL polyfill. The sy
 Do not rely only on:
 
 ```ts
-CSS.supports("d", 'path("M0 0 L1 1")')
+CSS.supports('d', 'path("M0 0 L1 1")');
 ```
 
 Safari may parse the property while not applying it.
@@ -494,13 +487,13 @@ Use capability results rather than user-agent sniffing.
 
 ## 15. Multi-path strategy comparison
 
-| Strategy | Integration | Portability | Performance and size | Decision |
-|---|---|---|---|---|
-| One track per path | Direct WAAPI and SMIL mapping; simple target IDs | High | More native effect objects, but geometry normally dominates | **Recommended** |
-| Merge every path | Simple single animation | Technically portable | Fewer effect objects but similar coordinate payload | Only when semantics are provably identical |
-| Animate custom properties | Difficult target/cascade model | Low | Does not remove geometry data | Reject |
-| CSS keyframes per path | Good for declarative output | Limited by CSS `d` | Similar to WAAPI and can duplicate fallback data | Optional output |
-| JavaScript `requestAnimationFrame` sampler | Maximum control | High | Main-thread parsing, interpolation, and DOM writes | Last-resort backend |
+| Strategy                                   | Integration                                      | Portability          | Performance and size                                        | Decision                                   |
+| ------------------------------------------ | ------------------------------------------------ | -------------------- | ----------------------------------------------------------- | ------------------------------------------ |
+| One track per path                         | Direct WAAPI and SMIL mapping; simple target IDs | High                 | More native effect objects, but geometry normally dominates | **Recommended**                            |
+| Merge every path                           | Simple single animation                          | Technically portable | Fewer effect objects but similar coordinate payload         | Only when semantics are provably identical |
+| Animate custom properties                  | Difficult target/cascade model                   | Low                  | Does not remove geometry data                               | Reject                                     |
+| CSS keyframes per path                     | Good for declarative output                      | Limited by CSS `d`   | Similar to WAAPI and can duplicate fallback data            | Optional output                            |
+| JavaScript `requestAnimationFrame` sampler | Maximum control                                  | High                 | Main-thread parsing, interpolation, and DOM writes          | Last-resort backend                        |
 
 ### Why custom properties should be rejected
 
@@ -649,11 +642,7 @@ When `prefers-reduced-motion: reduce` is active:
 Instead of storing:
 
 ```json
-[
-  "M 10 20 C ...",
-  "M 11 21 C ...",
-  "M 12 22 C ..."
-]
+["M 10 20 C ...", "M 11 21 C ...", "M 12 22 C ..."]
 ```
 
 store:
