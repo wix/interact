@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { generate, _generate, DEFAULT_INITIAL } from '../src/core/css';
+import { staggerPropName } from '../src/core/utilities';
 import type { InteractConfig, CSSRuleData } from '../src/types';
 
 describe('css.generate', () => {
@@ -398,6 +399,7 @@ describe('css.generate', () => {
 });
 
 const isAnimationProp = (name: string) => /^--animation-\d/.test(name);
+const isAnimationDelayProp = (name: string) => /^--animation-delay-/.test(name);
 const isCompositionProp = (name: string) => /^--animation-composition-/.test(name);
 const isTransitionProp = (name: string) => /^--transition-/.test(name);
 const isTimelineProp = (name: string) => /^--animation-timeline-/.test(name);
@@ -1202,10 +1204,11 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      const animRules = cssRules.filter(
-        (r) =>
-          r.declarations.some((d) => isAnimationProp(d.name)) &&
-          !r.declarations.some((d) => String(d.value).includes('var(')),
+      // per-effect definition rules: the `--animation-N` declaration holds a concrete value (no var).
+      // NB: these rules now also carry an `--animation-delay-N` calc that itself contains `var(`, so
+      // we match on the animation-prop declaration's own value rather than the whole rule.
+      const animRules = cssRules.filter((r) =>
+        r.declarations.some((d) => isAnimationProp(d.name) && !String(d.value).includes('var(')),
       );
       expect(animRules.length).toBeGreaterThanOrEqual(2);
 
@@ -1318,6 +1321,108 @@ describe('css._generate', () => {
       const conditionedRule = seqListRules.find((r) => r.media);
       expect(conditionedRule).toBeDefined();
       expect(conditionedRule!.media).toContain('min-width: 1024px');
+    });
+
+    it('should emit a generic animation-delay calc referencing the shared stagger custom property per sequence effect', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                sequenceId: 'seq-1',
+                delay: 100,
+                offset: 50,
+                effects: [
+                  {
+                    effectId: 'a',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'aKf',
+                      keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                    },
+                  },
+                  {
+                    effectId: 'b',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'bKf',
+                      keyframes: [{ opacity: '1' }, { opacity: '0' }],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const css = generate(config);
+
+      // base = sequence delay (100) + effect own delay (0); offset = 50; only the factor var is dynamic.
+      // The names must be exactly what the run-time writes (shared staggerPropName helper).
+      expect(css).toContain(`calc(var(${staggerPropName('seq-1', 0)}, 0) * 50ms + 100ms)`);
+      expect(css).toContain(`calc(var(${staggerPropName('seq-1', 1)}, 0) * 50ms + 100ms)`);
+    });
+
+    it('should keep animation and animation-delay lists positionally aligned (equal entry counts)', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                sequenceId: 'seq-align',
+                effects: [
+                  {
+                    effectId: 'a',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'aKf',
+                      keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                    },
+                  },
+                  {
+                    effectId: 'b',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'bKf',
+                      keyframes: [{ opacity: '1' }, { opacity: '0' }],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      // In every coordinated-list rule that sets both properties, the comma-separated `animation`
+      // and `animation-delay` values must have the same number of entries so delays line up.
+      const listRules = cssRules.filter(
+        (r) =>
+          r.declarations.some((d) => isAnimationProp(d.name) && String(d.value).includes('var(')) &&
+          r.declarations.some(
+            (d) => isAnimationDelayProp(d.name) && String(d.value).includes('var('),
+          ),
+      );
+      expect(listRules.length).toBeGreaterThanOrEqual(1);
+      listRules.forEach((rule) => {
+        const anim = rule.declarations.find(
+          (d) => isAnimationProp(d.name) && String(d.value).includes('var('),
+        )!;
+        const delay = rule.declarations.find(
+          (d) => isAnimationDelayProp(d.name) && String(d.value).includes('var('),
+        )!;
+        const count = (v: string | number) => String(v).split(',').length;
+        expect(count(delay.value)).toBe(count(anim.value));
+      });
     });
   });
 

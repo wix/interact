@@ -360,7 +360,7 @@ describe('css resolvers', () => {
         expect(result?.effects[0].conditions).toContain('condition');
         expect(result?.effects[1].conditions).toContain('condition');
       });
-      it('should add offsets (delay) to all individual effects', () => {
+      it('should set only the stagger base delay (sequence delay + own delay) and record sequenceIndex; the eased offset is applied at run-time via calc', () => {
         const result = resolveSequenceForCSS(
           {
             delay: 100,
@@ -370,12 +370,16 @@ describe('css resolvers', () => {
           BASE_INTERACTION,
           EMPTY_CONFIG,
         );
+        // offset is no longer baked in — both effects carry only the base delay
         expect((result?.effects[0] as any).delay).toBe(100);
-        expect((result?.effects[1] as any).delay).toBe(150);
+        expect((result?.effects[1] as any).delay).toBe(100);
+        expect((result?.effects[0] as any).sequenceIndex).toBe(0);
+        expect((result?.effects[1] as any).sequenceIndex).toBe(1);
       });
-      it('should add correct offsets to effects by original order (even if null after resolving)', () => {
+      it('should preserve each effect original index (sequenceIndex) even when some effects are null after resolving', () => {
         const result = resolveSequenceForCSS(
           {
+            delay: 0,
             offset: 100,
             effects: [
               { effectId: 'e1' } as EffectRef,
@@ -387,8 +391,12 @@ describe('css resolvers', () => {
           EMPTY_CONFIG,
         );
         expect(result?.effects).toHaveLength(2);
+        // base delay only (sequence delay 0 + own delay 0); the offset is applied at run-time
         expect((result?.effects[0] as any).delay).toBe(0);
-        expect((result?.effects[1] as any).delay).toBe(200);
+        expect((result?.effects[1] as any).delay).toBe(0);
+        // original indices survive filtering (e1 → 0, e3 → 2) so the stagger prop name matches runtime
+        expect((result?.effects[0] as any).sequenceIndex).toBe(0);
+        expect((result?.effects[1] as any).sequenceIndex).toBe(2);
       });
     });
   });

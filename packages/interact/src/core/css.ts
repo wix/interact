@@ -18,7 +18,7 @@ import {
 } from '../utils';
 import { getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
-import { getElementHash, getUniqueEncodedHash } from './utilities';
+import { getElementHash, getUniqueEncodedHash, staggerPropName } from './utilities';
 import { keyframesToCSS, CSSRuleToString, buildListsRule } from './cssUtils';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { getCSSAnimation, MotionKeyframeEffect, TriggerVariant } from '@wix/motion';
@@ -40,7 +40,17 @@ const LIST_ANIMATION_PROPERTY_NAMES = [
 
 type AnimationPropertyName = (typeof LIST_ANIMATION_PROPERTY_NAMES)[number];
 
-const LIST_PROPERTY_NAMES: ListPropertyName[] = ['transition', ...LIST_ANIMATION_PROPERTY_NAMES];
+// `animation-delay` is placed right after `animation` so that, in the final coordinated-list rule,
+// the `animation-delay` longhand is emitted after the `animation` shorthand and therefore overrides
+// the shorthand's delay slot (see effectToCSS / buildListsRule).
+const LIST_PROPERTY_NAMES: ListPropertyName[] = [
+  'transition',
+  'animation',
+  'animation-delay',
+  'animation-composition',
+  'animation-timeline',
+  'animation-range',
+];
 
 const LIST_PROPERTY_NAMES_MOTION: Record<AnimationPropertyName, string> = {
   animation: 'animation',
@@ -51,6 +61,7 @@ const LIST_PROPERTY_NAMES_MOTION: Record<AnimationPropertyName, string> = {
 
 const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
   animation: 'none',
+  'animation-delay': '0s',
   'animation-composition': 'replace',
   transition: '_',
   'animation-timeline': 'auto',
@@ -175,6 +186,7 @@ function effectToCSS(
   customProps: ListCustomProps,
   trigger: TriggerVariant,
   childSelector?: string,
+  staggerCalc?: string,
 ): {
   rules: CSSRuleData[];
   keyframes: MotionKeyframeEffect[];
@@ -210,7 +222,7 @@ function effectToCSS(
   let usedProperties: ListPropertyName[] = [];
 
   if (namedEffect || keyframeEffect) {
-    usedProperties = [...LIST_ANIMATION_PROPERTY_NAMES];
+    usedProperties = [...LIST_ANIMATION_PROPERTY_NAMES, 'animation-delay'];
 
     const animationOptions = effectToAnimationOptions(effect);
     const cssAnimations = getCSSAnimation(null, animationOptions, trigger).filter(
@@ -242,6 +254,18 @@ function effectToCSS(
           })
           .join(', ') || LIST_PROPERTY_FALLBACKS[propertyName],
     }));
+
+    // The `animation-delay` longhand is authoritative over the shorthand's delay slot. For sequence
+    // effects its value is a `calc(...)` referencing a per-element stagger custom property that the
+    // run-time populates (see add.ts); otherwise it is the effect's own delay. One entry per
+    // css-animation keeps it positionally aligned with the `animation` list.
+    const delayValue = staggerCalc ?? `${effect.delay || 1}ms`;
+    animationDeclarations.push({
+      name: customProps['animation-delay'],
+      value:
+        cssAnimations.map(() => delayValue).join(', ') ||
+        LIST_PROPERTY_FALLBACKS['animation-delay'],
+    });
 
     if (initial) {
       // declare animation and composition custom properties with initial dependent on data-motion-enter
@@ -310,6 +334,7 @@ function parseEffect(
   useFirstChild: boolean = true,
   sequenceCustomProps?: Record<ListPropertyName, string>,
   precomputedTargetHash?: string,
+  staggerCalc?: string,
 ): { rules: CSSRuleData[]; usedProperties: ListPropertyName[] } {
   const { key } = effect;
   const targetHash = precomputedTargetHash ?? getElementHash(effect);
@@ -343,6 +368,7 @@ function parseEffect(
     localCustomProps,
     trigger,
     childSelector,
+    staggerCalc,
   );
 
   // update keyframes map
@@ -385,6 +411,13 @@ function parseSequence(
 
     const seqCustomProps = generateSequenceCustomProps(targetHash, interactionIdx, index);
 
+    // Generic per-element stagger delay: the run-time populates `staggerProp` on each matched
+    // element with the eased ordinal factor `f`, and CSS resolves `f * offset + base` per element.
+    // `base` (sequence delay + effect's own delay) and `offset` are static; only `f` is dynamic.
+    const staggerProp = staggerPropName(sequence.sequenceId, effect.sequenceIndex ?? 0);
+    const base = effect.delay || 0;
+    const staggerCalc = `calc(var(${staggerProp}, 0) * ${sequence.offset}ms + ${base}ms)`;
+
     const { rules, usedProperties } = parseEffect(
       configConditions,
       interactionIdx,
@@ -395,6 +428,7 @@ function parseSequence(
       useFirstChild,
       seqCustomProps,
       targetHash,
+      staggerCalc,
     );
     cssRules.push(...rules);
 

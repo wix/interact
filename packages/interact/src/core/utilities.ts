@@ -42,3 +42,17 @@ export function getUniqueEncodedHash(hash: string): string {
   }
   return ((h1 >>> 0) * 0x100000 + ((h2 >>> 0) % 0x100000)).toString(36);
 }
+
+/**
+ * Name of the CSS custom property that carries a sequence effect's per-element stagger factor.
+ *
+ * This is the single source of truth shared by the build-time CSS generator (which embeds
+ * `var(<name>)` inside an `animation-delay: calc(...)`) and the run-time (which writes the
+ * per-element factor via `element.style.setProperty`). The two MUST agree byte-for-byte, so the
+ * name is derived only from identifiers computed identically on both sides: the `sequenceId` and
+ * the effect's original index within the sequence's `effects` array. Notably it does NOT use the
+ * interaction index, which is positional in the CSS pass but a module-global counter at run-time.
+ */
+export function staggerPropName(sequenceId: string, effectIndex: number): string {
+  return `--wi-stg-${getUniqueEncodedHash(`${sequenceId}\0${effectIndex}`)}`;
+}

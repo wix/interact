@@ -29,6 +29,7 @@ vi.mock('@wix/motion', () => {
     getWebAnimation: vi.fn(),
     getScrubScene: vi.fn(),
     getEasing: vi.fn((v: string) => v),
+    getJsEasing: vi.fn(() => (t: number) => t),
     getAnimation: vi.fn(),
     registerEffects: vi.fn(),
     getSequence: vi.fn().mockReturnValue(mockSequence),

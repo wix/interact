@@ -17,22 +17,6 @@ export function camelToKebabCase(property: string): string {
   return property.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
 }
 
-export function calculateSequenceEffectsOffsets(
-  effects: ((any & { delay?: number }) | null)[],
-  delay: number,
-  offset: number,
-  offsetEasing: (p: number) => number,
-): void {
-  const maxIndex = effects.length - 1;
-
-  effects.forEach((effect, index) => {
-    if (effect) {
-      const safeOffset = index ? (offsetEasing(index / maxIndex) * maxIndex * offset) | 0 : 0;
-      effect.delay = delay + safeOffset + (effect.delay || 0);
-    }
-  });
-}
-
 /**
  * Applies a selector condition predicate to a base selector.
  * - If `&` is in the predicate, replace `&` with the base selector

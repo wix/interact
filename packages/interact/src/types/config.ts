@@ -63,6 +63,10 @@ export type ResolvedEffect = ElementIdentifier &
     conditions: string[];
     triggerType: TimeAnimationTriggerType;
     initial: boolean;
+    /** Delay in ms. For sequence effects this is the stagger base (sequenceDelay + effectOwnDelay). */
+    delay?: number;
+    /** Original 0-based index within the sequence's `effects` array; used to derive the stagger custom-property name. */
+    sequenceIndex?: number;
   };
 
 export type ResolvedSequence = {

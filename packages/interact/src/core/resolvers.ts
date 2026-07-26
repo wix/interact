@@ -13,7 +13,7 @@ import type {
   TimeAnimationTriggerType,
   TriggerType,
 } from '../types';
-import { isTemplatedKey, generateId, calculateSequenceEffectsOffsets } from '../utils';
+import { isTemplatedKey, generateId } from '../utils';
 import { shouldUseInitial } from './utilities';
 
 const TIME_TRIGGER_TO_DEFAULT_TYPE: Map<TriggerType, TimeAnimationTriggerType> = new Map([
@@ -132,20 +132,31 @@ export function resolveSequenceForCSS(
     ...new Set((conditions || []).filter((condition: string) => configConditions[condition])),
   ];
   // resolving effects and cascading the conditions from sequence
-  const resolvedEffects = effects.map((effect) => {
+  const resolvedEffects = effects.map((effect, index) => {
     if (!effect.conditions) {
       effect.conditions = [...conditions];
     } else {
       effect.conditions.push(...conditions);
     }
-    return resolveEffectForCSS({ ...effect, triggerType }, interaction, config);
+    const resolved = resolveEffectForCSS({ ...effect, triggerType }, interaction, config);
+    if (resolved) {
+      // record the effect's original position in the sequence, used to derive the stagger
+      // custom-property name (must match the run-time write, see core/utilities.ts:staggerPropName)
+      resolved.sequenceIndex = index;
+      // Bake only the stagger BASE into the delay (sequence delay + effect's own delay). The
+      // per-element eased stagger is applied at run-time via `animation-delay: calc(...)` that
+      // references a custom property, since the matched element count/order is unknown until the
+      // DOM is queried (see add.ts).
+      resolved.delay = delay + (resolved.delay || 0);
+    }
+    return resolved;
   });
 
-  // resolving offsets
+  // offsetEasing is still resolved to a function to satisfy the ResolvedSequence type; the eased
+  // stagger itself is now computed at run-time (add.ts) rather than baked into the CSS here.
   if (!(typeof offsetEasing === 'function')) {
     offsetEasing = getJsEasing(offsetEasing) || ((x) => x);
   }
-  calculateSequenceEffectsOffsets(resolvedEffects, delay, offset, offsetEasing);
 
   // removing unsupported effects and the whole sequence if all are unsupported
   const filteredEffects = resolvedEffects.filter((effect) => effect !== null);

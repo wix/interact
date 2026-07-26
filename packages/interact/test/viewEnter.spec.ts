@@ -15,6 +15,7 @@ vi.mock('@wix/motion', () => ({
     ready: Promise.resolve(),
   }),
   registerEffects: vi.fn(),
+  getJsEasing: vi.fn(() => (t: number) => t),
 }));
 
 vi.mock('fastdom', () => ({

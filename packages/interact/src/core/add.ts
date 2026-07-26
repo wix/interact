@@ -15,10 +15,12 @@ import type {
   AnimationOptions,
 } from '../types';
 import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
-import { getInterpolatedKey } from './utilities';
+import { getInterpolatedKey, staggerPropName } from './utilities';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { Interact, getSelector } from './Interact';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
+import fastdom from 'fastdom';
+import { getJsEasing } from '@wix/motion';
 import type { AnimationGroupArgs } from '@wix/motion';
 
 type InteractionsToApply = Array<
@@ -398,6 +400,99 @@ function _attachSequenceTriggers(
   });
 }
 
+function _resolveOffsetEasing(offsetEasing: SequenceConfig['offsetEasing']): (p: number) => number {
+  if (typeof offsetEasing === 'function') {
+    return offsetEasing;
+  }
+  return getJsEasing(offsetEasing || 'linear') || ((x) => x);
+}
+
+/**
+ * Writes each matched element's stagger factor into the custom property that its sequence effect's
+ * generated `animation-delay: calc(var(--wi-stg-…, 0) * offset + base)` reads (see css.ts). The
+ * factor is the eased running ordinal across every (effect → matched element) pair of the sequence,
+ * in effect order and DOM order — which reduces to the plain integer ordinal for the default linear
+ * easing. `staggerPropName` is the single source of truth shared with the CSS generator.
+ *
+ * It always re-resolves the full matched set (independent of any incremental list batch), so it
+ * doubles as the reindex path when list items are added/removed and ordinals/counts shift.
+ */
+function _applySequenceStagger(
+  sequenceConfig: SequenceConfig,
+  sequenceId: string,
+  sourceKey: string,
+  sourceController: IInteractionController,
+  instance: Interact,
+): void {
+  if (Interact.forceReducedMotion) {
+    return;
+  }
+
+  const seqMql = getMediaQuery(sequenceConfig.conditions || [], instance.dataCache.conditions);
+  if (seqMql && !seqMql.matches) {
+    return;
+  }
+
+  const seqEffects: (Effect | EffectRef)[] = sequenceConfig.effects || [];
+  const targets: { element: HTMLElement; prop: string }[] = [];
+
+  for (let effectIndex = 0; effectIndex < seqEffects.length; effectIndex++) {
+    const effect = seqEffects[effectIndex];
+    const effectId = (effect as EffectRef).effectId;
+    const resolvedEffect = effectId ? instance.dataCache.effects[effectId] || {} : {};
+    const effectOptions = { ...resolvedEffect, ...effect };
+
+    const effectMql = getMediaQuery(effectOptions.conditions || [], instance.dataCache.conditions);
+    if (effectMql && !effectMql.matches) {
+      continue;
+    }
+
+    const targetKey_ = effectOptions.key;
+    const target = targetKey_ && getInterpolatedKey(targetKey_, sourceKey);
+
+    let targetController: IInteractionController | undefined;
+    if (target) {
+      targetController = Interact.getController(target);
+      if (!targetController) {
+        continue;
+      }
+    } else {
+      targetController = sourceController;
+    }
+
+    const targetElement = _getElementsFromData(
+      effectOptions,
+      targetController.element,
+      targetController.useFirstChild,
+    );
+    if (!targetElement) {
+      continue;
+    }
+
+    // effect order is major, DOM order within an effect is minor: this defines the running ordinal
+    const prop = staggerPropName(sequenceId, effectIndex);
+    const elements = Array.isArray(targetElement) ? targetElement : [targetElement];
+    for (const element of elements) {
+      targets.push({ element, prop });
+    }
+  }
+
+  if (!targets.length) {
+    return;
+  }
+
+  const easingFn = _resolveOffsetEasing(sequenceConfig.offsetEasing);
+  const last = targets.length - 1;
+
+  fastdom.mutate(() => {
+    targets.forEach(({ element, prop }, ordinal) => {
+      // linear easing → factor === ordinal; CSS then resolves `factor * offset + base` per element
+      const factor = last > 0 ? easingFn(ordinal / last) * last : 0;
+      element.style.setProperty(prop, `${factor}`);
+    });
+  });
+}
+
 function _resolveListItemIndices(
   controller: IInteractionController,
   listContainer: string,
@@ -446,6 +541,10 @@ function _processSequences(
     const cacheKey = getInterpolatedKey(`${sourceKey}::seq::${sequenceId}`, sourceKey);
 
     if (instance.addedInteractions[cacheKey] && !elements) return;
+
+    // (re)write per-element stagger factors for the full matched set. Runs on initial add and on
+    // any list mutation (add/remove routes through addListItems → here), reindexing shifted ordinals.
+    _applySequenceStagger(sequenceConfig, sequenceId, sourceKey, sourceController, instance);
 
     const listElements: ListElements | undefined =
       elements && interaction.listContainer
@@ -562,6 +661,9 @@ function _processSequencesForTarget(
       if (instance.addedInteractions[cacheKey] && !elements) {
         return true;
       }
+
+      // (re)write per-element stagger factors for the full matched set (see _applySequenceStagger)
+      _applySequenceStagger(sequenceConfig, sequenceId, sourceKey!, sourceController, instance);
 
       const listElements: ListElements | undefined =
         elements && listContainer

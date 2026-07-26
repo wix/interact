@@ -1,5 +1,6 @@
 export type ListPropertyName =
   | 'animation'
+  | 'animation-delay'
   | 'transition'
   | 'animation-composition'
   | 'animation-timeline'
