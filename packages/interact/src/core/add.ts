@@ -61,6 +61,18 @@ function _applyPlugins(
 ): void {
   const pluginNames = Interact.getPluginsNames();
 
+  Object.keys(config)
+    .filter(
+      (field) =>
+        field.startsWith(PLUGIN_FIELD_PREFIX) &&
+        !pluginNames.has(field.slice(PLUGIN_FIELD_PREFIX.length)),
+    )
+    .forEach((field) => {
+      throw new Error(
+        `Interact: Config uses field "${field}" but no plugin is registered under "${field.slice(PLUGIN_FIELD_PREFIX.length)}". Call Interact.use('${field.slice(PLUGIN_FIELD_PREFIX.length)}', plugin) before Interact.create().`,
+      );
+    });
+
   for (const name of pluginNames) {
     const field = `${PLUGIN_FIELD_PREFIX}${name}`;
     if (!(field in config)) {
