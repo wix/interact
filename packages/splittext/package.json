@@ -16,6 +16,11 @@
       "types": "./dist/types/react/index.d.ts",
       "import": "./dist/es/react.js",
       "require": "./dist/cjs/react.js"
+    },
+    "./plugin": {
+      "types": "./dist/types/plugin/index.d.ts",
+      "import": "./dist/es/plugin.js",
+      "require": "./dist/cjs/plugin.js"
     }
   },
   "files": [

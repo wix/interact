@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Interact, add, remove, generate } from '@wix/interact';
 import type { InteractConfig } from '@wix/interact';
-import { splitTextPlugin, splitTextStyle } from '../src/plugins/splitTextPlugin';
+import { splitTextPlugin, splitTextStyle } from '../src/plugins/splitText';
 
 // End-to-end proof of the plugin bridge with the REAL @wix/splittext: splitText mutates the DOM,
 // Interact resolves the generated spans, and disconnect reverts the split. The animation engine
@@ -78,7 +78,7 @@ describe('splitText through the Interact plugin bridge (real @wix/splittext)', (
     // SSR: the container is hidden until the split marks it ready.
     const css = generate(config, true, { splitText: splitTextStyle });
     expect(css).toContain(
-      '[data-interact-key="hero"] .title:not([data-splittext-ready]) { visibility: hidden; }',
+      '[data-interact-key="hero"] .title:not([data-splittext-ready]) {\nvisibility: hidden;\n}',
     );
 
     // Runtime: after the plugin splits, the container carries the marker, so the hide rule

@@ -1,5 +1,19 @@
-import { splitText, type SplitTextOptions, type SplitTextResult } from '@wix/splittext';
-import type { InteractPlugin, InteractPluginStyleGenerator } from '@wix/interact';
+/**
+ * Interact plugin bridge for `@wix/splittext` — ships from `@wix/splittext/plugin`.
+ *
+ * Lets `@wix/splittext` be driven declaratively through an `@wix/interact` config's `$splitText`
+ * field, so apps can reuse the adapter instead of copy-pasting it.
+ *
+ * IMPORTANT: this module does NOT import `@wix/interact` — the two packages stay fully decoupled.
+ * The callbacks below are typed against the minimal *structural* shapes Interact relies on, so
+ * they are assignable to Interact's `InteractPlugin` / `InteractPluginStyleGenerator` without a
+ * dependency on it. A consumer that also has `@wix/interact` "resolves the typing" on its side:
+ * it ties the `$splitText` config value to {@link SplitTextPluginConfig} via declaration merging
+ * on `InteractPluginConfigMap` (see the demo's `plugins/splitText.ts`).
+ */
+
+import { splitText } from '../splitText';
+import type { SplitTextOptions, SplitTextResult } from '../types';
 
 /** Config accepted under `$splitText` in an InteractConfig on an interaction or effect. */
 export type SplitTextPluginConfig = {
@@ -12,6 +26,23 @@ export type SplitTextPluginConfig = {
   hideUntilReady?: boolean;
 } & SplitTextOptions;
 
+/**
+ * Minimal structural mirror of the runtime context Interact passes to a plugin (a subset of
+ * Interact's `InteractPluginContext`). Only `root` is read here; typing it as a subset keeps
+ * {@link splitTextPlugin} assignable to `InteractPlugin` without importing `@wix/interact`.
+ */
+type PluginContext = { root: HTMLElement };
+
+/**
+ * Minimal structural mirror of the CSS rule Interact's `generate()` expects back from a style
+ * generator — matches `Pick<CSSRuleData, 'declarations' | 'selectorSuffix'>`. Kept local so this
+ * module stays free of `@wix/interact`.
+ */
+type PluginStyleRule = {
+  declarations: { name: string; value: string | number }[];
+  selectorSuffix?: string;
+};
+
 const READY_ATTR = 'data-splittext-ready';
 
 /**
@@ -21,14 +52,11 @@ const READY_ATTR = 'data-splittext-ready';
  *
  * ```ts
  * import { Interact } from '@wix/interact';
- * import { splitTextPlugin } from './plugins/splitTextPlugin';
+ * import { splitTextPlugin } from '@wix/splittext/plugin';
  * Interact.use('splitText', splitTextPlugin);
  * ```
- *
- * This module is the ONLY place that imports both packages. `@wix/interact` never imports
- * `@wix/splittext` and vice-versa — the plugin bridge keeps them fully decoupled.
  */
-export const splitTextPlugin: InteractPlugin = (value, { root }) => {
+export const splitTextPlugin = (value: unknown, { root }: PluginContext): void | (() => void) => {
   const { container, hideUntilReady, ...options } = value as SplitTextPluginConfig;
 
   const element = root.querySelector<HTMLElement>(container);
@@ -58,11 +86,11 @@ export const splitTextPlugin: InteractPlugin = (value, { root }) => {
  *
  * ```ts
  * import { generate } from '@wix/interact';
- * import { splitTextStyle } from './plugins/splitTextPlugin';
+ * import { splitTextStyle } from '@wix/splittext/plugin';
  * const css = generate(config, true, { splitText: splitTextStyle });
  * ```
  */
-export const splitTextStyle: InteractPluginStyleGenerator = (value, _) => {
+export const splitTextStyle = (value: unknown): PluginStyleRule[] => {
   const { container, hideUntilReady } = value as SplitTextPluginConfig;
 
   if (!hideUntilReady) {
@@ -76,10 +104,3 @@ export const splitTextStyle: InteractPluginStyleGenerator = (value, _) => {
     },
   ];
 };
-
-// Type the `$splitText` value so configs get autocomplete + checking.
-declare module '@wix/interact' {
-  interface InteractPluginConfigMap {
-    splitText: SplitTextPluginConfig;
-  }
-}

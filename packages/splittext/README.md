@@ -164,19 +164,15 @@ Screen readers and crawlers see the original text; the split spans are hidden fr
 
 ## Using with `@wix/interact`
 
-`@wix/splittext` is standalone and has **no** dependency on `@wix/interact`. To drive it declaratively through an `InteractConfig`, register a small adapter as an Interact plugin — the adapter (in your app) is the only code that imports both packages:
+`@wix/splittext` is standalone and has **no** dependency on `@wix/interact`. To drive it declaratively through an `InteractConfig`, a ready-made adapter ships from the `@wix/splittext/plugin` entry point. It's written against Interact's plugin contract _structurally_, so it stays assignable to `InteractPlugin` without importing `@wix/interact` — the two packages remain fully decoupled.
+
+Register `splitTextPlugin` once, before `Interact.create()`, then declare `$splitText` on any interaction or effect:
 
 ```ts
 import { Interact } from '@wix/interact';
-import { splitText } from '@wix/splittext';
+import { splitTextPlugin } from '@wix/splittext/plugin';
 
-Interact.use('splitText', (value, { root }) => {
-  const { container, ...options } = value;
-  const el = root.querySelector(container);
-  if (!el) return;
-  const result = splitText(el, options);
-  return () => result.revert(); // Interact reverts on teardown
-});
+Interact.use('splitText', splitTextPlugin);
 
 Interact.create({
   effects: { 'char-fade-up': { namedEffect: { type: 'FadeIn' }, duration: 400 } },
@@ -184,11 +180,33 @@ Interact.create({
     {
       key: 'hero',
       trigger: 'viewEnter',
-      $splitText: { container: '.title', type: 'chars' },
+      // `hideUntilReady` hides the container until the split runs, preventing a FOUC.
+      $splitText: { container: '.title', type: 'chars', hideUntilReady: true },
       sequences: [{ offset: 30, effects: [{ effectId: 'char-fade-up', selector: '.split-c' }] }],
     },
   ],
 });
+```
+
+For SSR / build-time CSS, pass the companion `splitTextStyle` generator to `generate()` so the `hideUntilReady` container is hidden until the runtime split marks it ready:
+
+```ts
+import { generate } from '@wix/interact';
+import { splitTextStyle } from '@wix/splittext/plugin';
+
+const css = generate(config, true, { splitText: splitTextStyle });
+```
+
+To type the `$splitText` config field, augment `InteractPluginConfigMap` from your app (the only place that imports both packages):
+
+```ts
+import type { SplitTextPluginConfig } from '@wix/splittext/plugin';
+
+declare module '@wix/interact' {
+  interface InteractPluginConfigMap {
+    splitText: SplitTextPluginConfig;
+  }
+}
 ```
 
 See the `@wix/interact` [Plugins guide](../interact/docs/guides/plugins.md) for the full contract.
