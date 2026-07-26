@@ -264,6 +264,10 @@ export class Interact {
     return Interact.plugins.size > 0;
   }
 
+  static getPluginsNames(): string[] {
+    return [...Interact.plugins.keys()];
+  }
+
   static getSequence(
     cacheKey: string,
     sequenceOptions: SequenceOptions,

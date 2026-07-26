@@ -55,19 +55,19 @@ type ListElements = {
 function _applyPlugins(
   owner: IInteractionController,
   root: HTMLElement,
-  config: object,
+  config: Record<string, unknown>,
   key: string,
   scope: 'interaction' | 'effect',
 ): void {
-  const fields = config as Record<string, unknown>;
+  const pluginNames = Interact.getPluginsNames();
 
-  for (const field of Object.keys(fields)) {
-    if (field.length <= PLUGIN_FIELD_PREFIX.length || !field.startsWith(PLUGIN_FIELD_PREFIX)) {
+  for (const name of pluginNames) {
+    const field = `${PLUGIN_FIELD_PREFIX}${name}`;
+    if (!(field in config)) {
       continue;
     }
 
-    const name = field.slice(PLUGIN_FIELD_PREFIX.length);
-    const value = fields[field];
+    const value = config[field];
 
     if (value !== null && typeof value === 'object') {
       if (owner._appliedPlugins.has(value)) {
@@ -85,7 +85,7 @@ function _applyPlugins(
       );
     }
 
-    const cleanup = plugin(value, { root, key, scope, config: fields });
+    const cleanup = plugin(value, { root, key, scope, config });
 
     if (typeof cleanup === 'function') {
       owner._pluginCleanups.push(cleanup);

@@ -71,7 +71,7 @@ export class InteractionController {
           console.error(e);
         }
       }
-      this._pluginCleanups = [];
+      this._pluginCleanups.length = 0;
     }
     this._appliedPlugins = new WeakSet();
 
