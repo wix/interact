@@ -1,8 +1,6 @@
 import { type InteractConfig } from '@wix/interact/web';
 import { useInteractInstance } from '../hooks/useInteractInstance';
 
-const initialPath = 'M 0,0 L 100,100 L 0,100 Z';
-
 const svgPathMorphConfig: InteractConfig = {
   interactions: [
     {
@@ -62,7 +60,7 @@ export const SvgPathMorphDemo = () => {
             aria-label="Morphing triangle"
             role="img"
           >
-            <path data-morph-layer="0" fill="#c0ffee" d={initialPath} />
+            <path data-morph-layer="0" fill="#c0ffee" d="M 0,0 L 100,100 L 0,100 Z" />
           </svg>
         </div>
       </interact-element>
