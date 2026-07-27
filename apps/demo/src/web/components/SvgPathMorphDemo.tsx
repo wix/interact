@@ -9,7 +9,7 @@ const svgPathMorphConfig: InteractConfig = {
       effects: [
         {
           effectId: 'svg-path-morph-effect',
-          selector: '[data-morph-layer="0"]',
+          selector: 'path:nth-child(1)',
         },
       ],
     },
@@ -54,20 +54,29 @@ export const SvgPathMorphDemo = () => {
       <interact-element data-interact-key="svg-path-morph">
         <div className="svg-path-morph-stage">
           <svg
-            width="240"
-            height="240"
+            aria-label=""
+            role="presentation"
+            aria-hidden="true"
+            preserveAspectRatio="xMidYMid meet"
+            data-type="color"
             viewBox="0 0 100 100"
-            aria-label="Morphing triangle"
-            role="img"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+            xmlns="http://www.w3.org/2000/svg"
+            data-bbox="0 0 100 100"
           >
-            <path data-morph-layer="0" fill="#c0ffee" d="M 0,0 L 100,100 L 0,100 Z" />
+            <g className="_svgImageSource_1lilf_7" data-type="color">
+              <g>
+                <path d="m0 0 100 100H0Z" fill="#c0ffee" />
+              </g>
+            </g>
           </svg>
         </div>
       </interact-element>
 
       <p className="svg-path-morph-note">
         The initial <code>d</code> attribute is static. The effect selector targets the nested
-        <code>&lt;path&gt;</code>, so Interact applies the keyframes only after <code>viewEnter</code>.
+        <code>path:nth-child(1)</code>, so Interact applies the keyframes only after
+        <code>viewEnter</code>.
       </p>
     </section>
   );
