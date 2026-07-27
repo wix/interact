@@ -515,11 +515,7 @@ describe('motion.ts', () => {
         const result = getWebAnimation(path, animationOptions);
 
         expect(result).toBe(mockAnimationGroup);
-        expect(KeyframeEffect).toHaveBeenCalledWith(
-          path,
-          expect.any(Array),
-          expect.any(Object),
-        );
+        expect(KeyframeEffect).toHaveBeenCalledWith(path, expect.any(Array), expect.any(Object));
 
         (AnimationGroup as Mock).mockRestore();
       });
