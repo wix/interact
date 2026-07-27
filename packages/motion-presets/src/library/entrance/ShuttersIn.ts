@@ -1,5 +1,5 @@
 import { ShuttersIn, TimeAnimationOptions, EffectFourDirections } from '../../types';
-import { getShuttersClipPaths, getEasing, toKeyframeValue, parseDirection } from '../../utils';
+import { getShuttersClipPaths, getEasing, toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'right';
@@ -32,6 +32,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ...options,
       easing,
       name: shuttersIn,
+      fill: getEntranceFill(options),
       custom,
       keyframes: [
         {
@@ -45,6 +46,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       custom: {},
       keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
     },

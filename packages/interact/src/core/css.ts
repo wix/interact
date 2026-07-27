@@ -25,10 +25,10 @@ import { getCSSAnimation, MotionKeyframeEffect, TriggerVariant } from '@wix/moti
 
 export const DEFAULT_INITIAL = [
   { name: 'visibility', value: 'hidden' },
-  { name: 'transform', value: 'none' },
-  { name: 'translate', value: 'none' },
-  { name: 'scale', value: 'none' },
-  { name: 'rotate', value: 'none' },
+  { name: 'transform', value: 'none', important: true },
+  { name: 'translate', value: 'none', important: true },
+  { name: 'scale', value: 'none', important: true },
+  { name: 'rotate', value: 'none', important: true },
 ];
 
 const LIST_ANIMATION_PROPERTY_NAMES = [

@@ -1,4 +1,4 @@
-import { getClipPolygonParams, toKeyframeValue, parseDirection, parseLength } from '../../utils';
+import { getClipPolygonParams, toKeyframeValue, parseDirection, parseLength, getEntranceFill } from '../../utils';
 import type { TiltIn, TimeAnimationOptions, EffectTwoSides } from '../../types';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
 
@@ -46,6 +46,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       duration: options.duration! * 0.2,
       easing: 'cubicOut',
       custom: {},
@@ -54,6 +55,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: tiltInRotate,
+      fill: getEntranceFill(options),
       easing,
       custom: rotateCustom,
       keyframes: [
@@ -68,6 +70,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: tiltInClip,
+      fill: getEntranceFill(options),
       easing,
       composite: 'add' as const,
       duration: options.duration! * 0.8,

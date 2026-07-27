@@ -42,6 +42,7 @@ export type AnyEffect = {
   fill?: string;
   namedEffect?: { type?: string; range?: unknown; [k: string]: unknown };
   keyframeEffect?: { name?: string; keyframes?: Array<Record<string, unknown>> };
+  customEffect?: (element: Element, progress: number | { x: number; y: number }) => void;
   transition?: { styleProperties?: unknown[] };
   transitionProperties?: unknown[];
   rangeStart?: { offset?: { value?: number; unit?: string } };

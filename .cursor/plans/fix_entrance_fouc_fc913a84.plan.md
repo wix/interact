@@ -4,16 +4,16 @@ overview: Prevent delayed entrance flashes without changing IntersectionObserver
 todos:
   - id: important-initial-css
     content: Emit author-important transient FOUC declarations and preserve true zero animation delays
-    status: pending
+    status: completed
   - id: entrance-fill-defaults
     content: Default every entrance preset descriptor to backwards fill while preserving explicit overrides
-    status: pending
+    status: completed
   - id: validation-guidance
     content: Add backwards-fill validation guidance and align Interact docs, rules, and Interactor skill
-    status: pending
+    status: completed
   - id: regression-tests
     content: Cover CSS serialization, timing, all entrance presets, validator behavior, and run targeted verification
-    status: pending
+    status: completed
 isProject: false
 ---
 

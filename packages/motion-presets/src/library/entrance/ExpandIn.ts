@@ -1,5 +1,5 @@
 import type { TimeAnimationOptions } from '../../types';
-import { getCssUnits, toKeyframeValue, parseLength, parseDirection } from '../../utils';
+import { getCssUnits, toKeyframeValue, parseLength, parseDirection, getEntranceFill } from '../../utils';
 import type { ExpandIn } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -58,6 +58,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       easing,
       duration: options.duration! * 0.7,
       name: fadeIn,
+      fill: getEntranceFill(options),
       custom: {},
       keyframes: [{ offset: 0, opacity: 0 }],
     },
@@ -65,6 +66,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ...options,
       easing,
       name: expandIn,
+      fill: getEntranceFill(options),
       custom,
       keyframes: [
         {

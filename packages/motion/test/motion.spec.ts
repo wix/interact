@@ -315,10 +315,35 @@ describe('motion.ts', () => {
 
         expect(result[0]).toMatchObject({
           target: '#test-target',
-          animation: 'fade-in 1000ms 1ms ease-in forwards 2 paused',
+          animation: 'fade-in 1000ms 0ms ease-in forwards 2 paused',
           name: 'fade-in',
           keyframes: [{ opacity: 0 }, { opacity: 1 }],
         });
+      });
+
+      test('should preserve explicit zero delay in generated CSS animation shorthand', () => {
+        const animationOptions: AnimationOptions = {
+          namedEffect: { type: 'FadeIn', id: 'fade' },
+          duration: 1000,
+          delay: 0,
+        };
+
+        const result = getCSSAnimation('test-target', animationOptions);
+
+        expect(result[0].animation).toContain('0ms');
+        expect(result[0].animation).not.toContain('1ms');
+      });
+
+      test('should preserve positive delay in generated CSS animation shorthand', () => {
+        const animationOptions: AnimationOptions = {
+          namedEffect: { type: 'FadeIn', id: 'fade' },
+          duration: 1000,
+          delay: 200,
+        };
+
+        const result = getCSSAnimation('test-target', animationOptions);
+
+        expect(result[0].animation).toContain('200ms');
       });
 
       test('should handle named effects', () => {
