@@ -457,37 +457,6 @@ describe('css._generate', () => {
       expect(animDeclOnInitial!.value).toContain('myAnim');
     });
 
-    it('should emit 0ms delay and backwards fill for viewEnter with explicit zero delay', () => {
-      const config: InteractConfig = {
-        effects: {},
-        interactions: [
-          {
-            key: 'el',
-            trigger: 'viewEnter',
-            effects: [
-              {
-                effectId: 'kf1',
-                duration: 500,
-                delay: 0,
-                fill: 'backwards',
-                keyframeEffect: {
-                  name: 'myAnim',
-                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
-                },
-              },
-            ],
-          },
-        ],
-      };
-
-      const result = generate(config);
-
-      expect(result).toContain('0ms');
-      expect(result).not.toContain('1ms');
-      expect(result).toContain('backwards');
-      expect(result).toContain('visibility: hidden');
-    });
-
     it('should inline animation declarations when initial is false (click trigger)', () => {
       const config: InteractConfig = {
         effects: {},

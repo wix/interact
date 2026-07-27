@@ -122,10 +122,10 @@ referenced entry and may override any of them (`key`, `duration`, `easing`,
 ```
 
 **`fill` guidance:** use `'both'` for scroll/pointer-driven and for toggling
-hover/click (`alternate`/`repeat`/`state`). Default to `'backwards'` for all
-`viewEnter` + `once` animation effects (including custom `keyframeEffect`
-entrances) so any `delay` holds the first keyframe. Use `'both'` when the final
-keyframe must persist after the animation (see [CSS generation & FOUC](#css-generation--fouc)).
+hover/click (`alternate`/`repeat`/`state`). Entrance presets default to
+`'backwards'`. Set `fill: 'backwards'` explicitly for `viewEnter` + `once`
+`keyframeEffect` entrances. Use `'both'` when the final keyframe must persist
+after the animation (see [CSS generation & FOUC](#css-generation--fouc)).
 
 **`composite`:** `'replace'` (default) overwrites prior values; `'add'`
 concatenates transform/filter functions; `'accumulate'` sums matching function args

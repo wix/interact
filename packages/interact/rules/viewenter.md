@@ -23,7 +23,7 @@ This document contains rules for generating interactions that respond to element
 
 **Solution:** Call `generate(config, useFirstChild)` at build/generation time and embed the resulting CSS before first paint. Among all the CSS it produces, `generate()` includes initial rules that hide entrance-animated elements from the moment the page renders, before JS runs. The rules use `:not([data-interact-enter])` so elements become visible once the animation starts.
 
-For any `delay`, set `fill: 'backwards'` (or `'both'` when the final keyframe must persist) so the starting keyframe applies during the delay after `data-interact-enter` is set. Entrance presets default to `backwards`; custom `keyframeEffect` entrances should set it explicitly.
+For entrance animations, set `fill: 'backwards'` (or `'both'` when the final keyframe must persist). Entrance presets default to `backwards`; inline `keyframeEffect` entrances should set it explicitly.
 
 ### Generate CSS at build time and embed in HTML
 
@@ -92,7 +92,7 @@ const css = generate(config, useFirstChild); // true for web; false for react/va
 - Inject runtime-generated CSS before the corresponding `Interact.create()` call
   and before revealing initially hidden content to minimize FOUC.
 - FOUC initial rules apply only to `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
-- For `viewEnter` + `once` entrances with any `delay`, or inside a sequence with `delay` and/or `offset`, use `fill: 'backwards'` (or `'both'` when the final keyframe must persist after the animation).
+- For `viewEnter` + `once` entrance animations, use `fill: 'backwards'` (or `'both'` when the final keyframe must persist after the animation).
 - For `viewEnter` with `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting keyframe as inline styles on the target element and use `fill: 'both'`.
 - `generate(config)` processes all interactions in the config, not just `viewEnter`.
 

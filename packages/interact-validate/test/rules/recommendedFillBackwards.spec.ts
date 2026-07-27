@@ -4,13 +4,20 @@ import { validateInteractConfig } from '../../src';
 const CODE = 'RECOMMENDED_FILL_BACKWARDS';
 
 describe('recommendedFillBackwards — RECOMMENDED_FILL_BACKWARDS', () => {
-  it('warns for a viewEnter once effect that omits fill', () => {
+  it('warns for a delayed same-element viewEnter once effect that omits fill', () => {
     const result = validateInteractConfig({
       interactions: [
         {
           key: 'el',
           trigger: 'viewEnter',
-          effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400, triggerType: 'once' }],
+          effects: [
+            {
+              namedEffect: { type: 'FadeIn' },
+              duration: 400,
+              delay: 200,
+              triggerType: 'once',
+            },
+          ],
         },
       ],
     });
@@ -22,13 +29,13 @@ describe('recommendedFillBackwards — RECOMMENDED_FILL_BACKWARDS', () => {
     expect(result.valid).toBe(true);
   });
 
-  it('warns for a viewEnter effect with implicit once triggerType', () => {
+  it('warns for a separate-target viewEnter effect with implicit once triggerType', () => {
     const result = validateInteractConfig({
       interactions: [
         {
-          key: 'el',
+          key: 'source',
           trigger: 'viewEnter',
-          effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
+          effects: [{ key: 'target', namedEffect: { type: 'FadeIn' }, duration: 400 }],
         },
       ],
     });
@@ -120,6 +127,34 @@ describe('recommendedFillBackwards — RECOMMENDED_FILL_BACKWARDS', () => {
                 triggerType: 'once',
               },
             ],
+          },
+        ],
+      });
+
+      expect(result.errors.filter((e) => e.code === CODE)).toHaveLength(0);
+    });
+
+    it('does not warn for a same-element entrance without delay', () => {
+      const result = validateInteractConfig({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
+          },
+        ],
+      });
+
+      expect(result.errors.filter((e) => e.code === CODE)).toHaveLength(0);
+    });
+
+    it('does not warn for a customEffect entrance', () => {
+      const result = validateInteractConfig({
+        interactions: [
+          {
+            key: 'source',
+            trigger: 'viewEnter',
+            effects: [{ key: 'target', customEffect: () => {}, duration: 400 }],
           },
         ],
       });

@@ -361,7 +361,7 @@ Each effect applies a visual change to a target element. An effect is either inl
 **`fill` guidance:**
 
 - `'both'` — use for scroll-driven (`viewProgress`), pointer-driven (`pointerMove`), and toggling effects (`hover`/`click` with `alternate`, `repeat`, or `state` type).
-- `'backwards'` — default for entrance animations (`viewEnter` + `once`). Applies the first keyframe during any `delay` after the entrance marker is set. Use `'both'` when the final keyframe must persist after the animation.
+- `'backwards'` — use for entrance animations (`viewEnter` + `once`). Entrance presets default to `'backwards'`; set it explicitly for inline `keyframeEffect` entrances. Use `'both'` when the final keyframe must persist after the animation.
 
 **`composite`** — same as CSS's `animation-composition`. Controls how this effect combines with others on the same property (transforms & filters):
 

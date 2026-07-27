@@ -16,7 +16,7 @@ import {
   checkEmptyStyleProperties,
   checkStateRemoveWithoutEffectId,
 } from './partialData';
-import { checkRecommendedFill, checkRecommendedFillBackwards } from './recommendedPatterns';
+import { checkRecommendedFill } from './recommendedPatterns';
 import { findAnimationEndWarnings } from './animationEndGraph';
 
 // Single traversal of top-level registry effects/sequences and per-interaction
@@ -76,7 +76,6 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
       warnings.push(...checkEmptyStyleProperties(path, effect));
       warnings.push(...checkStateRemoveWithoutEffectId(path, effect));
       warnings.push(...checkRecommendedFill(path, resolvedEffect, owner));
-      warnings.push(...checkRecommendedFillBackwards(path, resolvedEffect, owner));
       warnings.push(...checkPointerAxisIgnored(path, resolvedEffect, owner));
       warnings.push(...checkKeyframePropCamelCase(path, effect));
     },

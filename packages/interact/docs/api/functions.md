@@ -249,7 +249,7 @@ For entrance animations where the source and target are the same element, `gener
 
 The initial rule uses `:not([data-interact-enter])` so the element becomes visible once the animation begins. This only applies to `viewEnter` interactions with `triggerType: 'once'` (the default for `viewEnter`)
 
-For any entrance `delay`/`offset`, use `fill: 'backwards'` (or `'both'` when the final keyframe must persist). Entrance presets default to `backwards`.
+For any entrance animation, use `fill: 'backwards'` (or `'both'` when the final keyframe must persist). Entrance presets default to `backwards`.
 
 For `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting keyframe as inline styles on the target element and use `fill: 'both'`.
 
