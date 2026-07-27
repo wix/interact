@@ -1,5 +1,11 @@
 import type { TimeAnimationOptions } from '../../types';
-import { getCssUnits, toKeyframeValue, parseLength, parseDirection, getEntranceFill } from '../../utils';
+import {
+  getCssUnits,
+  toKeyframeValue,
+  parseLength,
+  parseDirection,
+  getEntranceFill,
+} from '../../utils';
 import type { ExpandIn } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 

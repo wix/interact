@@ -5,7 +5,6 @@ import type {
   Point,
   ScrubTransitionEasing,
   AnimationFillMode,
-  AnimationData,
   TimeAnimationOptions,
 } from '@wix/motion';
 

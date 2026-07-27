@@ -1,4 +1,10 @@
-import { getClipPolygonParams, toKeyframeValue, parseDirection, parseLength, getEntranceFill } from '../../utils';
+import {
+  getClipPolygonParams,
+  toKeyframeValue,
+  parseDirection,
+  parseLength,
+  getEntranceFill,
+} from '../../utils';
 import type { TiltIn, TimeAnimationOptions, EffectTwoSides } from '../../types';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
 

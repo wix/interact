@@ -1,4 +1,10 @@
-import { getEasingFamily, getEasing, toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
+import {
+  getEasingFamily,
+  getEasing,
+  toKeyframeValue,
+  parseDirection,
+  getEntranceFill,
+} from '../../utils';
 import type { BounceIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 

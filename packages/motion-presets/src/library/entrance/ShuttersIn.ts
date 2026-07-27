@@ -1,5 +1,11 @@
 import { ShuttersIn, TimeAnimationOptions, EffectFourDirections } from '../../types';
-import { getShuttersClipPaths, getEasing, toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
+import {
+  getShuttersClipPaths,
+  getEasing,
+  toKeyframeValue,
+  parseDirection,
+  getEntranceFill,
+} from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'right';
