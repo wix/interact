@@ -56,7 +56,7 @@ if (!result.valid) {
 - `valid` is `true` when no remaining issue has severity `'error'`. **Warnings alone do not make `valid: false`.**
 - `errors` holds **all** surfaced issues — both `'error'` and `'warning'` severities. Filter on `severity` to separate them.
 - Issues are sorted lexicographically by `path`.
-- Validation runs in two layers: a **structural** zod parse first (produces `SCHEMA_*` and numeric/threshold codes); if that succeeds, **referential + semantic** checks run (dangling references, unused definitions, duplicate keyframe names, media-query syntax, and the rule-derived semantic warnings — same-element re-trigger, hit-area shift, scroll-preset `range`, `animationEnd` graph cycles, element-selection coherence, `fill`/`inset`/keyframe-camelCase nudges). If the structural parse fails, the semantic layer is skipped.
+- Validation runs in two layers: a **structural** zod parse first (produces `SCHEMA_*` and numeric/threshold codes); if that succeeds, **referential + semantic** checks run (dangling references, unused definitions, duplicate keyframe names, media-query syntax, and the rule-derived semantic warnings — same-element re-trigger, hit-area shift, scroll-preset `range`, `animationEnd` graph cycles, element-selection coherence, `fill`/`inset` nudges, CSS property names that are neither camelCase nor kebab-case). If the structural parse fails, the semantic layer is skipped.
 
 ### assertValidInteractConfig
 
@@ -140,7 +140,7 @@ Severity is one of `'error' | 'warning'`. There are exactly two levers:
 | `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                  | warning          |
 | `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                     | info             |
 | `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                      | warning          |
-| `KEYFRAME_STYLE`         | `KEYFRAME_PROP_NOT_CAMEL_CASE`                                              | warning          |
+| `CSS_PROPERTY_NAME`      | `INVALID_CSS_PROPERTY_NAME`                                                 | warning          |
 | `VIEW_INSET`             | `INVALID_INSET`                                                             | warning          |
 
 For each category, set `'off'` to drop those issues entirely, `'warning'` / `'error'` to set their severity:
@@ -234,7 +234,7 @@ Statically-detectable authoring pitfalls lifted from the trigger rule files. Eac
 | `STATE_REMOVE_WITHOUT_EFFECT_ID`       | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                                                                           | `STATE_EFFECT`           |
 | `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.                                     | `RECOMMENDED_FILL`       |
 | `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).                                            | `POINTER_AXIS`           |
-| `KEYFRAME_PROP_NOT_CAMEL_CASE`         | A `keyframeEffect` property name is kebab-case (not WAAPI camelCase).                                                                                 | `KEYFRAME_STYLE`         |
+| `INVALID_CSS_PROPERTY_NAME`            | A keyframe or state-effect property name is neither camelCase nor kebab-case (both casings are accepted; this one cannot be normalized).              | `CSS_PROPERTY_NAME`      |
 | `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 whitespace-separated CSS lengths/percentages.                                                                   | `VIEW_INSET`             |
 
 ---

@@ -55,7 +55,7 @@ For static sites, pre-render CSS via `generate()` at build time — see
 - `[TARGET_KEY]` — identifier matching the element's key (`data-interact-key` for web, `interactKey` for React) on the element to animate (can be same as source or different).
 - `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built effect from `@wix/motion-presets`. **CRITICAL:** Scroll presets (`*Scroll`) MUST include `range: 'in' | 'out' | 'continuous'` in their options. `'in'` ends at the idle state, `'out'` starts from the idle state, `'continuous'` passes through it.
 - `[EFFECT_NAME]` — unique name for custom keyframe effect.
-- `[EFFECT_KEYFRAMES]` — array of keyframe objects defining CSS property values (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
+- `[EFFECT_KEYFRAMES]` — array of keyframe objects defining CSS property values (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names may be camelCase or kebab-case (both accepted); prefer camelCase, which is what WAAPI uses.
 - `[RANGE_NAME]` — scroll range name:
   - `'cover'` — full visibility span from first pixel entering to last pixel leaving.
   - `'entry'` — the phase while the element is entering the viewport.

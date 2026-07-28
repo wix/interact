@@ -5,6 +5,7 @@ import type {
   CSSCoordinatedLists,
   CSSRuleData,
 } from '../types';
+import { toCSSPropertyName } from '@wix/motion';
 import {
   roundNumber,
   getFullPredicateByType,
@@ -25,7 +26,7 @@ export function keyframePropertyToCSS(key: string): string {
   if (key === 'composite') {
     return 'animation-composition';
   }
-  return key.replace(/([A-Z])/g, '-$1').toLowerCase();
+  return toCSSPropertyName(key);
 }
 
 export function interpolateKeyframesOffsets(keyframes: Keyframe[]): Keyframe[] {

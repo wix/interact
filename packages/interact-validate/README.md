@@ -147,7 +147,7 @@ Every issue is `'error'` or `'warning'`. `valid` is `true` **iff** no `'error'` 
 | `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                  | warning          |
 | `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                     | info             |
 | `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                      | warning          |
-| `KEYFRAME_STYLE`         | `KEYFRAME_PROP_NOT_CAMEL_CASE`                                              | warning          |
+| `CSS_PROPERTY_NAME`      | `INVALID_CSS_PROPERTY_NAME`                                                 | warning          |
 | `VIEW_INSET`             | `INVALID_INSET`                                                             | warning          |
 
 Set a category to `'off'` to drop those issues, or `'warning'` / `'error'` to set their severity. **All other codes** (every `SCHEMA_*`, numeric, effect-source, and referential code) are not in a category and **cannot** be silenced or re-leveled via `severityOverrides` — they always emit at their built-in severity. Precedence: `'off'` first (drops the issue), then a `'warning'`/`'error'` override, then `strict` (forces the rest to `'error'`).
@@ -211,7 +211,7 @@ These encode statically-detectable authoring pitfalls from the trigger rule file
 | `STATE_REMOVE_WITHOUT_EFFECT_ID`       | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                                             | `STATE_EFFECT`           |
 | `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.       | `RECOMMENDED_FILL`       |
 | `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).              | `POINTER_AXIS`           |
-| `KEYFRAME_PROP_NOT_CAMEL_CASE`         | A `keyframeEffect` property name is kebab-case (not WAAPI camelCase).                                                   | `KEYFRAME_STYLE`         |
+| `INVALID_CSS_PROPERTY_NAME`            | A keyframe or state-effect property name is neither camelCase nor kebab-case (both are accepted).                       | `CSS_PROPERTY_NAME`      |
 | `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 CSS lengths/percentages.                                                          | `VIEW_INSET`             |
 
 ## Usage recipes

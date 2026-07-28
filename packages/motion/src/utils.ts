@@ -4,6 +4,86 @@ export function getCssUnits(unit: 'percentage' | string) {
   return unit === 'percentage' ? '%' : unit || 'px';
 }
 
+// A vendor-prefixed property is `webkitTransform` as an IDL attribute and
+// `-webkit-transform` as a CSS property - the leading dash has to be restored.
+const VENDOR_PREFIX = /^(webkit|moz|ms|o)(?=[A-Z])/;
+
+// Keyframe keys that are not plain CSS property names. `offset`, `easing` and
+// `composite` keep their WAAPI meaning, so the CSS `offset` shorthand is only
+// reachable as `cssOffset`.
+const KEYFRAME_CSS_TO_WAAPI: Record<string, string> = {
+  float: 'cssFloat',
+  'animation-timing-function': 'easing',
+  'animation-composition': 'composite',
+};
+
+/**
+ * Converts a CSS property name to its kebab-case form, for use in CSS text.
+ * Already kebab-case names are returned as-is, and custom properties (`--*`)
+ * are left untouched since they are case-sensitive.
+ */
+export function toCSSPropertyName(name: string): string {
+  if (name.startsWith('--')) {
+    return name;
+  }
+
+  const prefixed = VENDOR_PREFIX.test(name) ? `-${name}` : name;
+
+  return prefixed.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+}
+
+/**
+ * Converts a CSS property name to its camelCase form, for use with the Web
+ * Animations API. Already camelCase names are returned as-is, and custom
+ * properties (`--*`) are left untouched since they are case-sensitive.
+ */
+export function toWAAPIPropertyName(name: string): string {
+  if (name.startsWith('--') || !name.includes('-')) {
+    return name;
+  }
+
+  return name.replace(/^-/, '').replace(/-([a-z])/g, (_, char: string) => char.toUpperCase());
+}
+
+/**
+ * Normalizes keyframe property names to the camelCase form WAAPI expects, so
+ * that both camelCase and kebab-case are valid input. Returns the same array
+ * (and the same frame objects) when everything is already normalized.
+ */
+export function normalizeKeyframes<T extends Record<string, any>>(keyframes: T[]): T[] {
+  if (!Array.isArray(keyframes)) {
+    return keyframes;
+  }
+
+  let changed = false;
+
+  const normalized = keyframes.map((frame) => {
+    if (!frame || typeof frame !== 'object') {
+      return frame;
+    }
+
+    let frameChanged = false;
+    const normalizedFrame: Record<string, unknown> = {};
+
+    for (const [name, value] of Object.entries(frame)) {
+      const normalizedName = KEYFRAME_CSS_TO_WAAPI[name] || toWAAPIPropertyName(name);
+
+      frameChanged = frameChanged || normalizedName !== name;
+      normalizedFrame[normalizedName] = value;
+    }
+
+    if (!frameChanged) {
+      return frame;
+    }
+
+    changed = true;
+
+    return normalizedFrame as T;
+  });
+
+  return changed ? normalized : keyframes;
+}
+
 export function getEasing(easing?: keyof typeof cssEasings | string): string {
   return easing ? cssEasings[easing as keyof typeof cssEasings] || easing : cssEasings.linear;
 }
