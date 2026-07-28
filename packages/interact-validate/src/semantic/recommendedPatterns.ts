@@ -36,7 +36,7 @@ export function checkRecommendedFill(
   const triggerType = effect.triggerType ?? 'once';
   if (triggerType !== 'once') return [];
   if (!isKeyframeEffect(effect)) return [];
-  if (effect.fill === 'backwards') return [];
+  if (effect.fill === 'backwards' || effect.fill === 'both') return [];
 
   const sameElement = targetsSameElementAsSource(owner, effect);
   if (sameElement && !effect.delay) return [];
