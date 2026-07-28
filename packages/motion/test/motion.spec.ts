@@ -494,6 +494,32 @@ describe('motion.ts', () => {
         (AnimationGroup as Mock).mockRestore();
       });
 
+      test('should handle SVG path targets', async () => {
+        const animationOptions: AnimationOptions = {
+          duration: 2000,
+          keyframeEffect: {
+            name: 'morph-layer-0',
+            keyframes: [
+              { d: 'path("M 0,0 L 100,100 L 0,100 Z")' },
+              { d: 'path("M 100,0 L 100,100 L 0,100 Z")' },
+            ],
+          },
+        };
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+        const { AnimationGroup } = await import('../src/AnimationGroup');
+        (AnimationGroup as Mock).mockImplementation(function () {
+          return mockAnimationGroup;
+        });
+
+        const result = getWebAnimation(path, animationOptions);
+
+        expect(result).toBe(mockAnimationGroup);
+        expect(KeyframeEffect).toHaveBeenCalledWith(path, expect.any(Array), expect.any(Object));
+
+        (AnimationGroup as Mock).mockRestore();
+      });
+
       test('should handle custom mouse effects', async () => {
         const animationOptions: AnimationOptions = {
           customEffect: {
