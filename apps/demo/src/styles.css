@@ -458,6 +458,66 @@ body {
   color: #a5b4fc;
 }
 
+/* SVG path morph demo */
+.svg-path-morph-demo {
+  margin-top: 2rem;
+}
+
+.svg-path-morph-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.svg-path-morph-header h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.svg-path-morph-header p,
+.svg-path-morph-note {
+  margin: 0;
+  color: rgb(148 163 184 / 0.9);
+  line-height: 1.6;
+}
+
+.svg-path-morph-status {
+  flex: none;
+  border: 1px solid rgb(192 255 238 / 0.35);
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  color: #c0ffee;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.svg-path-morph-stage {
+  display: grid;
+  min-height: 300px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgb(192 255 238 / 0.15);
+  border-radius: 1rem;
+  background: radial-gradient(circle, rgb(192 255 238 / 0.14), transparent 65%);
+}
+
+.svg-path-morph-stage svg {
+  width: min(240px, 65vw);
+  height: auto;
+  filter: drop-shadow(0 18px 28px rgb(192 255 238 / 0.25));
+}
+
+.svg-path-morph-note {
+  margin-top: 1.25rem;
+}
+
+.svg-path-morph-note code {
+  color: #c4b5fd;
+}
+
 /* Responsive Demo */
 .responsive-demo-panel {
   margin-top: 20px;

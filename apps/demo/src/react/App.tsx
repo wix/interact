@@ -7,6 +7,7 @@ import { SequencePlayground } from './components/SequencePlayground';
 import { SequenceEntranceDemo } from './components/SequenceEntranceDemo';
 import { SequenceClickDemo } from './components/SequenceClickDemo';
 import { SequenceEasingComparison } from './components/SequenceEasingComparison';
+import { SvgPathMorphDemo } from './components/SvgPathMorphDemo';
 
 const heroCopy = [
   'Tune triggers, easings, and delays in real time.',
@@ -39,6 +40,7 @@ function App() {
       </header>
 
       <Playground />
+      <SvgPathMorphDemo />
       <SelectorConditionDemo />
       <div className="scroll-showcase-wrapper">
         <ResponsiveDemo />
