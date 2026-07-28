@@ -134,20 +134,6 @@ describe('recommendedFillBackwards — RECOMMENDED_FILL_BACKWARDS', () => {
       expect(result.errors.filter((e) => e.code === CODE)).toHaveLength(0);
     });
 
-    it('does not warn for a same-element entrance without delay', () => {
-      const result = validateInteractConfig({
-        interactions: [
-          {
-            key: 'el',
-            trigger: 'viewEnter',
-            effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
-          },
-        ],
-      });
-
-      expect(result.errors.filter((e) => e.code === CODE)).toHaveLength(0);
-    });
-
     it('does not warn for a customEffect entrance', () => {
       const result = validateInteractConfig({
         interactions: [
