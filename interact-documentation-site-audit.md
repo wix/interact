@@ -32,17 +32,25 @@ Line numbers refer to the current state of `interact-documentation-site.md`.
 
 The documentation is structurally sound — the page inventory and the order of pages are right and should not change. The problems fall into five buckets:
 
-| Bucket | Count | Severity |
-| :---- | :---- | :---- |
-| Technical errors (wrong, will mislead or break user code) | 22 | Blocking / High |
-| Missing information (correct but incomplete) | 24 | Medium |
-| Authoring residue (owners, TODOs, Google Docs artifacts, dead links) | ~90 instances across 12 classes | Blocking (cosmetic but public-facing) |
-| Structural / navigation defects | 14 | High |
-| Style & consistency (authoring voice, terminology, code style, markdown) | 11 classes | Medium |
+| Bucket                                                                   | Count                           | Severity                              |
+| :----------------------------------------------------------------------- | :------------------------------ | :------------------------------------ |
+| Technical errors (wrong, will mislead or break user code)                | 22                              | Blocking / High                       |
+| Missing information (correct but incomplete)                             | 24                              | Medium                                |
+| Authoring residue (owners, TODOs, Google Docs artifacts, dead links)     | ~90 instances across 12 classes | Blocking (cosmetic but public-facing) |
+| Structural / navigation defects                                          | 14                              | High                                  |
+| Style & consistency (authoring voice, terminology, code style, markdown) | 11 classes                      | Medium                                |
 
 Two pages are not shippable at all in their current state: **"The final result + examples links"** (an unwritten outline) and **"Using lists"** (all code samples are rendered as single-cell Markdown tables).
 
-The single most damaging technical error is the **camelCase guidance for state-effect `styleProperties`** (§3.1) — it is repeated on two pages across five examples, and every one of those examples produces CSS that browsers silently discard.
+The most-repeated technical error is the **casing guidance for state-effect `styleProperties`** (§3.1) — it appears on two pages across five examples. Under the decision below the examples stop being broken, but the guidance is still wrong: it presents camelCase as the required form on a surface where kebab-case is the house style and both forms are accepted.
+
+### 1.1 Decisions taken after this audit
+
+| Date       | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                     | Audit items superseded                                                                                |
+| :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------- |
+| 2026-07-28 | `@wix/interact` will accept **both** camelCase and kebab-case on every input that takes a general CSS property name (`keyframeEffect.keyframes`, `transition.styleProperties`, `transitionProperties`) and normalise internally per usage — camelCase for WAAPI keyframes, kebab-case for generated CSS. CSS custom properties (`--*`) are used verbatim. Implementation plan: [`dual-casing-support-plan.md`](dual-casing-support-plan.md). | B1, §3.1, §11 (`click & hover`, `what are effects?`, `transition Effects`), Appendix A A1 (+ new A12) |
+
+Documentation that depends on a decision above must not ship before the release that implements it.
 
 ---
 
@@ -50,52 +58,54 @@ The single most damaging technical error is the **camelCase guidance for state-e
 
 These must be resolved; everything else can be triaged.
 
-| # | Issue | Location |
-| :---- | :---- | :---- |
-| B1 | State-effect `styleProperties` documented as camelCase — produces invalid CSS | L2341, L2352-2353, L3096-3098, L3113-3127, L3146-3148 |
-| B2 | Owner/Reviewer attribution lines with internal Wix email addresses | 27 lines (see §5.1) |
-| B3 | Link to an internal Google Docs document | L1093 |
-| B4 | 25 `http://ADDLINK` / `ADDLINK` placeholder links, plus 3 `google.com/search?q=ADDLINK` links | §5.3 |
-| B5 | "The final result + examples links" page is an unwritten outline | L827-842 |
-| B6 | "Using lists" code samples rendered as single-cell Markdown tables | L4473-4505 |
-| B7 | `data-interact-initial="true"` — an attribute that does not exist | L2812 |
-| B8 | Vanilla `generate(config)` example contradicts the page's own `useFirstChild` table | L699, L4481 |
-| B9 | Empty stub sections: "Combining triggers", several bare `##` / `#` headings | L977, L1000, L2067, L2589, L3070, L3998 |
-| B10 | `pageVisible` listed as a trigger — no such trigger exists | L3218 |
-| B11 | Element-resolution rules contradict each other across three pages and are wrong on two counts | L3601-3638, L3621, L4356-4358, L4374-4382 |
-| B12 | Unwritten placeholders in body copy: "TO DO ADD VISUAL DEMONSTRATION", `[Explain that…]`, `[Add link to…]`, `[ A very cool visual example… ]` | L13, L29, L452, L3337, L3341, L4298 |
+| #   | Issue                                                                                                                                                                              | Location                                              |
+| :-- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------- |
+| B1  | State-effect `styleProperties` documented as camelCase-only — both casings are accepted and kebab-case is the house style (§3.1; wording ships with the dual-casing release, §1.1) | L2341, L2352-2353, L3096-3098, L3113-3127, L3146-3148 |
+| B2  | Owner/Reviewer attribution lines with internal Wix email addresses                                                                                                                 | 27 lines (see §5.1)                                   |
+| B3  | Link to an internal Google Docs document                                                                                                                                           | L1093                                                 |
+| B4  | 25 `http://ADDLINK` / `ADDLINK` placeholder links, plus 3 `google.com/search?q=ADDLINK` links                                                                                      | §5.3                                                  |
+| B5  | "The final result + examples links" page is an unwritten outline                                                                                                                   | L827-842                                              |
+| B6  | "Using lists" code samples rendered as single-cell Markdown tables                                                                                                                 | L4473-4505                                            |
+| B7  | `data-interact-initial="true"` — an attribute that does not exist                                                                                                                  | L2812                                                 |
+| B8  | Vanilla `generate(config)` example contradicts the page's own `useFirstChild` table                                                                                                | L699, L4481                                           |
+| B9  | Empty stub sections: "Combining triggers", several bare `##` / `#` headings                                                                                                        | L977, L1000, L2067, L2589, L3070, L3998               |
+| B10 | `pageVisible` listed as a trigger — no such trigger exists                                                                                                                         | L3218                                                 |
+| B11 | Element-resolution rules contradict each other across three pages and are wrong on two counts                                                                                      | L3601-3638, L3621, L4356-4358, L4374-4382             |
+| B12 | Unwritten placeholders in body copy: "TO DO ADD VISUAL DEMONSTRATION", `[Explain that…]`, `[Add link to…]`, `[ A very cool visual example… ]`                                      | L13, L29, L452, L3337, L3341, L4298                   |
 
 ---
 
 ## 3. Technical errors
 
-### 3.1 State-effect style property names must be kebab-case, not camelCase — **BLOCKING**
+### 3.1 State-effect style property names — both casings accepted, kebab-case is the house style — **BLOCKING**
 
 **Where:** L2341 (`What are effects?` → State Effects), L2352-2353 (same page, example), L3096-3098, L3113-3127, L3146-3148 (`transition Effects` page, all three examples).
 
 **What the docs say:** "CSS property names use **camelCase** (`backgroundColor`, `borderRadius`)."
 
-**What is true:** `styleProperties[].name` and `transitionProperties[].name` are written **verbatim** into the generated stylesheet — both into the state rule and into the `transition:` shorthand. `camelToKebabCase()` is applied only to the trigger name (`src/core/css.ts:458`), never to style property names (`src/core/cssUtils.ts:148`, `src/utils.ts:77-93`).
+**What is true today (pre-dual-casing):** `styleProperties[].name` and `transitionProperties[].name` are written **verbatim** into the generated stylesheet — both into the state rule and into the `transition:` shorthand. `camelToKebabCase()` is applied only to the trigger name (`src/core/css.ts:458`), never to style property names (`src/core/cssUtils.ts:148`, `src/utils.ts:77-93`), so a camelCase name is silently discarded by the browser.
 
 **[verified by execution]** Running `generate()` on a config containing both spellings emits:
 
 ```css
-[data-interact-key="btn"] > :first-child {
+[data-interact-key='btn'] > :first-child {
   --transition-0-…: backgroundColor 200ms ease, background-color 200ms ease;
 }
-[data-interact-key="btn"]:is(:state(…), :--…, [data-interact-effect~="…"]) > :first-child {
-  backgroundColor: #111;    /* invalid — dropped by the browser */
-  background-color: #222;   /* works */
+[data-interact-key='btn']:is(:state(…), :--…, [data-interact-effect~='…']) > :first-child {
+  backgroundcolor: #111; /* invalid — dropped by the browser */
+  background-color: #222; /* works */
 }
 ```
 
-`packages/interact/README.md:326` uses `box-shadow` (kebab-case), confirming kebab-case is the intended convention.
+**What will be true (decision of 2026-07-28 — see §1.1):** both casings are accepted on every CSS-property input and normalised internally — camelCase for WAAPI keyframes, kebab-case for generated CSS; `--*` custom properties verbatim. kebab-case remains the house style for state effects because it is literally what the browser receives; `packages/interact/README.md:326` (`box-shadow`) and L1450-1457 (`click & hover`) already follow it.
 
 **Fix:**
-- L2341 — replace with: "State-effect property names are written straight into CSS, so they use standard **kebab-case** CSS property names (`background-color`, `border-radius`). This is the opposite of `keyframeEffect` keyframes, which use **camelCase** (WAAPI)."
-- Rewrite all five examples to kebab-case.
-- Add the camelCase-vs-kebab-case contrast as an explicit callout on both the `What are effects?` page and the `transition Effects` page — it is the single easiest thing to get wrong.
+
+- L2341 — replace with: "State-effect property names end up in CSS, so write them as standard **kebab-case** CSS properties (`background-color`, `border-radius`). camelCase (`backgroundColor`) is accepted too — Interact normalises either form. `keyframeEffect` keyframes are the mirror image: **camelCase** is idiomatic there (it is what WAAPI uses), and kebab-case is likewise accepted."
+- Rewrite all five examples to kebab-case, so every state-effect example matches the CSS it produces.
+- Add one short callout on both the `What are effects?` and the `transition Effects` page: the two surfaces have opposite idiomatic forms, and both accept either. Do **not** frame it as "get this wrong and your CSS breaks" — that stops being true with the dual-casing release.
 - L1450-1457 (`click & hover` page) already uses kebab-case correctly — keep it, and make it the reference example.
+- Sequencing: until the release that ships §1.1 lands, the camelCase examples in this file are genuinely broken, so the rewrite to kebab-case can go out immediately; the "either casing works" sentence must wait for that release.
 
 ### 3.2 `listItemSelector` does not filter runtime source/target binding — **BLOCKING**
 
@@ -106,11 +116,12 @@ These must be resolved; everything else can be triaged.
 **What is true:** `listItemSelector` is never consulted during element resolution. `_getElementsFromData()` (`src/core/add.ts:43-77`) branches only on `listContainer` and `selector`; with `listContainer` alone it returns `Array.from(container.children)` — **all** immediate children. The MutationObserver path (`InteractionController._childListChangeHandler`) likewise processes every added/removed `HTMLElement` child with no filter.
 
 `listItemSelector` is used in exactly three places:
+
 1. CSS selector generation — `getSelector(…, { addItemFilter: true })` emits `${listContainer} > ${listItemSelector}` (`src/core/Interact.ts:340`);
 2. the `closest()` lookup for **state effects** on lists (`src/handlers/effectHandlers.ts:112`);
 3. the element-identity hash (`src/core/utilities.ts:31-33`).
 
-**Fix:** Replace the "filters which children participate" framing everywhere with the accurate description — which the `Using lists` page (L4462) already has: *"Narrows which direct children count as list items when Interact generates CSS (for `transition` / state effects). Use it when the container also holds elements that are not items."* Add an explicit warning: **`listItemSelector` does not restrict which children receive JS-driven triggers or animations — all immediate children of `listContainer` are bound.** Delete or rewrite the `.active` example at L3603-3618, which teaches behaviour the runtime does not implement.
+**Fix:** Replace the "filters which children participate" framing everywhere with the accurate description — which the `Using lists` page (L4462) already has: _"Narrows which direct children count as list items when Interact generates CSS (for `transition` / state effects). Use it when the container also holds elements that are not items."_ Add an explicit warning: **`listItemSelector` does not restrict which children receive JS-driven triggers or animations — all immediate children of `listContainer` are bound.** Delete or rewrite the `.active` example at L3603-3618, which teaches behaviour the runtime does not implement.
 
 ### 3.3 `selector` resolves with `querySelectorAll`, not `querySelector` — **BLOCKING**
 
@@ -120,15 +131,15 @@ These must be resolved; everything else can be triaged.
 
 This directly contradicts L4374-4382 on the `what is a list?` page ("a `selector` alone matches via `querySelectorAll`"), which is correct.
 
-**Fix:** Correct recap step 3. Reconcile the two pages so they state the same rule. Note the practical consequence: `selector: '.card'` on an interaction attaches the trigger to *every* `.card` in the root, not just the first.
+**Fix:** Correct recap step 3. Reconcile the two pages so they state the same rule. Note the practical consequence: `selector: '.card'` on an interaction attaches the trigger to _every_ `.card` in the root, not just the first.
 
 ### 3.4 `listContainer` + `selector` resolution is described wrongly
 
 **Where:** L3621 and L3635 (`source and target resolving`): "Interact runs `querySelector` inside each direct child of the container."
 
-**What is true:** at bind time, `src/core/add.ts:57-59` runs `container.querySelectorAll(selector)` — a single query scoped to the *container*, matching any depth. The per-child `element.querySelector(selector)` form (`_queryItemElement`, `src/core/add.ts:79-85`) is used **only** for items discovered later by the MutationObserver.
+**What is true:** at bind time, `src/core/add.ts:57-59` runs `container.querySelectorAll(selector)` — a single query scoped to the _container_, matching any depth. The per-child `element.querySelector(selector)` form (`_queryItemElement`, `src/core/add.ts:79-85`) is used **only** for items discovered later by the MutationObserver.
 
-This is a real behavioural difference: `listContainer: '.grid', selector: 'img'` binds to *all* images inside `.grid`, including two images inside the same card, whereas a dynamically appended card contributes only its first `img`.
+This is a real behavioural difference: `listContainer: '.grid', selector: 'img'` binds to _all_ images inside `.grid`, including two images inside the same card, whereas a dynamically appended card contributes only its first `img`.
 
 **Fix:** State the container-scoped `querySelectorAll` rule as the primary behaviour. Either document the per-item difference for dynamically-added children, or (preferred) file it as a runtime inconsistency and document only the stable rule — see [Appendix A](#appendix-a--upstream-fixes-outside-this-file). The `Using lists` page (L4461) is already correct.
 
@@ -139,6 +150,7 @@ This is a real behavioural difference: `listContainer: '.grid', selector: 'img'`
 **What the docs say:** "pre-render the CSS with `generate(config)` and mark the element with `data-interact-initial="true"`."
 
 **What is true:** the attribute is `data-interact-enter`, and it is **written by the runtime, never by the author**. `generate()` emits two guarded rules (`src/core/css.ts:246-263`):
+
 - `…:not([data-interact-enter])` → applies `DEFAULT_INITIAL` (`visibility: hidden; transform: none; translate: none; scale: none; rotate: none`);
 - `…:not([data-interact-enter="done"])` → applies the animation custom properties.
 
@@ -179,12 +191,14 @@ The `pointerMove` page (L1896-1898) states this correctly.
 **Where:** L4155-4158 (`responsive animation design`) presents `{ type: 'container', predicate: '(min-width: 600px)' }` as a working feature, and the page body advertises "container conditions" (L4142).
 
 **What is true:** `type: 'container'` is in the TypeScript type (`src/types/config.ts:5`) and in the validator schema (`interact-validate/src/schema/primitives.ts:41`), but nothing consumes it:
+
 - `generate()` only ever calls `getFullPredicateByType(…, 'media')` — no `@container` rule is ever emitted;
 - runtime gating uses `getMediaQuery()`, which is also media-only (`src/utils.ts:170-178`).
 
 A `container` condition is therefore **silently dropped** — the gated interaction runs unconditionally. The L4165 example (`conditions: ['desktop', 'motion-ok', 'wide-container']`) does not do what the surrounding prose claims.
 
 **Fix (pick one, then apply consistently):**
+
 - **Recommended:** remove container conditions from the docs entirely. Rewrite the L4145-4197 example using only `media` conditions, and drop "container sizes" from L4046 and L4142.
 - **Alternative:** keep them but add an explicit "not yet implemented — reserved" note. This is worse for a public docs launch.
 
@@ -214,17 +228,17 @@ Either way, resolve the inconsistency with the `understanding conditions` page (
 
 ```ts
 type SequenceConfig = {
-  effects: (Effect | EffectRef)[];              // REQUIRED
-  delay?: number;                                // ms before the whole sequence starts
-  offset?: number;                               // ms between consecutive participants
+  effects: (Effect | EffectRef)[]; // REQUIRED
+  delay?: number; // ms before the whole sequence starts
+  offset?: number; // ms between consecutive participants
   offsetEasing?: string | ((p: number) => number); // distributes the offsets
-  sequenceId?: string;                           // id for referencing / caching
-  conditions?: string[];                         // gate the whole sequence
-  triggerType?: TimeAnimationTriggerType;        // playback behaviour for the sequence
+  sequenceId?: string; // id for referencing / caching
+  conditions?: string[]; // gate the whole sequence
+  triggerType?: TimeAnimationTriggerType; // playback behaviour for the sequence
 };
 ```
 
-The doc's snippet omits `delay`, `sequenceId`, `conditions` and `triggerType`, and types `offsetEasing` as `string` only. `triggerType` in particular is important — it is documented on the *other* sequences page (L4686) but missing from the type on this one.
+The doc's snippet omits `delay`, `sequenceId`, `conditions` and `triggerType`, and types `offsetEasing` as `string` only. `triggerType` in particular is important — it is documented on the _other_ sequences page (L4686) but missing from the type on this one.
 
 **Fix:** Replace the snippet with the full type and annotate each field. Defaults from `resolveSequenceForCSS` (`src/core/resolvers.ts:118-129`): `delay = 0`, `offset = 0`, `offsetEasing = 'linear'`, `triggerType` falls back to the trigger's default (`once` for `viewEnter`/`animationEnd`, `alternate` for `hover`/`click`/`interest`/`activate`).
 
@@ -298,7 +312,7 @@ The doc's snippet omits `delay`, `sequenceId`, `conditions` and `triggerType`, a
 
 **Why this is a problem:** the same documentation set marks this CRITICAL elsewhere — L1262-1263 ("Keep the hover hit area stable"), L2440, L3497 — and `@wix/interact-validate` has a dedicated `HIT_AREA_SHIFT` rule for it. A `scale(2)` on the hovered element is the textbook case: the element grows out from under the pointer, `mouseleave` fires, the animation reverses, the element shrinks back under the pointer, and it flickers.
 
-(Note: the validator's `checkHitAreaShift` only inspects `transform` **strings** for `translate|scale|matrix` (`interact-validate/src/semantic/fouc.ts:59-64`), so the bare `scale: 2` keyframe property used here escapes detection — the example is unsafe *and* invisible to the linter.)
+(Note: the validator's `checkHitAreaShift` only inspects `transform` **strings** for `translate|scale|matrix` (`interact-validate/src/semantic/fouc.ts:59-64`), so the bare `scale: 2` keyframe property used here escapes detection — the example is unsafe _and_ invisible to the linter.)
 
 **Fix:** Change the first tutorial to a safe pattern — either a modest, non-geometry effect on the element itself (e.g. `opacity` / `filter` / `boxShadow`), or keep the scale but move it to a child via `selector`. Also reduce `scale: 2` to something realistic (`1.05`). This is the first code a reader ever runs; it should model the house rules.
 
@@ -316,32 +330,32 @@ The doc's snippet omits `delay`, `sequenceId`, `conditions` and `triggerType`, a
 
 Ordered by impact.
 
-| # | Missing | Where it belongs |
-| :---- | :---- | :---- |
-| M1 | **FOUC chapter does not exist.** L1093 points at a Google Doc instead. FOUC is referenced from 6 pages (L515, L771-777, L1091, L2812, L3490-3492, L4481) but never explained in one canonical place. | New/expanded page; the `HTML integration` §"Generating CSS & preventing FOUC" (L754-777) is the best existing draft and should be promoted. |
-| M2 | **The named-easing catalogue is never listed.** Examples use `backOut` (L2607, L4085) with no reference. `@wix/motion` accepts `sineIn/Out/InOut`, `quadIn/Out/InOut`, `cubicIn/Out/InOut`, `quartIn/…`, `quintIn/…`, `expoIn/…`, `circIn/…`, `backIn/Out/InOut`, plus all CSS easings and `linear(…)`. | `What are effects?` → Timing & easing reference (L2591-2607). |
-| M3 | **FOUC guidance for non-`once` effects.** The rules state: for `repeat`/`alternate`/`state`, apply the starting keyframe manually (inline styles or stylesheet) and use `fill: 'both'`. Only hinted at (L1350, L3528). | FOUC chapter + `viewEnter` chapter. |
-| M4 | **`data-interact-enter`** — the attribute that drives FOUC (`start` / `done`) is undocumented, yet users will see it in DevTools. | FOUC chapter. |
-| M5 | **CSS embedding options.** `rules/full-lean.md:634-658` documents three placements including `<style blocking="render">`, which is the strongest FOUC guard. Not in the docs. | `HTML integration`. |
-| M6 | **`Interact.create(config, options)`** — `options.useCustomElement` is undocumented (L787 shows `options?` but never explains it). | `HTML integration` → Static API reference. |
-| M7 | **`Interact.setup()` replaces rather than merges** `viewEnter` options across calls (`src/handlers/viewEnter.ts:60-62` assigns). | `HTML integration` → `Interact.setup`. |
-| M8 | **`Interact.forceReducedMotion` must be set before `Interact.create()`** — it is read at handler-attach time, not re-read afterwards. | Reduced-motion sections (L2585, L4026). |
-| M9 | **`transitionDelay`** is a valid scrub/pointer smoothing option (`src/types/effects.ts:53`) — omitted from L1908-1911 and L2278. | `pointerMove`, `What are effects?`. |
-| M10 | **Scrub effects also accept `iterations`, `alternate`, `reversed`** (`src/types/effects.ts:42-55`) — omitted from the scrub snippet at L2271-2282. | `What are effects?`. |
-| M11 | **`iterations: 0` is treated as `Infinity`** (per rules). | `What are effects?` → Time Effects. |
-| M12 | **Selector conditions support `&`** — the predicate may contain `&`, replaced by the base selector (`src/utils.ts:41-46`). Without it, the predicate is appended. Documented in the rules, missing here. | `understanding conditions` → Selector conditions. |
-| M13 | **Perspective guidance** — prefer `transform: perspective(…)` inside keyframes; use the CSS `perspective` property only when multiple children share a `perspective-origin` (`rules/full-lean.md:42`). Relevant to the 3D tilt examples (L1934, L3815). | `What are effects?` → Performance, and `pointerMove`. |
-| M14 | **`interest` and `activate` have no chapter**, although the trigger overview (L994-996) promises "Each trigger has its own chapter". | Either add a short chapter, or change the overview to say they are covered inside `click & hover`. |
-| M15 | **`hover`/`click`/`interest`/`activate` take no `params`** — stated only obliquely (L1029). | Trigger overview table. |
-| M16 | **`customEffect` makes a config non-JSON-serializable** — worth stating given the "LLM-friendly / JSON config" positioning on the About page. | `custom Effects` + About. |
-| M17 | **`@wix/motion-presets` also exports experimental `Bg*` background-scroll presets** (marked "NOT PRODUCTION READY" in source) which `import * as presets` will pull in. | `Named Effects`. |
-| M18 | **`CustomMouse`** is exported from the mouse category (12 exports, 11 documented). Either document it or state that it is excluded. | `Named Effects` → Mouse. |
-| M19 | **`generate()` must be re-run after `registerEffects()`** for each config — and presets must be registered in **both** the build/SSR process and the client bundle. | `HTML integration` → Named effects. |
-| M20 | **Inline state effects get a generated id** — L1476 explains this well, but the consequence (pre-generated CSS from a separate build will not match the client's generated ids) deserves promotion to a callout rather than a paragraph. | `click & hover`, `transition Effects`. |
-| M21 | **`remove(key)` tears down the whole controller for that key** — all interactions bound to that element, not a single interaction. L719 is right but terse; add that re-binding requires `add()` again. | `HTML integration` → Vanilla JS API. |
-| M22 | **`useSafeViewEnter`** is mentioned only in passing (L1075) and is missing from the `params` list at L1070-1073 and from the `Interact.setup({ viewEnter })` description. | `viewEnter`. |
-| M23 | **Browser support** — no statement anywhere. `ViewTimeline` is feature-detected with a `fizban` fallback (`src/handlers/viewProgress.ts:36-53`); `:state()` / `:--` state selectors have a `[data-interact-effect~=…]` fallback; custom elements are required (`Interact.init` bails when `window.customElements` is absent). | New short section on the `HTML integration` page. |
-| M24 | **SSR caveat** — `Interact.init()` returns immediately when `typeof window === 'undefined'` (`src/core/Interact.ts:61-63`). Worth stating explicitly next to the React `useEffect` guidance. | `HTML integration` → React. |
+| #   | Missing                                                                                                                                                                                                                                                                                                                       | Where it belongs                                                                                                                            |
+| :-- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| M1  | **FOUC chapter does not exist.** L1093 points at a Google Doc instead. FOUC is referenced from 6 pages (L515, L771-777, L1091, L2812, L3490-3492, L4481) but never explained in one canonical place.                                                                                                                          | New/expanded page; the `HTML integration` §"Generating CSS & preventing FOUC" (L754-777) is the best existing draft and should be promoted. |
+| M2  | **The named-easing catalogue is never listed.** Examples use `backOut` (L2607, L4085) with no reference. `@wix/motion` accepts `sineIn/Out/InOut`, `quadIn/Out/InOut`, `cubicIn/Out/InOut`, `quartIn/…`, `quintIn/…`, `expoIn/…`, `circIn/…`, `backIn/Out/InOut`, plus all CSS easings and `linear(…)`.                       | `What are effects?` → Timing & easing reference (L2591-2607).                                                                               |
+| M3  | **FOUC guidance for non-`once` effects.** The rules state: for `repeat`/`alternate`/`state`, apply the starting keyframe manually (inline styles or stylesheet) and use `fill: 'both'`. Only hinted at (L1350, L3528).                                                                                                        | FOUC chapter + `viewEnter` chapter.                                                                                                         |
+| M4  | **`data-interact-enter`** — the attribute that drives FOUC (`start` / `done`) is undocumented, yet users will see it in DevTools.                                                                                                                                                                                             | FOUC chapter.                                                                                                                               |
+| M5  | **CSS embedding options.** `rules/full-lean.md:634-658` documents three placements including `<style blocking="render">`, which is the strongest FOUC guard. Not in the docs.                                                                                                                                                 | `HTML integration`.                                                                                                                         |
+| M6  | **`Interact.create(config, options)`** — `options.useCustomElement` is undocumented (L787 shows `options?` but never explains it).                                                                                                                                                                                            | `HTML integration` → Static API reference.                                                                                                  |
+| M7  | **`Interact.setup()` replaces rather than merges** `viewEnter` options across calls (`src/handlers/viewEnter.ts:60-62` assigns).                                                                                                                                                                                              | `HTML integration` → `Interact.setup`.                                                                                                      |
+| M8  | **`Interact.forceReducedMotion` must be set before `Interact.create()`** — it is read at handler-attach time, not re-read afterwards.                                                                                                                                                                                         | Reduced-motion sections (L2585, L4026).                                                                                                     |
+| M9  | **`transitionDelay`** is a valid scrub/pointer smoothing option (`src/types/effects.ts:53`) — omitted from L1908-1911 and L2278.                                                                                                                                                                                              | `pointerMove`, `What are effects?`.                                                                                                         |
+| M10 | **Scrub effects also accept `iterations`, `alternate`, `reversed`** (`src/types/effects.ts:42-55`) — omitted from the scrub snippet at L2271-2282.                                                                                                                                                                            | `What are effects?`.                                                                                                                        |
+| M11 | **`iterations: 0` is treated as `Infinity`** (per rules).                                                                                                                                                                                                                                                                     | `What are effects?` → Time Effects.                                                                                                         |
+| M12 | **Selector conditions support `&`** — the predicate may contain `&`, replaced by the base selector (`src/utils.ts:41-46`). Without it, the predicate is appended. Documented in the rules, missing here.                                                                                                                      | `understanding conditions` → Selector conditions.                                                                                           |
+| M13 | **Perspective guidance** — prefer `transform: perspective(…)` inside keyframes; use the CSS `perspective` property only when multiple children share a `perspective-origin` (`rules/full-lean.md:42`). Relevant to the 3D tilt examples (L1934, L3815).                                                                       | `What are effects?` → Performance, and `pointerMove`.                                                                                       |
+| M14 | **`interest` and `activate` have no chapter**, although the trigger overview (L994-996) promises "Each trigger has its own chapter".                                                                                                                                                                                          | Either add a short chapter, or change the overview to say they are covered inside `click & hover`.                                          |
+| M15 | **`hover`/`click`/`interest`/`activate` take no `params`** — stated only obliquely (L1029).                                                                                                                                                                                                                                   | Trigger overview table.                                                                                                                     |
+| M16 | **`customEffect` makes a config non-JSON-serializable** — worth stating given the "LLM-friendly / JSON config" positioning on the About page.                                                                                                                                                                                 | `custom Effects` + About.                                                                                                                   |
+| M17 | **`@wix/motion-presets` also exports experimental `Bg*` background-scroll presets** (marked "NOT PRODUCTION READY" in source) which `import * as presets` will pull in.                                                                                                                                                       | `Named Effects`.                                                                                                                            |
+| M18 | **`CustomMouse`** is exported from the mouse category (12 exports, 11 documented). Either document it or state that it is excluded.                                                                                                                                                                                           | `Named Effects` → Mouse.                                                                                                                    |
+| M19 | **`generate()` must be re-run after `registerEffects()`** for each config — and presets must be registered in **both** the build/SSR process and the client bundle.                                                                                                                                                           | `HTML integration` → Named effects.                                                                                                         |
+| M20 | **Inline state effects get a generated id** — L1476 explains this well, but the consequence (pre-generated CSS from a separate build will not match the client's generated ids) deserves promotion to a callout rather than a paragraph.                                                                                      | `click & hover`, `transition Effects`.                                                                                                      |
+| M21 | **`remove(key)` tears down the whole controller for that key** — all interactions bound to that element, not a single interaction. L719 is right but terse; add that re-binding requires `add()` again.                                                                                                                       | `HTML integration` → Vanilla JS API.                                                                                                        |
+| M22 | **`useSafeViewEnter`** is mentioned only in passing (L1075) and is missing from the `params` list at L1070-1073 and from the `Interact.setup({ viewEnter })` description.                                                                                                                                                     | `viewEnter`.                                                                                                                                |
+| M23 | **Browser support** — no statement anywhere. `ViewTimeline` is feature-detected with a `fizban` fallback (`src/handlers/viewProgress.ts:36-53`); `:state()` / `:--` state selectors have a `[data-interact-effect~=…]` fallback; custom elements are required (`Interact.init` bails when `window.customElements` is absent). | New short section on the `HTML integration` page.                                                                                           |
+| M24 | **SSR caveat** — `Interact.init()` returns immediately when `typeof window === 'undefined'` (`src/core/Interact.ts:61-63`). Worth stating explicitly next to the React `useEffect` guidance.                                                                                                                                  | `HTML integration` → React.                                                                                                                 |
 
 ---
 
@@ -359,63 +373,63 @@ Every page heading is prefixed with 🧑‍🌾 or 🧑‍💻 (apparently marki
 
 ### 5.3 Placeholder and dead links
 
-| Type | Count | Lines |
-| :---- | :---- | :---- |
-| `http://ADDLINK` / `(ADDLINK)` | 22 | L174-176, L295, L388, L462 (×3), L470, L478, L514, L822-825, L1918-1919 area, L2811, L3946, L4031, L4035-4038 |
-| `https://www.google.com/search?q=ADDLINK` | 3 | L4616-4618 |
-| Empty `()` links | 5 | L865, L874, L878, L882, L1000, L1203, L1865, L3243 |
-| Fake internal URLs `http://Configuration/...` | 8 | L1736, L1749, L3438, L3623, L3697, L3714, L3762, L3770, L3859, L3875 |
-| Internal Google Docs link | 1 | **L1093** |
-| In-page anchors to sections that may not survive the site build | 2 | L3482 (`#when-source-and-target-differ-fouc-and-refined-targets`, `#lists-listcontainer-and-listitemselector`), L514 (`#named-effects-registereffects`) |
+| Type                                                            | Count | Lines                                                                                                                                                   |
+| :-------------------------------------------------------------- | :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `http://ADDLINK` / `(ADDLINK)`                                  | 22    | L174-176, L295, L388, L462 (×3), L470, L478, L514, L822-825, L1918-1919 area, L2811, L3946, L4031, L4035-4038                                           |
+| `https://www.google.com/search?q=ADDLINK`                       | 3     | L4616-4618                                                                                                                                              |
+| Empty `()` links                                                | 5     | L865, L874, L878, L882, L1000, L1203, L1865, L3243                                                                                                      |
+| Fake internal URLs `http://Configuration/...`                   | 8     | L1736, L1749, L3438, L3623, L3697, L3714, L3762, L3770, L3859, L3875                                                                                    |
+| Internal Google Docs link                                       | 1     | **L1093**                                                                                                                                               |
+| In-page anchors to sections that may not survive the site build | 2     | L3482 (`#when-source-and-target-differ-fouc-and-refined-targets`, `#lists-listcontainer-and-listitemselector`), L514 (`#named-effects-registereffects`) |
 
 **Action:** build a link map (page slug ↔ target) and resolve all of them. Nothing with `ADDLINK`, `google.com/search`, `docs.google.com`, or `http://Configuration/` may ship.
 
 ### 5.4 Editorial notes and TODOs left in body copy
 
-| Line | Content |
-| :---- | :---- |
-| L13 | `## [ A very cool visual example should be added here for a capabilities showoff]` |
-| L29 | `[Add link to Rules and/or Skills]` |
-| L452 | `TO DO ADD VISUAL DEMONSTRATION` |
-| L994 | `*(In the live page, each trigger name links to its own chapter — a ↗ icon appears to its left and it underlines on hover.)*` — a note to the site builder |
+| Line  | Content                                                                                                                                                                                                                 |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| L13   | `## [ A very cool visual example should be added here for a capabilities showoff]`                                                                                                                                      |
+| L29   | `[Add link to Rules and/or Skills]`                                                                                                                                                                                     |
+| L452  | `TO DO ADD VISUAL DEMONSTRATION`                                                                                                                                                                                        |
+| L994  | `*(In the live page, each trigger name links to its own chapter — a ↗ icon appears to its left and it underlines on hover.)*` — a note to the site builder                                                              |
 | L1180 | "Because of the current threshold limitation above, do not describe `threshold: 0.5` as a guaranteed 50%-visible gate yet." — reviewer note; also a **dangling reference** (no threshold limitation is described above) |
-| L1730 | `(maybe next to it an 'out' animation for visual comparison)` |
-| L3337 | `[Explain that interaction is the connection between a trigger and effects.]` |
-| L3341 | `*[Visual example: A scroll-based interaction…]*` |
-| L4298 | `(see reduced motion <add link to understanding condition - reduced motion>)` |
-| L4612 | "Overshooting durations: If your sequence contains structural loops or heavy offsets…" — "structural loops" is not a concept in this library; the sentence is not actionable |
+| L1730 | `(maybe next to it an 'out' animation for visual comparison)`                                                                                                                                                           |
+| L3337 | `[Explain that interaction is the connection between a trigger and effects.]`                                                                                                                                           |
+| L3341 | `*[Visual example: A scroll-based interaction…]*`                                                                                                                                                                       |
+| L4298 | `(see reduced motion <add link to understanding condition - reduced motion>)`                                                                                                                                           |
+| L4612 | "Overshooting durations: If your sequence contains structural loops or heavy offsets…" — "structural loops" is not a concept in this library; the sentence is not actionable                                            |
 
 ### 5.5 Google Docs export artifacts
 
-| Artifact | Instances | Example |
-| :---- | :---- | :---- |
-| Backslash-escaped Markdown (`\-`, `\+`, `\[`, `\*\*`, `` \` ``, `\<`, `\#`) | ~60 | L23, L94, L454, L833-839, L1207-1212, L2183, L2232, L2674, L2790-2793, L2812, L2831, L2864, L3078-3080, L3159-3161, L4304 |
-| Smart quotes (`'`, `"`) — including **inside code-like text** | 18 | L1863-1872, L2921, L2971, L3002-3003, L3021-3023, L3078-3080, L3108, L3161 |
-| Callout/admonition text merged into a heading | 4 | L454, L2674, L2812, L2831 |
-| YAML frontmatter rendered as a heading | 3 | L2899, L2973, L3173 |
-| Code samples rendered as single-cell tables | 5 | L4473-4477, L4487-4491, L4504-4505 |
-| Stray label lines (`TypeScript`, `HTML`) outside fences | 4 | L4532, L4555, L4597 |
-| Duplicated nav markers | 2 | L178-180 (`# Getting Started` / `# Getting Started Tab`) |
-| Orphan MDX components inside plain fences | 2 blocks | L260-322 (`<Steps>` / `<Step>`), L345 & L408 (stray `</Step>`) |
-| Empty headings | 6 | L252, L853, L977, L2067, L2589, L3070, L3998 |
-| Empty blockquote / stray bullet | 2 | L2263 (`>`), L3315 (`*`) |
-| Bare URL as page content | 1 | L5 |
+| Artifact                                                                    | Instances | Example                                                                                                                   |
+| :-------------------------------------------------------------------------- | :-------- | :------------------------------------------------------------------------------------------------------------------------ |
+| Backslash-escaped Markdown (`\-`, `\+`, `\[`, `\*\*`, `` \` ``, `\<`, `\#`) | ~60       | L23, L94, L454, L833-839, L1207-1212, L2183, L2232, L2674, L2790-2793, L2812, L2831, L2864, L3078-3080, L3159-3161, L4304 |
+| Smart quotes (`'`, `"`) — including **inside code-like text**               | 18        | L1863-1872, L2921, L2971, L3002-3003, L3021-3023, L3078-3080, L3108, L3161                                                |
+| Callout/admonition text merged into a heading                               | 4         | L454, L2674, L2812, L2831                                                                                                 |
+| YAML frontmatter rendered as a heading                                      | 3         | L2899, L2973, L3173                                                                                                       |
+| Code samples rendered as single-cell tables                                 | 5         | L4473-4477, L4487-4491, L4504-4505                                                                                        |
+| Stray label lines (`TypeScript`, `HTML`) outside fences                     | 4         | L4532, L4555, L4597                                                                                                       |
+| Duplicated nav markers                                                      | 2         | L178-180 (`# Getting Started` / `# Getting Started Tab`)                                                                  |
+| Orphan MDX components inside plain fences                                   | 2 blocks  | L260-322 (`<Steps>` / `<Step>`), L345 & L408 (stray `</Step>`)                                                            |
+| Empty headings                                                              | 6         | L252, L853, L977, L2067, L2589, L3070, L3998                                                                              |
+| Empty blockquote / stray bullet                                             | 2         | L2263 (`>`), L3315 (`*`)                                                                                                  |
+| Bare URL as page content                                                    | 1         | L5                                                                                                                        |
 
 ### 5.6 Content that duplicates other pages and should be cut or cross-linked
 
-| Duplicate | Lines | Recommendation |
-| :---- | :---- | :---- |
-| Install instructions appear twice, with different wording | L188-206 and L472-484 | Keep the `Installation and Entry points` version as canonical; on `HTML integration`, replace with a one-line pointer. |
-| Entry-point table appears twice, with different "use when" columns | L212-216 and L465-468 | Merge into one table; use it on the Installation page and link from Integration. |
-| `registerEffects` setup appears three times | L496, L728-750, L2650-2674 | Canonical: `Named Effects` page. Others link to it. |
-| `triggerType` table appears four times with different wording | L1031-1036, L1248-1253, L1356-1361, L2256-2261 | Keep the per-trigger tables (they legitimately differ per trigger) but make the wording of each row identical across pages. Add the `viewEnter` column to the effects-page table only. |
-| `stateAction` table appears twice | L1465-1470, L2334-2339 | Same treatment. |
-| `composite` explanation appears three times | L2228-2232, L3863-3873, L1023 | Canonical: `multi-interaction compositions`. Others summarise in one line + link. |
-| Reduced motion appears four times | L2550-2585, L2868-2891, L4000-4027, L4296-4298 | Canonical: `understanding conditions` → Reduced motion. Others link. |
-| `overflow: hidden` caveat appears three times | L1581-1601, L2311, L2831 | Canonical: `viewProgress`. Others summarise + link. |
-| Scroll-preset `range` requirement appears twice | L1704-1732, L2831 | Canonical: `viewProgress`. |
-| "Don't guess preset options" appears three times | L1732, L2546, L2790 | Canonical: `Named Effects`. |
-| Hit-area-shift warning appears four times | L1262-1263, L2440, L3497, L2060 | Canonical: `source and target resolving`. |
+| Duplicate                                                          | Lines                                          | Recommendation                                                                                                                                                                         |
+| :----------------------------------------------------------------- | :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install instructions appear twice, with different wording          | L188-206 and L472-484                          | Keep the `Installation and Entry points` version as canonical; on `HTML integration`, replace with a one-line pointer.                                                                 |
+| Entry-point table appears twice, with different "use when" columns | L212-216 and L465-468                          | Merge into one table; use it on the Installation page and link from Integration.                                                                                                       |
+| `registerEffects` setup appears three times                        | L496, L728-750, L2650-2674                     | Canonical: `Named Effects` page. Others link to it.                                                                                                                                    |
+| `triggerType` table appears four times with different wording      | L1031-1036, L1248-1253, L1356-1361, L2256-2261 | Keep the per-trigger tables (they legitimately differ per trigger) but make the wording of each row identical across pages. Add the `viewEnter` column to the effects-page table only. |
+| `stateAction` table appears twice                                  | L1465-1470, L2334-2339                         | Same treatment.                                                                                                                                                                        |
+| `composite` explanation appears three times                        | L2228-2232, L3863-3873, L1023                  | Canonical: `multi-interaction compositions`. Others summarise in one line + link.                                                                                                      |
+| Reduced motion appears four times                                  | L2550-2585, L2868-2891, L4000-4027, L4296-4298 | Canonical: `understanding conditions` → Reduced motion. Others link.                                                                                                                   |
+| `overflow: hidden` caveat appears three times                      | L1581-1601, L2311, L2831                       | Canonical: `viewProgress`. Others summarise + link.                                                                                                                                    |
+| Scroll-preset `range` requirement appears twice                    | L1704-1732, L2831                              | Canonical: `viewProgress`.                                                                                                                                                             |
+| "Don't guess preset options" appears three times                   | L1732, L2546, L2790                            | Canonical: `Named Effects`.                                                                                                                                                            |
+| Hit-area-shift warning appears four times                          | L1262-1263, L2440, L3497, L2060                | Canonical: `source and target resolving`.                                                                                                                                              |
 
 ### 5.7 Miscellaneous content to drop
 
@@ -436,11 +450,11 @@ Almost every page opens with the site-page marker (`# 🧑‍💻 viewEnter`) fo
 
 Current mix: `About Interact`, `Installation and Entry points`, `My first interaction`, `HTML integration`, `the config object`, `what is a trigger?`, `viewEnter`, `click & hover`, `keyframe Effects`, `transition Effects`, `custom Effects`, `Named Effects`, `what is an interaction?`, `source and target resolving`, `effects array & cascading logic`, `multi-interaction compositions`, `understanding conditions`, `responsive animation design`, `what is a list?`, `using lists`, `what is a sequence?`, `using sequences`.
 
-**Recommendation:** sentence case for all page titles, keeping API identifiers in code font: *"What is a trigger?"*, *"Keyframe effects"*, *"Transition effects"*, *"Custom effects"*, *"Named effects"*, *"Source and target resolving"*, *"Effects array and cascading logic"*, *"Using lists"*.
+**Recommendation:** sentence case for all page titles, keeping API identifiers in code font: _"What is a trigger?"_, _"Keyframe effects"_, _"Transition effects"_, _"Custom effects"_, _"Named effects"_, _"Source and target resolving"_, _"Effects array and cascading logic"_, _"Using lists"_.
 
 ### 6.3 Nav title does not match page content
 
-- **`keyframe Effects`** (L2893) actually covers *time effects* (named + keyframe) **and** *scrub effects* including pointer properties. Either rename the page to "Time and scrub effects" or split the scrub half out and move the pointer content into the `pointerMove` chapter (see §6.5).
+- **`keyframe Effects`** (L2893) actually covers _time effects_ (named + keyframe) **and** _scrub effects_ including pointer properties. Either rename the page to "Time and scrub effects" or split the scrub half out and move the pointer content into the `pointerMove` chapter (see §6.5).
 - **`transition Effects`** (L3064) and the `What are effects?` page's "State Effects" (L2315) are the same concept under two names. Pick one — see §8.
 
 ### 6.4 Promised chapters that do not exist
@@ -457,15 +471,16 @@ L994-996 says each of the eight triggers has its own chapter. Only six chapters 
 
 The five trigger chapters do not follow a common order:
 
-| Page | Order |
-| :---- | :---- |
-| `viewEnter` | intro → how it works → triggerType → params → caveats → FOUC → examples |
+| Page            | Order                                                                                  |
+| :-------------- | :------------------------------------------------------------------------------------- |
+| `viewEnter`     | intro → how it works → triggerType → params → caveats → FOUC → examples                |
 | `click & hover` | intro → payload families → a11y → conditions → hover → click → state effects → presets |
-| `viewProgress` | intro → how it works → caveat → params → examples → presets → advanced pattern |
-| `pointerMove` | intro → progress model → params → smoothing → payloads → examples → FOUC |
-| `animationEnd` | intro → params → examples → chaining → rules |
+| `viewProgress`  | intro → how it works → caveat → params → examples → presets → advanced pattern         |
+| `pointerMove`   | intro → progress model → params → smoothing → payloads → examples → FOUC               |
+| `animationEnd`  | intro → params → examples → chaining → rules                                           |
 
 **Recommendation** — canonical trigger-chapter order:
+
 1. What it is / when to use it
 2. How it works (underlying platform API)
 3. Trigger `params`
@@ -489,18 +504,18 @@ Only 4 of 27 pages have one (L172-176, L820-825, L4033-4038, L4614-4618, L4725-4
 
 L260-448 present three integrations (React, Web Components, Vanilla) sequentially, with the React one still wrapped in raw `<Steps>`/`<Step>` MDX inside a code fence, an orphan `</Step>` at L345 and L408, and a prose sentence sitting inside a bare code fence at L348-350. The three variants also have no headings identifying which is which.
 
-**Fix:** rebuild as proper tabs (or three clearly-headed subsections), one per entry point, each with identical step structure: *1. Add the markup → 2. Define the config → 3. Create the runtime → 4. Clean up*.
+**Fix:** rebuild as proper tabs (or three clearly-headed subsections), one per entry point, each with identical step structure: _1. Add the markup → 2. Define the config → 3. Create the runtime → 4. Clean up_.
 
 ### 6.10 Remaining structural defects
 
-| # | Issue | Line |
-| :---- | :---- | :---- |
-| a | "every integration follows the same **three** steps" — followed by a four-item list | L511-516 |
-| b | `## **Set up an Interaction**  Types of triggers` / `Types of effects` — three headings collapsed into one line plus an orphan | L252-256 |
-| c | `## **Combining triggers**` → body is `See [here]()` | L998-1000 |
-| d | `The final result + examples links` page is an unwritten bullet outline | L827-842 |
-| e | Empty `## ` / `# ` headings | L252, L853, L977, L2067, L2589, L3070, L3998 |
-| f | `Named Effects` §"3. Reference the preset by name" is buried inside a merged heading, so the numbered setup sequence reads 1 → 2 → (nothing) | L2674 |
+| #   | Issue                                                                                                                                        | Line                                         |
+| :-- | :------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------- |
+| a   | "every integration follows the same **three** steps" — followed by a four-item list                                                          | L511-516                                     |
+| b   | `## **Set up an Interaction**  Types of triggers` / `Types of effects` — three headings collapsed into one line plus an orphan               | L252-256                                     |
+| c   | `## **Combining triggers**` → body is `See [here]()`                                                                                         | L998-1000                                    |
+| d   | `The final result + examples links` page is an unwritten bullet outline                                                                      | L827-842                                     |
+| e   | Empty `## ` / `# ` headings                                                                                                                  | L252, L853, L977, L2067, L2589, L3070, L3998 |
+| f   | `Named Effects` §"3. Reference the preset by name" is buried inside a merged heading, so the numbered setup sequence reads 1 → 2 → (nothing) | L2674                                        |
 
 ---
 
@@ -545,17 +560,17 @@ Three distinct voices are present:
 
 ### 7.2 Pages that must be brought up to Style A
 
-| Page | Missing relative to Style A |
-| :---- | :---- |
-| `pointerMove` | No HTML markup with any example; no **Result:** paragraphs (only one, at L2054, and it is not bolded like the others); no "See also". |
-| `animationEnd` | No HTML; examples are config fragments only; "Important rules" is a flat bullet list where other pages use prose + callouts. |
-| `keyframe Effects` | Leftover frontmatter headings; two examples are unlabelled fragments; the accessibility paragraph (L2971) is a wall of prose where other pages use a code example. |
-| `transition Effects` | Three long unbroken prose paragraphs (L3078-3080, L3108, L3159-3161) where the parallel `click & hover` state section uses tables + examples; no HTML; no **Result:**. |
-| `custom Effects` | No **Result:** paragraphs; the cancellation example (L3317-3329) has broken indentation and a TS cast in a JS fence. |
-| `using sequences` | Numbered-step format is fine, but examples are fragments with no HTML, no **Result:**, and two unlabelled fences. |
-| `using lists` | Examples are tables (B6); needs a full rebuild. |
-| `what is an interaction?` | Purely conceptual with pseudo-code blocks; should carry at least one real config. |
-| `responsive animation design` | Good examples, but no HTML, no **Result:**, and the "Best practices" section is a bullet list where other pages use prose. |
+| Page                          | Missing relative to Style A                                                                                                                                            |
+| :---------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pointerMove`                 | No HTML markup with any example; no **Result:** paragraphs (only one, at L2054, and it is not bolded like the others); no "See also".                                  |
+| `animationEnd`                | No HTML; examples are config fragments only; "Important rules" is a flat bullet list where other pages use prose + callouts.                                           |
+| `keyframe Effects`            | Leftover frontmatter headings; two examples are unlabelled fragments; the accessibility paragraph (L2971) is a wall of prose where other pages use a code example.     |
+| `transition Effects`          | Three long unbroken prose paragraphs (L3078-3080, L3108, L3159-3161) where the parallel `click & hover` state section uses tables + examples; no HTML; no **Result:**. |
+| `custom Effects`              | No **Result:** paragraphs; the cancellation example (L3317-3329) has broken indentation and a TS cast in a JS fence.                                                   |
+| `using sequences`             | Numbered-step format is fine, but examples are fragments with no HTML, no **Result:**, and two unlabelled fences.                                                      |
+| `using lists`                 | Examples are tables (B6); needs a full rebuild.                                                                                                                        |
+| `what is an interaction?`     | Purely conceptual with pseudo-code blocks; should carry at least one real config.                                                                                      |
+| `responsive animation design` | Good examples, but no HTML, no **Result:**, and the "Best practices" section is a bullet list where other pages use prose.                                             |
 
 ### 7.3 Admonition set
 
@@ -579,61 +594,62 @@ Used on some pages as `**Result:**` (L1698, L1853, L3436, L3691, L3855), on othe
 
 Pick one term per row and apply it throughout.
 
-| Concept | Currently used | Recommended |
-| :---- | :---- | :---- |
-| The state/transition effect kind | "State Effect" (L2189, L2315), "Transition effect" (L3072), "CSS style toggle", "state effects" | **"State effect"** everywhere; on the dedicated page, open with "State effects (also called transition effects, after the `transition` field)". |
-| The scrub effect kind | "Scrub Effect" (L2188), "scroll-driven", "continuous trigger", "progress-based" | **"Scrub effect"** for the effect kind; **"continuous trigger"** for `viewProgress`/`pointerMove`. |
-| The time effect kind | "Time Effect", "Time effects", "time-based effect", "time-based animation payload", "event trigger" | **"Time effect"** for the effect; **"event trigger"** for the trigger. |
-| Presets | "named effect", "namedEffect", "preset", "Named Effects", "ready-made effects" | **"named effect"** in prose, `namedEffect` for the field, "preset" only when referring to the `@wix/motion-presets` package contents. |
-| The library | "Interact", "@wix/interact", "the library", "`@wix/interact`" | **"Interact"** in prose; `@wix/interact` when naming the package. |
-| The flash problem | "flash of un-animated content (FOUC)" (L515), "Flash of Unstyled Content (FOUC)" (L2058), "Flash Of Un-styled Content (FOUC)" (L3490), "entrance flash" (L1091, L1350) | **"flash of unstyled content (FOUC)"**, defined once, abbreviated thereafter. |
-| The keyed element | "keyed element", "keyed root", "root element", "the `<interact-element>`", "the element registered for the key" | **"keyed element"** for the bound element; **"root"** only inside resolution descriptions where it is defined. |
-| Concept capitalisation | "Interaction"/"interaction", "Effect"/"effect", "Sequence"/"sequence", "Condition"/"condition", "Trigger"/"trigger" — inconsistent within single pages (e.g. L855-882 vs L2177) | **Lowercase** in prose; capitalise only when naming the TypeScript type (`Interaction`, `Effect`) or the React component (`<Interaction>`). |
-| Source/target | `SOURCE`/`TARGET` uppercase comments used in ~half of the examples | Use them in **every** example where source ≠ target; omit where they are the same. |
-| `key` terminology | "interaction key", "element key", "`data-interact-key`", "interactKey" | **"key"** generically; name the binding mechanism per integration once, in the resolution chapter. |
-| Effect-registry entries | "the top-level `effects` map", "the effects registry", "`EffectRef`" | **"the `effects` registry"**; use `EffectRef` only when naming the type. |
+| Concept                          | Currently used                                                                                                                                                                  | Recommended                                                                                                                                     |
+| :------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| The state/transition effect kind | "State Effect" (L2189, L2315), "Transition effect" (L3072), "CSS style toggle", "state effects"                                                                                 | **"State effect"** everywhere; on the dedicated page, open with "State effects (also called transition effects, after the `transition` field)". |
+| The scrub effect kind            | "Scrub Effect" (L2188), "scroll-driven", "continuous trigger", "progress-based"                                                                                                 | **"Scrub effect"** for the effect kind; **"continuous trigger"** for `viewProgress`/`pointerMove`.                                              |
+| The time effect kind             | "Time Effect", "Time effects", "time-based effect", "time-based animation payload", "event trigger"                                                                             | **"Time effect"** for the effect; **"event trigger"** for the trigger.                                                                          |
+| Presets                          | "named effect", "namedEffect", "preset", "Named Effects", "ready-made effects"                                                                                                  | **"named effect"** in prose, `namedEffect` for the field, "preset" only when referring to the `@wix/motion-presets` package contents.           |
+| The library                      | "Interact", "@wix/interact", "the library", "`@wix/interact`"                                                                                                                   | **"Interact"** in prose; `@wix/interact` when naming the package.                                                                               |
+| The flash problem                | "flash of un-animated content (FOUC)" (L515), "Flash of Unstyled Content (FOUC)" (L2058), "Flash Of Un-styled Content (FOUC)" (L3490), "entrance flash" (L1091, L1350)          | **"flash of unstyled content (FOUC)"**, defined once, abbreviated thereafter.                                                                   |
+| The keyed element                | "keyed element", "keyed root", "root element", "the `<interact-element>`", "the element registered for the key"                                                                 | **"keyed element"** for the bound element; **"root"** only inside resolution descriptions where it is defined.                                  |
+| Concept capitalisation           | "Interaction"/"interaction", "Effect"/"effect", "Sequence"/"sequence", "Condition"/"condition", "Trigger"/"trigger" — inconsistent within single pages (e.g. L855-882 vs L2177) | **Lowercase** in prose; capitalise only when naming the TypeScript type (`Interaction`, `Effect`) or the React component (`<Interaction>`).     |
+| Source/target                    | `SOURCE`/`TARGET` uppercase comments used in ~half of the examples                                                                                                              | Use them in **every** example where source ≠ target; omit where they are the same.                                                              |
+| `key` terminology                | "interaction key", "element key", "`data-interact-key`", "interactKey"                                                                                                          | **"key"** generically; name the binding mechanism per integration once, in the resolution chapter.                                              |
+| Effect-registry entries          | "the top-level `effects` map", "the effects registry", "`EffectRef`"                                                                                                            | **"the `effects` registry"**; use `EffectRef` only when naming the type.                                                                        |
 
 ---
 
 ## 9. Code-sample consistency
 
-| # | Issue | Instances | Recommendation |
-| :---- | :---- | :---- | :---- |
-| C1 | Fence languages: `ts` (80), `javascript` (27), `html` (21), `css` (7), `shell` (6), `typescript` (2), `tsx` (2), `java` (1), none (~18) | throughout | **`ts`** for all TypeScript/config, **`tsx`** for JSX, **`js`** only where the sample is deliberately plain JS, **`html`**, **`css`**, **`bash`** for shell. Fix `java` at L4557. Label all 18 unlabelled fences (L599, L656, L2678, L4680, L4700 and others). |
-| C2 | Indentation: 2-space on most pages, 4-space on `keyframe Effects` and `transition Effects` (L2909-2938, L3089-3129) | 2 pages | 2 spaces everywhere. |
-| C3 | Quotes: single in most `ts` samples, double in the About page and `using lists` samples | ~6 samples | Single quotes. |
-| C4 | Keyframe values: `opacity: 0` (number) vs `opacity: '0'` (string) — both valid, mixed within the same page | throughout | Pick **numbers** for numeric properties, strings for anything with a unit or function. |
-| C5 | Config fragments vs. complete configs — most examples are bare object fragments that will not compile if pasted | ~40 samples | Wrap every example a reader might copy in `const config: InteractConfig = { interactions: [ … ] };`. Keep fragments only for field-level illustration, and prefix them with `// inside interactions[]`. |
-| C6 | `Interact.create(config)` shown in some examples, omitted in most | mixed | Include it only in "getting started"/integration examples; omit consistently in reference examples. |
-| C7 | Broken indentation | L2950-2951 (`params: { threshold: 0.3 }` split across lines before a comma), L3813-3816 (`keyframeEffect: {` / `     name:`), L3319-3328 (custom-effect cancellation) | Reformat. |
-| C8 | TypeScript syntax inside `javascript` fences | L3266 (`type PointerProgress = …`), L3319 (`element as HTMLCanvasElement`) | Change fence to `ts`. |
-| C9 | Nested/doubled fences (```` inside ```) | L260-322, L326-346, L390-409, L2907-2919, L2925-2940 | Flatten. |
-| C10 | Literal ellipses inside otherwise-valid code | L4504 (`keyframes: [...]`), L2308 (`/* ... */`), L3708-3709 | Use `/* … */` consistently, or complete the sample. |
-| C11 | Smart quotes inside code-adjacent text | L3002-3003, L3021-3023 (`‘percentage’`, `‘self’`, `‘root’`, `‘both’`) | Convert to straight quotes and wrap in backticks. |
-| C12 | Type snippets styled as `css` | L2286-2288 (`animation-range: { name: … }` in a `css` fence — that shape is TypeScript, not CSS) | Change to `ts` and remove the invented `animation-range:` prefix. |
+| #   | Issue                                                                                                                                   | Instances                                                                                                                                                             | Recommendation                                                                                                                                                                                                                                                 |
+| :-- | :-------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| C1  | Fence languages: `ts` (80), `javascript` (27), `html` (21), `css` (7), `shell` (6), `typescript` (2), `tsx` (2), `java` (1), none (~18) | throughout                                                                                                                                                            | **`ts`** for all TypeScript/config, **`tsx`** for JSX, **`js`** only where the sample is deliberately plain JS, **`html`**, **`css`**, **`bash`** for shell. Fix `java` at L4557. Label all 18 unlabelled fences (L599, L656, L2678, L4680, L4700 and others). |
+| C2  | Indentation: 2-space on most pages, 4-space on `keyframe Effects` and `transition Effects` (L2909-2938, L3089-3129)                     | 2 pages                                                                                                                                                               | 2 spaces everywhere.                                                                                                                                                                                                                                           |
+| C3  | Quotes: single in most `ts` samples, double in the About page and `using lists` samples                                                 | ~6 samples                                                                                                                                                            | Single quotes.                                                                                                                                                                                                                                                 |
+| C4  | Keyframe values: `opacity: 0` (number) vs `opacity: '0'` (string) — both valid, mixed within the same page                              | throughout                                                                                                                                                            | Pick **numbers** for numeric properties, strings for anything with a unit or function.                                                                                                                                                                         |
+| C5  | Config fragments vs. complete configs — most examples are bare object fragments that will not compile if pasted                         | ~40 samples                                                                                                                                                           | Wrap every example a reader might copy in `const config: InteractConfig = { interactions: [ … ] };`. Keep fragments only for field-level illustration, and prefix them with `// inside interactions[]`.                                                        |
+| C6  | `Interact.create(config)` shown in some examples, omitted in most                                                                       | mixed                                                                                                                                                                 | Include it only in "getting started"/integration examples; omit consistently in reference examples.                                                                                                                                                            |
+| C7  | Broken indentation                                                                                                                      | L2950-2951 (`params: { threshold: 0.3 }` split across lines before a comma), L3813-3816 (`keyframeEffect: {` / `     name:`), L3319-3328 (custom-effect cancellation) | Reformat.                                                                                                                                                                                                                                                      |
+| C8  | TypeScript syntax inside `javascript` fences                                                                                            | L3266 (`type PointerProgress = …`), L3319 (`element as HTMLCanvasElement`)                                                                                            | Change fence to `ts`.                                                                                                                                                                                                                                          |
+| C9  | Nested/doubled fences (``inside`)                                                                                                       | L260-322, L326-346, L390-409, L2907-2919, L2925-2940                                                                                                                  | Flatten.                                                                                                                                                                                                                                                       |
+| C10 | Literal ellipses inside otherwise-valid code                                                                                            | L4504 (`keyframes: [...]`), L2308 (`/* ... */`), L3708-3709                                                                                                           | Use `/* … */` consistently, or complete the sample.                                                                                                                                                                                                            |
+| C11 | Smart quotes inside code-adjacent text                                                                                                  | L3002-3003, L3021-3023 (`‘percentage’`, `‘self’`, `‘root’`, `‘both’`)                                                                                                 | Convert to straight quotes and wrap in backticks.                                                                                                                                                                                                              |
+| C12 | Type snippets styled as `css`                                                                                                           | L2286-2288 (`animation-range: { name: … }` in a `css` fence — that shape is TypeScript, not CSS)                                                                      | Change to `ts` and remove the invented `animation-range:` prefix.                                                                                                                                                                                              |
 
 ---
 
 ## 10. Markdown and formatting defects
 
-| # | Defect | Line | Fix |
-| :---- | :---- | :---- | :---- |
-| F1 | **Broken table** — a 3-column table row contains an unescaped `\|` inside a type union, producing a 4-cell row | L3918 (`\| \`type\` \| \`'media'\` \| \`'selector'\` \| How the condition is evaluated. \|`) | Escape as `` `'media'` \| `'selector'` `` or move the union into the description cell. |
-| F2 | Bold-wrapped headings (`## **Title**`) | ~90 headings | Remove the `**`; heading level already conveys emphasis. |
-| F3 | Table alignment markers inconsistent: `:----` on most tables, `-----` on others | L1248-1253, L1356-1361, L1465-1470 | Use `:----` everywhere. |
-| F4 | Trailing double-space line breaks (Google Docs soft wraps) creating unintended `<br>` | throughout bullet lists, e.g. L1038-1041, L2195-2198, L3399-3400 | Strip. |
-| F5 | Non-breaking / stray whitespace at line ends | L15, L380, L442, L1885, L2864, L4569 | Strip. |
-| F6 | Escaped backticks inside headings and prose, rendering as literal `` \` `` | L454, L2674, L2812, L2831, L2864, L2905, L2921 | Unescape. |
-| F7 | Table cells containing multi-line code (the `using lists` samples) | L4473-4505 | Convert to fenced code blocks. |
-| F8 | Heading levels skip (H1 → H3 with no H2) | L2652 (`### 1. Install the package` under an H2 that is itself inside a merged heading), L4630 | Normalise. |
-| F9 | Inconsistent list markers (`*` vs `-`) — `*` on the 🧑‍🌾-authored pages, `-` on the 🧑‍💻 pages | throughout | Use `-` everywhere. |
-| F10 | `✅` / `⚠️` / `❌` emoji used as semantic markers in some places only | L2536-2537, L1590-1596, L3540, L3551, L3702, L4609 | Keep `❌`/`✅` for do/don't code pairs (they read well); replace bare `⚠️` headings with the standard Warning admonition. |
+| #   | Defect                                                                                                         | Line                                                                                           | Fix                                                                                                                       |
+| :-- | :------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
+| F1  | **Broken table** — a 3-column table row contains an unescaped `\|` inside a type union, producing a 4-cell row | L3918 (`\| \`type\` \| \`'media'\` \| \`'selector'\` \| How the condition is evaluated. \|`)   | Escape as `` `'media'` \| `'selector'` `` or move the union into the description cell.                                    |
+| F2  | Bold-wrapped headings (`## **Title**`)                                                                         | ~90 headings                                                                                   | Remove the `**`; heading level already conveys emphasis.                                                                  |
+| F3  | Table alignment markers inconsistent: `:----` on most tables, `-----` on others                                | L1248-1253, L1356-1361, L1465-1470                                                             | Use `:----` everywhere.                                                                                                   |
+| F4  | Trailing double-space line breaks (Google Docs soft wraps) creating unintended `<br>`                          | throughout bullet lists, e.g. L1038-1041, L2195-2198, L3399-3400                               | Strip.                                                                                                                    |
+| F5  | Non-breaking / stray whitespace at line ends                                                                   | L15, L380, L442, L1885, L2864, L4569                                                           | Strip.                                                                                                                    |
+| F6  | Escaped backticks inside headings and prose, rendering as literal `` \` ``                                     | L454, L2674, L2812, L2831, L2864, L2905, L2921                                                 | Unescape.                                                                                                                 |
+| F7  | Table cells containing multi-line code (the `using lists` samples)                                             | L4473-4505                                                                                     | Convert to fenced code blocks.                                                                                            |
+| F8  | Heading levels skip (H1 → H3 with no H2)                                                                       | L2652 (`### 1. Install the package` under an H2 that is itself inside a merged heading), L4630 | Normalise.                                                                                                                |
+| F9  | Inconsistent list markers (`*` vs `-`) — `*` on the 🧑‍🌾-authored pages, `-` on the 🧑‍💻 pages                     | throughout                                                                                     | Use `-` everywhere.                                                                                                       |
+| F10 | `✅` / `⚠️` / `❌` emoji used as semantic markers in some places only                                          | L2536-2537, L1590-1596, L3540, L3551, L3702, L4609                                             | Keep `❌`/`✅` for do/don't code pairs (they read well); replace bare `⚠️` headings with the standard Warning admonition. |
 
 ---
 
 ## 11. Per-page action list
 
 ### About Interact / Overview (L1-176)
+
 - Remove owner line (L3), bare URL (L5), visual placeholder (L13), `[Add link…]` (L29), orphan H2 (L15).
 - Fix dangling `effectId` references in both configs (§3.22); add the `effects` registry or inline the payloads.
 - Make the two configs (L59-89, L119-148) consistent with each other — same keys, same list fields.
@@ -642,14 +658,17 @@ Pick one term per row and apply it throughout.
 - Add a sentence noting that configs are JSON-serializable **except** `customEffect` (M16).
 
 ### Getting Started (nav) (L178-180)
+
 - Delete the duplicated marker lines.
 
 ### Installation and Entry points (L182-246)
+
 - Remove owner line (L184).
 - Reconcile the entry-point table with L465-468 (§5.6); keep one canonical version here.
 - Add a note that `generate()` is exported from all three entry points.
 
 ### My first interaction (L248-454)
+
 - Remove owner line (L250); fix the mangled headings (L252-256).
 - Rebuild as three labelled tabs/subsections with identical step structure (§6.9); remove the raw `<Steps>`/`<Step>` MDX and orphan `</Step>` tags (L345, L408); move the prose at L348-350 out of its code fence.
 - **Change the example away from the hit-area-shift anti-pattern** (§3.21).
@@ -658,6 +677,7 @@ Pick one term per row and apply it throughout.
 - Un-merge the callout at L454 into a proper Note.
 
 ### HTML integration (L456-825)
+
 - Remove owner line (L458).
 - Fix "three steps" → four (L511-516).
 - **Fix `generate(config)` → `generate(config, false)` for vanilla (L699).**
@@ -669,21 +689,25 @@ Pick one term per row and apply it throughout.
 - Resolve 11 `ADDLINK`s.
 
 ### The final result + examples links (L827-842)
+
 - **Write the page.** It is currently a six-bullet outline. It should be the capstone: one complete, runnable page (HTML + generated CSS + config + `create()`) that exercises `viewEnter` + FOUC, a hover state effect, and a `viewProgress` scrub, with the output shown.
 
 ### the config object (L843-953)
+
 - Remove owner line (L847), empty heading (L853).
 - Add `container` to (or remove it from) the `Condition` description in line with the §3.9 decision.
 - Resolve the four empty `()` links (L865, L874, L878, L882).
 - The example (L899-953) is good — keep it as the canonical "everything together" config and cross-link it from the sequences and lists pages.
 
 ### what is a trigger? (L955-1000)
+
 - Remove owner line (L959), empty heading (L977), site-builder note (L994).
 - Add the "no params for hover/click/interest/activate" note (M15).
 - Either write "Combining triggers" (L998-1000) or delete the section and link to `multi-interaction compositions`.
 - Resolve the promise that every trigger has a chapter (§6.4).
 
 ### viewEnter (L1002-1180)
+
 - Remove owner line (L1004).
 - **Replace the Google Docs link (L1093)** with the internal FOUC chapter link.
 - **Remove the reviewer note at L1180** and its dangling "threshold limitation" reference — or write the limitation it refers to.
@@ -692,12 +716,14 @@ Pick one term per row and apply it throughout.
 - Otherwise this page is the strongest in the set — use it as the Style A exemplar.
 
 ### click & hover (L1182-1556)
+
 - Remove owner line (L1184).
-- Keep the kebab-case `styleProperties` example (L1450-1457) — it is the correct one; cross-reference it from the effects pages.
+- Keep the kebab-case `styleProperties` example (L1450-1457) — it stays the reference example and the house style even though camelCase is also accepted (§3.1); cross-reference it from the effects pages.
 - Promote the inline-state-identity paragraph (L1476) to a Warning (M20).
 - Add `interest`/`activate` coverage explicitly if no separate chapters are added (§6.4).
 
 ### viewProgress (L1558-1855)
+
 - Remove owner line (L1560).
 - Fix the `contain` definition (§3.15).
 - Add the forced-reduced-motion skip note (§3.14).
@@ -705,6 +731,7 @@ Pick one term per row and apply it throughout.
 - Fix the two `http://Configuration/...` links (L1736, L1749).
 
 ### pointerMove (L1857-2061)
+
 - Remove owner line (L1859).
 - Fix the reduced-motion wording (§3.13).
 - Add `transitionDelay` (M9).
@@ -714,13 +741,15 @@ Pick one term per row and apply it throughout.
 - Resolve the empty `[viewProgress]()` link (L1865).
 
 ### animationEnd (L2063-2165)
+
 - Remove owner line (L2065), empty `#` heading (L2067).
 - Soften the chain-isolation claim (§3.17).
 - Bring up to Style A: add HTML, add **Result:** to both examples, convert "Important rules" into prose + Warning admonitions (§7.2).
 
 ### what are effects? (L2167-2607)
+
 - Remove owner line (L2171), empty blockquote (L2263), empty heading (L2589).
-- **Fix the camelCase claim (L2341) and example (L2352-2353)** (§3.1).
+- **Fix the camelCase-only claim (L2341) and the example (L2352-2353)** — kebab-case example plus the "either casing works" note (§3.1).
 - Fix `'Both'` → `'both'` (L2225).
 - Fix the `css`-fenced type snippet (L2286-2288) (§9 C12).
 - Add missing scrub fields: `iterations`, `alternate`, `reversed`, `transitionDelay` (M9, M10).
@@ -732,6 +761,7 @@ Pick one term per row and apply it throughout.
 - Fix the reduced-motion framing (§3.13).
 
 ### Named Effects (L2609-2891)
+
 - Remove owner line (L2611).
 - **Remove `data-interact-initial="true"` (L2812)** (§3.5).
 - Un-merge the three callouts that became headings (L2674, L2812, L2831) and restore the numbered setup sequence 1 → 2 → 3.
@@ -742,6 +772,7 @@ Pick one term per row and apply it throughout.
 - Make all `generate(` calls explicit about `useFirstChild`.
 
 ### keyframe Effects (L2893-3062)
+
 - Remove owner line (L2895); remove the three frontmatter-as-heading lines (L2899, L2973); rename the page (§6.3).
 - **Fix the `hitArea` description (L3021)** (§3.8) — or delete the pointer section and link to `pointerMove` (§6.5).
 - Fix the reduced-motion claim at L3023 (§3.13).
@@ -752,14 +783,16 @@ Pick one term per row and apply it throughout.
 - Add HTML + **Result:** to the two "real-world" examples.
 
 ### transition Effects (L3064-3165)
+
 - Remove owner line (L3066), empty heading (L3070), frontmatter heading (L3173 belongs to the next page but check L3072 area).
-- **Fix all camelCase `styleProperties` / `transitionProperties` examples (L3096-3098, L3113-3127, L3146-3148)** (§3.1).
+- **Rewrite the camelCase `styleProperties` / `transitionProperties` examples to kebab-case (L3096-3098, L3113-3127, L3146-3148)** and add the "either casing works" note (§3.1).
 - Break the three prose walls (L3078-3080, L3108, L3159-3161) into tables + examples, mirroring the `click & hover` state section.
 - Unescape the `@property` example at L3161 and put it in a `css` fence.
 - Add the `transition`-wins precedence rule (§3.19) and the `duration` gotcha (§3.20).
 - Add HTML + **Result:** to the theme-switcher example.
 
 ### custom Effects (L3167-3329)
+
 - Remove owner line (L3169), frontmatter heading (L3173), stray bullet (L3315).
 - **Remove `pageVisible` (L3218)** (§3.7).
 - Fix the TS-in-JS fences (L3266, L3319) and the broken indentation in the cancellation example (L3317-3329).
@@ -768,10 +801,12 @@ Pick one term per row and apply it throughout.
 - Add **Result:** paragraphs.
 
 ### what is an interaction? (L3331-3387)
+
 - Remove owner line (L3335), editorial instruction (L3337), visual placeholder (L3341).
 - Add at least one real config so the page is not purely conceptual (§7.2).
 
 ### source and target resolving (L3389-3640)
+
 - Remove owner line (L3391).
 - **Fix recap steps 2 and 3 (L3633-3638)** — `querySelectorAll` not `querySelector`; `listItemSelector` does not filter (§3.2, §3.3, §3.4).
 - **Fix the `listItemSelector` filter claim and example (L3601-3618)** (§3.2).
@@ -780,17 +815,20 @@ Pick one term per row and apply it throughout.
 - This page and `what is a list?` / `using lists` must state identical resolution rules — reconcile all three.
 
 ### effects array & cascading logic (L3642-3762)
+
 - Remove owner line (L3644).
 - Fix three `http://Configuration/...` links (L3697, L3714, L3762).
 - Content is accurate — verified against the per-interaction custom-property mechanism in `src/core/css.ts:440-513`.
 
 ### multi-interaction compositions (L3764-3875)
+
 - Remove owner line (L3766).
 - Fix the broken indentation at L3813-3816.
 - Fix three `http://Configuration/...` links (L3770, L3859, L3875).
 - Make this the canonical `composite` reference (§5.6) and trim the duplicate explanations elsewhere.
 
 ### understanding conditions (L3877-4038)
+
 - Remove owner line (L3881), empty heading (L3998).
 - **Fix the broken table at L3918** (§10 F1).
 - **Fix "reported as errors" (L4031)** (§3.10).
@@ -800,6 +838,7 @@ Pick one term per row and apply it throughout.
 - Resolve five `ADDLINK`s (L3946, L4031, L4035-4038).
 
 ### responsive animation design (L4040-4298)
+
 - Remove owner line (L4042).
 - **Resolve the `container` condition example (L4145-4197)** (§3.9).
 - Add HTML + **Result:** to the three examples.
@@ -807,12 +846,14 @@ Pick one term per row and apply it throughout.
 - The cascade explanation (L4050-4058) duplicates `effects array & cascading logic` — trim to a summary + link.
 
 ### what is a list? (L4300-4444)
+
 - Remove owner line (L4304).
 - **Fix the `listItemSelector` claim (L4358)** (§3.2).
 - The `selector`-only row of the comparison table (L4380) is correct — keep, and align the `source and target resolving` recap to it.
 - **The comparison table at L4376-4382 has lost its ✓/✗ markers.** Five cells now begin with a bare leading space (`|  dynamic tracking + stagger |`, `|  a filtered subset of children |`, `|  (filtered) |`, `|  \`querySelectorAll\` matches |`), so both "Targets multiple elements?" and "A managed list?" columns read as unanswered. Restore the markers (or convert the two yes/no columns to explicit "Yes/No" text, which survives copy-paste better).
 
 ### using lists (L4446-4510)
+
 - Remove owner line (L4448).
 - **Rebuild all five code samples out of Markdown tables into fenced blocks (L4473-4505)** (B6).
 - Fix `generate(config)` → `generate(config, false)` (L4481).
@@ -820,6 +861,7 @@ Pick one term per row and apply it throughout.
 - The three-property table (L4458-4462) is the most accurate description of `listItemSelector` in the whole document — promote its wording to the other two pages.
 
 ### what is a sequence? (L4512-4618)
+
 - Remove owner line (L4514).
 - **Complete the `SequenceConfig` type (L4534-4539)** (§3.12).
 - Fix the `java` fence (L4557) and the stray `TypeScript` / `HTML` labels (L4532, L4555, L4597).
@@ -828,6 +870,7 @@ Pick one term per row and apply it throughout.
 - The example duplicates the `the config object` example (L899-953) verbatim — keep one and cross-link.
 
 ### using sequences (L4620-4733)
+
 - Remove owner line (L4622).
 - **Fix the `assertValidInteractConfig` claim (L4723)** (§3.11).
 - **Add `animationEnd` to the supported-trigger list (L4678)** and state that `viewProgress`/`pointerMove` are unsupported (§3.16).
@@ -842,43 +885,44 @@ Pick one term per row and apply it throughout.
 
 These are defects in the shipped agent rules and package metadata, discovered while auditing. They are out of scope for the documentation file but should be tracked, because agents and humans will otherwise get contradictory guidance.
 
-| # | File | Issue |
-| :---- | :---- | :---- |
-| A1 | `packages/interact/rules/full-lean.md:471`, `rules/click.md:133`, `rules/hover.md:134` | State-effect `[CSS_PROP]` documented as camelCase. **Wrong** — must be kebab-case (§3.1). `packages/interact/README.md:326` already uses kebab-case. |
-| A2 | `rules/full-lean.md:239` | `hitArea` default documented as `'self'`. Runtime default is effectively `'root'` (`src/handlers/pointerMove.ts:39`). Note that `interact-validate/src/semantic/fouc.ts:55-57` assumes the `'self'` default when deciding whether to raise `HIT_AREA_SHIFT` — so either the runtime default or the rule/validator needs to change. |
-| A3 | `rules/full-lean.md:493-496` | Mouse preset list has 9 entries; 12 are exported (`BounceMouse`, `SpinMouse`, `CustomMouse` missing). |
-| A4 | `rules/full-lean.md:452` | Claims per-property `transitionProperties` take precedence when both are set. **Wrong** — `src/utils.ts:62` ignores `transitionProperties` entirely when `transition` is present. |
-| A5 | `rules/full-lean.md:691` | Source resolution claims `listItemSelector` filters which children become sources. **Wrong** (§3.2). |
-| A6 | `rules/full-lean.md:284-290` | `ViewEnterParams` omits `useSafeViewEnter`, which exists in the type and the validator schema. |
-| A7 | `packages/interact/llms.txt:7` | "Five trigger types: hover, click, viewEnter, viewProgress, pointerMove" — there are eight (`animationEnd`, `activate`, `interest` missing). |
-| A8 | `packages/interact/llms.txt:24` | Links to `rules/plugins.md` describing `Interact.use()` and `$`-prefixed config fields. Neither the file nor the API exists in this repo. |
-| A9 | `interact-validate/src/semantic/fouc.ts:59-64` | `HIT_AREA_SHIFT` only inspects `transform` **strings**; bare `scale` / `translate` / `rotate` keyframe properties (the individual CSS transform properties) escape detection — which is exactly what the `My first interaction` example uses. |
-| A10 | `src/core/add.ts:57-59` vs `:79-85` | `listContainer` + `selector` resolves differently at initial bind (`container.querySelectorAll`) than for MutationObserver-added items (`child.querySelector`). Likely a bug; documenting it as-is would be documenting an inconsistency (§3.4). |
-| A11 | `src/types/config.ts:5` | `Condition.type` accepts `'container'` but nothing implements it — conditions of that type are silently dropped (§3.9). Either implement `@container` emission or remove the type. |
+| #   | File                                                                                                                                                               | Issue                                                                                                                                                                                                                                                                                                                                                                                       |
+| :-- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A1  | `packages/interact/rules/full-lean.md:471`, `:507`, `rules/click.md:70`, `:133`, `rules/hover.md:72`, `:134`, `rules/viewenter.md:152`, `rules/viewprogress.md:58` | Casing documented as a single required form (camelCase for both state properties and keyframes). Per §1.1 both casings are accepted everywhere; the rules must say so and name the idiomatic form per surface — kebab-case for state properties (as `packages/interact/README.md:326` already does), camelCase for keyframes, `--*` verbatim.                                               |
+| A2  | `rules/full-lean.md:239`                                                                                                                                           | `hitArea` default documented as `'self'`. Runtime default is effectively `'root'` (`src/handlers/pointerMove.ts:39`). Note that `interact-validate/src/semantic/fouc.ts:55-57` assumes the `'self'` default when deciding whether to raise `HIT_AREA_SHIFT` — so either the runtime default or the rule/validator needs to change.                                                          |
+| A3  | `rules/full-lean.md:493-496`                                                                                                                                       | Mouse preset list has 9 entries; 12 are exported (`BounceMouse`, `SpinMouse`, `CustomMouse` missing).                                                                                                                                                                                                                                                                                       |
+| A4  | `rules/full-lean.md:452`                                                                                                                                           | Claims per-property `transitionProperties` take precedence when both are set. **Wrong** — `src/utils.ts:62` ignores `transitionProperties` entirely when `transition` is present.                                                                                                                                                                                                           |
+| A5  | `rules/full-lean.md:691`                                                                                                                                           | Source resolution claims `listItemSelector` filters which children become sources. **Wrong** (§3.2).                                                                                                                                                                                                                                                                                        |
+| A6  | `rules/full-lean.md:284-290`                                                                                                                                       | `ViewEnterParams` omits `useSafeViewEnter`, which exists in the type and the validator schema.                                                                                                                                                                                                                                                                                              |
+| A7  | `packages/interact/llms.txt:7`                                                                                                                                     | "Five trigger types: hover, click, viewEnter, viewProgress, pointerMove" — there are eight (`animationEnd`, `activate`, `interest` missing).                                                                                                                                                                                                                                                |
+| A8  | `packages/interact/llms.txt:24`                                                                                                                                    | Links to `rules/plugins.md` describing `Interact.use()` and `$`-prefixed config fields. Neither the file nor the API exists in this repo.                                                                                                                                                                                                                                                   |
+| A9  | `interact-validate/src/semantic/fouc.ts:59-64`                                                                                                                     | `HIT_AREA_SHIFT` only inspects `transform` **strings**; bare `scale` / `translate` / `rotate` keyframe properties (the individual CSS transform properties) escape detection — which is exactly what the `My first interaction` example uses.                                                                                                                                               |
+| A10 | `src/core/add.ts:57-59` vs `:79-85`                                                                                                                                | `listContainer` + `selector` resolves differently at initial bind (`container.querySelectorAll`) than for MutationObserver-added items (`child.querySelector`). Likely a bug; documenting it as-is would be documenting an inconsistency (§3.4).                                                                                                                                            |
+| A11 | `src/types/config.ts:5`                                                                                                                                            | `Condition.type` accepts `'container'` but nothing implements it — conditions of that type are silently dropped (§3.9). Either implement `@container` emission or remove the type.                                                                                                                                                                                                          |
+| A12 | `interact-validate/src/semantic/cssSyntax.ts`, `src/errors.ts:33`, `interact-validate/README.md:150`, `:214`, `rules/validate.md:59`, `:143`, `:237`               | `KEYFRAME_PROP_NOT_CAMEL_CASE` (rule category `KEYFRAME_STYLE`) warns on kebab-case keyframe properties, which §1.1 makes valid. Replace it with a check for names that are neither valid camelCase nor valid kebab-case, covering `styleProperties` / `transitionProperties` names too, and update both code tables (see [`dual-casing-support-plan.md`](dual-casing-support-plan.md) §5). |
 
 ---
 
 ## Appendix B — verification notes
 
-| Claim group | Source of truth |
-| :---- | :---- |
-| Trigger list (8) | `src/types/triggers.ts:7-15` |
-| Default `triggerType` per trigger | `src/core/resolvers.ts:19-26` (`viewEnter`/`animationEnd` → `once`; `hover`/`click`/`activate`/`interest` → `alternate`) |
-| hover/click playback semantics | `src/handlers/effectHandlers.ts:34-88` |
-| viewEnter playback semantics, threshold 0.2, inset negation, `useSafeViewEnter`, exit observer | `src/handlers/viewEnter.ts:11-51, 91-153, 198-291` |
-| a11y upgrade (`hover`→`interest`, `click`→`activate`) | `src/handlers/index.ts:9-29`, `src/handlers/constants.ts` |
-| Keyboard handling (Enter/Space, `preventDefault` on Space, `tabIndex = 0` on `focusin`) | `src/handlers/eventTrigger.ts:36-46, 172-177` |
-| `stateAction` semantics incl. `clear` | `src/core/InteractionController.ts:107-142`, `src/handlers/effectHandlers.ts:91-130` |
-| FOUC: `data-interact-enter`, `DEFAULT_INITIAL`, `shouldUseInitial` | `src/core/css.ts:26-32, 246-263`, `src/core/utilities.ts:19-28`, `src/handlers/viewEnter.ts:216-237` |
-| `generate(config, useFirstChild = true)` | `src/core/css.ts:547` |
-| State-property CSS emission | `src/core/cssUtils.ts:148`, `src/utils.ts:58-98` — **[verified by execution]** |
-| Element resolution | `src/core/add.ts:43-105`, `src/core/Interact.ts:331-353` |
-| `listItemSelector` usage sites | `src/core/Interact.ts:340`, `src/handlers/effectHandlers.ts:112`, `src/core/utilities.ts:31-33` (exhaustive grep) |
-| Reduced motion | `src/core/add.ts` (all `reducedMotion:` call sites pass `Interact.forceReducedMotion`), `src/handlers/pointerMove.ts:24-26`, `src/handlers/viewProgress.ts:25-27` |
-| Conditions: media merge, selector `:is()` + `&`, container unimplemented | `src/utils.ts:41-46, 153-192`, `src/core/css.ts` (only `'media'` is ever requested) |
-| Cascade / coexistence mechanics | `src/core/css.ts:429-513` (per-interaction custom property per target; per-sequence-index custom properties; `buildListsRule` concatenation) |
-| Sequence resolution and defaults | `src/core/resolvers.ts:103-165`, `src/utils.ts:20-34` |
-| Sequence trigger dispatch | `src/core/add.ts:376-399` |
-| Validator codes and severities | `interact-validate/src/errors.ts:14-35`, `structural.ts:42-88`, `schema/interactions.ts:250-345`, `schema/primitives.ts:39-60` |
-| Preset inventory | `packages/motion-presets/src/library/{entrance,scroll,ongoing,mouse,backgroundScroll}/index.ts` — 19 / 19 / 13 / 12 / 12 (bg marked not production ready) |
-| Preset option shapes (`direction`, `range`, `distance`, `iterationDelay`) | `packages/motion-presets/src/types.ts`, `consts.ts`, `utils.ts:395-445`, `library/entrance/*.ts`, `packages/motion/src/types.ts:1-50, 133-136` |
+| Claim group                                                                                    | Source of truth                                                                                                                                                   |
+| :--------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Trigger list (8)                                                                               | `src/types/triggers.ts:7-15`                                                                                                                                      |
+| Default `triggerType` per trigger                                                              | `src/core/resolvers.ts:19-26` (`viewEnter`/`animationEnd` → `once`; `hover`/`click`/`activate`/`interest` → `alternate`)                                          |
+| hover/click playback semantics                                                                 | `src/handlers/effectHandlers.ts:34-88`                                                                                                                            |
+| viewEnter playback semantics, threshold 0.2, inset negation, `useSafeViewEnter`, exit observer | `src/handlers/viewEnter.ts:11-51, 91-153, 198-291`                                                                                                                |
+| a11y upgrade (`hover`→`interest`, `click`→`activate`)                                          | `src/handlers/index.ts:9-29`, `src/handlers/constants.ts`                                                                                                         |
+| Keyboard handling (Enter/Space, `preventDefault` on Space, `tabIndex = 0` on `focusin`)        | `src/handlers/eventTrigger.ts:36-46, 172-177`                                                                                                                     |
+| `stateAction` semantics incl. `clear`                                                          | `src/core/InteractionController.ts:107-142`, `src/handlers/effectHandlers.ts:91-130`                                                                              |
+| FOUC: `data-interact-enter`, `DEFAULT_INITIAL`, `shouldUseInitial`                             | `src/core/css.ts:26-32, 246-263`, `src/core/utilities.ts:19-28`, `src/handlers/viewEnter.ts:216-237`                                                              |
+| `generate(config, useFirstChild = true)`                                                       | `src/core/css.ts:547`                                                                                                                                             |
+| State-property CSS emission                                                                    | `src/core/cssUtils.ts:148`, `src/utils.ts:58-98` — **[verified by execution]** (pre-dual-casing behaviour; see §1.1)                                              |
+| Element resolution                                                                             | `src/core/add.ts:43-105`, `src/core/Interact.ts:331-353`                                                                                                          |
+| `listItemSelector` usage sites                                                                 | `src/core/Interact.ts:340`, `src/handlers/effectHandlers.ts:112`, `src/core/utilities.ts:31-33` (exhaustive grep)                                                 |
+| Reduced motion                                                                                 | `src/core/add.ts` (all `reducedMotion:` call sites pass `Interact.forceReducedMotion`), `src/handlers/pointerMove.ts:24-26`, `src/handlers/viewProgress.ts:25-27` |
+| Conditions: media merge, selector `:is()` + `&`, container unimplemented                       | `src/utils.ts:41-46, 153-192`, `src/core/css.ts` (only `'media'` is ever requested)                                                                               |
+| Cascade / coexistence mechanics                                                                | `src/core/css.ts:429-513` (per-interaction custom property per target; per-sequence-index custom properties; `buildListsRule` concatenation)                      |
+| Sequence resolution and defaults                                                               | `src/core/resolvers.ts:103-165`, `src/utils.ts:20-34`                                                                                                             |
+| Sequence trigger dispatch                                                                      | `src/core/add.ts:376-399`                                                                                                                                         |
+| Validator codes and severities                                                                 | `interact-validate/src/errors.ts:14-35`, `structural.ts:42-88`, `schema/interactions.ts:250-345`, `schema/primitives.ts:39-60`                                    |
+| Preset inventory                                                                               | `packages/motion-presets/src/library/{entrance,scroll,ongoing,mouse,backgroundScroll}/index.ts` — 19 / 19 / 13 / 12 / 12 (bg marked not production ready)         |
+| Preset option shapes (`direction`, `range`, `distance`, `iterationDelay`)                      | `packages/motion-presets/src/types.ts`, `consts.ts`, `utils.ts:395-445`, `library/entrance/*.ts`, `packages/motion/src/types.ts:1-50, 133-136`                    |
