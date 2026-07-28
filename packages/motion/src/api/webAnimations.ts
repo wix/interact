@@ -26,7 +26,7 @@ import fastdom from 'fastdom';
 function getWebAnimationEffect(
   preset: AnimationEffectAPI<any> | WebAnimationEffectFactory<any> | null,
   animation: AnimationOptions,
-  target: HTMLElement | string | null,
+  target: Element | string | null,
   trigger?: Partial<TriggerVariant>,
   options?: Record<string, any>,
 ): AnimationData[] | MouseAnimationFactory {
@@ -58,13 +58,13 @@ function getWebAnimationEffect(
 }
 
 function getWebAnimation(
-  target: HTMLElement | string | null,
+  target: Element | string | null,
   animationOptions: AnimationOptions,
   trigger?: Partial<TriggerVariant> & { element?: HTMLElement },
   options?: Record<string, any>,
   ownerDocument?: Document,
 ): AnimationGroup | MouseAnimationInstance | null {
-  const element = target instanceof HTMLElement ? target : getElement(target, ownerDocument);
+  const element = typeof target === 'string' ? getElement(target, ownerDocument) : target;
 
   if (trigger?.trigger === 'pointer-move' && !animationOptions.keyframeEffect) {
     let effectOptions = animationOptions;
