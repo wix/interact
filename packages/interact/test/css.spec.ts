@@ -1581,7 +1581,54 @@ describe('css._generate', () => {
     });
   });
 
-  describe('plugin styles (generate `plugins` argument)', () => {
+  describe('options argument', () => {
+    const config: InteractConfig = {
+      effects: {},
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'click',
+          effects: [{ effectId: 'e1' }],
+        },
+      ],
+    };
+
+    it('should default useFirstChild to true when no options are passed', () => {
+      const { cssRules } = _generate(config);
+
+      expect(cssRules.find((r) => r.childSelector === '> :first-child')).toBeDefined();
+    });
+
+    it('should treat a boolean options argument as the legacy useFirstChild', () => {
+      expect(
+        _generate(config, false).cssRules.find((r) => r.childSelector === '> :first-child'),
+      ).toBeUndefined();
+      expect(
+        _generate(config, true).cssRules.find((r) => r.childSelector === '> :first-child'),
+      ).toBeDefined();
+    });
+
+    it('should read useFirstChild from an options object', () => {
+      expect(
+        _generate(config, { useFirstChild: false }).cssRules.find(
+          (r) => r.childSelector === '> :first-child',
+        ),
+      ).toBeUndefined();
+      expect(
+        _generate(config, { useFirstChild: true }).cssRules.find(
+          (r) => r.childSelector === '> :first-child',
+        ),
+      ).toBeDefined();
+    });
+
+    it('should default useFirstChild to true when the options object omits it', () => {
+      const { cssRules } = _generate(config, { plugins: {} });
+
+      expect(cssRules.find((r) => r.childSelector === '> :first-child')).toBeDefined();
+    });
+  });
+
+  describe('plugin styles (generate `plugins` option)', () => {
     it('appends CSS from an interaction-level $-field generator, without inspecting the value', () => {
       const calls: Array<{ value: unknown; ctx: any }> = [];
       const config: InteractConfig = {
@@ -1596,16 +1643,18 @@ describe('css._generate', () => {
         ],
       };
 
-      const result = generate(config, true, {
-        splitText: (value, ctx) => {
-          calls.push({ value, ctx });
-          const { container } = value as { container: string };
-          return [
-            {
-              declarations: [{ name: 'visibility', value: 'hidden' }],
-              selectorSuffix: ` ${container}`,
-            },
-          ];
+      const result = generate(config, {
+        plugins: {
+          splitText: (value, ctx) => {
+            calls.push({ value, ctx });
+            const { container } = value as { container: string };
+            return [
+              {
+                declarations: [{ name: 'visibility', value: 'hidden' }],
+                selectorSuffix: ` ${container}`,
+              },
+            ];
+          },
         },
       });
 
@@ -1616,7 +1665,7 @@ describe('css._generate', () => {
       expect(result).toContain('[data-interact-key="hero"] .title {\nvisibility: hidden;\n}');
     });
 
-    it('does nothing when no plugins argument is passed', () => {
+    it('does nothing when no plugins option is passed', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -1652,7 +1701,7 @@ describe('css._generate', () => {
         ],
       };
 
-      const result = generate(config, true, { splitText });
+      const result = generate(config, { plugins: { splitText } });
       expect(splitText).not.toHaveBeenCalled();
       expect(result).not.toContain('.x {');
     });
@@ -1677,10 +1726,12 @@ describe('css._generate', () => {
         ],
       };
 
-      generate(config, true, {
-        splitText: (_value, ctx) => {
-          seen.push({ key: ctx.key, scope: ctx.scope });
-          return [];
+      generate(config, {
+        plugins: {
+          splitText: (_value, ctx) => {
+            seen.push({ key: ctx.key, scope: ctx.scope });
+            return [];
+          },
         },
       });
 

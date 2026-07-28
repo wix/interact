@@ -196,27 +196,29 @@ console.log('Interactions removed for hero');
 
 ---
 
-## `generate(config, useFirstChild?, plugins?)`
+## `generate(config, options?)`
 
 Generates a complete CSS string from an `InteractConfig`. The output includes `@keyframes`, animation and transition custom properties, view-timeline declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules — everything the browser needs to run the configured animations and transitions natively, without waiting for JavaScript.
 
 ### Signature
 
 ```typescript
-function generate(
-  config: InteractConfig,
-  useFirstChild?: boolean,
-  plugins?: InteractPluginStyles,
-): string;
+function generate(config: InteractConfig, options?: boolean | GenerateOptions): string;
+
+type GenerateOptions = {
+  useFirstChild?: boolean;
+  plugins?: InteractPluginStyles;
+};
 ```
 
 ### Parameters
 
 **`config: InteractConfig`** - The full interaction configuration. Every interaction in the config is processed — not just `viewEnter`.
 
-**`useFirstChild?: boolean`** - When `true` (the default), generated selectors target the first child of each keyed element (e.g. `[data-interact-key="hero"] > :first-child`). This is the correct mode for `<interact-element>` custom elements. Pass `false` when the keyed element itself is the animation target (vanilla JS or React `<Interaction>`).
+**`options?: boolean | GenerateOptions`** - Either an options object or — for backwards compatibility — a bare boolean used as `useFirstChild` (`generate(config, false)` ≡ `generate(config, { useFirstChild: false })`).
 
-**`plugins?: InteractPluginStyles`** - Optional map of plugin name → SSR style generator. For every `$<name>` field in the config, the matching generator is called with the field's (opaque) value and a context, and its returned CSS data is appended to the output. Used to emit build-time styling on a plugin's behalf — e.g. hiding pre-split text for FOUC prevention. Like `create()`/`use()`, `generate()` never inspects the field value. See [Plugins → SSR styling](../guides/plugins.md#ssr-styling-foouc-prevention).
+- **`useFirstChild?: boolean`** - When `true` (the default), generated selectors target the first child of each keyed element (e.g. `[data-interact-key="hero"] > :first-child`). This is the correct mode for `<interact-element>` custom elements. Pass `false` when the keyed element itself is the animation target (vanilla JS or React `<Interaction>`).
+- **`plugins?: InteractPluginStyles`** - Optional map of plugin name → SSR style generator. For every `$<name>` field in the config, the matching generator is called with the field's (opaque) value and a context, and its returned CSS data is appended to the output. Used to emit build-time styling on a plugin's behalf — e.g. hiding pre-split text for FOUC prevention. Like `create()`/`use()`, `generate()` never inspects the field value. See [Plugins → SSR styling](../guides/plugins.md#ssr-styling-foouc-prevention).
 
 ### Returns
 

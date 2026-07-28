@@ -65,7 +65,7 @@ export type InteractPluginStyleGenerator = (
   context: InteractPluginStyleContext,
 ) => Pick<CSSRuleData, 'declarations' | 'selectorSuffix'>[];
 
-/** Map of plugin name → SSR style generator, passed as the `plugins` argument to `generate()`. */
+/** Map of plugin name → SSR style generator, passed as `generate()`'s `plugins` option. */
 export type InteractPluginStyles = Record<string, InteractPluginStyleGenerator>;
 
 /**

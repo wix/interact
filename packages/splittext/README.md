@@ -194,7 +194,7 @@ For SSR / build-time CSS, pass the companion `splitTextStyle` generator to `gene
 import { generate } from '@wix/interact';
 import { splitTextStyle } from '@wix/splittext/plugin';
 
-const css = generate(config, true, { splitText: splitTextStyle });
+const css = generate(config, { plugins: { splitText: splitTextStyle } });
 ```
 
 To type the `$splitText` config field, augment `InteractPluginConfigMap` from your app (the only place that imports both packages):

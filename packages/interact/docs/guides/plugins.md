@@ -141,9 +141,9 @@ A `$`-prefixed field can also sit on an individual effect, using that effect's *
 
 ## SSR styling (FOUC prevention)
 
-A plugin often needs initial CSS _before_ it runs — e.g. hiding the un-split text so an entrance animation doesn't flash the raw content. That's a build-time concern, so it lives in [`generate()`](../api/functions.md#generateconfig-usefirstchild-plugins), not in the runtime `use()` callback.
+A plugin often needs initial CSS _before_ it runs — e.g. hiding the un-split text so an entrance animation doesn't flash the raw content. That's a build-time concern, so it lives in [`generate()`](../api/functions.md#generateconfig-options), not in the runtime `use()` callback.
 
-Pass a **second, separate callback per plugin** as `generate()`'s third argument. For every `$<name>` field, `generate()` calls the matching generator with the field's (opaque) value and a context, and appends the returned CSS. Like `create()`, `generate()` never looks inside the value — the plugin decides what to emit (and defines its own selectors under `selectorSuffix`).
+Pass a **second, separate callback per plugin** in the `plugins` option of `generate()`'s options bag — `generate(config, { useFirstChild, plugins })`. For every `$<name>` field, `generate()` calls the matching generator with the field's (opaque) value and a context, and appends the returned CSS. Like `create()`, `generate()` never looks inside the value — the plugin decides what to emit (and defines its own selectors under `selectorSuffix`).
 
 ```ts
 type InteractPluginStyleGenerator = (
@@ -179,7 +179,7 @@ const config = {
 };
 
 // Embed this CSS in <head> at build/SSR time.
-const css = generate(config, true, { splitText: splitTextStyle });
+const css = generate(config, { plugins: { splitText: splitTextStyle } });
 // → `[data-interact-key="hero"] .title:not([data-splittext-ready]) { visibility: hidden; }`
 ```
 

@@ -76,7 +76,7 @@ describe('splitText through the Interact plugin bridge (real @wix/splittext)', (
     };
 
     // SSR: the container is hidden until the split marks it ready.
-    const css = generate(config, true, { splitText: splitTextStyle });
+    const css = generate(config, { plugins: { splitText: splitTextStyle } });
     expect(css).toContain(
       '[data-interact-key="hero"] .title:not([data-splittext-ready]) {\nvisibility: hidden;\n}',
     );
@@ -114,7 +114,7 @@ describe('splitText through the Interact plugin bridge (real @wix/splittext)', (
       ],
     };
 
-    const css = generate(config, true, { splitText: splitTextStyle });
+    const css = generate(config, { plugins: { splitText: splitTextStyle } });
     expect(css).not.toContain('data-splittext-ready');
   });
 });

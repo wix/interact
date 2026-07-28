@@ -430,7 +430,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
 - **Hit-area shift on `hover` / `pointerMove`** — Animating size/position of the hovered element shifts the hit area and causes jitter. Instead, animate a child via `selector` or a different `key`.
 - **`registerEffects()` must run before `Interact.create()`/`generate()`** when using `namedEffect`.
 - **FOUC prevention** — requires injecting the output of `generate(config)` into `<head>`.
-- **`generate(config, useFirstChild)`** — Pass `true` for `<interact-element>` (web), `false` for vanilla and React `<Interaction>`.
+- **`generate(config, options?)`** — `options` is `{ useFirstChild?, plugins? }`, or a bare boolean used as `useFirstChild`. Pass `true` for `<interact-element>` (web), `false` for vanilla and React `<Interaction>`.
 - **`<interact-element>` must wrap exactly one child** — the library targets `:first-child` by default.
 
 ## AI & Agent Support

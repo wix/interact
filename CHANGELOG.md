@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/splittext
 
+### [0.2.0] - unreleased
+
+#### Added
+
+- `@wix/splittext/plugin` entry point: `splitTextPlugin` (runtime adapter for `Interact.use('splitText', …)`) and its build-time counterpart `splitTextStyle` for `generate()`'s `plugins` option (#275)
+- `SplitTextPluginConfig` type — `{ container, hideUntilReady?, ...SplitTextOptions }` — for declaration-merging `$splitText` into `InteractPluginConfigMap` (#275)
+- `hideUntilReady` opts into SSR FOUC prevention: `splitTextStyle` hides the container until the runtime split sets `data-splittext-ready` (#275)
+
 ### [0.1.2] - 2026-07-14
 
 #### Added
@@ -25,6 +33,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact-validate
+
+### [0.2.0] - unreleased
+
+#### Added
+
+- Plugin fields: `$`-prefixed keys on interactions and effects are accepted with opaque values (validate never inspects plugin config), while every other unknown key is still reported as `SCHEMA_UNRECOGNIZED_KEYS` so typos are still caught (#275)
 
 ### [0.1.1] - 2026-07-14
 
@@ -52,6 +66,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact
+
+### [2.6.0] - unreleased
+
+#### Added
+
+- Generic plugin bridge: `Interact.use(name, plugin)` registers a plugin, and a `$<name>` field on an interaction or effect (e.g. `$splitText`) routes its value to it at connect time, before target resolution. Plugin values are opaque to Interact; a returned cleanup runs on disconnect/teardown (#275)
+- `generate()` accepts a `plugins` option — a map of plugin name → build-time style generator — so plugins can emit SSR CSS (e.g. FOUC prevention for un-split text) without Interact inspecting their config (#275)
+- Plugin types: `InteractPlugin`, `InteractPluginContext`, `InteractPluginCleanup`, `InteractPluginConfigMap` (augment to type `$<name>` fields), `InteractPluginStyleContext`, `InteractPluginStyleGenerator`, `InteractPluginStyles`, and `PluginFields` (#275)
+- Agent rules (`rules/plugins.md`) and docs (`docs/guides/plugins.md`) for registering plugins and their SSR styling (#275)
+
+#### Changed
+
+- `generate(config, options?)`: the second argument now accepts an options bag — `{ useFirstChild?, plugins? }` — exported as the `GenerateOptions` type. Passing a bare boolean still works and is treated as `useFirstChild`, so `generate(config, true)` is unchanged (#275)
 
 ### [2.5.4] - 2026-07-16
 

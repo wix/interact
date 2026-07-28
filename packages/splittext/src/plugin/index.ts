@@ -90,7 +90,7 @@ export const splitTextPlugin = (value: unknown, { root }: PluginContext): void |
  * ```ts
  * import { generate } from '@wix/interact';
  * import { splitTextStyle } from '@wix/splittext/plugin';
- * const css = generate(config, true, { splitText: splitTextStyle });
+ * const css = generate(config, { plugins: { splitText: splitTextStyle } });
  * ```
  */
 export const splitTextStyle = (value: unknown): PluginStyleRule[] => {

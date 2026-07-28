@@ -38,6 +38,9 @@ export type {
 // Controller
 export type { IInteractionController, IInteractElement } from './controller';
 
+// CSS generation
+export type { GenerateOptions } from './css';
+
 // Options
 export type { InteractOptions } from './handlers';
 

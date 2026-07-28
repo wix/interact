@@ -9,6 +9,7 @@ import type {
   CSSCoordinatedLists,
   CSSRuleData,
   InteractPluginStyles,
+  GenerateOptions,
 } from '../types';
 import { PLUGIN_FIELD_PREFIX } from '../types';
 import {
@@ -566,14 +567,29 @@ function parseInteraction(
 
 // ----- EndPoints -----
 
+/**
+ * Normalizes `generate()`'s single optional argument, which is either the legacy `useFirstChild`
+ * boolean or an options bag.
+ */
+function normalizeGenerateOptions(options: boolean | GenerateOptions = {}): {
+  useFirstChild: boolean;
+  plugins?: InteractPluginStyles;
+} {
+  const { useFirstChild = true, plugins } =
+    typeof options === 'boolean' ? { useFirstChild: options, plugins: undefined } : options;
+
+  return { useFirstChild, plugins };
+}
+
 export function _generate(
   config: InteractConfig,
-  useFirstChild: boolean = true,
-  plugins?: InteractPluginStyles,
+  options?: boolean | GenerateOptions,
 ): {
   cssRules: CSSRuleData[];
   keyframes: Map<string, Keyframe[]>;
 } {
+  const { useFirstChild, plugins } = normalizeGenerateOptions(options);
+
   // targetHash to lists of custom-properties for each coordinated-list type property
   // to be populated when parsing interactions
   const targetToLists = new Map<string, CSSCoordinatedLists>();
@@ -602,19 +618,19 @@ export function _generate(
  * Generates CSS for animations from an InteractConfig.
  *
  * @param config - The interact configuration containing effects and interactions
- * @param useFirstChild - Whether to use the first child selector (default: true)
- * @param plugins - Optional map of plugin name → SSR style generator. For every `$<name>` field in
- *   the config, the matching generator is called with the field's (opaque) value and a context;
- *   its returned CSS is appended. Used e.g. to hide pre-split text for FOUC prevention. Interact
- *   never inspects the field value — mirroring `create()`/`use()`.
+ * @param options - Either a {@link GenerateOptions} bag or — for backwards compatibility — a bare
+ *   boolean used as `useFirstChild`:
+ *
+ *   - `useFirstChild` - Whether to use the first child selector (default: true)
+ *   - `plugins` - Optional map of plugin name → SSR style generator. For every `$<name>` field in
+ *       the config, the matching generator is called with the field's (opaque) value and a context;
+ *       its returned CSS is appended. Used e.g. to hide pre-split text for FOUC prevention.
+ *       Interact never inspects the field value — mirroring `create()`/`use()`.
+ *
  * @returns string containing all of the CSS rules needed for time-based animations
  */
-export function generate(
-  config: InteractConfig,
-  useFirstChild: boolean = true,
-  plugins?: InteractPluginStyles,
-): string {
-  const { cssRules, keyframes } = _generate(config, useFirstChild, plugins);
+export function generate(config: InteractConfig, options?: boolean | GenerateOptions): string {
+  const { cssRules, keyframes } = _generate(config, options);
 
   const css = [
     ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),

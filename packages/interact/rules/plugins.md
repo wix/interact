@@ -50,20 +50,23 @@ Add a `$<plugin-name>` field on an **interaction** or an **effect**:
 
 ## SSR styling (FOUC prevention)
 
-Runtime plugins mutate the DOM only after JS loads. To style the element _before_ that (e.g. hide un-split text so an entrance animation doesn't flash), pass a **separate** per-plugin callback as `generate()`'s third argument:
+Runtime plugins mutate the DOM only after JS loads. To style the element _before_ that (e.g. hide un-split text so an entrance animation doesn't flash), pass a **separate** per-plugin callback in the `plugins` option of `generate()`'s options bag:
 
 ```js
-const css = generate(config, /* useFirstChild */ true, {
-  myPlugin: (value, _context) => {
-    // value: the opaque `$myPlugin` value;
-    // context: { key, scope: 'interaction' | 'effect', config }
-    // return: { declarations: { name: string; value: number | string }[]; selectorSuffix?: string }[]
-    return [
-      {
-        declarations: [{ name: 'visibility', value: 'hidden' }],
-        selectorSuffix: ` ${value.container ?? ''}:not([data-myplugin-ready])`,
-      },
-    ];
+const css = generate(config, {
+  useFirstChild: true,
+  plugins: {
+    myPlugin: (value, _context) => {
+      // value: the opaque `$myPlugin` value;
+      // context: { key, scope: 'interaction' | 'effect', config }
+      // return: { declarations: { name: string; value: number | string }[]; selectorSuffix?: string }[]
+      return [
+        {
+          declarations: [{ name: 'visibility', value: 'hidden' }],
+          selectorSuffix: ` ${value.container ?? ''}:not([data-myplugin-ready])`,
+        },
+      ];
+    },
   },
 });
 ```
@@ -100,7 +103,7 @@ const config = {
 
 Interact.use('splitText', splitTextPlugin);
 
-const css = generate(config, /* useFirstChild */ true, { splitText: splitTextStyle });
+const css = generate(config, { useFirstChild: true, plugins: { splitText: splitTextStyle } });
 // Embed css in HTML — see CSS Generation & FOUC Prevention
 
 Interact.create(config);
