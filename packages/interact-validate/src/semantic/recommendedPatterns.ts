@@ -1,6 +1,5 @@
 import type { Path, SemanticIssue, AnyEffect, AnyInteraction } from '../types';
 import { RETRIGGER_TYPES } from '../types';
-import { targetsSameElementAsSource } from './fouc';
 
 function isKeyframeEffect(effect: AnyEffect): boolean {
   return !!(effect.namedEffect || effect.keyframeEffect);
@@ -38,18 +37,12 @@ export function checkRecommendedFill(
   if (!isKeyframeEffect(effect)) return [];
   if (effect.fill === 'backwards' || effect.fill === 'both') return [];
 
-  const sameElement = targetsSameElementAsSource(owner, effect);
-  if (sameElement && !effect.delay) return [];
-  const timing = sameElement
-    ? 'during its delay'
-    : 'before the animation starts on a target without FOUC hiding rules';
-
   return [
     {
       code: 'custom',
       params: { domainCode: 'RECOMMENDED_FILL_BACKWARDS' },
       path: [...path, 'fill'],
-      message: `Include \`fill: 'backwards'\` (or \`'both'\` when the final keyframe must persist) so the starting keyframe applies ${timing}.`,
+      message: `Include \`fill: 'backwards'\` (or \`'both'\` when the final keyframe must persist) so the starting keyframe applies before the animation starts on a target without FOUC hiding rules.`,
       severity: 'info',
     },
   ];
