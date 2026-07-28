@@ -59,23 +59,26 @@ const READY_ATTR = 'data-splittext-ready';
 export const splitTextPlugin = (value: unknown, { root }: PluginContext): void | (() => void) => {
   const { container, hideUntilReady, ...options } = value as SplitTextPluginConfig;
 
-  const element = root.querySelector<HTMLElement>(container);
+  const elements = root.querySelectorAll<HTMLElement>(container);
 
-  if (!element) {
+  if (!elements.length) {
     return;
   }
 
-  const result: SplitTextResult = splitText(element, options);
+  const results: SplitTextResult[] = [];
+  elements.forEach((element) => {
+    results.push(splitText(element, options));
+  });
 
   // Reveal the container (see splitTextStyle) now that it holds the individually-animated spans.
   if (hideUntilReady) {
-    element.setAttribute(READY_ATTR, '');
+    elements.forEach((element) => element.setAttribute(READY_ATTR, ''));
   }
 
   // Interact runs this on disconnect/teardown, restoring the original text.
   return () => {
-    result.revert();
-    element.removeAttribute(READY_ATTR);
+    results.forEach((result) => result.revert());
+    elements.forEach((element) => element.removeAttribute(READY_ATTR));
   };
 };
 

@@ -260,10 +260,6 @@ export class Interact {
     return Interact.plugins.get(name);
   }
 
-  static hasPlugins(): boolean {
-    return Interact.plugins.size > 0;
-  }
-
   static getPluginsNames(): Set<string> {
     return new Set(Interact.plugins.keys());
   }

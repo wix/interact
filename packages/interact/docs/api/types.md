@@ -975,13 +975,17 @@ type InteractPluginCleanup = () => void; // runs on disconnect/teardown
 Augmentable interface for typing plugin fields, keyed by the **unprefixed** plugin name. Empty by default; consumers merge into it:
 
 ```typescript
+import type { SplitTextPluginConfig } from '@wix/splittext/plugin';
+
 declare module '@wix/interact' {
   interface InteractPluginConfigMap {
-    splitText: { container: string /* + splitText options */ };
+    splitText: SplitTextPluginConfig;
   }
 }
 // types the `$splitText` field on interactions and effects
 ```
+
+Prefer the config type exported by the plugin package over re-declaring its shape by hand.
 
 ### `PluginFields`
 

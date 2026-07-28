@@ -33,7 +33,7 @@ class Interact {
   static getController(key: string | undefined): IInteractionController | undefined;
   static use(name: string, plugin: InteractPlugin): void;
   static getPlugin(name: string): InteractPlugin | undefined;
-  static hasPlugins(): boolean;
+  static getPluginNames(): Set<string>;
 
   // Instance methods
   init(config: InteractConfig, options?: { useCustomElement?: boolean }): void;
@@ -246,7 +246,7 @@ Registers a plugin under a name. When an interaction or effect carries a `$<name
 
 ```typescript
 import { Interact } from '@wix/interact';
-import { splitTextPlugin } from './splitTextPlugin';
+import { splitTextPlugin } from '@wix/splittext/plugin';
 
 Interact.use('splitText', splitTextPlugin);
 Interact.create(config); // configs may now use a `$splitText: { ... }` field
@@ -255,15 +255,15 @@ Interact.create(config); // configs may now use a `$splitText: { ... }` field
 **Notes:**
 
 - Register plugins **before** `Interact.create()`.
-- Registration is global. A `$<name>` field naming an unregistered plugin throws at connect time.
+- Registration is global. A `$<name>` field naming an unregistered plugin is ignored.
 
 ### `Interact.getPlugin(name)`
 
 Returns the plugin registered under `name`, or `undefined`.
 
-### `Interact.hasPlugins()`
+### `Interact.getPluginsNames()`
 
-Returns `true` if any plugin has been registered.
+Returns the set of registered plugins names (non-prefixed).
 
 ### `Interact.getController(key)`
 

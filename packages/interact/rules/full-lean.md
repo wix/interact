@@ -708,21 +708,21 @@ The target element is what the effect animates. Resolved in priority order:
 
 ## Plugins
 
-Interact can route config to external plugins registered with `Interact.use(name, plugin)`. Interact is only a bridge — it matches a `$<name>` config field to a registered plugin name and passes the value in; it never inspects plugin behavior. Neither Interact nor the plugin package depend on each other — the adapter lives in your app.
+Interact can route config to external plugins registered with `Interact.use(name, plugin)`. Interact is only a bridge — it matches a `$<name>` config field to a registered plugin name and passes the value in; it never inspects plugin behavior. Neither Interact nor the plugin package depend on each other. A plugin package MAY ship its own adapter typed structurally against the contract (e.g. `@wix/splittext/plugin`) — use it instead of hand-rolling one; your app supplies only the type glue.
 
 - Register before `create()`: `Interact.use('splitText', splitTextPlugin)`.
 - Reference with a `$<name>` field on an **interaction** or **effect**: `$splitText: { container: '.title', type: 'chars' }`.
 - Plugins run at connect time, **before** target resolution — so DOM they create (e.g. `.split-c` spans) is visible to `selector` queries that follow.
 - A plugin may return a cleanup function; Interact runs it on disconnect/teardown.
-- A `$<name>` field with no registered plugin throws at connect time.
+- A `$<name>` field with no registered plugin is ignored.
 - Plugin fields MUST be `$`-prefixed — a non-prefixed unknown key on an interaction/effect is rejected by `@wix/interact-validate`.
-- **SSR styling:** for FOUC prevention (e.g. hiding un-split text before an entrance animation), pass a **separate** per-plugin callback as `generate()`'s third arg: `generate(config, true, { splitText: (value, context) => { declarations, selectorSuffix }[] })`. `generate()` does not inspect the value; the callback returns CSS rule(s) data and scopes them under the base selector (`[data-interact-key="<key>"]`). It is NOT the `use()` callback.
+- **SSR styling:** for FOUC prevention (e.g. hiding un-split text before an entrance animation), pass a **separate** per-plugin callback as `generate()`'s third arg: `generate(config, true, { myPlugin: (value, context) => { declarations, selectorSuffix }[] })`. `generate()` does not inspect the value; the callback returns CSS rule(s) data and scopes them under the base selector (`[data-interact-key="<key>"]`). It is NOT the `use()` callback. If the plugin package ships a generator (e.g. `splitTextStyle` from `@wix/splittext/plugin`), pass that instead of writing one.
 
-**Example — split text, then stagger the generated char spans:**
+**Example — split text, then stagger the generated char spans.** Use the adapter shipped from `@wix/splittext/plugin` (`splitTextPlugin` + its SSR counterpart `splitTextStyle`); do NOT hand-roll it:
 
 ```js
 import { Interact, generate } from '@wix/interact';
-import { splitText } from '@wix/splittext';
+import { splitTextPlugin, splitTextStyle } from '@wix/splittext/plugin';
 
 const config = {
   effects: { 'char-fade-up': { namedEffect: { type: 'FadeIn' }, duration: 400 } },
@@ -730,35 +730,23 @@ const config = {
     {
       key: 'hero',
       trigger: 'viewEnter',
-      $splitText: { container: '.title', type: 'chars' },
+      // `hideUntilReady` opts into the SSR hide rule emitted by splitTextStyle
+      $splitText: { container: '.title', type: 'chars', hideUntilReady: true },
       sequences: [{ offset: 30, effects: [{ effectId: 'char-fade-up', selector: '.split-c' }] }],
     },
   ],
 };
 
-const css = Interact.generate(config, /* useFirstChild */ true, {
-  splitText: (value, _) => {
-    return [
-      {
-        declarations: [{ name: 'visibility', value: 'hidden' }],
-        selectorSuffix: ` ${value.container ?? ''}:not([data-splittext-ready])`,
-      },
-    ];
-  },
-});
+const css = generate(config, /* useFirstChild */ true, { splitText: splitTextStyle });
 // Embed css in HTML — see CSS Generation & FOUC Prevention
 
-// The only glue that imports both packages:
-Interact.use('splitText', (value, { root }) => {
-  const { container, ...options } = value;
-  const el = root.querySelector(container);
-  if (!el) return;
-  const result = splitText(el, options);
-  return () => result.revert();
-});
+Interact.use('splitText', splitTextPlugin);
 
 Interact.create(config);
 ```
+
+- `$splitText` takes `{ container, hideUntilReady?, ...SplitTextOptions }`; `container` is resolved within the element and every match is split.
+- Type the field in your app: `declare module '@wix/interact' { interface InteractPluginConfigMap { splitText: SplitTextPluginConfig } }` (type from `@wix/splittext/plugin`).
 
 Default split wrapper classes: `.split-c` (chars), `.split-w` (words), `.split-l` (lines), `.split-s` (sentences).
 

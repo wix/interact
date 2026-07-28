@@ -2,7 +2,7 @@
 
 `@wix/interact` can route parts of your config to **plugins** — external code registered at runtime. Interact acts purely as a bridge: it knows a plugin's _name_, and when an interaction or effect carries a field named `$<name>` it hands that field's value to the plugin. Interact never knows what the plugin does.
 
-This keeps Interact free of any plugin-specific code, and keeps plugins (like [`@wix/splittext`](https://www.npmjs.com/package/@wix/splittext)) free of any Interact-specific code. Neither package depends on the other — the glue lives in your app.
+This keeps Interact free of any plugin-specific code, and keeps plugins (like [`@wix/splittext`](https://www.npmjs.com/package/@wix/splittext)) free of any dependency on Interact. A plugin package can still ship its own adapter — `@wix/splittext/plugin` does — by typing it _structurally_ against the contract below rather than importing `@wix/interact`. Your app then only supplies the type glue.
 
 ## How it works
 
@@ -35,7 +35,7 @@ This keeps Interact free of any plugin-specific code, and keeps plugins (like [`
 
 When the `hero` element connects, Interact sees the `$myPlugin` field, looks up the `myPlugin` plugin, and calls it with `{ any: 'value' }`. Plugins run **before** target resolution, so any DOM a plugin creates is visible to the `selector` / `listContainer` queries that follow.
 
-If a `$`-prefixed field names a plugin that was never registered, Interact throws a clear error at connect time.
+If a `$`-prefixed field names a plugin that was never registered, Interact ignores it.
 
 > **Why the `$` prefix?** It marks a field as plugin config unambiguously (no clash with real config fields), it's a valid unquoted key in JS/TS and valid JSON, and it lets `@wix/interact-validate` accept plugin fields (via `catchall`) while still flagging genuinely-unknown keys.
 
@@ -72,22 +72,11 @@ declare module '@wix/interact' {
 
 ## Example: `@wix/splittext`
 
-`@wix/splittext` splits an element's text into `<span>` wrappers (`.split-c` for chars, `.split-w` for words, `.split-l` for lines, `.split-s` for sentences). Wire it up as a plugin, then target the generated spans with a normal `selector`:
+`@wix/splittext` splits an element's text into `<span>` wrappers (`.split-c` for chars, `.split-w` for words, `.split-l` for lines, `.split-s` for sentences). You don't need to write the adapter — it ships from the `@wix/splittext/plugin` entry point, written against the contract above _structurally_ so `@wix/splittext` keeps no dependency on `@wix/interact`. Register it, then target the generated spans with a normal `selector`:
 
 ```ts
-// splitTextPlugin.ts — the ONLY module that imports both packages
-import { splitText, type SplitTextOptions, type SplitTextResult } from '@wix/splittext';
-import type { InteractPlugin } from '@wix/interact';
-
-export type SplitTextPluginConfig = { container: string } & SplitTextOptions;
-
-export const splitTextPlugin: InteractPlugin = (value, { root }) => {
-  const { container, ...options } = value as SplitTextPluginConfig;
-  const element = root.querySelector<HTMLElement>(container);
-  if (!element) return;
-  const result: SplitTextResult = splitText(element, options);
-  return () => result.revert(); // Interact reverts the split on teardown
-};
+// splitTextTypes.ts — the ONLY module that needs both packages, and only for types
+import type { SplitTextPluginConfig } from '@wix/splittext/plugin';
 
 declare module '@wix/interact' {
   interface InteractPluginConfigMap {
@@ -98,7 +87,7 @@ declare module '@wix/interact' {
 
 ```ts
 import { Interact } from '@wix/interact';
-import { splitTextPlugin } from './splitTextPlugin';
+import { splitTextPlugin } from '@wix/splittext/plugin';
 
 Interact.use('splitText', splitTextPlugin);
 
@@ -171,52 +160,30 @@ type InteractPluginStyleGenerator = (
 
 ### SplitText example — hide until split
 
-Pair a runtime marker with a build-time hide rule so the container is hidden on first paint and revealed once split:
-
-```ts
-// splitTextPlugin.ts (extends the earlier example)
-import type { InteractPlugin, InteractPluginStyleGenerator } from '@wix/interact';
-
-const READY_ATTR = 'data-splittext-ready';
-
-export const splitTextPlugin: InteractPlugin = (value, { root }) => {
-  const { container, hideUntilReady, ...options } = value as {
-    container: string;
-    hideUntilReady?: boolean;
-  } & SplitTextOptions;
-  const el = root.querySelector<HTMLElement>(container);
-  if (!el) return;
-  const result = splitText(el, options);
-  if (hideUntilReady) el.setAttribute(READY_ATTR, ''); // reveal (see the SSR rule below)
-  return () => {
-    result.revert();
-    el.removeAttribute(READY_ATTR);
-  };
-};
-
-// The SSR counterpart — NOT the same callback as splitTextPlugin.
-export const splitTextStyle: InteractPluginStyleGenerator = (value, _) => {
-  const { container, hideUntilReady } = value as { container: string; hideUntilReady?: boolean };
-  if (!hideUntilReady) return;
-  return [
-    {
-      declarations: [{ name: 'visibility', value: 'hidden' }],
-      selectorSuffix: ` ${container}:not([${READY_ATTR}])`,
-    },
-  ];
-};
-```
+`@wix/splittext/plugin` ships this pairing ready-made: `splitTextStyle` is the SSR counterpart to `splitTextPlugin`, and the two agree on a `data-splittext-ready` marker. Opt in per-field with `hideUntilReady`:
 
 ```ts
 import { generate } from '@wix/interact';
-import { splitTextStyle } from './splitTextPlugin';
+import { splitTextStyle } from '@wix/splittext/plugin';
+
+const config = {
+  effects: { 'char-fade-up': { namedEffect: { type: 'FadeIn' }, duration: 400 } },
+  interactions: [
+    {
+      key: 'hero',
+      trigger: 'viewEnter',
+      $splitText: { container: '.title', type: 'chars', hideUntilReady: true },
+      sequences: [{ offset: 30, effects: [{ effectId: 'char-fade-up', selector: '.split-c' }] }],
+    },
+  ],
+};
 
 // Embed this CSS in <head> at build/SSR time.
 const css = generate(config, true, { splitText: splitTextStyle });
 // → `[data-interact-key="hero"] .title:not([data-splittext-ready]) { visibility: hidden; }`
 ```
 
-On first paint the container is hidden; once the runtime plugin splits it and sets `data-splittext-ready`, the hide rule stops matching and the (individually-hidden) spans take over their entrance animation — no flash of un-split text.
+On first paint the container is hidden; once the runtime plugin splits it and sets `data-splittext-ready`, the hide rule stops matching and the (individually-hidden) spans take over their entrance animation — no flash of un-split text. Without `hideUntilReady`, `splitTextStyle` emits nothing.
 
 > Plugin styles are emitted verbatim and unconditionally. If a rule should be scoped to a media query or condition, have the generator build that itself (it receives the interaction/effect `config`).
 

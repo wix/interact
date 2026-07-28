@@ -54,13 +54,12 @@ describe('interact plugin bridge', () => {
     Interact.allowA11yTriggers = false;
   });
 
-  describe('registry (use / getPlugin / hasPlugins)', () => {
+  describe('registry (use / getPlugin)', () => {
     it('registers and retrieves a plugin by name', () => {
       const plugin = vi.fn();
       Interact.use('demo-registry', plugin);
 
       expect(Interact.getPlugin('demo-registry')).toBe(plugin);
-      expect(Interact.hasPlugins()).toBe(true);
     });
 
     it('returns undefined for an unregistered plugin name', () => {
@@ -198,24 +197,6 @@ describe('interact plugin bridge', () => {
       controller?.update(); // disconnect + connect
 
       expect(apply).toHaveBeenCalledTimes(2);
-    });
-
-    it('throws a clear error when a $-prefixed field has no registered plugin', () => {
-      const config: InteractConfig = {
-        interactions: [
-          {
-            key: 'el',
-            trigger: 'hover',
-            $unregisteredXyz: {},
-            effects: [{ key: 'el', namedEffect: { type: 'FadeIn' } as any, duration: 100 }],
-          },
-        ],
-      };
-
-      const element = document.createElement('div');
-      Interact.create(config);
-
-      expect(() => add(element, 'el')).toThrow(/"\$unregisteredXyz"|"unregisteredXyz"/);
     });
   });
 
