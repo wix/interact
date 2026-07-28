@@ -155,7 +155,7 @@ Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animatio
 - `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
 - `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
 - `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.
-- `[FILL_MODE]` — `'both'` for `triggerType: 'alternate'`, `'repeat'`, or `'state'`. For `triggerType: 'once'`: default to `'backwards'` so the first keyframe applies during any `delay` (use `'both'` when the final keyframe must persist after the animation).
+- `[FILL_MODE]` — `'both'` for `triggerType: 'alternate'`, `'repeat'`, or `'state'`. For `triggerType: 'once'`: use `'backwards'` for entrance, so the first keyframe applies during any `delay` (use `'both'` when the final keyframe must persist after the animation).
 - `[DURATION_MS]` — animation duration in milliseconds.
 - `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`.
 - `[DELAY_MS]` — optional delay before the effect starts, in milliseconds.
