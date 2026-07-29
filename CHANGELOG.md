@@ -26,6 +26,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact-validate
 
+### [0.1.2] - 2026-07-29
+
+#### Added
+
+- `RECOMMENDED_FILL_BACKWARDS` semantic check nudging `viewEnter` + `once` keyframe/named effects without FOUC hiding rules to set `fill: 'backwards'` or `'both'` (#277)
+
+#### Changed
+
+- README rule catalog updated for `RECOMMENDED_FILL_BACKWARDS` (#277)
+
 ### [0.1.1] - 2026-07-14
 
 #### Added
@@ -52,6 +62,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact
+
+### [2.5.5] - 2026-07-29
+
+#### Fixed
+
+- Entrance FOUC prevention: `generate()` initial rules now emit `!important` on transform neutralization declarations so they override inline styles until the animation starts (#277)
+
+#### Changed
+
+- `viewEnter` rules and docs recommend `fill: 'backwards'` (or `'both'`) for entrance animations; CSS rule declarations support an optional `important` flag (#277)
 
 ### [2.5.4] - 2026-07-16
 
@@ -255,6 +275,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion
 
+### [2.1.8] - 2026-07-29
+
+#### Added
+
+- `getWebAnimation()` accepts SVG elements (and any `Element`) as keyframe targets, not only `HTMLElement` (#280)
+
+#### Changed
+
+- `getCSSAnimation()` delay serialization: use `0ms` when `delay` is `0` instead of previously defaulting to `1ms` (#277)
+
 ### [2.1.7] - 2026-05-29
 
 #### Added
@@ -332,6 +362,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion-presets
+
+### [1.0.4] - 2026-07-29
+
+#### Changed
+
+- Entrance presets default to `fill: 'backwards'` via `getEntranceFill()` unless overridden (#277)
 
 ### [1.0.3] - 2026-05-29
 
