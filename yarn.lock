@@ -1390,7 +1390,7 @@ __metadata:
   resolution: "@wix/interact-playground@workspace:apps/playground"
   dependencies:
     "@wix/interact": "npm:^2.5.5"
-    "@wix/motion-presets": "npm:^1.0.3"
+    "@wix/motion-presets": "npm:^1.0.4"
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
   languageName: unknown
@@ -1450,7 +1450,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/motion-presets@npm:^1.0.3, @wix/motion-presets@workspace:packages/motion-presets":
+"@wix/motion-presets@npm:^1.0.4, @wix/motion-presets@workspace:packages/motion-presets":
   version: 0.0.0-use.local
   resolution: "@wix/motion-presets@workspace:packages/motion-presets"
   dependencies:
