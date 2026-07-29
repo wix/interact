@@ -40,6 +40,7 @@ export type AnyEffect = {
   triggerType?: string;
   stateAction?: string;
   fill?: string;
+  delay?: number;
   namedEffect?: { type?: string; range?: unknown; [k: string]: unknown };
   keyframeEffect?: { name?: string; keyframes?: Array<Record<string, unknown>> };
   transition?: { styleProperties?: unknown[] };

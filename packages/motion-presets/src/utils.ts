@@ -4,6 +4,8 @@ import type {
   EffectScrollRange,
   Point,
   ScrubTransitionEasing,
+  AnimationFillMode,
+  TimeAnimationOptions,
 } from '@wix/motion';
 
 export type Direction =
@@ -201,6 +203,10 @@ export function getMouseTransitionEasing(value?: ScrubTransitionEasing) {
 
 export function deg2rad(angleInDeg: number): number {
   return (angleInDeg * Math.PI) / 180;
+}
+
+export function getEntranceFill(options: TimeAnimationOptions): AnimationFillMode {
+  return options.fill ?? 'backwards';
 }
 
 export function getTransformParams(

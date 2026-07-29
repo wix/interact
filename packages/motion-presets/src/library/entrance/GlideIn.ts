@@ -1,5 +1,11 @@
 import type { TimeAnimationOptions, GlideIn } from '../../types';
-import { getCssUnits, toKeyframeValue, parseLength, parseDirection } from '../../utils';
+import {
+  getCssUnits,
+  toKeyframeValue,
+  parseLength,
+  parseDirection,
+  getEntranceFill,
+} from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION = 180;
@@ -55,6 +61,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: glideIn,
+      fill: getEntranceFill(options),
       easing,
       custom,
       keyframes: [
@@ -77,6 +84,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       custom: {},
       keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
     },

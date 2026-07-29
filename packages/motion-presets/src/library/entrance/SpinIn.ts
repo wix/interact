@@ -1,5 +1,5 @@
 import type { SpinIn, TimeAnimationOptions } from '../../types';
-import { toKeyframeValue, parseDirection } from '../../utils';
+import { toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
 import { SPIN_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
@@ -35,6 +35,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       easing: 'cubicIn',
       duration: options.duration! * initialScale,
       custom: {},
@@ -43,6 +44,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: spinIn,
+      fill: getEntranceFill(options),
       easing,
       custom,
       keyframes: [

@@ -23,6 +23,8 @@ This document contains rules for generating interactions that respond to element
 
 **Solution:** Call `generate(config, useFirstChild)` at build/generation time and embed the resulting CSS before first paint. Among all the CSS it produces, `generate()` includes initial rules that hide entrance-animated elements from the moment the page renders, before JS runs. The rules use `:not([data-interact-enter])` so elements become visible once the animation starts.
 
+For entrance animations, set `fill: 'backwards'` (or `'both'` when the final keyframe must persist). Entrance presets default to `backwards`; inline `keyframeEffect` entrances should set it explicitly.
+
 ### Generate CSS at build time and embed in HTML
 
 Prefer running this for the complete config in a **build/generation script**
@@ -90,6 +92,7 @@ const css = generate(config, useFirstChild); // true for web; false for react/va
 - Inject runtime-generated CSS before the corresponding `Interact.create()` call
   and before revealing initially hidden content to minimize FOUC.
 - FOUC initial rules apply only to `viewEnter` + `triggerType: 'once'` (or no `triggerType`, which defaults to `'once'`) where source and target are the same element.
+- For `viewEnter` + `once` entrance animations, use `fill: 'backwards'` (or `'both'` when the final keyframe must persist after the animation).
 - For `viewEnter` with `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting keyframe as inline styles on the target element and use `fill: 'both'`.
 - `generate(config)` processes all interactions in the config, not just `viewEnter`.
 
@@ -152,7 +155,7 @@ Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animatio
 - `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
 - `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
 - `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.
-- `[FILL_MODE]` — `'both'` for `triggerType: 'alternate'`, `'repeat'`, or `'state'`. For `triggerType: 'once'`: use `'backwards'` when the animation's final keyframe has no additional effect (over element's base style); use `'both'` otherwise.
+- `[FILL_MODE]` — `'both'` for `triggerType: 'alternate'`, `'repeat'`, or `'state'`. For `triggerType: 'once'`: use `'backwards'` for entrance, so the first keyframe applies during any `delay` (use `'both'` when the final keyframe must persist after the animation).
 - `[DURATION_MS]` — animation duration in milliseconds.
 - `[EASING_FUNCTION]` — CSS easing string or named easing from `@wix/motion`.
 - `[DELAY_MS]` — optional delay before the effect starts, in milliseconds.

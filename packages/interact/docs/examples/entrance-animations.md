@@ -74,6 +74,7 @@ Add a delay for dramatic timing.
         },
         duration: 1000,
         delay: 500,  // Wait 500ms before starting
+        fill: 'backwards',  // Hold first keyframe during delay
         easing: 'ease-out'
     }]
 }

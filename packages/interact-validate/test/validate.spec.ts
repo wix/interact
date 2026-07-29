@@ -6,7 +6,7 @@ const VALID_CONFIG = {
     {
       key: 'el',
       trigger: 'viewEnter',
-      effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
+      effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400, fill: 'backwards' }],
     },
   ],
 };
@@ -18,7 +18,7 @@ const CONFIG_WITH_WARNING = {
     {
       key: 'el',
       trigger: 'viewEnter',
-      effects: [{ namedEffect: { type: 'SlideIn' }, duration: 400 }],
+      effects: [{ namedEffect: { type: 'SlideIn' }, duration: 400, fill: 'backwards' }],
     },
   ],
 };
