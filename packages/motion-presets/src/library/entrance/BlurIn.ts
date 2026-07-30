@@ -1,5 +1,5 @@
 import type { BlurIn, TimeAnimationOptions } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, getEntranceFill } from '../../utils';
 
 export function getNames(_: TimeAnimationOptions) {
   return ['motion-fadeIn', 'motion-blurIn'];
@@ -23,6 +23,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       duration: options.duration! * 0.7,
       easing: 'sineIn',
       custom: {},
@@ -31,6 +32,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: blurIn,
+      fill: getEntranceFill(options),
       easing,
       composite: 'add' as const, // make sure we don't override existing filters on the component
       custom,

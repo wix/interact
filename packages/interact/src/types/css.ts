@@ -19,7 +19,7 @@ export type ListCustomProps = {
 export type CSSRuleData = {
   key: string;
   childSelector?: string;
-  declarations: { name: string; value: string | number }[];
+  declarations: { name: string; value: string | number; important?: boolean }[];
   media?: string;
   states?: string[];
   selectorCondition?: string;

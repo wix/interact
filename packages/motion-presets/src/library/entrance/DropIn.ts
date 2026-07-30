@@ -1,5 +1,5 @@
 import type { TimeAnimationOptions, DropIn } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, getEntranceFill } from '../../utils';
 
 export function getNames(_: TimeAnimationOptions) {
   return ['motion-fadeIn', 'motion-dropIn'];
@@ -23,6 +23,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       easing: 'quadOut',
       duration: options.duration! * 0.8,
       custom: {},
@@ -31,6 +32,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: dropIn,
+      fill: getEntranceFill(options),
       easing,
       custom,
       keyframes: [

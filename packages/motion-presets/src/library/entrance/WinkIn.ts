@@ -1,4 +1,4 @@
-import { getClipPolygonParams, parseDirection } from '../../utils';
+import { getClipPolygonParams, parseDirection, getEntranceFill } from '../../utils';
 import type { TimeAnimationOptions, WinkIn } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
 
@@ -40,6 +40,7 @@ export function style(options: TimeAnimationOptions) {
       ...options,
       easing: 'quadOut',
       name: fadeIn,
+      fill: getEntranceFill(options),
       custom: {},
       keyframes: [{ offset: 0, opacity: 0 }],
     },
@@ -47,6 +48,7 @@ export function style(options: TimeAnimationOptions) {
       ...options,
       easing,
       name: winkInClip,
+      fill: getEntranceFill(options),
       custom,
       keyframes: [
         {
@@ -62,6 +64,7 @@ export function style(options: TimeAnimationOptions) {
       duration: options.duration! * 0.85,
       easing,
       name: winkInRotate,
+      fill: getEntranceFill(options),
       custom,
       keyframes: [
         {

@@ -145,7 +145,9 @@ export function CSSRuleToString(rule: CSSRuleData): string {
     selector = applySelectorCondition(selector, selectorCondition);
   }
 
-  const declarationsStr = declarations.map(({ name, value }) => `${name}: ${value};`).join('\n');
+  const declarationsStr = declarations
+    .map(({ name, value, important }) => `${name}: ${value}${important ? ' !important' : ''};`)
+    .join('\n');
   const cssRule = `${selector} {\n${declarationsStr}\n}`;
 
   return media ? `@media ${media} {\n${cssRule}\n}` : cssRule;

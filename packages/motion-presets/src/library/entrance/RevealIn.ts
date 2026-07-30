@@ -1,5 +1,5 @@
 import type { RevealIn, TimeAnimationOptions, EffectFourDirections } from '../../types';
-import { getClipPolygonParams, parseDirection } from '../../utils';
+import { getClipPolygonParams, parseDirection, getEntranceFill } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'left';
@@ -30,6 +30,7 @@ export function style(options: TimeAnimationOptions) {
       ...options,
       easing,
       name: revealIn,
+      fill: getEntranceFill(options),
       custom,
       keyframes: [
         {
@@ -43,6 +44,7 @@ export function style(options: TimeAnimationOptions) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       easing,
       custom: {},
       keyframes: [{ offset: 0, opacity: 0 }],

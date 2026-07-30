@@ -108,7 +108,7 @@ Keep applying the semantic checklist in SKILL.md and trigger/preset references f
 - **Preset registry** — whether `namedEffect.type` is a registered preset or has valid options
 - **DOM / markup** — element existence for keys/selectors, matching `data-interact-key` / `interactKey`
 - **`registerEffects()` order** — unregistered presets log a warning, not a validation error
-- **FOUC / `generate()`** — CSS injection, `useFirstChild` parity
+- **FOUC / `generate()`** — CSS injection, `useFirstChild` parity (validator also emits `RECOMMENDED_FILL_BACKWARDS` when a `viewEnter` + `once` named/keyframe effect targeting another element or using a same-element delay omits `backwards`/`both`)
 - **`overflow: clip`** — ancestors with `overflow: hidden` break `viewProgress`
 
 ---

@@ -221,6 +221,20 @@ describe('CSSRuleToString', () => {
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
+  it('should serialize important declarations when flagged', () => {
+    const rule: CSSRuleData = {
+      key: 'my-el',
+      dataInteractEnterSelector: ':not([data-interact-enter])',
+      declarations: [
+        { name: 'visibility', value: 'hidden', important: true },
+        { name: 'transform', value: 'none', important: true },
+      ],
+    };
+    const expected =
+      '[data-interact-key="my-el"]:not([data-interact-enter]) {\nvisibility: hidden !important;\ntransform: none !important;\n}';
+    expect(CSSRuleToString(rule)).toEqual(expected);
+  });
+
   it('should dataInteractEnterSelector when provided', () => {
     const rule: CSSRuleData = {
       key: 'my-el',

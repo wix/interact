@@ -1,4 +1,10 @@
-import { getEasingFamily, getEasing, toKeyframeValue, parseDirection } from '../../utils';
+import {
+  getEasingFamily,
+  getEasing,
+  toKeyframeValue,
+  parseDirection,
+  getEntranceFill,
+} from '../../utils';
 import type { BounceIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -80,6 +86,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       easing: 'quadOut',
       duration: (options.duration! * BOUNCE_KEYFRAMES[3].offset) / 100,
       custom: {},
@@ -88,6 +95,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: bounceIn,
+      fill: getEntranceFill(options),
       easing: 'linear',
       custom,
       keyframes,

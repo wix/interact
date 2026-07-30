@@ -1,5 +1,5 @@
 import type { CurveIn, TimeAnimationOptions, DomApi } from '../../types';
-import { toKeyframeValue, parseDirection, parseLength } from '../../utils';
+import { toKeyframeValue, parseDirection, parseLength, getEntranceFill } from '../../utils';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DEPTH = { value: 300, unit: 'px' };
@@ -45,6 +45,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: curveIn,
+      fill: getEntranceFill(options),
       easing,
       custom,
       keyframes: [
@@ -67,6 +68,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       easing,
       custom: {},
       keyframes: [{ offset: 0, opacity: 0 }],
