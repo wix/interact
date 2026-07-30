@@ -465,8 +465,8 @@ describe('interact (web)', () => {
     vi.clearAllMocks();
     // Clear Interact instances to ensure test isolation
     Interact.destroy();
-    // Reset forceReducedMotion to default
-    Interact.forceReducedMotion = false;
+    // Reset forceReducedMotion to default (detected from the browser)
+    Interact.forceReducedMotion = undefined;
     // Reset allowA11yTriggers to default false for test isolation
     Interact.allowA11yTriggers = false;
   });
@@ -628,7 +628,7 @@ describe('interact (web)', () => {
         reducedMotion: true,
       });
 
-      Interact.forceReducedMotion = false;
+      Interact.forceReducedMotion = undefined;
 
       Interact.destroy();
     });

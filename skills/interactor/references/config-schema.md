@@ -2,7 +2,7 @@
 
 The complete `InteractConfig` schema, every effect variant, sequences, conditions,
 element resolution, FOUC, and the static API. This is source-accurate as of
-`@wix/interact` 2.5.1.
+`@wix/interact` 2.6.0.
 
 ## Table of contents
 
@@ -341,10 +341,15 @@ container.
 
 ## CSS generation & FOUC
 
-`generate(config, useFirstChild = true)` returns a complete CSS string for **all**
+`generate(config, useFirstChild = true, options?)` returns a complete CSS string for **all**
 interactions: `@keyframes`, animation/transition custom properties, native
 `view-timeline` declarations for `viewProgress`, state-selector rules, coordinated
-list aggregation, and FOUC initial rules.
+list aggregation, `@media (prefers-reduced-motion: reduce)` overrides, and FOUC initial rules.
+
+**`options.reducedMotion`:** `true` by default — emits the reduced-motion overrides
+(single-run animations collapse to `1ms`; perpetual and scroll-driven animations and
+transitions are turned off). Pass `false` only to deliberately ignore the browser
+setting, together with `Interact.forceReducedMotion = false`.
 
 **Static site policy:** Follow the canonical policy in
 `references/integration-recipes.md` under
@@ -388,7 +393,7 @@ lifecycle.
 | `Interact.setup(options)`                                   | Global defaults — call before `create()`. See below.                                                                                                 |
 | `Interact.destroy()`                                        | Static — tears down **all** instances (e.g. on route change).                                                                                        |
 | `Interact.getInstance(key)` / `Interact.getController(key)` | Look up the instance/controller owning a key.                                                                                                        |
-| `Interact.forceReducedMotion`                               | `boolean`, default `false` — force reduced-motion globally.                                                                                          |
+| `Interact.forceReducedMotion`                               | `boolean` — detected from the browser's `prefers-reduced-motion` setting. Set `true`/`false` to override it, `undefined` to go back to detection.    |
 | `Interact.allowA11yTriggers`                                | `boolean`, **default `true`** — enable `interest`/`activate` and layer a11y behavior onto `hover`/`click`.                                           |
 | `instance.destroy()`                                        | Tear down just this instance — call on component unmount.                                                                                            |
 | `instance.has(key)` / `instance.get(key)`                   | Instance lookups.                                                                                                                                    |
@@ -400,7 +405,7 @@ import { add, remove, generate } from '@wix/interact';
 
 add(element: HTMLElement, key?: string): void;  // key defaults to element.dataset.interactKey
 remove(key: string): void;                       // unbind everything for a key
-generate(config: InteractConfig, useFirstChild?: boolean): string;
+generate(config: InteractConfig, useFirstChild?: boolean, options?: { reducedMotion?: boolean }): string;
 ```
 
 **`Interact.setup(options)`:**

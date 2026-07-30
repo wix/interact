@@ -12,7 +12,7 @@ import {
   IInteractElement,
 } from '../types';
 import { getInterpolatedKey } from './utilities';
-import { generateId } from '../utils';
+import { generateId, prefersReducedMotion } from '../utils';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
@@ -42,12 +42,29 @@ export class Interact {
     [listContainer: string]: { [interactionId: string]: boolean };
   };
   controllers: Set<IInteractionController>;
-  static forceReducedMotion: boolean = false;
+  private static _forceReducedMotion: boolean | undefined;
   static allowA11yTriggers: boolean = true;
   static instances: Interact[] = [];
   static controllerCache = new Map<string, IInteractionController>();
   static sequenceCache = new Map<string, Sequence>();
   static elementSequenceMap = new WeakMap<HTMLElement, Set<Sequence>>();
+
+  /**
+   * Whether interactions should run in reduced-motion mode.
+   * Detected from the browser's `prefers-reduced-motion` setting unless it was set explicitly -
+   * an explicit `true` or `false` always wins, in either direction.
+   */
+  static get forceReducedMotion(): boolean {
+    return Interact._forceReducedMotion ?? prefersReducedMotion();
+  }
+
+  /**
+   * Set to `true` or `false` to override the browser setting.
+   * Set to `undefined` to go back to detecting it from the browser.
+   */
+  static set forceReducedMotion(value: boolean | undefined | null) {
+    Interact._forceReducedMotion = value ?? undefined;
+  }
 
   constructor() {
     this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };

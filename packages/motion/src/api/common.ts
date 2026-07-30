@@ -132,8 +132,35 @@ function isNotAScrubTrigger(trigger?: Partial<TriggerVariant>) {
   return !trigger || (trigger.trigger !== 'pointer-move' && trigger.trigger !== 'view-progress');
 }
 
+/**
+ * The single definition of what reduced motion means for an animation:
+ * a single-iteration time-based animation collapses to its end state,
+ * while scroll/pointer-driven and perpetual animations do not run at all.
+ *
+ * @returns the animation options to use instead, or `null` when the animation should be skipped
+ */
+function getReducedMotionOptions(
+  animation: AnimationOptions,
+  trigger?: Partial<TriggerVariant>,
+): AnimationOptions | null {
+  if (!isNotAScrubTrigger(trigger)) {
+    // scrub animations are driven by scroll/pointer position, there is no shortened version of them
+    return null;
+  }
+
+  const { iterations } = animation;
+
+  if (iterations === 1 || iterations == undefined) {
+    // a 1ms animation still applies its end state, it just does not move on the way there
+    return { ...animation, duration: 1 };
+  }
+
+  return null;
+}
+
 export {
   isNotAScrubTrigger,
+  getReducedMotionOptions,
   getElement,
   getElementMotionPart,
   getNamedEffect,

@@ -372,6 +372,70 @@ describe('motion.ts', () => {
         // They return empty array as they need to be processed as web animations
         expect(result).toHaveLength(0);
       });
+
+      describe('reduced motion', () => {
+        test('should collapse a single-iteration animation to 1ms', () => {
+          const animationOptions: AnimationOptions = {
+            namedEffect: { type: 'FadeIn', id: 'fade' },
+            duration: 1000,
+            delay: 200,
+          };
+
+          const result = getCSSAnimation('test-target', animationOptions, undefined, {
+            reducedMotion: true,
+          });
+
+          expect(result).toHaveLength(1);
+          expect(result[0].animation).toContain('1ms');
+          expect(result[0].animation).not.toContain('1000ms');
+          // the original options are not mutated
+          expect(animationOptions.duration).toBe(1000);
+        });
+
+        test('should skip a perpetual animation', () => {
+          const animationOptions: AnimationOptions = {
+            namedEffect: { type: 'FadeIn', id: 'fade' },
+            duration: 1000,
+            iterations: Infinity,
+          };
+
+          const result = getCSSAnimation('test-target', animationOptions, undefined, {
+            reducedMotion: true,
+          });
+
+          expect(result).toHaveLength(0);
+        });
+
+        test('should skip a scroll-driven animation', () => {
+          const animationOptions: AnimationOptions = {
+            namedEffect: { type: 'FadeScroll', id: 'scroll-fade', range: 'in', opacity: 0.5 },
+          };
+
+          const trigger: TriggerVariant = {
+            id: 'view-timeline-1',
+            trigger: 'view-progress',
+            componentId: 'comp-123',
+          };
+
+          const result = getCSSAnimation('test-target', animationOptions, trigger, {
+            reducedMotion: true,
+          });
+
+          expect(result).toHaveLength(0);
+        });
+
+        test('should be a no-op when the option is not set', () => {
+          const animationOptions: AnimationOptions = {
+            namedEffect: { type: 'FadeIn', id: 'fade' },
+            duration: 1000,
+          };
+
+          const result = getCSSAnimation('test-target', animationOptions, undefined, {});
+
+          expect(result).toHaveLength(1);
+          expect(result[0].animation).toContain('1000ms');
+        });
+      });
     });
 
     describe('getWebAnimation()', () => {

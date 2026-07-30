@@ -219,8 +219,8 @@ describe('interact (react)', () => {
     vi.clearAllMocks();
     // Clear Interact instances to ensure test isolation
     Interact.destroy();
-    // Reset forceReducedMotion to default
-    Interact.forceReducedMotion = false;
+    // Reset forceReducedMotion to default (detected from the browser)
+    Interact.forceReducedMotion = undefined;
   });
 
   describe('createInteractRef', () => {

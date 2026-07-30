@@ -177,6 +177,29 @@ export function getMediaQuery(
   return mql;
 }
 
+export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
+/**
+ * Reads the user's OS-level motion preference.
+ * SSR-safe, and deliberately uncached so it always reflects the current preference -
+ * reads happen once per interaction bind, not in a hot path.
+ */
+export function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return false;
+  }
+
+  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
+
+/**
+ * Combines media query predicates into a single `and`-joined condition.
+ * Empty predicates are dropped, so a single predicate is returned as-is.
+ */
+export function combineMedia(...predicates: (string | undefined)[]): string {
+  return predicates.filter(Boolean).join(' and ');
+}
+
 export function getSelectorCondition(
   conditionNames: string[] | undefined,
   conditions: Record<string, Condition>,

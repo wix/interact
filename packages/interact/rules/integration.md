@@ -344,12 +344,12 @@ See [viewenter.md](./viewenter.md) for full details.
 
 Each `Interact.create(config)` call returns an instance. Keep a reference if you need to add/remove elements dynamically (vanilla JS) or to destroy a specific instance. Call `Interact.destroy()` to tear down all instances at once (e.g. on page navigation).
 
-| Method / Property                   | Description                                                                                  |
-| :---------------------------------- | :------------------------------------------------------------------------------------------- |
-| `generate(config, useFirstChild?)`  | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML.     |
-| `Interact.create(config)`           | Initialize with a config. Returns the instance. Multiple configs create separate instances.  |
-| `Interact.registerEffects(presets)` | Register named effect presets before `generate()` and `create`. Required for `namedEffect`.  |
-| `Interact.destroy()`                | Tear down all instances.                                                                     |
-| `Interact.forceReducedMotion`       | `boolean` — force reduced-motion behavior regardless of OS setting. Default: `false`.        |
-| `Interact.allowA11yTriggers`        | `boolean` — enable accessibility triggers (`interest`, `activate`). Default: `false`.        |
-| `Interact.setup(options)`           | Configure global defaults for scroll/pointer/viewEnter trigger params. Call before `create`. |
+| Method / Property                            | Description                                                                                                                                                                 |
+| :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `generate(config, useFirstChild?, options?)` | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML. `options.reducedMotion` (default `true`) emits `prefers-reduced-motion` overrides. |
+| `Interact.create(config)`                    | Initialize with a config. Returns the instance. Multiple configs create separate instances.                                                                                 |
+| `Interact.registerEffects(presets)`          | Register named effect presets before `generate()` and `create`. Required for `namedEffect`.                                                                                 |
+| `Interact.destroy()`                         | Tear down all instances.                                                                                                                                                    |
+| `Interact.forceReducedMotion`                | `boolean` — detected from the browser's `prefers-reduced-motion` setting. Set `true`/`false` to override it, `undefined` to go back to detection.                           |
+| `Interact.allowA11yTriggers`                 | `boolean` — enable accessibility triggers (`interest`, `activate`). Default: `false`.                                                                                       |
+| `Interact.setup(options)`                    | Configure global defaults for scroll/pointer/viewEnter trigger params. Call before `create`.                                                                                |

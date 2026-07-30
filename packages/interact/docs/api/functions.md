@@ -12,11 +12,11 @@ import { add, remove, generate } from '@wix/interact';
 
 ## Functions Overview
 
-| Function     | Purpose                                                                          | Parameters                 | Returns  |
-| ------------ | -------------------------------------------------------------------------------- | -------------------------- | -------- |
-| `add()`      | Add interactions to an element                                                   | `element`, `key?`          | `void`   |
-| `remove()`   | Remove interactions from an element                                              | `key`                      | `void`   |
-| `generate()` | Generate complete CSS for all animations, transitions, and scroll-driven effects | `config`, `useFirstChild?` | `string` |
+| Function     | Purpose                                                                          | Parameters                             | Returns  |
+| ------------ | -------------------------------------------------------------------------------- | -------------------------------------- | -------- |
+| `add()`      | Add interactions to an element                                                   | `element`, `key?`                      | `void`   |
+| `remove()`   | Remove interactions from an element                                              | `key`                                  | `void`   |
+| `generate()` | Generate complete CSS for all animations, transitions, and scroll-driven effects | `config`, `useFirstChild?`, `options?` | `string` |
 
 ---
 
@@ -196,14 +196,18 @@ console.log('Interactions removed for hero');
 
 ---
 
-## `generate(config, useFirstChild?)`
+## `generate(config, useFirstChild?, options?)`
 
-Generates a complete CSS string from an `InteractConfig`. The output includes `@keyframes`, animation and transition custom properties, view-timeline declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules — everything the browser needs to run the configured animations and transitions natively, without waiting for JavaScript.
+Generates a complete CSS string from an `InteractConfig`. The output includes `@keyframes`, animation and transition custom properties, view-timeline declarations, state-selector rules, coordinated-list aggregation, reduced-motion overrides, and FOUC-prevention initial rules — everything the browser needs to run the configured animations and transitions natively, without waiting for JavaScript.
 
 ### Signature
 
 ```typescript
-function generate(config: InteractConfig, useFirstChild?: boolean): string;
+function generate(
+  config: InteractConfig,
+  useFirstChild?: boolean,
+  options?: { reducedMotion?: boolean },
+): string;
 ```
 
 ### Parameters
@@ -211,6 +215,8 @@ function generate(config: InteractConfig, useFirstChild?: boolean): string;
 **`config: InteractConfig`** - The full interaction configuration. Every interaction in the config is processed — not just `viewEnter`.
 
 **`useFirstChild?: boolean`** - When `true` (the default), generated selectors target the first child of each keyed element (e.g. `[data-interact-key="hero"] > :first-child`). This is the correct mode for `<interact-element>` custom elements. Pass `false` when the keyed element itself is the animation target (vanilla JS or React `<Interaction>`).
+
+**`options?: { reducedMotion?: boolean }`** - When `reducedMotion` is `true` (the default), the output includes `@media (prefers-reduced-motion: reduce)` rules that neutralize animations and transitions. Pass `false` only when the surface deliberately ignores the browser setting — the build-time counterpart of `Interact.forceReducedMotion = false`.
 
 ### Returns
 
@@ -228,6 +234,7 @@ The output covers every CSS-expressible aspect of the configuration:
 - **Coordinated-list aggregation rules** that combine animation/transition properties from multiple interactions targeting the same element, using CSS custom properties so they compose rather than override.
 - **FOUC-prevention initial rules** for `viewEnter` + `triggerType: 'once'` effects where source and target are the same element — these hide the target with `visibility: hidden` and neutral transform values until the animation starts (gated by `:not([data-interact-enter])`).
 - **Condition-gated rules** — `@media` wrappers for media-type conditions, and selector-based conditions appended to the element selector.
+- **Reduced-motion overrides** — `@media (prefers-reduced-motion: reduce)` rules that neutralize each effect (see below).
 
 ### Benefits
 
@@ -278,6 +285,37 @@ For `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting
 ### Scroll-driven CSS (viewProgress)
 
 For `viewProgress` interactions, `generate()` emits `view-timeline` declarations and `animation-timeline`/`animation-range` custom properties. This produces fully native scroll-driven animations that work before JavaScript loads — the browser drives the animation based on the element's scroll position, with zero JS overhead.
+
+### Reduced motion
+
+Because the generated CSS runs before (and without) JavaScript, the reduced-motion handling has to live in the CSS itself. For every effect, `generate()` emits a matching rule inside `@media (prefers-reduced-motion: reduce)` that overrides the effect's own custom properties — same selector, later in source order, so it wins wherever the media condition matches. This mirrors what the runtime does when `Interact.forceReducedMotion` is `true`:
+
+| Effect                                                    | Under `prefers-reduced-motion: reduce`                                                           |
+| :-------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| Time-based animation running once (`iterations: 1`/unset) | Collapses to a `1ms` animation, so the element lands on its end state instead of animating to it |
+| Perpetual animation (`iterations: Infinity`)              | `animation: none` — the element keeps its natural state                                          |
+| Scroll-driven (`viewProgress`) animation                  | `animation: none` and `animation-timeline: auto` — the timeline is detached                      |
+| Transition (`transition` / `transitionProperties`)        | The transition is dropped, so the state still applies but applies instantly                      |
+
+```css
+/* single-iteration entrance: lands on its end state immediately */
+@media (prefers-reduced-motion: reduce) {
+  [data-interact-key='hero'] > :first-child:not([data-interact-enter='done']) {
+    --animation-0-abc: motion-fadeIn 1ms 200ms linear backwards 1 paused;
+  }
+}
+/* scroll-driven effect: off entirely */
+@media (prefers-reduced-motion: reduce) {
+  [data-interact-key='banner'] > :first-child {
+    --animation-1-def: none;
+    --animation-timeline-1-def: auto;
+  }
+}
+```
+
+Pass `{ reducedMotion: false }` to leave these rules out. Do that only when the surface deliberately ignores the browser setting, and pair it with `Interact.forceReducedMotion = false` so the runtime and the CSS agree.
+
+> **Note:** `Interact.forceReducedMotion = true` on a device whose browser reports no preference does **not** neutralize CSS-backed animations — the runtime plays the CSS animation the generated stylesheet already declared, and these overrides only apply when the media query matches. Forcing reduced motion in that direction currently affects JS-driven effects only.
 
 ### Examples
 

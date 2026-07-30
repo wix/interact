@@ -53,6 +53,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.6.0] - 2026-07-28
+
+#### Added
+
+- Reduced motion is now detected from the browser: `Interact.forceReducedMotion` reads `prefers-reduced-motion` unless it was set explicitly, and the browser setting is re-read as each interaction is bound
+- `generate()` accepts a third `options` argument and emits `@media (prefers-reduced-motion: reduce)` overrides by default — animations that run once collapse to `1ms` and land on their end state, perpetual and scroll-driven animations are turned off, transitions are dropped. Pass `{ reducedMotion: false }` to opt out
+
+#### Changed
+
+- `Interact.forceReducedMotion = false` now means "ignore the browser setting and animate" instead of "use the default"; assign `undefined` to go back to browser detection
+
 ### [2.5.4] - 2026-07-16
 
 #### Fixed
@@ -254,6 +265,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion
+
+### [2.2.0] - 2026-07-28
+
+#### Added
+
+- `getCSSAnimation()` accepts a `{ reducedMotion }` option so generated CSS can express the same reduced-motion behavior as the Web Animations path — animations that run once collapse to a `1ms` duration, while perpetual and scrub-driven animations are skipped
+
+#### Changed
+
+- The reduced-motion rule shared by the Web Animations and CSS paths lives in a single `getReducedMotionOptions()` helper
 
 ### [2.1.7] - 2026-05-29
 

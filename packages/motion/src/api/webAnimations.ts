@@ -20,6 +20,7 @@ import {
   getNamedEffect,
   getEffectsData,
   isNotAScrubTrigger,
+  getReducedMotionOptions,
 } from './common';
 import fastdom from 'fastdom';
 
@@ -36,11 +37,13 @@ function getWebAnimationEffect(
       animation.duration = animation.duration || 1;
 
       if (options?.reducedMotion) {
-        if (animation.iterations === 1 || animation.iterations == undefined) {
-          animation = { ...animation, duration: 1 };
-        } else {
+        const reduced = getReducedMotionOptions(animation, trigger);
+
+        if (!reduced) {
           return [];
         }
+
+        animation = reduced;
       }
     }
 

@@ -1205,7 +1205,9 @@ describe('css._generate', () => {
       const animRules = cssRules.filter(
         (r) =>
           r.declarations.some((d) => isAnimationProp(d.name)) &&
-          !r.declarations.some((d) => String(d.value).includes('var(')),
+          !r.declarations.some((d) => String(d.value).includes('var(')) &&
+          // the reduced-motion overrides reuse the same names on purpose
+          !r.media?.includes('prefers-reduced-motion'),
       );
       expect(animRules.length).toBeGreaterThanOrEqual(2);
 
@@ -1580,6 +1582,155 @@ describe('css._generate', () => {
           String(r.declarations.find((d) => d.name === 'animation')?.value).includes('var('),
       );
       expect(coordListRules).toHaveLength(1);
+    });
+  });
+
+  describe('reduced motion', () => {
+    const REDUCE_MEDIA = '(prefers-reduced-motion: reduce)';
+
+    const getReducedRules = (config: InteractConfig, options?: { reducedMotion?: boolean }) =>
+      _generate(config, true, options).cssRules.filter((r) => r.media?.includes(REDUCE_MEDIA));
+
+    const timeConfig = (
+      effect: Partial<InteractConfig['interactions'][number]['effects']>[number] = {},
+    ): InteractConfig => ({
+      effects: {},
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'hover',
+          effects: [
+            {
+              effectId: 'kf1',
+              duration: 600,
+              keyframeEffect: {
+                name: 'anim1',
+                keyframes: [{ opacity: '0' }, { opacity: '1' }],
+              },
+              ...effect,
+            },
+          ],
+        },
+      ],
+    });
+
+    it('should collapse a single-iteration animation to 1ms', () => {
+      const rules = getReducedRules(timeConfig());
+
+      expect(rules).toHaveLength(1);
+      expect(String(rules[0].declarations[0].value)).toContain('anim1 1ms');
+    });
+
+    it('should turn off a perpetual animation', () => {
+      const rules = getReducedRules(timeConfig({ iterations: Infinity }));
+
+      expect(rules).toHaveLength(1);
+      expect(rules[0].declarations[0].value).toBe('none');
+    });
+
+    it('should turn off a scroll-driven animation and detach its timeline', () => {
+      const rules = getReducedRules({
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            effects: [
+              {
+                effectId: 'scroll1',
+                keyframeEffect: {
+                  name: 'parallax',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(rules).toHaveLength(1);
+      expect(rules[0].declarations).toEqual([
+        { name: expect.stringMatching(/^--animation-\d/), value: 'none' },
+        { name: expect.stringMatching(/^--animation-composition-\d/), value: 'replace' },
+        { name: expect.stringMatching(/^--animation-timeline-\d/), value: 'auto' },
+        { name: expect.stringMatching(/^--animation-range-\d/), value: 'normal' },
+      ]);
+    });
+
+    it('should turn off transitions so state effects apply instantly', () => {
+      const rules = getReducedRules({
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'state1',
+                transition: {
+                  duration: 300,
+                  styleProperties: [{ name: 'background-color', value: 'red' }],
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(rules).toHaveLength(1);
+      expect(rules[0].declarations[0].name).toMatch(/^--transition-\d/);
+      expect(rules[0].declarations[0].value).toBe('_');
+    });
+
+    it('should keep the reduced-motion override on the same selector as the rule it overrides', () => {
+      const config = timeConfig({ initial: true });
+      const { cssRules } = _generate(config);
+
+      const animationRules = cssRules.filter((r) =>
+        r.declarations.some((d) => isAnimationProp(d.name)),
+      );
+      const reducedRule = animationRules.find((r) => r.media?.includes(REDUCE_MEDIA))!;
+      const baseRule = animationRules.find((r) => !r.media?.includes(REDUCE_MEDIA))!;
+
+      expect(reducedRule.childSelector).toBe(baseRule.childSelector);
+      expect(reducedRule.dataInteractEnterSelector).toBe(baseRule.dataInteractEnterSelector);
+      // the override comes after the rule it overrides, so it wins on source order
+      expect(cssRules.indexOf(reducedRule)).toBeGreaterThan(cssRules.indexOf(baseRule));
+    });
+
+    it('should combine the reduced-motion query with the effect media condition', () => {
+      const rules = getReducedRules({
+        effects: {},
+        conditions: {
+          desktop: { type: 'media', predicate: '(min-width: 1024px)' },
+        },
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'hover',
+            conditions: ['desktop'],
+            effects: [
+              {
+                effectId: 'kf1',
+                duration: 600,
+                conditions: ['desktop'],
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(rules).toHaveLength(1);
+      expect(rules[0].media).toBe(`((min-width: 1024px)) and ${REDUCE_MEDIA}`);
+    });
+
+    it('should emit no reduced-motion rules when opted out', () => {
+      expect(getReducedRules(timeConfig(), { reducedMotion: false })).toHaveLength(0);
+      expect(generate(timeConfig(), true, { reducedMotion: false })).not.toContain(REDUCE_MEDIA);
     });
   });
 });

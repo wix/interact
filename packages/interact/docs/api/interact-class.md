@@ -19,6 +19,9 @@ import { Interact } from '@wix/interact';
 
 ```typescript
 class Interact {
+  // Static properties
+  static forceReducedMotion: boolean;
+
   // Static methods
   static create(config: InteractConfig, options?: { useCustomElement?: boolean }): Interact;
   static getInstance(key: string): Interact | undefined;
@@ -39,6 +42,41 @@ class Interact {
   get(key: string): InteractCache['interactions'][string] | undefined;
 }
 ```
+
+## Static Properties
+
+### `Interact.forceReducedMotion`
+
+Whether interactions run in reduced-motion mode. **Detected from the browser's `prefers-reduced-motion` setting** unless you set it explicitly — an explicit `true` or `false` always wins, in either direction:
+
+```typescript
+// default: follows the browser
+Interact.forceReducedMotion; // true when the user asked for reduced motion
+
+// force reduced motion even for users who did not ask for it
+Interact.forceReducedMotion = true;
+
+// opt out of the browser setting and always animate
+Interact.forceReducedMotion = false;
+
+// go back to following the browser
+Interact.forceReducedMotion = undefined;
+```
+
+Set it before `Interact.create()` so the value applies as interactions are bound.
+
+**What reduced motion does:**
+
+| Effect                                                    | Behavior                                                            |
+| :-------------------------------------------------------- | :------------------------------------------------------------------ |
+| Time-based animation running once (`iterations: 1`/unset) | Runs with a `1ms` duration, landing on its end state without motion |
+| Perpetual animation (`iterations: Infinity`)              | Does not run                                                        |
+| `viewProgress` and `pointerMove` effects                  | Skipped — no scroll or pointer scene is created                     |
+| Transitions                                               | Dropped, so state effects apply instantly                           |
+
+**Timing:** the browser setting is read each time the value is used — that is, as each interaction is bound. Flipping the OS preference while the page is open therefore affects interactions created afterwards, not animations that already exist. For live switching, use a `prefers-reduced-motion` [media condition](../guides/conditions-and-media-queries.md) instead, which re-evaluates on change.
+
+**Pre-rendered CSS:** `generate()` emits its own `@media (prefers-reduced-motion: reduce)` overrides, so pre-rendered animations respect the browser setting before JavaScript loads. See [`generate()`](functions.md#generate). If you set `Interact.forceReducedMotion = false` to ignore the browser setting, also pass `{ reducedMotion: false }` to `generate()` so the two agree.
 
 ## Static Methods
 
@@ -133,7 +171,7 @@ Configures global settings for the Interact system.
 - `options.viewEnter` - Optional default partial `ViewEnterParams` (e.g. `threshold`, `inset`, `useSafeViewEnter`)
 - `options.allowA11yTriggers` - When `true`, `click` and `hover` triggers also respond to keyboard (Enter/Space) and focus
 
-To force reduced motion globally, set `Interact.forceReducedMotion = true` (static property, not via `setup`).
+Reduced motion is not part of `setup` — see the [`Interact.forceReducedMotion`](#interactforcereducedmotion) static property.
 
 **Example:**
 

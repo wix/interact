@@ -38,7 +38,7 @@ Each item here is CRITICAL — ignoring any of them will break animations.
   events and flickering. Use `selector` to target a child element, or set the effect's `key` to a different element.
 - **CRITICAL**: For `pointerMove` trigger MUST AVOID using the same element as both source and target with `hitArea: 'self'` and effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
 - **CRITICAL — Do NOT guess preset options**: If you don't know the expected type/structure for a `namedEffect` param, omit it — rely on defaults rather than guessing.
-- **Reduced motion**: Use conditions to provide gentler alternatives (shorter durations, fewer transforms, no perpetual motion) for users who prefer reduced motion. You can also set `Interact.forceReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches` to force a global reduced-motion behavior programmatically.
+- **Reduced motion**: Handled out of the box — `Interact.forceReducedMotion` follows the browser's `prefers-reduced-motion` setting, and `generate()` emits matching `@media (prefers-reduced-motion: reduce)` rules, so single-run animations land on their end state and perpetual, scroll- and pointer-driven effects do not run. Use conditions on top of that when you want a gentler alternative rather than no motion (shorter durations, fewer transforms). Set `Interact.forceReducedMotion = true` to force reduced motion for everyone, or `false` to ignore the browser setting (pair with `generate(config, useFirstChild, { reducedMotion: false })`).
 - **Perspective**: Prefer `transform: perspective(...)` inside keyframes. Use the CSS `perspective` property only when multiple children share the same `perspective-origin`.
 
 ---
@@ -707,15 +707,15 @@ The target element is what the effect animates. Resolved in priority order:
 
 ## Static API
 
-| Method / Property                   | Description                                                                                                   |
-| :---------------------------------- | :------------------------------------------------------------------------------------------------------------ |
-| `generate(config, useFirstChild?)`  | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML.                      |
-| `Interact.create(config)`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                   |
-| `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `generate()` and `create`.                               |
-| `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                             |
-| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — force reduced-motion behavior regardless of OS setting.                        |
-| `Interact.allowA11yTriggers`        | `boolean` (default: `true`) — enable accessibility trigger variants (`interest`, `activate`).                 |
-| `Interact.setup(options)`           | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below. |
+| Method / Property                            | Description                                                                                                                                                                 |
+| :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `generate(config, useFirstChild?, options?)` | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML. `options.reducedMotion` (default `true`) emits `prefers-reduced-motion` overrides. |
+| `Interact.create(config)`                    | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                                                                                 |
+| `Interact.registerEffects(presets)`          | Register named effect presets. MUST be called before `generate()` and `create`.                                                                                             |
+| `Interact.destroy()`                         | Tear down all instances. Call on unmount or route change to prevent memory leaks.                                                                                           |
+| `Interact.forceReducedMotion`                | `boolean` — detected from the browser's `prefers-reduced-motion` setting. Set `true`/`false` to override it in either direction, `undefined` to go back to detection.       |
+| `Interact.allowA11yTriggers`                 | `boolean` (default: `true`) — enable accessibility trigger variants (`interest`, `activate`).                                                                               |
+| `Interact.setup(options)`                    | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below.                                                               |
 
 **`Interact.setup(options)`** — optional configuration object:
 

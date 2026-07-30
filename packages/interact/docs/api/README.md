@@ -18,7 +18,7 @@ Complete reference documentation for all public APIs in `@wix/interact`.
   - [Error handling](functions.md#error-handling) and [performance considerations](functions.md#performance-considerations)
 - [**remove(path)**](functions.md#remove) - Remove interactions from an element
   - [Cleanup behavior](functions.md#behavior-details) and [advanced usage](functions.md#advanced-usage)
-- [**generate(config, useFirstChild?)**](functions.md#generate) - Generate complete CSS for all animations, transitions, scroll-driven effects, and FOUC prevention
+- [**generate(config, useFirstChild?, options?)**](functions.md#generate) - Generate complete CSS for all animations, transitions, scroll-driven effects, reduced-motion overrides, and FOUC prevention
   - [What it generates](functions.md#what-it-generates), [benefits](functions.md#benefits), and [use cases](functions.md#use-cases)
   - [FOUC prevention](functions.md#fouc-prevention-viewenter), [scroll-driven CSS](functions.md#scroll-driven-css-viewprogress), and [SSR](functions.md#server-side-rendering-ssr)
 - [**addListItems(root, key, listContainer, elements)**](functions.md#addlistitems) - Add interactions to new list items

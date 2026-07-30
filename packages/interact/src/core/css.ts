@@ -15,6 +15,8 @@ import {
   transitionEffectToTransitionsList,
   getFullPredicateByType,
   getSelectorCondition,
+  combineMedia,
+  REDUCED_MOTION_QUERY,
 } from '../utils';
 import { getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
@@ -22,6 +24,18 @@ import { getElementHash, getUniqueEncodedHash } from './utilities';
 import { keyframesToCSS, CSSRuleToString, buildListsRule } from './cssUtils';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { getCSSAnimation, MotionKeyframeEffect, TriggerVariant } from '@wix/motion';
+
+/**
+ * Options for CSS generation.
+ *
+ * `reducedMotion` (default `true`) emits `@media (prefers-reduced-motion: reduce)` rules that
+ * neutralize animations and transitions for users who asked for reduced motion. Pass `false` only
+ * when the surface deliberately opts out of the browser setting - the runtime counterpart of
+ * `Interact.forceReducedMotion = false`.
+ */
+export type GenerateOptions = { reducedMotion?: boolean };
+
+type CSSContext = { useFirstChild: boolean; reducedMotion: boolean };
 
 export const DEFAULT_INITIAL = [
   { name: 'visibility', value: 'hidden' },
@@ -134,13 +148,52 @@ function generateSequenceCustomProps(
   return buildCustomProps([interactionIdx, index], getUniqueEncodedHash(targetHash));
 }
 
+function buildAnimationDeclarations(
+  cssAnimations: ReturnType<typeof getCSSAnimation>,
+  customProps: ListCustomProps,
+) {
+  return LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
+    name: customProps[propertyName],
+    value:
+      cssAnimations
+        .map((animation) => {
+          const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
+          return (animation as Record<string, unknown>)[name];
+        })
+        .join(', ') || LIST_PROPERTY_FALLBACKS[propertyName],
+  }));
+}
+
+/**
+ * Declarations that neutralize an effect for users who asked for reduced motion, mirroring what the
+ * runtime does: a single-iteration time-based animation collapses into a 1ms animation that lands on
+ * its end state, while scroll/pointer-driven and perpetual animations are turned off completely so
+ * the element keeps its natural state.
+ */
+function buildReducedAnimationDeclarations(
+  animationOptions: Parameters<typeof getCSSAnimation>[1],
+  trigger: TriggerVariant,
+  customProps: ListCustomProps,
+) {
+  const reducedAnimations = getCSSAnimation(null, animationOptions, trigger, {
+    reducedMotion: true,
+  }).filter((anim) => anim.name);
+
+  return reducedAnimations.length
+    ? buildAnimationDeclarations(reducedAnimations, customProps)
+    : LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
+        name: customProps[propertyName],
+        value: LIST_PROPERTY_FALLBACKS[propertyName],
+      }));
+}
+
 // ----- Parsers -----
 
 function triggerToCSS(
   interaction: Interaction,
   configConditions: Record<string, Condition>,
   triggerId: string,
-  useFirstChild: boolean = true,
+  { useFirstChild }: CSSContext,
 ): CSSRuleData {
   const { key, conditions } = interaction;
 
@@ -174,6 +227,7 @@ function effectToCSS(
   configConditions: Record<string, Condition>,
   customProps: ListCustomProps,
   trigger: TriggerVariant,
+  context: CSSContext,
   childSelector?: string,
 ): {
   rules: CSSRuleData[];
@@ -193,6 +247,7 @@ function effectToCSS(
 
   const media = getFullPredicateByType(conditions, configConditions, 'media');
   const selectorCondition = getSelectorCondition(conditions, configConditions);
+  const reducedMotionMedia = combineMedia(media, REDUCED_MOTION_QUERY);
 
   const rules: CSSRuleData[] = [
     {
@@ -232,16 +287,13 @@ function effectToCSS(
       ),
     );
 
-    const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
-      name: customProps[propertyName],
-      value:
-        cssAnimations
-          .map((animation) => {
-            const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
-            return (animation as Record<string, unknown>)[name];
-          })
-          .join(', ') || LIST_PROPERTY_FALLBACKS[propertyName],
-    }));
+    const animationDeclarations = buildAnimationDeclarations(cssAnimations, customProps);
+
+    // reduced-motion overrides go right after the rule they override - same selector, same
+    // specificity, so the later one wins wherever the media condition matches
+    const reducedDeclarations = context.reducedMotion
+      ? buildReducedAnimationDeclarations(animationOptions, trigger, customProps)
+      : [];
 
     if (initial) {
       // declare animation and composition custom properties with initial dependent on data-motion-enter
@@ -261,9 +313,30 @@ function effectToCSS(
         declarations: animationDeclarations,
         dataInteractEnterSelector: ':not([data-interact-enter="done"])',
       });
+
+      if (reducedDeclarations.length) {
+        rules.push({
+          key,
+          media: reducedMotionMedia,
+          selectorCondition,
+          childSelector,
+          declarations: reducedDeclarations,
+          dataInteractEnterSelector: ':not([data-interact-enter="done"])',
+        });
+      }
     } else {
       // declare animation and composition custom properties
       declarations.push(...animationDeclarations);
+
+      if (reducedDeclarations.length) {
+        rules.push({
+          key,
+          media: reducedMotionMedia,
+          selectorCondition,
+          childSelector,
+          declarations: reducedDeclarations,
+        });
+      }
     }
   } else if (transition || transitionProperties) {
     usedProperties = ['transition'];
@@ -276,6 +349,18 @@ function effectToCSS(
       name: customProps.transition,
       value: transitions.join(', ') || LIST_PROPERTY_FALLBACKS.transition,
     });
+
+    // the state itself still applies under reduced motion, it just applies instantly -
+    // this mirrors the `(prefers-reduced-motion: no-preference)` wrapper in createTransitionCSS()
+    if (context.reducedMotion && transitions.length) {
+      rules.push({
+        key,
+        media: reducedMotionMedia,
+        selectorCondition,
+        childSelector,
+        declarations: [{ name: customProps.transition, value: LIST_PROPERTY_FALLBACKS.transition }],
+      });
+    }
 
     // adding state rule using custom properties that could be overriden to implement
     // same-interaction-cascade
@@ -307,7 +392,7 @@ function parseEffect(
   targetToCustomProps: Map<string, ListCustomProps>,
   keyframesMap: Map<string, Keyframe[]>,
   trigger: TriggerVariant,
-  useFirstChild: boolean = true,
+  context: CSSContext,
   sequenceCustomProps?: Record<ListPropertyName, string>,
   precomputedTargetHash?: string,
 ): { rules: CSSRuleData[]; usedProperties: ListPropertyName[] } {
@@ -315,7 +400,7 @@ function parseEffect(
   const targetHash = precomputedTargetHash ?? getElementHash(effect);
   const childSelector = getSelector(effect, {
     asCombinator: true,
-    useFirstChild,
+    useFirstChild: context.useFirstChild,
     addItemFilter: true,
   });
 
@@ -342,6 +427,7 @@ function parseEffect(
     configConditions,
     localCustomProps,
     trigger,
+    context,
     childSelector,
   );
 
@@ -358,7 +444,7 @@ function parseSequence(
   targetToCustomProps: Map<string, ListCustomProps>,
   keyframesMap: Map<string, Keyframe[]>,
   trigger: TriggerVariant,
-  useFirstChild: boolean = true,
+  context: CSSContext,
   targetUsedProperties?: Map<string, Set<ListPropertyName>>,
 ): CSSRuleData[] {
   // in a similar manner to how we treat different interactions and use lists to concatenate them
@@ -376,7 +462,7 @@ function parseSequence(
     const { key } = effect;
     const childSelector = getSelector(effect, {
       asCombinator: true,
-      useFirstChild,
+      useFirstChild: context.useFirstChild,
       addItemFilter: true,
     });
 
@@ -392,7 +478,7 @@ function parseSequence(
       targetToCustomProps,
       keyframesMap,
       trigger,
-      useFirstChild,
+      context,
       seqCustomProps,
       targetHash,
     );
@@ -432,7 +518,7 @@ function parseInteraction(
   interactionIdx: number,
   targetToLists: Map<string, CSSCoordinatedLists>,
   keyframesMap: Map<string, Keyframe[]>,
-  useFirstChild: boolean = true,
+  context: CSSContext,
 ): CSSRuleData[] {
   const { effects = [], sequences = [] } = interaction;
   const configConditions = config.conditions || {};
@@ -460,7 +546,7 @@ function parseInteraction(
     componentId: '',
   } as TriggerVariant;
   if (trigger === 'viewProgress') {
-    cssRules.push(triggerToCSS(interaction, configConditions, motionTrigger.id, useFirstChild));
+    cssRules.push(triggerToCSS(interaction, configConditions, motionTrigger.id, context));
   }
 
   for (const effect of resolvedEffects) {
@@ -472,7 +558,7 @@ function parseInteraction(
       targetToCustomProps,
       keyframesMap,
       motionTrigger,
-      useFirstChild,
+      context,
     );
     cssRules.push(...rules);
 
@@ -492,7 +578,7 @@ function parseInteraction(
         targetToCustomProps,
         keyframesMap,
         motionTrigger,
-        useFirstChild,
+        context,
         targetUsedProperties,
       ),
     ),
@@ -517,6 +603,7 @@ function parseInteraction(
 export function _generate(
   config: InteractConfig,
   useFirstChild: boolean = true,
+  options: GenerateOptions = {},
 ): {
   cssRules: CSSRuleData[];
   keyframes: Map<string, Keyframe[]>;
@@ -525,9 +612,13 @@ export function _generate(
   // to be populated when parsing interactions
   const targetToLists = new Map<string, CSSCoordinatedLists>();
   const keyframes = new Map<string, Keyframe[]>();
+  const context: CSSContext = {
+    useFirstChild,
+    reducedMotion: options.reducedMotion ?? true,
+  };
 
   const cssRules = config.interactions.flatMap((interaction, interactionIdx) =>
-    parseInteraction(config, interaction, interactionIdx, targetToLists, keyframes, useFirstChild),
+    parseInteraction(config, interaction, interactionIdx, targetToLists, keyframes, context),
   );
 
   // for each target add unconditional rule for the coordinated lists from interactions targeting it
@@ -542,10 +633,15 @@ export function _generate(
  *
  * @param config - The interact configuration containing effects and interactions
  * @param useFirstChild - Whether to use the first child selector (default: true)
+ * @param options - `reducedMotion: false` skips the `prefers-reduced-motion` rules (default: `true`)
  * @returns string containing all of the CSS rules needed for time-based animations
  */
-export function generate(config: InteractConfig, useFirstChild: boolean = true): string {
-  const { cssRules, keyframes } = _generate(config, useFirstChild);
+export function generate(
+  config: InteractConfig,
+  useFirstChild: boolean = true,
+  options: GenerateOptions = {},
+): string {
+  const { cssRules, keyframes } = _generate(config, useFirstChild, options);
 
   const css = [
     ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),

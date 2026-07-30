@@ -5,7 +5,13 @@ import type {
   AnimationOptions,
   TriggerVariant,
 } from '../types';
-import { getEffectsData, getRanges, getNamedEffect, isNotAScrubTrigger } from './common';
+import {
+  getEffectsData,
+  getRanges,
+  getNamedEffect,
+  isNotAScrubTrigger,
+  getReducedMotionOptions,
+} from './common';
 
 function getAnimationTarget(target: string | null, part: string | undefined) {
   return target ? `#${target}${part ? `[data-motion-part~="${part}"]` : ''}` : '';
@@ -52,11 +58,25 @@ function getCSSAnimation(
   target: string | null,
   animationOptions: AnimationOptions,
   trigger?: TriggerVariant,
+  options?: { reducedMotion?: boolean },
 ) {
   // get the preset for the given animation options
   const namedEffect = getNamedEffect(animationOptions) as AnimationEffectAPI<any> | null;
 
-  const animationsData = getCSSAnimationEffect(namedEffect, animationOptions);
+  let effectOptions = animationOptions;
+
+  if (options?.reducedMotion) {
+    // pass a copy - getCSSAnimationEffect() mutates the duration of the options it gets
+    const reduced = getReducedMotionOptions({ ...animationOptions }, trigger);
+
+    if (!reduced) {
+      return [];
+    }
+
+    effectOptions = reduced;
+  }
+
+  const animationsData = getCSSAnimationEffect(namedEffect, effectOptions);
   const data = getEffectsData(animationsData, trigger, animationOptions.effectId, true);
   const isViewProgress = trigger?.trigger === 'view-progress';
 
