@@ -14,9 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Added
 
-- `@wix/splittext/plugin` entry point: `splitTextPlugin` (runtime adapter for `Interact.use('splitText', …)`) and its build-time counterpart `splitTextStyle` for `generate()`'s `plugins` option (#275)
-- `SplitTextPluginConfig` type — `{ container, hideUntilReady?, ...SplitTextOptions }` — for declaration-merging `$splitText` into `InteractPluginConfigMap` (#275)
-- `hideUntilReady` opts into SSR FOUC prevention: `splitTextStyle` hides the container until the runtime split sets `data-splittext-ready` (#275)
+- `@wix/splittext/plugin` entry points: `splitTextPlugin` for `Interact.use()`, and `splitTextStyle` for `generate()` (#275)
+- `hideUntilReady`: `splitTextStyle` hides the container until the runtime split sets `data-splittext-ready` (#275)
 
 ### [0.1.2] - 2026-07-14
 
@@ -38,7 +37,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Added
 
-- Plugin fields: `$`-prefixed keys on interactions and effects are accepted with opaque values (validate never inspects plugin config), while every other unknown key is still reported as `SCHEMA_UNRECOGNIZED_KEYS` so typos are still caught (#275)
+- Plugin fields: `$`-prefixed keys on interactions and effects are accepted; every other unknown key is still reported as `SCHEMA_UNRECOGNIZED_KEYS` (#275)
+
+### [0.1.2] - 2026-07-29
+
+#### Added
+
+- `RECOMMENDED_FILL_BACKWARDS` semantic check nudging `viewEnter` + `once` keyframe/named effects without FOUC hiding rules to set `fill: 'backwards'` or `'both'` (#277)
+
+#### Changed
+
+- README rule catalog updated for `RECOMMENDED_FILL_BACKWARDS` (#277)
 
 ### [0.1.1] - 2026-07-14
 
@@ -71,14 +80,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Added
 
-- Generic plugin bridge: `Interact.use(name, plugin)` registers a plugin, and a `$<name>` field on an interaction or effect (e.g. `$splitText`) routes its value to it at connect time, before target resolution. Plugin values are opaque to Interact; a returned cleanup runs on disconnect/teardown (#275)
-- `generate()` accepts a `plugins` option — a map of plugin name → build-time style generator — so plugins can emit SSR CSS (e.g. FOUC prevention for un-split text) without Interact inspecting their config (#275)
-- Plugin types: `InteractPlugin`, `InteractPluginContext`, `InteractPluginCleanup`, `InteractPluginConfigMap` (augment to type `$<name>` fields), `InteractPluginStyleContext`, `InteractPluginStyleGenerator`, `InteractPluginStyles`, and `PluginFields` (#275)
-- Agent rules (`rules/plugins.md`) and docs (`docs/guides/plugins.md`) for registering plugins and their SSR styling (#275)
+- Generic plugin bridge: `Interact.use(name, plugin)` registers a plugin, and a `$<name>` field on an interaction or effect (#275)
+- `generate()` accepts a `plugins` option — a map of plugin name → build-time style generator (#275)
 
 #### Changed
 
-- `generate(config, options?)`: the second argument now accepts an options bag — `{ useFirstChild?, plugins? }` — exported as the `GenerateOptions` type. Passing a bare boolean still works and is treated as `useFirstChild`, so `generate(config, true)` is unchanged (#275)
+- `generate(config, options?)`: the second argument now accepts an options bag — `{ useFirstChild?, plugins? }` — exported as the `GenerateOptions` (#275)
+
+### [2.5.5] - 2026-07-29
+
+#### Fixed
+
+- Entrance FOUC prevention: `generate()` initial rules now emit `!important` on transform neutralization declarations so they override inline styles until the animation starts (#277)
+
+#### Changed
+
+- `viewEnter` rules and docs recommend `fill: 'backwards'` (or `'both'`) for entrance animations; CSS rule declarations support an optional `important` flag (#277)
 
 ### [2.5.4] - 2026-07-16
 
@@ -282,6 +299,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion
 
+### [2.1.8] - 2026-07-29
+
+#### Added
+
+- `getWebAnimation()` accepts SVG elements (and any `Element`) as keyframe targets, not only `HTMLElement` (#280)
+
+#### Changed
+
+- `getCSSAnimation()` delay serialization: use `0ms` when `delay` is `0` instead of previously defaulting to `1ms` (#277)
+
 ### [2.1.7] - 2026-05-29
 
 #### Added
@@ -359,6 +386,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion-presets
+
+### [1.0.4] - 2026-07-29
+
+#### Changed
+
+- Entrance presets default to `fill: 'backwards'` via `getEntranceFill()` unless overridden (#277)
 
 ### [1.0.3] - 2026-05-29
 

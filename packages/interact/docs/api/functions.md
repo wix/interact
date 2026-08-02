@@ -255,7 +255,9 @@ The output covers every CSS-expressible aspect of the configuration:
 
 For entrance animations where the source and target are the same element, `generate()` emits an initial rule that hides the element until its animation starts. Inject the generated CSS into `<head>` (preferred) or the beginning of `<body>`.
 
-The initial rule uses `:not([data-interact-enter])` so the element becomes visible once the animation begins. This only applies to `viewEnter` interactions with `triggerType: 'once'` (the default for `viewEnter`).
+The initial rule uses `:not([data-interact-enter])` so the element becomes visible once the animation begins. This only applies to `viewEnter` interactions with `triggerType: 'once'` (the default for `viewEnter`)
+
+For any entrance animation, use `fill: 'backwards'` (or `'both'` when the final keyframe must persist). Entrance presets default to `backwards`.
 
 For `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting keyframe as inline styles on the target element and use `fill: 'both'`.
 
@@ -264,10 +266,10 @@ For `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting
 ```css
 [data-interact-key='hero']:not([data-interact-enter]) {
   visibility: hidden;
-  transform: none;
-  translate: none;
-  scale: none;
-  rotate: none;
+  transform: none !important;
+  translate: none !important;
+  scale: none !important;
+  rotate: none !important;
 }
 ```
 

@@ -45,9 +45,10 @@ use **separate** source and target elements (trigger on a stable wrapper, animat
 child via `selector`, or point the effect at a different `key`).
 
 **FOUC:** `once` entrances need injected `generate()` CSS before first paint (see
-`config-schema.md` and SKILL.md invariant 3). When source ≠ target (staggering
-children via `selector`) `generate()` emits no hiding rules for those targets — also
-set `fill: 'backwards'` on the effect so they don't flash before the trigger.
+`config-schema.md` and SKILL.md invariant 3). Set `fill: 'backwards'` on every
+`viewEnter` + `once` animation effect so any `delay` holds the first keyframe.
+When source ≠ target (staggering children via `selector`) `generate()` emits no
+hiding rules for those targets — `fill: 'backwards'` is still required.
 
 ```ts
 { interactions: [{ key: 'hero', trigger: 'viewEnter', params: { threshold: 0.2 },

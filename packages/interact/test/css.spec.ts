@@ -438,10 +438,11 @@ describe('css._generate', () => {
       const initialRule = cssRules.find((r) => r.selectorSuffix === ':not([data-interact-enter])')!;
       expect(initialRule).toBeDefined();
 
-      DEFAULT_INITIAL.forEach(({ name, value }) => {
+      DEFAULT_INITIAL.forEach(({ name, value, important }) => {
         const decl = initialRule.declarations.find((d) => d.name === name);
         expect(decl, `expected DEFAULT_INITIAL declaration: ${name}`).toBeDefined();
         expect(decl!.value).toBe(value);
+        expect(decl!.important).toBe(important);
       });
 
       const animationRule = cssRules.find(
