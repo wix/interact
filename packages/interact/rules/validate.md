@@ -278,6 +278,7 @@ const ExperienceSchema = z.object({
 - `InteractConfigSchema` is `.strict()` — unrecognized top-level keys produce `SCHEMA_UNRECOGNIZED_KEYS`.
 - `InteractConfigSchema` carries a `.transform()`, so a successful `.parse()` returns the config augmented with an internal `warnings` array; `validateInteractConfig` consumes that for you.
 - `customEffect` and function-valued `offsetEasing` are accepted as opaque functions (`z.custom<Function>`) — they are not deep-validated, so JS-authored configs with function fields validate correctly.
+- Interactions and effects accept `$`-prefixed plugin fields (e.g. `$splitText`) — config routed to plugins registered via `Interact.use()`. Interaction/effect schemas use `.catchall(z.unknown())` + a key check instead of `.strict()`: `$`-prefixed fields are accepted with opaque values (validate has no knowledge of any plugin's shape), while any non-prefixed unknown key is still reported as `SCHEMA_UNRECOGNIZED_KEYS` (typo detection preserved). The top-level `InteractConfigSchema` stays `.strict()`.
 
 ---
 

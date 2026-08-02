@@ -24,6 +24,7 @@ Declarative configuration-driven interaction library. Binds animations to trigge
 - [Conditions](#conditions)
 - [CSS Generation & FOUC Prevention](#css-generation--fouc-prevention)
 - [Element Resolution](#element-resolution)
+- [Plugins](#plugins)
 - [Static API](#static-api)
 
 ---
@@ -705,17 +706,62 @@ The target element is what the effect animates. Resolved in priority order:
 
 ---
 
+## Plugins
+
+Interact can route config to external plugins registered with `Interact.use(name, plugin)`. Interact is only a bridge — it matches a `$<name>` config field to a registered plugin name and passes the value in; it never inspects plugin behavior. Neither Interact nor the plugin package depend on each other. A plugin package MAY ship its own adapter typed structurally against the contract (e.g. `@wix/splittext/plugin`) — use it instead of hand-rolling one; your app supplies only the type glue.
+
+- Register before `create()`: `Interact.use('splitText', splitTextPlugin)`.
+- Reference with a `$<name>` field on an **interaction** or **effect**: `$splitText: { container: '.title', type: 'chars' }`.
+- Plugins run at connect time, **before** target resolution — so DOM they create (e.g. `.split-c` spans) is visible to `selector` queries that follow.
+- A plugin may return a cleanup function; Interact runs it on disconnect/teardown.
+- A `$<name>` field with no registered plugin is ignored.
+- Plugin fields MUST be `$`-prefixed — a non-prefixed unknown key on an interaction/effect is rejected by `@wix/interact-validate`.
+- **SSR styling:** for FOUC prevention (e.g. hiding un-split text before an entrance animation), pass a **separate** per-plugin callback in the `plugins` option of `generate()`'s options bag: `generate(config, { useFirstChild: true, plugins: { myPlugin: (value, context) => { declarations, selectorSuffix }[] } })`. `generate()` does not inspect the value; the callback returns CSS rule(s) data and scopes them under the base selector (`[data-interact-key="<key>"]`). It is NOT the `use()` callback. If the plugin package ships a generator (e.g. `splitTextStyle` from `@wix/splittext/plugin`), pass that instead of writing one.
+
+**Example — split text, then stagger the generated char spans.** Use the adapter shipped from `@wix/splittext/plugin` (`splitTextPlugin` + its SSR counterpart `splitTextStyle`); do NOT hand-roll it:
+
+```js
+import { Interact, generate } from '@wix/interact';
+import { splitTextPlugin, splitTextStyle } from '@wix/splittext/plugin';
+
+const config = {
+  effects: { 'char-fade-up': { namedEffect: { type: 'FadeIn' }, duration: 400 } },
+  interactions: [
+    {
+      key: 'hero',
+      trigger: 'viewEnter',
+      // `hideUntilReady` opts into the SSR hide rule emitted by splitTextStyle
+      $splitText: { container: '.title', type: 'chars', hideUntilReady: true },
+      sequences: [{ offset: 30, effects: [{ effectId: 'char-fade-up', selector: '.split-c' }] }],
+    },
+  ],
+};
+
+const css = generate(config, { useFirstChild: true, plugins: { splitText: splitTextStyle } });
+// Embed css in HTML — see CSS Generation & FOUC Prevention
+
+Interact.use('splitText', splitTextPlugin);
+
+Interact.create(config);
+```
+
+- `$splitText` takes `{ container, hideUntilReady?, ...SplitTextOptions }`; `container` is resolved within the element and every match is split.
+- Type the field in your app: `declare module '@wix/interact' { interface InteractPluginConfigMap { splitText: SplitTextPluginConfig } }` (type from `@wix/splittext/plugin`).
+
+Default split wrapper classes: `.split-c` (chars), `.split-w` (words), `.split-l` (lines), `.split-s` (sentences).
+
 ## Static API
 
-| Method / Property                   | Description                                                                                                   |
-| :---------------------------------- | :------------------------------------------------------------------------------------------------------------ |
-| `generate(config, useFirstChild?)`  | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML.                      |
-| `Interact.create(config)`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                   |
-| `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `generate()` and `create`.                               |
-| `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                             |
-| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — force reduced-motion behavior regardless of OS setting.                        |
-| `Interact.allowA11yTriggers`        | `boolean` (default: `true`) — enable accessibility trigger variants (`interest`, `activate`).                 |
-| `Interact.setup(options)`           | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below. |
+| Method / Property                   | Description                                                                                                                                                                                                                                               |
+| :---------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `generate(config, options?)`        | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML. `options` = `{ useFirstChild?, plugins? }`, or a bare boolean for legacy `useFirstChild`. `plugins` = per-plugin SSR style generators (see [Plugins](#plugins)). |
+| `Interact.create(config)`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                                                                                                                                                               |
+| `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `generate()` and `create`.                                                                                                                                                                           |
+| `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                                                                                                                                                                         |
+| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — force reduced-motion behavior regardless of OS setting.                                                                                                                                                                    |
+| `Interact.allowA11yTriggers`        | `boolean` (default: `true`) — enable accessibility trigger variants (`interest`, `activate`).                                                                                                                                                             |
+| `Interact.setup(options)`           | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below.                                                                                                                                             |
+| `Interact.use(name, plugin)`        | Register an external plugin by name (see [Plugins](#plugins)). Call before `create`.                                                                                                                                                                      |
 
 **`Interact.setup(options)`** — optional configuration object:
 

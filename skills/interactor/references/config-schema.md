@@ -343,7 +343,7 @@ container.
 
 ## CSS generation & FOUC
 
-`generate(config, useFirstChild = true)` returns a complete CSS string for **all**
+`generate(config, options?)` returns a complete CSS string for **all**
 interactions: `@keyframes`, animation/transition custom properties, native
 `view-timeline` declarations for `viewProgress`, state-selector rules, coordinated
 list aggregation, and FOUC initial rules.
@@ -359,7 +359,10 @@ const css = generate(config, true); // true for web; false for vanilla/React
 
 **`useFirstChild`:** `true` for the **web** (`<interact-element>`) entry point —
 selectors target `:first-child`; `false` for **vanilla** and **React**. The default
-is `true`, so vanilla/React callers must pass `false` explicitly.
+is `true`, so vanilla/React callers must pass `false` explicitly. Pass it as a bare
+boolean (`generate(config, false)`) or in the options bag
+(`generate(config, { useFirstChild: false })`); the bag also carries `plugins`,
+a map of plugin name → SSR style generator for `$<name>` config fields.
 
 **FOUC prevention (viewEnter + once):** For entrance animations where source and
 target are the **same** element, `generate()` emits author-important initial rules
@@ -404,7 +407,7 @@ import { add, remove, generate } from '@wix/interact';
 
 add(element: HTMLElement, key?: string): void;  // key defaults to element.dataset.interactKey
 remove(key: string): void;                       // unbind everything for a key
-generate(config: InteractConfig, useFirstChild?: boolean): string;
+generate(config: InteractConfig, options?: boolean | { useFirstChild?: boolean; plugins?: InteractPluginStyles }): string;
 ```
 
 **`Interact.setup(options)`:**

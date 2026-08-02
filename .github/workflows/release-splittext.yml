@@ -80,6 +80,14 @@ jobs:
       - name: Build splittext package
         run: yarn workspace @wix/splittext build
 
+      # @wix/interact is a devDependency used only by the plugin-bridge integration test —
+      # splittext itself neither builds nor runs against it (note the build step above runs first).
+      - name: Build motion package (test-only dependency of @wix/interact)
+        run: yarn workspace @wix/motion build
+
+      - name: Build interact package (test-only dependency)
+        run: yarn workspace @wix/interact build
+
       - name: Test splittext package
         run: yarn workspace @wix/splittext test
 

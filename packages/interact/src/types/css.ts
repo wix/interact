@@ -1,3 +1,19 @@
+import type { InteractPluginStyles } from './plugins';
+
+/**
+ * Options bag for `generate()`. Passed as its single optional 2nd argument, which also accepts a
+ * bare boolean for the legacy `useFirstChild` signature.
+ */
+export type GenerateOptions = {
+  /** Whether to use the first child selector (default: `true`). */
+  useFirstChild?: boolean;
+  /**
+   * Map of plugin name → SSR style generator. For every `$<name>` field in the config, the matching
+   * generator is called with the field's (opaque) value and a context; its returned CSS is appended.
+   */
+  plugins?: InteractPluginStyles;
+};
+
 export type ListPropertyName =
   | 'animation'
   | 'transition'
@@ -23,5 +39,5 @@ export type CSSRuleData = {
   media?: string;
   states?: string[];
   selectorCondition?: string;
-  dataInteractEnterSelector?: string;
+  selectorSuffix?: string;
 };

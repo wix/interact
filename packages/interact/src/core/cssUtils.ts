@@ -107,15 +107,8 @@ export function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
 }
 
 export function CSSRuleToString(rule: CSSRuleData): string {
-  const {
-    key,
-    childSelector,
-    declarations,
-    media,
-    states,
-    selectorCondition,
-    dataInteractEnterSelector,
-  } = rule;
+  const { key, childSelector, declarations, media, states, selectorCondition, selectorSuffix } =
+    rule;
   if (!declarations.length) {
     return '';
   }
@@ -135,8 +128,8 @@ export function CSSRuleToString(rule: CSSRuleData): string {
     selector = `${selector} ${childSelector}`;
   }
 
-  if (dataInteractEnterSelector) {
-    selector = `${selector}${dataInteractEnterSelector}`;
+  if (selectorSuffix) {
+    selector = `${selector}${selectorSuffix}`;
   }
 
   // maybe nesting is simpler? -

@@ -51,4 +51,12 @@ describe('schema type parity (drift guard)', () => {
       Record<string, unknown> | undefined
     >();
   });
+
+  it('interaction/effect schemas accept $-prefixed plugin fields (mirrors PluginFields)', () => {
+    // Both the zod-inferred type and the canonical type accept an arbitrary `$`-prefixed field.
+    type InferredInteraction = InferredConfig['interactions'][number];
+    type CanonicalInteraction = InteractConfig['interactions'][number];
+    expectTypeOf<InferredInteraction['$anyPlugin']>().toMatchTypeOf<unknown>();
+    expectTypeOf<CanonicalInteraction['$anyPlugin']>().toMatchTypeOf<unknown>();
+  });
 });

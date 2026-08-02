@@ -237,7 +237,7 @@ animation no-ops. Apply them every time, even if you don't open a reference file
    selective `import { FadeIn, … }` (tree-shakeable) over `import * as presets` in
    bundled apps.
 
-2. **`generate(config, useFirstChild)` parity** — pass `true` for the **web**
+2. **`generate(config, useFirstChild)` parity** (or `generate(config, { useFirstChild })`) — pass `true` for the **web**
    (`<interact-element>`) entry point, `false` for **vanilla** and **React**.
    Backwards = the FOUC-prevention selectors target the wrong node and break.
 

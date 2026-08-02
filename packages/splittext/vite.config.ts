@@ -11,6 +11,7 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         react: path.resolve(__dirname, 'src/react/index.ts'),
+        plugin: path.resolve(__dirname, 'src/plugin/index.ts'),
       },
       formats: ['es', 'cjs'],
     },

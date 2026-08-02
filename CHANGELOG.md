@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/splittext
 
+### [0.2.0] - unreleased
+
+#### Added
+
+- `@wix/splittext/plugin` entry points: `splitTextPlugin` for `Interact.use()`, and `splitTextStyle` for `generate()` (#275)
+- `hideUntilReady`: `splitTextStyle` hides the container until the runtime split sets `data-splittext-ready` (#275)
+
 ### [0.1.2] - 2026-07-14
 
 #### Added
@@ -25,6 +32,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact-validate
+
+### [0.2.0] - unreleased
+
+#### Added
+
+- Plugin fields: `$`-prefixed keys on interactions and effects are accepted; every other unknown key is still reported as `SCHEMA_UNRECOGNIZED_KEYS` (#275)
 
 ### [0.1.2] - 2026-07-29
 
@@ -62,6 +75,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact
+
+### [2.6.0] - unreleased
+
+#### Added
+
+- Generic plugin bridge: `Interact.use(name, plugin)` registers a plugin, and a `$<name>` field on an interaction or effect (#275)
+- `generate()` accepts a `plugins` option — a map of plugin name → build-time style generator (#275)
+
+#### Changed
+
+- `generate(config, options?)`: the second argument now accepts an options bag — `{ useFirstChild?, plugins? }` — exported as the `GenerateOptions` (#275)
 
 ### [2.5.5] - 2026-07-29
 
