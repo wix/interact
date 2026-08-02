@@ -1492,6 +1492,7 @@ __metadata:
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
     "@vitest/coverage-v8": "npm:^4.0.14"
+    "@wix/interact": "npm:^2.5.5"
     jsdom: "npm:^24.0.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"

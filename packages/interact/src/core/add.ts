@@ -76,14 +76,7 @@ function _applyPlugins(
       owner._appliedPlugins.add(value);
     }
 
-    const plugin = Interact.getPlugin(name);
-
-    if (!plugin) {
-      throw new Error(
-        `Interact: config uses plugin field "${field}" but no plugin is registered under ` +
-          `"${name}". Call Interact.use('${name}', plugin) before Interact.create().`,
-      );
-    }
+    const plugin = Interact.getPlugin(name)!;
 
     const cleanup = plugin(value, { root, key, scope, config });
 

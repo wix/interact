@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Interact, add, remove, generate } from '@wix/interact';
 import type { InteractConfig } from '@wix/interact';
-import { splitTextPlugin, splitTextStyle } from '../src/plugins/splitText';
+import { splitTextPlugin, splitTextStyle } from '../src/plugin';
 
 // End-to-end proof of the plugin bridge with the REAL @wix/splittext: splitText mutates the DOM,
 // Interact resolves the generated spans, and disconnect reverts the split. The animation engine
