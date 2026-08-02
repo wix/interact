@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 #### Changed
 
 - `KEYFRAME_PROP_NOT_CAMEL_CASE` (rule category `KEYFRAME_STYLE`) is replaced by `INVALID_CSS_PROPERTY_NAME` (rule category `CSS_PROPERTY_NAME`): both camelCase and kebab-case CSS property names are valid input, so only names that are neither are reported, and the check now covers `transition.styleProperties` / `transitionProperties` names in addition to `keyframeEffect` keyframes
+- `severityOverrides` keyed on `KEYFRAME_STYLE` are now silently ignored. Rename the key to `CSS_PROPERTY_NAME` to keep an override in effect
 
 ### [0.1.1] - 2026-07-14
 
@@ -67,6 +68,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Fixed
 
+- camelCase property names in `transition.styleProperties` / `transitionProperties` are now normalized to kebab-case
 - CSS custom properties in keyframes (e.g. `--fooBar`) are no longer lower-cased when emitted into `@keyframes`
 - Vendor-prefixed keyframe properties (e.g. `webkitTextStroke`) now emit a valid CSS property name (`-webkit-text-stroke`)
 

@@ -98,71 +98,59 @@ describe('cssSyntax — INVALID_CSS_PROPERTY_NAME', () => {
   });
 
   describe('no warning for the documented valid patterns', () => {
+    // `valid` must be asserted alongside the missing warning: a structural (zod) rejection
+    // skips the semantic layer entirely, which would also produce zero INVALID_CSS_PROPERTY_NAME
+    // issues - and would mean the casing was never accepted in the first place.
+    function expectAccepted(result: ReturnType<typeof validateInteractConfig>) {
+      expect(result.errors.filter((e) => e.code.startsWith('SCHEMA_'))).toEqual([]);
+      expect(result.valid).toBe(true);
+      expect(result.errors.filter((e) => e.code === CODE)).toHaveLength(0);
+    }
+
     it('does not warn for a camelCase keyframe property', () => {
-      expect(
-        validateKeyframeProperty('backgroundColor').errors.filter((e) => e.code === CODE),
-      ).toHaveLength(0);
+      expectAccepted(validateKeyframeProperty('backgroundColor'));
     });
 
     it('does not warn for a kebab-case keyframe property', () => {
-      expect(
-        validateKeyframeProperty('background-color').errors.filter((e) => e.code === CODE),
-      ).toHaveLength(0);
+      expectAccepted(validateKeyframeProperty('background-color'));
     });
 
     it('does not warn for a vendor-prefixed keyframe property in either casing', () => {
-      expect(
-        validateKeyframeProperty('-webkit-text-stroke', '1px red').errors.filter(
-          (e) => e.code === CODE,
-        ),
-      ).toHaveLength(0);
-      expect(
-        validateKeyframeProperty('webkitTextStroke', '1px red').errors.filter(
-          (e) => e.code === CODE,
-        ),
-      ).toHaveLength(0);
+      expectAccepted(validateKeyframeProperty('-webkit-text-stroke', '1px red'));
+      expectAccepted(validateKeyframeProperty('webkitTextStroke', '1px red'));
     });
 
     it('does not warn for WAAPI keyframe keywords', () => {
-      const result = validateInteractConfig({
-        interactions: [
-          {
-            key: 'el',
-            trigger: 'viewEnter',
-            effects: [
-              {
-                duration: 400,
-                keyframeEffect: {
-                  name: 'kf',
-                  keyframes: [{ opacity: 0, offset: 0, easing: 'ease-in', composite: 'add' }],
+      expectAccepted(
+        validateInteractConfig({
+          interactions: [
+            {
+              key: 'el',
+              trigger: 'viewEnter',
+              effects: [
+                {
+                  duration: 400,
+                  keyframeEffect: {
+                    name: 'kf',
+                    keyframes: [{ opacity: 0, offset: 0, easing: 'ease-in', composite: 'add' }],
+                  },
                 },
-              },
-            ],
-          },
-        ],
-      });
-      expect(result.errors.filter((e) => e.code === CODE)).toHaveLength(0);
-    });
-
-    it('does not warn for a CSS custom property (--*) in either shape', () => {
-      expect(
-        validateKeyframeProperty('--my-var', '1').errors.filter((e) => e.code === CODE),
-      ).toHaveLength(0);
-      expect(
-        validateKeyframeProperty('--myVar', '1').errors.filter((e) => e.code === CODE),
-      ).toHaveLength(0);
-      expect(validateStyleProperty('--myVar').errors.filter((e) => e.code === CODE)).toHaveLength(
-        0,
+              ],
+            },
+          ],
+        }),
       );
     });
 
+    it('does not warn for a CSS custom property (--*) in either shape', () => {
+      expectAccepted(validateKeyframeProperty('--my-var', '1'));
+      expectAccepted(validateKeyframeProperty('--myVar', '1'));
+      expectAccepted(validateStyleProperty('--myVar'));
+    });
+
     it('does not warn for camelCase or kebab-case style properties', () => {
-      expect(
-        validateStyleProperty('backgroundColor').errors.filter((e) => e.code === CODE),
-      ).toHaveLength(0);
-      expect(
-        validateStyleProperty('background-color').errors.filter((e) => e.code === CODE),
-      ).toHaveLength(0);
+      expectAccepted(validateStyleProperty('backgroundColor'));
+      expectAccepted(validateStyleProperty('background-color'));
     });
   });
 });

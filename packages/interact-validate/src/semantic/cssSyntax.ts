@@ -9,9 +9,9 @@ const INSET_TOKEN = /^(auto|[+-]?(?:\d+\.?\d*|\.\d+)(?:%|[a-z]{1,5})?)$/i;
 const CAMEL_CASE_PROPERTY = /^[a-z][a-zA-Z0-9]*$/;
 const KEBAB_CASE_PROPERTY = /^-?[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
-// WAAPI keyframe keys that are not CSS property names
-const KEYFRAME_KEYWORDS = ['offset', 'easing', 'composite'];
-
+// note: the WAAPI keyframe keys that are not CSS property names (`offset`,
+// `easing`, `composite`) are plain lowercase words, so they pass the camelCase
+// check and need no special casing here.
 function isNormalizableProperty(name: string): boolean {
   return name.startsWith('--') || CAMEL_CASE_PROPERTY.test(name) || KEBAB_CASE_PROPERTY.test(name);
 }
@@ -34,7 +34,7 @@ export function checkCSSPropertyNames(path: Path, effect: AnyEffect): SemanticIs
     keyframes.forEach((frame, ki) => {
       if (!frame || typeof frame !== 'object') return;
       Object.keys(frame).forEach((prop) => {
-        if (KEYFRAME_KEYWORDS.includes(prop) || isNormalizableProperty(prop)) return;
+        if (isNormalizableProperty(prop)) return;
         result.push(invalidPropertyName([...path, 'keyframeEffect', 'keyframes', ki, prop], prop));
       });
     });
