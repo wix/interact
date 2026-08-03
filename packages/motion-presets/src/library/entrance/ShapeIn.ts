@@ -1,5 +1,5 @@
 import type { Shape, ShapeIn, TimeAnimationOptions } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, getEntranceFill } from '../../utils';
 
 export function getNames(_: TimeAnimationOptions) {
   return ['motion-fadeIn', 'motion-shapeIn'];
@@ -39,6 +39,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       easing: 'quadOut',
       duration: options.duration! * 0.8,
       custom: {},
@@ -47,6 +48,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: shapeIn,
+      fill: getEntranceFill(options),
       easing,
       custom,
       keyframes: [

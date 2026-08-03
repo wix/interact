@@ -117,7 +117,7 @@ type Interaction = {
   params?: TriggerParams;
   conditions?: string[];
   effects: ((Effect | EffectRef) & { interactionId?: string })[];
-};
+} & PluginFields; // `$<name>` plugin fields, e.g. `$splitText`
 ```
 
 **Properties:**
@@ -128,6 +128,7 @@ type Interaction = {
 - `listContainer` - Optional selector for list container when targeting list items
 - `params` - Optional parameters for the trigger
 - `conditions` - Optional array of condition IDs to evaluate
+- `$<name>` - Optional `$`-prefixed plugin fields (see [Plugin Types](#plugin-types)). Also available on effects.
 - `effects` - Array of effects to apply when triggered
 
 **Example:**
@@ -936,6 +937,96 @@ Union type of all trigger parameter types.
 
 ```typescript
 type TriggerParams = ViewEnterParams | PointerMoveParams | AnimationEndParams;
+```
+
+## Plugin Types
+
+See the [Plugins guide](../guides/plugins.md) for the full picture.
+
+### `InteractPlugin`
+
+A plugin callback registered via `Interact.use()`.
+
+```typescript
+type InteractPlugin = (
+  value: unknown,
+  context: InteractPluginContext,
+) => void | InteractPluginCleanup;
+```
+
+### `InteractPluginContext`
+
+```typescript
+type InteractPluginContext = {
+  root: HTMLElement; // the interaction's (or effect target's) root element
+  key: string; // the interaction/effect key
+  scope: 'interaction' | 'effect';
+  config: Record<string, unknown>; // the interaction/effect object the plugin field was on
+};
+```
+
+### `InteractPluginCleanup`
+
+```typescript
+type InteractPluginCleanup = () => void; // runs on disconnect/teardown
+```
+
+### `InteractPluginConfigMap`
+
+Augmentable interface for typing plugin fields, keyed by the **unprefixed** plugin name. Empty by default; consumers merge into it:
+
+```typescript
+import type { SplitTextPluginConfig } from '@wix/splittext/plugin';
+
+declare module '@wix/interact' {
+  interface InteractPluginConfigMap {
+    splitText: SplitTextPluginConfig;
+  }
+}
+// types the `$splitText` field on interactions and effects
+```
+
+Prefer the config type exported by the plugin package over re-declaring its shape by hand.
+
+### `PluginFields`
+
+The `$`-prefixed plugin fields allowed on interactions and effects. Augmented plugins keep their value types (as `$<name>`); any other `$`-prefixed field is still allowed with an `unknown` value.
+
+```typescript
+type PluginFields = {
+  [K in keyof InteractPluginConfigMap as `$${K & string}`]?: InteractPluginConfigMap[K];
+} & {
+  [pluginField: `$${string}`]: unknown;
+};
+```
+
+### `InteractPluginStyleGenerator`
+
+A plugin's **build-time** styling callback, passed in the `plugins` argument of `generate()` (distinct from the runtime callback given to `Interact.use()`). Returns initial CSS declarations for the element — e.g. hiding pre-plugin content for FOUC prevention.
+
+```typescript
+type InteractPluginStyleGenerator = (
+  value: unknown,
+  context: InteractPluginStyleContext,
+) => { declarations: { name: string; value: string | number }[]; selectorSuffix?: string }[];
+```
+
+### `InteractPluginStyleContext`
+
+```typescript
+type InteractPluginStyleContext = {
+  key: string; // the interaction (or effect target) key the field is on
+  scope: 'interaction' | 'effect';
+  config: Record<string, unknown>; // the interaction/effect object the field is on
+};
+```
+
+### `InteractPluginStyles`
+
+Map of plugin name → SSR style generator, passed as the `plugins` argument to `generate()`.
+
+```typescript
+type InteractPluginStyles = Record<string, InteractPluginStyleGenerator>;
 ```
 
 ## See Also

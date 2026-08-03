@@ -237,16 +237,18 @@ animation no-ops. Apply them every time, even if you don't open a reference file
    selective `import { FadeIn, … }` (tree-shakeable) over `import * as presets` in
    bundled apps.
 
-2. **`generate(config, useFirstChild)` parity** — pass `true` for the **web**
+2. **`generate(config, useFirstChild)` parity** (or `generate(config, { useFirstChild })`) — pass `true` for the **web**
    (`<interact-element>`) entry point, `false` for **vanilla** and **React**.
    Backwards = the FOUC-prevention selectors target the wrong node and break.
 
 3. **FOUC prevention.** Follow the canonical CSS generation policy in
    `references/integration-recipes.md`. For the generated initial-rule behavior
    and trigger-specific exceptions, see “CSS generation & FOUC” in
-   `references/config-schema.md`. For `viewEnter` + `once` where source ≠ target,
-   `generate()` emits no hiding rules — set `fill: 'backwards'` on the effect so
-   targets don't flash before the trigger.
+   `references/config-schema.md`. Same-element `viewEnter` + `once` entrances get
+   author-important neutral initial rules from `generate()`. Always set
+   `fill: 'backwards'` on `viewEnter` + `once` animation effects (or `'both'`
+   when the final keyframe must persist) so delayed entrances hold their first
+   keyframe after the entrance marker is set.
 
 4. **Vanilla binding.** You must then call the **standalone** `add(element, 'key')` for
    each element once it exists in the DOM. For clean up call the `remove('key')` function.

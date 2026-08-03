@@ -125,7 +125,7 @@ const ExperienceSchema = z.object({
 });
 ```
 
-> `InteractConfigSchema` carries a `.transform()`, so a successful `.parse()` returns the config augmented with an internal `warnings` array (`validateInteractConfig` consumes that for you). `customEffect` and function-valued `offsetEasing` are accepted as opaque functions and not deep-validated.
+> `InteractConfigSchema` carries a `.transform()`, so a successful `.parse()` returns the config augmented with an internal `warnings` array (`validateInteractConfig` consumes that for you). `customEffect` and function-valued `offsetEasing` are accepted as opaque functions and not deep-validated. Interactions and effects also accept `$`-prefixed plugin fields (e.g. `$splitText`) — config routed to `Interact.use()` plugins. Their schemas use `.catchall(z.unknown())` + a key check rather than `.strict()`: `$`-prefixed fields are accepted with opaque values, while any non-prefixed unknown key is still rejected as `SCHEMA_UNRECOGNIZED_KEYS`.
 
 ## Severity model
 
@@ -209,7 +209,8 @@ These encode statically-detectable authoring pitfalls from the trigger rule file
 | `REDUNDANT_SELECTOR_WITH_LIST_ITEM`    | `selector` ignored when `listContainer` + `listItemSelector` are both present.                                          | `ELEMENT_SELECTION`      |
 | `EMPTY_STYLE_PROPERTIES`               | A state effect's `transition.styleProperties` / `transitionProperties` is `[]` (toggles nothing).                       | `STATE_EFFECT`           |
 | `STATE_REMOVE_WITHOUT_EFFECT_ID`       | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                                             | `STATE_EFFECT`           |
-| `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.       | `RECOMMENDED_FILL`       |
+| `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.                           | `RECOMMENDED_FILL`       |
+| `RECOMMENDED_FILL_BACKWARDS`           | A `viewEnter` + `once` named/keyframe effect targeting another element or using a same-element delay omits `fill: 'backwards'` or `'both'`. | `RECOMMENDED_FILL`       |
 | `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).              | `POINTER_AXIS`           |
 | `INVALID_CSS_PROPERTY_NAME`            | A keyframe or state-effect property name is neither camelCase nor kebab-case (both are accepted).                       | `CSS_PROPERTY_NAME`      |
 | `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 CSS lengths/percentages.                                                          | `VIEW_INSET`             |

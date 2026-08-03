@@ -8,7 +8,8 @@
       "@/*": ["./src/*"],
       "@wix/interact/web": ["../../packages/interact/src/web"],
       "@wix/interact/react": ["../../packages/interact/src/react"],
-      "@wix/interact": ["../../packages/interact/src/index"]
+      "@wix/interact": ["../../packages/interact/src/index"],
+      "@wix/splittext/plugin": ["../../packages/splittext/dist/types/plugin/index"]
     }
   },
   "include": ["src"],

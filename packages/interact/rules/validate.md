@@ -233,6 +233,7 @@ Statically-detectable authoring pitfalls lifted from the trigger rule files. Eac
 | `EMPTY_STYLE_PROPERTIES`               | A state effect's `transition.styleProperties` / `transitionProperties` is `[]` (toggles nothing).                                                     | `STATE_EFFECT`           |
 | `STATE_REMOVE_WITHOUT_EFFECT_ID`       | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                                                                           | `STATE_EFFECT`           |
 | `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.                                     | `RECOMMENDED_FILL`       |
+| `RECOMMENDED_FILL_BACKWARDS`           | A `viewEnter` + `once` named/keyframe effect targeting another element or using a same-element delay omits `fill: 'backwards'` or `'both'`.           | `RECOMMENDED_FILL`       |
 | `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).                                            | `POINTER_AXIS`           |
 | `INVALID_CSS_PROPERTY_NAME`            | A keyframe or state-effect property name is neither camelCase nor kebab-case (both casings are accepted; this one cannot be normalized).              | `CSS_PROPERTY_NAME`      |
 | `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 whitespace-separated CSS lengths/percentages.                                                                   | `VIEW_INSET`             |
@@ -277,6 +278,7 @@ const ExperienceSchema = z.object({
 - `InteractConfigSchema` is `.strict()` — unrecognized top-level keys produce `SCHEMA_UNRECOGNIZED_KEYS`.
 - `InteractConfigSchema` carries a `.transform()`, so a successful `.parse()` returns the config augmented with an internal `warnings` array; `validateInteractConfig` consumes that for you.
 - `customEffect` and function-valued `offsetEasing` are accepted as opaque functions (`z.custom<Function>`) — they are not deep-validated, so JS-authored configs with function fields validate correctly.
+- Interactions and effects accept `$`-prefixed plugin fields (e.g. `$splitText`) — config routed to plugins registered via `Interact.use()`. Interaction/effect schemas use `.catchall(z.unknown())` + a key check instead of `.strict()`: `$`-prefixed fields are accepted with opaque values (validate has no knowledge of any plugin's shape), while any non-prefixed unknown key is still reported as `SCHEMA_UNRECOGNIZED_KEYS` (typo detection preserved). The top-level `InteractConfigSchema` stays `.strict()`.
 
 ---
 

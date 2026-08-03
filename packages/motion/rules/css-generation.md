@@ -180,7 +180,7 @@ effect: **`iterations: 0` on the options ⇒ `infinite` in the generated CSS; `u
 
 ## Relationship to `@wix/interact`'s `generate()`
 
-`@wix/interact` builds its own `generate(config, useFirstChild)` on top of this primitive to emit
+`@wix/interact` builds its own `generate(config, options?)` on top of this primitive to emit
 **complete** page CSS: `@keyframes`, animation/transition custom properties, `view-timeline`
 declarations, state-selector rules, coordinated-list aggregation, and — critically —
 **FOUC-prevention initial rules** that hide `viewEnter` + `once` entrance targets until the animation

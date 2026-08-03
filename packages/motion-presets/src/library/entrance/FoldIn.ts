@@ -1,5 +1,5 @@
 import type { EffectFourDirections, FoldIn, TimeAnimationOptions } from '../../types';
-import { parseDirection, toKeyframeValue } from '../../utils';
+import { parseDirection, toKeyframeValue, getEntranceFill } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 export function getNames(_: TimeAnimationOptions) {
@@ -52,6 +52,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ...options,
       easing: 'quadOut',
       name: fadeIn,
+      fill: getEntranceFill(options),
       custom: {},
       keyframes: [{ offset: 0, opacity: 0 }],
     },
@@ -59,6 +60,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ...options,
       easing,
       name: foldIn,
+      fill: getEntranceFill(options),
       custom,
       keyframes: [
         {

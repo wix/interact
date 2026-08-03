@@ -122,8 +122,10 @@ referenced entry and may override any of them (`key`, `duration`, `easing`,
 ```
 
 **`fill` guidance:** use `'both'` for scroll/pointer-driven and for toggling
-hover/click (`alternate`/`repeat`/`state`). Use `'backwards'` for `viewEnter` +
-`once` entrances when source ≠ target (see [CSS generation & FOUC](#css-generation--fouc)).
+hover/click (`alternate`/`repeat`/`state`). Entrance presets default to
+`'backwards'`. Set `fill: 'backwards'` explicitly for `viewEnter` + `once`
+`keyframeEffect` entrances. Use `'both'` when the final keyframe must persist
+after the animation (see [CSS generation & FOUC](#css-generation--fouc)).
 
 **`composite`:** `'replace'` (default) overwrites prior values; `'add'`
 concatenates transform/filter functions; `'accumulate'` sums matching function args
@@ -343,7 +345,7 @@ container.
 
 ## CSS generation & FOUC
 
-`generate(config, useFirstChild = true)` returns a complete CSS string for **all**
+`generate(config, options?)` returns a complete CSS string for **all**
 interactions: `@keyframes`, animation/transition custom properties, native
 `view-timeline` declarations for `viewProgress`, state-selector rules, coordinated
 list aggregation, and FOUC initial rules.
@@ -359,15 +361,20 @@ const css = generate(config, true); // true for web; false for vanilla/React
 
 **`useFirstChild`:** `true` for the **web** (`<interact-element>`) entry point —
 selectors target `:first-child`; `false` for **vanilla** and **React**. The default
-is `true`, so vanilla/React callers must pass `false` explicitly.
+is `true`, so vanilla/React callers must pass `false` explicitly. Pass it as a bare
+boolean (`generate(config, false)`) or in the options bag
+(`generate(config, { useFirstChild: false })`); the bag also carries `plugins`,
+a map of plugin name → SSR style generator for `$<name>` config fields.
 
 **FOUC prevention (viewEnter + once):** For entrance animations where source and
-target are the **same** element, `generate()` emits initial rules that hide the
-target until its animation starts (gated by `:not([data-interact-enter])`). When
-source ≠ target, `generate()` emits **no** hiding rules for the targets — so set
-`fill: 'backwards'` on the effect to prevent FOUC. This matters most with motion-presets
-`namedEffect`s. For `repeat`/`alternate`/`state`, inline the
-starting keyframe and use `fill: 'both'`. `viewProgress` needs no FOUC rules.
+target are the **same** element, `generate()` emits author-important initial rules
+that hide the target and neutralize transforms until its animation starts (gated
+by `:not([data-interact-enter])`). When source ≠ target, `generate()` emits **no**
+hiding rules for the targets. In both cases, set `fill: 'backwards'` on every
+`viewEnter` + `once` animation effect so any `delay` holds the first keyframe
+after the entrance marker is set. Use `'both'` when the final keyframe must
+persist. Entrance presets default to `backwards`. For `repeat`/`alternate`/`state`,
+inline the starting keyframe and use `fill: 'both'`. `viewProgress` needs no FOUC rules.
 
 For when and where to emit this CSS, follow the canonical static/pre-rendered
 policy in `references/integration-recipes.md`.
@@ -402,7 +409,7 @@ import { add, remove, generate } from '@wix/interact';
 
 add(element: HTMLElement, key?: string): void;  // key defaults to element.dataset.interactKey
 remove(key: string): void;                       // unbind everything for a key
-generate(config: InteractConfig, useFirstChild?: boolean): string;
+generate(config: InteractConfig, options?: boolean | { useFirstChild?: boolean; plugins?: InteractPluginStyles }): string;
 ```
 
 **`Interact.setup(options)`:**

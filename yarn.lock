@@ -1358,7 +1358,8 @@ __metadata:
     "@types/react": "npm:^18.3.2"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    "@wix/interact": "npm:^2.5.4"
+    "@wix/interact": "npm:^2.5.5"
+    "@wix/splittext": "npm:^0.1.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     typescript: "npm:^5.9.3"
@@ -1373,7 +1374,7 @@ __metadata:
     "@types/react": "npm:^18.3.2"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
-    "@wix/interact": "npm:^2.5.4"
+    "@wix/interact": "npm:^2.5.5"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-markdown: "npm:^9.0.1"
@@ -1389,8 +1390,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@wix/interact-playground@workspace:apps/playground"
   dependencies:
-    "@wix/interact": "npm:^2.5.4"
-    "@wix/motion-presets": "npm:^1.0.3"
+    "@wix/interact": "npm:^2.5.5"
+    "@wix/motion-presets": "npm:^1.0.4"
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
   languageName: unknown
@@ -1401,14 +1402,14 @@ __metadata:
   resolution: "@wix/interact-validate@workspace:packages/interact-validate"
   dependencies:
     "@vitest/coverage-v8": "npm:^4.0.14"
-    "@wix/interact": "npm:^2.5.4"
+    "@wix/interact": "npm:^2.5.5"
     rimraf: "npm:^6.0.1"
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
     vitest: "npm:^4.0.14"
     zod: "npm:^4.0.0"
   peerDependencies:
-    "@wix/interact": ^2.5.4
+    "@wix/interact": ^2.5.5
   languageName: unknown
   linkType: soft
 
@@ -1418,7 +1419,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/interact@npm:^2.5.4, @wix/interact@workspace:packages/interact":
+"@wix/interact@npm:^2.5.5, @wix/interact@workspace:packages/interact":
   version: 0.0.0-use.local
   resolution: "@wix/interact@workspace:packages/interact"
   dependencies:
@@ -1428,7 +1429,7 @@ __metadata:
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
     "@vitest/coverage-v8": "npm:^4.0.14"
-    "@wix/motion": "npm:^2.1.7"
+    "@wix/motion": "npm:^2.1.8"
     fastdom: "npm:^1.0.12"
     fizban: "npm:^0.7.2"
     jsdom: "npm:^24.0.0"
@@ -1450,12 +1451,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/motion-presets@npm:^1.0.3, @wix/motion-presets@workspace:packages/motion-presets":
+"@wix/motion-presets@npm:^1.0.4, @wix/motion-presets@workspace:packages/motion-presets":
   version: 0.0.0-use.local
   resolution: "@wix/motion-presets@workspace:packages/motion-presets"
   dependencies:
     "@vitest/coverage-v8": "npm:^4.0.14"
-    "@wix/motion": "npm:^2.1.7"
+    "@wix/motion": "npm:^2.1.8"
     rimraf: "npm:^6.0.1"
     typescript: "npm:^5.9.3"
     vite: "npm:^7.2.2"
@@ -1463,7 +1464,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/motion@npm:^2.1.7, @wix/motion@workspace:packages/motion":
+"@wix/motion@npm:^2.1.8, @wix/motion@workspace:packages/motion":
   version: 0.0.0-use.local
   resolution: "@wix/motion@workspace:packages/motion"
   dependencies:
@@ -1481,7 +1482,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wix/splittext@workspace:packages/splittext":
+"@wix/splittext@npm:^0.1.0, @wix/splittext@workspace:packages/splittext":
   version: 0.0.0-use.local
   resolution: "@wix/splittext@workspace:packages/splittext"
   dependencies:
@@ -1491,6 +1492,7 @@ __metadata:
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-react": "npm:^4.3.4"
     "@vitest/coverage-v8": "npm:^4.0.14"
+    "@wix/interact": "npm:^2.5.5"
     jsdom: "npm:^24.0.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
