@@ -15,6 +15,7 @@ import { PLUGIN_FIELD_PREFIX } from '../types';
 import {
   kebabCustomProp,
   camelToKebabCase,
+  getStateStyleProperties,
   transitionEffectToTransitionsList,
   getFullPredicateByType,
   getSelectorCondition,
@@ -307,7 +308,7 @@ function effectToCSS(
   } else if (transition || transitionProperties) {
     usedProperties = ['transition'];
 
-    const properties = transition?.styleProperties || transitionProperties || [];
+    const properties = getStateStyleProperties(effect);
     const transitions = transitionEffectToTransitionsList(effect);
 
     // declaring transition custom property

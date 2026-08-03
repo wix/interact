@@ -616,6 +616,7 @@ type TransitionProperty = StyleProperty & TransitionOptions;
 
 **Properties:**
 
+- `name` - CSS property name, in kebab-case (`'background-color'`) or camelCase (`'backgroundColor'`). Both are accepted and normalized to kebab-case in the generated CSS; custom properties (`--*`) are used verbatim and are case-sensitive.
 - `stateAction` - How to modify the element's CSS state on event triggers (`hover`, `click`, `activate`, `interest`):
   - `'toggle'` (default) - Hover: adds on enter, removes on leave. Click: toggles on each click.
   - `'add'` - Add the effect state; hover leave will NOT auto-remove.

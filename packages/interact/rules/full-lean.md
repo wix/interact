@@ -469,7 +469,7 @@ Used with `hover` / `click` triggers. Set `stateAction` on the effect to control
 }
 ```
 
-CSS property names use **camelCase** (e.g. `'backgroundColor'`, `'borderRadius'`).
+CSS property names may be written in **kebab-case** (`'background-color'`) or **camelCase** (`'backgroundColor'`) — both are accepted and normalized. Prefer kebab-case here: these properties are written into CSS. CSS custom properties (`--*`) are used verbatim and are case-sensitive.
 
 ### Animation Payloads
 
@@ -505,7 +505,7 @@ Exactly one MUST be provided per time-based or scroll/pointer-driven effect:
    ```
 
    - `[EFFECT_NAME]` — unique string identifier for this effect.
-   - `[KEYFRAMES]` — array of keyframe objects using standard WAAPI format (e.g. `[{ opacity: '0' }, { opacity: '1' }]`). Property names in camelCase.
+   - `[KEYFRAMES]` — array of keyframe objects using standard WAAPI format (e.g. `[{ opacity: '0' }, { opacity: '1' }]`). Property names may be camelCase or kebab-case (both are accepted and normalized); prefer camelCase, which is what WAAPI uses. `offset`, `easing` and `composite` keep their WAAPI meaning, so the CSS `offset` property is written as `cssOffset`.
 
 3. **`customEffect`** — imperative update callback. Use only when CSS-based effects cannot express the desired behavior (e.g., animating SVG attributes, canvas, text content).
 

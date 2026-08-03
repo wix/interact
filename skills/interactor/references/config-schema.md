@@ -142,7 +142,7 @@ names like `easeOutCubic`/`elasticOut` are **not** valid and silently no-op.)
 | Payload                               | Shape                                     | Use for                                                                                                                |
 | :------------------------------------ | :---------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
 | `namedEffect`                         | `{ type: string, ...presetOptions }`      | Prebuilt preset (preferred). Do **not** guess option names — omit unknowns.                                            |
-| `keyframeEffect`                      | `{ name: string, keyframes: Keyframe[] }` | Inline custom keyframes (WAAPI; camelCase props).                                                                      |
+| `keyframeEffect`                      | `{ name: string, keyframes: Keyframe[] }` | Inline custom keyframes (WAAPI; camelCase or kebab-case props).                                                        |
 | `customEffect`                        | `(element, progress) => void`             | Imperative; only when CSS can't express it (SVG/canvas/text). `progress` is `0–1`, or the 2D object for `pointerMove`. |
 | `transition` / `transitionProperties` | see [State effect](#state-effect)         | CSS-state toggle (transitions) on hover/click.                                                                         |
 
@@ -235,7 +235,9 @@ For `hover` / `click` CSS-state toggles. Set `stateAction` (not `triggerType`).
 }
 ```
 
-CSS property names are **camelCase** (`backgroundColor`, `borderRadius`). If both
+CSS property names may be **kebab-case** (`background-color`) or **camelCase**
+(`backgroundColor`) — both are accepted and normalized; prefer kebab-case here,
+since these are written into CSS. Custom properties (`--*`) are verbatim. If both
 `transition` and `transitionProperties` are given, per-property entries win for
 overlapping properties.
 

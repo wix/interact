@@ -339,7 +339,7 @@ For authoring custom `keyframeEffect` animations (`{ name: string; keyframes: Ke
   - Optional `offset` (0–1, step 0.01) — shown for 3+ keyframes
   - CSS property/value rows with text inputs
   - Property name autocomplete via `<datalist>` (opacity, transform, background-color, clip-path, filter, border-radius, etc.)
-  - Kebab-case input auto-converts to camelCase on blur (Web Animations API requirement)
+  - Kebab-case input auto-converts to camelCase on blur (display preference — Interact accepts either casing)
   - Add/remove property rows (min 1 per keyframe)
 - **Add Keyframe** button — appends an empty keyframe
 - Remove keyframe button (min 1 keyframe enforced)

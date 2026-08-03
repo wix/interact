@@ -1,5 +1,5 @@
-import { getEasing } from '@wix/motion';
-import type { Condition, CreateTransitionCSSParams, StateEffect } from './types';
+import { getEasing, toCSSPropertyName } from '@wix/motion';
+import type { Condition, CreateTransitionCSSParams, StateEffect, StyleProperty } from './types';
 
 export function roundNumber(num: number, precision = 2): number {
   return parseFloat(num.toFixed(precision));
@@ -55,6 +55,23 @@ export function generateId() {
   );
 }
 
+/**
+ * Resolves the style properties of a state effect - `transition.styleProperties` wins
+ * when both are set - with property names normalized to the kebab-case form CSS expects.
+ * Property names may be authored in either camelCase or kebab-case.
+ */
+export function getStateStyleProperties(
+  transitionEffect: Pick<StateEffect, 'transition' | 'transitionProperties'>,
+): StyleProperty[] {
+  const { transition, transitionProperties } = transitionEffect;
+  const properties = transition?.styleProperties || transitionProperties || [];
+
+  return properties.map((property) => ({
+    ...property,
+    name: toCSSPropertyName(property.name),
+  }));
+}
+
 export function transitionEffectToTransitionsList(transitionEffect: StateEffect) {
   let { transition, transitionProperties } = transitionEffect;
   let transitions: string[] = [];
@@ -76,7 +93,7 @@ export function transitionEffectToTransitionsList(transitionEffect: StateEffect)
       } else {
         transitions = transition.styleProperties.map(
           (styleProperty) =>
-            `${styleProperty.name} ${duration}ms ${getEasing(
+            `${toCSSPropertyName(styleProperty.name)} ${duration}ms ${getEasing(
               easing || 'ease',
             )}${delay ? ` ${delay}ms` : ''}`,
         );
@@ -88,7 +105,7 @@ export function transitionEffectToTransitionsList(transitionEffect: StateEffect)
         ?.filter((property) => property.duration)
         .map(
           (property) =>
-            `${property.name} ${property.duration}ms ${
+            `${toCSSPropertyName(property.name)} ${property.duration}ms ${
               getEasing(property.easing) || 'ease'
             }${property.delay ? ` ${property.delay}ms` : ''}`,
         ) || [];
@@ -112,10 +129,9 @@ export function createTransitionCSS({
     transitionProperties,
   });
 
-  const styleProperties =
-    (transition?.styleProperties || transitionProperties)?.map(
-      (property) => `${property.name}: ${property.value};`,
-    ) || [];
+  const styleProperties = getStateStyleProperties({ transition, transitionProperties }).map(
+    (property) => `${property.name}: ${property.value};`,
+  );
   const escapedKey = key.replace(/"/g, "'");
 
   // Build selectors, applying condition if present
