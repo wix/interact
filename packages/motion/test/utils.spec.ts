@@ -185,4 +185,10 @@ describe('utils/normalizeKeyframes()', () => {
 
     expect(normalizeKeyframes(once)).toBe(once);
   });
+
+  test('does not resolve property names off Object.prototype', () => {
+    const keyframes = [{ constructor: 'red', toString: 'blue', valueOf: '1' }];
+
+    expect(normalizeKeyframes(keyframes)).toBe(keyframes);
+  });
 });
