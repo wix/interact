@@ -43,13 +43,28 @@ export class Interact {
     [listContainer: string]: { [interactionId: string]: boolean };
   };
   controllers: Set<IInteractionController>;
-  static forceReducedMotion: boolean = false;
+  static forceReducedMotion?: boolean = undefined;
   static allowA11yTriggers: boolean = true;
   static instances: Interact[] = [];
   static controllerCache = new Map<string, IInteractionController>();
   static sequenceCache = new Map<string, Sequence>();
   static elementSequenceMap = new WeakMap<HTMLElement, Set<Sequence>>();
   private static plugins = new Map<string, InteractPlugin>();
+  private static _prefersReducedMotion?: MediaQueryList;
+
+  static get reducedMotion(): boolean {
+    if (Interact.forceReducedMotion !== undefined) {
+      return Interact.forceReducedMotion;
+    }
+
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return false;
+    }
+
+    Interact._prefersReducedMotion ??= window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    return Interact._prefersReducedMotion.matches;
+  }
 
   constructor() {
     this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
@@ -190,6 +205,7 @@ export class Interact {
     Interact.controllerCache.clear();
     Interact.sequenceCache.clear();
     Interact.elementSequenceMap = new WeakMap();
+    Interact._prefersReducedMotion = undefined;
   }
 
   static setup(options: {

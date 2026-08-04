@@ -454,7 +454,7 @@ function _attachSequenceTriggers(
       { triggerType: sequenceConfig.triggerType } as Effect,
       interaction.params || {},
       {
-        reducedMotion: Interact.forceReducedMotion,
+        reducedMotion: Interact.reducedMotion,
         selectorCondition,
         animation: sequence,
         allowA11yTriggers: Interact.allowA11yTriggers,
@@ -537,11 +537,11 @@ function _processSequences(
       );
 
       Interact.addToSequence(cacheKey, animationGroupArgs, indices, {
-        reducedMotion: Interact.forceReducedMotion,
+        reducedMotion: Interact.reducedMotion,
       });
 
       const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
-        reducedMotion: Interact.forceReducedMotion,
+        reducedMotion: Interact.reducedMotion,
       });
 
       const selectorCondition = getSelectorCondition(
@@ -565,7 +565,7 @@ function _processSequences(
     }
 
     const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
-      reducedMotion: Interact.forceReducedMotion,
+      reducedMotion: Interact.reducedMotion,
     });
 
     const selectorCondition = getSelectorCondition(
@@ -649,14 +649,14 @@ function _processSequencesForTarget(
         const indices = _resolveListItemIndices(targetController, listContainer!, elements);
 
         Interact.addToSequence(cacheKey, animationGroupArgs, indices, {
-          reducedMotion: Interact.forceReducedMotion,
+          reducedMotion: Interact.reducedMotion,
         });
 
         return true;
       }
 
       const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
-        reducedMotion: Interact.forceReducedMotion,
+        reducedMotion: Interact.reducedMotion,
       });
 
       const selectorCondition = getSelectorCondition(
@@ -867,7 +867,7 @@ function addInteraction<T extends TriggerType>(
   }
 
   TRIGGER_TO_HANDLER_MODULE_MAP[trigger]?.add(source, target, effect, options, {
-    reducedMotion: Interact.forceReducedMotion,
+    reducedMotion: Interact.reducedMotion,
     targetController,
     selectorCondition,
     allowA11yTriggers: Interact.allowA11yTriggers,

@@ -50,7 +50,7 @@ describe('interact plugin bridge', () => {
     vi.restoreAllMocks();
     vi.clearAllMocks();
     Interact.destroy();
-    Interact.forceReducedMotion = false;
+    Interact.forceReducedMotion = undefined;
     Interact.allowA11yTriggers = false;
   });
 
