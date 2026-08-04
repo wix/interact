@@ -7,7 +7,8 @@ import { getSequence, createAnimationGroups } from '@wix/motion';
 import { addListItems } from '../src/core/add';
 import { removeListItems } from '../src/core/remove';
 
-vi.mock('@wix/motion', () => {
+vi.mock('@wix/motion', async () => {
+  const { toCSSPropertyName } = await vi.importActual<typeof import('@wix/motion')>('@wix/motion');
   const mockSequence = {
     play: vi.fn(),
     cancel: vi.fn(),
@@ -31,6 +32,7 @@ vi.mock('@wix/motion', () => {
     getEasing: vi.fn((v: string) => v),
     getAnimation: vi.fn(),
     registerEffects: vi.fn(),
+    toCSSPropertyName,
     getSequence: vi.fn().mockReturnValue(mockSequence),
     createAnimationGroups: vi.fn().mockReturnValue([]),
   };

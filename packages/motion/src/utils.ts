@@ -4,6 +4,98 @@ export function getCssUnits(unit: 'percentage' | string) {
   return unit === 'percentage' ? '%' : unit || 'px';
 }
 
+// A vendor-prefixed property is `webkitTransform` as an IDL attribute and
+// `-webkit-transform` as a CSS property - the leading dash has to be restored.
+const VENDOR_PREFIX = /^(webkit|moz|ms|o)(?=[A-Z])/;
+
+// Keyframe keys that are not plain CSS property names. `offset`, `easing` and
+// `composite` keep their WAAPI meaning, so the CSS `offset` shorthand is only
+// reachable as `cssOffset`.
+// null-prototype so that keys like `constructor` or `toString` don't resolve
+// to an inherited member
+const KEYFRAME_CSS_TO_WAAPI: Record<string, string> = Object.assign(Object.create(null), {
+  float: 'cssFloat',
+  'animation-timing-function': 'easing',
+  'animation-composition': 'composite',
+});
+
+/**
+ * Converts a CSS property name to its kebab-case form, for use in CSS text.
+ * Already kebab-case names are returned as-is, and custom properties (`--*`)
+ * are left untouched since they are case-sensitive.
+ */
+export function toCSSPropertyName(name: string): string {
+  if (name.startsWith('--')) {
+    return name;
+  }
+
+  const prefixed = VENDOR_PREFIX.test(name) ? `-${name}` : name;
+
+  return prefixed.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+}
+
+/**
+ * Converts a CSS property name to its camelCase form, for use with the Web
+ * Animations API. Already camelCase names are returned as-is, and custom
+ * properties (`--*`) are left untouched since they are case-sensitive.
+ */
+export function toWAAPIPropertyName(name: string): string {
+  if (name.startsWith('--') || !name.includes('-')) {
+    return name;
+  }
+
+  return name.replace(/^-/, '').replace(/-([a-z])/g, (_, char: string) => char.toUpperCase());
+}
+
+function toWAAPIKeyframeKey(name: string): string {
+  return KEYFRAME_CSS_TO_WAAPI[name] || toWAAPIPropertyName(name);
+}
+
+function keyframeNeedsNormalizing(frame: Record<string, any>): boolean {
+  for (const name in frame) {
+    if (Object.hasOwn(frame, name) && toWAAPIKeyframeKey(name) !== name) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Normalizes keyframe property names to the camelCase form WAAPI expects, so
+ * that both camelCase and kebab-case are valid input. Returns the same array
+ * (and the same frame objects) when everything is already normalized, without
+ * allocating - the common case is keyframes that are already camelCase.
+ */
+export function normalizeKeyframes<T extends Record<string, any>>(keyframes: T[]): T[] {
+  if (!Array.isArray(keyframes)) {
+    return keyframes;
+  }
+
+  let normalized: T[] | undefined;
+
+  keyframes.forEach((frame, index) => {
+    if (!frame || typeof frame !== 'object' || !keyframeNeedsNormalizing(frame)) {
+      return;
+    }
+
+    // first frame that needs normalizing - copy the array, keeping every other frame by reference
+    normalized ??= keyframes.slice();
+
+    const normalizedFrame: Record<string, unknown> = {};
+
+    for (const name in frame) {
+      if (Object.hasOwn(frame, name)) {
+        normalizedFrame[toWAAPIKeyframeKey(name)] = frame[name];
+      }
+    }
+
+    normalized[index] = normalizedFrame as T;
+  });
+
+  return normalized || keyframes;
+}
+
 export function getEasing(easing?: keyof typeof cssEasings | string): string {
   return easing ? cssEasings[easing as keyof typeof cssEasings] || easing : cssEasings.linear;
 }

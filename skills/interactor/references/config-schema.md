@@ -142,7 +142,7 @@ names like `easeOutCubic`/`elasticOut` are **not** valid and silently no-op.)
 | Payload                               | Shape                                     | Use for                                                                                                                |
 | :------------------------------------ | :---------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
 | `namedEffect`                         | `{ type: string, ...presetOptions }`      | Prebuilt preset (preferred). Do **not** guess option names — omit unknowns.                                            |
-| `keyframeEffect`                      | `{ name: string, keyframes: Keyframe[] }` | Inline custom keyframes (WAAPI; camelCase props).                                                                      |
+| `keyframeEffect`                      | `{ name: string, keyframes: Keyframe[] }` | Inline custom keyframes (WAAPI; camelCase or kebab-case props).                                                        |
 | `customEffect`                        | `(element, progress) => void`             | Imperative; only when CSS can't express it (SVG/canvas/text). `progress` is `0–1`, or the 2D object for `pointerMove`. |
 | `transition` / `transitionProperties` | see [State effect](#state-effect)         | CSS-state toggle (transitions) on hover/click.                                                                         |
 
@@ -235,7 +235,9 @@ For `hover` / `click` CSS-state toggles. Set `stateAction` (not `triggerType`).
 }
 ```
 
-CSS property names are **camelCase** (`backgroundColor`, `borderRadius`). If both
+CSS property names may be **kebab-case** (`background-color`) or **camelCase**
+(`backgroundColor`) — both are accepted and normalized; prefer kebab-case here,
+since these are written into CSS. Custom properties (`--*`) are verbatim. If both
 `transition` and `transitionProperties` are given, per-property entries win for
 overlapping properties.
 
@@ -343,7 +345,7 @@ container.
 
 ## CSS generation & FOUC
 
-`generate(config, useFirstChild = true)` returns a complete CSS string for **all**
+`generate(config, options?)` returns a complete CSS string for **all**
 interactions: `@keyframes`, animation/transition custom properties, native
 `view-timeline` declarations for `viewProgress`, state-selector rules, coordinated
 list aggregation, and FOUC initial rules.
@@ -359,7 +361,10 @@ const css = generate(config, true); // true for web; false for vanilla/React
 
 **`useFirstChild`:** `true` for the **web** (`<interact-element>`) entry point —
 selectors target `:first-child`; `false` for **vanilla** and **React**. The default
-is `true`, so vanilla/React callers must pass `false` explicitly.
+is `true`, so vanilla/React callers must pass `false` explicitly. Pass it as a bare
+boolean (`generate(config, false)`) or in the options bag
+(`generate(config, { useFirstChild: false })`); the bag also carries `plugins`,
+a map of plugin name → SSR style generator for `$<name>` config fields.
 
 **FOUC prevention (viewEnter + once):** For entrance animations where source and
 target are the **same** element, `generate()` emits author-important initial rules
@@ -404,7 +409,7 @@ import { add, remove, generate } from '@wix/interact';
 
 add(element: HTMLElement, key?: string): void;  // key defaults to element.dataset.interactKey
 remove(key: string): void;                       // unbind everything for a key
-generate(config: InteractConfig, useFirstChild?: boolean): string;
+generate(config: InteractConfig, options?: boolean | { useFirstChild?: boolean; plugins?: InteractPluginStyles }): string;
 ```
 
 **`Interact.setup(options)`:**

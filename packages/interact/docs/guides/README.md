@@ -40,6 +40,10 @@ Working with dynamic lists, list containers, staggered animations, and automatic
 
 Coordinate multiple effects with staggered timing using easing-driven delay offsets. Covers inline and reusable sequences, cross-element orchestration, `listContainer` integration, dynamic add/remove, and conditional sequences.
 
+### 🔌 [Plugins](./plugins.md)
+
+Extend Interact with external code via `Interact.use()` and `$`-prefixed config fields. Covers the generic bridge, the plugin contract and cleanup lifecycle, type-safe config, and using `@wix/splittext` to split text for staggered reveals.
+
 ## Learning Path
 
 If you're new to `@wix/interact`, we recommend following the guides in this order:

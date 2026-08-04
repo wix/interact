@@ -216,6 +216,23 @@ describe('motion.ts', () => {
         });
       });
 
+      test('should normalize kebab-case keyframe properties of a keyframeEffect', () => {
+        const animationOptions: AnimationOptions = {
+          keyframeEffect: {
+            name: 'mixed-casing',
+            keyframes: [{ 'background-color': 'red' }, { backgroundColor: 'blue' }],
+          },
+          duration: 1000,
+        };
+
+        const result = getCSSAnimation('test-target', animationOptions);
+
+        expect(result[0].keyframes).toEqual([
+          { backgroundColor: 'red' },
+          { backgroundColor: 'blue' },
+        ]);
+      });
+
       test('should handle view-progress trigger animations', () => {
         const animationOptions: AnimationOptions = {
           namedEffect: {
@@ -786,6 +803,37 @@ describe('motion.ts', () => {
           expect.arrayContaining([expect.objectContaining({ opacity: expect.any(Number) })]),
         );
         expect(result).toBe(mockAnimationGroup);
+
+        (AnimationGroup as Mock).mockRestore();
+      });
+
+      test('should normalize kebab-case keyframe properties to camelCase for WAAPI', async () => {
+        const animationOptions: AnimationOptions = {
+          keyframeEffect: {
+            name: 'mixed-casing',
+            keyframes: [
+              { 'background-color': 'red', borderRadius: '0px' },
+              { 'background-color': 'blue', borderRadius: '8px' },
+            ],
+          },
+          duration: 1000,
+        };
+
+        const { AnimationGroup } = await import('../src/AnimationGroup');
+        (AnimationGroup as Mock).mockImplementation(function () {
+          return mockAnimationGroup;
+        });
+        const fastdom = (await import('fastdom')).default;
+
+        getWebAnimation(mockElement, animationOptions);
+
+        const mutateCallback = (fastdom.mutate as Mock).mock.calls[0][0];
+        mutateCallback();
+
+        expect(mockKeyframeEffect.setKeyframes).toHaveBeenCalledWith([
+          { backgroundColor: 'red', borderRadius: '0px' },
+          { backgroundColor: 'blue', borderRadius: '8px' },
+        ]);
 
         (AnimationGroup as Mock).mockRestore();
       });

@@ -152,7 +152,7 @@ Use `keyframeEffect` or `namedEffect` when the viewEnter should play an animatio
   - `'state'` — resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`). Use separate source and target.
 - `[VISIBILITY_THRESHOLD]` — optional. Number between 0–1 indicating how much of the source element must be visible to trigger (e.g. `0.3` = 30%).
 - `[VIEWPORT_INSETS]` — optional. String adjusting the viewport detection area (e.g. `'-100px'` extends it, `'50px'` shrinks it).
-- `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
+- `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names may be camelCase or kebab-case (both accepted); prefer camelCase, which is what WAAPI uses.
 - `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
 - `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.
 - `[FILL_MODE]` — `'both'` for `triggerType: 'alternate'`, `'repeat'`, or `'state'`. For `triggerType: 'once'`: use `'backwards'` for entrance, so the first keyframe applies during any `delay` (use `'both'` when the final keyframe must persist after the animation).

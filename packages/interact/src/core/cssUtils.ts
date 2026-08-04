@@ -5,6 +5,7 @@ import type {
   CSSCoordinatedLists,
   CSSRuleData,
 } from '../types';
+import { toCSSPropertyName } from '@wix/motion';
 import {
   roundNumber,
   getFullPredicateByType,
@@ -25,7 +26,7 @@ export function keyframePropertyToCSS(key: string): string {
   if (key === 'composite') {
     return 'animation-composition';
   }
-  return key.replace(/([A-Z])/g, '-$1').toLowerCase();
+  return toCSSPropertyName(key);
 }
 
 export function interpolateKeyframesOffsets(keyframes: Keyframe[]): Keyframe[] {
@@ -107,15 +108,8 @@ export function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
 }
 
 export function CSSRuleToString(rule: CSSRuleData): string {
-  const {
-    key,
-    childSelector,
-    declarations,
-    media,
-    states,
-    selectorCondition,
-    dataInteractEnterSelector,
-  } = rule;
+  const { key, childSelector, declarations, media, states, selectorCondition, selectorSuffix } =
+    rule;
   if (!declarations.length) {
     return '';
   }
@@ -135,8 +129,8 @@ export function CSSRuleToString(rule: CSSRuleData): string {
     selector = `${selector} ${childSelector}`;
   }
 
-  if (dataInteractEnterSelector) {
-    selector = `${selector}${dataInteractEnterSelector}`;
+  if (selectorSuffix) {
+    selector = `${selector}${selectorSuffix}`;
   }
 
   // maybe nesting is simpler? -

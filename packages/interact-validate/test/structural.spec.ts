@@ -97,6 +97,88 @@ describe('validateStructural', () => {
     expect(result.errors[0].path).toEqual(['interactions']);
   });
 
+  it('accepts an interaction-level $-prefixed plugin field without inspecting its value', () => {
+    const result = validateStructural({
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'viewEnter',
+          $splitText: { container: '.title', type: 'chars', anything: [1, 2] },
+          effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
+        },
+      ],
+    });
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('accepts an effect-level $-prefixed plugin field', () => {
+    const result = validateStructural({
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'viewEnter',
+          effects: [
+            {
+              namedEffect: { type: 'FadeIn' },
+              duration: 400,
+              $splitText: { container: '.heading' },
+            },
+          ],
+        },
+      ],
+    });
+    expect(result.ok).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('accepts a $-prefixed field with any value type (opaque)', () => {
+    const result = validateStructural({
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'viewEnter',
+          $anyPlugin: 'a-primitive-is-fine',
+          effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
+        },
+      ],
+    });
+    expect(result.ok).toBe(true);
+  });
+
+  it('rejects a non-prefixed unknown key on an interaction (must be $-prefixed)', () => {
+    const result = validateStructural({
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'viewEnter',
+          splitText: { container: '.title' }, // missing `$` prefix → unrecognized
+          effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
+        },
+      ],
+    });
+    expect(result.ok).toBe(false);
+    const err = result.errors.find((e) => e.code === 'SCHEMA_UNRECOGNIZED_KEYS');
+    expect(err).toBeDefined();
+    expect(err?.path).toEqual(['interactions', 0]);
+  });
+
+  it('treats a bare "$" (prefix only) as an unrecognized key', () => {
+    const result = validateStructural({
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'viewEnter',
+          $: { container: '.title' }, // prefix with no plugin name
+          effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400 }],
+        },
+      ],
+    });
+    expect(result.ok).toBe(false);
+    const err = result.errors.find((e) => e.code === 'SCHEMA_UNRECOGNIZED_KEYS');
+    expect(err).toBeDefined();
+  });
+
   it('emits SCHEMA_TOO_SMALL when condition predicate is an empty string', () => {
     const result = validateStructural({
       interactions: [],
