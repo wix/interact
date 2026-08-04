@@ -7,7 +7,8 @@ import type { InteractConfig } from '../src/types';
 import type { NamedEffect } from '@wix/motion';
 
 // Mock @wix/motion module
-vi.mock('@wix/motion', () => {
+vi.mock('@wix/motion', async () => {
+  const { toCSSPropertyName } = await vi.importActual<typeof import('@wix/motion')>('@wix/motion');
   const mock: any = {
     getWebAnimation: vi.fn().mockReturnValue({
       play: vi.fn(),
@@ -29,6 +30,7 @@ vi.mock('@wix/motion', () => {
       });
     }),
     registerEffects: vi.fn(),
+    toCSSPropertyName,
   };
 
   return mock;

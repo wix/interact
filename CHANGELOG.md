@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/splittext
 
+### [0.2.0] - unreleased
+
+#### Added
+
+- `@wix/splittext/plugin` entry points: `splitTextPlugin` for `Interact.use()`, and `splitTextStyle` for `generate()` (#275)
+- `hideUntilReady`: `splitTextStyle` hides the container until the runtime split sets `data-splittext-ready` (#275)
+
 ### [0.1.2] - 2026-07-14
 
 #### Added
@@ -25,6 +32,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact-validate
+
+### [0.2.0] - unreleased
+
+#### Added
+
+- Plugin fields: `$`-prefixed keys on interactions and effects are accepted; every other unknown key is still reported as `SCHEMA_UNRECOGNIZED_KEYS` (#275)
+
+#### Changed
+
+- `KEYFRAME_PROP_NOT_CAMEL_CASE` (rule category `KEYFRAME_STYLE`) is replaced by `INVALID_CSS_PROPERTY_NAME` (rule category `CSS_PROPERTY_NAME`): both camelCase and kebab-case CSS property names are valid input, so only names that are neither are reported, and the check now covers `transition.styleProperties` / `transitionProperties` names in addition to `keyframeEffect` keyframes
+- `severityOverrides` keyed on `KEYFRAME_STYLE` are now silently ignored. Rename the key to `CSS_PROPERTY_NAME` to keep an override in effect
+
+### [0.1.2] - 2026-07-29
+
+#### Added
+
+- `RECOMMENDED_FILL_BACKWARDS` semantic check nudging `viewEnter` + `once` keyframe/named effects without FOUC hiding rules to set `fill: 'backwards'` or `'both'` (#277)
+
+#### Changed
+
+- README rule catalog updated for `RECOMMENDED_FILL_BACKWARDS` (#277)
 
 ### [0.1.1] - 2026-07-14
 
@@ -53,16 +81,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
-### [2.6.0] - 2026-07-28
+### [2.6.0] - unreleased
 
 #### Added
 
+- Generic plugin bridge: `Interact.use(name, plugin)` registers a plugin, and a `$<name>` field on an interaction or effect (#275)
+- `generate()` accepts a `plugins` option — a map of plugin name → build-time style generator (#275)
 - Reduced motion is now detected from the browser: `Interact.forceReducedMotion` reads `prefers-reduced-motion` unless it was set explicitly, and the browser setting is re-read as each interaction is bound
 - `generate()` accepts a third `options` argument and emits `@media (prefers-reduced-motion: reduce)` overrides by default — animations that run once collapse to `1ms` and land on their end state, perpetual and scroll-driven animations are turned off, transitions are dropped. Pass `{ reducedMotion: false }` to opt out
 
 #### Changed
 
+- `generate(config, options?)`: the second argument now accepts an options bag — `{ useFirstChild?, plugins? }` — exported as the `GenerateOptions` (#275)
+- CSS property names may be authored in either camelCase or kebab-case in `transition.styleProperties`, `transitionProperties` and `keyframeEffect.keyframes`; state-effect properties are normalized to kebab-case for the generated CSS (state rules and the `transition:` shorthand) and keyframes to camelCase for WAAPI
 - `Interact.forceReducedMotion = false` now means "ignore the browser setting and animate" instead of "use the default"; assign `undefined` to go back to browser detection
+
+#### Fixed
+
+- camelCase property names in `transition.styleProperties` / `transitionProperties` are now normalized to kebab-case
+- CSS custom properties in keyframes (e.g. `--fooBar`) are no longer lower-cased when emitted into `@keyframes`
+- Vendor-prefixed keyframe properties (e.g. `webkitTextStroke`) now emit a valid CSS property name (`-webkit-text-stroke`)
+
+### [2.5.5] - 2026-07-29
+
+#### Fixed
+
+- Entrance FOUC prevention: `generate()` initial rules now emit `!important` on transform neutralization declarations so they override inline styles until the animation starts (#277)
+
+#### Changed
+
+- `viewEnter` rules and docs recommend `fill: 'backwards'` (or `'both'`) for entrance animations; CSS rule declarations support an optional `important` flag (#277)
 
 ### [2.5.4] - 2026-07-16
 
@@ -270,11 +318,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Added
 
+- `toCSSPropertyName()`, `toWAAPIPropertyName()` and `normalizeKeyframes()` utilities for converting CSS property names between their CSS and WAAPI forms
 - `getCSSAnimation()` accepts a `{ reducedMotion }` option so generated CSS can express the same reduced-motion behavior as the Web Animations path — animations that run once collapse to a `1ms` duration, while perpetual and scrub-driven animations are skipped
 
 #### Changed
 
+- Keyframe property names may be authored in either camelCase or kebab-case and are normalized to WAAPI's camelCase on every animation path — `keyframeEffect`, presets, and effects registered via `registerEffects()`
 - The reduced-motion rule shared by the Web Animations and CSS paths lives in a single `getReducedMotionOptions()` helper
+
+### [2.1.8] - 2026-07-29
+
+#### Added
+
+- `getWebAnimation()` accepts SVG elements (and any `Element`) as keyframe targets, not only `HTMLElement` (#280)
+
+#### Changed
+
+- `getCSSAnimation()` delay serialization: use `0ms` when `delay` is `0` instead of previously defaulting to `1ms` (#277)
 
 ### [2.1.7] - 2026-05-29
 
@@ -353,6 +413,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion-presets
+
+### [1.0.4] - 2026-07-29
+
+#### Changed
+
+- Entrance presets default to `fill: 'backwards'` via `getEntranceFill()` unless overridden (#277)
 
 ### [1.0.3] - 2026-05-29
 

@@ -4,6 +4,7 @@ import type {
   ScrubTransitionEasing,
   MotionAnimationOptions,
 } from '@wix/motion';
+import type { PluginFields } from './plugins';
 
 type Fill = 'none' | 'forwards' | 'backwards' | 'both';
 
@@ -85,7 +86,7 @@ export type EffectBase = {
   conditions?: string[];
   selector?: string;
   effectId?: string;
-};
+} & PluginFields; // `$<name>` fields route to plugins registered via `Interact.use()`
 
 export type EffectRef = EffectBase & { effectId: string };
 

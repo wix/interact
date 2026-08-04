@@ -1,5 +1,6 @@
 import type { TriggerType, TriggerParams } from './triggers';
 import type { Effect, EffectRef, EffectProperty, TimeAnimationTriggerType } from './effects';
+import type { PluginFields } from './plugins';
 
 export type Condition = {
   type: 'media' | 'container' | 'selector';
@@ -36,7 +37,7 @@ export type InteractionTrigger = {
   params?: TriggerParams;
   conditions?: string[];
   selector?: string;
-};
+} & PluginFields; // `$<name>` fields route to plugins registered via `Interact.use()`
 
 export type Interaction = InteractionTrigger & {
   effects?: ((Effect | EffectRef) & { interactionId?: string })[];

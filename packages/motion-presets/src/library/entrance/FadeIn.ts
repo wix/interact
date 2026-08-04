@@ -1,5 +1,7 @@
 import { TimeAnimationOptions } from '../../types';
 
+import { getEntranceFill } from '../../utils';
+
 export function getNames(_: TimeAnimationOptions) {
   return ['motion-fadeIn'];
 }
@@ -15,6 +17,7 @@ export function style(options: TimeAnimationOptions) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       easing: 'sineInOut',
       keyframes: [{ offset: 0, opacity: 0 }],
     },

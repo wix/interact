@@ -37,6 +37,20 @@ describe('keyframePropertyToCSS', () => {
     expect(keyframePropertyToCSS('color')).toBe('color');
     expect(keyframePropertyToCSS('transform')).toBe('transform');
   });
+
+  it('should leave kebab-case properties unchanged', () => {
+    expect(keyframePropertyToCSS('background-color')).toBe('background-color');
+    expect(keyframePropertyToCSS('-webkit-text-stroke')).toBe('-webkit-text-stroke');
+  });
+
+  it('should leave custom properties untouched', () => {
+    expect(keyframePropertyToCSS('--fooBar')).toBe('--fooBar');
+    expect(keyframePropertyToCSS('--foo-bar')).toBe('--foo-bar');
+  });
+
+  it('should restore the leading dash of vendor-prefixed properties', () => {
+    expect(keyframePropertyToCSS('webkitTextStroke')).toBe('-webkit-text-stroke');
+  });
 });
 
 describe('interpolateKeyframesOffsets', () => {
@@ -221,10 +235,24 @@ describe('CSSRuleToString', () => {
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
-  it('should dataInteractEnterSelector when provided', () => {
+  it('should serialize important declarations when flagged', () => {
     const rule: CSSRuleData = {
       key: 'my-el',
-      dataInteractEnterSelector: ':not([data-interact-enter="done"])',
+      selectorSuffix: ':not([data-interact-enter])',
+      declarations: [
+        { name: 'visibility', value: 'hidden', important: true },
+        { name: 'transform', value: 'none', important: true },
+      ],
+    };
+    const expected =
+      '[data-interact-key="my-el"]:not([data-interact-enter]) {\nvisibility: hidden !important;\ntransform: none !important;\n}';
+    expect(CSSRuleToString(rule)).toEqual(expected);
+  });
+
+  it('should add selectorSuffix when provided', () => {
+    const rule: CSSRuleData = {
+      key: 'my-el',
+      selectorSuffix: ':not([data-interact-enter="done"])',
       declarations: [{ name: 'opacity', value: '0' }],
     };
     const expected =
@@ -268,7 +296,7 @@ describe('CSSRuleToString', () => {
     const rule: CSSRuleData = {
       key: 'my-el',
       childSelector: '.child',
-      dataInteractEnterSelector: ':not([data-interact-enter="done"])',
+      selectorSuffix: ':not([data-interact-enter="done"])',
       states: ['hover'],
       media: '(min-width: 1024px)',
       declarations: [

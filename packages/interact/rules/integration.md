@@ -273,7 +273,7 @@ Define reusable sequences in `InteractConfig.sequences` and reference by `sequen
 
 ## CSS Generation & FOUC Prevention
 
-`generate(config, useFirstChild)` produces complete CSS for **all** interactions in the config — `@keyframes`, animation/transition custom properties, `view-timeline` declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules.
+`generate(config, options?)` produces complete CSS for **all** interactions in the config — `@keyframes`, animation/transition custom properties, `view-timeline` declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules.
 
 **Static site policy:** For static or pre-rendered HTML (agent-generated pages,
 SSG, static export), prefer calling `generate()` for the complete config at
@@ -284,7 +284,7 @@ browser before its `Interact.create()` call. If splitting is impractical,
 generating the complete CSS at runtime is an acceptable fallback. Call
 `registerEffects()` before each `generate()` when using `namedEffect`.
 
-The `useFirstChild` argument tells Interact whether to render `:first-child` selectors for custom-element (`web`) integration: `true` for **web**, `false` for **react** and **vanilla**.
+The `useFirstChild` option tells Interact whether to render `:first-child` selectors for custom-element (`web`) integration: `true` for **web**, `false` for **react** and **vanilla**. Pass it either as a bare boolean (`generate(config, true)`) or in the options bag (`generate(config, { useFirstChild: true })`) — the bag is also where `plugins` goes.
 
 ```javascript
 import { generate } from '@wix/interact/web';
@@ -344,12 +344,12 @@ See [viewenter.md](./viewenter.md) for full details.
 
 Each `Interact.create(config)` call returns an instance. Keep a reference if you need to add/remove elements dynamically (vanilla JS) or to destroy a specific instance. Call `Interact.destroy()` to tear down all instances at once (e.g. on page navigation).
 
-| Method / Property                            | Description                                                                                                                                                                 |
-| :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `generate(config, useFirstChild?, options?)` | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML. `options.reducedMotion` (default `true`) emits `prefers-reduced-motion` overrides. |
-| `Interact.create(config)`                    | Initialize with a config. Returns the instance. Multiple configs create separate instances.                                                                                 |
-| `Interact.registerEffects(presets)`          | Register named effect presets before `generate()` and `create`. Required for `namedEffect`.                                                                                 |
-| `Interact.destroy()`                         | Tear down all instances.                                                                                                                                                    |
-| `Interact.forceReducedMotion`                | `boolean` — detected from the browser's `prefers-reduced-motion` setting. Set `true`/`false` to override it, `undefined` to go back to detection.                           |
-| `Interact.allowA11yTriggers`                 | `boolean` — enable accessibility triggers (`interest`, `activate`). Default: `false`.                                                                                       |
-| `Interact.setup(options)`                    | Configure global defaults for scroll/pointer/viewEnter trigger params. Call before `create`.                                                                                |
+| Method / Property                   | Description                                                                                                                                                                        |
+| :---------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `generate(config, options?)`        | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML. `options` = `{ useFirstChild?, plugins? }`, or a bare boolean for legacy `useFirstChild`. |
+| `Interact.create(config)`           | Initialize with a config. Returns the instance. Multiple configs create separate instances.                                                                                        |
+| `Interact.registerEffects(presets)` | Register named effect presets before `generate()` and `create`. Required for `namedEffect`.                                                                                        |
+| `Interact.destroy()`                | Tear down all instances.                                                                                                                                                           |
+| `Interact.forceReducedMotion`       | `boolean` — force reduced-motion behavior regardless of OS setting. Default: `false`.                                                                                              |
+| `Interact.allowA11yTriggers`        | `boolean` — enable accessibility triggers (`interest`, `activate`). Default: `false`.                                                                                              |
+| `Interact.setup(options)`           | Configure global defaults for scroll/pointer/viewEnter trigger params. Call before `create`.                                                                                       |

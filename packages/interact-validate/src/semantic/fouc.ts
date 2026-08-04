@@ -11,7 +11,7 @@ import { RETRIGGER_TYPES } from '../types';
 const DISCRETE_TRIGGERS = ['hover', 'click', 'interest', 'activate'];
 const HIT_AREA_TRANSFORM = /(translate|scale|matrix)/;
 
-function targetsSameElementAsSource(owner: AnyInteraction, effect: AnyEffect): boolean {
+export function targetsSameElementAsSource(owner: AnyInteraction, effect: AnyEffect): boolean {
   if (effect.key !== undefined && effect.key !== owner.key) return false;
   const refiners = ['selector', 'listContainer', 'listItemSelector'] as const;
   for (const field of refiners) {

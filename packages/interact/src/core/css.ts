@@ -8,10 +8,14 @@ import type {
   ListCustomProps,
   CSSCoordinatedLists,
   CSSRuleData,
+  InteractPluginStyles,
+  GenerateOptions,
 } from '../types';
+import { PLUGIN_FIELD_PREFIX } from '../types';
 import {
   kebabCustomProp,
   camelToKebabCase,
+  getStateStyleProperties,
   transitionEffectToTransitionsList,
   getFullPredicateByType,
   getSelectorCondition,
@@ -25,24 +29,12 @@ import { keyframesToCSS, CSSRuleToString, buildListsRule } from './cssUtils';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { getCSSAnimation, MotionKeyframeEffect, TriggerVariant } from '@wix/motion';
 
-/**
- * Options for CSS generation.
- *
- * `reducedMotion` (default `true`) emits `@media (prefers-reduced-motion: reduce)` rules that
- * neutralize animations and transitions for users who asked for reduced motion. Pass `false` only
- * when the surface deliberately opts out of the browser setting - the runtime counterpart of
- * `Interact.forceReducedMotion = false`.
- */
-export type GenerateOptions = { reducedMotion?: boolean };
-
-type CSSContext = { useFirstChild: boolean; reducedMotion: boolean };
-
 export const DEFAULT_INITIAL = [
   { name: 'visibility', value: 'hidden' },
-  { name: 'transform', value: 'none' },
-  { name: 'translate', value: 'none' },
-  { name: 'scale', value: 'none' },
-  { name: 'rotate', value: 'none' },
+  { name: 'transform', value: 'none', important: true },
+  { name: 'translate', value: 'none', important: true },
+  { name: 'scale', value: 'none', important: true },
+  { name: 'rotate', value: 'none', important: true },
 ];
 
 const LIST_ANIMATION_PROPERTY_NAMES = [
@@ -193,7 +185,7 @@ function triggerToCSS(
   interaction: Interaction,
   configConditions: Record<string, Condition>,
   triggerId: string,
-  { useFirstChild }: CSSContext,
+  { useFirstChild }: GenerateOptions,
 ): CSSRuleData {
   const { key, conditions } = interaction;
 
@@ -222,13 +214,45 @@ function triggerToCSS(
   };
 }
 
+/**
+ * Collects build-time plugin styles for one effect config object. For every
+ * `$`-prefixed field with a matching generator in `plugins`, calls the generator with the raw
+ * value and a context scoped to the element, and return CSS rule(s) data. Interact
+ * never inspects the field value — it only routes it to the plugin (same contract as `create()`).
+ */
+function collectFieldPluginStyles(
+  scope: 'interaction' | 'effect',
+  source: Record<string, unknown>,
+  key: string,
+  media: string,
+  plugins: InteractPluginStyles,
+): CSSRuleData[] {
+  const rules = [];
+  for (const pluginName of Object.keys(plugins)) {
+    const pluginField = `${PLUGIN_FIELD_PREFIX}${pluginName}`;
+    if (!(pluginField in source)) {
+      continue;
+    }
+
+    rules.push(
+      ...plugins[pluginName](source[pluginField], {
+        key,
+        scope,
+        config: source,
+      }).map((data) => ({ ...data, key, media })),
+    );
+  }
+  return rules;
+}
+
 function effectToCSS(
   effect: ResolvedEffect,
   configConditions: Record<string, Condition>,
   customProps: ListCustomProps,
   trigger: TriggerVariant,
-  context: CSSContext,
+  context: GenerateOptions,
   childSelector?: string,
+  plugins?: InteractPluginStyles,
 ): {
   rules: CSSRuleData[];
   keyframes: MotionKeyframeEffect[];
@@ -264,6 +288,10 @@ function effectToCSS(
 
   let usedProperties: ListPropertyName[] = [];
 
+  if (plugins) {
+    rules.push(...collectFieldPluginStyles('effect', effect, key, media, plugins));
+  }
+
   if (namedEffect || keyframeEffect) {
     usedProperties = [...LIST_ANIMATION_PROPERTY_NAMES];
 
@@ -296,14 +324,14 @@ function effectToCSS(
       : [];
 
     if (initial) {
-      // declare animation and composition custom properties with initial dependent on data-motion-enter
+      // declare animation custom properties with initial dependent on data-motion-enter
       rules.push({
         key,
         media,
         selectorCondition,
         childSelector,
         declarations: DEFAULT_INITIAL,
-        dataInteractEnterSelector: ':not([data-interact-enter])',
+        selectorSuffix: ':not([data-interact-enter])',
       });
       rules.push({
         key,
@@ -311,7 +339,7 @@ function effectToCSS(
         selectorCondition,
         childSelector,
         declarations: animationDeclarations,
-        dataInteractEnterSelector: ':not([data-interact-enter="done"])',
+        selectorSuffix: ':not([data-interact-enter="done"])',
       });
 
       if (reducedDeclarations.length) {
@@ -321,11 +349,11 @@ function effectToCSS(
           selectorCondition,
           childSelector,
           declarations: reducedDeclarations,
-          dataInteractEnterSelector: ':not([data-interact-enter="done"])',
+          selectorSuffix: ':not([data-interact-enter="done"])',
         });
       }
     } else {
-      // declare animation and composition custom properties
+      // declare animation custom properties
       declarations.push(...animationDeclarations);
 
       if (reducedDeclarations.length) {
@@ -341,7 +369,7 @@ function effectToCSS(
   } else if (transition || transitionProperties) {
     usedProperties = ['transition'];
 
-    const properties = transition?.styleProperties || transitionProperties || [];
+    const properties = getStateStyleProperties(effect);
     const transitions = transitionEffectToTransitionsList(effect);
 
     // declaring transition custom property
@@ -362,7 +390,7 @@ function effectToCSS(
       });
     }
 
-    // adding state rule using custom properties that could be overriden to implement
+    // adding state rule
     // same-interaction-cascade
     rules.push({
       key,
@@ -373,7 +401,7 @@ function effectToCSS(
       declarations: properties,
     });
   } else {
-    // setting off animation, composition and transition custom properties
+    // setting off animation custom properties
     declarations.push(
       ...LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
         name: customProps[propertyName],
@@ -392,7 +420,7 @@ function parseEffect(
   targetToCustomProps: Map<string, ListCustomProps>,
   keyframesMap: Map<string, Keyframe[]>,
   trigger: TriggerVariant,
-  context: CSSContext,
+  context: GenerateOptions,
   sequenceCustomProps?: Record<ListPropertyName, string>,
   precomputedTargetHash?: string,
 ): { rules: CSSRuleData[]; usedProperties: ListPropertyName[] } {
@@ -429,6 +457,7 @@ function parseEffect(
     trigger,
     context,
     childSelector,
+    context.plugins,
   );
 
   // update keyframes map
@@ -444,7 +473,7 @@ function parseSequence(
   targetToCustomProps: Map<string, ListCustomProps>,
   keyframesMap: Map<string, Keyframe[]>,
   trigger: TriggerVariant,
-  context: CSSContext,
+  context: GenerateOptions,
   targetUsedProperties?: Map<string, Set<ListPropertyName>>,
 ): CSSRuleData[] {
   // in a similar manner to how we treat different interactions and use lists to concatenate them
@@ -518,9 +547,9 @@ function parseInteraction(
   interactionIdx: number,
   targetToLists: Map<string, CSSCoordinatedLists>,
   keyframesMap: Map<string, Keyframe[]>,
-  context: CSSContext,
+  context: GenerateOptions,
 ): CSSRuleData[] {
-  const { effects = [], sequences = [] } = interaction;
+  const { key, conditions, effects = [], sequences = [] } = interaction;
   const configConditions = config.conditions || {};
 
   // targetHash to custom-property per each coordinated-list type property for current interaction
@@ -537,7 +566,15 @@ function parseInteraction(
     .map((effect) => resolveEffectForCSS(effect, interaction, config))
     .filter((effect) => effect !== null);
 
-  const cssRules = [];
+  const cssRules = context.plugins
+    ? collectFieldPluginStyles(
+        'interaction',
+        interaction,
+        key,
+        getFullPredicateByType(conditions, configConditions, 'media'),
+        context.plugins,
+      )
+    : [];
 
   const { trigger } = interaction;
   const motionTrigger = {
@@ -600,22 +637,31 @@ function parseInteraction(
 
 // ----- EndPoints -----
 
+/**
+ * Normalizes `generate()`'s single optional argument, which is either the legacy `useFirstChild`
+ * boolean or an options bag.
+ */
+function normalizeGenerateOptions(options: boolean | GenerateOptions = {}): GenerateOptions {
+  const { useFirstChild = true, plugins, reducedMotion = true } =
+    typeof options === 'boolean' ? { useFirstChild: options, plugins: undefined, reducedMotion: true } : options;
+
+  return { useFirstChild, plugins, reducedMotion };
+}
+
 export function _generate(
   config: InteractConfig,
-  useFirstChild: boolean = true,
-  options: GenerateOptions = {},
+  options?: boolean | GenerateOptions,
 ): {
   cssRules: CSSRuleData[];
   keyframes: Map<string, Keyframe[]>;
 } {
+  const context: GenerateOptions = normalizeGenerateOptions(options);
+
   // targetHash to lists of custom-properties for each coordinated-list type property
   // to be populated when parsing interactions
   const targetToLists = new Map<string, CSSCoordinatedLists>();
   const keyframes = new Map<string, Keyframe[]>();
-  const context: CSSContext = {
-    useFirstChild,
-    reducedMotion: options.reducedMotion ?? true,
-  };
+
 
   const cssRules = config.interactions.flatMap((interaction, interactionIdx) =>
     parseInteraction(config, interaction, interactionIdx, targetToLists, keyframes, context),
@@ -632,16 +678,19 @@ export function _generate(
  * Generates CSS for animations from an InteractConfig.
  *
  * @param config - The interact configuration containing effects and interactions
- * @param useFirstChild - Whether to use the first child selector (default: true)
- * @param options - `reducedMotion: false` skips the `prefers-reduced-motion` rules (default: `true`)
+ * @param options - Either a {@link GenerateOptions} bag or — for backwards compatibility — a bare
+ *   boolean used as `useFirstChild`:
+ *
+ *   - `useFirstChild` - Whether to use the first child selector (default: true)
+ *   - `plugins` - Optional map of plugin name → SSR style generator. For every `$<name>` field in
+ *       the config, the matching generator is called with the field's (opaque) value and a context;
+ *       its returned CSS is appended. Used e.g. to hide pre-split text for FOUC prevention.
+ *       Interact never inspects the field value — mirroring `create()`/`use()`.
+ *
  * @returns string containing all of the CSS rules needed for time-based animations
  */
-export function generate(
-  config: InteractConfig,
-  useFirstChild: boolean = true,
-  options: GenerateOptions = {},
-): string {
-  const { cssRules, keyframes } = _generate(config, useFirstChild, options);
+export function generate(config: InteractConfig, options?: boolean | GenerateOptions): string {
+  const { cssRules, keyframes } = _generate(config, options);
 
   const css = [
     ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),

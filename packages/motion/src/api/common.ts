@@ -8,7 +8,7 @@ import type {
   TriggerVariant,
   UnitLengthPercentage,
 } from '../types';
-import { getCssUnits, getEasing } from '../utils';
+import { getCssUnits, getEasing, normalizeKeyframes } from '../utils';
 import fastdom from 'fastdom';
 import { getRegisteredEffect } from './registry';
 
@@ -119,8 +119,12 @@ function getEffectsData(
       }
     }
 
+    // keyframe property names may be authored in camelCase or kebab-case,
+    // WAAPI only understands camelCase
+    const keyframes = normalizeKeyframes(effect.keyframes);
+
     return {
-      effect,
+      effect: keyframes === effect.keyframes ? effect : { ...effect, keyframes },
       options: effectOptions,
       id: effectId && `${effectId}-${index + 1}`,
       part: effect.part,

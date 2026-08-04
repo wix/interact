@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { generate, _generate, DEFAULT_INITIAL } from '../src/core/css';
 import type { InteractConfig, CSSRuleData } from '../src/types';
 
@@ -435,19 +435,18 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      const initialRule = cssRules.find(
-        (r) => r.dataInteractEnterSelector === ':not([data-interact-enter])',
-      )!;
+      const initialRule = cssRules.find((r) => r.selectorSuffix === ':not([data-interact-enter])')!;
       expect(initialRule).toBeDefined();
 
-      DEFAULT_INITIAL.forEach(({ name, value }) => {
+      DEFAULT_INITIAL.forEach(({ name, value, important }) => {
         const decl = initialRule.declarations.find((d) => d.name === name);
         expect(decl, `expected DEFAULT_INITIAL declaration: ${name}`).toBeDefined();
         expect(decl!.value).toBe(value);
+        expect(decl!.important).toBe(important);
       });
 
       const animationRule = cssRules.find(
-        (r) => r.dataInteractEnterSelector === ':not([data-interact-enter="done"])',
+        (r) => r.selectorSuffix === ':not([data-interact-enter="done"])',
       )!;
       const animDeclOnInitial = findDecl(animationRule.declarations, (d) =>
         isAnimationProp(d.name),
@@ -479,7 +478,7 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      expect(cssRules.every((r) => !r.dataInteractEnterSelector)).toBe(true);
+      expect(cssRules.every((r) => !r.selectorSuffix)).toBe(true);
 
       const effectRule = cssRules.find((r) => r.declarations.some((d) => isAnimationProp(d.name)))!;
       expect(effectRule).toBeDefined();
@@ -499,7 +498,7 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      expect(cssRules.every((r) => !r.dataInteractEnterSelector)).toBe(true);
+      expect(cssRules.every((r) => !r.selectorSuffix)).toBe(true);
     });
   });
 
@@ -661,7 +660,7 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      expect(cssRules.every((r) => !r.dataInteractEnterSelector)).toBe(true);
+      expect(cssRules.every((r) => !r.selectorSuffix)).toBe(true);
     });
 
     it('should emit auto duration in animation shorthand for viewProgress (SSR-safe)', () => {
@@ -804,7 +803,7 @@ describe('css._generate', () => {
       const { cssRules } = _generate(config);
 
       const initialRule = cssRules.find(
-        (r) => r.dataInteractEnterSelector === ':not([data-interact-enter="done"])',
+        (r) => r.selectorSuffix === ':not([data-interact-enter="done"])',
       )!;
       expect(initialRule).toBeDefined();
 
@@ -1159,7 +1158,7 @@ describe('css._generate', () => {
       };
 
       const { cssRules } = _generate(config);
-      const initialRule = cssRules.find((r) => r.dataInteractEnterSelector)!;
+      const initialRule = cssRules.find((r) => r.selectorSuffix)!;
 
       expect(initialRule).toBeDefined();
       expect(initialRule.media).toContain('min-width: 1024px');
@@ -1589,7 +1588,7 @@ describe('css._generate', () => {
     const REDUCE_MEDIA = '(prefers-reduced-motion: reduce)';
 
     const getReducedRules = (config: InteractConfig, options?: { reducedMotion?: boolean }) =>
-      _generate(config, true, options).cssRules.filter((r) => r.media?.includes(REDUCE_MEDIA));
+      _generate(config, options).cssRules.filter((r) => r.media?.includes(REDUCE_MEDIA));
 
     const timeConfig = (
       effect: Partial<InteractConfig['interactions'][number]['effects']>[number] = {},
@@ -1693,7 +1692,7 @@ describe('css._generate', () => {
       const baseRule = animationRules.find((r) => !r.media?.includes(REDUCE_MEDIA))!;
 
       expect(reducedRule.childSelector).toBe(baseRule.childSelector);
-      expect(reducedRule.dataInteractEnterSelector).toBe(baseRule.dataInteractEnterSelector);
+      expect(reducedRule.selectorSuffix).toBe(baseRule.selectorSuffix);
       // the override comes after the rule it overrides, so it wins on source order
       expect(cssRules.indexOf(reducedRule)).toBeGreaterThan(cssRules.indexOf(baseRule));
     });
@@ -1730,7 +1729,167 @@ describe('css._generate', () => {
 
     it('should emit no reduced-motion rules when opted out', () => {
       expect(getReducedRules(timeConfig(), { reducedMotion: false })).toHaveLength(0);
-      expect(generate(timeConfig(), true, { reducedMotion: false })).not.toContain(REDUCE_MEDIA);
+      expect(generate(timeConfig(), { reducedMotion: false })).not.toContain(REDUCE_MEDIA);
+    });
+  });
+  describe('options argument', () => {
+    const config: InteractConfig = {
+      effects: {},
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'click',
+          effects: [{ effectId: 'e1' }],
+        },
+      ],
+    };
+
+    it('should default useFirstChild to true when no options are passed', () => {
+      const { cssRules } = _generate(config);
+
+      expect(cssRules.find((r) => r.childSelector === '> :first-child')).toBeDefined();
+    });
+
+    it('should treat a boolean options argument as the legacy useFirstChild', () => {
+      expect(
+        _generate(config, false).cssRules.find((r) => r.childSelector === '> :first-child'),
+      ).toBeUndefined();
+      expect(
+        _generate(config, true).cssRules.find((r) => r.childSelector === '> :first-child'),
+      ).toBeDefined();
+    });
+
+    it('should read useFirstChild from an options object', () => {
+      expect(
+        _generate(config, { useFirstChild: false }).cssRules.find(
+          (r) => r.childSelector === '> :first-child',
+        ),
+      ).toBeUndefined();
+      expect(
+        _generate(config, { useFirstChild: true }).cssRules.find(
+          (r) => r.childSelector === '> :first-child',
+        ),
+      ).toBeDefined();
+    });
+
+    it('should default useFirstChild to true when the options object omits it', () => {
+      const { cssRules } = _generate(config, { plugins: {} });
+
+      expect(cssRules.find((r) => r.childSelector === '> :first-child')).toBeDefined();
+    });
+  });
+
+  describe('plugin styles (generate `plugins` option)', () => {
+    it('appends CSS from an interaction-level $-field generator, without inspecting the value', () => {
+      const calls: Array<{ value: unknown; ctx: any }> = [];
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'hero',
+            trigger: 'viewEnter',
+            $splitText: { container: '.title', type: 'chars' },
+            effects: [{ effectId: 'fadeIn', namedEffect: { type: 'fadeIn' } }],
+          },
+        ],
+      };
+
+      const result = generate(config, {
+        plugins: {
+          splitText: (value, ctx) => {
+            calls.push({ value, ctx });
+            const { container } = value as { container: string };
+            return [
+              {
+                declarations: [{ name: 'visibility', value: 'hidden' }],
+                selectorSuffix: ` ${container}`,
+              },
+            ];
+          },
+        },
+      });
+
+      expect(calls).toHaveLength(1);
+      expect(calls[0].value).toEqual({ container: '.title', type: 'chars' });
+      expect(calls[0].ctx.key).toBe('hero');
+      expect(calls[0].ctx.scope).toBe('interaction');
+      expect(result).toContain('[data-interact-key="hero"] .title {\nvisibility: hidden;\n}');
+    });
+
+    it('does nothing when no plugins option is passed', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'hero',
+            trigger: 'viewEnter',
+            $splitText: { container: '.title' },
+            effects: [{ effectId: 'fadeIn', namedEffect: { type: 'fadeIn' } }],
+          },
+        ],
+      };
+
+      expect(() => generate(config)).not.toThrow();
+      expect(generate(config)).not.toContain('.title');
+    });
+
+    it('skips $-fields with no matching generator', () => {
+      const splitText = vi.fn(() => [
+        {
+          declarations: [{ name: 'name', value: 'value' }],
+          selectorSuffix: '.x',
+        },
+      ]);
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'hero',
+            trigger: 'viewEnter',
+            $unknownPlugin: { foo: 1 },
+            effects: [{ effectId: 'fadeIn', namedEffect: { type: 'fadeIn' } }],
+          },
+        ],
+      };
+
+      const result = generate(config, { plugins: { splitText } });
+      expect(splitText).not.toHaveBeenCalled();
+      expect(result).not.toContain('.x {');
+    });
+
+    it('routes effect-level $-fields with the resolved target key and effect scope', () => {
+      const seen: Array<{ key: string; scope: string }> = [];
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'source',
+            trigger: 'viewEnter',
+            effects: [
+              {
+                key: 'target',
+                $splitText: { container: '.h' },
+                effectId: 'fadeIn',
+                namedEffect: { type: 'fadeIn' },
+              },
+            ],
+          },
+        ],
+      };
+
+      generate(config, {
+        plugins: {
+          splitText: (_value, ctx) => {
+            seen.push({ key: ctx.key, scope: ctx.scope });
+            return [];
+          },
+        },
+      });
+
+      expect(seen).toContainEqual({
+        key: 'target',
+        scope: 'effect',
+      });
     });
   });
 });

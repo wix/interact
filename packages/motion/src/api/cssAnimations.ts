@@ -31,7 +31,7 @@ function getAnimationAsCSS(
   const isAutoDuration = duration === 'auto';
 
   return `${animationName} ${isAutoDuration ? 'auto' : `${duration}ms`}${
-    isAutoDuration ? ' ' : ` ${delay || 1}ms `
+    isAutoDuration ? ' ' : ` ${delay ?? 0}ms `
   }${easing}${fill && fill !== 'none' ? ` ${fill}` : ''} ${
     !iterations || iterations === Infinity ? 'infinite' : iterations
   }${direction === 'normal' ? '' : ` ${direction}`} ${isRunning ? '' : 'paused'}`;
