@@ -19,11 +19,17 @@ import {
   transitionEffectToTransitionsList,
   getFullPredicateByType,
   getSelectorCondition,
+  getMotionPreferenceMedia,
 } from '../utils';
 import { getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
 import { getElementHash, getUniqueEncodedHash } from './utilities';
-import { keyframesToCSS, CSSRuleToString, buildListsRule } from './cssUtils';
+import {
+  keyframesToCSS,
+  CSSRuleToString,
+  buildListsRule,
+  buildReducedMotionRule,
+} from './cssUtils';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { getCSSAnimation, MotionKeyframeEffect, TriggerVariant } from '@wix/motion';
 
@@ -148,7 +154,7 @@ function triggerToCSS(
 ): CSSRuleData {
   const { key, conditions } = interaction;
 
-  const media = getFullPredicateByType(conditions, configConditions, 'media');
+  const media = getMotionPreferenceMedia('no-preference', conditions, configConditions);
   const selectorCondition = getSelectorCondition(conditions, configConditions);
 
   const childSelector = getSelector(interaction, {
@@ -162,8 +168,6 @@ function triggerToCSS(
     media,
     selectorCondition,
     childSelector,
-    // invalidating earlier cascaded custom properties affected from earlier transitionEffects
-    // to implement same-interaction-cascade
     declarations: [
       {
         name: 'view-timeline',
@@ -311,6 +315,8 @@ function effectToCSS(
     const properties = getStateStyleProperties(effect);
     const transitions = transitionEffectToTransitionsList(effect);
 
+    // adding 'no-preference' media query to transition rule
+    rules[0].media = getMotionPreferenceMedia('no-preference', conditions, configConditions);
     // declaring transition custom property
     declarations.push({
       name: customProps.transition,
@@ -608,9 +614,16 @@ export function _generate(
     ),
   );
 
-  // for each target add unconditional rule for the coordinated lists from interactions targeting it
+  // for each target add unconditional rule for the coordinated lists from interactions targeting it,
+  // followed by the single rule that reduced motion needs for that target
   targetToLists.forEach((lists) => {
     cssRules.push(buildListsRule(lists));
+
+    const reducedMotionRule = buildReducedMotionRule(lists);
+
+    if (reducedMotionRule) {
+      cssRules.push(reducedMotionRule);
+    }
   });
 
   return { keyframes, cssRules };

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { generate, _generate, DEFAULT_INITIAL } from '../src/core/css';
+import { createTransitionCSS } from '../src/utils';
 import type { InteractConfig, CSSRuleData } from '../src/types';
 
 describe('css.generate', () => {
@@ -1740,6 +1741,173 @@ describe('css._generate', () => {
         key: 'target',
         scope: 'effect',
       });
+    });
+  });
+
+  describe('reduced motion', () => {
+    const REDUCE = '(prefers-reduced-motion: reduce)';
+    const NO_PREFERENCE = '(prefers-reduced-motion: no-preference)';
+    const keyframeEffect = (name: string) => ({
+      name,
+      keyframes: [{ opacity: '0' }, { opacity: '1' }],
+    });
+
+    it('should collapse every animation on a target with one rule, after its list rule', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'kf1',
+                duration: 500,
+                delay: 200,
+                iterations: 2,
+                keyframeEffect: keyframeEffect('finiteAnim'),
+              },
+              {
+                effectId: 'kf2',
+                duration: 500,
+                iterations: 0,
+                keyframeEffect: keyframeEffect('ongoingAnim'),
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+      const reduceRules = cssRules.filter((r) => r.media === REDUCE);
+
+      expect(reduceRules).toHaveLength(1);
+      // `animation-iteration-count` keeps the ongoing effect from looping at 1ms
+      expect(reduceRules[0].declarations).toEqual([
+        { name: 'animation-duration', value: '1ms' },
+        { name: 'animation-delay', value: '0s' },
+        { name: 'animation-iteration-count', value: '1' },
+      ]);
+
+      // must come after the `animation` shorthand it overrides
+      const listIdx = cssRules.findIndex((r) => r.declarations.some((d) => d.name === 'animation'));
+      expect(cssRules.indexOf(reduceRules[0])).toBeGreaterThan(listIdx);
+    });
+
+    it('should gate the scroll-driven timeline on no-preference, leaving timelines untouched', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: { desktop: { type: 'media', predicate: 'min-width: 900px' } },
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            conditions: ['desktop'],
+            effects: [{ effectId: 'kf1', keyframeEffect: keyframeEffect('scrollAnim') }],
+          },
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              { effectId: 'kf2', duration: 500, keyframeEffect: keyframeEffect('clickAnim') },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+      const triggerRule = cssRules.find((r) =>
+        r.declarations.some((d) => d.name === 'view-timeline'),
+      )!;
+      const reduceRule = cssRules.find((r) => r.media === REDUCE)!;
+
+      // with no `view-timeline` to resolve, the scroll-driven animation has no timeline at all
+      expect(triggerRule.media).toBe(`(min-width: 900px) and ${NO_PREFERENCE}`);
+      // so nothing has to single out the scrub interaction's timeline on the shared target
+      expect(reduceRule.declarations.every((d) => !isTimelineProp(d.name))).toBe(true);
+    });
+
+    it('should gate a state effect transition on no-preference, composing its conditions', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: { desktop: { type: 'media', predicate: 'min-width: 900px' } },
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'trans1',
+                conditions: ['desktop'],
+                transition: {
+                  styleProperties: [{ name: 'opacity', value: '1' }],
+                  duration: 500,
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+      const transitionRule = cssRules.find((r) =>
+        r.declarations.some((d) => isTransitionProp(d.name)),
+      )!;
+      const stateRule = cssRules.find((r) => r.states?.includes('trans1'))!;
+
+      expect(transitionRule.media).toBe(`(min-width: 900px) and ${NO_PREFERENCE}`);
+      expect(cssRules.some((r) => r.media?.includes(REDUCE))).toBe(false);
+      expect(stateRule.media).toBe('(min-width: 900px)');
+      expect(stateRule.declarations).toEqual([{ name: 'opacity', value: '1' }]);
+    });
+
+    it('should never suppress an animation that owns an initial rule', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            effects: [
+              {
+                effectId: 'kf1',
+                triggerType: 'once',
+                duration: 800,
+                delay: 100,
+                iterations: 2,
+                keyframeEffect: keyframeEffect('enterAnim'),
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+      const initialRule = cssRules.find((r) => r.selectorSuffix === ':not([data-interact-enter])')!;
+
+      // the rule that hides the element must stay unconditional, so nothing may drop the
+      // animation that lets `data-interact-enter` reach `done`
+      expect(initialRule.media).toBeFalsy();
+      expect(cssRules.find((r) => r.media === REDUCE)).toBeDefined();
+      expect(
+        cssRules.some((r) =>
+          r.declarations.some(
+            (d) => (d.name === 'animation-name' || isAnimationProp(d.name)) && d.value === 'none',
+          ),
+        ),
+      ).toBe(false);
+    });
+
+    it('should gate the runtime transition path the same way', () => {
+      const result = createTransitionCSS({
+        key: 'el',
+        effectId: 'trans1',
+        transition: { styleProperties: [{ name: 'opacity', value: '1' }], duration: 200 },
+      }).join('\n');
+
+      expect(result).toContain(`@media ${NO_PREFERENCE}`);
+      expect(result).toContain('transition: opacity 200ms ease;');
+      expect(result).not.toContain('transition: none');
     });
   });
 });

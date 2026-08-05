@@ -2400,6 +2400,33 @@ describe('motion.ts', () => {
 
         (AnimationGroup as Mock).mockRestore();
       });
+
+      test('should return the CSS animation as-is when reducedMotion is true', async () => {
+        // reducedMotion is not applied to CSS animations here by design: @wix/interact's
+        // `generate()` emits `@media (prefers-reduced-motion: reduce)` rules that collapse or
+        // suppress them, which also covers SSR and no-JS
+        mockElement = {
+          id: 'test-element',
+          getAnimations: vi.fn(() => mockCSSAnimations),
+        } as any;
+
+        const animationOptions: AnimationOptions = {
+          namedEffect: { type: 'FadeIn', id: 'fade' },
+          duration: 1000,
+        };
+
+        const { AnimationGroup } = await import('../src/AnimationGroup');
+        (AnimationGroup as Mock).mockImplementation(function () {
+          return mockAnimationGroup;
+        });
+
+        const result = getAnimation(mockElement, animationOptions, undefined, true);
+
+        expect(AnimationGroup).toHaveBeenCalledWith([mockCSSAnimations[0]]);
+        expect(result).toBe(mockAnimationGroup);
+
+        (AnimationGroup as Mock).mockRestore();
+      });
     });
   });
 

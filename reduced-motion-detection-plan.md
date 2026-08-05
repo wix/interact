@@ -1,6 +1,6 @@
 # Reduced motion in `@wix/interact` — research, findings, and plan
 
-**Status:** Phase 1 implemented (see §4 Phase 1). Phases 2–4 not started.
+**Status:** Phases 1 and 2 implemented (see §4). Phases 3–4 not started — note that the shipped docs stay wrong until Phase 4 rewrites them.
 **Date:** 2026-08-04
 **Verified against:** `origin/master` @ `84626c8` — `@wix/interact` 2.5.5, `@wix/motion` 2.1.8, `@wix/motion-presets` 1.0.4, `@wix/interact-validate` 0.1.2
 **Subject:** `Interact.forceReducedMotion` and everything downstream of it — the handler drop paths, the `@wix/motion` collapse paths, and the CSS that `generate()` emits.
@@ -108,13 +108,13 @@ The state itself still applies under `reduce`; only the tween is dropped. That i
 
 Six findings. F2, F3 and F4 are pre-existing defects independent of the detection work — but detection is not worth shipping without them, because they are the paths a production integration actually uses.
 
-### F1 — Detection does not exist (the brief)
+### F1 — Detection does not exist (the brief) — ✅ closed by Phase 1
 
 No `matchMedia('(prefers-reduced-motion: reduce)')` call anywhere in `packages/interact/src` or `packages/motion/src`. `grep -rn "prefers-reduced-motion" packages/*/src` returns exactly one hit: the `no-preference` wrapper of §1.4. Five documentation sites claim otherwise.
 
 **Impact:** the accessibility default is "ignore the user's stated preference". Every integrator has to know to write `Interact.forceReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches` themselves, and the only place that line appears is `rules/full-lean.md:42` and one line of the docs site (L2584).
 
-### F2 — `reducedMotion` is bypassed whenever the effect resolves to a CSS animation
+### F2 — `reducedMotion` is bypassed whenever the effect resolves to a CSS animation — ✅ closed by Phase 2 (in CSS, not in JS)
 
 `getElementCSSAnimation()` is called before, and independently of, the `reducedMotion` argument (`packages/motion/src/motion.ts:204`). For any `namedEffect` or `keyframeEffect`:
 
@@ -128,13 +128,13 @@ The handler then plays that group at its full authored duration.
 
 **Evidence:** traced through source. The existing motion tests cover the flag only with `getAnimations()` mocked to `[]` (`packages/motion/test/motion.spec.ts:2312-2353`, where `mockElement.getAnimations` returns `[]`); the neighbouring test is literally named _"should return a Web Animation if \*NO\* CSS animation is found"_. **The CSS-animation-found × `reducedMotion: true` combination has no test.** Tracked as audit A14.
 
-### F3 — The two state-effect CSS paths disagree
+### F3 — The two state-effect CSS paths disagree — ✅ closed by Phase 2
 
 `createTransitionCSS` (runtime, `src/utils.ts:162`) wraps `transition:` in `@media (prefers-reduced-motion: no-preference)`. `effectToCSS`'s transition branch (`generate()`, `src/core/css.ts:302-329`) declares the `--transition-*` custom property unconditionally — `grep -n "prefers-reduced" src/core/css.ts` returns nothing.
 
 **Impact:** the same config honours the preference when its CSS was produced at runtime and ignores it when the CSS was pre-generated. Tracked as audit A13.
 
-### F4 — Scroll-driven effects keep scrubbing under reduced motion when pre-generated
+### F4 — Scroll-driven effects keep scrubbing under reduced motion when pre-generated — ✅ closed by Phase 2
 
 Two things combine:
 
@@ -160,7 +160,7 @@ In practice F2 masks this today (the CSS path usually matches first and returns 
 
 **Rule this establishes:** _never suppress an effect that owns a FOUC initial rule. Collapse it._ Any reduced-motion implementation that drops entrance animations must also drop the initial rule that hides the element, or it trades a flash for a permanently blank page. Collapsing duration avoids having to reason about that at all.
 
-### F6 — The flag is read once, at attach time
+### F6 — The flag is read once, at attach time — open, Phase 3
 
 Covered as audit M8. `Interact.forceReducedMotion` must be set before `Interact.create()`; changing it later does nothing until something rebinds. Once detection is automatic, users will reasonably expect toggling the OS setting mid-session to take effect — which is Phase 3.
 
@@ -240,7 +240,57 @@ Not done here, as designed: nothing observable changes for a config whose CSS wa
 
 **Deliberately not done here:** no change to `getWebAnimationEffect`'s collapse/drop semantics. They are already correct (§1.3) and F5 depends on them.
 
-### Phase 2 — close the CSS bypasses
+### Phase 2 — close the CSS bypasses ✅ DONE
+
+**Status: ✅ DONE**, with a different enforcement shape than sketched below — one accumulated rule per target instead of a reduce rule per effect. What landed:
+
+- `packages/interact/src/utils.ts:4` — `getMotionPreferenceMedia(preference, conditions?, configConditions?)`: appends a synthetic `$prefers-reduced-motion` condition to the effect's own condition names and lets `getFullPredicateByType` compose the predicate, so a gated interaction yields `(min-width: 900px) and (prefers-reduced-motion: no-preference)` with no string splicing.
+- `packages/interact/src/core/cssUtils.ts:19` — `REDUCED_MOTION_DECLARATIONS` + `buildReducedMotionRule(lists)`, the sibling of `buildListsRule`.
+- `packages/interact/src/core/css.ts:157` — `triggerToCSS`'s `view-timeline` rule is gated on `no-preference`; `:630` — `_generate` pushes each target's reduce rule right after its coordinated-list rule.
+- `packages/interact/test/css.spec.ts` — `reduced motion` describe, 5 tests (plan items 7–13 as reshaped below).
+
+**Enforcement shape.** Per target, exactly one rule:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  [data-interact-key='el'] > :first-child {
+    animation-duration: 1ms;
+    animation-delay: 0s;
+    animation-iteration-count: 1;
+  }
+}
+```
+
+…plus, for `viewProgress` interactions only, the `view-timeline` rule that `triggerToCSS` already emits on the source gains a media query:
+
+```css
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  [data-interact-key='el'] > :first-child {
+    view-timeline: --trigger-0;
+  }
+}
+```
+
+Why this shape:
+
+- **Longhands, not rewritten shorthands.** The three timing longhands override the `animation` shorthand that `buildListsRule` emits, for every animation on the target at once, so nothing has to parse or restate a shorthand value. This deletes `reduceAnimation()` and its regex entirely.
+- **Cost is per target, not per effect.** A target with five animated effects gets one extra rule with three declarations, instead of five rules each restating a full shorthand. Test 7 pins the count at one.
+- **`animation-iteration-count: 1` replaces suppressing ongoing effects.** A 1 ms infinite loop is the thing to avoid; capping iterations at 1 achieves that without a per-effect decision, and — unlike `animation-name: none` — it cannot strand an element that owns a FOUC initial rule (F5). Nothing anywhere is suppressed by name now, which is what test 12 asserts globally.
+- **Scroll-driven animations are detached at the source, not collapsed.** The timing longhands are ignored for progress-based timelines, so a scrub has to lose its timeline. Gating the source's `view-timeline` declaration on `no-preference` leaves the `--trigger-N` name unresolvable under `reduce`, which per spec leaves every animation referencing it with no timeline — the same result as `animation-timeline: none`, with no extra rule, no extra declaration and no per-target bookkeeping. It also keeps the interaction's own conditions scoping the decision, and a target that mixes a `viewProgress` interaction with a time-based one is safe by construction, since nothing touches timelines at all.
+- **`no-preference` gating where one rule suffices.** The state-effect `--transition-*` declaration now lives in a `no-preference`-gated rule instead of being declared and then overridden: under `reduce` it is simply absent and `var(--transition-…, _)` falls back to the list-safe no-op. Same semantics, one rule instead of two, and it also settles the `transition: none` problem below — `none` is invalid in a multi-value `transition` shorthand, so an override would have had to use `_` anyway.
+- **The runtime path (`createTransitionCSS`) keeps its original `@media (prefers-reduced-motion: no-preference)` wrapper**, now sharing the query string via `getMotionPreferenceMedia`. F3 is closed by moving `generate()` to that shape rather than the reverse, so the runtime output is byte-identical to `master`.
+
+Consequences worth knowing:
+
+- The blanket rule collapses **every** animation on an Interact-managed element under `reduce`, including animations the host page declared itself in its own CSS (`[data-interact-key] > :first-child` outbids a class selector). That is a deliberate trade of precision for weight, and arguably the accessible behaviour, but it is a behaviour change outside Interact's own effects.
+- Under `reduce`, a `viewProgress` effect shows the element's base style (its timeline no longer resolves), so R6 stands: an effect whose start state is invisible needs an author-supplied fallback. Phase 4's validator nudge is still the answer.
+- That suppression rests on "unresolvable timeline name ⇒ animation with no timeline" rather than an explicit `none`. If an engine instead fell back to the document timeline, the animation would become time-based and the reduce rule would collapse it to its end state — graceful, but a different look. Worth confirming in a browser on the demo page; the unit tests only pin the emitted CSS.
+
+Suite: `@wix/interact` 453/453, `@wix/motion` 286/286, `@wix/interact-validate` 159/159, `yarn lint` clean.
+
+Still open after this phase: `customEffect` and the `fizban` `viewProgress` fallback are JS-only paths that CSS cannot reach (§3.2) — they rely on the Phase 1 flag, which is correct but only re-read on bind (F6 → Phase 3).
+
+Original plan for reference:
 
 All of this lands in `packages/interact/src/core/css.ts`, and the plumbing already exists: `CSSRuleData` has a `media` field and `CSSRuleToString` already wraps a rule in `@media` (`src/core/cssUtils.ts:145-148`).
 
@@ -292,22 +342,20 @@ Document the resulting contract honestly rather than over-promising: CSS-backed 
 4. ✅ `forceReducedMotion = true` + `matchMedia` not matching → `true` (and `matchMedia` is never called).
 5. ✅ No `window.matchMedia` → `false`, no throw. Guards the SSR/JSDOM path.
 6. ✅ `matchMedia` is called at most once across many reads (the `MediaQueryList` is cached).
-6a. ✅ `Interact.destroy()` drops the cached `MediaQueryList`, so a suite can swap `matchMedia` between tests.
-6b. ✅ With no override, the detected value (both `true` and `false`) reaches `getWebAnimation` through `add()` — pins the `add.ts` rewiring.
+   6a. ✅ `Interact.destroy()` drops the cached `MediaQueryList` — the other half of test 6, and required by Phase 1 step 1 so a suite can swap `matchMedia` between tests. Not covered elsewhere (test 17 is about the Phase 3 change-listener, a different object).
+   6b. ✅ With no override, the detected value reaches `getWebAnimation` through `add()` — pins the `add.ts` rewiring. **Overlap check:** the pass-down itself is already covered three times via the override (`web.spec.ts:592`, `mini.spec.ts:609`, `react.spec.tsx:839`), and detection→`false` is now implicit in every test in those suites. Only detection→`true` was untested, so this was trimmed to that single case.
 
-**Enforcement (Phase 2)** — assertions on `generate()` output strings
+**Enforcement (Phase 2)** — ✅ 5 tests in `packages/interact/test/css.spec.ts` (`describe('reduced motion')`), reshaped around the one-rule-per-target design
 
-7. Finite-iteration time effect → a `@media (prefers-reduced-motion: reduce)` rule collapsing duration to `1ms` and delay to `0ms`, emitted **after** the base rule.
-8. `iterations: Infinity` → `none` under `reduce`, not a 1 ms loop.
-9. `viewProgress` effect → animation and `animation-timeline` both `none` under `reduce`.
-10. State effect → `--transition-*: none` under `reduce`, while the state rule's `styleProperties` are untouched.
-11. Condition-gated interaction → media queries **compose**: `(min-width: 900px) and (prefers-reduced-motion: reduce)`.
-12. **The F5 invariant:** for every effect where `shouldUseInitial()` is `true`, the reduce rule collapses rather than suppresses, and the `:not([data-interact-enter])` rule is emitted unconditionally. Property-style test over a config matrix.
-13. `createTransitionCSS` runtime output matches the `generate()` shape (F3 regression).
+- **7 + 8** ✅ Two effects on one target — one finite, one ongoing — produce **exactly one** `@media (prefers-reduced-motion: reduce)` rule, holding `animation-duration: 1ms`, `animation-delay: 0s`, `animation-iteration-count: 1`, emitted **after** the target's `animation` shorthand rule. The iteration cap is what keeps an ongoing effect from looping at 1 ms, so there is no per-kind branch left to test separately.
+- **9** ✅ A condition-gated `viewProgress` interaction emits its `view-timeline` rule under `(min-width: 900px) and (prefers-reduced-motion: no-preference)`, and the reduce rule of a target it shares with a `click` interaction carries no timeline declaration at all.
+- **10 + 11** ✅ A condition-gated state effect declares `--transition-*` inside `@media (min-width: 900px) and (prefers-reduced-motion: no-preference)` — composition and gating in one assertion — while the state rule keeps `(min-width: 900px)` and its `styleProperties`, and no `reduce` rule is emitted for it at all.
+- **12** ✅ **The F5 invariant:** for a `viewEnter` + `once` + `iterations: 2` effect, the `:not([data-interact-enter])` hiding rule stays unconditional, the target still gets its reduce rule, and **no rule anywhere** sets `animation-name` or an `--animation-*` custom property to `none`. Asserted over the whole output rather than one rule, since the design's F5 guarantee is that suppression-by-name never happens.
+- **13** ✅ `createTransitionCSS` gates the transition on `no-preference` and emits no `transition: none` — the runtime and `generate()` paths now agree (F3), and the runtime output is unchanged from `master`.
 
 **Motion (F2 gap)**
 
-14. `getAnimation()` with a matching CSS animation on the element **and** `reducedMotion: true` — pins whatever behaviour Phase 2 settles on. This combination currently has no test at all (`packages/motion/test/motion.spec.ts:2312-2353` mocks `getAnimations()` to `[]`).
+14. ✅ `getAnimation()` with a matching CSS animation **and** `reducedMotion: true` returns that group untouched (`packages/motion/test/motion.spec.ts`, after the existing "should return a CSS animation if a CSS animation is found"). A characterisation test — it passed on first run, which is the point: Phase 2 settles F2 in CSS and deliberately leaves motion's JS path alone, so this pins the division of labour against a future "fix" in JS.
 
 **Reactivity (Phase 3)**
 

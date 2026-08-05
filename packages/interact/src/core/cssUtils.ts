@@ -11,7 +11,16 @@ import {
   getFullPredicateByType,
   getSelectorCondition,
   applySelectorCondition,
+  getMotionPreferenceMedia,
 } from '../utils';
+
+// collapsing rather than removing keeps every animation's end state and, for entrance effects,
+// the `data-interact-enter` handshake that reveals the element
+const REDUCED_MOTION_DECLARATIONS = [
+  { name: 'animation-duration', value: '1ms' },
+  { name: 'animation-delay', value: '0s' },
+  { name: 'animation-iteration-count', value: '1' },
+];
 
 export function keyframePropertyToCSS(key: string): string {
   if (key === 'cssFloat') {
@@ -145,6 +154,21 @@ export function CSSRuleToString(rule: CSSRuleData): string {
   const cssRule = `${selector} {\n${declarationsStr}\n}`;
 
   return media ? `@media ${media} {\n${cssRule}\n}` : cssRule;
+}
+
+export function buildReducedMotionRule(lists: CSSCoordinatedLists): CSSRuleData | null {
+  const { key, childSelector, properties } = lists;
+
+  if (!properties.animation?.varNames.length) {
+    return null;
+  }
+
+  return {
+    key,
+    childSelector,
+    media: getMotionPreferenceMedia('reduce'),
+    declarations: REDUCED_MOTION_DECLARATIONS,
+  };
 }
 
 export function buildListsRule(

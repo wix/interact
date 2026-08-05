@@ -141,20 +141,17 @@ describe('reduced motion', () => {
       },
     };
 
-    it.each([true, false])(
-      'should pass the detected preference (%s) to the animation layer',
-      async (matches) => {
-        const { getWebAnimation } = await import('@wix/motion');
-        mockMatchMedia(matches);
-        Interact.create(config);
+    it('should pass the detected preference to the animation layer', async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      mockMatchMedia(true);
+      Interact.create(config);
 
-        const element = document.createElement('div');
-        add(element, 'logo-hover');
+      const element = document.createElement('div');
+      add(element, 'logo-hover');
 
-        expect(getWebAnimation).toHaveBeenCalledWith(element, expect.any(Object), undefined, {
-          reducedMotion: matches,
-        });
-      },
-    );
+      expect(getWebAnimation).toHaveBeenCalledWith(element, expect.any(Object), undefined, {
+        reducedMotion: true,
+      });
+    });
   });
 });

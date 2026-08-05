@@ -1,6 +1,30 @@
 import { getEasing, toCSSPropertyName } from '@wix/motion';
 import type { Condition, CreateTransitionCSSParams, StateEffect, StyleProperty } from './types';
 
+const MOTION_PREFERENCE_CONDITION = '$prefers-reduced-motion';
+
+/**
+ * Composes a motion preference into the media predicate of the given conditions, so a gated
+ * interaction ends up with `(min-width: 900px) and (prefers-reduced-motion: reduce)`.
+ */
+export function getMotionPreferenceMedia(
+  preference: 'reduce' | 'no-preference',
+  conditions?: string[],
+  configConditions?: Record<string, Condition>,
+): string {
+  return getFullPredicateByType(
+    [...(conditions || []), MOTION_PREFERENCE_CONDITION],
+    {
+      ...configConditions,
+      [MOTION_PREFERENCE_CONDITION]: {
+        type: 'media',
+        predicate: `prefers-reduced-motion: ${preference}`,
+      },
+    },
+    'media',
+  );
+}
+
 export function roundNumber(num: number, precision = 2): number {
   return parseFloat(num.toFixed(precision));
 }
@@ -159,7 +183,7 @@ export function createTransitionCSS({
       ? applySelectorCondition(transitionSelector, selectorCondition)
       : transitionSelector;
 
-    result.push(`@media (prefers-reduced-motion: no-preference) { ${finalTransitionSelector} {
+    result.push(`@media ${getMotionPreferenceMedia('no-preference')} { ${finalTransitionSelector} {
       transition: ${transitions.join(', ')};
     } }`);
   }
