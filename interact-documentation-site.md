@@ -12,7 +12,7 @@ https://wix.github.io/interact/llms-full.txt
 
 ## \[ A very cool visual example should be added here for a capabilities showoff\]
 
-## This experience was built with Interact. 
+## This experience was built with Interact.
 
 ---
 
@@ -20,7 +20,7 @@ https://wix.github.io/interact/llms-full.txt
 
 Interact is a web animation and interaction library that helps developers, designers, and anyone building websites or apps create responsive, high-performance motion experiences.
 
-It provides a structured way to connect user actions with visual changes \-  from simple UI animations to complex, coordinated page experiences.
+It provides a structured way to connect user actions with visual changes \- from simple UI animations to complex, coordinated page experiences.
 
 Interact uses a declarative JavaScript API that describes interactions as structured configuration rather than imperative animation code. This makes interactions easier to write, review, and maintain as projects grow.
 
@@ -30,9 +30,9 @@ The same structure is also easy for Large Language Models (LLMs) to understand a
 
 With Interact, you define the relationship between:
 
-* **Triggers** — what starts the interaction  
-* **Effects** — what animation should happen  
-* **Elements** — what should respond
+- **Triggers** — what starts the interaction
+- **Effects** — what animation should happen
+- **Elements** — what should respond
 
 Instead of implementing each animation and coordinating it with triggers in imperative code, you describe the relationship between triggers, effects, and elements in a structured configuration.
 
@@ -153,11 +153,11 @@ const config = {
 
 Interact combines:
 
-* Powerful animation capabilities  
-* A declarative way to define interactions  
-* Reusable effects and sequences  
-* Responsive behavior across devices  
-* High-performance execution through `@wix/motion`
+- Powerful animation capabilities
+- A declarative way to define interactions
+- Reusable effects and sequences
+- Responsive behavior across devices
+- High-performance execution through `@wix/motion`
 
 Interact describes the interaction.
 
@@ -171,8 +171,8 @@ Create your first Interaction.
 
 ## **See also**
 
-- [Set up your first Interaction](http://ADDLINK)  
-- [Named effects](http://ADDLINK)  
+- [Set up your first Interaction](http://ADDLINK)
+- [Named effects](http://ADDLINK)
 - [Configuration](http://ADDLINK)
 
 # Getting Started
@@ -209,11 +209,11 @@ You do not need this package when using only `keyframeEffect` or `customEffect`.
 
 Choose the entry point that matches your project:
 
-| Entry point | Use when |
-| :---- | :---- |
-| `@wix/interact/web` | Static HTML, Web Components, SSR, or most non-React frameworks |
-| `@wix/interact/react` | React, Next.js, or Remix |
-| `@wix/interact` | Vanilla JavaScript or manual DOM management |
+| Entry point           | Use when                                                       |
+| :-------------------- | :------------------------------------------------------------- |
+| `@wix/interact/web`   | Static HTML, Web Components, SSR, or most non-React frameworks |
+| `@wix/interact/react` | React, Next.js, or Remix                                       |
+| `@wix/interact`       | Vanilla JavaScript or manual DOM management                    |
 
 ### **Web Components**
 
@@ -249,9 +249,9 @@ The validator checks configurations without requiring a browser or DOM.
 
 ## **Owner: [Monty Alon](mailto:montya@wix.com) Reviewer: [Idan Levi](mailto:idanlev@wix.com)**
 
-## 
+##
 
-## **Set up an Interaction**  Types of triggers
+## **Set up an Interaction** Types of triggers
 
 Types of effects
 
@@ -351,22 +351,22 @@ Define the config object with a hover trigger and a scale effect, then create th
 
 ```javascript
 // main.js
-import { Interact } from "@wix/interact/web";
+import { Interact } from '@wix/interact/web';
 
 const config = {
   interactions: [
     {
-      key: "my-image",
-      trigger: "hover",
+      key: 'my-image',
+      trigger: 'hover',
       effects: [
         {
           keyframeEffect: {
-            name: "scale",
+            name: 'scale',
             keyframes: [{ scale: 2 }],
           },
           duration: 300,
-          easing: "ease-out",
-          fill: "both",
+          easing: 'ease-out',
+          fill: 'both',
         },
       ],
     },
@@ -377,10 +377,10 @@ const config = {
 const instance = Interact.create(config);
 ```
 
-Clean up Interactions when the page unloads: 
+Clean up Interactions when the page unloads:
 
 ```javascript
-window.addEventListener("beforeunload", () => {
+window.addEventListener('beforeunload', () => {
   instance.destroy();
 });
 ```
@@ -410,22 +410,22 @@ Add the element you want to animate:
 
 ```javascript
 // main.js
-import { Interact, add } from "@wix/interact";
+import { Interact, add } from '@wix/interact';
 
 const config = {
   interactions: [
     {
-      key: "my-image",
-      trigger: "hover",
+      key: 'my-image',
+      trigger: 'hover',
       effects: [
         {
           keyframeEffect: {
-            name: "scale",
+            name: 'scale',
             keyframes: [{ scale: 2 }],
           },
           duration: 300,
-          easing: "ease-out",
-          fill: "both",
+          easing: 'ease-out',
+          fill: 'both',
         },
       ],
     },
@@ -433,16 +433,15 @@ const config = {
   effects: {},
 };
 
-
 const instance = Interact.create(config);
-const imageContainer = document.querySelector(".image-container");
-add(imageContainer, "my-image");
+const imageContainer = document.querySelector('.image-container');
+add(imageContainer, 'my-image');
 ```
 
-Clean up Interactions when the page unloads or when navigating to another component: 
+Clean up Interactions when the page unloads or when navigating to another component:
 
 ```javascript
-window.addEventListener("beforeunload", () => {
+window.addEventListener('beforeunload', () => {
   instance.destroy();
 });
 ```
@@ -461,11 +460,11 @@ TO DO ADD VISUAL DEMONSTRATION
 
 Interact ships three entry points so you can drop it into any stack — a framework-free page, a React app, or a Web Components setup. All three share the same `Interact` class, the same `generate()` CSS helper, the same [`InteractConfig`](http://ADDLINK) shape, and the same [triggers](http://ADDLINK) and [effects](http://ADDLINK). The only thing that changes between them is **how a DOM element gets bound to an interaction `key`**.
 
-| Entry point | Bind an element by… | Best for |
-| :---- | :---- | :---- |
-| `@wix/interact/web` | Wrapping content in `<interact-element>` | Server-rendered HTML, Web Components |
-| `@wix/interact/react` | Rendering the `<Interaction>` component | React apps |
-| `@wix/interact` | Calling `add(element, key)` yourself | Vanilla JS — you own the element lifecycle |
+| Entry point           | Bind an element by…                      | Best for                                   |
+| :-------------------- | :--------------------------------------- | :----------------------------------------- |
+| `@wix/interact/web`   | Wrapping content in `<interact-element>` | Server-rendered HTML, Web Components       |
+| `@wix/interact/react` | Rendering the `<Interaction>` component  | React apps                                 |
+| `@wix/interact`       | Calling `add(element, key)` yourself     | Vanilla JS — you own the element lifecycle |
 
 > **Info:** Interact is powered by `@wix/motion`, which comes bundled — you don't install it separately. If you want to use [named effects](http://ADDLINK) (pre-made presets), install `@wix/motion-presets` alongside Interact.
 
@@ -510,9 +509,9 @@ For environments without a package manager or build step, load the pre-bundled m
 
 Regardless of the entry point, every integration follows the same three steps:
 
-1. **Define a config** — an [`InteractConfig`](http://ADDLINK) object describing your interactions.  
-2. **Register presets** *(optional)* — if your config uses [`namedEffect`](http://ADDLINK) presets, call `Interact.registerEffects(...)` **before** the next two steps. Both `generate()` and `Interact.create()` need the presets already registered. See [Named effects](#named-effects-registereffects).  
-3. **Generate CSS** — call `generate(config)` at build time or on the server, and inject the result into `<head>`. This prepares `@keyframes`, `view-timeline` declarations, transitions, and — for entrance animations — prevents a flash of un-animated content (FOUC).  
+1. **Define a config** — an [`InteractConfig`](http://ADDLINK) object describing your interactions.
+2. **Register presets** _(optional)_ — if your config uses [`namedEffect`](http://ADDLINK) presets, call `Interact.registerEffects(...)` **before** the next two steps. Both `generate()` and `Interact.create()` need the presets already registered. See [Named effects](#named-effects-registereffects).
+3. **Generate CSS** — call `generate(config)` at build time or on the server, and inject the result into `<head>`. This prepares `@keyframes`, `view-timeline` declarations, transitions, and — for entrance animations — prevents a flash of un-animated content (FOUC).
 4. **Create the runtime** — call `Interact.create(config)` on the client to start observing triggers and running effects.
 
 The only per-framework difference is how each keyed element is bound to the runtime.
@@ -584,8 +583,8 @@ Interact.create(config);
 
 **Key remarks**
 
-- `data-interact-key` **must** be unique within the page and match the interaction's `key`.  
-- `<interact-element>` **must** wrap at least one child element — Interact targets its `:first-child` by default.  
+- `data-interact-key` **must** be unique within the page and match the interaction's `key`.
+- `<interact-element>` **must** wrap at least one child element — Interact targets its `:first-child` by default.
 - When generating CSS for the web entry point, pass `generate(config, true)` so `:first-child` selectors are emitted correctly.
 
 ---
@@ -643,11 +642,11 @@ export function App() {
 
 **`<Interaction>` props**
 
-| Prop | Type | Description |
-| :---- | :---- | :---- |
-| `tagName` | `string` | **Required.** The HTML tag to render (e.g. `"section"`, `"div"`). |
-| `interactKey` | `string` | **Required.** Unique key matching an interaction's `key`. |
-| `...rest` | — | Any valid props for `tagName` (`className`, `style`, event handlers, `ref`, etc.). |
+| Prop          | Type     | Description                                                                        |
+| :------------ | :------- | :--------------------------------------------------------------------------------- |
+| `tagName`     | `string` | **Required.** The HTML tag to render (e.g. `"section"`, `"div"`).                  |
+| `interactKey` | `string` | **Required.** Unique key matching an interaction's `key`.                          |
+| `...rest`     | —        | Any valid props for `tagName` (`className`, `style`, event handlers, `ref`, etc.). |
 
 **Manual binding with `createInteractRef`**
 
@@ -664,8 +663,8 @@ function Hero() {
 
 **Key remarks**
 
-- Always call `Interact.create()` inside `useEffect` and call `instance.destroy()` in the cleanup function.  
-- `tagName` must be a valid HTML tag; `interactKey` must be unique within the page.  
+- Always call `Interact.create()` inside `useEffect` and call `instance.destroy()` in the cleanup function.
+- `tagName` must be a valid HTML tag; `interactKey` must be unique within the page.
 - Pass `generate(config, false)` for React — the keyed element is rendered directly, without a `<interact-element>` wrapper.
 
 ---
@@ -713,14 +712,14 @@ add(document.querySelector('.hero'), 'hero');
 
 **API**
 
-| Function | Description |
-| :---- | :---- |
+| Function            | Description                                                                               |
+| :------------------ | :---------------------------------------------------------------------------------------- |
 | `add(element, key)` | Binds a DOM element to an interaction `key`. Call it **after** the element is in the DOM. |
-| `remove(key)` | Unbinds every interaction registered for `key` and disconnects its triggers. |
+| `remove(key)`       | Unbinds every interaction registered for `key` and disconnects its triggers.              |
 
 **Notes**
 
-- `add()` must run after the target element exists in the DOM.  
+- `add()` must run after the target element exists in the DOM.
 - For content that appears later (modals, infinite lists, route changes), call `add()` when the element mounts and `remove()` when it unmounts.
 
 ---
@@ -761,9 +760,9 @@ import { generate } from '@wix/interact/web';
 const css = generate(config, /* useFirstChild */ true);
 ```
 
-| Argument | Description |
-| :---- | :---- |
-| `config` | The same `InteractConfig` you pass to `Interact.create()`. |
+| Argument        | Description                                                                                                    |
+| :-------------- | :------------------------------------------------------------------------------------------------------------- |
+| `config`        | The same `InteractConfig` you pass to `Interact.create()`.                                                     |
 | `useFirstChild` | `true` for the **web** (`<interact-element>`) entry point; `false` for **vanilla** and **React** integrations. |
 
 ### **Why FOUC prevention matters**
@@ -772,8 +771,8 @@ Entrance animations (for example, a `FadeIn` on `viewEnter`) start from a hidden
 
 **Notes**
 
-- `generate()` covers the whole config, not just entrance triggers — always inject it, even for hover/click-only pages.  
-- Call it server-side or at build time. Calling it on the client is fine only if page content is initially hidden (for example, behind a loader).  
+- `generate()` covers the whole config, not just entrance triggers — always inject it, even for hover/click-only pages.
+- Call it server-side or at build time. Calling it on the client is fine only if page content is initially hidden (for example, behind a loader).
 - FOUC initial rules apply to `viewEnter` with `triggerType: 'once'` (the default) where the source and target are the same element.
 
 ---
@@ -782,15 +781,15 @@ Entrance animations (for example, a `FadeIn` on `viewEnter`) start from a hidden
 
 Each `Interact.create(config)` call returns an `Interact` instance. Keep a reference if you need to dynamically bind elements, or to destroy that instance later.
 
-| Member | Description |
-| :---- | :---- |
-| `Interact.create(config, options?)` | Initializes a runtime for the config and returns the instance. Multiple configs create separate instances. |
-| `Interact.registerEffects(presets)` | Registers `namedEffect` presets. Call before `generate()`/`create()` when using named effects. |
-| `Interact.setup(options)` | Sets global defaults for scroll (`viewProgress`), pointer (`pointerMove`), and `viewEnter` behavior, and toggles a11y triggers. Call before `create()`. |
-| `Interact.destroy()` | Tears down **all** instances (e.g. on full page navigation). |
-| `instance.destroy()` | Tears down a single instance created by `Interact.create()`. |
-| `Interact.forceReducedMotion` | `boolean` — force reduced-motion behavior regardless of the OS setting. Default: `false`. |
-| `Interact.allowA11yTriggers` | `boolean` — enable the accessible trigger variants (`interest`, `activate`). Default: `true`. |
+| Member                              | Description                                                                                                                                             |
+| :---------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Interact.create(config, options?)` | Initializes a runtime for the config and returns the instance. Multiple configs create separate instances.                                              |
+| `Interact.registerEffects(presets)` | Registers `namedEffect` presets. Call before `generate()`/`create()` when using named effects.                                                          |
+| `Interact.setup(options)`           | Sets global defaults for scroll (`viewProgress`), pointer (`pointerMove`), and `viewEnter` behavior, and toggles a11y triggers. Call before `create()`. |
+| `Interact.destroy()`                | Tears down **all** instances (e.g. on full page navigation).                                                                                            |
+| `instance.destroy()`                | Tears down a single instance created by `Interact.create()`.                                                                                            |
+| `Interact.forceReducedMotion`       | `boolean` — force reduced-motion behavior regardless of the OS setting. Default: `false`.                                                               |
+| `Interact.allowA11yTriggers`        | `boolean` — enable the accessible trigger variants (`interest`, `activate`). Default: `true`.                                                           |
 
 ### **`Interact.setup(options)`**
 
@@ -798,10 +797,14 @@ Configure global trigger defaults before creating any instances:
 
 ```ts
 Interact.setup({
-  viewEnter: { threshold: 0.25 },              // default viewport-entry threshold
-  scrollOptionsGetter: () => ({ /* … */ }),    // defaults for viewProgress
-  pointerOptionsGetter: () => ({ /* … */ }),   // defaults for pointerMove
-  allowA11yTriggers: true,                      // enable interest / activate
+  viewEnter: { threshold: 0.25 }, // default viewport-entry threshold
+  scrollOptionsGetter: () => ({
+    /* … */
+  }), // defaults for viewProgress
+  pointerOptionsGetter: () => ({
+    /* … */
+  }), // defaults for pointerMove
+  allowA11yTriggers: true, // enable interest / activate
 });
 ```
 
@@ -811,17 +814,17 @@ Interact.setup({
 
 ## **Choosing an entry point**
 
-- **Server-rendered HTML or a design tool output?** Use **web** (`<interact-element>`) — binding is automatic and works without hydration.  
-- **React app?** Use **react** (`<Interaction>`) — lifecycle and binding are handled for you.  
+- **Server-rendered HTML or a design tool output?** Use **web** (`<interact-element>`) — binding is automatic and works without hydration.
+- **React app?** Use **react** (`<Interaction>`) — lifecycle and binding are handled for you.
 - **Full control over the DOM, or a non-React framework?** Use **vanilla** — call `add()`/`remove()` at the right moments in your own lifecycle.
 
 All three produce identical animations from the same config; pick the one that matches how you render markup.
 
 ## **See also**
 
-- [Set up your first Interaction](http://ADDLINK)  
-- [Configuration structure](http://ADDLINK)  
-- [Named effects](http://ADDLINK)  
+- [Set up your first Interaction](http://ADDLINK)
+- [Configuration structure](http://ADDLINK)
+- [Named effects](http://ADDLINK)
 - [Triggers](http://ADDLINK)
 
 # 🧑‍🌾 The final result \+ examples links
@@ -850,26 +853,26 @@ Type of effects \- keyframeEffects, namedEffects, transitionEffects (states)
 
 ## **About the Config Object**
 
-## 
+##
 
-**InteractConfig** is the single object that describes every interaction on a page. It has one required field: **interactions** \- an array of Interaction definitions, plus three optional registries of reusable pieces those interactions can reference by id: 
+**InteractConfig** is the single object that describes every interaction on a page. It has one required field: **interactions** \- an array of Interaction definitions, plus three optional registries of reusable pieces those interactions can reference by id:
 
-* **effects** (by `effectId`)  
-*  **sequences** (by `sequenceId`)  
-* **conditions**
+- **effects** (by `effectId`)
+- **sequences** (by `sequenceId`)
+- **conditions**
 
 The whole config is built up front and passed to `Interact.create()`, which wires up all the triggers, observers, and timelines, or to `generate()` for generating CSS.
 
-**Interactions:** An Interaction binds a trigger (click, hover, pointer-move, entrance, scroll or animation-end) on a source element to one or more effects that play in response. 
+**Interactions:** An Interaction binds a trigger (click, hover, pointer-move, entrance, scroll or animation-end) on a source element to one or more effects that play in response.
 
 For more information on Interactions check out [“What is an interaction"]().
 
-**Effects:**  An Effect is a single visual change applied to a target element that runs when its interaction's trigger fires. Each effect carries exactly one of the following: 
+**Effects:** An Effect is a single visual change applied to a target element that runs when its interaction's trigger fires. Each effect carries exactly one of the following:
 
-* `namedEffect`  \-a registered preset  
-* `keyframeEffect` \- your own keyframes  
-* `customEffect` \- an imperative per-frame callback  
-* `transitionProperties` or `transition` \- a CSS style toggle.
+- `namedEffect` \-a registered preset
+- `keyframeEffect` \- your own keyframes
+- `customEffect` \- an imperative per-frame callback
+- `transitionProperties` or `transition` \- a CSS style toggle.
 
 For more information on Effects check out [“What are effects”]().
 
@@ -877,7 +880,7 @@ For more information on Effects check out [“What are effects”]().
 
 For more information on Sequences check out [“Sequences and lists”]().
 
-**Conditions:**  A Condition is a named predicate (a CSS media query or a selector) that specifies whether something applies, evaluated against the environment or the DOM. conditions can be attached by id to an interaction (gating the whole trigger), to an individual effect (skipping just that effect), or to a sequence; all listed conditions must pass.
+**Conditions:** A Condition is a named predicate (a CSS media query or a selector) that specifies whether something applies, evaluated against the environment or the DOM. conditions can be attached by id to an interaction (gating the whole trigger), to an individual effect (skipping just that effect), or to a sequence; all listed conditions must pass.
 
 For more information on Conditions check out [“Conditions”]().
 
@@ -904,7 +907,6 @@ type InteractConfig = {
     <article class="card">Three</article>
   </div>
 </interact-element>
-
 ```
 
 ```ts
@@ -919,7 +921,7 @@ const config: InteractConfig = {
       key: 'card-row',
       trigger: 'viewEnter',
       params: { threshold: 0.2 },
-      conditions: ['desktop'],              // references the conditions map below
+      conditions: ['desktop'], // references the conditions map below
       sequences: [{ sequenceId: 'cards-in' }], // references the sequences map below
     },
   ],
@@ -935,7 +937,7 @@ const config: InteractConfig = {
 
   sequences: {
     'cards-in': {
-      offset: 120,                          // ms between each card starting
+      offset: 120, // ms between each card starting
       effects: [
         { effectId: 'card-fade', listContainer: '.cards' }, // references card-fade, staggered across list children
       ],
@@ -949,7 +951,6 @@ const config: InteractConfig = {
 
 Interact.registerEffects(presets); // required before create() when using namedEffect
 Interact.create(config);
-
 ```
 
 # triggers
@@ -967,31 +968,31 @@ A trigger is the event that starts — or continuously drives — an interaction
 In Interact you don't wire up your own event listeners or observers. Instead you describe interactions declaratively: each interaction binds one trigger to one or more effects on a keyed element, and the library handles the listening, observing, and cleanup for you.
 
 ```ts
-{  
-  key: "my-element",     // which element (its data-interact-key)  
-  trigger: "viewEnter",  // the event that fires the effects  
-  effects: [{ effectId: "fade-in" }],  
+{
+  key: "my-element",     // which element (its data-interact-key)
+  trigger: "viewEnter",  // the event that fires the effects
+  effects: [{ effectId: "fade-in" }],
 }
 ```
 
-## 
+##
 
 ## **Trigger list and overview**
 
 Interact ships with eight triggers, spanning pointer input, the viewport, scrolling, and animation chaining:
 
-| Trigger | Fires when… |
-| :---- | :---- |
-| `hover` | the pointer enters or leaves the element |
-| `click` | the element is clicked |
-| `interest` | accessible hover — pointer or keyboard focus |
-| `activate` | accessible click — click, Enter, or Space |
-| `viewEnter` | the element scrolls into the viewport |
-| `viewProgress` | continuously, mapped to scroll position |
-| `pointerMove` | continuously, mapped to the cursor's position |
-| `animationEnd` | another effect finishes (for chaining) |
+| Trigger        | Fires when…                                   |
+| :------------- | :-------------------------------------------- |
+| `hover`        | the pointer enters or leaves the element      |
+| `click`        | the element is clicked                        |
+| `interest`     | accessible hover — pointer or keyboard focus  |
+| `activate`     | accessible click — click, Enter, or Space     |
+| `viewEnter`    | the element scrolls into the viewport         |
+| `viewProgress` | continuously, mapped to scroll position       |
+| `pointerMove`  | continuously, mapped to the cursor's position |
+| `animationEnd` | another effect finishes (for chaining)        |
 
-*(In the live page, each trigger name links to its own chapter — a ↗ icon appears to its left and it underlines on hover.)*
+_(In the live page, each trigger name links to its own chapter — a ↗ icon appears to its left and it underlines on hover.)_
 
 Each trigger has its own chapter with its full options and examples — this page just introduces the concept and shows how they combine.
 
@@ -1010,7 +1011,7 @@ Entrance animations play when an element becomes visible in the viewport. Scroll
 ## **How it works:** `IntersectionObserver`
 
 @wix/interact's viewEnter trigger is built on the native IntersectionObserver — the browser API that reports when an element crosses in and out of the viewport. The browser tells the library when the source element becomes visible, and the library plays the animation.  
-[https://developer.mozilla.org/en-US/docs/Web/API/Intersection\_Observer\_API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)
+[https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)
 
 ### **An event trigger**
 
@@ -1028,17 +1029,17 @@ Give every `keyframeEffect` a unique `name` within the config so its generated `
 
 The most important decision for a viewEnter animation is what happens on repeat visits — because unlike a click, scrolling past an element can happen many times. That behavior is chosen with `triggerType`, set **on each effect** or on a sequence (the interaction's `params` only holds observer tuning — see the next section). The table shows the enter/exit behavior; see the threshold note below when the exact trigger point matters.
 
-| triggerType | When the element enters | When the element exits |
-| :---- | :---- | :---- |
-| `once` (default) | Plays once; the trigger is then removed | — |
-| `repeat` | Restarts from the beginning | Resets, once the element is fully out of view |
-| `alternate` | Plays forward | Plays in reverse |
-| `state` | Plays or resumes | Pauses (keeping its progress), once fully out of view |
+| triggerType      | When the element enters                 | When the element exits                                |
+| :--------------- | :-------------------------------------- | :---------------------------------------------------- |
+| `once` (default) | Plays once; the trigger is then removed | —                                                     |
+| `repeat`         | Restarts from the beginning             | Resets, once the element is fully out of view         |
+| `alternate`      | Plays forward                           | Plays in reverse                                      |
+| `state`          | Plays or resumes                        | Pauses (keeping its progress), once fully out of view |
 
-* `once` is the classic entrance: the element reveals itself the first time the visitor reaches it, and stays put. This is the default, and the right choice for most content reveals.  
-* `repeat` replays the animation on every visit — the element resets when it has scrolled completely out of view, ready to play again on the next encounter. Good for counters and attention moments that should feel fresh each time.  
-* `alternate` makes visibility reversible: the animation plays as the element enters and reverses as it exits. Note the boundary: alternate reverses as soon as the element crosses back below the trigger threshold, while repeat and state wait until the element is completely out of view before resetting or pausing.  
-* `state` treats the animation as something that's running while the element is on screen — typically a loop with `iterations: Infinity`. It resumes where it left off on entry and pauses off-screen. Like all the re-triggering types, it should use a separate source and target when the animation can change the source's intersection geometry (see the caveat below). Here a stable wrapper is observed while the orb inside it animates:
+- `once` is the classic entrance: the element reveals itself the first time the visitor reaches it, and stays put. This is the default, and the right choice for most content reveals.
+- `repeat` replays the animation on every visit — the element resets when it has scrolled completely out of view, ready to play again on the next encounter. Good for counters and attention moments that should feel fresh each time.
+- `alternate` makes visibility reversible: the animation plays as the element enters and reverses as it exits. Note the boundary: alternate reverses as soon as the element crosses back below the trigger threshold, while repeat and state wait until the element is completely out of view before resetting or pausing.
+- `state` treats the animation as something that's running while the element is on screen — typically a loop with `iterations: Infinity`. It resumes where it left off on entry and pauses off-screen. Like all the re-triggering types, it should use a separate source and target when the animation can change the source's intersection geometry (see the caveat below). Here a stable wrapper is observed while the orb inside it animates:
 
 Use `fill: 'both'` for `repeat`, `alternate`, and `state` effects so their endpoints remain applied and the animation stays available for replay. For a `once` effect whose final keyframe matches the element's normal styling, `fill: 'backwards'` is useful when a delay must hold the first keyframe. If a `once` effect ends in a look that differs from the element's normal CSS and that look must persist, use `fill: 'forwards'` or `'both'` instead.
 
@@ -1069,8 +1070,8 @@ Use `fill: 'both'` for `repeat`, `alternate`, and `state` effects so their endpo
 
 The interaction's `params` holds the observer options:
 
-* `threshold` — a number from 0 to 1 passed to `IntersectionObserver`. The default is 0.2.  
-* `inset` — a length (`'100px'`, `'10%'`) that shrinks or grows the trigger area at the top and bottom of the viewport. A positive inset contracts the area inward, so the trigger fires late — only once the element is that far inside the viewport (useful when triggering at the very edge feels premature). A negative inset extends the area beyond the viewport, so the trigger fires early — before the element is actually visible (useful for preparing content just off-screen). Two space-separated values set top and bottom independently (`'10% 30%'`).
+- `threshold` — a number from 0 to 1 passed to `IntersectionObserver`. The default is 0.2.
+- `inset` — a length (`'100px'`, `'10%'`) that shrinks or grows the trigger area at the top and bottom of the viewport. A positive inset contracts the area inward, so the trigger fires late — only once the element is that far inside the viewport (useful when triggering at the very edge feels premature). A negative inset extends the area beyond the viewport, so the trigger fires early — before the element is actually visible (useful for preparing content just off-screen). Two space-separated values set top and bottom independently (`'10% 30%'`).
 
 The library also exposes `useSafeViewEnter` for a source whose configured threshold cannot fit inside the viewport. In that case, it falls back to a safe entry point near the viewport edge so the animation is not silently skipped. Supply an explicit `threshold` when enabling this option; it does not currently evaluate the default threshold.
 
@@ -1191,8 +1192,8 @@ Click and hover are the triggers of direct manipulation: the visitor does someth
 
 Here's the key mental model for this chapter. Click and hover can drive both effect families:
 
-* Animations — `keyframeEffect`, `namedEffect`, or `customEffect` with a `duration`. A choreographed piece of motion that plays, reverses, restarts, or pauses when the trigger fires.  
-* State effects — `transition` / `transitionProperties`. A set of target CSS values the element should move to, animated by a CSS transition. Firing the trigger switches the state on or off; think of it as a class toggle that comes with its transition built in.
+- Animations — `keyframeEffect`, `namedEffect`, or `customEffect` with a `duration`. A choreographed piece of motion that plays, reverses, restarts, or pauses when the trigger fires.
+- State effects — `transition` / `transitionProperties`. A set of target CSS values the element should move to, animated by a CSS transition. Firing the trigger switches the state on or off; think of it as a class toggle that comes with its transition built in.
 
 The rule of thumb: if you're describing motion — keyframes, a bounce, a multi-step sequence — use an animation. If you're describing a second look for the element — "while hovered, the button is dark and lifted" — use a state effect, and let the transition handle getting there and back.
 
@@ -1200,7 +1201,7 @@ Both behaviors are configured on the effect itself: animations with `triggerType
 
 As with `viewEnter`, the interaction's `key` identifies the keyed root used to resolve the source, and each effect's `key` identifies its target root. Interaction-level `selector` or `listContainer` fields can resolve descendant or list-item sources; effect-level selection does the same for targets. Omit the effect key to use the source root as the target root, or add `selector` to target descendants inside it.
 
-Time-based effects can also be grouped into a sequence when one click or hover should coordinate several targets.  See the [Sequence section]().
+Time-based effects can also be grouped into a sequence when one click or hover should coordinate several targets. See the [Sequence section]().
 
 ## **Keyboard equivalents are enabled by default**
 
@@ -1245,12 +1246,12 @@ const config = {
 
 The pointer path for hover uses enter and leave; with the default accessibility upgrade, focus in and focus out follow the same playback behavior. For animations, `triggerType` decides how those paired events map onto playback:
 
-| triggerType | On pointer enter | On pointer leave |
-| ----- | ----- | ----- |
-| `alternate` (default) | Plays forward | Plays in reverse |
-| `repeat` | Restarts from the beginning | Cancels — the target snaps to idle |
-| `once` | Can play once per input method | — |
-| `state` | Plays or resumes (unless finished) | Pauses, keeping its progress |
+| triggerType           | On pointer enter                   | On pointer leave                   |
+| --------------------- | ---------------------------------- | ---------------------------------- |
+| `alternate` (default) | Plays forward                      | Plays in reverse                   |
+| `repeat`              | Restarts from the beginning        | Cancels — the target snaps to idle |
+| `once`                | Can play once per input method     | —                                  |
+| `state`               | Plays or resumes (unless finished) | Pauses, keeping its progress       |
 
 `alternate` is the natural hover feel and the default: the effect builds up while the pointer arrives and unwinds when it leaves. It's fully interruption-safe — if the pointer leaves mid-animation, the direction simply flips from wherever it is, with no jumps or restarts. Give alternate effects `fill: 'both'` so the target holds the hovered look while the pointer stays, and holds the rest look after unwinding.
 
@@ -1353,12 +1354,12 @@ Match your CSS to the first keyframe. The reveal animation only exists after the
 
 Click fires once per activation — there's no natural "opposite" event like leave — so `triggerType` decides what successive clicks mean:
 
-| triggerType | On each click |
-| ----- | ----- |
+| triggerType           | On each click                                                        |
+| --------------------- | -------------------------------------------------------------------- |
 | `alternate` (default) | First click plays; every further click reverses direction — a toggle |
-| `repeat` | Restarts from the beginning |
-| `once` | Has separate one-shot pointer and keyboard listeners |
-| `state` | Plays or toggles play/pause while the animation is unfinished |
+| `repeat`              | Restarts from the beginning                                          |
+| `once`                | Has separate one-shot pointer and keyboard listeners                 |
+| `state`               | Plays or toggles play/pause while the animation is unfinished        |
 
 `alternate` turns any animation into an open/close toggle: click to play forward, click again to reverse — even mid-animation, where the direction just flips in place. `repeat` is for feedback bursts that confirm an action. `state` makes the click a play/pause button while the animation is unfinished; once a finite animation reaches its finished state, later clicks do not restart it. Use `iterations: Infinity` for a persistent play/pause control. If your element starts in the "open" pose and the first click should close it, add `reversed: true` to the effect to flip the initial direction.
 
@@ -1381,10 +1382,7 @@ const config = {
           key: 'mobile-nav',
           keyframeEffect: {
             name: 'nav-slide',
-            keyframes: [
-              { transform: 'translateX(-100%)' },
-              { transform: 'translateX(0)' },
-            ],
+            keyframes: [{ transform: 'translateX(-100%)' }, { transform: 'translateX(0)' }],
           },
           duration: 300,
           easing: 'ease-out',
@@ -1410,12 +1408,7 @@ const config = {
 
 ```html
 <interact-element data-interact-key="menu-button">
-  <button
-    class="menu-button"
-    aria-label="Menu"
-    aria-controls="mobile-nav"
-    aria-expanded="false"
-  >
+  <button class="menu-button" aria-label="Menu" aria-controls="mobile-nav" aria-expanded="false">
     <span class="menu-icon" aria-hidden="true">☰</span>
   </button>
 </interact-element>
@@ -1462,14 +1455,14 @@ State effects flip the target between its stylesheet look and a declared alterna
 
 This is `:hover` with superpowers: it can target a different element than the one being hovered, it can be switched by clicks as well as hovers, and its on/off behavior is configurable via `stateAction` on the effect:
 
-| stateAction | On click | On hover |
-| ----- | :---- | :---- |
-| `toggle` (default) | Each click flips the state on/off | On while hovered — added on enter, removed on leave |
-| `add` | Switches the state on (repeat clicks are harmless) | Entering switches it on; it stays on |
-| `remove` | Switches the state off | Entering switches it off |
-| `clear` | Clears all active states on the target | Same, on enter |
+| stateAction        | On click                                           | On hover                                            |
+| ------------------ | :------------------------------------------------- | :-------------------------------------------------- |
+| `toggle` (default) | Each click flips the state on/off                  | On while hovered — added on enter, removed on leave |
+| `add`              | Switches the state on (repeat clicks are harmless) | Entering switches it on; it stays on                |
+| `remove`           | Switches the state off                             | Entering switches it off                            |
+| `clear`            | Clears all active states on the target             | Same, on enter                                      |
 
-`remove` only has something stable to remove when it refers to the same `effectId` that was previously added. 
+`remove` only has something stable to remove when it refers to the same `effectId` that was previously added.
 
 Under the hood, Interact generates the CSS for you: your `styleProperties` are applied while the state is on, and the transition rule lives on the target — so both directions animate, into the state and back out. States persist until something removes them. If you pre-generate the CSS, apply the reduced-motion guidance above. Custom properties (`--accent-color`) can be set as state values; register them with CSS `@property` if they must interpolate smoothly. If you need different timing per property, use `transitionProperties` instead of `transition` — each entry carries its own `duration`, `delay`, and `easing`.
 
@@ -1571,9 +1564,9 @@ Once the domain of heavy JavaScript scroll listeners, this class of effect has b
 
 ### **A continuous trigger, not an event trigger**
 
-This is the key mental shift from the time-based triggers (`hover`, `click`, `viewEnter`). Those are **event triggers**: something happens, and an animation plays over a fixed `duration`. `viewProgress` is a **continuous trigger**: there is no duration and nothing "plays." Instead, the scroll position continuously drives — *scrubs* — the effect's progress from `0` to `1`.
+This is the key mental shift from the time-based triggers (`hover`, `click`, `viewEnter`). Those are **event triggers**: something happens, and an animation plays over a fixed `duration`. `viewProgress` is a **continuous trigger**: there is no duration and nothing "plays." Instead, the scroll position continuously drives — _scrubs_ — the effect's progress from `0` to `1`.
 
-- When the user isn't scrolling, the effect is **static** — frozen at whatever progress the current scroll position maps to.  
+- When the user isn't scrolling, the effect is **static** — frozen at whatever progress the current scroll position maps to.
 - Scrolling forward advances the effect; scrolling back reverses it.
 
 Because the progress is scrubbed rather than played, `viewProgress` works with the animation payloads that expose a progress timeline — `keyframeEffect`, `namedEffect`, and `customEffect` — but it **cannot** be used with state effects (`transition` / `transitionProperties`). Those describe a discrete state change over a time-based transition, which has no meaning on a scrubbed timeline.
@@ -1613,20 +1606,20 @@ rangeEnd:   { name: 'cover', offset: { unit: 'percentage', value: 100 } }
 
 The `name` selects a phase of the subject's pass through the scroll container:
 
-| Range name | Meaning |
-| :---- | :---- |
-| `cover` | Full span, from the first pixel entering to the last pixel leaving. |
-| `entry` | While the element is entering the viewport. |
-| `exit` | While the element is exiting the viewport. |
-| `contain` | While the element is fully contained in the viewport (great with sticky). |
+| Range name       | Meaning                                                                                                   |
+| :--------------- | :-------------------------------------------------------------------------------------------------------- |
+| `cover`          | Full span, from the first pixel entering to the last pixel leaving.                                       |
+| `entry`          | While the element is entering the viewport.                                                               |
+| `exit`           | While the element is exiting the viewport.                                                                |
+| `contain`        | While the element is fully contained in the viewport (great with sticky).                                 |
 | `entry-crossing` | Extends `entry` range on elements larger than the viewport up to the trailing edge entering the viewport. |
-| `exit-crossing` | Extends `exit` range on elements larger than the viewport from where the leading edge left the viewport. |
+| `exit-crossing`  | Extends `exit` range on elements larger than the viewport from where the leading edge left the viewport.  |
 
 The `offset` shifts a boundary within that phase — `{ unit: 'percentage', value: 0–100 }` for relative positions, or absolute lengths like `{ unit: 'px', value: 200 }`. These map directly to the CSS `animation-range` property; see [MDN: `animation-range`](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-range) for the full range-name reference.
 
 ### **Hold the effect in place with `fill: 'both'`**
 
-Notice that every scroll-driven effect in this chapter sets `fill: 'both'` — and as a rule, you should too. `fill` maps to the CSS [`animation-fill-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-fill-mode), which decides how the target looks *outside* the active range: before `rangeStart` and after `rangeEnd`.
+Notice that every scroll-driven effect in this chapter sets `fill: 'both'` — and as a rule, you should too. `fill` maps to the CSS [`animation-fill-mode`](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-fill-mode), which decides how the target looks _outside_ the active range: before `rangeStart` and after `rangeEnd`.
 
 With the default, `fill: 'none'`, the effect only applies while the scroll position is inside the range; on either side the target snaps back to its un-animated state. For a scrubbed animation that almost always looks wrong — the element would pop into its start value as the range begins and pop back out once it ends. `fill: 'both'` instead pins the first keyframe before the range starts and holds the last keyframe after it finishes, so the target stays exactly where the scroll left it at either boundary. That continuity is what you want in virtually every `viewProgress` effect, so reach for `fill: 'both'` by default.
 
@@ -1703,8 +1696,8 @@ const config = {
 
 Scroll presets have one required option: **`range`**, which declares how the animation relates to the element's **idle state** — its natural, at-rest layout and styling:
 
-- **`'in'`** — the animation **ends** at the idle state. The element animates *into* its natural look as it enters.  
-- **`'out'`** — the animation **starts** from the idle state. The element animates *away* from its natural look as it exits.  
+- **`'in'`** — the animation **ends** at the idle state. The element animates _into_ its natural look as it enters.
+- **`'out'`** — the animation **starts** from the idle state. The element animates _away_ from its natural look as it exits.
 - **`'continuous'`** — the animation **passes through** the idle state, animating from one side, through the natural look, and out the other.
 
 The same preset produces different behavior depending on `range`. Fading in on entry vs. fading out on exit:
@@ -1739,16 +1732,16 @@ The canonical demonstration is turning vertical scroll into horizontal motion �
 
 The layout works like this:
 
-- **`h-scroll`** — a tall wrapper (e.g. `height: 400vh`). Its height *is* the horizontal scroll distance, and it's the `ViewTimeline` source.  
-- **`.sticky-viewport`** — a `position: sticky; top: 0; height: 100vh` child that stays pinned while the wrapper scrolls. It uses **`overflow: clip`** (never `hidden`) to hide the off-screen cards without breaking the timeline.  
+- **`h-scroll`** — a tall wrapper (e.g. `height: 400vh`). Its height _is_ the horizontal scroll distance, and it's the `ViewTimeline` source.
+- **`.sticky-viewport`** — a `position: sticky; top: 0; height: 100vh` child that stays pinned while the wrapper scrolls. It uses **`overflow: clip`** (never `hidden`) to hide the off-screen cards without breaking the timeline.
 - **`.track`** — a horizontal flex row of cards. We translate it along X as the wrapper scrolls.
 
 A single **`viewProgress`** interaction on `h-scroll` drives everything — its scroll timeline scrubs two effects at once:
 
-1. The first effect targets the whole **track** and translates it along X during the pinned `contain` phase — this is the horizontal scroll itself.  
+1. The first effect targets the whole **track** and translates it along X during the pinned `contain` phase — this is the horizontal scroll itself.
 2. The second is a **list effect**: `listContainer: '.track'` applies it to every card and `selector: '.card-media'` narrows it to the media inside each one, giving them a gentle counter-parallax drift as the track pans. Because it animates the cards' inner media — a different target from the track — it never competes with the pan over the same property. See [lists](http://Configuration/lists-and-sequences/lists) for more on `listContainer`.
 
-There are deliberately **no sequences** here: a sequence distributes *time-based* delay offsets across its effects, which has no meaning on a scroll-scrubbed timeline. On a `viewProgress` interaction, coordinate multiple items with `listContainer` and ranges rather than with a sequence.
+There are deliberately **no sequences** here: a sequence distributes _time-based_ delay offsets across its effects, which has no meaning on a scroll-scrubbed timeline. On a `viewProgress` interaction, coordinate multiple items with `listContainer` and ranges rather than with a sequence.
 
 ```ts
 const config = {
@@ -1805,11 +1798,26 @@ const config = {
     <div class="sticky-viewport">
       <interact-element data-interact-key="h-track">
         <ul class="track">
-          <li class="card"><div class="card-media"></div><h3 class="card-title">One</h3></li>
-          <li class="card"><div class="card-media"></div><h3 class="card-title">Two</h3></li>
-          <li class="card"><div class="card-media"></div><h3 class="card-title">Three</h3></li>
-          <li class="card"><div class="card-media"></div><h3 class="card-title">Four</h3></li>
-          <li class="card"><div class="card-media"></div><h3 class="card-title">Five</h3></li>
+          <li class="card">
+            <div class="card-media"></div>
+            <h3 class="card-title">One</h3>
+          </li>
+          <li class="card">
+            <div class="card-media"></div>
+            <h3 class="card-title">Two</h3>
+          </li>
+          <li class="card">
+            <div class="card-media"></div>
+            <h3 class="card-title">Three</h3>
+          </li>
+          <li class="card">
+            <div class="card-media"></div>
+            <h3 class="card-title">Four</h3>
+          </li>
+          <li class="card">
+            <div class="card-media"></div>
+            <h3 class="card-title">Five</h3>
+          </li>
         </ul>
       </interact-element>
     </div>
@@ -1882,7 +1890,7 @@ A namedEffect or customEffect receives both the horizontal and vertical coordina
 
 By default, progress is calculated from the hit area: `(0, 0)` is its top-left and `(1, 1)` is its bottom-right.
 
- `centeredToTarget: true`, to remap progress so the target’s center corresponds to `(0.5, 0.5)`. The values remain clamped to `0–1`. `centeredToTarget` is set on an **effect**, not in the trigger `params`.
+`centeredToTarget: true`, to remap progress so the target’s center corresponds to `(0.5, 0.5)`. The values remain clamped to `0–1`. `centeredToTarget` is set on an **effect**, not in the trigger `params`.
 
 ## **Parameters**
 
@@ -1893,9 +1901,9 @@ params: {
 }
 ```
 
-- `hitArea: 'self'` tracks movement inside the source element. The source must receive pointer events, so do not apply `pointer-events: none` to it.  
-- `hitArea: 'root'` tracks movement across the viewport.  
-- `axis` maps either the horizontal (`'x'`) or vertical (`'y'`) position to a `keyframeEffect`. It defaults to `'y'`.  
+- `hitArea: 'self'` tracks movement inside the source element. The source must receive pointer events, so do not apply `pointer-events: none` to it.
+- `hitArea: 'root'` tracks movement across the viewport.
+- `axis` maps either the horizontal (`'x'`) or vertical (`'y'`) position to a `keyframeEffect`. It defaults to `'y'`.
 - `axis` is ignored by `namedEffect` and `customEffect`, which receive both axes.
 
 Set `hitArea` explicitly so the intended tracking area is clear.
@@ -1913,7 +1921,7 @@ The smoothing is set on the effect, not on the trigger:
 
 `transitionDuration` controls, in milliseconds, how long the effect takes to catch up with the pointer. Without it, the effect responds immediately. Short durations such as `100–300ms` soften the movement, while larger values create more noticeable lag.
 
-`transitionEasing` controls how that transition progresses and defaults to `linear`. 
+`transitionEasing` controls how that transition progresses and defaults to `linear`.
 
 ## **Named effects**
 
@@ -1982,10 +1990,7 @@ const config = {
     'tilt-x': {
       keyframeEffect: {
         name: 'tilt-x',
-        keyframes: [
-          { transform: 'rotateY(-12deg)' },
-          { transform: 'rotateY(12deg)' },
-        ],
+        keyframes: [{ transform: 'rotateY(-12deg)' }, { transform: 'rotateY(12deg)' }],
       },
       easing: 'linear',
       composite: 'add',
@@ -1994,10 +1999,7 @@ const config = {
     'tilt-y': {
       keyframeEffect: {
         name: 'tilt-y',
-        keyframes: [
-          { transform: 'rotateX(12deg)' },
-          { transform: 'rotateX(-12deg)' },
-        ],
+        keyframes: [{ transform: 'rotateX(12deg)' }, { transform: 'rotateX(-12deg)' }],
       },
       easing: 'linear',
       composite: 'add',
@@ -2033,10 +2035,7 @@ const config = {
           customEffect: (element, progress) => {
             const x = progress.x * 100;
             const y = progress.y * 100;
-            const velocity = Math.hypot(
-              progress.v?.x ?? 0,
-              progress.v?.y ?? 0,
-            );
+            const velocity = Math.hypot(progress.v?.x ?? 0, progress.v?.y ?? 0);
             const radius = 120 + Math.min(velocity / 40, 1) * 80;
 
             element.style.backgroundImage =
@@ -2057,14 +2056,14 @@ Result: the spotlight follows the pointer and grows when the pointer moves faste
 
 A Flash of Unstyled Content (FOUC) can occur when the target first renders in its base style and changes after the pointer interaction starts. Jitter can occur when an effect moves its own hit area, causing the pointer to repeatedly enter and leave it.
 
-- Keep the hit area stationary. If an effect moves or scales content, animate a child or a separate target instead of the source.  
+- Keep the hit area stationary. If an effect moves or scales content, animate a child or a separate target instead of the source.
 - For `keyframeEffect`, use `fill: 'both'` and define a suitable base style so the target does not jump between states.
 
 # 🧑‍💻 animationEnd
 
 ## **Owner: [Idan Levi](mailto:idanlev@wix.com) Reviewer: [Marine Bretonniere](mailto:marinebr@wix.com)**
 
-# 
+#
 
 # AnimationEnd
 
@@ -2156,12 +2155,12 @@ Give the produced effect its own `effectId`, then add another `animationEnd` int
 
 ## **Important rules**
 
-- Only time-based effects with an effectId can be observed by animationEnd.  
-- The source `key` should match the element where the preceding animation finishes, not necessarily the element that originally triggered it.  
-- Unrelated animations finishing on the same element do not activate the chain.  
-- A canceled or interrupted animation does not count as completed.  
-- Do not wait for an effect produced by the same `animationEnd` interaction; it can never start.  
-- Avoid circular chains where effects wait for one another.  
+- Only time-based effects with an effectId can be observed by animationEnd.
+- The source `key` should match the element where the preceding animation finishes, not necessarily the element that originally triggered it.
+- Unrelated animations finishing on the same element do not activate the chain.
+- A canceled or interrupted animation does not count as completed.
+- Do not wait for an effect produced by the same `animationEnd` interaction; it can never start.
+- Avoid circular chains where effects wait for one another.
 - Use `animationEnd` instead of matching delays manually. The chain remains correct when an earlier animation’s duration changes.
 
 # effects
@@ -2174,7 +2173,7 @@ Give the produced effect its own `effectId`, then add another `animationEnd` int
 
 # What Are Effects?
 
-An **Effect** is the visual change an interaction produces, what actually animates, and how. Every interaction connects a trigger to one or more effects; the trigger decides the *when*, the effect decides the *what*.
+An **Effect** is the visual change an interaction produces, what actually animates, and how. Every interaction connects a trigger to one or more effects; the trigger decides the _when_, the effect decides the _what_.
 
 ## **Two ways to classify an effect**
 
@@ -2182,20 +2181,20 @@ Effects vary along two independent axes. Keep them separate in your head — the
 
 **1\. What drives the effect** (its timing model):
 
-| Kind | Driven by | Used with triggers |
-| :---- | :---- | :---- |
-| **Time Effect** | a fixed `duration` — it plays from start to finish | `hover`, `click`, `viewEnter`, `animationEnd` |
-| **Scrub Effect** | continuous progress, from scroll position or pointer movement | `viewProgress`, `pointerMove` |
-| **State Effect** | a CSS state toggle, transitioned over time | `hover`, `click` |
+| Kind             | Driven by                                                     | Used with triggers                            |
+| :--------------- | :------------------------------------------------------------ | :-------------------------------------------- |
+| **Time Effect**  | a fixed `duration` — it plays from start to finish            | `hover`, `click`, `viewEnter`, `animationEnd` |
+| **Scrub Effect** | continuous progress, from scroll position or pointer movement | `viewProgress`, `pointerMove`                 |
+| **State Effect** | a CSS state toggle, transitioned over time                    | `hover`, `click`                              |
 
 > `hover` and `click` can drive **either** a Time Effect or a State Effect — you choose by which fields you set (see `triggerType` vs `stateAction` below). Scrub effects are the only kind bound to specific triggers.
 
-**2\. How you describe the change** (its *payload*). Every effect carries **exactly one**:
+**2\. How you describe the change** (its _payload_). Every effect carries **exactly one**:
 
-- **`namedEffect`**: a ready-made preset from `@wix/motion-presets` (e.g. `FadeIn`, `Pulse`, `ParallaxScroll`). Tuned and GPU-friendly.  
-- **`keyframeEffect`**:  your own WAAPI keyframes (`{ name, keyframes }`).  
-- **`customEffect`**:  an imperative callback run every frame; for things CSS can't express (canvas, SVG attributes, text).  
-- **`transition` / `transitionProperties`**: CSS style toggles; these *are* what makes an effect a State Effect.
+- **`namedEffect`**: a ready-made preset from `@wix/motion-presets` (e.g. `FadeIn`, `Pulse`, `ParallaxScroll`). Tuned and GPU-friendly.
+- **`keyframeEffect`**: your own WAAPI keyframes (`{ name, keyframes }`).
+- **`customEffect`**: an imperative callback run every frame; for things CSS can't express (canvas, SVG attributes, text).
+- **`transition` / `transitionProperties`**: CSS style toggles; these _are_ what makes an effect a State Effect.
 
 Time and Scrub effects animate using `@wix/motion` under the hood and can pull in presets from `@wix/motion-presets`. State effects use plain CSS transitions.
 
@@ -2222,13 +2221,13 @@ These fields apply to any effect:
 
 ### **`fill` guidance**
 
-- **`'Both'`**:  for scroll-driven (`viewProgress`), pointer-driven (`pointerMove`), and any toggling effect (`triggerType` of `alternate`, `repeat`, or `state`). Keeps the effect applied while finished and prevents it from being garbage-collected.  
+- **`'Both'`**: for scroll-driven (`viewProgress`), pointer-driven (`pointerMove`), and any toggling effect (`triggerType` of `alternate`, `repeat`, or `state`). Keeps the effect applied while finished and prevents it from being garbage-collected.
 - **`'backwards'`**: for one-shot entrances (`triggerType: 'once'`) when the element's own resting CSS already matches the final keyframe.
 
 ### **`composite` (how this effect combines with others on the same property)**
 
-- **`'replace'`** (default) — overrides prior values.  
-- **`'add'`** — appends transform/filter functions after existing ones.  
+- **`'replace'`** (default) — overrides prior values.
+- **`'add'`** — appends transform/filter functions after existing ones.
 - **`'accumulate'`** — sums arguments of matching functions (`translateX(10px)` \+ `translateX(20px)` → `translateX(30px)`).
 
 ---
@@ -2253,14 +2252,14 @@ Play over a fixed duration. Used with `hover`, `click`, `viewEnter`, and `animat
 
 ### **`triggerType` — playback behavior**
 
-| `triggerType` | hover | click | viewEnter |
-| :---- | :---- | :---- | :---- |
+| `triggerType` | hover                              | click                         | viewEnter                          |
+| :------------ | :--------------------------------- | :---------------------------- | :--------------------------------- |
 | `'alternate'` | play in on enter, reverse on leave | toggle play/reverse per click | play in on enter, reverse on leave |
-| `'repeat'` | restart on each enter | restart per click | restart on each entry |
-| `'once'` | play once, first enter only | play once, first click only | play once, first entry only |
-| `'state'` | play on enter, pause on leave | toggle play/pause per click | play on enter, pause on leave |
+| `'repeat'`    | restart on each enter              | restart per click             | restart on each entry              |
+| `'once'`      | play once, first enter only        | play once, first click only   | play once, first entry only        |
+| `'state'`     | play on enter, pause on leave      | toggle play/pause per click   | play on enter, pause on leave      |
 
-> 
+>
 
 > **Important:** For `viewEnter`, `repeat`/`alternate`/`state` require **separate** source and target elements. Animating the observed element itself can make it leave/re-enter the viewport and re-trigger. Same source-and-target is safe only with `once`.
 
@@ -2331,12 +2330,12 @@ Use `transition` when all properties share timing; use `transitionProperties` wh
 }
 ```
 
-| `stateAction` | hover | click |
-| :---- | :---- | :---- |
+| `stateAction`        | hover                               | click            |
+| :------------------- | :---------------------------------- | :--------------- |
 | `'toggle'` (default) | add state on enter, remove on leave | toggle per click |
-| `'add'` | add on enter; leave does not remove | add on click |
-| `'remove'` | remove on enter | remove on click |
-| `'clear'` | reset all states on enter | reset all states |
+| `'add'`              | add on enter; leave does not remove | add on click     |
+| `'remove'`           | remove on enter                     | remove on click  |
+| `'clear'`            | reset all states on enter           | reset all states |
 
 CSS property names use **camelCase** (`backgroundColor`, `borderRadius`).
 
@@ -2533,7 +2532,7 @@ Use a `customEffect` callback when CSS can't express the change. It receives the
 
 Animate properties the browser can composite cheaply:
 
-- ✅ `transform` (translate, scale, rotate), `opacity`, `filter`  
+- ✅ `transform` (translate, scale, rotate), `opacity`, `filter`
 - ⚠️ Avoid layout/paint-triggering properties: `width`, `height`, `margin`, `padding`, `top`, `left` — they force reflow.
 
 Prefer `namedEffect` presets over hand-written keyframes where one fits — they're tuned by `@wix/motion`:
@@ -2586,24 +2585,24 @@ You can also force this globally: `Interact.forceReducedMotion = matchMedia('(pr
 
 ---
 
-## 
+##
 
 ## **Timing & easing reference**
 
 Rough starting points (tune to taste):
 
-| Use | Duration |
-| :---- | :---- |
-| Micro-interactions (hover, click) | 100–300 ms |
-| Page transitions | 300–500 ms |
-| Entrance animations | 500–800 ms |
-| Complex sequences | 800–1200 ms |
+| Use                               | Duration    |
+| :-------------------------------- | :---------- |
+| Micro-interactions (hover, click) | 100–300 ms  |
+| Page transitions                  | 300–500 ms  |
+| Entrance animations               | 500–800 ms  |
+| Complex sequences                 | 800–1200 ms |
 
-| Use | Easing |
-| :---- | :---- |
-| Entrances | `ease-out`, `cubic-bezier(0.16, 1, 0.3, 1)` |
-| Exits | `ease-in`, `cubic-bezier(0.4, 0, 1, 1)` |
-| Interactions | `ease-in-out` |
+| Use                 | Easing                                                                |
+| :------------------ | :-------------------------------------------------------------------- |
+| Entrances           | `ease-out`, `cubic-bezier(0.16, 1, 0.3, 1)`                           |
+| Exits               | `ease-in`, `cubic-bezier(0.4, 0, 1, 1)`                               |
+| Interactions        | `ease-in-out`                                                         |
 | Elastic / overshoot | `cubic-bezier(0.34, 1.56, 0.64, 1)`, or a named easing like `backOut` |
 
 # 🧑‍🌾 Named Effects
@@ -2626,12 +2625,12 @@ You use one by giving an effect a `namedEffect` payload instead of a `keyframeEf
 
 Presets come in four categories, each built for a particular kind of motion (and therefore a particular trigger):
 
-| Category | Built for | Typical trigger | Count |
-| :---- | :---- | :---- | :---- |
-| **Entrance** | An element appearing | `viewEnter` (also `hover`, `click`, `animationEnd`) | 19 |
-| **Scroll** | Motion tied to scroll position | `viewProgress` | 19 |
-| **Ongoing** | A continuous, looping animation | any trigger, with `iterations: Infinity` | 13 |
-| **Mouse** | Real-time response to the pointer | `pointerMove` | 11 |
+| Category     | Built for                         | Typical trigger                                     | Count |
+| :----------- | :-------------------------------- | :-------------------------------------------------- | :---- |
+| **Entrance** | An element appearing              | `viewEnter` (also `hover`, `click`, `animationEnd`) | 19    |
+| **Scroll**   | Motion tied to scroll position    | `viewProgress`                                      | 19    |
+| **Ongoing**  | A continuous, looping animation   | any trigger, with `iterations: Infinity`            | 13    |
+| **Mouse**    | Real-time response to the pointer | `pointerMove`                                       | 11    |
 
 ### **All available named effects**
 
@@ -2789,7 +2788,7 @@ There are **two distinct groups of options**, and mixing them up is the most com
 
 \*\*Don't guess preset options.\*\* Option names and accepted values differ per preset. If you're unsure, omit them and rely on the preset's defaults. See the API Reference for each preset's options. A couple of cross-preset conventions worth knowing:
 
-- **`direction` is overloaded** — it means different things per preset. `SlideIn`/`FloatIn` take cardinal values (`top | right | bottom | left`), `WinkIn` takes an axis (`horizontal | vertical`), `GlideIn` takes an angle (`0–360`), `SpinIn` takes `clockwise | counter-clockwise`, etc. Check the preset's reference.  
+- **`direction` is overloaded** — it means different things per preset. `SlideIn`/`FloatIn` take cardinal values (`top | right | bottom | left`), `WinkIn` takes an axis (`horizontal | vertical`), `GlideIn` takes an angle (`0–360`), `SpinIn` takes `clockwise | counter-clockwise`, etc. Check the preset's reference.
 - **Distances use object notation** — `distance: { value: 120, unit: 'px' }` (units: `px`, `em`, `rem`, `vh`, `vw`, `vmin`, `vmax`, `percentage`). A flat string (`'120px'`) also works; pick one style and stay consistent.
 
 ---
@@ -2861,7 +2860,7 @@ Transform values are driven by the cursor in real time. Mouse presets handle 2D 
 }
 ```
 
-Mouse presets only make sense on hover-capable devices and may behave differently on touch. Gate them with a \`(hover: hover)\` media condition and consider a \`viewEnter\`/\`viewProgress\` fallback for touch. 
+Mouse presets only make sense on hover-capable devices and may behave differently on touch. Gate them with a \`(hover: hover)\` media condition and consider a \`viewEnter\`/\`viewProgress\` fallback for touch.
 
 ---
 
@@ -2902,7 +2901,7 @@ Common reduced-motion fallbacks: `BounceIn`/`SpinIn`/`ArcIn`/`FlipIn`/`TurnIn` �
 
 Time effects are traditional time-based animations perfect for entrance effects, hover interactions, and click responses.
 
-Named effects are pre-built animations from \`@wix/motion-presets\` or effects registered via \`Interact.registerEffects()\`: 
+Named effects are pre-built animations from \`@wix/motion-presets\` or effects registered via \`Interact.registerEffects()\`:
 
 ````
 ```typescript
@@ -2920,7 +2919,7 @@ Named effects are pre-built animations from \`@wix/motion-presets\` or effects r
 
 Use keyframeEffect when you need a custom animation that isn’t covered by a named effect. The keyframeEffect payload takes a \`name\` (used to generate the underlying CSS keyframes rule) and a \`keyframes\` array of WAAPI-style keyframe objects. Give every keyframeEffect a unique name within the config so its generated keyframes rule doesn’t collide with another effect.
 
-For custom animations, use keyframe effects: 
+For custom animations, use keyframe effects:
 
 ````
 ```typescript
@@ -3067,7 +3066,7 @@ A single viewProgress trigger drives two keyframeEffects at different rangeStart
 
 ---
 
-## 
+##
 
 ## **Transition effects**
 
@@ -3103,7 +3102,7 @@ Transition effects are only used with the hover and click triggers (and their ac
 
 ### **Individual property transitions**
 
-For different timing per property: 
+For different timing per property:
 
 The example above used a single transition block because every property (backgroundColor, color, and borderRadius) shares identical timing. Use transition whenever that is true. Reach for transitionProperties instead as soon as different properties need independent timing \- for example, a background fade that should be slower than an accompanying scale bounce. transitionProperties is an array where each entry names its own target property and value, and can override duration, delay, and easing individually, instead of inheriting one shared set of timing values.
 
@@ -3180,16 +3179,16 @@ Imperative effect callback for cases that are not well served by `namedEffect`, 
 
 Prefer the declarative options first:
 
-* Use `namedEffect` for registered reusable presets.  
-* Use `keyframeEffect` for standard WAAPI/CSS-keyframe animation.  
-* Use `transition` or `transitionProperties` for stateful CSS changes.
+- Use `namedEffect` for registered reusable presets.
+- Use `keyframeEffect` for standard WAAPI/CSS-keyframe animation.
+- Use `transition` or `transitionProperties` for stateful CSS changes.
 
 Use `customEffect` when you need JavaScript on every update in cases such as:
 
-* Animating SVG attributes such as `stroke-dashoffset`  
-* Updating counters or text content  
-* Driving canvas, WebGL, or third-party renderers  
-* Writing progress into CSS custom properties for more advanced styling
+- Animating SVG attributes such as `stroke-dashoffset`
+- Updating counters or text content
+- Driving canvas, WebGL, or third-party renderers
+- Writing progress into CSS custom properties for more advanced styling
 
 ## **Basic shape**
 
@@ -3217,9 +3216,9 @@ The first argument is the resolved target element. The second argument depends o
 
 For `viewEnter`, `pageVisible`, `hover`, `click`, `activate`, `interest`, and `animationEnd`, `progress` is a `number | null`.
 
-* `0` means the effect is at the beginning  
-* `1` means the effect is complete  
-* `null` is a one-time signal that the effect has stopped being active
+- `0` means the effect is at the beginning
+- `1` means the effect is complete
+- `null` is a one-time signal that the effect has stopped being active
 
 ```javascript
 {
@@ -3240,7 +3239,7 @@ For `viewEnter`, `pageVisible`, `hover`, `click`, `activate`, `interest`, and `a
 
 For `viewProgress`, `progress` is also `number | null`, but it is driven by scroll position instead of time.
 
-* Use `rangeStart` and `rangeEnd` to control when progress maps from `0` to `1.` See [`viewprogress` chapter]()
+- Use `rangeStart` and `rangeEnd` to control when progress maps from `0` to `1.` See [`viewprogress` chapter]()
 
 ```javascript
 {
@@ -3271,9 +3270,9 @@ type PointerProgress = {
 };
 ```
 
-* `x` and `y` are normalized pointer progress values, usually based on the hit area, and remapped when `centeredToTarget` is enabled (see more in pointerMove)  
-* `v` is the optional velocity vector  
-* `active` indicates whether the pointer is currently active
+- `x` and `y` are normalized pointer progress values, usually based on the hit area, and remapped when `centeredToTarget` is enabled (see more in pointerMove)
+- `v` is the optional velocity vector
+- `active` indicates whether the pointer is currently active
 
 ```javascript
 {
@@ -3308,11 +3307,11 @@ When a custom animation is cancelled, the runtime calls the callback with `progr
 
 Use it to:
 
-* Clear inline styles  
-* Restore text content  
-* Reset CSS variables  
-* Return the element to a neutral visual state  
-* 
+- Clear inline styles
+- Restore text content
+- Reset CSS variables
+- Return the element to a neutral visual state
+-
 
 ```javascript
 customEffect: (element, progress) => {
@@ -3338,7 +3337,7 @@ if (progress === null) {
 
 # **What is an Interaction?**
 
-*\[Visual example: A scroll-based interaction. As the user enters the section, the headline appears, cards reveal one by one, and background elements animate into place.\]*
+_\[Visual example: A scroll-based interaction. As the user enters the section, the headline appears, cards reveal one by one, and background elements animate into place.\]_
 
 The example above is powered by an Interaction.
 
@@ -3356,9 +3355,9 @@ The section enters the viewport.
 
 **Effects**
 
-* Reveal the headline  
-* Stagger the cards  
-* Animate the background elements
+- Reveal the headline
+- Stagger the cards
+- Animate the background elements
 
 When the trigger occurs, Interact runs the connected effects and sequences to create the complete experience.
 
@@ -3394,9 +3393,9 @@ Multiple effects.
 
 # Source and Target Resolving
 
-Every interaction in Interact binds a **trigger** to one or more **effects**. That binding is the key to a lot of the library's flexibility: because the trigger and the effect are described separately, the element that *listens* for the interaction (the **source**) does not have to be the element that gets *animated* (the **target**).
+Every interaction in Interact binds a **trigger** to one or more **effects**. That binding is the key to a lot of the library's flexibility: because the trigger and the effect are described separately, the element that _listens_ for the interaction (the **source**) does not have to be the element that gets _animated_ (the **target**).
 
-- The **source** is where the trigger attaches — the element that is hovered, clicked, scrolled into view, or moved over.  
+- The **source** is where the trigger attaches — the element that is hovered, clicked, scrolled into view, or moved over.
 - The **target** is where the effect runs — the element that fades, moves, scales, or changes color.
 
 For the majority of interactions the source and the target are the same element, and you never have to think about the distinction. But when they differ, this chapter explains exactly how each element is located.
@@ -3456,13 +3455,13 @@ These four fields appear on the interaction (describing the **source**) and on e
 
 `key` is the primary identifier and the only required field. It matches the value you assign when binding an element:
 
-| Integration | How the key is assigned |
-| :---- | :---- |
-| Web | `data-interact-key="hero"` on `<interact-element>` |
-| React | `interactKey="hero"` on `<Interaction>` |
-| Vanilla JS | `add(element, 'hero')` (or a `data-interact-key` attribute) |
+| Integration | How the key is assigned                                     |
+| :---------- | :---------------------------------------------------------- |
+| Web         | `data-interact-key="hero"` on `<interact-element>`          |
+| React       | `interactKey="hero"` on `<Interaction>`                     |
+| Vanilla JS  | `add(element, 'hero')` (or a `data-interact-key` attribute) |
 
-On the interaction, `key` is mandatory — the trigger has to attach *somewhere*. On the effect, `key` is **optional**: when you omit it, the effect inherits the interaction's `key`, so the effect targets the same root as the source. This is what makes self-targeting effects so concise:
+On the interaction, `key` is mandatory — the trigger has to attach _somewhere_. On the effect, `key` is **optional**: when you omit it, the effect inherits the interaction's `key`, so the effect targets the same root as the source. This is what makes self-targeting effects so concise:
 
 ```ts
 {
@@ -3487,13 +3486,13 @@ Interact compares the **whole** `ElementIdentifier` — all four fields, not jus
 
 ## **When source and target differ: FOUC and refined targets**
 
-Entrance animations are a good illustration of why you sometimes *want* the source and target to differ. An element with an entrance effect (say `viewEnter` \+ `FadeIn`) is styled in its final, visible state. Before the runtime applies the animation's starting keyframe (e.g. `opacity: 0`), the element flashes at full opacity — a **Flash Of Un-styled Content (FOUC)**.
+Entrance animations are a good illustration of why you sometimes _want_ the source and target to differ. An element with an entrance effect (say `viewEnter` \+ `FadeIn`) is styled in its final, visible state. Before the runtime applies the animation's starting keyframe (e.g. `opacity: 0`), the element flashes at full opacity — a **Flash Of Un-styled Content (FOUC)**.
 
 To prevent this, `generate()` emits the applied animation effect, plus initial-state CSS that may be required for first paint in special cases. The moment the identifiers diverge, Interact considers them separate elements and does not auto-generate that special initial state.
 
 In some cases it is required to separate source and target elements. Animating the very element you observe or hover can be counter-productive:
 
-- A `viewEnter` effect that moves or resizes the observed element can push it back out of (or into) the viewport, causing it to re-trigger.  
+- A `viewEnter` effect that moves or resizes the observed element can push it back out of (or into) the viewport, causing it to re-trigger.
 - A `hover` or `pointerMove` effect that scales or translates the hovered element shifts its own hit-area, producing jittery enter/leave cycles.
 
 The fix is to keep the trigger on a stable outer element and refine the **target** down to an inner child with `selector`:
@@ -3531,7 +3530,7 @@ The fix is to keep the trigger on a stable outer element and refine the **target
 
 This is the most important rule to internalize: `selector`, `listContainer`, and `listItemSelector` **behave differently depending on where they appear**.
 
-- On the **interaction**, they refine the **source** — which element the trigger attaches to.  
+- On the **interaction**, they refine the **source** — which element the trigger attaches to.
 - On the **effect**, they refine the **target** — which element the animation runs on.
 
 And unlike `key`, they are **not inherited** from the interaction to the effect. Omitting `key` on an effect makes it fall back to the interaction's key; omitting `selector` on an effect does **not** make it fall back to the interaction's `selector`.
@@ -3626,15 +3625,15 @@ Lists are also the foundation for staggered, coordinated animations. For the ful
 
 Both the source (on the interaction) and the target (on the effect) resolve through the same steps. The only difference between them is the starting `key`:
 
-1. **Determine the root `key`.**  
-   - On the **interaction**, `key` is required.  
-   - On the **effect**, use the effect's own `key`; if omitted, fall back to the referenced registry entry's `key` (for an `EffectRef`), and finally to the interaction's `key`.  
-   - Resolve that key to a root element: the element registered for the key (React / Vanilla), or its first child (Web `<interact-element>`).  
-2. **If `listContainer` is set**, find the container inside the root, then pick the elements within it:  
-   - with `listItemSelector` → every descendant matching `listItemSelector`;  
-   - with `selector` → `querySelector` within each direct child of the container;  
-   - alone → every direct child of the container.  
-3. **Else if `selector` is set**, use `querySelector` within the root to select first matching descendant.  
+1. **Determine the root `key`.**
+   - On the **interaction**, `key` is required.
+   - On the **effect**, use the effect's own `key`; if omitted, fall back to the referenced registry entry's `key` (for an `EffectRef`), and finally to the interaction's `key`.
+   - Resolve that key to a root element: the element registered for the key (React / Vanilla), or its first child (Web `<interact-element>`).
+2. **If `listContainer` is set**, find the container inside the root, then pick the elements within it:
+   - with `listItemSelector` → every descendant matching `listItemSelector`;
+   - with `selector` → `querySelector` within each direct child of the container;
+   - alone → every direct child of the container.
+3. **Else if `selector` is set**, use `querySelector` within the root to select first matching descendant.
 4. **Else**, use the root itself (React / Vanilla) or the root's first child (Web).
 
 The resulting element(s) become the **source** when the identifier is on an interaction, or the **target** when it is on an effect. Two identifiers that are equal across all four fields resolve to the same element(s); any difference makes them distinct.
@@ -3717,7 +3716,7 @@ To play multiple animations together on one element, use a **sequence** instead.
 
 An interaction can also hold an array of `sequences`, and it behaves just like the `effects` array at the top level: every sequence fires from the same trigger, and each sequence can carry its own `conditions`, so the array defines the same kind of conditional cascade.
 
-The difference is what happens **inside** each entry. Where two effects targeting the same element in the `effects` array override each other, the effects *within a single sequence* can coexist on the same target — they're merged into one coordinated timeline rather than competing for the element's `animation` property. That's exactly why sequences are the right choice for layering animations on one element.
+The difference is what happens **inside** each entry. Where two effects targeting the same element in the `effects` array override each other, the effects _within a single sequence_ can coexist on the same target — they're merged into one coordinated timeline rather than competing for the element's `animation` property. That's exactly why sequences are the right choice for layering animations on one element.
 
 ## **The array as a cascade: conditional, responsive effects**
 
@@ -3775,8 +3774,8 @@ This is what makes rich, layered motion possible. A single element can react to 
 
 Here is a feature card that is alive on three axes simultaneously:
 
-- it **drifts upward as you scroll** (`viewProgress`),  
-- it **tilts in 3D toward the cursor** (`pointerMove`, driven from the surrounding section),  
+- it **drifts upward as you scroll** (`viewProgress`),
+- it **tilts in 3D toward the cursor** (`pointerMove`, driven from the surrounding section),
 - and it **scales up on hover** (`hover`).
 
 Each behavior is its own interaction, and all three effects target `feature-card`:
@@ -3811,9 +3810,9 @@ const config = {
         {
           key: 'feature-card', // TARGET — the same card
           keyframeEffect: {
-     name: 'card-tilt',
+            name: 'card-tilt',
             keyframes: [{ transform: 'rotateX(-15deg)' }, { transform: 'rotateX(15deg)' }],
-   },
+          },
           centeredToTarget: true, // 0.5 progress = pointer over the card's center
           fill: 'both',
           composite: 'add',
@@ -3866,8 +3865,8 @@ Effects that come from **separate** interactions behave the opposite way: each i
 
 When two animations on an element animate the same property, the default behavior (`composite: 'replace'`) is that each fully replaces the value beneath it, so only one contribution to that property is visible at a time. To make them blend, set `composite` on the effects that should stack:
 
-- **`'replace'`** (default) — the animation fully replaces the underlying value of the property.  
-- **`'add'`** — appends this animation's transform/filter functions after the existing ones (e.g. an underlying `translateY(…)` plus an added `rotate(…)` and `scale(…)` all apply together).  
+- **`'replace'`** (default) — the animation fully replaces the underlying value of the property.
+- **`'add'`** — appends this animation's transform/filter functions after the existing ones (e.g. an underlying `translateY(…)` plus an added `rotate(…)` and `scale(…)` all apply together).
 - **`'accumulate'`** — merges the arguments of matching functions (e.g. `translateX(10px)` \+ `translateX(20px)` → `translateX(30px)`), while non-matching functions concatenate like `'add'`.
 
 In the composition above, the parallax is the base layer, and the tilt and hover effects use `composite: 'add'` so their transforms are added on top of it rather than clobbering it. `composite` maps directly to the CSS `animation-composition` property — see [MDN: `animation-composition`](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-composition) for the underlying semantics.
@@ -3907,16 +3906,16 @@ const config: InteractConfig = {
 };
 ```
 
-> **Info:** Conditions never *cause* an interaction — a trigger does. They only decide whether a triggered interaction is permitted to run in the current environment.
+> **Info:** Conditions never _cause_ an interaction — a trigger does. They only decide whether a triggered interaction is permitted to run in the current environment.
 
 ## **Defining conditions**
 
 Every condition has two fields:
 
-| Field | Type | Description |
-| :---- | :---- | :---- |
-| `type` | `'media'` | `'selector'` | How the condition is evaluated. |
-| `predicate` | `string` | The query or selector to test, matching the `type`. |
+| Field       | Type      | Description                                         |
+| :---------- | :-------- | :-------------------------------------------------- | ------------------------------- |
+| `type`      | `'media'` | `'selector'`                                        | How the condition is evaluated. |
+| `predicate` | `string`  | The query or selector to test, matching the `type`. |
 
 ```ts
 {
@@ -3971,11 +3970,11 @@ The predicate is applied via CSS `:is(...)`, so the rule takes effect only while
 
 Reference conditions by ID from a `conditions: string[]` array at three levels. **All listed conditions must pass** (they combine with AND).
 
-| Level | Effect when it fails |
-| :---- | :---- |
+| Level           | Effect when it fails                                             |
+| :-------------- | :--------------------------------------------------------------- |
 | **Interaction** | The entire interaction (all its effects and sequences) is gated. |
-| **Effect** | Only that individual effect is gated. |
-| **Sequence** | The whole sequence is gated. |
+| **Effect**      | Only that individual effect is gated.                            |
+| **Sequence**    | The whole sequence is gated.                                     |
 
 ```ts
 {
@@ -3995,7 +3994,7 @@ Reference conditions by ID from a `conditions: string[]` array at three levels. 
 
 > **Note:** Combine conditions by listing multiple IDs — `conditions: ['desktop', 'can-hover']` runs only when **both** match. Multiple `media` predicates are merged into a single `and`\-joined media query.
 
-## 
+##
 
 ## **Reduced motion**
 
@@ -4032,9 +4031,9 @@ Condition IDs referenced from `conditions: [...]` arrays must exist in the top-l
 
 ## **See also**
 
-- [Configuration structure](http://ADDLINK)  
-- [Effects](http://ADDLINK)  
-- [Sequences](http://ADDLINK)  
+- [Configuration structure](http://ADDLINK)
+- [Effects](http://ADDLINK)
+- [Sequences](http://ADDLINK)
 - [Validating a config](http://ADDLINK)
 
 # 🧑‍💻 responsive animation design
@@ -4049,9 +4048,9 @@ Conditions let you adapt interactions to different screen sizes, container sizes
 
 When multiple effects in the same `effects` array target the same element and animate the same output, Interact resolves them in order, similarly to CSS:
 
-* The effects must belong to the same interaction  
-* The effects must target the same element  
-* If multiple matching effects overlap, later ones take precedence over earlier ones
+- The effects must belong to the same interaction
+- The effects must target the same element
+- If multiple matching effects overlap, later ones take precedence over earlier ones
 
 For responsive variants, this means you can define a base effect first, then layer more specific breakpoint overrides after it.
 
@@ -4132,10 +4131,10 @@ const responsiveConfig: InteractConfig = {
 
 In this example:
 
-* Mobile is the base behavior  
-* Tablet overrides mobile starting at `768px`  
-* Desktop overrides tablet starting at `1024px`  
-* The order matters: base first, more specific variants later
+- Mobile is the base behavior
+- Tablet overrides mobile starting at `768px`
+- Desktop overrides tablet starting at `1024px`
+- The order matters: base first, more specific variants later
 
 ## **Combining multiple responsive signals**
 
@@ -4202,8 +4201,8 @@ Sometimes the right responsive behavior is not just a milder or stronger version
 
 For example:
 
-* On mobile, a menu should open on tap  
-* On desktop, navigation should respond to hover
+- On mobile, a menu should open on tap
+- On desktop, navigation should respond to hover
 
 In that case, use separate interactions rather than trying to cascade effect variants inside one interaction.
 
@@ -4303,7 +4302,7 @@ Always provide a motion-safe alternative when the primary interaction depends on
 
 ## **Owner: [Hassan Kittany](mailto:hassank@wix.com) Reviewer: [Michael Be\`eri](mailto:michaelb@wix.com)**
 
-#  What is a List?
+# What is a List?
 
 A **list** is Interact's way of applying a single interaction definition to a whole collection of sibling elements at once — the children of a container — instead of writing a separate interaction for each one.
 
@@ -4346,15 +4345,15 @@ Without a list, that would be one interaction per card. With a list, it's one de
 
 ## **Why lists exist**
 
-- **One definition, many elements.** Describe the behavior once; it applies to every item in the container.  
-- **Dynamic content.** Interact watches the container and applies interactions to items added later, and cleans up items that are removed — no re-wiring. This is what makes lists ideal for feeds, search results, carts, and infinite scroll.  
-- **Consistency.** Every item behaves identically because they share one definition.  
+- **One definition, many elements.** Describe the behavior once; it applies to every item in the container.
+- **Dynamic content.** Interact watches the container and applies interactions to items added later, and cleans up items that are removed — no re-wiring. This is what makes lists ideal for feeds, search results, carts, and infinite scroll.
+- **Consistency.** Every item behaves identically because they share one definition.
 - **Staggering.** Lists are the foundation for staggered, one-after-another animations (see **Sequences**).
 
 ## **The container and its items**
 
-- **`listContainer`** — a CSS selector for the container element, resolved *within* the keyed `<interact-element>`. So the keyed element wraps the container, and the container holds the items. **This is what establishes a list.**  
-- **Items** — by default, the container's **immediate children**.  
+- **`listContainer`** — a CSS selector for the container element, resolved _within_ the keyed `<interact-element>`. So the keyed element wraps the container, and the container holds the items. **This is what establishes a list.**
+- **Items** — by default, the container's **immediate children**.
 - **`listItemSelector`** — an optional filter that narrows the list to the children matching it (`.container > .listItemSelector`). Omit it and every immediate child participates; provide it (e.g. `.active`) to include only those children.
 
 Together, `listContainer` defines the list and `listItemSelector` refines which of its children take part:
@@ -4371,13 +4370,13 @@ Together, `listContainer` defines the list and `listItemSelector` refines which 
 
 ### **A list vs. a plain multi-select**
 
-`listContainer` isn't the only way to touch *several* elements — a `selector` alone matches via `querySelectorAll`, so it also fans an interaction across every match. But that's a **static, one-time query**: it has none of the list semantics.
+`listContainer` isn't the only way to touch _several_ elements — a `selector` alone matches via `querySelectorAll`, so it also fans an interaction across every match. But that's a **static, one-time query**: it has none of the list semantics.
 
-| Mechanism | Targets multiple elements? | A managed list? |
-| :---- | :---- | :---- |
-| `listContainer` | the container's children |  dynamic tracking \+ stagger |
-| `listContainer` \+ `listItemSelector` |  a filtered subset of children |  (filtered) |
-| `selector` only |  `querySelectorAll` matches |  static — no tracking, no coordination |
+| Mechanism                             | Targets multiple elements?    | A managed list?                       |
+| :------------------------------------ | :---------------------------- | :------------------------------------ |
+| `listContainer`                       | the container's children      | dynamic tracking \+ stagger           |
+| `listContainer` \+ `listItemSelector` | a filtered subset of children | (filtered)                            |
+| `selector` only                       | `querySelectorAll` matches    | static — no tracking, no coordination |
 
 The difference is what you get for free: a list is **dynamically tracked** (children added/removed are handled automatically) and can be **coordinated into a stagger** via a sequence. A `selector` multi-select is just "these elements, right now."
 
@@ -4385,10 +4384,10 @@ The difference is what you get for free: a list is **dynamically tracked** (chil
 
 Because both interactions and effects accept `listContainer`, you control the list on two axes:
 
-- **On the interaction** (the *source*) — the trigger attaches to **each item**. e.g. `hover` fires per card, when you hover *that* card.  
-- **On the effect** (the *target*) — the effect applies to **each item**.
+- **On the interaction** (the _source_) — the trigger attaches to **each item**. e.g. `hover` fires per card, when you hover _that_ card.
+- **On the effect** (the _target_) — the effect applies to **each item**.
 
-The common case uses the same container for both: each item is its own trigger *and* its own target (hover a card → that card animates). You can also combine `listContainer` with `selector` on the effect to animate a **child inside each item** — e.g. hovering a card zooms the `img` within it:
+The common case uses the same container for both: each item is its own trigger _and_ its own target (hover a card → that card animates). You can also combine `listContainer` with `selector` on the effect to animate a **child inside each item** — e.g. hovering a card zooms the `img` within it:
 
 ```ts
 {
@@ -4435,13 +4434,13 @@ For `viewEnter` entrance animations on a list that grows (e.g. loading more item
 
 ## **Lists and sequences**
 
-A list applies the *same* effect to every item, all firing together. To make items animate **one after another**  (a staggered cascade) combine a list with a **sequence**: the sequence's `offset` spaces each item's start, and its `offsetEasing` shapes how that spacing is distributed. New items added to the DOM rejoin the sequence with recalculated offsets.
+A list applies the _same_ effect to every item, all firing together. To make items animate **one after another** (a staggered cascade) combine a list with a **sequence**: the sequence's `offset` spaces each item's start, and its `offsetEasing` shapes how that spacing is distributed. New items added to the DOM rejoin the sequence with recalculated offsets.
 
 ## **Notes**
 
-- `listContainer` is resolved relative to the keyed element, so structure your markup as `<interact-element key> → container → items`.  
-- Prefer **one container** over many separate keys for large or dynamic lists — it's a single observer and a single definition, not one per item.  
-- `selector` targets a single child *within a root*; `listContainer` fans an interaction *across many children*. They compose (`listContainer` \+ `selector` \= "a child inside each item").
+- `listContainer` is resolved relative to the keyed element, so structure your markup as `<interact-element key> → container → items`.
+- Prefer **one container** over many separate keys for large or dynamic lists — it's a single observer and a single definition, not one per item.
+- `selector` targets a single child _within a root_; `listContainer` fans an interaction _across many children_. They compose (`listContainer` \+ `selector` \= "a child inside each item").
 
 # 🧑‍💻 using lists
 
@@ -4449,32 +4448,32 @@ A list applies the *same* effect to every item, all firing together. To make ite
 
 # **Using lists**
 
-Most real interfaces repeat a shape many times: product grids, feeds, galleries, navigation menus, search results. Wiring an interaction to each item by hand is tedious and breaks the moment the data changes. Interact solves this with **lists** \- you point one interaction at a *container*, and Interact applies the behavior to every child, keeps it in sync as items are added or removed, and can stagger them into a sequence.
+Most real interfaces repeat a shape many times: product grids, feeds, galleries, navigation menus, search results. Wiring an interaction to each item by hand is tedious and breaks the moment the data changes. Interact solves this with **lists** \- you point one interaction at a _container_, and Interact applies the behavior to every child, keeps it in sync as items are added or removed, and can stagger them into a sequence.
 
 ## **The three properties that define a list**
 
 A list is described by up to three properties, which appear **both** on the `Interaction` (the trigger side) and on the `Effect` (the target side):
 
-| Property | What it does |
-| :---- | :---- |
-| `listContainer` | A CSS selector, resolved **within the interaction's root element**, that finds the container holding the items. This is what turns an interaction into a list. |
-| `selector` | Optional. With `listContainer`, Interact runs `querySelectorAll(selector)` **inside the container** and treats each match as the target. Without it, every **direct child** of the container is a target. |
-| `listItemSelector` | Optional. Narrows which direct children count as list items when Interact generates CSS (for `transition` / state effects). Use it when the container also holds elements that are not items. |
+| Property           | What it does                                                                                                                                                                                              |
+| :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `listContainer`    | A CSS selector, resolved **within the interaction's root element**, that finds the container holding the items. This is what turns an interaction into a list.                                            |
+| `selector`         | Optional. With `listContainer`, Interact runs `querySelectorAll(selector)` **inside the container** and treats each match as the target. Without it, every **direct child** of the container is a target. |
+| `listItemSelector` | Optional. Narrows which direct children count as list items when Interact generates CSS (for `transition` / state effects). Use it when the container also holds elements that are not items.             |
 
 Two rules that trip people up:
 
-1. **`listContainer` is not inherited from the interaction to its effects.** If the trigger uses `listContainer`, each effect that should also operate per item must repeat it (and `selector`, if used). An effect without `listContainer` falls back to normal single-element selection.  
+1. **`listContainer` is not inherited from the interaction to its effects.** If the trigger uses `listContainer`, each effect that should also operate per item must repeat it (and `selector`, if used). An effect without `listContainer` falls back to normal single-element selection.
 2. The container selector is resolved **relative to the interaction's root element** (the element identified by `key`), not the whole document. With the Web Components entry that root is the `<interact-element>`; the container must live inside it.
 
 ## **A basic list entrance**
 
 The most common list interaction is a `viewEnter` entrance applied to each item. Note how `listContainer` appears on the interaction **and** on the effect.
 
-| `HTML` `<interact-element data-interact-key="feature-list">`   `<ul class="features">`     `<li>Fast</li>`     `<li>Declarative</li>`     `<li>Framework-agnostic</li>`     `<li>Accessible</li>`   `</ul>` `</interact-element>` |
-| :---- |
+| `HTML` `<interact-element data-interact-key="feature-list">` `<ul class="features">` `<li>Fast</li>` `<li>Declarative</li>` `<li>Framework-agnostic</li>` `<li>Accessible</li>` `</ul>` `</interact-element>` |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 
-| `TypeScript` `const config = {`   `interactions: [`     `{`       `key: "feature-list",`       `listContainer: ".features", // turns this into a list`       `trigger: "viewEnter",`       `params: { threshold: 0.15 },`       `effects: [`         `{`           `key: "feature-list",`           `listContainer: ".features", // repeat on the effect`           `keyframeEffect: {`             `name: "fade-up",`             `keyframes: [`               `{ opacity: "0", transform: "translateY(24px)" },`               `{ opacity: "1", transform: "translateY(0)" },`             `],`           `},`           `duration: 600,`           `easing: "ease-out",`           `fill: "both",`         `},`       `],`     `},`   `],` `};` `Interact.create(config);` |
-| :---- |
+| `TypeScript` `const config = {` `interactions: [` `{` `key: "feature-list",` `listContainer: ".features", // turns this into a list` `trigger: "viewEnter",` `params: { threshold: 0.15 },` `effects: [` `{` `key: "feature-list",` `listContainer: ".features", // repeat on the effect` `keyframeEffect: {` `name: "fade-up",` `keyframes: [` `{ opacity: "0", transform: "translateY(24px)" },` `{ opacity: "1", transform: "translateY(0)" },` `],` `},` `duration: 600,` `easing: "ease-out",` `fill: "both",` `},` `],` `},` `],` `};` `Interact.create(config);` |
+| :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 Each `<li>` now fades and slides up independently as the list scrolls into view. Add a fifth `<li>` to the markup and it animates too \- no config change required.
 
@@ -4484,11 +4483,11 @@ Each `<li>` now fades and slides up independently as the list scrolls into view.
 
 Combine `listContainer` with `selector` to reach a specific descendant of every item. Here the hover trigger listens on each card, and the effect zooms only the image inside that card:
 
-| `HTML` `<interact-element data-interact-key="gallery">`   `<div class="gallery-grid">`     `<figure class="gallery-item">`       `<img src="1.jpg" alt="" />`       `<figcaption class="overlay">View</figcaption>`     `</figure>`     `<figure class="gallery-item">`       `<img src="2.jpg" alt="" />`       `<figcaption class="overlay">View</figcaption>`     `</figure>`   `</div>` `</interact-element>` |
-| :---- |
+| `HTML` `<interact-element data-interact-key="gallery">` `<div class="gallery-grid">` `<figure class="gallery-item">` `<img src="1.jpg" alt="" />` `<figcaption class="overlay">View</figcaption>` `</figure>` `<figure class="gallery-item">` `<img src="2.jpg" alt="" />` `<figcaption class="overlay">View</figcaption>` `</figure>` `</div>` `</interact-element>` |
+| :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
-| `TypeScript` `{`   `key: 'gallery',`   `listContainer: '.gallery-grid',`   `selector: '.gallery-item', // trigger on each item`   `trigger: 'interest', // accessible hover (pointer + keyboard)`   `effects: [`     `{`       `key: 'gallery',`       `listContainer: '.gallery-grid',`       `selector: '.gallery-item img', // effect on the image within the item`       `keyframeEffect: {`         `name: 'zoom',`         `keyframes: [`           `{ transform: 'scale(1)' },`           `{ transform: 'scale(1.08)' },`         `],`       `},`       `duration: 300,`       `easing: 'ease-out',`       `fill: 'both',`     `},`   `],` `}` |
-| :---- |
+| `TypeScript` `{` `key: 'gallery',` `listContainer: '.gallery-grid',` `selector: '.gallery-item', // trigger on each item` `trigger: 'interest', // accessible hover (pointer + keyboard)` `effects: [` `{` `key: 'gallery',` `listContainer: '.gallery-grid',` `selector: '.gallery-item img', // effect on the image within the item` `keyframeEffect: {` `name: 'zoom',` `keyframes: [` `{ transform: 'scale(1)' },` `{ transform: 'scale(1.08)' },` `],` `},` `duration: 300,` `easing: 'ease-out',` `fill: 'both',` `},` `],` `}` |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 
 The interaction's `selector` and the effect's `selector` are independent \- the trigger element and the animated element can differ within the same item.
 
@@ -4496,24 +4495,24 @@ The interaction's `selector` and the effect's `selector` are independent \- the 
 
 This is the part that makes lists worth using. When an interaction (or effect) declares a `listContainer`, Interact attaches a `MutationObserver` to that container. From then on:
 
-* **Appending** a direct child to the container applies the list's interactions and effects to the new item automatically.  
-* **Removing** a direct child cleans up its listeners and removes it from any sequences.
+- **Appending** a direct child to the container applies the list's interactions and effects to the new item automatically.
+- **Removing** a direct child cleans up its listeners and removes it from any sequences.
 
-You do **not** need to call any imperative "add item" API \- mutating the DOM is enough. 
+You do **not** need to call any imperative "add item" API \- mutating the DOM is enough.
 
-| `TypeScript const config = {`   `interactions: [`     `{`       `key: 'feed',`       `listContainer: '.feed-items',`       `trigger: 'viewEnter',`       `effects: [`         `{`           `key: 'feed',`           `listContainer: '.feed-items',`           `triggerType: 'repeat', // re-arm so late arrivals animate too`           `keyframeEffect: {name: 'slide-in', keyframes: [...]}`         `},`       `],`     `},`   `],` `}; Interact.create(config); // Later - the new node animates automatically: document.querySelector('.feed-items').appendChild(makeItem('New post'));` |
-| :---- |
+| `TypeScript const config = {` `interactions: [` `{` `key: 'feed',` `listContainer: '.feed-items',` `trigger: 'viewEnter',` `effects: [` `{` `key: 'feed',` `listContainer: '.feed-items',` `triggerType: 'repeat', // re-arm so late arrivals animate too` `keyframeEffect: {name: 'slide-in', keyframes: [...]}` `},` `],` `},` `],` `}; Interact.create(config); // Later - the new node animates automatically: document.querySelector('.feed-items').appendChild(makeItem('New post'));` |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 Two things to keep in mind:
 
-* Only **direct children** of the container are tracked. Wrapping items in an extra layer moves them out of view of the observer.  
-* Use `triggerType: 'repeat'` on the effect when items arrive after the initial trigger fired (infinite scroll, "load more", live feeds), so the animation is armed to run again rather than only once.
+- Only **direct children** of the container are tracked. Wrapping items in an extra layer moves them out of view of the observer.
+- Use `triggerType: 'repeat'` on the effect when items arrive after the initial trigger fired (infinite scroll, "load more", live feeds), so the animation is armed to run again rather than only once.
 
 # 🧑‍🌾 what is a sequence?
 
 ## **Owner: [Monty Alon](mailto:montya@wix.com) Reviewer: [Michael Be\`eri](mailto:michaelb@wix.com)**
 
-#  What is a Sequence?
+# What is a Sequence?
 
 A **Sequence** coordinates several Effects, possibly with staggered timing, so they are fired and controlled as one orchestrated group instead of multiple single Effects.
 
@@ -4521,9 +4520,9 @@ Instead of manually wiring up independent timelines or guessing escalating delay
 
 ### **Why sequences exist**
 
-* **One orchestrated group:** Bundles multiple visual changes across the page and triggers them as a single cohesive unit.  
-* **Staggering made easy:** Effortlessly creates waterfalls of motion (e.g., elements in a layout revealing one after another).  
-* **Dynamic content recalculation:** When paired with lists, newly appended items automatically rejoin the sequence with properly calculated timeline offsets.
+- **One orchestrated group:** Bundles multiple visual changes across the page and triggers them as a single cohesive unit.
+- **Staggering made easy:** Effortlessly creates waterfalls of motion (e.g., elements in a layout revealing one after another).
+- **Dynamic content recalculation:** When paired with lists, newly appended items automatically rejoin the sequence with properly calculated timeline offsets.
 
 ### **Anatomy of a Sequence Config**
 
@@ -4539,8 +4538,8 @@ type SequenceConfig = {
 };
 ```
 
-* **offset**: The delay in milliseconds introduced between the start of consecutive elements in the sequence.  
-* **offsetEasing**: Shapes how the spacing between staggered animations is distributed over time (e.g., accelerating or decelerating the cascade).
+- **offset**: The delay in milliseconds introduced between the start of consecutive elements in the sequence.
+- **offsetEasing**: Shapes how the spacing between staggered animations is distributed over time (e.g., accelerating or decelerating the cascade).
 
 ### **Sequences \+ Lists: The Staggered Cascade**
 
@@ -4566,7 +4565,7 @@ const config: InteractConfig = {
       trigger: 'viewEnter',
       params: { threshold: 0.2 },
       // References the sequences map below
-      sequences: [{ sequenceId: 'cards-in' }], 
+      sequences: [{ sequenceId: 'cards-in' }],
     },
   ],
 
@@ -4584,7 +4583,7 @@ const config: InteractConfig = {
       offset: 120, // ms between each card starting
       effects: [
         // References card-fade, staggered across list children
-        { effectId: 'card-fade', listContainer: '.cards' }, 
+        { effectId: 'card-fade', listContainer: '.cards' },
       ],
     },
   },
@@ -4608,14 +4607,14 @@ HTML
 
 ### **⚠️ Pitfalls**
 
-* **Missing listContainer on Effect Ref:** When referencing an effect inside a sequence registry, ensure listContainer is explicitly declared on the effect entry so the sequence runtime knows which elements to stagger.  
-* **Overshooting durations:** If your sequence contains structural loops or heavy offsets, ensure total sequence time aligns well with the user's viewport residency time.
+- **Missing listContainer on Effect Ref:** When referencing an effect inside a sequence registry, ensure listContainer is explicitly declared on the effect entry so the sequence runtime knows which elements to stagger.
+- **Overshooting durations:** If your sequence contains structural loops or heavy offsets, ensure total sequence time aligns well with the user's viewport residency time.
 
 ### **See also**
 
-* [What is a list?](https://www.google.com/search?q=ADDLINK)  
-* [About the config object](https://www.google.com/search?q=ADDLINK)  
-* [What are effects](https://www.google.com/search?q=ADDLINK)
+- [What is a list?](https://www.google.com/search?q=ADDLINK)
+- [About the config object](https://www.google.com/search?q=ADDLINK)
+- [What are effects](https://www.google.com/search?q=ADDLINK)
 
 # 🧑‍💻 using sequences
 
@@ -4639,9 +4638,9 @@ For a one-off stagger, define the sequence directly inside the interaction's `se
   sequences: [
     {
       offset: 120,
-      effects: [{ 
-        effectId: 'card-fade', 
-        listContainer: '.cards' 
+      effects: [{
+        effectId: 'card-fade',
+        listContainer: '.cards'
       }],
     },
   ],
@@ -4655,17 +4654,17 @@ For a sequence reused across multiple interactions, define it once under the top
   sequences: {
     'cards-in': {
       offset: 120,
-      effects: [{ 
-        effectId: 'card-fade', 
-        listContainer: '.cards' 
+      effects: [{
+        effectId: 'card-fade',
+        listContainer: '.cards'
       }]
     }
   }
   interactions: [
-    { 
-      key: 'card-row', 
-      trigger: 'viewEnter', 
-      sequences: [{ sequenceId: 'cards-in' }] 
+    {
+      key: 'card-row',
+      trigger: 'viewEnter',
+      sequences: [{ sequenceId: 'cards-in' }]
     }
   ]
 }
@@ -4707,9 +4706,9 @@ Since the effect targets the list rather than a single key, newly added children
 
 ### **4\. Tune the timing**
 
-* `offset` — milliseconds between the start of each participant's animation. Must be zero or greater; a negative value raises `NEGATIVE_OFFSET`.  
-* `offsetEasing` — a CSS or `@wix/motion` easing name that reshapes how the offsets are distributed (e.g. front-loaded vs. back-loaded stagger) rather than a linear stagger.  
-* `delay` — a single base delay, in milliseconds, applied before the whole sequence starts (separate from each item's `offset`).
+- `offset` — milliseconds between the start of each participant's animation. Must be zero or greater; a negative value raises `NEGATIVE_OFFSET`.
+- `offsetEasing` — a CSS or `@wix/motion` easing name that reshapes how the offsets are distributed (e.g. front-loaded vs. back-loaded stagger) rather than a linear stagger.
+- `delay` — a single base delay, in milliseconds, applied before the whole sequence starts (separate from each item's `offset`).
 
 ### **5\. Validate before shipping**
 
@@ -4724,9 +4723,7 @@ This catches dangling `sequenceId`/`effectId` references, negative `offset`/`del
 
 ### **See also**
 
-* What is a Sequence?  
-* Using Lists  
-* effects array & cascading logic  
-* understanding conditions
-
-
+- What is a Sequence?
+- Using Lists
+- effects array & cascading logic
+- understanding conditions
