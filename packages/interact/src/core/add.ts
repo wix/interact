@@ -15,7 +15,13 @@ import type {
   AnimationOptions,
 } from '../types';
 import { PLUGIN_FIELD_PREFIX } from '../types';
-import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
+import {
+  createTransitionCSS,
+  getMediaQuery,
+  getSelectorCondition,
+  generateId,
+  REDUCED_MOTION_QUERY,
+} from '../utils';
 import { getInterpolatedKey } from './utilities';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { Interact, getSelector } from './Interact';
@@ -894,6 +900,20 @@ export function add(controller: IInteractionController): boolean {
   const hasTriggers = triggers.length > 0;
 
   instance.setController(key, controller);
+
+  if (
+    Interact.forceReducedMotion === undefined &&
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    triggers.some((t) => t.trigger === 'viewProgress' || t.trigger === 'pointerMove')
+  ) {
+    instance.setupMediaQueryListener(
+      `${key}::reducedMotion`,
+      window.matchMedia(REDUCED_MOTION_QUERY),
+      key,
+      () => controller.update(),
+    );
+  }
 
   triggers.forEach((interaction, index) => {
     const mql = getMediaQuery(interaction.conditions, instance!.dataCache.conditions);

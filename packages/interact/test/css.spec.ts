@@ -1205,7 +1205,9 @@ describe('css._generate', () => {
       const animRules = cssRules.filter(
         (r) =>
           r.declarations.some((d) => isAnimationProp(d.name)) &&
-          !r.declarations.some((d) => String(d.value).includes('var(')),
+          !r.declarations.some((d) => String(d.value).includes('var(')) &&
+          // reduced motion re-declares an effect's own prop; uniqueness is about base declarations
+          !r.media?.includes('prefers-reduced-motion'),
       );
       expect(animRules.length).toBeGreaterThanOrEqual(2);
 
@@ -1744,15 +1746,178 @@ describe('css._generate', () => {
     });
   });
 
+  describe('initial rule conditions', () => {
+    const entranceEffect = {
+      effectId: 'kf1',
+      triggerType: 'once' as const,
+      duration: 500,
+      keyframeEffect: { name: 'enterAnim', keyframes: [{ opacity: '0' }, { opacity: '1' }] },
+    };
+    const initialRuleOf = (cssRules: CSSRuleData[]) =>
+      cssRules.find((r) => r.selectorSuffix === ':not([data-interact-enter])')!;
+
+    it('should gate the hiding rule on the interaction conditions', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: { desktop: { type: 'media', predicate: 'min-width: 900px' } },
+        interactions: [
+          { key: 'el', trigger: 'viewEnter', conditions: ['desktop'], effects: [entranceEffect] },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      expect(initialRuleOf(cssRules).media).toBe('(min-width: 900px)');
+    });
+
+    it('should compose interaction and effect conditions into the hiding rule', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: {
+          desktop: { type: 'media', predicate: 'min-width: 900px' },
+          wide: { type: 'media', predicate: 'min-width: 1200px' },
+        },
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            conditions: ['desktop'],
+            effects: [{ ...entranceEffect, conditions: ['wide'] }],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      expect(initialRuleOf(cssRules).media).toContain('(min-width: 900px)');
+      expect(initialRuleOf(cssRules).media).toContain('(min-width: 1200px)');
+    });
+
+    it('should carry an interaction selector condition into the hiding rule', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: { dark: { type: 'selector', predicate: '.dark' } },
+        interactions: [
+          { key: 'el', trigger: 'viewEnter', conditions: ['dark'], effects: [entranceEffect] },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      expect(initialRuleOf(cssRules).selectorCondition).toBe(':is(.dark)');
+    });
+
+    it('should leave the hiding rule unconditional when nothing is gated', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [{ key: 'el', trigger: 'viewEnter', effects: [entranceEffect] }],
+      };
+
+      const { cssRules } = _generate(config);
+      const initialRule = initialRuleOf(cssRules);
+
+      expect(initialRule.media).toBeFalsy();
+      expect(initialRule.selectorCondition).toBeFalsy();
+    });
+  });
+
   describe('reduced motion', () => {
     const REDUCE = '(prefers-reduced-motion: reduce)';
     const NO_PREFERENCE = '(prefers-reduced-motion: no-preference)';
+    const MOTION_CONDITIONS = {
+      'motion-ok': { type: 'media' as const, predicate: 'prefers-reduced-motion: no-preference' },
+      'motion-reduced': { type: 'media' as const, predicate: 'prefers-reduced-motion: reduce' },
+    };
     const keyframeEffect = (name: string) => ({
       name,
       keyframes: [{ opacity: '0' }, { opacity: '1' }],
     });
+    const collapseRulesOf = (cssRules: CSSRuleData[]) =>
+      cssRules.filter(
+        (r) =>
+          r.media?.includes(REDUCE) &&
+          r.declarations.length === 1 &&
+          isAnimationProp(r.declarations[0].name) &&
+          String(r.declarations[0].value).includes(' 1ms '),
+      );
 
-    it('should collapse every animation on a target with one rule, after its list rule', () => {
+    it('should collapse each effect through its own custom property, after it is declared', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              { effectId: 'kf1', duration: 500, delay: 200, keyframeEffect: keyframeEffect('a') },
+            ],
+          },
+          {
+            key: 'el',
+            trigger: 'hover',
+            effects: [{ effectId: 'kf2', duration: 500, keyframeEffect: keyframeEffect('b') }],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+      const reduceRules = collapseRulesOf(cssRules);
+
+      // one per effect, each touching only its own animation custom property
+      expect(reduceRules).toHaveLength(2);
+      const names = reduceRules.flatMap((r) => r.declarations.map((d) => d.name));
+      expect(names.every(isAnimationProp)).toBe(true);
+      expect(new Set(names).size).toBe(2);
+
+      // each override must follow the declaration it overrides
+      reduceRules.forEach((reduceRule) => {
+        const propName = reduceRule.declarations[0].name;
+        const baseIdx = cssRules.findIndex(
+          (r) => r !== reduceRule && r.declarations.some((d) => d.name === propName),
+        );
+        expect(cssRules.indexOf(reduceRule)).toBeGreaterThan(baseIdx);
+      });
+    });
+
+    it('should leave an author-gated effect alone while still collapsing its ungated neighbour', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: MOTION_CONDITIONS,
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            conditions: ['motion-reduced'],
+            effects: [{ effectId: 'calm', duration: 300, keyframeEffect: keyframeEffect('calm') }],
+          },
+          {
+            key: 'el',
+            trigger: 'hover',
+            effects: [{ effectId: 'big', duration: 800, keyframeEffect: keyframeEffect('big') }],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+      const reduceRules = collapseRulesOf(cssRules);
+
+      // only the ungated neighbour is collapsed
+      const collapsed = reduceRules.filter((r) => r.media === REDUCE);
+      expect(collapsed).toHaveLength(1);
+      expect(String(collapsed[0].declarations[0].value)).toContain('big');
+
+      // the gated effect keeps its authored 300ms, declared under its own condition
+      const calmDecl = cssRules
+        .flatMap((r) => r.declarations)
+        .filter((d) => isAnimationProp(d.name))
+        .find((d) => String(d.value).includes('calm'))!;
+      expect(String(calmDecl.value)).toContain('300ms');
+      expect(cssRules.some((r) => r.declarations.includes(calmDecl) && r.media === REDUCE)).toBe(
+        false,
+      );
+    });
+
+    it('should collapse to a single 1ms iteration while preserving name and fill', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -1764,13 +1929,8 @@ describe('css._generate', () => {
                 effectId: 'kf1',
                 duration: 500,
                 delay: 200,
-                iterations: 2,
-                keyframeEffect: keyframeEffect('finiteAnim'),
-              },
-              {
-                effectId: 'kf2',
-                duration: 500,
                 iterations: 0,
+                fill: 'both',
                 keyframeEffect: keyframeEffect('ongoingAnim'),
               },
             ],
@@ -1779,19 +1939,93 @@ describe('css._generate', () => {
       };
 
       const { cssRules } = _generate(config);
-      const reduceRules = cssRules.filter((r) => r.media === REDUCE);
+      const value = String(collapseRulesOf(cssRules)[0].declarations[0].value);
 
-      expect(reduceRules).toHaveLength(1);
-      // `animation-iteration-count` keeps the ongoing effect from looping at 1ms
-      expect(reduceRules[0].declarations).toEqual([
-        { name: 'animation-duration', value: '1ms' },
-        { name: 'animation-delay', value: '0s' },
-        { name: 'animation-iteration-count', value: '1' },
-      ]);
+      expect(value).toContain('ongoingAnim');
+      expect(value).toContain('1ms');
+      expect(value).toContain('0ms');
+      expect(value).not.toContain('infinite');
+      expect(value).toContain('both');
+      expect(value).not.toContain('500ms');
+      expect(value).not.toContain('200ms');
+    });
 
-      // must come after the `animation` shorthand it overrides
-      const listIdx = cssRules.findIndex((r) => r.declarations.some((d) => d.name === 'animation'));
-      expect(cssRules.indexOf(reduceRules[0])).toBeGreaterThan(listIdx);
+    it('should compose an ungated effect conditions into the reduce query', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: { desktop: { type: 'media', predicate: 'min-width: 900px' } },
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'kf1',
+                conditions: ['desktop'],
+                duration: 500,
+                keyframeEffect: keyframeEffect('a'),
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      expect(collapseRulesOf(cssRules)[0].media).toContain(`(min-width: 900px)`);
+      expect(collapseRulesOf(cssRules)[0].media).toContain(REDUCE);
+    });
+
+    it('should treat an effect-level motion condition as author-gating', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: MOTION_CONDITIONS,
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'kf1',
+                conditions: ['motion-reduced'],
+                duration: 300,
+                keyframeEffect: keyframeEffect('calm'),
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      expect(collapseRulesOf(cssRules)).toHaveLength(0);
+    });
+
+    it('should cancel a scrub at the source even when the author gated it on reduce', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: MOTION_CONDITIONS,
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            conditions: ['motion-reduced'],
+            effects: [{ effectId: 'kf1', keyframeEffect: keyframeEffect('scrollAnim') }],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+      const triggerRule = cssRules.find((r) =>
+        r.declarations.some((d) => d.name === 'view-timeline'),
+      )!;
+
+      // parity with the runtime handler, which early-returns under `reduce` whatever the
+      // interaction's conditions say — so this timeline is declared under a query that never matches
+      expect(triggerRule.media).toContain(NO_PREFERENCE);
+      expect(triggerRule.media).toContain(REDUCE);
+      // and a scrub is never collapsed, since there is no meaningful collapse of a scrubbed timeline
+      expect(collapseRulesOf(cssRules)).toHaveLength(0);
     });
 
     it('should gate the scroll-driven timeline on no-preference, leaving timelines untouched', () => {
@@ -1819,12 +2053,14 @@ describe('css._generate', () => {
       const triggerRule = cssRules.find((r) =>
         r.declarations.some((d) => d.name === 'view-timeline'),
       )!;
-      const reduceRule = cssRules.find((r) => r.media === REDUCE)!;
 
       // with no `view-timeline` to resolve, the scroll-driven animation has no timeline at all
       expect(triggerRule.media).toBe(`(min-width: 900px) and ${NO_PREFERENCE}`);
-      // so nothing has to single out the scrub interaction's timeline on the shared target
-      expect(reduceRule.declarations.every((d) => !isTimelineProp(d.name))).toBe(true);
+      // the click effect sharing the target is still collapsed, and touches no timeline
+      const reduceRules = collapseRulesOf(cssRules);
+      expect(reduceRules).toHaveLength(1);
+      expect(String(reduceRules[0].declarations[0].value)).toContain('clickAnim');
+      expect(reduceRules[0].declarations.every((d) => !isTimelineProp(d.name))).toBe(true);
     });
 
     it('should gate a state effect transition on no-preference, composing its conditions', () => {
@@ -1861,6 +2097,38 @@ describe('css._generate', () => {
       expect(stateRule.declarations).toEqual([{ name: 'opacity', value: '1' }]);
     });
 
+    it('should let a reduce-gated state effect keep its transition', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: MOTION_CONDITIONS,
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'trans1',
+                conditions: ['motion-reduced'],
+                transition: {
+                  styleProperties: [{ name: 'opacity', value: '1' }],
+                  duration: 200,
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+      const transitionRule = cssRules.find((r) =>
+        r.declarations.some((d) => isTransitionProp(d.name)),
+      )!;
+
+      // unlike a scrub, a state effect the author scoped to `reduce` is theirs to define
+      expect(transitionRule.media).toBe(REDUCE);
+      expect(String(transitionRule.declarations[0].value)).toContain('200ms');
+    });
+
     it('should never suppress an animation that owns an initial rule', () => {
       const config: InteractConfig = {
         effects: {},
@@ -1884,11 +2152,15 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
       const initialRule = cssRules.find((r) => r.selectorSuffix === ':not([data-interact-enter])')!;
+      const reduceRule = collapseRulesOf(cssRules)[0];
 
       // the rule that hides the element must stay unconditional, so nothing may drop the
       // animation that lets `data-interact-enter` reach `done`
       expect(initialRule.media).toBeFalsy();
-      expect(cssRules.find((r) => r.media === REDUCE)).toBeDefined();
+      expect(reduceRule).toBeDefined();
+      // and it must carry the same suffix as the declaration it overrides, or it never applies
+      expect(reduceRule.selectorSuffix).toBe(':not([data-interact-enter="done"])');
+      expect(String(reduceRule.declarations[0].value)).toContain('enterAnim');
       expect(
         cssRules.some((r) =>
           r.declarations.some(
@@ -1896,6 +2168,35 @@ describe('css._generate', () => {
           ),
         ),
       ).toBe(false);
+    });
+
+    it('should not strand an element whose entrance is gated at the interaction level', () => {
+      const config: InteractConfig = {
+        effects: {},
+        conditions: MOTION_CONDITIONS,
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            conditions: ['motion-reduced'],
+            effects: [
+              {
+                effectId: 'calm',
+                triggerType: 'once',
+                duration: 300,
+                keyframeEffect: keyframeEffect('calm'),
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+      const initialRule = cssRules.find((r) => r.selectorSuffix === ':not([data-interact-enter])')!;
+
+      // under no-preference this interaction never binds, so an unconditional hiding rule would
+      // leave the element invisible forever — the exact shape Phase 2.2 asks authors to write
+      expect(initialRule.media).toBe(REDUCE);
     });
 
     it('should gate the runtime transition path the same way', () => {

@@ -13,7 +13,7 @@ import {
   InteractPlugin,
 } from '../types';
 import { getInterpolatedKey } from './utilities';
-import { generateId } from '../utils';
+import { generateId, REDUCED_MOTION_QUERY } from '../utils';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
@@ -61,7 +61,7 @@ export class Interact {
       return false;
     }
 
-    Interact._prefersReducedMotion ??= window.matchMedia('(prefers-reduced-motion: reduce)');
+    Interact._prefersReducedMotion ??= window.matchMedia(REDUCED_MOTION_QUERY);
 
     return Interact._prefersReducedMotion.matches;
   }
