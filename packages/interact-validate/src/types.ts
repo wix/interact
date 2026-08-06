@@ -69,9 +69,15 @@ export type AnyInteraction = {
   conditions?: string[];
 };
 
+export type AnyCondition = {
+  type: string;
+  predicate: string;
+};
+
 export type AnyConfig = {
   effects?: Record<string, AnyEffect>;
   sequences?: Record<string, AnySequence>;
+  conditions?: Record<string, AnyCondition>;
   interactions: AnyInteraction[];
 };
 

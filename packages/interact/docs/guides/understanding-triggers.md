@@ -684,7 +684,7 @@ You can combine multiple triggers on the same element for complex interactions:
 
 ### Accessibility
 
-1. **Respect `prefers-reduced-motion`** media query
+1. **`prefers-reduced-motion` is handled for you** — Interact detects it and collapses time effects, drops state-transition tweens, and cancels `viewProgress`/`pointerMove`. Add a gated alternative only for a specific calmer look, or when a cancelled scrub would leave the element hidden. See [Reduced Motion](conditions-and-media-queries.md#reduced-motion)
 2. **Use `activate` instead of `click`** for keyboard accessibility
 3. **Use `interest` instead of `hover`** for keyboard accessibility
 4. **Ensure click targets are accessible** via keyboard

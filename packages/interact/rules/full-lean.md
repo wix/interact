@@ -22,6 +22,7 @@ Declarative configuration-driven interaction library. Binds animations to trigge
   - [Animation Payloads](#animation-payloads)
 - [Sequences](#sequences)
 - [Conditions](#conditions)
+- [Reduced motion](#reduced-motion)
 - [CSS Generation & FOUC Prevention](#css-generation--fouc-prevention)
 - [Element Resolution](#element-resolution)
 - [Plugins](#plugins)
@@ -39,7 +40,7 @@ Each item here is CRITICAL — ignoring any of them will break animations.
   events and flickering. Use `selector` to target a child element, or set the effect's `key` to a different element.
 - **CRITICAL**: For `pointerMove` trigger MUST AVOID using the same element as both source and target with `hitArea: 'self'` and effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
 - **CRITICAL — Do NOT guess preset options**: If you don't know the expected type/structure for a `namedEffect` param, omit it — rely on defaults rather than guessing.
-- **Reduced motion**: Use conditions to provide gentler alternatives (shorter durations, fewer transforms, no perpetual motion) for users who prefer reduced motion. You can also set `Interact.forceReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches` to force a global reduced-motion behavior programmatically.
+- **Reduced motion**: Interact detects `prefers-reduced-motion: reduce` on its own and needs no setup — time effects collapse, state transitions drop their tween, and scroll/pointer effects are cancelled. Do NOT re-implement that. Add a condition-gated alternative only when the cancelled or collapsed result is not good enough — and note that a scrub's alternative MUST use a time-based trigger. See [Reduced motion](#reduced-motion).
 - **Perspective**: Prefer `transform: perspective(...)` inside keyframes. Use the CSS `perspective` property only when multiple children share the same `perspective-origin`.
 
 ---
@@ -607,6 +608,75 @@ conditions: {
 
 ---
 
+## Reduced motion
+
+### What Interact does on its own
+
+Interact respects `prefers-reduced-motion: reduce` with **no configuration**. `Interact.reducedMotion` resolves to `Interact.forceReducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches`, and `generate()` emits `@media (prefers-reduced-motion: reduce)` rules alongside the base ones — so enforcement also works with JS disabled, under SSR, and when the user changes the setting mid-session.
+
+Do NOT gate every effect behind `(prefers-reduced-motion: no-preference)` "to be safe" — it is redundant noise, and it removes the sensible default below in favor of nothing at all. The defaults per effect kind:
+
+| Effect kind                                                                         | Under `reduce`                                                                                        | What the user sees                                                                  |
+| :---------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
+| Time effect (`viewEnter`, `hover`, `click`, `interest`, `activate`, `animationEnd`) | **Collapsed** — `1ms` duration, `0ms` delay, one iteration                                            | The end state, applied instantly. Nothing is suppressed, so nothing is left hidden. |
+| Ongoing time effect (`iterations: Infinity`)                                        | **Collapsed too** — the same rule caps iterations at 1                                                | The end state. No perpetual motion.                                                 |
+| State effect (`transition` / `transitionProperties`)                                | **Tween dropped, state kept** — the `transition` is declared only under `no-preference`               | The state toggles instantly. State is meaning; only the motion goes.                |
+| `viewProgress`                                                                      | **Cancelled** — `view-timeline` is declared only under `no-preference`, and the handler early-returns | The element's authored **base style**.                                              |
+| `pointerMove`                                                                       | **Cancelled** — the handler early-returns, so the paused CSS animation is never driven                | The effect's **first keyframe**.                                                    |
+| `customEffect`                                                                      | JS only — collapsed to `1ms` with the default `iterations: 1`, dropped when `iterations > 1`          | Its end state, or nothing.                                                          |
+
+**A scrub is the only kind that can leave a problem.** Time and state effects always land on their end state, so an entrance can never be stranded invisible. A cancelled scrub falls back to a state you authored — and if that state hides, clips, or displaces the element, you must supply an alternative. Interact cannot see your CSS, so it cannot warn you.
+
+### Writing a reduced-motion alternative
+
+Only when the default above is not good enough. Gate the alternative on an explicit `prefers-reduced-motion` condition:
+
+```ts
+{
+  conditions: {
+    'motion-reduced': { type: 'media', predicate: '(prefers-reduced-motion: reduce)' },
+  },
+  interactions: [
+    {
+      key: 'panel',
+      trigger: 'viewEnter',
+      effects: [
+        // no condition needed — collapsed automatically under `reduce`
+        { namedEffect: { type: 'SpinIn' }, duration: 700, fill: 'backwards' },
+        // the calmer alternative, exempt from the collapse because it names the preference
+        {
+          namedEffect: { type: 'FadeIn' },
+          duration: 400,
+          fill: 'backwards',
+          conditions: ['motion-reduced'],
+        },
+      ],
+    },
+  ],
+}
+```
+
+Rules for the alternative:
+
+- It MUST carry a `prefers-reduced-motion` condition. That condition is what exempts it from the automatic collapse, and it exempts **only that effect** — neighbouring effects on the same target need no changes and MUST NOT be gated to make it work.
+- The condition may sit on the **interaction** or on the **effect**. Both reach an entrance's FOUC hiding rule, so neither can strand the element.
+- **A scrub's alternative MUST use a time-based trigger** (`viewEnter`, or a plain CSS rule of your own). A `viewProgress` / `pointerMove` interaction gated on `reduce` never runs — the runtime cancels scrubs under `reduce` whatever the conditions say. `@wix/interact-validate` reports this as `REDUCE_GATED_SCRUB`.
+- Prefer opacity/blur-based presets for the alternative (`FadeIn`, `BlurIn`). Common swaps: `BounceIn`/`SpinIn`/`ArcIn`/`FlipIn`/`TurnIn` → `FadeIn`; `ParallaxScroll` → static; mouse presets → static.
+
+### The override, and when a change takes effect
+
+`Interact.forceReducedMotion` is the escape hatch, not the mechanism:
+
+| Value                 | Meaning                                                     |
+| :-------------------- | :---------------------------------------------------------- |
+| `undefined` (default) | Follow `prefers-reduced-motion`.                            |
+| `true`                | Force reduced-motion behavior regardless of the OS setting. |
+| `false`               | Force motion **on** regardless of the OS setting.           |
+
+Setting it explicitly makes the decision read-once, so assign it **before `Interact.create()`**. With it left `undefined`, a mid-session preference change is picked up as follows: CSS-backed time and state effects follow it immediately (pure CSS, no JS involved); `viewProgress` / `pointerMove` interactions rebind and pick it up; `customEffect` and other WAAPI-only effects pick it up on their next bind.
+
+---
+
 ## CSS Generation & FOUC Prevention
 
 ### Generating CSS
@@ -758,7 +828,8 @@ Default split wrapper classes: `.split-c` (chars), `.split-w` (words), `.split-l
 | `Interact.create(config)`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                                                                                                                                                               |
 | `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `generate()` and `create`.                                                                                                                                                                           |
 | `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                                                                                                                                                                         |
-| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — force reduced-motion behavior regardless of OS setting.                                                                                                                                                                    |
+| `Interact.forceReducedMotion`       | `boolean \| undefined` (default: `undefined`) — override the detected preference. `undefined` follows `prefers-reduced-motion`; `true` forces reduced motion on, `false` forces motion on. Set before `create()`. See [Reduced motion](#reduced-motion).  |
+| `Interact.reducedMotion`            | `boolean`, **read-only** — the resolved decision: `forceReducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches`.                                                                                                                         |
 | `Interact.allowA11yTriggers`        | `boolean` (default: `true`) — enable accessibility trigger variants (`interest`, `activate`).                                                                                                                                                             |
 | `Interact.setup(options)`           | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below.                                                                                                                                             |
 | `Interact.use(name, plugin)`        | Register an external plugin by name (see [Plugins](#plugins)). Call before `create`.                                                                                                                                                                      |

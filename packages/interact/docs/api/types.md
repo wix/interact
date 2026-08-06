@@ -283,7 +283,7 @@ type InteractOptions = {
 
 **Properties:**
 
-- `reducedMotion` - Whether reduced motion is enabled (respects `prefers-reduced-motion` or `Interact.forceReducedMotion`)
+- `reducedMotion` - Whether reduced motion is in effect. Handlers receive the value of [`Interact.reducedMotion`](interact-class.md#interactreducedmotion), which is `Interact.forceReducedMotion` when set and the `prefers-reduced-motion` media query otherwise. Read at bind time; the CSS that `generate()` emits carries the preference independently.
 - `targetController` - The controller managing the target element
 - `selectorCondition` - Optional CSS selector condition for element matching
 - `allowA11yTriggers` - Whether to enable accessibility triggers (keyboard events) for `click` and `hover` triggers. When `true`, `click` responds to Enter/Space keys and `hover` responds to focus events. Defaults to `true`.
@@ -293,7 +293,7 @@ type InteractOptions = {
 ```typescript
 // Used internally by handlers
 const options: InteractOptions = {
-  reducedMotion: Interact.forceReducedMotion,
+  reducedMotion: Interact.reducedMotion,
   targetController: Interact.getController('my-element'),
 };
 ```

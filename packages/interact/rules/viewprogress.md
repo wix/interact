@@ -8,10 +8,26 @@ These rules help generate scroll-driven interactions using `@wix/interact`. View
 
 ## Table of Contents
 
+- [Reduced Motion](#reduced-motion)
 - [Rule 1: ViewProgress with keyframeEffect or namedEffect](#rule-1-viewprogress-with-keyframeeffect-or-namedeffect)
 - [Rule 2: ViewProgress with customEffect](#rule-2-viewprogress-with-customeffect)
 - [Rule 3: ViewProgress with Tall Wrapper + Sticky Container (contain range)](#rule-3-viewprogress-with-tall-wrapper--sticky-container-contain-range)
 - [Pre-rendering Scroll-driven CSS with generate()](#pre-rendering-scroll-driven-css-with-generate)
+
+---
+
+## Reduced Motion
+
+`viewProgress` effects are **cancelled**, not collapsed, under `prefers-reduced-motion: reduce` — there is no meaningful slow-down of a scrubbed timeline. This happens automatically and in both paths, so it holds with JS disabled too: `generate()` declares the source's `view-timeline` only inside `@media (prefers-reduced-motion: no-preference)`, so the `--trigger-N` name never resolves under `reduce`; and `addViewProgressHandler` early-returns on `Interact.reducedMotion`, so neither the `ViewTimeline` animation nor the polyfill fallback is created.
+
+**The authoring consequence:** the element renders at its authored **base style**, not at the effect's first keyframe. Interact adds no hiding rule of its own for a `viewProgress` target (only `viewEnter` entrances get one), so a scroll effect that merely embellishes — a parallax shift, a scale, a rotation — is safe with nothing to do.
+
+It is **not** safe when your own CSS leaves the element invisible or displaced without the animation. That is common with `in`-range reveal presets whose base style is `opacity: 0`. In that case you must supply an alternative:
+
+- The alternative MUST use a **time-based trigger** such as `viewEnter`, or be a plain CSS rule in your own stylesheet. A `viewProgress` interaction gated on `(prefers-reduced-motion: reduce)` never runs, in CSS or in JS — `@wix/interact-validate` reports that mistake as `REDUCE_GATED_SCRUB`.
+- Or drop the hiding from your base style, so the un-animated element is simply already there.
+
+See [full-lean.md § Reduced motion](https://wix.github.io/interact/rules/full-lean.md#reduced-motion) for the per-effect-kind table and the general alternative pattern.
 
 ---
 

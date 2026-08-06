@@ -301,8 +301,10 @@ type Condition = { type: 'media' | 'container' | 'selector'; predicate?: string 
 
 Attach with `conditions: ['desktop']` on an interaction (gates the whole trigger),
 an effect (skips just that effect), or a sequence. **All** listed conditions must
-pass. Conditions re-evaluate when the media state changes — the primary mechanism
-for reduced-motion alternatives.
+pass. Conditions re-evaluate when the media state changes. A `prefers-reduced-motion`
+condition additionally exempts that effect from Interact's automatic reduced-motion
+collapse — which is how a gentler alternative is expressed. See
+[`presets.md` § Accessibility & reduced motion](presets.md#accessibility--reduced-motion).
 
 ```ts
 conditions: {
@@ -390,17 +392,18 @@ common choice); omit it if you'd rather it lay out like a normal block.
 `Interact.create(config)` returns an instance. Keep the reference to manage its
 lifecycle.
 
-| Member                                                      | Description                                                                                                                                          |
-| :---------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Interact.create(config, options?)`                         | Initialize; returns an independent instance. `options.useCustomElement` toggles `<interact-element>` mode.                                           |
-| `Interact.registerEffects(presets)`                         | Register named-effect presets. **Call before `create()`/`generate()`** when using `namedEffect`. Same function as `@wix/motion`'s `registerEffects`. |
-| `Interact.setup(options)`                                   | Global defaults — call before `create()`. See below.                                                                                                 |
-| `Interact.destroy()`                                        | Static — tears down **all** instances (e.g. on route change).                                                                                        |
-| `Interact.getInstance(key)` / `Interact.getController(key)` | Look up the instance/controller owning a key.                                                                                                        |
-| `Interact.forceReducedMotion`                               | `boolean`, default `false` — force reduced-motion globally.                                                                                          |
-| `Interact.allowA11yTriggers`                                | `boolean`, **default `true`** — enable `interest`/`activate` and layer a11y behavior onto `hover`/`click`.                                           |
-| `instance.destroy()`                                        | Tear down just this instance — call on component unmount.                                                                                            |
-| `instance.has(key)` / `instance.get(key)`                   | Instance lookups.                                                                                                                                    |
+| Member                                                      | Description                                                                                                                                                                                                     |
+| :---------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Interact.create(config, options?)`                         | Initialize; returns an independent instance. `options.useCustomElement` toggles `<interact-element>` mode.                                                                                                      |
+| `Interact.registerEffects(presets)`                         | Register named-effect presets. **Call before `create()`/`generate()`** when using `namedEffect`. Same function as `@wix/motion`'s `registerEffects`.                                                            |
+| `Interact.setup(options)`                                   | Global defaults — call before `create()`. See below.                                                                                                                                                            |
+| `Interact.destroy()`                                        | Static — tears down **all** instances (e.g. on route change).                                                                                                                                                   |
+| `Interact.getInstance(key)` / `Interact.getController(key)` | Look up the instance/controller owning a key.                                                                                                                                                                   |
+| `Interact.forceReducedMotion`                               | `boolean \| undefined`, default `undefined` — override the detected preference. `undefined` follows `prefers-reduced-motion`; `true` forces reduced motion on, `false` forces motion on. Set before `create()`. |
+| `Interact.reducedMotion`                                    | `boolean`, read-only — the resolved decision (`forceReducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches`).                                                                                  |
+| `Interact.allowA11yTriggers`                                | `boolean`, **default `true`** — enable `interest`/`activate` and layer a11y behavior onto `hover`/`click`.                                                                                                      |
+| `instance.destroy()`                                        | Tear down just this instance — call on component unmount.                                                                                                                                                       |
+| `instance.has(key)` / `instance.get(key)`                   | Instance lookups.                                                                                                                                                                                               |
 
 **Standalone functions** (exported from every entry point):
 

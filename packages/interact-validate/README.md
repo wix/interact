@@ -82,7 +82,7 @@ type ValidationError = {
   code: string; // domain code — see the catalogue below
   message: string; // human-readable description
   path: (string | number)[]; // e.g. ['interactions', 0, 'effects', 0, 'duration']
-  severity: 'error' | 'warning';
+  severity: 'error' | 'warning' | 'info';
   hint?: string; // optional remediation hint (reserved; not currently populated)
 };
 ```
@@ -129,10 +129,10 @@ const ExperienceSchema = z.object({
 
 ## Severity model
 
-Every issue is `'error'` or `'warning'`. `valid` is `true` **iff** no `'error'` remains.
+Every issue is `'error'`, `'warning'` or `'info'`. `valid` is `true` **iff** no `'error'` remains.
 
 - **`strict: true`** promotes all remaining issues to `'error'`.
-- **`severityOverrides`** is keyed by **rule category**, and only these three categories are registered/overridable:
+- **`severityOverrides`** is keyed by **rule category**, and only these categories are registered/overridable:
 
 | Rule category            | Covers codes                                                                | Default severity |
 | ------------------------ | --------------------------------------------------------------------------- | ---------------- |
@@ -145,10 +145,11 @@ Every issue is `'error'` or `'warning'`. `valid` is `true` **iff** no `'error'` 
 | `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE`, `ANIMATION_END_CYCLE`                       | warning          |
 | `ELEMENT_SELECTION`      | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER`, `REDUNDANT_SELECTOR_WITH_LIST_ITEM` | warning          |
 | `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                  | warning          |
-| `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                     | info             |
+| `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`, `RECOMMENDED_FILL_BACKWARDS`                       | info             |
 | `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                      | warning          |
 | `CSS_PROPERTY_NAME`      | `INVALID_CSS_PROPERTY_NAME`                                                 | warning          |
 | `VIEW_INSET`             | `INVALID_INSET`                                                             | warning          |
+| `REDUCED_MOTION`         | `REDUCE_GATED_SCRUB`                                                        | warning          |
 
 Set a category to `'off'` to drop those issues, or `'warning'` / `'error'` to set their severity. **All other codes** (every `SCHEMA_*`, numeric, effect-source, and referential code) are not in a category and **cannot** be silenced or re-leveled via `severityOverrides` — they always emit at their built-in severity. Precedence: `'off'` first (drops the issue), then a `'warning'`/`'error'` override, then `strict` (forces the rest to `'error'`).
 
@@ -194,26 +195,27 @@ The single source of truth for every code the validator emits. The agent-facing 
 
 These encode statically-detectable authoring pitfalls from the trigger rule files. Each belongs to a [rule category](#severity-model), so set the category to `'off'` to silence it or `'error'` to make it fail `valid`.
 
-| Code                                   | Trigger                                                                                                                                     | Rule category            |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `UNUSED_EFFECT`                        | A `config.effects` entry is never referenced.                                                                                               | `UNUSED_DEFINITION`      |
-| `UNUSED_SEQUENCE`                      | A `config.sequences` entry is never referenced.                                                                                             | `UNUSED_DEFINITION`      |
-| `UNUSED_CONDITION`                     | A `config.conditions` entry is never referenced.                                                                                            | `UNUSED_DEFINITION`      |
-| `DUPLICATE_KEYFRAME_NAME`              | A `keyframeEffect.name` is reused across effects.                                                                                           | `UNIQUE_DEFINITION_IDS`  |
-| `SAME_ELEMENT_RETRIGGER`               | `viewEnter` with a non-`once` `triggerType` on the same source+target element.                                                              | `SAME_ELEMENT_RETRIGGER` |
-| `HIT_AREA_SHIFT`                       | `hover`/`pointerMove` `keyframeEffect` with a `translate`/`scale`/`matrix` transform on the same source+target element.                     | `HIT_AREA_SHIFT`         |
-| `SCROLL_PRESET_MISSING_RANGE`          | A `*Scroll` `namedEffect` on `viewProgress` omits `range`.                                                                                  | `SCROLL_RANGE`           |
-| `SCROLL_PRESET_BAD_RANGE`              | A scroll preset `range` is not `'in'`/`'out'`/`'continuous'`.                                                                               | `SCROLL_RANGE`           |
-| `ANIMATION_END_SELF_REFERENCE`         | An `animationEnd` interaction waits on an effect it also produces (never starts).                                                           | `ANIMATION_END_GRAPH`    |
-| `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER` | `listItemSelector` present without `listContainer` (inert).                                                                                 | `ELEMENT_SELECTION`      |
-| `REDUNDANT_SELECTOR_WITH_LIST_ITEM`    | `selector` ignored when `listContainer` + `listItemSelector` are both present.                                                              | `ELEMENT_SELECTION`      |
-| `EMPTY_STYLE_PROPERTIES`               | A state effect's `transition.styleProperties` / `transitionProperties` is `[]` (toggles nothing).                                           | `STATE_EFFECT`           |
-| `STATE_REMOVE_WITHOUT_EFFECT_ID`       | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                                                                 | `STATE_EFFECT`           |
-| `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.                           | `RECOMMENDED_FILL`       |
-| `RECOMMENDED_FILL_BACKWARDS`           | A `viewEnter` + `once` named/keyframe effect targeting another element or using a same-element delay omits `fill: 'backwards'` or `'both'`. | `RECOMMENDED_FILL`       |
-| `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).                                  | `POINTER_AXIS`           |
-| `INVALID_CSS_PROPERTY_NAME`            | A keyframe or state-effect property name is neither camelCase nor kebab-case (both are accepted).                                           | `CSS_PROPERTY_NAME`      |
-| `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 CSS lengths/percentages.                                                                              | `VIEW_INSET`             |
+| Code                                   | Trigger                                                                                                                                                      | Rule category            |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
+| `UNUSED_EFFECT`                        | A `config.effects` entry is never referenced.                                                                                                                | `UNUSED_DEFINITION`      |
+| `UNUSED_SEQUENCE`                      | A `config.sequences` entry is never referenced.                                                                                                              | `UNUSED_DEFINITION`      |
+| `UNUSED_CONDITION`                     | A `config.conditions` entry is never referenced.                                                                                                             | `UNUSED_DEFINITION`      |
+| `DUPLICATE_KEYFRAME_NAME`              | A `keyframeEffect.name` is reused across effects.                                                                                                            | `UNIQUE_DEFINITION_IDS`  |
+| `SAME_ELEMENT_RETRIGGER`               | `viewEnter` with a non-`once` `triggerType` on the same source+target element.                                                                               | `SAME_ELEMENT_RETRIGGER` |
+| `HIT_AREA_SHIFT`                       | `hover`/`pointerMove` `keyframeEffect` with a `translate`/`scale`/`matrix` transform on the same source+target element.                                      | `HIT_AREA_SHIFT`         |
+| `SCROLL_PRESET_MISSING_RANGE`          | A `*Scroll` `namedEffect` on `viewProgress` omits `range`.                                                                                                   | `SCROLL_RANGE`           |
+| `SCROLL_PRESET_BAD_RANGE`              | A scroll preset `range` is not `'in'`/`'out'`/`'continuous'`.                                                                                                | `SCROLL_RANGE`           |
+| `ANIMATION_END_SELF_REFERENCE`         | An `animationEnd` interaction waits on an effect it also produces (never starts).                                                                            | `ANIMATION_END_GRAPH`    |
+| `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER` | `listItemSelector` present without `listContainer` (inert).                                                                                                  | `ELEMENT_SELECTION`      |
+| `REDUNDANT_SELECTOR_WITH_LIST_ITEM`    | `selector` ignored when `listContainer` + `listItemSelector` are both present.                                                                               | `ELEMENT_SELECTION`      |
+| `EMPTY_STYLE_PROPERTIES`               | A state effect's `transition.styleProperties` / `transitionProperties` is `[]` (toggles nothing).                                                            | `STATE_EFFECT`           |
+| `STATE_REMOVE_WITHOUT_EFFECT_ID`       | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                                                                                  | `STATE_EFFECT`           |
+| `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.                                            | `RECOMMENDED_FILL`       |
+| `RECOMMENDED_FILL_BACKWARDS`           | A `viewEnter` + `once` named/keyframe effect targeting another element or using a same-element delay omits `fill: 'backwards'` or `'both'`.                  | `RECOMMENDED_FILL`       |
+| `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).                                                   | `POINTER_AXIS`           |
+| `INVALID_CSS_PROPERTY_NAME`            | A keyframe or state-effect property name is neither camelCase nor kebab-case (both are accepted).                                                            | `CSS_PROPERTY_NAME`      |
+| `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 CSS lengths/percentages.                                                                                               | `VIEW_INSET`             |
+| `REDUCE_GATED_SCRUB`                   | A `viewProgress`/`pointerMove` interaction or effect gated on `(prefers-reduced-motion: reduce)` — scrubs are cancelled under `reduce`, so it can never run. | `REDUCED_MOTION`         |
 
 ## Usage recipes
 
