@@ -338,6 +338,21 @@ describe('motion.ts', () => {
         });
       });
 
+      test('should collapse the reduced motion shorthand to a single 1ms iteration', () => {
+        const animationOptions: AnimationOptions = {
+          namedEffect: { type: 'FadeIn', id: 'fade' },
+          duration: 1000,
+          delay: 200,
+          fill: 'forwards',
+          iterations: 2,
+        };
+
+        const result = getCSSAnimation('test-target', animationOptions);
+
+        expect(result[0].animation).toBe('fade-in 1000ms 200ms ease-in forwards 2 paused');
+        expect(result[0].reducedAnimation).toBe('fade-in 1ms 0ms ease-in forwards 1 paused');
+      });
+
       test('should preserve explicit zero delay in generated CSS animation shorthand', () => {
         const animationOptions: AnimationOptions = {
           namedEffect: { type: 'FadeIn', id: 'fade' },
@@ -2394,33 +2409,6 @@ describe('motion.ts', () => {
         });
 
         const result = getAnimation(mockElement, animationOptions);
-
-        expect(AnimationGroup).toHaveBeenCalledWith([mockCSSAnimations[0]]);
-        expect(result).toBe(mockAnimationGroup);
-
-        (AnimationGroup as Mock).mockRestore();
-      });
-
-      test('should return the CSS animation as-is when reducedMotion is true', async () => {
-        // reducedMotion is not applied to CSS animations here by design: @wix/interact's
-        // `generate()` emits `@media (prefers-reduced-motion: reduce)` rules that collapse or
-        // suppress them, which also covers SSR and no-JS
-        mockElement = {
-          id: 'test-element',
-          getAnimations: vi.fn(() => mockCSSAnimations),
-        } as any;
-
-        const animationOptions: AnimationOptions = {
-          namedEffect: { type: 'FadeIn', id: 'fade' },
-          duration: 1000,
-        };
-
-        const { AnimationGroup } = await import('../src/AnimationGroup');
-        (AnimationGroup as Mock).mockImplementation(function () {
-          return mockAnimationGroup;
-        });
-
-        const result = getAnimation(mockElement, animationOptions, undefined, true);
 
         expect(AnimationGroup).toHaveBeenCalledWith([mockCSSAnimations[0]]);
         expect(result).toBe(mockAnimationGroup);

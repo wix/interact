@@ -648,7 +648,7 @@ export function _generate(
     ),
   );
 
-  // for each target add unconditional rule for the coordinated lists from interactions targeting it.
+  // for each target add unconditional rule for the coordinated lists from interactions targeting it
   targetToLists.forEach((lists) => {
     cssRules.push(buildListsRule(lists));
   });
