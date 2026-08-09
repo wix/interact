@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { validateInteractConfig } from '../../src';
 
-// A `viewProgress`/`pointerMove` interaction or effect gated on `(prefers-reduced-motion: reduce)`
-// can never run: `generate()` gates the source's `view-timeline` on `no-preference` regardless of
+// A scrub interaction or effect gated on `(prefers-reduced-motion: reduce)` can never run:
+// `generate()` gates the source's `view-timeline` on `no-preference` regardless of
 // conditions, and the handlers early-return on `Interact.reducedMotion` regardless of conditions.
 
 const CODE = 'REDUCE_GATED_SCRUB';
