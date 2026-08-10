@@ -38,5 +38,20 @@ export type {
 // Controller
 export type { IInteractionController, IInteractElement } from './controller';
 
+// CSS generation
+export type { GenerateOptions } from './css';
+
 // Options
 export type { InteractOptions } from './handlers';
+
+// Plugins
+export type {
+  InteractPlugin,
+  InteractPluginContext,
+  InteractPluginCleanup,
+  InteractPluginConfigMap,
+  InteractPluginStyleContext,
+  InteractPluginStyleGenerator,
+  InteractPluginStyles,
+  PluginFields,
+} from './plugins';

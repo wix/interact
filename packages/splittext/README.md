@@ -162,6 +162,55 @@ When `preserveText` is `false`, `aria-label` is set on the container instead of 
 
 Screen readers and crawlers see the original text; the split spans are hidden from the accessibility tree. `result.revert()` restores `originalHTML` captured at construction time. On re-split (`autoSplit`), plain text is re-read from the element so content changes are picked up.
 
+## Using with `@wix/interact`
+
+`@wix/splittext` is standalone and has **no** dependency on `@wix/interact`. To drive it declaratively through an `InteractConfig`, a ready-made adapter ships from the `@wix/splittext/plugin` entry point. It's written against Interact's plugin contract _structurally_, so it stays assignable to `InteractPlugin` without importing `@wix/interact` — the two packages remain fully decoupled.
+
+Register `splitTextPlugin` once, before `Interact.create()`, then declare `$splitText` on any interaction or effect:
+
+```ts
+import { Interact } from '@wix/interact';
+import { splitTextPlugin } from '@wix/splittext/plugin';
+
+Interact.use('splitText', splitTextPlugin);
+
+Interact.create({
+  effects: { 'char-fade-up': { namedEffect: { type: 'FadeIn' }, duration: 400 } },
+  interactions: [
+    {
+      key: 'hero',
+      trigger: 'viewEnter',
+      // `hideUntilReady` hides the container until the split runs, preventing a FOUC.
+      $splitText: { container: '.title', type: 'chars', hideUntilReady: true },
+      sequences: [{ offset: 30, effects: [{ effectId: 'char-fade-up', selector: '.split-c' }] }],
+    },
+  ],
+});
+```
+
+For SSR / build-time CSS, pass the companion `splitTextStyle` generator to `generate()` so the `hideUntilReady` container is hidden until the runtime split marks it ready:
+
+```ts
+import { generate } from '@wix/interact';
+import { splitTextStyle } from '@wix/splittext/plugin';
+
+const css = generate(config, { plugins: { splitText: splitTextStyle } });
+```
+
+To type the `$splitText` config field, augment `InteractPluginConfigMap` from your app (the only place that imports both packages):
+
+```ts
+import type { SplitTextPluginConfig } from '@wix/splittext/plugin';
+
+declare module '@wix/interact' {
+  interface InteractPluginConfigMap {
+    splitText: SplitTextPluginConfig;
+  }
+}
+```
+
+See the `@wix/interact` [Plugins guide](../interact/docs/guides/plugins.md) for the full contract.
+
 ## License
 
 [MIT](https://github.com/wix/interact/blob/master/LICENSE)

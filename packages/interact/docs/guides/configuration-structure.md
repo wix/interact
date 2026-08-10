@@ -43,6 +43,8 @@ Each interaction defines a complete cause-and-effect relationship:
 
 Time-based playback (`once`, `repeat`, `alternate`, `state`) is set with `triggerType` on each time effect, or with `triggerType` on a sequence object when using `sequences`. Optional `params` on the interaction are for observer options (`viewEnter`), pointer/`animationEnd` settings, and other non-playback trigger configuration.
 
+An interaction (or effect) may also carry `$`-prefixed fields (e.g. `$splitText`) — config routed to external plugins registered via `Interact.use()`. See the [Plugins guide](./plugins.md).
+
 ## Element Selection with Selectors
 
 The `selector` property allows you to specify exactly which element should be used for interactions, instead of being limited to the first child element.

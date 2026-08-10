@@ -69,7 +69,7 @@ Use `keyframeEffect` or `namedEffect` when the hover should play an animation (C
   - `'repeat'` — restarts the animation from the beginning on each enter. On leave, jumps to the beginning and pauses.
   - `'once'` — plays once on the first enter and never again.
   - `'state'` — resumes on enter, pauses on leave. Useful for continuous loops (`iterations: Infinity`).
-- `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
+- `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names may be camelCase or kebab-case (both accepted); prefer camelCase, which is what WAAPI uses.
 - `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
 - `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.
 - `[DURATION_MS]` — animation duration in milliseconds.
@@ -131,7 +131,7 @@ Use `transition` when all properties share timing. Use `transitionProperties` wh
   - `'add'` — applies the style state on enter. Leave does NOT remove it.
   - `'remove'` — removes a previously applied style state on enter. Use with provided `effectId` to map to a matching interaction with `add` and effect with same `effectId`.
   - `'clear'` — clears all previously applied style states on enter. Use to reset multiple stacked `'add'` style changes at once (e.g. a "reset" hover area that undoes several accumulated states).
-- `[CSS_PROP]` — CSS property name as a string in camelCase format (e.g. `'backgroundColor'`, `'borderRadius'`, `'opacity'`).
+- `[CSS_PROP]` — CSS property name as a string, in kebab-case (`'background-color'`) or camelCase (`'backgroundColor'`) — both accepted; prefer kebab-case, since these are written into CSS. Custom properties (`--*`) are used verbatim.
 - `[VALUE]` — target CSS value for the property.
 - `[DURATION_MS]` — transition duration in milliseconds.
 - `[DELAY_MS]` — optional transition delay in milliseconds.

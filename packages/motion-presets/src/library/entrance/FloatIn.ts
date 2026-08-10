@@ -1,5 +1,5 @@
 import type { TimeAnimationOptions, FloatIn, EffectFourDirections } from '../../types';
-import { toKeyframeValue, parseDirection } from '../../utils';
+import { toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'left';
@@ -39,6 +39,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: floatIn,
+      fill: getEntranceFill(options),
       easing,
       custom,
       keyframes: [
@@ -61,6 +62,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     {
       ...options,
       name: fadeIn,
+      fill: getEntranceFill(options),
       easing,
       custom: {},
       keyframes: [{ offset: 0, opacity: 0 }],

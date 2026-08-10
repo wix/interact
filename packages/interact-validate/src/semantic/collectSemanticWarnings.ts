@@ -4,7 +4,7 @@
 // `collectSemanticWarnings` (consumed by the schema `transform`).
 
 import type { Path, SemanticIssue, AnyConfig, Visitors } from '../types';
-import { checkKeyframePropCamelCase, checkInvalidInset } from './cssSyntax';
+import { checkCSSPropertyNames, checkInvalidInset } from './cssSyntax';
 import { checkSameElementRetrigger, checkHitAreaShift } from './fouc';
 import {
   checkListItemSelectorWithoutContainer,
@@ -77,7 +77,7 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
       warnings.push(...checkStateRemoveWithoutEffectId(path, effect));
       warnings.push(...checkRecommendedFill(path, resolvedEffect, owner));
       warnings.push(...checkPointerAxisIgnored(path, resolvedEffect, owner));
-      warnings.push(...checkKeyframePropCamelCase(path, effect));
+      warnings.push(...checkCSSPropertyNames(path, effect));
     },
     onSequence: (path, sequence, isTopLevel, owner) => {
       const { sequenceId } = sequence;

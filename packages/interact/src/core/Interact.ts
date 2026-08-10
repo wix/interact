@@ -10,6 +10,7 @@ import {
   ViewEnterHandlerModule,
   IInteractionController,
   IInteractElement,
+  InteractPlugin,
 } from '../types';
 import { getInterpolatedKey } from './utilities';
 import { generateId } from '../utils';
@@ -48,6 +49,7 @@ export class Interact {
   static controllerCache = new Map<string, IInteractionController>();
   static sequenceCache = new Map<string, Sequence>();
   static elementSequenceMap = new WeakMap<HTMLElement, Set<Sequence>>();
+  private static plugins = new Map<string, InteractPlugin>();
 
   constructor() {
     this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
@@ -244,6 +246,23 @@ export class Interact {
   }
 
   static registerEffects = registerEffects;
+
+  /**
+   * Registers a plugin under a name. When the config carries a plugin field (e.g. `$splitText`) with a matching key
+   * (on an interaction or effect), Interact invokes the plugin with the field's value and a
+   * context. Interact is agnostic to what the plugin does — see the `InteractPlugin` type.
+   */
+  static use(name: string, plugin: InteractPlugin): void {
+    Interact.plugins.set(name, plugin);
+  }
+
+  static getPlugin(name: string): InteractPlugin | undefined {
+    return Interact.plugins.get(name);
+  }
+
+  static getPluginsNames(): Set<string> {
+    return new Set(Interact.plugins.keys());
+  }
 
   static getSequence(
     cacheKey: string,

@@ -12,11 +12,11 @@ import { add, remove, generate } from '@wix/interact';
 
 ## Functions Overview
 
-| Function     | Purpose                                                                          | Parameters                 | Returns  |
-| ------------ | -------------------------------------------------------------------------------- | -------------------------- | -------- |
-| `add()`      | Add interactions to an element                                                   | `element`, `key?`          | `void`   |
-| `remove()`   | Remove interactions from an element                                              | `key`                      | `void`   |
-| `generate()` | Generate complete CSS for all animations, transitions, and scroll-driven effects | `config`, `useFirstChild?` | `string` |
+| Function     | Purpose                                                                          | Parameters                             | Returns  |
+| ------------ | -------------------------------------------------------------------------------- | -------------------------------------- | -------- |
+| `add()`      | Add interactions to an element                                                   | `element`, `key?`                      | `void`   |
+| `remove()`   | Remove interactions from an element                                              | `key`                                  | `void`   |
+| `generate()` | Generate complete CSS for all animations, transitions, and scroll-driven effects | `config`, `useFirstChild?`, `plugins?` | `string` |
 
 ---
 
@@ -196,21 +196,29 @@ console.log('Interactions removed for hero');
 
 ---
 
-## `generate(config, useFirstChild?)`
+## `generate(config, options?)`
 
 Generates a complete CSS string from an `InteractConfig`. The output includes `@keyframes`, animation and transition custom properties, view-timeline declarations, state-selector rules, coordinated-list aggregation, and FOUC-prevention initial rules — everything the browser needs to run the configured animations and transitions natively, without waiting for JavaScript.
 
 ### Signature
 
 ```typescript
-function generate(config: InteractConfig, useFirstChild?: boolean): string;
+function generate(config: InteractConfig, options?: boolean | GenerateOptions): string;
+
+type GenerateOptions = {
+  useFirstChild?: boolean;
+  plugins?: InteractPluginStyles;
+};
 ```
 
 ### Parameters
 
 **`config: InteractConfig`** - The full interaction configuration. Every interaction in the config is processed — not just `viewEnter`.
 
-**`useFirstChild?: boolean`** - When `true` (the default), generated selectors target the first child of each keyed element (e.g. `[data-interact-key="hero"] > :first-child`). This is the correct mode for `<interact-element>` custom elements. Pass `false` when the keyed element itself is the animation target (vanilla JS or React `<Interaction>`).
+**`options?: boolean | GenerateOptions`** - Either an options object or — for backwards compatibility — a bare boolean used as `useFirstChild` (`generate(config, false)` ≡ `generate(config, { useFirstChild: false })`).
+
+- **`useFirstChild?: boolean`** - When `true` (the default), generated selectors target the first child of each keyed element (e.g. `[data-interact-key="hero"] > :first-child`). This is the correct mode for `<interact-element>` custom elements. Pass `false` when the keyed element itself is the animation target (vanilla JS or React `<Interaction>`).
+- **`plugins?: InteractPluginStyles`** - Optional map of plugin name → SSR style generator. For every `$<name>` field in the config, the matching generator is called with the field's (opaque) value and a context, and its returned CSS data is appended to the output. Used to emit build-time styling on a plugin's behalf — e.g. hiding pre-split text for FOUC prevention. Like `create()`/`use()`, `generate()` never inspects the field value. See [Plugins → SSR styling](../guides/plugins.md#ssr-styling-foouc-prevention).
 
 ### Returns
 
@@ -247,7 +255,9 @@ The output covers every CSS-expressible aspect of the configuration:
 
 For entrance animations where the source and target are the same element, `generate()` emits an initial rule that hides the element until its animation starts. Inject the generated CSS into `<head>` (preferred) or the beginning of `<body>`.
 
-The initial rule uses `:not([data-interact-enter])` so the element becomes visible once the animation begins. This only applies to `viewEnter` interactions with `triggerType: 'once'` (the default for `viewEnter`).
+The initial rule uses `:not([data-interact-enter])` so the element becomes visible once the animation begins. This only applies to `viewEnter` interactions with `triggerType: 'once'` (the default for `viewEnter`)
+
+For any entrance animation, use `fill: 'backwards'` (or `'both'` when the final keyframe must persist). Entrance presets default to `backwards`.
 
 For `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting keyframe as inline styles on the target element and use `fill: 'both'`.
 
@@ -256,10 +266,10 @@ For `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting
 ```css
 [data-interact-key='hero']:not([data-interact-enter]) {
   visibility: hidden;
-  transform: none;
-  translate: none;
-  scale: none;
-  rotate: none;
+  transform: none !important;
+  translate: none !important;
+  scale: none !important;
+  rotate: none !important;
 }
 ```
 

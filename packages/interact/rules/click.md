@@ -67,7 +67,7 @@ Use `keyframeEffect` or `namedEffect` when the click should play an animation (C
   - `'repeat'` — restarts the animation from the beginning on each click.
   - `'once'` — plays once on the first click and never again.
   - `'state'` — resumes/pauses the animation on each click. Useful for continuous loops (`iterations: Infinity`).
-- `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names in camelCase.
+- `[KEYFRAMES]` — array of keyframe objects (e.g. `[{ opacity: 0 }, { opacity: 1 }]`). Property names may be camelCase or kebab-case (both accepted); prefer camelCase, which is what WAAPI uses.
 - `[EFFECT_NAME]` — unique string identifier for a `keyframeEffect`.
 - `[NAMED_EFFECT_DEFINITION]` — object with properties of pre-built, time-based animation effect from `@wix/motion-presets`. Refer to motion-presets rules for available presets and their options.
 - `[FILL_MODE]` - optional. Always `'both'` with `triggerType: 'alternate'` or `'repeat'`, otherwise depends on the effect.
@@ -130,7 +130,7 @@ Use `transition` when all properties share timing. Use `transitionProperties` wh
   - `'add'` — applies the style state. Does not remove on subsequent clicks.
   - `'remove'` — removes a previously applied style state.
   - `'clear'` — clears all previously applied style states. Useful for resetting multiple stacked style states at once.
-- `[CSS_PROP]` — CSS property name as a string in camelCase format (e.g. `'backgroundColor'`, `'borderRadius'`, `'opacity'`).
+- `[CSS_PROP]` — CSS property name as a string, in kebab-case (`'background-color'`) or camelCase (`'backgroundColor'`) — both accepted; prefer kebab-case, since these are written into CSS. Custom properties (`--*`) are used verbatim.
 - `[VALUE]` — target CSS value for the property.
 - `[DURATION_MS]` — transition duration in milliseconds.
 - `[DELAY_MS]` — optional transition delay in milliseconds.
