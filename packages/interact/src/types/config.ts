@@ -42,7 +42,6 @@ export type InteractionTrigger = {
 export type Interaction = InteractionTrigger & {
   effects?: ((Effect | EffectRef) & { interactionId?: string })[];
   sequences?: (SequenceConfig | SequenceConfigRef)[];
-  configIndex?: number;
 };
 
 export type InteractConfig = {

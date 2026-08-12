@@ -113,10 +113,16 @@ seq.play();
 `offset[i] = offsetEasing(i / last) * last * offsetMs`; the sequence rewrites each
 group's delay so all end together.
 
+Pass a `sequenceId` and the stagger switches routes for **CSS-backed** groups: instead of rewriting
+`delay`, the sequence sets `--motion-<sequenceId>-index` / `--motion-<sequenceId>-last` on each target,
+which the `calc()` delay emitted by `getCSSAnimation(target, options, trigger, sequenceOptions)` reads.
+This is how one static rule staggers a whole list. The same id must reach both halves; a string
+`offsetEasing` is required (functions have no CSS form).
+
 ## Easings — three separate namespaces (don't mix)
 
 1. **`easing`** (time/scrub option) → `cssEasings`: `linear, ease, easeIn/Out/InOut, sineIn/Out/InOut, quadIn…, cubicIn…, quartIn…, quintIn…, expoIn…, circIn…, backIn/Out/InOut`, or any raw CSS `cubic-bezier(...)`/`linear(...)`. Unknown strings pass through unchanged (so a typo silently does nothing).
-2. **`offsetEasing`** (sequence) → `jsEasings` function map, or a `cubic-bezier(...)`/`linear(...)` string; falls back to `linear`.
+2. **`offsetEasing`** (sequence) → `jsEasings` function map, or a `cubic-bezier(...)`/`linear(...)` string; falls back to `linear`. For generated CSS it is instead compiled to a `calc()` fragment via `jsEasingsInCSS`/`getJsEasingInCSS` — same key set, but a function value is not supported there.
 3. **`transitionEasing`** (scrub smoothing) → `'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce'` (note: `hardBackOut`/`elastic`/`bounce` fall back to `linear` internally).
 
 ## Engine gotchas

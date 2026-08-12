@@ -18,6 +18,7 @@ uses it internally for staggered list animations.
 - [`SequenceOptions` / `AnimationGroupArgs`](#sequenceoptions--animationgroupargs)
 - [Target Resolution](#target-resolution)
 - [Stagger Offset Formula](#stagger-offset-formula)
+- [CSS-Driven Stagger (`sequenceId`)](#css-driven-stagger-sequenceid)
 - [`Sequence` Class Surface](#sequence-class-surface)
 - [Reduced Motion](#reduced-motion)
 - [Gotchas / Rules](#gotchas--rules)
@@ -65,10 +66,11 @@ type SequenceOptions = {
   delay?: number; // ms base delay, default 0
   offset?: number; // ms stagger interval, default 0
   offsetEasing?: string | ((p: number) => number); // default 'linear'
+  sequenceId?: string; // opts CSS-driven groups into the CSS stagger path
 };
 ```
 
-(`../src/types.ts:268-272`)
+(`../src/types.ts:268-273`)
 
 ```typescript
 type AnimationGroupArgs = {
@@ -104,12 +106,42 @@ offset[i] = (offsetEasing(i / last) * last * offset) | 0
 
 where `i` is the (0-based) group index and `last` is the index of the final group (`count - 1`). Single-
 group sequences (`count <= 1`) always produce `[0]`, regardless of `offset`/`offsetEasing`
-(`../src/Sequence.ts:52-62`).
+(`../src/Sequence.ts:54-64`).
 
-Each group's calculated offset is added to its animations' `delay` timing. An `endDelay` is also computed
-per group so that **all groups share the same total active duration** — this is what lets `finished` /
-`onFinish` resolve at the correct overall time regardless of per-group stagger
-(`../src/Sequence.ts:64-102`).
+Each group's calculated offset is added to its animations' `delay` timing, and the sequence-level
+`delay` is added on top of that. An `endDelay` is also computed per group so that **all groups share the
+same total active duration** — this is what lets `finished` / `onFinish` resolve at the correct overall
+time regardless of per-group stagger (`../src/Sequence.ts:66-102`).
+
+> **Rule**: the sequence-level `delay` shifts the whole timeline, so it is deliberately **excluded** from
+> the `endDelay` computation — `endDelay = sequenceDuration - (baseDelay + offset[i] + duration × iterations)`.
+> Folding `delay` into that subtraction produces negative `endDelay`s and breaks reverse playback.
+
+## CSS-Driven Stagger (`sequenceId`)
+
+When the child animations are **CSS Animations** (`AnimationGroup.isCSS`, i.e. picked up from
+already-rendered CSS via `getElementCSSAnimation`) their `delay` comes from the generated `animation`
+shorthand, not from the WAAPI. Overwriting it with `updateTiming({ delay })` would detach the animation
+from its CSS declaration. So for that combination `Sequence` takes a different route
+(`../src/Sequence.ts:66-102`):
+
+| Condition                  | How the stagger delay is applied                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `sequenceId` set + `isCSS` | Sets `--motion-<sequenceId>-index` (the group index) and `--motion-<sequenceId>-last` on the group's target element |
+| otherwise                  | `effect.updateTiming({ delay: baseDelay + offset[i] + sequence.delay })`                                            |
+
+The matching `calc()` that consumes those custom properties is emitted by `getCSSAnimation` when it is
+passed the same `SequenceOptions` — see [`./css-generation.md`](./css-generation.md#sequence-stagger-in-css).
+`endDelay` is applied in **both** routes, so `finished`/`onFinish` behave identically.
+
+- **MUST** pass the same `sequenceId` to `getCSSAnimation` (at CSS-generation time) and to
+  `getSequence`/`new Sequence` (at runtime) — they are the two halves of one contract, joined only by
+  the custom-property name. A mismatch silently yields no stagger: the `var()` fallbacks resolve
+  `index` to `0` and every element animates at the base delay.
+- **Rule**: a `Sequence` without a `sequenceId`, or one whose groups are WAAPI animations, behaves exactly
+  as before — the CSS path is purely additive.
+- **Rule**: the target must be an `HTMLElement` for the custom properties to be set; other targets fall
+  through with `endDelay` applied but no stagger.
 
 ### Offsets by Easing
 
@@ -158,6 +190,7 @@ class Sequence extends AnimationGroup {
   delay: number;
   offset: number;
   offsetEasing: (p: number) => number;
+  sequenceId: string | undefined;
 
   constructor(animationGroups: AnimationGroup[], options?: SequenceOptions);
 
@@ -182,22 +215,22 @@ class Sequence extends AnimationGroup {
 }
 ```
 
-(`../src/Sequence.ts:13-45`)
+(`../src/Sequence.ts:13-47`)
 
 ```typescript
 type IndexedGroup = { index: number; group: AnimationGroup };
 ```
 
-(`../src/types.ts:280-283`)
+(`../src/types.ts:281-284`)
 
-- **`addGroups(entries)`** (`../src/Sequence.ts:109-128`) — inserts groups at the given indices (processed
+- **`addGroups(entries)`** (`../src/Sequence.ts:127-146`) — inserts groups at the given indices (processed
   highest-index-first so earlier insertion indices stay valid), splices the new groups' animations into the
   flattened `animations` array at the matching position, recalculates offsets for **all** groups, and
   resets `ready` to `Promise.all(animationGroups.map(g => g.ready))`.
-- **`removeGroups(predicate)`** (`../src/Sequence.ts:135-163`) — cancels and removes every group for which
+- **`removeGroups(predicate)`** (`../src/Sequence.ts:153-181`) — cancels and removes every group for which
   `predicate(group)` returns `true`, rebuilds the flattened `animations` array, recalculates offsets for
   the remaining groups, resets `ready`, and returns the removed groups (`[]` if none matched).
-- **`onFinish(callback)`** (overridden, `../src/Sequence.ts:165-172`) — awaits each child group's own
+- **`onFinish(callback)`** (overridden, `../src/Sequence.ts:183-190`) — awaits each child group's own
   `finished` promise individually (`Promise.all(animationGroups.map(g => g.finished))`), not the flattened
   `AnimationGroup.finished`. On any rejection it logs a warning via `console.warn` and does **not** invoke
   `callback`.
@@ -205,14 +238,14 @@ type IndexedGroup = { index: number; group: AnimationGroup };
   can be read back, but mutating them after construction does **not** retrigger offset recalculation —
   `applyOffsets()` is private and only runs from the constructor, `addGroups`, and `removeGroups`. To
   change stagger timing, construct a new `Sequence`.
-- **`offsetEasing` resolution** (`../src/Sequence.ts:27-30`): if `options.offsetEasing` is a function, it's
+- **`offsetEasing` resolution** (`../src/Sequence.ts:29-32`): if `options.offsetEasing` is a function, it's
   used as-is; if it's a string, it's resolved via `getJsEasing(string)`; otherwise (or if resolution fails)
   it falls back to the local `linear` easing. Valid string keys are the `jsEasings` set —
   `linear, sineIn, sineOut, sineInOut, quadIn, quadOut, quadInOut, cubicIn, cubicOut, cubicInOut, quartIn,
 quartOut, quartInOut, quintIn, quintOut, quintInOut, expoIn, expoOut, expoInOut, circIn, circOut,
 circInOut, backIn, backOut, backInOut`
   (`../src/easings.ts:187-213`) — or a raw `cubic-bezier(x1, y1, x2, y2)` string, or a custom
-  `(p: number) => number` function (`../src/utils.ts:177-187`).
+  `(p: number) => number` function (`../src/utils.ts:312-322`).
 
 ### `addGroups` / `removeGroups` Examples
 

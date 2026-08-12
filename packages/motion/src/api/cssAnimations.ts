@@ -27,10 +27,10 @@ function getAnimationAsCSS(
   const animationName = data.effect.name;
   const isAutoDuration = duration === 'auto';
 
+  const { sequenceId, delay: seqDelay, offset, offsetEasing = 'linear' } = sequenceOptions || {};
   let delayStr = `${delay ?? 0}ms`;
 
-  if (sequenceOptions?.sequenceId && typeof sequenceOptions?.offsetEasing === 'string') {
-    const { delay: seqDelay, offset, offsetEasing, sequenceId } = sequenceOptions;
+  if (sequenceId && typeof offsetEasing === 'string') {
     const calcEasing = getJsEasingInCSS(offsetEasing);
 
     if (calcEasing) {
@@ -40,7 +40,7 @@ function getAnimationAsCSS(
         const easing = calcEasing(
           `(var(--motion-${sequenceId}-index, 0) / var(--motion-${sequenceId}-last, 1))`,
         );
-        const stagger = `(${baseDelay} + ${easing} * ${offset ?? 0} * var(--motion-${sequenceId}-last, 1))`;
+        const stagger = `(${baseDelay} + ${easing} * ${offset} * var(--motion-${sequenceId}-last, 1))`;
         delayStr = `calc(${stagger} * 1ms)`;
       } else {
         delayStr = `${baseDelay}ms`;

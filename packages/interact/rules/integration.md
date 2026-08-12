@@ -269,6 +269,14 @@ Define reusable sequences in `InteractConfig.sequences` and reference by `sequen
 }
 ```
 
+- **MUST** use a **string** `offsetEasing` (named key, `cubic-bezier(...)` or `linear(...)`) on any
+  sequence that needs generated CSS. `generate()` compiles the stagger into a `calc()` delay driven by
+  `--motion-<sequenceId>-index` custom properties, which a `(p: number) => number` function cannot
+  express — such a sequence is omitted from the generated CSS entirely and loses FOUC prevention.
+- **Rule**: `sequenceId` names those custom properties, so it must be identical on both sides.
+  Interact handles this for you — omitted ids default to `seq-<interactionIndex>-<sequenceIndex>`, derived
+  from the config position — but a hand-written id must be stable across CSS generation and runtime.
+
 ---
 
 ## CSS Generation & FOUC Prevention

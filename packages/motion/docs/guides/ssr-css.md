@@ -16,6 +16,7 @@ function getCSSAnimation(
   target: string | null,
   animationOptions: AnimationOptions,
   trigger?: TriggerVariant,
+  sequenceOptions?: SequenceOptions,
 ): Array<{
   target: string;
   animation: string;
@@ -33,17 +34,17 @@ function getCSSAnimation(
 rules target selectors, so there's no element reference to accept. One entry is returned per generated
 `@keyframes`/`animation` pair (e.g. one per `data-motion-part` sub-target).
 
-| Field               | Meaning                                                                                                                         |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `target`            | Selector for the animated element or sub-part, e.g. `"#hero"` or `"#hero[data-motion-part~='icon']"`; `""` if nothing resolved. |
-| `animation`         | The CSS `animation` shorthand value. **Paused by default** — see [below](#paused-by-default).                                   |
-| `composition`       | `CompositeOperation`, if the effect set one.                                                                                    |
-| `custom`            | Custom property values referenced by the keyframes, if any.                                                                     |
-| `name`              | The `@keyframes` name — pair it with `keyframes` to build the `@keyframes` block.                                               |
-| `keyframes`         | Ordered keyframe declarations (property-bag objects, not a WAAPI `Keyframe[]`) — the steps of the `@keyframes` block.           |
-| `id`                | Effect id, if `animationOptions.effectId` was set.                                                                              |
-| `animationTimeline` | `` `--${trigger.id}` `` for `view-progress` triggers, else `""`. Maps to the CSS `animation-timeline` property.                 |
-| `animationRange`    | e.g. `"cover 0% cover 100%"` for `view-progress` triggers, else `""`. Maps to `animation-range`.                                |
+| Field               | Meaning                                                                                                                                                                                                                                |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target`            | Selector for the animated element or sub-part, e.g. `"#hero"` or `"#hero[data-motion-part~='icon']"`; `""` if nothing resolved.                                                                                                        |
+| `animation`         | The CSS `animation` shorthand value. **Paused by default** — see [below](#paused-by-default). The delay becomes a `calc()` when `sequenceOptions` is passed — see [Staggering a list from one rule](#staggering-a-list-from-one-rule). |
+| `composition`       | `CompositeOperation`, if the effect set one.                                                                                                                                                                                           |
+| `custom`            | Custom property values referenced by the keyframes, if any.                                                                                                                                                                            |
+| `name`              | The `@keyframes` name — pair it with `keyframes` to build the `@keyframes` block.                                                                                                                                                      |
+| `keyframes`         | Ordered keyframe declarations (property-bag objects, not a WAAPI `Keyframe[]`) — the steps of the `@keyframes` block.                                                                                                                  |
+| `id`                | Effect id, if `animationOptions.effectId` was set.                                                                                                                                                                                     |
+| `animationTimeline` | `` `--${trigger.id}` `` for `view-progress` triggers, else `""`. Maps to the CSS `animation-timeline` property.                                                                                                                        |
+| `animationRange`    | e.g. `"cover 0% cover 100%"` for `view-progress` triggers, else `""`. Maps to `animation-range`.                                                                                                                                       |
 
 ## Building a stylesheet from descriptors
 
@@ -120,6 +121,33 @@ client renders it. So it always passes an internal `forCSS` flag that forces `du
 generated CSS safe to render ahead of time: it's native-`ViewTimeline` CSS every time, which any browser
 that doesn't support `ViewTimeline` will simply treat as a paused/static animation rather than break.
 
+## Staggering a list from one rule
+
+Staggering a list in static CSS looks like it needs one rule per item — each item wants its own
+`animation-delay`, and the item count usually isn't known when the CSS is generated. The optional
+`sequenceOptions` argument sidesteps that: the delay slot becomes a `calc()` that reads the element's
+position in the list from two custom properties, so **one rule covers the whole list**.
+
+```typescript
+const [{ animation }] = getCSSAnimation(
+  'card',
+  { namedEffect: { type: 'FadeIn' }, duration: 600 },
+  undefined,
+  { sequenceId: 'cards', offset: 120, offsetEasing: 'quadIn' },
+);
+// fade-in 600ms calc((0 + <easing(index / last)> * 120 * var(--motion-cards-last, 1)) * 1ms) … paused
+```
+
+`--motion-cards-index` and `--motion-cards-last` are set per element at runtime by a
+[`Sequence`](../api/sequence.md#css-driven-stagger) built with the same `sequenceId` — the id is the only
+thing joining the two halves, so it must match. Until the Sequence runs, the `var()` fallbacks
+(`index: 0`, `last: 1`) collapse the `calc()` to the plain base delay, keeping the pre-JS render valid.
+
+`offsetEasing` must be a string here (a named key, `cubic-bezier(...)`, or `linear(...)`); a JS function
+has no CSS equivalent and falls back to an unstaggered delay. It defaults to `'linear'`, and the emitted
+expressions use the CSS math functions `pow()`, `sqrt()`, `sin()`, `cos()`, `acos()`,
+`round()`, `max()` and `clamp()`.
+
 ## Paused by default
 
 The `animation` shorthand generated for **time-based** animations is paused by default — the CSS is
@@ -145,3 +173,4 @@ for the full contract. Reach for `getCSSAnimation()` directly only when you're g
   of the core API.
 - [Custom Effects](./custom-effects.md) — implement an effect module's optional `style()` hook to opt
   into this path.
+- [Sequence](../api/sequence.md#css-driven-stagger) — the runtime half of the CSS stagger.

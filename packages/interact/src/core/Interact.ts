@@ -440,7 +440,6 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
       ...rest,
       effects: effects.length > 0 ? effects : undefined,
       sequences: processedSequences,
-      configIndex,
     } as Interaction;
 
     interactions[source].triggers.push(interaction);

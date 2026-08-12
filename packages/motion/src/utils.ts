@@ -100,7 +100,12 @@ export function getEasing(easing?: keyof typeof cssEasings | string): string {
   return easing ? cssEasings[easing as keyof typeof cssEasings] || easing : cssEasings.linear;
 }
 
-function cubicBezierEasing(x1: number, y1: number, x2: number, y2: number): (t: number) => number {
+export function cubicBezierEasing(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): (t: number) => number {
   const cx = 3 * x1;
   const bx = 3 * (x2 - x1) - cx;
   const ax = 1 - cx - bx;
@@ -292,13 +297,22 @@ function parseCssLinearToCalc(str: string): ((t: string) => string) | undefined 
   if (!resolved) return undefined;
 
   return (t: string) => {
-    const clamps: string[] = [];
+    const terms: string[] = [`${resolved[0].output}`];
     for (let i = 1; i < resolved.length; i++) {
-      clamps.push(
-        `clamp(0, (${t} - ${resolved[i - 1].pos}) / ${resolved[i].pos - resolved[i - 1].pos}, 1) * ${resolved[i].output - resolved[i - 1].output}`,
-      );
+      const dx = resolved[i].pos - resolved[i - 1].pos;
+      const dy = resolved[i].output - resolved[i - 1].output;
+
+      if (dx === 0 && resolved[i - 1].pos === 0) {
+        terms.push(`${dy}`);
+      } else {
+        const clampMid =
+          dx === 0
+            ? `round(${t} / ${2 * resolved[i - 1].pos})`
+            : `(${t} - ${resolved[i - 1].pos}) / ${dx}`;
+        terms.push(`clamp(0, ${clampMid}, 1) * ${dy}`);
+      }
     }
-    return `(${clamps.join(' + ')})`;
+    return `(${terms.join(' + ')})`;
   };
 }
 

@@ -17,6 +17,7 @@ documents only the lower-level `@wix/motion` primitive it is built on.
 - [Package Boundary](#package-boundary)
 - [Signature](#signature)
 - [Return Shape: an Array of Descriptors](#return-shape-an-array-of-descriptors)
+- [Sequence Stagger in CSS](#sequence-stagger-in-css)
 - [`forCSS` and `duration: 'auto'`](#forcss-and-duration-auto)
 - [Injecting the Output](#injecting-the-output)
 - [The `iterations` Idiom in CSS](#the-iterations-idiom-in-css)
@@ -35,11 +36,12 @@ documents only the lower-level `@wix/motion` primitive it is built on.
 ## Signature
 
 ```typescript
-// ../src/api/cssAnimations.ts:51-80
+// ../src/api/cssAnimations.ts:75-105
 function getCSSAnimation(
   target: string | null,
   animationOptions: AnimationOptions,
   trigger?: TriggerVariant,
+  sequenceOptions?: SequenceOptions, // opt in to the CSS stagger — see below
 ): Array<{
   target: string;
   animation: string;
@@ -65,24 +67,68 @@ Unlike `getWebAnimation`, `target` here is `string | null` **only** — an eleme
 
 One descriptor is produced per `AnimationData` the effect's `web`/`style` returns (see
 [`./custom-effects.md`](./custom-effects.md)), so a multi-part effect yields multiple descriptors —
-one per `part` (`../src/api/cssAnimations.ts:63-79`).
+one per `part` (`../src/api/cssAnimations.ts:88-104`).
 
-| Field               | Meaning                                                                                                                                                                                                                                                                                                              |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `target`            | `#<id>` or `#<id>[data-motion-part~="<part>"]` (see [`./custom-effects.md#data-motion-part-sub-targeting`](./custom-effects.md#data-motion-part-sub-targeting)); `''` if `target` was `null`.                                                                                                                        |
-| `animation`         | The CSS `animation` shorthand: `<name> <duration> <delay> <easing> <fill> <iterations> <direction> <playState>`. **Paused by default** for time-based/pointer animations; **not** paused for `view-progress` (the timeline governs playback instead) — see `getAnimationAsCSS`, `../src/api/cssAnimations.ts:14-32`. |
-| `composition?`      | The effect's `CompositeOperation` (`'replace' \| 'add' \| 'accumulate'`), if set — apply as `animation-composition` when building the rule; not embedded in the `animation` shorthand itself.                                                                                                                        |
-| `custom?`           | CSS custom properties the effect needs on the target (e.g. `--motion-rotate`) — apply as inline declarations alongside `animation`.                                                                                                                                                                                  |
-| `name`              | The `@keyframes` name — use it both to declare `@keyframes <name> { … }` and it is already embedded in the `animation` shorthand.                                                                                                                                                                                    |
-| `keyframes`         | The keyframe list to render into the `@keyframes` block.                                                                                                                                                                                                                                                             |
-| `id`                | `${effectId}-${index + 1}` if the animation options had an `effectId`, else `undefined`. For tracking the descriptor back to its source effect — not itself required in the emitted CSS.                                                                                                                             |
-| `animationTimeline` | `--${trigger.id}` when `trigger.trigger === 'view-progress'`, else `''` — apply as `animation-timeline`.                                                                                                                                                                                                             |
-| `animationRange`    | e.g. `"cover 0% cover 100%"` for `view-progress`, else `''` — apply as `animation-range`.                                                                                                                                                                                                                            |
+| Field               | Meaning                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target`            | `#<id>` or `#<id>[data-motion-part~="<part>"]` (see [`./custom-effects.md#data-motion-part-sub-targeting`](./custom-effects.md#data-motion-part-sub-targeting)); `''` if `target` was `null`.                                                                                                                                                                                                                                                 |
+| `animation`         | The CSS `animation` shorthand: `<name> <duration> <delay> <easing> <fill> <iterations> <direction> <playState>`. `<delay>` becomes a `calc()` when `sequenceOptions` is passed (see [Sequence Stagger in CSS](#sequence-stagger-in-css)). **Paused by default** for time-based/pointer animations; **not** paused for `view-progress` (the timeline governs playback instead) — see `getAnimationAsCSS`, `../src/api/cssAnimations.ts:16-59`. |
+| `composition?`      | The effect's `CompositeOperation` (`'replace' \| 'add' \| 'accumulate'`), if set — apply as `animation-composition` when building the rule; not embedded in the `animation` shorthand itself.                                                                                                                                                                                                                                                 |
+| `custom?`           | CSS custom properties the effect needs on the target (e.g. `--motion-rotate`) — apply as inline declarations alongside `animation`.                                                                                                                                                                                                                                                                                                           |
+| `name`              | The `@keyframes` name — use it both to declare `@keyframes <name> { … }` and it is already embedded in the `animation` shorthand.                                                                                                                                                                                                                                                                                                             |
+| `keyframes`         | The keyframe list to render into the `@keyframes` block.                                                                                                                                                                                                                                                                                                                                                                                      |
+| `id`                | `${effectId}-${index + 1}` if the animation options had an `effectId`, else `undefined`. For tracking the descriptor back to its source effect — not itself required in the emitted CSS.                                                                                                                                                                                                                                                      |
+| `animationTimeline` | `--${trigger.id}` when `trigger.trigger === 'view-progress'`, else `''` — apply as `animation-timeline`.                                                                                                                                                                                                                                                                                                                                      |
+| `animationRange`    | e.g. `"cover 0% cover 100%"` for `view-progress`, else `''` — apply as `animation-range`.                                                                                                                                                                                                                                                                                                                                                     |
+
+## Sequence Stagger in CSS
+
+Pass a `SequenceOptions` as the 4th argument to stagger a group of elements **from a single static CSS
+rule**. Instead of baking a different `animation-delay` per element (which would need one rule per item,
+and therefore knowledge of the item count at generation time), the delay slot becomes a `calc()` that
+reads the element's position from two custom properties
+(`getAnimationAsCSS`, `../src/api/cssAnimations.ts:16-59`):
+
+```
+calc((<delay + sequence.delay> + <easing(index / last)> * <offset> * var(--motion-<id>-last, 1)) * 1ms)
+```
+
+where `index / last` is spelled `var(--motion-<id>-index, 0) / var(--motion-<id>-last, 1)`.
+
+```typescript
+getCSSAnimation('card', { namedEffect: { type: 'FadeIn' }, duration: 600 }, undefined, {
+  sequenceId: 'cards',
+  offset: 120,
+  offsetEasing: 'quadIn',
+})[0].animation;
+// fade-in 600ms calc((0 + (…index/…last) * (…index/…last) * 120 * var(--motion-cards-last, 1)) * 1ms) … paused
+```
+
+The custom properties are set per element at runtime by `Sequence` (see
+[`./sequences.md`](./sequences.md#css-driven-stagger-sequenceid)) — pass it the **same `sequenceId`**.
+Until it runs, the `var()` fallbacks (`index: 0`, `last: 1`) resolve the `calc()` to the plain base delay,
+so the emitted CSS is valid and FOUC-free before any JS loads.
+
+| `sequenceOptions`                  | Emitted delay slot                                |
+| ---------------------------------- | ------------------------------------------------- |
+| omitted, or no `sequenceId`        | `<delay>ms` — unchanged                           |
+| `sequenceId` + non-zero `offset`   | the `calc()` above                                |
+| `sequenceId` + `offset: 0`/omitted | `<delay + sequence.delay>ms` — nothing to stagger |
+| `offsetEasing` is a **function**   | `<delay>ms` — a JS function has no CSS form       |
+
+- **MUST NOT** pass a function `offsetEasing` and expect a stagger — only string easings
+  (named key, `cubic-bezier(...)`, or `linear(...)`) can be compiled to `calc()`, via
+  `getJsEasingInCSS` (`../src/utils.ts:324-334`). A function silently falls back to the plain delay;
+  `@wix/interact` instead drops the whole sequence from its generated CSS.
+- **Rule:** `offsetEasing` defaults to `'linear'` here, matching `Sequence` — `{ sequenceId, offset }`
+  alone is enough to get an evenly-spaced stagger.
+- **Rule:** the stagger only affects the delay slot, which is omitted entirely for `duration: 'auto'`
+  (`view-progress`) animations — sequences are time-based only.
 
 ## `forCSS` and `duration: 'auto'`
 
 `getCSSAnimation` internally calls the shared `getEffectsData(..., forCSS = true)`
-(`../src/api/cssAnimations.ts:60`). For a `view-progress` trigger, this **forces `duration: 'auto'`
+(`../src/api/cssAnimations.ts:85`). For a `view-progress` trigger, this **forces `duration: 'auto'`
 regardless of whether the current runtime supports `window.ViewTimeline`**:
 
 ```typescript
@@ -169,7 +215,7 @@ On the server, write the same `css` string into the rendered HTML's `<head>` ins
 ## The `iterations` Idiom in CSS
 
 ```typescript
-// ../src/api/cssAnimations.ts:30-31
+// ../src/api/cssAnimations.ts:56-57
 !iterations || iterations === Infinity ? 'infinite' : iterations;
 ```
 
@@ -203,6 +249,9 @@ rule logic.
   (`./waapi.md`).
 - **Rule:** for full FOUC-prevention and declarative CSS generation, use `@wix/interact`'s
   `generate()` rather than reimplementing it against these descriptors.
+- **Rule:** a `sequenceOptions.sequenceId` used here is only half the contract — the runtime
+  `Sequence` must receive the same id or the stagger never materializes. See
+  [`./sequences.md`](./sequences.md#css-driven-stagger-sequenceid).
 - A registered effect only participates in `getCSSAnimation` output if it implements the optional
   `style` member of `AnimationEffectAPI` — see [`./custom-effects.md`](./custom-effects.md).
 
@@ -212,6 +261,7 @@ rule logic.
   reference.
 - [`./custom-effects.md`](./custom-effects.md) — the `AnimationEffectAPI`/`style()` contract that
   feeds `getCSSAnimation`, and `data-motion-part` sub-targeting.
+- [`./sequences.md`](./sequences.md) — the runtime `Sequence` half of the CSS stagger contract.
 - `./scrub-scenes.md` — the native-`ViewTimeline`-vs-polyfill duration branch this file's `forCSS`
   override bypasses.
 - `../../interact/rules/integration.md` — `@wix/interact`'s `generate()`, which builds full

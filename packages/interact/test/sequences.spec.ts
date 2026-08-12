@@ -190,6 +190,61 @@ describe('interact sequences', () => {
       expect(triggerSequence.sequenceId).toBeTruthy();
     });
 
+    // The generated CSS names its stagger custom properties `--motion-<sequenceId>-index`, so a
+    // config-position-derived id is what lets the runtime Sequence address the very same properties.
+    test('derives auto-generated sequenceIds from the config position, matching generate()', () => {
+      const config = createBaseConfig();
+      config.interactions = [
+        {
+          trigger: 'click',
+          key: 'source-key',
+          sequences: [{ effects: [{ effectId: 'effect-source' }] }],
+        },
+        {
+          trigger: 'click',
+          key: 'other-key',
+          sequences: [
+            { effects: [{ effectId: 'effect-source' }] },
+            { effects: [{ effectId: 'effect-source' }] },
+          ],
+        },
+      ];
+
+      const instance = Interact.create(config, { useCustomElement: false });
+      const idsFor = (key: string) =>
+        instance.dataCache.interactions[key].triggers[0].sequences?.map(
+          (s) => (s as SequenceConfig).sequenceId,
+        );
+
+      expect(idsFor('source-key')).toEqual(['seq-0-0']);
+      expect(idsFor('other-key')).toEqual(['seq-1-0', 'seq-1-1']);
+    });
+
+    test('derives auto-generated effectIds from the config position', () => {
+      const config = createBaseConfig();
+      config.interactions = [
+        {
+          trigger: 'click',
+          key: 'source-key',
+          effects: [{ duration: 100 }, { duration: 200 }],
+          sequences: [{ effects: [{ duration: 300 }, { duration: 400 }] }],
+        },
+      ];
+
+      Interact.create(config, { useCustomElement: false });
+
+      // effects keep their config order, sequence effects are namespaced under the sequence id
+      expect(config.interactions[0].effects?.map((e: any) => e.effectId)).toEqual([
+        'eff-0-0',
+        'eff-0-1',
+      ]);
+      expect(
+        (config.interactions[0].sequences?.[0] as SequenceConfig).effects.map(
+          (e: any) => e.effectId,
+        ),
+      ).toEqual(['eff-seq-0-0-0', 'eff-seq-0-0-1']);
+    });
+
     test('warns when referencing unknown sequenceId', () => {
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const config = createBaseConfig();

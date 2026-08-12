@@ -77,20 +77,22 @@ export class Sequence extends AnimationGroup {
         if (!effect) return;
 
         const { delay: baseDelay, duration, iterations } = this.timingOptions[groupIdx][animIdx];
-        const delay = baseDelay + offsets[groupIdx] + this.delay;
-
-        if (!group.isCSS || !this.sequenceId) {
-          effect.updateTiming({ delay });
-        } else {
-          const { target } = effect as KeyframeEffect;
-          if (!(target instanceof HTMLElement)) return;
-
-          target.style.setProperty(`--motion-${this.sequenceId}-index`, `${groupIdx}`);
-          target.style.setProperty(`--motion-${this.sequenceId}-last`, `${last}`);
-        }
-
+        const delay = baseDelay + offsets[groupIdx];
         const endDelay = sequenceDuration - (delay + duration * iterations);
-        effect.updateTiming({ endDelay });
+
+        if (group.isCSS && !!this.sequenceId) {
+          const { target } = effect as KeyframeEffect;
+
+          if (target instanceof HTMLElement) {
+            target.style.setProperty(`--motion-${this.sequenceId}-index`, `${groupIdx}`);
+            target.style.setProperty(`--motion-${this.sequenceId}-last`, `${last}`);
+          }
+
+          effect.updateTiming({ endDelay });
+        } else {
+          // add the sequence delay to the animation delay at the end - it doesn't need to affect the endDelay
+          effect.updateTiming({ delay: delay + this.delay, endDelay });
+        }
       });
     });
   }

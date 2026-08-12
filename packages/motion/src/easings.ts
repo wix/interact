@@ -220,12 +220,50 @@ export const cubicBezierCalc = (t: string, x1: number, y1: number, x2: number, y
   const cy2 = 3 * (y2 - 2 * y1);
   const cy3 = 1 - 3 * y2 + 3 * y1;
 
-  const p_3 = (3 * cx3 * cx1 - cx2 * cx2) / (9 * cx3 * cx3);
-  const q_2 = `(${2 * Math.pow(cx2, 3) - 9 * cx1 * cx2 * cx3} - ${27 * cx3 * cx3} * ${t}) / ${54 * Math.pow(cx3, 3)}`;
-  const sqrt = `sqrt(pow(${q_2}, 2) + ${Math.pow(p_3, 3)})`;
-  const t_val = `pow(-1 * ${q_2} + ${sqrt}, 1 / 3) + pow(-1 * ${q_2} - ${sqrt}, 1 / 3) - ${cx2 / (3 * cx3)}`;
+  let t_val: string;
 
-  return `(${cy3} * pow(${t_val}, 3) + ${cy2} * pow(${t_val}, 2) + ${cy1} * (${t_val}))`;
+  if (cx3 === 0) {
+    // degenerate curve - x(s) is quadratic (or linear when cx2 is also 0), not cubic
+    t_val =
+      cx2 === 0
+        ? `(${t} / ${cx1})`
+        : `((sqrt(max(0, ${cx1 * cx1} + ${4 * cx2} * ${t})) - ${cx1}) / ${2 * cx2})`;
+  } else {
+    const shift = cx2 / (3 * cx3);
+    const qNum = 2 * Math.pow(cx2, 3) - 9 * cx1 * cx2 * cx3;
+    const qDen = 54 * Math.pow(cx3, 3);
+    const p_3 = (3 * cx3 * cx1 - cx2 * cx2) / (9 * cx3 * cx3);
+    const q_2 = `((${qNum} - ${27 * cx3 * cx3} * ${t}) / ${qDen})`;
+
+    if (p_3 < 0) {
+      // casus irreducibilis - Cardano's cube roots would be complex here, so use the trigonometric form
+      const m = 2 * Math.sqrt(-p_3);
+
+      let rootIdx = 0;
+      for (const k of [0, 1, 2]) {
+        const inDomain = [0, 0.25, 0.5, 0.75, 1].every((t) => {
+          const arg = Math.min(
+            Math.max((2 * (qNum - 27 * cx3 * cx3 * t)) / (qDen * p_3 * m), -1),
+            1,
+          );
+          const root = m * Math.cos((Math.acos(arg) - k * 2 * Math.PI) / 3) - shift;
+
+          return root >= -1e-6 && root <= 1 + 1e-6;
+        });
+
+        if (inDomain) rootIdx = k;
+      }
+      // clamping guards acos against arguments pushed just outside [-1, 1] by float error
+      const angle = `(acos(clamp(-1, ${2 / (p_3 * m)} * ${q_2}, 1)) - ${360 * rootIdx}deg) / 3`;
+
+      t_val = `(${m} * cos(${angle}) - ${shift})`;
+    } else {
+      const sqrt = `sqrt(pow(${q_2}, 2) + ${Math.pow(p_3, 3)})`;
+      t_val = `(pow(${sqrt} - ${q_2}, 1 / 3) - pow(${sqrt} + ${q_2}, 1 / 3) - ${shift})`;
+    }
+  }
+
+  return `(${cy3} * pow(${t_val}, 3) + ${cy2} * pow(${t_val}, 2) + ${cy1} * ${t_val})`;
 };
 
 export const jsEasingsInCSS = {
@@ -260,7 +298,7 @@ export const jsEasingsInCSS = {
   circIn: (t: string) => `(1 - sqrt(1 - ${t} * ${t}))`,
   circOut: (t: string) => `sqrt(1 - (${t} - 1) * (${t} - 1))`,
   circInOut: (t: string) =>
-    `((round(${t}) * (sqrt((3 - 2 * ${t}) * (2 * ${t} - 1)) + 1) + (1 - round(${t})) * (1 - sqrt(1 - 4 * ${t} * ${t}))) / 2)`,
+    `((round(${t}) * (sqrt(max(0, (3 - 2 * ${t}) * (2 * ${t} - 1))) + 1) + (1 - round(${t})) * (1 - sqrt(max(0, 1 - 4 * ${t} * ${t})))) / 2)`,
   backIn: (t: string) => `(2.70158 * pow(${t}, 3) - 1.70158 * ${t} * ${t})`,
   backOut: (t: string) => `(1 + 2.70158 * pow(${t} - 1, 3) + 1.70158 * (${t} - 1) * (${t} - 1))`,
   backInOut: (t: string) =>
