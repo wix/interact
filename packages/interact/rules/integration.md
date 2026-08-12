@@ -273,6 +273,7 @@ Define reusable sequences in `InteractConfig.sequences` and reference by `sequen
   sequence that needs generated CSS. `generate()` compiles the stagger into a `calc()` delay driven by
   `--motion-<sequenceId>-index` custom properties, which a `(p: number) => number` function cannot
   express — such a sequence is omitted from the generated CSS entirely and loses FOUC prevention.
+  `@wix/interact-validate` flags it as `FUNCTION_OFFSET_EASING` (warning, rule category `OFFSET_EASING`).
 - **Rule**: `sequenceId` names those custom properties, so it must be identical on both sides.
   Interact handles this for you — omitted ids default to `seq-<interactionIndex>-<sequenceIndex>`, derived
   from the config position — but a hand-written id must be stable across CSS generation and runtime.

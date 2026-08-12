@@ -4,6 +4,7 @@
 // `collectSemanticWarnings` (consumed by the schema `transform`).
 
 import type { Path, SemanticIssue, AnyConfig, Visitors } from '../types';
+import { checkFunctionOffsetEasing } from './cssGeneration';
 import { checkCSSPropertyNames, checkInvalidInset } from './cssSyntax';
 import { checkSameElementRetrigger, checkHitAreaShift } from './fouc';
 import {
@@ -86,6 +87,7 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
           ? { ...((config.sequences ?? {})[sequenceId] ?? {}), ...sequence }
           : sequence;
       warnings.push(...checkSameElementRetrigger(path, resolvedSequence, owner));
+      warnings.push(...checkFunctionOffsetEasing(path, sequence));
     },
   });
 

@@ -270,7 +270,7 @@ type SequenceConfigRef = {
 
 Prefer a **string** `offsetEasing`. `generate()` compiles the stagger into a `calc()` delay driven by
 `--motion-<sequenceId>-index` custom properties, and a `(p: number) => number` function has no CSS form —
-such a sequence is dropped from the generated CSS and loses FOUC prevention (it still runs at runtime).
+such a sequence is dropped from the generated CSS and loses FOUC prevention (it still runs at runtime). The validator flags this as `FUNCTION_OFFSET_EASING` (warning).
 
 A common pattern: one trigger fires a sequence whose single effect uses `selector`
 to pick the items — each matched element becomes a staggered child. (Use `selector`

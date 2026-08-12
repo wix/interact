@@ -43,6 +43,9 @@ config.
 > equivalent, so `generate()` skips the entire sequence — the animations still run once Interact
 > initializes, but nothing is rendered ahead of time and entrance animations may flash. Use a named easing,
 > `cubic-bezier(...)`, or `linear(...)` for anything that needs generated CSS.
+>
+> [`@wix/interact-validate`](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md)
+> reports this statically as the `FUNCTION_OFFSET_EASING` warning.
 
 ## Config Structure
 

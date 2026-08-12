@@ -56,7 +56,7 @@ if (!result.valid) {
 - `valid` is `true` when no remaining issue has severity `'error'`. **Warnings alone do not make `valid: false`.**
 - `errors` holds **all** surfaced issues — both `'error'` and `'warning'` severities. Filter on `severity` to separate them.
 - Issues are sorted lexicographically by `path`.
-- Validation runs in two layers: a **structural** zod parse first (produces `SCHEMA_*` and numeric/threshold codes); if that succeeds, **referential + semantic** checks run (dangling references, unused definitions, duplicate keyframe names, media-query syntax, and the rule-derived semantic warnings — same-element re-trigger, hit-area shift, scroll-preset `range`, `animationEnd` graph cycles, element-selection coherence, `fill`/`inset` nudges, CSS property names that are neither camelCase nor kebab-case). If the structural parse fails, the semantic layer is skipped.
+- Validation runs in two layers: a **structural** zod parse first (produces `SCHEMA_*` and numeric/threshold codes); if that succeeds, **referential + semantic** checks run (dangling references, unused definitions, duplicate keyframe names, media-query syntax, and the rule-derived semantic warnings — same-element re-trigger, hit-area shift, scroll-preset `range`, `animationEnd` graph cycles, element-selection coherence, `fill`/`inset` nudges, CSS property names that are neither camelCase nor kebab-case, sequence easings that cannot be compiled to CSS). If the structural parse fails, the semantic layer is skipped.
 
 ### assertValidInteractConfig
 
@@ -142,6 +142,7 @@ Severity is one of `'error' | 'warning'`. There are exactly two levers:
 | `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                      | warning          |
 | `CSS_PROPERTY_NAME`      | `INVALID_CSS_PROPERTY_NAME`                                                 | warning          |
 | `VIEW_INSET`             | `INVALID_INSET`                                                             | warning          |
+| `OFFSET_EASING`          | `FUNCTION_OFFSET_EASING`                                                    | warning          |
 
 For each category, set `'off'` to drop those issues entirely, `'warning'` / `'error'` to set their severity:
 
@@ -237,6 +238,7 @@ Statically-detectable authoring pitfalls lifted from the trigger rule files. Eac
 | `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).                                            | `POINTER_AXIS`           |
 | `INVALID_CSS_PROPERTY_NAME`            | A keyframe or state-effect property name is neither camelCase nor kebab-case (both casings are accepted; this one cannot be normalized).              | `CSS_PROPERTY_NAME`      |
 | `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 whitespace-separated CSS lengths/percentages.                                                                   | `VIEW_INSET`             |
+| `FUNCTION_OFFSET_EASING`               | A sequence's `offsetEasing` is a function, so `generate()` omits that sequence from the generated CSS.                                                | `OFFSET_EASING`          |
 
 ---
 
@@ -277,7 +279,7 @@ const ExperienceSchema = z.object({
 
 - `InteractConfigSchema` is `.strict()` — unrecognized top-level keys produce `SCHEMA_UNRECOGNIZED_KEYS`.
 - `InteractConfigSchema` carries a `.transform()`, so a successful `.parse()` returns the config augmented with an internal `warnings` array; `validateInteractConfig` consumes that for you.
-- `customEffect` and function-valued `offsetEasing` are accepted as opaque functions (`z.custom<Function>`) — they are not deep-validated, so JS-authored configs with function fields validate correctly.
+- `customEffect` and function-valued `offsetEasing` are accepted as opaque functions (`z.custom<Function>`) — they are not deep-validated, so JS-authored configs with function fields validate correctly. A function `offsetEasing` is still structurally valid, but raises the `FUNCTION_OFFSET_EASING` warning because `generate()` cannot compile it to CSS.
 - Interactions and effects accept `$`-prefixed plugin fields (e.g. `$splitText`) — config routed to plugins registered via `Interact.use()`. Interaction/effect schemas use `.catchall(z.unknown())` + a key check instead of `.strict()`: `$`-prefixed fields are accepted with opaque values (validate has no knowledge of any plugin's shape), while any non-prefixed unknown key is still reported as `SCHEMA_UNRECOGNIZED_KEYS` (typo detection preserved). The top-level `InteractConfigSchema` stays `.strict()`.
 
 ---
