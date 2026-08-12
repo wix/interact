@@ -212,6 +212,61 @@ export const jsEasings = {
   backInOut,
 };
 
+export const cubicBezierCalc = (t: string, x1: number, y1: number, x2: number, y2: number) => {
+  const cx1 = 3 * x1;
+  const cx2 = 3 * (x2 - 2 * x1);
+  const cx3 = 1 - 3 * x2 + 3 * x1;
+  const cy1 = 3 * y1;
+  const cy2 = 3 * (y2 - 2 * y1);
+  const cy3 = 1 - 3 * y2 + 3 * y1;
+
+  const p_3 = (3 * cx3 * cx1 - cx2 * cx2) / (9 * cx3 * cx3);
+  const q_2 = `(${2 * Math.pow(cx2, 3) - 9 * cx1 * cx2 * cx3} - ${27 * cx3 * cx3} * ${t}) / ${54 * Math.pow(cx3, 3)}`;
+  const sqrt = `sqrt(pow(${q_2}, 2) + ${Math.pow(p_3, 3)})`;
+  const t_val = `pow(-1 * ${q_2} + ${sqrt}, 1 / 3) + pow(-1 * ${q_2} - ${sqrt}, 1 / 3) - ${cx2 / (3 * cx3)}`;
+
+  return `(${cy3} * pow(${t_val}, 3) + ${cy2} * pow(${t_val}, 2) + ${cy1} * (${t_val}))`;
+};
+
+export const jsEasingsInCSS = {
+  linear: (t: string) => t,
+  ease: (t: string) => cubicBezierCalc(t, 0.25, 0.1, 0.25, 1),
+  easeIn: (t: string) => cubicBezierCalc(t, 0.42, 0, 1, 1),
+  easeOut: (t: string) => cubicBezierCalc(t, 0, 0, 0.58, 1),
+  easeInOut: (t: string) => cubicBezierCalc(t, 0.42, 0, 0.58, 1),
+  sineIn: (t: string) => `(1 - cos(${t} * 90deg))`,
+  sineOut: (t: string) => `(sin(${t} * 90deg))`,
+  sineInOut: (t: string) => `((1 - cos(${t} * 180deg)) / 2)`,
+  quadIn: (t: string) => `(${t} * ${t})`,
+  quadOut: (t: string) => `(1 - (1 - ${t}) * (1 - ${t}))`,
+  quadInOut: (t: string) =>
+    `(round(${t}) * (1 - (-2 * ${t} + 2) * (-2 * ${t} + 2) / 2) + (1 - round(${t})) * 2 * ${t} * ${t})`,
+  cubicIn: (t: string) => `pow(${t}, 3)`,
+  cubicOut: (t: string) => `(1 - pow(1 - ${t}, 3))`,
+  cubicInOut: (t: string) =>
+    `(round(${t}) * (1 - pow(-2 * ${t} + 2, 3) / 2) + (1 - round(${t})) * 4 * pow(${t}, 3))`,
+  quartIn: (t: string) => `pow(${t}, 4)`,
+  quartOut: (t: string) => `(1 - pow(1 - ${t}, 4))`,
+  quartInOut: (t: string) =>
+    `(round(${t}) * (1 - pow(-2 * ${t} + 2, 4) / 2) + (1 - round(${t})) * 8 * pow(${t}, 4))`,
+  quintIn: (t: string) => `pow(${t}, 5)`,
+  quintOut: (t: string) => `(1 - pow(1 - ${t}, 5))`,
+  quintInOut: (t: string) =>
+    `(round(${t}) * (1 - pow(-2 * ${t} + 2, 5) / 2) + (1 - round(${t})) * 16 * pow(${t}, 5))`,
+  expoIn: (t: string) => `(pow(2, 10 * ${t} - 10) - pow(2, -10) * (1 - ${t}))`,
+  expoOut: (t: string) => `(1 - pow(2, -10 * ${t}) + pow(2, -10) * ${t})`,
+  expoInOut: (t: string) =>
+    `((round(${t}) * (2 - pow(2, -20 * ${t} + 10)) + (1 - round(${t})) * pow(2, 20 * ${t} - 10)) / 2)`,
+  circIn: (t: string) => `(1 - sqrt(1 - ${t} * ${t}))`,
+  circOut: (t: string) => `sqrt(1 - (${t} - 1) * (${t} - 1))`,
+  circInOut: (t: string) =>
+    `((round(${t}) * (sqrt((3 - 2 * ${t}) * (2 * ${t} - 1)) + 1) + (1 - round(${t})) * (1 - sqrt(1 - 4 * ${t} * ${t}))) / 2)`,
+  backIn: (t: string) => `(2.70158 * pow(${t}, 3) - 1.70158 * ${t} * ${t})`,
+  backOut: (t: string) => `(1 + 2.70158 * pow(${t} - 1, 3) + 1.70158 * (${t} - 1) * (${t} - 1))`,
+  backInOut: (t: string) =>
+    `((round(${t}) * (2 + (2 * ${t} - 2) * (2 * ${t} - 2) * (2.5949095 + 3.5949095 * (2 * ${t} - 2))) + (1 - round(${t})) * 4 * ${t} * ${t} * (3.5949095 * 2 * ${t} - 2.5949095)) / 2)`,
+};
+
 /**
  * CSS cubic-bezier easings based on PostCSS Easings
  */

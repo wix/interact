@@ -42,6 +42,7 @@ export type InteractionTrigger = {
 export type Interaction = InteractionTrigger & {
   effects?: ((Effect | EffectRef) & { interactionId?: string })[];
   sequences?: (SequenceConfig | SequenceConfigRef)[];
+  configIndex?: number;
 };
 
 export type InteractConfig = {
@@ -71,7 +72,7 @@ export type ResolvedSequence = {
   triggerType: TimeAnimationTriggerType;
   delay: number;
   offset: number;
-  offsetEasing: (p: number) => number;
+  offsetEasing: string;
   conditions: string[];
   effects: ResolvedEffect[];
 };

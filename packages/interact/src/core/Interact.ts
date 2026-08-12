@@ -13,7 +13,6 @@ import {
   InteractPlugin,
 } from '../types';
 import { getInterpolatedKey } from './utilities';
-import { generateId } from '../utils';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
@@ -401,7 +400,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
   const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {} } = config;
   const interactions: InteractCache['interactions'] = {};
 
-  config.interactions?.forEach((interaction_) => {
+  config.interactions?.forEach((interaction_, configIndex) => {
     const source = interaction_.key;
     const interactionIdx = ++interactionIdCounter;
     const { effects: effects_, sequences: sequences_, ...rest } = interaction_;
@@ -420,7 +419,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
     effects.reverse(); // reverse to ensure the first effect is the one that will be applied first
 
     // Resolve and preprocess sequences
-    const processedSequences = sequences_?.map((seqOrRef) => {
+    const processedSequences = sequences_?.map((seqOrRef, sequenceIndex) => {
       if (_isSequenceConfigRef(seqOrRef)) {
         const resolved = sequenceMap[seqOrRef.sequenceId];
         if (!resolved) {
@@ -432,7 +431,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
 
       const seq = seqOrRef as SequenceConfig;
       if (!seq.sequenceId) {
-        seq.sequenceId = generateId();
+        seq.sequenceId = `seq-${configIndex}-${sequenceIndex}`;
       }
       return seq;
     });
@@ -441,6 +440,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
       ...rest,
       effects: effects.length > 0 ? effects : undefined,
       sequences: processedSequences,
+      configIndex,
     } as Interaction;
 
     interactions[source].triggers.push(interaction);
@@ -450,7 +450,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
 
     const listContainer = interaction.listContainer;
 
-    effects.forEach((effect) => {
+    effects.forEach((effect, effectIndex) => {
       /*
        * Target cascade order is the first of:
        *  -> Config.interactions.effects.effect.key
@@ -468,7 +468,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
       }
 
       if (!(effect as EffectRef).effectId) {
-        (effect as EffectRef).effectId = generateId();
+        (effect as EffectRef).effectId = `eff-${configIndex}-${effects.length - 1 - effectIndex}`;
       }
 
       // if no target is specified, use the source element as the target
@@ -510,12 +510,12 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
       if (!seqConfig || _isSequenceConfigRef(seqConfig)) return;
 
       const sequenceConfig = seqConfig as SequenceConfig;
-      const sequenceId = sequenceConfig.sequenceId || generateId();
+      const sequenceId = sequenceConfig.sequenceId!;
       const seqEffects = sequenceConfig.effects;
 
-      for (const effect of seqEffects) {
+      seqEffects.forEach((effect, effectIndex) => {
         if (!(effect as EffectRef).effectId) {
-          (effect as EffectRef).effectId = generateId();
+          (effect as EffectRef).effectId = `eff-${sequenceId}-${effectIndex}`;
         }
 
         let target = effect.key;
@@ -547,7 +547,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
           });
           targetEntry.selectors.add(effectSelector);
         }
-      }
+      });
     });
   });
 
