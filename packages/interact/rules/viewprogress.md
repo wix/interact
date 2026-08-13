@@ -60,9 +60,9 @@ For static sites, pre-render CSS via `generate()` at build time — see
   - `'cover'` — full visibility span from first pixel entering to last pixel leaving.
   - `'entry'` — the phase while the element is entering the viewport.
   - `'exit'` — the phase while the element is exiting the viewport.
-  - `'contain'` — while the element is fully contained in the viewport. Typically used with a `position: sticky` container.
-  - `'entry-crossing'` — from the element's leading edge entering to its leading edge reaching the opposite side.
-  - `'exit-crossing'` — from the element's trailing edge reaching the start to its trailing edge leaving.
+  - `'contain'` — while the element is fully contained by the viewport, or — for an element taller than the viewport — while it fully covers it. This is the phase a `position: sticky` child stays pinned, which is why it pairs with a sticky container.
+  - `'entry-crossing'` — from the element's leading edge entering to its trailing edge entering.
+  - `'exit-crossing'` — from the element's leading edge exiting to its trailing edge exiting.
 - `[START_PERCENTAGE]` — 0–100, starting point within the named range.
 - `[END_PERCENTAGE]` — 0–100, end point within the named range.
 - `[EASING_FUNCTION]` - CSS easing string or named easing from `@wix/motion`. Typically `'linear'` for scrolling effects.

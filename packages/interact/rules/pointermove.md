@@ -36,9 +36,10 @@ type PointerMoveParams = {
 
 ### Properties
 
-- `hitArea` — determines where mouse movement is tracked:
+- `hitArea` — determines where mouse movement is tracked. **Omitting it behaves as `'root'`**: only an explicit `'self'` scopes tracking to the source element.
   - `'self'` — tracks pointer within the source element's bounds only. Use for local pointer-tracking effects on a specific element.
-  - `'root'` — tracks pointer anywhere in the viewport. Use for global cursor followers, ambient effects.
+  - `'root'` (default) — tracks pointer anywhere in the viewport. Use for global cursor followers, ambient effects.
+  - Note: `@wix/interact-validate` still treats an **omitted** `hitArea` as at risk of hit-area shift and will raise `HIT_AREA_SHIFT` for a geometry-changing effect on the source. Set `hitArea: 'root'` explicitly to silence it, which also states the intent.
 - `axis` — restricts pointer tracking to a single axis. Used with `keyframeEffect` to map one axis to 0–1 progress; ignored by `namedEffect` and `customEffect` which receive the full 2D progress:
   - `'x'` — maps horizontal pointer position to 0–1 progress for keyframe interpolation.
   - `'y'` — maps vertical pointer position to 0–1 progress for keyframe interpolation. **Default** when `keyframeEffect` is used.
@@ -69,7 +70,9 @@ type Progress = {
 Controls which element's bounds define the 0–1 progress range.
 
 - **`false` (default)**: Progress is calculated against the **source element's** (or viewport's) bounds. The `50%` progress of the timeline is at the center of the source element.
-- **`true`**: `50%` progress of the timeline is calculated against the **target element's center**. The edges of the timeline are still calculated against the edges of the source element/viewport depending on `hitAea`.
+- **`true`**: `50%` progress of the timeline is calculated against the **target element's center**. The edges of the timeline are still calculated against the edges of the source element/viewport depending on `hitArea`.
+
+**Applies to `namedEffect` and `customEffect` only.** Centering needs a resolved target, and a `keyframeEffect` scrub scene resolves none — set it there and it is silently ignored.
 
 ---
 
@@ -118,9 +121,7 @@ Use pre-built mouse presets from `@wix/motion-presets` that handle 2D mouse trac
                 type: '[NAMED_EFFECT_TYPE]',
                 [EFFECT_PROPERTIES]
             },
-            centeredToTarget: [CENTERED_TO_TARGET],
-            transitionDuration: [TRANSITION_DURATION_MS],
-            transitionEasing: '[TRANSITION_EASING]'
+            centeredToTarget: [CENTERED_TO_TARGET]
         },
         // additional effects targeting other elements can be added here
     ]
@@ -135,8 +136,8 @@ Use pre-built mouse presets from `@wix/motion-presets` that handle 2D mouse trac
 - `[NAMED_EFFECT_TYPE]` — a registered effect name, or a preset from `@wix/motion-presets` `mouse` library.
 - `[EFFECT_PROPERTIES]` — preset-specific options. Refer to motion-presets rules for each preset's available options and their value types. Do NOT guess preset option names or types; omit unknown options and rely on defaults.
 - `[CENTERED_TO_TARGET]` — `true` or `false`. See **Centering with `centeredToTarget`** above.
-- `[TRANSITION_DURATION_MS]` — optional number. Milliseconds for smoothing (interpolating) between progress updates. The animation does not jump to the new progress value instantly; instead it transitions over this duration. Use to add inertia/lag to the effect, making it feel more physical (e.g. `200`–`600`).
-- `[TRANSITION_EASING]` — optional string. CSS easing or named easing from `@wix/motion`. Adds a natural deceleration feel when used with `transitionDuration`.
+
+> `transitionDuration` / `transitionEasing` are **not** available here. They are forwarded only for a `customEffect` payload (see Rule 4).
 
 ---
 
@@ -160,9 +161,6 @@ Use `keyframeEffect` when the pointer position along a single axis should drive 
                 keyframes: [KEYFRAMES]
             },
             fill: 'both',
-            centeredToTarget: [CENTERED_TO_TARGET],
-            transitionDuration: [TRANSITION_DURATION_MS],
-            transitionEasing: '[TRANSITION_EASING]',
             effectId: '[UNIQUE_EFFECT_ID]'
         },
         // additional effects targeting other elements can be added here
@@ -177,10 +175,9 @@ Use `keyframeEffect` when the pointer position along a single axis should drive 
 - `[AXIS]` — `'x'` (horizontal) or `'y'` (vertical). Defaults to `'y'` when omitted.
 - `[EFFECT_NAME]` — unique string name for the keyframe effect.
 - `[KEYFRAMES]` — array of CSS keyframe objects (e.g. `[{ transform: 'rotate(-10deg)' }, { transform: 'rotate(0)' }, { transform: 'rotate(10deg)' }]`). Distributed evenly across 0–1 progress: first keyframe = progress 0 (left/top edge), last = progress 1 (right/bottom edge). Any number of keyframes is allowed.
-- `[CENTERED_TO_TARGET]` — optional. `true` or `false`. See **Centering with `centeredToTarget`** above. Defaults to `false`.
-- `[TRANSITION_DURATION_MS]` — optional. Milliseconds for smoothing between progress updates. See Rule 1 for details.
-- `[TRANSITION_EASING]` — optional. CSS easing string or named easing from `@wix/motion`. See Rule 1 for supported values.
 - `[UNIQUE_EFFECT_ID]` — optional string identifier.
+
+> A `keyframeEffect` scrub scene resolves no target, so `centeredToTarget` is silently ignored here, and `transitionDuration` / `transitionEasing` are not forwarded either. All three apply only to the payloads noted in Rules 1 and 4. For smoothed, centered pointer motion use a mouse `namedEffect` or a `customEffect`.
 
 ---
 
@@ -211,9 +208,7 @@ Use two separate interactions on the same source/target pair — one for `axis: 
                 keyframes: [X_KEYFRAMES]
             },
             fill: '[FILL_MODE]', // usually 'both'
-            composite: '[COMPOSITE_OPERATION]',
-            transitionDuration: [TRANSITION_DURATION_MS],
-            transitionEasing: '[TRANSITION_EASING]'
+            composite: '[COMPOSITE_OPERATION]'
         },
         '[Y_EFFECT_ID]': {
             keyframeEffect: {
@@ -221,9 +216,7 @@ Use two separate interactions on the same source/target pair — one for `axis: 
                 keyframes: [Y_KEYFRAMES]
             },
             fill: '[FILL_MODE]', // usually 'both'
-            composite: '[COMPOSITE_OPERATION]',
-            transitionDuration: [TRANSITION_DURATION_MS],
-            transitionEasing: '[TRANSITION_EASING]'
+            composite: '[COMPOSITE_OPERATION]'
         }
     }
 }
@@ -238,8 +231,8 @@ Use two separate interactions on the same source/target pair — one for `axis: 
 - `[X_KEYFRAMES]` / `[Y_KEYFRAMES]` — arrays of WAAPI keyframe objects for the X-axis and Y-axis effects respectively. Each effect can vary in propertise and keyframes.
 - `[COMPOSITE_OPERATION]` — `'add'` or `'accumulate'`. Required when both effects animate `transform` and/or both animate `filter`, so their values combine rather than override. `'add'`: composited transform functions are appended. `'accumulate'`: matching function arguments are summed.
 - `[FILL_MODE]` — typically `'both'` to ensure the effect keeps applying after exiting the effect's active range.
-- `[TRANSITION_DURATION_MS]` — optional. Milliseconds for smoothing between progress updates. See Rule 1 for details.
-- `[TRANSITION_EASING]` — optional. CSS easing function for the smoothing transition. See Rule 1 for supported values.
+
+> As in Rule 2, `transitionDuration` / `transitionEasing` / `centeredToTarget` do not apply to a `keyframeEffect` payload.
 
 ---
 

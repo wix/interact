@@ -237,7 +237,7 @@ For most use cases, `key` alone is sufficient for both source and target resolut
           - `effectId`: string of the effect to wait for completion
           - Usage: Fire when the specified effect (by `effectId`) on the source element finishes, useful for chaining sequences.
         - pointerMove: `PointerMoveParams`
-          - `hitArea?`: `'root' | 'self'` (default `'self'`)
+          - `hitArea?`: `'root' | 'self'` (default `'root'` — an omitted `hitArea` tracks the viewport)
           - `axis?`: `'x' | 'y'` - when using `keyframeEffect` with `pointerMove`, selects which pointer coordinate maps to linear 0-1 progress; defaults to `'y'`. Ignored for `namedEffect` and `customEffect`.
           - Usage:
             - `'self'`: Track pointer within the source element’s bounds.
@@ -283,14 +283,22 @@ For `TimeEffect` (keyframe/named/custom effects), set `triggerType` on the effec
 
 ```ts
 params: {
-  threshold?: number;  // 0–1, IntersectionObserver threshold
-  inset?: string;      // like view-timeline-inset, e.g. '-100px' or '-50px 0px'
+  threshold?: number;           // 0–1, IntersectionObserver threshold (default 0.2)
+  inset?: string;               // like view-timeline-inset, e.g. '-100px' or '-50px 0px'
+  useSafeViewEnter?: boolean;   // default false; see below
 }
 // Playback behavior is set on each effect:
 effect.triggerType: 'once' | 'repeat' | 'alternate' | 'state';  // default: 'once'
 ```
 
 **CRITICAL:** When source and target are the **same element**, MUST use `triggerType: 'once'`. For `'repeat'` / `'alternate'` / `'state'`, ALWAYS use **separate** source and target elements — animating the observed element can cause it to leave/re-enter the viewport, causing rapid re-triggers.
+
+**`useSafeViewEnter`** — guards against a `threshold` that can never be met. A `threshold` is a fraction of the **source's own box**, so when `sourceHeight × threshold` exceeds the viewport height the ratio is unreachable and the animation never fires. With this flag set, the first non-intersecting observer callback measures the source and, if the threshold is unreachable, swaps to a fallback observer (`threshold: 0`, `rootMargin: '0px 0px -10% 0px'`).
+
+Two constraints that follow from the implementation:
+
+- It only helps alongside an **explicit** `threshold`. The check reads the authored value, not the `0.2` default, so `useSafeViewEnter: true` on its own does nothing.
+- The fallback observer uses a fixed config, so a configured `inset` is discarded once it kicks in.
 
 ### viewProgress
 
@@ -317,7 +325,9 @@ params: {
 - For 2D effects, use `namedEffect` mouse presets or `customEffect`. `keyframeEffect` only supports a single axis.
 - For independent 2-axis control with keyframes, use two separate interactions (one `axis: 'x'`, one `axis: 'y'`) with `composite: 'add'` or `'accumulate'` on the second effect.
 
-**`centeredToTarget`** — set `true` to remap the `0–1` progress range so that `0.5` progress corresponds to the center of the target element. Use when source and target are different elements, or when `hitArea: 'root'` is used, so that the pointer resting over the target center produces 50% progress regardless of position in viewport.
+**`centeredToTarget`** — set `true` to remap the `0–1` progress range so that `0.5` progress corresponds to the center of the target element. Use when source and target are different elements, or when `hitArea: 'root'` is used, so that the pointer resting over the target center produces 50% progress regardless of position in viewport. Applies to `namedEffect` and `customEffect` only: a `keyframeEffect` scrub scene resolves no target, so centering is silently ignored there.
+
+**`transitionDuration` / `transitionEasing`** — progress smoothing. Forwarded **only** when the payload is a `customEffect`; they are dropped for `keyframeEffect` and `namedEffect` on `pointerMove`.
 
 **Progress object** (for `customEffect`):
 
@@ -406,10 +416,10 @@ Used with `viewProgress` and `pointerMove` triggers.
   reversed?: boolean;
   fill?: 'none' | 'forwards' | 'backwards' | 'both';
   composite?: 'replace' | 'add' | 'accumulate';
-  centeredToTarget?: boolean;
-  transitionDuration?: number; // ms, smoothing on progress jumps (primarily for pointerMove)
+  centeredToTarget?: boolean;  // pointerMove; namedEffect / customEffect only — ignored for keyframeEffect
+  transitionDuration?: number; // ms, smoothing on progress jumps; pointerMove + customEffect only
   transitionDelay?: number;    // ms (primarily for pointerMove)
-  transitionEasing?: 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce';
+  transitionEasing?: 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce'; // pointerMove + customEffect only
   // + exactly one animation payload (see below)
 }
 ```
@@ -450,7 +460,7 @@ Used with `hover` / `click` triggers. Set `stateAction` on the effect to control
   - `transition?`: `{ duration?: number; delay?: number; easing?: string; styleProperties: { name: string; value: string }[] }`
     - Applies a single transition options block to all listed style properties.
   - `transitionProperties?`: `Array<{ name: string; value: string; duration?: number; delay?: number; easing?: string }>`
-    - Allows per-property transition options. If both `transition` and `transitionProperties` are provided, the system SHOULD apply both with per-property entries taking precedence for overlapping properties.
+    - Allows per-property transition options. Set one or the other: if `transition.styleProperties` is present, `transitionProperties` is ignored **entirely** — it is not merged, and per-property entries do not take precedence for overlapping properties.
 
 ```ts
 // Shared timing for all properties:
@@ -494,9 +504,11 @@ Exactly one MUST be provided per time-based or scroll/pointer-driven effect:
    | Entrance | `FadeIn`, `GlideIn`, `SlideIn`, `FloatIn`, `RevealIn`, `ExpandIn`, `BlurIn`, `FlipIn`, `ArcIn`, `ShuttersIn`, `CurveIn`, `DropIn`, `FoldIn`, `ShapeIn`, `TiltIn`, `WinkIn`, `SpinIn`, `TurnIn`, `BounceIn`                                                                                   |
    | Ongoing  | `Pulse`, `Spin`, `Breathe`, `Bounce`, `Wiggle`, `Flash`, `Flip`, `Fold`, `Jello`, `Poke`, `Rubber`, `Swing`, `Cross`                                                                                                                                                                         |
    | Scroll   | `FadeScroll`, `RevealScroll`, `ParallaxScroll`, `MoveScroll`, `SlideScroll`, `GrowScroll`, `ShrinkScroll`, `TiltScroll`, `PanScroll`, `BlurScroll`, `FlipScroll`, `SpinScroll`, `ArcScroll`, `ShapeScroll`, `ShuttersScroll`, `SkewPanScroll`, `Spin3dScroll`, `StretchScroll`, `TurnScroll` |
-   | Mouse    | `TrackMouse`, `Tilt3DMouse`, `Track3DMouse`, `SwivelMouse`, `AiryMouse`, `ScaleMouse`, `BlurMouse`, `SkewMouse`, `BlobMouse`                                                                                                                                                                 |
+   | Mouse    | `TrackMouse`, `Tilt3DMouse`, `Track3DMouse`, `SwivelMouse`, `AiryMouse`, `ScaleMouse`, `BlurMouse`, `SkewMouse`, `BlobMouse`, `BounceMouse`, `SpinMouse`                                                                                                                                     |
    - **CRITICAL** — Scroll presets (`*Scroll`) used with `viewProgress` MUST include `range` in options: `'in'` (ends at idle state), `'out'` (starts from idle state), or `'continuous'` (passes through idle). Prefer `'continuous'`.
    - Mouse presets are preferred over `keyframeEffect` for `pointerMove` 2D effects.
+   - The mouse category also exports `CustomMouse`, which is a factory taking a `customEffect` callback rather than a ready-made preset. It cannot be used as a `namedEffect` (a `namedEffect` and a `customEffect` are mutually exclusive payloads) — reach for `customEffect` directly instead.
+   - `@wix/motion-presets` additionally exports experimental `Bg*` background-scroll presets marked NOT PRODUCTION READY in source. `import * as presets` pulls them in; do not use them in generated configs.
 
 2. **`keyframeEffect`** — custom keyframe animations.
 
