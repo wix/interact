@@ -84,6 +84,14 @@ function createStatefulGroup(duration = 1000, initialDelay = 0) {
   return new AnimationGroup([anim]);
 }
 
+function createCSSGroup(target: HTMLElement) {
+  const anim = createStatefulMockAnimation(1000, 0);
+  Object.setPrototypeOf(anim, (globalThis as any).CSSAnimation.prototype);
+  (anim.effect as any).target = target;
+
+  return new AnimationGroup([anim as Animation]);
+}
+
 describe('Sequence', () => {
   describe('Constructor', () => {
     test('creates Sequence with empty groups array', () => {
@@ -270,6 +278,73 @@ describe('Sequence', () => {
       resolveSecond();
       await readyPromise;
       expect(resolved).toBe(true);
+    });
+  });
+
+  describe('CSS-driven stagger (sequenceId + CSS groups)', () => {
+    const createTargets = (count: number) =>
+      Array.from({ length: count }, () => document.createElement('div'));
+
+    test('sets the index/last custom properties on each group target', () => {
+      const targets = createTargets(3);
+      const groups = targets.map((t) => createCSSGroup(t));
+      new Sequence(groups, { sequenceId: 'seq-0-0', offset: 100, offsetEasing: 'linear' });
+
+      targets.forEach((target, i) => {
+        expect(target.style.getPropertyValue('--motion-seq-0-0-index')).toBe(`${i}`);
+        expect(target.style.getPropertyValue('--motion-seq-0-0-last')).toBe('2');
+      });
+    });
+
+    test('does not override the CSS-driven delay via updateTiming', () => {
+      const targets = createTargets(3);
+      const groups = targets.map((t) => createCSSGroup(t));
+      new Sequence(groups, { sequenceId: 'seq-0-0', delay: 500, offset: 100 });
+
+      groups.forEach((group) => {
+        expect(group.animations[0].effect!.getTiming().delay).toBe(0);
+        expect(group.animations[0].effect!.updateTiming).not.toHaveBeenCalledWith(
+          expect.objectContaining({ delay: expect.anything() }),
+        );
+      });
+    });
+
+    test('still computes endDelay so all groups share one timeline', () => {
+      const targets = createTargets(3);
+      const groups = targets.map((t) => createCSSGroup(t));
+      new Sequence(groups, { sequenceId: 'seq-0-0', offset: 100, offsetEasing: 'linear' });
+
+      const endDelays = groups.map((g) => g.animations[0].effect!.getTiming().endDelay);
+      expect(endDelays).toEqual([200, 100, 0]);
+    });
+
+    test('recalculates the index properties after addGroups', () => {
+      const targets = createTargets(2);
+      const groups = targets.map((t) => createCSSGroup(t));
+      const sequence = new Sequence(groups, { sequenceId: 'seq-0-0', offset: 100 });
+
+      const newTarget = document.createElement('div');
+      sequence.addGroups([{ index: 1, group: createCSSGroup(newTarget) }]);
+
+      expect(newTarget.style.getPropertyValue('--motion-seq-0-0-index')).toBe('1');
+      expect(targets[1].style.getPropertyValue('--motion-seq-0-0-index')).toBe('2');
+      expect(targets[0].style.getPropertyValue('--motion-seq-0-0-last')).toBe('2');
+    });
+
+    test('falls back to updateTiming for CSS groups when the sequence has no id', () => {
+      const targets = createTargets(2);
+      const groups = targets.map((t) => createCSSGroup(t));
+      new Sequence(groups, { offset: 100, offsetEasing: 'linear' });
+
+      expect(groups.map((g) => g.animations[0].effect!.getTiming().delay)).toEqual([0, 100]);
+      expect(targets[0].style.getPropertyValue('--motion-undefined-index')).toBe('');
+    });
+
+    test('falls back to updateTiming for non-CSS groups even when a sequenceId is set', () => {
+      const groups = [createStatefulGroup(), createStatefulGroup()];
+      new Sequence(groups, { sequenceId: 'seq-0-0', offset: 100, offsetEasing: 'linear' });
+
+      expect(groups.map((g) => g.animations[0].effect!.getTiming().delay)).toEqual([0, 100]);
     });
   });
 

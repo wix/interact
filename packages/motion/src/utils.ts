@@ -1,4 +1,4 @@
-import { cssEasings, jsEasings } from './easings';
+import { cssEasings, jsEasings, jsEasingsInCSS, cubicBezierCalc } from './easings';
 
 export function getCssUnits(unit: 'percentage' | string) {
   return unit === 'percentage' ? '%' : unit || 'px';
@@ -100,7 +100,12 @@ export function getEasing(easing?: keyof typeof cssEasings | string): string {
   return easing ? cssEasings[easing as keyof typeof cssEasings] || easing : cssEasings.linear;
 }
 
-function cubicBezierEasing(x1: number, y1: number, x2: number, y2: number): (t: number) => number {
+export function cubicBezierEasing(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): (t: number) => number {
   const cx = 3 * x1;
   const bx = 3 * (x2 - x1) - cx;
   const ax = 1 - cx - bx;
@@ -149,7 +154,7 @@ function cubicBezierEasing(x1: number, y1: number, x2: number, y2: number): (t: 
   };
 }
 
-function parseCubicBezier(str: string): ((t: number) => number) | undefined {
+function parseCubicBezierParams(str: string): [number, number, number, number] | undefined {
   const m = str.match(
     /^cubic-bezier\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)$/,
   );
@@ -163,10 +168,26 @@ function parseCubicBezier(str: string): ((t: number) => number) | undefined {
 
   if ([x1, y1, x2, y2].some(isNaN)) return undefined;
 
-  return cubicBezierEasing(x1, y1, x2, y2);
+  return [x1, y1, x2, y2];
 }
 
-function parseCssLinear(str: string): ((t: number) => number) | undefined {
+function parseCubicBezier(str: string): ((t: number) => number) | undefined {
+  const params = parseCubicBezierParams(str);
+
+  if (!params || params.some(isNaN)) return undefined;
+
+  return cubicBezierEasing(...params);
+}
+
+function parseCubicBezierToCalc(str: string): ((t: string) => string) | undefined {
+  const params = parseCubicBezierParams(str);
+
+  if (!params || params.some(isNaN)) return undefined;
+
+  return (t) => cubicBezierCalc(t, ...params);
+}
+
+function parseCssLinearStops(str: string): Array<{ output: number; pos: number }> | undefined {
   const m = str.match(/^linear\((.+)\)$/);
   if (!m) return undefined;
 
@@ -240,7 +261,12 @@ function parseCssLinear(str: string): ((t: number) => number) | undefined {
     if (stops[j].pos! < stops[j - 1].pos!) stops[j].pos = stops[j - 1].pos;
   }
 
-  const resolved = stops as Array<{ output: number; pos: number }>;
+  return stops as Array<{ output: number; pos: number }>;
+}
+
+function parseCssLinear(str: string): ((t: number) => number) | undefined {
+  const resolved = parseCssLinearStops(str);
+  if (!resolved) return undefined;
 
   return (t: number) => {
     if (t <= resolved[0].pos) return resolved[0].output;
@@ -266,6 +292,30 @@ function parseCssLinear(str: string): ((t: number) => number) | undefined {
   };
 }
 
+function parseCssLinearToCalc(str: string): ((t: string) => string) | undefined {
+  const resolved = parseCssLinearStops(str);
+  if (!resolved) return undefined;
+
+  return (t: string) => {
+    const terms: string[] = [`${resolved[0].output}`];
+    for (let i = 1; i < resolved.length; i++) {
+      const dx = resolved[i].pos - resolved[i - 1].pos;
+      const dy = resolved[i].output - resolved[i - 1].output;
+
+      if (dx === 0 && resolved[i - 1].pos === 0) {
+        terms.push(`${dy}`);
+      } else {
+        const clampMid =
+          dx === 0
+            ? `round(${t} / ${2 * resolved[i - 1].pos})`
+            : `(${t} - ${resolved[i - 1].pos}) / ${dx}`;
+        terms.push(`clamp(0, ${clampMid}, 1) * ${dy}`);
+      }
+    }
+    return `(${terms.join(' + ')})`;
+  };
+}
+
 export function getJsEasing(
   easing?: keyof typeof jsEasings | string,
 ): ((t: number) => number) | undefined {
@@ -276,4 +326,16 @@ export function getJsEasing(
   if (named) return named;
 
   return parseCubicBezier(easing) ?? parseCssLinear(easing) ?? jsEasings.linear;
+}
+
+export function getJsEasingInCSS(
+  easing?: keyof typeof jsEasingsInCSS | string,
+): ((t: string) => string) | undefined {
+  if (!easing) return undefined;
+
+  const named = jsEasingsInCSS[easing as keyof typeof jsEasingsInCSS];
+
+  if (named) return named;
+
+  return parseCubicBezierToCalc(easing) ?? parseCssLinearToCalc(easing) ?? jsEasingsInCSS.linear;
 }

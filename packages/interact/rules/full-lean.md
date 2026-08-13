@@ -540,8 +540,10 @@ Coordinate multiple effects with staggered timing. Prefer sequences over manual 
   effects: (Effect | EffectRef)[];      // REQUIRED
   delay?: number;                       // ms before sequence starts
   offset?: number;                      // ms between each child's animation start
-  offsetEasing?: string;                // easing curve for staggering offsets
-  sequenceId?: string;                  // for caching/referencing
+  offsetEasing?: string;                // easing curve for staggering offsets - keep it a string, a
+                                        // function excludes the sequence from generated CSS
+  sequenceId?: string;                  // for caching/referencing; also names the CSS stagger custom
+                                        // properties. Defaults to `seq-<interactionIdx>-<sequenceIdx>`
   conditions?: string[];                // ids referencing the top-level conditions map
 }
 ```

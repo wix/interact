@@ -95,12 +95,14 @@ If you're using `@wix/interact`, its bundled scroll polyfill, [`fizban`](https:/
 ```typescript
 function getEasing(easing?: string): string; // CSS easing string, default 'linear'
 function getJsEasing(easing?: string): ((t: number) => number) | undefined; // JS easing fn
+function getJsEasingInCSS(easing?: string): ((t: string) => string) | undefined; // calc() builder
 ```
 
 - **JS easings** (Penner functions — used by `getJsEasing` and as a `Sequence`'s `offsetEasing`): `linear`, `sineIn`, `sineOut`, `sineInOut`, `quadIn`, `quadOut`, `quadInOut`, `cubicIn`, `cubicOut`, `cubicInOut`, `quartIn`, `quartOut`, `quartInOut`, `quintIn`, `quintOut`, `quintInOut`, `expoIn`, `expoOut`, `expoInOut`, `circIn`, `circOut`, `circInOut`, `backIn`, `backOut`, `backInOut`.
 - **CSS easings** (used by `getEasing` / the `easing` option): `linear`, `ease`, `easeIn`, `easeOut`, `easeInOut`, plus every JS key above (except `linear`/`ease*`) resolving to a `cubic-bezier(...)` string.
 - Both also accept a raw `cubic-bezier(x1, y1, x2, y2)` string (hyphenated — not `cubicBezier(...)`), and `getJsEasing` additionally parses CSS `linear(...)` strings.
 - Standard CSS timing-function keywords (like `ease-out`) work as-is wherever `easing` is accepted — they don't need to match one of the named keys above.
+- **CSS-expression easings** (`getJsEasingInCSS`): the same curves as `getJsEasing`, plus `ease`/`easeIn`/`easeOut`/`easeInOut`, emitted as `calc()` string fragments rather than functions. Used to compile a `Sequence`'s `offsetEasing` into generated CSS — see [SSR & CSS Generation](./guides/ssr-css.md#staggering-a-list-from-one-rule).
 
 There is no `easeOutCubic`, `elasticOut`, `bounceOut`, or `bounceIn` — those names don't exist. (`elastic`/`bounce` exist only as `transitionEasing` values for pointer smoothing, a separate field.)
 

@@ -125,7 +125,7 @@ const ExperienceSchema = z.object({
 });
 ```
 
-> `InteractConfigSchema` carries a `.transform()`, so a successful `.parse()` returns the config augmented with an internal `warnings` array (`validateInteractConfig` consumes that for you). `customEffect` and function-valued `offsetEasing` are accepted as opaque functions and not deep-validated. Interactions and effects also accept `$`-prefixed plugin fields (e.g. `$splitText`) — config routed to `Interact.use()` plugins. Their schemas use `.catchall(z.unknown())` + a key check rather than `.strict()`: `$`-prefixed fields are accepted with opaque values, while any non-prefixed unknown key is still rejected as `SCHEMA_UNRECOGNIZED_KEYS`.
+> `InteractConfigSchema` carries a `.transform()`, so a successful `.parse()` returns the config augmented with an internal `warnings` array (`validateInteractConfig` consumes that for you). `customEffect` and function-valued `offsetEasing` are accepted as opaque functions and not deep-validated (a function `offsetEasing` does raise the `FUNCTION_OFFSET_EASING` warning, since `generate()` cannot compile it to CSS). Interactions and effects also accept `$`-prefixed plugin fields (e.g. `$splitText`) — config routed to `Interact.use()` plugins. Their schemas use `.catchall(z.unknown())` + a key check rather than `.strict()`: `$`-prefixed fields are accepted with opaque values, while any non-prefixed unknown key is still rejected as `SCHEMA_UNRECOGNIZED_KEYS`.
 
 ## Severity model
 
@@ -149,6 +149,7 @@ Every issue is `'error'` or `'warning'`. `valid` is `true` **iff** no `'error'` 
 | `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                      | warning          |
 | `CSS_PROPERTY_NAME`      | `INVALID_CSS_PROPERTY_NAME`                                                 | warning          |
 | `VIEW_INSET`             | `INVALID_INSET`                                                             | warning          |
+| `OFFSET_EASING`          | `FUNCTION_OFFSET_EASING`                                                    | warning          |
 
 Set a category to `'off'` to drop those issues, or `'warning'` / `'error'` to set their severity. **All other codes** (every `SCHEMA_*`, numeric, effect-source, and referential code) are not in a category and **cannot** be silenced or re-leveled via `severityOverrides` — they always emit at their built-in severity. Precedence: `'off'` first (drops the issue), then a `'warning'`/`'error'` override, then `strict` (forces the rest to `'error'`).
 
@@ -214,6 +215,7 @@ These encode statically-detectable authoring pitfalls from the trigger rule file
 | `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).                                  | `POINTER_AXIS`           |
 | `INVALID_CSS_PROPERTY_NAME`            | A keyframe or state-effect property name is neither camelCase nor kebab-case (both are accepted).                                           | `CSS_PROPERTY_NAME`      |
 | `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 CSS lengths/percentages.                                                                              | `VIEW_INSET`             |
+| `FUNCTION_OFFSET_EASING`               | A sequence's `offsetEasing` is a function, so `generate()` omits that sequence from the generated CSS.                                      | `OFFSET_EASING`          |
 
 ## Usage recipes
 

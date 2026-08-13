@@ -269,6 +269,7 @@ export type SequenceOptions = {
   delay?: number;
   offset?: number;
   offsetEasing?: string | ((p: number) => number);
+  sequenceId?: string;
 };
 
 export type AnimationGroupArgs = {

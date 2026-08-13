@@ -101,7 +101,7 @@ runtime — type your consts accordingly.
 | Function                | Signature                                                        | Returns                                                                                                                                                     | Source                           |
 | ----------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
 | `getWebAnimation`       | `(target, animationOptions, trigger?, options?, ownerDocument?)` | `AnimationGroup \| MouseAnimationInstance \| null`                                                                                                          | `../src/api/webAnimations.ts:60` |
-| `getCSSAnimation`       | `(target, animationOptions, trigger?)`                           | `Array<{ target, animation, composition?, custom?, name, keyframes, id, animationTimeline, animationRange }>` — **an array of descriptors, never a string** | `../src/api/cssAnimations.ts:51` |
+| `getCSSAnimation`       | `(target, animationOptions, trigger?, sequenceOptions?)`         | `Array<{ target, animation, composition?, custom?, name, keyframes, id, animationTimeline, animationRange }>` — **an array of descriptors, never a string** | `../src/api/cssAnimations.ts:75` |
 | `getScrubScene`         | `(target, animationOptions, trigger, sceneOptions?)`             | `ScrubScrollScene[] \| ScrubPointerScene \| ScrubPointerScene[] \| null`                                                                                    | `../src/motion.ts:74`            |
 | `getAnimation`          | `(target, animationOptions, trigger?, reducedMotion?)`           | `AnimationGroup \| MouseAnimationInstance \| null`                                                                                                          | `../src/motion.ts:198`           |
 | `prepareAnimation`      | `(target, animation, callback?)`                                 | `void`                                                                                                                                                      | `../src/api/prepare.ts:5`        |
@@ -109,7 +109,8 @@ runtime — type your consts accordingly.
 | `createAnimationGroups` | `(animationGroupArgs, context?)`                                 | `AnimationGroup[]`                                                                                                                                          | `../src/motion.ts:232`           |
 | `registerEffects`       | `(effects: Record<string, EffectModule>)`                        | `void`                                                                                                                                                      | `../src/api/registry.ts:5`       |
 | `getEasing`             | `(easing?: string)`                                              | `string` — CSS easing string, default `'linear'`                                                                                                            | `../src/utils.ts:7`              |
-| `getJsEasing`           | `(easing?: string)`                                              | `((t: number) => number) \| undefined`                                                                                                                      | `../src/utils.ts:177`            |
+| `getJsEasing`           | `(easing?: string)`                                              | `((t: number) => number) \| undefined`                                                                                                                      | `../src/utils.ts:312`            |
+| `getJsEasingInCSS`      | `(easing?: string)`                                              | `((t: string) => string) \| undefined` — builds a `calc()` fragment, not a number                                                                           | `../src/utils.ts:324`            |
 
 Also exported (not detailed here): `getElementCSSAnimation`, `getElementAnimation` — look for an
 existing CSS animation already running on an element (used internally by `getAnimation`).
@@ -129,7 +130,7 @@ do not mix them up:
 `cubicInOut`, `quartIn`, `quartOut`, `quartInOut`, `quintIn`, `quintOut`, `quintInOut`, `expoIn`,
 `expoOut`, `expoInOut`, `circIn`, `circOut`, `circInOut`, `backIn`, `backOut`, `backInOut`.
 
-**CSS easings** (`cssEasings`, `../src/easings.ts:218-248`) — named → `cubic-bezier(...)` (or a
+**CSS easings** (`cssEasings`) — named → `cubic-bezier(...)` (or a
 plain CSS keyword), resolved by `getEasing` for the `easing` option:
 
 `linear`, `ease`, `easeIn`, `easeOut`, `easeInOut`, plus every JS key above except
@@ -140,6 +141,14 @@ Both helpers also accept a raw `cubic-bezier(x1, y1, x2, y2)` string (hyphenated
 falls back to the raw string if it isn't a known key, else `'linear'`. `getJsEasing` returns
 `undefined` only when `easing` is falsy, and otherwise falls back to `jsEasings.linear` if nothing
 else parses.
+
+**CSS-expression easings** (`jsEasingsInCSS`) — a third set, mirroring
+every `jsEasings` curve (plus `ease`/`easeIn`/`easeOut`/`easeInOut`) as `calc()` **string fragments**
+rather than functions. Resolved by `getJsEasingInCSS`, which accepts the same inputs as `getJsEasing`
+(named key, `cubic-bezier(...)`, `linear(...)`) and returns a `(t: string) => string` builder that
+substitutes an arbitrary CSS expression for `t`. Used only to compile a sequence's `offsetEasing` into
+the staggered `animation-delay` — see [`./css-generation.md`](./css-generation.md#sequence-stagger-in-css).
+The generated expressions rely on the CSS math functions `pow`, `sqrt`, `sin`, `cos`, `acos`, `round`, `max` and `clamp`.
 
 **Easing names that DO NOT EXIST — never use:** `easeOutCubic`, `elasticOut`, `bounceOut`, `bounceIn`.
 

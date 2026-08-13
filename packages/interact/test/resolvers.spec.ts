@@ -67,6 +67,21 @@ describe('css resolvers', () => {
       it('should generate id if effectId does not exist', () => {
         expect(resolveEffectForCSS({}, BASE_INTERACTION, EMPTY_CONFIG)?.effectId).toBeTruthy();
       });
+      it('should prefer the deterministic fallback id over a generated one', () => {
+        const effect = {};
+        const result = resolveEffectForCSS(effect, BASE_INTERACTION, EMPTY_CONFIG, 'eff-0-1');
+        expect(result?.effectId).toBe('eff-0-1');
+        expect((effect as EffectRef).effectId).toBe('eff-0-1');
+      });
+      it('should not override an existing effectId with the fallback id', () => {
+        const result = resolveEffectForCSS(
+          { effectId: 'mine' },
+          BASE_INTERACTION,
+          EMPTY_CONFIG,
+          'eff-0-1',
+        );
+        expect(result?.effectId).toBe('mine');
+      });
     });
 
     describe('conditions', () => {
@@ -255,14 +270,35 @@ describe('css resolvers', () => {
           resolveSequenceForCSS(BASE_SEQUENCE, BASE_INTERACTION, EMPTY_CONFIG)?.sequenceId,
         ).toBeTruthy();
       });
+      it('should prefer the deterministic fallback id, so CSS and runtime agree on the var names', () => {
+        const sequence = { effects: [{}] };
+        const result = resolveSequenceForCSS(sequence, BASE_INTERACTION, EMPTY_CONFIG, 'seq-0-1');
+        expect(result?.sequenceId).toBe('seq-0-1');
+        expect(sequence).toMatchObject({ sequenceId: 'seq-0-1' });
+      });
     });
 
     describe('delay, offset, offsetEasing', () => {
-      it('should default to 0, 0, linear(function)', () => {
+      it("should default to 0, 0, 'linear'", () => {
         const result = resolveSequenceForCSS(BASE_SEQUENCE, BASE_INTERACTION, EMPTY_CONFIG);
-        expect(result).toMatchObject({ delay: 0, offset: 0 });
-        const randomVal = Math.random();
-        expect(result?.offsetEasing(randomVal)).toBe(randomVal);
+        expect(result).toMatchObject({ delay: 0, offset: 0, offsetEasing: 'linear' });
+      });
+      it('should pass the offsetEasing string through untouched for the CSS calc()', () => {
+        const result = resolveSequenceForCSS(
+          { ...BASE_SEQUENCE, offsetEasing: 'cubic-bezier(0.25, 0.1, 0.25, 1)' },
+          BASE_INTERACTION,
+          EMPTY_CONFIG,
+        );
+        expect(result?.offsetEasing).toBe('cubic-bezier(0.25, 0.1, 0.25, 1)');
+      });
+      it('should return null for a function offsetEasing - CSS cannot express it', () => {
+        expect(
+          resolveSequenceForCSS(
+            { ...BASE_SEQUENCE, offsetEasing: (p: number) => p ** 2 },
+            BASE_INTERACTION,
+            EMPTY_CONFIG,
+          ),
+        ).toBeNull();
       });
     });
 
@@ -360,20 +396,21 @@ describe('css resolvers', () => {
         expect(result?.effects[0].conditions).toContain('condition');
         expect(result?.effects[1].conditions).toContain('condition');
       });
-      it('should add offsets (delay) to all individual effects', () => {
+      it('should leave effect delays untouched - stagger is applied by the CSS calc()', () => {
         const result = resolveSequenceForCSS(
           {
             delay: 100,
             offset: 50,
-            effects: [{ effectId: 'e1' }, { effectId: 'e2' }],
+            effects: [{ effectId: 'e1' }, { effectId: 'e2', delay: 20 }],
           },
           BASE_INTERACTION,
           EMPTY_CONFIG,
         );
-        expect((result?.effects[0] as any).delay).toBe(100);
-        expect((result?.effects[1] as any).delay).toBe(150);
+        expect((result?.effects[0] as any).delay).toBeUndefined();
+        expect((result?.effects[1] as any).delay).toBe(20);
+        expect(result).toMatchObject({ delay: 100, offset: 50 });
       });
-      it('should add correct offsets to effects by original order (even if null after resolving)', () => {
+      it('should drop unsupported effects while keeping the sequence timing', () => {
         const result = resolveSequenceForCSS(
           {
             offset: 100,
@@ -387,8 +424,8 @@ describe('css resolvers', () => {
           EMPTY_CONFIG,
         );
         expect(result?.effects).toHaveLength(2);
-        expect((result?.effects[0] as any).delay).toBe(0);
-        expect((result?.effects[1] as any).delay).toBe(200);
+        expect(result?.effects.map((e) => e.effectId)).toEqual(['e1', 'e3']);
+        expect(result?.offset).toBe(100);
       });
     });
   });

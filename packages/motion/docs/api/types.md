@@ -228,8 +228,11 @@ type SequenceOptions = {
   delay?: number; // ms base delay, default 0
   offset?: number; // ms stagger interval, default 0
   offsetEasing?: string | ((p: number) => number);
+  sequenceId?: string; // links the Sequence to CSS generated for the same id
 };
 ```
+
+`SequenceOptions` is also the optional 4th argument to `getCSSAnimation()`, which compiles `delay`/`offset`/`offsetEasing` into a `calc()` delay driven by `--motion-<sequenceId>-index`. See [CSS-Driven Stagger](./sequence.md#css-driven-stagger).
 
 ### `AnimationGroupArgs`
 

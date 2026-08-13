@@ -1,4 +1,4 @@
-import { MotionKeyframeEffect, NamedEffect, getJsEasing } from '@wix/motion';
+import { MotionKeyframeEffect, NamedEffect } from '@wix/motion';
 import type {
   InteractConfig,
   Effect,
@@ -13,7 +13,7 @@ import type {
   TimeAnimationTriggerType,
   TriggerType,
 } from '../types';
-import { isTemplatedKey, generateId, calculateSequenceEffectsOffsets } from '../utils';
+import { isTemplatedKey, generateId } from '../utils';
 import { shouldUseInitial } from './utilities';
 
 const TIME_TRIGGER_TO_DEFAULT_TYPE: Map<TriggerType, TimeAnimationTriggerType> = new Map([
@@ -29,6 +29,7 @@ export function resolveEffectForCSS(
   effect: Effect | EffectRef,
   interaction: Interaction,
   config: InteractConfig,
+  fallbackId?: string,
 ): ResolvedEffect | null {
   const { effects = {}, conditions: configConditions = {} } = config;
   const { key: interactionKey, trigger } = interaction;
@@ -36,7 +37,7 @@ export function resolveEffectForCSS(
 
   // ensuring the original refernce of the effect has an id (required for states)
   if (!effect.effectId) {
-    effect.effectId = generateId();
+    effect.effectId = fallbackId || generateId();
   }
   const { effectId } = effect;
 
@@ -104,12 +105,12 @@ export function resolveSequenceForCSS(
   sequence: SequenceConfig | SequenceConfigRef,
   interaction: Interaction,
   config: InteractConfig,
+  fallbackId?: string,
 ): ResolvedSequence | null {
   const { sequences = {}, conditions: configConditions = {} } = config;
 
-  // required?
   if (!sequence.sequenceId) {
-    sequence.sequenceId = generateId();
+    sequence.sequenceId = fallbackId || generateId();
   }
 
   const { sequenceId } = sequence;
@@ -123,6 +124,10 @@ export function resolveSequenceForCSS(
     offset = 0,
     offsetEasing = 'linear',
   } = fullSequence;
+
+  if (typeof offsetEasing === 'function') {
+    return null; // CSS does not support JS functions for easing
+  }
 
   if (!triggerType) {
     triggerType = TIME_TRIGGER_TO_DEFAULT_TYPE.get(interaction.trigger)!;
@@ -140,12 +145,6 @@ export function resolveSequenceForCSS(
     }
     return resolveEffectForCSS({ ...effect, triggerType }, interaction, config);
   });
-
-  // resolving offsets
-  if (!(typeof offsetEasing === 'function')) {
-    offsetEasing = getJsEasing(offsetEasing) || ((x) => x);
-  }
-  calculateSequenceEffectsOffsets(resolvedEffects, delay, offset, offsetEasing);
 
   // removing unsupported effects and the whole sequence if all are unsupported
   const filteredEffects = resolvedEffects.filter((effect) => effect !== null);
