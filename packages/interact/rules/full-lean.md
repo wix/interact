@@ -504,11 +504,9 @@ Exactly one MUST be provided per time-based or scroll/pointer-driven effect:
    | Entrance | `FadeIn`, `GlideIn`, `SlideIn`, `FloatIn`, `RevealIn`, `ExpandIn`, `BlurIn`, `FlipIn`, `ArcIn`, `ShuttersIn`, `CurveIn`, `DropIn`, `FoldIn`, `ShapeIn`, `TiltIn`, `WinkIn`, `SpinIn`, `TurnIn`, `BounceIn`                                                                                   |
    | Ongoing  | `Pulse`, `Spin`, `Breathe`, `Bounce`, `Wiggle`, `Flash`, `Flip`, `Fold`, `Jello`, `Poke`, `Rubber`, `Swing`, `Cross`                                                                                                                                                                         |
    | Scroll   | `FadeScroll`, `RevealScroll`, `ParallaxScroll`, `MoveScroll`, `SlideScroll`, `GrowScroll`, `ShrinkScroll`, `TiltScroll`, `PanScroll`, `BlurScroll`, `FlipScroll`, `SpinScroll`, `ArcScroll`, `ShapeScroll`, `ShuttersScroll`, `SkewPanScroll`, `Spin3dScroll`, `StretchScroll`, `TurnScroll` |
-   | Mouse    | `TrackMouse`, `Tilt3DMouse`, `Track3DMouse`, `SwivelMouse`, `AiryMouse`, `ScaleMouse`, `BlurMouse`, `SkewMouse`, `BlobMouse`, `BounceMouse`, `SpinMouse`                                                                                                                                     |
+   | Mouse    | `TrackMouse`, `Tilt3DMouse`, `Track3DMouse`, `SwivelMouse`, `AiryMouse`, `ScaleMouse`, `BlurMouse`, `SkewMouse`, `BlobMouse`                                                                                                                                                                 |
    - **CRITICAL** — Scroll presets (`*Scroll`) used with `viewProgress` MUST include `range` in options: `'in'` (ends at idle state), `'out'` (starts from idle state), or `'continuous'` (passes through idle). Prefer `'continuous'`.
    - Mouse presets are preferred over `keyframeEffect` for `pointerMove` 2D effects.
-   - The mouse category also exports `CustomMouse`, which is a factory taking a `customEffect` callback rather than a ready-made preset. It cannot be used as a `namedEffect` (a `namedEffect` and a `customEffect` are mutually exclusive payloads) — reach for `customEffect` directly instead.
-   - `@wix/motion-presets` additionally exports experimental `Bg*` background-scroll presets marked NOT PRODUCTION READY in source. `import * as presets` pulls them in; do not use them in generated configs.
 
 2. **`keyframeEffect`** — custom keyframe animations.
 
