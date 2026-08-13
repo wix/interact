@@ -81,7 +81,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
-### [2.6.0] - unreleased
+### [2.5.6] - 2026-08-13
 
 #### Added
 
@@ -91,13 +91,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 #### Changed
 
 - `generate(config, options?)`: the second argument now accepts an options bag — `{ useFirstChild?, plugins? }` — exported as the `GenerateOptions` (#275)
-- CSS property names may be authored in either camelCase or kebab-case in `transition.styleProperties`, `transitionProperties` and `keyframeEffect.keyframes`; state-effect properties are normalized to kebab-case for the generated CSS (state rules and the `transition:` shorthand) and keyframes to camelCase for WAAPI
+- CSS property names may be authored in either camelCase or kebab-case in `transition.styleProperties`, `transitionProperties` and `keyframeEffect.keyframes`; state-effect properties are normalized to kebab-case for the generated CSS (state rules and the `transition:` shorthand) and keyframes to camelCase for WAAPI (#281)
 
 #### Fixed
 
-- camelCase property names in `transition.styleProperties` / `transitionProperties` are now normalized to kebab-case
-- CSS custom properties in keyframes (e.g. `--fooBar`) are no longer lower-cased when emitted into `@keyframes`
-- Vendor-prefixed keyframe properties (e.g. `webkitTextStroke`) now emit a valid CSS property name (`-webkit-text-stroke`)
+- camelCase property names in `transition.styleProperties` / `transitionProperties` are now normalized to kebab-case (#281)
+- CSS custom properties in keyframes (e.g. `--fooBar`) are no longer lower-cased when emitted into `@keyframes` (#281)
+- Vendor-prefixed keyframe properties (e.g. `webkitTextStroke`) now emit a valid CSS property name (`-webkit-text-stroke`) (#281)
 
 ### [2.5.5] - 2026-07-29
 
@@ -311,15 +311,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion
 
-### [Unreleased]
+### [2.1.9] - 2026-08-13
 
 #### Added
 
-- `toCSSPropertyName()`, `toWAAPIPropertyName()` and `normalizeKeyframes()` utilities for converting CSS property names between their CSS and WAAPI forms
+- `toCSSPropertyName()`, `toWAAPIPropertyName()` and `normalizeKeyframes()` utilities for converting CSS property names between their CSS and WAAPI forms (#281)
 
 #### Changed
 
-- Keyframe property names may be authored in either camelCase or kebab-case and are normalized to WAAPI's camelCase on every animation path — `keyframeEffect`, presets, and effects registered via `registerEffects()`
+- Keyframe property names may be authored in either camelCase or kebab-case and are normalized to WAAPI's camelCase on every animation path — `keyframeEffect`, presets, and effects registered via `registerEffects()` (#281)
 
 ### [2.1.8] - 2026-07-29
 
