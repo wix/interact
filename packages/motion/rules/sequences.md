@@ -70,8 +70,6 @@ type SequenceOptions = {
 };
 ```
 
-(`../src/types.ts:268-273`)
-
 ```typescript
 type AnimationGroupArgs = {
   target: HTMLElement | HTMLElement[] | string | null;
@@ -105,13 +103,12 @@ offset[i] = (offsetEasing(i / last) * last * offset) | 0
 ```
 
 where `i` is the (0-based) group index and `last` is the index of the final group (`count - 1`). Single-
-group sequences (`count <= 1`) always produce `[0]`, regardless of `offset`/`offsetEasing`
-(`../src/Sequence.ts:54-64`).
+group sequences (`count <= 1`) always produce `[0]`, regardless of `offset`/`offsetEasing`.
 
 Each group's calculated offset is added to its animations' `delay` timing, and the sequence-level
 `delay` is added on top of that. An `endDelay` is also computed per group so that **all groups share the
 same total active duration** — this is what lets `finished` / `onFinish` resolve at the correct overall
-time regardless of per-group stagger (`../src/Sequence.ts:66-102`).
+time regardless of per-group stagger.
 
 > **Rule**: the sequence-level `delay` shifts the whole timeline, so it is deliberately **excluded** from
 > the `endDelay` computation — `endDelay = sequenceDuration - (baseDelay + offset[i] + duration × iterations)`.
@@ -122,8 +119,7 @@ time regardless of per-group stagger (`../src/Sequence.ts:66-102`).
 When the child animations are **CSS Animations** (`AnimationGroup.isCSS`, i.e. picked up from
 already-rendered CSS via `getElementCSSAnimation`) their `delay` comes from the generated `animation`
 shorthand, not from the WAAPI. Overwriting it with `updateTiming({ delay })` would detach the animation
-from its CSS declaration. So for that combination `Sequence` takes a different route
-(`../src/Sequence.ts:66-102`):
+from its CSS declaration. So for that combination `Sequence` takes a different route:
 
 | Condition                  | How the stagger delay is applied                                                                                    |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -215,22 +211,18 @@ class Sequence extends AnimationGroup {
 }
 ```
 
-(`../src/Sequence.ts:13-47`)
-
 ```typescript
 type IndexedGroup = { index: number; group: AnimationGroup };
 ```
 
-(`../src/types.ts:281-284`)
-
-- **`addGroups(entries)`** (`../src/Sequence.ts:127-146`) — inserts groups at the given indices (processed
+- **`addGroups(entries)`** — inserts groups at the given indices (processed
   highest-index-first so earlier insertion indices stay valid), splices the new groups' animations into the
   flattened `animations` array at the matching position, recalculates offsets for **all** groups, and
   resets `ready` to `Promise.all(animationGroups.map(g => g.ready))`.
-- **`removeGroups(predicate)`** (`../src/Sequence.ts:153-181`) — cancels and removes every group for which
+- **`removeGroups(predicate)`** — cancels and removes every group for which
   `predicate(group)` returns `true`, rebuilds the flattened `animations` array, recalculates offsets for
   the remaining groups, resets `ready`, and returns the removed groups (`[]` if none matched).
-- **`onFinish(callback)`** (overridden, `../src/Sequence.ts:183-190`) — awaits each child group's own
+- **`onFinish(callback)`** (overridden) — awaits each child group's own
   `finished` promise individually (`Promise.all(animationGroups.map(g => g.finished))`), not the flattened
   `AnimationGroup.finished`. On any rejection it logs a warning via `console.warn` and does **not** invoke
   `callback`.
@@ -238,14 +230,14 @@ type IndexedGroup = { index: number; group: AnimationGroup };
   can be read back, but mutating them after construction does **not** retrigger offset recalculation —
   `applyOffsets()` is private and only runs from the constructor, `addGroups`, and `removeGroups`. To
   change stagger timing, construct a new `Sequence`.
-- **`offsetEasing` resolution** (`../src/Sequence.ts:29-32`): if `options.offsetEasing` is a function, it's
+- **`offsetEasing` resolution**: if `options.offsetEasing` is a function, it's
   used as-is; if it's a string, it's resolved via `getJsEasing(string)`; otherwise (or if resolution fails)
   it falls back to the local `linear` easing. Valid string keys are the `jsEasings` set —
   `linear, sineIn, sineOut, sineInOut, quadIn, quadOut, quadInOut, cubicIn, cubicOut, cubicInOut, quartIn,
 quartOut, quartInOut, quintIn, quintOut, quintInOut, expoIn, expoOut, expoInOut, circIn, circOut,
 circInOut, backIn, backOut, backInOut`
   (`../src/easings.ts:187-213`) — or a raw `cubic-bezier(x1, y1, x2, y2)` string, or a custom
-  `(p: number) => number` function (`../src/utils.ts:312-322`).
+  `(p: number) => number` function.
 
 ### `addGroups` / `removeGroups` Examples
 

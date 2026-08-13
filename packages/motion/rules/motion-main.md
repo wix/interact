@@ -130,7 +130,7 @@ do not mix them up:
 `cubicInOut`, `quartIn`, `quartOut`, `quartInOut`, `quintIn`, `quintOut`, `quintInOut`, `expoIn`,
 `expoOut`, `expoInOut`, `circIn`, `circOut`, `circInOut`, `backIn`, `backOut`, `backInOut`.
 
-**CSS easings** (`cssEasings`, `../src/easings.ts:331-361`) — named → `cubic-bezier(...)` (or a
+**CSS easings** (`cssEasings`) — named → `cubic-bezier(...)` (or a
 plain CSS keyword), resolved by `getEasing` for the `easing` option:
 
 `linear`, `ease`, `easeIn`, `easeOut`, `easeInOut`, plus every JS key above except
@@ -142,7 +142,7 @@ falls back to the raw string if it isn't a known key, else `'linear'`. `getJsEas
 `undefined` only when `easing` is falsy, and otherwise falls back to `jsEasings.linear` if nothing
 else parses.
 
-**CSS-expression easings** (`jsEasingsInCSS`, `../src/easings.ts:287-329`) — a third set, mirroring
+**CSS-expression easings** (`jsEasingsInCSS`) — a third set, mirroring
 every `jsEasings` curve (plus `ease`/`easeIn`/`easeOut`/`easeInOut`) as `calc()` **string fragments**
 rather than functions. Resolved by `getJsEasingInCSS`, which accepts the same inputs as `getJsEasing`
 (named key, `cubic-bezier(...)`, `linear(...)`) and returns a `(t: string) => string` builder that

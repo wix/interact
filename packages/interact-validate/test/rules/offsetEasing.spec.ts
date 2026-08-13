@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { validateInteractConfig } from '../../src';
 
-// A sequence's stagger is compiled into a `calc()` delay in the generated CSS, which a
-// `(p: number) => number` easing cannot express — `generate()` drops the whole sequence.
-// Source: interact/docs/guides/sequences.md "Stagger in Generated CSS".
-
 const EFFECTS = [{ namedEffect: { type: 'FadeIn' }, duration: 400 }];
 
 describe('offsetEasing', () => {

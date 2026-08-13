@@ -36,7 +36,6 @@ documents only the lower-level `@wix/motion` primitive it is built on.
 ## Signature
 
 ```typescript
-// ../src/api/cssAnimations.ts:75-105
 function getCSSAnimation(
   target: string | null,
   animationOptions: AnimationOptions,
@@ -67,19 +66,19 @@ Unlike `getWebAnimation`, `target` here is `string | null` **only** — an eleme
 
 One descriptor is produced per `AnimationData` the effect's `web`/`style` returns (see
 [`./custom-effects.md`](./custom-effects.md)), so a multi-part effect yields multiple descriptors —
-one per `part` (`../src/api/cssAnimations.ts:88-104`).
+one per `part`.
 
-| Field               | Meaning                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `target`            | `#<id>` or `#<id>[data-motion-part~="<part>"]` (see [`./custom-effects.md#data-motion-part-sub-targeting`](./custom-effects.md#data-motion-part-sub-targeting)); `''` if `target` was `null`.                                                                                                                                                                                                                                                 |
-| `animation`         | The CSS `animation` shorthand: `<name> <duration> <delay> <easing> <fill> <iterations> <direction> <playState>`. `<delay>` becomes a `calc()` when `sequenceOptions` is passed (see [Sequence Stagger in CSS](#sequence-stagger-in-css)). **Paused by default** for time-based/pointer animations; **not** paused for `view-progress` (the timeline governs playback instead) — see `getAnimationAsCSS`, `../src/api/cssAnimations.ts:16-59`. |
-| `composition?`      | The effect's `CompositeOperation` (`'replace' \| 'add' \| 'accumulate'`), if set — apply as `animation-composition` when building the rule; not embedded in the `animation` shorthand itself.                                                                                                                                                                                                                                                 |
-| `custom?`           | CSS custom properties the effect needs on the target (e.g. `--motion-rotate`) — apply as inline declarations alongside `animation`.                                                                                                                                                                                                                                                                                                           |
-| `name`              | The `@keyframes` name — use it both to declare `@keyframes <name> { … }` and it is already embedded in the `animation` shorthand.                                                                                                                                                                                                                                                                                                             |
-| `keyframes`         | The keyframe list to render into the `@keyframes` block.                                                                                                                                                                                                                                                                                                                                                                                      |
-| `id`                | `${effectId}-${index + 1}` if the animation options had an `effectId`, else `undefined`. For tracking the descriptor back to its source effect — not itself required in the emitted CSS.                                                                                                                                                                                                                                                      |
-| `animationTimeline` | `--${trigger.id}` when `trigger.trigger === 'view-progress'`, else `''` — apply as `animation-timeline`.                                                                                                                                                                                                                                                                                                                                      |
-| `animationRange`    | e.g. `"cover 0% cover 100%"` for `view-progress`, else `''` — apply as `animation-range`.                                                                                                                                                                                                                                                                                                                                                     |
+| Field               | Meaning                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target`            | `#<id>` or `#<id>[data-motion-part~="<part>"]` (see [`./custom-effects.md#data-motion-part-sub-targeting`](./custom-effects.md#data-motion-part-sub-targeting)); `''` if `target` was `null`.                                                                                                                                                                                                            |
+| `animation`         | The CSS `animation` shorthand: `<name> <duration> <delay> <easing> <fill> <iterations> <direction> <playState>`. `<delay>` becomes a `calc()` when `sequenceOptions` is passed (see [Sequence Stagger in CSS](#sequence-stagger-in-css)). **Paused by default** for time-based/pointer animations; **not** paused for `view-progress` (the timeline governs playback instead) — see `getAnimationAsCSS`. |
+| `composition?`      | The effect's `CompositeOperation` (`'replace' \| 'add' \| 'accumulate'`), if set — apply as `animation-composition` when building the rule; not embedded in the `animation` shorthand itself.                                                                                                                                                                                                            |
+| `custom?`           | CSS custom properties the effect needs on the target (e.g. `--motion-rotate`) — apply as inline declarations alongside `animation`.                                                                                                                                                                                                                                                                      |
+| `name`              | The `@keyframes` name — use it both to declare `@keyframes <name> { … }` and it is already embedded in the `animation` shorthand.                                                                                                                                                                                                                                                                        |
+| `keyframes`         | The keyframe list to render into the `@keyframes` block.                                                                                                                                                                                                                                                                                                                                                 |
+| `id`                | `${effectId}-${index + 1}` if the animation options had an `effectId`, else `undefined`. For tracking the descriptor back to its source effect — not itself required in the emitted CSS.                                                                                                                                                                                                                 |
+| `animationTimeline` | `--${trigger.id}` when `trigger.trigger === 'view-progress'`, else `''` — apply as `animation-timeline`.                                                                                                                                                                                                                                                                                                 |
+| `animationRange`    | e.g. `"cover 0% cover 100%"` for `view-progress`, else `''` — apply as `animation-range`.                                                                                                                                                                                                                                                                                                                |
 
 ## Sequence Stagger in CSS
 
@@ -87,7 +86,7 @@ Pass a `SequenceOptions` as the 4th argument to stagger a group of elements **fr
 rule**. Instead of baking a different `animation-delay` per element (which would need one rule per item,
 and therefore knowledge of the item count at generation time), the delay slot becomes a `calc()` that
 reads the element's position from two custom properties
-(`getAnimationAsCSS`, `../src/api/cssAnimations.ts:16-59`):
+(`getAnimationAsCSS`):
 
 ```
 calc((<delay + sequence.delay> + <easing(index / last)> * <offset> * var(--motion-<id>-last, 1)) * 1ms)
@@ -127,8 +126,7 @@ so the emitted CSS is valid and FOUC-free before any JS loads.
 
 ## `forCSS` and `duration: 'auto'`
 
-`getCSSAnimation` internally calls the shared `getEffectsData(..., forCSS = true)`
-(`../src/api/cssAnimations.ts:85`). For a `view-progress` trigger, this **forces `duration: 'auto'`
+`getCSSAnimation` internally calls the shared `getEffectsData(..., forCSS = true)`. For a `view-progress` trigger, this **forces `duration: 'auto'`
 regardless of whether the current runtime supports `window.ViewTimeline`**:
 
 ```typescript
@@ -215,7 +213,6 @@ On the server, write the same `css` string into the rendered HTML's `<head>` ins
 ## The `iterations` Idiom in CSS
 
 ```typescript
-// ../src/api/cssAnimations.ts:56-57
 !iterations || iterations === Infinity ? 'infinite' : iterations;
 ```
 
