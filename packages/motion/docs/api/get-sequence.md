@@ -27,8 +27,11 @@ type SequenceOptions = {
   delay?: number; // Base delay (ms), default 0
   offset?: number; // Stagger interval (ms), default 0
   offsetEasing?: string | ((p: number) => number); // Easing for offset distribution
+  sequenceId?: string; // Links the Sequence to CSS generated for the same id
 };
 ```
+
+`sequenceId` opts CSS-backed groups into the [CSS-driven stagger](./sequence.md#css-driven-stagger): rather than writing each group's `delay` through the WAAPI, the Sequence sets `--motion-<sequenceId>-index` / `--motion-<sequenceId>-last` on the target elements, which the `calc()` delay emitted by `getCSSAnimation()` reads. Pass the same id to both.
 
 #### `animationGroups` (required)
 

@@ -15,6 +15,7 @@ export class Sequence extends AnimationGroup {
   delay: number;
   offset: number;
   offsetEasing: (p: number) => number;
+  sequenceId: string | undefined;
   private timingOptions: { delay: number; duration: number; iterations: number }[][];
 
   constructor(animationGroups: AnimationGroup[], options: SequenceOptions = {}) {
@@ -24,6 +25,7 @@ export class Sequence extends AnimationGroup {
     this.animationGroups = animationGroups;
     this.delay = options.delay ?? 0;
     this.offset = options.offset ?? 0;
+    this.sequenceId = options.sequenceId;
     this.offsetEasing =
       typeof options.offsetEasing === 'function'
         ? options.offsetEasing
@@ -67,6 +69,7 @@ export class Sequence extends AnimationGroup {
     const offsets = this.calculateOffsets();
     const sequenceDuration = this.getSequenceActiveDuration(offsets);
 
+    const last = this.animationGroups.length - 1;
     this.animationGroups.forEach((group, groupIdx) => {
       group.animations.forEach((animation, animIdx) => {
         const effect = animation.effect;
@@ -77,8 +80,19 @@ export class Sequence extends AnimationGroup {
         const delay = baseDelay + offsets[groupIdx];
         const endDelay = sequenceDuration - (delay + duration * iterations);
 
-        // add the sequence delay to the animation delay at the end - it doesn't need to affect the endDelay
-        effect.updateTiming({ delay: delay + this.delay, endDelay });
+        if (group.isCSS && !!this.sequenceId) {
+          const { target } = effect as KeyframeEffect;
+
+          if (target instanceof HTMLElement) {
+            target.style.setProperty(`--motion-${this.sequenceId}-index`, `${groupIdx}`);
+            target.style.setProperty(`--motion-${this.sequenceId}-last`, `${last}`);
+          }
+
+          effect.updateTiming({ endDelay });
+        } else {
+          // add the sequence delay to the animation delay at the end - it doesn't need to affect the endDelay
+          effect.updateTiming({ delay: delay + this.delay, endDelay });
+        }
       });
     });
   }

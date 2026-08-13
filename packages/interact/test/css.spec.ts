@@ -1276,6 +1276,99 @@ describe('css._generate', () => {
       expect(rangeDecl).toBeDefined();
     });
 
+    describe('staggered delay', () => {
+      const staggerConfig = (
+        sequence: Partial<InteractConfig['interactions'][number]['sequences']>[number] = {},
+      ): InteractConfig => ({
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                offset: 120,
+                ...sequence,
+                effects: [
+                  {
+                    effectId: 'kf1',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'anim1',
+                      keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                    },
+                  },
+                ],
+              } as any,
+            ],
+          },
+        ],
+      });
+
+      const animationValue = (config: InteractConfig) => {
+        const { cssRules } = _generate(config);
+
+        return cssRules
+          .flatMap((r) => r.declarations)
+          .filter((d) => isAnimationProp(d.name) && !String(d.value).includes('var(--animation'))
+          .map((d) => String(d.value))
+          .join('\n');
+      };
+
+      it('should express the stagger as a calc() over the sequence index custom properties', () => {
+        const value = animationValue(staggerConfig());
+
+        expect(value).toContain('calc(');
+        expect(value).toContain('var(--motion-seq-0-0-index, 0)');
+        expect(value).toContain('var(--motion-seq-0-0-last, 1)');
+      });
+
+      it('should derive the sequence id from the config position so the runtime matches', () => {
+        const config = staggerConfig();
+        const second = staggerConfig().interactions[0];
+        second.key = 'el2';
+        config.interactions.push(second);
+
+        const value = animationValue(config);
+
+        expect(value).toContain('--motion-seq-0-0-index');
+        expect(value).toContain('--motion-seq-1-0-index');
+      });
+
+      it('should honour an explicit sequenceId', () => {
+        expect(animationValue(staggerConfig({ sequenceId: 'my-seq' }))).toContain(
+          'var(--motion-my-seq-index, 0)',
+        );
+      });
+
+      it('should fold the sequence delay into the calc() base', () => {
+        expect(animationValue(staggerConfig({ delay: 40 }))).toContain('calc((40 +');
+      });
+
+      it('should apply the offsetEasing inside the calc()', () => {
+        const ratio = '(var(--motion-seq-0-0-index, 0) / var(--motion-seq-0-0-last, 1))';
+
+        expect(animationValue(staggerConfig({ offsetEasing: 'quadIn' }))).toContain(
+          `${ratio} * ${ratio}`,
+        );
+      });
+
+      it('should emit a plain delay when the sequence has no offset', () => {
+        const value = animationValue(staggerConfig({ offset: 0, delay: 40 }));
+
+        expect(value).not.toContain('calc(');
+        expect(value).toContain('40ms');
+      });
+
+      it('should skip a sequence whose offsetEasing is a function', () => {
+        const { cssRules } = _generate(staggerConfig({ offsetEasing: (p: number) => p ** 2 }));
+
+        expect(
+          cssRules.flatMap((r) => r.declarations).filter((d) => isAnimationProp(d.name)),
+        ).toHaveLength(0);
+      });
+    });
+
     it('should apply sequence-level conditions to the coordinated-list rule', () => {
       const config: InteractConfig = {
         effects: {},

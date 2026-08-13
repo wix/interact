@@ -904,6 +904,10 @@ Different `offsetEasing` values produce distinct stagger patterns:
 { offset: 80, offsetEasing: 'sineOut' }
 ```
 
+Any string easing works — named keys, `cubic-bezier(...)`, or `linear(...)`. Keep it a string rather than a
+function if the list should also be staggered by generated CSS; see
+[Stagger in Generated CSS](../guides/sequences.md#stagger-in-generated-css).
+
 ### 20. Reusable Sequences with `sequenceId`
 
 Define a sequence once, reference it from multiple interactions:

@@ -211,6 +211,7 @@ function effectToCSS(
   trigger: TriggerVariant,
   childSelector?: string,
   plugins?: InteractPluginStyles,
+  sequence?: ResolvedSequence,
 ): {
   rules: CSSRuleData[];
   keyframes: MotionKeyframeEffect[];
@@ -253,7 +254,7 @@ function effectToCSS(
     usedProperties = [...LIST_ANIMATION_PROPERTY_NAMES];
 
     const animationOptions = effectToAnimationOptions(effect);
-    const cssAnimations = getCSSAnimation(null, animationOptions, trigger).filter(
+    const cssAnimations = getCSSAnimation(null, animationOptions, trigger, sequence).filter(
       (anim) => anim.name,
     );
 
@@ -350,6 +351,7 @@ function parseEffect(
   plugins?: InteractPluginStyles,
   sequenceCustomProps?: Record<ListPropertyName, string>,
   precomputedTargetHash?: string,
+  sequence?: ResolvedSequence,
 ): { rules: CSSRuleData[]; usedProperties: ListPropertyName[] } {
   const { key } = effect;
   const targetHash = precomputedTargetHash ?? getElementHash(effect);
@@ -384,6 +386,7 @@ function parseEffect(
     trigger,
     childSelector,
     plugins,
+    sequence,
   );
 
   // update keyframes map
@@ -438,6 +441,7 @@ function parseSequence(
       plugins,
       seqCustomProps,
       targetHash,
+      sequence,
     );
     cssRules.push(...rules);
 
@@ -492,7 +496,9 @@ function parseInteraction(
   const targetUsedProperties = new Map<string, Set<ListPropertyName>>();
 
   const resolvedEffects = effects
-    .map((effect) => resolveEffectForCSS(effect, interaction, config))
+    .map((effect, effIndex) =>
+      resolveEffectForCSS(effect, interaction, config, `eff-${interactionIdx}-${effIndex}`),
+    )
     .filter((effect) => effect !== null);
 
   const cssRules = plugins
@@ -533,7 +539,9 @@ function parseInteraction(
   }
 
   const resolvedSequences = sequences
-    .map((sequence) => resolveSequenceForCSS(sequence, interaction, config))
+    .map((sequence, seqIndex) =>
+      resolveSequenceForCSS(sequence, interaction, config, `seq-${interactionIdx}-${seqIndex}`),
+    )
     .filter((sequence) => sequence !== null);
 
   cssRules.push(

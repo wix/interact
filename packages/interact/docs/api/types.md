@@ -772,8 +772,8 @@ type SequenceOptionsConfig = {
 
 - `delay` - Base delay (ms) applied to all effects in the sequence. Default: `0`.
 - `offset` - Stagger interval (ms) between consecutive effects. Default: `0`.
-- `offsetEasing` - Easing function or named string for offset distribution (`'linear'`, `'quadIn'`, `'sineOut'`, etc.). Default: `linear`.
-- `sequenceId` - Optional ID for referencing a reusable sequence from `InteractConfig.sequences`.
+- `offsetEasing` - Easing function or named string for offset distribution (`'linear'`, `'quadIn'`, `'sineOut'`, etc.). Default: `linear`. Only string easings can be compiled into generated CSS — a function excludes the sequence from `generate()`'s output. See [Stagger in Generated CSS](../guides/sequences.md#stagger-in-generated-css).
+- `sequenceId` - Optional ID for referencing a reusable sequence from `InteractConfig.sequences`. Also names the `--motion-<sequenceId>-index` custom properties that carry the stagger in generated CSS. Defaults to `seq-<interactionIndex>-<sequenceIndex>`, derived from the config position so CSS generation and the runtime agree.
 - `conditions` - Optional array of condition IDs. When set, the sequence is only active when all conditions match.
 - `triggerType` - Controls play behavior for event trigger sequences (`hover`, `click`, `activate`, `interest`, `viewEnter`). Same values as `TimeEffect.triggerType`: `'once'` (default for viewEnter), `'alternate'` (default for hover/click), `'repeat'`, `'state'`.
 

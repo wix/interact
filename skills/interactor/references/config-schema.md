@@ -254,7 +254,7 @@ type SequenceConfig = {
   delay?: number; // ms before the sequence starts
   offset?: number; // ms between each child's start
   offsetEasing?: string | ((p: number) => number); // stagger distribution curve (default 'linear')
-  sequenceId?: string; // auto-generated if omitted
+  sequenceId?: string; // defaults to `seq-<interactionIndex>-<sequenceIndex>`
   conditions?: string[];
   triggerType?: 'once' | 'repeat' | 'alternate' | 'state'; // set on the sequence, NOT its child effects
 };
@@ -267,6 +267,10 @@ type SequenceConfigRef = {
   conditions?: string[];
 };
 ```
+
+Prefer a **string** `offsetEasing`. `generate()` compiles the stagger into a `calc()` delay driven by
+`--motion-<sequenceId>-index` custom properties, and a `(p: number) => number` function has no CSS form —
+such a sequence is dropped from the generated CSS and loses FOUC prevention (it still runs at runtime). The validator flags this as `FUNCTION_OFFSET_EASING` (warning).
 
 A common pattern: one trigger fires a sequence whose single effect uses `selector`
 to pick the items — each matched element becomes a staggered child. (Use `selector`

@@ -53,6 +53,7 @@ export type AnyEffect = {
 export type AnySequence = {
   triggerType?: string;
   sequenceId?: string;
+  offsetEasing?: string | ((...args: unknown[]) => unknown);
   effects?: AnyEffect[];
   conditions?: string[];
 };
