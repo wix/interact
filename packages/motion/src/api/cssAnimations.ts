@@ -3,8 +3,10 @@ import type {
   AnimationDataForScrub,
   AnimationEffectAPI,
   AnimationOptions,
+  SequenceOptions,
   TriggerVariant,
 } from '../types';
+import { getJsEasingInCSS } from '../utils';
 import { getEffectsData, getRanges, getNamedEffect, isNotAScrubTrigger } from './common';
 
 function getAnimationTarget(target: string | null, part: string | undefined) {
@@ -19,13 +21,35 @@ function getAnimationAsCSS(
     part: string | undefined;
   },
   isRunning?: boolean,
+  sequenceOptions?: SequenceOptions,
 ) {
   const { duration, delay, iterations = 1, fill, easing = 'linear', direction } = data.options;
   const animationName = data.effect.name;
   const isAutoDuration = duration === 'auto';
 
+  const { sequenceId, delay: seqDelay, offset, offsetEasing = 'linear' } = sequenceOptions || {};
+  let delayStr = `${delay ?? 0}ms`;
+
+  if (sequenceId && typeof offsetEasing === 'string') {
+    const calcEasing = getJsEasingInCSS(offsetEasing);
+
+    if (calcEasing) {
+      const baseDelay = (delay ?? 0) + (seqDelay ?? 0);
+
+      if (offset) {
+        const easing = calcEasing(
+          `(var(--motion-${sequenceId}-index, 0) / var(--motion-${sequenceId}-last, 1))`,
+        );
+        const stagger = `(${baseDelay} + ${easing} * ${offset} * var(--motion-${sequenceId}-last, 1))`;
+        delayStr = `calc(${stagger} * 1ms)`;
+      } else {
+        delayStr = `${baseDelay}ms`;
+      }
+    }
+  }
+
   return `${animationName} ${isAutoDuration ? 'auto' : `${duration}ms`}${
-    isAutoDuration ? ' ' : ` ${delay ?? 0}ms `
+    isAutoDuration ? ' ' : ` ${delayStr} `
   }${easing}${fill && fill !== 'none' ? ` ${fill}` : ''} ${
     !iterations || iterations === Infinity ? 'infinite' : iterations
   }${direction === 'normal' ? '' : ` ${direction}`} ${isRunning ? '' : 'paused'}`;
@@ -52,6 +76,7 @@ function getCSSAnimation(
   target: string | null,
   animationOptions: AnimationOptions,
   trigger?: TriggerVariant,
+  sequenceOptions?: SequenceOptions,
 ) {
   // get the preset for the given animation options
   const namedEffect = getNamedEffect(animationOptions) as AnimationEffectAPI<any> | null;
@@ -67,7 +92,7 @@ function getCSSAnimation(
 
     return {
       target: getAnimationTarget(target, item.part),
-      animation: getAnimationAsCSS(item, isViewProgress),
+      animation: getAnimationAsCSS(item, isViewProgress, sequenceOptions),
       composition: item.options.composite,
       custom: item.effect.custom,
       name: item.effect.name,

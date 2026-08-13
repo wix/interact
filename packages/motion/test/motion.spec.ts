@@ -363,6 +363,78 @@ describe('motion.ts', () => {
         expect(result[0].animation).toContain('200ms');
       });
 
+      describe('sequence stagger', () => {
+        const staggered = (
+          sequenceOptions: Parameters<typeof getCSSAnimation>[3],
+          options: Partial<AnimationOptions> = {},
+        ) =>
+          getCSSAnimation(
+            'test-target',
+            { namedEffect: { type: 'FadeIn', id: 'fade' }, duration: 1000, ...options },
+            undefined,
+            sequenceOptions,
+          )[0].animation;
+
+        test('should emit a plain delay when no sequence options are passed', () => {
+          expect(staggered(undefined, { delay: 200 })).toContain(' 200ms ');
+        });
+
+        test('should emit a calc() delay driven by the sequence index custom properties', () => {
+          const animation = staggered({ sequenceId: 'seq-0-0', offset: 100 });
+
+          expect(animation).toContain('calc(');
+          expect(animation).toContain('var(--motion-seq-0-0-index, 0)');
+          expect(animation).toContain('var(--motion-seq-0-0-last, 1)');
+          expect(animation).toContain('* 1ms');
+        });
+
+        test('should fold the effect delay and the sequence delay into the calc() base', () => {
+          const animation = staggered(
+            { sequenceId: 'seq-0-0', offset: 100, delay: 50 },
+            { delay: 200 },
+          );
+
+          expect(animation).toContain('calc((250 +');
+        });
+
+        test('should emit a plain summed delay when the sequence has no offset', () => {
+          const animation = staggered(
+            { sequenceId: 'seq-0-0', offset: 0, delay: 50 },
+            { delay: 200 },
+          );
+
+          expect(animation).toContain(' 250ms ');
+          expect(animation).not.toContain('calc(');
+        });
+
+        test('should apply the offsetEasing to the index ratio', () => {
+          const animation = staggered({
+            sequenceId: 'seq-0-0',
+            offset: 100,
+            offsetEasing: 'quadIn',
+          });
+          const ratio = '(var(--motion-seq-0-0-index, 0) / var(--motion-seq-0-0-last, 1))';
+
+          expect(animation).toContain(`${ratio} * ${ratio}`);
+        });
+
+        test('should ignore a function offsetEasing - it cannot be expressed in CSS', () => {
+          const animation = staggered({
+            sequenceId: 'seq-0-0',
+            offset: 100,
+            offsetEasing: (p: number) => p ** 2,
+            delay: 50,
+          });
+
+          expect(animation).not.toContain('calc(');
+          expect(animation).toContain(' 0ms ');
+        });
+
+        test('should not stagger when the sequence has no id', () => {
+          expect(staggered({ offset: 100, delay: 50 }, { delay: 200 })).toContain(' 200ms ');
+        });
+      });
+
       test('should handle named effects', () => {
         const animationOptions: AnimationOptions = {
           namedEffect: {

@@ -71,7 +71,7 @@ export type ResolvedSequence = {
   triggerType: TimeAnimationTriggerType;
   delay: number;
   offset: number;
-  offsetEasing: (p: number) => number;
+  offsetEasing: string;
   conditions: string[];
   effects: ResolvedEffect[];
 };

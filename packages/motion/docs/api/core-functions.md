@@ -80,6 +80,7 @@ function getCSSAnimation(
   target: string | null,
   animationOptions: AnimationOptions,
   trigger?: TriggerVariant,
+  sequenceOptions?: SequenceOptions,
 ): Array<{
   target: string;
   animation: string;
@@ -95,11 +96,12 @@ function getCSSAnimation(
 
 ### Parameters
 
-| Parameter          | Type               | Description                                                                                                                                                                 |
-| ------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `target`           | `string \| null`   | Element id or CSS selector. CSS rules target selectors, so — unlike `getWebAnimation` — an `HTMLElement` reference is not accepted here.                                    |
-| `animationOptions` | `AnimationOptions` | Same shape as `getWebAnimation`.                                                                                                                                            |
-| `trigger`          | `TriggerVariant`   | Optional. `view-progress` animations always resolve to `duration: 'auto'` through this function, regardless of runtime `ViewTimeline` support (the SSR-safe `forCSS` path). |
+| Parameter          | Type               | Description                                                                                                                                                                                                                   |
+| ------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target`           | `string \| null`   | Element id or CSS selector. CSS rules target selectors, so — unlike `getWebAnimation` — an `HTMLElement` reference is not accepted here.                                                                                      |
+| `animationOptions` | `AnimationOptions` | Same shape as `getWebAnimation`.                                                                                                                                                                                              |
+| `trigger`          | `TriggerVariant`   | Optional. `view-progress` animations always resolve to `duration: 'auto'` through this function, regardless of runtime `ViewTimeline` support (the SSR-safe `forCSS` path).                                                   |
+| `sequenceOptions`  | `SequenceOptions`  | Optional. When it carries a `sequenceId` and a non-zero `offset`, the delay slot of the `animation` shorthand becomes a `calc()` staggered by `--motion-<sequenceId>-index`. See [Staggered Sequences](#staggered-sequences). |
 
 ### Returns
 
@@ -157,6 +159,31 @@ document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
 // Or render to a <style> tag on the server using the same fields:
 // descriptors.map((d) => `@keyframes ${d.name} { ... } ${d.target} { animation: ${d.animation}; }`).join('\n')
 ```
+
+### Staggered Sequences
+
+Staggering a list from static CSS would normally need one rule per item, since each item needs a different `animation-delay` — and at generation time the item count isn't known. Passing `sequenceOptions` avoids that: the delay becomes a `calc()` over two custom properties, so a **single rule** staggers any number of elements.
+
+```typescript
+const [{ animation }] = getCSSAnimation(
+  'card',
+  { namedEffect: { type: 'FadeIn' }, duration: 600 },
+  undefined,
+  { sequenceId: 'cards', offset: 120, offsetEasing: 'quadIn' },
+);
+// fade-in 600ms calc((0 + <easing(index / last)> * 120 * var(--motion-cards-last, 1)) * 1ms) … paused
+```
+
+`--motion-cards-index` and `--motion-cards-last` are written per element at runtime by a [`Sequence`](./sequence.md#css-driven-stagger) constructed with the same `sequenceId`. Before that happens the `var()` fallbacks (`index: 0`, `last: 1`) resolve the `calc()` to the plain base delay, so the CSS stays valid and FOUC-free with no JS.
+
+| `sequenceOptions`                  | Emitted delay                                     |
+| ---------------------------------- | ------------------------------------------------- |
+| omitted, or without a `sequenceId` | `<delay>ms`                                       |
+| `sequenceId` + non-zero `offset`   | the staggered `calc()`                            |
+| `sequenceId` + `offset: 0`/omitted | `<delay + sequenceOptions.delay>ms`               |
+| `offsetEasing` given as a function | `<delay>ms` — a JS function has no CSS equivalent |
+
+`offsetEasing` accepts the same strings as `getJsEasing` (named key, `cubic-bezier(...)`, `linear(...)`) and defaults to `'linear'`; it is compiled to a `calc()` fragment by [`getJsEasingInCSS`](#getjseasingincss).
 
 ## getScrubScene
 
@@ -400,6 +427,41 @@ getEasing(); // → 'linear' (default)
 const ease = getJsEasing('backOut'); // → (t: number) => number
 getJsEasing(); // → undefined (falsy input)
 ```
+
+## getJsEasingInCSS
+
+Compiles an easing into a CSS `calc()` **expression builder**, for cases where the input isn't known until the browser evaluates the stylesheet. Used to express a sequence's `offsetEasing` in generated CSS — see [Staggered Sequences](#staggered-sequences).
+
+### Signature
+
+```typescript
+function getJsEasingInCSS(easing?: string): ((t: string) => string) | undefined;
+```
+
+### Parameters
+
+| Parameter | Type     | Description                                                                                                                  |
+| --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `easing`  | `string` | Optional. Same inputs as `getJsEasing`: a named key, a `cubic-bezier(x1, y1, x2, y2)` string, or a CSS `linear(...)` string. |
+
+### Returns
+
+`((t: string) => string) | undefined` — a builder that substitutes any CSS expression for the easing's input and returns the eased expression. Returns `undefined` only when `easing` is falsy; anything unparsable falls back to the linear builder.
+
+Unlike `getJsEasing`, this returns a **string builder, not a numeric function** — it never evaluates the curve, it emits math for the browser to evaluate. The named keys are the same as `getJsEasing`, plus `ease`, `easeIn`, `easeOut`, and `easeInOut`.
+
+### Example
+
+```typescript
+import { getJsEasingInCSS } from '@wix/motion';
+
+const easing = getJsEasingInCSS('quadIn')!;
+
+easing('var(--p)'); // → '(var(--p) * var(--p))'
+getJsEasingInCSS(); // → undefined (falsy input)
+```
+
+> **Browser support**: the emitted expressions use the CSS math functions `pow()`, `sqrt()`, `sin()`, `cos()`, `acos()`, `round()`, `max()` and `clamp()`.
 
 ---
 

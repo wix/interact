@@ -148,6 +148,10 @@ const sequence = getSequence(
 sequence.play();
 ```
 
+Add a `sequenceId` to stagger CSS-rendered animations too: `getCSSAnimation()` accepts the same options and
+emits a single rule whose delay is a `calc()` over `--motion-<sequenceId>-index`, which the `Sequence` then
+sets per element. See [CSS-Driven Stagger](./docs/api/sequence.md#css-driven-stagger).
+
 See [`docs/api/get-sequence.md`](https://github.com/wix/interact/blob/master/packages/motion/docs/api/get-sequence.md) for the full stagger model.
 
 ## ViewTimeline and Polyfills

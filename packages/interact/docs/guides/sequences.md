@@ -18,6 +18,35 @@ For example, with 5 effects and `offset: 200`:
 | `quadIn`  | 0, 50, 200, 450, 800  | Slow start, then rapid   |
 | `sineOut` | 0, 306, 565, 739, 800 | Fast start, then gradual |
 
+## Stagger in Generated CSS
+
+`generate()` emits **one** animation rule per sequence effect, not one per list item — the item count
+isn't known when the CSS is produced. The per-item delay is therefore expressed as a `calc()` over two
+custom properties naming the element's position in the sequence:
+
+```css
+animation: card-entrance 600ms
+  calc((0 + <offsetEasing(index / last) > * 80 * var(--motion-card-stagger-last, 1)) * 1ms) …;
+```
+
+At runtime the `Sequence` writes `--motion-<sequenceId>-index` and `--motion-<sequenceId>-last` onto each
+target element, and the shared rule resolves to a different delay per item. Before that — during SSR and
+until Interact initializes — the `var()` fallbacks resolve `index` to `0`, so every element sits at the
+base delay and the CSS stays valid and FOUC-free.
+
+This is why sequences need a stable `sequenceId`: it names the custom properties, and the CSS half and the
+runtime half must agree on it. When you don't provide one, Interact derives it from the sequence's position
+in the config (`seq-<interactionIndex>-<sequenceIndex>`) so both halves compute the same value from the same
+config.
+
+> **`offsetEasing` must be a string for CSS generation.** A `(p: number) => number` function has no CSS
+> equivalent, so `generate()` skips the entire sequence — the animations still run once Interact
+> initializes, but nothing is rendered ahead of time and entrance animations may flash. Use a named easing,
+> `cubic-bezier(...)`, or `linear(...)` for anything that needs generated CSS.
+>
+> [`@wix/interact-validate`](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md)
+> reports this statically as the `FUNCTION_OFFSET_EASING` warning.
+
 ## Config Structure
 
 Sequences can be defined at two levels:
@@ -124,10 +153,14 @@ type SequenceOptionsConfig = {
   delay?: number; // Base delay (ms). Default: 0
   offset?: number; // Stagger interval (ms). Default: 0
   offsetEasing?: string | ((p: number) => number); // Easing for offset distribution
-  sequenceId?: string; // ID for reusable sequence reference
+  sequenceId?: string; // ID for reusable sequence reference, and for the CSS stagger custom properties
   conditions?: string[]; // Media query condition IDs
 };
 ```
+
+A function `offsetEasing` works at runtime but excludes the sequence from
+[generated CSS](#stagger-in-generated-css). Auto-generated `sequenceId`s are derived from the config
+position, so `generate()` and the runtime agree on them.
 
 ### `SequenceConfig`
 
