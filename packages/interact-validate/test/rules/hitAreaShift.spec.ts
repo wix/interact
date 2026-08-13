@@ -33,7 +33,7 @@ describe('hitAreaShift — HIT_AREA_SHIFT', () => {
     expect(result.valid).toBe(true);
   });
 
-  it('warns for a pointerMove keyframeEffect with a scale transform (default hitArea: self)', () => {
+  it('does not warns for a pointerMove keyframeEffect with a scale transform (default hitArea: root)', () => {
     const result = validateInteractConfig({
       interactions: [
         {
@@ -48,7 +48,7 @@ describe('hitAreaShift — HIT_AREA_SHIFT', () => {
         },
       ],
     });
-    expect(result.errors.some((e) => e.code === CODE)).toBe(true);
+    expect(result.errors.some((e) => e.code === CODE)).toBe(false);
   });
 
   describe('no warning for the documented valid patterns', () => {

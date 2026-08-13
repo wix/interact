@@ -53,8 +53,8 @@ export function checkHitAreaShift(
   const isPointer = owner.trigger === 'pointerMove';
   if (!isDiscrete && !isPointer) return [];
   // `hitArea: 'root'` tracks the viewport, so a transform on the source cannot
-  // shift the hit area. Default (`'self'`) and explicit `'self'` are at risk.
-  if (isPointer && owner.params?.hitArea === 'root') return [];
+  // shift the hit area. Only explicit `'self'` are at risk.
+  if (isPointer && owner.params?.hitArea !== 'self') return [];
   if (!targetsSameElementAsSource(owner, effect)) return [];
   const keyframes = effect.keyframeEffect?.keyframes;
   if (!Array.isArray(keyframes)) return [];
