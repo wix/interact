@@ -51,7 +51,6 @@ export type ScrubEffect = {
   rangeEnd?: RangeOffset;
   centeredToTarget?: boolean;
   transitionDuration?: number;
-  transitionDelay?: number;
   transitionEasing?: ScrubTransitionEasing;
 } & EffectEffectProperty;
 

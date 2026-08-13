@@ -6,6 +6,7 @@ import {
   addHandlerToMap,
   removeElementFromHandlerMap,
 } from './utilities';
+import { matchesSelectorCondition } from '../utils';
 
 const handlerMap = new WeakMap() as HandlerObjectMap;
 
@@ -37,7 +38,7 @@ function addAnimationEndHandler(
   const { effectId } = params;
 
   const handler = (event: Event) => {
-    if (selectorCondition && !target.matches(selectorCondition)) return;
+    if (selectorCondition && !matchesSelectorCondition(target, selectorCondition)) return;
 
     const animName = (event as AnimationEvent).animationName;
     const eventEffectId = (event as CustomEvent).detail?.effectId;

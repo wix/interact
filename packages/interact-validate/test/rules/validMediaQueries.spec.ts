@@ -24,11 +24,7 @@ afterEach(() => {
 });
 
 // Helper: a config that references the named condition so no UNUSED_CONDITION fires.
-function configWithCondition(
-  id: string,
-  predicate?: string,
-  type: 'media' | 'container' | 'selector' = 'media',
-) {
+function configWithCondition(id: string, predicate?: string, type: 'media' | 'selector' = 'media') {
   return {
     conditions: { [id]: { type, predicate: predicate || '' } },
     interactions: [

@@ -2,66 +2,16 @@
 
 **Audited file:** `interact-documentation-site.md`
 **Audited against:** `packages/interact/src/**`, `packages/interact/rules/*.md`, `packages/interact/README.md`, `packages/interact-validate/src/**`, `packages/motion-presets/src/**`, `packages/motion/src/**`, `packages/splittext/src/plugin/**`
-**Original audit:** 2026-07-26 · **Re-verified:** 2026-08-04 · **Remediation pass:** 2026-08-13
-**Package versions:** `@wix/interact` 2.5.6, `@wix/motion` 2.1.9, `@wix/motion-presets` 1.0.4, `@wix/interact-validate` 0.1.2, `@wix/splittext` 0.1.2
+**Original audit:** 2026-07-26 · **Re-verified:** 2026-08-04 · **Remediation passes:** 2026-08-13
 
-> **This document has been reduced to open items only.** The 2026-08-13 remediation pass closed the
-> blocking issues, the technical errors, the authoring residue, the structural defects and the
-> style/consistency work — except for the two deliberately deferred clusters below. See
-> [§0](#0-what-the-2026-08-13-pass-closed) for what was done.
+> **This document has been reduced to the two deliberately deferred clusters.** Everything else the
+> audit raised — the blocking issues, the technical errors, the authoring residue, the structural
+> and style defects, and all upstream defects outside the site doc — has been closed.
 
 Line numbers from the original audit no longer apply: the file grew from 4,729 to ~6,770 lines.
 **Locate every item below by searching for the quoted text.**
 
----
-
-## Table of contents
-
-1. [What the 2026-08-13 pass closed](#0-what-the-2026-08-13-pass-closed)
-2. [Deferred cluster A — reduced motion](#1-deferred-cluster-a--reduced-motion)
-3. [Deferred cluster B — selectors and element resolution](#2-deferred-cluster-b--selectors-and-element-resolution)
-4. [Open decision — release gating of 2.6.0 API](#3-open-decision--release-gating-of-260-api)
-5. [Upstream items still open](#4-upstream-items-still-open)
-6. [Findings raised during remediation](#5-findings-raised-during-remediation)
-7. [Verification baseline](#6-verification-baseline)
-
----
-
-## 0. What the 2026-08-13 pass closed
-
-The site doc went from 4,729 to ~6,770 lines and from 27 to 28 pages. It is Prettier-clean and
-passes these mechanical checks — **re-run them before publishing**:
-
-| Check                                                                         | Result  |
-| :---------------------------------------------------------------------------- | :------ |
-| `ADDLINK`, `google.com/search?q=`, `docs.google.com`, `http://Configuration/` | 0       |
-| Owner/Reviewer lines, internal `@wix.com` addresses                           | 0       |
-| Emoji role markers (🧑‍🌾 / 🧑‍💻)                                                  | 0       |
-| Bold-wrapped headings, smart quotes, empty `()` links                         | 0       |
-| `data-interact-initial`, `pageVisible`                                        | 0       |
-| Internal links resolving to a real page slug **and** heading anchor           | 213/213 |
-| Code fences balanced and language-labelled                                    | yes     |
-
-Closed: all 12 blocking issues except the element-resolution one (B11); technical errors §3.1,
-§3.5–§3.12, §3.15–§3.22; missing-information items M1–M7 and M9–M29; all of §5 (residue),
-§6 (structure), §7 (authoring style), §8 (terminology), §9 (code samples) and §10 (markdown
-defects). Two pages were authored from scratch: **Plugins** (M25) and **The final result** (B5).
-Page titles are now single, sentence-case, emoji-free H1s; `keyframe Effects` was renamed
-**Time and scrub effects**.
-
-Decisions taken during the pass, recorded so they are not re-litigated:
-
-| Decision                                                                                                       | Rationale                                                           |
-| :------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------ |
-| Placeholder links resolved to site-relative slugs derived from page titles (`/named-effects`, `/viewenter`, …) | The published URL scheme is not in the repo; slugs are greppable    |
-| Full title normalisation — one sentence-case H1 per page, body at H2                                           | §6.1–§6.3                                                           |
-| `container` conditions **removed** from the docs rather than marked "reserved"                                 | §3.9 — silently dropped at runtime; worse to advertise              |
-| `interest` / `activate` covered inside **Click and hover** rather than getting their own chapters              | §6.4 / M14 — they are the a11y upgrades of `hover` / `click`        |
-| `Installation and entry points` kept as a separate page, deduped against `HTML integration`                    | §6.8 — preserves the page inventory the original audit called sound |
-| Full Style A pass — HTML markup + `**Result:**` on every complete example                                      | §7.2                                                                |
-| 2.6.0-only API documented with **no version pins**                                                             | See [§3](#3-open-decision--release-gating-of-260-api)               |
-
-Canonical section anchors established in that pass — reuse these when cross-linking:
+Canonical section anchors established during remediation — reuse these when cross-linking:
 
 | Topic                             | Anchor                                                          |
 | :-------------------------------- | :-------------------------------------------------------------- |
@@ -77,14 +27,22 @@ Canonical section anchors established in that pass — reuse these when cross-li
 
 ---
 
+## Table of contents
+
+1. [Deferred cluster A — reduced motion](#1-deferred-cluster-a--reduced-motion)
+2. [Deferred cluster B — selectors and element resolution](#2-deferred-cluster-b--selectors-and-element-resolution)
+3. [Open decision — release gating of 2.6.0 API](#3-open-decision--release-gating-of-260-api)
+
+---
+
 ## 1. Deferred cluster A — reduced motion
 
 **Status: the runtime shipped 2026-08-06 (in `@wix/interact` 2.6.0, unreleased). The site doc was
 deliberately left untouched, so every reduced-motion statement in it now _under_-promises.**
 
-The 2026-08-13 pass verified this cluster unchanged: reduced-motion mentions 33 → 33,
-`forceReducedMotion` 3 → 3, `Interact.reducedMotion` still absent. Only admonition labels, link
-targets and table-column layout were touched; no claim was altered.
+Verified unchanged: reduced-motion mentions 33 → 33, `forceReducedMotion` 3 → 3,
+`Interact.reducedMotion` still absent. Only admonition labels, link targets and table-column layout
+were touched; no claim was altered.
 
 §1.1 is the **spec for the rewrite**. Nothing needs inventing — §1.2 lists where the wording exists.
 
@@ -177,10 +135,9 @@ Left alone to keep the section byte-identical. Fix them as part of A1:
 affected pages must not be rewritten until that plan is accepted or rejected, because the correct
 wording differs depending on the outcome.
 
-The 2026-08-13 pass verified this cluster unchanged: `listItemSelector` mentions 19 → 19, and every
-wrong claim below is still present verbatim. Only formatting was applied — heading case, link
-targets, `\+` unescaping, and the `/using-lists` code-in-tables conversion, which reproduced the code
-exactly.
+Verified unchanged: `listItemSelector` mentions 19 → 19, and every wrong claim below is still present
+verbatim. Only formatting was applied — heading case, link targets, `\+` unescaping, and the
+`/using-lists` code-in-tables conversion, which reproduced the code exactly.
 
 ### 2.1 The runtime truth
 
@@ -236,13 +193,22 @@ listItemSelector`; `src/types/config.ts` declares `key, listContainer, listItemS
 - Delete or rewrite the `.active` example, which teaches behaviour the runtime does not implement.
 - State the container-scoped `querySelectorAll` rule as the primary behaviour. Either document the
   per-item difference for MutationObserver-added children, or (preferred) file it as a runtime
-  inconsistency ([§4](#4-upstream-items-still-open) A10) and document only the stable rule.
+  inconsistency and document only the stable rule.
 - Note the practical consequence of `querySelectorAll`: `selector: '.card'` attaches the trigger to
   _every_ `.card` in the root, not just the first.
 - Also fix while in the area: the two same-page links on `/source-and-target-resolving` are written as
   full slug + anchor (`/source-and-target-resolving#…`); switch to bare `#anchor` if the site builder
   prefers that. And that page's four pre-existing examples were left without `### Example:` headings,
   because adding headings would have changed the anchor set.
+
+### 2.4 Blocked upstream items in this cluster
+
+These two are deliberately **not** fixed — they are the runtime/rules side of the same decision:
+
+| #   | File                                     | Issue                                                                                                                                                                                                                               |
+| :-- | :--------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| B1  | `rules/full-lean.md:692`, `:202`, `:356` | Source resolution claims `listItemSelector` filters which children become sources. Wrong (§2.1). Three sites, same framing.                                                                                                         |
+| B2  | `src/core/add.ts`                        | `listContainer` + `selector` resolves differently at initial bind (`container.querySelectorAll`) than for MutationObserver-added items (`child.querySelector`). Likely a bug; documenting it as-is would document an inconsistency. |
 
 ---
 
@@ -252,8 +218,8 @@ listItemSelector`; `src/types/config.ts` declares `key, listContainer, listItemS
 (PR #275) "shipped in `@wix/interact` 2.5.5". They did not. `CHANGELOG.md` places both under
 **`@wix/interact [2.6.0] — unreleased`**; the published version is **2.5.6**.
 
-The site doc now documents **master, with no version pins** (an explicit decision — see §0). One
-consequence needs resolving before publishing:
+The site doc now documents **master, with no version pins** (an explicit decision). One consequence
+needs resolving before publishing:
 
 | Surface                                        | On master (2.6.0)                                     | On published 2.5.6                                                             |
 | :--------------------------------------------- | :---------------------------------------------------- | :----------------------------------------------------------------------------- |
@@ -265,89 +231,3 @@ The options-bag form is documented on `/html-integration`, `/named-effects`, `/u
 `/the-final-result`. **Options:** ship the site alongside the 2.6.0 release (no doc change needed);
 add "Requires `@wix/interact` 2.6.0" notes to those surfaces; or revert to the legacy positional
 boolean until release.
-
----
-
-## 4. Upstream items still open
-
-Defects outside the site doc. Original A1, A3, A4, A6, A8 and A12 are now **fixed** — A3/A4/A6 in the
-2026-08-13 rules pass (see [§5.1](#51-rules-files--fixed-on-2026-08-13)).
-
-| #   | File                                           | Issue                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| :-- | :--------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A2  | `interact-validate/src/semantic/fouc.ts`       | **`hitArea` default is inconsistent between runtime and validator.** The runtime default is effectively `'root'` (`src/handlers/pointerMove.ts:39` — an undefined `hitArea` yields an undefined root, which falls through to kuliso's viewport default). `checkHitAreaShift` (`:55-57`) instead treats an omitted `hitArea` as `'self'` and therefore at risk. The rules files were corrected to document `'root'` on 2026-08-13 and now note the validator's stricter assumption. **Decide which side moves.** |
-| A5  | `rules/full-lean.md:692`, `:202`, `:356`       | Source resolution claims `listItemSelector` filters which children become sources. Wrong (§2.1). Three sites, same framing. **Deliberately not fixed** — part of deferred cluster B; see [`element-resolution-plan.md`](element-resolution-plan.md).                                                                                                                                                                                                                                                            |
-| A7  | `packages/interact/llms.txt:7` (and root)      | "Five trigger types: hover, click, viewEnter, viewProgress, pointerMove" — there are eight (`animationEnd`, `activate`, `interest` missing). Both files are **generated and gitignored**, so the fix belongs in the generator input, `scripts/generate-llms.mjs`. The generated index also does not list `rules/plugins.md`.                                                                                                                                                                                    |
-| A9  | `interact-validate/src/semantic/fouc.ts:59-64` | `HIT_AREA_SHIFT` only inspects `transform` **strings** against `/(translate\|scale\|matrix)/`. Escapes: bare `scale` / `translate` / `rotate` keyframe properties (the individual CSS transform properties), `transform: 'rotate(…)'` (not in the pattern), box metrics, and anything via `namedEffect` / `customEffect`.                                                                                                                                                                                       |
-| A10 | `src/core/add.ts`                              | `listContainer` + `selector` resolves differently at initial bind (`container.querySelectorAll`) than for MutationObserver-added items (`child.querySelector`). Likely a bug; documenting it as-is would be documenting an inconsistency. Covered in depth by [`element-resolution-plan.md`](element-resolution-plan.md).                                                                                                                                                                                       |
-| A11 | `src/types/config.ts:6`                        | `Condition.type` accepts `'container'` but nothing implements it — such conditions are silently dropped. Re-verified 2026-08-13: `getFullPredicateByType` is the only possible reader and all four call sites (`core/css.ts:151, 230, 503`, `core/cssUtils.ts:179`) pass `'media'`; `grep '@container'` over `packages/interact/src` returns zero hits. The docs now omit it. Either implement `@container` emission or remove the type.                                                                        |
-
----
-
-## 5. Findings raised during remediation
-
-All verified against source during the 2026-08-13 pass. None is in the site doc.
-
-### 5.1 Rules files — fixed on 2026-08-13
-
-| File                                | Was                                                                                                           | Now                                                                                                                                                                                                                                      |
-| :---------------------------------- | :------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `full-lean.md` transitionProperties | Per-property entries take precedence when both are set                                                        | `transition` wins; `transitionProperties` is ignored entirely (`src/utils.ts:67`, `:79`)                                                                                                                                                 |
-| `full-lean.md` mouse presets        | 9 entries                                                                                                     | 11 usable, plus notes on `CustomMouse` (a factory taking a `customEffect`, not usable as a `namedEffect`) and the experimental `Bg*` background-scroll presets                                                                           |
-| `full-lean.md` `hitArea`            | Default `'self'`                                                                                              | Default `'root'`; see A2 for the validator coupling                                                                                                                                                                                      |
-| `full-lean.md` viewEnter params     | `useSafeViewEnter` absent everywhere in the rules                                                             | Documented, including that it needs an **explicit** `threshold` (the check reads the authored value, not the `0.2` default) and that the fallback observer discards a configured `inset`                                                 |
-| `full-lean.md` scrub options        | `centeredToTarget` / `transition*` unscoped                                                                   | Scoped per payload                                                                                                                                                                                                                       |
-| `pointermove.md` Rules 1–3          | `centeredToTarget` / `transitionDuration` / `transitionEasing` offered for `keyframeEffect` and `namedEffect` | `transition*` forwarded **only** for a `customEffect` payload (`motion/src/motion.ts:161-164`); `centeredToTarget` needs a resolved target, which a `keyframeEffect` scrub scene lacks (`target: undefined`, kuliso `controller.js:101`) |
-| `viewprogress.md`                   | `entry-crossing` / `exit-crossing` described leading-edge-to-opposite-side                                    | Aligned to `full-lean.md`: leading edge to trailing edge. `contain` also made precise (fully contained **by, or fully containing**, the scrollport)                                                                                      |
-| `integration.md:354`                | `allowA11yTriggers` default `false`                                                                           | `true` (`src/core/Interact.ts:47`)                                                                                                                                                                                                       |
-
-### 5.2 Still open
-
-| #   | Where                                                         | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| :-- | :------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| R1  | `packages/interact/src/types/effects.ts:54`                   | **`transitionDelay` has no runtime consumer.** It exists in the type, in `motion/src/types.ts:174` and in the validator schema, but nothing in `packages/motion/src`, `packages/motion-presets/src` or kuliso reads it — only `transitionDuration` and `transitionEasing` are consumed. Deliberately left alone. Either implement it or remove it from the public type.                                                                                                                                                                                                                                                                                                                                                         |
-| R2  | `packages/motion/src/utils.ts:269-279`                        | **`transitionEasing` is inert for four of its five values.** `getJsEasing` looks the value up in `jsEasings`, which contains no `hardBackOut`, `easeOut`, `elastic` or `bounce`; all four fall through to `jsEasings.linear`. Either populate `jsEasings` or narrow the public type.                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| R3  | `packages/interact/src/utils.ts:36-46` vs the handlers        | **Selector conditions substitute `&` on only one of two paths.** The CSS path calls `applySelectorCondition()` (`core/cssUtils.ts:137-140`). The runtime path gates with `element.matches(selectorCondition)` on the **raw** string (`handlers/effectHandlers.ts:38`, `:108`; `handlers/viewEnter.ts:199`; `handlers/animationEnd.ts:40`), so the browser is asked to evaluate `matches(':is(.theme-dark &)')`. `test/sequences.spec.ts:673-695` asserts the unsubstituted string is what arrives. Needs a real-browser check: if `&` outside a nested rule is not treated as `:scope`, this throws a `SyntaxError` at trigger time. The site doc documents only the CSS composition rule and makes no claim about `matches()`. |
-| R4  | `packages/interact/docs/guides/plugins.md:188`                | Says plugin styles are "emitted verbatim and unconditionally" and that media scoping must be built by the generator. Source disagrees: `collectFieldPluginStyles` stamps the interaction's/effect's media predicate onto every returned rule (`core/css.ts:201`, `:230`, `:503`). Media `conditions` **are** applied; selector-type conditions are not.                                                                                                                                                                                                                                                                                                                                                                         |
-| R5  | `packages/interact/docs/guides/getting-started.md`            | Ships the `scale: 2`-on-the-hovered-element hit-area anti-pattern **twice**, plus `effects: {}`. Contradicts `rules/hover.md`, which marks it CRITICAL. The site doc's tutorial was fixed; this guide was not.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| R6  | `packages/interact/docs/integration/README.md`                | Links to `vanilla-js.md`, `other-frameworks.md`, `migration.md`, `build-tools.md` and `testing.md`, none of which exist.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| R7  | `packages/interact/docs/guides/effects-and-animations.md:271` | Documents a third `params` argument on the `customEffect` callback. The real signature is `(element: Element, progress: any) => void` (`src/types/effects.ts:28`, `:109`; `motion/src/CustomAnimation.ts:30`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| R8  | `packages/motion-presets/src/library/entrance/`               | `FloatIn` hardcodes `easing: 'sineInOut'` **after** spreading options, so a caller-supplied `easing` is silently discarded. Other entrance presets honour `options.easing`. Either respect the option or document the exception.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| R9  | `packages/motion-presets/src/library/scroll/`                 | `ParallaxScroll`'s implementation never reads its `range` option, yet `@wix/interact-validate` requires `range` on every `*Scroll` preset under `viewProgress`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| R10 | `packages/interact/src/handlers/`                             | The `activate` a11y upgrade does **not** set `tabIndex` (only `interest` does, on `focusin`). A non-focusable `<div>` with `trigger: 'click'` therefore stays keyboard-unreachable even with `allowA11yTriggers: true`. Possible real accessibility gap.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| R11 | `packages/interact/src/core/resolvers.ts:94`                  | `resolveEffectForCSS` returns `{ initial, ...rest }` for a `customEffect`, so it may emit an initial-state rule even though it emits no animation CSS. What `generate()` ultimately outputs was not pinned down; the site doc makes no claim about SSR/FOUC for custom effects.                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| R12 | `packages/interact/src/handlers/viewEnter.ts:11-15, 125-129`  | `useSafeViewEnter` reads the **authored** `threshold`, not the resolved `0.2` default, so the flag alone is a no-op; and the fallback observer's fixed config discards a configured `inset`. Now documented in the rules and the site doc, but both read as bugs rather than intent.                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| R13 | `rules/viewprogress.md:152-233` vs `/viewprogress`            | The rules treat `generate()` pre-rendering as the preferred path for static sites; the `/viewprogress` chapter never mentions pre-generating scroll-driven CSS. Likely a real content gap.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| R14 | `packages/motion/src/easings.ts:218-248`                      | Named-easing catalogue: the original audit listed 24 (`sine`/`quad`/`cubic`/`quart`/`quint`/`expo`/`circ`/`back` × `In`/`Out`/`InOut`). Source has **five more** camelCase aliases for the CSS keywords: `linear`, `ease`, `easeIn`, `easeOut`, `easeInOut`. The site doc now documents all 29.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| R15 | `packages/motion-presets/src/library/ongoing/`                | `DVD` exists in the directory but is not exported (marked not-production-ready). Confirm that is intentional.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| R16 | `packages/interact` types                                     | `import * as presets; registerEffects(presets)` — the idiom shipped in `README.md:73` and `rules/full-lean.md:128` — does not typecheck. `typeof import('@wix/motion-presets')` is not assignable to `Record<string, EffectModule>`, because the mouse presets are scrub factories returning a function rather than `AnimationData[]`. A library typing gap, not a docs bug; the documented idiom was kept.                                                                                                                                                                                                                                                                                                                     |
-
----
-
-## 6. Verification baseline
-
-Source of truth for claims, so a future pass need not re-derive them.
-
-| Claim group                                                              | Source of truth                                                                                                                                                                                                                           |
-| :----------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Trigger list (8)                                                         | `src/types/triggers.ts:7-15`                                                                                                                                                                                                              |
-| Default `triggerType` per trigger                                        | `src/core/resolvers.ts:19-26` (`viewEnter`/`animationEnd` → `once`; `hover`/`click`/`activate`/`interest` → `alternate`)                                                                                                                  |
-| hover/click playback semantics                                           | `src/handlers/effectHandlers.ts:34-88`                                                                                                                                                                                                    |
-| `stateAction` semantics incl. `clear`                                    | `src/core/InteractionController.ts:107-142, 144-156`, `src/handlers/effectHandlers.ts:91-130`                                                                                                                                             |
-| a11y upgrade + keyboard handling                                         | `src/handlers/index.ts:9-29`, `src/handlers/constants.ts`, `src/handlers/eventTrigger.ts:18-46, 172-193`                                                                                                                                  |
-| viewEnter playback, threshold `0.2`, inset, `useSafeViewEnter`           | `src/handlers/viewEnter.ts:11-51, 91-153, 198-291`                                                                                                                                                                                        |
-| FOUC: `data-interact-enter`, `DEFAULT_INITIAL` (+ `!important`)          | `src/core/css.ts:30-36, 286-303`, `src/core/utilities.ts:19-28`, `src/handlers/viewEnter.ts:218, 228`, `src/handlers/effectHandlers.ts:60-82`. Note `visibility: hidden` is **not** `!important` — only the four transform properties are |
-| `generate(config, options?: boolean \| GenerateOptions)`                 | `src/core/css.ts:633`, `normalizeGenerateOptions` at `:575`, `GenerateOptions` at `src/types/css.ts:7-16` (2.6.0)                                                                                                                         |
-| CSS property-name normalisation (both casings)                           | `src/utils.ts:63-73`, `src/core/cssUtils.ts:16-30`, `packages/motion/src/utils.ts:27-35, 70-97` — suites `test/propertyCasing.spec.ts`, `packages/motion/test/utils.spec.ts` (2.6.0)                                                      |
-| Plugin API                                                               | `src/core/Interact.ts:255`, `src/types/plugins.ts`, `src/core/add.ts` (`_applyPlugins`, pre-resolution), `src/core/css.ts:191`, `packages/splittext/src/plugin/index.ts` (2.6.0)                                                          |
-| Element resolution                                                       | `src/core/add.ts:43-105`, `src/core/Interact.ts:331-353`                                                                                                                                                                                  |
-| `listItemSelector` usage sites (exhaustive)                              | `src/core/Interact.ts:340`, `src/handlers/effectHandlers.ts:112`, `src/core/utilities.ts:31-33`                                                                                                                                           |
-| Reduced motion (post-2026-08-06 contract)                                | See [§1.1](#11-what-the-runtime-now-does); `src/core/Interact.ts`, the seven `src/core/add.ts` call sites, `src/handlers/{pointerMove,viewProgress,viewEnter,effectHandlers}.ts`, `src/utils.ts`, `packages/motion/src/motion.ts`         |
-| Conditions: media merge, selector `:is()` + `&`, container unimplemented | `src/utils.ts:36-46, 153-207`, `src/core/css.ts:151, 230, 503`, `src/core/cssUtils.ts:179`                                                                                                                                                |
-| Validator severities                                                     | `interact-validate/src/structural.ts:58, 71-76, 83-88`, `src/errors.ts:60, 80`, `src/schema/interactions.ts:231-244, 258-265, 287-330`                                                                                                    |
-| Cascade / coexistence mechanics                                          | `src/core/css.ts:429-513`                                                                                                                                                                                                                 |
-| Sequence resolution, defaults, trigger dispatch                          | `src/core/resolvers.ts:19-26, 103-165`, `src/utils.ts:20-34`, `src/core/add.ts:376-399, 441-463`, `packages/motion/src/Sequence.ts:52-102, 165-172`                                                                                       |
-| Sequence `effects` are `TimeEffect` only, `.min(1)`                      | `interact-validate/src/schema/sequences.ts:18`                                                                                                                                                                                            |
-| Preset inventory (verified counts)                                       | `packages/motion-presets/src/library/` — entrance 19, scroll 19, ongoing 13, mouse 12 (incl. `CustomMouse`), backgroundScroll 12 (experimental)                                                                                           |
-| Pointer scene options per payload                                        | `packages/motion/src/motion.ts:122-166`, kuliso `controller.js:101`                                                                                                                                                                       |
-| State-effect easing defaults                                             | `transition` → `ease` (`src/utils.ts:90, 96`); a `transitionProperties` entry → `linear`, because `getEasing(undefined)` returns a truthy `cssEasings.linear` so the `\|\| 'ease'` fallback never fires (`:109`)                          |

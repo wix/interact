@@ -12,13 +12,11 @@ import { generateId } from '../../utils/id';
 
 const CONDITION_TYPES: { value: Condition['type']; label: string }[] = [
   { value: 'media', label: 'Media Query' },
-  { value: 'container', label: 'Container' },
   { value: 'selector', label: 'Selector' },
 ];
 
 const PREDICATE_PLACEHOLDERS: Record<string, string> = {
   media: '(min-width: 768px)',
-  container: '(min-width: 400px)',
   selector: ':nth-of-type(odd)',
 };
 

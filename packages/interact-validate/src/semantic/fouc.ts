@@ -9,7 +9,31 @@ import { RETRIGGER_TYPES } from '../types';
 // false positives (e.g. registry effects with no owning interaction).
 
 const DISCRETE_TRIGGERS = ['hover', 'click', 'interest', 'activate'];
-const HIT_AREA_TRANSFORM = /(translate|scale|matrix)/;
+const HIT_AREA_TRANSFORM = /(translate|scale|matrix|rotate|skew|perspective)/;
+// The individual CSS transform properties, plus the box metrics that move or
+// resize the element without going through `transform` at all.
+const HIT_AREA_PROPERTIES = [
+  'translate',
+  'scale',
+  'rotate',
+  'width',
+  'height',
+  'top',
+  'right',
+  'bottom',
+  'left',
+  'margin',
+  'marginTop',
+  'marginRight',
+  'marginBottom',
+  'marginLeft',
+  'margin-top',
+  'margin-right',
+  'margin-bottom',
+  'margin-left',
+  'padding',
+  'inset',
+];
 
 export function targetsSameElementAsSource(owner: AnyInteraction, effect: AnyEffect): boolean {
   if (effect.key !== undefined && effect.key !== owner.key) return false;
@@ -60,7 +84,9 @@ export function checkHitAreaShift(
   if (!Array.isArray(keyframes)) return [];
   const shifts = keyframes.some(
     (frame) =>
-      typeof frame?.transform === 'string' && HIT_AREA_TRANSFORM.test(frame.transform as string),
+      (typeof frame?.transform === 'string' &&
+        HIT_AREA_TRANSFORM.test(frame.transform as string)) ||
+      HIT_AREA_PROPERTIES.some((prop) => frame?.[prop] !== undefined),
   );
   if (!shifts) return [];
   return [
@@ -68,7 +94,7 @@ export function checkHitAreaShift(
       code: 'custom',
       params: { domainCode: 'HIT_AREA_SHIFT' },
       path: [...path],
-      message: `${owner.trigger} effect changes size/position (transform) on the same element used as the source; the shifting hit area causes jittery re-entry. Target a child via \`selector\` or set a different \`key\`.`,
+      message: `${owner.trigger} effect changes size/position on the same element used as the source; the shifting hit area causes jittery re-entry. Target a child via \`selector\` or set a different \`key\`.`,
     },
   ];
 }

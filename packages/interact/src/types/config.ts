@@ -3,7 +3,7 @@ import type { Effect, EffectRef, EffectProperty, TimeAnimationTriggerType } from
 import type { PluginFields } from './plugins';
 
 export type Condition = {
-  type: 'media' | 'container' | 'selector';
+  type: 'media' | 'selector';
   predicate: string;
 };
 
