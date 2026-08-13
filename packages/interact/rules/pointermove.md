@@ -39,7 +39,6 @@ type PointerMoveParams = {
 - `hitArea` — determines where mouse movement is tracked. **Omitting it behaves as `'root'`**: only an explicit `'self'` scopes tracking to the source element.
   - `'self'` — tracks pointer within the source element's bounds only. Use for local pointer-tracking effects on a specific element.
   - `'root'` (default) — tracks pointer anywhere in the viewport. Use for global cursor followers, ambient effects.
-  - Note: `@wix/interact-validate` still treats an **omitted** `hitArea` as at risk of hit-area shift and will raise `HIT_AREA_SHIFT` for a geometry-changing effect on the source. Set `hitArea: 'root'` explicitly to silence it, which also states the intent.
 - `axis` — restricts pointer tracking to a single axis. Used with `keyframeEffect` to map one axis to 0–1 progress; ignored by `namedEffect` and `customEffect` which receive the full 2D progress:
   - `'x'` — maps horizontal pointer position to 0–1 progress for keyframe interpolation.
   - `'y'` — maps vertical pointer position to 0–1 progress for keyframe interpolation. **Default** when `keyframeEffect` is used.
