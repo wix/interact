@@ -586,6 +586,11 @@ Avoid animating:
 
 ### Accessibility
 
+Interact collapses time effects to 1ms under `prefers-reduced-motion: reduce` on its own, so the
+primary effect below needs no condition. Add a gated alternative only when you want a specific
+calmer look — the condition is what exempts that effect from the collapse, and it exempts only
+that effect. See [Reduced Motion](conditions-and-media-queries.md#reduced-motion).
+
 ```typescript
 // Respect user preferences
 {
@@ -594,7 +599,8 @@ Avoid animating:
             namedEffect: {
                 type: 'FadeIn'
             },
-            duration: 600
+            duration: 400,
+            fill: 'backwards'
         }
     },
     interactions: [
@@ -603,14 +609,17 @@ Avoid animating:
             trigger: 'viewEnter',
             effects: [
                 {
+                    // No condition — collapsed automatically under `reduce`
                     namedEffect: {
                         type: 'SlideIn'
                     },
-                    duration: 600
+                    duration: 600,
+                    fill: 'backwards'
                 },
                 {
+                    // The calmer alternative — its condition keeps it at its authored duration
                     effectId: 'reduced-motion-entry',
-                    conditions: ['reduced-motion']   // Only animate if user allows motion
+                    conditions: ['reduced-motion']
                 }
             ]
         }

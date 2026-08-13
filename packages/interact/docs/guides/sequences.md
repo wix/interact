@@ -373,6 +373,10 @@ const config: InteractConfig = {
 
 ### Sequence with Media-Query Conditions
 
+> The `no-reduced-motion` gate below shows how conditions compose across levels; it is **not**
+> required for accessibility. Interact collapses time effects under `reduce` on its own — see
+> [Reduced Motion](conditions-and-media-queries.md#reduced-motion).
+
 ```typescript
 const config: InteractConfig = {
   conditions: {

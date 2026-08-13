@@ -37,6 +37,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Added
 
+- `REDUCE_GATED_SCRUB` (new rule category `REDUCED_MOTION`, severity `warning`): a `viewProgress` / `pointerMove` interaction or effect gated on a `prefers-reduced-motion: reduce` condition can never run, since the runtime cancels scrubs under `reduce` regardless of conditions. A `no-preference` gate is not reported — it is redundant, not dead
 - Plugin fields: `$`-prefixed keys on interactions and effects are accepted; every other unknown key is still reported as `SCHEMA_UNRECOGNIZED_KEYS` (#275)
 
 #### Changed
@@ -85,11 +86,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Added
 
+- `Interact.reducedMotion` — a read-only static getter resolving to `Interact.forceReducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches`, and the single source of truth the handlers consult. Returns `false` where there is no `window`/`matchMedia` (SSR, JSDOM)
 - Generic plugin bridge: `Interact.use(name, plugin)` registers a plugin, and a `$<name>` field on an interaction or effect (#275)
 - `generate()` accepts a `plugins` option — a map of plugin name → build-time style generator (#275)
 
 #### Changed
 
+- **Reduced motion is now detected and enforced by default.** `prefers-reduced-motion: reduce` is respected with no setup, and enforcement moved into the CSS that `generate()` emits — so it also applies with JS disabled, under SSR, and when the visitor changes the OS setting mid-session. Previously the only reduced-motion signal was an explicit `Interact.forceReducedMotion = true`, and even that was bypassed for any effect whose CSS had been pre-generated. **Pages that animate today for visitors who prefer reduced motion will stop.** To restore the old behavior, set `Interact.forceReducedMotion = false` before `Interact.create()`. Per effect kind: time effects (including `iterations: Infinity`) collapse to a `1ms` single iteration with no delay; state effects keep the state and drop the tween; `viewProgress` and `pointerMove` effects are cancelled. Nothing is suppressed by name, so a collapsed entrance still completes and can never be stranded behind its own FOUC hiding rule
+- `Interact.forceReducedMotion` is now `boolean | undefined` and defaults to `undefined` (was `boolean`, default `false`). It is an **override**: `undefined` follows `prefers-reduced-motion`, `true` forces reduced motion on, `false` forces motion on. `undefined` is falsy, so `if (Interact.forceReducedMotion)` and `!Interact.forceReducedMotion` are unaffected; only an explicit `=== false` comparison changes meaning. Setting it suppresses the preference-change listener, so it must be assigned before `Interact.create()`
+- An effect (or interaction) whose `conditions` include a `prefers-reduced-motion` media condition is exempt from the automatic collapse and runs exactly as authored — this is how a gentler alternative is expressed, and it exempts only that effect. A `viewProgress` / `pointerMove` interaction gated on `reduce` never runs in either path, so a scrub's alternative must use a time-based trigger
+- A `viewEnter` entrance's FOUC hiding rule is now gated on the union of its interaction's and its effect's conditions. Previously an interaction-level condition left the rule unconditional, so a gated entrance (e.g. `conditions: ['desktop']`) could leave its element permanently hidden wherever the condition did not match
 - `generate(config, options?)`: the second argument now accepts an options bag — `{ useFirstChild?, plugins? }` — exported as the `GenerateOptions` (#275)
 - CSS property names may be authored in either camelCase or kebab-case in `transition.styleProperties`, `transitionProperties` and `keyframeEffect.keyframes`; state-effect properties are normalized to kebab-case for the generated CSS (state rules and the `transition:` shorthand) and keyframes to camelCase for WAAPI
 

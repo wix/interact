@@ -338,6 +338,21 @@ describe('motion.ts', () => {
         });
       });
 
+      test('should collapse the reduced motion shorthand to a single 1ms iteration', () => {
+        const animationOptions: AnimationOptions = {
+          namedEffect: { type: 'FadeIn', id: 'fade' },
+          duration: 1000,
+          delay: 200,
+          fill: 'forwards',
+          iterations: 2,
+        };
+
+        const result = getCSSAnimation('test-target', animationOptions);
+
+        expect(result[0].animation).toBe('fade-in 1000ms 200ms ease-in forwards 2 paused');
+        expect(result[0].reducedAnimation).toBe('fade-in 1ms 0ms ease-in forwards 1 paused');
+      });
+
       test('should preserve explicit zero delay in generated CSS animation shorthand', () => {
         const animationOptions: AnimationOptions = {
           namedEffect: { type: 'FadeIn', id: 'fade' },

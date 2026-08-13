@@ -55,6 +55,77 @@ Use container queries to respond to element size:
 }
 ```
 
+## Reduced Motion
+
+Reduced motion is the one preference Interact acts on **by itself**. It is worth reading before you write a `prefers-reduced-motion` condition, because most of the time you don't need one.
+
+### What happens without any config
+
+`Interact.reducedMotion` resolves to `Interact.forceReducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches`, and `generate()` emits `@media (prefers-reduced-motion: reduce)` rules next to the base ones. Because the decision lives in CSS, it also holds with JS disabled, under SSR, and when the user flips the OS setting mid-session.
+
+| Effect kind                                                                         | Under `reduce`                                                                                       | What the user sees                    |
+| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| Time effect (`viewEnter`, `hover`, `click`, `interest`, `activate`, `animationEnd`) | **Collapsed** — `1ms` duration, `0ms` delay, one iteration                                           | The end state, applied instantly      |
+| Ongoing time effect (`iterations: Infinity`)                                        | **Collapsed too** — iterations capped at 1                                                           | The end state; no perpetual motion    |
+| State effect (`transition` / `transitionProperties`)                                | **Tween dropped, state kept** — the `transition` is declared only under `no-preference`              | The state toggles instantly           |
+| `viewProgress`                                                                      | **Cancelled** — `view-timeline` is declared only under `no-preference` and the handler early-returns | The element's authored **base style** |
+| `pointerMove`                                                                       | **Cancelled** — the handler early-returns, so the paused CSS animation is never driven               | The effect's **first keyframe**       |
+| `customEffect`                                                                      | JS only — collapsed to `1ms` with the default `iterations: 1`, dropped when `iterations > 1`         | Its end state, or nothing             |
+
+Nothing is ever suppressed by name, so a collapsed entrance still completes its FOUC handshake and can never leave an element permanently hidden.
+
+### When you still need a condition
+
+Two cases:
+
+1. **You want a specific calmer look** rather than the instant end state.
+2. **A cancelled scrub leaves the element unusable** — e.g. an `in`-range scroll reveal whose base style is `opacity: 0`. Interact cannot see your stylesheet, so it cannot warn you about this one.
+
+Gate **only** the alternative. A `prefers-reduced-motion` condition on an effect (or on its interaction) exempts that effect from the automatic collapse — and only that effect, so neighbours on the same target need no changes:
+
+```typescript
+{
+  conditions: {
+    'motion-reduced': { type: 'media', predicate: '(prefers-reduced-motion: reduce)' },
+  },
+  interactions: [
+    {
+      key: 'hero-title',
+      trigger: 'viewEnter',
+      effects: [
+        // No condition — collapsed automatically under `reduce`.
+        {
+          keyframeEffect: {
+            name: 'fade-move',
+            keyframes: [
+              { opacity: '0', transform: 'translateY(50px) rotate(-2deg)' },
+              { opacity: '1', transform: 'translateY(0) rotate(0deg)' },
+            ],
+          },
+          duration: 800,
+          fill: 'backwards',
+        },
+        // The calmer alternative, exempt from the collapse because it names the preference.
+        {
+          keyframeEffect: { name: 'fade', keyframes: [{ opacity: '0' }, { opacity: '1' }] },
+          duration: 300,
+          fill: 'backwards',
+          conditions: ['motion-reduced'],
+        },
+      ],
+    },
+  ],
+}
+```
+
+**A scrub's alternative must use a time-based trigger.** A `viewProgress` or `pointerMove` interaction gated on `(prefers-reduced-motion: reduce)` never runs — the runtime cancels scrubs under `reduce` regardless of conditions, and the generated CSS encodes the same decision. Substitute a `viewEnter` effect, or a plain CSS rule in your own stylesheet. [`@wix/interact-validate`](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md) reports the mistake as `REDUCE_GATED_SCRUB`.
+
+### The override
+
+`Interact.forceReducedMotion` overrides detection: `true` forces reduced motion on, `false` forces motion on, `undefined` (the default) follows the OS. Setting it explicitly suppresses the preference-change listener, so assign it **before `Interact.create()`**. See [`Interact.forceReducedMotion`](../api/interact-class.md#interactforcereducedmotion).
+
+With detection left in place, a mid-session change is picked up as follows: CSS-backed time and state effects follow it immediately (no JS involved), `viewProgress` / `pointerMove` interactions rebind and pick it up, and `customEffect` and other WAAPI-only effects pick it up on their next bind.
+
 ## Cascading of effects
 
 Interact allows you to apply multiple effects on the same target and have them cascade, just like they do in CSS.
@@ -205,63 +276,48 @@ const responsiveConfig: InteractConfig = {
 };
 ```
 
-### Accessibility-Aware Animations
+### Preference-Aware Animations
+
+Reduced motion has its own section — see [Reduced Motion](#reduced-motion) — because Interact acts on it automatically. Other user preferences do not, so both sides need gating:
 
 ```typescript
 const accessibleConfig: InteractConfig = {
   conditions: {
-    'motion-ok': {
-      type: 'media',
-      predicate: '(prefers-reduced-motion: no-preference)',
-    },
-    'motion-reduced': {
-      type: 'media',
-      predicate: '(prefers-reduced-motion: reduce)',
-    },
     'high-contrast': {
       type: 'media',
       predicate: '(prefers-contrast: high)',
     },
+    'standard-contrast': {
+      type: 'media',
+      predicate: '(prefers-contrast: no-preference)',
+    },
   },
 
   interactions: [
-    // Full animation for users who prefer motion
     {
-      key: 'hero-title',
-      trigger: 'viewEnter',
-      conditions: ['motion-ok'],
-      params: { threshold: 0.3 },
+      key: 'cta',
+      trigger: 'hover',
       effects: [
+        // Subtle tint at standard contrast.
         {
-          key: 'hero-title',
-          keyframeEffect: {
-            name: 'fade-move',
-            keyframes: [
-              { opacity: '0', transform: 'translateY(50px) rotate(-2deg)' },
-              { opacity: '1', transform: 'translateY(0) rotate(0deg)' },
+          key: 'cta',
+          conditions: ['standard-contrast'],
+          transition: {
+            duration: 200,
+            styleProperties: [{ name: 'background-color', value: 'rgba(0, 90, 200, 0.12)' }],
+          },
+        },
+        // Solid, unambiguous fill when the user asks for high contrast.
+        {
+          key: 'cta',
+          conditions: ['high-contrast'],
+          transition: {
+            duration: 200,
+            styleProperties: [
+              { name: 'background-color', value: '#0033aa' },
+              { name: 'color', value: '#ffffff' },
             ],
           },
-          duration: 800,
-          easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-        },
-      ],
-    },
-
-    // Subtle animation for reduced motion users
-    {
-      key: 'hero-title',
-      trigger: 'viewEnter',
-      conditions: ['motion-reduced'],
-      params: { threshold: 0.3 },
-      effects: [
-        {
-          key: 'hero-title',
-          keyframeEffect: {
-            name: 'fade',
-            keyframes: [{ opacity: '0' }, { opacity: '1' }],
-          },
-          duration: 300,
-          easing: 'ease-out',
         },
       ],
     },
@@ -1011,23 +1067,20 @@ const progressiveConfig: InteractConfig = {
 
 ### Accessibility First
 
-Always provide accessible alternatives:
+Reduced motion is already handled — see [Reduced Motion](#reduced-motion). Add a condition only for a specific calmer look, or when a cancelled scroll/pointer effect would leave the element hidden. Gate the alternative alone, not the primary effect:
 
 ```typescript
-// Always provide a motion-safe version
 {
     key: 'animated-element',
     trigger: 'viewEnter',
-    conditions: ['motion-ok'],
-    effects: [/* complex animation */]
-},
-{
-    key: 'animated-element',
-    trigger: 'viewEnter',
-    conditions: ['motion-reduced'],
-    effects: [/* simple fade or no animation */]
+    effects: [
+        /* complex animation — collapsed automatically under `reduce` */,
+        { conditions: ['motion-reduced'], /* simple fade */ }
+    ]
 }
 ```
+
+For other preferences — `prefers-contrast`, `prefers-color-scheme` — Interact does nothing on its own, so those genuinely need both sides gated.
 
 ## Debugging Conditions
 

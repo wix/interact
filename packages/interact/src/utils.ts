@@ -1,6 +1,51 @@
 import { getEasing, toCSSPropertyName } from '@wix/motion';
 import type { Condition, CreateTransitionCSSParams, StateEffect, StyleProperty } from './types';
 
+const MOTION_PREFERENCE_FEATURE = 'prefers-reduced-motion';
+const MOTION_PREFERENCE_CONDITION = `$${MOTION_PREFERENCE_FEATURE}`;
+export const REDUCED_MOTION_QUERY = `(${MOTION_PREFERENCE_FEATURE}: reduce)`;
+
+export function hasMotionPreferenceCondition(
+  conditions?: string[],
+  configConditions?: Record<string, Condition>,
+): boolean {
+  return !!conditions?.some((conditionName) => {
+    const condition = configConditions?.[conditionName];
+    return condition?.type === 'media' && condition.predicate.includes(MOTION_PREFERENCE_FEATURE);
+  });
+}
+
+/**
+ * Composes a motion preference into the media predicate of the given conditions, so a gated
+ * interaction ends up with `(min-width: 900px) and (prefers-reduced-motion: reduce)`.
+ *
+ * An author-declared motion-preference condition wins outright, since composing on top of it would
+ * yield a query that can never match. Pass `force` for a gate the runtime applies regardless
+ * of what the author asked for, where that unmatchable query is the correct encoding.
+ */
+export function getMotionPreferenceMedia(
+  preference: 'reduce' | 'no-preference',
+  conditions?: string[],
+  configConditions?: Record<string, Condition>,
+  force = false,
+): string {
+  if (!force && hasMotionPreferenceCondition(conditions, configConditions)) {
+    return getFullPredicateByType(conditions, configConditions || {}, 'media');
+  }
+
+  return getFullPredicateByType(
+    [...(conditions || []), MOTION_PREFERENCE_CONDITION],
+    {
+      ...configConditions,
+      [MOTION_PREFERENCE_CONDITION]: {
+        type: 'media',
+        predicate: `${MOTION_PREFERENCE_FEATURE}: ${preference}`,
+      },
+    },
+    'media',
+  );
+}
+
 export function roundNumber(num: number, precision = 2): number {
   return parseFloat(num.toFixed(precision));
 }
@@ -159,7 +204,7 @@ export function createTransitionCSS({
       ? applySelectorCondition(transitionSelector, selectorCondition)
       : transitionSelector;
 
-    result.push(`@media (prefers-reduced-motion: no-preference) { ${finalTransitionSelector} {
+    result.push(`@media ${getMotionPreferenceMedia('no-preference')} { ${finalTransitionSelector} {
       transition: ${transitions.join(', ')};
     } }`);
   }

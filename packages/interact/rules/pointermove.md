@@ -9,6 +9,7 @@ These rules help generate pointer-driven interactions using `@wix/interact`. Poi
 - [Progress Object Structure](#progress-object-structure)
 - [Centering with `centeredToTarget`](#centering-with-centeredtotarget)
 - [Device Conditions](#device-conditions)
+- [Reduced Motion](#reduced-motion)
 - [Rule 1: namedEffect](#rule-1-namedeffect)
 - [Rule 2: keyframeEffect with Single Axis](#rule-2-keyframeeffect-with-single-axis)
 - [Rule 3: Two keyframeEffects with Two Axes and `composite`](#rule-3-two-keyframeeffects-with-two-axes-and-composite)
@@ -95,6 +96,19 @@ Controls which element's bounds define the 0–1 progress range.
 ```
 
 For devices with dynamic viewport sizes (e.g. mobile browsers where the address bar collapses), consider using viewport-relative units carefully and prefer `lvh`/`svh` over `dvh` unless dynamic viewport behavior is specifically desired.
+
+---
+
+## Reduced Motion
+
+`pointerMove` effects are **cancelled**, not collapsed, under `prefers-reduced-motion: reduce` — there is no meaningful slow-down of a pointer-tracked timeline. `addPointerMoveHandler` early-returns on `Interact.reducedMotion`, so no `Pointer` instance and no scene are created and nothing is ever driven. This is automatic; do not add a condition to achieve it.
+
+**The authoring consequence:** a `keyframeEffect` is pre-generated as a paused CSS animation, so with nothing driving it the element holds the effect's **first keyframe**. `namedEffect` and `customEffect` on `pointerMove` produce no CSS at all (their 2D progress cannot be expressed as a CSS animation), so those elements render at their authored base style. Either way, if that resting state hides or displaces the element, supply an alternative:
+
+- The alternative MUST use a **time-based trigger** such as `viewEnter`, or be a plain CSS rule in your own stylesheet. A `pointerMove` interaction gated on `(prefers-reduced-motion: reduce)` never runs — `@wix/interact-validate` reports that mistake as `REDUCE_GATED_SCRUB`.
+- The `(hover: hover)` condition above is a separate concern and still worth having: it covers touch-only devices, which is a different exclusion from the motion preference.
+
+See [full-lean.md § Reduced motion](https://wix.github.io/interact/rules/full-lean.md#reduced-motion) for the per-effect-kind table and the general alternative pattern.
 
 ---
 

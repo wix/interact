@@ -17,6 +17,7 @@ import {
   checkStateRemoveWithoutEffectId,
 } from './partialData';
 import { checkRecommendedFill } from './recommendedPatterns';
+import { checkReduceGatedScrub } from './reducedMotion';
 import { findAnimationEndWarnings } from './animationEndGraph';
 
 // Single traversal of top-level registry effects/sequences and per-interaction
@@ -54,12 +55,21 @@ export function walkConfig(config: AnyConfig, visitors: Visitors): void {
 // Collect every warning/info-level semantic issue (consumed by `transform`).
 export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
   const warnings: SemanticIssue[] = [];
+  const configConditions = config.conditions ?? {};
 
   walkConfig(config, {
     onInteraction: (path, interaction) => {
       warnings.push(...checkListItemSelectorWithoutContainer(path, interaction));
       warnings.push(...checkRedundantSelector(path, interaction));
       warnings.push(...checkInvalidInset(path, interaction));
+      warnings.push(
+        ...checkReduceGatedScrub(
+          path,
+          interaction.conditions,
+          configConditions,
+          interaction.trigger,
+        ),
+      );
     },
     // checks that only look at depth>1 properties in effects/sequences do not need resolving
     onEffect: (path, effect, isTopLevel, owner) => {
@@ -78,6 +88,9 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
       warnings.push(...checkRecommendedFill(path, resolvedEffect, owner));
       warnings.push(...checkPointerAxisIgnored(path, resolvedEffect, owner));
       warnings.push(...checkCSSPropertyNames(path, effect));
+      warnings.push(
+        ...checkReduceGatedScrub(path, resolvedEffect.conditions, configConditions, owner?.trigger),
+      );
     },
     onSequence: (path, sequence, isTopLevel, owner) => {
       const { sequenceId } = sequence;

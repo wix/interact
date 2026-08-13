@@ -15,7 +15,13 @@ import type {
   AnimationOptions,
 } from '../types';
 import { PLUGIN_FIELD_PREFIX } from '../types';
-import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
+import {
+  createTransitionCSS,
+  getMediaQuery,
+  getSelectorCondition,
+  generateId,
+  REDUCED_MOTION_QUERY,
+} from '../utils';
 import { getInterpolatedKey } from './utilities';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { Interact, getSelector } from './Interact';
@@ -454,7 +460,7 @@ function _attachSequenceTriggers(
       { triggerType: sequenceConfig.triggerType } as Effect,
       interaction.params || {},
       {
-        reducedMotion: Interact.forceReducedMotion,
+        reducedMotion: Interact.reducedMotion,
         selectorCondition,
         animation: sequence,
         allowA11yTriggers: Interact.allowA11yTriggers,
@@ -537,11 +543,11 @@ function _processSequences(
       );
 
       Interact.addToSequence(cacheKey, animationGroupArgs, indices, {
-        reducedMotion: Interact.forceReducedMotion,
+        reducedMotion: Interact.reducedMotion,
       });
 
       const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
-        reducedMotion: Interact.forceReducedMotion,
+        reducedMotion: Interact.reducedMotion,
       });
 
       const selectorCondition = getSelectorCondition(
@@ -565,7 +571,7 @@ function _processSequences(
     }
 
     const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
-      reducedMotion: Interact.forceReducedMotion,
+      reducedMotion: Interact.reducedMotion,
     });
 
     const selectorCondition = getSelectorCondition(
@@ -649,14 +655,14 @@ function _processSequencesForTarget(
         const indices = _resolveListItemIndices(targetController, listContainer!, elements);
 
         Interact.addToSequence(cacheKey, animationGroupArgs, indices, {
-          reducedMotion: Interact.forceReducedMotion,
+          reducedMotion: Interact.reducedMotion,
         });
 
         return true;
       }
 
       const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
-        reducedMotion: Interact.forceReducedMotion,
+        reducedMotion: Interact.reducedMotion,
       });
 
       const selectorCondition = getSelectorCondition(
@@ -867,7 +873,7 @@ function addInteraction<T extends TriggerType>(
   }
 
   TRIGGER_TO_HANDLER_MODULE_MAP[trigger]?.add(source, target, effect, options, {
-    reducedMotion: Interact.forceReducedMotion,
+    reducedMotion: Interact.reducedMotion,
     targetController,
     selectorCondition,
     allowA11yTriggers: Interact.allowA11yTriggers,
@@ -894,6 +900,20 @@ export function add(controller: IInteractionController): boolean {
   const hasTriggers = triggers.length > 0;
 
   instance.setController(key, controller);
+
+  if (
+    Interact.forceReducedMotion === undefined &&
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    triggers.some((t) => t.trigger === 'viewProgress' || t.trigger === 'pointerMove')
+  ) {
+    instance.setupMediaQueryListener(
+      `${key}::reducedMotion`,
+      window.matchMedia(REDUCED_MOTION_QUERY),
+      key,
+      () => controller.update(),
+    );
+  }
 
   triggers.forEach((interaction, index) => {
     const mql = getMediaQuery(interaction.conditions, instance!.dataCache.conditions);

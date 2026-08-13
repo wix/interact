@@ -892,32 +892,37 @@ const config = {
 
 ### Accessibility
 
-```css
-/* Respect reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
+Interact already collapses hover animations and drops state-transition tweens under
+`prefers-reduced-motion: reduce`, so a hover interaction needs **no condition** for the baseline —
+and a global CSS reset like `* { animation-duration: 0.01ms !important }` is not needed for
+Interact's own effects. See [Reduced Motion](../guides/conditions-and-media-queries.md#reduced-motion).
+
+Add a gated alternative only when you want a specific calmer look instead of the instant end
+state. Gate the alternative alone — the condition exempts that effect from the collapse, and its
+un-gated neighbours keep working:
 
 ```typescript
-// Configuration with reduced motion support
 const config = {
   conditions: {
-    'motion-ok': {
+    'motion-reduced': {
       type: 'media',
-      predicate: '(prefers-reduced-motion: no-preference)',
+      predicate: '(prefers-reduced-motion: reduce)',
     },
   },
   interactions: [
     {
       key: 'animated-hover',
       trigger: 'hover',
-      conditions: ['motion-ok'],
       effects: [
-        /* complex animations */
+        /* complex animation — collapsed automatically under `reduce` */
+        {
+          key: 'animated-hover',
+          conditions: ['motion-reduced'],
+          transition: {
+            duration: 150,
+            styleProperties: [{ name: 'opacity', value: '0.85' }],
+          },
+        },
       ],
     },
   ],

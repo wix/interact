@@ -35,6 +35,11 @@ class Interact {
   static getPlugin(name: string): InteractPlugin | undefined;
   static getPluginNames(): Set<string>;
 
+  // Static properties
+  static forceReducedMotion?: boolean; // override — default `undefined`
+  static get reducedMotion(): boolean; // resolved decision — read-only
+  static allowA11yTriggers: boolean;
+
   // Instance methods
   init(config: InteractConfig, options?: { useCustomElement?: boolean }): void;
   destroy(): void;
@@ -136,7 +141,7 @@ Configures global settings for the Interact system.
 - `options.viewEnter` - Optional default partial `ViewEnterParams` (e.g. `threshold`, `inset`, `useSafeViewEnter`)
 - `options.allowA11yTriggers` - When `true`, `click` and `hover` triggers also respond to keyboard (Enter/Space) and focus
 
-To force reduced motion globally, set `Interact.forceReducedMotion = true` (static property, not via `setup`).
+Reduced motion is **not** configured through `setup()` — see [`Interact.forceReducedMotion`](#interactforcereducedmotion) below.
 
 **Example:**
 
@@ -300,6 +305,47 @@ if (controller) {
 - Cache is cleared when `remove()` is called or when elements disconnect
 - Useful for programmatic element manipulation
 - Returns the controller that manages the element's interactions
+
+## Static Properties
+
+### `Interact.forceReducedMotion`
+
+`boolean | undefined` — an **override** for the detected motion preference. Default `undefined`.
+
+| Value                 | Meaning                                                     |
+| --------------------- | ----------------------------------------------------------- |
+| `undefined` (default) | Follow `prefers-reduced-motion`.                            |
+| `true`                | Force reduced-motion behavior regardless of the OS setting. |
+| `false`               | Force motion **on** regardless of the OS setting.           |
+
+```typescript
+// Restore pre-2.6.0 behavior — animate for everyone
+Interact.forceReducedMotion = false;
+```
+
+**Details:**
+
+- Detection needs no setup. Leave this `undefined` unless you are deliberately overriding the user.
+- Setting it explicitly **suppresses the preference-change listener**, so the value is read once — assign it before `Interact.create()`.
+- Reading it returns the raw override, not the resolved decision. Read `Interact.reducedMotion` for that.
+
+### `Interact.reducedMotion`
+
+`boolean`, **read-only** — the resolved decision, and the single source of truth the handlers consult:
+
+```typescript
+Interact.forceReducedMotion ?? matchMedia('(prefers-reduced-motion: reduce)').matches;
+```
+
+**Details:**
+
+- Returns `false` when there is no `window` or no `matchMedia` (SSR, JSDOM) — safe by construction, because the reduced-motion rules that `generate()` emits carry the preference themselves, so a server render does not need to know it.
+- The `MediaQueryList` is created lazily and cached; `Interact.destroy()` drops the cache.
+- This is the JS half only. Reduced motion for CSS-backed effects is enforced by `@media (prefers-reduced-motion: reduce)` rules in the output of [`generate()`](functions.md#generateconfig-options), which is why it also works with JS disabled and reacts to a mid-session change immediately. See the [reduced-motion guide](../guides/conditions-and-media-queries.md#reduced-motion) for the per-effect-kind behavior.
+
+### `Interact.allowA11yTriggers`
+
+`boolean`, default `true` — enables the accessibility trigger variants (`interest`, `activate`) and layers keyboard/focus behavior onto `hover` and `click`. Also settable via `Interact.setup({ allowA11yTriggers })`.
 
 ## Instance Methods
 

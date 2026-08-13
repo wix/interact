@@ -68,6 +68,11 @@ function getCSSAnimation(
     return {
       target: getAnimationTarget(target, item.part),
       animation: getAnimationAsCSS(item, isViewProgress),
+      // same shorthand collapsed to a single 1ms iteration with no delay, for reduced motion.
+      reducedAnimation: getAnimationAsCSS(
+        { ...item, options: { ...item.options, duration: 1, delay: 0, iterations: 1 } },
+        isViewProgress,
+      ),
       composition: item.options.composite,
       custom: item.effect.custom,
       name: item.effect.name,

@@ -122,7 +122,7 @@ group's delay so all end together.
 ## Engine gotchas
 
 - **fastdom batching** makes setup async: `play()`/`reverse()` await `ready`; await `scene.ready` before reading `currentTime`/`progress`. Use `prepareAnimation()` to pre-measure layout values CSS can't compute.
-- **Reduced motion** (`options.reducedMotion` / `context.reducedMotion`): time-based collapses `duration` to 1ms (single iteration); multi-iteration animations are dropped entirely (returns `[]`).
+- **Reduced motion** (`options.reducedMotion` / `context.reducedMotion`): time-based collapses `duration` to 1ms (single iteration); multi-iteration animations are dropped entirely (returns `[]`). This is the **WAAPI** path only — `getAnimation()` returns a matching CSS animation before the flag is consulted, and deliberately so: `@wix/interact` enforces reduced motion for CSS-backed effects in the CSS that `generate()` emits, not here. `@wix/motion` does no detection of its own; the caller passes the flag.
 - **`customEffect`** is the only path with a rAF loop; it forces `composite: 'add'` and calls `customEffect(target, null)` on cancel (teardown signal).
 - **Effect modules** (`AnimationEffectAPI`): `{ web(options, dom?) => AnimationData[], getNames(options) => string[], style?(options) => AnimationData[], prepare?(options, dom?) }`. Mouse presets instead export a factory `(options) => (target) => instance`.
 - `iterations: 0` or `Infinity` → infinite. Generated animation ids: `${effectId}-${index+1}`.

@@ -222,7 +222,7 @@ describe('interact (react)', () => {
     // Clear Interact instances to ensure test isolation
     Interact.destroy();
     // Reset forceReducedMotion to default
-    Interact.forceReducedMotion = false;
+    Interact.forceReducedMotion = undefined;
   });
 
   describe('createInteractRef', () => {

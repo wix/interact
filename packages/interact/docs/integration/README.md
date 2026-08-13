@@ -127,7 +127,7 @@ Framework-specific integration guides and migration documentation for `@wix/inte
 ### Implementation
 
 - [**CSS Fallbacks**](progressive-enhancement.md#css) - CSS-only alternatives
-- [**Reduced Motion**](progressive-enhancement.md#reduced-motion) - Accessibility preferences
+- [**Reduced Motion**](../guides/conditions-and-media-queries.md#reduced-motion) - Detected and enforced automatically, in JS and in generated CSS
 - [**Network Awareness**](progressive-enhancement.md#network) - Adaptive loading
 
 ## Browser Support

@@ -19,6 +19,8 @@ import {
   transitionEffectToTransitionsList,
   getFullPredicateByType,
   getSelectorCondition,
+  getMotionPreferenceMedia,
+  hasMotionPreferenceCondition,
 } from '../utils';
 import { getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
@@ -148,7 +150,9 @@ function triggerToCSS(
 ): CSSRuleData {
   const { key, conditions } = interaction;
 
-  const media = getFullPredicateByType(conditions, configConditions, 'media');
+  // Forced: the runtime cancels a scrub under `reduce` whatever the author's conditions say, so an
+  // interaction gated on `reduce` correctly yields a timeline declaration that never applies.
+  const media = getMotionPreferenceMedia('no-preference', conditions, configConditions, true);
   const selectorCondition = getSelectorCondition(conditions, configConditions);
 
   const childSelector = getSelector(interaction, {
@@ -162,8 +166,6 @@ function triggerToCSS(
     media,
     selectorCondition,
     childSelector,
-    // invalidating earlier cascaded custom properties affected from earlier transitionEffects
-    // to implement same-interaction-cascade
     declarations: [
       {
         name: 'view-timeline',
@@ -210,6 +212,7 @@ function effectToCSS(
   customProps: ListCustomProps,
   trigger: TriggerVariant,
   childSelector?: string,
+  interactionConditions?: string[],
   plugins?: InteractPluginStyles,
 ): {
   rules: CSSRuleData[];
@@ -283,12 +286,17 @@ function effectToCSS(
           .join(', ') || LIST_PROPERTY_FALLBACKS[propertyName],
     }));
 
+    // initial rule requires the interaction's conditions as well
+    const effectiveConditions = [
+      ...new Set([...(interactionConditions || []), ...(conditions || [])]),
+    ];
+
     if (initial) {
       // declare animation custom properties with initial dependent on data-motion-enter
       rules.push({
         key,
-        media,
-        selectorCondition,
+        media: getFullPredicateByType(effectiveConditions, configConditions, 'media'),
+        selectorCondition: getSelectorCondition(effectiveConditions, configConditions),
         childSelector,
         declarations: DEFAULT_INITIAL,
         selectorSuffix: ':not([data-interact-enter])',
@@ -305,12 +313,38 @@ function effectToCSS(
       // declare animation custom properties
       declarations.push(...animationDeclarations);
     }
+
+    // Reduced motion, per time effect: re-declare only this effect's own `animation` custom property
+    // with the collapsed shorthand, so an effect the author gated on a motion preference — or any
+    // effect on a neighbouring target — is left exactly as authored.
+    if (
+      trigger.trigger !== 'view-progress' &&
+      !hasMotionPreferenceCondition(effectiveConditions, configConditions)
+    ) {
+      rules.push({
+        key,
+        media: getMotionPreferenceMedia('reduce', conditions, configConditions),
+        selectorCondition,
+        childSelector,
+        selectorSuffix: initial ? ':not([data-interact-enter="done"])' : undefined,
+        declarations: [
+          {
+            name: customProps.animation,
+            value:
+              cssAnimations.map(({ reducedAnimation }) => reducedAnimation).join(', ') ||
+              LIST_PROPERTY_FALLBACKS.animation,
+          },
+        ],
+      });
+    }
   } else if (transition || transitionProperties) {
     usedProperties = ['transition'];
 
     const properties = getStateStyleProperties(effect);
     const transitions = transitionEffectToTransitionsList(effect);
 
+    // adding 'no-preference' media query to transition rule
+    rules[0].media = getMotionPreferenceMedia('no-preference', conditions, configConditions);
     // declaring transition custom property
     declarations.push({
       name: customProps.transition,
@@ -347,6 +381,7 @@ function parseEffect(
   keyframesMap: Map<string, Keyframe[]>,
   trigger: TriggerVariant,
   useFirstChild: boolean = true,
+  interactionConditions?: string[],
   plugins?: InteractPluginStyles,
   sequenceCustomProps?: Record<ListPropertyName, string>,
   precomputedTargetHash?: string,
@@ -383,6 +418,7 @@ function parseEffect(
     localCustomProps,
     trigger,
     childSelector,
+    interactionConditions,
     plugins,
   );
 
@@ -400,6 +436,7 @@ function parseSequence(
   keyframesMap: Map<string, Keyframe[]>,
   trigger: TriggerVariant,
   useFirstChild: boolean = true,
+  interactionConditions?: string[],
   targetUsedProperties?: Map<string, Set<ListPropertyName>>,
   plugins?: InteractPluginStyles,
 ): CSSRuleData[] {
@@ -435,6 +472,7 @@ function parseSequence(
       keyframesMap,
       trigger,
       useFirstChild,
+      interactionConditions,
       plugins,
       seqCustomProps,
       targetHash,
@@ -525,6 +563,7 @@ function parseInteraction(
       keyframesMap,
       motionTrigger,
       useFirstChild,
+      conditions,
       plugins,
     );
     cssRules.push(...rules);
@@ -546,6 +585,7 @@ function parseInteraction(
         keyframesMap,
         motionTrigger,
         useFirstChild,
+        conditions,
         targetUsedProperties,
         plugins,
       ),

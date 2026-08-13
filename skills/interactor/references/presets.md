@@ -180,30 +180,41 @@ one exists (`FadeIn`↔`FadeScroll`, `SlideIn`↔`SlideScroll`, `RevealIn`↔`Re
 
 ## Accessibility & reduced motion
 
-Motion is a host responsibility: gate risky effects with a
-`(prefers-reduced-motion: reduce)` condition and swap to a calmer effect (conditions
-re-evaluate when the preference changes). Apply constraints **only when the user
-asks** for "accessible" / "reduced-motion safe" / "subtle" / "tone it down" — don't
-limit creativity by default.
+**Interact already handles the baseline.** Under `prefers-reduced-motion: reduce` it
+collapses time effects to 1ms, drops state-transition tweens, and cancels `*Scroll`
+and mouse presets outright — detected automatically, enforced in the generated CSS.
+So do **not** gate every preset behind `(prefers-reduced-motion: no-preference)`, and
+apply extra constraints **only when the user asks** for "accessible" /
+"reduced-motion safe" / "subtle" / "tone it down" — don't limit creativity by default.
 
 - **High-risk** (spin/bounce/flash/3D/large parallax): `SpinIn`, `Spin`, `SpinScroll`, `Spin3dScroll`, `BounceIn`, `Bounce`, `ArcIn`, `ArcScroll`, `FlipIn`, `FlipScroll`, `Tilt3DMouse`, `Flash`, `Jello`, `Wiggle`.
 - **Safe**: `FadeIn`, `FadeScroll`, `BlurIn`, `BlurScroll`, `Pulse` (subtle), `Breathe`, `SlideIn`/`GlideIn` (subtle).
 - **Reduced-motion fallbacks:** `BounceIn`/`SpinIn`/`ArcIn`/`FlipIn`/`TurnIn` → `FadeIn`; `Spin`/`Bounce`/`Wiggle` → stop or subtle `Pulse`; `Flash` → reduce to <3/sec; `ParallaxScroll` → static; `*Scroll` → `FadeScroll` or disable; mouse presets → static state.
 
-Reduced-motion pattern with conditions:
+A named alternative is worth adding when the automatic collapse is too abrupt, or —
+**required** — when a cancelled `*Scroll` preset would leave the element hidden at its
+base style. Gate only the alternative; a `prefers-reduced-motion` condition exempts
+that effect from the collapse and leaves its neighbours alone:
 
 ```ts
 { interactions: [
-    { key: 'hero', trigger: 'viewEnter', conditions: ['ok'],  effects: [{ effectId: 'spin-in' }] },
-    { key: 'hero', trigger: 'viewEnter', conditions: ['rm'],  effects: [{ effectId: 'fade-in' }] },
+    { key: 'hero', trigger: 'viewEnter', effects: [
+      { effectId: 'spin-in' },                          // collapsed automatically under reduce
+      { effectId: 'fade-in', conditions: ['rm'] },      // the calmer alternative
+    ] },
   ],
   effects: {
-    'spin-in': { duration: 800, namedEffect: { type: 'SpinIn' }, triggerType: 'once' },
-    'fade-in': { duration: 400, namedEffect: { type: 'FadeIn' }, triggerType: 'once' },
+    'spin-in': { duration: 800, namedEffect: { type: 'SpinIn' }, triggerType: 'once', fill: 'backwards' },
+    'fade-in': { duration: 400, namedEffect: { type: 'FadeIn' }, triggerType: 'once', fill: 'backwards' },
   },
-  conditions: { ok: { type: 'media', predicate: '(prefers-reduced-motion: no-preference)' },
-                rm: { type: 'media', predicate: '(prefers-reduced-motion: reduce)' } } }
+  conditions: { rm: { type: 'media', predicate: '(prefers-reduced-motion: reduce)' } } }
 ```
+
+**A scrub's alternative must use a time-based trigger.** A `viewProgress` or
+`pointerMove` interaction gated on `reduce` never runs — the runtime cancels scrubs
+under `reduce` whatever the conditions say, so substitute a `viewEnter` effect or a
+plain CSS rule instead. `@wix/interact-validate` reports the mistake as
+`REDUCE_GATED_SCRUB`.
 
 ## Duration guidance
 
