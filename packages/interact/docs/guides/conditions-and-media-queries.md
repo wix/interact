@@ -56,9 +56,6 @@ effect applies to; without it the predicate is appended to the element's own sel
 }
 ```
 
-> There is no container-query condition type. Scope by viewport with a `media` condition, or by
-> ancestor with a `selector` condition.
-
 ## Cascading of effects
 
 Interact allows you to apply multiple effects on the same target and have them cascade, just like they do in CSS.
