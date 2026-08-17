@@ -38,6 +38,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 #### Added
 
 - Plugin fields: `$`-prefixed keys on interactions and effects are accepted; every other unknown key is still reported as `SCHEMA_UNRECOGNIZED_KEYS` (#275)
+- `FUNCTION_OFFSET_EASING` semantic warning when a sequence's `offsetEasing` is a function — `generate()` cannot compile it to CSS (#289)
+
+#### Fixed
+
+- `HIT_AREA_SHIFT`: only warn for `pointerMove` with explicit `hitArea: 'self'`; omitted or `'root'` no longer triggers (default is `'root'`) (#293)
 
 #### Changed
 
@@ -80,6 +85,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact
+
+### [2.5.7] - 2026-08-16
+
+#### Added
+
+- `generate()` compiles sequence stagger delays into `calc()` over `--motion-<sequenceId>-index` and `--motion-<sequenceId>-last` custom properties, enabling FOUC-prevented list entrances at build time (#289)
+- Stable derived IDs when `effectId` or `sequenceId` is omitted: effects use `eff-<interactionIndex>-<effectIndex>` (or `eff-<sequenceId>-<effectIndex>` inside sequences), sequences use `seq-<interactionIndex>-<sequenceIndex>` — CSS generation and runtime now agree (#289)
+
+#### Changed
+
+- Sequence stagger timing for CSS animations is driven by custom properties and `calc()` delay rather than pre-computed per-effect delays in resolvers (#289)
+- Sequences whose `offsetEasing` is a function are omitted from `generate()` output (runtime still animates); use a string easing for CSS-pre-rendered stagger (#289)
+- Interaction rules aligned with runtime: `pointerMove` default `hitArea` is `'root'`; `allowA11yTriggers` defaults to `true`; `useSafeViewEnter`, view-progress range definitions, `centeredToTarget` / `transitionDuration` / `transitionEasing` applicability, and `transition` vs `transitionProperties` mutual exclusion (#293)
 
 ### [2.5.6] - 2026-08-13
 
@@ -316,10 +334,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 #### Added
 
 - `toCSSPropertyName()`, `toWAAPIPropertyName()` and `normalizeKeyframes()` utilities for converting CSS property names between their CSS and WAAPI forms (#281)
+- `getJsEasingInCSS()`, `jsEasingsInCSS`, and `cubicBezierCalc()` for expressing offset easings as CSS `calc()` math (#289)
+- `Sequence.sequenceId` option; CSS-based sequences set `--motion-<sequenceId>-index` and `--motion-<sequenceId>-last` on targets instead of per-animation delay offsets (#289)
+- `getCSSAnimation()` accepts optional `sequenceOptions` to emit stagger delays as `calc()` (#289)
+- Exported `cubicBezierEasing()` from utils (#289)
 
 #### Changed
 
 - Keyframe property names may be authored in either camelCase or kebab-case and are normalized to WAAPI's camelCase on every animation path — `keyframeEffect`, presets, and effects registered via `registerEffects()` (#281)
+- `Sequence.applyOffsets()`: CSS animation groups with a `sequenceId` use custom-property-driven delays via generated CSS rather than `updateTiming({ delay })` (#289)
 
 ### [2.1.8] - 2026-07-29
 
