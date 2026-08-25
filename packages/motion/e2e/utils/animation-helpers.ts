@@ -58,6 +58,7 @@ export async function waitForElementAnimationState(
         `Animation count: ${debug.animationCount}`,
         `Original error: ${String(error)}`,
       ].join('\n'),
+      { cause: error },
     );
   }
 }

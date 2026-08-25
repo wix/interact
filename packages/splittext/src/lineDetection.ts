@@ -36,7 +36,7 @@ export function detectLinesFromTextNode(textNode: Text): DetectedLine[] {
   const range = document.createRange();
   range.setStart(textNode, 0);
   const lines: DetectedLine[] = [];
-  let currentLine: DetectedLine | null = null;
+  let currentLine: DetectedLine | undefined;
 
   for (let i = 0; i < normalised.length; i++) {
     range.setEnd(textNode, i + 1);
