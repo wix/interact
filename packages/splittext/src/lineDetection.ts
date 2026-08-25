@@ -36,6 +36,7 @@ export function detectLinesFromTextNode(textNode: Text): DetectedLine[] {
   const range = document.createRange();
   range.setStart(textNode, 0);
   const lines: DetectedLine[] = [];
+  let currentLine: DetectedLine | undefined;
 
   for (let i = 0; i < normalised.length; i++) {
     range.setEnd(textNode, i + 1);
@@ -44,10 +45,13 @@ export function detectLinesFromTextNode(textNode: Text): DetectedLine[] {
     const lineIndex = rects.length - 1;
 
     if (!lines[lineIndex]) {
-      lines[lineIndex] = { chars: [], node: textNode };
+      currentLine = { chars: [], node: textNode };
+      lines.push(currentLine);
+    } else {
+      currentLine = lines[lineIndex];
     }
 
-    lines[lineIndex].chars.push(normalised.charAt(i));
+    currentLine.chars.push(normalised.charAt(i));
   }
 
   // Restore original text to leave the node in its pre-measurement state
