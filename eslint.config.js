@@ -55,7 +55,8 @@ export default [
     },
     settings: {
       react: {
-        version: 'detect',
+        // eslint-plugin-react 7.37 still calls context.getFilename() when this is "detect"
+        version: '18.3.1',
       },
     },
     rules: {
