@@ -50,7 +50,8 @@ jobs:
       - name: Install dependencies
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: NPQ_PKG_MGR=yarn npx npq install --allow-non-interactive-install --immutable
+          NPQ_ALLOW_NON_INTERACTIVE_INSTALL: 'true'
+        run: NPQ_PKG_MGR=yarn npx npq install --immutable
 
       - name: Build
         run: yarn build
