@@ -41,8 +41,9 @@ jobs:
       - name: Install dependencies
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPQ_ALLOW_NON_INTERACTIVE_INSTALL: 'true'
         run: |
-          NPQ_PKG_MGR=yarn npx npq install --allow-non-interactive-install
+          NPQ_PKG_MGR=yarn npx npq install
 
       - name: Build packages and landing page libs
         run: ./scripts/build-landing.sh
