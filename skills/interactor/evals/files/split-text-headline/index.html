@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Studio — kinetic headline</title>
+    <style>
+      * { margin: 0; box-sizing: border-box; }
+      body { font-family: system-ui, sans-serif; color: #fff; background: #0a0c14; }
+
+      .hero {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+        text-align: center;
+      }
+      .hero__title {
+        font-size: clamp(2.5rem, 8vw, 5rem);
+        line-height: 1.05;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .hero__sub {
+        margin-top: 1.5rem;
+        font-size: 1.25rem;
+        opacity: 0.7;
+        max-width: 32rem;
+      }
+
+      .about {
+        padding: 6rem 1.5rem;
+        max-width: 60rem;
+        margin: 0 auto;
+        color: #c8ccd6;
+      }
+      .about h2 { font-size: 2rem; margin-bottom: 1rem; color: #fff; }
+
+      interact-element { display: contents; }
+    </style>
+  </head>
+  <body>
+    <interact-element data-interact-key="hero">
+      <section class="hero">
+        <div>
+          <h1 class="hero__title">Design in motion</h1>
+          <p class="hero__sub">Crafting interfaces that move with purpose.</p>
+        </div>
+      </section>
+    </interact-element>
+
+    <section class="about">
+      <h2>About the studio</h2>
+      <p>
+        We build digital experiences where every transition earns its place.
+        Scroll down to see the headline reveal letter by letter.
+      </p>
+    </section>
+  </body>
+</html>

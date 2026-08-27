@@ -99,6 +99,11 @@ Interact.create(config);
 
 Install as devDependency: `npm install -D @wix/interact-validate`.
 
+**Plugin fields:** only `$`-prefixed keys on an interaction/effect pass through as
+opaque plugin config. A non-prefixed unknown key is rejected as an unrecognized
+field — so a mistyped plugin field name (e.g. `splitText` instead of `$splitText`)
+surfaces as a validation error.
+
 ---
 
 ## What validate does NOT check
@@ -109,6 +114,7 @@ Keep applying the semantic checklist in SKILL.md and trigger/preset references f
 - **DOM / markup** — element existence for keys/selectors, matching `data-interact-key` / `interactKey`
 - **`registerEffects()` order** — unregistered presets log a warning, not a validation error
 - **FOUC / `generate()`** — CSS injection, `useFirstChild` parity (validator also emits `RECOMMENDED_FILL_BACKWARDS` when a `viewEnter` + `once` named/keyframe effect targeting another element or using a same-element delay omits `backwards`/`both`, and `FUNCTION_OFFSET_EASING` when a sequence's function easing keeps it out of the generated CSS)
+- **Plugin registration / value shape** — whether the plugin is registered via `Interact.use()`, whether the `$<name>` value is valid for the plugin, or whether a `container` selector matches anything in the DOM
 - **`overflow: clip`** — ancestors with `overflow: hidden` break `viewProgress`
 
 ---

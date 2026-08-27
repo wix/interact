@@ -45,6 +45,9 @@ produces silently-wrong output. Never invent a `type`.
 
 `triggerType: 'once'` for the classic entrance. Default easing is per-preset.
 
+For per-char or per-word text entrances, use the `$splitText` plugin to split
+text into spans, then stagger them with a sequence — see `plugins.md`.
+
 | Preset       | Params (default)                                                                                              | Look                                |
 | :----------- | :------------------------------------------------------------------------------------------------------------ | :---------------------------------- |
 | `FadeIn`     | —                                                                                                             | transparent → opaque                |

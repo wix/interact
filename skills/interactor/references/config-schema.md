@@ -52,6 +52,7 @@ type Interaction = {
   selector?: string; // CSS selector refining the source within the keyed root
   listContainer?: string; // CSS selector for a list container context
   listItemSelector?: string; // filter which children of listContainer participate
+  $[pluginName]?: unknown; // plugin config — routes to Interact.use('<pluginName>', …); see plugins.md
 };
 ```
 
@@ -115,6 +116,7 @@ referenced entry and may override any of them (`key`, `duration`, `easing`,
   selector?: string;         // refine the target within its root
   listContainer?: string;    // list container for the target
   listItemSelector?: string; // filter children of listContainer
+  $[pluginName]?: unknown;   // plugin config — routes to Interact.use('<pluginName>', …); see plugins.md
   composite?: 'replace' | 'add' | 'accumulate';   // = CSS animation-composition
   fill?: 'none' | 'forwards' | 'backwards' | 'both';
   easing?: string;
@@ -368,7 +370,9 @@ selectors target `:first-child`; `false` for **vanilla** and **React**. The defa
 is `true`, so vanilla/React callers must pass `false` explicitly. Pass it as a bare
 boolean (`generate(config, false)`) or in the options bag
 (`generate(config, { useFirstChild: false })`); the bag also carries `plugins`,
-a map of plugin name → SSR style generator for `$<name>` config fields.
+a map of plugin name → SSR style generator for `$<name>` config fields. When a
+config uses plugin fields, pass the matching generator here **and** register the
+runtime plugin with `Interact.use()` before `create()` — see `plugins.md`.
 
 **FOUC prevention (viewEnter + once):** For entrance animations where source and
 target are the **same** element, `generate()` emits author-important initial rules
@@ -398,6 +402,8 @@ lifecycle.
 | :---------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Interact.create(config, options?)`                         | Initialize; returns an independent instance. `options.useCustomElement` toggles `<interact-element>` mode.                                           |
 | `Interact.registerEffects(presets)`                         | Register named-effect presets. **Call before `create()`/`generate()`** when using `namedEffect`. Same function as `@wix/motion`'s `registerEffects`. |
+| `Interact.use(name, plugin)`                                | Register a plugin under `name`. When the config carries `$<name>`, Interact invokes the plugin. **Call before `create()`.** See `plugins.md`.        |
+| `Interact.getPlugin(name)` / `Interact.getPluginsNames()`   | Inspect the plugin registry.                                                                                                                         |
 | `Interact.setup(options)`                                   | Global defaults — call before `create()`. See below.                                                                                                 |
 | `Interact.destroy()`                                        | Static — tears down **all** instances (e.g. on route change).                                                                                        |
 | `Interact.getInstance(key)` / `Interact.getController(key)` | Look up the instance/controller owning a key.                                                                                                        |

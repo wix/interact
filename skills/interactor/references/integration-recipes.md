@@ -9,6 +9,10 @@ Shared rules that apply to **every** recipe:
 
 - `Interact.registerEffects(presets)` runs **before** `generate()` / `create()`.
 - `generate(config, useFirstChild)`: `true` for **web**, `false` for **vanilla/React**.
+- When a config uses `$`-prefixed plugin fields, register the runtime plugin with
+  `Interact.use()` **before** `create()` and pass the matching SSR style generator
+  in `generate()`'s `plugins` option — see [Plugins (`$` fields)](#plugins--fields)
+  and `references/plugins.md`.
 - For static or pre-rendered output, follow the canonical
   [CSS generation policy](#css-generation-policy-for-static-and-pre-rendered-output).
 - Keep the instance reference; call `instance.destroy()` on teardown (route change / unmount).
@@ -259,6 +263,47 @@ add(document.querySelector('#hero')!, 'hero'); // 2) bind the element (key optio
 
 ---
 
+## Plugins (`$` fields)
+
+When a config carries a `$<name>` field (e.g. `$splitText`), you need **both**
+halves wired up — the runtime plugin and the SSR style generator. See
+`references/plugins.md` for the full contract.
+
+**Web / bundled vanilla:**
+
+```ts
+import { Interact, generate } from '@wix/interact/web';
+import { splitTextPlugin, splitTextStyle } from '@wix/splittext/plugin';
+
+Interact.use('splitText', splitTextPlugin); // BEFORE create()
+
+const css = generate(config, {
+  useFirstChild: true, // or false for vanilla/React
+  plugins: { splitText: splitTextStyle },
+});
+
+Interact.create(config);
+```
+
+**CDN / no build step:**
+
+```html
+<script type="module">
+  import { Interact, generate } from 'https://esm.sh/@wix/interact/web';
+  import { splitTextPlugin, splitTextStyle } from 'https://esm.sh/@wix/splittext/plugin';
+
+  Interact.use('splitText', splitTextPlugin);
+  // Pre-generate css in a scratch script with plugins: { splitText: splitTextStyle }
+  Interact.create(config);
+</script>
+```
+
+**React:** register `Interact.use()` at module scope (before `create()` in
+`useEffect`). Plugin cleanups run automatically when `instance.destroy()` is
+called on unmount. Pass the matching generator in `generate()` at build/SSR time.
+
+---
+
 ## Verifying the integration
 
 1. **Config passes validation** — `validateInteractConfig(config)` returns no errors; shipped files contain no `@wix/interact-validate` reference (grep check in `references/validate.md`).
@@ -266,4 +311,5 @@ add(document.querySelector('#hero')!, 'hero'); // 2) bind the element (key optio
 3. **Console is clean** — no `"… not found in registry"` warnings (means a `namedEffect.type` wasn't registered or is misspelled).
 4. **Entrance elements aren't flashing** — with the FOUC setup correct, `once` entrances start hidden and animate in.
 5. **Scroll animations track scroll** — if a `viewProgress` effect doesn't move, check for `overflow: hidden` on an ancestor (must be `overflow: clip`).
-6. If a dev server exists, load the page and watch the effect actually play. Animations are hard to assert headlessly, so the static checks are the primary proxy and the live load is confirmation.
+6. **Plugin containers aren't stuck hidden** — if a `$splitText` field uses `hideUntilReady`, confirm both `splitTextPlugin` (runtime) and `splitTextStyle` (SSR generator) are wired; missing the runtime plugin leaves the container `visibility: hidden` forever.
+7. If a dev server exists, load the page and watch the effect actually play. Animations are hard to assert headlessly, so the static checks are the primary proxy and the live load is confirmation.

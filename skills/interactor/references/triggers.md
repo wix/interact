@@ -211,7 +211,9 @@ phases that aren't a simple stagger (e.g. play B only after A finishes).
 For animating many items with offset timing (cards, list items, nav links), use a
 **sequence** — don't hand-roll incrementing `delay`s. One trigger fires the whole
 sequence; the effect's **`selector`** picks the items to stagger, and each matched
-element becomes a staggered participant.
+element becomes a staggered participant. The same pattern applies to split text
+spans (`.split-c`, `.split-w`, etc.) — use `$splitText` on the interaction, then
+`selector` on the effect with `fill: 'backwards'`; see `plugins.md`.
 
 ```ts
 // One viewEnter trigger on the section; selector on the effect picks the cards to stagger.
