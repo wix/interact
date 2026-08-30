@@ -58,8 +58,6 @@ Add a `$<plugin-name>` field on an **interaction** or an **effect**:
   registration does not replay it until the element reconnects.
 - **MUST** prefix plugin fields with `$` (e.g. `$splitText`). A non-prefixed
   unknown key on an interaction/effect is rejected by `@wix/interact-validate`.
-- Use a bare, unquoted `$<name>` key — no quotes needed since `$` is a valid
-  identifier start (e.g. `$splitText:`, not `'plugin:splitText':`).
 - Plugins run at **connect time, before target resolution** — DOM a plugin
   creates is visible to the `selector` / `listContainer` queries that follow.
 - A returned cleanup runs on disconnect, on `Interact.destroy()`, and on
