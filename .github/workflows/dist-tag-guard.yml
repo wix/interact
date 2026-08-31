@@ -1,0 +1,88 @@
+name: npm dist-tag guard
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Report drift without repairing it'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: dist-tag-guard
+  cancel-in-progress: false
+
+env:
+  DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout guard script
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Guard @wix/interact
+        id: interact
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.INTERACT_NPM_TOKEN }}
+        run: node .github/scripts/dist-tag-guard.mjs --package=@wix/interact --min-major=2 --dry-run=${{ env.DRY_RUN }}
+
+      - name: Guard @wix/motion
+        id: motion
+        if: ${{ !cancelled() }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.RELEASE_MOTION_NPM_TOKEN }}
+        run: node .github/scripts/dist-tag-guard.mjs --package=@wix/motion --min-major=2 --dry-run=${{ env.DRY_RUN }}
+
+      - name: Report drift
+        if: ${{ !cancelled() && (steps.interact.outputs.drifted == 'true' || steps.motion.outputs.drifted == 'true') }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          INTERACT_FROM: ${{ steps.interact.outputs.from }}
+          INTERACT_TO: ${{ steps.interact.outputs.to }}
+          INTERACT_REASON: ${{ steps.interact.outputs.reason }}
+          MOTION_FROM: ${{ steps.motion.outputs.from }}
+          MOTION_TO: ${{ steps.motion.outputs.to }}
+          MOTION_REASON: ${{ steps.motion.outputs.reason }}
+        run: |
+          report() {
+            local pkg="$1" from="$2" to="$3" reason="$4"
+            if [ -z "$from" ]; then
+              return 0
+            fi
+            local title="npm dist-tag drift: $pkg"
+            if gh issue list --state open --limit 100 --json title --jq '.[].title' | grep -qxF "$title"; then
+              echo "$pkg: open issue already tracks this, skipping"
+              return 0
+            fi
+            local body
+            body=$(printf '%s\n' \
+              "\`$pkg@latest\` pointed at \`$from\` ($reason). Expected \`$to\`." \
+              "" \
+              "This usually means a v1 release from [wix-private/wow-libs](https://github.com/wix-private/wow-libs) published without an explicit dist-tag and took \`latest\`. If so, the \`publishConfig.tag\` fix in that repo is not taking effect and the tag has to be set in the Falcon npm target instead." \
+              "" \
+              "Guard run: $RUN_URL")
+            gh issue create --title "$title" --body "$body"
+          }
+          report '@wix/interact' "$INTERACT_FROM" "$INTERACT_TO" "$INTERACT_REASON"
+          report '@wix/motion' "$MOTION_FROM" "$MOTION_TO" "$MOTION_REASON"
