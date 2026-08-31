@@ -57,7 +57,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@wix/motion": "^2.1.12"
+    "@wix/motion": "^2.1.13"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.14",
