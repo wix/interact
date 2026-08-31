@@ -10,6 +10,11 @@ on:
         required: false
         default: false
         type: boolean
+      verify_auth:
+        description: 'Probe npm write access with a throwaway tag, then exit (takes precedence over dry_run)'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -21,6 +26,7 @@ concurrency:
 
 env:
   DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+  VERIFY_AUTH: ${{ github.event.inputs.verify_auth || 'false' }}
 
 jobs:
   guard:
@@ -43,14 +49,14 @@ jobs:
         id: interact
         env:
           NODE_AUTH_TOKEN: ${{ secrets.INTERACT_NPM_TOKEN }}
-        run: node .github/scripts/dist-tag-guard.mjs --package=@wix/interact --min-major=2 --dry-run=${{ env.DRY_RUN }}
+        run: node .github/scripts/dist-tag-guard.mjs --package=@wix/interact --min-major=2 --dry-run=${{ env.DRY_RUN }} --verify-auth=${{ env.VERIFY_AUTH }}
 
       - name: Guard @wix/motion
         id: motion
         if: ${{ !cancelled() }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.RELEASE_MOTION_NPM_TOKEN }}
-        run: node .github/scripts/dist-tag-guard.mjs --package=@wix/motion --min-major=2 --dry-run=${{ env.DRY_RUN }}
+        run: node .github/scripts/dist-tag-guard.mjs --package=@wix/motion --min-major=2 --dry-run=${{ env.DRY_RUN }} --verify-auth=${{ env.VERIFY_AUTH }}
 
       - name: Report drift
         if: ${{ !cancelled() && (steps.interact.outputs.drifted == 'true' || steps.motion.outputs.drifted == 'true') }}
