@@ -1,6 +1,6 @@
 {
   "name": "@wix/motion",
-  "version": "2.1.12",
+  "version": "2.1.13",
   "description": "Low-level, web-first, animation toolkit, with support for triggered, scroll-driven, pointer-tracking, WAAPI & CSS animations.",
   "license": "MIT",
   "main": "dist/cjs/motion.js",
