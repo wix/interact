@@ -86,6 +86,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.5.13] - 2026-09-02
+
+#### Added
+
+- `instance.destroy({ clearCache?: boolean })` — when `true`, removes this instance's controllers from `Interact.controllerCache` on teardown (forwards to `disconnect({ removeFromCache })`) (#314)
+
 ### [2.5.7] - 2026-08-16
 
 #### Added
@@ -431,6 +437,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion-presets
+
+### [1.0.6] - 2026-09-02
+
+#### Added
+
+- `@wix/motion-presets/browser` entry point: self-contained browser bundle (`dist/browser/motion-presets.js`) with `@wix/motion` inlined for dynamic import without an import map (#316)
 
 ### [1.0.4] - 2026-07-29
 
