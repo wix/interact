@@ -22,7 +22,7 @@ const DOCS_LINK_TITLES = new Map([
 const STATIC_BODY = [
   '- Install: `npm install @wix/interact @wix/motion-presets`',
   '- Three entry points: vanilla JS (`@wix/interact`), React (`@wix/interact/react`), Web Components (`@wix/interact/web`)',
-  '- Five trigger types: hover, click, viewEnter, viewProgress, pointerMove',
+  '- Five trigger types: hover (interest), click (activate), viewEnter, viewProgress, pointerMove',
   '- Effects via named presets (`@wix/motion-presets`), keyframes, CSS transitions, or custom JS callbacks',
   '- Configs are JSON-serializable -- designed for LLM generation',
 ].join('\n');

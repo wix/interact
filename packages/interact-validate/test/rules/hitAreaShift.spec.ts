@@ -51,6 +51,66 @@ describe('hitAreaShift — HIT_AREA_SHIFT', () => {
     expect(result.errors.some((e) => e.code === CODE)).toBe(false);
   });
 
+  it('warns for an individual `scale` transform property, not just a transform string', () => {
+    const result = validateInteractConfig({
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'hover',
+          effects: [
+            {
+              triggerType: 'alternate',
+              duration: 200,
+              fill: 'both',
+              keyframeEffect: { name: 'grow', keyframes: [{ scale: '1.2' }] },
+            },
+          ],
+        },
+      ],
+    });
+    expect(result.errors.some((e) => e.code === CODE)).toBe(true);
+  });
+
+  it('warns for a box metric that resizes the element', () => {
+    const result = validateInteractConfig({
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'hover',
+          effects: [
+            {
+              triggerType: 'alternate',
+              duration: 200,
+              fill: 'both',
+              keyframeEffect: { name: 'widen', keyframes: [{ width: '200px' }] },
+            },
+          ],
+        },
+      ],
+    });
+    expect(result.errors.some((e) => e.code === CODE)).toBe(true);
+  });
+
+  it('warns for a rotate() transform function', () => {
+    const result = validateInteractConfig({
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'hover',
+          effects: [
+            {
+              triggerType: 'alternate',
+              duration: 200,
+              fill: 'both',
+              keyframeEffect: { name: 'turn', keyframes: [{ transform: 'rotate(10deg)' }] },
+            },
+          ],
+        },
+      ],
+    });
+    expect(result.errors.some((e) => e.code === CODE)).toBe(true);
+  });
+
   describe('no warning for the documented valid patterns', () => {
     it('does not warn when the effect targets a child via selector', () => {
       const result = validateInteractConfig({

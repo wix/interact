@@ -39,7 +39,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     '--motion-depth-positive': `calc(${depthValue} * 3)`,
   };
 
-  const easing = 'quadOut';
+  const easing = options.easing || 'quadOut';
 
   return [
     {

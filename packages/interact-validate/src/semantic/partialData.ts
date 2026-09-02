@@ -4,8 +4,14 @@ const SCROLL_RANGE_VALUES = ['in', 'out', 'continuous'];
 
 // Scroll presets (the `*Scroll` motion-presets) all end with `Scroll`; no other
 // preset category does. Used to flag a missing/invalid `range` on `viewProgress`.
-function isScrollPresetType(type: unknown): boolean {
-  return typeof type === 'string' && /Scroll$/.test(type);
+// `ParallaxScroll` is the one exception: it always spans the full timeline and
+// its implementation never reads `range`.
+const RANGELESS_SCROLL_PRESETS = ['ParallaxScroll'];
+
+function doesPresetRequireRange(type: unknown): boolean {
+  return (
+    typeof type === 'string' && /Scroll$/.test(type) && !RANGELESS_SCROLL_PRESETS.includes(type)
+  );
 }
 
 // `*Scroll` namedEffect on viewProgress without a valid `range`
@@ -16,7 +22,7 @@ export function checkScrollPresetRange(
 ): SemanticIssue[] {
   if (!owner || owner.trigger !== 'viewProgress') return [];
   const named = effect.namedEffect;
-  if (!named || !isScrollPresetType(named.type)) return [];
+  if (!named || !doesPresetRequireRange(named.type)) return [];
   if (named.range === undefined) {
     return [
       {

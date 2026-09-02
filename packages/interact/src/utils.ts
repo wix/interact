@@ -29,6 +29,17 @@ export function applySelectorCondition(baseSelector: string, predicate: string):
   return `${baseSelector}${predicate}`;
 }
 
+/**
+ * Runtime counterpart of `applySelectorCondition` for the JS trigger paths.
+ * `matches()` has no scoping element - outside a nested rule `&` resolves to
+ * `:scope`, which is the element's *root*, so `:is(.theme-dark &)` never
+ * matches. `*` stands in for the element's own position instead, which keeps
+ * the ancestor and combinator semantics the CSS path produces.
+ */
+export function matchesSelectorCondition(element: Element, selectorCondition: string): boolean {
+  return element.matches(applySelectorCondition('*', selectorCondition));
+}
+
 export function generateId() {
   return 'wi-12343210'.replace(
     /\d/g,
@@ -153,7 +164,7 @@ export function createTransitionCSS({
 export function getFullPredicateByType(
   conditionNames: string[] | undefined,
   conditions: Record<string, Condition>,
-  type: 'media' | 'container',
+  type: 'media',
 ) {
   const conditionContent = (conditionNames || [])
     .filter((conditionName) => {

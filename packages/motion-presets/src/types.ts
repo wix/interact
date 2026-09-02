@@ -308,7 +308,6 @@ export type PanScroll = {
 export type ParallaxScroll = {
   type: 'ParallaxScroll';
   parallaxFactor?: number;
-  range?: EffectScrollRange;
 };
 export type RevealScroll = {
   type: 'RevealScroll';

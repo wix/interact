@@ -8,6 +8,7 @@ import type {
   EventTriggerConfigEnterLeave,
 } from '../types';
 import { effectToAnimationOptions } from './utilities';
+import { matchesSelectorCondition } from '../utils';
 import fastdom from 'fastdom';
 
 export function createTimeEffectHandler(
@@ -35,7 +36,7 @@ export function createTimeEffectHandler(
   const type = effect.triggerType || 'alternate';
 
   return (event: Event) => {
-    if (selectorCondition && !element.matches(selectorCondition)) return;
+    if (selectorCondition && !matchesSelectorCondition(element, selectorCondition)) return;
 
     const isToggle = !enterLeave;
     const isEnter = enterLeave?.enter?.includes(event.type);
@@ -105,7 +106,7 @@ export function createTransitionHandler(
   const isToggle = action === 'toggle';
 
   return (event: Event) => {
-    if (selectorCondition && !element.matches(selectorCondition)) return;
+    if (selectorCondition && !matchesSelectorCondition(element, selectorCondition)) return;
 
     const item: HTMLElement | null | undefined = shouldSetStateOnElement
       ? (element.closest(

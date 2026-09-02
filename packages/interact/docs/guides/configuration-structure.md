@@ -244,8 +244,8 @@ const responsiveConfig: InteractConfig = {
       type: 'media',
       predicate: '(prefers-reduced-motion: no-preference)',
     },
-    'large-container': {
-      type: 'container',
+    'wide-viewport': {
+      type: 'media',
       predicate: '(min-width: 600px)',
     },
   },

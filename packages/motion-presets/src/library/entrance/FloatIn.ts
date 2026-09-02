@@ -33,7 +33,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     '--motion-translate-y': `${translateY}px`,
   };
 
-  const easing = 'sineInOut';
+  const easing = options.easing || 'sineInOut';
 
   return [
     {
