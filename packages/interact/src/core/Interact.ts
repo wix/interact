@@ -86,9 +86,9 @@ export class Interact {
     }
   }
 
-  destroy(): void {
+  destroy({ clearCache = false }: { clearCache?: boolean } = {}): void {
     for (const controller of this.controllers) {
-      controller.disconnect();
+      controller.disconnect({ removeFromCache: clearCache });
     }
 
     // Properly remove all media query listeners before clearing the Map
