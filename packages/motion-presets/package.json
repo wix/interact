@@ -1,6 +1,6 @@
 {
   "name": "@wix/motion-presets",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Ready-made animation presets for @wix/motion effects — entrance, scroll, pointer, loop, and micro-interactions.",
   "license": "MIT",
   "main": "dist/cjs/motion-presets.js",
@@ -12,6 +12,9 @@
       "import": "./dist/es/motion-presets.js",
       "require": "./dist/cjs/motion-presets.js"
     },
+    "./browser": {
+      "import": "./dist/browser/motion-presets.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -20,7 +23,7 @@
   "sideEffects": false,
   "scripts": {
     "dev": "vite dev --open",
-    "build": "rimraf dist && npm run build:types && vite build",
+    "build": "rimraf dist && npm run build:types && vite build && vite build --config vite.browser.config.ts",
     "build:types": "tsc -p tsconfig.build.json",
     "lint": "tsc -p tsconfig.build.json --noEmit",
     "test": "vitest run",
