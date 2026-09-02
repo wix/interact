@@ -1,0 +1,838 @@
+# packages/interact/context/glossary.yaml
+#
+# Single source of truth for @wix/interact parameter tables, type shapes,
+# defaults, and term definitions.
+#
+# Consumed by scripts/build-context.js to:
+#   - Fully generate rules/ output files via renderer functions
+#   - Inject structured param tables into hand-authored docs/ files
+#     between <!-- PARAMS:START id=<term-id> --> / <!-- PARAMS:END --> markers
+#
+# Schema
+# ------
+# Each term has:
+#   id         - unique slug used in renderer lookups and PARAMS markers
+#   name       - display name (code identifier or phrase)
+#   category   - trigger | effect-type | config | api | concept | enum
+#   description - single authoritative description (prose)
+#   params     - list of { name, type, default, required, description }
+#   values     - list of { value, description }  (enum terms only)
+#   caveats    - list of string warnings / gotchas
+#   sourceFile - path relative to packages/interact/ (for audit references)
+#   related    - list of other term IDs for cross-references
+#
+# Verified against source on 2026-05-31 (see audit in context_ssot_restructure plan).
+
+package: '@wix/interact'
+
+terms:
+  # ─── Triggers ────────────────────────────────────────────────────────────────
+
+  - id: trigger-hover
+    name: hover
+    category: trigger
+    description: >-
+      Fires on mouseenter / mouseleave. When allowA11yTriggers is true (default),
+      the library transparently remaps hover to the interest handler, which adds
+      focusin / focusout alongside the mouse events for keyboard accessibility.
+    params: []
+    effect_note: >-
+      No trigger-level params. Control animation behavior via triggerType on
+      TimeEffect (default: 'alternate') or stateAction on StateEffect (default: 'toggle').
+    default_triggerType: alternate
+    caveats:
+      - "Use triggerType: 'alternate' (default) for enter/leave animation pairs."
+      - 'Do not mix TimeEffect.triggerType with StateEffect.stateAction on the same effect.'
+      - 'When allowA11yTriggers is true (default), hover transparently maps to the interest handler.'
+    sourceFile: src/handlers/eventTrigger.ts
+    related: [trigger-interest, concept-a11y-mapping]
+
+  - id: trigger-click
+    name: click
+    category: trigger
+    description: >-
+      Fires on click. When allowA11yTriggers is true (default), the library
+      transparently remaps click to the activate handler, which adds keydown
+      Enter/Space handling for keyboard accessibility.
+    params: []
+    effect_note: >-
+      No trigger-level params. Control animation behavior via triggerType on
+      TimeEffect (default: 'alternate') or stateAction on StateEffect (default: 'toggle').
+    default_triggerType: alternate
+    caveats:
+      - "Use triggerType: 'alternate' (default) for toggle-on / toggle-off behavior."
+      - 'When allowA11yTriggers is true (default), click transparently maps to the activate handler.'
+    sourceFile: src/handlers/eventTrigger.ts
+    related: [trigger-activate, concept-a11y-mapping]
+
+  - id: trigger-viewEnter
+    name: viewEnter
+    category: trigger
+    description: >-
+      Fires when the element crosses the viewport threshold via IntersectionObserver.
+      Primary trigger for entrance animations. Supports FOUC prevention via
+      generate() CSS and the initial flag.
+    params:
+      - name: threshold
+        type: number
+        default: '0.2'
+        required: false
+        description: 'Fraction of the element visible in viewport to trigger (0–1).'
+      - name: inset
+        type: string
+        default: 'null'
+        required: false
+        description: 'Maps to IntersectionObserver rootMargin. Shrinks or expands the detection zone.'
+      - name: useSafeViewEnter
+        type: boolean
+        default: 'false'
+        required: false
+        description: 'Internal fallback for environments where IntersectionObserver timing is unreliable.'
+    default_triggerType: once
+    caveats:
+      - "When source and target are the same element, only triggerType: 'once' is reliable. Other triggerType values require separate source and target elements."
+      - 'FOUC prevention requires both generate(config) CSS injected into <head> AND the initial flag on each entrance-animated element.'
+      - 'pageVisible is a deprecated alias that shares this IntersectionObserver handler.'
+    sourceFile: src/handlers/viewEnter.ts
+    related: [concept-fouc, trigger-pageVisible]
+
+  - id: trigger-viewProgress
+    name: viewProgress
+    category: trigger
+    description: >-
+      Scroll-driven animation. Uses native ViewTimeline when available; falls back to
+      fizban Scroll + getScrubScene. Animation progress is driven by the element's
+      scroll position relative to the viewport. Configure the scrub range via
+      rangeStart/rangeEnd on the ScrubEffect — not on params.
+    params: []
+    effect_note: >-
+      Trigger params (ViewEnterParams) are accepted in the TypeScript type but ignored
+      at runtime — the handler uses __ as the param name. Scrub range is configured
+      via rangeStart/rangeEnd on the ScrubEffect.
+    default_triggerType: null
+    caveats:
+      - 'Trigger-level params (ViewEnterParams shape) are ignored at runtime. Use ScrubEffect.rangeStart / rangeEnd instead.'
+      - 'For sticky/tall-wrapper patterns, the source element (the key element) is the ViewTimeline source — not the sticky child.'
+      - 'Respects reducedMotion: skips the animation entirely when reducedMotion is true.'
+      - 'Falls back to fizban Scroll + getScrubScene when window.ViewTimeline is unavailable.'
+    sourceFile: src/handlers/viewProgress.ts
+    related: [effect-scrub]
+
+  - id: trigger-pointerMove
+    name: pointerMove
+    category: trigger
+    description: >-
+      Drives animation progress from mouse / pointer position using getScrubScene.
+      The pointer position along the chosen axis is mapped to a 0–1 progress value.
+    params:
+      - name: hitArea
+        type: "'self' | 'root'"
+        default: 'undefined (document body)'
+        required: false
+        description: "Element that captures pointer events. 'self' = source element, 'root' = document root. Omit to use document body."
+      - name: axis
+        type: "'x' | 'y'"
+        default: "'y'"
+        required: false
+        description: 'Pointer axis that drives animation progress.'
+    default_triggerType: null
+    caveats:
+      - 'hitArea omitted means document body is the pointer capture area.'
+      - "Do not use hitArea: 'self' with effects that change the element's size or position — the transform shifts the hit area, causing jitter."
+    sourceFile: src/handlers/pointerMove.ts
+    related: [effect-scrub]
+
+  - id: trigger-animationEnd
+    name: animationEnd
+    category: trigger
+    description: >-
+      Chains one animation after another. Listens for animationend on the source
+      element and plays the effect on the target when it fires.
+    params:
+      - name: effectId
+        type: string
+        default: '—'
+        required: true
+        description: 'ID of the preceding CSS animation effect to listen for. Used to filter which animationend event triggers the chain.'
+    default_triggerType: once
+    caveats:
+      - 'effectId filters the animationend event — it is not the primary trigger mechanism.'
+      - 'The source element must be running a CSS animation for animationend to fire.'
+    sourceFile: src/handlers/animationEnd.ts
+    related: []
+
+  - id: trigger-activate
+    name: activate
+    category: trigger
+    description: >-
+      Accessible variant of click. Handles click + keydown Enter/Space.
+      When allowA11yTriggers is true (default), the library automatically uses this
+      handler when trigger is 'click' — users do not configure activate directly.
+    params: []
+    effect_note: 'Same as click. Control via triggerType on TimeEffect or stateAction on StateEffect.'
+    default_triggerType: alternate
+    caveats:
+      - "Automatically activated when allowA11yTriggers: true and trigger: 'click'. Users configure 'click', not 'activate'."
+      - "Can be used directly as trigger: 'activate' when fine-grained control is needed."
+    sourceFile: src/handlers/eventTrigger.ts
+    related: [trigger-click, concept-a11y-mapping]
+
+  - id: trigger-interest
+    name: interest
+    category: trigger
+    description: >-
+      Accessible variant of hover. Handles mouseenter + focusin (enter) and
+      mouseleave + focusout (leave). When allowA11yTriggers is true (default),
+      the library automatically uses this handler when trigger is 'hover'.
+    params: []
+    effect_note: 'Same as hover. Control via triggerType on TimeEffect or stateAction on StateEffect.'
+    default_triggerType: alternate
+    caveats:
+      - "Automatically activated when allowA11yTriggers: true and trigger: 'hover'. Users configure 'hover', not 'interest'."
+      - "Can be used directly as trigger: 'interest' when fine-grained control is needed."
+    sourceFile: src/handlers/eventTrigger.ts
+    related: [trigger-hover, concept-a11y-mapping]
+
+  - id: trigger-pageVisible
+    name: pageVisible
+    category: trigger
+    deprecated: true
+    description: >-
+      DEPRECATED. Shares the viewEnter IntersectionObserver handler.
+      Will be removed in a future version. Use trigger: 'viewEnter' instead.
+    params: []
+    default_triggerType: once
+    caveats:
+      - "Deprecated. Use trigger: 'viewEnter' as the drop-in replacement."
+    sourceFile: src/handlers/viewEnter.ts
+    related: [trigger-viewEnter]
+
+  # ─── Effect Types ─────────────────────────────────────────────────────────────
+
+  - id: effect-time
+    name: TimeEffect
+    category: effect-type
+    description: >-
+      Duration-based animation. Plays a keyframe, named, or custom animation over
+      a fixed time. Used with hover, click, viewEnter, animationEnd, and their
+      a11y variants.
+    params:
+      - name: duration
+        type: number
+        default: '—'
+        required: true
+        description: 'Animation duration in milliseconds.'
+      - name: easing
+        type: string
+        default: 'null'
+        required: false
+        description: "CSS or named easing string (e.g. 'ease-out', 'cubicOut')."
+      - name: delay
+        type: number
+        default: '0'
+        required: false
+        description: 'Delay before animation starts in ms.'
+      - name: iterations
+        type: number
+        default: '1'
+        required: false
+        description: 'Number of times to repeat. Use Infinity for a continuous loop.'
+      - name: alternate
+        type: boolean
+        default: 'false'
+        required: false
+        description: 'Alternate animation direction on each iteration.'
+      - name: fill
+        type: "'none' | 'forwards' | 'backwards' | 'both'"
+        default: "'forwards'"
+        required: false
+        description: 'CSS animation fill mode.'
+      - name: reversed
+        type: boolean
+        default: 'false'
+        required: false
+        description: 'Play the animation in reverse.'
+      - name: triggerType
+        type: "'once' | 'repeat' | 'alternate' | 'state'"
+        default: 'trigger-dependent'
+        required: false
+        description: 'Controls animation response to repeated trigger events. Default varies by trigger type.'
+      - name: composite
+        type: CompositeOperation
+        default: 'null'
+        required: false
+        description: 'WAAPI composite operation for layering animations.'
+    effect_property_note: >-
+      Requires exactly one animation payload: namedEffect: { type: string, ...params },
+      keyframeEffect: { name: string, keyframes: Keyframe[] }, or
+      customEffect: (element: Element, progress: any) => void.
+    caveats:
+      - "triggerType default is 'once' for viewEnter / animationEnd; 'alternate' for hover / click / activate / interest."
+      - "Do not set triggerType: 'state' alongside stateAction — those belong to StateEffect, not TimeEffect."
+    sourceFile: src/types/effects.ts
+    related: [enum-triggerType]
+
+  - id: effect-scrub
+    name: ScrubEffect
+    category: effect-type
+    description: >-
+      Scroll- or pointer-driven animation. Progress is controlled externally by
+      scroll position (viewProgress) or pointer movement (pointerMove) rather than
+      playing over fixed time.
+    params:
+      - name: rangeStart
+        type: RangeOffset
+        default: 'null'
+        required: false
+        description: "Start of the ViewTimeline scroll range. Shape: { name: RangeOffsetName, offset: CSSPercentValue }. RangeOffset names: 'entry' | 'exit' | 'contain' | 'cover' | 'entry-crossing' | 'exit-crossing'."
+      - name: rangeEnd
+        type: RangeOffset
+        default: 'null'
+        required: false
+        description: 'End of the ViewTimeline scroll range. Same shape as rangeStart.'
+      - name: centeredToTarget
+        type: boolean
+        default: 'false'
+        required: false
+        description: 'Center the timeline scroll range on the target element rather than the source.'
+      - name: easing
+        type: string
+        default: 'null'
+        required: false
+        description: 'CSS easing string for the scrub animation.'
+      - name: iterations
+        type: number
+        default: '1'
+        required: false
+        description: 'Number of animation iterations.'
+      - name: alternate
+        type: boolean
+        default: 'false'
+        required: false
+        description: 'Alternate direction on each iteration.'
+      - name: fill
+        type: "'none' | 'forwards' | 'backwards' | 'both'"
+        default: "'both'"
+        required: false
+        description: 'CSS animation fill mode.'
+      - name: reversed
+        type: boolean
+        default: 'false'
+        required: false
+        description: 'Reverse the animation direction.'
+      - name: transitionDuration
+        type: number
+        default: 'null'
+        required: false
+        description: 'Duration (ms) of ease-in / ease-out transition at scrub endpoints.'
+      - name: transitionDelay
+        type: number
+        default: 'null'
+        required: false
+        description: 'Delay (ms) for the scrub endpoint transition.'
+      - name: transitionEasing
+        type: ScrubTransitionEasing
+        default: 'null'
+        required: false
+        description: 'Easing for the scrub endpoint transition.'
+      - name: composite
+        type: CompositeOperation
+        default: 'null'
+        required: false
+        description: 'WAAPI composite operation.'
+    effect_property_note: 'Requires exactly one of: namedEffect, keyframeEffect, or customEffect.'
+    caveats:
+      - "Native ViewTimeline path: uses duration: 'auto'. Fallback path: duration 99.99 with manual scrub."
+      - 'rangeStart / rangeEnd configure the scroll range — do not put these in trigger params.'
+    sourceFile: src/types/effects.ts
+    related: [trigger-viewProgress, trigger-pointerMove]
+
+  - id: effect-state
+    name: StateEffect
+    category: effect-type
+    description: >-
+      CSS class / state toggle animation. Adds, removes, or toggles a CSS class or
+      custom state on the target element. Used with hover, click, and their a11y
+      variants. Timing is controlled by CSS transitions, not by duration.
+    params:
+      - name: stateAction
+        type: "'add' | 'remove' | 'toggle' | 'clear'"
+        default: "'toggle'"
+        required: false
+        description: 'Class manipulation action on trigger activation.'
+      - name: effectId
+        type: string
+        default: 'null'
+        required: false
+        description: 'ID for this state effect — referenced by animationEnd trigger chains.'
+      - name: key
+        type: string
+        default: 'null'
+        required: false
+        description: 'Override target element key.'
+      - name: transition
+        type: 'TransitionOptions & { styleProperties: StyleProperty[] }'
+        default: 'null'
+        required: false
+        description: 'CSS transition spec including target style properties. Mutually exclusive with transitionProperties.'
+      - name: transitionProperties
+        type: 'TransitionProperty[]'
+        default: 'null'
+        required: false
+        description: 'Per-property transition overrides. Mutually exclusive with transition.'
+    caveats:
+      - 'Use transition OR transitionProperties — not both on the same StateEffect.'
+      - "stateAction: 'clear' removes all tracked states from the element."
+      - 'Does not require duration — CSS transition declarations control timing.'
+    sourceFile: src/types/effects.ts
+    related: [enum-stateAction]
+
+  # ─── Config Types ─────────────────────────────────────────────────────────────
+
+  - id: config-InteractConfig
+    name: InteractConfig
+    category: config
+    description: >-
+      Root configuration object passed to Interact.create(). Defines all
+      trigger-effect bindings and shared named resources. JSON-serializable
+      by design.
+    params:
+      - name: interactions
+        type: 'Interaction[]'
+        default: '—'
+        required: true
+        description: 'Array of interaction definitions. Each entry binds a trigger to one or more effects.'
+      - name: effects
+        type: 'Record<string, Effect>'
+        default: '{}'
+        required: false
+        description: 'Reusable effect registry. Effects referenced by effectId from interactions.'
+      - name: sequences
+        type: 'Record<string, SequenceConfig>'
+        default: '{}'
+        required: false
+        description: 'Reusable sequence definitions. Referenced by sequenceId from interactions.'
+      - name: conditions
+        type: 'Record<string, Condition>'
+        default: '{}'
+        required: false
+        description: 'Named conditions (media / container / selector). Referenced by ID from interactions or effects.'
+    caveats:
+      - 'JSON-serializable — no functions at the config root level (customEffect goes in the effect payload, not at config level).'
+      - 'Each Interact.create(config) call creates a separate independent instance.'
+    sourceFile: src/types/config.ts
+    related: [config-Interaction]
+
+  - id: config-Interaction
+    name: Interaction
+    category: config
+    description: >-
+      Binds a trigger to one or more effects or sequences on a specific element.
+      The key field matches the element's data-interact-key (web) or interactKey (React).
+    params:
+      - name: key
+        type: string
+        default: '—'
+        required: true
+        description: 'Matches data-interact-key (web) or interactKey (React). Identifies the source element.'
+      - name: trigger
+        type: TriggerType
+        default: '—'
+        required: true
+        description: 'Trigger type: hover | click | viewEnter | viewProgress | pointerMove | animationEnd | activate | interest.'
+      - name: params
+        type: TriggerParams
+        default: 'null'
+        required: false
+        description: 'Trigger-specific params. See individual trigger entries for available fields.'
+      - name: effects
+        type: 'Effect[]'
+        default: 'null'
+        required: false
+        description: 'Effects to play when triggered. At least one of effects or sequences is required.'
+      - name: sequences
+        type: '(SequenceConfig | SequenceConfigRef)[]'
+        default: 'null'
+        required: false
+        description: 'Sequences to play when triggered. At least one of effects or sequences is required.'
+      - name: selector
+        type: string
+        default: 'null'
+        required: false
+        description: 'CSS selector to refine source / target within the keyed element.'
+      - name: listContainer
+        type: string
+        default: 'null'
+        required: false
+        description: 'CSS selector for a list container. Trigger attaches to each direct child.'
+      - name: listItemSelector
+        type: string
+        default: 'null'
+        required: false
+        description: 'Filter which children of listContainer participate. Omit to select all direct children.'
+      - name: conditions
+        type: 'string[]'
+        default: 'null'
+        required: false
+        description: 'IDs of conditions that must all pass for this interaction to activate.'
+    caveats:
+      - 'At least one of effects or sequences must be provided.'
+      - 'Multiple entries in effects all fire simultaneously when the trigger activates.'
+    sourceFile: src/types/config.ts
+    related: [config-InteractConfig, concept-element-resolution]
+
+  - id: config-SequenceConfig
+    name: SequenceConfig
+    category: config
+    description: >-
+      Defines a staggered sequence of effects with coordinated timing offsets.
+      Used inline in Interaction.sequences or as a reusable entry in
+      InteractConfig.sequences referenced by sequenceId.
+    params:
+      - name: effects
+        type: '(Effect | EffectRef)[]'
+        default: '—'
+        required: true
+        description: 'Ordered list of effects in the sequence.'
+      - name: offset
+        type: number
+        default: '0'
+        required: false
+        description: 'Milliseconds between consecutive items in the stagger.'
+      - name: offsetEasing
+        type: 'string | ((p: number) => number)'
+        default: "'linear'"
+        required: false
+        description: 'Easing curve for the stagger distribution. CSS easing string or JS function.'
+      - name: delay
+        type: number
+        default: '0'
+        required: false
+        description: 'Base delay in ms before the entire sequence starts.'
+      - name: triggerType
+        type: "'once' | 'repeat' | 'alternate' | 'state'"
+        default: 'trigger-dependent'
+        required: false
+        description: 'Controls playback behavior on repeated triggers. Same semantics as TimeEffect.triggerType.'
+      - name: sequenceId
+        type: string
+        default: 'null'
+        required: false
+        description: 'When defined in InteractConfig.sequences, sets the ID for referencing via SequenceConfigRef.'
+      - name: conditions
+        type: 'string[]'
+        default: 'null'
+        required: false
+        description: 'Condition IDs that must all pass for this sequence to activate.'
+    caveats:
+      - 'Stagger formula: offset[i] = easing(i / last) * last * offsetMs (integer-truncated).'
+      - 'offsetEasing controls spacing between items; delay shifts the whole sequence.'
+    sourceFile: src/types/config.ts
+    related: []
+
+  - id: config-Condition
+    name: Condition
+    category: config
+    description: >-
+      Named condition that gates whether an interaction or effect is active.
+      Defined in InteractConfig.conditions and referenced by string ID.
+    params:
+      - name: type
+        type: "'media' | 'container' | 'selector'"
+        default: '—'
+        required: true
+        description: 'Condition category: media = CSS @media query, container = CSS container query, selector = CSS selector match on the element.'
+      - name: predicate
+        type: string
+        default: 'null'
+        required: false
+        description: "The query or selector string. E.g. '(min-width: 768px)' for media."
+    caveats:
+      - "Only 'media', 'container', and 'selector' are valid types — there is no 'custom' condition type."
+      - 'Multiple conditions on an interaction are AND-ed: all must pass.'
+    sourceFile: src/types/config.ts
+    related: []
+
+  # ─── API ──────────────────────────────────────────────────────────────────────
+
+  - id: api-create
+    name: 'Interact.create'
+    category: api
+    description: >-
+      Static factory method. Creates a new Interact instance, initializes it with
+      the provided config, and returns the instance. Call after DOM is ready.
+    signature: 'static create(config: InteractConfig): Interact'
+    caveats:
+      - 'Each call creates an independent instance. Multiple configs are independent.'
+      - 'In React, wrap in useEffect to prevent SSR execution.'
+    sourceFile: src/core/Interact.ts
+    related: [api-destroy]
+
+  - id: api-destroy
+    name: 'Interact.destroy / instance.destroy'
+    category: api
+    description: >-
+      Tears down all interactions and frees listeners. Static form destroys all
+      instances; instance form destroys only that instance.
+    signature: 'static destroy(): void  |  instance.destroy(): void'
+    caveats:
+      - 'In React, call instance.destroy() in the useEffect cleanup function.'
+      - 'Static Interact.destroy() clears all active instances at once.'
+    sourceFile: src/core/Interact.ts
+    related: [api-create]
+
+  - id: api-setup
+    name: 'Interact.setup'
+    category: api
+    description: >-
+      Configure global defaults for scroll, pointer, and viewEnter trigger behavior.
+      Must be called before Interact.create for settings to take effect.
+    signature: 'static setup(options: Partial<InteractSetupOptions>): void'
+    caveats:
+      - 'Must be called before Interact.create.'
+      - 'Accepts scrollOptionsGetter for configuring fizban Scroll internals (viewProgress).'
+    sourceFile: src/core/Interact.ts
+    related: []
+
+  - id: api-registerEffects
+    name: 'Interact.registerEffects'
+    category: api
+    description: >-
+      Register named effect presets from @wix/motion-presets into the motion
+      registry. Required before using namedEffect in any config. Delegates to
+      motion's registerEffects internally.
+    signature: 'static registerEffects(effects: Record<string, EffectModule>): void'
+    caveats:
+      - 'Must be called before Interact.create.'
+      - "Presets are keyed by namedEffect.type string. namedEffect must be an object: { type: 'FadeIn' }, not a bare string."
+    sourceFile: src/core/Interact.ts
+    related: []
+
+  - id: api-add
+    name: 'instance.add'
+    category: api
+    description: >-
+      Register a DOM element with a key after Interact.create. Used in vanilla JS
+      integration to manually associate elements with interaction keys.
+    signature: 'add(element: HTMLElement, key: string): void'
+    caveats:
+      - 'Call only after the element exists in the DOM.'
+      - 'Vanilla JS only — web/React use declarative element wrapping.'
+    sourceFile: src/core/Interact.ts
+    related: [api-remove]
+
+  - id: api-remove
+    name: 'instance.remove'
+    category: api
+    description: >-
+      Unregister all interactions for a given key, removing event listeners and
+      cleaning up animation state.
+    signature: 'remove(key: string): void'
+    sourceFile: src/core/Interact.ts
+    related: [api-add]
+
+  - id: api-generate
+    name: generate
+    category: api
+    description: >-
+      Generates a complete CSS string for all interactions in a config — including
+      @keyframes, animation / transition custom properties, view-timeline declarations,
+      state-selector rules, coordinated-list aggregation, and FOUC-prevention initial
+      rules. Call server-side or at build time and inject the result into <head>.
+    signature: 'generate(config: InteractConfig, useFirstChild?: boolean): string'
+    caveats:
+      - 'Returns a CSS string — inject into <head> or beginning of <body>.'
+      - 'useFirstChild: true when using web (custom element) integration — adds :first-child selectors.'
+      - 'FOUC prevention requires both generate() CSS AND the initial flag on each element.'
+      - 'Processes all interactions, not only viewEnter.'
+    sourceFile: src/core/css.ts
+    related: [concept-fouc]
+
+  - id: api-allowA11yTriggers
+    name: 'Interact.allowA11yTriggers'
+    category: api
+    description: >-
+      Static boolean flag. When true, hover interactions transparently use the
+      interest handler (adds focusin / focusout) and click interactions use the
+      activate handler (adds keydown Enter/Space).
+    signature: 'static allowA11yTriggers: boolean'
+    default: 'true'
+    caveats:
+      - 'Default is true. Set to false only to explicitly opt out of a11y trigger remapping.'
+      - 'Affects all instances. Must be set before Interact.create.'
+    sourceFile: src/core/Interact.ts
+    related: [concept-a11y-mapping]
+
+  - id: api-forceReducedMotion
+    name: 'Interact.forceReducedMotion'
+    category: api
+    description: >-
+      Static boolean flag. When true, forces reduced-motion behavior for all
+      interactions regardless of the OS prefers-reduced-motion setting.
+    signature: 'static forceReducedMotion: boolean'
+    default: 'false'
+    caveats:
+      - 'Does not affect CSS animations generated by generate() — handle prefers-reduced-motion in CSS.'
+    sourceFile: src/core/Interact.ts
+    related: []
+
+  # ─── Concepts ────────────────────────────────────────────────────────────────
+
+  - id: concept-fouc
+    name: 'FOUC Prevention'
+    category: concept
+    description: >-
+      Flash of Un-animated Content (FOUC) occurs when entrance-animated elements
+      are briefly visible in their final state before the animation sets the initial
+      keyframe. Prevention requires two things that must both be present: (1) the
+      CSS produced by generate(config) injected into <head>, and (2) the initial
+      flag set on each entrance-animated element.
+    fouc_flags:
+      - integration: web
+        element_flag: "data-interact-initial='true' on <interact-element>"
+      - integration: react
+        element_flag: 'initial={true} on <Interaction>'
+      - integration: vanilla
+        element_flag: "data-interact-initial='true' on the keyed element"
+    caveats:
+      - 'Both generate() CSS and the initial flag are required — neither alone prevents FOUC.'
+      - "initial is only valid for viewEnter + triggerType: 'once' where source and target are the same element."
+      - 'generate() processes all interactions, not just viewEnter.'
+      - 'generate() can be called client-side if the page is initially hidden (e.g. behind a loader).'
+    sourceFile: src/core/css.ts
+    related: [trigger-viewEnter, api-generate]
+
+  - id: concept-element-resolution
+    name: 'Element Resolution Order'
+    category: concept
+    description: >-
+      How Interact resolves which DOM element is the source (trigger host) and
+      target (animation host) for each interaction.
+    source_priority_order:
+      - 'listContainer + listItemSelector — elements matching listItemSelector within the container'
+      - 'listContainer only — all direct children of the container'
+      - 'listContainer + selector — querySelector within each direct child'
+      - 'selector only — querySelectorAll within the root element'
+      - 'Fallback — firstElementChild of <interact-element> (web) or root element (react / vanilla)'
+    target_priority_order:
+      - 'Effect.key — root element with matching data-interact-key'
+      - 'EffectRef key — key from the referenced registry entry'
+      - 'Fallback to Interaction.key — source root acts as target root'
+      - 'After resolving root: Effect.selector / listContainer / listItemSelector further refine the animated element'
+    caveats:
+      - 'listItemSelector is optional — omit to select all direct children of listContainer.'
+      - 'Target resolution runs the same priority logic as source, starting from Effect-level fields.'
+    sourceFile: src/core/add.ts
+    related: [config-Interaction]
+
+  - id: concept-a11y-mapping
+    name: 'Accessibility Trigger Mapping'
+    category: concept
+    description: >-
+      When Interact.allowA11yTriggers is true (default), hover and click are
+      transparently mapped to richer handlers. Users always configure hover/click
+      in the config; the library handles the a11y remapping automatically.
+    mappings:
+      - user_trigger: hover
+        a11y_handler: 'interest — mouseenter + focusin (enter) / mouseleave + focusout (leave)'
+      - user_trigger: click
+        a11y_handler: 'activate — click + keydown Enter/Space'
+    caveats:
+      - 'allowA11yTriggers default: true. Set to false only to opt out explicitly.'
+      - 'activate and interest can also be set directly as trigger values for fine-grained control.'
+    sourceFile: src/handlers/index.ts
+    related: [api-allowA11yTriggers, trigger-hover, trigger-click]
+
+  - id: concept-entry-points
+    name: 'Entry Points'
+    category: concept
+    description: >-
+      Three integration patterns for @wix/interact, all using the same
+      InteractConfig schema.
+    entry_points:
+      - name: 'Web (Custom Elements)'
+        import: "import { Interact } from '@wix/interact/web'"
+        element: "<interact-element data-interact-key='...'>"
+        notes:
+          - 'Use Interact.create(config). Wrap target elements with <interact-element>.'
+          - 'data-interact-key MUST be unique within the page.'
+          - 'Element MUST contain at least one child (library targets firstElementChild by default).'
+      - name: React
+        import: "import { Interact, Interaction } from '@wix/interact/react'"
+        element: "<Interaction tagName='div' interactKey='...'>"
+        notes:
+          - 'Wrap Interact.create(config) in useEffect to prevent SSR execution.'
+          - 'Store the instance; call instance.destroy() in the useEffect cleanup.'
+          - 'interactKey MUST be unique within the page.'
+      - name: 'Vanilla JS'
+        import: "import { Interact } from '@wix/interact'"
+        element: 'any HTMLElement'
+        notes:
+          - 'const instance = Interact.create(config); instance.add(element, key).'
+          - 'Call add() only after the element exists in the DOM.'
+    caveats:
+      - 'All three entry points use the same InteractConfig schema.'
+      - 'React: never call Interact.create outside useEffect — it will run on the server.'
+    related: [api-create]
+
+  - id: concept-named-effect
+    name: 'namedEffect'
+    category: concept
+    description: >-
+      The animation payload type that references a preset registered via
+      Interact.registerEffects / motion's registerEffects. Must be an object with
+      a type field matching the registered preset name.
+    shape: '{ type: string; [paramName: string]: any }'
+    example: "{ type: 'FadeIn' }  or  { type: 'ArcIn', direction: 'bottom' }"
+    caveats:
+      - "Must be an object { type: '...' } — bare strings like 'FadeIn' are NOT accepted."
+      - 'All presets from @wix/motion-presets must be registered before use.'
+      - 'Unknown namedEffect.type values are silently ignored at runtime.'
+    sourceFile: src/types/effects.ts
+    related: [api-registerEffects]
+
+  # ─── Enums / Unions ──────────────────────────────────────────────────────────
+
+  - id: enum-triggerType
+    name: TimeAnimationTriggerType
+    category: enum
+    description: >-
+      Controls how a TimeEffect or SequenceConfig responds to repeated trigger
+      events. Applies to duration-based animations only (not scrub or state).
+    values:
+      - value: once
+        description: 'Play once on first trigger. Ignore subsequent activations. Default for viewEnter, animationEnd.'
+      - value: repeat
+        description: 'Play from the start on every trigger activation.'
+      - value: alternate
+        description: 'Play forward on trigger activate, reverse on trigger deactivate. Default for hover, click, activate, interest.'
+      - value: state
+        description: 'Controlled externally by stateAction on StateEffect.'
+    defaults_by_trigger:
+      hover: alternate
+      click: alternate
+      activate: alternate
+      interest: alternate
+      viewEnter: once
+      animationEnd: once
+      pageVisible: once
+      viewProgress: null
+      pointerMove: null
+    sourceFile: src/types/effects.ts
+    related: [effect-time]
+
+  - id: enum-stateAction
+    name: StateAction
+    category: enum
+    description: 'The CSS state manipulation action for StateEffect.'
+    values:
+      - value: toggle
+        description: 'Add state if absent, remove if present. Default.'
+      - value: add
+        description: 'Add the CSS class or custom state.'
+      - value: remove
+        description: 'Remove the CSS class or custom state.'
+      - value: clear
+        description: 'Remove all tracked states from the element.'
+    sourceFile: src/types/effects.ts
+    related: [effect-state]
