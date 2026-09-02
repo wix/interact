@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@wix/interact": "^2.5.12",
-    "@wix/motion-presets": "^1.0.6"
+    "@wix/motion-presets": "^1.0.7"
   },
   "devDependencies": {
     "typescript": "^5.9.3",
