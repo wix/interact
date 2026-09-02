@@ -87,7 +87,7 @@ export class Interact {
   }
 
   destroy({ removeFromCache = false }: { removeFromCache?: boolean } = {}): void {
-    for (const controller of [...this.controllers]) {
+    for (const controller of this.controllers) {
       controller.disconnect({ removeFromCache });
     }
 
