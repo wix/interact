@@ -285,18 +285,32 @@ const css = generate(config, {
 Interact.create(config);
 ```
 
-**CDN / no build step:**
+**CDN / no build step:** the halves split across the two phases of the
+[CSS generation policy](#css-generation-policy-for-static-and-pre-rendered-output).
+`splitTextStyle` belongs to the scratch script that pre-generates the CSS; only
+`splitTextPlugin` ships:
 
 ```html
-<script type="module">
-  import { Interact, generate } from 'https://esm.sh/@wix/interact/web';
-  import { splitTextPlugin, splitTextStyle } from 'https://esm.sh/@wix/splittext/plugin';
+<head>
+  <style>
+    /* …pre-generated css, produced in a scratch script with
+       generate(config, { useFirstChild: true, plugins: { splitText: splitTextStyle } })… */
+  </style>
+</head>
 
-  Interact.use('splitText', splitTextPlugin);
-  // Pre-generate css in a scratch script with plugins: { splitText: splitTextStyle }
+<script type="module">
+  import { Interact } from 'https://esm.sh/@wix/interact/web';
+  import { splitTextPlugin } from 'https://esm.sh/@wix/splittext/plugin';
+  import * as presets from 'https://esm.sh/@wix/motion-presets';
+
+  Interact.registerEffects(presets);
+  Interact.use('splitText', splitTextPlugin); // BEFORE create()
   Interact.create(config);
 </script>
 ```
+
+No `generate` and no `splitTextStyle` in the shipped page — the CSS they produce is
+already in the `<style>` block above.
 
 **React:** register `Interact.use()` at module scope (before `create()` in
 `useEffect`). Plugin cleanups run automatically when `instance.destroy()` is

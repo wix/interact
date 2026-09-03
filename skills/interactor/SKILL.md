@@ -86,27 +86,26 @@ Prefer two phases — **generation/build** (all CSS possible) and **runtime**
 // Generation/build script (Node, SSG, agent scratch)
 import { Interact, generate } from '@wix/interact/web'; // or /react, or '@wix/interact'
 import { FadeIn } from '@wix/motion-presets';
-import { splitTextPlugin, splitTextStyle } from '@wix/splittext/plugin'; // only when using $splitText
 
 Interact.registerEffects({ FadeIn }); // BEFORE generate() — see invariants
-const css = generate(config, {
-  useFirstChild: true, // true=web, false=react/vanilla
-  plugins: { splitText: splitTextStyle }, // only when config uses $splitText
-});
+const css = generate(config, true); // true=web, false=react/vanilla
 // Deliver css according to the canonical policy in integration-recipes.md
 ```
 
 ```ts
 // Runtime (browser bundle / CDN module)
 import { Interact } from '@wix/interact/web';
-import { splitTextPlugin } from '@wix/splittext/plugin'; // only when using $splitText
 
-Interact.use('splitText', splitTextPlugin); // BEFORE create() — see references/plugins.md
 const instance = Interact.create(config); // wire triggers
 ```
 
 For CSS delivery and runtime-only configs, follow the canonical policy in
 `references/integration-recipes.md`.
+
+If the config carries a `$`-prefixed plugin field (e.g. `$splitText` for text effects),
+each phase gains one line — `plugins: { … }` in `generate()`'s options bag
+above, `Interact.use(…)` before `create()` below. Both, or neither; see
+`references/plugins.md`.
 
 (For CDN/quick-start, `import * as presets` + `registerEffects(presets)` is fine at
 generation time — selective imports just keep bundled apps lean. See `references/presets.md`.)
@@ -168,11 +167,11 @@ To **add** an interaction:
    background + overlay + content, card image + text), key the **one container**
    that wraps them and put a single effect on it — don't repeat the effect on each
    layer (invariant 11).
-5. **Text per char/word/line:** add `$splitText` on the interaction (not hand-rolled
-   spans), then target the generated `.split-c` / `.split-w` / `.split-l` / `.split-s`
-   spans with `selector` on the **effect** inside a sequence. Register
-   `splitTextPlugin` before `create()` and pass `splitTextStyle` to `generate()`'s
-   `plugins` option — see `references/plugins.md`.
+5. **Text per char/word/line:** add `$splitText` on the interaction rather than
+   hand-rolling spans, then stagger the generated `.split-c` / `.split-w` /
+   `.split-l` / `.split-s` spans with `selector` on the **effect** inside a sequence.
+   Read `references/plugins.md` for the wiring, and note that on character-sized
+   targets a `keyframeEffect` usually beats a preset.
 
 To **edit** an existing config: read the current config first, find the
 interaction/effect by its `key`/`effectId`, and change _only_ what's asked.
@@ -196,7 +195,9 @@ construct the config statically:
 
 - **Static config** (you authored a literal you can read in full): validate **before
   emit** in a scratch script — never add validator imports to user files. See
-  `references/validate.md` for per-environment run mechanics.
+  `references/validate.md` for per-environment run mechanics. Validate (and
+  serialize) **before** calling `generate()`/`create()`, never after: both rewrite
+  the config in place, leaving it invalid — see `config-schema.md`.
 - **Dynamic config** (built at runtime from data/props/fetch/loops — you cannot
   construct it by reading): temporarily inject `assertValidInteractConfig(config)`
   immediately before `generate()`/`create()`, run so that code path executes, fix
@@ -321,12 +322,12 @@ animation no-ops. Apply them every time, even if you don't open a reference file
     parent, animate one child). Litmus test: same trigger, same effect, same timing
     across the layers ⇒ they belong on one keyed container.
 
-12. **Plugins are all-or-nothing.** Register with `Interact.use()` **before**
-    `create()`; prefix the config field with `$` (e.g. `$splitText`). When a plugin
-    ships an SSR style generator (e.g. `splitTextStyle`), pass it to `generate()`'s
-    `plugins` option **and** register the runtime plugin — shipping only one half
-    silently fails (e.g. `hideUntilReady` without the runtime plugin leaves the
-    container `visibility: hidden` forever). See `references/plugins.md`.
+12. **Plugins come in halves — wire both or neither.** A `$`-prefixed field
+    (`$splitText`) needs `Interact.use()` before `create()` for the runtime half and
+    the plugin's SSR generator in `generate()`'s `plugins` option for the CSS half.
+    Half a wiring fails silently: with `hideUntilReady` but no runtime plugin the
+    container stays `visibility: hidden` forever, because nothing ever sets the ready
+    marker the generated CSS is waiting on. See `references/plugins.md`.
 
 ## Verify your work (run before declaring done)
 
@@ -351,7 +352,7 @@ Items the validator cannot check — walk these after automated validation passe
 - [ ] Child-target effects put `selector`/`key` on the **effect**, not the interaction. Groups of items use one keyed wrapper + a **descendant** match (no duplicate keys): `selector` on the effect for a one-trigger stagger/sequence, `listContainer` on the interaction for per-item triggers.
 - [ ] Composite elements whose layers animate as one unit are keyed on a **single container** with one effect — the same effect is not copied onto each layer (distinct from intentional per-layer parallax, which uses different rates, or child-targeting to avoid hit-area shift).
 - [ ] Invariants 5–7, 10, 11, and 12 hold for the relevant triggers (separate source/target, child targets, `overflow: clip`, unique keys, layers collapsed to one container, plugins registered and paired).
-- [ ] When using plugins: `Interact.use()` precedes `create()`; `$`-prefixed fields only; split targets use `selector` on the effect with `fill: 'backwards'`; `.split-*` selectors match the classes the chosen `type` produces.
+- [ ] When using plugins: both halves wired (`Interact.use()` before `create()`, SSR generator in `generate()`); `$`-prefixed fields only; split targets carry `fill: 'backwards'` and a `.split-*` selector matching the classes the chosen `type` actually produces.
 
 If a dev server is available, load the page and confirm the animation runs and the
 browser console is free of "not found in registry" warnings.

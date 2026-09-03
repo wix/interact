@@ -141,19 +141,30 @@ For older environments supply a polyfill via the `segmenter` option.
 
 ### Canonical recipe
 
+The two plugin halves belong to **different phases**, so don't write them as one
+script. `splitTextStyle` is a build-time concern and `splitTextPlugin` is a runtime
+one; the CSS generation policy in `integration-recipes.md` applies here unchanged.
+
+The shared config:
+
 ```ts
-import { Interact, generate } from '@wix/interact/web';
-import { splitTextPlugin, splitTextStyle } from '@wix/splittext/plugin';
-import { FadeIn } from '@wix/motion-presets';
-
-Interact.registerEffects({ FadeIn });
-
 const config = {
   effects: {
     'char-fade-up': {
-      namedEffect: { type: 'FadeIn' },
-      duration: 400,
-      fill: 'backwards',
+      // A keyframeEffect, not a preset — see "Why not a preset here?" below.
+      // `em` keeps the rise proportional to the font size, which matters on a
+      // headline sized with clamp().
+      keyframeEffect: {
+        name: 'char-fade-up', // must be unique document-wide
+        keyframes: [
+          { opacity: 0, transform: 'translateY(0.4em)' },
+          { opacity: 1, transform: 'translateY(0)' },
+        ],
+      },
+      duration: 500,
+      easing: 'cubicOut',
+      triggerType: 'once',
+      fill: 'backwards', // required — see "Staggering split spans"
     },
   },
   interactions: [
@@ -166,12 +177,27 @@ const config = {
     },
   ],
 };
+```
 
-Interact.use('splitText', splitTextPlugin);
+**Phase 1 — generation (scratch script / build step, never ships):**
 
+```ts
+import { generate } from '@wix/interact/web';
+import { splitTextStyle } from '@wix/splittext/plugin'; // the SSR half only
+
+// No registerEffects() here — this config uses a keyframeEffect, not a preset.
+// A config that does use presets must still register them before generate().
 const css = generate(config, { useFirstChild: true, plugins: { splitText: splitTextStyle } });
-// Embed css in HTML — see integration-recipes.md
+// Write css into the page's <style> / a .css file — integration-recipes.md
+```
 
+**Phase 2 — runtime (the code you ship):**
+
+```ts
+import { Interact } from '@wix/interact/web';
+import { splitTextPlugin } from '@wix/splittext/plugin'; // the runtime half only
+
+Interact.use('splitText', splitTextPlugin); // BEFORE create()
 Interact.create(config);
 ```
 

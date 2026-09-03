@@ -5,6 +5,11 @@ Static schema + referential validation for `InteractConfig`. Runs with no DOM �
 ## When to validate
 
 - **Always (agent):** before `generate()` / `Interact.create()` and before declaring done.
+- **Order matters — validate the config you authored, before any runtime call touches
+  it.** Both `generate()` and `create()` inject generated ids into the config in place,
+  so validating (or serializing) it afterwards reports spurious errors and ships an
+  invalid config. Snapshot or emit it first. See "`generate()` and `create()` both
+  mutate…" in `config-schema.md`.
 - **After validation, for static site output:** follow the canonical CSS
   generation policy in `references/integration-recipes.md`.
 - **Never ship:** no `@wix/interact-validate` import or call in the code you deliver — unless the user explicitly asked for a permanent dev/CI guard.

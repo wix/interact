@@ -374,6 +374,23 @@ a map of plugin name → SSR style generator for `$<name>` config fields. When a
 config uses plugin fields, pass the matching generator here **and** register the
 runtime plugin with `Interact.use()` before `create()` — see `plugins.md`.
 
+**`generate()` and `create()` both mutate the config you pass — and the mutated
+object no longer validates.** They write generated ids back into it in place:
+`effectId` (`eff-0-0`, …) onto inline effects, `sequenceId` (`seq-0-0`, …) plus
+`conditions: []` onto inline sequences, and `create()` additionally writes `key`
+and an internal `interactionId`. Two rules for the standard build-then-ship flow:
+
+- **Validate the config you authored, before any runtime call touches it** — before
+  `generate()` and before `create()`.
+- **Serialize it before `generate()`/`create()`, not after** (`structuredClone` it,
+  or emit it first). Otherwise the page ships generator internals and an invalid config.
+
+If you do validate an already-processed config, the errors are artifacts of these
+injected ids — `SEQUENCE_ID_NOT_FOUND` (error) and `EFFECT_ID_NOT_FOUND` (warning)
+for ids that point at registry entries you never authored, and
+`SCHEMA_INVALID_UNION` from the unrecognized `interactionId`. Don't "fix" them by
+inventing top-level `effects`/`sequences` entries to satisfy the dangling ids.
+
 **FOUC prevention (viewEnter + once):** For entrance animations where source and
 target are the **same** element, `generate()` emits author-important initial rules
 that hide the target and neutralize transforms until its animation starts (gated
