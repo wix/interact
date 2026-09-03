@@ -139,6 +139,26 @@
         "Shipped CODE files contain no @wix/interact-validate / validateInteractConfig / assertValidInteractConfig / InteractValidationError reference (a mention in EXPLANATION.md/docs is fine).",
         "No invented or forbidden presets (no Bg*/ImageParallax/DVD/made-up names)."
       ]
+    },
+    {
+      "id": 8,
+      "name": "split-text-char-reveal",
+      "prompt": "Attached is my landing page (index.html) — plain static HTML, CDN, no build tools. I want the hero headline to reveal letter by letter as it scrolls into view, with a subtle fade-up on each character. Wire it up with @wix/interact and @wix/splittext. Give me the updated index.html.",
+      "expected_output": "Uses @wix/splittext/plugin (splitTextPlugin + splitTextStyle) — NOT hand-rolled text.split('') or manual per-char spans. Interact.use('splitText', splitTextPlugin) before create(). $splitText on the hero interaction with container: '.hero__title', type: 'chars', hideUntilReady: true. generate(config, { useFirstChild: true, plugins: { splitText: splitTextStyle } }) with CSS embedded in <head>. Sequence with offset staggering the effect's selector: '.split-c' and fill: 'backwards' on the entrance effect (source ≠ target). Real registered preset (FadeIn or similar). registerEffects before generate/create. Web entry point (<interact-element>). Config validated before emit; no @wix/interact-validate in shipped index.html.",
+      "files": ["skills/interactor/evals/files/split-text-headline/index.html"],
+      "assertions": [
+        "Uses @wix/splittext/plugin (splitTextPlugin, splitTextStyle) — NOT hand-rolled text.split('') or manual per-char span markup.",
+        "Interact.use('splitText', splitTextPlugin) is called BEFORE Interact.create().",
+        "$splitText field on the hero interaction with container matching '.hero__title', type: 'chars', and hideUntilReady: true.",
+        "generate() called with useFirstChild: true and plugins: { splitText: splitTextStyle }; CSS embedded in <head>.",
+        "Sequence with offset staggers the effect via selector: '.split-c' (not on the interaction).",
+        "Entrance effect sets fill: 'backwards' (source ≠ target — split spans are separate targets).",
+        "Uses a real registered preset (FadeIn or similar) with triggerType: 'once' on viewEnter.",
+        "Uses the /web entry point: <interact-element data-interact-key=...> + Interact.create(config).",
+        "Registers presets before use: Interact.registerEffects(...) called BEFORE generate/create.",
+        "Shipped index.html contains no @wix/interact-validate, validateInteractConfig, assertValidInteractConfig, or InteractValidationError reference.",
+        "No invented or forbidden presets (no Bg*/ImageParallax/DVD/made-up names)."
+      ]
     }
   ]
 }
