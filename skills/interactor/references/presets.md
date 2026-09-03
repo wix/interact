@@ -61,27 +61,27 @@ produces silently-wrong output. Never invent a `type`.
 For per-char or per-word text entrances, use the `$splitText` plugin to split
 text into spans, then stagger them with a sequence — see `plugins.md`.
 
-| Preset       | Params (default)                                                                                              | Look                                |
-| :----------- | :------------------------------------------------------------------------------------------------------------ | :---------------------------------- |
-| `FadeIn`     | —                                                                                                             | transparent → opaque                |
+| Preset       | Params (default)                                                                                              | Look                                    |
+| :----------- | :------------------------------------------------------------------------------------------------------------ | :-------------------------------------- |
+| `FadeIn`     | —                                                                                                             | transparent → opaque                    |
 | `GlideIn`    | `direction` 0–360 \| cardinal (`180`/left), `distance` (`{100,'percentage'}`)                                 | glides in from off-screen — **no fade** |
-| `SlideIn`    | `direction` cardinal (`'left'`), `initialTranslate` 0–1 (`1`)                                                 | slides in behind a clip mask        |
-| `FloatIn`    | `direction` cardinal (`'left'`)                                                                               | gentle drift + fade                 |
-| `RevealIn`   | `direction` cardinal (`'left'`)                                                                               | clip-path reveal from an edge       |
-| `ExpandIn`   | `initialScale` (`0`), `direction` number\|cardinal (`90`), `distance` (`{120,'percentage'}`)                  | expands from a point + fade         |
-| `BlurIn`     | `blur` px (`6`)                                                                                               | blurred → sharp + fade              |
-| `FlipIn`     | `direction` cardinal (`'top'`), `initialRotate` deg (`90`), `perspective` (`800`)                             | 3D flip into place                  |
-| `ArcIn`      | `direction` cardinal (`'right'`), `depth` (`{200,'px'}`), `perspective` (`800`)                               | swings in along a 3D arc            |
-| `ShuttersIn` | `direction` cardinal (`'right'`), `shutters` (`12`), `staggered` (`true`)                                     | shutter strips open — **no fade**   |
-| `CurveIn`    | `direction` `left\|right\|pseudoLeft\|pseudoRight` (`'right'`), `depth` (`{300,'px'}`), `perspective` (`200`) | 180° swing arc                      |
-| `DropIn`     | `initialScale` (`1.6`)                                                                                        | shrinks from larger to natural size |
-| `FoldIn`     | `direction` cardinal (`'top'`), `initialRotate` deg (`90`), `perspective` (`800`)                             | unfolds at a hinged edge            |
-| `ShapeIn`    | `shape` `circle\|ellipse\|rectangle\|diamond\|window` (`'rectangle'`)                                         | expanding clip-path shape           |
-| `TiltIn`     | `direction` `left\|right` (`'left'`), `depth` (`{200,'px'}`), `perspective` (`800`)                           | 3D tilt + clip reveal               |
-| `WinkIn`     | `direction` `horizontal\|vertical` (`'horizontal'`)                                                           | expands from the center axis        |
-| `SpinIn`     | `spins` (`0.5`), `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `initialScale` (`0`)             | spins + scales in                   |
-| `TurnIn`     | `direction` corner (`'top-left'`)                                                                             | rotates around a corner pivot       |
-| `BounceIn`   | `direction` cardinal\|`center` (`'bottom'`), `distanceFactor` (`1`), `perspective` (`800`)                    | elastic bounce in                   |
+| `SlideIn`    | `direction` cardinal (`'left'`), `initialTranslate` 0–1 (`1`)                                                 | slides in behind a clip mask            |
+| `FloatIn`    | `direction` cardinal (`'left'`)                                                                               | gentle drift + fade                     |
+| `RevealIn`   | `direction` cardinal (`'left'`)                                                                               | clip-path reveal from an edge           |
+| `ExpandIn`   | `initialScale` (`0`), `direction` number\|cardinal (`90`), `distance` (`{120,'percentage'}`)                  | expands from a point + fade             |
+| `BlurIn`     | `blur` px (`6`)                                                                                               | blurred → sharp + fade                  |
+| `FlipIn`     | `direction` cardinal (`'top'`), `initialRotate` deg (`90`), `perspective` (`800`)                             | 3D flip into place                      |
+| `ArcIn`      | `direction` cardinal (`'right'`), `depth` (`{200,'px'}`), `perspective` (`800`)                               | swings in along a 3D arc                |
+| `ShuttersIn` | `direction` cardinal (`'right'`), `shutters` (`12`), `staggered` (`true`)                                     | shutter strips open — **no fade**       |
+| `CurveIn`    | `direction` `left\|right\|pseudoLeft\|pseudoRight` (`'right'`), `depth` (`{300,'px'}`), `perspective` (`200`) | 180° swing arc                          |
+| `DropIn`     | `initialScale` (`1.6`)                                                                                        | shrinks from larger to natural size     |
+| `FoldIn`     | `direction` cardinal (`'top'`), `initialRotate` deg (`90`), `perspective` (`800`)                             | unfolds at a hinged edge                |
+| `ShapeIn`    | `shape` `circle\|ellipse\|rectangle\|diamond\|window` (`'rectangle'`)                                         | expanding clip-path shape               |
+| `TiltIn`     | `direction` `left\|right` (`'left'`), `depth` (`{200,'px'}`), `perspective` (`800`)                           | 3D tilt + clip reveal                   |
+| `WinkIn`     | `direction` `horizontal\|vertical` (`'horizontal'`)                                                           | expands from the center axis            |
+| `SpinIn`     | `spins` (`0.5`), `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `initialScale` (`0`)             | spins + scales in                       |
+| `TurnIn`     | `direction` corner (`'top-left'`)                                                                             | rotates around a corner pivot           |
+| `BounceIn`   | `direction` cardinal\|`center` (`'bottom'`), `distanceFactor` (`1`), `perspective` (`800`)                    | elastic bounce in                       |
 
 ---
 
