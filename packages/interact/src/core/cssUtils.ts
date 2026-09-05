@@ -83,8 +83,8 @@ export function keyframeObjectToKeyframeCSS(keyframeObj: Keyframe, percentage: n
       const cssKey = keyframePropertyToCSS(key);
       return `${cssKey}: ${value};`;
     })
-    .join('\n');
-  return `${percentage}% {\n${properties}\n}`;
+    .join('\n    ');
+  return `${percentage}% {\n    ${properties}\n  }`;
 }
 
 export function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
@@ -100,9 +100,9 @@ export function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
 
       return keyframeObjectToKeyframeCSS(kf, percentage);
     })
-    .join('\n');
+    .join('\n  ');
 
-  return `@keyframes ${name} {\n${keyframeBlocks}\n}`;
+  return `@keyframes ${name} {\n  ${keyframeBlocks}\n}`;
 }
 
 export function CSSRuleToString(rule: CSSRuleData): string {
@@ -139,8 +139,8 @@ export function CSSRuleToString(rule: CSSRuleData): string {
 
   const declarationsStr = declarations
     .map(({ name, value, important }) => `${name}: ${value}${important ? ' !important' : ''};`)
-    .join('\n');
-  const cssRule = `${selector} {\n${declarationsStr}\n}`;
+    .join('\n  ');
+  const cssRule = `${selector} {\n  ${declarationsStr}\n}`;
 
   return media ? `@media ${media} {\n${cssRule}\n}` : cssRule;
 }
@@ -172,11 +172,13 @@ export function buildAtPropertyRules(
   transitionSlotLength: number,
 ) : string[] {
   return LIST_PROPERTY_NAMES.flatMap((name) => [
-    ...Array(name === 'transition' ? transitionLength : animationLength).map(
+    ...Array.from(
+      { length: name === 'transition' ? transitionLength : animationLength },
       (_, i) => `@property ${getCustomPropName(name, i)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`
     ),
-    ...Array(name === 'transition' ? animationSlotLength : transitionSlotLength).map(
-      (_, i) => `@property ${getCustomPropName(name, i)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`
+    ...Array.from(
+      { length: name === 'transition' ? transitionSlotLength : animationSlotLength },
+      (_, i) => `@property ${getCustomPropName(name, i, true)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`
     ),
   ])
 }
@@ -204,7 +206,8 @@ export function buildSequenceListsRule(
   const declarations = propertyNames.map(
     (name) => ({
       name: getCustomPropName(name, name === 'transition' ? transitionIndex : animationIndex),
-      value: Array(name === 'transition' ? transitionLength : animationLength).map(
+      value: Array.from(
+        { length: name === 'transition' ? transitionLength : animationLength },
         (_, i) => `var(${getCustomPropName(name, i + (name === 'transition' ? transitionSlotIndex : animationSlotIndex), true)})`
       ).join(', ')}),
   );
@@ -239,7 +242,8 @@ export function buildListsRule(
   const declarations = propertyNames.map(
     (name) => ({
       name,
-      value: Array(name === 'transition' ? transitionLength : animationLength).map(
+      value: Array.from(
+        { length: name === 'transition' ? transitionLength : animationLength },
         // TODO: maybe add `-intrct` to names? --anm-0 or --trns-0 could collide with user-defined names
         (_, i) => `var(${getCustomPropName(name, i)})`
       ).join(', ')}),

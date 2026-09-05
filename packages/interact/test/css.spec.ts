@@ -397,11 +397,27 @@ describe('css.generate', () => {
   });
 });
 
-const isAnimationProp = (name: string) => /^--animation-\d/.test(name);
-const isCompositionProp = (name: string) => /^--animation-composition-/.test(name);
-const isTransitionProp = (name: string) => /^--transition-/.test(name);
-const isTimelineProp = (name: string) => /^--animation-timeline-/.test(name);
-const isRangeProp = (name: string) => /^--animation-range-/.test(name);
+const isAnimationProp = (name: string) => /^--anm-(slot-)?\d/.test(name);
+const isCompositionProp = (name: string) => /^--anm-cmps-(slot-)?\d/.test(name);
+const isTransitionProp = (name: string) => /^--trns-(slot-)?\d/.test(name);
+const isTimelineProp = (name: string) => /^--anm-tmln-(slot-)?\d/.test(name);
+const isRangeProp = (name: string) => /^--anm-rng-(slot-)?\d/.test(name);
+
+function parseListsRule(listsRule: string) {
+  const [, selector = '', body = ''] = listsRule.match(/^([^{]+)\{([\s\S]*)\}$/) || [];
+
+  return {
+    selectors: selector.trim().split(', ').filter(Boolean),
+    declarations: body
+      .split(';')
+      .map((declaration) => declaration.trim())
+      .filter(Boolean)
+      .map((declaration) => ({
+        name: declaration.slice(0, declaration.indexOf(':')).trim(),
+        value: declaration.slice(declaration.indexOf(':') + 1).trim(),
+      })),
+  };
+}
 
 function findDecl(
   declarations: CSSRuleData['declarations'],
@@ -731,20 +747,16 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { listsRule } = _generate(config);
+      const { declarations } = parseListsRule(listsRule);
 
-      const coordListRule = cssRules.find(
-        (r) =>
-          r.declarations.some((d) => d.name === 'animation-timeline') &&
-          String(r.declarations.find((d) => d.name === 'animation-timeline')?.value).includes(
-            '), var(',
-          ),
-      );
-      expect(coordListRule).toBeDefined();
+      const timelineListDecl = declarations.find((d) => d.name === 'animation-timeline');
+      expect(timelineListDecl).toBeDefined();
+      expect(timelineListDecl!.value).toBe('var(--anm-tmln-0), var(--anm-tmln-1)');
 
-      const rangeListDecl = coordListRule!.declarations.find((d) => d.name === 'animation-range');
+      const rangeListDecl = declarations.find((d) => d.name === 'animation-range');
       expect(rangeListDecl).toBeDefined();
-      expect(String(rangeListDecl!.value)).toContain('), var(');
+      expect(rangeListDecl!.value).toBe('var(--anm-rng-0), var(--anm-rng-1)');
     });
 
     it('should set timeline to none and range to normal for non-viewProgress keyframeEffect', () => {
@@ -1310,7 +1322,7 @@ describe('css._generate', () => {
 
         return cssRules
           .flatMap((r) => r.declarations)
-          .filter((d) => isAnimationProp(d.name) && !String(d.value).includes('var(--animation'))
+          .filter((d) => isAnimationProp(d.name) && !String(d.value).includes('var(--anm'))
           .map((d) => String(d.value))
           .join('\n');
       };
@@ -1449,25 +1461,25 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { listsRule } = _generate(config);
+      const { selectors, declarations } = parseListsRule(listsRule);
 
-      const coordListRule = cssRules.find(
-        (r) =>
-          r.declarations.some((d) => d.name === 'animation') &&
-          String(r.declarations.find((d) => d.name === 'animation')?.value).includes('), var('),
-      );
-      expect(coordListRule).toBeDefined();
+      expect(selectors).toEqual(['[data-interact-key="el"] > :first-child']);
 
-      const timelineDecl = coordListRule!.declarations.find((d) => d.name === 'animation-timeline');
+      const animationDecl = declarations.find((d) => d.name === 'animation');
+      expect(animationDecl).toBeDefined();
+      expect(animationDecl!.value).toBe('var(--anm-0), var(--anm-1)');
+
+      const timelineDecl = declarations.find((d) => d.name === 'animation-timeline');
       expect(timelineDecl).toBeDefined();
-      expect(String(timelineDecl!.value)).toContain('), var(');
+      expect(timelineDecl!.value).toBe('var(--anm-tmln-0), var(--anm-tmln-1)');
 
-      const rangeDecl = coordListRule!.declarations.find((d) => d.name === 'animation-range');
+      const rangeDecl = declarations.find((d) => d.name === 'animation-range');
       expect(rangeDecl).toBeDefined();
-      expect(String(rangeDecl!.value)).toContain('), var(');
+      expect(rangeDecl!.value).toBe('var(--anm-rng-0), var(--anm-rng-1)');
     });
 
-    it('should produce separate coordinated-list rules for different targets', () => {
+    it('should produce a single coordinated-list rule covering all targets', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -1502,18 +1514,17 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { listsRule } = _generate(config);
+      const { selectors, declarations } = parseListsRule(listsRule);
 
-      const coordListRules = cssRules.filter(
-        (r) =>
-          r.declarations.some((d) => d.name === 'animation') &&
-          String(r.declarations.find((d) => d.name === 'animation')?.value).includes('var('),
-      );
-      expect(coordListRules.length).toBe(2);
+      expect(selectors).toEqual([
+        '[data-interact-key="el-a"] > :first-child',
+        '[data-interact-key="el-b"] > :first-child',
+      ]);
 
-      const keys = coordListRules.map((r) => r.key);
-      expect(keys).toContain('el-a');
-      expect(keys).toContain('el-b');
+      const animationDecl = declarations.find((d) => d.name === 'animation');
+      expect(animationDecl).toBeDefined();
+      expect(animationDecl!.value).toBe('var(--anm-0)');
     });
   });
 
@@ -1654,7 +1665,7 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { cssRules, listsRule } = _generate(config);
 
       const effectRules = cssRules.filter((r) =>
         r.declarations.some((d) => isAnimationProp(d.name)),
@@ -1666,12 +1677,10 @@ describe('css._generate', () => {
       );
       expect(new Set(animPropNames).size).toBe(1);
 
-      const coordListRules = cssRules.filter(
-        (r) =>
-          r.declarations.some((d) => d.name === 'animation') &&
-          String(r.declarations.find((d) => d.name === 'animation')?.value).includes('var('),
-      );
-      expect(coordListRules).toHaveLength(1);
+      const { declarations } = parseListsRule(listsRule);
+      const animationDecl = declarations.find((d) => d.name === 'animation');
+      expect(animationDecl).toBeDefined();
+      expect(animationDecl!.value).toBe('var(--anm-0)');
     });
   });
 
@@ -1756,7 +1765,7 @@ describe('css._generate', () => {
       expect(calls[0].value).toEqual({ container: '.title', type: 'chars' });
       expect(calls[0].ctx.key).toBe('hero');
       expect(calls[0].ctx.scope).toBe('interaction');
-      expect(result).toContain('[data-interact-key="hero"] .title {\nvisibility: hidden;\n}');
+      expect(result).toContain('[data-interact-key="hero"] .title {\n  visibility: hidden;\n}');
     });
 
     it('does nothing when no plugins option is passed', () => {

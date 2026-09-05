@@ -163,6 +163,7 @@ function effectToCSS(
     }));
 
     // declare custom parameters
+    // TODO - register those to define with @property to prevent unintended override
     declarations.push(
       ...cssAnimations.flatMap(({ custom }) =>
         Object.entries(custom || {})
@@ -171,15 +172,18 @@ function effectToCSS(
       ),
     );
 
+    // TODO - we always set everything to avoid cascade mistakes. but with @property there is initial-value,
+    // so as long as no non-default value was set for a property in any previous effect/sequence in the same interaction
+    // we can skip setting it here to default
     const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
       name: customProps[propertyName],
       value:
         cssAnimations
           .map((animation) => {
             const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
-            return (animation as Record<string, unknown>)[name];
+            return (animation as Record<string, unknown>)[name] || LIST_PROPERTY_FALLBACKS[propertyName];
           })
-          .join(', ') || LIST_PROPERTY_FALLBACKS[propertyName],
+          .join(', '),
     }));
 
     if (initial) {
