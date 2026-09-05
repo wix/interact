@@ -112,6 +112,7 @@ function effectToCSS(
   configConditions: Record<string, Condition>,
   trigger: TriggerVariant,
   customProps: Record<ListPropertyName, string>,
+  nonDefaults: Set<string>,
   childSelector?: string,
   plugins?: InteractPluginStyles,
   sequence?: ResolvedSequence,
@@ -172,10 +173,8 @@ function effectToCSS(
       ),
     );
 
-    // TODO - we always set everything to avoid cascade mistakes. but with @property there is initial-value,
-    // so as long as no non-default value was set for a property in any previous effect/sequence in the same interaction
-    // we can skip setting it here to default
     const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
+      _listPropertyName: propertyName,
       name: customProps[propertyName],
       value:
         cssAnimations
@@ -184,7 +183,10 @@ function effectToCSS(
             return (animation as Record<string, unknown>)[name] || LIST_PROPERTY_FALLBACKS[propertyName];
           })
           .join(', '),
-    }));
+    })).filter(({ _listPropertyName, name, value }) =>
+      value !== LIST_PROPERTY_FALLBACKS[_listPropertyName] || nonDefaults.has(name)
+    );
+    animationDeclarations.forEach(({ name }) => nonDefaults.add(name));
 
     if (initial) {
       // declare animation custom properties with initial dependent on data-motion-enter
@@ -213,10 +215,13 @@ function effectToCSS(
     const transitions = transitionEffectToTransitionsList(effect);
 
     // declaring transition custom property
-    declarations.push({
-      name: customProps.transition,
-      value: transitions.join(', ') || LIST_PROPERTY_FALLBACKS.transition,
-    });
+    if (transitions.length || nonDefaults.has(customProps.transition)) {
+      declarations.push({
+        name: customProps.transition,
+        value: transitions.join(', ') || LIST_PROPERTY_FALLBACKS.transition,
+      });
+      nonDefaults.add(customProps.transition);
+    }
 
     // adding state rule
     rules.push({
@@ -230,7 +235,9 @@ function effectToCSS(
   } else {
     // setting off animation custom properties
     declarations.push(
-      ...LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
+      ...LIST_ANIMATION_PROPERTY_NAMES.filter((propertyName) =>
+        nonDefaults.has(customProps[propertyName])
+      ).map((propertyName) => ({
         name: customProps[propertyName],
         value: LIST_PROPERTY_FALLBACKS[propertyName],
       })),
@@ -257,6 +264,7 @@ function parseEffect(
     sequenceTransitionIndex: number;
     hasAnimation: boolean;
     hasTransition: boolean;
+    nonDefaults: Set<string>;
   }>,
   visited: Set<string>,
   keyframesMap: Map<string, Keyframe[]>,
@@ -285,6 +293,7 @@ function parseEffect(
     sequenceTransitionIndex: 0,
     hasAnimation: false,
     hasTransition: false,
+    nonDefaults: new Set<string>(),
   };
   visited.add(targetHash);
 
@@ -313,6 +322,7 @@ function parseEffect(
     configConditions,
     trigger,
     customProps,
+    current.nonDefaults,
     childSelector,
     plugins,
     sequence,
@@ -320,8 +330,10 @@ function parseEffect(
 
   keyframes.forEach(({ name, keyframes }) => keyframesMap.set(name, keyframes));
 
-  const hasAnimation = Boolean(effect.namedEffect || effect.keyframeEffect);
-  const hasTransition = Boolean(effect.transition || effect.transitionProperties);
+  const hasAnimation = LIST_ANIMATION_PROPERTY_NAMES.some(
+    (propertyName) => current.nonDefaults.has(customProps[propertyName])
+  );
+  const hasTransition = current.nonDefaults.has(customProps['transition']);
   current.hasAnimation ||= hasAnimation;
   current.hasTransition ||= hasTransition;
   if (sequence) {
@@ -350,6 +362,7 @@ function parseSequence(
     sequenceTransitionIndex: number;
     hasAnimation: boolean;
     hasTransition: boolean;
+    nonDefaults: Set<string>;
   }>,
   visited: Set<string>,
   keyframesMap: Map<string, Keyframe[]>,
@@ -360,20 +373,17 @@ function parseSequence(
 
   const localVisited = new Set<string>();
 
-  for (const effect of sequence.effects) {
-    const rules = parseEffect(
-      effect,
-      configConditions,
-      trigger,
-      targetsMap,
-      localVisited,
-      keyframesMap,
-      useFirstChild,
-      plugins,
-      sequence,
-    );
-    cssRules.push(...rules);
-  }
+  cssRules.push(...sequence.effects.flatMap((effect) => parseEffect(
+    effect,
+    configConditions,
+    trigger,
+    targetsMap,
+    localVisited,
+    keyframesMap,
+    useFirstChild,
+    plugins,
+    sequence,
+  )));
 
   const { conditions } = sequence;
 
@@ -396,6 +406,7 @@ function parseSequence(
       configConditions,
     );
     if (rule) {
+      rule.declarations.forEach(({ name }) => current.nonDefaults.add(name));
       cssRules.push(rule);
     }
 
@@ -424,6 +435,7 @@ function parseInteraction(
     sequenceTransitionIndex: number;
     hasAnimation: boolean;
     hasTransition: boolean;
+    nonDefaults: Set<string>;
   }>,
   keyframesMap: Map<string, Keyframe[]>,
   useFirstChild: boolean = true,
@@ -543,6 +555,7 @@ export function _generate(
     sequenceTransitionIndex: number;
     hasAnimation: boolean;
     hasTransition: boolean;
+    nonDefaults: Set<string>;
   }>();
   const keyframes = new Map<string, Keyframe[]>();
 
@@ -595,7 +608,7 @@ export function generate(config: InteractConfig, options?: boolean | GenerateOpt
     ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),
     ...cssRules.map(CSSRuleToString),
     listsRule
-  ];
+  ].filter((rule) => rule);
 
   return css.join('\n');
 }

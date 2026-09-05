@@ -759,7 +759,7 @@ describe('css._generate', () => {
       expect(rangeListDecl!.value).toBe('var(--anm-rng-0), var(--anm-rng-1)');
     });
 
-    it('should set timeline to none and range to normal for non-viewProgress keyframeEffect', () => {
+    it('should leave timeline and range at their @property defaults for non-viewProgress keyframeEffect', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -780,18 +780,22 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { cssRules, atProperty } = _generate(config);
 
       const effectRule = cssRules.find((r) => r.declarations.some((d) => isAnimationProp(d.name)))!;
 
-      const timelineDecl = findDecl(effectRule.declarations, (d) => isTimelineProp(d.name));
-      expect(timelineDecl!.value).toBe('auto');
+      expect(findDecl(effectRule.declarations, (d) => isTimelineProp(d.name))).toBeUndefined();
+      expect(findDecl(effectRule.declarations, (d) => isRangeProp(d.name))).toBeUndefined();
 
-      const rangeDecl = findDecl(effectRule.declarations, (d) => isRangeProp(d.name));
-      expect(rangeDecl!.value).toBe('normal');
+      expect(atProperty).toContain(
+        '@property --anm-tmln-0 { syntax: "*"; inherits: false; initial-value: auto; }',
+      );
+      expect(atProperty).toContain(
+        '@property --anm-rng-0 { syntax: "*"; inherits: false; initial-value: normal; }',
+      );
     });
 
-    it('should include timeline and range custom props on initial rule for viewEnter', () => {
+    it('should keep the animation slot on the initial rule for viewEnter, with timeline and range left to @property', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -812,20 +816,23 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { cssRules, atProperty } = _generate(config);
 
       const initialRule = cssRules.find(
         (r) => r.selectorSuffix === ':not([data-interact-enter="done"])',
       )!;
       expect(initialRule).toBeDefined();
 
-      const timelineDecl = findDecl(initialRule.declarations, (d) => isTimelineProp(d.name));
-      expect(timelineDecl).toBeDefined();
-      expect(timelineDecl!.value).toBe('auto');
+      expect(findDecl(initialRule.declarations, (d) => isAnimationProp(d.name))).toBeDefined();
+      expect(findDecl(initialRule.declarations, (d) => isTimelineProp(d.name))).toBeUndefined();
+      expect(findDecl(initialRule.declarations, (d) => isRangeProp(d.name))).toBeUndefined();
 
-      const rangeDecl = findDecl(initialRule.declarations, (d) => isRangeProp(d.name));
-      expect(rangeDecl).toBeDefined();
-      expect(rangeDecl!.value).toBe('normal');
+      expect(atProperty).toContain(
+        '@property --anm-tmln-0 { syntax: "*"; inherits: false; initial-value: auto; }',
+      );
+      expect(atProperty).toContain(
+        '@property --anm-rng-0 { syntax: "*"; inherits: false; initial-value: normal; }',
+      );
     });
 
     it('should produce a view-timeline rule for viewProgress trigger', () => {
@@ -970,7 +977,7 @@ describe('css._generate', () => {
   });
 
   describe('effectToCSS - no effect property', () => {
-    it('should set all custom properties to off values when effect has no animation or transition', () => {
+    it('should emit nothing when the effect has no animation or transition and nothing set the slots', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -982,22 +989,78 @@ describe('css._generate', () => {
         ],
       };
 
+      expect(_generate(config).cssRules).toEqual([]);
+      expect(generate(config)).toBe('');
+    });
+
+    it('should reset only the slots a previous effect on the same target set to a non-default', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'kf1',
+                duration: 300,
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+              { effectId: 'empty1' },
+            ],
+          },
+        ],
+      };
+
       const { cssRules } = _generate(config);
 
-      const effectRule = cssRules.find(
-        (r) =>
-          r.declarations.some((d) => isAnimationProp(d.name) && d.value === 'none') &&
-          r.declarations.some((d) => isCompositionProp(d.name) && d.value === 'replace'),
+      const offRule = cssRules.find((r) =>
+        r.declarations.some((d) => isAnimationProp(d.name) && d.value === 'none'),
       );
-      expect(effectRule).toBeDefined();
+      expect(offRule).toBeDefined();
 
-      const timelineDecl = findDecl(effectRule!.declarations, (d) => isTimelineProp(d.name));
-      expect(timelineDecl).toBeDefined();
-      expect(timelineDecl!.value).toBe('auto');
+      expect(findDecl(offRule!.declarations, (d) => isCompositionProp(d.name))).toBeUndefined();
+      expect(findDecl(offRule!.declarations, (d) => isTimelineProp(d.name))).toBeUndefined();
+      expect(findDecl(offRule!.declarations, (d) => isRangeProp(d.name))).toBeUndefined();
+    });
 
-      const rangeDecl = findDecl(effectRule!.declarations, (d) => isRangeProp(d.name));
-      expect(rangeDecl).toBeDefined();
-      expect(rangeDecl!.value).toBe('normal');
+    it('should not reset a slot an earlier interaction set, since the later interaction gets its own slot', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'kf1',
+                duration: 300,
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
+          },
+          {
+            key: 'el',
+            trigger: 'hover',
+            effects: [{ effectId: 'empty1' }],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      expect(
+        cssRules.some((r) => r.declarations.some((d) => isAnimationProp(d.name) && d.value !== 'none')),
+      ).toBe(true);
+      expect(
+        cssRules.some((r) => r.declarations.some((d) => isAnimationProp(d.name) && d.value === 'none')),
+      ).toBe(false);
     });
 
     it('should produce no keyframes for an effect with no animation', () => {
@@ -1566,7 +1629,16 @@ describe('css._generate', () => {
           {
             key: 'el',
             trigger: 'click',
-            effects: [{ effectId: 'e1' }],
+            effects: [
+              {
+                effectId: 'e1',
+                duration: 300,
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
           },
         ],
       };
@@ -1584,13 +1656,23 @@ describe('css._generate', () => {
           {
             key: 'el',
             trigger: 'click',
-            effects: [{ effectId: 'e1' }],
+            effects: [
+              {
+                effectId: 'e1',
+                duration: 300,
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
           },
         ],
       };
 
       const { cssRules } = _generate(config, false);
 
+      expect(cssRules).not.toEqual([]);
       const ruleWithFirstChild = cssRules.find((r) => r.childSelector === '> :first-child');
       expect(ruleWithFirstChild).toBeUndefined();
     });
@@ -1691,7 +1773,16 @@ describe('css._generate', () => {
         {
           key: 'el',
           trigger: 'click',
-          effects: [{ effectId: 'e1' }],
+          effects: [
+            {
+              effectId: 'e1',
+              duration: 300,
+              keyframeEffect: {
+                name: 'anim1',
+                keyframes: [{ opacity: '0' }, { opacity: '1' }],
+              },
+            },
+          ],
         },
       ],
     };
