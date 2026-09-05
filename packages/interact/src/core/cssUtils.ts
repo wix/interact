@@ -1,8 +1,6 @@
 import type {
   Condition,
   ListPropertyName,
-  ListCustomProps,
-  CSSCoordinatedLists,
   CSSRuleData,
 } from '../types';
 import { toCSSPropertyName } from '@wix/motion';
@@ -147,38 +145,110 @@ export function CSSRuleToString(rule: CSSRuleData): string {
   return media ? `@media ${media} {\n${cssRule}\n}` : cssRule;
 }
 
-export function buildListsRule(
-  lists: CSSCoordinatedLists,
-  customProps?: ListCustomProps,
+export const LIST_ANIMATION_PROPERTY_NAMES = [
+  'animation',
+  'animation-composition',
+  'animation-timeline',
+  'animation-range',
+] as const satisfies readonly ListPropertyName[];
+export const LIST_PROPERTY_NAMES = [...LIST_ANIMATION_PROPERTY_NAMES, 'transition'] as const satisfies readonly ListPropertyName[];
+export const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
+  transition: '_',
+  animation: 'none',
+  'animation-composition': 'replace',
+  'animation-timeline': 'auto',
+  'animation-range': 'normal',
+};
+
+// TODO: maybe add `-intrct` to names? --anm-0 or --trns-0 could collide with user-defined names
+export function getCustomPropName(name: string, index: number, isSlot: boolean = false): string {
+  return `--${name.replace(/(?<!(^|-))([aeiou]|tion)/g, '')}${isSlot ? '-slot' : ''}-${index}`;
+}
+
+export function buildAtPropertyRules(
+  animationLength: number,
+  transitionLength: number,
+  animationSlotLength: number,
+  transitionSlotLength: number,
+) : string[] {
+  return LIST_PROPERTY_NAMES.flatMap((name) => [
+    ...Array(name === 'transition' ? transitionLength : animationLength).map(
+      (_, i) => `@property ${getCustomPropName(name, i)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`
+    ),
+    ...Array(name === 'transition' ? animationSlotLength : transitionSlotLength).map(
+      (_, i) => `@property ${getCustomPropName(name, i)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`
+    ),
+  ])
+}
+
+export function buildSequenceListsRule(
+  animationLength: number,
+  transitionLength: number,
+  animationIndex: number,
+  transitionIndex: number,
+  animationSlotIndex: number,
+  transitionSlotIndex: number,
+  key: string,
+  childSelector?: string,
   conditions?: string[],
   configConditions?: Record<string, Condition>,
-): CSSRuleData {
-  const { key, childSelector, properties } = lists;
+) : CSSRuleData | null {
+  const propertyNames = [
+    ...(animationLength <= 0 ? [] : LIST_ANIMATION_PROPERTY_NAMES),
+    ...(transitionLength <= 0 ? [] : ['transition']),
+  ];
+  if (propertyNames.length === 0) {
+    return null;
+  }
 
-  const declarations = Object.entries(properties)
-    .filter(
-      (entry: [string, { fallback: string; varNames: string[] }]) =>
-        entry[1] && entry[1].varNames.length,
-    )
-    .map(([name, { fallback, varNames }]) => ({
-      name,
-      value: varNames.map((n) => `var(${n}, ${fallback})`).join(', '),
-    }));
+  const declarations = propertyNames.map(
+    (name) => ({
+      name: getCustomPropName(name, name === 'transition' ? transitionIndex : animationIndex),
+      value: Array(name === 'transition' ? transitionLength : animationLength).map(
+        (_, i) => `var(${getCustomPropName(name, i + (name === 'transition' ? transitionSlotIndex : animationSlotIndex), true)})`
+      ).join(', ')}),
+  );
 
   const rule: CSSRuleData = { key, childSelector, declarations };
 
-  // option to assign into custom-properties instead of directly into the actual css properties
-  if (customProps) {
-    rule.declarations.forEach((declaration) => {
-      declaration.name = customProps[declaration.name as ListPropertyName];
-    });
-  }
-
-  // option to add conditions to the rules
   if (conditions) {
     rule.media = getFullPredicateByType(conditions, configConditions || {}, 'media');
     rule.selectorCondition = getSelectorCondition(conditions, configConditions || {});
   }
 
   return rule;
+}
+
+export function buildListsRule(
+  targets: { key: string; childSelector?: string }[],
+  animationLength: number,
+  transitionLength: number,
+) : string {
+  if (targets.length === 0) {
+    return '';
+  }
+
+  const propertyNames = [
+    ...(animationLength <= 0 ? [] : LIST_ANIMATION_PROPERTY_NAMES),
+    ...(transitionLength <= 0 ? [] : ['transition']),
+  ];
+  if (propertyNames.length === 0) {
+    return '';
+  }
+
+  const declarations = propertyNames.map(
+    (name) => ({
+      name,
+      value: Array(name === 'transition' ? transitionLength : animationLength).map(
+        // TODO: maybe add `-intrct` to names? --anm-0 or --trns-0 could collide with user-defined names
+        (_, i) => `var(${getCustomPropName(name, i)})`
+      ).join(', ')}),
+  );
+
+  const joinedSelector = targets.map(
+    ({ key, childSelector }) => `[data-interact-key="${key}"]${childSelector ? ` ${childSelector}` : ''}`
+  ).join(', ');
+
+
+  return `${joinedSelector} {\n${declarations.map(({ name, value }) => `  ${name}: ${value};`).join('\n')}\n}`;
 }

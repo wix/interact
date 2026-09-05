@@ -35,7 +35,7 @@ export function resolveEffectForCSS(
   const { key: interactionKey, trigger } = interaction;
   const isPointerMove = trigger === 'pointerMove';
 
-  // ensuring the original refernce of the effect has an id (required for states)
+  // ensuring the original reference of the effect has an id (required for states)
   if (!effect.effectId) {
     effect.effectId = fallbackId || generateId();
   }
@@ -137,13 +137,13 @@ export function resolveSequenceForCSS(
     ...new Set((conditions || []).filter((condition: string) => configConditions[condition])),
   ];
   // resolving effects and cascading the conditions from sequence
-  const resolvedEffects = effects.map((effect) => {
+  const resolvedEffects = effects.map((effect, index) => {
     if (!effect.conditions) {
       effect.conditions = [...conditions];
     } else {
       effect.conditions.push(...conditions);
     }
-    return resolveEffectForCSS({ ...effect, triggerType }, interaction, config);
+    return resolveEffectForCSS({ ...effect, triggerType }, interaction, config, `${sequenceId}-eff-${index}`);
   });
 
   // removing unsupported effects and the whole sequence if all are unsupported
