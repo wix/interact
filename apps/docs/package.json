@@ -11,7 +11,7 @@
     "test": "echo 'No tests yet'"
   },
   "dependencies": {
-    "@wix/interact": "^2.5.13",
+    "@wix/interact": "^2.5.14",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.1",
