@@ -10,6 +10,7 @@ import {
   buildAtPropertyRules,
   getCustomPropName,
 } from '../src/core/cssUtils';
+import type { ListSlots } from '../src/core/cssUtils';
 import type { CSSRuleData } from '../src/types/css';
 
 describe('keyframePropertyToCSS', () => {
@@ -443,8 +444,25 @@ describe('buildListsRule', () => {
 });
 
 describe('buildSequenceListsRule', () => {
+  const target = ({
+    key = 'my-el',
+    childSelector,
+    animation,
+    transition,
+  }: {
+    key?: string;
+    childSelector?: string;
+    animation?: Partial<ListSlots>;
+    transition?: Partial<ListSlots>;
+  } = {}) => ({
+    key,
+    childSelector,
+    animation: { listIndex: 0, slotCursor: 0, slotsInSequence: 0, ...animation },
+    transition: { listIndex: 0, slotCursor: 0, slotsInSequence: 0, ...transition },
+  });
+
   it('should assign the interaction custom property from the sequence slot properties', () => {
-    const rule = buildSequenceListsRule(2, 0, 0, 0, 0, 0, 'my-el')!;
+    const rule = buildSequenceListsRule(target({ animation: { slotsInSequence: 2 } }))!;
 
     expect(rule.key).toBe('my-el');
     expect(rule.declarations).toEqual([
@@ -456,7 +474,9 @@ describe('buildSequenceListsRule', () => {
   });
 
   it('should offset the slot names by the slot index', () => {
-    const rule = buildSequenceListsRule(2, 0, 1, 0, 3, 0, 'my-el')!;
+    const rule = buildSequenceListsRule(
+      target({ animation: { slotsInSequence: 2, listIndex: 1, slotCursor: 3 } }),
+    )!;
 
     expect(rule.declarations[0]).toEqual({
       name: '--anm-1',
@@ -465,23 +485,40 @@ describe('buildSequenceListsRule', () => {
   });
 
   it('should include childSelector when present', () => {
-    const rule = buildSequenceListsRule(1, 0, 0, 0, 0, 0, 'my-el', '.target')!;
+    const rule = buildSequenceListsRule(
+      target({ childSelector: '.target', animation: { slotsInSequence: 1 } }),
+    )!;
 
     expect(rule.childSelector).toBe('.target');
   });
 
   it('should omit animation properties when there are no animations', () => {
-    const rule = buildSequenceListsRule(0, 1, 0, 0, 0, 0, 'my-el')!;
+    const rule = buildSequenceListsRule(target({ transition: { slotsInSequence: 1 } }))!;
 
     expect(rule.declarations).toEqual([{ name: '--trns-0', value: 'var(--trns-slot-0)' }]);
   });
 
+  it('should offset transition slots independently of animation slots', () => {
+    const rule = buildSequenceListsRule(
+      target({
+        animation: { slotsInSequence: 1, listIndex: 2, slotCursor: 4 },
+        transition: { slotsInSequence: 2, listIndex: 1, slotCursor: 3 },
+      }),
+    )!;
+
+    expect(rule.declarations[0]).toEqual({ name: '--anm-2', value: 'var(--anm-slot-4)' });
+    expect(rule.declarations[4]).toEqual({
+      name: '--trns-1',
+      value: 'var(--trns-slot-3), var(--trns-slot-4)',
+    });
+  });
+
   it('should return null when there are no list properties', () => {
-    expect(buildSequenceListsRule(0, 0, 0, 0, 0, 0, 'my-el')).toBeNull();
+    expect(buildSequenceListsRule(target())).toBeNull();
   });
 
   it('should add media condition when conditions with media type are provided', () => {
-    const rule = buildSequenceListsRule(1, 0, 0, 0, 0, 0, 'my-el', undefined, ['desktop'], {
+    const rule = buildSequenceListsRule(target({ animation: { slotsInSequence: 1 } }), ['desktop'], {
       desktop: { type: 'media' as const, predicate: 'min-width: 1024px' },
     })!;
 
@@ -490,7 +527,7 @@ describe('buildSequenceListsRule', () => {
   });
 
   it('should add selectorCondition when conditions with selector type are provided', () => {
-    const rule = buildSequenceListsRule(1, 0, 0, 0, 0, 0, 'my-el', undefined, ['visible'], {
+    const rule = buildSequenceListsRule(target({ animation: { slotsInSequence: 1 } }), ['visible'], {
       visible: { type: 'selector' as const, predicate: '.is-visible' },
     })!;
 
@@ -499,7 +536,7 @@ describe('buildSequenceListsRule', () => {
   });
 
   it('should have no media or selectorCondition when no conditions are given', () => {
-    const rule = buildSequenceListsRule(1, 0, 0, 0, 0, 0, 'my-el')!;
+    const rule = buildSequenceListsRule(target({ animation: { slotsInSequence: 1 } }))!;
 
     expect(rule.media).toBeUndefined();
     expect(rule.selectorCondition).toBeUndefined();

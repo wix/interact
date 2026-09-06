@@ -152,6 +152,18 @@ export const LIST_ANIMATION_PROPERTY_NAMES = [
   'animation-range',
 ] as const satisfies readonly ListPropertyName[];
 export const LIST_PROPERTY_NAMES = [...LIST_ANIMATION_PROPERTY_NAMES, 'transition'] as const satisfies readonly ListPropertyName[];
+export const LIST_KINDS = ['animation', 'transition'] as const;
+export type ListKind = (typeof LIST_KINDS)[number];
+export type ListSlots = {
+  listIndex: number;
+  slotCursor: number;
+  slotsInSequence: number;
+};
+
+export function listKind(name: ListPropertyName): ListKind {
+  return name === 'transition' ? 'transition' : 'animation';
+}
+
 export const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
   transition: '_',
   animation: 'none',
@@ -184,35 +196,35 @@ export function buildAtPropertyRules(
 }
 
 export function buildSequenceListsRule(
-  animationLength: number,
-  transitionLength: number,
-  animationIndex: number,
-  transitionIndex: number,
-  animationSlotIndex: number,
-  transitionSlotIndex: number,
-  key: string,
-  childSelector?: string,
+  target: {
+    key: string;
+    childSelector?: string;
+    animation: ListSlots;
+    transition: ListSlots;
+  },
   conditions?: string[],
   configConditions?: Record<string, Condition>,
 ) : CSSRuleData | null {
-  const propertyNames = [
-    ...(animationLength <= 0 ? [] : LIST_ANIMATION_PROPERTY_NAMES),
-    ...(transitionLength <= 0 ? [] : ['transition']),
-  ];
+  const propertyNames = LIST_PROPERTY_NAMES.filter(
+    (name) => target[listKind(name)].slotsInSequence > 0,
+  );
   if (propertyNames.length === 0) {
     return null;
   }
 
-  const declarations = propertyNames.map(
-    (name) => ({
-      name: getCustomPropName(name, name === 'transition' ? transitionIndex : animationIndex),
-      value: Array.from(
-        { length: name === 'transition' ? transitionLength : animationLength },
-        (_, i) => `var(${getCustomPropName(name, i + (name === 'transition' ? transitionSlotIndex : animationSlotIndex), true)})`
-      ).join(', ')}),
-  );
+  const declarations = propertyNames.map((name) => {
+    const { listIndex, slotCursor, slotsInSequence } = target[listKind(name)];
 
-  const rule: CSSRuleData = { key, childSelector, declarations };
+    return {
+      name: getCustomPropName(name, listIndex),
+      value: Array.from(
+        { length: slotsInSequence },
+        (_, i) => `var(${getCustomPropName(name, slotCursor + i, true)})`
+      ).join(', '),
+    };
+  });
+
+  const rule: CSSRuleData = { key: target.key, childSelector: target.childSelector, declarations };
 
   if (conditions) {
     rule.media = getFullPredicateByType(conditions, configConditions || {}, 'media');
