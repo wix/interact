@@ -86,6 +86,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.5.14] - 2026-09-06
+
+#### Changed
+
+- Optimized styles mitted by `generate()` (#320)
+- Shorter list custom property names (`--anm-0`, `--anm-cmps-0`, `--anm-tmln-0`, `--anm-rng-0`, `--trns-0`; slot variants use `-slot-`) replace the previous encoded names (#320)
+- `animation-timeline` and `animation-range` are no longer written on effect rules when the `@property` initial values (`auto` / `normal`) apply — only set explicitly for `viewProgress` and similar cases (#320)
+- Coordinated-list rules are merged into a single rule covering all targets instead of one rule per target (#320)
+- Sequence interactions with a single slot write list custom properties directly rather than via an intermediate slot (#320)
+
 ### [2.5.13] - 2026-09-02
 
 #### Added
