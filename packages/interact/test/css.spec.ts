@@ -1355,6 +1355,140 @@ describe('css._generate', () => {
       expect(rangeDecl).toBeDefined();
     });
 
+    it('should write the interaction custom property directly when a sequence target takes a single slot', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                effects: [
+                  {
+                    effectId: 'kf1',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'anim1',
+                      keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules, atProperty } = _generate(config);
+
+      const animDecls = cssRules
+        .flatMap((r) => r.declarations)
+        .filter((d) => isAnimationProp(d.name));
+      expect(animDecls.map((d) => d.name)).toContain('--anm-0');
+      expect(animDecls.some((d) => d.name.includes('-slot-'))).toBe(false);
+      expect(animDecls.some((d) => String(d.value).includes('var('))).toBe(false);
+      expect(atProperty.some((rule) => rule.includes('-slot-'))).toBe(false);
+    });
+
+    it('should write the transition custom property directly for a single-effect sequence', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                effects: [
+                  {
+                    effectId: 'trans1',
+                    transition: {
+                      styleProperties: [{ name: 'opacity', value: '1' }],
+                      duration: 500,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules, atProperty } = _generate(config);
+
+      const transDecls = cssRules
+        .flatMap((r) => r.declarations)
+        .filter((d) => isTransitionProp(d.name));
+      expect(transDecls.map((d) => d.name)).toEqual(['--trns-0']);
+      expect(String(transDecls[0].value)).toContain('opacity');
+      expect(atProperty.some((rule) => rule.includes('-slot-'))).toBe(false);
+    });
+
+    it('should only use slots for the targets that repeat within the sequence', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                effects: [
+                  {
+                    effectId: 'kf1',
+                    key: 'repeated',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'anim1',
+                      keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                    },
+                  },
+                  {
+                    effectId: 'kf2',
+                    key: 'repeated',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'anim2',
+                      keyframes: [{ opacity: '1' }, { opacity: '0' }],
+                    },
+                  },
+                  {
+                    effectId: 'kf3',
+                    key: 'single',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'anim3',
+                      keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      const animPropsByKey = (key: string) =>
+        cssRules
+          .filter((r) => r.key === key)
+          .flatMap((r) => r.declarations)
+          .filter((d) => isAnimationProp(d.name));
+
+      const repeated = animPropsByKey('repeated');
+      expect(repeated.filter((d) => d.name === '--anm-slot-0')).toHaveLength(1);
+      expect(repeated.filter((d) => d.name === '--anm-slot-1')).toHaveLength(1);
+      expect(repeated.find((d) => d.name === '--anm-0')!.value).toBe(
+        'var(--anm-slot-0), var(--anm-slot-1)',
+      );
+
+      const single = animPropsByKey('single');
+      expect(single.some((d) => d.name.includes('-slot-'))).toBe(false);
+      expect(single.find((d) => d.name === '--anm-0')).toBeDefined();
+    });
+
     describe('staggered delay', () => {
       const staggerConfig = (
         sequence: Partial<InteractConfig['interactions'][number]['sequences']>[number] = {},
@@ -1468,6 +1602,14 @@ describe('css._generate', () => {
                     keyframeEffect: {
                       name: 'anim1',
                       keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                    },
+                  },
+                  {
+                    effectId: 'kf2',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'anim2',
+                      keyframes: [{ opacity: '1' }, { opacity: '0' }],
                     },
                   },
                 ],

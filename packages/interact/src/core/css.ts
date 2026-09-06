@@ -51,6 +51,8 @@ type ListCounters = ListSlots & {
   slotsInInteraction: number;
   touched: boolean;
 };
+type SlotUsage = Record<ListKind, boolean>;
+const NO_SLOTS: SlotUsage = { animation: false, transition: false };
 type TargetContext = {
   key: string;
   childSelector?: string;
@@ -89,14 +91,15 @@ function createTargetContext(key: string, childSelector?: string): TargetContext
 
 function getCustomProps(
   target: TargetContext,
-  inSequence: boolean,
+  useSlots: SlotUsage,
 ): Record<ListPropertyName, string> {
   return Object.fromEntries(
     LIST_PROPERTY_NAMES.map((name) => {
-      const { listIndex, slotCursor, slotsInSequence } = target[listKind(name)];
+      const kind = listKind(name);
+      const { listIndex, slotCursor, slotsInSequence } = target[kind];
       return [
         name,
-        inSequence
+        useSlots[kind]
           ? getCustomPropName(name, slotCursor + slotsInSequence, true)
           : getCustomPropName(name, listIndex),
       ];
@@ -107,7 +110,7 @@ function getCustomProps(
 function endEffect(
   target: TargetContext,
   wrote: Record<ListKind, boolean>,
-  inSequence: boolean,
+  useSlots: SlotUsage,
 ): void {
   LIST_KINDS.forEach((kind) => {
     if (!wrote[kind]) {
@@ -115,10 +118,45 @@ function endEffect(
     }
 
     target[kind].touched = true;
-    if (inSequence) {
+    if (useSlots[kind]) {
       target[kind].slotsInSequence += 1;
     }
   });
+}
+
+function getEffectListKind(effect: ResolvedEffect): ListKind | null {
+  const { namedEffect, keyframeEffect, transition, transitionProperties } = effect;
+
+  if (namedEffect || keyframeEffect) {
+    return 'animation';
+  }
+  if (transition || transitionProperties) {
+    return 'transition';
+  }
+  return null;
+}
+
+function getSlotUsage(sequence: ResolvedSequence): Map<string, SlotUsage> {
+  const counts = new Map<string, Record<ListKind, number>>();
+
+  sequence.effects.forEach((effect) => {
+    const kind = getEffectListKind(effect);
+    if (!kind) {
+      return;
+    }
+
+    const targetHash = getElementHash(effect);
+    const count = counts.get(targetHash) || { animation: 0, transition: 0 };
+    count[kind] += 1;
+    counts.set(targetHash, count);
+  });
+
+  return new Map(
+    [...counts].map(([targetHash, { animation, transition }]) => [
+      targetHash,
+      { animation: animation > 1, transition: transition > 1 },
+    ]),
+  );
 }
 
 function endSequence(target: TargetContext): void {
@@ -352,6 +390,7 @@ function parseEffect(
   trigger: TriggerVariant,
   visited: Set<string>,
   sequence?: ResolvedSequence,
+  slotUsage?: Map<string, SlotUsage>,
 ): CSSRuleData[] {
   const targetHash = getElementHash(effect);
   const current =
@@ -366,8 +405,8 @@ function parseEffect(
     );
   visited.add(targetHash);
 
-  const inSequence = Boolean(sequence);
-  const customProps = getCustomProps(current, inSequence);
+  const useSlots = slotUsage?.get(targetHash) || NO_SLOTS;
+  const customProps = getCustomProps(current, useSlots);
 
   const { rules, keyframes, wrote } = effectToCSS(
     ctx,
@@ -380,7 +419,7 @@ function parseEffect(
 
   keyframes.forEach(({ name, keyframes }) => ctx.keyframesMap.set(name, keyframes));
 
-  endEffect(current, wrote, inSequence);
+  endEffect(current, wrote, useSlots);
   ctx.targetsMap.set(targetHash, current);
 
   return rules;
@@ -395,10 +434,11 @@ function parseSequence(
   const cssRules: CSSRuleData[] = [];
 
   const localVisited = new Set<string>();
+  const slotUsage = getSlotUsage(sequence);
 
   cssRules.push(
     ...sequence.effects.flatMap((effect) =>
-      parseEffect(ctx, effect, trigger, localVisited, sequence),
+      parseEffect(ctx, effect, trigger, localVisited, sequence, slotUsage),
     ),
   );
 
