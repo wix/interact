@@ -43,6 +43,22 @@ export const DEFAULT_INITIAL = [
 ];
 
 type AnimationPropertyName = (typeof LIST_ANIMATION_PROPERTY_NAMES)[number];
+type TargetContext = {
+    key: string;
+    childSelector?: string;
+    animationIndex: number;
+    transitionIndex: number;
+    usedAnimationSlots: number;
+    usedTransitionSlots: number;
+    reservedAnimationSlots: number;
+    reservedTransitionSlots: number;
+    sequenceAnimationIndex: number;
+    sequenceTransitionIndex: number;
+    hasAnimation: boolean;
+    hasTransition: boolean;
+    nonDefaults: Set<string>;
+};
+type TargetsMap = Map<string, TargetContext>;
 
 const LIST_PROPERTY_NAMES_MOTION: Record<AnimationPropertyName, string> = {
   animation: 'animation',
@@ -251,21 +267,7 @@ function parseEffect(
   effect: ResolvedEffect,
   configConditions: Record<string, Condition>,
   trigger: TriggerVariant,
-  targetsMap: Map<string, {
-    key: string;
-    childSelector?: string;
-    animationIndex: number;
-    transitionIndex: number;
-    usedAnimationSlots: number;
-    usedTransitionSlots: number;
-    reservedAnimationSlots: number;
-    reservedTransitionSlots: number;
-    sequenceAnimationIndex: number;
-    sequenceTransitionIndex: number;
-    hasAnimation: boolean;
-    hasTransition: boolean;
-    nonDefaults: Set<string>;
-  }>,
+  targetsMap: TargetsMap,
   visited: Set<string>,
   keyframesMap: Map<string, Keyframe[]>,
   useFirstChild: boolean = true,
@@ -349,21 +351,7 @@ function parseSequence(
   sequence: ResolvedSequence,
   configConditions: Record<string, Condition>,
   trigger: TriggerVariant,
-  targetsMap: Map<string, {
-    key: string;
-    childSelector?: string;
-    animationIndex: number;
-    transitionIndex: number;
-    usedAnimationSlots: number;
-    usedTransitionSlots: number;
-    reservedAnimationSlots: number;
-    reservedTransitionSlots: number;
-    sequenceAnimationIndex: number;
-    sequenceTransitionIndex: number;
-    hasAnimation: boolean;
-    hasTransition: boolean;
-    nonDefaults: Set<string>;
-  }>,
+  targetsMap: TargetsMap,
   visited: Set<string>,
   keyframesMap: Map<string, Keyframe[]>,
   useFirstChild: boolean = true,
@@ -422,21 +410,7 @@ function parseInteraction(
   config: InteractConfig,
   interaction: Interaction,
   interactionIdx: number,
-  targetsMap: Map<string, {
-    key: string;
-    childSelector?: string;
-    animationIndex: number;
-    transitionIndex: number;
-    usedAnimationSlots: number;
-    usedTransitionSlots: number;
-    reservedAnimationSlots: number;
-    reservedTransitionSlots: number;
-    sequenceAnimationIndex: number;
-    sequenceTransitionIndex: number;
-    hasAnimation: boolean;
-    hasTransition: boolean;
-    nonDefaults: Set<string>;
-  }>,
+  targetsMap: TargetsMap,
   keyframesMap: Map<string, Keyframe[]>,
   useFirstChild: boolean = true,
   plugins?: InteractPluginStyles,
@@ -542,21 +516,7 @@ export function _generate(
 } {
   const { useFirstChild, plugins } = normalizeGenerateOptions(options);
 
-  const targetsMap = new Map<string, {
-    key: string;
-    childSelector?: string;
-    animationIndex: number;
-    transitionIndex: number;
-    usedAnimationSlots: number;
-    usedTransitionSlots: number;
-    reservedAnimationSlots: number;
-    reservedTransitionSlots: number;
-    sequenceAnimationIndex: number;
-    sequenceTransitionIndex: number;
-    hasAnimation: boolean;
-    hasTransition: boolean;
-    nonDefaults: Set<string>;
-  }>();
+  const targetsMap: TargetsMap = new Map<string, TargetContext>();
   const keyframes = new Map<string, Keyframe[]>();
 
   const cssRules = config.interactions.flatMap((interaction, interactionIdx) =>
