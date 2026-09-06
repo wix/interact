@@ -143,7 +143,12 @@ export function resolveSequenceForCSS(
     } else {
       effect.conditions.push(...conditions);
     }
-    return resolveEffectForCSS({ ...effect, triggerType }, interaction, config, `${sequenceId}-eff-${index}`);
+    return resolveEffectForCSS(
+      { ...effect, triggerType },
+      interaction,
+      config,
+      `${sequenceId}-eff-${index}`,
+    );
   });
 
   // removing unsupported effects and the whole sequence if all are unsupported

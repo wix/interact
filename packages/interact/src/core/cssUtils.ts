@@ -1,8 +1,4 @@
-import type {
-  Condition,
-  ListPropertyName,
-  CSSRuleData,
-} from '../types';
+import type { Condition, ListPropertyName, CSSRuleData } from '../types';
 import { toCSSPropertyName } from '@wix/motion';
 import {
   roundNumber,
@@ -151,7 +147,10 @@ export const LIST_ANIMATION_PROPERTY_NAMES = [
   'animation-timeline',
   'animation-range',
 ] as const satisfies readonly ListPropertyName[];
-export const LIST_PROPERTY_NAMES = [...LIST_ANIMATION_PROPERTY_NAMES, 'transition'] as const satisfies readonly ListPropertyName[];
+export const LIST_PROPERTY_NAMES = [
+  ...LIST_ANIMATION_PROPERTY_NAMES,
+  'transition',
+] as const satisfies readonly ListPropertyName[];
 export const LIST_KINDS = ['animation', 'transition'] as const;
 export type ListKind = (typeof LIST_KINDS)[number];
 export type ListSlots = {
@@ -182,17 +181,19 @@ export function buildAtPropertyRules(
   transitionLength: number,
   animationSlotLength: number,
   transitionSlotLength: number,
-) : string[] {
+): string[] {
   return LIST_PROPERTY_NAMES.flatMap((name) => [
     ...Array.from(
       { length: name === 'transition' ? transitionLength : animationLength },
-      (_, i) => `@property ${getCustomPropName(name, i)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`
+      (_, i) =>
+        `@property ${getCustomPropName(name, i)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
     ),
     ...Array.from(
       { length: name === 'transition' ? transitionSlotLength : animationSlotLength },
-      (_, i) => `@property ${getCustomPropName(name, i, true)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`
+      (_, i) =>
+        `@property ${getCustomPropName(name, i, true)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
     ),
-  ])
+  ]);
 }
 
 export function buildSequenceListsRule(
@@ -204,7 +205,7 @@ export function buildSequenceListsRule(
   },
   conditions?: string[],
   configConditions?: Record<string, Condition>,
-) : CSSRuleData | null {
+): CSSRuleData | null {
   const propertyNames = LIST_PROPERTY_NAMES.filter(
     (name) => target[listKind(name)].slotsInSequence > 0,
   );
@@ -219,7 +220,7 @@ export function buildSequenceListsRule(
       name: getCustomPropName(name, listIndex),
       value: Array.from(
         { length: slotsInSequence },
-        (_, i) => `var(${getCustomPropName(name, slotCursor + i, true)})`
+        (_, i) => `var(${getCustomPropName(name, slotCursor + i, true)})`,
       ).join(', '),
     };
   });
@@ -238,7 +239,7 @@ export function buildListsRule(
   targets: { key: string; childSelector?: string }[],
   animationLength: number,
   transitionLength: number,
-) : string {
+): string {
   if (targets.length === 0) {
     return '';
   }
@@ -251,20 +252,21 @@ export function buildListsRule(
     return '';
   }
 
-  const declarations = propertyNames.map(
-    (name) => ({
-      name,
-      value: Array.from(
-        { length: name === 'transition' ? transitionLength : animationLength },
-        // TODO: maybe add `-intrct` to names? --anm-0 or --trns-0 could collide with user-defined names
-        (_, i) => `var(${getCustomPropName(name, i)})`
-      ).join(', ')}),
-  );
+  const declarations = propertyNames.map((name) => ({
+    name,
+    value: Array.from(
+      { length: name === 'transition' ? transitionLength : animationLength },
+      // TODO: maybe add `-intrct` to names? --anm-0 or --trns-0 could collide with user-defined names
+      (_, i) => `var(${getCustomPropName(name, i)})`,
+    ).join(', '),
+  }));
 
-  const joinedSelector = targets.map(
-    ({ key, childSelector }) => `[data-interact-key="${key}"]${childSelector ? ` ${childSelector}` : ''}`
-  ).join(', ');
-
+  const joinedSelector = targets
+    .map(
+      ({ key, childSelector }) =>
+        `[data-interact-key="${key}"]${childSelector ? ` ${childSelector}` : ''}`,
+    )
+    .join(', ');
 
   return `${joinedSelector} {\n${declarations.map(({ name, value }) => `  ${name}: ${value};`).join('\n')}\n}`;
 }

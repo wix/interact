@@ -271,15 +271,17 @@ function effectToCSS(
     const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
       _listPropertyName: propertyName,
       name: customProps[propertyName],
-      value:
-        cssAnimations
-          .map((animation) => {
-            const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
-            return (animation as Record<string, unknown>)[name] || LIST_PROPERTY_FALLBACKS[propertyName];
-          })
-          .join(', '),
-    })).filter(({ _listPropertyName, name, value }) =>
-      value !== LIST_PROPERTY_FALLBACKS[_listPropertyName] || assigned.has(name)
+      value: cssAnimations
+        .map((animation) => {
+          const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
+          return (
+            (animation as Record<string, unknown>)[name] || LIST_PROPERTY_FALLBACKS[propertyName]
+          );
+        })
+        .join(', '),
+    })).filter(
+      ({ _listPropertyName, name, value }) =>
+        value !== LIST_PROPERTY_FALLBACKS[_listPropertyName] || assigned.has(name),
     );
     animationDeclarations.forEach(({ name }) => assigned.add(name));
     wrote.animation = animationDeclarations.length > 0;
@@ -333,7 +335,7 @@ function effectToCSS(
     // setting off animation custom properties
     declarations.push(
       ...LIST_ANIMATION_PROPERTY_NAMES.filter((propertyName) =>
-        assigned.has(customProps[propertyName])
+        assigned.has(customProps[propertyName]),
       ).map((propertyName) => ({
         name: customProps[propertyName],
         value: LIST_PROPERTY_FALLBACKS[propertyName],
@@ -521,9 +523,15 @@ export function _generate(
   const listsRule = buildListsRule(targets, animationLength, transitionLength);
 
   const animationSlotLength = Math.max(0, ...targets.map(({ animation }) => animation.slotCursor));
-  const transitionSlotLength = Math.max(0, ...targets.map(({ transition }) => transition.slotCursor));
+  const transitionSlotLength = Math.max(
+    0,
+    ...targets.map(({ transition }) => transition.slotCursor),
+  );
   const atProperty = buildAtPropertyRules(
-    animationLength, transitionLength, animationSlotLength, transitionSlotLength
+    animationLength,
+    transitionLength,
+    animationSlotLength,
+    transitionSlotLength,
   );
 
   return { keyframes: ctx.keyframesMap, atProperty, cssRules, listsRule };
@@ -550,7 +558,7 @@ export function generate(config: InteractConfig, options?: boolean | GenerateOpt
     ...atProperty,
     ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),
     ...cssRules.map(CSSRuleToString),
-    listsRule
+    listsRule,
   ].filter((rule) => rule);
 
   return css.join('\n');

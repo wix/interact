@@ -415,9 +415,7 @@ describe('buildListsRule', () => {
       0,
     );
 
-    expect(rule).toContain(
-      '[data-interact-key="a"] > :first-child, [data-interact-key="b"] {',
-    );
+    expect(rule).toContain('[data-interact-key="a"] > :first-child, [data-interact-key="b"] {');
   });
 
   it('should omit animation properties when there are no animations', () => {
@@ -518,18 +516,26 @@ describe('buildSequenceListsRule', () => {
   });
 
   it('should add media condition when conditions with media type are provided', () => {
-    const rule = buildSequenceListsRule(target({ animation: { slotsInSequence: 1 } }), ['desktop'], {
-      desktop: { type: 'media' as const, predicate: 'min-width: 1024px' },
-    })!;
+    const rule = buildSequenceListsRule(
+      target({ animation: { slotsInSequence: 1 } }),
+      ['desktop'],
+      {
+        desktop: { type: 'media' as const, predicate: 'min-width: 1024px' },
+      },
+    )!;
 
     expect(rule.media).toBe('(min-width: 1024px)');
     expect(rule.selectorCondition).toBeFalsy();
   });
 
   it('should add selectorCondition when conditions with selector type are provided', () => {
-    const rule = buildSequenceListsRule(target({ animation: { slotsInSequence: 1 } }), ['visible'], {
-      visible: { type: 'selector' as const, predicate: '.is-visible' },
-    })!;
+    const rule = buildSequenceListsRule(
+      target({ animation: { slotsInSequence: 1 } }),
+      ['visible'],
+      {
+        visible: { type: 'selector' as const, predicate: '.is-visible' },
+      },
+    )!;
 
     expect(rule.selectorCondition).toBe(':is(.is-visible)');
     expect(rule.media).toBeFalsy();

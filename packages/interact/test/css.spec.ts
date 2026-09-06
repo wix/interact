@@ -1056,10 +1056,14 @@ describe('css._generate', () => {
       const { cssRules } = _generate(config);
 
       expect(
-        cssRules.some((r) => r.declarations.some((d) => isAnimationProp(d.name) && d.value !== 'none')),
+        cssRules.some((r) =>
+          r.declarations.some((d) => isAnimationProp(d.name) && d.value !== 'none'),
+        ),
       ).toBe(true);
       expect(
-        cssRules.some((r) => r.declarations.some((d) => isAnimationProp(d.name) && d.value === 'none')),
+        cssRules.some((r) =>
+          r.declarations.some((d) => isAnimationProp(d.name) && d.value === 'none'),
+        ),
       ).toBe(false);
     });
 
