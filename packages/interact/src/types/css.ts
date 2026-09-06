@@ -21,17 +21,6 @@ export type ListPropertyName =
   | 'animation-timeline'
   | 'animation-range';
 
-export type CSSCoordinatedLists = {
-  key: string;
-  childSelector?: string;
-  properties: Partial<Record<ListPropertyName, { fallback: string; varNames: string[] }>>;
-};
-
-export type ListCustomProps = {
-  key: string;
-  childSelector?: string;
-} & Record<ListPropertyName, string>;
-
 export type CSSRuleData = {
   key: string;
   childSelector?: string;

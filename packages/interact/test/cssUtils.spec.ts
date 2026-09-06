@@ -6,8 +6,12 @@ import {
   keyframesToCSS,
   CSSRuleToString,
   buildListsRule,
+  buildSequenceListsRule,
+  buildAtPropertyRules,
+  getCustomPropName,
 } from '../src/core/cssUtils';
-import type { CSSCoordinatedLists, ListCustomProps, CSSRuleData } from '../src/types/css';
+import type { ListSlots } from '../src/core/cssUtils';
+import type { CSSRuleData } from '../src/types/css';
 
 describe('keyframePropertyToCSS', () => {
   it('should convert cssFloat to float', () => {
@@ -150,8 +154,8 @@ describe('interpolateKeyframesOffsets', () => {
 describe('keyframeObjectToKeyframeCSS', () => {
   it('should convert a keyframe object to a CSS block at the given percentage', () => {
     const result = keyframeObjectToKeyframeCSS({ opacity: '0', transform: 'scale(0.5)' }, 0);
-    const expected1 = '0% {\nopacity: 0;\ntransform: scale(0.5);\n}';
-    const expected2 = '0% {\ntransform: scale(0.5);\nopacity: 0;\n}';
+    const expected1 = '0% {\n    opacity: 0;\n    transform: scale(0.5);\n  }';
+    const expected2 = '0% {\n    transform: scale(0.5);\n    opacity: 0;\n  }';
     expect(result === expected1 || result === expected2).toBe(true);
   });
 
@@ -165,7 +169,7 @@ describe('keyframeObjectToKeyframeCSS', () => {
       { opacity: '1', transform: undefined, color: null },
       50,
     );
-    const expected = '50% {\nopacity: 1;\n}';
+    const expected = '50% {\n    opacity: 1;\n  }';
     expect(result).toEqual(expected);
   });
 
@@ -181,7 +185,8 @@ describe('keyframesToCSS', () => {
       { offset: 0, opacity: '0' },
       { offset: 1, opacity: '1' },
     ]);
-    const expected = '@keyframes fadeIn {\n0% {\nopacity: 0;\n}\n100% {\nopacity: 1;\n}\n}';
+    const expected =
+      '@keyframes fadeIn {\n  0% {\n    opacity: 0;\n  }\n  100% {\n    opacity: 1;\n  }\n}';
     expect(result).toEqual(expected);
   });
 
@@ -216,7 +221,7 @@ describe('CSSRuleToString', () => {
       declarations: [{ name: 'opacity', value: '0' }],
     };
     const result = CSSRuleToString(rule);
-    const expected = '[data-interact-key="my-el"] {\nopacity: 0;\n}';
+    const expected = '[data-interact-key="my-el"] {\n  opacity: 0;\n}';
     expect(result).toEqual(expected);
   });
 
@@ -231,7 +236,7 @@ describe('CSSRuleToString', () => {
       childSelector: '.inner',
       declarations: [{ name: 'color', value: 'red' }],
     };
-    const expected = '[data-interact-key="my-el"] .inner {\ncolor: red;\n}';
+    const expected = '[data-interact-key="my-el"] .inner {\n  color: red;\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
@@ -245,7 +250,7 @@ describe('CSSRuleToString', () => {
       ],
     };
     const expected =
-      '[data-interact-key="my-el"]:not([data-interact-enter]) {\nvisibility: hidden !important;\ntransform: none !important;\n}';
+      '[data-interact-key="my-el"]:not([data-interact-enter]) {\n  visibility: hidden !important;\n  transform: none !important;\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
@@ -256,7 +261,7 @@ describe('CSSRuleToString', () => {
       declarations: [{ name: 'opacity', value: '0' }],
     };
     const expected =
-      '[data-interact-key="my-el"]:not([data-interact-enter="done"]) {\nopacity: 0;\n}';
+      '[data-interact-key="my-el"]:not([data-interact-enter="done"]) {\n  opacity: 0;\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
@@ -267,7 +272,7 @@ describe('CSSRuleToString', () => {
       declarations: [{ name: 'opacity', value: '1' }],
     };
     const expected =
-      '[data-interact-key="my-el"]:is(:state(active), :--active, [data-interact-effect~="active"]) {\nopacity: 1;\n}';
+      '[data-interact-key="my-el"]:is(:state(active), :--active, [data-interact-effect~="active"]) {\n  opacity: 1;\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
@@ -277,7 +282,7 @@ describe('CSSRuleToString', () => {
       selectorCondition: ':is(.visible)',
       declarations: [{ name: 'opacity', value: '1' }],
     };
-    const expected = '[data-interact-key="my-el"]:is(.visible) {\nopacity: 1;\n}';
+    const expected = '[data-interact-key="my-el"]:is(.visible) {\n  opacity: 1;\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
@@ -288,7 +293,7 @@ describe('CSSRuleToString', () => {
       declarations: [{ name: 'display', value: 'block' }],
     };
     const expected =
-      '@media (min-width: 768px) {\n[data-interact-key="my-el"] {\ndisplay: block;\n}\n}';
+      '@media (min-width: 768px) {\n[data-interact-key="my-el"] {\n  display: block;\n}\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 
@@ -305,92 +310,240 @@ describe('CSSRuleToString', () => {
       ],
     };
     const expected =
-      '@media (min-width: 1024px) {\n[data-interact-key="my-el"]:is(:state(hover), :--hover, [data-interact-effect~="hover"]) .child:not([data-interact-enter="done"]) {\nopacity: 1;\ncolor: blue;\n}\n}';
+      '@media (min-width: 1024px) {\n[data-interact-key="my-el"]:is(:state(hover), :--hover, [data-interact-effect~="hover"]) .child:not([data-interact-enter="done"]) {\n  opacity: 1;\n  color: blue;\n}\n}';
     expect(CSSRuleToString(rule)).toEqual(expected);
   });
 });
 
+describe('getCustomPropName', () => {
+  it('should compress property names by stripping vowels', () => {
+    expect(getCustomPropName('animation', 0)).toBe('--anm-0');
+    expect(getCustomPropName('animation-composition', 0)).toBe('--anm-cmps-0');
+    expect(getCustomPropName('animation-timeline', 0)).toBe('--anm-tmln-0');
+    expect(getCustomPropName('animation-range', 0)).toBe('--anm-rng-0');
+    expect(getCustomPropName('transition', 0)).toBe('--trns-0');
+  });
+
+  it('should append the index', () => {
+    expect(getCustomPropName('animation', 3)).toBe('--anm-3');
+  });
+
+  it('should mark slot names when isSlot is true', () => {
+    expect(getCustomPropName('animation', 2, true)).toBe('--anm-slot-2');
+    expect(getCustomPropName('transition', 0, true)).toBe('--trns-slot-0');
+  });
+});
+
+describe('buildAtPropertyRules', () => {
+  it('should declare one @property per list property with its fallback as initial-value', () => {
+    const rules = buildAtPropertyRules(1, 1, 0, 0);
+
+    expect(rules).toEqual([
+      '@property --anm-0 { syntax: "*"; inherits: false; initial-value: none; }',
+      '@property --anm-cmps-0 { syntax: "*"; inherits: false; initial-value: replace; }',
+      '@property --anm-tmln-0 { syntax: "*"; inherits: false; initial-value: auto; }',
+      '@property --anm-rng-0 { syntax: "*"; inherits: false; initial-value: normal; }',
+      '@property --trns-0 { syntax: "*"; inherits: false; initial-value: _; }',
+    ]);
+  });
+
+  it('should declare one @property per index', () => {
+    const rules = buildAtPropertyRules(2, 0, 0, 0);
+
+    expect(rules.filter((rule) => rule.startsWith('@property --anm-'))).toHaveLength(8);
+    expect(rules).toContain(
+      '@property --anm-1 { syntax: "*"; inherits: false; initial-value: none; }',
+    );
+  });
+
+  it('should declare slot properties alongside the non-slot ones', () => {
+    const rules = buildAtPropertyRules(1, 0, 2, 0);
+
+    expect(rules).toContain(
+      '@property --anm-slot-0 { syntax: "*"; inherits: false; initial-value: none; }',
+    );
+    expect(rules).toContain(
+      '@property --anm-slot-1 { syntax: "*"; inherits: false; initial-value: none; }',
+    );
+    expect(rules).toContain(
+      '@property --anm-cmps-slot-1 { syntax: "*"; inherits: false; initial-value: replace; }',
+    );
+  });
+
+  it('should use the transition lengths for the transition property', () => {
+    const rules = buildAtPropertyRules(0, 2, 0, 1);
+
+    expect(rules.filter((rule) => rule.startsWith('@property --trns-'))).toEqual([
+      '@property --trns-0 { syntax: "*"; inherits: false; initial-value: _; }',
+      '@property --trns-1 { syntax: "*"; inherits: false; initial-value: _; }',
+      '@property --trns-slot-0 { syntax: "*"; inherits: false; initial-value: _; }',
+    ]);
+  });
+
+  it('should return no rules when all lengths are zero', () => {
+    expect(buildAtPropertyRules(0, 0, 0, 0)).toEqual([]);
+  });
+});
+
 describe('buildListsRule', () => {
-  const baseLists: CSSCoordinatedLists = {
-    key: 'my-el',
-    properties: {
-      animation: {
-        fallback: 'none',
-        varNames: ['--anim-1', '--anim-2'],
-      },
-      transition: {
-        fallback: '_',
-        varNames: ['--trans-1'],
-      },
-      'animation-composition': {
-        fallback: 'replace',
-        varNames: ['--comp-1'],
-      },
-    },
-  };
+  it('should build one rule assigning each list property from its custom properties', () => {
+    const rule = buildListsRule([{ key: 'my-el' }], 2, 1);
 
-  it('should build a rule with var() declarations for each prop', () => {
-    const rule = buildListsRule(baseLists);
+    expect(rule).toBe(
+      [
+        '[data-interact-key="my-el"] {',
+        '  animation: var(--anm-0), var(--anm-1);',
+        '  animation-composition: var(--anm-cmps-0), var(--anm-cmps-1);',
+        '  animation-timeline: var(--anm-tmln-0), var(--anm-tmln-1);',
+        '  animation-range: var(--anm-rng-0), var(--anm-rng-1);',
+        '  transition: var(--trns-0);',
+        '}',
+      ].join('\n'),
+    );
+  });
+
+  it('should append childSelector to the target selector', () => {
+    const rule = buildListsRule([{ key: 'my-el', childSelector: '> :first-child' }], 1, 0);
+
+    expect(rule).toContain('[data-interact-key="my-el"] > :first-child {');
+  });
+
+  it('should join all targets into a single selector list', () => {
+    const rule = buildListsRule(
+      [{ key: 'a', childSelector: '> :first-child' }, { key: 'b' }],
+      1,
+      0,
+    );
+
+    expect(rule).toContain('[data-interact-key="a"] > :first-child, [data-interact-key="b"] {');
+  });
+
+  it('should omit animation properties when there are no animations', () => {
+    const rule = buildListsRule([{ key: 'my-el' }], 0, 1);
+
+    expect(rule).not.toContain('animation');
+    expect(rule).toContain('transition: var(--trns-0);');
+  });
+
+  it('should omit the transition property when there are no transitions', () => {
+    const rule = buildListsRule([{ key: 'my-el' }], 1, 0);
+
+    expect(rule).not.toContain('transition');
+    expect(rule).toContain('animation: var(--anm-0);');
+  });
+
+  it('should return an empty string when there are no targets', () => {
+    expect(buildListsRule([], 2, 1)).toBe('');
+  });
+
+  it('should return an empty string when there are no list properties', () => {
+    expect(buildListsRule([{ key: 'my-el' }], 0, 0)).toBe('');
+  });
+});
+
+describe('buildSequenceListsRule', () => {
+  const target = ({
+    key = 'my-el',
+    childSelector,
+    animation,
+    transition,
+  }: {
+    key?: string;
+    childSelector?: string;
+    animation?: Partial<ListSlots>;
+    transition?: Partial<ListSlots>;
+  } = {}) => ({
+    key,
+    childSelector,
+    animation: { listIndex: 0, slotCursor: 0, slotsInSequence: 0, ...animation },
+    transition: { listIndex: 0, slotCursor: 0, slotsInSequence: 0, ...transition },
+  });
+
+  it('should assign the interaction custom property from the sequence slot properties', () => {
+    const rule = buildSequenceListsRule(target({ animation: { slotsInSequence: 2 } }))!;
+
     expect(rule.key).toBe('my-el');
-    expect(rule.declarations).toHaveLength(3);
+    expect(rule.declarations).toEqual([
+      { name: '--anm-0', value: 'var(--anm-slot-0), var(--anm-slot-1)' },
+      { name: '--anm-cmps-0', value: 'var(--anm-cmps-slot-0), var(--anm-cmps-slot-1)' },
+      { name: '--anm-tmln-0', value: 'var(--anm-tmln-slot-0), var(--anm-tmln-slot-1)' },
+      { name: '--anm-rng-0', value: 'var(--anm-rng-slot-0), var(--anm-rng-slot-1)' },
+    ]);
+  });
 
-    const animDecl = rule.declarations.find((d) => d.name === 'animation');
-    expect(animDecl?.value).toBe('var(--anim-1, none), var(--anim-2, none)');
+  it('should offset the slot names by the slot index', () => {
+    const rule = buildSequenceListsRule(
+      target({ animation: { slotsInSequence: 2, listIndex: 1, slotCursor: 3 } }),
+    )!;
 
-    const compositionDecl = rule.declarations.find((d) => d.name === 'animation-composition');
-    expect(compositionDecl?.value).toBe('var(--comp-1, replace)');
-
-    const transDecl = rule.declarations.find((d) => d.name === 'transition');
-    expect(transDecl?.value).toBe('var(--trans-1, _)');
+    expect(rule.declarations[0]).toEqual({
+      name: '--anm-1',
+      value: 'var(--anm-slot-3), var(--anm-slot-4)',
+    });
   });
 
   it('should include childSelector when present', () => {
-    const lists: CSSCoordinatedLists = { ...baseLists, childSelector: '.target' };
-    const rule = buildListsRule(lists);
+    const rule = buildSequenceListsRule(
+      target({ childSelector: '.target', animation: { slotsInSequence: 1 } }),
+    )!;
+
     expect(rule.childSelector).toBe('.target');
   });
 
-  it('should rename declarations when customProps mapping is provided', () => {
-    const customProps = {
-      key: 'my-el',
-      childSelector: undefined,
-      animation: '--my-anim',
-      transition: '--my-trans',
-      'animation-composition': '--my-comp',
-    } as ListCustomProps;
+  it('should omit animation properties when there are no animations', () => {
+    const rule = buildSequenceListsRule(target({ transition: { slotsInSequence: 1 } }))!;
 
-    const rule = buildListsRule(baseLists, customProps);
-    const names = rule.declarations.map((d) => d.name);
-    expect(names).toContain('--my-anim');
-    expect(names).toContain('--my-trans');
-    expect(names).toContain('--my-comp');
-    expect(names).not.toContain('animation');
-    expect(names).not.toContain('transition');
-    expect(names).not.toContain('animation-composition');
+    expect(rule.declarations).toEqual([{ name: '--trns-0', value: 'var(--trns-slot-0)' }]);
+  });
+
+  it('should offset transition slots independently of animation slots', () => {
+    const rule = buildSequenceListsRule(
+      target({
+        animation: { slotsInSequence: 1, listIndex: 2, slotCursor: 4 },
+        transition: { slotsInSequence: 2, listIndex: 1, slotCursor: 3 },
+      }),
+    )!;
+
+    expect(rule.declarations[0]).toEqual({ name: '--anm-2', value: 'var(--anm-slot-4)' });
+    expect(rule.declarations[4]).toEqual({
+      name: '--trns-1',
+      value: 'var(--trns-slot-3), var(--trns-slot-4)',
+    });
+  });
+
+  it('should return null when there are no list properties', () => {
+    expect(buildSequenceListsRule(target())).toBeNull();
   });
 
   it('should add media condition when conditions with media type are provided', () => {
-    const conditions = ['desktop'];
-    const configConditions = {
-      desktop: { type: 'media' as const, predicate: 'min-width: 1024px' },
-    };
-    const rule = buildListsRule(baseLists, undefined, conditions, configConditions);
+    const rule = buildSequenceListsRule(
+      target({ animation: { slotsInSequence: 1 } }),
+      ['desktop'],
+      {
+        desktop: { type: 'media' as const, predicate: 'min-width: 1024px' },
+      },
+    )!;
+
     expect(rule.media).toBe('(min-width: 1024px)');
     expect(rule.selectorCondition).toBeFalsy();
   });
 
   it('should add selectorCondition when conditions with selector type are provided', () => {
-    const conditions = ['visible'];
-    const configConditions = {
-      visible: { type: 'selector' as const, predicate: '.is-visible' },
-    };
-    const rule = buildListsRule(baseLists, undefined, conditions, configConditions);
+    const rule = buildSequenceListsRule(
+      target({ animation: { slotsInSequence: 1 } }),
+      ['visible'],
+      {
+        visible: { type: 'selector' as const, predicate: '.is-visible' },
+      },
+    )!;
+
     expect(rule.selectorCondition).toBe(':is(.is-visible)');
     expect(rule.media).toBeFalsy();
   });
 
   it('should have no media or selectorCondition when no conditions are given', () => {
-    const rule = buildListsRule(baseLists);
+    const rule = buildSequenceListsRule(target({ animation: { slotsInSequence: 1 } }))!;
+
     expect(rule.media).toBeUndefined();
     expect(rule.selectorCondition).toBeUndefined();
   });

@@ -1,10 +1,4 @@
-import type {
-  Condition,
-  ListPropertyName,
-  ListCustomProps,
-  CSSCoordinatedLists,
-  CSSRuleData,
-} from '../types';
+import type { Condition, ListPropertyName, CSSRuleData } from '../types';
 import { toCSSPropertyName } from '@wix/motion';
 import {
   roundNumber,
@@ -85,8 +79,8 @@ export function keyframeObjectToKeyframeCSS(keyframeObj: Keyframe, percentage: n
       const cssKey = keyframePropertyToCSS(key);
       return `${cssKey}: ${value};`;
     })
-    .join('\n');
-  return `${percentage}% {\n${properties}\n}`;
+    .join('\n    ');
+  return `${percentage}% {\n    ${properties}\n  }`;
 }
 
 export function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
@@ -102,9 +96,9 @@ export function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
 
       return keyframeObjectToKeyframeCSS(kf, percentage);
     })
-    .join('\n');
+    .join('\n  ');
 
-  return `@keyframes ${name} {\n${keyframeBlocks}\n}`;
+  return `@keyframes ${name} {\n  ${keyframeBlocks}\n}`;
 }
 
 export function CSSRuleToString(rule: CSSRuleData): string {
@@ -141,44 +135,138 @@ export function CSSRuleToString(rule: CSSRuleData): string {
 
   const declarationsStr = declarations
     .map(({ name, value, important }) => `${name}: ${value}${important ? ' !important' : ''};`)
-    .join('\n');
-  const cssRule = `${selector} {\n${declarationsStr}\n}`;
+    .join('\n  ');
+  const cssRule = `${selector} {\n  ${declarationsStr}\n}`;
 
   return media ? `@media ${media} {\n${cssRule}\n}` : cssRule;
 }
 
-export function buildListsRule(
-  lists: CSSCoordinatedLists,
-  customProps?: ListCustomProps,
+export const LIST_ANIMATION_PROPERTY_NAMES = [
+  'animation',
+  'animation-composition',
+  'animation-timeline',
+  'animation-range',
+] as const satisfies readonly ListPropertyName[];
+export const LIST_PROPERTY_NAMES = [
+  ...LIST_ANIMATION_PROPERTY_NAMES,
+  'transition',
+] as const satisfies readonly ListPropertyName[];
+export const LIST_KINDS = ['animation', 'transition'] as const;
+export type ListKind = (typeof LIST_KINDS)[number];
+export type ListSlots = {
+  listIndex: number;
+  slotCursor: number;
+  slotsInSequence: number;
+};
+
+export function listKind(name: ListPropertyName): ListKind {
+  return name === 'transition' ? 'transition' : 'animation';
+}
+
+export const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
+  transition: '_',
+  animation: 'none',
+  'animation-composition': 'replace',
+  'animation-timeline': 'auto',
+  'animation-range': 'normal',
+};
+
+// TODO: maybe add `-intrct` to names? --anm-0 or --trns-0 could collide with user-defined names
+export function getCustomPropName(name: string, index: number, isSlot: boolean = false): string {
+  return `--${name.replace(/(?<!(^|-))([aeiou]|tion)/g, '')}${isSlot ? '-slot' : ''}-${index}`;
+}
+
+export function buildAtPropertyRules(
+  animationLength: number,
+  transitionLength: number,
+  animationSlotLength: number,
+  transitionSlotLength: number,
+): string[] {
+  return LIST_PROPERTY_NAMES.flatMap((name) => [
+    ...Array.from(
+      { length: name === 'transition' ? transitionLength : animationLength },
+      (_, i) =>
+        `@property ${getCustomPropName(name, i)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
+    ),
+    ...Array.from(
+      { length: name === 'transition' ? transitionSlotLength : animationSlotLength },
+      (_, i) =>
+        `@property ${getCustomPropName(name, i, true)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
+    ),
+  ]);
+}
+
+export function buildSequenceListsRule(
+  target: {
+    key: string;
+    childSelector?: string;
+    animation: ListSlots;
+    transition: ListSlots;
+  },
   conditions?: string[],
   configConditions?: Record<string, Condition>,
-): CSSRuleData {
-  const { key, childSelector, properties } = lists;
-
-  const declarations = Object.entries(properties)
-    .filter(
-      (entry: [string, { fallback: string; varNames: string[] }]) =>
-        entry[1] && entry[1].varNames.length,
-    )
-    .map(([name, { fallback, varNames }]) => ({
-      name,
-      value: varNames.map((n) => `var(${n}, ${fallback})`).join(', '),
-    }));
-
-  const rule: CSSRuleData = { key, childSelector, declarations };
-
-  // option to assign into custom-properties instead of directly into the actual css properties
-  if (customProps) {
-    rule.declarations.forEach((declaration) => {
-      declaration.name = customProps[declaration.name as ListPropertyName];
-    });
+): CSSRuleData | null {
+  const propertyNames = LIST_PROPERTY_NAMES.filter(
+    (name) => target[listKind(name)].slotsInSequence > 0,
+  );
+  if (propertyNames.length === 0) {
+    return null;
   }
 
-  // option to add conditions to the rules
+  const declarations = propertyNames.map((name) => {
+    const { listIndex, slotCursor, slotsInSequence } = target[listKind(name)];
+
+    return {
+      name: getCustomPropName(name, listIndex),
+      value: Array.from(
+        { length: slotsInSequence },
+        (_, i) => `var(${getCustomPropName(name, slotCursor + i, true)})`,
+      ).join(', '),
+    };
+  });
+
+  const rule: CSSRuleData = { key: target.key, childSelector: target.childSelector, declarations };
+
   if (conditions) {
     rule.media = getFullPredicateByType(conditions, configConditions || {}, 'media');
     rule.selectorCondition = getSelectorCondition(conditions, configConditions || {});
   }
 
   return rule;
+}
+
+export function buildListsRule(
+  targets: { key: string; childSelector?: string }[],
+  animationLength: number,
+  transitionLength: number,
+): string {
+  if (targets.length === 0) {
+    return '';
+  }
+
+  const propertyNames = [
+    ...(animationLength <= 0 ? [] : LIST_ANIMATION_PROPERTY_NAMES),
+    ...(transitionLength <= 0 ? [] : ['transition']),
+  ];
+  if (propertyNames.length === 0) {
+    return '';
+  }
+
+  const declarations = propertyNames.map((name) => ({
+    name,
+    value: Array.from(
+      { length: name === 'transition' ? transitionLength : animationLength },
+      // TODO: maybe add `-intrct` to names? --anm-0 or --trns-0 could collide with user-defined names
+      (_, i) => `var(${getCustomPropName(name, i)})`,
+    ).join(', '),
+  }));
+
+  const joinedSelector = targets
+    .map(
+      ({ key, childSelector }) =>
+        `[data-interact-key="${key}"]${childSelector ? ` ${childSelector}` : ''}`,
+    )
+    .join(', ');
+
+  return `${joinedSelector} {\n${declarations.map(({ name, value }) => `  ${name}: ${value};`).join('\n')}\n}`;
 }

@@ -5,15 +5,12 @@ import type {
   ResolvedSequence,
   Condition,
   ListPropertyName,
-  ListCustomProps,
-  CSSCoordinatedLists,
   CSSRuleData,
   InteractPluginStyles,
   GenerateOptions,
 } from '../types';
 import { PLUGIN_FIELD_PREFIX } from '../types';
 import {
-  kebabCustomProp,
   camelToKebabCase,
   getStateStyleProperties,
   transitionEffectToTransitionsList,
@@ -22,8 +19,21 @@ import {
 } from '../utils';
 import { getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
-import { getElementHash, getUniqueEncodedHash } from './utilities';
-import { keyframesToCSS, CSSRuleToString, buildListsRule } from './cssUtils';
+import { getElementHash } from './utilities';
+import {
+  LIST_ANIMATION_PROPERTY_NAMES,
+  LIST_PROPERTY_NAMES,
+  LIST_PROPERTY_FALLBACKS,
+  keyframesToCSS,
+  CSSRuleToString,
+  buildListsRule,
+  buildAtPropertyRules,
+  getCustomPropName,
+  buildSequenceListsRule,
+  LIST_KINDS,
+  listKind,
+} from './cssUtils';
+import type { ListKind, ListSlots } from './cssUtils';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { getCSSAnimation, MotionKeyframeEffect, TriggerVariant } from '@wix/motion';
 
@@ -35,16 +45,137 @@ export const DEFAULT_INITIAL = [
   { name: 'rotate', value: 'none', important: true },
 ];
 
-const LIST_ANIMATION_PROPERTY_NAMES = [
-  'animation',
-  'animation-composition',
-  'animation-timeline',
-  'animation-range',
-] as const satisfies readonly ListPropertyName[];
-
 type AnimationPropertyName = (typeof LIST_ANIMATION_PROPERTY_NAMES)[number];
 
-const LIST_PROPERTY_NAMES: ListPropertyName[] = ['transition', ...LIST_ANIMATION_PROPERTY_NAMES];
+type ListCounters = ListSlots & {
+  slotsInInteraction: number;
+  touched: boolean;
+};
+type SlotUsage = Record<ListKind, boolean>;
+const NO_SLOTS: SlotUsage = { animation: false, transition: false };
+type TargetContext = {
+  key: string;
+  childSelector?: string;
+  assigned: Set<string>;
+  animation: ListCounters;
+  transition: ListCounters;
+};
+type TargetsMap = Map<string, TargetContext>;
+
+type GenerateContext = {
+  config: InteractConfig;
+  configConditions: Record<string, Condition>;
+  targetsMap: TargetsMap;
+  keyframesMap: Map<string, Keyframe[]>;
+  useFirstChild: boolean;
+  plugins?: InteractPluginStyles;
+};
+
+function createTargetContext(key: string, childSelector?: string): TargetContext {
+  const createListCounters = (): ListCounters => ({
+    listIndex: 0,
+    slotCursor: 0,
+    slotsInInteraction: 0,
+    slotsInSequence: 0,
+    touched: false,
+  });
+
+  return {
+    key,
+    childSelector,
+    assigned: new Set<string>(),
+    animation: createListCounters(),
+    transition: createListCounters(),
+  };
+}
+
+function getCustomProps(
+  target: TargetContext,
+  useSlots: SlotUsage,
+): Record<ListPropertyName, string> {
+  return Object.fromEntries(
+    LIST_PROPERTY_NAMES.map((name) => {
+      const kind = listKind(name);
+      const { listIndex, slotCursor, slotsInSequence } = target[kind];
+      return [
+        name,
+        useSlots[kind]
+          ? getCustomPropName(name, slotCursor + slotsInSequence, true)
+          : getCustomPropName(name, listIndex),
+      ];
+    }),
+  ) as Record<ListPropertyName, string>;
+}
+
+function endEffect(
+  target: TargetContext,
+  wrote: Record<ListKind, boolean>,
+  useSlots: SlotUsage,
+): void {
+  LIST_KINDS.forEach((kind) => {
+    if (!wrote[kind]) {
+      return;
+    }
+
+    target[kind].touched = true;
+    if (useSlots[kind]) {
+      target[kind].slotsInSequence += 1;
+    }
+  });
+}
+
+function getEffectListKind(effect: ResolvedEffect): ListKind | null {
+  const { namedEffect, keyframeEffect, transition, transitionProperties } = effect;
+
+  if (namedEffect || keyframeEffect) {
+    return 'animation';
+  }
+  if (transition || transitionProperties) {
+    return 'transition';
+  }
+  return null;
+}
+
+function getSlotUsage(sequence: ResolvedSequence): Map<string, SlotUsage> {
+  const counts = new Map<string, Record<ListKind, number>>();
+
+  sequence.effects.forEach((effect) => {
+    const kind = getEffectListKind(effect);
+    if (!kind) {
+      return;
+    }
+
+    const targetHash = getElementHash(effect);
+    const count = counts.get(targetHash) || { animation: 0, transition: 0 };
+    count[kind] += 1;
+    counts.set(targetHash, count);
+  });
+
+  return new Map(
+    [...counts].map(([targetHash, { animation, transition }]) => [
+      targetHash,
+      { animation: animation > 1, transition: transition > 1 },
+    ]),
+  );
+}
+
+function endSequence(target: TargetContext): void {
+  LIST_KINDS.forEach((kind) => {
+    const counters = target[kind];
+    counters.slotsInInteraction = Math.max(counters.slotsInInteraction, counters.slotsInSequence);
+    counters.slotsInSequence = 0;
+  });
+}
+
+function endInteraction(target: TargetContext): void {
+  LIST_KINDS.forEach((kind) => {
+    const counters = target[kind];
+    counters.listIndex += counters.touched ? 1 : 0;
+    counters.slotCursor += counters.slotsInInteraction;
+    counters.slotsInInteraction = 0;
+    counters.touched = false;
+  });
+}
 
 const LIST_PROPERTY_NAMES_MOTION: Record<AnimationPropertyName, string> = {
   animation: 'animation',
@@ -53,107 +184,19 @@ const LIST_PROPERTY_NAMES_MOTION: Record<AnimationPropertyName, string> = {
   'animation-range': 'animationRange',
 };
 
-const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
-  animation: 'none',
-  'animation-composition': 'replace',
-  transition: '_',
-  'animation-timeline': 'auto',
-  'animation-range': 'normal',
-};
-
-// ----- Map Updaters -----
-
-function accumulateUsedProperties(
-  map: Map<string, Set<ListPropertyName>>,
-  targetHash: string,
-  props: ListPropertyName[],
-) {
-  const existing = map.get(targetHash);
-  if (existing) {
-    props.forEach((p) => existing.add(p));
-  } else {
-    map.set(targetHash, new Set(props));
-  }
-}
-
-function pushToTargetCustomPropsLists(
-  targetToLists: Map<string, CSSCoordinatedLists>,
-  targetHash: string,
-  customProps: ListCustomProps,
-  usedProperties?: Set<ListPropertyName>,
-): void {
-  const { key, childSelector } = customProps;
-  const propertyNames = usedProperties
-    ? LIST_PROPERTY_NAMES.filter((n) => usedProperties.has(n))
-    : LIST_PROPERTY_NAMES;
-
-  if (!targetToLists.has(targetHash)) {
-    targetToLists.set(targetHash, { key, childSelector, properties: {} });
-  }
-  const { properties } = targetToLists.get(targetHash)!;
-  for (const name of propertyNames) {
-    if (!properties[name]) {
-      properties[name] = { fallback: LIST_PROPERTY_FALLBACKS[name], varNames: [] };
-    }
-    properties[name]!.varNames.push(customProps[name]);
-  }
-}
-
-function buildCustomProps(
-  indices: (string | number)[],
-  encodedHash: string,
-): Record<ListPropertyName, string> {
-  return LIST_PROPERTY_NAMES.reduce(
-    (acc, name) => {
-      acc[name] = kebabCustomProp([name, ...indices, encodedHash]);
-      return acc;
-    },
-    {} as Record<ListPropertyName, string>,
-  );
-}
-
-function getInteractionCustomPropsForTarget(
-  targetHash: string,
-  key: string,
-  interactionIdx: number,
-  targetToCustomProps: Map<string, ListCustomProps>,
-  childSelector?: string,
-): ListCustomProps {
-  if (!targetToCustomProps.has(targetHash)) {
-    targetToCustomProps.set(targetHash, {
-      key,
-      childSelector,
-      ...buildCustomProps([interactionIdx], getUniqueEncodedHash(targetHash)),
-    });
-  }
-
-  return targetToCustomProps.get(targetHash)!;
-}
-
-function generateSequenceCustomProps(
-  targetHash: string,
-  interactionIdx: number,
-  index: number,
-): Record<ListPropertyName, string> {
-  return buildCustomProps([interactionIdx, index], getUniqueEncodedHash(targetHash));
-}
-
-// ----- Parsers -----
-
 function triggerToCSS(
+  ctx: GenerateContext,
   interaction: Interaction,
-  configConditions: Record<string, Condition>,
   triggerId: string,
-  useFirstChild: boolean = true,
 ): CSSRuleData {
   const { key, conditions } = interaction;
 
-  const media = getFullPredicateByType(conditions, configConditions, 'media');
-  const selectorCondition = getSelectorCondition(conditions, configConditions);
+  const media = getFullPredicateByType(conditions, ctx.configConditions, 'media');
+  const selectorCondition = getSelectorCondition(conditions, ctx.configConditions);
 
   const childSelector = getSelector(interaction, {
     asCombinator: true,
-    useFirstChild,
+    useFirstChild: ctx.useFirstChild,
     addItemFilter: true,
   });
 
@@ -162,8 +205,6 @@ function triggerToCSS(
     media,
     selectorCondition,
     childSelector,
-    // invalidating earlier cascaded custom properties affected from earlier transitionEffects
-    // to implement same-interaction-cascade
     declarations: [
       {
         name: 'view-timeline',
@@ -173,12 +214,6 @@ function triggerToCSS(
   };
 }
 
-/**
- * Collects build-time plugin styles for one effect config object. For every
- * `$`-prefixed field with a matching generator in `plugins`, calls the generator with the raw
- * value and a context scoped to the element, and return CSS rule(s) data. Interact
- * never inspects the field value — it only routes it to the plugin (same contract as `create()`).
- */
 function collectFieldPluginStyles(
   scope: 'interaction' | 'effect',
   source: Record<string, unknown>,
@@ -205,18 +240,19 @@ function collectFieldPluginStyles(
 }
 
 function effectToCSS(
+  ctx: GenerateContext,
   effect: ResolvedEffect,
-  configConditions: Record<string, Condition>,
-  customProps: ListCustomProps,
+  target: TargetContext,
   trigger: TriggerVariant,
-  childSelector?: string,
-  plugins?: InteractPluginStyles,
+  customProps: Record<ListPropertyName, string>,
   sequence?: ResolvedSequence,
 ): {
   rules: CSSRuleData[];
   keyframes: MotionKeyframeEffect[];
-  usedProperties: ListPropertyName[];
+  wrote: Record<ListKind, boolean>;
 } {
+  const { assigned, childSelector } = target;
+  const wrote: Record<ListKind, boolean> = { animation: false, transition: false };
   const {
     key,
     effectId,
@@ -228,8 +264,8 @@ function effectToCSS(
     initial,
   } = effect;
 
-  const media = getFullPredicateByType(conditions, configConditions, 'media');
-  const selectorCondition = getSelectorCondition(conditions, configConditions);
+  const media = getFullPredicateByType(conditions, ctx.configConditions, 'media');
+  const selectorCondition = getSelectorCondition(conditions, ctx.configConditions);
 
   const rules: CSSRuleData[] = [
     {
@@ -244,15 +280,11 @@ function effectToCSS(
 
   const { declarations } = rules[0];
 
-  let usedProperties: ListPropertyName[] = [];
-
-  if (plugins) {
-    rules.push(...collectFieldPluginStyles('effect', effect, key, media, plugins));
+  if (ctx.plugins) {
+    rules.push(...collectFieldPluginStyles('effect', effect, key, media, ctx.plugins));
   }
 
   if (namedEffect || keyframeEffect) {
-    usedProperties = [...LIST_ANIMATION_PROPERTY_NAMES];
-
     const animationOptions = effectToAnimationOptions(effect);
     const cssAnimations = getCSSAnimation(null, animationOptions, trigger, sequence).filter(
       (anim) => anim.name,
@@ -265,6 +297,7 @@ function effectToCSS(
     }));
 
     // declare custom parameters
+    // TODO - register those to define with @property to prevent unintended override
     declarations.push(
       ...cssAnimations.flatMap(({ custom }) =>
         Object.entries(custom || {})
@@ -274,15 +307,22 @@ function effectToCSS(
     );
 
     const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
+      _listPropertyName: propertyName,
       name: customProps[propertyName],
-      value:
-        cssAnimations
-          .map((animation) => {
-            const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
-            return (animation as Record<string, unknown>)[name];
-          })
-          .join(', ') || LIST_PROPERTY_FALLBACKS[propertyName],
-    }));
+      value: cssAnimations
+        .map((animation) => {
+          const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
+          return (
+            (animation as Record<string, unknown>)[name] || LIST_PROPERTY_FALLBACKS[propertyName]
+          );
+        })
+        .join(', '),
+    })).filter(
+      ({ _listPropertyName, name, value }) =>
+        value !== LIST_PROPERTY_FALLBACKS[_listPropertyName] || assigned.has(name),
+    );
+    animationDeclarations.forEach(({ name }) => assigned.add(name));
+    wrote.animation = animationDeclarations.length > 0;
 
     if (initial) {
       // declare animation custom properties with initial dependent on data-motion-enter
@@ -307,16 +347,18 @@ function effectToCSS(
       declarations.push(...animationDeclarations);
     }
   } else if (transition || transitionProperties) {
-    usedProperties = ['transition'];
-
     const properties = getStateStyleProperties(effect);
     const transitions = transitionEffectToTransitionsList(effect);
 
     // declaring transition custom property
-    declarations.push({
-      name: customProps.transition,
-      value: transitions.join(', ') || LIST_PROPERTY_FALLBACKS.transition,
-    });
+    if (transitions.length || assigned.has(customProps.transition)) {
+      declarations.push({
+        name: customProps.transition,
+        value: transitions.join(', ') || LIST_PROPERTY_FALLBACKS.transition,
+      });
+      assigned.add(customProps.transition);
+      wrote.transition = true;
+    }
 
     // adding state rule
     rules.push({
@@ -330,184 +372,108 @@ function effectToCSS(
   } else {
     // setting off animation custom properties
     declarations.push(
-      ...LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
+      ...LIST_ANIMATION_PROPERTY_NAMES.filter((propertyName) =>
+        assigned.has(customProps[propertyName]),
+      ).map((propertyName) => ({
         name: customProps[propertyName],
         value: LIST_PROPERTY_FALLBACKS[propertyName],
       })),
     );
   }
 
-  return { rules: rules.filter((r) => r.declarations.length), keyframes, usedProperties };
+  return { rules: rules.filter((r) => r.declarations.length), keyframes, wrote };
 }
 
 function parseEffect(
-  configConditions: Record<string, Condition>,
-  interactionIdx: number,
+  ctx: GenerateContext,
   effect: ResolvedEffect,
-  targetToCustomProps: Map<string, ListCustomProps>,
-  keyframesMap: Map<string, Keyframe[]>,
   trigger: TriggerVariant,
-  useFirstChild: boolean = true,
-  plugins?: InteractPluginStyles,
-  sequenceCustomProps?: Record<ListPropertyName, string>,
-  precomputedTargetHash?: string,
+  visited: Set<string>,
   sequence?: ResolvedSequence,
-): { rules: CSSRuleData[]; usedProperties: ListPropertyName[] } {
-  const { key } = effect;
-  const targetHash = precomputedTargetHash ?? getElementHash(effect);
-  const childSelector = getSelector(effect, {
-    asCombinator: true,
-    useFirstChild,
-    addItemFilter: true,
-  });
+  slotUsage?: Map<string, SlotUsage>,
+): CSSRuleData[] {
+  const targetHash = getElementHash(effect);
+  const current =
+    ctx.targetsMap.get(targetHash) ||
+    createTargetContext(
+      effect.key,
+      getSelector(effect, {
+        asCombinator: true,
+        useFirstChild: ctx.useFirstChild,
+        addItemFilter: true,
+      }),
+    );
+  visited.add(targetHash);
 
-  // get existing custom-property names for coordinated-list for this target and interaction
-  // or generate them if it is first time this interaction uses this target
-  const customProps = getInteractionCustomPropsForTarget(
-    targetHash,
-    key,
-    interactionIdx,
-    targetToCustomProps,
-    childSelector,
-  );
+  const useSlots = slotUsage?.get(targetHash) || NO_SLOTS;
+  const customProps = getCustomProps(current, useSlots);
 
-  // in case effect is part of a sequence, we use different custom-proprties names to not override
-  // the entire interaction, instead we generate unique-per-effect name to allow effects to live together
-  const localCustomProps = { ...customProps };
-  if (sequenceCustomProps) {
-    Object.assign(localCustomProps, sequenceCustomProps);
-  }
-
-  // process effect into css-rules and keyframes
-  const { rules, keyframes, usedProperties } = effectToCSS(
+  const { rules, keyframes, wrote } = effectToCSS(
+    ctx,
     effect,
-    configConditions,
-    localCustomProps,
+    current,
     trigger,
-    childSelector,
-    plugins,
+    customProps,
     sequence,
   );
 
-  // update keyframes map
-  keyframes.forEach(({ name, keyframes }) => keyframesMap.set(name, keyframes));
+  keyframes.forEach(({ name, keyframes }) => ctx.keyframesMap.set(name, keyframes));
 
-  return { rules, usedProperties };
+  endEffect(current, wrote, useSlots);
+  ctx.targetsMap.set(targetHash, current);
+
+  return rules;
 }
 
 function parseSequence(
-  configConditions: Record<string, Condition>,
-  interactionIdx: number,
+  ctx: GenerateContext,
   sequence: ResolvedSequence,
-  targetToCustomProps: Map<string, ListCustomProps>,
-  keyframesMap: Map<string, Keyframe[]>,
   trigger: TriggerVariant,
-  useFirstChild: boolean = true,
-  targetUsedProperties?: Map<string, Set<ListPropertyName>>,
-  plugins?: InteractPluginStyles,
+  visited: Set<string>,
 ): CSSRuleData[] {
-  // in a similar manner to how we treat different interactions and use lists to concatenate them
-  // instead of overriding, we use the same mechanism to allow all of the effects of a sequence to
-  // exist together on the same target -
-  // targetHash to lists of custom-properties for each coordinated-list type property
-  // to be populated when parsing effects
-  const targetToSequenceLists = new Map<string, CSSCoordinatedLists>();
-  const targetSequenceIndex = new Map<string, number>();
-
   const cssRules: CSSRuleData[] = [];
 
-  for (const effect of sequence.effects) {
-    const targetHash = getElementHash(effect);
-    const { key } = effect;
-    const childSelector = getSelector(effect, {
-      asCombinator: true,
-      useFirstChild,
-      addItemFilter: true,
-    });
+  const localVisited = new Set<string>();
+  const slotUsage = getSlotUsage(sequence);
 
-    const index = targetSequenceIndex.get(targetHash) || 0;
-    targetSequenceIndex.set(targetHash, index + 1);
-
-    const seqCustomProps = generateSequenceCustomProps(targetHash, interactionIdx, index);
-
-    const { rules, usedProperties } = parseEffect(
-      configConditions,
-      interactionIdx,
-      effect,
-      targetToCustomProps,
-      keyframesMap,
-      trigger,
-      useFirstChild,
-      plugins,
-      seqCustomProps,
-      targetHash,
-      sequence,
-    );
-    cssRules.push(...rules);
-
-    const usedSet = new Set(usedProperties);
-
-    pushToTargetCustomPropsLists(
-      targetToSequenceLists,
-      targetHash,
-      { key, childSelector, ...seqCustomProps },
-      usedSet,
-    );
-
-    if (targetUsedProperties) {
-      accumulateUsedProperties(targetUsedProperties, targetHash, usedProperties);
-    }
-  }
+  cssRules.push(
+    ...sequence.effects.flatMap((effect) =>
+      parseEffect(ctx, effect, trigger, localVisited, sequence, slotUsage),
+    ),
+  );
 
   const { conditions } = sequence;
 
-  targetToSequenceLists.forEach((lists, targetHash) => {
-    const customProps = targetToCustomProps.get(targetHash)!;
+  localVisited.forEach((targetHash) => {
+    visited.add(targetHash);
+    const current = ctx.targetsMap.get(targetHash)!;
 
-    // for each target add rule with sequence-conditions for the coordinated lists from interactions targeting it
-    // here we use the interaction's custom-properties to set the lists as values for them instead of
-    // directly into the actual coordinated-list type property, to provide cascading in the array of sequences
-    cssRules.push(buildListsRule(lists, customProps, conditions, configConditions));
+    const rule = buildSequenceListsRule(current, conditions, ctx.configConditions);
+    if (rule) {
+      rule.declarations.forEach(({ name }) => current.assigned.add(name));
+      cssRules.push(rule);
+    }
+
+    endSequence(current);
   });
 
   return cssRules;
 }
 
 function parseInteraction(
-  config: InteractConfig,
+  ctx: GenerateContext,
   interaction: Interaction,
   interactionIdx: number,
-  targetToLists: Map<string, CSSCoordinatedLists>,
-  keyframesMap: Map<string, Keyframe[]>,
-  useFirstChild: boolean = true,
-  plugins?: InteractPluginStyles,
 ): CSSRuleData[] {
   const { key, conditions, effects = [], sequences = [] } = interaction;
-  const configConditions = config.conditions || {};
 
-  // targetHash to custom-property per each coordinated-list type property for current interaction
-  // to be populated when parsing the effects (since it is per target).
-  // Each interaction uses a single custom-property for each coordinated-list type property,
-  // to provide cascading in the array of effects - e.g. effects in the interaction array with exact same target
-  // will populate the same per-interaction custom-property (e.g. `--animation-${interactionIdx}-${targetUniqueSuffix}`)
-  // and the last one will be applied.
-  const targetToCustomProps = new Map<string, ListCustomProps>();
-
-  const targetUsedProperties = new Map<string, Set<ListPropertyName>>();
-
-  const resolvedEffects = effects
-    .map((effect, effIndex) =>
-      resolveEffectForCSS(effect, interaction, config, `eff-${interactionIdx}-${effIndex}`),
-    )
-    .filter((effect) => effect !== null);
-
-  const cssRules = plugins
+  const cssRules = ctx.plugins
     ? collectFieldPluginStyles(
         'interaction',
         interaction,
         key,
-        getFullPredicateByType(conditions, configConditions, 'media'),
-        plugins,
+        getFullPredicateByType(conditions, ctx.configConditions, 'media'),
+        ctx.plugins,
       )
     : [];
 
@@ -518,58 +484,34 @@ function parseInteraction(
     componentId: '',
   } as TriggerVariant;
   if (trigger === 'viewProgress') {
-    cssRules.push(triggerToCSS(interaction, configConditions, motionTrigger.id, useFirstChild));
+    cssRules.push(triggerToCSS(ctx, interaction, motionTrigger.id));
   }
 
-  for (const effect of resolvedEffects) {
-    const targetHash = getElementHash(effect);
-    const { rules, usedProperties } = parseEffect(
-      configConditions,
-      interactionIdx,
-      effect,
-      targetToCustomProps,
-      keyframesMap,
-      motionTrigger,
-      useFirstChild,
-      plugins,
-    );
-    cssRules.push(...rules);
+  const visited = new Set<string>();
 
-    accumulateUsedProperties(targetUsedProperties, targetHash, usedProperties);
-  }
+  const resolvedEffects = effects
+    .map((effect, effIndex) =>
+      resolveEffectForCSS(effect, interaction, ctx.config, `eff-${interactionIdx}-${effIndex}`),
+    )
+    .filter((effect) => effect !== null);
+
+  cssRules.push(
+    ...resolvedEffects.flatMap((effect) => parseEffect(ctx, effect, motionTrigger, visited)),
+  );
 
   const resolvedSequences = sequences
     .map((sequence, seqIndex) =>
-      resolveSequenceForCSS(sequence, interaction, config, `seq-${interactionIdx}-${seqIndex}`),
+      resolveSequenceForCSS(sequence, interaction, ctx.config, `seq-${interactionIdx}-${seqIndex}`),
     )
     .filter((sequence) => sequence !== null);
 
   cssRules.push(
     ...resolvedSequences.flatMap((sequence) =>
-      parseSequence(
-        configConditions,
-        interactionIdx,
-        sequence,
-        targetToCustomProps,
-        keyframesMap,
-        motionTrigger,
-        useFirstChild,
-        targetUsedProperties,
-        plugins,
-      ),
+      parseSequence(ctx, sequence, motionTrigger, visited),
     ),
   );
 
-  // after processing all of the effects, we add to the lists of custom-properties per target
-  // the new interaction's custom-property names
-  targetToCustomProps.forEach((customProps, targetHash) => {
-    pushToTargetCustomPropsLists(
-      targetToLists,
-      targetHash,
-      customProps,
-      targetUsedProperties.get(targetHash),
-    );
-  });
+  visited.forEach((targetHash) => endInteraction(ctx.targetsMap.get(targetHash)!));
 
   return cssRules;
 }
@@ -595,33 +537,44 @@ export function _generate(
   options?: boolean | GenerateOptions,
 ): {
   cssRules: CSSRuleData[];
+  listsRule: string;
   keyframes: Map<string, Keyframe[]>;
+  atProperty: string[];
 } {
   const { useFirstChild, plugins } = normalizeGenerateOptions(options);
 
-  // targetHash to lists of custom-properties for each coordinated-list type property
-  // to be populated when parsing interactions
-  const targetToLists = new Map<string, CSSCoordinatedLists>();
-  const keyframes = new Map<string, Keyframe[]>();
+  const ctx: GenerateContext = {
+    config,
+    configConditions: config.conditions || {},
+    targetsMap: new Map<string, TargetContext>(),
+    keyframesMap: new Map<string, Keyframe[]>(),
+    useFirstChild,
+    plugins,
+  };
 
   const cssRules = config.interactions.flatMap((interaction, interactionIdx) =>
-    parseInteraction(
-      config,
-      interaction,
-      interactionIdx,
-      targetToLists,
-      keyframes,
-      useFirstChild,
-      plugins,
-    ),
+    parseInteraction(ctx, interaction, interactionIdx),
   );
 
-  // for each target add unconditional rule for the coordinated lists from interactions targeting it
-  targetToLists.forEach((lists) => {
-    cssRules.push(buildListsRule(lists));
-  });
+  const targets = [...ctx.targetsMap.values()];
 
-  return { keyframes, cssRules };
+  const animationLength = Math.max(0, ...targets.map(({ animation }) => animation.listIndex));
+  const transitionLength = Math.max(0, ...targets.map(({ transition }) => transition.listIndex));
+  const listsRule = buildListsRule(targets, animationLength, transitionLength);
+
+  const animationSlotLength = Math.max(0, ...targets.map(({ animation }) => animation.slotCursor));
+  const transitionSlotLength = Math.max(
+    0,
+    ...targets.map(({ transition }) => transition.slotCursor),
+  );
+  const atProperty = buildAtPropertyRules(
+    animationLength,
+    transitionLength,
+    animationSlotLength,
+    transitionSlotLength,
+  );
+
+  return { keyframes: ctx.keyframesMap, atProperty, cssRules, listsRule };
 }
 /**
  * Generates CSS for animations from an InteractConfig.
@@ -639,12 +592,14 @@ export function _generate(
  * @returns string containing all of the CSS rules needed for time-based animations
  */
 export function generate(config: InteractConfig, options?: boolean | GenerateOptions): string {
-  const { cssRules, keyframes } = _generate(config, options);
+  const { cssRules, keyframes, atProperty, listsRule } = _generate(config, options);
 
   const css = [
+    ...atProperty,
     ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),
     ...cssRules.map(CSSRuleToString),
-  ];
+    listsRule,
+  ].filter((rule) => rule);
 
   return css.join('\n');
 }

@@ -397,11 +397,27 @@ describe('css.generate', () => {
   });
 });
 
-const isAnimationProp = (name: string) => /^--animation-\d/.test(name);
-const isCompositionProp = (name: string) => /^--animation-composition-/.test(name);
-const isTransitionProp = (name: string) => /^--transition-/.test(name);
-const isTimelineProp = (name: string) => /^--animation-timeline-/.test(name);
-const isRangeProp = (name: string) => /^--animation-range-/.test(name);
+const isAnimationProp = (name: string) => /^--anm-(slot-)?\d/.test(name);
+const isCompositionProp = (name: string) => /^--anm-cmps-(slot-)?\d/.test(name);
+const isTransitionProp = (name: string) => /^--trns-(slot-)?\d/.test(name);
+const isTimelineProp = (name: string) => /^--anm-tmln-(slot-)?\d/.test(name);
+const isRangeProp = (name: string) => /^--anm-rng-(slot-)?\d/.test(name);
+
+function parseListsRule(listsRule: string) {
+  const [, selector = '', body = ''] = listsRule.match(/^([^{]+)\{([\s\S]*)\}$/) || [];
+
+  return {
+    selectors: selector.trim().split(', ').filter(Boolean),
+    declarations: body
+      .split(';')
+      .map((declaration) => declaration.trim())
+      .filter(Boolean)
+      .map((declaration) => ({
+        name: declaration.slice(0, declaration.indexOf(':')).trim(),
+        value: declaration.slice(declaration.indexOf(':') + 1).trim(),
+      })),
+  };
+}
 
 function findDecl(
   declarations: CSSRuleData['declarations'],
@@ -731,23 +747,19 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { listsRule } = _generate(config);
+      const { declarations } = parseListsRule(listsRule);
 
-      const coordListRule = cssRules.find(
-        (r) =>
-          r.declarations.some((d) => d.name === 'animation-timeline') &&
-          String(r.declarations.find((d) => d.name === 'animation-timeline')?.value).includes(
-            '), var(',
-          ),
-      );
-      expect(coordListRule).toBeDefined();
+      const timelineListDecl = declarations.find((d) => d.name === 'animation-timeline');
+      expect(timelineListDecl).toBeDefined();
+      expect(timelineListDecl!.value).toBe('var(--anm-tmln-0), var(--anm-tmln-1)');
 
-      const rangeListDecl = coordListRule!.declarations.find((d) => d.name === 'animation-range');
+      const rangeListDecl = declarations.find((d) => d.name === 'animation-range');
       expect(rangeListDecl).toBeDefined();
-      expect(String(rangeListDecl!.value)).toContain('), var(');
+      expect(rangeListDecl!.value).toBe('var(--anm-rng-0), var(--anm-rng-1)');
     });
 
-    it('should set timeline to none and range to normal for non-viewProgress keyframeEffect', () => {
+    it('should leave timeline and range at their @property defaults for non-viewProgress keyframeEffect', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -768,18 +780,22 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { cssRules, atProperty } = _generate(config);
 
       const effectRule = cssRules.find((r) => r.declarations.some((d) => isAnimationProp(d.name)))!;
 
-      const timelineDecl = findDecl(effectRule.declarations, (d) => isTimelineProp(d.name));
-      expect(timelineDecl!.value).toBe('auto');
+      expect(findDecl(effectRule.declarations, (d) => isTimelineProp(d.name))).toBeUndefined();
+      expect(findDecl(effectRule.declarations, (d) => isRangeProp(d.name))).toBeUndefined();
 
-      const rangeDecl = findDecl(effectRule.declarations, (d) => isRangeProp(d.name));
-      expect(rangeDecl!.value).toBe('normal');
+      expect(atProperty).toContain(
+        '@property --anm-tmln-0 { syntax: "*"; inherits: false; initial-value: auto; }',
+      );
+      expect(atProperty).toContain(
+        '@property --anm-rng-0 { syntax: "*"; inherits: false; initial-value: normal; }',
+      );
     });
 
-    it('should include timeline and range custom props on initial rule for viewEnter', () => {
+    it('should keep the animation slot on the initial rule for viewEnter, with timeline and range left to @property', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -800,20 +816,23 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { cssRules, atProperty } = _generate(config);
 
       const initialRule = cssRules.find(
         (r) => r.selectorSuffix === ':not([data-interact-enter="done"])',
       )!;
       expect(initialRule).toBeDefined();
 
-      const timelineDecl = findDecl(initialRule.declarations, (d) => isTimelineProp(d.name));
-      expect(timelineDecl).toBeDefined();
-      expect(timelineDecl!.value).toBe('auto');
+      expect(findDecl(initialRule.declarations, (d) => isAnimationProp(d.name))).toBeDefined();
+      expect(findDecl(initialRule.declarations, (d) => isTimelineProp(d.name))).toBeUndefined();
+      expect(findDecl(initialRule.declarations, (d) => isRangeProp(d.name))).toBeUndefined();
 
-      const rangeDecl = findDecl(initialRule.declarations, (d) => isRangeProp(d.name));
-      expect(rangeDecl).toBeDefined();
-      expect(rangeDecl!.value).toBe('normal');
+      expect(atProperty).toContain(
+        '@property --anm-tmln-0 { syntax: "*"; inherits: false; initial-value: auto; }',
+      );
+      expect(atProperty).toContain(
+        '@property --anm-rng-0 { syntax: "*"; inherits: false; initial-value: normal; }',
+      );
     });
 
     it('should produce a view-timeline rule for viewProgress trigger', () => {
@@ -958,7 +977,7 @@ describe('css._generate', () => {
   });
 
   describe('effectToCSS - no effect property', () => {
-    it('should set all custom properties to off values when effect has no animation or transition', () => {
+    it('should emit nothing when the effect has no animation or transition and nothing set the slots', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -970,22 +989,82 @@ describe('css._generate', () => {
         ],
       };
 
+      expect(_generate(config).cssRules).toEqual([]);
+      expect(generate(config)).toBe('');
+    });
+
+    it('should reset only the slots a previous effect on the same target set to a non-default', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'kf1',
+                duration: 300,
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+              { effectId: 'empty1' },
+            ],
+          },
+        ],
+      };
+
       const { cssRules } = _generate(config);
 
-      const effectRule = cssRules.find(
-        (r) =>
-          r.declarations.some((d) => isAnimationProp(d.name) && d.value === 'none') &&
-          r.declarations.some((d) => isCompositionProp(d.name) && d.value === 'replace'),
+      const offRule = cssRules.find((r) =>
+        r.declarations.some((d) => isAnimationProp(d.name) && d.value === 'none'),
       );
-      expect(effectRule).toBeDefined();
+      expect(offRule).toBeDefined();
 
-      const timelineDecl = findDecl(effectRule!.declarations, (d) => isTimelineProp(d.name));
-      expect(timelineDecl).toBeDefined();
-      expect(timelineDecl!.value).toBe('auto');
+      expect(findDecl(offRule!.declarations, (d) => isCompositionProp(d.name))).toBeUndefined();
+      expect(findDecl(offRule!.declarations, (d) => isTimelineProp(d.name))).toBeUndefined();
+      expect(findDecl(offRule!.declarations, (d) => isRangeProp(d.name))).toBeUndefined();
+    });
 
-      const rangeDecl = findDecl(effectRule!.declarations, (d) => isRangeProp(d.name));
-      expect(rangeDecl).toBeDefined();
-      expect(rangeDecl!.value).toBe('normal');
+    it('should not reset a slot an earlier interaction set, since the later interaction gets its own slot', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'kf1',
+                duration: 300,
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
+          },
+          {
+            key: 'el',
+            trigger: 'hover',
+            effects: [{ effectId: 'empty1' }],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      expect(
+        cssRules.some((r) =>
+          r.declarations.some((d) => isAnimationProp(d.name) && d.value !== 'none'),
+        ),
+      ).toBe(true);
+      expect(
+        cssRules.some((r) =>
+          r.declarations.some((d) => isAnimationProp(d.name) && d.value === 'none'),
+        ),
+      ).toBe(false);
     });
 
     it('should produce no keyframes for an effect with no animation', () => {
@@ -1276,6 +1355,140 @@ describe('css._generate', () => {
       expect(rangeDecl).toBeDefined();
     });
 
+    it('should write the interaction custom property directly when a sequence target takes a single slot', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                effects: [
+                  {
+                    effectId: 'kf1',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'anim1',
+                      keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules, atProperty } = _generate(config);
+
+      const animDecls = cssRules
+        .flatMap((r) => r.declarations)
+        .filter((d) => isAnimationProp(d.name));
+      expect(animDecls.map((d) => d.name)).toContain('--anm-0');
+      expect(animDecls.some((d) => d.name.includes('-slot-'))).toBe(false);
+      expect(animDecls.some((d) => String(d.value).includes('var('))).toBe(false);
+      expect(atProperty.some((rule) => rule.includes('-slot-'))).toBe(false);
+    });
+
+    it('should write the transition custom property directly for a single-effect sequence', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                effects: [
+                  {
+                    effectId: 'trans1',
+                    transition: {
+                      styleProperties: [{ name: 'opacity', value: '1' }],
+                      duration: 500,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules, atProperty } = _generate(config);
+
+      const transDecls = cssRules
+        .flatMap((r) => r.declarations)
+        .filter((d) => isTransitionProp(d.name));
+      expect(transDecls.map((d) => d.name)).toEqual(['--trns-0']);
+      expect(String(transDecls[0].value)).toContain('opacity');
+      expect(atProperty.some((rule) => rule.includes('-slot-'))).toBe(false);
+    });
+
+    it('should only use slots for the targets that repeat within the sequence', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                effects: [
+                  {
+                    effectId: 'kf1',
+                    key: 'repeated',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'anim1',
+                      keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                    },
+                  },
+                  {
+                    effectId: 'kf2',
+                    key: 'repeated',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'anim2',
+                      keyframes: [{ opacity: '1' }, { opacity: '0' }],
+                    },
+                  },
+                  {
+                    effectId: 'kf3',
+                    key: 'single',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'anim3',
+                      keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { cssRules } = _generate(config);
+
+      const animPropsByKey = (key: string) =>
+        cssRules
+          .filter((r) => r.key === key)
+          .flatMap((r) => r.declarations)
+          .filter((d) => isAnimationProp(d.name));
+
+      const repeated = animPropsByKey('repeated');
+      expect(repeated.filter((d) => d.name === '--anm-slot-0')).toHaveLength(1);
+      expect(repeated.filter((d) => d.name === '--anm-slot-1')).toHaveLength(1);
+      expect(repeated.find((d) => d.name === '--anm-0')!.value).toBe(
+        'var(--anm-slot-0), var(--anm-slot-1)',
+      );
+
+      const single = animPropsByKey('single');
+      expect(single.some((d) => d.name.includes('-slot-'))).toBe(false);
+      expect(single.find((d) => d.name === '--anm-0')).toBeDefined();
+    });
+
     describe('staggered delay', () => {
       const staggerConfig = (
         sequence: Partial<InteractConfig['interactions'][number]['sequences']>[number] = {},
@@ -1310,7 +1523,7 @@ describe('css._generate', () => {
 
         return cssRules
           .flatMap((r) => r.declarations)
-          .filter((d) => isAnimationProp(d.name) && !String(d.value).includes('var(--animation'))
+          .filter((d) => isAnimationProp(d.name) && !String(d.value).includes('var(--anm'))
           .map((d) => String(d.value))
           .join('\n');
       };
@@ -1391,6 +1604,14 @@ describe('css._generate', () => {
                       keyframes: [{ opacity: '0' }, { opacity: '1' }],
                     },
                   },
+                  {
+                    effectId: 'kf2',
+                    duration: 300,
+                    keyframeEffect: {
+                      name: 'anim2',
+                      keyframes: [{ opacity: '1' }, { opacity: '0' }],
+                    },
+                  },
                 ],
               },
             ],
@@ -1449,25 +1670,25 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { listsRule } = _generate(config);
+      const { selectors, declarations } = parseListsRule(listsRule);
 
-      const coordListRule = cssRules.find(
-        (r) =>
-          r.declarations.some((d) => d.name === 'animation') &&
-          String(r.declarations.find((d) => d.name === 'animation')?.value).includes('), var('),
-      );
-      expect(coordListRule).toBeDefined();
+      expect(selectors).toEqual(['[data-interact-key="el"] > :first-child']);
 
-      const timelineDecl = coordListRule!.declarations.find((d) => d.name === 'animation-timeline');
+      const animationDecl = declarations.find((d) => d.name === 'animation');
+      expect(animationDecl).toBeDefined();
+      expect(animationDecl!.value).toBe('var(--anm-0), var(--anm-1)');
+
+      const timelineDecl = declarations.find((d) => d.name === 'animation-timeline');
       expect(timelineDecl).toBeDefined();
-      expect(String(timelineDecl!.value)).toContain('), var(');
+      expect(timelineDecl!.value).toBe('var(--anm-tmln-0), var(--anm-tmln-1)');
 
-      const rangeDecl = coordListRule!.declarations.find((d) => d.name === 'animation-range');
+      const rangeDecl = declarations.find((d) => d.name === 'animation-range');
       expect(rangeDecl).toBeDefined();
-      expect(String(rangeDecl!.value)).toContain('), var(');
+      expect(rangeDecl!.value).toBe('var(--anm-rng-0), var(--anm-rng-1)');
     });
 
-    it('should produce separate coordinated-list rules for different targets', () => {
+    it('should produce a single coordinated-list rule covering all targets', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -1502,18 +1723,17 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { listsRule } = _generate(config);
+      const { selectors, declarations } = parseListsRule(listsRule);
 
-      const coordListRules = cssRules.filter(
-        (r) =>
-          r.declarations.some((d) => d.name === 'animation') &&
-          String(r.declarations.find((d) => d.name === 'animation')?.value).includes('var('),
-      );
-      expect(coordListRules.length).toBe(2);
+      expect(selectors).toEqual([
+        '[data-interact-key="el-a"] > :first-child',
+        '[data-interact-key="el-b"] > :first-child',
+      ]);
 
-      const keys = coordListRules.map((r) => r.key);
-      expect(keys).toContain('el-a');
-      expect(keys).toContain('el-b');
+      const animationDecl = declarations.find((d) => d.name === 'animation');
+      expect(animationDecl).toBeDefined();
+      expect(animationDecl!.value).toBe('var(--anm-0)');
     });
   });
 
@@ -1555,7 +1775,16 @@ describe('css._generate', () => {
           {
             key: 'el',
             trigger: 'click',
-            effects: [{ effectId: 'e1' }],
+            effects: [
+              {
+                effectId: 'e1',
+                duration: 300,
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
           },
         ],
       };
@@ -1573,13 +1802,23 @@ describe('css._generate', () => {
           {
             key: 'el',
             trigger: 'click',
-            effects: [{ effectId: 'e1' }],
+            effects: [
+              {
+                effectId: 'e1',
+                duration: 300,
+                keyframeEffect: {
+                  name: 'anim1',
+                  keyframes: [{ opacity: '0' }, { opacity: '1' }],
+                },
+              },
+            ],
           },
         ],
       };
 
       const { cssRules } = _generate(config, false);
 
+      expect(cssRules).not.toEqual([]);
       const ruleWithFirstChild = cssRules.find((r) => r.childSelector === '> :first-child');
       expect(ruleWithFirstChild).toBeUndefined();
     });
@@ -1654,7 +1893,7 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { cssRules, listsRule } = _generate(config);
 
       const effectRules = cssRules.filter((r) =>
         r.declarations.some((d) => isAnimationProp(d.name)),
@@ -1666,12 +1905,10 @@ describe('css._generate', () => {
       );
       expect(new Set(animPropNames).size).toBe(1);
 
-      const coordListRules = cssRules.filter(
-        (r) =>
-          r.declarations.some((d) => d.name === 'animation') &&
-          String(r.declarations.find((d) => d.name === 'animation')?.value).includes('var('),
-      );
-      expect(coordListRules).toHaveLength(1);
+      const { declarations } = parseListsRule(listsRule);
+      const animationDecl = declarations.find((d) => d.name === 'animation');
+      expect(animationDecl).toBeDefined();
+      expect(animationDecl!.value).toBe('var(--anm-0)');
     });
   });
 
@@ -1682,7 +1919,16 @@ describe('css._generate', () => {
         {
           key: 'el',
           trigger: 'click',
-          effects: [{ effectId: 'e1' }],
+          effects: [
+            {
+              effectId: 'e1',
+              duration: 300,
+              keyframeEffect: {
+                name: 'anim1',
+                keyframes: [{ opacity: '0' }, { opacity: '1' }],
+              },
+            },
+          ],
         },
       ],
     };
@@ -1756,7 +2002,7 @@ describe('css._generate', () => {
       expect(calls[0].value).toEqual({ container: '.title', type: 'chars' });
       expect(calls[0].ctx.key).toBe('hero');
       expect(calls[0].ctx.scope).toBe('interaction');
-      expect(result).toContain('[data-interact-key="hero"] .title {\nvisibility: hidden;\n}');
+      expect(result).toContain('[data-interact-key="hero"] .title {\n  visibility: hidden;\n}');
     });
 
     it('does nothing when no plugins option is passed', () => {

@@ -9,10 +9,6 @@ export function isTemplatedKey(key: string) {
   return /\[]/g.test(key);
 }
 
-export function kebabCustomProp(args: (string | number)[]) {
-  return `--${args.join('-')}`;
-}
-
 export function camelToKebabCase(property: string): string {
   return property.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
 }
