@@ -78,7 +78,7 @@ describe('splitText through the Interact plugin bridge (real @wix/splittext)', (
     // SSR: the container is hidden until the split marks it ready.
     const css = generate(config, { plugins: { splitText: splitTextStyle } });
     expect(css).toContain(
-      '[data-interact-key="hero"] .title:not([data-splittext-ready]) {\nvisibility: hidden;\n}',
+      '[data-interact-key="hero"] .title:not([data-splittext-ready]) {\n  visibility: hidden;\n}',
     );
 
     // Runtime: after the plugin splits, the container carries the marker, so the hide rule
