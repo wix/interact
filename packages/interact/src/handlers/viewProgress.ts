@@ -5,6 +5,7 @@ import type { ViewEnterParams, ScrubEffect, HandlerObjectMap, InteractOptions } 
 import {
   effectToAnimationOptions,
   addHandlerToMap,
+  cancelAnimationGroup,
   removeElementFromHandlerMap,
 } from './utilities';
 
@@ -45,9 +46,7 @@ function addViewProgressHandler(
       animationGroup.play();
 
       cleanup = () => {
-        (animationGroup as AnimationGroup).ready.then(() => {
-          animationGroup.cancel();
-        });
+        cancelAnimationGroup(animationGroup);
       };
     }
   } else {
@@ -64,15 +63,21 @@ function addViewProgressHandler(
         root: document.body,
         ...scrollOptionsGetter(),
       });
+      let disposed = false;
 
       cleanup = () => {
+        disposed = true;
         scroll.destroy();
       };
 
-      Promise.all((scenes as ScrubScrollScene[]).map((s) => s.ready || Promise.resolve())).then(
+      void Promise.all(
+        (scenes as ScrubScrollScene[]).map((s) => s.ready || Promise.resolve()),
+      ).then(
         () => {
+          if (disposed) return;
           scroll.start();
         },
+        () => undefined,
       );
     }
   }

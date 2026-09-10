@@ -4,6 +4,7 @@ import type { TimeEffect, HandlerObjectMap, ViewEnterParams, InteractOptions } f
 import {
   effectToAnimationOptions,
   addHandlerToMap,
+  cancelAnimationGroup,
   removeElementFromHandlerMap,
 } from './utilities';
 import fastdom from 'fastdom';
@@ -63,8 +64,8 @@ function setOptions(options: Partial<ViewEnterParams>) {
 
 function invokeHandlers(target: HTMLElement, isIntersecting: boolean, isFullExit?: boolean) {
   const handlers = handlerMap.get(target);
-  handlers?.forEach(({ source, handler }) => {
-    if (source === target) {
+  handlers?.forEach(({ source, handler, active }) => {
+    if (source === target && active !== false) {
       handler!(isIntersecting, isFullExit);
     }
   });
@@ -115,6 +116,8 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
 
         if (options.useSafeViewEnter && !entry.isIntersecting) {
           fastdom.measure(() => {
+            if (!handlerMap.has(target)) return;
+
             const sourceHeight = entry.boundingClientRect.height;
             const rootHeight = entry.rootBounds?.height;
 
@@ -130,6 +133,8 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
 
             if (needsSafeObserver) {
               fastdom.mutate(() => {
+                if (!handlerMap.has(target)) return;
+
                 observer.unobserve(target);
                 const safeObserver = getObserver(options, true);
                 elementObserverMap.set(target, safeObserver);
@@ -186,6 +191,7 @@ function addViewEnterHandler(
   let isInitialPlay = true;
 
   let onceDone = false;
+  let disposed = false;
 
   // Declared early so the handler closure can reference it for self-cleanup
   let handlerObj: {
@@ -193,21 +199,24 @@ function addViewEnterHandler(
     target: HTMLElement;
     handler: typeof handler;
     cleanup: () => void;
+    active?: boolean;
   };
 
   const handler = (isIntersecting?: boolean, isFullExit?: boolean) => {
+    if (disposed) return;
     if (selectorCondition && !target.matches(selectorCondition)) return;
 
     if (type === 'once') {
       if (isIntersecting && !onceDone) {
         onceDone = true;
-
-        handlerMap.get(source)?.delete(handlerObj);
-        handlerMap.get(target)?.delete(handlerObj);
+        handlerObj.active = false;
 
         const remaining = handlerMap.get(source);
+        const hasActiveHandlers = Array.from(remaining ?? []).some(
+          ({ active }) => active !== false,
+        );
 
-        if (!remaining || remaining.size === 0) {
+        if (!hasActiveHandlers) {
           const currentObserver = elementObserverMap.get(source) || observer;
           currentObserver.unobserve(source);
           elementFirstRun.delete(source);
@@ -215,6 +224,7 @@ function addViewEnterHandler(
 
         animation.play(() => {
           const setEnterStart = () => {
+            if (disposed) return;
             target.dataset.interactEnter = 'start';
           };
 
@@ -225,6 +235,7 @@ function addViewEnterHandler(
 
             const setEnterDone = () => {
               fastdom.mutate(() => {
+                if (disposed) return;
                 target.dataset.interactEnter = 'done';
               });
             };
@@ -261,6 +272,8 @@ function addViewEnterHandler(
   };
 
   const cleanup = () => {
+    disposed = true;
+    handlerObj.active = false;
     const currentObserver = elementObserverMap.get(source) || observer;
     currentObserver.unobserve(source);
 
@@ -269,12 +282,14 @@ function addViewEnterHandler(
       exitObserver.unobserve(source);
     }
 
-    animation.cancel();
+    if (!preCreatedAnimation) {
+      cancelAnimationGroup(animation);
+    }
     elementFirstRun.delete(source);
     elementObserverMap.delete(source);
   };
 
-  handlerObj = { source, target, handler, cleanup };
+  handlerObj = { source, target, handler, cleanup, active: true };
 
   addHandlerToMap(handlerMap, source, handlerObj);
   addHandlerToMap(handlerMap, target, handlerObj);

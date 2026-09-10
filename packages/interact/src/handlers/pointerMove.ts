@@ -40,7 +40,9 @@ function addPointerMoveHandler(
       scenes,
       ...pointerOptionsGetter(),
     });
+    let disposed = false;
     const cleanup = () => {
+      disposed = true;
       pointer.destroy();
     };
 
@@ -49,11 +51,15 @@ function addPointerMoveHandler(
     addHandlerToMap(pointerManagerMap, source, handlerObj);
     addHandlerToMap(pointerManagerMap, target, handlerObj);
 
-    Promise.all(
+    void Promise.all(
       scenes.map((s) => (s as { ready?: Promise<void> }).ready || Promise.resolve()),
-    ).then(() => {
-      pointer.start();
-    });
+    ).then(
+      () => {
+        if (disposed) return;
+        pointer.start();
+      },
+      () => undefined,
+    );
   }
 }
 

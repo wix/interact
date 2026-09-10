@@ -1340,6 +1340,179 @@ describe('interact (mini)', () => {
 
       expect(pointerInstance.destroy).toHaveBeenCalledTimes(1);
     });
+
+    it('should cancel a running event-triggered animation', async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      const animation = {
+        play: vi.fn(),
+        cancel: vi.fn(),
+        onFinish: vi.fn(),
+        onAbort: vi.fn(),
+        pause: vi.fn(),
+        reverse: vi.fn(),
+        progress: vi.fn(),
+        persist: vi.fn(),
+        isCSS: false,
+        playState: 'running',
+        ready: Promise.resolve(),
+      };
+      vi.mocked(getWebAnimation).mockReturnValueOnce(animation as any);
+
+      element = document.createElement('div');
+
+      TRIGGER_TO_HANDLER_MODULE_MAP.click.add(
+        element,
+        element,
+        getMockConfig().effects['logo-bounce'],
+        {},
+        {},
+      );
+      element.dispatchEvent(new PointerEvent('click', { pointerType: 'mouse' }));
+      TRIGGER_TO_HANDLER_MODULE_MAP.click.remove(element);
+
+      expect(animation.play).toHaveBeenCalledTimes(1);
+      expect(animation.cancel).toHaveBeenCalled();
+    });
+
+    it('should keep a pending event-triggered animation cancelled after it becomes ready', async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      let resolveReady!: () => void;
+      const ready = new Promise<void>((resolve) => {
+        resolveReady = resolve;
+      });
+      const animation = {
+        play: vi.fn(),
+        cancel: vi.fn(),
+        onFinish: vi.fn(),
+        onAbort: vi.fn(),
+        pause: vi.fn(),
+        reverse: vi.fn(),
+        progress: vi.fn(),
+        persist: vi.fn(),
+        isCSS: false,
+        playState: 'running',
+        ready,
+      };
+      vi.mocked(getWebAnimation).mockReturnValueOnce(animation as any);
+
+      element = document.createElement('div');
+
+      TRIGGER_TO_HANDLER_MODULE_MAP.click.add(
+        element,
+        element,
+        getMockConfig().effects['logo-bounce'],
+        {},
+        {},
+      );
+      element.dispatchEvent(new PointerEvent('click', { pointerType: 'mouse' }));
+      TRIGGER_TO_HANDLER_MODULE_MAP.click.remove(element);
+
+      expect(animation.cancel).toHaveBeenCalledTimes(1);
+
+      resolveReady();
+      await ready;
+      await Promise.resolve();
+
+      expect(animation.cancel).toHaveBeenCalledTimes(2);
+    });
+
+    it('should cancel a running view-progress animation before readiness settles', async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      let resolveReady!: () => void;
+      const ready = new Promise<void>((resolve) => {
+        resolveReady = resolve;
+      });
+      const animation = {
+        play: vi.fn(),
+        cancel: vi.fn(),
+        isCSS: false,
+        ready,
+      };
+      vi.mocked(getWebAnimation).mockReturnValueOnce(animation as any);
+
+      const key = 'logo-scroll';
+      element = document.createElement('div');
+      element.dataset.interactKey = key;
+
+      add(element, key);
+      remove(key);
+
+      expect(animation.play).toHaveBeenCalledTimes(1);
+      expect(animation.cancel).toHaveBeenCalledTimes(1);
+
+      resolveReady();
+      await ready;
+      await Promise.resolve();
+
+      expect(animation.cancel).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not start a pointer effect after it was removed while scenes were pending', async () => {
+      const { getScrubScene } = await import('@wix/motion');
+      const { Pointer } = await import('kuliso');
+      let resolveReady!: () => void;
+      const ready = new Promise<void>((resolve) => {
+        resolveReady = resolve;
+      });
+      const pointerInstance = {
+        start: vi.fn(),
+        destroy: vi.fn(),
+      };
+      vi.mocked(getScrubScene).mockReturnValueOnce({ ready } as any);
+      vi.mocked(Pointer).mockImplementationOnce(function (this: any) {
+        Object.assign(this, pointerInstance);
+      } as any);
+
+      const key = 'logo-mouse';
+      element = document.createElement('div');
+      element.dataset.interactKey = key;
+
+      add(element, key);
+      remove(key);
+      resolveReady();
+      await ready;
+      await Promise.resolve();
+
+      expect(pointerInstance.destroy).toHaveBeenCalledTimes(1);
+      expect(pointerInstance.start).not.toHaveBeenCalled();
+    });
+
+    it('should not start a scroll effect after it was removed while scenes were pending', async () => {
+      const ViewTimeline = (window as any).ViewTimeline;
+      delete (window as any).ViewTimeline;
+
+      const { getScrubScene } = await import('@wix/motion');
+      const { Scroll } = await import('fizban');
+      let resolveReady!: () => void;
+      const ready = new Promise<void>((resolve) => {
+        resolveReady = resolve;
+      });
+      const scrollInstance = {
+        start: vi.fn(),
+        destroy: vi.fn(),
+      };
+      vi.mocked(getScrubScene).mockReturnValueOnce({ ready } as any);
+      vi.mocked(Scroll).mockImplementationOnce(function (this: any) {
+        Object.assign(this, scrollInstance);
+      } as any);
+
+      const key = 'logo-scroll';
+      element = document.createElement('div');
+      element.dataset.interactKey = key;
+
+      try {
+        add(element, key);
+        remove(key);
+        resolveReady();
+        await ready;
+        await Promise.resolve();
+
+        expect(scrollInstance.destroy).toHaveBeenCalledTimes(1);
+        expect(scrollInstance.start).not.toHaveBeenCalled();
+      } finally {
+        (window as any).ViewTimeline = ViewTimeline;
+      }
+    });
   });
 
   describe('effect cascading logic', () => {

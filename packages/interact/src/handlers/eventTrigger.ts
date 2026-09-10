@@ -123,6 +123,7 @@ function addEventTriggerHandler(
   const enterLeave = getEnterLeaveConfig(genericConfig);
 
   let handler: EventHandler | null;
+  let animationCleanup: (() => void) | undefined;
   let once = false;
 
   if (isTransition) {
@@ -134,7 +135,7 @@ function addEventTriggerHandler(
       enterLeave,
     );
   } else {
-    handler = createTimeEffectHandler(
+    const timeEffectHandler = createTimeEffectHandler(
       target,
       effect as TimeEffect & EffectBase,
       reducedMotion,
@@ -142,6 +143,8 @@ function addEventTriggerHandler(
       enterLeave,
       preCreatedAnimation,
     );
+    handler = timeEffectHandler?.handler ?? null;
+    animationCleanup = timeEffectHandler?.cleanup;
     once = (effect as TimeEffect).triggerType === 'once';
   }
 
@@ -159,6 +162,7 @@ function addEventTriggerHandler(
 
   const cleanup = () => {
     controller.abort();
+    animationCleanup?.();
   };
 
   const handlerObj = { source, target, cleanup };

@@ -4,6 +4,7 @@ import type { AnimationEndParams, TimeEffect, HandlerObjectMap, InteractOptions 
 import {
   effectToAnimationOptions,
   addHandlerToMap,
+  cancelAnimationGroup,
   removeElementFromHandlerMap,
 } from './utilities';
 
@@ -63,7 +64,9 @@ function addAnimationEndHandler(
   };
 
   const cleanup = () => {
-    animation.cancel();
+    if (!preCreatedAnimation) {
+      cancelAnimationGroup(animation);
+    }
     source.removeEventListener('animationend', handler);
   };
 

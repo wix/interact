@@ -6,6 +6,7 @@ import type {
   HandlerObjectMap,
   AnimationOptions,
 } from '../types';
+import type { AnimationGroup } from '@wix/motion';
 
 const DEFAULT_RANGE_VALUES = {
   rangeStart: { name: 'cover' as const, offset: { value: 0, unit: 'percentage' as const } },
@@ -83,4 +84,19 @@ export function removeElementFromHandlerMap(handlerMap: HandlerObjectMap, elemen
   });
 
   handlerMap.delete(element);
+}
+
+/**
+ * Cancel now, then cancel once more when initialization completes.
+ *
+ * AnimationGroup.play() waits for ready before playing its animations. If teardown happens while
+ * that wait is pending, a single synchronous cancel can be followed by the queued play. Repeating
+ * the cancellation after ready makes teardown win that race as well.
+ */
+export function cancelAnimationGroup(animation: AnimationGroup): void {
+  animation.cancel();
+  void animation.ready?.then(
+    () => animation.cancel(),
+    () => undefined,
+  );
 }

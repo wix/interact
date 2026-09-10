@@ -122,6 +122,70 @@ describe('viewEnter handler', () => {
 
       expect(unobserveSpy).toHaveBeenCalledWith(element);
     });
+
+    it('should retain cleanup ownership after a once animation starts', async () => {
+      const { getAnimation } = await import('@wix/motion');
+      const animation = {
+        play: vi.fn(),
+        cancel: vi.fn(),
+        onFinish: vi.fn(),
+        onAbort: vi.fn(),
+        pause: vi.fn(),
+        reverse: vi.fn(),
+        progress: vi.fn(),
+        persist: vi.fn(),
+        isCSS: false,
+        playState: 'running',
+        ready: Promise.resolve(),
+      };
+      vi.mocked(getAnimation).mockReturnValueOnce(animation as any);
+
+      viewEnterHandler.add(
+        element,
+        target,
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'once' },
+        {},
+        {},
+      );
+
+      getMainObserverCallback()([createEntry()]);
+      viewEnterHandler.remove(element);
+
+      expect(animation.play).toHaveBeenCalledTimes(1);
+      expect(animation.cancel).toHaveBeenCalled();
+    });
+
+    it('should cancel an ongoing state animation when removed', async () => {
+      const { getAnimation } = await import('@wix/motion');
+      const animation = {
+        play: vi.fn(),
+        cancel: vi.fn(),
+        onFinish: vi.fn(),
+        onAbort: vi.fn(),
+        pause: vi.fn(),
+        reverse: vi.fn(),
+        progress: vi.fn(),
+        persist: vi.fn(),
+        isCSS: false,
+        playState: 'running',
+        ready: Promise.resolve(),
+      };
+      vi.mocked(getAnimation).mockReturnValueOnce(animation as any);
+
+      viewEnterHandler.add(
+        element,
+        target,
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'state' },
+        {},
+        {},
+      );
+
+      getMainObserverCallback()([createEntry()]);
+      viewEnterHandler.remove(element);
+
+      expect(animation.play).toHaveBeenCalledTimes(1);
+      expect(animation.cancel).toHaveBeenCalled();
+    });
   });
 
   describe('Safe flow', () => {
