@@ -204,8 +204,11 @@ function addViewEnterHandler(
 
         // if no more handlers exist we unobserve but keep the handler on the map
         const sourceHandlers = handlerMap.get(source);
-        if (!sourceHandlers || sourceHandlers.size === 0 ||
-          (sourceHandlers.size === 1 && sourceHandlers.has(handlerObj))) {
+        if (
+          !sourceHandlers ||
+          sourceHandlers.size === 0 ||
+          (sourceHandlers.size === 1 && sourceHandlers.has(handlerObj))
+        ) {
           const currentObserver = elementObserverMap.get(source) || observer;
           currentObserver.unobserve(source);
           elementFirstRun.delete(source);
