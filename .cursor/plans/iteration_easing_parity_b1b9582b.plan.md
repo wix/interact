@@ -9,7 +9,7 @@ todos:
     content: Implement the pure planIterationEasing(easing, keyframes, preferCSS) returning none | bake | runtime, including the faithfulness predicate and non-invertible/step bail-outs
     status: pending
   - id: build-side
-    content: "Wire the planner into getCSSAnimation: thread an easing override into getAnimationAsCSS and return baked keyframes, without mutating the shared options object"
+    content: 'Wire the planner into getCSSAnimation: thread an easing override into getAnimationAsCSS and return baked keyframes, without mutating the shared options object'
     status: pending
   - id: runtime-side
     content: Thread trigger into getElementCSSAnimation and apply effect.updateTiming({ easing }) for kind 'runtime' in both the namedEffect.style branch and the getElementAnimation fallback
@@ -24,7 +24,7 @@ todos:
     content: Add a browser e2e comparing computed styles between a WAAPI animation and the baked CSS animation at matched currentTime values
     status: pending
   - id: validator
-    content: "Optional: warn in interact-validate when a viewProgress effect combines a non-invertible easing with multiple keyframe intervals"
+    content: 'Optional: warn in interact-validate when a viewProgress effect combines a non-invertible easing with multiple keyframe intervals'
     status: pending
   - id: docs
     content: Update Motion/Interact docs and rules for the new easing semantics, and write the CHANGELOG entry covering the CSS output change and the linear() support floor
@@ -57,20 +57,20 @@ Let `f` be the resolved CSS easing and `o_i` the keyframe offsets. The shorthand
 - `f` is `linear`, **or**
 - there is exactly one interpolation interval **and** no non-final keyframe carries its own `easing`.
 
-The second clause matters because a keyframe's own `animation-timing-function` *overrides* the element-level one in CSS, whereas WAAPI *composes* the two. So even a 2-keyframe effect deviates if the first keyframe has an `easing` (e.g. `ShuttersIn` uses `easing: 'step-start'` on keyframe 0).
+The second clause matters because a keyframe's own `animation-timing-function` _overrides_ the element-level one in CSS, whereas WAAPI _composes_ the two. So even a 2-keyframe effect deviates if the first keyframe has an `easing` (e.g. `ShuttersIn` uses `easing: 'step-start'` on keyframe 0).
 
 ## Two remediations
 
 ### Bake (pure CSS, exact to sampling tolerance)
 
-Re-sampling keyframe *values* is not viable — preset values are opaque strings like `calc(var(--motion-direction-x) * var(--motion-distance-factor) * 50px)` in [packages/motion-presets/src/library/entrance/BounceIn.ts](packages/motion-presets/src/library/entrance/BounceIn.ts). Instead, move the keyframes in *time* and push the residual curve into per-segment timing functions. Keyframe count is unchanged; no value math.
+Re-sampling keyframe _values_ is not viable — preset values are opaque strings like `calc(var(--motion-direction-x) * var(--motion-distance-factor) * 50px)` in [packages/motion-presets/src/library/entrance/BounceIn.ts](packages/motion-presets/src/library/entrance/BounceIn.ts). Instead, move the keyframes in _time_ and push the residual curve into per-segment timing functions. Keyframe count is unchanged; no value math.
 
 - New offsets: `u_i = f⁻¹(o_i)`
 - Segment residual: `g_i(s) = (f(u_i + s·Δu_i) − o_i) / Δo_i`, a monotonic `[0,1] → [0,1]` map
 - Emitted per-keyframe easing: `h_i = e_i ∘ g_i`, serialized as `linear(<stops>)` (`e_i` = the keyframe's original easing, identity if absent)
 - Element-level easing becomes `linear`
 
-`linear()` accepts numbers outside `[0,1]`, so an overshooting *keyframe* easing (`backOut`) still serializes fine. Direction is safe: CSS reverses keyframe timing functions for `reverse`/`alternate-reverse`, which exactly reverses the baked value-vs-time curve, matching WAAPI applying `f` to directed progress.
+`linear()` accepts numbers outside `[0,1]`, so an overshooting _keyframe_ easing (`backOut`) still serializes fine. Direction is safe: CSS reverses keyframe timing functions for `reverse`/`alternate-reverse`, which exactly reverses the baked value-vs-time curve, matching WAAPI applying `f` to directed progress.
 
 **Not bakeable** when `f` is non-monotonic or non-invertible. From `cssEasings`, that is `backIn` / `backOut` / `backInOut` (cubic-beziers with control points outside `[0,1]`), plus any `steps()` / `step-start` / `step-end`, plus a non-monotonic `linear()`. Also bail when any non-final keyframe easing is a step function.
 
@@ -78,7 +78,7 @@ Re-sampling keyframe *values* is not viable — preset values are opaque strings
 
 Emit `linear` in the shorthand and call `effect.updateTiming({ easing })` on the adopted `CSSAnimation`. The keyframes then carry `linear` per segment, so composing the iteration easing on top reproduces WAAPI semantics exactly.
 
-No visual jump for time-based animations: `getAnimationAsCSS` emits `paused`, and `getAnimation` adopts + retimes at handler-registration time, long before `animation.play()` in [packages/interact/src/handlers/viewEnter.ts](packages/interact/src/handlers/viewEnter.ts) and [packages/interact/src/handlers/effectHandlers.ts](packages/interact/src/handlers/effectHandlers.ts). A scroll-driven animation is *not* paused, so the non-bakeable scroll case can show a one-frame linear value before retiming.
+No visual jump for time-based animations: `getAnimationAsCSS` emits `paused`, and `getAnimation` adopts + retimes at handler-registration time, long before `animation.play()` in [packages/interact/src/handlers/viewEnter.ts](packages/interact/src/handlers/viewEnter.ts) and [packages/interact/src/handlers/effectHandlers.ts](packages/interact/src/handlers/effectHandlers.ts). A scroll-driven animation is _not_ paused, so the non-bakeable scroll case can show a one-frame linear value before retiming.
 
 ## Routing
 
@@ -113,9 +113,9 @@ type IterationEasingPlan =
   | { kind: 'runtime'; easing: string };
 
 function planIterationEasing(
-  easing: string,          // already through getEasing()
+  easing: string, // already through getEasing()
   keyframes: Keyframe[],
-  preferCSS: boolean,      // trigger?.trigger === 'view-progress'
+  preferCSS: boolean, // trigger?.trigger === 'view-progress'
 ): IterationEasingPlan;
 ```
 
@@ -155,7 +155,7 @@ Minimal. `keyframePropertyToCSS` already handles `easing`, `interpolateKeyframes
 
 ## Testing
 
-**Parity harness (the core deliverable).** Compare in *progress space* rather than value space, which sidesteps opaque `calc(var(…))` values entirely. For each sample time `t`, both models yield a `(segmentIndex, localProgress)` pair:
+**Parity harness (the core deliverable).** Compare in _progress space_ rather than value space, which sidesteps opaque `calc(var(…))` values entirely. For each sample time `t`, both models yield a `(segmentIndex, localProgress)` pair:
 
 - WAAPI: `p = f(t)`; locate segment `j` in the original offsets; `local = e_j((p − o_j) / Δo_j)`
 - Baked CSS: locate segment `j` in the baked offsets; `s = (t − u_j) / Δu_j`; `local = h_j(s)`, evaluating the emitted `linear()`
@@ -163,6 +163,7 @@ Minimal. `keyframePropertyToCSS` already handles `easing`, `interpolateKeyframes
 Assert identical `j` and `|Δlocal| < 1e-3`. Requires exposing the `linear()` parser for tests.
 
 Coverage:
+
 - Every value in `cssEasings` crossed with 2-keyframe, 3-keyframe, and 13-keyframe (`Bounce`) shapes, with and without keyframe-level easings.
 - Planner classification: assert `none` for linear and single-interval cases, `bake` for monotonic multi-interval under `view-progress`, `runtime` for `back*` / `steps` and for all time-based triggers.
 - Sweep every `@wix/motion-presets` `style()` output, asserting the plan kind and bake parity.
