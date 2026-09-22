@@ -117,11 +117,11 @@ export const SplitTextPluginConfigSchema = SplitTextOptionsSchema.safeExtend({
 
 export type SplitType = z.infer<typeof SplitTypeSchema>;
 
-export interface WrapperClassConfig extends z.infer<typeof WrapperClassConfigSchema> {}
+export type WrapperClassConfig = z.infer<typeof WrapperClassConfigSchema>;
 
-export interface WrapperStyleConfig extends z.infer<typeof WrapperStyleConfigSchema> {}
+export type WrapperStyleConfig = z.infer<typeof WrapperStyleConfigSchema>;
 
-export interface WrapperAttrsConfig extends z.infer<typeof WrapperAttrsConfigSchema> {}
+export type WrapperAttrsConfig = z.infer<typeof WrapperAttrsConfigSchema>;
 
 /** Options for {@link splitText} and the `$splitText` Interact plugin (except `container`). */
 export interface SplitTextOptions {
