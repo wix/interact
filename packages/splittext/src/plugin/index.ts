@@ -13,18 +13,10 @@
  */
 
 import { splitText } from '../splitText';
-import type { SplitTextOptions, SplitTextResult } from '../types';
+import type { SplitTextPluginConfig } from '../schema';
+import type { SplitTextResult } from '../types';
 
-/** Config accepted under `$splitText` in an InteractConfig on an interaction or effect. */
-export type SplitTextPluginConfig = {
-  container: string;
-  /**
-   * Hide the container until the split has been applied, to prevent a flash of the un-split text
-   * before an entrance/scroll animation runs. Emits SSR CSS via {@link splitTextStyle} and is
-   * revealed once the runtime plugin marks the container ready.
-   */
-  hideUntilReady?: boolean;
-} & SplitTextOptions;
+export type { SplitTextPluginConfig };
 
 /**
  * Minimal structural mirror of the runtime context Interact passes to a plugin (a subset of

@@ -12,12 +12,13 @@ export default defineConfig({
         index: path.resolve(__dirname, 'src/index.ts'),
         react: path.resolve(__dirname, 'src/react/index.ts'),
         plugin: path.resolve(__dirname, 'src/plugin/index.ts'),
+        schema: path.resolve(__dirname, 'src/schema.ts'),
       },
       formats: ['es', 'cjs'],
     },
     sourcemap: true,
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: ['react', 'react-dom', 'zod'],
       output: {
         entryFileNames: '[format]/[name].js',
         compact: true,

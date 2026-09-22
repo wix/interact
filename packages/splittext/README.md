@@ -162,6 +162,32 @@ When `preserveText` is `false`, `aria-label` is set on the container instead of 
 
 Screen readers and crawlers see the original text; the split spans are hidden from the accessibility tree. `result.revert()` restores `originalHTML` captured at construction time. On re-split (`autoSplit`), plain text is re-read from the element so content changes are picked up.
 
+## Schema and validation
+
+Static Zod schemas for `SplitTextOptions` and the Interact plugin shape ship from `@wix/splittext/schema`. They are the source of truth for the exported TypeScript types and can be composed into host validators (CI, build tools, or LLM-output checks).
+
+```ts
+import {
+  SplitTextOptionsSchema,
+  SplitTextPluginConfigSchema,
+  validateSplitTextPluginConfig,
+} from '@wix/splittext/schema';
+import { z } from 'zod';
+
+const result = validateSplitTextPluginConfig({
+  container: '.title',
+  type: 'chars',
+  hideUntilReady: true,
+});
+
+// Embed in a larger config validator:
+const HeroBlockSchema = z.object({
+  split: SplitTextPluginConfigSchema,
+});
+```
+
+`@wix/interact-validate` still treats `$splitText` as an opaque plugin field on interactions and effects — import `@wix/splittext/schema` when you need to validate the `$splitText` payload itself.
+
 ## Using with `@wix/interact`
 
 `@wix/splittext` is standalone and has **no** dependency on `@wix/interact`. To drive it declaratively through an `InteractConfig`, a ready-made adapter ships from the `@wix/splittext/plugin` entry point. It's written against Interact's plugin contract _structurally_, so it stays assignable to `InteractPlugin` without importing `@wix/interact` — the two packages remain fully decoupled.
