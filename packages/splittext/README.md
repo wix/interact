@@ -164,21 +164,23 @@ Screen readers and crawlers see the original text; the split spans are hidden fr
 
 ## Schema and validation
 
-Static Zod schemas for `SplitTextOptions` and the Interact plugin shape ship from `@wix/splittext/schema`. They are the source of truth for the exported TypeScript types and can be composed into host validators (CI, build tools, or LLM-output checks).
+TypeScript option types ship from `@wix/splittext`. Static Zod schemas and validators for `SplitTextOptions` and the Interact plugin shape live in `@wix/interact-validate/splittext` (keeps `@wix/splittext` free of a `zod` dependency). Schemas are checked against the hand-written types via compile-time drift guards.
 
 ```ts
 import {
   SplitTextOptionsSchema,
   SplitTextPluginConfigSchema,
   validateSplitTextPluginConfig,
-} from '@wix/splittext/schema';
+} from '@wix/interact-validate/splittext';
 import { z } from 'zod';
 
-const result = validateSplitTextPluginConfig({
+const pluginConfig = {
   container: '.title',
   type: 'chars',
   hideUntilReady: true,
-});
+};
+
+const result = validateSplitTextPluginConfig(pluginConfig);
 
 // Embed in a larger config validator:
 const HeroBlockSchema = z.object({
@@ -186,7 +188,7 @@ const HeroBlockSchema = z.object({
 });
 ```
 
-`@wix/interact-validate` still treats `$splitText` as an opaque plugin field on interactions and effects — import `@wix/splittext/schema` when you need to validate the `$splitText` payload itself.
+`validateInteractConfig` still treats `$splitText` as an opaque plugin field on interactions and effects — import `@wix/interact-validate/splittext` when you need to validate the `$splitText` payload itself.
 
 ## Using with `@wix/interact`
 

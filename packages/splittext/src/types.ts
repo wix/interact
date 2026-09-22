@@ -1,13 +1,168 @@
-export type {
-  SplitType,
-  WrapperClassConfig,
-  WrapperStyleConfig,
-  WrapperAttrsConfig,
-  SplitTextOptions,
-  SplitTextPluginConfig,
-} from './schema';
+export type SplitType = 'chars' | 'words' | 'lines' | 'sentences';
 
-import type { SplitTextOptions } from './schema';
+export type WrapperClassConfig = {
+  chars?: string;
+  words?: string;
+  lines?: string;
+  sentences?: string;
+};
+
+/** Serializable inline-style values (CSS property → string or number). */
+export type CssStyleRecord = Record<string, string | number>;
+
+export type WrapperStyleConfig = {
+  chars?: CssStyleRecord;
+  words?: CssStyleRecord;
+  lines?: CssStyleRecord;
+  sentences?: CssStyleRecord;
+};
+
+export type WrapperAttrsConfig = {
+  chars?: Record<string, string>;
+  words?: Record<string, string>;
+  lines?: Record<string, string>;
+  sentences?: Record<string, string>;
+};
+
+/** Options for {@link splitText} and the `$splitText` Interact plugin (except `container`). */
+export interface SplitTextOptions {
+  /**
+   * Split types to build. When specified, splitting runs eagerly on invocation;
+   * omitting the option defers splitting until each getter is accessed.
+   *
+   * A single type produces a flat split. An array of two or more types builds a
+   * **nested** DOM tree (coarse → fine), e.g. words containing chars. Array
+   * order is normalized automatically to `lines → sentences → words → chars`.
+   *
+   * Multi-type arrays require `nested: 'flatten'` (v1). Single-type splits
+   * support all `nested` modes (`'preserve'`, `'flatten'`, or a number).
+   */
+  type?: SplitType | SplitType[];
+
+  /**
+   * CSS class(es) added to every wrapper `<span>`. Accepts either a single
+   * string (applied to all types) or a per-type config object.
+   */
+  wrapperClass?: string | WrapperClassConfig;
+
+  /**
+   * Inline styles applied to every wrapper `<span>`. Accepts either a global
+   * `CSSStyleDeclaration` partial (applied to all types) or a per-type config.
+   */
+  wrapperStyle?: CssStyleRecord | WrapperStyleConfig;
+
+  /**
+   * Custom HTML attributes applied to every wrapper `<span>`. Accepts either a
+   * global record (applied to all types) or a per-type config.
+   */
+  wrapperAttrs?: Record<string, string> | WrapperAttrsConfig;
+
+  /**
+   * Controls whether char/word wrappers receive a `data-content` attribute
+   * mirroring their text content (useful for CSS `content: attr(data-content)`
+   * generated-content effects).
+   *
+   * - `'both'` (default): text content present and `data-content` set.
+   * - `'none'`: no `data-content` attribute.
+   * - `'attribute-only'`: `data-content` set, text content left empty.
+   */
+  contentAttribute?: 'none' | 'both' | 'attribute-only';
+
+  /**
+   * ARIA handling mode.
+   *
+   * - `'auto'` (default): wraps split content in an `aria-hidden` div and
+   *   preserves the original text for screen readers.
+   * - `'none'`: no ARIA changes.
+   */
+  aria?: 'auto' | 'none';
+
+  /**
+   * When `true` (default), inserts a visually-hidden `<span>` containing the
+   * original text as a sibling of the split content for SEO and assistive
+   * technology. When `false`, sets `aria-label` on the container instead.
+   */
+  preserveText?: boolean;
+
+  /**
+   * Provide a custom `Intl.Segmenter` constructor when native support is
+   * missing. Accepts either an already-constructed instance or the constructor
+   * itself (the library will instantiate it per granularity).
+   */
+  segmenter?:
+    | Intl.Segmenter
+    | { new (locale: string, options: { granularity: string }): Intl.Segmenter };
+
+  /**
+   * Optional plugin for BiDi (bidirectional text) handling. Receives the flat
+   * text content and must return ordered runs with explicit direction. See docs
+   * for plugin contract details.
+   */
+  bidiResolver?: (text: string) => Array<{ text: string; direction: 'ltr' | 'rtl' }>;
+
+  /**
+   * When `true`, attaches a `ResizeObserver` and `fonts.ready` listener that
+   * automatically re-split on viewport or font changes.
+   */
+  autoSplit?: boolean;
+
+  /**
+   * Called after every split (including re-splits triggered by `autoSplit`).
+   * Receives the updated `SplitTextResult`.
+   */
+  onSplit?: (result: SplitTextResult) => void;
+
+  /**
+   * When `true` (default), sets CSS custom properties (`--char-index`,
+   * `--word-index`, `--line-index`, `--sentence-index`) on each wrapper span
+   * for use in staggered CSS animations.
+   */
+  partIndexing?: boolean;
+
+  /**
+   * Controls how punctuation and whitespace relate to word wrappers.
+   *
+   * - `'adjacent'` (default): punctuation is glued to the nearest word within
+   *   each whitespace-delimited token; trailing spaces attach to the preceding
+   *   word. Every visible character participates in word-level effects.
+   * - `'none'`: lexical words and punctuation each receive their own indexed
+   *   wrapper; whitespace remains as plain text nodes between spans.
+   */
+  wordGlue?: 'adjacent' | 'none';
+
+  /**
+   * Controls how nested DOM elements within the target are handled during splitting.
+   *
+   * - `'preserve'` (default): Preserves inline element structure (e.g. `<a>`, `<strong>`,
+   *   `<em>`). Each text node is split in place, keeping parent elements intact so they
+   *   remain in the output DOM alongside the split spans.
+   * - `'flatten'`: Extracts plain text via `element.textContent`, ignores all inner DOM
+   *   structure, and splits that flat string. Useful for dirty/generated markup.
+   * - `number`: Like `'preserve'`, but only the first N element levels are kept. Elements
+   *   deeper than N levels are replaced with their text content. For example, `nested: 2`
+   *   on `<b>bold <i>italic <u>underlined</u></i></b>` keeps `<b>` and `<i>` but removes
+   *   `<u>`, inlining its text as `<b>bold <i>italic underlined</i></b>`.
+   */
+  nested?: 'flatten' | 'preserve' | number;
+
+  /**
+   * CSS selector or predicate to skip nodes during traversal (only applies in
+   * `'preserve'` / `number` nested modes). Use a comma-separated selector for
+   * logical OR (e.g. `'sup, sub'`).
+   */
+  ignore?: string | ((node: Node) => boolean);
+}
+
+/** Config accepted under `$splitText` in an InteractConfig on an interaction or effect. */
+export interface SplitTextPluginConfig extends SplitTextOptions {
+  container: string;
+  /**
+   * Hide the container until the split has been applied, to prevent a flash of the un-split text
+   * before an entrance/scroll animation runs. Emits SSR CSS via {@link splitTextStyle} and is
+   * revealed once the runtime plugin marks the container ready.
+   */
+  hideUntilReady?: boolean;
+}
 
 /**
  * Live DOM handle returned by {@link splitText}. Not part of the JSON schema surface.

@@ -11,6 +11,11 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/es/index.js",
       "require": "./dist/cjs/index.js"
+    },
+    "./splittext": {
+      "types": "./dist/types/splittext.d.ts",
+      "import": "./dist/es/splittext.js",
+      "require": "./dist/cjs/splittext.js"
     }
   },
   "files": [
@@ -49,11 +54,18 @@
     "zod": "^4.0.0"
   },
   "peerDependencies": {
-    "@wix/interact": "^2.5.16"
+    "@wix/interact": "^2.5.16",
+    "@wix/splittext": "^0.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@wix/splittext": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.14",
     "@wix/interact": "^2.5.16",
+    "@wix/splittext": "workspace:*",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.3",
     "vite": "^7.2.2",

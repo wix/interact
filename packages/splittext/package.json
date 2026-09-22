@@ -21,11 +21,6 @@
       "types": "./dist/types/plugin/index.d.ts",
       "import": "./dist/es/plugin.js",
       "require": "./dist/cjs/plugin.js"
-    },
-    "./schema": {
-      "types": "./dist/types/schema.d.ts",
-      "import": "./dist/es/schema.js",
-      "require": "./dist/cjs/schema.js"
     }
   },
   "files": [
@@ -73,9 +68,6 @@
     "react-dom": {
       "optional": true
     }
-  },
-  "dependencies": {
-    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",

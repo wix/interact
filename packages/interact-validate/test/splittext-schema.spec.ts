@@ -7,8 +7,7 @@ import type {
   WrapperAttrsConfig,
   WrapperClassConfig,
   SplitType,
-} from '../src/types';
-import type { SplitTextPluginConfig as PluginConfigFromSchema } from '../src/schema';
+} from '@wix/splittext';
 import {
   SplitTextOptionsSchema,
   SplitTextPluginConfigSchema,
@@ -18,7 +17,7 @@ import {
   assertValidSplitTextPluginConfig,
   WrapperClassConfigSchema,
   SplitTypeSchema,
-} from '../src/schema';
+} from '../src/schema/splittext';
 
 type InferredOptions = z.infer<typeof SplitTextOptionsSchema>;
 type InferredPlugin = z.infer<typeof SplitTextPluginConfigSchema>;
@@ -95,14 +94,25 @@ describe('SplitText schema validation', () => {
     }
   });
 
-  it('rejects invalid enum values', () => {
+  it('rejects invalid enum values with a field-specific error', () => {
     const result = validateSplitTextOptions({ wordGlue: 'invalid' as 'adjacent' });
     expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.some((e) => e.path.includes('wordGlue'))).toBe(true);
+    expect(result.errors.some((e) => e.message.toLowerCase().includes('invalid'))).toBe(true);
+  });
+
+  it('rejects invalid split type with a field-specific error', () => {
+    const result = validateSplitTextOptions({ type: 'invalid' as SplitType });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.some((e) => e.path.includes('type'))).toBe(true);
   });
 
   it('assert helpers throw with package prefix', () => {
     expect(() => assertValidSplitTextOptions({ badKey: 1 })).toThrow(/Invalid SplitTextOptions/);
     expect(() => assertValidSplitTextPluginConfig({})).toThrow(/Invalid SplitTextPluginConfig/);
+    expect(() => assertValidSplitTextOptions({ badKey: 1 })).toThrow(/@wix\/interact-validate/);
   });
 });
 
@@ -120,11 +130,7 @@ describe('SplitText schema type parity (drift guard)', () => {
   });
 
   it('SplitTextPluginConfig matches SplitTextPluginConfigSchema', () => {
-    expectTypeOf<PluginConfigFromSchema>().toEqualTypeOf<InferredPlugin>();
-  });
-
-  it('plugin re-export matches schema plugin type', () => {
-    expectTypeOf<SplitTextPluginConfig>().toEqualTypeOf<PluginConfigFromSchema>();
+    expectTypeOf<SplitTextPluginConfig>().toEqualTypeOf<InferredPlugin>();
   });
 
   it('WrapperAttrsConfig per-type records use string values', () => {

@@ -13,7 +13,7 @@
  */
 
 import { splitText } from '../splitText';
-import type { SplitTextPluginConfig } from '../schema';
+import type { SplitTextPluginConfig } from '../types';
 import type { SplitTextResult } from '../types';
 
 export type { SplitTextPluginConfig };
