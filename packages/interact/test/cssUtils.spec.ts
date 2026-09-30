@@ -380,6 +380,12 @@ describe('buildAtPropertyRules', () => {
     ]);
   });
 
+  it('should declare the view-timeline list entries', () => {
+    expect(buildAtPropertyRules(0, 0, 0, 0, 1)).toEqual([
+      '@property --vw-tmln-0 { syntax: "*"; inherits: false; initial-value: none; }',
+    ]);
+  });
+
   it('should return no rules when all lengths are zero', () => {
     expect(buildAtPropertyRules(0, 0, 0, 0)).toEqual([]);
   });
@@ -432,6 +438,13 @@ describe('buildListsRule', () => {
     expect(rule).toContain('animation: var(--anm-0);');
   });
 
+  it('should list the view timelines', () => {
+    const rule = buildListsRule([{ key: 'my-el' }], 0, 0, 2);
+
+    expect(rule).toContain('view-timeline: var(--vw-tmln-0), var(--vw-tmln-1);');
+    expect(rule).not.toContain('animation');
+  });
+
   it('should return an empty string when there are no targets', () => {
     expect(buildListsRule([], 2, 1)).toBe('');
   });
@@ -457,6 +470,7 @@ describe('buildSequenceListsRule', () => {
     childSelector,
     animation: { listIndex: 0, slotCursor: 0, slotsInSequence: 0, ...animation },
     transition: { listIndex: 0, slotCursor: 0, slotsInSequence: 0, ...transition },
+    timeline: { listIndex: 0, slotCursor: 0, slotsInSequence: 0 },
   });
 
   it('should assign the interaction custom property from the sequence slot properties', () => {

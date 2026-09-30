@@ -150,8 +150,9 @@ export const LIST_ANIMATION_PROPERTY_NAMES = [
 export const LIST_PROPERTY_NAMES = [
   ...LIST_ANIMATION_PROPERTY_NAMES,
   'transition',
+  'view-timeline',
 ] as const satisfies readonly ListPropertyName[];
-export const LIST_KINDS = ['animation', 'transition'] as const;
+export const LIST_KINDS = ['animation', 'transition', 'timeline'] as const;
 export type ListKind = (typeof LIST_KINDS)[number];
 export type ListSlots = {
   listIndex: number;
@@ -160,7 +161,10 @@ export type ListSlots = {
 };
 
 export function listKind(name: ListPropertyName): ListKind {
-  return name === 'transition' ? 'transition' : 'animation';
+  if (name === 'transition') {
+    return 'transition';
+  }
+  return name === 'view-timeline' ? 'timeline' : 'animation';
 }
 
 export const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
@@ -169,6 +173,7 @@ export const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
   'animation-composition': 'replace',
   'animation-timeline': 'auto',
   'animation-range': 'normal',
+  'view-timeline': 'none',
 };
 
 // TODO: maybe add `-intrct` to names? --anm-0 or --trns-0 could collide with user-defined names
@@ -181,15 +186,26 @@ export function buildAtPropertyRules(
   transitionLength: number,
   animationSlotLength: number,
   transitionSlotLength: number,
+  timelineLength: number = 0,
 ): string[] {
+  const lengths = {
+    animation: animationLength,
+    transition: transitionLength,
+    timeline: timelineLength,
+  };
+  const slotLengths = {
+    animation: animationSlotLength,
+    transition: transitionSlotLength,
+    timeline: 0,
+  };
   return LIST_PROPERTY_NAMES.flatMap((name) => [
     ...Array.from(
-      { length: name === 'transition' ? transitionLength : animationLength },
+      { length: lengths[listKind(name)] },
       (_, i) =>
         `@property ${getCustomPropName(name, i)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
     ),
     ...Array.from(
-      { length: name === 'transition' ? transitionSlotLength : animationSlotLength },
+      { length: slotLengths[listKind(name)] },
       (_, i) =>
         `@property ${getCustomPropName(name, i, true)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
     ),
@@ -202,6 +218,7 @@ export function buildSequenceListsRule(
     childSelector?: string;
     animation: ListSlots;
     transition: ListSlots;
+    timeline: ListSlots;
   },
   conditions?: string[],
   configConditions?: Record<string, Condition>,
@@ -239,15 +256,18 @@ export function buildListsRule(
   targets: { key: string; childSelector?: string }[],
   animationLength: number,
   transitionLength: number,
+  timelineLength: number = 0,
 ): string {
   if (targets.length === 0) {
     return '';
   }
 
-  const propertyNames = [
-    ...(animationLength <= 0 ? [] : LIST_ANIMATION_PROPERTY_NAMES),
-    ...(transitionLength <= 0 ? [] : ['transition']),
-  ];
+  const lengths = {
+    animation: animationLength,
+    transition: transitionLength,
+    timeline: timelineLength,
+  };
+  const propertyNames = LIST_PROPERTY_NAMES.filter((name) => lengths[listKind(name)] > 0);
   if (propertyNames.length === 0) {
     return '';
   }
@@ -255,7 +275,7 @@ export function buildListsRule(
   const declarations = propertyNames.map((name) => ({
     name,
     value: Array.from(
-      { length: name === 'transition' ? transitionLength : animationLength },
+      { length: lengths[listKind(name)] },
       // TODO: maybe add `-intrct` to names? --anm-0 or --trns-0 could collide with user-defined names
       (_, i) => `var(${getCustomPropName(name, i)})`,
     ).join(', '),
