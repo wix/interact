@@ -181,32 +181,12 @@ export function getCustomPropName(name: string, index: number, isSlot: boolean =
   return `--${name.replace(/(?<!(^|-))([aeiou]|tion)/g, '')}${isSlot ? '-slot' : ''}-${index}`;
 }
 
-// measured on the animated element at runtime, so an element that isn't measured must not inherit them
-const LAYOUT_PROPERTIES = [
-  '--motion-left',
-  '--motion-top',
-  '--motion-width',
-  '--motion-height',
-  '--motion-container-width',
-  '--motion-container-height',
-];
-
-// the ones read by the generated keyframes or the declarations of their params
-export function getLayoutProperties(generated: unknown): string[] {
-  const text = JSON.stringify(generated);
-  return LAYOUT_PROPERTIES.filter(
-    (name) => text.includes(`var(${name},`) || text.includes(`var(${name})`),
-  );
-}
-
-// also registers the given custom properties as non-inherited
 export function buildAtPropertyRules(
   animationLength: number,
   transitionLength: number,
   animationSlotLength: number,
   transitionSlotLength: number,
   timelineLength: number = 0,
-  customProperties: Iterable<string> = [],
 ): string[] {
   const lengths = {
     animation: animationLength,
@@ -218,7 +198,7 @@ export function buildAtPropertyRules(
     transition: transitionSlotLength,
     timeline: 0,
   };
-  const listRules = LIST_PROPERTY_NAMES.flatMap((name) => [
+  return LIST_PROPERTY_NAMES.flatMap((name) => [
     ...Array.from(
       { length: lengths[listKind(name)] },
       (_, i) =>
@@ -230,10 +210,6 @@ export function buildAtPropertyRules(
         `@property ${getCustomPropName(name, i, true)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
     ),
   ]);
-  return [
-    ...listRules,
-    ...[...customProperties].map((name) => `@property ${name} { syntax: "*"; inherits: false; }`),
-  ];
 }
 
 export function buildSequenceListsRule(

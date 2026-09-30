@@ -386,12 +386,6 @@ describe('buildAtPropertyRules', () => {
     ]);
   });
 
-  it('should register the given custom properties as non-inherited', () => {
-    expect(buildAtPropertyRules(0, 0, 0, 0, 0, ['--motion-fade-opacity'])).toEqual([
-      '@property --motion-fade-opacity { syntax: "*"; inherits: false; }',
-    ]);
-  });
-
   it('should return no rules when all lengths are zero', () => {
     expect(buildAtPropertyRules(0, 0, 0, 0)).toEqual([]);
   });
