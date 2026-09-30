@@ -1742,12 +1742,12 @@ describe('css._generate', () => {
     });
   });
 
-  describe('namedEffect custom properties and slots', () => {
+  describe('namedEffect keyframe slots', () => {
     const style = ({ suffix = '', ...options }: { suffix?: string }) => [
       {
         ...options,
         name: `test-move${suffix}`,
-        custom: { [`--test-move${suffix}-x`]: 'calc(var(--motion-left, 0px) + 10px)' },
+        custom: { [`--test-move${suffix}-x`]: '10px' },
         keyframes: [{ translate: `var(--test-move${suffix}-x)` }, { translate: '0px' }],
       },
     ];
@@ -1763,20 +1763,6 @@ describe('css._generate', () => {
       effectId,
       duration: 100,
       namedEffect: { type: 'TestMove' },
-    });
-
-    it('registers the layout properties the params read as non-inherited, once', () => {
-      const { atProperty } = _generate({
-        interactions: [
-          { key: 'a', trigger: 'viewEnter', effects: [effect('first')] },
-          { key: 'a', trigger: 'click', effects: [effect('second')] },
-        ],
-      });
-
-      const custom = atProperty.filter(
-        (rule) => rule.includes('--motion-') || rule.includes('--test-'),
-      );
-      expect(custom).toEqual(['@property --motion-left { syntax: "*"; inherits: false; }']);
     });
 
     it('gives an effect whose keyframes are already used on its target the next free slot', () => {

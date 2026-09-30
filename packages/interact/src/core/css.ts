@@ -28,7 +28,6 @@ import {
   CSSRuleToString,
   buildListsRule,
   buildAtPropertyRules,
-  getLayoutProperties,
   getCustomPropName,
   buildSequenceListsRule,
   LIST_KINDS,
@@ -696,7 +695,6 @@ export function _generate(
     animationSlotLength,
     transitionSlotLength,
     timelineLength,
-    getLayoutProperties([...ctx.keyframesMap.values(), cssRules]),
   );
 
   return { keyframes: ctx.keyframesMap, atProperty, cssRules, listsRule };
