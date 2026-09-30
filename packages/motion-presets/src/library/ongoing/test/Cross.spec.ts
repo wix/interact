@@ -36,6 +36,13 @@ function fakeDom() {
 }
 
 describe('Cross', () => {
+  test('prepare measures the layout in its parent, for the CSS animation', () => {
+    const { target, dom } = fakeDom();
+    Cross.prepare(options(), dom);
+    expect(target.style.getPropertyValue('--motion-left')).toBe('100px');
+    expect(target.style.getPropertyValue('--motion-container-width')).toBe('1000px');
+  });
+
   test('continuous keyframes from the direction side to the opposite side', () => {
     const [cross, rotation] = Cross.style(options());
     expect(cross.custom).toMatchObject({

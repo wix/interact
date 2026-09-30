@@ -43,6 +43,10 @@ export function getNames({ suffix = '' }: TimeAnimationOptions) {
   return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
 }
 
+export function prepare(_options: TimeAnimationOptions, dom?: DomApi) {
+  measureLayout(dom, 'parent');
+}
+
 export function web(options: TimeAnimationOptions, dom?: DomApi) {
   return style(options, true, measureLayout(dom, 'parent'));
 }
