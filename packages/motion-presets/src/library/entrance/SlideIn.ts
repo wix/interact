@@ -1,73 +1,97 @@
 import type { EffectFourDirections, SlideIn, TimeAnimationOptions } from '../../types';
-import { getClipPolygonParams, parseDirection, getEntranceFill } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
+import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
+import {
+  MOTION_TRANS_ROT_NAME,
+  getMotionTransRot,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import { parseKeywordLazy } from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { oppositeDirection, useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'left';
+const TRAVEL = '100%';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-slideIn', 'motion-fadeIn'];
-}
-
-const PARAM_MAP: Record<
-  EffectFourDirections,
-  { dx: number; dy: number; clip: EffectFourDirections }
-> = {
-  top: { dx: 0, dy: -1, clip: 'bottom' },
-  right: { dx: 1, dy: 0, clip: 'left' },
-  bottom: { dx: 0, dy: 1, clip: 'top' },
-  left: { dx: -1, dy: 0, clip: 'right' },
+const DEFAULT_EASING = 'cubicInOut';
+const DEFAULTS: Required<SlideIn> = {
+  type: 'SlideIn',
+  from: 'left',
+  start: 0,
 };
 
-export function web(options: TimeAnimationOptions) {
-  return style(options);
+export const schema = {
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.from },
+  start: { type: 'number', min: 0, max: 1, default: DEFAULTS.start },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [
+    MOTION_FADE_NAME,
+    MOTION_LAYOUT_ROTATION_NAME,
+    MOTION_TRANS_ROT_NAME,
+    MOTION_REVEAL_NAME,
+  ].map((name) => name + suffix);
 }
 
-export function style(options: TimeAnimationOptions) {
-  const namedEffect = options.namedEffect as SlideIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { initialTranslate = 1 } = namedEffect;
-  const [slideIn, fadeIn] = getNames(options);
+export function web(options: TimeAnimationOptions) {
+  return style(options, true);
+}
 
-  const easing = options.easing || 'cubicInOut';
-  const minimum = 100 - initialTranslate * 100;
+export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<SlideIn>;
+  const { start: minimum = DEFAULTS.start } = namedEffect!;
 
-  const start = getClipPolygonParams({
-    direction: PARAM_MAP[direction].clip,
-    minimum,
-  });
-  const clipEnd = getClipPolygonParams({ direction: 'initial' });
+  // SlideIn reveals in the opposite direction to the movement to create its entrance feel
+  const clipFrom = oppositeDirection(
+    parseKeywordLazy(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from),
+    'four-sides',
+  );
 
-  const custom = {
-    '--motion-clip-start': start,
-    '--motion-translate-x': `${PARAM_MAP[direction].dx * 100}%`,
-    '--motion-translate-y': `${PARAM_MAP[direction].dy * 100}%`,
-  };
+  const transformOptions = {
+    ...options,
+    composite: 'add',
+    easing,
+    namedEffect: {
+      ...namedEffect,
+      travel: TRAVEL,
+    },
+  } as TimeAnimationOptions;
+  const revealOptions = {
+    ...options,
+    easing,
+    namedEffect: {
+      ...namedEffect,
+      minimum,
+      from: clipFrom,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      name: slideIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `rotate(var(--motion-rotate, 0deg)) translate(var(--motion-translate-x, ${custom['--motion-translate-x']}), var(--motion-translate-y, ${custom['--motion-translate-y']}))`,
-          clipPath: `var(--motion-clip-start, ${custom['--motion-clip-start']})`,
-        },
-        {
-          transform: 'rotate(var(--motion-rotate, 0deg)) translate(0px, 0px)',
-          clipPath: clipEnd,
-        },
-      ],
-    },
-    {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
-    },
+    useBasicPreset(getMotionFade, { ...options, easing }, 'entrance', asWeb, suffix),
+    // the layout rotation comes first, so the motion moves along the element's rotated axes
+    useLayoutRotation(transformOptions, 'entrance', { composite: 'replace' }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      transformOptions,
+      'entrance',
+      {
+        defaultDirection: DEFAULTS.from,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
+    useDirectionalPreset(
+      getMotionReveal,
+      revealOptions,
+      'entrance',
+      {
+        defaultDirection: oppositeDirection(DEFAULTS.from, 'four-sides') as EffectFourDirections,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
   ];
 }

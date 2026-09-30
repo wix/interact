@@ -1,17 +1,28 @@
-import { ShuttersIn, TimeAnimationOptions, EffectFourDirections } from '../../types';
-import {
-  getShuttersClipPaths,
-  getEasing,
-  toKeyframeValue,
-  parseDirection,
-  getEntranceFill,
-} from '../../utils';
+import { ShuttersIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
+import { MOTION_SHUTTERS_NAME, getMotionShutters } from '../../clipUtils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'right';
+const FADE_IN_EASING = 'step-start';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-shuttersIn', 'motion-fadeIn'];
+const DEFAULT_EASING = 'sineIn';
+const DEFAULTS: Required<ShuttersIn> = {
+  type: 'ShuttersIn',
+  from: 'left',
+  shutters: 12,
+  staggered: true,
+};
+
+export const schema = {
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.from },
+  shutters: { type: 'number', min: 1, int: true, default: DEFAULTS.shutters },
+  staggered: { type: 'bool', default: DEFAULTS.staggered },
+};
+
+export function getNames({ namedEffect, suffix = '' }: TimeAnimationOptions) {
+  const { shutters = DEFAULTS.shutters } = namedEffect as ShuttersIn;
+  return [MOTION_FADE_NAME + suffix, `${MOTION_SHUTTERS_NAME}${suffix}-${shutters}`];
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -19,42 +30,36 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as ShuttersIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { shutters = 12, staggered = true } = namedEffect;
-  const [shuttersIn, fadeIn] = getNames(options);
+  const {
+    easing = DEFAULT_EASING,
+    namedEffect,
+    suffix,
+  } = options as TimeAnimationOptions<ShuttersIn>;
+  const { shutters = DEFAULTS.shutters, staggered = DEFAULTS.staggered } = namedEffect!;
 
-  const { clipStart, clipEnd } = getShuttersClipPaths(direction, shutters, staggered);
-
-  const custom = {
-    '--motion-shutters-start': clipStart,
-    '--motion-shutters-end': clipEnd,
-  };
-
-  const easing = getEasing(options.easing || 'sineIn');
+  const fadeOptions = { ...options, easing: FADE_IN_EASING };
+  const shuttersOptions = {
+    ...options,
+    easing,
+    namedEffect: {
+      ...namedEffect,
+      shutters,
+      staggered,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      easing,
-      name: shuttersIn,
-      fill: getEntranceFill(options),
-      custom,
-      keyframes: [
-        {
-          clipPath: toKeyframeValue(custom, '--motion-shutters-start', asWeb),
-        },
-        {
-          clipPath: toKeyframeValue(custom, '--motion-shutters-end', asWeb),
-        },
-      ],
-    },
-    {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      custom: {},
-      keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
-    },
+    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useDirectionalPreset(
+      getMotionShutters,
+      shuttersOptions,
+      'entrance',
+      {
+        defaultDirection: DEFAULTS.from,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
   ];
 }

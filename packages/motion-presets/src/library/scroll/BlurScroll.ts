@@ -1,8 +1,21 @@
-import type { AnimationFillMode, BlurScroll, ScrubAnimationOptions, DomApi } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import type { BlurScroll, ScrubAnimationOptions, DomApi } from '../../types';
+import { SCROLL_RANGES } from '../../consts';
+import { getMotionBlur, MOTION_BLUR_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset } from '../../presetUtils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-blurScroll'];
+const DEFAULTS: Required<BlurScroll> = {
+  type: 'BlurScroll',
+  blur: 6,
+  range: 'in',
+};
+
+export const schema = {
+  blur: { type: 'number', min: 0, default: DEFAULTS.blur },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+};
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return [MOTION_BLUR_NAME + suffix];
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -10,38 +23,16 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const { blur = 6, range = 'in' } = options.namedEffect as BlurScroll;
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<BlurScroll>;
+  const { blur = DEFAULTS.blur } = namedEffect!;
 
-  const fromValue = range === 'out' ? 0 : blur;
-  const toValue = range === 'out' ? blur : 0;
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
-
-  const [blurScroll] = getNames(options);
-
-  const custom = {
-    '--motion-blur-from': `${fromValue}px`,
-    '--motion-blur-to': `${toValue}px`,
-  };
-
-  return [
-    {
-      ...options,
-      name: blurScroll,
-      fill,
-      easing,
-      composite: 'add' as const,
-      custom,
-      keyframes: [
-        {
-          filter: `blur(${toKeyframeValue(custom, '--motion-blur-from', asWeb)})`,
-        },
-        {
-          filter: `blur(${toKeyframeValue(custom, '--motion-blur-to', asWeb)})`,
-        },
-      ],
+  const blurOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      blur,
     },
-  ];
+  } as ScrubAnimationOptions;
+
+  return [useBasicPreset(getMotionBlur, blurOptions, 'scroll', asWeb, suffix)];
 }

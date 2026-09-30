@@ -53,12 +53,12 @@ Visual: Element enters along a 3D arc path, rotating into view with depth motion
 
 Parameters:
 
-- `direction`: 'top' | 'right' | 'bottom' | 'left' (default: `'right'`)
-- `depth`: UnitLengthPercentage — Z translation distance (default: `{ value: 200, unit: 'px' }`)
+- `from`: 'top' | 'right' | 'bottom' | 'left' — the side the element comes from (default: `'right'`)
+- `depth`: UnitLengthPercentage — Z translation distance (default: `{ value: 100, unit: 'px' }`)
 - `perspective`: number — 3D perspective in px (default: `800`)
 
 ```typescript
-{ type: 'ArcIn', direction: 'bottom' }
+{ type: 'ArcIn', from: 'bottom' }
 ```
 
 ---
@@ -83,12 +83,12 @@ Visual: Element bounces into place from a direction with an elastic multi-step c
 
 Parameters:
 
-- `direction`: 'top' | 'right' | 'bottom' | 'left' | 'center' (default: `'bottom'`)
-- `distanceFactor`: number — bounce distance multiplier (default: `1`)
-- `perspective`: number — 3D perspective for center direction (default: `800`)
+- `from`: 'top' | 'right' | 'bottom' | 'left' | 'back' (default: `'bottom'`)
+- `travel`: UnitLengthPercentage — bounce distance (default: `{ value: 50, unit: 'px' }`)
+- `perspective`: number — 3D perspective for `'back'` (default: `800`)
 
 ```typescript
-{ type: 'BounceIn', direction: 'left', distanceFactor: 2 }
+{ type: 'BounceIn', from: 'left', travel: { value: 100, unit: 'px' } }
 ```
 
 ---
@@ -99,12 +99,12 @@ Visual: Element curves in with a 180° rotation and depth motion in a 3D space, 
 
 Parameters:
 
-- `direction`: 'left' | 'right' | 'pseudoLeft' | 'pseudoRight' (default: `'right'`)
-- `depth`: UnitLengthPercentage — Z translation distance (default: `{ value: 300, unit: 'px' }`)
+- `from`: 'top' | 'right' | 'bottom' | 'left' (default: `'right'`)
+- `depth`: UnitLengthPercentage — Z translation distance (default: `{ value: 900, unit: 'px' }`)
 - `perspective`: number — 3D perspective in px (default: `200`)
 
 ```typescript
-{ type: 'CurveIn', direction: 'left' }
+{ type: 'CurveIn', from: 'left' }
 ```
 
 ---
@@ -115,10 +115,10 @@ Visual: Element shrinks down from a larger size to its final scale.
 
 Parameters:
 
-- `initialScale`: number — starting scale before settling to 1 (default: `1.6`)
+- `scale`: number — starting scale before settling to 1, min 1 (default: `1.6`)
 
 ```typescript
-{ type: 'DropIn', initialScale: 2 }
+{ type: 'DropIn', scale: 2 }
 ```
 
 ---
@@ -129,12 +129,12 @@ Visual: Element expands from a point in a given direction, scaling from small to
 
 Parameters:
 
-- `initialScale`: number — starting scale, 0 = invisible (default: `0`)
-- `direction`: number | 'top' | 'right' | 'bottom' | 'left' — angle or cardinal direction (default: `90` / top). 0° = right, 90° = top, 180° = left, 270° = bottom
-- `distance`: UnitLengthPercentage — how far the element travels (default: `{ value: 120, unit: 'percentage' }`)
+- `scale`: number — 0 to 1, starting scale, 0 = invisible (default: `0`)
+- `from`: number | 'top' | 'right' | 'bottom' | 'left' — angle or side it comes from (default: `270` / top). 0° = right, 90° = bottom, 180° = left, 270° = top
+- `travel`: UnitLengthPercentage — how far the element travels (default: `{ value: 120, unit: 'percentage' }`)
 
 ```typescript
-{ type: 'ExpandIn', direction: 'bottom', initialScale: 0.5 }
+{ type: 'ExpandIn', from: 'bottom', scale: 0.5 }
 ```
 
 ---
@@ -145,12 +145,12 @@ Visual: Element flips into view with a 3D rotation around the X or Y axis.
 
 Parameters:
 
-- `direction`: 'top' | 'right' | 'bottom' | 'left' (default: `'top'`)
-- `initialRotate`: number — starting rotation in degrees (default: `90`)
+- `direction`: 'horizontal' | 'vertical' — flip axis (default: `'vertical'`)
+- `angle`: number — starting rotation in degrees; negative flips the other way (default: `90`)
 - `perspective`: number — 3D perspective in px (default: `800`)
 
 ```typescript
-{ type: 'FlipIn', direction: 'right', initialRotate: 180 }
+{ type: 'FlipIn', direction: 'horizontal', angle: 180 }
 ```
 
 ---
@@ -161,10 +161,10 @@ Visual: Element drifts gently into place from a direction with a fade-in.
 
 Parameters:
 
-- `direction`: 'top' | 'right' | 'bottom' | 'left' (default: `'left'`)
+- `from`: 'top' | 'right' | 'bottom' | 'left' (default: `'left'`)
 
 ```typescript
-{ type: 'FloatIn', direction: 'bottom' }
+{ type: 'FloatIn', from: 'bottom' }
 ```
 
 ---
@@ -175,12 +175,12 @@ Visual: Element unfolds from an edge, rotating around an axis at the edge as if 
 
 Parameters:
 
-- `direction`: 'top' | 'right' | 'bottom' | 'left' (default: `'top'`)
-- `initialRotate`: number — starting fold angle in degrees (default: `90`)
+- `pivot`: 'top' | 'right' | 'bottom' | 'left' — the hinged edge (default: `'top'`)
+- `angle`: number — starting fold angle in degrees (default: `-90`)
 - `perspective`: number — 3D perspective in px (default: `800`)
 
 ```typescript
-{ type: 'FoldIn', direction: 'left', initialRotate: 60 }
+{ type: 'FoldIn', pivot: 'left', angle: -60 }
 ```
 
 ---
@@ -191,11 +191,11 @@ Visual: Element glides in smoothly from off-screen along a direction.
 
 Parameters:
 
-- `direction`: number | 'top' | 'right' | 'bottom' | 'left' — angle or cardinal (default: `180` / left). 0° = right, 90° = top, 180° = left, 270° = bottom
-- `distance`: UnitLengthPercentage | 'top' | 'right' | 'bottom' | 'left' — travel distance or edge keyword (default: `{ value: 100, unit: 'percentage' }`)
+- `from`: number | 'top' | 'right' | 'bottom' | 'left' — angle or side it comes from (default: `180` / left). 0° = right, 90° = bottom, 180° = left, 270° = top
+- `travel`: UnitLengthPercentage — travel distance (default: `{ value: 100, unit: 'percentage' }`)
 
 ```typescript
-{ type: 'GlideIn', direction: 270, distance: { value: 200, unit: 'px' } }
+{ type: 'GlideIn', from: 90, travel: { value: 200, unit: 'px' } }
 ```
 
 ---
@@ -206,10 +206,10 @@ Visual: Element is progressively revealed by an expanding clip-path from one edg
 
 Parameters:
 
-- `direction`: 'top' | 'right' | 'bottom' | 'left' (default: `'left'`)
+- `from`: 'top' | 'right' | 'bottom' | 'left' — the edge the reveal starts from (default: `'left'`)
 
 ```typescript
-{ type: 'RevealIn', direction: 'bottom' }
+{ type: 'RevealIn', from: 'bottom' }
 ```
 
 ---
@@ -234,12 +234,12 @@ Visual: Element is revealed through multiple shutter-like strips that open in se
 
 Parameters:
 
-- `direction`: 'top' | 'right' | 'bottom' | 'left' (default: `'right'`)
-- `shutters`: number — number of shutter segments (default: `12`)
+- `from`: 'top' | 'right' | 'bottom' | 'left' — the side the shutters open from (default: `'left'`)
+- `shutters`: number — number of shutter segments, min 1 (default: `12`)
 - `staggered`: boolean — whether shutters open in a staggered pattern (default: `true`)
 
 ```typescript
-{ type: 'ShuttersIn', direction: 'top', shutters: 8 }
+{ type: 'ShuttersIn', from: 'bottom', shutters: 8 }
 ```
 
 ---
@@ -250,11 +250,11 @@ Visual: Element slides in from one side while being revealed with a clip-path ma
 
 Parameters:
 
-- `direction`: 'top' | 'right' | 'bottom' | 'left' (default: `'left'`)
-- `initialTranslate`: number — 0 to 1, how far off-screen the element starts (default: `1`)
+- `from`: 'top' | 'right' | 'bottom' | 'left' (default: `'left'`)
+- `start`: number — 0 to 1, how far into the slide the element starts; 0 = fully offset (default: `0`)
 
 ```typescript
-{ type: 'SlideIn', direction: 'right', initialTranslate: 0.5 }
+{ type: 'SlideIn', from: 'right', start: 0.5 }
 ```
 
 ---
@@ -267,7 +267,7 @@ Parameters:
 
 - `spins`: number — number of full rotations (default: `0.5`)
 - `direction`: 'clockwise' | 'counter-clockwise' (default: `'clockwise'`)
-- `initialScale`: number — starting scale, 0 = invisible (default: `0`)
+- `scale`: number — starting scale, 0 = invisible (default: `0`)
 
 ```typescript
 { type: 'SpinIn', spins: 1, direction: 'counter-clockwise' }
@@ -281,12 +281,12 @@ Visual: Element tilts in from the side with 3D rotation and a clip-path reveal.
 
 Parameters:
 
-- `direction`: 'left' | 'right' (default: `'left'`)
-- `depth`: UnitLengthPercentage — Z translation distance (default: `{ value: 200, unit: 'px' }`)
+- `from`: 'left' | 'right' (default: `'left'`)
+- `depth`: UnitLengthPercentage — Z translation distance (default: `{ value: 100, unit: 'px' }`)
 - `perspective`: number — 3D perspective in px (default: `800`)
 
 ```typescript
-{ type: 'TiltIn', direction: 'right' }
+{ type: 'TiltIn', from: 'right' }
 ```
 
 ---
@@ -297,10 +297,10 @@ Visual: Element rotates into view around a corner pivot point.
 
 Parameters:
 
-- `direction`: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' (default: `'top-left'`)
+- `pivot`: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' (default: `'top-left'`)
 
 ```typescript
-{ type: 'TurnIn', direction: 'bottom-right' }
+{ type: 'TurnIn', pivot: 'bottom-right' }
 ```
 
 ---
@@ -325,41 +325,41 @@ Some preset parameters are exposed but their defaults have been tuned for good v
 
 ### 3D Perspective
 
-| Preset            | Parameter     | Default | Range    |
-| ----------------- | ------------- | ------- | -------- |
-| ArcIn             | `perspective` | 800     | 200-2000 |
-| TiltIn            | `perspective` | 800     | 200-2000 |
-| FoldIn            | `perspective` | 800     | 200-2000 |
-| FlipIn            | `perspective` | 800     | 200-2000 |
-| CurveIn           | `perspective` | 200     | 100-1000 |
-| BounceIn (center) | `perspective` | 800     | 200-2000 |
+| Preset          | Parameter     | Default | Range    |
+| --------------- | ------------- | ------- | -------- |
+| ArcIn           | `perspective` | 800     | 200-2000 |
+| TiltIn          | `perspective` | 800     | 200-2000 |
+| FoldIn          | `perspective` | 800     | 200-2000 |
+| FlipIn          | `perspective` | 800     | 200-2000 |
+| CurveIn         | `perspective` | 200     | 100-1000 |
+| BounceIn (back) | `perspective` | 800     | 200-2000 |
 
 ### Depth (Z Translation)
 
 | Preset  | Parameter | Default | Notes                  |
 | ------- | --------- | ------- | ---------------------- |
-| ArcIn   | `depth`   | 200px   | Z translation distance |
-| CurveIn | `depth`   | 300px   | Z translation distance |
-| TiltIn  | `depth`   | 200px   | Z translation distance |
+| ArcIn   | `depth`   | 100px   | Z translation distance |
+| CurveIn | `depth`   | 900px   | Z translation distance |
+| TiltIn  | `depth`   | 100px   | Z translation distance |
 
 ## Intensity Value Guide
 
 Tested values for different intensity levels. When a user asks for "soft", "subtle", "medium", or "hard"/"dramatic" motion, use these as guidelines.
 
-| Preset   | Parameter        | Subtle/Soft | Medium     | Dramatic/Hard |
-| -------- | ---------------- | ----------- | ---------- | ------------- |
-| ArcIn    | easing           | sineOut     | cubicInOut | quintInOut    |
-| BlurIn   | blur             | 6px         | 25px       | 50px          |
-| BounceIn | distanceFactor   | 1           | 2          | 3             |
-| DropIn   | initialScale     | 1.2         | 1.6        | 2             |
-| FlipIn   | initialRotate    | 35°         | 60°        | 90°           |
-| FoldIn   | initialRotate    | 35°         | 60°        | 90°           |
-| ExpandIn | initialScale     | 0.8         | 0.6        | 0             |
-| SlideIn  | initialTranslate | 0.2         | 0.8        | 1             |
-| SpinIn   | initialScale     | 1           | 0.6        | 0             |
+| Preset   | Parameter | Subtle/Soft | Medium     | Dramatic/Hard |
+| -------- | --------- | ----------- | ---------- | ------------- |
+| ArcIn    | easing    | sineOut     | cubicInOut | quintInOut    |
+| BlurIn   | blur      | 6px         | 25px       | 50px          |
+| BounceIn | travel    | 50px        | 100px      | 150px         |
+| DropIn   | scale     | 1.2         | 1.6        | 2             |
+| FlipIn   | angle     | 35°         | 60°        | 90°           |
+| FoldIn   | angle     | -35°        | -60°       | -90°          |
+| ExpandIn | scale     | 0.8         | 0.6        | 0             |
+| SlideIn  | start     | 0.8         | 0.2        | 0             |
+| SpinIn   | scale     | 1           | 0.6        | 0             |
 
 ### Intensity Usage Example
 
 When a user asks: "I want a subtle flip entrance"
 
-Suggest: `{ type: 'FlipIn', initialRotate: 35 }`
+Suggest: `{ type: 'FlipIn', angle: 35 }`

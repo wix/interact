@@ -1,269 +1,38 @@
 import { describe, expect, test } from 'vitest';
-
 import * as PanScroll from '../PanScroll';
-import type { PanScroll as PanScrollType, ScrubAnimationOptions } from '../../../types';
-import { baseMockOptions } from './testUtils';
+import { getOffscreenTravels } from '../../../layoutUtils';
+import { byName, fakeDom, scrollOptions } from './testUtils';
+
+const panOf = (namedEffect: Record<string, unknown>) =>
+  byName(
+    PanScroll.style(scrollOptions({ type: 'PanScroll', ...namedEffect }), true),
+    'motion-trans-rot',
+  ).custom!;
 
 describe('PanScroll', () => {
-  describe('web', () => {
-    test('default values', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as PanScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'backwards',
-          keyframes: [
-            {
-              transform:
-                'translateX(calc(var(--motion-left, calc(100vw - 100%)) * -1 - 100%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateX(0) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = PanScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom distance', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {
-          distance: { value: 200, unit: 'percentage' },
-        } as PanScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateX(calc(var(--motion-left, calc(100vw - 100%)) * -1 - 100%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateX(0) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = PanScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - right', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'right' } as PanScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateX(calc(100vw - var(--motion-left, 0px))) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateX(0) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = PanScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - out', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'out' } as PanScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'forwards',
-          keyframes: [
-            {
-              transform: 'translateX(0) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateX(calc(var(--motion-left, calc(100vw - 100%)) * -1 - 100%)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = PanScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - continuous', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        fill: 'both',
-        namedEffect: { range: 'continuous' } as PanScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'both',
-          keyframes: [
-            {
-              transform:
-                'translateX(calc(var(--motion-left, calc(100vw - 100%)) * -1 - 100%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateX(calc(100vw - var(--motion-left, 0px))) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = PanScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('startFromOffScreen - false', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {
-          startFromOffScreen: false,
-        } as PanScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform: 'translateX(-400px) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateX(0) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = PanScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
+  test('moves between offscreen positions by default', () => {
+    const { travel, toTravel } = getOffscreenTravels('left');
+    const custom = panOf({ direction: 'left' });
+    expect(custom['--motion-trans-rot-travel']).toBe(travel);
+    expect(custom['--motion-trans-rot-to-travel']).toBe(toTravel);
   });
 
-  describe('style', () => {
-    test('default values', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as PanScrollType,
-      };
+  test('moves by distance when not starting offscreen', () => {
+    expect(panOf({ startFromOffScreen: false })['--motion-trans-rot-travel']).toBe('400px');
+    expect(panOf({ startFromOffScreen: false, distance: '20%' })['--motion-trans-rot-travel']).toBe(
+      '20%',
+    );
+  });
 
-      const expectedResult = [
-        {
-          fill: 'backwards',
-          keyframes: [
-            {
-              transform: 'translateX(var(--motion-pan-from)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateX(var(--motion-pan-to)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = PanScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - right', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'right' } as PanScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform: 'translateX(var(--motion-pan-from)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateX(var(--motion-pan-to)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = PanScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - out', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'out' } as PanScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'forwards',
-          keyframes: [
-            {
-              transform: 'translateX(var(--motion-pan-from)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateX(var(--motion-pan-to)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = PanScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - continuous', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        fill: 'both',
-        namedEffect: { range: 'continuous' } as PanScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'both',
-          keyframes: [
-            {
-              transform: 'translateX(var(--motion-pan-from)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateX(var(--motion-pan-to)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = PanScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
+  test('prepare measures only when starting offscreen', () => {
+    const element = document.createElement('div');
+    element.getBoundingClientRect = () => ({ left: 50, top: 0 }) as DOMRect;
+    PanScroll.prepare(
+      scrollOptions({ type: 'PanScroll', startFromOffScreen: false }),
+      fakeDom(element),
+    );
+    expect(element.style.getPropertyValue('--motion-left')).toBe('');
+    PanScroll.prepare(scrollOptions({ type: 'PanScroll' }), fakeDom(element));
+    expect(element.style.getPropertyValue('--motion-left')).toBe('50px');
   });
 });

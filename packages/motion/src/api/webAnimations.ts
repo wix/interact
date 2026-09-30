@@ -196,6 +196,11 @@ function getWebAnimation(
     return animation;
   });
 
+  // layers of the same effect always cover the ones below them, which the browser would remove once they finish
+  if (animations.length > 1) {
+    animations.forEach((animation) => animation.persist?.());
+  }
+
   // create an AnimationGroup with the generate animations
   return new AnimationGroup(animations, {
     ...animationOptions,

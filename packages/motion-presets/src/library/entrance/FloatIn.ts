@@ -1,71 +1,62 @@
-import type { TimeAnimationOptions, FloatIn, EffectFourDirections } from '../../types';
-import { toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
+import type { FloatIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
+import {
+  MOTION_TRANS_ROT_NAME,
+  getMotionTransRot,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'left';
+const TRAVEL = '120px';
+const EASING = 'sineInOut';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-floatIn', 'motion-fadeIn'];
-}
-
-const DIRECTION_MAP = {
-  top: { dx: 0, dy: -1, distance: 120 },
-  right: { dx: 1, dy: 0, distance: 120 },
-  bottom: { dx: 0, dy: 1, distance: 120 },
-  left: { dx: -1, dy: 0, distance: 120 },
+const DEFAULTS: Required<FloatIn> = {
+  type: 'FloatIn',
+  from: 'left',
 };
+
+export const schema = {
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.from },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map(
+    (name) => name + suffix,
+  );
+}
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as FloatIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const [floatIn, fadeIn] = getNames(options);
-  const fromParams = DIRECTION_MAP[direction];
+  const { namedEffect, suffix } = options as TimeAnimationOptions<FloatIn>;
 
-  const translateX = fromParams.dx * fromParams.distance;
-  const translateY = fromParams.dy * fromParams.distance;
-
-  const custom = {
-    '--motion-translate-x': `${translateX}px`,
-    '--motion-translate-y': `${translateY}px`,
-  };
-
-  const easing = 'sineInOut';
+  const fadeOptions = { ...options, easing: EASING };
+  const transformOptions = {
+    ...options,
+    easing: EASING,
+    namedEffect: {
+      ...namedEffect,
+      travel: TRAVEL,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      name: floatIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `translate(${toKeyframeValue(
-            custom,
-            '--motion-translate-x',
-            asWeb,
-          )}, ${toKeyframeValue(
-            custom,
-            '--motion-translate-y',
-            asWeb,
-          )}) rotate(var(--motion-rotate, 0deg))`,
-        },
-        {
-          transform: 'translate(0, 0) rotate(var(--motion-rotate, 0deg))',
-        },
-      ],
-    },
-    {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
-    },
+    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      transformOptions,
+      'entrance',
+      {
+        defaultDirection: DEFAULTS.from,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
+    useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
   ];
 }

@@ -9,8 +9,8 @@ import {
   getCssUnits,
   getMouseTransitionEasing,
   mapRange,
-  parseLength,
   parseDirection,
+  parseLength,
 } from '../../utils';
 import { circInOut } from '@wix/motion';
 import { CustomMouse } from './CustomMouse';

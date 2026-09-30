@@ -1,8 +1,30 @@
-import type { TimeAnimationOptions, DropIn } from '../../types';
-import { toKeyframeValue, getEntranceFill } from '../../utils';
+import type { DropIn, TimeAnimationOptions } from '../../types';
+import {
+  MOTION_SCALE_NAME,
+  getMotionScale,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPresetAsBasic } from '../../presetUtils';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-dropIn'];
+const FADE_IN_DURATION_FACTOR = 0.8;
+const FADE_IN_EASING = 'quadOut';
+
+const DEFAULT_EASING = 'quintInOut';
+const DEFAULTS: Required<DropIn> = {
+  type: 'DropIn',
+  scale: 1.6,
+};
+
+export const schema = {
+  scale: { type: 'number', min: 1, default: DEFAULTS.scale },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -10,39 +32,26 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { initialScale = 1.6 } = options.namedEffect as DropIn;
-  const [fadeIn, dropIn] = getNames(options);
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<DropIn>;
+  const { scale = DEFAULTS.scale } = namedEffect!;
 
-  const easing = options.easing || 'quintInOut';
-
-  const custom = {
-    '--motion-scale': `${initialScale}`,
+  const fadeOptions = {
+    ...options,
+    duration: options.duration! * FADE_IN_DURATION_FACTOR,
+    easing: FADE_IN_EASING,
   };
+  const transformOptions = {
+    ...options,
+    easing,
+    namedEffect: {
+      ...namedEffect,
+      scale,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing: 'quadOut',
-      duration: options.duration! * 0.8,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
-    },
-    {
-      ...options,
-      name: dropIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          scale: toKeyframeValue(custom, '--motion-scale', asWeb),
-        },
-        {
-          scale: '1',
-        },
-      ],
-    },
+    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useLayoutRotation(transformOptions, 'entrance', { composite: 'replace' }, asWeb, suffix),
+    useDirectionalPresetAsBasic(getMotionScale, transformOptions, 'entrance', {}, asWeb, suffix),
   ];
 }

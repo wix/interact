@@ -1,24 +1,41 @@
-import type {
-  AnimationFillMode,
-  ScrubAnimationOptions,
-  ShuttersScroll,
-  DomApi,
-  EffectFourDirections,
-} from '../../types';
-import {
-  getOppositeDirection,
-  getShuttersClipPaths,
-  getEasing,
-  toKeyframeValue,
-  FOUR_DIRECTIONS,
-  parseDirection,
-} from '../../utils';
+import type { ScrubAnimationOptions, ShuttersScroll, DomApi } from '../../types';
+import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
+import { MOTION_SHUTTERS_NAME, getMotionShutters } from '../../clipUtils';
+import { compareKeywordToNonDefaults } from '../../utils';
+import { useDirectionalPreset } from '../../presetUtils';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'right';
+const EASING = 'sineOut';
+const IN_EASING = 'sineIn';
 
-export function getNames(options: ScrubAnimationOptions) {
-  const { range = 'in' } = options.namedEffect as ShuttersScroll;
-  return [`motion-shuttersScroll-${range === 'continuous' ? '-continuous' : ''}`];
+// continuous holds the fully revealed state in the middle of the range, before closing towards the other side
+const CONTINUOUS_HOLD = 0.2;
+
+const DEFAULTS: Required<ShuttersScroll> = {
+  type: 'ShuttersScroll',
+  direction: 'right',
+  range: 'in',
+  shutters: 12,
+  staggered: true,
+};
+
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  shutters: { type: 'number', min: 1, int: true, default: DEFAULTS.shutters },
+  staggered: { type: 'bool', default: DEFAULTS.staggered },
+};
+
+export function getNames({ namedEffect, suffix = '' }: ScrubAnimationOptions) {
+  const {
+    shutters = DEFAULTS.shutters,
+    staggered = DEFAULTS.staggered,
+    range,
+  } = namedEffect as ShuttersScroll;
+  const staggerContinuous = staggered && compareKeywordToNonDefaults(range, ['continuous']);
+
+  return [
+    `${MOTION_SHUTTERS_NAME}${suffix}-${shutters}${staggerContinuous ? '-cont-stagger' : ''}`,
+  ];
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -26,85 +43,43 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as ShuttersScroll;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { shutters = 12, staggered = true, range = 'in' } = namedEffect;
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<ShuttersScroll>;
+  const { range, shutters = DEFAULTS.shutters, staggered = DEFAULTS.staggered } = namedEffect!;
 
-  const easing = range === 'in' ? getEasing('sineIn') : getEasing('sineOut');
-
-  const directionOpp = getOppositeDirection(FOUR_DIRECTIONS, direction);
-
-  const { clipStart, clipEnd } = getShuttersClipPaths(
-    range === 'out' ? directionOpp : direction,
-    shutters,
-    staggered,
-  );
-
-  const custom = {
-    '--motion-shutters-clip-start': range === 'out' ? clipEnd : clipStart,
-    '--motion-shutters-clip-end': range === 'out' ? clipStart : clipEnd,
-  };
-
-  const [shuttersScroll] = getNames(options);
-
-  const keyframes: {
-    clipPath: string | number;
-    easing?: string;
-    offset?: number;
-  }[] = [
-    {
-      clipPath: toKeyframeValue(custom, '--motion-shutters-clip-start', asWeb),
-      easing,
-    },
-    {
-      clipPath: toKeyframeValue(custom, '--motion-shutters-clip-end', asWeb),
-    },
-  ];
-
-  if (range === 'continuous') {
-    keyframes[1].easing = easing;
-    keyframes[1].offset = staggered ? 0.45 : 0.4;
-
-    const { clipStart: oppClipStart, clipEnd: oppClipEnd } = getShuttersClipPaths(
-      directionOpp,
+  const shuttersOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
       shutters,
       staggered,
-      true,
-    );
-    Object.assign(custom, {
-      '--motion-shutters-clip-opp-end': oppClipEnd,
-      '--motion-shutters-clip-opp-start': oppClipStart,
-    });
+    },
+  } as ScrubAnimationOptions;
 
-    const secondOffset = staggered ? 0.55 : 0.6;
-    keyframes.push(
-      {
-        clipPath: toKeyframeValue(custom, '--motion-shutters-clip-end', asWeb),
-        offset: secondOffset,
-        easing,
-      },
-      {
-        clipPath: toKeyframeValue(custom, '--motion-shutters-clip-opp-end', asWeb),
-        offset: secondOffset,
-        easing,
-      },
-      {
-        clipPath: toKeyframeValue(custom, '--motion-shutters-clip-opp-start', asWeb),
-      },
-    );
-  }
+  // staggered continuous motion has its timing set on its keyframes by getMotionShutters
+  const isContinuous = compareKeywordToNonDefaults(range, ['continuous']);
+  const easingOptions =
+    isContinuous && staggered
+      ? {}
+      : {
+          easing: IN_EASING,
+          outEasing: EASING,
+          continuousEasing: EASING,
+          continuousHold: CONTINUOUS_HOLD,
+        };
 
   return [
-    {
-      ...options,
-      name: shuttersScroll,
-      fill,
-      easing: 'linear',
-      custom,
-      keyframes,
-    },
+    useDirectionalPreset(
+      getMotionShutters,
+      shuttersOptions,
+      'scroll',
+      {
+        defaultDirection: DEFAULTS.direction,
+        defaultRange: DEFAULTS.range,
+        directionType: 'four-sides',
+        ...easingOptions,
+      },
+      asWeb,
+      suffix,
+    ),
   ];
 }

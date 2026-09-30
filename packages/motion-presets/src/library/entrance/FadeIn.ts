@@ -1,25 +1,27 @@
-import { TimeAnimationOptions } from '../../types';
+import type { TimeAnimationOptions } from '../../types';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset } from '../../presetUtils';
 
-import { getEntranceFill } from '../../utils';
+const EASING = 'sineInOut';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn'];
+export const schema = {};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME + suffix];
 }
 
 export function web(options: TimeAnimationOptions) {
-  return style(options);
+  return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions) {
-  const [fadeIn] = getNames(options);
-
+export function style(options: TimeAnimationOptions, asWeb = false) {
   return [
-    {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing: 'sineInOut',
-      keyframes: [{ offset: 0, opacity: 0 }],
-    },
+    useBasicPreset(
+      getMotionFade,
+      { ...options, easing: EASING },
+      'entrance',
+      asWeb,
+      options.suffix,
+    ),
   ];
 }

@@ -1,10 +1,10 @@
 import {
+  distance2d,
   getCssUnits,
   getMouseTransitionEasing,
-  distance2d,
   mapRange,
-  parseLength,
   parseDirection,
+  parseLength,
 } from '../../utils';
 import { quadInOut } from '@wix/motion';
 import { CustomMouse } from './CustomMouse';

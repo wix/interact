@@ -1,39 +1,46 @@
-import type {
-  AnimationFillMode,
-  DomApi,
-  EffectTwoSides,
-  ScrubAnimationOptions,
-  TurnScroll,
-} from '../../types';
-import { toKeyframeValue, parseDirection } from '../../utils';
-import { SPIN_DIRECTIONS, TWO_SIDES_DIRECTIONS } from '../../consts';
+import type { DomApi, ScrubAnimationOptions, TurnScroll } from '../../types';
+import { SCROLL_RANGES, SPIN_DIRECTIONS, TWO_SIDES_DIRECTIONS } from '../../consts';
+import { getOffscreenTravels, measureLayout } from '../../layoutUtils';
+import {
+  MOTION_LAYOUT_ROTATION_NAME,
+  MOTION_SCALE_NAME,
+  MOTION_TRANS_ROT_NAME,
+  getMotionScale,
+  getMotionTransRot,
+  useLayoutRotation,
+} from '../../transformUtils';
+import { parseKeywordLazy } from '../../utils';
+import {
+  useDirectionalPreset,
+  useDirectionalPresetAsBasic,
+  withSharedScrollRange,
+} from '../../presetUtils';
 
-const ELEMENT_ROTATION = 45;
-const DEFAULT_DIRECTION: EffectTwoSides = 'right';
-const DEFAULT_SPIN: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
-
-const ROTATE_DIRECTION_MAP = {
-  clockwise: 1,
-  'counter-clockwise': -1,
+const DEFAULTS: Required<TurnScroll> = {
+  type: 'TurnScroll',
+  angle: 45,
+  direction: 'left',
+  range: 'in',
+  scale: 1,
+  spin: 'clockwise',
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-turnScroll'];
+export const schema = {
+  angle: { type: 'number', default: DEFAULTS.angle },
+  direction: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+  spin: { type: 'enum', values: SPIN_DIRECTIONS, default: DEFAULTS.spin },
+};
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
-  if (dom) {
-    let left = 0;
-    dom.measure((target) => {
-      if (!target) {
-        return;
-      }
-      left = target.getBoundingClientRect().left;
-    });
-    dom.mutate((target) => {
-      target?.style.setProperty('--motion-left', `${left}px`);
-    });
-  }
+  measureLayout(dom);
 }
 
 export function web(options: ScrubAnimationOptions, dom?: DomApi) {
@@ -42,90 +49,54 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
   return style(options, true);
 }
 
+// moves from fully outside the viewport on one side to fully outside on the other side while turning
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as TurnScroll;
-  const direction = parseDirection(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULT_DIRECTION);
-  const spin = parseDirection(namedEffect?.spin, SPIN_DIRECTIONS, DEFAULT_SPIN);
-  const { scale = 1, range = 'in' } = namedEffect;
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<TurnScroll>;
+  const { angle = DEFAULTS.angle, scale = DEFAULTS.scale } = namedEffect!;
+  const side = parseKeywordLazy(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULTS.direction);
+  const spin = parseKeywordLazy(namedEffect?.spin, SPIN_DIRECTIONS, DEFAULTS.spin);
 
-  const startXLeft = `calc(-1 * ${toKeyframeValue(
-    {},
-    '--motion-left',
-    false,
-    'calc(100vw - 100%)',
-  )} - 100%)`;
-  const endXLeft = `calc(100vw - ${toKeyframeValue({}, '--motion-left', false, '0px')})`;
-  const [startX, endX] = direction === 'left' ? [startXLeft, endXLeft] : [endXLeft, startXLeft];
-
-  const rotate = ELEMENT_ROTATION * ROTATE_DIRECTION_MAP[spin];
-
-  const fromValues = {
-    rotation: range === 'out' ? 0 : -rotate,
-    scale: range === 'out' ? 1 : scale,
-    translate: range === 'out' ? '0px' : startX,
-  };
-  const toValues = {
-    rotation: range === 'in' ? 0 : rotate,
-    scale: range === 'in' ? 1 : scale,
-    translate: range === 'in' ? '0px' : endX,
-  };
-
-  const [turnScroll] = getNames(options);
-
-  const custom = {
-    '--motion-turn-translate-from': fromValues.translate,
-    '--motion-turn-translate-to': toValues.translate,
-    '--motion-turn-scale-from': fromValues.scale,
-    '--motion-turn-scale-to': toValues.scale,
-    '--motion-turn-rotation-from': `${fromValues.rotation}deg`,
-    '--motion-turn-rotation-to': `${toValues.rotation}deg`,
-  };
-
-  return [
-    {
-      ...options,
-      name: turnScroll,
-      fill,
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `translateX(${toKeyframeValue(
-            custom,
-            '--motion-turn-translate-from',
-            asWeb,
-          )}) scale(${toKeyframeValue(
-            custom,
-            '--motion-turn-scale-from',
-            asWeb,
-          )}) rotate(calc(${toKeyframeValue(
-            {},
-            '--motion-rotate',
-            false,
-            '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-turn-rotation-from', asWeb)}))`,
-        },
-        {
-          transform: `translateX(${toKeyframeValue(
-            custom,
-            '--motion-turn-translate-to',
-            asWeb,
-          )}) scale(${toKeyframeValue(
-            custom,
-            '--motion-turn-scale-to',
-            asWeb,
-          )}) rotate(calc(${toKeyframeValue(
-            {},
-            '--motion-rotate',
-            false,
-            '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-turn-rotation-to', asWeb)}))`,
-        },
-      ],
+  const turnOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      // the rotation shares the motion's sign - a positive angle turns clockwise when moving right
+      angle: angle * (spin === 'clockwise' ? 1 : -1) * (side === 'right' ? 1 : -1),
+      direction: side,
+      ...getOffscreenTravels(side),
     },
-  ];
+  } as ScrubAnimationOptions;
+  const scaleOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      scale,
+    },
+  } as ScrubAnimationOptions;
+
+  return withSharedScrollRange([
+    useDirectionalPreset(
+      getMotionTransRot,
+      turnOptions,
+      'scroll',
+      {
+        defaultDirection: DEFAULTS.direction,
+        defaultRange: DEFAULTS.range,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
+    useLayoutRotation(turnOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    useDirectionalPresetAsBasic(
+      getMotionScale,
+      scaleOptions,
+      'scroll',
+      {
+        defaultRange: DEFAULTS.range,
+      },
+      asWeb,
+      suffix,
+    ),
+  ]);
 }

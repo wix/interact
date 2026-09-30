@@ -1,90 +1,72 @@
-import type {
-  Poke,
-  TimeAnimationOptions,
-  DomApi,
-  AnimationExtraOptions,
-  EffectFourDirections,
-} from '../../types';
-import { getTimingFactor, toKeyframeValue, mapRange, parseDirection } from '../../utils';
+import type { DomApi, Poke, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
+import {
+  MOTION_LAYOUT_ROTATION_NAME,
+  MOTION_TRANS_ROT_NAME,
+  getMotionTransRot,
+  useLayoutRotation,
+} from '../../transformUtils';
+import type { LoopPoint } from '../../easingUtils';
+import { useDirectionalPreset } from '../../presetUtils';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'right';
-
-const TRANSLATE_KEYFRAMES = [
-  { keyframe: 17, translate: 7 },
-  { keyframe: 32, translate: 25 },
-  { keyframe: 48, translate: 8 },
-  { keyframe: 56, translate: 11 },
-  { keyframe: 66, translate: 25 },
-  { keyframe: 83, translate: 4 },
-  { keyframe: 100, translate: 0 },
-];
-
-const POKE_FACTOR_SOFT = 1;
-const POKE_FACTOR_HARD = 4;
-
-const DIRECTION_MAP = {
-  top: { x: 0, y: -1 },
-  bottom: { x: 0, y: 1 },
-  right: { x: 1, y: 0 },
-  left: { x: -1, y: 0 },
+const DEFAULTS: Required<Poke> = {
+  type: 'Poke',
+  direction: 'right',
+  iterationDelay: 0,
+  travel: { value: 62.5, unit: 'px' },
 };
 
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.direction },
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
+
+// two pokes towards the direction
+const SHAPE: LoopPoint[] = [
+  [0, 0],
+  [0.28, 0.17],
+  [1, 0.32],
+  [0.32, 0.48],
+  [0.44, 0.56],
+  [1, 0.66],
+  [0.16, 0.83],
+  [0, 1],
+];
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+}
+
+export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as Poke;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { intensity = 0.5 } = namedEffect;
+export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { namedEffect, suffix } = options as TimeAnimationOptions<Poke>;
+  const { travel = DEFAULTS.travel } = namedEffect!;
 
-  const duration = options.duration || 1;
-  const iterationDelay = +(namedEffect?.iterationDelay || 0);
-  const { x, y } = DIRECTION_MAP[direction];
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
-  const [name] = getNames(options);
-
-  const pokeFactor = mapRange(0, 1, POKE_FACTOR_SOFT, POKE_FACTOR_HARD, intensity);
-
-  // Create CSS custom properties for the poke configuration
-  const custom: Record<string, string | number> = {
-    '--motion-translate-x': x * pokeFactor,
-    '--motion-translate-y': y * pokeFactor,
-  };
-
-  const keyframes = TRANSLATE_KEYFRAMES.map(({ keyframe, translate }) => {
-    const translateValue = `calc(${toKeyframeValue(
-      custom,
-      '--motion-translate-x',
-      asWeb,
-    )} * ${translate}px) calc(${toKeyframeValue(
-      custom,
-      '--motion-translate-y',
-      asWeb,
-    )} * ${translate}px)`;
-
-    return {
-      offset: (keyframe / 100) * timingFactor,
-      translate: translateValue,
-    };
-  });
+  const pokeOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      travel,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      name,
-      easing: 'linear',
-      duration: duration + iterationDelay,
-      custom,
-      keyframes,
-    },
+    useDirectionalPreset(
+      getMotionTransRot,
+      pokeOptions,
+      'ongoing',
+      {
+        defaultDirection: DEFAULTS.direction,
+        directionType: 'four-sides',
+        loop: { shape: SHAPE },
+      },
+      asWeb,
+      suffix,
+    ),
+    useLayoutRotation(pokeOptions, 'ongoing', {}, asWeb, suffix),
   ];
-}
-
-export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Poke)?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true) as string;
-
-  return [`motion-poke-${timingFactor}`];
 }

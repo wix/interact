@@ -1,71 +1,61 @@
-import type { Pulse, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, toKeyframeValue, mapRange } from '../../utils';
+import type { DomApi, Pulse, TimeAnimationOptions } from '../../types';
+import {
+  MOTION_LAYOUT_ROTATION_NAME,
+  MOTION_SCALE_NAME,
+  getMotionScale,
+  useLayoutRotation,
+} from '../../transformUtils';
+import { useDirectionalPresetAsBasic } from '../../presetUtils';
 
-const PULSE_OFFSET_SOFT = 0;
-const PULSE_OFFSET_HARD = 0.12;
+const DEFAULTS: Required<Pulse> = {
+  type: 'Pulse',
+  iterationDelay: 0,
+  scale: 0.93,
+};
 
-const SCALE_KEYFRAMES = [
-  { keyframe: 27, scale: 0.96 },
-  { keyframe: 45, scale: 1 },
-  { keyframe: 72, scale: 0.93 },
-  { keyframe: 100, scale: 1 },
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+};
+
+// two beats - a light one and then the full one
+const SHAPE: [number, number][] = [
+  [0, 0],
+  [4 / 7, 0.27],
+  [0, 0.45],
+  [1, 0.72],
+  [0, 1],
 ];
 
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map((name) => name + suffix);
+}
+
+export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as Pulse;
-  const { intensity = 0 } = namedEffect;
+export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { namedEffect, suffix } = options as TimeAnimationOptions<Pulse>;
+  const { scale = DEFAULTS.scale } = namedEffect!;
 
-  const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
-  const [name] = getNames(options);
-
-  const pulseOffset = mapRange(0, 1, PULSE_OFFSET_SOFT, PULSE_OFFSET_HARD, intensity);
-
-  // Create CSS custom properties for the pulse configuration
-  const custom: Record<string, string | number> = {
-    '--motion-pulse-offset': pulseOffset,
-  };
-
-  const keyframes = SCALE_KEYFRAMES.map(({ keyframe, scale }) => {
-    const offset = (keyframe / 100) * timingFactor;
-
-    return {
-      offset,
-      transform: `scale(${
-        scale < 1
-          ? `calc(${scale} - ${toKeyframeValue(custom, '--motion-pulse-offset', asWeb)})`
-          : '1'
-      })`,
-    };
-  });
-
-  if (timingFactor < 1) {
-    keyframes.push({
-      offset: 1,
-      transform: 'scale(1)',
-    });
-  }
+  const scaleOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      scale,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      name,
-      easing: 'linear',
-      duration: duration + iterationDelay,
-      custom,
-      keyframes,
-    },
+    useLayoutRotation(options, 'ongoing', { composite: 'replace' }, asWeb, suffix),
+    useDirectionalPresetAsBasic(
+      getMotionScale,
+      scaleOptions,
+      'ongoing',
+      { loop: { shape: SHAPE } },
+      asWeb,
+      suffix,
+    ),
   ];
-}
-
-export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Pulse)?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
-
-  return [`motion-pulse-${timingFactor}`];
 }

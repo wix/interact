@@ -1,0 +1,559 @@
+import { describe, expect, test } from 'vitest';
+
+import type { MotionRange } from '../presetUtils';
+import {
+  oppositeDirection,
+  useBasicPreset,
+  useDirectionalPreset,
+  useDirectionalPresetAsBasic,
+  withSharedScrollRange,
+} from '../presetUtils';
+
+const basicPreset = (params: any) => ({ name: 'basic', keyframes: [], params });
+
+function capture() {
+  const calls: { motionRange: MotionRange; params: any }[] = [];
+  const preset = (motionRange: MotionRange, params: any) => {
+    calls.push({ motionRange: { ...motionRange }, params });
+    return { name: 'directional', keyframes: [] };
+  };
+  return { preset, last: () => calls[calls.length - 1] };
+}
+
+const cover = (value: number) => ({ name: 'cover', offset: { value, unit: 'percentage' } });
+
+describe('useBasicPreset', () => {
+  test('passes the named effect to the preset and spreads options and overrides', () => {
+    const result: any = useBasicPreset(
+      basicPreset,
+      { duration: 500, namedEffect: { type: 'FadeIn' } } as any,
+      'entrance',
+    );
+    expect(result.name).toBe('basic');
+    expect(result.duration).toBe(500);
+    expect(result.params).toEqual({ type: 'FadeIn' });
+  });
+
+  describe('entrance', () => {
+    test('defaults fill to backwards and keeps the user easing', () => {
+      const result: any = useBasicPreset(
+        basicPreset,
+        { easing: 'sineIn', namedEffect: { type: 'X' } } as any,
+        'entrance',
+      );
+      expect(result.fill).toBe('backwards');
+      expect(result.easing).toBe('sineIn');
+    });
+
+    test('keeps an explicit fill', () => {
+      const result: any = useBasicPreset(
+        basicPreset,
+        { fill: 'both', namedEffect: { type: 'X' } } as any,
+        'entrance',
+      );
+      expect(result.fill).toBe('both');
+    });
+  });
+
+  describe('scroll', () => {
+    const scroll = (range?: string, parsingOptions = {}, options = {}) =>
+      useBasicPreset(
+        basicPreset,
+        { easing: 'user-easing', namedEffect: { type: 'X', range }, ...options } as any,
+        'scroll',
+        true,
+        '',
+        parsingOptions,
+      ) as any;
+
+    test('in: fill backwards, cover 0% - 50%, preset easing', () => {
+      const result = scroll('in', { easing: 'sineOut' });
+      expect(result.fill).toBe('backwards');
+      expect(result.reversed).toBeUndefined();
+      expect(result.startOffset).toEqual(cover(0));
+      expect(result.endOffset).toEqual(cover(50));
+      expect(result.easing).toBe('cubic-bezier(0.39, 0.575, 0.565, 1)');
+    });
+
+    test('ignores the user easing', () => {
+      expect(scroll('in').easing).toBe('linear');
+    });
+
+    test('out: reversed, fill forwards, cover 50% - 100%', () => {
+      const result = scroll('out');
+      expect(result.fill).toBe('forwards');
+      expect(result.reversed).toBe(true);
+      expect(result.startOffset).toEqual(cover(50));
+      expect(result.endOffset).toEqual(cover(100));
+    });
+
+    test('out: flips an already reversed animation', () => {
+      expect(scroll('out', {}, { reversed: true }).reversed).toBe(false);
+    });
+
+    test('out: uses easing as is, or mirrors outEasing since it is played reversed', () => {
+      expect(scroll('out', { easing: 'ease-in' }).easing).toBe('cubic-bezier(0.42, 0, 1, 1)');
+      expect(scroll('out', { easing: 'ease-in', outEasing: 'ease-out' }).easing).toBe(
+        'cubic-bezier(0.42, 0, 1, 1)',
+      );
+      expect(scroll('out', { outEasing: 'ease-in' }).easing).toBe('cubic-bezier(0, 0, 0.58, 1)');
+    });
+
+    test('continuous: fill both, cover 0% - 100%, back-and-forth easing', () => {
+      const result = scroll('continuous');
+      expect(result.fill).toBe('both');
+      expect(result.startOffset).toEqual(cover(0));
+      expect(result.endOffset).toEqual(cover(100));
+      expect(result.easing).toBe('linear(0 0%, 1 50%, 1 50%, 0 100%)');
+    });
+
+    test('continuous: continuousEasing overrides easing and continuousHold holds in the middle', () => {
+      const result = scroll('continuous', {
+        easing: 'sineOut',
+        continuousEasing: 'linear',
+        continuousHold: 0.2,
+      });
+      expect(result.easing).toBe('linear(0 0%, 1 40%, 1 60%, 0 100%)');
+    });
+
+    test('invalid range falls back to the default range', () => {
+      const result = useBasicPreset(
+        basicPreset,
+        { namedEffect: { type: 'X', range: 'nope' } } as any,
+        'scroll',
+        true,
+        '',
+        { defaultRange: 'out' },
+      ) as any;
+      expect(result.reversed).toBe(true);
+    });
+
+    test('completes partial user offsets', () => {
+      const result = scroll(
+        'out',
+        {},
+        { startOffset: { name: 'cover' }, endOffset: { offset: { value: 80 } } },
+      );
+      expect(result.startOffset).toEqual(cover(50));
+      expect(result.endOffset).toEqual(cover(80));
+    });
+
+    test('non-cover ranges default to 0% and the end range name to the start one', () => {
+      const result = scroll('in', {}, { startOffset: { name: 'contain' }, endOffset: {} });
+      expect(result.startOffset).toEqual({
+        name: 'contain',
+        offset: { value: 0, unit: 'percentage' },
+      });
+      expect(result.endOffset).toEqual({
+        name: 'contain',
+        offset: { value: 0, unit: 'percentage' },
+      });
+    });
+  });
+
+  describe('ongoing', () => {
+    const ongoing = (namedEffect: any, parsingOptions = {}, options = {}) =>
+      useBasicPreset(
+        basicPreset,
+        {
+          duration: 1000,
+          easing: 'user-easing',
+          namedEffect: { type: 'X', ...namedEffect },
+          ...options,
+        } as any,
+        'ongoing',
+        true,
+        '',
+        parsingOptions,
+      ) as any;
+
+    test('does not override fill', () => {
+      expect(ongoing({}).fill).toBeUndefined();
+      expect(ongoing({}, {}, { fill: 'forwards' }).fill).toBe('forwards');
+    });
+
+    test('easing is linear without a loop', () => {
+      expect(ongoing({}).easing).toBe('linear');
+    });
+
+    test('iterationDelay stretches the duration and holds rest at the end of the loop easing', () => {
+      const result = ongoing(
+        { iterationDelay: 1000 },
+        {
+          loop: {
+            shape: [
+              [0, 0],
+              [1, 0.5],
+              [0, 1],
+            ],
+          },
+        },
+      );
+      expect(result.duration).toBe(2000);
+      expect(result.easing).toBe('linear(1 0%, 0 25%, 0 25%, 1 50%, 1 100%)');
+    });
+  });
+});
+
+describe('useDirectionalPreset', () => {
+  const run = (group: any, namedEffect: any, parsingOptions: any = {}, options: any = {}) => {
+    const { preset, last } = capture();
+    const result: any = useDirectionalPreset(
+      preset,
+      { namedEffect: { type: 'X', ...namedEffect }, ...options } as any,
+      group,
+      parsingOptions,
+    );
+    return { result, ...last() };
+  };
+
+  describe('four-sides', () => {
+    const sides = { directionType: 'four-sides' };
+
+    test('entrance starts at the `from` side', () => {
+      expect(run('entrance', { from: 'left' }, sides).motionRange).toEqual({
+        fromSign: -1,
+        toSign: 0,
+        vertical: false,
+        movementAngle: '0deg',
+      });
+      expect(run('entrance', { from: 'right' }, sides).motionRange.fromSign).toBe(1);
+      expect(run('entrance', { from: 'bottom' }, sides).motionRange).toEqual({
+        fromSign: 1,
+        toSign: 0,
+        vertical: true,
+        movementAngle: '90deg',
+      });
+    });
+
+    test('entrance falls back to the default direction', () => {
+      expect(
+        run('entrance', { from: 'nope' }, { ...sides, defaultDirection: 'top' }).motionRange,
+      ).toMatchObject({
+        fromSign: -1,
+        vertical: true,
+      });
+    });
+
+    test('scroll moves towards `direction`', () => {
+      expect(run('scroll', { direction: 'right' }, sides).motionRange).toMatchObject({
+        fromSign: -1,
+        toSign: 0,
+      });
+      expect(run('scroll', { direction: 'top' }, sides).motionRange).toMatchObject({
+        fromSign: 1,
+        vertical: true,
+      });
+    });
+
+    test('scroll out is the opposite direction reversed', () => {
+      const { motionRange, result } = run('scroll', { direction: 'right', range: 'out' }, sides);
+      expect(motionRange).toMatchObject({ fromSign: 1, toSign: 0, movementAngle: '0deg' });
+      expect(result.reversed).toBe(true);
+    });
+
+    test('scroll continuous ends at the opposite sign', () => {
+      expect(
+        run('scroll', { direction: 'right', range: 'continuous' }, sides).motionRange,
+      ).toMatchObject({
+        fromSign: -1,
+        toSign: 1,
+      });
+      expect(
+        run('scroll', { direction: 'left', range: 'continuous' }, sides).motionRange,
+      ).toMatchObject({
+        fromSign: 1,
+        toSign: -1,
+      });
+    });
+
+    test('scroll continuous directional linear easing stays linear', () => {
+      expect(run('scroll', { direction: 'right', range: 'continuous' }, sides).result.easing).toBe(
+        'linear',
+      );
+    });
+
+    test('ongoing keyframes start at the peak towards `direction`', () => {
+      expect(run('ongoing', { direction: 'right' }, sides).motionRange).toMatchObject({
+        fromSign: 1,
+        movementAngle: '0deg',
+      });
+    });
+  });
+
+  describe('axis', () => {
+    test('vertical and horizontal', () => {
+      expect(run('entrance', { direction: 'vertical' }).motionRange).toEqual({
+        fromSign: -1,
+        toSign: 0,
+        vertical: true,
+        movementAngle: '90deg',
+      });
+      expect(run('entrance', { direction: 'horizontal' }).motionRange).toMatchObject({
+        vertical: false,
+        movementAngle: '0deg',
+      });
+    });
+
+    test('defaults to vertical and is not flipped by group or out', () => {
+      expect(run('entrance', {}).motionRange.vertical).toBe(true);
+      expect(run('ongoing', { direction: 'horizontal' }).motionRange).toMatchObject({
+        fromSign: -1,
+        vertical: false,
+      });
+      expect(run('scroll', { direction: 'horizontal', range: 'out' }).motionRange).toMatchObject({
+        fromSign: -1,
+        vertical: false,
+      });
+    });
+  });
+
+  describe('spin', () => {
+    const spin = { directionType: 'spin' };
+
+    test('clockwise starts negative, counter-clockwise positive, no movement angle', () => {
+      expect(run('entrance', { direction: 'clockwise' }, spin).motionRange).toEqual({
+        fromSign: -1,
+        toSign: 0,
+        vertical: false,
+        movementAngle: '0deg',
+      });
+      expect(run('entrance', { direction: 'counter-clockwise' }, spin).motionRange.fromSign).toBe(
+        1,
+      );
+    });
+
+    test('is not flipped for entrance or ongoing, only for scroll out', () => {
+      expect(run('ongoing', { direction: 'clockwise' }, spin).motionRange.fromSign).toBe(-1);
+      expect(
+        run('scroll', { direction: 'clockwise', range: 'out' }, spin).motionRange.fromSign,
+      ).toBe(1);
+    });
+  });
+
+  describe('angle', () => {
+    const angle = { directionType: 'angle' };
+
+    test('scroll uses numeric and css angles as is', () => {
+      expect(run('scroll', { direction: 45 }, angle).motionRange).toMatchObject({
+        fromSign: -1,
+        movementAngle: '45deg',
+      });
+      expect(run('scroll', { direction: '0.5turn' }, angle).motionRange.movementAngle).toBe(
+        '0.5turn',
+      );
+      expect(run('scroll', { direction: '30' }, angle).motionRange.movementAngle).toBe('30deg');
+      expect(
+        run('scroll', { direction: 'calc(10deg + 5deg)' }, angle).motionRange.movementAngle,
+      ).toBe('calc(10deg + 5deg)');
+    });
+
+    test('entrance `from` angle is turned around', () => {
+      expect(run('entrance', { from: 45 }, angle).motionRange.movementAngle).toBe(
+        'calc(180deg + 45deg)',
+      );
+    });
+
+    test('accepts side keywords', () => {
+      expect(run('entrance', { from: 'left' }, angle).motionRange).toMatchObject({
+        fromSign: -1,
+        movementAngle: '0deg',
+      });
+    });
+
+    test('falls back to the default angle', () => {
+      expect(
+        run('scroll', { direction: 'nope' }, { ...angle, defaultDirection: 90 }).motionRange
+          .movementAngle,
+      ).toBe('90deg');
+    });
+  });
+
+  describe('params', () => {
+    test('parses travel and depth with defaults', () => {
+      expect(run('entrance', {}).params).toMatchObject({
+        travel: '0px',
+        depth: '0px',
+        toTravel: undefined,
+      });
+      expect(run('entrance', { travel: 50, depth: '20%' }).params).toMatchObject({
+        travel: '50px',
+        depth: '20%',
+      });
+      expect(
+        run(
+          'entrance',
+          {},
+          { defaultTravel: { value: 10, unit: 'vh' }, defaultDepth: { value: 5, unit: 'px' } },
+        ).params,
+      ).toMatchObject({ travel: '10vh', depth: '5px' });
+    });
+
+    test('keeps the other named effect params', () => {
+      expect(run('entrance', { angle: 30 }).params.angle).toBe(30);
+    });
+
+    test('swaps travel and toTravel on out', () => {
+      expect(run('scroll', { travel: '10px', toTravel: '20px' }).params).toMatchObject({
+        travel: '10px',
+        toTravel: '20px',
+      });
+      expect(
+        run('scroll', { travel: '10px', toTravel: '20px', range: 'out' }).params,
+      ).toMatchObject({
+        travel: '20px',
+        toTravel: '10px',
+      });
+      expect(run('scroll', { travel: '10px', range: 'out' }).params).toMatchObject({
+        travel: '10px',
+        toTravel: undefined,
+      });
+    });
+
+    test('maps the pivot to a transform origin', () => {
+      expect(run('entrance', {}).params.transformOrigin).toEqual({ x: '0px', y: '0px' });
+      expect(run('entrance', { pivot: 'top-left' }).params.transformOrigin).toEqual({
+        x: '-50%',
+        y: '-50%',
+      });
+      expect(run('entrance', { pivot: 'bottom-right' }).params.transformOrigin).toEqual({
+        x: '50%',
+        y: '50%',
+      });
+      expect(run('entrance', { pivot: 'right' }).params.transformOrigin).toEqual({
+        x: '50%',
+        y: '0px',
+      });
+    });
+
+    test('limits the pivot by pivotType', () => {
+      expect(
+        run('entrance', { pivot: 'top-left' }, { pivotType: 'four-sides' }).params.transformOrigin,
+      ).toEqual({
+        x: '0px',
+        y: '0px',
+      });
+      expect(
+        run(
+          'entrance',
+          { pivot: 'top' },
+          { pivotType: 'four-corners', defaultPivot: 'bottom-left' },
+        ).params.transformOrigin,
+      ).toEqual({ x: '-50%', y: '50%' });
+      expect(
+        run('entrance', { pivot: 'top' }, { pivotType: 'four-sides' }).params.transformOrigin,
+      ).toEqual({
+        x: '0px',
+        y: '-50%',
+      });
+    });
+  });
+
+  describe('parallax', () => {
+    test('defaults the center by range and sets the parallax range to the scroll range', () => {
+      const inRange = run('scroll', { parallax: { speed: 2 } });
+      expect(inRange.params.parallax.center).toBe(1);
+      expect(inRange.params.parallax.range).toEqual({
+        startOffset: cover(0),
+        endOffset: cover(50),
+      });
+      expect(inRange.motionRange.parallaxReversed).toBe(false);
+
+      expect(
+        run('scroll', { parallax: { speed: 2 }, range: 'continuous' }).params.parallax.center,
+      ).toBe(0.5);
+
+      const outRange = run('scroll', { parallax: { speed: 2 }, range: 'out' });
+      expect(outRange.params.parallax.center).toBe(0);
+      expect(outRange.motionRange.parallaxReversed).toBe(true);
+    });
+
+    test('keeps an explicit center', () => {
+      expect(run('scroll', { parallax: { speed: 2, center: 0.3 } }).params.parallax.center).toBe(
+        0.3,
+      );
+    });
+
+    test('is scroll only', () => {
+      const { params, motionRange } = run('entrance', { parallax: { speed: 2 } });
+      expect(params.parallax.center).toBeUndefined();
+      expect(motionRange.parallaxReversed).toBeUndefined();
+    });
+  });
+});
+
+describe('useDirectionalPresetAsBasic', () => {
+  test('always uses a fixed motion range and normalized params', () => {
+    const { preset, last } = capture();
+    useDirectionalPresetAsBasic(
+      preset,
+      { namedEffect: { type: 'X', range: 'out', pivot: 'top', scale: 2 } } as any,
+      'scroll',
+      {},
+    );
+    expect(last().motionRange).toEqual({
+      fromSign: -1,
+      toSign: 0,
+      movementAngle: '90deg',
+      vertical: true,
+    });
+    expect(last().params).toMatchObject({ scale: 2, transformOrigin: { x: '0px', y: '-50%' } });
+  });
+
+  test('uses non-directional continuous easing', () => {
+    const { preset } = capture();
+    const result: any = useDirectionalPresetAsBasic(
+      preset,
+      { namedEffect: { type: 'X', range: 'continuous' } } as any,
+      'scroll',
+      {},
+    );
+    expect(result.easing).toBe('linear(0 0%, 1 50%, 1 50%, 0 100%)');
+  });
+});
+
+describe('withSharedScrollRange', () => {
+  test('copies the defined scroll range keys of the first animation to the rest', () => {
+    const [first, second, third]: any[] = withSharedScrollRange([
+      { keyframes: [], startOffset: cover(10), endOffset: cover(90), startOffsetAdd: '5vh' } as any,
+      { keyframes: [], startOffset: cover(0), endOffset: cover(100), endOffsetAdd: '1px' } as any,
+      { keyframes: [], name: 'third' } as any,
+    ]);
+    expect(first.startOffset).toEqual(cover(10));
+    expect(second).toMatchObject({
+      startOffset: cover(10),
+      endOffset: cover(90),
+      startOffsetAdd: '5vh',
+      endOffsetAdd: '1px',
+    });
+    expect(third).toMatchObject({
+      name: 'third',
+      startOffset: cover(10),
+      endOffset: cover(90),
+      startOffsetAdd: '5vh',
+    });
+    expect('endOffsetAdd' in third).toBe(false);
+  });
+});
+
+describe('oppositeDirection', () => {
+  test('axis keeps its direction', () => {
+    expect(oppositeDirection('vertical', 'axis')).toBe('vertical');
+  });
+
+  test('spin swaps', () => {
+    expect(oppositeDirection('clockwise', 'spin')).toBe('counter-clockwise');
+    expect(oppositeDirection('counter-clockwise', 'spin')).toBe('clockwise');
+  });
+
+  test('four-sides uses the opposite side', () => {
+    expect(oppositeDirection('top', 'four-sides')).toBe('bottom');
+    expect(oppositeDirection('left', 'four-sides')).toBe('right');
+  });
+
+  test('angle uses the opposite side or turns the angle around', () => {
+    expect(oppositeDirection('right', 'angle')).toBe('left');
+    expect(oppositeDirection('45deg', 'angle')).toBe('calc(180deg + 45deg)');
+    expect(oppositeDirection('calc(10deg + 5deg)', 'angle')).toBe('calc(180deg + (10deg + 5deg))');
+  });
+});

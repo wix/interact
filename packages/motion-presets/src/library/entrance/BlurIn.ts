@@ -1,8 +1,27 @@
 import type { BlurIn, TimeAnimationOptions } from '../../types';
-import { toKeyframeValue, getEntranceFill } from '../../utils';
+import {
+  getMotionBlur,
+  getMotionFade,
+  MOTION_BLUR_NAME,
+  MOTION_FADE_NAME,
+} from '../../fadeBlurUtils';
+import { useBasicPreset } from '../../presetUtils';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-blurIn'];
+const FADE_IN_DURATION_FACTOR = 0.7;
+const FADE_IN_EASING = 'sineIn';
+
+const DEFAULT_EASING = 'linear';
+const DEFAULTS: Required<BlurIn> = {
+  type: 'BlurIn',
+  blur: 6,
+};
+
+export const schema = {
+  blur: { type: 'number', min: 0, default: DEFAULTS.blur },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME, MOTION_BLUR_NAME].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -10,40 +29,25 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { blur = 6 } = options.namedEffect as BlurIn;
-  const [fadeIn, blurIn] = getNames(options);
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<BlurIn>;
+  const { blur = DEFAULTS.blur } = namedEffect!;
 
-  const easing = options.easing || 'linear';
-
-  const custom = {
-    '--motion-blur': `${blur}px`,
+  const fadeOptions = {
+    ...options,
+    duration: options.duration! * FADE_IN_DURATION_FACTOR,
+    easing: FADE_IN_EASING,
   };
+  const blurOptions = {
+    ...options,
+    easing,
+    namedEffect: {
+      ...namedEffect,
+      blur,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      duration: options.duration! * 0.7,
-      easing: 'sineIn',
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
-    },
-    {
-      ...options,
-      name: blurIn,
-      fill: getEntranceFill(options),
-      easing,
-      composite: 'add' as const, // make sure we don't override existing filters on the component
-      custom,
-      keyframes: [
-        {
-          filter: `blur(${toKeyframeValue(custom, '--motion-blur', asWeb)})`,
-        },
-        {
-          filter: 'blur(0px)',
-        },
-      ],
-    },
+    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useBasicPreset(getMotionBlur, blurOptions, 'entrance', asWeb, suffix),
   ];
 }

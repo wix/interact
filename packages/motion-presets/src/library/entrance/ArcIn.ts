@@ -1,88 +1,76 @@
-import type { ArcIn, TimeAnimationOptions, EffectFourDirections, DomApi } from '../../types';
-import { toKeyframeValue, parseDirection, parseLength, getEntranceFill } from '../../utils';
+import type { ArcIn, DomApi, LengthValue, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
+import {
+  MOTION_3D_TRANSFORM_NAME,
+  getMotion3dTransform,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+
+const FADE_IN_DURATION_FACTOR = 0.7;
+const FADE_IN_EASING = 'sineIn';
 
 const ROTATION_ANGLE = 80;
-const DEFAULT_DIRECTION: EffectFourDirections = 'right';
-const DEFAULT_DEPTH = { value: 200, unit: 'px' };
 
-const DIRECTION_MAP: Record<EffectFourDirections, { x: number; y: number; sign: number }> = {
-  top: { x: 1, y: 0, sign: 1 },
-  right: { x: 0, y: 1, sign: 1 },
-  bottom: { x: 1, y: 0, sign: -1 },
-  left: { x: 0, y: 1, sign: -1 },
+const DEFAULT_EASING = 'quintInOut';
+const DEFAULTS: Required<ArcIn> = {
+  type: 'ArcIn',
+  depth: { value: 100, unit: 'px' },
+  from: 'right',
+  perspective: 800,
 };
+
+export const schema = {
+  depth: { type: 'length', default: DEFAULTS.depth },
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.from },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME, MOTION_3D_TRANSFORM_NAME, MOTION_LAYOUT_ROTATION_NAME].map(
+    (name) => name + suffix,
+  );
+}
 
 export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-arcIn'];
-}
-
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as ArcIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<ArcIn>;
+  const { perspective = DEFAULTS.perspective } = namedEffect!;
 
-  const depth = parseLength(namedEffect.depth, DEFAULT_DEPTH);
-  const { perspective = 800 } = namedEffect;
-  const [fadeIn, arcIn] = getNames(options);
-
-  const easing = options.easing || 'quintInOut';
-
-  const { x, y, sign } = DIRECTION_MAP[direction];
-  const depthValue = `${depth.value}${depth.unit === 'percentage' ? '%' : depth.unit}`;
-
-  const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-arc-x': `${x}`,
-    '--motion-arc-y': `${y}`,
-    '--motion-arc-sign': `${sign}`,
-    '--motion-depth-negative': `calc(-1 * ${depthValue} / 2)`,
-    '--motion-depth-positive': `calc(${depthValue} / 2)`,
+  const fadeOptions = {
+    ...options,
+    duration: options.duration! * FADE_IN_DURATION_FACTOR,
+    easing: FADE_IN_EASING,
   };
+  const transformOptions = {
+    ...options,
+    easing,
+    namedEffect: {
+      ...namedEffect,
+      angle: ROTATION_ANGLE,
+      perspective,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      fill: getEntranceFill(options),
-      name: fadeIn,
-      duration: options.duration! * 0.7,
-      easing: 'sineIn',
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
-    },
-    {
-      ...options,
-      fill: getEntranceFill(options),
-      name: arcIn,
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(custom, '--motion-depth-negative', asWeb)}) rotateX(calc(${toKeyframeValue(
-            custom,
-            '--motion-arc-x',
-            asWeb,
-          )} * ${toKeyframeValue(
-            custom,
-            '--motion-arc-sign',
-            asWeb,
-          )} * ${ROTATION_ANGLE}deg)) rotateY(calc(${toKeyframeValue(
-            custom,
-            '--motion-arc-y',
-            asWeb,
-          )} * ${toKeyframeValue(
-            custom,
-            '--motion-arc-sign',
-            asWeb,
-          )} * ${ROTATION_ANGLE}deg)) translateZ(${toKeyframeValue(custom, '--motion-depth-positive', asWeb)}) rotate(var(--motion-rotate, 0deg))`,
-        },
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(custom, '--motion-depth-negative', asWeb)}) rotateX(0deg) rotateY(0deg) translateZ(${toKeyframeValue(custom, '--motion-depth-positive', asWeb)}) rotate(var(--motion-rotate, 0deg))`,
-        },
-      ],
-    },
+    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useDirectionalPreset(
+      getMotion3dTransform,
+      transformOptions,
+      'entrance',
+      {
+        defaultDepth: DEFAULTS.depth as LengthValue,
+        defaultDirection: DEFAULTS.from,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
+    useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
   ];
 }

@@ -1,25 +1,38 @@
-import type {
-  AnimationFillMode,
-  ScrubAnimationOptions,
-  TiltScroll,
-  DomApi,
-  EffectTwoSides,
-} from '../../types';
-import { cssEasings as easings } from '@wix/motion';
-import { toKeyframeValue, parseDirection } from '../../utils';
-import { TWO_SIDES_DIRECTIONS } from '../../consts';
+import type { ScrubAnimationOptions, TiltScroll, DomApi } from '../../types';
+import { SCROLL_RANGES, SPIN_DIRECTIONS } from '../../consts';
+import {
+  MOTION_TRANS_ROT_NAME,
+  MOTION_3D_TRANSFORM_NAME,
+  getMotionTransRot,
+  getMotion3dTransform,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import { compareKeywordToNonDefaults } from '../../utils';
+import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 
-const MAX_Y_TRAVEL = 40;
 const [ROTATION_X, ROTATION_Y, ROTATION_Z] = [10, 25, 25];
-const DEFAULT_DIRECTION: EffectTwoSides = 'right';
+const ROTATION_Z_EASING = 'sineInOut';
 
-const DIRECTIONS_MAP = {
-  right: 1,
-  left: -1,
+const DEFAULTS: Required<TiltScroll> = {
+  type: 'TiltScroll',
+  direction: 'counter-clockwise',
+  perspective: 400,
+  range: 'in',
+  speed: 1,
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-tiltScrollTranslate', 'motion-tiltScrollRotate'];
+export const schema = {
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: DEFAULTS.direction },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  speed: { type: 'number', min: 0, default: DEFAULTS.speed },
+};
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return [MOTION_3D_TRANSFORM_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -27,109 +40,64 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as TiltScroll;
-  const direction = parseDirection(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULT_DIRECTION);
-  const { parallaxFactor = 0, perspective = 400 } = namedEffect;
-  const { range = 'in' } = namedEffect;
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<TiltScroll>;
+  const { perspective = DEFAULTS.perspective, range, speed = DEFAULTS.speed } = namedEffect!;
 
-  const travelY = MAX_Y_TRAVEL * parallaxFactor;
-  const dir = DIRECTIONS_MAP[direction];
+  // the 3d tilt is not directional - 'out' is 'in' reversed with the same tilt, so its direction is pre-flipped
+  const isOut = compareKeywordToNonDefaults(range, ['out']);
+  const rot3dDirection = isOut ? 'counter-clockwise' : 'clockwise';
 
-  const from = {
-    x: ROTATION_X * (range === 'out' ? 0 : -1),
-    y: ROTATION_Y * (range === 'out' ? 0 : -1),
-    z: ROTATION_Z * dir * (range === 'out' ? 0 : range === 'in' ? 1 : -1),
-    transY: range === 'out' ? 0 : travelY,
-  };
-  const to = {
-    x: ROTATION_X * (range === 'in' ? 0 : range === 'out' ? -1 : 1),
-    y: ROTATION_Y * (range === 'in' ? 0 : range === 'out' ? -1 : 0.5),
-    z: ROTATION_Z * dir * (range === 'in' ? 0 : range === 'out' ? 1 : 1.25),
-    transY: range === 'in' ? 0 : -1 * travelY,
-  };
-
-  const startOffsetAdd = range === 'out' ? '0px' : `${-1 * Math.abs(travelY)}vh`;
-  const endOffsetAdd = range === 'in' ? '0px' : `${Math.abs(travelY)}vh`;
-
-  const [tiltScrollTranslate, tiltScrollRotate] = getNames(options);
-
-  const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-tilt-y-from': `${from.transY}vh`,
-    '--motion-tilt-y-to': `${to.transY}vh`,
-    '--motion-tilt-x-from': `${from.x}deg`,
-    '--motion-tilt-x-to': `${to.x}deg`,
-    '--motion-tilt-y-rot-from': `${from.y}deg`,
-    '--motion-tilt-y-rot-to': `${to.y}deg`,
-    '--motion-tilt-z-from': `${from.z}deg`,
-    '--motion-tilt-z-to': `${to.z}deg`,
-  };
-
-  return [
-    {
-      ...options,
-      name: tiltScrollTranslate,
-      fill,
-      easing,
-      startOffsetAdd,
-      endOffsetAdd,
-      custom,
-      keyframes: [
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateY(${toKeyframeValue(
-            custom,
-            '--motion-tilt-y-from',
-            asWeb,
-          )}) rotateX(${toKeyframeValue(
-            custom,
-            '--motion-tilt-x-from',
-            asWeb,
-          )}) rotateY(${toKeyframeValue(custom, '--motion-tilt-y-rot-from', asWeb)})`,
-        },
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateY(${toKeyframeValue(
-            custom,
-            '--motion-tilt-y-to',
-            asWeb,
-          )}) rotateX(${toKeyframeValue(
-            custom,
-            '--motion-tilt-x-to',
-            asWeb,
-          )}) rotateY(${toKeyframeValue(custom, '--motion-tilt-y-rot-to', asWeb)})`,
-        },
-      ],
+  const transform3dOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      angle: { x: ROTATION_X, y: ROTATION_Y },
+      direction: rot3dDirection,
+      perspective,
+      parallax: { speed },
     },
-    {
-      ...options,
-      name: tiltScrollRotate,
-      fill,
-      easing: easings.sineInOut,
-      startOffsetAdd,
-      endOffsetAdd,
-      composite: 'add' as const, // add this animation on top of the previous one
-      custom,
-      keyframes: [
-        {
-          transform: `rotate(calc(${toKeyframeValue(
-            {},
-            '--motion-rotate',
-            false,
-            '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-tilt-z-from', asWeb)}))`,
-        },
-        {
-          transform: `rotate(calc(${toKeyframeValue(
-            {},
-            '--motion-rotate',
-            false,
-            '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-tilt-z-to', asWeb)}))`,
-        },
-      ],
+  } as ScrubAnimationOptions;
+  const transform2dOptions = {
+    ...options,
+    composite: 'add',
+    namedEffect: {
+      ...namedEffect,
+      angle: ROTATION_Z,
     },
-  ];
+  } as ScrubAnimationOptions;
+
+  return withSharedScrollRange([
+    useDirectionalPreset(
+      getMotion3dTransform,
+      transform3dOptions,
+      'scroll',
+      {
+        defaultRange: DEFAULTS.range,
+        directionType: 'spin',
+      },
+      asWeb,
+      suffix,
+    ),
+    useDirectionalPreset(
+      getMotionTransRot,
+      transform2dOptions,
+      'scroll',
+      {
+        defaultDirection: DEFAULTS.direction,
+        defaultRange: DEFAULTS.range,
+        directionType: 'spin',
+        easing: ROTATION_Z_EASING,
+        outEasing: ROTATION_Z_EASING,
+      },
+      asWeb,
+      suffix,
+    ),
+    useLayoutRotation(
+      transform3dOptions,
+      'scroll',
+      { defaultRange: DEFAULTS.range },
+      asWeb,
+      suffix,
+    ),
+  ]);
 }

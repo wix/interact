@@ -1,324 +1,42 @@
 import { describe, expect, test } from 'vitest';
-
 import * as TurnScroll from '../TurnScroll';
-import type { TurnScroll as TurnScrollType, ScrubAnimationOptions } from '../../../types';
-import { baseMockOptions } from './testUtils';
+import { getOffscreenTravels } from '../../../layoutUtils';
+import { MOTION_TRANS_ROT_NAME } from '../../../transformUtils';
+import { byName, fakeDom, scrollOptions } from './testUtils';
+
+const turnOf = (namedEffect: Record<string, unknown>) =>
+  byName(
+    TurnScroll.style(scrollOptions({ type: 'TurnScroll', ...namedEffect }), true),
+    MOTION_TRANS_ROT_NAME,
+  ).custom!;
 
 describe('TurnScroll', () => {
-  describe('web', () => {
-    test('default values', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as TurnScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'backwards',
-          easing: 'linear',
-          keyframes: [
-            {
-              transform:
-                'translateX(calc(100vw - var(--motion-left, 0px))) scale(1) rotate(calc(var(--motion-rotate, 0deg) + -45deg))',
-            },
-            {
-              transform: 'translateX(0px) scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom spin - counter-clockwise', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { spin: 'counter-clockwise' } as TurnScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateX(calc(100vw - var(--motion-left, 0px))) scale(1) rotate(calc(var(--motion-rotate, 0deg) + 45deg))',
-            },
-            {
-              transform: 'translateX(0px) scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - left', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TurnScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateX(calc(-1 * var(--motion-left, calc(100vw - 100%)) - 100%)) scale(1) rotate(calc(var(--motion-rotate, 0deg) + -45deg))',
-            },
-            {
-              transform: 'translateX(0px) scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom scale', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { scale: 0.5 } as TurnScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateX(calc(100vw - var(--motion-left, 0px))) scale(0.5) rotate(calc(var(--motion-rotate, 0deg) + -45deg))',
-            },
-            {
-              transform: 'translateX(0px) scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - out', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'out' } as TurnScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'forwards',
-          keyframes: [
-            {
-              transform: 'translateX(0px) scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
-            },
-            {
-              transform:
-                'translateX(calc(-1 * var(--motion-left, calc(100vw - 100%)) - 100%)) scale(1) rotate(calc(var(--motion-rotate, 0deg) + 45deg))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - continuous', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'continuous' } as TurnScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateX(calc(100vw - var(--motion-left, 0px))) scale(1) rotate(calc(var(--motion-rotate, 0deg) + -45deg))',
-            },
-            {
-              transform:
-                'translateX(calc(-1 * var(--motion-left, calc(100vw - 100%)) - 100%)) scale(1) rotate(calc(var(--motion-rotate, 0deg) + 45deg))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
+  test('the angle sign combines the spin with the direction of the movement', () => {
+    expect(turnOf({ direction: 'right', spin: 'clockwise' })['--motion-trans-rot-angle']).toBe(
+      '45deg',
+    );
+    expect(turnOf({ direction: 'left', spin: 'clockwise' })['--motion-trans-rot-angle']).toBe(
+      '-45deg',
+    );
+    expect(
+      turnOf({ direction: 'left', spin: 'counter-clockwise', angle: 90 })[
+        '--motion-trans-rot-angle'
+      ],
+    ).toBe('90deg');
   });
 
-  describe('style', () => {
-    test('default values', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as TurnScrollType,
-      };
+  test('moves from offscreen on one side to offscreen on the other', () => {
+    const { travel, toTravel } = getOffscreenTravels('right');
+    const custom = turnOf({ direction: 'right' });
+    expect(custom['--motion-trans-rot-travel']).toBe(travel);
+    expect(custom['--motion-trans-rot-to-travel']).toBe(toTravel);
+  });
 
-      const expectedResult = [
-        {
-          fill: 'backwards',
-          easing: 'linear',
-          keyframes: [
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-from)) scale(var(--motion-turn-scale-from)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-from)))',
-            },
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-to)) scale(var(--motion-turn-scale-to)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-to)))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom spin - counter-clockwise', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { spin: 'counter-clockwise' } as TurnScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-from)) scale(var(--motion-turn-scale-from)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-from)))',
-            },
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-to)) scale(var(--motion-turn-scale-to)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-to)))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - left', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TurnScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-from)) scale(var(--motion-turn-scale-from)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-from)))',
-            },
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-to)) scale(var(--motion-turn-scale-to)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-to)))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom scale', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { scale: 0.5 } as TurnScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-from)) scale(var(--motion-turn-scale-from)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-from)))',
-            },
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-to)) scale(var(--motion-turn-scale-to)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-to)))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - out', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'out' } as TurnScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'forwards',
-          keyframes: [
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-from)) scale(var(--motion-turn-scale-from)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-from)))',
-            },
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-to)) scale(var(--motion-turn-scale-to)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-to)))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - continuous', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'continuous' } as TurnScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-from)) scale(var(--motion-turn-scale-from)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-from)))',
-            },
-            {
-              transform:
-                'translateX(var(--motion-turn-translate-to)) scale(var(--motion-turn-scale-to)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-to)))',
-            },
-          ],
-        },
-      ];
-
-      const result = TurnScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
+  test('prepare measures the layout position', () => {
+    const element = document.createElement('div');
+    element.getBoundingClientRect = () => ({ left: 120, top: 30 }) as DOMRect;
+    TurnScroll.prepare(scrollOptions({ type: 'TurnScroll' }), fakeDom(element));
+    expect(element.style.getPropertyValue('--motion-left')).toBe('120px');
+    expect(element.style.getPropertyValue('--motion-top')).toBe('30px');
   });
 });

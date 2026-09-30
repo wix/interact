@@ -1,33 +1,32 @@
-import type {
-  AnimationFillMode,
-  DomApi,
-  EffectFourDirections,
-  ScrubAnimationOptions,
-  SlideScroll,
-  Translate,
-} from '../../types';
+import type { DomApi, EffectFourDirections, ScrubAnimationOptions, SlideScroll } from '../../types';
+import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
+import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
 import {
-  getOppositeDirection,
-  getRevealClipFrom,
-  getRevealClipTo,
-  toKeyframeValue,
-  INITIAL_CLIP,
-  FOUR_DIRECTIONS,
-  parseDirection,
-} from '../../utils';
+  MOTION_TRANS_ROT_NAME,
+  getMotionTransRot,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import { parseKeywordLazy } from '../../utils';
+import { oppositeDirection, useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'bottom';
+const TRAVEL = '100%';
 
-const DIRECTION_TRANSLATION_MAP: Record<EffectFourDirections, Translate> = {
-  bottom: { x: '0', y: '100%' },
-  left: { x: '-100%', y: '0' },
-  top: { x: '0', y: '-100%' },
-  right: { x: '100%', y: '0' },
+const DEFAULTS: Required<SlideScroll> = {
+  type: 'SlideScroll',
+  direction: 'top',
+  range: 'in',
 };
 
-export function getNames(options: ScrubAnimationOptions) {
-  const { range = 'in' } = options.namedEffect as SlideScroll;
-  return [`motion-slideScroll${range === 'continuous' ? '-continuous' : ''}`];
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+};
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return [MOTION_LAYOUT_ROTATION_NAME, MOTION_TRANS_ROT_NAME, MOTION_REVEAL_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -35,76 +34,65 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as SlideScroll;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { range = 'in' } = namedEffect;
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
-  const oppositeDirection = getOppositeDirection(FOUR_DIRECTIONS, direction);
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<SlideScroll>;
 
-  const translateFrom = range === 'out' ? { x: '0', y: '0' } : DIRECTION_TRANSLATION_MAP[direction];
-  const translateTo =
-    range === 'in'
-      ? { x: '0', y: '0' }
-      : DIRECTION_TRANSLATION_MAP[range === 'out' ? direction : oppositeDirection];
+  // SlideScroll reveals in the opposite direction to the movement to create its entrance-exit feel
+  const clipDirection = oppositeDirection(
+    parseKeywordLazy(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction),
+    'four-sides',
+  );
 
-  const custom = {
-    '--motion-clip-from': getRevealClipFrom(direction, range),
-    '--motion-clip-to': getRevealClipTo(direction, range),
-    '--motion-translate-from-x': translateFrom.x,
-    '--motion-translate-from-y': translateFrom.y,
-    '--motion-translate-to-x': translateTo.x,
-    '--motion-translate-to-y': translateTo.y,
-  };
-
-  const keyframes = [
-    {
-      clipPath: toKeyframeValue({}, '--motion-clip-from', false, custom['--motion-clip-from']),
-      transform: `rotate(${toKeyframeValue(
-        {},
-        '--motion-rotate',
-        false,
-        '0',
-      )}) translate(${toKeyframeValue(
-        custom,
-        `--motion-translate-from-x`,
-        asWeb,
-      )}, ${toKeyframeValue(custom, `--motion-translate-from-y`, asWeb)})`,
+  const transformOptions = {
+    ...options,
+    composite: 'add',
+    namedEffect: {
+      ...namedEffect,
+      travel: TRAVEL,
     },
-    {
-      clipPath: toKeyframeValue({}, '--motion-clip-to', false, custom['--motion-clip-to']),
-      transform: `rotate(${toKeyframeValue(
-        {},
-        '--motion-rotate',
-        false,
-        '0',
-      )}) translate(${toKeyframeValue(
-        custom,
-        `--motion-translate-to-x`,
-        asWeb,
-      )}, ${toKeyframeValue(custom, `--motion-translate-to-y`, asWeb)})`,
+  } as ScrubAnimationOptions;
+  const revealOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      direction: clipDirection,
     },
-  ];
+  } as ScrubAnimationOptions;
 
-  if (range === 'continuous') {
-    keyframes.splice(1, 0, {
-      clipPath: INITIAL_CLIP,
-      transform: `rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')}) translate(0, 0)`,
-    });
-  }
-
-  const [slideScroll] = getNames(options);
-
-  return [
-    {
-      ...options,
-      name: slideScroll,
-      fill,
-      easing,
-      custom,
-      keyframes,
-    },
-  ];
+  return withSharedScrollRange([
+    // the layout rotation comes first, so the motion moves along the element's rotated axes
+    useLayoutRotation(
+      transformOptions,
+      'scroll',
+      { composite: 'replace', defaultRange: DEFAULTS.range },
+      asWeb,
+      suffix,
+    ),
+    useDirectionalPreset(
+      getMotionTransRot,
+      transformOptions,
+      'scroll',
+      {
+        defaultDirection: DEFAULTS.direction,
+        defaultRange: DEFAULTS.range,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
+    useDirectionalPreset(
+      getMotionReveal,
+      revealOptions,
+      'scroll',
+      {
+        defaultDirection: oppositeDirection(
+          DEFAULTS.direction,
+          'four-sides',
+        ) as EffectFourDirections,
+        defaultRange: DEFAULTS.range,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
+  ]);
 }

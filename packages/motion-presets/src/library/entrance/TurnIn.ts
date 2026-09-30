@@ -1,75 +1,78 @@
-import type { TurnIn, TimeAnimationOptions, EffectFourCorners } from '../../types';
-import { toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
+import type { TimeAnimationOptions, TurnIn } from '../../types';
 import { FOUR_CORNERS_DIRECTIONS } from '../../consts';
-const DEFAULT_DIRECTION: EffectFourCorners = 'top-left';
+import {
+  MOTION_TRANS_ROT_NAME,
+  getMotionTransRot,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import { compareKeywordToNonDefaults } from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-turnIn'];
-}
+const FADE_IN_EASING = 'sineIn';
+const FADE_IN_DURATION_FACTOR = 0.6;
 
-const DIRECTION_TO_TRANSFORM_MAP: Record<
-  EffectFourCorners,
-  { x: number; y: number; angle: number }
-> = {
-  'top-left': { angle: -50, x: -50, y: -50 },
-  'top-right': { angle: 50, x: 50, y: -50 },
-  'bottom-right': { angle: 50, x: 50, y: 50 },
-  'bottom-left': { angle: -50, x: -50, y: 50 },
+const ROTATION_ANGLE = 50;
+
+const DEFAULT_EASING = 'backOut';
+const DEFAULTS: Required<TurnIn> = {
+  type: 'TurnIn',
+  pivot: 'top-left',
 };
+
+export const schema = {
+  pivot: { type: 'enum', values: FOUR_CORNERS_DIRECTIONS, default: DEFAULTS.pivot },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map(
+    (name) => name + suffix,
+  );
+}
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as TurnIn;
-  const direction = parseDirection(
-    namedEffect?.direction,
-    FOUR_CORNERS_DIRECTIONS,
-    DEFAULT_DIRECTION,
-  );
-  const [fadeIn, turnIn] = getNames(options);
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<TurnIn>;
+  const { pivot } = namedEffect!;
 
-  const easing = options.easing || 'backOut';
-  const { x, y, angle } = DIRECTION_TO_TRANSFORM_MAP[direction];
+  // TurnIn always comes from the top - so it is clockwise when rotating around the left side
+  const direction = compareKeywordToNonDefaults(pivot, ['top-right', 'bottom-right'])
+    ? 'counter-clockwise'
+    : 'clockwise';
 
-  const custom = {
-    '--motion-origin': `${x}%, ${y}%`,
-    '--motion-origin-invert': `${-x}%, ${-y}%`,
-    '--motion-rotate-z': `${angle}deg`,
+  const fadeOptions = {
+    ...options,
+    duration: options.duration! * FADE_IN_DURATION_FACTOR,
+    easing: FADE_IN_EASING,
   };
-
-  const origin = toKeyframeValue(custom, '--motion-origin', asWeb);
-  const invertedOrigin = toKeyframeValue(custom, '--motion-origin-invert', asWeb);
+  const transformOptions = {
+    ...options,
+    easing,
+    namedEffect: {
+      ...namedEffect,
+      angle: ROTATION_ANGLE,
+      direction,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      duration: options.duration! * 0.6,
-      easing: 'sineIn',
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
-    },
-    {
-      ...options,
-      name: turnIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `translate(${origin}) rotate(${toKeyframeValue(
-            custom,
-            '--motion-rotate-z',
-            asWeb,
-          )}) translate(${invertedOrigin}) rotate(var(--motion-rotate, 0deg))`,
-        },
-        {
-          transform: `translate(${origin}) rotate(0deg) translate(${invertedOrigin}) rotate(var(--motion-rotate, 0deg))`,
-        },
-      ],
-    },
+    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      transformOptions,
+      'entrance',
+      {
+        defaultPivot: DEFAULTS.pivot,
+        directionType: 'spin',
+        pivotType: 'four-corners',
+      },
+      asWeb,
+      suffix,
+    ),
+    useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
   ];
 }

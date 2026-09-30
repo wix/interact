@@ -1,79 +1,101 @@
-import type { Wiggle, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, roundNumber, toKeyframeValue, mapRange } from '../../utils';
+import type { DomApi, TimeAnimationOptions, Wiggle } from '../../types';
+import {
+  MOTION_3D_TRANSFORM_NAME,
+  MOTION_LAYOUT_ROTATION_NAME,
+  MOTION_TRANS_ROT_NAME,
+  getMotion3dTransform,
+  getMotionTransRot,
+  useLayoutRotation,
+} from '../../transformUtils';
+import type { LoopPoint } from '../../easingUtils';
+import { useDirectionalPreset, useDirectionalPresetAsBasic } from '../../presetUtils';
 
-const WIGGLE_FACTOR_SOFT = 1;
-const WIGGLE_FACTOR_HARD = 4;
+const DEFAULTS: Required<Wiggle> = {
+  type: 'Wiggle',
+  angle: 25,
+  iterationDelay: 0,
+  travel: { value: 25, unit: 'px' },
+};
 
-const TRANSFORM_KEYFRAMES = [
-  { keyframe: 18, transY: -10, accRotate: 10 },
-  { keyframe: 35, transY: 0, accRotate: -18 },
-  { keyframe: 53, transY: 0, accRotate: 14 },
-  { keyframe: 73, transY: 0, accRotate: -10 },
-  { keyframe: 100, transY: 0, accRotate: 4 },
+export const schema = {
+  angle: { type: 'number', default: DEFAULTS.angle },
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
+
+// the rotation and the lift have different shapes, so each has its own layer
+// a damped wobble, first to the positive angle
+const ROTATION_SHAPE: LoopPoint[] = [
+  [0, 0],
+  [1, 0.18],
+  [-0.8, 0.35],
+  [0.6, 0.53],
+  [-0.4, 0.73],
+  [0, 1],
+];
+// a single lift during the first swing
+const LIFT_SHAPE: LoopPoint[] = [
+  [0, 0],
+  [1, 0.18],
+  [0, 0.35],
+  [0, 1],
 ];
 
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_LAYOUT_ROTATION_NAME, MOTION_3D_TRANSFORM_NAME, MOTION_TRANS_ROT_NAME].map(
+    (name) => name + suffix,
+  );
+}
+
+export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as Wiggle;
-  const { intensity = 0.5 } = namedEffect;
-  const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
-  const [name] = getNames(options);
+export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { namedEffect, suffix } = options as TimeAnimationOptions<Wiggle>;
+  const { angle = DEFAULTS.angle, travel = DEFAULTS.travel } = namedEffect!;
 
-  const wiggleFactor = mapRange(0, 1, WIGGLE_FACTOR_SOFT, WIGGLE_FACTOR_HARD, intensity);
-
-  let currentRotation = 0;
-
-  // Create CSS custom properties for the wiggle configuration
-  const custom: Record<string, string | number> = {
-    '--motion-wiggle-factor': wiggleFactor,
-  };
-
-  const keyframes = TRANSFORM_KEYFRAMES.map(({ keyframe, transY, accRotate }) => {
-    const offset = (keyframe / 100) * timingFactor;
-    const rotateValue = `calc(var(--motion-rotate, 0deg) + ${roundNumber(
-      currentRotation + accRotate * wiggleFactor,
-    )}deg)`;
-    const translateYValue = `${transY * wiggleFactor}px`;
-
-    const rotateKey = `--motion-rotate-${keyframe}`;
-    const translateYKey = `--motion-translate-y-${keyframe}`;
-
-    // For non-web usage, add the values to custom properties
-    custom[rotateKey] = rotateValue;
-    custom[translateYKey] = translateYValue;
-
-    currentRotation += accRotate * wiggleFactor;
-
-    return {
-      offset,
-      transform: `rotate(${toKeyframeValue(
-        custom,
-        rotateKey,
-        asWeb,
-      )}) translateY(${toKeyframeValue(custom, translateYKey, asWeb)})`,
-    };
-  });
-
-  return [
-    {
-      ...options,
-      name,
-      easing: 'linear',
-      duration: duration + iterationDelay,
-      custom,
-      keyframes,
+  const rotationOptions = {
+    ...options,
+    composite: 'add',
+    namedEffect: {
+      ...namedEffect,
+      // the keyframes start at the negative sign, so the first peak is +angle
+      angle: { z: -angle },
+      // no z-motion, so the perspective has no effect
+      perspective: 800,
+      travel: 0,
     },
+  } as TimeAnimationOptions;
+  const liftOptions = {
+    ...options,
+    composite: 'add',
+    namedEffect: {
+      ...namedEffect,
+      angle: 0,
+      direction: 'top',
+      travel,
+    },
+  } as TimeAnimationOptions;
+
+  // the lift comes after the rotations, so it is along the element's tilted axes
+  return [
+    useLayoutRotation(options, 'ongoing', { composite: 'replace' }, asWeb, suffix),
+    useDirectionalPresetAsBasic(
+      getMotion3dTransform,
+      rotationOptions,
+      'ongoing',
+      { loop: { shape: ROTATION_SHAPE } },
+      asWeb,
+      suffix,
+    ),
+    useDirectionalPreset(
+      getMotionTransRot,
+      liftOptions,
+      'ongoing',
+      { directionType: 'four-sides', loop: { shape: LIFT_SHAPE } },
+      asWeb,
+      suffix,
+    ),
   ];
-}
-
-export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Wiggle)?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
-
-  return [`motion-wiggle-${timingFactor}`];
 }
