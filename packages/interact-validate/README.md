@@ -152,7 +152,6 @@ Every issue is `'error'` or `'warning'`. `valid` is `true` **iff** no `'error'` 
 | `VALID_MEDIA_QUERIES`    | `INVALID_MEDIA_QUERY`                                                       | error            |
 | `SAME_ELEMENT_RETRIGGER` | `SAME_ELEMENT_RETRIGGER`                                                    | warning          |
 | `HIT_AREA_SHIFT`         | `HIT_AREA_SHIFT`                                                            | warning          |
-| `SCROLL_RANGE`           | `SCROLL_PRESET_MISSING_RANGE`, `SCROLL_PRESET_BAD_RANGE`                    | warning          |
 | `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE`, `ANIMATION_END_CYCLE`                       | warning          |
 | `ELEMENT_SELECTION`      | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER`, `REDUNDANT_SELECTOR_WITH_LIST_ITEM` | warning          |
 | `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                  | warning          |
@@ -214,8 +213,6 @@ These encode statically-detectable authoring pitfalls from the trigger rule file
 | `DUPLICATE_KEYFRAME_NAME`              | A `keyframeEffect.name` is reused across effects.                                                                                           | `UNIQUE_DEFINITION_IDS`  |
 | `SAME_ELEMENT_RETRIGGER`               | `viewEnter` with a non-`once` `triggerType` on the same source+target element.                                                              | `SAME_ELEMENT_RETRIGGER` |
 | `HIT_AREA_SHIFT`                       | `hover`/`pointerMove` `keyframeEffect` with a `translate`/`scale`/`matrix` transform on the same source+target element.                     | `HIT_AREA_SHIFT`         |
-| `SCROLL_PRESET_MISSING_RANGE`          | A `*Scroll` `namedEffect` on `viewProgress` omits `range`.                                                                                  | `SCROLL_RANGE`           |
-| `SCROLL_PRESET_BAD_RANGE`              | A scroll preset `range` is not `'in'`/`'out'`/`'continuous'`.                                                                               | `SCROLL_RANGE`           |
 | `ANIMATION_END_SELF_REFERENCE`         | An `animationEnd` interaction waits on an effect it also produces (never starts).                                                           | `ANIMATION_END_GRAPH`    |
 | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER` | `listItemSelector` present without `listContainer` (inert).                                                                                 | `ELEMENT_SELECTION`      |
 | `REDUNDANT_SELECTOR_WITH_LIST_ITEM`    | `selector` ignored when `listContainer` + `listItemSelector` are both present.                                                              | `ELEMENT_SELECTION`      |
