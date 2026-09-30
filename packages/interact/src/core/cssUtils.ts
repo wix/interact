@@ -181,35 +181,50 @@ export function getCustomPropName(name: string, index: number, isSlot: boolean =
   return `--${name.replace(/(?<!(^|-))([aeiou]|tion)/g, '')}${isSlot ? '-slot' : ''}-${index}`;
 }
 
-export type ListLengths = Record<ListKind, number>;
-
-// registers the list entries (with their fallbacks) and the effects' own custom properties as non-inherited
+// also registers the effects' own custom properties as non-inherited
 export function buildAtPropertyRules(
-  lengths: ListLengths,
-  slotLengths: ListLengths,
+  animationLength: number,
+  transitionLength: number,
+  animationSlotLength: number,
+  transitionSlotLength: number,
+  timelineLength: number = 0,
   customProperties: Iterable<string> = [],
 ): string[] {
+  const lengths = {
+    animation: animationLength,
+    transition: transitionLength,
+    timeline: timelineLength,
+  };
+  const slotLengths = {
+    animation: animationSlotLength,
+    transition: transitionSlotLength,
+    timeline: 0,
+  };
+  const listRules = LIST_PROPERTY_NAMES.flatMap((name) => [
+    ...Array.from(
+      { length: lengths[listKind(name)] },
+      (_, i) =>
+        `@property ${getCustomPropName(name, i)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
+    ),
+    ...Array.from(
+      { length: slotLengths[listKind(name)] },
+      (_, i) =>
+        `@property ${getCustomPropName(name, i, true)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
+    ),
+  ]);
   return [
-    ...LIST_PROPERTY_NAMES.flatMap((name) => [
-      ...Array.from(
-        { length: lengths[listKind(name)] },
-        (_, i) =>
-          `@property ${getCustomPropName(name, i)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
-      ),
-      ...Array.from(
-        { length: slotLengths[listKind(name)] },
-        (_, i) =>
-          `@property ${getCustomPropName(name, i, true)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
-      ),
-    ]),
+    ...listRules,
     ...[...customProperties].map((name) => `@property ${name} { syntax: "*"; inherits: false; }`),
   ];
 }
 
 export function buildSequenceListsRule(
-  target: Record<ListKind, ListSlots> & {
+  target: {
     key: string;
     childSelector?: string;
+    animation: ListSlots;
+    transition: ListSlots;
+    timeline: ListSlots;
   },
   conditions?: string[],
   configConditions?: Record<string, Condition>,
@@ -245,12 +260,19 @@ export function buildSequenceListsRule(
 
 export function buildListsRule(
   targets: { key: string; childSelector?: string }[],
-  lengths: ListLengths,
+  animationLength: number,
+  transitionLength: number,
+  timelineLength: number = 0,
 ): string {
   if (targets.length === 0) {
     return '';
   }
 
+  const lengths = {
+    animation: animationLength,
+    transition: transitionLength,
+    timeline: timelineLength,
+  };
   const propertyNames = LIST_PROPERTY_NAMES.filter((name) => lengths[listKind(name)] > 0);
   if (propertyNames.length === 0) {
     return '';

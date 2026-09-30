@@ -336,10 +336,7 @@ describe('getCustomPropName', () => {
 
 describe('buildAtPropertyRules', () => {
   it('should declare one @property per list property with its fallback as initial-value', () => {
-    const rules = buildAtPropertyRules(
-      { animation: 1, transition: 1, timeline: 0 },
-      { animation: 0, transition: 0, timeline: 0 },
-    );
+    const rules = buildAtPropertyRules(1, 1, 0, 0);
 
     expect(rules).toEqual([
       '@property --anm-0 { syntax: "*"; inherits: false; initial-value: none; }',
@@ -351,10 +348,7 @@ describe('buildAtPropertyRules', () => {
   });
 
   it('should declare one @property per index', () => {
-    const rules = buildAtPropertyRules(
-      { animation: 2, transition: 0, timeline: 0 },
-      { animation: 0, transition: 0, timeline: 0 },
-    );
+    const rules = buildAtPropertyRules(2, 0, 0, 0);
 
     expect(rules.filter((rule) => rule.startsWith('@property --anm-'))).toHaveLength(8);
     expect(rules).toContain(
@@ -363,10 +357,7 @@ describe('buildAtPropertyRules', () => {
   });
 
   it('should declare slot properties alongside the non-slot ones', () => {
-    const rules = buildAtPropertyRules(
-      { animation: 1, transition: 0, timeline: 0 },
-      { animation: 2, transition: 0, timeline: 0 },
-    );
+    const rules = buildAtPropertyRules(1, 0, 2, 0);
 
     expect(rules).toContain(
       '@property --anm-slot-0 { syntax: "*"; inherits: false; initial-value: none; }',
@@ -380,10 +371,7 @@ describe('buildAtPropertyRules', () => {
   });
 
   it('should use the transition lengths for the transition property', () => {
-    const rules = buildAtPropertyRules(
-      { animation: 0, transition: 2, timeline: 0 },
-      { animation: 0, transition: 1, timeline: 0 },
-    );
+    const rules = buildAtPropertyRules(0, 2, 0, 1);
 
     expect(rules.filter((rule) => rule.startsWith('@property --trns-'))).toEqual([
       '@property --trns-0 { syntax: "*"; inherits: false; initial-value: _; }',
@@ -393,37 +381,25 @@ describe('buildAtPropertyRules', () => {
   });
 
   it('should declare the view-timeline list entries', () => {
-    expect(
-      buildAtPropertyRules(
-        { animation: 0, transition: 0, timeline: 1 },
-        { animation: 0, transition: 0, timeline: 0 },
-      ),
-    ).toEqual(['@property --vw-tmln-0 { syntax: "*"; inherits: false; initial-value: none; }']);
+    expect(buildAtPropertyRules(0, 0, 0, 0, 1)).toEqual([
+      '@property --vw-tmln-0 { syntax: "*"; inherits: false; initial-value: none; }',
+    ]);
   });
 
   it('should register the given custom properties as non-inherited', () => {
-    expect(
-      buildAtPropertyRules(
-        { animation: 0, transition: 0, timeline: 0 },
-        { animation: 0, transition: 0, timeline: 0 },
-        ['--motion-fade-opacity'],
-      ),
-    ).toEqual(['@property --motion-fade-opacity { syntax: "*"; inherits: false; }']);
+    expect(buildAtPropertyRules(0, 0, 0, 0, 0, ['--motion-fade-opacity'])).toEqual([
+      '@property --motion-fade-opacity { syntax: "*"; inherits: false; }',
+    ]);
   });
 
   it('should return no rules when all lengths are zero', () => {
-    expect(
-      buildAtPropertyRules(
-        { animation: 0, transition: 0, timeline: 0 },
-        { animation: 0, transition: 0, timeline: 0 },
-      ),
-    ).toEqual([]);
+    expect(buildAtPropertyRules(0, 0, 0, 0)).toEqual([]);
   });
 });
 
 describe('buildListsRule', () => {
   it('should build one rule assigning each list property from its custom properties', () => {
-    const rule = buildListsRule([{ key: 'my-el' }], { animation: 2, transition: 1, timeline: 0 });
+    const rule = buildListsRule([{ key: 'my-el' }], 2, 1);
 
     expect(rule).toBe(
       [
@@ -439,54 +415,48 @@ describe('buildListsRule', () => {
   });
 
   it('should append childSelector to the target selector', () => {
-    const rule = buildListsRule([{ key: 'my-el', childSelector: '> :first-child' }], {
-      animation: 1,
-      transition: 0,
-      timeline: 0,
-    });
+    const rule = buildListsRule([{ key: 'my-el', childSelector: '> :first-child' }], 1, 0);
 
     expect(rule).toContain('[data-interact-key="my-el"] > :first-child {');
   });
 
   it('should join all targets into a single selector list', () => {
-    const rule = buildListsRule([{ key: 'a', childSelector: '> :first-child' }, { key: 'b' }], {
-      animation: 1,
-      transition: 0,
-      timeline: 0,
-    });
+    const rule = buildListsRule(
+      [{ key: 'a', childSelector: '> :first-child' }, { key: 'b' }],
+      1,
+      0,
+    );
 
     expect(rule).toContain('[data-interact-key="a"] > :first-child, [data-interact-key="b"] {');
   });
 
   it('should omit animation properties when there are no animations', () => {
-    const rule = buildListsRule([{ key: 'my-el' }], { animation: 0, transition: 1, timeline: 0 });
+    const rule = buildListsRule([{ key: 'my-el' }], 0, 1);
 
     expect(rule).not.toContain('animation');
     expect(rule).toContain('transition: var(--trns-0);');
   });
 
   it('should omit the transition property when there are no transitions', () => {
-    const rule = buildListsRule([{ key: 'my-el' }], { animation: 1, transition: 0, timeline: 0 });
+    const rule = buildListsRule([{ key: 'my-el' }], 1, 0);
 
     expect(rule).not.toContain('transition');
     expect(rule).toContain('animation: var(--anm-0);');
   });
 
   it('should list the view timelines', () => {
-    const rule = buildListsRule([{ key: 'my-el' }], { animation: 0, transition: 0, timeline: 2 });
+    const rule = buildListsRule([{ key: 'my-el' }], 0, 0, 2);
 
     expect(rule).toContain('view-timeline: var(--vw-tmln-0), var(--vw-tmln-1);');
     expect(rule).not.toContain('animation');
   });
 
   it('should return an empty string when there are no targets', () => {
-    expect(buildListsRule([], { animation: 2, transition: 1, timeline: 0 })).toBe('');
+    expect(buildListsRule([], 2, 1)).toBe('');
   });
 
   it('should return an empty string when there are no list properties', () => {
-    expect(buildListsRule([{ key: 'my-el' }], { animation: 0, transition: 0, timeline: 0 })).toBe(
-      '',
-    );
+    expect(buildListsRule([{ key: 'my-el' }], 0, 0)).toBe('');
   });
 });
 
