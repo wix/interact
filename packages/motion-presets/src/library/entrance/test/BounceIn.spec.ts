@@ -12,10 +12,11 @@ describe('BounceIn', () => {
     expect(layer(out, 'motion-layout-rotation').easing).toBe(motion.easing);
   });
 
-  test("'back' bounces along the z-axis", () => {
+  test("'back' bounces along the z-axis from behind the element", () => {
     const out = run(BounceIn, { from: 'back', travel: '80px' });
     const motion = layer(out, 'motion-3d-transform');
     expect(motion.custom['--motion-transform-3d-travel-z']).toBe('80px');
+    expect(motion.custom['--motion-transform-3d-from']).toBe(-1);
     expect(out.map((a) => a.name)).not.toContain('motion-trans-rot');
   });
 

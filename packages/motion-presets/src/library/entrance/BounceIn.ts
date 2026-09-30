@@ -96,15 +96,16 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const { from, perspective = DEFAULTS.perspective } = namedEffect!;
 
   // 'back' bounces along the z-axis, the sides along their own axis
-  const preset = compareKeywordToNonDefaults(from, ['back'])
-    ? getMotion3dTransform
-    : getMotionTransRot;
+  const isBack = compareKeywordToNonDefaults(from, ['back']);
+  const preset = isBack ? getMotion3dTransform : getMotionTransRot;
 
   const transformOptions = {
     ...options,
     easing: BOUNCE_IN_EASING,
     namedEffect: {
       ...namedEffect,
+      // from 'top' starts at the negative sign - the z travel then starts behind the element
+      from: isBack ? 'top' : from,
       perspective,
     },
   } as TimeAnimationOptions;
