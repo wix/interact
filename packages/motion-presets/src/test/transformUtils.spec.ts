@@ -92,7 +92,10 @@ describe('getMotionTransRot', () => {
   test('no parallax - no range offsets', () => {
     const data = getMotionTransRot(RANGES.inVertical, {}, false) as any;
     expect(data.startOffset).toBeUndefined();
-    expect(data.custom).not.toHaveProperty('--motion-trans-rot-parallax-from');
+    expect(data.custom).toMatchObject({
+      '--motion-trans-rot-parallax-from': '0px',
+      '--motion-trans-rot-parallax-to': '0px',
+    });
   });
 });
 

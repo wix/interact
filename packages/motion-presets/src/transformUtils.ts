@@ -165,6 +165,13 @@ function computeParallax(
   return rangeOffsets;
 }
 
+// declared anyway, so an element never reads the parallax of an ancestor running the same keyframes
+function withoutParallax(custom: Record<string, number | string>, prefix: string) {
+  custom[`${prefix}-parallax-from`] = '0px';
+  custom[`${prefix}-parallax-to`] = '0px';
+  return {};
+}
+
 type parallaxParams = {
   range: { startOffset: Required<RangeOffset>; endOffset: Required<RangeOffset> };
   speed?: number;
@@ -223,10 +230,10 @@ export function getMotionTransRot(
         prefix,
         asWeb,
       )
-    : {};
+    : withoutParallax(custom, prefix);
 
-  const parallaxFrom = toKeyframeValue(custom, `${prefix}-parallax-from`, asWeb, '0px') || '0px';
-  const parallaxTo = toKeyframeValue(custom, `${prefix}-parallax-to`, asWeb, '0px') || '0px';
+  const parallaxFrom = toKeyframeValue(custom, `${prefix}-parallax-from`, asWeb, '0px');
+  const parallaxTo = toKeyframeValue(custom, `${prefix}-parallax-to`, asWeb, '0px');
 
   const transformFrames = [
     [vars.from, vars.travel, parallaxFrom],
@@ -336,10 +343,10 @@ export function getMotion3dTransform(
         prefix,
         asWeb,
       )
-    : {};
+    : withoutParallax(custom, prefix);
 
-  const parallaxFrom = toKeyframeValue(custom, `${prefix}-parallax-from`, asWeb, '0px') || '0px';
-  const parallaxTo = toKeyframeValue(custom, `${prefix}-parallax-to`, asWeb, '0px') || '0px';
+  const parallaxFrom = toKeyframeValue(custom, `${prefix}-parallax-from`, asWeb, '0px');
+  const parallaxTo = toKeyframeValue(custom, `${prefix}-parallax-to`, asWeb, '0px');
 
   const transformFrames = [
     [vars.from, parallaxFrom],
