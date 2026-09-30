@@ -77,14 +77,16 @@ type ValidateOptions = {
   strict?: boolean;
   max?: number;
   severityOverrides?: Record<string, 'error' | 'warning' | 'off'>;
+  effects?: Record<string, { schema?: EffectSchema }>;
 };
 ```
 
-| Option              | Effect                                                                                                   |
-| ------------------- | -------------------------------------------------------------------------------------------------------- |
-| `strict`            | Promotes every remaining issue to `'error'`. Use in CI to fail on warnings too.                          |
-| `max`               | Truncates the returned list to the first N issues (after sorting). Useful for inline diagnostics.        |
-| `severityOverrides` | Per-**rule-category** severity override. Keys are rule-category codes (see below), not individual codes. |
+| Option              | Effect                                                                                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `strict`            | Promotes every remaining issue to `'error'`. Use in CI to fail on warnings too.                                                                  |
+| `max`               | Truncates the returned list to the first N issues (after sorting). Useful for inline diagnostics.                                                |
+| `severityOverrides` | Per-**rule-category** severity override. Keys are rule-category codes (see below), not individual codes.                                         |
+| `effects`           | Effect modules, as passed to `registerEffects`, whose `schema` validates `namedEffect` params. Defaults to the effects registered on `Interact`. |
 
 ### ValidationError shape
 
@@ -143,6 +145,7 @@ Severity is one of `'error' | 'warning'`. There are exactly two levers:
 | `CSS_PROPERTY_NAME`      | `INVALID_CSS_PROPERTY_NAME`                                                 | warning          |
 | `VIEW_INSET`             | `INVALID_INSET`                                                             | warning          |
 | `OFFSET_EASING`          | `FUNCTION_OFFSET_EASING`                                                    | warning          |
+| `NAMED_EFFECT_PARAMS`    | `NAMED_EFFECT_INVALID_PARAM` (error), `NAMED_EFFECT_UNKNOWN_PARAM`          | warning          |
 
 For each category, set `'off'` to drop those issues entirely, `'warning'` / `'error'` to set their severity:
 
@@ -239,6 +242,8 @@ Statically-detectable authoring pitfalls lifted from the trigger rule files. Eac
 | `INVALID_CSS_PROPERTY_NAME`            | A keyframe or state-effect property name is neither camelCase nor kebab-case (both casings are accepted; this one cannot be normalized).              | `CSS_PROPERTY_NAME`      |
 | `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 whitespace-separated CSS lengths/percentages.                                                                   | `VIEW_INSET`             |
 | `FUNCTION_OFFSET_EASING`               | A sequence's `offsetEasing` is a function, so `generate()` omits that sequence from the generated CSS.                                                | `OFFSET_EASING`          |
+| `NAMED_EFFECT_INVALID_PARAM`           | A `namedEffect` param does not match its effect's registered `schema` (type, enum values, min/max, length/angle format).                              | `NAMED_EFFECT_PARAMS`    |
+| `NAMED_EFFECT_UNKNOWN_PARAM`           | A `namedEffect` param is not declared in its effect's registered `schema` (e.g. a renamed param).                                                     | `NAMED_EFFECT_PARAMS`    |
 
 ---
 

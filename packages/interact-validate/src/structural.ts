@@ -2,7 +2,8 @@ import type { ZodIssue } from 'zod';
 import { InteractConfigSchema } from './schema';
 import type { InteractConfig } from '@wix/interact';
 import { finalize, InteractValidationError } from './errors';
-import type { Path, ValidationError, ValidateOptions, ValidationResult } from './types';
+import type { AnyConfig, Path, ValidationError, ValidateOptions, ValidationResult } from './types';
+import { checkNamedEffectParams } from './semantic/namedEffectParams';
 
 // Map Zod issue codes → domain error codes.
 // Custom issues carry their domain code in `params.domainCode`.
@@ -74,7 +75,8 @@ export function validateInteractConfig(
       path: (w?.path ?? []) as Path,
       severity: w?.severity ?? 'warning',
     }));
-    return finalize([...errors, ...warnings], options);
+    const paramErrors = checkNamedEffectParams(parsed as unknown as AnyConfig, options?.effects);
+    return finalize([...errors, ...warnings, ...paramErrors], options);
   }
 
   return finalize(errors, options);

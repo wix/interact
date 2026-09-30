@@ -25,10 +25,22 @@ export type ValidationResult = {
   errors: ValidationError[];
 };
 
+export type EffectParamSchema = {
+  type: string;
+  values?: readonly unknown[];
+  min?: number;
+  max?: number;
+  default?: unknown;
+};
+
+export type EffectSchema = Record<string, EffectParamSchema>;
+
 export type ValidateOptions = {
   strict?: boolean;
   max?: number;
   severityOverrides?: Record<string, Severity | 'off'>;
+  // effect modules as passed to `registerEffects` - defaults to the effects registered on `Interact`
+  effects?: Record<string, { schema?: EffectSchema }>;
 };
 
 export type AnyEffect = {
