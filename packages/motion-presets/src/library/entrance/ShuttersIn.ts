@@ -1,15 +1,8 @@
 import { ShuttersIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
-import {
-  MOTION_SHUTTERS_NAME,
-  getMotionShutters,
-} from '../../clipUtils';
-import {
-  MOTION_FADE_NAME,
-  getMotionFade,
-  useBasicPreset,
-  useDirectionalPreset,
-} from '../../utils';
+import { MOTION_SHUTTERS_NAME, getMotionShutters } from '../../clipUtils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 
 const FADE_IN_EASING = 'step-start';
 
@@ -27,7 +20,7 @@ export const schema = {
   staggered: { type: 'bool', default: DEFAULTS.staggered },
 };
 
-export function getNames({ namedEffect, suffix = ''}: TimeAnimationOptions) {
+export function getNames({ namedEffect, suffix = '' }: TimeAnimationOptions) {
   const { shutters = DEFAULTS.shutters } = namedEffect as ShuttersIn;
   return [MOTION_FADE_NAME + suffix, `${MOTION_SHUTTERS_NAME}${suffix}-${shutters}`];
 }
@@ -37,7 +30,11 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<ShuttersIn>;
+  const {
+    easing = DEFAULT_EASING,
+    namedEffect,
+    suffix,
+  } = options as TimeAnimationOptions<ShuttersIn>;
   const { shutters = DEFAULTS.shutters, staggered = DEFAULTS.staggered } = namedEffect!;
 
   const fadeOptions = { ...options, easing: FADE_IN_EASING };
@@ -49,13 +46,20 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       shutters,
       staggered,
     },
-  }  as TimeAnimationOptions;
+  } as TimeAnimationOptions;
 
   return [
     useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useDirectionalPreset(getMotionShutters, shuttersOptions, 'entrance', {
-      defaultDirection: DEFAULTS.from,
-      directionType: 'four-sides',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionShutters,
+      shuttersOptions,
+      'entrance',
+      {
+        defaultDirection: DEFAULTS.from,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
   ];
 }

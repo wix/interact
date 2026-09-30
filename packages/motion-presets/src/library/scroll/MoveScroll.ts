@@ -6,12 +6,8 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  compareKeywordToNonDefaults,
-  parseLength,
-  useDirectionalPreset,
-  withSharedScrollRange,
-} from '../../utils';
+import { compareKeywordToNonDefaults, parseLength } from '../../utils';
+import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 
 const DEFAULTS: Required<MoveScroll> = {
   type: 'MoveScroll',
@@ -42,7 +38,9 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   // TODO - teach fizban some more math operations to allow using calc here and accept any string as direction or travel
   const travel = parseLength(inputTravel, DEFAULTS.travel);
   const normalized = ((direction % 360) + 360) % 360;
-  const yDirection = Math.sign(travel.value) * (normalized === 180 || normalized === 0 ? 0 : normalized < 180 ? 1 : -1)
+  const yDirection =
+    Math.sign(travel.value) *
+    (normalized === 180 || normalized === 0 ? 0 : normalized < 180 ? 1 : -1);
 
   let startOffsetAdd = '',
     endOffsetAdd = '';
@@ -58,13 +56,22 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   }
 
   return withSharedScrollRange([
-    { ...useDirectionalPreset(getMotionTransRot, options, 'scroll', {
-        defaultDirection: DEFAULTS.direction as number,
-        defaultRange: DEFAULTS.range,
-        defaultTravel: DEFAULTS.travel,
-        directionType: 'angle',
-      }, asWeb, suffix),
-      startOffsetAdd, endOffsetAdd,
+    {
+      ...useDirectionalPreset(
+        getMotionTransRot,
+        options,
+        'scroll',
+        {
+          defaultDirection: DEFAULTS.direction as number,
+          defaultRange: DEFAULTS.range,
+          defaultTravel: DEFAULTS.travel,
+          directionType: 'angle',
+        },
+        asWeb,
+        suffix,
+      ),
+      startOffsetAdd,
+      endOffsetAdd,
     },
     useLayoutRotation(options, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
   ]);

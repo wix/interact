@@ -1,14 +1,8 @@
-import type {
-  DomApi,
-  ScrubAnimationOptions,
-  ShapeScroll,
-} from '../../types';
+import type { DomApi, ScrubAnimationOptions, ShapeScroll } from '../../types';
 import { SCROLL_RANGES, SHAPES } from '../../consts';
-import {
-  MOTION_SHAPE_NAME,
-  getMotionShape,
-} from '../../clipUtils';
-import { parseKeywordLazy, useBasicPreset } from '../../utils';
+import { MOTION_SHAPE_NAME, getMotionShape } from '../../clipUtils';
+import { parseKeywordLazy } from '../../utils';
+import { useBasicPreset } from '../../presetUtils';
 
 const EASING = 'circInOut';
 
@@ -23,7 +17,7 @@ export const schema = {
   range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
   shape: { type: 'enum', values: SHAPES, default: DEFAULTS.shape },
   start: { type: 'number', min: 0, max: 1, default: DEFAULTS.start },
-}
+};
 
 export function getNames({ suffix = '' }: ScrubAnimationOptions) {
   return [MOTION_SHAPE_NAME + suffix];
@@ -47,6 +41,9 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   } as ScrubAnimationOptions;
 
   return [
-    useBasicPreset(getMotionShape, shapeOptions, 'scroll', asWeb, suffix, { easing: EASING, outEasing: EASING }),
+    useBasicPreset(getMotionShape, shapeOptions, 'scroll', asWeb, suffix, {
+      easing: EASING,
+      outEasing: EASING,
+    }),
   ];
 }

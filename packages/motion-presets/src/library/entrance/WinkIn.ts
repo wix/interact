@@ -1,23 +1,19 @@
 import type { TimeAnimationOptions, WinkIn } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
-import {
-  MOTION_WINK_NAME,
-  getMotionWink,
-} from '../../clipUtils';
+import { MOTION_WINK_NAME, getMotionWink } from '../../clipUtils';
 import {
   MOTION_SCALE_NAME,
   getMotionScale,
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
+import { compareKeywordToNonDefaults } from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import {
-  MOTION_FADE_NAME,
-  compareKeywordToNonDefaults,
-  getMotionFade,
   useBasicPreset,
   useDirectionalPreset,
   useDirectionalPresetAsBasic,
-} from '../../utils';
+} from '../../presetUtils';
 
 const FADE_IN_EASING = 'quadOut';
 const TRANSFORM_2D_IN_DURATION_FACTOR = 0.85;
@@ -33,7 +29,9 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_FADE_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME, MOTION_WINK_NAME].map((name) => name + suffix);
+  return [MOTION_FADE_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME, MOTION_WINK_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -59,12 +57,25 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, { ...options, easing: FADE_IN_EASING }, 'entrance', asWeb, suffix),
+    useBasicPreset(
+      getMotionFade,
+      { ...options, easing: FADE_IN_EASING },
+      'entrance',
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(transformOptions, 'entrance', { composite: 'replace' }, asWeb, suffix),
     useDirectionalPresetAsBasic(getMotionScale, transformOptions, 'entrance', {}, asWeb, suffix),
-    useDirectionalPreset(getMotionWink, { ...options, easing }, 'entrance', {
-      defaultDirection: DEFAULTS.direction,
-      directionType: 'axis',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionWink,
+      { ...options, easing },
+      'entrance',
+      {
+        defaultDirection: DEFAULTS.direction,
+        directionType: 'axis',
+      },
+      asWeb,
+      suffix,
+    ),
   ];
 }

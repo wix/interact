@@ -8,8 +8,9 @@ import {
   getMotionTransRot,
   useLayoutRotation,
 } from '../../transformUtils';
-import type { LoopPoint } from '../../utils';
-import { getEasingFamily, parseKeywordLazy, useDirectionalPreset } from '../../utils';
+import type { LoopPoint } from '../../easingUtils';
+import { getEasingFamily, parseKeywordLazy } from '../../utils';
+import { useDirectionalPreset } from '../../presetUtils';
 
 const DEFAULT_EASING = 'sineInOut';
 const DIRECTIONS = [...AXIS_DIRECTIONS, 'center'] as const;
@@ -41,10 +42,13 @@ const SHAPE: LoopPoint[] = [
 ];
 
 export function getNames({ namedEffect, suffix = '' }: TimeAnimationOptions) {
-  const isCenter = (namedEffect as Breathe)?.direction === 'center';
-  return [isCenter ? MOTION_3D_TRANSFORM_NAME : MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map(
-    (name) => name + suffix,
-  );
+  const isCenter =
+    parseKeywordLazy((namedEffect as Breathe)?.direction, DIRECTIONS, DEFAULTS.direction) ===
+    'center';
+  return [
+    isCenter ? MOTION_3D_TRANSFORM_NAME : MOTION_TRANS_ROT_NAME,
+    MOTION_LAYOUT_ROTATION_NAME,
+  ].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions, _dom?: DomApi) {
@@ -70,10 +74,17 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useDirectionalPreset(isCenter ? getMotion3dTransform : getMotionTransRot, breatheOptions, 'ongoing', {
-      directionType: 'axis',
-      loop: { shape: SHAPE, easings: [ease.out, ease.inOut] },
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      isCenter ? getMotion3dTransform : getMotionTransRot,
+      breatheOptions,
+      'ongoing',
+      {
+        directionType: 'axis',
+        loop: { shape: SHAPE, easings: [ease.out, ease.inOut] },
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(breatheOptions, 'ongoing', {}, asWeb, suffix),
   ];
 }

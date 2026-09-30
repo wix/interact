@@ -1,8 +1,4 @@
-import type {
-  ScrubAnimationOptions,
-  ShrinkScroll,
-  DomApi,
-} from '../../types';
+import type { ScrubAnimationOptions, ShrinkScroll, DomApi } from '../../types';
 import { NINE_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 import {
   MOTION_SCALE_NAME,
@@ -12,12 +8,12 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
+import { compareKeywordToNonDefaults } from '../../utils';
 import {
-  compareKeywordToNonDefaults,
   useDirectionalPreset,
   useDirectionalPresetAsBasic,
   withSharedScrollRange,
-} from '../../utils';
+} from '../../presetUtils';
 
 const EPSILON = 0.01;
 
@@ -37,7 +33,9 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map((name) => name + suffix);
+  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -50,12 +48,10 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
 
   const isIn = !compareKeywordToNonDefaults(range, ['out', 'continuous']);
 
-  // GrowScroll always goes down in scale, so scale should be bigger than 1 for 'in' and smaller than 1 otherwise
-  // in case the scale is not in the correct range, we take it's inverse
+  // ShrinkScroll always goes down in scale, so scale should be bigger than 1 for 'in' and smaller than 1 otherwise
+  // in case the scale is not in the correct range, we take its inverse
   const invScale = 1 / Math.max(inputScale, EPSILON);
-  const scale = isIn
-    ? Math.max(inputScale, invScale)
-    : Math.min(inputScale, invScale);
+  const scale = isIn ? Math.max(inputScale, invScale) : Math.min(inputScale, invScale);
 
   // parallax is a directional motion, so it continues through 'continuous' while the scale goes back and forth
   const parallaxOptions = {
@@ -74,14 +70,28 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   } as ScrubAnimationOptions;
 
   return withSharedScrollRange([
-    useDirectionalPreset(getMotionTransRot, parallaxOptions, 'scroll', {
-      defaultRange: DEFAULTS.range,
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      parallaxOptions,
+      'scroll',
+      {
+        defaultRange: DEFAULTS.range,
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(parallaxOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
-    useDirectionalPresetAsBasic(getMotionScale, scaleOptions, 'scroll', {
-      defaultPivot: DEFAULTS.pivot,
-      defaultRange: DEFAULTS.range,
-      pivotType: 'all',
-    }, asWeb, suffix),
+    useDirectionalPresetAsBasic(
+      getMotionScale,
+      scaleOptions,
+      'scroll',
+      {
+        defaultPivot: DEFAULTS.pivot,
+        defaultRange: DEFAULTS.range,
+        pivotType: 'all',
+      },
+      asWeb,
+      suffix,
+    ),
   ]);
 }

@@ -1,11 +1,11 @@
 import type { BlurIn, TimeAnimationOptions } from '../../types';
-import { 
-  MOTION_BLUR_NAME,
-  MOTION_FADE_NAME,
+import {
   getMotionBlur,
   getMotionFade,
-  useBasicPreset,
-} from '../../utils';
+  MOTION_BLUR_NAME,
+  MOTION_FADE_NAME,
+} from '../../fadeBlurUtils';
+import { useBasicPreset } from '../../presetUtils';
 
 const FADE_IN_DURATION_FACTOR = 0.7;
 const FADE_IN_EASING = 'sineIn';

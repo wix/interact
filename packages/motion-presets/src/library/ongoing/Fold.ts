@@ -6,8 +6,9 @@ import {
   getMotion3dTransform,
   useLayoutRotation,
 } from '../../transformUtils';
-import type { LoopPoint } from '../../utils';
-import { getEasingFamily, useDirectionalPreset } from '../../utils';
+import type { LoopPoint } from '../../easingUtils';
+import { getEasingFamily } from '../../utils';
+import { useDirectionalPreset } from '../../presetUtils';
 
 const DEFAULT_EASING = 'cubicInOut';
 
@@ -48,7 +49,11 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<Fold>;
-  const { angle = DEFAULTS.angle, perspective = DEFAULTS.perspective, pivot = DEFAULTS.pivot } = namedEffect!;
+  const {
+    angle = DEFAULTS.angle,
+    perspective = DEFAULTS.perspective,
+    pivot = DEFAULTS.pivot,
+  } = namedEffect!;
   const ease = getEasingFamily(easing);
 
   const foldOptions = {
@@ -67,12 +72,19 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   return [
     // the layout rotation comes first, so the pivot is on the element's rotated side
     useLayoutRotation(foldOptions, 'ongoing', { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPreset(getMotion3dTransform, foldOptions, 'ongoing', {
-      defaultDirection: DEFAULTS.pivot,
-      directionType: 'four-sides',
-      pivotType: 'four-sides',
-      defaultPivot: DEFAULTS.pivot,
-      loop: { shape: SHAPE, easings: [ease.out, 'sineInOut'] },
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotion3dTransform,
+      foldOptions,
+      'ongoing',
+      {
+        defaultDirection: DEFAULTS.pivot,
+        directionType: 'four-sides',
+        pivotType: 'four-sides',
+        defaultPivot: DEFAULTS.pivot,
+        loop: { shape: SHAPE, easings: [ease.out, 'sineInOut'] },
+      },
+      asWeb,
+      suffix,
+    ),
   ];
 }

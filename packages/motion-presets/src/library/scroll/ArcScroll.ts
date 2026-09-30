@@ -6,11 +6,8 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  compareKeywordToNonDefaults,
-  useDirectionalPreset,
-  withSharedScrollRange,
-} from '../../utils';
+import { compareKeywordToNonDefaults } from '../../utils';
+import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 
 const DEPTH = '300px';
 const ROTATION_ANGLE = 68;
@@ -40,6 +37,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<ArcScroll>;
   const { direction, perspective = DEFAULTS.perspective } = namedEffect!;
 
+  // mapped to a side so that 'out' flips it like any directional motion, continuing the rotation of 'in'
   const fourSideDirection = compareKeywordToNonDefaults(direction, ['vertical']) ? 'top' : 'right';
 
   const transformOptions = {
@@ -54,10 +52,17 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   } as ScrubAnimationOptions;
 
   return withSharedScrollRange([
-    useDirectionalPreset(getMotion3dTransform, transformOptions, 'scroll', {
-      defaultRange: DEFAULTS.range,
-      directionType: 'four-sides',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotion3dTransform,
+      transformOptions,
+      'scroll',
+      {
+        defaultRange: DEFAULTS.range,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(transformOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
   ]);
 }

@@ -8,26 +8,51 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
+import { linearEasing } from '../../easingUtils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import {
-  MOTION_FADE_NAME,
-  getMotionFade,
-  linearEasing,
   useBasicPreset,
   useDirectionalPreset,
   useDirectionalPresetAsBasic,
-} from '../../utils';
+} from '../../presetUtils';
 
 // samples of the previous implementation: fading over 0 -> 65% (in) or 35% -> 100% (out) keyframes with 'backInOut'
 const FADE_EASING = linearEasing([
-  [0, 0], [0, 33.9], [0.0472, 35.6], [0.1041, 37.3], [0.173, 39], [0.2557, 40.7], [0.3539, 42.4],
-  [0.4681, 44.1], [0.5964, 45.8], [0.7335, 47.5], [0.871, 49.2], [1, 50.9], [1, 100],
+  [0, 0],
+  [0, 33.9],
+  [0.0472, 35.6],
+  [0.1041, 37.3],
+  [0.173, 39],
+  [0.2557, 40.7],
+  [0.3539, 42.4],
+  [0.4681, 44.1],
+  [0.5964, 45.8],
+  [0.7335, 47.5],
+  [0.871, 49.2],
+  [1, 50.9],
+  [1, 100],
 ]);
 const FADE_OUT_EASING = linearEasing([
-  [0, 0], [0, 45.1], [0.1458, 46.9], [0.2918, 48.7], [0.4315, 50.5], [0.5575, 52.3], [0.6668, 54.1],
-  [0.7595, 55.9], [0.8372, 57.7], [0.902, 59.5], [0.9558, 61.3], [1, 63], [1, 100],
+  [0, 0],
+  [0, 45.1],
+  [0.1458, 46.9],
+  [0.2918, 48.7],
+  [0.4315, 50.5],
+  [0.5575, 52.3],
+  [0.6668, 54.1],
+  [0.7595, 55.9],
+  [0.8372, 57.7],
+  [0.902, 59.5],
+  [0.9558, 61.3],
+  [1, 63],
+  [1, 100],
 ]);
 // previously a linear fade over each half of continuous, holding the fully visible state in the middle
-const FADE_CONTINUOUS_EASING = linearEasing([[0, 0], [1, 62.5], [1, 100]]);
+const FADE_CONTINUOUS_EASING = linearEasing([
+  [0, 0],
+  [1, 62.5],
+  [1, 100],
+]);
 
 const EASING = 'backInOut';
 const DIRECTION = 'top';
@@ -43,7 +68,12 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_SCALE_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+  return [
+    MOTION_FADE_NAME,
+    MOTION_TRANS_ROT_NAME,
+    MOTION_SCALE_NAME,
+    MOTION_LAYOUT_ROTATION_NAME,
+  ].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -86,18 +116,32 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       outEasing: FADE_OUT_EASING,
       continuousEasing: FADE_CONTINUOUS_EASING,
     }),
-    useDirectionalPreset(getMotionTransRot, translateOptions, 'scroll', {
-      defaultDirection: DIRECTION,
-      defaultRange: DEFAULTS.range,
-      directionType: 'four-sides',
-      easing: EASING,
-      outEasing: EASING,
-    }, asWeb, suffix),
-    useDirectionalPresetAsBasic(getMotionScale, scaleOptions, 'scroll', {
-      defaultRange: DEFAULTS.range,
-      easing: EASING,
-      outEasing: EASING,
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      translateOptions,
+      'scroll',
+      {
+        defaultDirection: DIRECTION,
+        defaultRange: DEFAULTS.range,
+        directionType: 'four-sides',
+        easing: EASING,
+        outEasing: EASING,
+      },
+      asWeb,
+      suffix,
+    ),
+    useDirectionalPresetAsBasic(
+      getMotionScale,
+      scaleOptions,
+      'scroll',
+      {
+        defaultRange: DEFAULTS.range,
+        easing: EASING,
+        outEasing: EASING,
+      },
+      asWeb,
+      suffix,
+    ),
     // the layout rotation comes last, so the stretch and its movement are along the screen's axes
     useLayoutRotation(translateOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
   ];

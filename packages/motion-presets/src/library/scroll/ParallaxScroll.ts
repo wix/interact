@@ -5,10 +5,7 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  useDirectionalPreset,
-  withSharedScrollRange,
-} from '../../utils';
+import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 
 const RANGE = 'continuous';
 

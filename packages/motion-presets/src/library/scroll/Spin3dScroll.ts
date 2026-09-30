@@ -6,10 +6,7 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  useDirectionalPreset,
-  withSharedScrollRange,
-} from '../../utils';
+import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 
 const DIRECTION = 'clockwise';
 
@@ -49,17 +46,24 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     namedEffect: {
       ...namedEffect,
       angle: { x: angle, y: angle, z: angle },
-      direction: DIRECTION, 
+      direction: DIRECTION,
       perspective,
       parallax: { speed },
     },
   } as ScrubAnimationOptions;
 
   return withSharedScrollRange([
-    useDirectionalPreset(getMotion3dTransform, transformOptions, 'scroll', {
-      defaultRange: DEFAULTS.range,
-      directionType: 'spin',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotion3dTransform,
+      transformOptions,
+      'scroll',
+      {
+        defaultRange: DEFAULTS.range,
+        directionType: 'spin',
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(transformOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
   ]);
 }

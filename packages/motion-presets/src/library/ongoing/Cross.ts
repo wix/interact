@@ -1,14 +1,21 @@
 import type { Cross, DomApi, EffectEightDirections, TimeAnimationOptions } from '../../types';
 import { EIGHT_DIRECTIONS } from '../../consts';
 import type { Layout } from '../../layoutUtils';
-import { getOffscreenDistance, getOffscreenTravel, getOppositeDirection, measureLayout } from '../../layoutUtils';
+import {
+  getOffscreenDistance,
+  getOffscreenTravel,
+  getOppositeDirection,
+  measureLayout,
+} from '../../layoutUtils';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
   getMotionTransRot,
   useLayoutRotation,
 } from '../../transformUtils';
-import { getActiveFraction, getWrapEasing, parseKeywordLazy, useDirectionalPreset } from '../../utils';
+import { parseKeywordLazy } from '../../utils';
+import { getActiveFraction, getWrapEasing } from '../../easingUtils';
+import { useDirectionalPreset } from '../../presetUtils';
 
 const DEFAULTS: Required<Cross> = {
   type: 'Cross',
@@ -59,8 +66,7 @@ export function style(options: TimeAnimationOptions, asWeb = false, layout?: Lay
     },
   } as TimeAnimationOptions;
 
-  // the keyframes pass through the element's place at the part of the whole distance that is towards the direction
-  // without measurements both sides are assumed to be the same distance
+  // progress where the keyframes pass through the element's place - unmeasured sides are assumed equal
   const getRest = () => {
     if (!layout?.measured) {
       return 0.5;
@@ -70,20 +76,27 @@ export function style(options: TimeAnimationOptions, asWeb = false, layout?: Lay
     return travel / (travel + toTravel || 1);
   };
 
-  const cross = useDirectionalPreset(getMotionTransRot, crossOptions, 'ongoing', {
-    directionType: 'angle',
-  }, asWeb, suffix);
+  const cross = useDirectionalPreset(
+    getMotionTransRot,
+    crossOptions,
+    'ongoing',
+    {
+      directionType: 'angle',
+    },
+    asWeb,
+    suffix,
+  );
 
   return [
     layout
       ? {
-        ...cross,
-        easing: getWrapEasing(0.5, activeFraction),
-        // read after measurements
-        get timing() {
-          return { easing: getWrapEasing(getRest(), activeFraction) };
-        },
-      }
+          ...cross,
+          easing: getWrapEasing(0.5, activeFraction),
+          // read by @wix/motion after measurements
+          get timing() {
+            return { easing: getWrapEasing(getRest(), activeFraction) };
+          },
+        }
       : { ...cross, easing: getWrapEasing(0.5, activeFraction) },
     useLayoutRotation(crossOptions, 'ongoing', {}, asWeb, suffix),
   ];

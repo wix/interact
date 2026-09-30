@@ -1,9 +1,6 @@
 import type { TimeAnimationOptions } from '../../types';
-import {
-  MOTION_FADE_NAME,
-  getMotionFade,
-  useBasicPreset,
-} from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset } from '../../presetUtils';
 
 const EASING = 'sineInOut';
 
@@ -18,5 +15,13 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  return [useBasicPreset(getMotionFade, { ...options, easing: EASING }, 'entrance', asWeb, options.suffix)];
+  return [
+    useBasicPreset(
+      getMotionFade,
+      { ...options, easing: EASING },
+      'entrance',
+      asWeb,
+      options.suffix,
+    ),
+  ];
 }

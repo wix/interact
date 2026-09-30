@@ -6,11 +6,8 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  compareKeywordToNonDefaults,
-  useDirectionalPreset,
-  withSharedScrollRange,
-} from '../../utils';
+import { compareKeywordToNonDefaults } from '../../utils';
+import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 
 const DEFAULTS: Required<FlipScroll> = {
   type: 'FlipScroll',
@@ -39,8 +36,9 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<FlipScroll>;
   const { angle = DEFAULTS.angle, direction, perspective = DEFAULTS.perspective } = namedEffect!;
 
+  // mapped to a side so that 'out' flips it like any directional motion, continuing the rotation of 'in'
   const fourSideDirection = compareKeywordToNonDefaults(direction, ['vertical']) ? 'top' : 'right';
-  
+
   const transformOptions = {
     ...options,
     namedEffect: {
@@ -52,10 +50,17 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   } as ScrubAnimationOptions;
 
   return withSharedScrollRange([
-    useDirectionalPreset(getMotion3dTransform, transformOptions, 'scroll', {
-      defaultRange: DEFAULTS.range,
-      directionType: 'four-sides',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotion3dTransform,
+      transformOptions,
+      'scroll',
+      {
+        defaultRange: DEFAULTS.range,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(transformOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
   ]);
 }

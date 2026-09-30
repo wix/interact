@@ -9,12 +9,12 @@ import {
   getMotionTransRot,
   useLayoutRotation,
 } from '../../transformUtils';
+import { parseKeywordLazy } from '../../utils';
 import {
-  parseKeywordLazy,
   useDirectionalPreset,
   useDirectionalPresetAsBasic,
   withSharedScrollRange,
-} from '../../utils';
+} from '../../presetUtils';
 
 const DEFAULTS: Required<TurnScroll> = {
   type: 'TurnScroll',
@@ -34,7 +34,9 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map((name) => name + suffix);
+  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -73,14 +75,28 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   } as ScrubAnimationOptions;
 
   return withSharedScrollRange([
-    useDirectionalPreset(getMotionTransRot, turnOptions, 'scroll', {
-      defaultDirection: DEFAULTS.direction,
-      defaultRange: DEFAULTS.range,
-      directionType: 'four-sides',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      turnOptions,
+      'scroll',
+      {
+        defaultDirection: DEFAULTS.direction,
+        defaultRange: DEFAULTS.range,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(turnOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
-    useDirectionalPresetAsBasic(getMotionScale, scaleOptions, 'scroll', {
-      defaultRange: DEFAULTS.range,
-    }, asWeb, suffix),
+    useDirectionalPresetAsBasic(
+      getMotionScale,
+      scaleOptions,
+      'scroll',
+      {
+        defaultRange: DEFAULTS.range,
+      },
+      asWeb,
+      suffix,
+    ),
   ]);
 }

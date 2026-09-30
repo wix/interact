@@ -6,12 +6,8 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  MOTION_FADE_NAME,
-  getMotionFade,
-  useBasicPreset,
-  useDirectionalPreset,
-} from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 
 const TRAVEL = '120px';
 const EASING = 'sineInOut';
@@ -26,7 +22,9 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -48,10 +46,17 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   return [
     useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useDirectionalPreset(getMotionTransRot, transformOptions, 'entrance', {
-      defaultDirection: DEFAULTS.from,
-      directionType: 'four-sides',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      transformOptions,
+      'entrance',
+      {
+        defaultDirection: DEFAULTS.from,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
   ];
 }

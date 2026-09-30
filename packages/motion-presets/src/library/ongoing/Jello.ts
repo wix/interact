@@ -5,8 +5,8 @@ import {
   getMotionTransRot,
   useLayoutRotation,
 } from '../../transformUtils';
-import type { LoopPoint } from '../../utils';
-import { useDirectionalPresetAsBasic } from '../../utils';
+import type { LoopPoint } from '../../easingUtils';
+import { useDirectionalPresetAsBasic } from '../../presetUtils';
 
 const DEFAULTS: Required<Jello> = {
   type: 'Jello',
@@ -46,7 +46,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     composite: 'add',
     namedEffect: {
       ...namedEffect,
-      // the keyframes start at the negative side
+      // the keyframes start at the negative sign, so the first peak is +skew
       skew: { y: -skew },
     },
   } as TimeAnimationOptions;
@@ -54,6 +54,13 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   return [
     // the layout rotation comes first, so the skew is along the element's rotated axes
     useLayoutRotation(jelloOptions, 'ongoing', { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPresetAsBasic(getMotionTransRot, jelloOptions, 'ongoing', { loop: { shape: SHAPE } }, asWeb, suffix),
+    useDirectionalPresetAsBasic(
+      getMotionTransRot,
+      jelloOptions,
+      'ongoing',
+      { loop: { shape: SHAPE } },
+      asWeb,
+      suffix,
+    ),
   ];
 }

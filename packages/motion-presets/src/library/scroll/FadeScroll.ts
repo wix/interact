@@ -1,6 +1,7 @@
 import type { FadeScroll, ScrubAnimationOptions, DomApi } from '../../types';
 import { SCROLL_RANGES } from '../../consts';
-import { MOTION_FADE_NAME, getMotionFade, useBasicPreset } from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset } from '../../presetUtils';
 
 const DEFAULTS: Required<FadeScroll> = {
   type: 'FadeScroll',
@@ -22,7 +23,5 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  return [
-    useBasicPreset(getMotionFade, options, 'scroll', asWeb, options.suffix),
-  ];
+  return [useBasicPreset(getMotionFade, options, 'scroll', asWeb, options.suffix)];
 }

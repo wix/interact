@@ -6,13 +6,9 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  MOTION_FADE_NAME,
-  compareKeywordToNonDefaults,
-  getMotionFade,
-  useBasicPreset,
-  useDirectionalPreset,
-} from '../../utils';
+import { compareKeywordToNonDefaults } from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 
 const FADE_IN_EASING = 'sineIn';
 const FADE_IN_DURATION_FACTOR = 0.6;
@@ -30,7 +26,9 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -63,11 +61,18 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   return [
     useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useDirectionalPreset(getMotionTransRot, transformOptions, 'entrance', {
-      defaultPivot: DEFAULTS.pivot,
-      directionType: 'spin',
-      pivotType: 'four-corners',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      transformOptions,
+      'entrance',
+      {
+        defaultPivot: DEFAULTS.pivot,
+        directionType: 'spin',
+        pivotType: 'four-corners',
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
   ];
 }

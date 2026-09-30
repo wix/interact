@@ -5,12 +5,8 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  MOTION_FADE_NAME,
-  getMotionFade,
-  useBasicPreset,
-  useDirectionalPresetAsBasic,
-} from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPresetAsBasic } from '../../presetUtils';
 
 const FADE_IN_DURATION_FACTOR = 0.8;
 const FADE_IN_EASING = 'quadOut';
@@ -26,7 +22,9 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_FADE_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map((name) => name + suffix);
+  return [MOTION_FADE_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: TimeAnimationOptions) {

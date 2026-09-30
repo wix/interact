@@ -1,5 +1,5 @@
 import type { Rubber, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, roundNumber, toKeyframeValue, mapRange } from '../../utils';
+import { getTimingFactor, mapRange, roundNumber, toKeyframeValue } from '../../utils';
 
 const RUBBER_OFFSET_SOFT = 0;
 const RUBBER_OFFSET_HARD = 0.1;

@@ -1,14 +1,8 @@
-import type {
-  ScrubAnimationOptions,
-  ShuttersScroll,
-  DomApi,
-} from '../../types';
+import type { ScrubAnimationOptions, ShuttersScroll, DomApi } from '../../types';
 import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
-import {
-  MOTION_SHUTTERS_NAME,
-  getMotionShutters,
-} from '../../clipUtils';
-import { compareKeywordToNonDefaults, useDirectionalPreset } from '../../utils';
+import { MOTION_SHUTTERS_NAME, getMotionShutters } from '../../clipUtils';
+import { compareKeywordToNonDefaults } from '../../utils';
+import { useDirectionalPreset } from '../../presetUtils';
 
 const EASING = 'sineOut';
 const IN_EASING = 'sineIn';
@@ -31,11 +25,17 @@ export const schema = {
   staggered: { type: 'bool', default: DEFAULTS.staggered },
 };
 
-export function getNames({ namedEffect, suffix = ''}: ScrubAnimationOptions) {
-  const { shutters = DEFAULTS.shutters, staggered = DEFAULTS.staggered, range } = namedEffect as ShuttersScroll;
+export function getNames({ namedEffect, suffix = '' }: ScrubAnimationOptions) {
+  const {
+    shutters = DEFAULTS.shutters,
+    staggered = DEFAULTS.staggered,
+    range,
+  } = namedEffect as ShuttersScroll;
   const staggerContinuous = staggered && compareKeywordToNonDefaults(range, ['continuous']);
 
-  return [`${MOTION_SHUTTERS_NAME}${suffix}-${shutters}${staggerContinuous ? '-cont-stagger' : ''}`];
+  return [
+    `${MOTION_SHUTTERS_NAME}${suffix}-${shutters}${staggerContinuous ? '-cont-stagger' : ''}`,
+  ];
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -53,23 +53,33 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       shutters,
       staggered,
     },
-  }  as ScrubAnimationOptions;
+  } as ScrubAnimationOptions;
 
   // staggered continuous motion has its timing set on its keyframes by getMotionShutters
   const isContinuous = compareKeywordToNonDefaults(range, ['continuous']);
-  const easingOptions = isContinuous && staggered ? {} : {
-    easing: IN_EASING,
-    outEasing: EASING,
-    continuousEasing: EASING,
-    continuousHold: CONTINUOUS_HOLD,
-  };
+  const easingOptions =
+    isContinuous && staggered
+      ? {}
+      : {
+          easing: IN_EASING,
+          outEasing: EASING,
+          continuousEasing: EASING,
+          continuousHold: CONTINUOUS_HOLD,
+        };
 
   return [
-    useDirectionalPreset(getMotionShutters, shuttersOptions, 'scroll', {
-      defaultDirection: DEFAULTS.direction,
-      defaultRange: DEFAULTS.range,
-      directionType: 'four-sides',
-      ...easingOptions,
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionShutters,
+      shuttersOptions,
+      'scroll',
+      {
+        defaultDirection: DEFAULTS.direction,
+        defaultRange: DEFAULTS.range,
+        directionType: 'four-sides',
+        ...easingOptions,
+      },
+      asWeb,
+      suffix,
+    ),
   ];
 }

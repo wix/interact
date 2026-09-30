@@ -12,7 +12,7 @@ import {
   useDirectionalPreset,
   useDirectionalPresetAsBasic,
   withSharedScrollRange,
-} from '../../utils';
+} from '../../presetUtils';
 
 const DEFAULTS: Required<SpinScroll> = {
   type: 'SpinScroll',
@@ -30,7 +30,9 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map((name) => name + suffix);
+  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -57,14 +59,28 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   } as ScrubAnimationOptions;
 
   return withSharedScrollRange([
-    useDirectionalPreset(getMotionTransRot, spinOptions, 'scroll', {
-      defaultDirection: DEFAULTS.direction,
-      defaultRange: DEFAULTS.range,
-      directionType: 'spin',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      spinOptions,
+      'scroll',
+      {
+        defaultDirection: DEFAULTS.direction,
+        defaultRange: DEFAULTS.range,
+        directionType: 'spin',
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(spinOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
-    useDirectionalPresetAsBasic(getMotionScale, scaleOptions, 'scroll', {
-      defaultRange: DEFAULTS.range,
-    }, asWeb, suffix),
+    useDirectionalPresetAsBasic(
+      getMotionScale,
+      scaleOptions,
+      'scroll',
+      {
+        defaultRange: DEFAULTS.range,
+      },
+      asWeb,
+      suffix,
+    ),
   ]);
 }

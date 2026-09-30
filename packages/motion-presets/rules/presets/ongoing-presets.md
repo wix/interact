@@ -32,11 +32,11 @@ Visual: Element bounces up and down with a natural multi-step curve, like a ball
 
 Parameters:
 
-- `intensity`: number — 0 to 1, maps to bounce height factor 1–3 (default: `0`)
+- `travel`: UnitLengthPercentage — bounce height at the peak (default: `{ value: 49, unit: 'px' }`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Bounce', intensity: 0.5, iterationDelay: 500 }
+{ type: 'Bounce', travel: { value: 98, unit: 'px' }, iterationDelay: 500 }
 ```
 
 ---
@@ -48,12 +48,12 @@ Visual: Element gently moves back and forth along an axis, like a breathing moti
 Parameters:
 
 - `direction`: 'vertical' | 'horizontal' | 'center' (default: `'vertical'`)
-- `distance`: UnitLengthPercentage — movement distance (default: `{ value: 25, unit: 'px' }`)
+- `travel`: UnitLengthPercentage — movement distance (default: `{ value: 25, unit: 'px' }`)
 - `perspective`: number — 3D perspective for center direction (default: `800`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Breathe', direction: 'horizontal', distance: { value: 15, unit: 'px' } }
+{ type: 'Breathe', direction: 'horizontal', travel: { value: 15, unit: 'px' } }
 ```
 
 ---
@@ -109,12 +109,13 @@ Visual: Element folds at an edge using 3D rotation, like a page turning back and
 
 Parameters:
 
-- `direction`: 'top' | 'right' | 'bottom' | 'left' (default: `'top'`)
-- `angle`: number — fold angle in degrees (default: `15`)
+- `pivot`: 'top' | 'right' | 'bottom' | 'left' — the folding edge (default: `'top'`)
+- `angle`: number — fold angle in degrees; always folds towards the viewer first (default: `15`)
+- `perspective`: number — 3D perspective in px (default: `800`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Fold', direction: 'right', angle: 30 }
+{ type: 'Fold', pivot: 'right', angle: 30 }
 ```
 
 ---
@@ -125,11 +126,11 @@ Visual: Element wobbles with a skew-based jello-like deformation.
 
 Parameters:
 
-- `intensity`: number — 0 to 1, maps to skew factor 1–4 (default: `0.25`)
+- `skew`: number — peak skew in degrees (default: `12.25`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Jello', intensity: 0.5 }
+{ type: 'Jello', skew: 17.5 }
 ```
 
 ---
@@ -141,11 +142,11 @@ Visual: Element makes two short, sharp translates in a direction back and forth,
 Parameters:
 
 - `direction`: 'top' | 'right' | 'bottom' | 'left' (default: `'right'`)
-- `intensity`: number — 0 to 1, maps to poke strength factor 1–4 (default: `0.5`)
+- `travel`: UnitLengthPercentage — poke distance at the peak (default: `{ value: 62.5, unit: 'px' }`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Poke', direction: 'left', intensity: 0.8 }
+{ type: 'Poke', direction: 'left', travel: { value: 85, unit: 'px' } }
 ```
 
 ---
@@ -156,11 +157,11 @@ Visual: Element pulses by subtly scaling up and down.
 
 Parameters:
 
-- `intensity`: number — 0 to 1, adjusts the scale range (default: `0`)
+- `scale`: number — scale at the deeper of the two beats (default: `0.93`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Pulse', intensity: 0.5 }
+{ type: 'Pulse', scale: 0.87 }
 ```
 
 ---
@@ -201,12 +202,12 @@ Visual: Element swings like a pendulum from a pivot at one edge.
 
 Parameters:
 
-- `direction`: 'top' | 'right' | 'bottom' | 'left' — swing pivot edge (default: `'top'`)
-- `swing`: number — maximum swing angle in degrees (default: `20`)
+- `pivot`: 'top' | 'right' | 'bottom' | 'left' — swing pivot edge (default: `'top'`)
+- `angle`: number — maximum swing angle in degrees (default: `20`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Swing', swing: 40, direction: 'right' }
+{ type: 'Swing', angle: 40, pivot: 'right' }
 ```
 
 ---
@@ -232,11 +233,11 @@ Tested values for different intensity levels. When a user asks for "soft", "subt
 
 | Preset | Parameter | Subtle/Soft | Medium | Dramatic/Hard |
 | ------ | --------- | ----------- | ------ | ------------- |
-| Bounce | intensity | 0           | 0.5    | 1             |
+| Bounce | travel    | 49px        | 98px   | 147px         |
 | Fold   | angle     | 15°         | 30°    | 45°           |
-| Jello  | intensity | 0           | 0.33   | 1             |
-| Poke   | intensity | 0           | 0.33   | 1             |
-| Pulse  | intensity | 0           | 0.5    | 1             |
+| Jello  | skew      | 7°          | 14°    | 28°           |
+| Poke   | travel    | 25px        | 50px   | 100px         |
+| Pulse  | scale     | 0.93        | 0.87   | 0.81          |
 | Rubber | intensity | 0           | 0.5    | 1             |
-| Swing  | swing     | 20°         | 40°    | 60°           |
+| Swing  | angle     | 20°         | 40°    | 60°           |
 | Wiggle | intensity | 0           | 0.33   | 1             |

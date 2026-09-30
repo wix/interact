@@ -1,5 +1,5 @@
 import type { Wiggle, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, roundNumber, toKeyframeValue, mapRange } from '../../utils';
+import { getTimingFactor, mapRange, roundNumber, toKeyframeValue } from '../../utils';
 
 const WIGGLE_FACTOR_SOFT = 1;
 const WIGGLE_FACTOR_HARD = 4;

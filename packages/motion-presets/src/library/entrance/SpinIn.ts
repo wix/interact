@@ -8,13 +8,12 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import {
-  MOTION_FADE_NAME,
-  getMotionFade,
   useBasicPreset,
   useDirectionalPreset,
   useDirectionalPresetAsBasic,
-} from '../../utils';
+} from '../../presetUtils';
 
 const FADE_IN_EASING = 'cubicIn';
 
@@ -33,7 +32,12 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map((name) => name + suffix);
+  return [
+    MOTION_FADE_NAME,
+    MOTION_TRANS_ROT_NAME,
+    MOTION_LAYOUT_ROTATION_NAME,
+    MOTION_SCALE_NAME,
+  ].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -44,6 +48,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<SpinIn>;
   const { scale = DEFAULTS.scale, spins = DEFAULTS.spins } = namedEffect!;
 
+  // the fade shortens with the starting scale - growing from 0 needs no fade
   const fadeOptions = {
     ...options,
     duration: options.duration! * Math.min(scale, 1),
@@ -61,10 +66,17 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   return [
     useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useDirectionalPreset(getMotionTransRot, transformOptions, 'entrance', {
-      defaultDirection: DEFAULTS.direction,
-      directionType: 'spin',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      transformOptions,
+      'entrance',
+      {
+        defaultDirection: DEFAULTS.direction,
+        directionType: 'spin',
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
     useDirectionalPresetAsBasic(getMotionScale, transformOptions, 'entrance', {}, asWeb, suffix),
   ];

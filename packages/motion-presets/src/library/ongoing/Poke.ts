@@ -6,8 +6,8 @@ import {
   getMotionTransRot,
   useLayoutRotation,
 } from '../../transformUtils';
-import type { LoopPoint } from '../../utils';
-import { useDirectionalPreset } from '../../utils';
+import type { LoopPoint } from '../../easingUtils';
+import { useDirectionalPreset } from '../../presetUtils';
 
 const DEFAULTS: Required<Poke> = {
   type: 'Poke',
@@ -55,11 +55,18 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useDirectionalPreset(getMotionTransRot, pokeOptions, 'ongoing', {
-      defaultDirection: DEFAULTS.direction,
-      directionType: 'four-sides',
-      loop: { shape: SHAPE },
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      pokeOptions,
+      'ongoing',
+      {
+        defaultDirection: DEFAULTS.direction,
+        directionType: 'four-sides',
+        loop: { shape: SHAPE },
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(pokeOptions, 'ongoing', {}, asWeb, suffix),
   ];
 }

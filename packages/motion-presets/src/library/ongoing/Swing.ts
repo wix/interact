@@ -6,8 +6,9 @@ import {
   getMotionTransRot,
   useLayoutRotation,
 } from '../../transformUtils';
-import type { LoopPoint } from '../../utils';
-import { getEasingFamily, useDirectionalPreset } from '../../utils';
+import type { LoopPoint } from '../../easingUtils';
+import { getEasingFamily } from '../../utils';
+import { useDirectionalPreset } from '../../presetUtils';
 
 const DEFAULT_EASING = 'sineInOut';
 
@@ -64,11 +65,18 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   return [
     // the layout rotation comes first, so the pivot is on the element's rotated side
     useLayoutRotation(swingOptions, 'ongoing', { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPreset(getMotionTransRot, swingOptions, 'ongoing', {
-      directionType: 'spin',
-      pivotType: 'four-sides',
-      defaultPivot: DEFAULTS.pivot,
-      loop: { shape: SHAPE, easings: [ease.out, ease.inOut] },
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      swingOptions,
+      'ongoing',
+      {
+        directionType: 'spin',
+        pivotType: 'four-sides',
+        defaultPivot: DEFAULTS.pivot,
+        loop: { shape: SHAPE, easings: [ease.out, ease.inOut] },
+      },
+      asWeb,
+      suffix,
+    ),
   ];
 }

@@ -6,7 +6,7 @@ import {
   getMotionTransRot,
   useLayoutRotation,
 } from '../../transformUtils';
-import { useDirectionalPreset } from '../../utils';
+import { useDirectionalPreset } from '../../presetUtils';
 
 const DEFAULT_EASING = 'linear';
 const ANGLE = 360;
@@ -48,11 +48,18 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useDirectionalPreset(getMotionTransRot, spinOptions, 'ongoing', {
-      defaultDirection: DEFAULTS.direction,
-      directionType: 'spin',
-      loop: { shape: SHAPE, easings: [easing] },
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      spinOptions,
+      'ongoing',
+      {
+        defaultDirection: DEFAULTS.direction,
+        directionType: 'spin',
+        loop: { shape: SHAPE, easings: [easing] },
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(spinOptions, 'ongoing', {}, asWeb, suffix),
   ];
 }

@@ -6,12 +6,8 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  MOTION_FADE_NAME,
-  getMotionFade,
-  useBasicPreset,
-  useDirectionalPreset,
-} from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 
 const FADE_IN_EASING = 'quadOut';
 
@@ -30,7 +26,9 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_FADE_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_3D_TRANSFORM_NAME].map((name) => name + suffix);
+  return [MOTION_FADE_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_3D_TRANSFORM_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -49,6 +47,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     namedEffect: {
       ...namedEffect,
       angle,
+      // folds in from its pivot side
       from: pivot,
       perspective,
     },
@@ -58,11 +57,18 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
     // the layout rotation comes first, so the motion moves along the element's rotated axes
     useLayoutRotation(transformOptions, 'entrance', { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPreset(getMotion3dTransform, transformOptions, 'entrance', {
-      defaultDirection: DEFAULTS.pivot,
-      defaultPivot: DEFAULTS.pivot,
-      directionType: 'four-sides',
-      pivotType: 'four-sides',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotion3dTransform,
+      transformOptions,
+      'entrance',
+      {
+        defaultDirection: DEFAULTS.pivot,
+        defaultPivot: DEFAULTS.pivot,
+        directionType: 'four-sides',
+        pivotType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
   ];
 }

@@ -13,13 +13,9 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  MOTION_FADE_NAME,
-  compareKeywordToNonDefaults,
-  getMotionFade,
-  useBasicPreset,
-  useDirectionalPreset,
-} from '../../utils';
+import { compareKeywordToNonDefaults } from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 
 // BounceIn uses easing to create the bouncing movement and uses only 2 keyframes
 const BOUNCE_IN_EASING = `linear(${[
@@ -82,13 +78,11 @@ export const schema = {
   travel: { type: 'length', default: DEFAULTS.travel },
 };
 
-export function getNames({ namedEffect, suffix }: TimeAnimationOptions) {
+export function getNames({ namedEffect, suffix = '' }: TimeAnimationOptions) {
   const { from } = namedEffect as BounceIn;
   return [
     MOTION_FADE_NAME,
-    compareKeywordToNonDefaults(from, ['back'])
-      ? MOTION_3D_TRANSFORM_NAME
-      : MOTION_TRANS_ROT_NAME,
+    compareKeywordToNonDefaults(from, ['back']) ? MOTION_3D_TRANSFORM_NAME : MOTION_TRANS_ROT_NAME,
     MOTION_LAYOUT_ROTATION_NAME,
   ].map((name) => name + suffix);
 }
@@ -101,7 +95,10 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const { namedEffect, suffix } = options as TimeAnimationOptions<BounceIn>;
   const { from, perspective = DEFAULTS.perspective } = namedEffect!;
 
-  const preset = compareKeywordToNonDefaults(from, ['back']) ? getMotion3dTransform : getMotionTransRot;
+  // 'back' bounces along the z-axis, the sides along their own axis
+  const preset = compareKeywordToNonDefaults(from, ['back'])
+    ? getMotion3dTransform
+    : getMotionTransRot;
 
   const transformOptions = {
     ...options,
@@ -120,11 +117,18 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   return [
     useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useDirectionalPreset(preset, transformOptions, 'entrance', {
-      defaultDirection: DEFAULTS.from as EffectFourDirections,
-      defaultTravel: DEFAULTS.travel as LengthValue,
-      directionType: 'four-sides',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      preset,
+      transformOptions,
+      'entrance',
+      {
+        defaultDirection: DEFAULTS.from as EffectFourDirections,
+        defaultTravel: DEFAULTS.travel as LengthValue,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
   ];
 }

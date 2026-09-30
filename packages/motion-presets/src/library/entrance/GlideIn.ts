@@ -5,12 +5,8 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  MOTION_FADE_NAME,
-  getMotionFade,
-  useBasicPreset,
-  useDirectionalPreset,
-} from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 
 const FADE_IN_EASING = 'step-start';
 
@@ -27,7 +23,9 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -38,12 +36,25 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const { easing = DEFAULT_EASING, suffix } = options as TimeAnimationOptions<GlideIn>;
 
   return [
-    useBasicPreset(getMotionFade, { ...options, easing: FADE_IN_EASING }, 'entrance', asWeb, suffix),
-    useDirectionalPreset(getMotionTransRot, { ...options, easing }, 'entrance', {
-      defaultDirection: DEFAULTS.from as number,
-      defaultTravel: DEFAULTS.travel as LengthValue,
-      directionType: 'angle',
-    }, asWeb, suffix),
+    useBasicPreset(
+      getMotionFade,
+      { ...options, easing: FADE_IN_EASING },
+      'entrance',
+      asWeb,
+      suffix,
+    ),
+    useDirectionalPreset(
+      getMotionTransRot,
+      { ...options, easing },
+      'entrance',
+      {
+        defaultDirection: DEFAULTS.from as number,
+        defaultTravel: DEFAULTS.travel as LengthValue,
+        directionType: 'angle',
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation({ ...options, easing }, 'entrance', {}, asWeb, suffix),
   ];
 }

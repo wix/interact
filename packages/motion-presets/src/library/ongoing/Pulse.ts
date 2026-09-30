@@ -5,7 +5,7 @@ import {
   getMotionScale,
   useLayoutRotation,
 } from '../../transformUtils';
-import { useDirectionalPresetAsBasic } from '../../utils';
+import { useDirectionalPresetAsBasic } from '../../presetUtils';
 
 const DEFAULTS: Required<Pulse> = {
   type: 'Pulse',
@@ -49,6 +49,13 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   return [
     useLayoutRotation(options, 'ongoing', { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPresetAsBasic(getMotionScale, scaleOptions, 'ongoing', { loop: { shape: SHAPE } }, asWeb, suffix),
+    useDirectionalPresetAsBasic(
+      getMotionScale,
+      scaleOptions,
+      'ongoing',
+      { loop: { shape: SHAPE } },
+      asWeb,
+      suffix,
+    ),
   ];
 }

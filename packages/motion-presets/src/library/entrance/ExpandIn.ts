@@ -1,8 +1,4 @@
-import type {
-  ExpandIn,
-  LengthValue,
-  TimeAnimationOptions,
-} from '../../types';
+import type { ExpandIn, LengthValue, TimeAnimationOptions } from '../../types';
 import {
   MOTION_SCALE_NAME,
   MOTION_TRANS_ROT_NAME,
@@ -11,13 +7,12 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import {
-  MOTION_FADE_NAME,
-  getMotionFade,
   useBasicPreset,
   useDirectionalPreset,
   useDirectionalPresetAsBasic,
-} from '../../utils';
+} from '../../presetUtils';
 
 const FADE_IN_DURATION_FACTOR = 0.7;
 
@@ -36,7 +31,12 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map((name) => name + suffix);
+  return [
+    MOTION_FADE_NAME,
+    MOTION_TRANS_ROT_NAME,
+    MOTION_LAYOUT_ROTATION_NAME,
+    MOTION_SCALE_NAME,
+  ].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -44,7 +44,11 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<ExpandIn>;
+  const {
+    easing = DEFAULT_EASING,
+    namedEffect,
+    suffix,
+  } = options as TimeAnimationOptions<ExpandIn>;
   const { scale = DEFAULTS.scale } = namedEffect!;
 
   const fadeOptions = {
@@ -63,11 +67,18 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   return [
     useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useDirectionalPreset(getMotionTransRot, transformOptions, 'entrance', {
-      defaultDirection: DEFAULTS.from as number,
-      defaultTravel: DEFAULTS.travel as LengthValue,
-      directionType: 'angle',
-    }, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      transformOptions,
+      'entrance',
+      {
+        defaultDirection: DEFAULTS.from as number,
+        defaultTravel: DEFAULTS.travel as LengthValue,
+        directionType: 'angle',
+      },
+      asWeb,
+      suffix,
+    ),
     useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
     useDirectionalPresetAsBasic(getMotionScale, transformOptions, 'entrance', {}, asWeb, suffix),
   ];

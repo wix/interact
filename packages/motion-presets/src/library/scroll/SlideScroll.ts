@@ -1,26 +1,14 @@
-import type {
-  DomApi,
-  EffectFourDirections,
-  ScrubAnimationOptions,
-  SlideScroll,
-} from '../../types';
+import type { DomApi, EffectFourDirections, ScrubAnimationOptions, SlideScroll } from '../../types';
 import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
-import {
-  MOTION_REVEAL_NAME,
-  getMotionReveal,
-} from '../../clipUtils';
+import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
 import {
   MOTION_TRANS_ROT_NAME,
   getMotionTransRot,
   MOTION_LAYOUT_ROTATION_NAME,
   useLayoutRotation,
 } from '../../transformUtils';
-import {
-  parseKeywordLazy,
-  oppositeDirection,
-  useDirectionalPreset,
-  withSharedScrollRange,
-} from '../../utils';
+import { parseKeywordLazy } from '../../utils';
+import { oppositeDirection, useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 
 const TRAVEL = '100%';
 
@@ -36,7 +24,9 @@ export const schema = {
 };
 
 export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_LAYOUT_ROTATION_NAME, MOTION_TRANS_ROT_NAME, MOTION_REVEAL_NAME].map((name) => name + suffix);
+  return [MOTION_LAYOUT_ROTATION_NAME, MOTION_TRANS_ROT_NAME, MOTION_REVEAL_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -46,9 +36,10 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<SlideScroll>;
 
-  // SlideScroll reveals in the opposite direction to the movement to create it's entrance-exit feel
+  // SlideScroll reveals in the opposite direction to the movement to create its entrance-exit feel
   const clipDirection = oppositeDirection(
-    parseKeywordLazy(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction), 'four-sides'
+    parseKeywordLazy(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction),
+    'four-sides',
   );
 
   const transformOptions = {
@@ -67,19 +58,41 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     },
   } as ScrubAnimationOptions;
 
-
   return withSharedScrollRange([
     // the layout rotation comes first, so the motion moves along the element's rotated axes
-    useLayoutRotation(transformOptions, 'scroll', { composite: 'replace', defaultRange: DEFAULTS.range }, asWeb, suffix),
-    useDirectionalPreset(getMotionTransRot, transformOptions, 'scroll', {
-      defaultDirection: DEFAULTS.direction,
-      defaultRange: DEFAULTS.range,
-      directionType: 'four-sides',
-    }, asWeb, suffix),
-    useDirectionalPreset(getMotionReveal, revealOptions, 'scroll', {
-      defaultDirection: oppositeDirection(DEFAULTS.direction, 'four-sides') as EffectFourDirections,
-      defaultRange: DEFAULTS.range,
-      directionType: 'four-sides',
-    }, asWeb, suffix),
+    useLayoutRotation(
+      transformOptions,
+      'scroll',
+      { composite: 'replace', defaultRange: DEFAULTS.range },
+      asWeb,
+      suffix,
+    ),
+    useDirectionalPreset(
+      getMotionTransRot,
+      transformOptions,
+      'scroll',
+      {
+        defaultDirection: DEFAULTS.direction,
+        defaultRange: DEFAULTS.range,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
+    useDirectionalPreset(
+      getMotionReveal,
+      revealOptions,
+      'scroll',
+      {
+        defaultDirection: oppositeDirection(
+          DEFAULTS.direction,
+          'four-sides',
+        ) as EffectFourDirections,
+        defaultRange: DEFAULTS.range,
+        directionType: 'four-sides',
+      },
+      asWeb,
+      suffix,
+    ),
   ]);
 }

@@ -1,15 +1,9 @@
 import type { ShapeIn, TimeAnimationOptions } from '../../types';
 import { SHAPES } from '../../consts';
-import {
-  MOTION_SHAPE_NAME,
-  getMotionShape,
-} from '../../clipUtils';
-import {
-  MOTION_FADE_NAME,
-  getMotionFade,
-  parseKeywordLazy,
-  useBasicPreset,
-} from '../../utils';
+import { MOTION_SHAPE_NAME, getMotionShape } from '../../clipUtils';
+import { parseKeywordLazy } from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { useBasicPreset } from '../../presetUtils';
 
 const FADE_IN_DURATION_FACTOR = 0.8;
 const FADE_IN_EASING = 'quadOut';

@@ -24,7 +24,15 @@ export type Layout = {
 // measures the element's position (and the container's size when it is not the viewport) into custom-properties
 // the returned layout is filled once measured, for values that must be computed from it (e.g. lazy timing)
 export function measureLayout(dom?: DomApi, container: LayoutContainer = 'viewport'): Layout {
-  const layout: Layout = { measured: false, left: 0, top: 0, width: 0, height: 0, containerWidth: 0, containerHeight: 0 };
+  const layout: Layout = {
+    measured: false,
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+    containerWidth: 0,
+    containerHeight: 0,
+  };
   if (!dom) {
     return layout;
   }
@@ -34,10 +42,19 @@ export function measureLayout(dom?: DomApi, container: LayoutContainer = 'viewpo
       return;
     }
     // the layout size, before transforms (as percentages of the element's own size are)
-    Object.assign(layout, { measured: true, width: target.offsetWidth, height: target.offsetHeight });
+    Object.assign(layout, {
+      measured: true,
+      width: target.offsetWidth,
+      height: target.offsetHeight,
+    });
     const { left, top } = target.getBoundingClientRect();
     if (container === 'viewport') {
-      Object.assign(layout, { left, top, containerWidth: window.innerWidth, containerHeight: window.innerHeight });
+      Object.assign(layout, {
+        left,
+        top,
+        containerWidth: window.innerWidth,
+        containerHeight: window.innerHeight,
+      });
       return;
     }
     const parent = target.offsetParent as HTMLElement;
