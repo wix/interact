@@ -1747,7 +1747,7 @@ describe('css._generate', () => {
       {
         ...options,
         name: `test-move${suffix}`,
-        custom: { [`--test-move${suffix}-x`]: '10px' },
+        custom: { [`--test-move${suffix}-x`]: 'calc(var(--motion-left, 0px) + 10px)' },
         keyframes: [{ translate: `var(--test-move${suffix}-x)` }, { translate: '0px' }],
       },
     ];
@@ -1765,16 +1765,22 @@ describe('css._generate', () => {
       namedEffect: { type: 'TestMove' },
     });
 
-    it('registers custom properties as non-inherited', () => {
+    it('registers the layout properties the params read as non-inherited, once', () => {
       const { atProperty } = _generate({
-        interactions: [{ key: 'a', trigger: 'viewEnter', effects: [effect('move')] }],
+        interactions: [
+          { key: 'a', trigger: 'viewEnter', effects: [effect('first')] },
+          { key: 'a', trigger: 'click', effects: [effect('second')] },
+        ],
       });
 
-      expect(atProperty).toContain('@property --test-move-x { syntax: "*"; inherits: false; }');
+      const custom = atProperty.filter(
+        (rule) => rule.includes('--motion-') || rule.includes('--test-'),
+      );
+      expect(custom).toEqual(['@property --motion-left { syntax: "*"; inherits: false; }']);
     });
 
     it('gives an effect whose keyframes are already used on its target the next free slot', () => {
-      const { keyframes, cssRules, atProperty } = _generate({
+      const { keyframes, cssRules } = _generate({
         interactions: [
           { key: 'a', trigger: 'viewEnter', effects: [effect('first')] },
           { key: 'a', trigger: 'click', effects: [effect('second')] },
@@ -1784,7 +1790,6 @@ describe('css._generate', () => {
       expect([...keyframes.keys()]).toEqual(['test-move', 'test-move-1']);
       const declared = cssRules.flatMap(({ declarations }) => declarations.map(({ name }) => name));
       expect(declared).toEqual(expect.arrayContaining(['--test-move-x', '--test-move-1-x']));
-      expect(atProperty).toContain('@property --test-move-1-x { syntax: "*"; inherits: false; }');
     });
 
     it('shares each slot between targets', () => {
