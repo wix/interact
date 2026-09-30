@@ -28,6 +28,7 @@ import {
   CSSRuleToString,
   buildListsRule,
   buildAtPropertyRules,
+  getLayoutProperties,
   getCustomPropName,
   buildSequenceListsRule,
   LIST_KINDS,
@@ -77,7 +78,6 @@ type GenerateContext = {
   configConditions: Record<string, Condition>;
   targetsMap: TargetsMap;
   keyframesMap: Map<string, Keyframe[]>;
-  customProperties: Set<string>;
   keyframeSlots: Map<string, string>;
   // only collecting the effects' list entries for getKeyframeSlots, without generating CSS
   collectSlots: boolean;
@@ -321,14 +321,15 @@ function effectToCSS(
       keyframes: anim.keyframes,
     }));
 
-    // declare custom parameters (registered as non-inherited with @property)
-    const customDeclarations = cssAnimations.flatMap(({ custom }) =>
-      Object.entries(custom || {})
-        .filter(([_, value]) => value !== undefined)
-        .map(([key, value]) => ({ name: key, value: value as string | number })),
+    // declare custom parameters
+    // TODO - register those to define with @property to prevent unintended override
+    declarations.push(
+      ...cssAnimations.flatMap(({ custom }) =>
+        Object.entries(custom || {})
+          .filter(([_, value]) => value !== undefined)
+          .map(([key, value]) => ({ name: key, value: value as string | number })),
+      ),
     );
-    customDeclarations.forEach(({ name }) => ctx.customProperties.add(name));
-    declarations.push(...customDeclarations);
 
     const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
       _listPropertyName: propertyName,
@@ -612,7 +613,6 @@ function parseConfig(
     configConditions: config.conditions || {},
     targetsMap: new Map<string, TargetContext>(),
     keyframesMap: new Map<string, Keyframe[]>(),
-    customProperties: new Set<string>(),
     keyframeSlots: collectSlots ? new Map() : getKeyframeSlots(config),
     collectSlots,
     useFirstChild,
@@ -696,7 +696,7 @@ export function _generate(
     animationSlotLength,
     transitionSlotLength,
     timelineLength,
-    ctx.customProperties,
+    getLayoutProperties([...ctx.keyframesMap.values(), cssRules]),
   );
 
   return { keyframes: ctx.keyframesMap, atProperty, cssRules, listsRule };
