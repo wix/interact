@@ -1,12 +1,5 @@
 import { Interact } from '@wix/interact';
-import { walkConfig } from '../walkConfig';
-import type {
-  AnyConfig,
-  EffectParamSchema,
-  EffectSchema,
-  ValidateOptions,
-  ValidationError,
-} from '../types';
+import type { AnyEffect, EffectParamSchema, EffectSchema, Path, SemanticIssue } from '../types';
 
 const LENGTH_REGEX = /^-?\d*\.?\d+(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)?$/i;
 const ANGLE_REGEX = /^-?\d*\.?\d+(deg|rad|grad|turn)?$/i;
@@ -61,49 +54,42 @@ const PARAM_TYPES: Record<
   },
 };
 
-function getSchema(type: string, effects: ValidateOptions['effects']): EffectSchema | undefined {
-  const module = effects ? effects[type] : Interact.getRegisteredEffect?.(type, false);
-  return (module as { schema?: EffectSchema } | null | undefined)?.schema;
-}
+const issue = (
+  path: Path,
+  domainCode: string,
+  message: string,
+  severity: SemanticIssue['severity'],
+) => ({ code: 'custom', path, message, params: { domainCode }, severity }) as SemanticIssue;
 
-// validates namedEffect params against the schema of the effect registered under their type
-export function checkNamedEffectParams(
-  config: AnyConfig,
-  effects: ValidateOptions['effects'],
-): ValidationError[] {
-  const errors: ValidationError[] = [];
+// the namedEffect's params against the schema of the effect registered on Interact under its type
+export function checkNamedEffectParams(path: Path, effect: AnyEffect): SemanticIssue[] {
+  const { type, ...params } = effect.namedEffect ?? {};
+  const module = typeof type === 'string' ? Interact.getRegisteredEffect?.(type, false) : null;
+  const schema = (module as { schema?: EffectSchema } | null | undefined)?.schema;
+  if (!schema) return [];
 
-  walkConfig(config, {
-    onEffect: (path, effect) => {
-      const { type, ...params } = effect.namedEffect ?? {};
-      const schema = typeof type === 'string' ? getSchema(type, effects) : undefined;
-      if (!schema) return;
-
-      Object.entries(params).forEach(([key, value]) => {
-        const paramPath = [...path, 'namedEffect', key];
-        const param = schema[key];
-        if (!param) {
-          errors.push({
-            code: 'NAMED_EFFECT_UNKNOWN_PARAM',
-            message: `'${key}' is not a parameter of ${type} (expected one of ${Object.keys(schema).join(', ')}).`,
-            path: paramPath,
-            severity: 'warning',
-          });
-          return;
-        }
-        const paramType = PARAM_TYPES[param.type];
-        if (value !== undefined && paramType && !paramType.isValid(value, param)) {
-          errors.push({
-            code: 'NAMED_EFFECT_INVALID_PARAM',
-            message: `${type} \`${key}\` must be ${paramType.expected(param)}; got ${JSON.stringify(value)}.`,
-            path: paramPath,
-            severity: 'error',
-          });
-        }
-      });
-    },
-    onSequence: () => {},
+  return Object.entries(params).flatMap(([key, value]) => {
+    const paramPath = [...path, 'namedEffect', key];
+    const param = schema[key];
+    if (!param) {
+      return [
+        issue(
+          paramPath,
+          'NAMED_EFFECT_UNKNOWN_PARAM',
+          `'${key}' is not a parameter of ${type} (expected one of ${Object.keys(schema).join(', ')}).`,
+          'warning',
+        ),
+      ];
+    }
+    const paramType = PARAM_TYPES[param.type];
+    if (value === undefined || !paramType || paramType.isValid(value, param)) return [];
+    return [
+      issue(
+        paramPath,
+        'NAMED_EFFECT_INVALID_PARAM',
+        `${type} \`${key}\` must be ${paramType.expected(param)}; got ${JSON.stringify(value)}.`,
+        'error',
+      ),
+    ];
   });
-
-  return errors;
 }

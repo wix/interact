@@ -1,12 +1,5 @@
 export { InteractValidationError } from './errors';
-export type {
-  Severity,
-  ValidationResult,
-  ValidationError,
-  ValidateOptions,
-  EffectSchema,
-  EffectParamSchema,
-} from './types';
+export type { Severity, ValidationResult, ValidationError, ValidateOptions } from './types';
 
 // Zod schemas and sub-schemas for host-project schema composition
 export {

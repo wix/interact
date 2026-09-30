@@ -12,6 +12,8 @@ const Move = {
   },
 };
 
+Interact.registerEffects({ Move, Unschemed: {} } as any);
+
 const configWith = (namedEffect: Record<string, unknown>) => ({
   interactions: [
     {
@@ -25,7 +27,7 @@ const configWith = (namedEffect: Record<string, unknown>) => ({
 });
 
 const paramErrors = (namedEffect: Record<string, unknown>) =>
-  validateInteractConfig(configWith(namedEffect), { effects: { Move } }).errors.filter((e) =>
+  validateInteractConfig(configWith(namedEffect)).errors.filter((e) =>
     e.code.startsWith('NAMED_EFFECT_'),
   );
 
@@ -46,6 +48,7 @@ describe('namedEffectParams', () => {
   });
 
   it('errors (NAMED_EFFECT_INVALID_PARAM) on values that do not match the schema', () => {
+    expect(validateInteractConfig(configWith({ scale: 2 })).valid).toBe(false);
     const errors = paramErrors({
       from: 'top',
       angle: 'sideways',
@@ -80,32 +83,26 @@ describe('namedEffectParams', () => {
     expect(error.path).toEqual(['interactions', 0, 'effects', 0, 'namedEffect', 'direction']);
   });
 
-  it('skips effects without a schema', () => {
-    const result = validateInteractConfig(configWith({ anything: 1 }), { effects: {} });
-    expect(result.errors.filter((e) => e.code.startsWith('NAMED_EFFECT_'))).toEqual([]);
+  it('skips effects without a schema, or not registered', () => {
+    for (const type of ['Unschemed', 'NotRegistered']) {
+      const config = configWith({ anything: 1 });
+      config.interactions[0].effects[0].namedEffect.type = type;
+      const errors = validateInteractConfig(config).errors;
+      expect(errors.filter((e) => e.code.startsWith('NAMED_EFFECT_'))).toEqual([]);
+    }
   });
 
   it('validates top-level effect definitions', () => {
-    const result = validateInteractConfig(
-      {
-        effects: { move: { namedEffect: { type: 'Move', scale: -1 } } },
-        interactions: [{ key: 'el', trigger: 'viewEnter', effects: [{ effectId: 'move' }] }],
-      },
-      { effects: { Move } },
-    );
-    const error = result.errors.find((e) => e.code === 'NAMED_EFFECT_INVALID_PARAM');
-    expect(error?.path).toEqual(['effects', 'move', 'namedEffect', 'scale']);
-  });
-
-  it('uses the effects registered on Interact by default', () => {
-    Interact.registerEffects({ Move } as any);
-    const result = validateInteractConfig(configWith({ scale: 5 }));
-    expect(result.errors.find((e) => e.code === 'NAMED_EFFECT_INVALID_PARAM')).toBeDefined();
+    const result = validateInteractConfig({
+      effects: { move: { namedEffect: { type: 'Move', scale: -1 } } },
+      interactions: [{ key: 'el', trigger: 'viewEnter', effects: [{ effectId: 'move' }] }],
+    });
+    const errors = result.errors.filter((e) => e.code === 'NAMED_EFFECT_INVALID_PARAM');
+    expect(errors.map((e) => e.path)).toEqual([['effects', 'move', 'namedEffect', 'scale']]);
   });
 
   it('can be turned off with severityOverrides', () => {
     const result = validateInteractConfig(configWith({ scale: 5, direction: 'left' }), {
-      effects: { Move },
       severityOverrides: { NAMED_EFFECT_PARAMS: 'off' },
     });
     expect(result.errors.filter((e) => e.code.startsWith('NAMED_EFFECT_'))).toEqual([]);

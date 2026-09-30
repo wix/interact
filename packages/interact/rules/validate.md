@@ -77,16 +77,14 @@ type ValidateOptions = {
   strict?: boolean;
   max?: number;
   severityOverrides?: Record<string, 'error' | 'warning' | 'off'>;
-  effects?: Record<string, { schema?: EffectSchema }>;
 };
 ```
 
-| Option              | Effect                                                                                                                                           |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `strict`            | Promotes every remaining issue to `'error'`. Use in CI to fail on warnings too.                                                                  |
-| `max`               | Truncates the returned list to the first N issues (after sorting). Useful for inline diagnostics.                                                |
-| `severityOverrides` | Per-**rule-category** severity override. Keys are rule-category codes (see below), not individual codes.                                         |
-| `effects`           | Effect modules, as passed to `registerEffects`, whose `schema` validates `namedEffect` params. Defaults to the effects registered on `Interact`. |
+| Option              | Effect                                                                                                   |
+| ------------------- | -------------------------------------------------------------------------------------------------------- |
+| `strict`            | Promotes every remaining issue to `'error'`. Use in CI to fail on warnings too.                          |
+| `max`               | Truncates the returned list to the first N issues (after sorting). Useful for inline diagnostics.        |
+| `severityOverrides` | Per-**rule-category** severity override. Keys are rule-category codes (see below), not individual codes. |
 
 ### ValidationError shape
 
