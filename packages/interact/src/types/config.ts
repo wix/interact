@@ -64,6 +64,9 @@ export type ResolvedEffect = ElementIdentifier &
     conditions: string[];
     triggerType: TimeAnimationTriggerType;
     initial: boolean;
+    suffix?: string;
+    // the effect's position in the config (see getSlotKey)
+    slotKey?: string;
   };
 
 export type ResolvedSequence = {
