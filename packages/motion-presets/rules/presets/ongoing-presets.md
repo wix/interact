@@ -172,11 +172,11 @@ Visual: Element stretches non-uniformly on X and Y axes, creating a rubber-band 
 
 Parameters:
 
-- `intensity`: number — 0 to 1, adjusts the stretch amplitude (default: `0.5`)
+- `stretch`: number — -1 to 1, the stretch amount at the first squash: scaleX = 1 + stretch, scaleY = 1 - stretch (default: `0.1`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Rubber', intensity: 0.8 }
+{ type: 'Rubber', stretch: 0.13 }
 ```
 
 ---
@@ -218,11 +218,12 @@ Visual: Element shakes with combined rotation and vertical translation.
 
 Parameters:
 
-- `intensity`: number — 0 to 1, maps to wiggle strength factor 1–4 (default: `0.5`)
+- `angle`: number — rotation in degrees at the first swing (default: `25`)
+- `travel`: LengthInput — how far the element lifts during the first swing (default: `25px`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Wiggle', intensity: 0.8 }
+{ type: 'Wiggle', angle: 34, travel: '34px' }
 ```
 
 ---
@@ -238,6 +239,6 @@ Tested values for different intensity levels. When a user asks for "soft", "subt
 | Jello  | skew      | 7°          | 14°    | 28°           |
 | Poke   | travel    | 25px        | 50px   | 100px         |
 | Pulse  | scale     | 0.93        | 0.87   | 0.81          |
-| Rubber | intensity | 0           | 0.5    | 1             |
+| Rubber | stretch   | 0.05        | 0.1    | 0.15          |
 | Swing  | angle     | 20°         | 40°    | 60°           |
-| Wiggle | intensity | 0           | 0.33   | 1             |
+| Wiggle | angle     | 10°         | 20°    | 40°           |

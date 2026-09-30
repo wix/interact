@@ -118,17 +118,6 @@ export function declareCustom<K extends string>(
   return { custom, vars };
 }
 
-export function getTimingFactor(
-  duration: number,
-  delay: number,
-  asString = false,
-): number | string {
-  const duration_ = duration || 1;
-  const delay_ = delay || 0;
-  const timingFactor = roundNumber(duration_ / (duration_ + delay_));
-  return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
-}
-
 const CSS_UNIT_REGEX = /^(-?\d*\.?\d+)(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/i;
 
 /**

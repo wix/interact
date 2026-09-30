@@ -18,7 +18,7 @@ type PresetModule = {
   web: (options: any) => any[];
 };
 
-const SKIP = ['Wiggle', 'Rubber', 'DVD'];
+const SKIP = ['DVD'];
 // getNames appends an undefined suffix
 const GROUP_OPTIONS = {
   entrance: { duration: 1000 },

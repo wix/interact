@@ -140,13 +140,13 @@ idle hold at rest appended after each cycle (the motion itself is unchanged).
 | `Spin`    | `direction` `clockwise\|counter-clockwise` (`'clockwise'`)                                               |
 | `Breathe` | `direction` `vertical\|horizontal\|center` (`'vertical'`), `travel` (`{25,'px'}`), `perspective` (`800`) |
 | `Bounce`  | `travel` (`{49,'px'}`)                                                                                   |
-| `Wiggle`  | `intensity` 0–1 (`0.5`)                                                                                  |
+| `Wiggle`  | `angle` deg (`25`), `travel` (`{25,'px'}`)                                                               |
 | `Flash`   | — (only `iterationDelay`)                                                                                |
 | `Flip`    | `direction` `vertical\|horizontal` (`'horizontal'`), `perspective` (`800`)                               |
 | `Fold`    | `pivot` cardinal (`'top'`), `angle` deg (`15`), `perspective` (`800`)                                    |
 | `Jello`   | `skew` deg (`12.25`)                                                                                     |
 | `Poke`    | `direction` cardinal (`'right'`), `travel` (`{62.5,'px'}`)                                               |
-| `Rubber`  | `intensity` 0–1 (`0.5`)                                                                                  |
+| `Rubber`  | `stretch` -1–1 (`0.1`)                                                                                   |
 | `Swing`   | `pivot` cardinal (`'top'`), `angle` deg (`20`)                                                           |
 | `Cross`   | `direction` 8-way (`'right'`)                                                                            |
 

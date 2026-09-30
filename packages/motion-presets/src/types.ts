@@ -222,8 +222,8 @@ export type Flip = {
 };
 export type Rubber = {
   type: 'Rubber';
-  intensity?: number;
   iterationDelay?: number;
+  stretch?: number;
 };
 export type Fold = {
   type: 'Fold';
@@ -239,8 +239,9 @@ export type Jello = {
 };
 export type Wiggle = {
   type: 'Wiggle';
-  intensity?: number;
+  angle?: number;
   iterationDelay?: number;
+  travel?: LengthInput;
 };
 export type Bounce = {
   type: 'Bounce';
