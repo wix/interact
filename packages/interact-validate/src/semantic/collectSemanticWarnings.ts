@@ -12,11 +12,7 @@ import {
   checkRedundantSelector,
   checkPointerAxisIgnored,
 } from './ignored';
-import {
-  checkScrollPresetRange,
-  checkEmptyStyleProperties,
-  checkStateRemoveWithoutEffectId,
-} from './partialData';
+import { checkEmptyStyleProperties, checkStateRemoveWithoutEffectId } from './partialData';
 import { checkRecommendedFill } from './recommendedPatterns';
 import { findAnimationEndWarnings } from './animationEndGraph';
 import { checkNamedEffectParams } from './namedEffectParams';
@@ -72,7 +68,6 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
           : effect;
       warnings.push(...checkSameElementRetrigger(path, resolvedEffect, owner));
       warnings.push(...checkHitAreaShift(path, resolvedEffect, owner));
-      warnings.push(...checkScrollPresetRange(path, resolvedEffect, owner));
       warnings.push(...checkListItemSelectorWithoutContainer(path, resolvedEffect));
       warnings.push(...checkRedundantSelector(path, resolvedEffect));
       warnings.push(...checkEmptyStyleProperties(path, effect));
