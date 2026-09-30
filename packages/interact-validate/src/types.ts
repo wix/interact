@@ -39,8 +39,6 @@ export type ValidateOptions = {
   strict?: boolean;
   max?: number;
   severityOverrides?: Record<string, Severity | 'off'>;
-  // effect modules as passed to `registerEffects` - defaults to the effects registered on `Interact`
-  effects?: Record<string, { schema?: EffectSchema }>;
 };
 
 export type AnyEffect = {

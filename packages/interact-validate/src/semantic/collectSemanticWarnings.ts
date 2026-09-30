@@ -19,6 +19,7 @@ import {
 } from './partialData';
 import { checkRecommendedFill } from './recommendedPatterns';
 import { findAnimationEndWarnings } from './animationEndGraph';
+import { checkNamedEffectParams } from './namedEffectParams';
 
 // Single traversal of top-level registry effects/sequences and per-interaction
 // effects/sequences, supplying each node's `path`, whether it is a top-level
@@ -79,6 +80,8 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
       warnings.push(...checkRecommendedFill(path, resolvedEffect, owner));
       warnings.push(...checkPointerAxisIgnored(path, resolvedEffect, owner));
       warnings.push(...checkCSSPropertyNames(path, effect));
+      // each definition's own params, not again at every reference to it
+      warnings.push(...checkNamedEffectParams(path, effect));
     },
     onSequence: (path, sequence, isTopLevel, owner) => {
       const { sequenceId } = sequence;

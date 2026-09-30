@@ -35,7 +35,7 @@ type ValidationError = {
 };
 ```
 
-**Options:** `strict` (promote warnings to errors), `max` (truncate issue list), `severityOverrides` (per rule category — see full docs), `effects` (effect modules whose `schema` validates `namedEffect` params; defaults to the effects registered on `Interact`).
+**Options:** `strict` (promote warnings to errors), `max` (truncate issue list), `severityOverrides` (per rule category — see full docs). `namedEffect` params are validated against the `schema` of the effects registered with `Interact.registerEffects`, so register them before validating.
 
 ---
 
