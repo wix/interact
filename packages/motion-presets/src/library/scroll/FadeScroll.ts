@@ -1,8 +1,20 @@
-import type { FadeScroll, ScrubAnimationOptions, AnimationFillMode, DomApi } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import type { FadeScroll, ScrubAnimationOptions, DomApi } from '../../types';
+import { SCROLL_RANGES } from '../../consts';
+import { MOTION_FADE_NAME, getMotionFade, useBasicPreset } from '../../utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-fadeScroll'];
+const DEFAULTS: Required<FadeScroll> = {
+  type: 'FadeScroll',
+  opacity: 0,
+  range: 'in',
+};
+
+export const schema = {
+  opacity: { type: 'number', min: 0, max: 1, default: DEFAULTS.opacity },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+};
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return [MOTION_FADE_NAME + suffix];
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -10,37 +22,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const { opacity = 0, range = 'in' } = options.namedEffect as FadeScroll;
-  const isOut = range === 'out';
-  const fromValue = isOut ? toKeyframeValue({}, '--comp-opacity', false, '1') : opacity;
-  const toValue = isOut ? opacity : toKeyframeValue({}, '--comp-opacity', false, '1');
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
-
-  const [fadeScroll] = getNames(options);
-
-  const custom = {
-    '--motion-fade-from': fromValue,
-    '--motion-fade-to': toValue,
-  };
-
   return [
-    {
-      ...options,
-      name: fadeScroll,
-      fill,
-      easing,
-      custom,
-      keyframes: [
-        {
-          opacity: toKeyframeValue(custom, '--motion-fade-from', asWeb),
-        },
-        {
-          opacity: toKeyframeValue(custom, '--motion-fade-to', asWeb),
-        },
-      ],
-    },
+    useBasicPreset(getMotionFade, options, 'scroll', asWeb, options.suffix),
   ];
 }

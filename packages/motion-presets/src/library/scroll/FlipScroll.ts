@@ -1,16 +1,34 @@
-import type { AnimationFillMode, DomApi, FlipScroll, ScrubAnimationOptions } from '../../types';
-import { toKeyframeValue, parseDirection } from '../../utils';
-import { AXIS_DIRECTIONS } from '../../consts';
+import type { DomApi, FlipScroll, ScrubAnimationOptions } from '../../types';
+import { AXIS_DIRECTIONS, SCROLL_RANGES } from '../../consts';
+import {
+  MOTION_3D_TRANSFORM_NAME,
+  getMotion3dTransform,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import {
+  compareKeywordToNonDefaults,
+  useDirectionalPreset,
+  withSharedScrollRange,
+} from '../../utils';
 
-const DEFAULT_DIRECTION: (typeof AXIS_DIRECTIONS)[number] = 'horizontal';
-
-const ROTATE_DIRECTION_MAP = {
-  vertical: 'rotateX',
-  horizontal: 'rotateY',
+const DEFAULTS: Required<FlipScroll> = {
+  type: 'FlipScroll',
+  angle: 240,
+  direction: 'horizontal',
+  perspective: 800,
+  range: 'continuous',
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-flipScroll'];
+export const schema = {
+  angle: { type: 'number', default: DEFAULTS.angle },
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: DEFAULTS.direction },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+};
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return [MOTION_3D_TRANSFORM_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -18,50 +36,26 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as FlipScroll;
-  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULT_DIRECTION);
-  const { rotate = 240, range = 'continuous', perspective = 800 } = namedEffect;
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<FlipScroll>;
+  const { angle = DEFAULTS.angle, direction, perspective = DEFAULTS.perspective } = namedEffect!;
 
-  const rotationAxis = ROTATE_DIRECTION_MAP[direction];
-
-  const fromValue = range === 'out' ? 0 : -rotate;
-  const toValue = range === 'in' ? 0 : rotate;
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
-
-  const [flipScroll] = getNames(options);
-
-  const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-flip-from': `${rotationAxis}(${fromValue}deg)`,
-    '--motion-flip-to': `${rotationAxis}(${toValue}deg)`,
-  };
-
-  return [
-    {
-      ...options,
-      name: flipScroll,
-      fill,
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) ${toKeyframeValue(
-            custom,
-            '--motion-flip-from',
-            asWeb,
-          )} rotate(${toKeyframeValue({}, '--motion-rotate', false, '0deg')})`,
-        },
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) ${toKeyframeValue(
-            custom,
-            '--motion-flip-to',
-            asWeb,
-          )} rotate(${toKeyframeValue({}, '--motion-rotate', false, '0deg')})`,
-        },
-      ],
+  const fourSideDirection = compareKeywordToNonDefaults(direction, ['vertical']) ? 'top' : 'right';
+  
+  const transformOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      angle,
+      direction: fourSideDirection,
+      perspective,
     },
-  ];
+  } as ScrubAnimationOptions;
+
+  return withSharedScrollRange([
+    useDirectionalPreset(getMotion3dTransform, transformOptions, 'scroll', {
+      defaultRange: DEFAULTS.range,
+      directionType: 'four-sides',
+    }, asWeb, suffix),
+    useLayoutRotation(transformOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+  ]);
 }

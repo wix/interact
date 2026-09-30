@@ -1,77 +1,64 @@
-import type { CurveIn, TimeAnimationOptions, DomApi } from '../../types';
-import { toKeyframeValue, parseDirection, parseLength, getEntranceFill } from '../../utils';
-import { TWO_SIDES_DIRECTIONS } from '../../consts';
+import type { CurveIn, DomApi, LengthValue, TimeAnimationOptions } from '../../types';
+import { FOUR_DIRECTIONS } from '../../consts';
+import {
+  MOTION_3D_TRANSFORM_NAME,
+  getMotion3dTransform,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import {
+  MOTION_FADE_NAME,
+  getMotionFade,
+  useBasicPreset,
+  useDirectionalPreset,
+} from '../../utils';
 
-const DEFAULT_DEPTH = { value: 300, unit: 'px' };
-const DIRECTIONS = [...TWO_SIDES_DIRECTIONS, 'pseudoLeft', 'pseudoRight'] as const;
-const DEFAULT_DIRECTION: (typeof DIRECTIONS)[number] = 'right';
+const EASING = 'quadOut';
+const ROTATION_ANGLE = 180;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-curveIn', 'motion-fadeIn'];
-}
-
-const PARAMS_MAP = {
-  pseudoRight: { rotationX: '180', rotationY: '0' },
-  right: { rotationX: '0', rotationY: '180' },
-  pseudoLeft: { rotationX: '-180', rotationY: '0' },
-  left: { rotationX: '0', rotationY: '-180' },
+const DEFAULTS: Required<CurveIn> = {
+  type: 'CurveIn',
+  depth: { value: 900, unit: 'px' },
+  from: 'right',
+  perspective: 200,
 };
+
+export const schema = {
+  depth: { type: 'length', default: DEFAULTS.depth },
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.from },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME, MOTION_3D_TRANSFORM_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+}
 
 export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as CurveIn;
-  const direction = parseDirection(namedEffect?.direction, DIRECTIONS, DEFAULT_DIRECTION);
-  const depth = parseLength(namedEffect.depth, DEFAULT_DEPTH);
-  const { perspective = 200 } = namedEffect;
-  const [curveIn, fadeIn] = getNames(options);
+  const { namedEffect, suffix } = options as TimeAnimationOptions<CurveIn>;
+  const { perspective = DEFAULTS.perspective } = namedEffect!;
 
-  const { rotationX, rotationY } = PARAMS_MAP[direction];
-  const depthValue = `${depth.value}${depth.unit === 'percentage' ? '%' : depth.unit}`;
-
-  const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-rotate-x': `${rotationX}deg`,
-    '--motion-rotate-y': `${rotationY}deg`,
-    '--motion-depth-negative': `calc(${depthValue} * -3)`,
-    '--motion-depth-positive': `calc(${depthValue} * 3)`,
-  };
-
-  const easing = 'quadOut';
+  const fadeOptions = { ...options, easing: EASING };
+  const transformOptions = {
+    ...options,
+    easing: EASING,
+    namedEffect: {
+      ...namedEffect,
+      angle: ROTATION_ANGLE,
+      perspective,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      name: curveIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(custom, '--motion-depth-negative', asWeb)}) rotateX(${toKeyframeValue(
-            custom,
-            '--motion-rotate-x',
-            asWeb,
-          )}) rotateY(${toKeyframeValue(
-            custom,
-            '--motion-rotate-y',
-            asWeb,
-          )}) translateZ(${toKeyframeValue(custom, '--motion-depth-positive', asWeb)}) rotateZ(var(--motion-rotate, 0deg))`,
-        },
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(custom, '--motion-depth-negative', asWeb)}) rotateX(0deg) rotateY(0deg) translateZ(${toKeyframeValue(custom, '--motion-depth-positive', asWeb)}) rotateZ(var(--motion-rotate, 0deg))`,
-        },
-      ],
-    },
-    {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
-    },
+    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useDirectionalPreset(getMotion3dTransform, transformOptions, 'entrance', {
+      defaultDepth: DEFAULTS.depth as LengthValue,
+      defaultDirection: DEFAULTS.from,
+      directionType: 'four-sides',
+    }, asWeb, suffix),
+    useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
   ];
 }

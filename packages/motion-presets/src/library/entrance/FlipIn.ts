@@ -1,69 +1,65 @@
-import { parseDirection, toKeyframeValue, getEntranceFill } from '../../utils';
-import type { EffectFourDirections, FlipIn, TimeAnimationOptions } from '../../types';
-import { FOUR_DIRECTIONS } from '../../consts';
+import type { FlipIn, TimeAnimationOptions } from '../../types';
+import { AXIS_DIRECTIONS } from '../../consts';
+import {
+  MOTION_3D_TRANSFORM_NAME,
+  getMotion3dTransform,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import {
+  MOTION_FADE_NAME,
+  getMotionFade,
+  useBasicPreset,
+  useDirectionalPreset,
+} from '../../utils';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'top';
+const FADE_IN_EASING = 'quadOut';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-flipIn'];
-}
-
-function getRotateFrom(direction: EffectFourDirections, rotate: number) {
-  return {
-    x: ROTATE_MAP[direction].x * rotate,
-    y: ROTATE_MAP[direction].y * rotate,
-  };
-}
-
-const ROTATE_MAP: Record<EffectFourDirections, { x: number; y: number }> = {
-  top: { x: 1, y: 0 },
-  right: { x: 0, y: 1 },
-  bottom: { x: -1, y: 0 },
-  left: { x: 0, y: -1 },
+const DEFAULT_EASING = 'backOut';
+const DEFAULTS: Required<FlipIn> = {
+  type: 'FlipIn',
+  angle: 90,
+  direction: 'vertical',
+  perspective: 800,
 };
+
+export const schema = {
+  angle: { type: 'number', default: DEFAULTS.angle },
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: DEFAULTS.direction },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_3D_TRANSFORM_NAME].map((name) => name + suffix);
+}
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as FlipIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { initialRotate = 90, perspective = 800 } = namedEffect;
-  const [fadeIn, flipIn] = getNames(options);
-  const easing = options.easing || 'backOut';
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<FlipIn>;
+  const { angle = DEFAULTS.angle, perspective = DEFAULTS.perspective } = namedEffect!;
 
-  const from = getRotateFrom(direction, initialRotate);
-
-  const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-rotate-x': `${from.x}deg`,
-    '--motion-rotate-y': `${from.y}deg`,
-  };
+  const fadeOptions = { ...options, easing: FADE_IN_EASING };
+  const transformOptions = {
+    ...options,
+    composite: 'add',
+    easing,
+    namedEffect: {
+      ...namedEffect,
+      angle,
+      perspective,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      easing: 'quadOut',
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
-    },
-    {
-      ...options,
-      easing,
-      name: flipIn,
-      fill: getEntranceFill(options),
-      custom,
-      keyframes: [
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(var(--motion-rotate-x, ${custom['--motion-rotate-x']})) rotateY(var(--motion-rotate-y, ${custom['--motion-rotate-y']}))`,
-        },
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(0deg) rotateY(0deg)`,
-        },
-      ],
-    },
+    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    // the layout rotation comes first, so the motion moves along the element's rotated axes
+    useLayoutRotation(transformOptions, 'entrance', { composite: 'replace' }, asWeb, suffix),
+    useDirectionalPreset(getMotion3dTransform, transformOptions, 'entrance', {
+      defaultDirection: DEFAULTS.direction,
+      directionType: 'axis',
+    }, asWeb, suffix),
   ];
 }

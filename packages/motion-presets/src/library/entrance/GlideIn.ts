@@ -1,25 +1,33 @@
-import type { TimeAnimationOptions, GlideIn } from '../../types';
+import type { GlideIn, LengthValue, TimeAnimationOptions } from '../../types';
 import {
-  getCssUnits,
-  toKeyframeValue,
-  parseLength,
-  parseDirection,
-  getEntranceFill,
+  MOTION_TRANS_ROT_NAME,
+  getMotionTransRot,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import {
+  MOTION_FADE_NAME,
+  getMotionFade,
+  useBasicPreset,
+  useDirectionalPreset,
 } from '../../utils';
-import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION = 180;
-const DEFAULT_DISTANCE = { value: 100, unit: 'percentage' };
-const DIRECTION_KEYWORD_TO_ANGLE: Record<string, number> = {
-  top: 90,
-  right: 0,
-  bottom: 270,
-  left: 180,
+const FADE_IN_EASING = 'step-start';
+
+const DEFAULT_EASING = 'quintInOut';
+const DEFAULTS: Required<GlideIn> = {
+  type: 'GlideIn',
+  from: 180,
+  travel: { value: 100, unit: 'percentage' },
 };
-const ALLOW_ANGLES = true;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-glideIn', 'motion-fadeIn'];
+export const schema = {
+  from: { type: 'angle', default: DEFAULTS.from },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -27,66 +35,15 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as GlideIn;
-
-  const parsedDirection = parseDirection(
-    namedEffect?.direction,
-    FOUR_DIRECTIONS,
-    DEFAULT_DIRECTION,
-    ALLOW_ANGLES,
-  );
-  const direction =
-    typeof parsedDirection === 'string'
-      ? DIRECTION_KEYWORD_TO_ANGLE[parsedDirection]
-      : parsedDirection;
-
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-
-  const angleInRad = (direction * Math.PI) / 180;
-  const unit = getCssUnits(distance.unit);
-
-  const easing = options.easing || 'quintInOut';
-
-  const translateX = `${(Math.cos(angleInRad) * distance.value) | 0}${unit}`;
-  const translateY = `${(Math.sin(angleInRad) * distance.value * -1) | 0}${unit}`;
-
-  const custom = {
-    '--motion-translate-x': `${translateX}`,
-    '--motion-translate-y': `${translateY}`,
-  };
-
-  const [glideIn, fadeIn] = getNames(options);
+  const { easing = DEFAULT_EASING, suffix } = options as TimeAnimationOptions<GlideIn>;
 
   return [
-    {
-      ...options,
-      name: glideIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `translate(${toKeyframeValue(
-            custom,
-            '--motion-translate-x',
-            asWeb,
-          )}, ${toKeyframeValue(
-            custom,
-            '--motion-translate-y',
-            asWeb,
-          )}) rotate(var(--motion-rotate, 0deg))`,
-        },
-        {
-          transform: 'translate(0, 0) rotate(var(--motion-rotate, 0deg))',
-        },
-      ],
-    },
-    {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      custom: {},
-      keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
-    },
+    useBasicPreset(getMotionFade, { ...options, easing: FADE_IN_EASING }, 'entrance', asWeb, suffix),
+    useDirectionalPreset(getMotionTransRot, { ...options, easing }, 'entrance', {
+      defaultDirection: DEFAULTS.from as number,
+      defaultTravel: DEFAULTS.travel as LengthValue,
+      directionType: 'angle',
+    }, asWeb, suffix),
+    useLayoutRotation({ ...options, easing }, 'entrance', {}, asWeb, suffix),
   ];
 }

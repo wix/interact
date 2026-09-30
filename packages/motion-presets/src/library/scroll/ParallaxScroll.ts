@@ -1,10 +1,30 @@
-import type { ScrubAnimationOptions, ParallaxScroll, AnimationFillMode, DomApi } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import type { ScrubAnimationOptions, ParallaxScroll, DomApi } from '../../types';
+import {
+  MOTION_TRANS_ROT_NAME,
+  getMotionTransRot,
+  MOTION_LAYOUT_ROTATION_NAME,
+  useLayoutRotation,
+} from '../../transformUtils';
+import {
+  useDirectionalPreset,
+  withSharedScrollRange,
+} from '../../utils';
 
-const DEFAULT_PARALLAX_FACTOR = 0.5;
+const RANGE = 'continuous';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-parallaxScroll'];
+const DEFAULTS: Required<ParallaxScroll> = {
+  type: 'ParallaxScroll',
+  center: 0.5,
+  speed: 0.7159,
+};
+
+export const schema = {
+  center: { type: 'number', min: 0, max: 1, default: DEFAULTS.center },
+  speed: { type: 'number', min: 0, default: DEFAULTS.speed },
+};
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -12,45 +32,19 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as ParallaxScroll;
-  const { parallaxFactor = DEFAULT_PARALLAX_FACTOR } = namedEffect;
-  const easing = 'linear';
-
-  const start = `${-50 * parallaxFactor}vh`;
-  const end = `${50 * parallaxFactor}vh`;
-
-  const [parallaxScroll] = getNames(options);
-
-  const custom = {
-    '--motion-parallax-to': end,
-  };
-
-  // use transform: translateY(<value>) and not translate: 0 <value> because of WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=276281
-  return [
-    {
-      ...options,
-      name: parallaxScroll,
-      fill: 'both' as AnimationFillMode,
-      easing,
-      startOffsetAdd: start,
-      endOffsetAdd: end,
-      custom,
-      keyframes: [
-        {
-          transform: `translateY(calc(-1 * ${toKeyframeValue(
-            custom,
-            '--motion-parallax-to',
-            asWeb,
-          )})) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
-        },
-        {
-          transform: `translateY(${toKeyframeValue(
-            custom,
-            '--motion-parallax-to',
-            asWeb,
-          )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
-        },
-      ],
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<ParallaxScroll>;
+  const { center = DEFAULTS.center, speed = DEFAULTS.speed } = namedEffect!;
+  const transformOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      parallax: { center, speed },
+      range: RANGE,
     },
-  ];
+  } as ScrubAnimationOptions;
+
+  return withSharedScrollRange([
+    useDirectionalPreset(getMotionTransRot, transformOptions, 'scroll', {}, asWeb, suffix),
+    useLayoutRotation(transformOptions, 'scroll', {}, asWeb, suffix),
+  ]);
 }

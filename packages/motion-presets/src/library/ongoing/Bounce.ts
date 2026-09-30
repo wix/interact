@@ -1,71 +1,70 @@
-import type { TimeAnimationOptions, Bounce, AnimationExtraOptions, DomApi } from '../../types';
-import { getEasing, getTimingFactor, toKeyframeValue, mapRange } from '../../utils';
+import type { Bounce, DomApi, TimeAnimationOptions } from '../../types';
+import {
+  MOTION_LAYOUT_ROTATION_NAME,
+  MOTION_TRANS_ROT_NAME,
+  getMotionTransRot,
+  useLayoutRotation,
+} from '../../transformUtils';
+import type { LoopPoint } from '../../utils';
+import { useDirectionalPreset } from '../../utils';
 
-const BOUNCE_FACTOR_SOFT = 1;
-const BOUNCE_FACTOR_HARD = 3;
+const EASING = 'sineOut';
+const DIRECTION = 'top';
 
-const TRANSLATE_Y_KEYFRAMES = [
-  { keyframe: 0, translateY: 0 },
-  { keyframe: 8.8, translateY: -55 },
-  { keyframe: 17.6, translateY: -87 },
-  { keyframe: 26.5, translateY: -98 },
-  { keyframe: 35.3, translateY: -87 },
-  { keyframe: 44.1, translateY: -55 },
-  { keyframe: 53.1, translateY: 0 },
-  { keyframe: 66.2, translateY: -23 },
-  { keyframe: 81, translateY: 0 },
-  { keyframe: 86.8, translateY: -5 },
-  { keyframe: 94.1, translateY: 0 },
-  { keyframe: 97.1, translateY: -2 },
-  { keyframe: 100, translateY: 0 },
-];
+const DEFAULTS: Required<Bounce> = {
+  type: 'Bounce',
+  iterationDelay: 0,
+  travel: { value: 49, unit: 'px' },
+};
 
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
+
+// a jump up and smaller bounces after it
+const SHAPE: LoopPoint[] = [
+  [0, 0],
+  [55, 8.8],
+  [87, 17.6],
+  [98, 26.5],
+  [87, 35.3],
+  [55, 44.1],
+  [0, 53.1],
+  [23, 66.2],
+  [0, 81],
+  [5, 86.8],
+  [0, 94.1],
+  [2, 97.1],
+  [0, 100],
+].map(([value, time]) => [value / 98, time / 100]);
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+}
+
+export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as Bounce;
-  const { intensity = 0 } = namedEffect;
+export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { namedEffect, suffix } = options as TimeAnimationOptions<Bounce>;
+  const { travel = DEFAULTS.travel } = namedEffect!;
 
-  const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
-  const [name] = getNames(options);
-
-  const bounceFactor = mapRange(0, 1, BOUNCE_FACTOR_SOFT, BOUNCE_FACTOR_HARD, intensity);
-
-  const easing = getEasing('sineOut');
-
-  const custom = {
-    '--motion-bounce-factor': bounceFactor,
-  };
-
-  const keyframes = TRANSLATE_Y_KEYFRAMES.map(({ keyframe, translateY }) => ({
-    offset: (keyframe / 100) * timingFactor,
-    translate: `0px calc(${translateY / 2}px * ${toKeyframeValue(
-      custom,
-      '--motion-bounce-factor',
-      asWeb,
-    )})`,
-    easing,
-  }));
+  const bounceOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      direction: DIRECTION,
+      travel,
+    },
+  } as TimeAnimationOptions;
 
   return [
-    {
-      ...options,
-      name,
-      easing: 'linear',
-      duration: duration + iterationDelay,
-      custom,
-      keyframes,
-    },
+    useDirectionalPreset(getMotionTransRot, bounceOptions, 'ongoing', {
+      directionType: 'four-sides',
+      loop: { shape: SHAPE, easings: [EASING] },
+    }, asWeb, suffix),
+    useLayoutRotation(bounceOptions, 'ongoing', {}, asWeb, suffix),
   ];
-}
-
-export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Bounce)?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
-
-  return [`motion-bounce-${timingFactor}`];
 }

@@ -1,53 +1,42 @@
-import type { RevealIn, TimeAnimationOptions, EffectFourDirections } from '../../types';
-import { getClipPolygonParams, parseDirection, getEntranceFill } from '../../utils';
+import type { RevealIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
+import {
+  MOTION_REVEAL_NAME,
+  getMotionReveal,
+} from '../../clipUtils';
+import {
+  MOTION_FADE_NAME,
+  getMotionFade,
+  useBasicPreset,
+  useDirectionalPreset,
+} from '../../utils';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'left';
+const DEFAULT_EASING = 'cubicInOut';
+const DEFAULTS: Required<RevealIn> = {
+  type: 'RevealIn',
+  from: 'left',
+};
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-revealIn', 'motion-fadeIn'];
+export const schema = {
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.from },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME, MOTION_REVEAL_NAME].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
-  return style(options);
+  return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions) {
-  const namedEffect = options.namedEffect as RevealIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const [revealIn, fadeIn] = getNames(options);
-  const easing = options.easing || 'cubicInOut';
-
-  const start = getClipPolygonParams({ direction, minimum: 0 });
-  const end = getClipPolygonParams({ direction: 'initial' });
-
-  const custom = {
-    '--motion-clip-start': start,
-  };
+export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { easing = DEFAULT_EASING, suffix } = options as TimeAnimationOptions<RevealIn>;
 
   return [
-    {
-      ...options,
-      easing,
-      name: revealIn,
-      fill: getEntranceFill(options),
-      custom,
-      keyframes: [
-        {
-          clipPath: `var(--motion-clip-start, ${start})`,
-        },
-        {
-          clipPath: end,
-        },
-      ],
-    },
-    {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
-    },
+    useBasicPreset(getMotionFade, { ...options, easing }, 'entrance', asWeb, suffix),
+    useDirectionalPreset(getMotionReveal, { ...options, easing }, 'entrance', {
+      defaultDirection: DEFAULTS.from,
+      directionType: 'four-sides',
+    }, asWeb, suffix),
   ];
 }
