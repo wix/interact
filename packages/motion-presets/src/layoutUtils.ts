@@ -1,13 +1,7 @@
+import { toCSSPropertyName } from '@wix/motion';
 import type { DomApi, EffectEightDirections, EffectFourDirections } from './types';
+import { oppositeDirection } from './presetUtils';
 import { getElementOffset } from './utils';
-
-// the element's layout position inside its container, measured before the animation starts
-const LEFT = '--motion-left';
-const TOP = '--motion-top';
-const WIDTH = '--motion-width';
-const HEIGHT = '--motion-height';
-const CONTAINER_WIDTH = '--motion-container-width';
-const CONTAINER_HEIGHT = '--motion-container-height';
 
 export type LayoutContainer = 'viewport' | 'parent';
 
@@ -20,6 +14,16 @@ export type Layout = {
   containerWidth: number;
   containerHeight: number;
 };
+
+type LayoutProperty = Exclude<keyof Layout, 'measured'>;
+
+// the element's layout position inside its container, measured before the animation starts
+const ELEMENT_PROPERTIES: LayoutProperty[] = ['left', 'top', 'width', 'height'];
+const CONTAINER_PROPERTIES: LayoutProperty[] = ['containerWidth', 'containerHeight'];
+
+const layoutProperty = (name: LayoutProperty) => `--motion-${toCSSPropertyName(name)}`;
+const layoutVar = (name: LayoutProperty, fallback: string) =>
+  `var(${layoutProperty(name)}, ${fallback})`;
 
 // measures the element's position (and the container's size when it is not the viewport) into custom-properties
 // the returned layout is filled once measured, for values that must be computed from it (e.g. lazy timing)
@@ -37,30 +41,24 @@ export function measureLayout(dom?: DomApi, container: LayoutContainer = 'viewpo
     return layout;
   }
 
+  const inViewport = container === 'viewport';
   dom.measure((target) => {
     if (!target) {
       return;
     }
-    // the layout size, before transforms (as percentages of the element's own size are)
+    const parent = target.offsetParent as HTMLElement;
+    const { left, top } = inViewport
+      ? target.getBoundingClientRect()
+      : getElementOffset(target, parent);
     Object.assign(layout, {
       measured: true,
+      left,
+      top,
+      // the layout size, before transforms (as percentages of the element's own size are)
       width: target.offsetWidth,
       height: target.offsetHeight,
-    });
-    const { left, top } = target.getBoundingClientRect();
-    if (container === 'viewport') {
-      Object.assign(layout, {
-        left,
-        top,
-        containerWidth: window.innerWidth,
-        containerHeight: window.innerHeight,
-      });
-      return;
-    }
-    const parent = target.offsetParent as HTMLElement;
-    Object.assign(layout, getElementOffset(target, parent), {
-      containerWidth: parent?.offsetWidth || 0,
-      containerHeight: parent?.offsetHeight || 0,
+      containerWidth: inViewport ? window.innerWidth : parent?.offsetWidth || 0,
+      containerHeight: inViewport ? window.innerHeight : parent?.offsetHeight || 0,
     });
   });
 
@@ -68,14 +66,13 @@ export function measureLayout(dom?: DomApi, container: LayoutContainer = 'viewpo
     if (!target || !layout.measured) {
       return;
     }
-    target.style.setProperty(LEFT, `${layout.left}px`);
-    target.style.setProperty(TOP, `${layout.top}px`);
-    target.style.setProperty(WIDTH, `${layout.width}px`);
-    target.style.setProperty(HEIGHT, `${layout.height}px`);
-    if (container === 'parent') {
-      target.style.setProperty(CONTAINER_WIDTH, `${layout.containerWidth}px`);
-      target.style.setProperty(CONTAINER_HEIGHT, `${layout.containerHeight}px`);
-    }
+    // the viewport's size is left to the fallbacks
+    const properties = inViewport
+      ? ELEMENT_PROPERTIES
+      : [...ELEMENT_PROPERTIES, ...CONTAINER_PROPERTIES];
+    properties.forEach((name) =>
+      target.style.setProperty(layoutProperty(name), `${layout[name]}px`),
+    );
   });
 
   return layout;
@@ -84,50 +81,11 @@ export function measureLayout(dom?: DomApi, container: LayoutContainer = 'viewpo
 // distance to move the element along a side until it is fully outside its container
 // the element's size is explicit since a diagonal travel is used on both axes, and fallbacks (not measured) are always far enough
 const OFFSCREEN_TRAVEL: Record<EffectFourDirections, string> = {
-  left: `calc(var(${LEFT}, calc(100vw - 100%)) + var(${WIDTH}, 100%))`,
-  right: `calc(var(${CONTAINER_WIDTH}, 100vw) - var(${LEFT}, 0px))`,
-  top: `calc(var(${TOP}, calc(100vh - 100%)) + var(${HEIGHT}, 100%))`,
-  bottom: `calc(var(${CONTAINER_HEIGHT}, 100vh) - var(${TOP}, 0px))`,
+  left: `calc(${layoutVar('left', 'calc(100vw - 100%)')} + ${layoutVar('width', '100%')})`,
+  right: `calc(${layoutVar('containerWidth', '100vw')} - ${layoutVar('left', '0px')})`,
+  top: `calc(${layoutVar('top', 'calc(100vh - 100%)')} + ${layoutVar('height', '100%')})`,
+  bottom: `calc(${layoutVar('containerHeight', '100vh')} - ${layoutVar('top', '0px')})`,
 };
-
-const SIDES_OF: Record<EffectEightDirections, EffectFourDirections[]> = {
-  top: ['top'],
-  right: ['right'],
-  bottom: ['bottom'],
-  left: ['left'],
-  'top-right': ['top', 'right'],
-  'top-left': ['top', 'left'],
-  'bottom-right': ['bottom', 'right'],
-  'bottom-left': ['bottom', 'left'],
-};
-
-const OPPOSITE: Record<EffectEightDirections, EffectEightDirections> = {
-  top: 'bottom',
-  right: 'left',
-  bottom: 'top',
-  left: 'right',
-  'top-right': 'bottom-left',
-  'top-left': 'bottom-right',
-  'bottom-right': 'top-left',
-  'bottom-left': 'top-right',
-};
-
-// a diagonal leaves the container through the nearer of its two sides, moving along the 45deg line
-export function getOffscreenTravel(direction: EffectEightDirections) {
-  const [first, second] = SIDES_OF[direction];
-  return second
-    ? `calc(min(${OFFSCREEN_TRAVEL[first]}, ${OFFSCREEN_TRAVEL[second]}) * ${Math.SQRT2})`
-    : OFFSCREEN_TRAVEL[first];
-}
-
-// travels for moving towards `direction` from fully offscreen on the other side to fully offscreen on that side
-// travel - the side it comes from, toTravel - the side it moves to
-export function getOffscreenTravels(direction: EffectEightDirections) {
-  return {
-    travel: getOffscreenTravel(OPPOSITE[direction]),
-    toTravel: getOffscreenTravel(direction),
-  };
-}
 
 const OFFSCREEN_DISTANCE: Record<EffectFourDirections, (layout: Layout) => number> = {
   left: ({ left, width }) => left + width,
@@ -136,14 +94,32 @@ const OFFSCREEN_DISTANCE: Record<EffectFourDirections, (layout: Layout) => numbe
   bottom: ({ top, containerHeight }) => containerHeight - top,
 };
 
+const sidesOf = (direction: EffectEightDirections) =>
+  direction.split('-') as EffectFourDirections[];
+
+// a diagonal leaves the container through the nearer of its two sides, moving along the 45deg line
+export function getOffscreenTravel(direction: EffectEightDirections) {
+  const travels = sidesOf(direction).map((side) => OFFSCREEN_TRAVEL[side]);
+  return travels.length > 1 ? `calc(min(${travels.join(', ')}) * ${Math.SQRT2})` : travels[0];
+}
+
 // the measured distance (in px, along the motion) matching getOffscreenTravel
 export function getOffscreenDistance(layout: Layout, direction: EffectEightDirections) {
-  const [first, second] = SIDES_OF[direction];
-  return second
-    ? Math.min(OFFSCREEN_DISTANCE[first](layout), OFFSCREEN_DISTANCE[second](layout)) * Math.SQRT2
-    : OFFSCREEN_DISTANCE[first](layout);
+  const distances = sidesOf(direction).map((side) => OFFSCREEN_DISTANCE[side](layout));
+  return distances.length > 1 ? Math.min(...distances) * Math.SQRT2 : distances[0];
 }
 
 export function getOppositeDirection(direction: EffectEightDirections) {
-  return OPPOSITE[direction];
+  return sidesOf(direction)
+    .map((side) => oppositeDirection(side, 'four-sides'))
+    .join('-') as EffectEightDirections;
+}
+
+// travels for moving towards `direction` from fully offscreen on the other side to fully offscreen on that side
+// travel - the side it comes from, toTravel - the side it moves to
+export function getOffscreenTravels(direction: EffectEightDirections) {
+  return {
+    travel: getOffscreenTravel(getOppositeDirection(direction)),
+    toTravel: getOffscreenTravel(direction),
+  };
 }

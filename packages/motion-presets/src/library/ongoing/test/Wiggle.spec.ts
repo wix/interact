@@ -23,7 +23,7 @@ describe('Wiggle', () => {
 
   test('rotates only around z, first to the positive angle (25deg by default)', () => {
     const angleOf = (namedEffect = {}) => {
-      const { custom } = Wiggle.style(options(namedEffect))[1];
+      const custom = Wiggle.style(options(namedEffect))[1].custom!;
       expect(custom).toMatchObject({
         '--motion-transform-3d-angle-x': '0deg',
         '--motion-transform-3d-angle-y': '0deg',
@@ -39,14 +39,14 @@ describe('Wiggle', () => {
   });
 
   test('lifts up without rotating (25px by default)', () => {
-    const { custom } = Wiggle.style(options({ travel: '40px' }))[2];
+    const custom = Wiggle.style(options({ travel: '40px' }))[2].custom!;
     expect(custom).toMatchObject({
       '--motion-trans-rot-angle': '0deg',
       '--motion-trans-rot-direction': '90deg',
       '--motion-trans-rot-from': -1,
       '--motion-trans-rot-travel': '40px',
     });
-    expect(Wiggle.style(options())[2].custom['--motion-trans-rot-travel']).toBe('25px');
+    expect(Wiggle.style(options())[2].custom!['--motion-trans-rot-travel']).toBe('25px');
   });
 
   test('the rotation wobbles while the lift is a single bump, both linear', () => {
