@@ -13,6 +13,7 @@ import {
   InteractPlugin,
 } from '../types';
 import { getInterpolatedKey } from './utilities';
+import { getKeyframeSlots, getSlotKey } from './css';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
@@ -398,9 +399,29 @@ function _ensureInteractionEntry(
   return interactions[key];
 }
 
+// the sequence's effects in their slots - copied, since a referenced sequence can be in different slots
+function withSlots<T extends SequenceConfig | SequenceConfigRef>(
+  sequence: T,
+  getKey: (effectIndex: number) => string,
+  slots: Map<string, string>,
+): T {
+  const { effects = [] } = sequence as Partial<SequenceConfig>;
+  if (!effects.some((_, index) => slots.has(getKey(index)))) {
+    return sequence;
+  }
+  return {
+    ...sequence,
+    effects: effects.map((effect, index) => {
+      const suffix = slots.get(getKey(index));
+      return suffix ? { ...effect, suffix } : effect;
+    }),
+  };
+}
+
 function parseConfig(config: InteractConfig, useCustomElement: boolean = false): InteractCache {
   const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {} } = config;
   const interactions: InteractCache['interactions'] = {};
+  const slots = getKeyframeSlots(config);
 
   config.interactions?.forEach((interaction_, configIndex) => {
     const source = interaction_.key;
@@ -441,7 +462,9 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
     const interaction = {
       ...rest,
       effects: effects.length > 0 ? effects : undefined,
-      sequences: processedSequences,
+      sequences: processedSequences?.map((seq, sequenceIndex) =>
+        withSlots(seq, (effectIndex) => getSlotKey(configIndex, effectIndex, sequenceIndex), slots),
+      ),
     } as Interaction;
 
     interactions[source].triggers.push(interaction);
@@ -470,6 +493,10 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
 
       if (!(effect as EffectRef).effectId) {
         (effect as EffectRef).effectId = `eff-${configIndex}-${effects.length - 1 - effectIndex}`;
+      }
+      const suffix = slots.get(getSlotKey(configIndex, effects.length - 1 - effectIndex));
+      if (suffix) {
+        (effect as { suffix?: string }).suffix = suffix;
       }
 
       // if no target is specified, use the source element as the target
