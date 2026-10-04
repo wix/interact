@@ -202,16 +202,24 @@ function addViewEnterHandler(
       if (isIntersecting && !onceDone) {
         onceDone = true;
 
-        handlerMap.get(source)?.delete(handlerObj);
-        handlerMap.get(target)?.delete(handlerObj);
-
-        const remaining = handlerMap.get(source);
-
-        if (!remaining || remaining.size === 0) {
+        // if no more handlers exist we unobserve but keep the handler on the map
+        const sourceHandlers = handlerMap.get(source);
+        if (
+          !sourceHandlers ||
+          sourceHandlers.size === 0 ||
+          (sourceHandlers.size === 1 && sourceHandlers.has(handlerObj))
+        ) {
           const currentObserver = elementObserverMap.get(source) || observer;
           currentObserver.unobserve(source);
           elementFirstRun.delete(source);
         }
+
+        // we delete the handlers only when there is no running animation to cancel
+        // allowing remove to find the handler to cleanup ongoing animations
+        animation.onFinish(() => {
+          handlerMap.get(source)?.delete(handlerObj);
+          handlerMap.get(target)?.delete(handlerObj);
+        });
 
         animation.play(() => {
           const setEnterStart = () => {

@@ -10,12 +10,13 @@ export default defineConfig({
     lib: {
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
+        splittext: path.resolve(__dirname, 'src/splittext.ts'),
       },
       formats: ['es', 'cjs'],
     },
     sourcemap: true,
     rollupOptions: {
-      external: ['zod', '@wix/interact'],
+      external: ['zod', '@wix/interact', '@wix/splittext'],
       output: {
         entryFileNames: '[format]/[name].js',
         compact: true,
