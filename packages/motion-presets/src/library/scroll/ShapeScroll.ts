@@ -1,9 +1,9 @@
-import type { DomApi, ScrubAnimationOptions, ShapeScroll } from '../../types';
+import type { AnimationData, DomApi, ScrubAnimationOptions, ShapeScroll } from '../../types';
 import { SCROLL_RANGES, SHAPES } from '../../consts';
 import { MOTION_SHAPE_NAME, getMotionShape } from '../../clipUtils';
+import { getScrollEasing } from '../../easingUtils';
+import { getScrollOverrides, parseRange } from '../../rangeUtils';
 import { parseKeywordLazy } from '../../utils';
-import { useBasicPreset } from '../../presetUtils';
-import { scrollGroup } from '../../scrollGroup';
 
 const EASING = 'circInOut';
 
@@ -28,23 +28,27 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<ShapeScroll>;
   const { shape = DEFAULTS.shape, start: minimum = DEFAULTS.start } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
+  const parsedShape = parseKeywordLazy(shape, SHAPES, DEFAULTS.shape);
 
   const shapeOptions = {
     ...options,
     namedEffect: {
       ...namedEffect,
       minimum,
-      shape: parseKeywordLazy(shape, SHAPES, DEFAULTS.shape),
+      shape: parsedShape,
     },
   } as ScrubAnimationOptions;
+  const easing = getScrollEasing(range, false, { easing: EASING, outEasing: EASING });
 
   return [
-    useBasicPreset(getMotionShape, shapeOptions, scrollGroup, asWeb, suffix, {
-      easing: EASING,
-      outEasing: EASING,
-    }),
+    {
+      ...shapeOptions,
+      ...getScrollOverrides(options, range, easing),
+      ...getMotionShape({ minimum, shape: parsedShape }, asWeb, suffix),
+    },
   ];
 }

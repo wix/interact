@@ -1,8 +1,7 @@
-import type { BlurScroll, ScrubAnimationOptions, DomApi } from '../../types';
+import type { BlurScroll, ScrubAnimationOptions, DomApi, AnimationData } from '../../types';
 import { SCROLL_RANGES } from '../../consts';
 import { getMotionBlur, MOTION_BLUR_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset } from '../../presetUtils';
-import { scrollGroup } from '../../scrollGroup';
+import { getLinearScrollEasing, getScrollOverrides, parseRange } from '../../rangeUtils';
 
 const DEFAULTS: Required<BlurScroll> = {
   type: 'BlurScroll',
@@ -23,9 +22,10 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<BlurScroll>;
   const { blur = DEFAULTS.blur } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
 
   const blurOptions = {
     ...options,
@@ -35,5 +35,11 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     },
   } as ScrubAnimationOptions;
 
-  return [useBasicPreset(getMotionBlur, blurOptions, scrollGroup, asWeb, suffix)];
+  return [
+    {
+      ...blurOptions,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, false)),
+      ...getMotionBlur({ blur }, asWeb, suffix),
+    },
+  ];
 }

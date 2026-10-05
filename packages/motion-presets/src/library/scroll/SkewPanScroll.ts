@@ -1,16 +1,20 @@
-import type { DomApi, ScrubAnimationOptions, SkewPanScroll } from '../../types';
+import type { AnimationData, DomApi, ScrubAnimationOptions, SkewPanScroll } from '../../types';
 import { SCROLL_RANGES, TWO_SIDES_DIRECTIONS } from '../../consts';
+import { sideDirection, toMotionRange } from '../../directions';
 import { getOffscreenTravels, measureLayout } from '../../layoutUtils';
+import {
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
+  getMotionLayoutRotation,
   getMotionTransRot,
-  useLayoutRotation,
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
-import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
-import { scrollGroup } from '../../scrollGroup';
-import { sideDirection } from '../../directions';
 
 const DEFAULTS: Required<SkewPanScroll> = {
   type: 'SkewPanScroll',
@@ -39,37 +43,49 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<SkewPanScroll>;
   const { direction, skew = DEFAULTS.skew } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
 
   // from fully outside the viewport on one side to fully outside on the other side
   const side = parseKeywordLazy(direction, TWO_SIDES_DIRECTIONS, DEFAULTS.direction);
+  const { travel, toTravel } = getOffscreenTravels(side);
+  // leaning into the movement, flipping as it passes its layout position
+  const skewXY = { x: -skew };
 
   const panOptions = {
     ...options,
     namedEffect: {
       ...namedEffect,
       direction: side,
-      ...getOffscreenTravels(side),
-      // leaning into the movement, flipping as it passes its layout position
-      skew: { x: -skew },
+      travel,
+      toTravel,
+      skew: skewXY,
     },
   } as ScrubAnimationOptions;
 
+  // 'out' is the reversed 'in' of the opposite direction, so its travel is the one towards the original direction
+  const motionTravels =
+    range === 'out' ? { travel: toTravel, toTravel: travel } : { travel, toTravel };
+  const motionSide = range === 'out' ? sideDirection.opposite(side) : side;
+
   return withSharedScrollRange([
-    useDirectionalPreset(
-      getMotionTransRot,
-      panOptions,
-      scrollGroup,
-      {
-        defaultDirection: DEFAULTS.direction,
-        defaultRange: DEFAULTS.range,
-        directionType: sideDirection,
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(panOptions, scrollGroup, { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    {
+      ...panOptions,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
+      ...getMotionTransRot(
+        toMotionRange(sideDirection, motionSide, range),
+        { skew: skewXY, ...motionTravels },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...panOptions,
+      composite: 'add',
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, false)),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ]);
 }
