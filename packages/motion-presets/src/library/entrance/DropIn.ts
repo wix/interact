@@ -7,6 +7,7 @@ import {
 } from '../../transformUtils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPresetAsBasic } from '../../presetUtils';
+import { entranceGroup } from '../../entranceGroup';
 
 const FADE_IN_DURATION_FACTOR = 0.8;
 const FADE_IN_EASING = 'quadOut';
@@ -50,8 +51,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useLayoutRotation(transformOptions, 'entrance', { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPresetAsBasic(getMotionScale, transformOptions, 'entrance', {}, asWeb, suffix),
+    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
+    useLayoutRotation(transformOptions, entranceGroup, { composite: 'replace' }, asWeb, suffix),
+    useDirectionalPresetAsBasic(getMotionScale, transformOptions, entranceGroup, {}, asWeb, suffix),
   ];
 }

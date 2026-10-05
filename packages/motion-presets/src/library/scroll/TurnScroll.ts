@@ -15,6 +15,7 @@ import {
   useDirectionalPresetAsBasic,
   withSharedScrollRange,
 } from '../../presetUtils';
+import { scrollGroup } from '../../scrollGroup';
 
 const DEFAULTS: Required<TurnScroll> = {
   type: 'TurnScroll',
@@ -78,7 +79,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       turnOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
@@ -87,11 +88,11 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(turnOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    useLayoutRotation(turnOptions, scrollGroup, { defaultRange: DEFAULTS.range }, asWeb, suffix),
     useDirectionalPresetAsBasic(
       getMotionScale,
       scaleOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultRange: DEFAULTS.range,
       },

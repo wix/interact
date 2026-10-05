@@ -8,6 +8,7 @@ import {
 } from '../../transformUtils';
 import { compareKeywordToNonDefaults } from '../../utils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
+import { scrollGroup } from '../../scrollGroup';
 
 const DEPTH = '300px';
 const ROTATION_ANGLE = 68;
@@ -55,7 +56,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotion3dTransform,
       transformOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultRange: DEFAULTS.range,
         directionType: 'four-sides',
@@ -63,6 +64,12 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(transformOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    useLayoutRotation(
+      transformOptions,
+      scrollGroup,
+      { defaultRange: DEFAULTS.range },
+      asWeb,
+      suffix,
+    ),
   ]);
 }

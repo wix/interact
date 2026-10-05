@@ -3,6 +3,7 @@ import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 import { MOTION_SHUTTERS_NAME, getMotionShutters } from '../../clipUtils';
 import { compareKeywordToNonDefaults } from '../../utils';
 import { useDirectionalPreset } from '../../presetUtils';
+import { scrollGroup } from '../../scrollGroup';
 
 const EASING = 'sineOut';
 const IN_EASING = 'sineIn';
@@ -71,7 +72,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionShutters,
       shuttersOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,

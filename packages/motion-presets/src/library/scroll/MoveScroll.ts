@@ -8,6 +8,7 @@ import {
 } from '../../transformUtils';
 import { compareKeywordToNonDefaults, parseLength } from '../../utils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
+import { scrollGroup } from '../../scrollGroup';
 
 const DEFAULTS: Required<MoveScroll> = {
   type: 'MoveScroll',
@@ -60,7 +61,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ...useDirectionalPreset(
         getMotionTransRot,
         options,
-        'scroll',
+        scrollGroup,
         {
           defaultDirection: DEFAULTS.direction as number,
           defaultRange: DEFAULTS.range,
@@ -73,6 +74,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       startOffsetAdd,
       endOffsetAdd,
     },
-    useLayoutRotation(options, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    useLayoutRotation(options, scrollGroup, { defaultRange: DEFAULTS.range }, asWeb, suffix),
   ]);
 }

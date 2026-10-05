@@ -3,6 +3,7 @@ import { SCROLL_RANGES, SHAPES } from '../../consts';
 import { MOTION_SHAPE_NAME, getMotionShape } from '../../clipUtils';
 import { parseKeywordLazy } from '../../utils';
 import { useBasicPreset } from '../../presetUtils';
+import { scrollGroup } from '../../scrollGroup';
 
 const EASING = 'circInOut';
 
@@ -41,7 +42,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   } as ScrubAnimationOptions;
 
   return [
-    useBasicPreset(getMotionShape, shapeOptions, 'scroll', asWeb, suffix, {
+    useBasicPreset(getMotionShape, shapeOptions, scrollGroup, asWeb, suffix, {
       easing: EASING,
       outEasing: EASING,
     }),

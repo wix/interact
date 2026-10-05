@@ -7,6 +7,7 @@ import {
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { useDirectionalPreset } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const EASING = 'sineOut';
 const DIRECTION = 'top';
@@ -64,7 +65,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       bounceOptions,
-      'ongoing',
+      ongoingGroup,
       {
         directionType: 'four-sides',
         loop: { shape: SHAPE, easings: [EASING] },
@@ -72,6 +73,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(bounceOptions, 'ongoing', {}, asWeb, suffix),
+    useLayoutRotation(bounceOptions, ongoingGroup, {}, asWeb, suffix),
   ];
 }

@@ -10,6 +10,7 @@ import {
 import { parseKeywordLazy } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { oppositeDirection, useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { entranceGroup } from '../../entranceGroup';
 
 const TRAVEL = '100%';
 
@@ -68,13 +69,13 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, { ...options, easing }, 'entrance', asWeb, suffix),
+    useBasicPreset(getMotionFade, { ...options, easing }, entranceGroup, asWeb, suffix),
     // the layout rotation comes first, so the motion moves along the element's rotated axes
-    useLayoutRotation(transformOptions, 'entrance', { composite: 'replace' }, asWeb, suffix),
+    useLayoutRotation(transformOptions, entranceGroup, { composite: 'replace' }, asWeb, suffix),
     useDirectionalPreset(
       getMotionTransRot,
       transformOptions,
-      'entrance',
+      entranceGroup,
       {
         defaultDirection: DEFAULTS.from,
         directionType: 'four-sides',
@@ -85,7 +86,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionReveal,
       revealOptions,
-      'entrance',
+      entranceGroup,
       {
         defaultDirection: oppositeDirection(DEFAULTS.from, 'four-sides') as EffectFourDirections,
         directionType: 'four-sides',

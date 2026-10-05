@@ -6,6 +6,7 @@ import {
   useLayoutRotation,
 } from '../../transformUtils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
+import { parallaxScrollGroup, scrollGroup } from '../../scrollGroup';
 
 const RANGE = 'continuous';
 
@@ -41,7 +42,14 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   } as ScrubAnimationOptions;
 
   return withSharedScrollRange([
-    useDirectionalPreset(getMotionTransRot, transformOptions, 'scroll', {}, asWeb, suffix),
-    useLayoutRotation(transformOptions, 'scroll', {}, asWeb, suffix),
+    useDirectionalPreset(
+      getMotionTransRot,
+      transformOptions,
+      parallaxScrollGroup,
+      {},
+      asWeb,
+      suffix,
+    ),
+    useLayoutRotation(transformOptions, scrollGroup, {}, asWeb, suffix),
   ]);
 }

@@ -14,6 +14,7 @@ import {
   useDirectionalPreset,
   useDirectionalPresetAsBasic,
 } from '../../presetUtils';
+import { entranceGroup } from '../../entranceGroup';
 
 const FADE_IN_EASING = 'quadOut';
 const TRANSFORM_2D_IN_DURATION_FACTOR = 0.85;
@@ -60,16 +61,16 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     useBasicPreset(
       getMotionFade,
       { ...options, easing: FADE_IN_EASING },
-      'entrance',
+      entranceGroup,
       asWeb,
       suffix,
     ),
-    useLayoutRotation(transformOptions, 'entrance', { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPresetAsBasic(getMotionScale, transformOptions, 'entrance', {}, asWeb, suffix),
+    useLayoutRotation(transformOptions, entranceGroup, { composite: 'replace' }, asWeb, suffix),
+    useDirectionalPresetAsBasic(getMotionScale, transformOptions, entranceGroup, {}, asWeb, suffix),
     useDirectionalPreset(
       getMotionWink,
       { ...options, easing },
-      'entrance',
+      entranceGroup,
       {
         defaultDirection: DEFAULTS.direction,
         directionType: 'axis',

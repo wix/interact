@@ -16,6 +16,7 @@ import {
 import { compareKeywordToNonDefaults } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { entranceGroup } from '../../entranceGroup';
 
 // BounceIn uses easing to create the bouncing movement and uses only 2 keyframes
 const BOUNCE_IN_EASING = `linear(${[
@@ -117,11 +118,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   };
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
     useDirectionalPreset(
       preset,
       transformOptions,
-      'entrance',
+      entranceGroup,
       {
         defaultDirection: DEFAULTS.from as EffectFourDirections,
         defaultTravel: DEFAULTS.travel as LengthValue,
@@ -130,6 +131,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
+    useLayoutRotation(transformOptions, entranceGroup, {}, asWeb, suffix),
   ];
 }

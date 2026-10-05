@@ -7,6 +7,7 @@ import {
   useLayoutRotation,
 } from '../../transformUtils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
+import { parallaxScrollGroup, scrollGroup } from '../../scrollGroup';
 
 const DIRECTION = 'clockwise';
 
@@ -56,7 +57,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotion3dTransform,
       transformOptions,
-      'scroll',
+      parallaxScrollGroup,
       {
         defaultRange: DEFAULTS.range,
         directionType: 'spin',
@@ -64,6 +65,12 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(transformOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    useLayoutRotation(
+      transformOptions,
+      scrollGroup,
+      { defaultRange: DEFAULTS.range },
+      asWeb,
+      suffix,
+    ),
   ]);
 }

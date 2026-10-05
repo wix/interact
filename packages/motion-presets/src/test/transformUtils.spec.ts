@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
 import type { MotionRange } from '../presetUtils';
+import { entranceGroup } from '../entranceGroup';
+import { createParallax } from '../parallaxUtils';
+import { scrollGroup } from '../scrollGroup';
 import {
   MOTION_3D_TRANSFORM_NAME,
   MOTION_LAYOUT_ROTATION_NAME,
@@ -78,7 +81,7 @@ describe('getMotionTransRot', () => {
   test('parallax adds range offsets and parallax custom properties', () => {
     const data = getMotionTransRot(
       { ...RANGES.inVertical },
-      { parallax: { range: COVER, speed: 0.5, center: 0.5 } },
+      { parallax: createParallax(COVER, false, 0.5, 0.5) },
       false,
     ) as any;
     expect(data).toMatchSnapshot();
@@ -192,8 +195,8 @@ describe('layout rotation', () => {
 
   test('useLayoutRotation composites add by default, or as given', () => {
     const options = { namedEffect: { type: 'X' }, duration: 100 } as any;
-    expect(useLayoutRotation(options, 'entrance').composite).toBe('add');
-    expect(useLayoutRotation(options, 'entrance', { composite: 'replace' }).composite).toBe(
+    expect(useLayoutRotation(options, entranceGroup).composite).toBe('add');
+    expect(useLayoutRotation(options, entranceGroup, { composite: 'replace' }).composite).toBe(
       'replace',
     );
   });
@@ -201,7 +204,7 @@ describe('layout rotation', () => {
   test('useLayoutRotation keeps the scroll range of its default range', () => {
     const options = { namedEffect: { type: 'X' } } as any;
     expect(
-      useLayoutRotation(structuredClone(options), 'scroll', { defaultRange: 'out' }),
+      useLayoutRotation(structuredClone(options), scrollGroup, { defaultRange: 'out' }),
     ).toMatchSnapshot();
   });
 });

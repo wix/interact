@@ -1,6 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
 import type { MotionRange } from '../presetUtils';
+import { entranceGroup } from '../entranceGroup';
+import { ongoingGroup } from '../ongoingGroup';
+import { parallaxScrollGroup, scrollGroup } from '../scrollGroup';
+import type { Parallax } from '../parallaxUtils';
+import { createParallax } from '../parallaxUtils';
 import {
   oppositeDirection,
   useBasicPreset,
@@ -27,7 +32,7 @@ describe('useBasicPreset', () => {
     const result: any = useBasicPreset(
       basicPreset,
       { duration: 500, namedEffect: { type: 'FadeIn' } } as any,
-      'entrance',
+      entranceGroup,
     );
     expect(result.name).toBe('basic');
     expect(result.duration).toBe(500);
@@ -39,7 +44,7 @@ describe('useBasicPreset', () => {
       const result: any = useBasicPreset(
         basicPreset,
         { easing: 'sineIn', namedEffect: { type: 'X' } } as any,
-        'entrance',
+        entranceGroup,
       );
       expect(result.fill).toBe('backwards');
       expect(result.easing).toBe('sineIn');
@@ -49,7 +54,7 @@ describe('useBasicPreset', () => {
       const result: any = useBasicPreset(
         basicPreset,
         { fill: 'both', namedEffect: { type: 'X' } } as any,
-        'entrance',
+        entranceGroup,
       );
       expect(result.fill).toBe('both');
     });
@@ -60,7 +65,7 @@ describe('useBasicPreset', () => {
       useBasicPreset(
         basicPreset,
         { easing: 'user-easing', namedEffect: { type: 'X', range }, ...options } as any,
-        'scroll',
+        scrollGroup,
         true,
         '',
         parsingOptions,
@@ -120,7 +125,7 @@ describe('useBasicPreset', () => {
       const result = useBasicPreset(
         basicPreset,
         { namedEffect: { type: 'X', range: 'nope' } } as any,
-        'scroll',
+        scrollGroup,
         true,
         '',
         { defaultRange: 'out' },
@@ -161,7 +166,7 @@ describe('useBasicPreset', () => {
           namedEffect: { type: 'X', ...namedEffect },
           ...options,
         } as any,
-        'ongoing',
+        ongoingGroup,
         true,
         '',
         parsingOptions,
@@ -211,14 +216,14 @@ describe('useDirectionalPreset', () => {
     const sides = { directionType: 'four-sides' };
 
     test('entrance starts at the `from` side', () => {
-      expect(run('entrance', { from: 'left' }, sides).motionRange).toEqual({
+      expect(run(entranceGroup, { from: 'left' }, sides).motionRange).toEqual({
         fromSign: -1,
         toSign: 0,
         vertical: false,
         movementAngle: '0deg',
       });
-      expect(run('entrance', { from: 'right' }, sides).motionRange.fromSign).toBe(1);
-      expect(run('entrance', { from: 'bottom' }, sides).motionRange).toEqual({
+      expect(run(entranceGroup, { from: 'right' }, sides).motionRange.fromSign).toBe(1);
+      expect(run(entranceGroup, { from: 'bottom' }, sides).motionRange).toEqual({
         fromSign: 1,
         toSign: 0,
         vertical: true,
@@ -228,7 +233,7 @@ describe('useDirectionalPreset', () => {
 
     test('entrance falls back to the default direction', () => {
       expect(
-        run('entrance', { from: 'nope' }, { ...sides, defaultDirection: 'top' }).motionRange,
+        run(entranceGroup, { from: 'nope' }, { ...sides, defaultDirection: 'top' }).motionRange,
       ).toMatchObject({
         fromSign: -1,
         vertical: true,
@@ -236,31 +241,31 @@ describe('useDirectionalPreset', () => {
     });
 
     test('scroll moves towards `direction`', () => {
-      expect(run('scroll', { direction: 'right' }, sides).motionRange).toMatchObject({
+      expect(run(scrollGroup, { direction: 'right' }, sides).motionRange).toMatchObject({
         fromSign: -1,
         toSign: 0,
       });
-      expect(run('scroll', { direction: 'top' }, sides).motionRange).toMatchObject({
+      expect(run(scrollGroup, { direction: 'top' }, sides).motionRange).toMatchObject({
         fromSign: 1,
         vertical: true,
       });
     });
 
     test('scroll out is the opposite direction reversed', () => {
-      const { motionRange, result } = run('scroll', { direction: 'right', range: 'out' }, sides);
+      const { motionRange, result } = run(scrollGroup, { direction: 'right', range: 'out' }, sides);
       expect(motionRange).toMatchObject({ fromSign: 1, toSign: 0, movementAngle: '0deg' });
       expect(result.reversed).toBe(true);
     });
 
     test('scroll continuous ends at the opposite sign', () => {
       expect(
-        run('scroll', { direction: 'right', range: 'continuous' }, sides).motionRange,
+        run(scrollGroup, { direction: 'right', range: 'continuous' }, sides).motionRange,
       ).toMatchObject({
         fromSign: -1,
         toSign: 1,
       });
       expect(
-        run('scroll', { direction: 'left', range: 'continuous' }, sides).motionRange,
+        run(scrollGroup, { direction: 'left', range: 'continuous' }, sides).motionRange,
       ).toMatchObject({
         fromSign: 1,
         toSign: -1,
@@ -268,13 +273,13 @@ describe('useDirectionalPreset', () => {
     });
 
     test('scroll continuous directional linear easing stays linear', () => {
-      expect(run('scroll', { direction: 'right', range: 'continuous' }, sides).result.easing).toBe(
-        'linear',
-      );
+      expect(
+        run(scrollGroup, { direction: 'right', range: 'continuous' }, sides).result.easing,
+      ).toBe('linear');
     });
 
     test('ongoing keyframes start at the peak towards `direction`', () => {
-      expect(run('ongoing', { direction: 'right' }, sides).motionRange).toMatchObject({
+      expect(run(ongoingGroup, { direction: 'right' }, sides).motionRange).toMatchObject({
         fromSign: 1,
         movementAngle: '0deg',
       });
@@ -283,28 +288,30 @@ describe('useDirectionalPreset', () => {
 
   describe('axis', () => {
     test('vertical and horizontal', () => {
-      expect(run('entrance', { direction: 'vertical' }).motionRange).toEqual({
+      expect(run(entranceGroup, { direction: 'vertical' }).motionRange).toEqual({
         fromSign: -1,
         toSign: 0,
         vertical: true,
         movementAngle: '90deg',
       });
-      expect(run('entrance', { direction: 'horizontal' }).motionRange).toMatchObject({
+      expect(run(entranceGroup, { direction: 'horizontal' }).motionRange).toMatchObject({
         vertical: false,
         movementAngle: '0deg',
       });
     });
 
     test('defaults to vertical and is not flipped by group or out', () => {
-      expect(run('entrance', {}).motionRange.vertical).toBe(true);
-      expect(run('ongoing', { direction: 'horizontal' }).motionRange).toMatchObject({
+      expect(run(entranceGroup, {}).motionRange.vertical).toBe(true);
+      expect(run(ongoingGroup, { direction: 'horizontal' }).motionRange).toMatchObject({
         fromSign: -1,
         vertical: false,
       });
-      expect(run('scroll', { direction: 'horizontal', range: 'out' }).motionRange).toMatchObject({
-        fromSign: -1,
-        vertical: false,
-      });
+      expect(run(scrollGroup, { direction: 'horizontal', range: 'out' }).motionRange).toMatchObject(
+        {
+          fromSign: -1,
+          vertical: false,
+        },
+      );
     });
   });
 
@@ -312,21 +319,21 @@ describe('useDirectionalPreset', () => {
     const spin = { directionType: 'spin' };
 
     test('clockwise starts negative, counter-clockwise positive, no movement angle', () => {
-      expect(run('entrance', { direction: 'clockwise' }, spin).motionRange).toEqual({
+      expect(run(entranceGroup, { direction: 'clockwise' }, spin).motionRange).toEqual({
         fromSign: -1,
         toSign: 0,
         vertical: false,
         movementAngle: '0deg',
       });
-      expect(run('entrance', { direction: 'counter-clockwise' }, spin).motionRange.fromSign).toBe(
-        1,
-      );
+      expect(
+        run(entranceGroup, { direction: 'counter-clockwise' }, spin).motionRange.fromSign,
+      ).toBe(1);
     });
 
     test('is not flipped for entrance or ongoing, only for scroll out', () => {
-      expect(run('ongoing', { direction: 'clockwise' }, spin).motionRange.fromSign).toBe(-1);
+      expect(run(ongoingGroup, { direction: 'clockwise' }, spin).motionRange.fromSign).toBe(-1);
       expect(
-        run('scroll', { direction: 'clockwise', range: 'out' }, spin).motionRange.fromSign,
+        run(scrollGroup, { direction: 'clockwise', range: 'out' }, spin).motionRange.fromSign,
       ).toBe(1);
     });
   });
@@ -335,27 +342,27 @@ describe('useDirectionalPreset', () => {
     const angle = { directionType: 'angle' };
 
     test('scroll uses numeric and css angles as is', () => {
-      expect(run('scroll', { direction: 45 }, angle).motionRange).toMatchObject({
+      expect(run(scrollGroup, { direction: 45 }, angle).motionRange).toMatchObject({
         fromSign: -1,
         movementAngle: '45deg',
       });
-      expect(run('scroll', { direction: '0.5turn' }, angle).motionRange.movementAngle).toBe(
+      expect(run(scrollGroup, { direction: '0.5turn' }, angle).motionRange.movementAngle).toBe(
         '0.5turn',
       );
-      expect(run('scroll', { direction: '30' }, angle).motionRange.movementAngle).toBe('30deg');
+      expect(run(scrollGroup, { direction: '30' }, angle).motionRange.movementAngle).toBe('30deg');
       expect(
-        run('scroll', { direction: 'calc(10deg + 5deg)' }, angle).motionRange.movementAngle,
+        run(scrollGroup, { direction: 'calc(10deg + 5deg)' }, angle).motionRange.movementAngle,
       ).toBe('calc(10deg + 5deg)');
     });
 
     test('entrance `from` angle is turned around', () => {
-      expect(run('entrance', { from: 45 }, angle).motionRange.movementAngle).toBe(
+      expect(run(entranceGroup, { from: 45 }, angle).motionRange.movementAngle).toBe(
         'calc(180deg + 45deg)',
       );
     });
 
     test('accepts side keywords', () => {
-      expect(run('entrance', { from: 'left' }, angle).motionRange).toMatchObject({
+      expect(run(entranceGroup, { from: 'left' }, angle).motionRange).toMatchObject({
         fromSign: -1,
         movementAngle: '0deg',
       });
@@ -363,7 +370,7 @@ describe('useDirectionalPreset', () => {
 
     test('falls back to the default angle', () => {
       expect(
-        run('scroll', { direction: 'nope' }, { ...angle, defaultDirection: 90 }).motionRange
+        run(scrollGroup, { direction: 'nope' }, { ...angle, defaultDirection: 90 }).motionRange
           .movementAngle,
       ).toBe('90deg');
     });
@@ -371,18 +378,18 @@ describe('useDirectionalPreset', () => {
 
   describe('params', () => {
     test('parses travel and depth with defaults', () => {
-      expect(run('entrance', {}).params).toMatchObject({
+      expect(run(entranceGroup, {}).params).toMatchObject({
         travel: '0px',
         depth: '0px',
         toTravel: undefined,
       });
-      expect(run('entrance', { travel: 50, depth: '20%' }).params).toMatchObject({
+      expect(run(entranceGroup, { travel: 50, depth: '20%' }).params).toMatchObject({
         travel: '50px',
         depth: '20%',
       });
       expect(
         run(
-          'entrance',
+          entranceGroup,
           {},
           { defaultTravel: { value: 10, unit: 'vh' }, defaultDepth: { value: 5, unit: 'px' } },
         ).params,
@@ -390,37 +397,37 @@ describe('useDirectionalPreset', () => {
     });
 
     test('keeps the other named effect params', () => {
-      expect(run('entrance', { angle: 30 }).params.angle).toBe(30);
+      expect(run(entranceGroup, { angle: 30 }).params.angle).toBe(30);
     });
 
     test('swaps travel and toTravel on out', () => {
-      expect(run('scroll', { travel: '10px', toTravel: '20px' }).params).toMatchObject({
+      expect(run(scrollGroup, { travel: '10px', toTravel: '20px' }).params).toMatchObject({
         travel: '10px',
         toTravel: '20px',
       });
       expect(
-        run('scroll', { travel: '10px', toTravel: '20px', range: 'out' }).params,
+        run(scrollGroup, { travel: '10px', toTravel: '20px', range: 'out' }).params,
       ).toMatchObject({
         travel: '20px',
         toTravel: '10px',
       });
-      expect(run('scroll', { travel: '10px', range: 'out' }).params).toMatchObject({
+      expect(run(scrollGroup, { travel: '10px', range: 'out' }).params).toMatchObject({
         travel: '10px',
         toTravel: undefined,
       });
     });
 
     test('maps the pivot to a transform origin', () => {
-      expect(run('entrance', {}).params.transformOrigin).toEqual({ x: '0px', y: '0px' });
-      expect(run('entrance', { pivot: 'top-left' }).params.transformOrigin).toEqual({
+      expect(run(entranceGroup, {}).params.transformOrigin).toEqual({ x: '0px', y: '0px' });
+      expect(run(entranceGroup, { pivot: 'top-left' }).params.transformOrigin).toEqual({
         x: '-50%',
         y: '-50%',
       });
-      expect(run('entrance', { pivot: 'bottom-right' }).params.transformOrigin).toEqual({
+      expect(run(entranceGroup, { pivot: 'bottom-right' }).params.transformOrigin).toEqual({
         x: '50%',
         y: '50%',
       });
-      expect(run('entrance', { pivot: 'right' }).params.transformOrigin).toEqual({
+      expect(run(entranceGroup, { pivot: 'right' }).params.transformOrigin).toEqual({
         x: '50%',
         y: '0px',
       });
@@ -428,20 +435,21 @@ describe('useDirectionalPreset', () => {
 
     test('limits the pivot by pivotType', () => {
       expect(
-        run('entrance', { pivot: 'top-left' }, { pivotType: 'four-sides' }).params.transformOrigin,
+        run(entranceGroup, { pivot: 'top-left' }, { pivotType: 'four-sides' }).params
+          .transformOrigin,
       ).toEqual({
         x: '0px',
         y: '0px',
       });
       expect(
         run(
-          'entrance',
+          entranceGroup,
           { pivot: 'top' },
           { pivotType: 'four-corners', defaultPivot: 'bottom-left' },
         ).params.transformOrigin,
       ).toEqual({ x: '-50%', y: '50%' });
       expect(
-        run('entrance', { pivot: 'top' }, { pivotType: 'four-sides' }).params.transformOrigin,
+        run(entranceGroup, { pivot: 'top' }, { pivotType: 'four-sides' }).params.transformOrigin,
       ).toEqual({
         x: '0px',
         y: '-50%',
@@ -450,34 +458,45 @@ describe('useDirectionalPreset', () => {
   });
 
   describe('parallax', () => {
-    test('defaults the center by range and sets the parallax range to the scroll range', () => {
-      const inRange = run('scroll', { parallax: { speed: 2 } });
-      expect(inRange.params.parallax.center).toBe(1);
-      expect(inRange.params.parallax.range).toEqual({
-        startOffset: cover(0),
-        endOffset: cover(50),
-      });
-      expect(inRange.motionRange.parallaxReversed).toBe(false);
+    const apply = (parallax: Parallax) => {
+      const custom = {};
+      const rangeOffsets = parallax(custom, '--p');
+      return { custom, rangeOffsets };
+    };
 
+    test('defaults the center by range and spans the scroll range', () => {
+      expect(apply(run(parallaxScrollGroup, { parallax: { speed: 2 } }).params.parallax)).toEqual(
+        apply(createParallax({ startOffset: cover(0), endOffset: cover(50) } as any, false, 2, 1)),
+      );
       expect(
-        run('scroll', { parallax: { speed: 2 }, range: 'continuous' }).params.parallax.center,
-      ).toBe(0.5);
-
-      const outRange = run('scroll', { parallax: { speed: 2 }, range: 'out' });
-      expect(outRange.params.parallax.center).toBe(0);
-      expect(outRange.motionRange.parallaxReversed).toBe(true);
-    });
-
-    test('keeps an explicit center', () => {
-      expect(run('scroll', { parallax: { speed: 2, center: 0.3 } }).params.parallax.center).toBe(
-        0.3,
+        apply(
+          run(parallaxScrollGroup, { parallax: { speed: 2 }, range: 'continuous' }).params.parallax,
+        ),
+      ).toEqual(
+        apply(
+          createParallax({ startOffset: cover(0), endOffset: cover(100) } as any, false, 2, 0.5),
+        ),
+      );
+      expect(
+        apply(run(parallaxScrollGroup, { parallax: { speed: 2 }, range: 'out' }).params.parallax),
+      ).toEqual(
+        apply(createParallax({ startOffset: cover(50), endOffset: cover(100) } as any, true, 2, 0)),
       );
     });
 
-    test('is scroll only', () => {
-      const { params, motionRange } = run('entrance', { parallax: { speed: 2 } });
-      expect(params.parallax.center).toBeUndefined();
-      expect(motionRange.parallaxReversed).toBeUndefined();
+    test('keeps an explicit center', () => {
+      expect(
+        apply(run(parallaxScrollGroup, { parallax: { speed: 2, center: 0.3 } }).params.parallax),
+      ).toEqual(
+        apply(
+          createParallax({ startOffset: cover(0), endOffset: cover(50) } as any, false, 2, 0.3),
+        ),
+      );
+    });
+
+    test('is applied only by the parallax scroll group', () => {
+      expect(run(scrollGroup, { parallax: { speed: 2 } }).params.parallax).toEqual({ speed: 2 });
+      expect(run(entranceGroup, { parallax: { speed: 2 } }).params.parallax).toEqual({ speed: 2 });
     });
   });
 });
@@ -488,7 +507,7 @@ describe('useDirectionalPresetAsBasic', () => {
     useDirectionalPresetAsBasic(
       preset,
       { namedEffect: { type: 'X', range: 'out', pivot: 'top', scale: 2 } } as any,
-      'scroll',
+      scrollGroup,
       {},
     );
     expect(last().motionRange).toEqual({
@@ -505,7 +524,7 @@ describe('useDirectionalPresetAsBasic', () => {
     const result: any = useDirectionalPresetAsBasic(
       preset,
       { namedEffect: { type: 'X', range: 'continuous' } } as any,
-      'scroll',
+      scrollGroup,
       {},
     );
     expect(result.easing).toBe('linear(0 0%, 1 50%, 1 50%, 0 100%)');

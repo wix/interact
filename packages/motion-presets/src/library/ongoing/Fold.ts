@@ -9,6 +9,7 @@ import {
 import type { LoopPoint } from '../../easingUtils';
 import { getEasingFamily } from '../../utils';
 import { useDirectionalPreset } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const DEFAULT_EASING = 'cubicInOut';
 
@@ -71,11 +72,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   return [
     // the layout rotation comes first, so the pivot is on the element's rotated side
-    useLayoutRotation(foldOptions, 'ongoing', { composite: 'replace' }, asWeb, suffix),
+    useLayoutRotation(foldOptions, ongoingGroup, { composite: 'replace' }, asWeb, suffix),
     useDirectionalPreset(
       getMotion3dTransform,
       foldOptions,
-      'ongoing',
+      ongoingGroup,
       {
         defaultDirection: DEFAULTS.pivot,
         directionType: 'four-sides',

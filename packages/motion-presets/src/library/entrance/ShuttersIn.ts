@@ -3,6 +3,7 @@ import { FOUR_DIRECTIONS } from '../../consts';
 import { MOTION_SHUTTERS_NAME, getMotionShutters } from '../../clipUtils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { entranceGroup } from '../../entranceGroup';
 
 const FADE_IN_EASING = 'step-start';
 
@@ -49,11 +50,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
     useDirectionalPreset(
       getMotionShutters,
       shuttersOptions,
-      'entrance',
+      entranceGroup,
       {
         defaultDirection: DEFAULTS.from,
         directionType: 'four-sides',

@@ -6,6 +6,7 @@ import {
   useLayoutRotation,
 } from '../../transformUtils';
 import { useDirectionalPresetAsBasic } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const DEFAULTS: Required<Pulse> = {
   type: 'Pulse',
@@ -48,11 +49,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useLayoutRotation(options, 'ongoing', { composite: 'replace' }, asWeb, suffix),
+    useLayoutRotation(options, ongoingGroup, { composite: 'replace' }, asWeb, suffix),
     useDirectionalPresetAsBasic(
       getMotionScale,
       scaleOptions,
-      'ongoing',
+      ongoingGroup,
       { loop: { shape: SHAPE } },
       asWeb,
       suffix,

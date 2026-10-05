@@ -9,6 +9,7 @@ import {
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
+import { scrollGroup } from '../../scrollGroup';
 
 const DEFAULTS: Required<SkewPanScroll> = {
   type: 'SkewPanScroll',
@@ -59,7 +60,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       panOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
@@ -68,6 +69,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(panOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    useLayoutRotation(panOptions, scrollGroup, { defaultRange: DEFAULTS.range }, asWeb, suffix),
   ]);
 }

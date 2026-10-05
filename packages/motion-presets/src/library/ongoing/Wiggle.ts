@@ -9,6 +9,7 @@ import {
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { useDirectionalPreset, useDirectionalPresetAsBasic } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const DEFAULTS: Required<Wiggle> = {
   type: 'Wiggle',
@@ -80,11 +81,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   // the lift comes after the rotations, so it is along the element's tilted axes
   return [
-    useLayoutRotation(options, 'ongoing', { composite: 'replace' }, asWeb, suffix),
+    useLayoutRotation(options, ongoingGroup, { composite: 'replace' }, asWeb, suffix),
     useDirectionalPresetAsBasic(
       getMotion3dTransform,
       rotationOptions,
-      'ongoing',
+      ongoingGroup,
       { loop: { shape: ROTATION_SHAPE } },
       asWeb,
       suffix,
@@ -92,7 +93,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       liftOptions,
-      'ongoing',
+      ongoingGroup,
       { directionType: 'four-sides', loop: { shape: LIFT_SHAPE } },
       asWeb,
       suffix,

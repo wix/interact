@@ -9,6 +9,7 @@ import {
 import { compareKeywordToNonDefaults } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { entranceGroup } from '../../entranceGroup';
 
 const FADE_IN_EASING = 'sineIn';
 const FADE_IN_DURATION_FACTOR = 0.6;
@@ -60,11 +61,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
     useDirectionalPreset(
       getMotionTransRot,
       transformOptions,
-      'entrance',
+      entranceGroup,
       {
         defaultPivot: DEFAULTS.pivot,
         directionType: 'spin',
@@ -73,6 +74,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
+    useLayoutRotation(transformOptions, entranceGroup, {}, asWeb, suffix),
   ];
 }

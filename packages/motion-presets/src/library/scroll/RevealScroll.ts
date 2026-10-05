@@ -2,6 +2,7 @@ import type { ScrubAnimationOptions, RevealScroll, DomApi } from '../../types';
 import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
 import { useDirectionalPreset } from '../../presetUtils';
+import { scrollGroup } from '../../scrollGroup';
 
 const DEFAULTS: Required<RevealScroll> = {
   type: 'RevealScroll',
@@ -29,7 +30,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionReveal,
       options,
-      'scroll',
+      scrollGroup,
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,

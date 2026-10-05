@@ -7,6 +7,7 @@ import {
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { useDirectionalPresetAsBasic } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const DEFAULTS: Required<Jello> = {
   type: 'Jello',
@@ -53,11 +54,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   return [
     // the layout rotation comes first, so the skew is along the element's rotated axes
-    useLayoutRotation(jelloOptions, 'ongoing', { composite: 'replace' }, asWeb, suffix),
+    useLayoutRotation(jelloOptions, ongoingGroup, { composite: 'replace' }, asWeb, suffix),
     useDirectionalPresetAsBasic(
       getMotionTransRot,
       jelloOptions,
-      'ongoing',
+      ongoingGroup,
       { loop: { shape: SHAPE } },
       asWeb,
       suffix,

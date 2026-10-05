@@ -7,6 +7,7 @@ import {
   useLayoutRotation,
 } from '../../transformUtils';
 import { useDirectionalPreset } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const DEFAULT_EASING = 'linear';
 const ANGLE = 360;
@@ -54,11 +55,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   return [
     // the layout rotation comes first, so the flip is along the element's rotated axes
-    useLayoutRotation(flipOptions, 'ongoing', { composite: 'replace' }, asWeb, suffix),
+    useLayoutRotation(flipOptions, ongoingGroup, { composite: 'replace' }, asWeb, suffix),
     useDirectionalPreset(
       getMotion3dTransform,
       flipOptions,
-      'ongoing',
+      ongoingGroup,
       {
         defaultDirection: DEFAULTS.direction,
         directionType: 'axis',

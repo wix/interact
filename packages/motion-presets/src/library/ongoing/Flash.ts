@@ -1,6 +1,7 @@
 import type { DomApi, Flash, TimeAnimationOptions } from '../../types';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const DEFAULT_EASING = 'cubicInOut';
 
@@ -32,7 +33,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const { easing = DEFAULT_EASING, suffix } = options;
 
   return [
-    useBasicPreset(getMotionFade, options, 'ongoing', asWeb, suffix, {
+    useBasicPreset(getMotionFade, options, ongoingGroup, asWeb, suffix, {
       loop: { shape: SHAPE, easings: [easing] },
     }),
   ];

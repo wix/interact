@@ -10,6 +10,7 @@ import {
 } from '../../transformUtils';
 import { compareKeywordToNonDefaults } from '../../utils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
+import { parallaxScrollGroup, scrollGroup } from '../../scrollGroup';
 
 const [ROTATION_X, ROTATION_Y, ROTATION_Z] = [10, 25, 25];
 const ROTATION_Z_EASING = 'sineInOut';
@@ -70,7 +71,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotion3dTransform,
       transform3dOptions,
-      'scroll',
+      parallaxScrollGroup,
       {
         defaultRange: DEFAULTS.range,
         directionType: 'spin',
@@ -81,7 +82,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       transform2dOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
@@ -94,7 +95,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     ),
     useLayoutRotation(
       transform3dOptions,
-      'scroll',
+      scrollGroup,
       { defaultRange: DEFAULTS.range },
       asWeb,
       suffix,

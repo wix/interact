@@ -11,6 +11,7 @@ import {
 import type { LoopPoint } from '../../easingUtils';
 import { getEasingFamily, parseKeywordLazy } from '../../utils';
 import { useDirectionalPreset } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const DEFAULT_EASING = 'sineInOut';
 const DIRECTIONS = [...AXIS_DIRECTIONS, 'center'] as const;
@@ -77,7 +78,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       isCenter ? getMotion3dTransform : getMotionTransRot,
       breatheOptions,
-      'ongoing',
+      ongoingGroup,
       {
         directionType: 'axis',
         loop: { shape: SHAPE, easings: [ease.out, ease.inOut] },
@@ -85,6 +86,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(breatheOptions, 'ongoing', {}, asWeb, suffix),
+    useLayoutRotation(breatheOptions, ongoingGroup, {}, asWeb, suffix),
   ];
 }

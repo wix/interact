@@ -8,6 +8,7 @@ import {
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { useDirectionalPreset } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const DEFAULTS: Required<Poke> = {
   type: 'Poke',
@@ -58,7 +59,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       pokeOptions,
-      'ongoing',
+      ongoingGroup,
       {
         defaultDirection: DEFAULTS.direction,
         directionType: 'four-sides',
@@ -67,6 +68,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(pokeOptions, 'ongoing', {}, asWeb, suffix),
+    useLayoutRotation(pokeOptions, ongoingGroup, {}, asWeb, suffix),
   ];
 }

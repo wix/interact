@@ -14,6 +14,7 @@ import {
   useDirectionalPresetAsBasic,
   withSharedScrollRange,
 } from '../../presetUtils';
+import { parallaxScrollGroup, scrollGroup } from '../../scrollGroup';
 
 const EPSILON = 0.01;
 
@@ -73,18 +74,24 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       parallaxOptions,
-      'scroll',
+      parallaxScrollGroup,
       {
         defaultRange: DEFAULTS.range,
       },
       asWeb,
       suffix,
     ),
-    useLayoutRotation(parallaxOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    useLayoutRotation(
+      parallaxOptions,
+      scrollGroup,
+      { defaultRange: DEFAULTS.range },
+      asWeb,
+      suffix,
+    ),
     useDirectionalPresetAsBasic(
       getMotionScale,
       scaleOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultPivot: DEFAULTS.pivot,
         defaultRange: DEFAULTS.range,

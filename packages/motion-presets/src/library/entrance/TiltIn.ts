@@ -12,6 +12,7 @@ import {
 import { compareKeywordToNonDefaults } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { entranceGroup } from '../../entranceGroup';
 
 const FADE_IN_EASING = 'cubicOut';
 const FADE_IN_DURATION_FACTOR = 0.2;
@@ -99,11 +100,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
     useDirectionalPreset(
       getMotion3dTransform,
       transform3dOptions,
-      'entrance',
+      entranceGroup,
       {
         defaultDepth: DEFAULTS.depth as LengthValue,
         directionType: 'axis',
@@ -114,18 +115,18 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       transform2dOptions,
-      'entrance',
+      entranceGroup,
       {
         directionType: 'spin',
       },
       asWeb,
       suffix,
     ),
-    useLayoutRotation(transform3dOptions, 'entrance', {}, asWeb, suffix),
+    useLayoutRotation(transform3dOptions, entranceGroup, {}, asWeb, suffix),
     useDirectionalPreset(
       getMotionReveal,
       revealOptions,
-      'entrance',
+      entranceGroup,
       {
         directionType: 'four-sides',
       },

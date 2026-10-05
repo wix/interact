@@ -8,6 +8,7 @@ import {
 } from '../../transformUtils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { entranceGroup } from '../../entranceGroup';
 
 const EASING = 'quadOut';
 const ROTATION_ANGLE = 180;
@@ -51,11 +52,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
     useDirectionalPreset(
       getMotion3dTransform,
       transformOptions,
-      'entrance',
+      entranceGroup,
       {
         defaultDepth: DEFAULTS.depth as LengthValue,
         defaultDirection: DEFAULTS.from,
@@ -64,6 +65,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
+    useLayoutRotation(transformOptions, entranceGroup, {}, asWeb, suffix),
   ];
 }

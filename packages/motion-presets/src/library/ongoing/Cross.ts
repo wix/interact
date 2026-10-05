@@ -16,6 +16,7 @@ import {
 import { parseKeywordLazy } from '../../utils';
 import { getActiveFraction, getWrapEasing } from '../../easingUtils';
 import { useDirectionalPreset } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const DEFAULTS: Required<Cross> = {
   type: 'Cross',
@@ -83,7 +84,7 @@ export function style(options: TimeAnimationOptions, asWeb = false, layout?: Lay
   const cross = useDirectionalPreset(
     getMotionTransRot,
     crossOptions,
-    'ongoing',
+    ongoingGroup,
     {
       directionType: 'angle',
     },
@@ -102,6 +103,6 @@ export function style(options: TimeAnimationOptions, asWeb = false, layout?: Lay
           },
         }
       : { ...cross, easing: getWrapEasing(0.5, activeFraction) },
-    useLayoutRotation(crossOptions, 'ongoing', {}, asWeb, suffix),
+    useLayoutRotation(crossOptions, ongoingGroup, {}, asWeb, suffix),
   ];
 }

@@ -7,6 +7,7 @@ import {
 } from '../../transformUtils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { entranceGroup } from '../../entranceGroup';
 
 const FADE_IN_EASING = 'step-start';
 
@@ -39,14 +40,14 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     useBasicPreset(
       getMotionFade,
       { ...options, easing: FADE_IN_EASING },
-      'entrance',
+      entranceGroup,
       asWeb,
       suffix,
     ),
     useDirectionalPreset(
       getMotionTransRot,
       { ...options, easing },
-      'entrance',
+      entranceGroup,
       {
         defaultDirection: DEFAULTS.from as number,
         defaultTravel: DEFAULTS.travel as LengthValue,
@@ -55,6 +56,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation({ ...options, easing }, 'entrance', {}, asWeb, suffix),
+    useLayoutRotation({ ...options, easing }, entranceGroup, {}, asWeb, suffix),
   ];
 }

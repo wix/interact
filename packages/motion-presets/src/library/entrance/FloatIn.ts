@@ -8,6 +8,7 @@ import {
 } from '../../transformUtils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { entranceGroup } from '../../entranceGroup';
 
 const TRAVEL = '120px';
 const EASING = 'sineInOut';
@@ -45,11 +46,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
     useDirectionalPreset(
       getMotionTransRot,
       transformOptions,
-      'entrance',
+      entranceGroup,
       {
         defaultDirection: DEFAULTS.from,
         directionType: 'four-sides',
@@ -57,6 +58,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
+    useLayoutRotation(transformOptions, entranceGroup, {}, asWeb, suffix),
   ];
 }

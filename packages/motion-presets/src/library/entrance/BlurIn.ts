@@ -6,6 +6,7 @@ import {
   MOTION_FADE_NAME,
 } from '../../fadeBlurUtils';
 import { useBasicPreset } from '../../presetUtils';
+import { entranceGroup } from '../../entranceGroup';
 
 const FADE_IN_DURATION_FACTOR = 0.7;
 const FADE_IN_EASING = 'sineIn';
@@ -47,7 +48,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useBasicPreset(getMotionBlur, blurOptions, 'entrance', asWeb, suffix),
+    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
+    useBasicPreset(getMotionBlur, blurOptions, entranceGroup, asWeb, suffix),
   ];
 }

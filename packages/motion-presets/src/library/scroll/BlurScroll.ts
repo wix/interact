@@ -2,6 +2,7 @@ import type { BlurScroll, ScrubAnimationOptions, DomApi } from '../../types';
 import { SCROLL_RANGES } from '../../consts';
 import { getMotionBlur, MOTION_BLUR_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset } from '../../presetUtils';
+import { scrollGroup } from '../../scrollGroup';
 
 const DEFAULTS: Required<BlurScroll> = {
   type: 'BlurScroll',
@@ -34,5 +35,5 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     },
   } as ScrubAnimationOptions;
 
-  return [useBasicPreset(getMotionBlur, blurOptions, 'scroll', asWeb, suffix)];
+  return [useBasicPreset(getMotionBlur, blurOptions, scrollGroup, asWeb, suffix)];
 }

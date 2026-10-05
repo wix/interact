@@ -11,9 +11,6 @@ import type {
   LengthInput,
   LengthValue,
   NamedEffect,
-  RangeOffset,
-  ScrubAnimationOptions,
-  TimeAnimationOptions,
 } from './types';
 import type { LoopShape } from './easingUtils';
 import {
@@ -24,16 +21,23 @@ import {
   SCROLL_RANGES,
   SPIN_DIRECTIONS,
 } from './consts';
-import {
-  getActiveFraction,
-  getContinuousEasing,
-  getLoopEasing,
-  mirrorEasing,
-  toCssEasing,
-} from './easingUtils';
 import { CSS_CALC_REGEX, parseKeywordLazy, parseLengthLazy, stripCalc } from './utils';
 
-export type PresetGroup = 'scroll' | 'entrance' | 'ongoing';
+// what differs between the scroll, entrance and ongoing presets - each group is its own module
+export type PresetGroup = {
+  name: 'scroll' | 'entrance' | 'ongoing';
+  getOverrides(
+    options: AnimationOptions,
+    range: EffectScrollRange,
+    easingOptions: EasingParsingOptions,
+    directional: boolean,
+  ): Partial<AnimationDataForScrub>;
+  applyParallax?(
+    params: { parallax?: unknown; [key: string]: unknown },
+    range: EffectScrollRange,
+    overrides: Partial<AnimationDataForScrub>,
+  ): void;
+};
 
 // the resolved direction of a directional preset
 // fromSign / toSign - the sign of the motion at the start / end keyframe (0 = rest)
@@ -43,7 +47,6 @@ export type MotionRange = {
   toSign: 0 | 1 | -1;
   movementAngle: string;
   vertical: boolean;
-  parallaxReversed?: boolean;
 };
 
 type SpinParsingOptions = {
@@ -97,7 +100,7 @@ type TravelParsingOptions = { defaultTravel?: LengthValue };
 type ScrollRangeParsingOptions = { defaultRange?: EffectScrollRange };
 
 // the preset's own easings - scroll ignores the user's easing and ongoing replaces it with its loop
-type EasingParsingOptions = {
+export type EasingParsingOptions = {
   easing?: string;
   outEasing?: string;
   continuousEasing?: string;
@@ -115,18 +118,6 @@ type PresetParsingOptions = DirectionParsingOptions &
 
 const CSS_ANGLE_REGEX = /^(-?\d*\.?\d+)(deg|rad|grad|turn)$/;
 
-const SCROLL_RANGE_COVER_0: RangeOffset = {
-  name: 'cover',
-  offset: { value: 0, unit: 'percentage' },
-};
-const SCROLL_RANGE_COVER_50: RangeOffset = {
-  name: 'cover',
-  offset: { value: 50, unit: 'percentage' },
-};
-const SCROLL_RANGE_COVER_100: RangeOffset = {
-  name: 'cover',
-  offset: { value: 100, unit: 'percentage' },
-};
 const SCROLL_RANGE_KEYS = ['startOffset', 'endOffset', 'startOffsetAdd', 'endOffsetAdd'] as const;
 
 // the axis of each side - the side's sign is MotionRange.fromSign
@@ -211,137 +202,22 @@ export function oppositeDirection(
   return `calc(180deg + ${stripCalc(direction)})`;
 }
 
-function cloneRangeOffset({ offset, ...rest }: RangeOffset): RangeOffset {
-  return { ...rest, ...(offset && { offset: { ...offset } }) };
-}
-
-function parseScrollRange(
-  options: ScrubAnimationOptions<NamedEffect & { range?: EffectScrollRange }>,
-  defaultRange: EffectScrollRange = 'in',
-) {
-  const { namedEffect } = options;
-  const range = parseKeywordLazy<EffectScrollRange>(
-    namedEffect!.range,
-    SCROLL_RANGES,
-    defaultRange,
-  );
-
-  // copies, since the offsets are completed in place below
-  const startOffset = cloneRangeOffset(
-    options.startOffset ?? (range === 'out' ? SCROLL_RANGE_COVER_50 : SCROLL_RANGE_COVER_0),
-  );
-  const endOffset = cloneRangeOffset(
-    options.endOffset ?? (range === 'in' ? SCROLL_RANGE_COVER_50 : SCROLL_RANGE_COVER_100),
-  );
-
-  startOffset.name = startOffset.name || 'cover';
-  endOffset.name = endOffset.name || startOffset.name;
-
-  startOffset.offset = startOffset.offset || {
-    value: range === 'out' && startOffset.name === 'cover' ? 50 : 0,
-    unit: 'percentage',
-  };
-  endOffset.offset = endOffset.offset || {
-    value: endOffset.name === 'cover' ? (range === 'in' ? 50 : 100) : 0,
-    unit: 'percentage',
-  };
-
-  startOffset.offset.unit = startOffset.offset.unit || 'percentage';
-  endOffset.offset.unit = endOffset.offset.unit || 'percentage';
-
-  startOffset.offset.value =
-    startOffset.offset.value ??
-    (range === 'out' && startOffset.name === 'cover' && startOffset.offset.unit === 'percentage'
-      ? 50
-      : 0);
-  endOffset.offset.value =
-    endOffset.offset.value ??
-    (endOffset.name === 'cover' && endOffset.offset.unit === 'percentage'
-      ? range === 'in'
-        ? 50
-        : 100
-      : 0);
-
-  return { range, startOffset, endOffset };
-}
-
-// scroll animations use only the preset's easing, applied per range to keep in + out = continuous
-// easing - the visual easing of the in-motion
-// outEasing - the visual easing of the out-motion (defaults to the in-motion reversed)
-// continuousEasing - the in-half of continuous (defaults to easing), the out-half uses outEasing
-function resolveScrollEasing(
-  range: EffectScrollRange,
-  directional: boolean,
-  parsingOptions: EasingParsingOptions,
-) {
-  const { easing, outEasing, continuousEasing = easing, continuousHold } = parsingOptions;
-  if (range === 'in') {
-    return toCssEasing(easing);
-  }
-  if (range === 'out') {
-    // 'out' is played reversed, so its visual easing is mirrored
-    return outEasing ? mirrorEasing(outEasing) : toCssEasing(easing);
-  }
-  return getContinuousEasing(continuousEasing, outEasing, directional, continuousHold);
-}
-
-function resolveScrollOverrides(
+function resolveGroupOverrides(
   options: AnimationOptions,
   group: PresetGroup,
-  defaultRange?: EffectScrollRange,
+  defaultRange: EffectScrollRange = 'in',
   easingOptions: EasingParsingOptions = {},
   directional: boolean = false,
 ) {
-  const { range, startOffset, endOffset } = parseScrollRange(
-    options as ScrubAnimationOptions<NamedEffect & { range?: EffectScrollRange }>,
-    defaultRange,
-  );
-
-  const defaultFill = range === 'out' ? 'forwards' : range === 'continuous' ? 'both' : 'backwards';
-  const { fill = defaultFill } = options;
-
-  const overrides: Partial<AnimationDataForScrub> =
-    group === 'ongoing' ? {} : range === 'out' ? { fill, reversed: !options.reversed } : { fill };
-
-  if (group === 'scroll') {
-    overrides.easing = resolveScrollEasing(range, directional, easingOptions);
-    overrides.startOffset = startOffset;
-    overrides.endOffset = endOffset;
-  }
-
-  if (group === 'ongoing') {
-    // the iteration delay is a hold at rest at the end of each iteration
-    const activeFraction = getActiveFraction(options);
-    Object.assign(overrides, {
-      duration: ((options as TimeAnimationOptions).duration || 1) / activeFraction,
-      easing: easingOptions.loop ? getLoopEasing(easingOptions.loop, activeFraction) : 'linear',
-    });
-  }
-
-  return { range, startOffset, endOffset, overrides };
+  const namedEffect = options.namedEffect as NamedEffect & { range?: EffectScrollRange };
+  const range = parseKeywordLazy<EffectScrollRange>(namedEffect.range, SCROLL_RANGES, defaultRange);
+  return { range, overrides: group.getOverrides(options, range, easingOptions, directional) };
 }
 
-function applyParallaxRange(
-  namedEffect: {
-    parallax?: {
-      speed: number;
-      center?: number;
-      range: { startOffset: RangeOffset; endOffset: RangeOffset };
-    };
-  },
-  motionRange: MotionRange,
-  range: EffectScrollRange,
-  startOffset: RangeOffset,
-  endOffset: RangeOffset,
-) {
-  if (!namedEffect.parallax) {
-    return;
-  }
-
-  motionRange.parallaxReversed = range === 'out';
-  namedEffect.parallax.center =
-    namedEffect.parallax.center ?? (range === 'continuous' ? 0.5 : range === 'out' ? 0 : 1);
-  namedEffect.parallax.range = { startOffset, endOffset };
+export function getFillOverrides(options: AnimationOptions, range: EffectScrollRange) {
+  const defaultFill = range === 'out' ? 'forwards' : range === 'continuous' ? 'both' : 'backwards';
+  const { fill = defaultFill } = options;
+  return range === 'out' ? { fill, reversed: !options.reversed } : { fill };
 }
 
 function pivotToTransformOrigin(pivot: string) {
@@ -403,7 +279,7 @@ export function useBasicPreset(
   parsingOptions: ScrollRangeParsingOptions & EasingParsingOptions = {},
 ): AnimationData {
   const namedEffect = options.namedEffect as NamedEffect & { range?: EffectScrollRange };
-  const { overrides } = resolveScrollOverrides(
+  const { overrides } = resolveGroupOverrides(
     options,
     group,
     parsingOptions.defaultRange,
@@ -421,15 +297,8 @@ export function useDirectionalPresetAsBasic(
   asWeb: boolean = true,
   suffix: string = '',
 ): AnimationData {
-  const namedEffect = options.namedEffect as NamedEffect & {
-    range?: EffectScrollRange;
-    parallax?: {
-      speed: number;
-      center?: number;
-      range: { startOffset: RangeOffset; endOffset: RangeOffset };
-    };
-  };
-  const { range, startOffset, endOffset, overrides } = resolveScrollOverrides(
+  const namedEffect = options.namedEffect as NamedEffect;
+  const { range, overrides } = resolveGroupOverrides(
     options,
     group,
     parsingOptions.defaultRange,
@@ -443,14 +312,13 @@ export function useDirectionalPresetAsBasic(
     vertical: true,
   };
 
-  if (group === 'scroll') {
-    applyParallaxRange(namedEffect, motionRange, range, startOffset, endOffset);
-  }
+  const params = normalizePresetParams(namedEffect, parsingOptions);
+  group.applyParallax?.(params, range, overrides);
 
   return {
     ...options,
     ...overrides,
-    ...preset(motionRange, normalizePresetParams(namedEffect, parsingOptions), asWeb, suffix),
+    ...preset(motionRange, params, asWeb, suffix),
   };
 }
 
@@ -465,17 +333,11 @@ export function useDirectionalPreset(
   const namedEffect = options.namedEffect as NamedEffect & {
     direction?: number | string;
     from?: number | string;
-    parallax?: {
-      speed: number;
-      center?: number;
-      range: { startOffset: RangeOffset; endOffset: RangeOffset };
-    };
-    range?: EffectScrollRange;
   };
 
   const { directionType = 'axis', defaultRange = 'in' } = parsingOptions;
 
-  const { range, startOffset, endOffset, overrides } = resolveScrollOverrides(
+  const { range, overrides } = resolveGroupOverrides(
     options,
     group,
     defaultRange,
@@ -487,7 +349,7 @@ export function useDirectionalPreset(
   // entrance starts at the 'from' side, ongoing moves first towards its direction (the keyframes start at their peak)
   const isSided = directionType !== 'axis' && directionType !== 'spin';
   const direction =
-    !isSided || group === 'scroll'
+    !isSided || group.name === 'scroll'
       ? range === 'out'
         ? oppositeDirection(
             parseDirectionForPreset(namedEffect.direction, parsingOptions),
@@ -496,7 +358,7 @@ export function useDirectionalPreset(
         : parseDirectionForPreset(namedEffect.direction, parsingOptions)
       : oppositeDirection(
           parseDirectionForPreset(
-            group === 'ongoing' ? namedEffect.direction : namedEffect.from,
+            group.name === 'ongoing' ? namedEffect.direction : namedEffect.from,
             parsingOptions,
           ),
           directionType,
@@ -514,11 +376,8 @@ export function useDirectionalPreset(
 
   const motionRange: MotionRange = { fromSign, toSign, vertical, movementAngle };
 
-  if (group === 'scroll') {
-    applyParallaxRange(namedEffect, motionRange, range, startOffset, endOffset);
-  }
-
   const params = normalizePresetParams(namedEffect, parsingOptions);
+  group.applyParallax?.(params, range, overrides);
   // 'out' is the reversed 'in' of the opposite direction, so its travel is the one towards the original direction
   if (range === 'out' && params.toTravel !== undefined) {
     [params.travel, params.toTravel] = [params.toTravel, params.travel];

@@ -9,6 +9,7 @@ import {
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
 import { oppositeDirection, useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
+import { scrollGroup } from '../../scrollGroup';
 
 const TRAVEL = '100%';
 
@@ -62,7 +63,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     // the layout rotation comes first, so the motion moves along the element's rotated axes
     useLayoutRotation(
       transformOptions,
-      'scroll',
+      scrollGroup,
       { composite: 'replace', defaultRange: DEFAULTS.range },
       asWeb,
       suffix,
@@ -70,7 +71,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       transformOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
@@ -82,7 +83,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionReveal,
       revealOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultDirection: oppositeDirection(
           DEFAULTS.direction,

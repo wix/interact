@@ -7,6 +7,7 @@ import {
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { useDirectionalPresetAsBasic } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const DEFAULTS: Required<Rubber> = {
   type: 'Rubber',
@@ -52,11 +53,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   return [
     // the layout rotation comes first, so the stretch is along the element's rotated axes
-    useLayoutRotation(options, 'ongoing', { composite: 'replace' }, asWeb, suffix),
+    useLayoutRotation(options, ongoingGroup, { composite: 'replace' }, asWeb, suffix),
     useDirectionalPresetAsBasic(
       getMotionScale,
       scaleOptions,
-      'ongoing',
+      ongoingGroup,
       { loop: { shape: SHAPE } },
       asWeb,
       suffix,

@@ -13,6 +13,7 @@ import {
   useDirectionalPresetAsBasic,
   withSharedScrollRange,
 } from '../../presetUtils';
+import { scrollGroup } from '../../scrollGroup';
 
 const DEFAULTS: Required<SpinScroll> = {
   type: 'SpinScroll',
@@ -62,7 +63,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       spinOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
@@ -71,11 +72,11 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(spinOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    useLayoutRotation(spinOptions, scrollGroup, { defaultRange: DEFAULTS.range }, asWeb, suffix),
     useDirectionalPresetAsBasic(
       getMotionScale,
       scaleOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultRange: DEFAULTS.range,
       },

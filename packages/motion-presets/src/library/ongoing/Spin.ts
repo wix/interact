@@ -7,6 +7,7 @@ import {
   useLayoutRotation,
 } from '../../transformUtils';
 import { useDirectionalPreset } from '../../presetUtils';
+import { ongoingGroup } from '../../ongoingGroup';
 
 const DEFAULT_EASING = 'linear';
 const ANGLE = 360;
@@ -51,7 +52,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       spinOptions,
-      'ongoing',
+      ongoingGroup,
       {
         defaultDirection: DEFAULTS.direction,
         directionType: 'spin',
@@ -60,6 +61,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       asWeb,
       suffix,
     ),
-    useLayoutRotation(spinOptions, 'ongoing', {}, asWeb, suffix),
+    useLayoutRotation(spinOptions, ongoingGroup, {}, asWeb, suffix),
   ];
 }

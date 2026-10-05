@@ -15,6 +15,7 @@ import {
   useDirectionalPreset,
   useDirectionalPresetAsBasic,
 } from '../../presetUtils';
+import { scrollGroup } from '../../scrollGroup';
 
 // samples of the previous implementation: fading over 0 -> 65% (in) or 35% -> 100% (out) keyframes with 'backInOut'
 const FADE_EASING = linearEasing([
@@ -110,7 +111,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   } as ScrubAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, options, 'scroll', asWeb, suffix, {
+    useBasicPreset(getMotionFade, options, scrollGroup, asWeb, suffix, {
       defaultRange: DEFAULTS.range,
       easing: FADE_EASING,
       outEasing: FADE_OUT_EASING,
@@ -119,7 +120,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPreset(
       getMotionTransRot,
       translateOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultDirection: DIRECTION,
         defaultRange: DEFAULTS.range,
@@ -133,7 +134,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     useDirectionalPresetAsBasic(
       getMotionScale,
       scaleOptions,
-      'scroll',
+      scrollGroup,
       {
         defaultRange: DEFAULTS.range,
         easing: EASING,
@@ -143,6 +144,12 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       suffix,
     ),
     // the layout rotation comes last, so the stretch and its movement are along the screen's axes
-    useLayoutRotation(translateOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    useLayoutRotation(
+      translateOptions,
+      scrollGroup,
+      { defaultRange: DEFAULTS.range },
+      asWeb,
+      suffix,
+    ),
   ];
 }
