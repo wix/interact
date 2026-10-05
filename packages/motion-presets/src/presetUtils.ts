@@ -20,7 +20,6 @@ import {
   SCROLL_RANGES,
 } from './consts';
 import type { DirectionKind } from './directions';
-import { axisDirection } from './directions';
 import { parseKeywordLazy, parseLengthLazy } from './utils';
 
 // what differs between the scroll, entrance and ongoing presets - each group is its own module
@@ -55,7 +54,7 @@ type SpinParsingOptions = {
 };
 
 type AxisParsingOptions = {
-  directionType?: DirectionKind<EffectTwoAxes>;
+  directionType: DirectionKind<EffectTwoAxes>;
   defaultDirection?: EffectTwoAxes;
 };
 
@@ -245,7 +244,7 @@ export function useDirectionalPreset(
     from?: number | string;
   };
 
-  const { directionType: kind = axisDirection, defaultRange = 'in' } = parsingOptions;
+  const { directionType: kind, defaultRange = 'in' } = parsingOptions;
   const parse = (direction: number | string | undefined) =>
     kind.parse(direction, parsingOptions.defaultDirection as never);
 

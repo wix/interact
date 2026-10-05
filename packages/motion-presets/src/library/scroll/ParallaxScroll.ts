@@ -6,6 +6,7 @@ import {
   useLayoutRotation,
 } from '../../transformUtils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
+import { axisDirection } from '../../directions';
 import { parallaxScrollGroup, scrollGroup } from '../../scrollGroup';
 
 const RANGE = 'continuous';
@@ -46,7 +47,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       getMotionTransRot,
       transformOptions,
       parallaxScrollGroup,
-      {},
+      { directionType: axisDirection },
       asWeb,
       suffix,
     ),

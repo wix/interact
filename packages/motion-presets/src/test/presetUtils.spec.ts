@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import type { MotionRange } from '../presetUtils';
 import { CENTER_AND_FOUR_DIRECTIONS, FOUR_CORNERS_DIRECTIONS } from '../consts';
-import { angleDirection, sideDirection, spinDirection } from '../directions';
+import { angleDirection, axisDirection, sideDirection, spinDirection } from '../directions';
 import { entranceGroup } from '../entranceGroup';
 import { ongoingGroup } from '../ongoingGroup';
 import { parallaxScrollGroup, scrollGroup } from '../scrollGroup';
@@ -208,7 +208,7 @@ describe('useDirectionalPreset', () => {
       preset,
       { namedEffect: { type: 'X', ...namedEffect }, ...options } as any,
       group,
-      parsingOptions,
+      { directionType: axisDirection, ...parsingOptions },
     );
     return { result, ...last() };
   };

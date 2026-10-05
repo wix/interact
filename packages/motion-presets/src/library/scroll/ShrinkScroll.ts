@@ -15,6 +15,7 @@ import {
   withSharedScrollRange,
 } from '../../presetUtils';
 import { parallaxScrollGroup, scrollGroup } from '../../scrollGroup';
+import { axisDirection } from '../../directions';
 
 const EPSILON = 0.01;
 
@@ -77,6 +78,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       parallaxScrollGroup,
       {
         defaultRange: DEFAULTS.range,
+        directionType: axisDirection,
       },
       asWeb,
       suffix,

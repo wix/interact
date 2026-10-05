@@ -9,60 +9,31 @@ import { getFillOverrides } from './presetUtils';
 import { getContinuousEasing, mirrorEasing, toCssEasing } from './easingUtils';
 import { createParallax } from './parallaxUtils';
 
-const SCROLL_RANGE_COVER_0: RangeOffset = {
-  name: 'cover',
-  offset: { value: 0, unit: 'percentage' },
-};
-const SCROLL_RANGE_COVER_50: RangeOffset = {
-  name: 'cover',
-  offset: { value: 50, unit: 'percentage' },
-};
-const SCROLL_RANGE_COVER_100: RangeOffset = {
-  name: 'cover',
-  offset: { value: 100, unit: 'percentage' },
-};
-
-function cloneRangeOffset({ offset, ...rest }: RangeOffset): RangeOffset {
-  return { ...rest, ...(offset && { offset: { ...offset } }) };
+// fills in a partial range offset - a cover offset defaults to its place in the cover range, any other to 0
+function completeRangeOffset(
+  rangeOffset: Partial<RangeOffset>,
+  defaultName: RangeOffset['name'],
+  coverValue: number,
+): RangeOffset {
+  const name = rangeOffset.name || defaultName;
+  const unit = rangeOffset.offset?.unit || 'percentage';
+  const value =
+    rangeOffset.offset?.value ?? (name === 'cover' && unit === 'percentage' ? coverValue : 0);
+  return { ...rangeOffset, name, offset: { ...rangeOffset.offset, unit, value } };
 }
 
+// in: cover 0% - 50%, out: cover 50% - 100%, continuous: cover 0% - 100%
 function completeScrollOffsets(options: ScrubAnimationOptions, range: EffectScrollRange) {
-  // copies, since the offsets are completed in place below
-  const startOffset = cloneRangeOffset(
-    options.startOffset ?? (range === 'out' ? SCROLL_RANGE_COVER_50 : SCROLL_RANGE_COVER_0),
+  const startOffset = completeRangeOffset(
+    options.startOffset ?? {},
+    'cover',
+    range === 'out' ? 50 : 0,
   );
-  const endOffset = cloneRangeOffset(
-    options.endOffset ?? (range === 'in' ? SCROLL_RANGE_COVER_50 : SCROLL_RANGE_COVER_100),
+  const endOffset = completeRangeOffset(
+    options.endOffset ?? {},
+    startOffset.name,
+    range === 'in' ? 50 : 100,
   );
-
-  startOffset.name = startOffset.name || 'cover';
-  endOffset.name = endOffset.name || startOffset.name;
-
-  startOffset.offset = startOffset.offset || {
-    value: range === 'out' && startOffset.name === 'cover' ? 50 : 0,
-    unit: 'percentage',
-  };
-  endOffset.offset = endOffset.offset || {
-    value: endOffset.name === 'cover' ? (range === 'in' ? 50 : 100) : 0,
-    unit: 'percentage',
-  };
-
-  startOffset.offset.unit = startOffset.offset.unit || 'percentage';
-  endOffset.offset.unit = endOffset.offset.unit || 'percentage';
-
-  startOffset.offset.value =
-    startOffset.offset.value ??
-    (range === 'out' && startOffset.name === 'cover' && startOffset.offset.unit === 'percentage'
-      ? 50
-      : 0);
-  endOffset.offset.value =
-    endOffset.offset.value ??
-    (endOffset.name === 'cover' && endOffset.offset.unit === 'percentage'
-      ? range === 'in'
-        ? 50
-        : 100
-      : 0);
-
   return { startOffset, endOffset };
 }
 
