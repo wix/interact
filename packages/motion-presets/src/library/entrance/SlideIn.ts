@@ -1,17 +1,20 @@
-import type { EffectFourDirections, SlideIn, TimeAnimationOptions } from '../../types';
+import type {
+  EffectFourDirections,
+  SlideIn,
+  TimeAnimationOptions,
+  AnimationData,
+} from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
 import {
   MOTION_TRANS_ROT_NAME,
+  getMotionLayoutRotation,
   getMotionTransRot,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
-import { entranceGroup } from '../../entranceGroup';
-import { sideDirection } from '../../directions';
+import { sideDirection, toMotionRange } from '../../directions';
 
 const TRAVEL = '100%';
 
@@ -40,59 +43,53 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<SlideIn>;
   const { start: minimum = DEFAULTS.start } = namedEffect!;
-
+  const { fill = 'backwards' } = options;
+  const from = parseKeywordLazy(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from);
   // SlideIn reveals in the opposite direction to the movement to create its entrance feel
-  const clipFrom = sideDirection.opposite(
-    parseKeywordLazy(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from),
-  );
+  const clipFrom = sideDirection.opposite(from) as EffectFourDirections;
 
   const transformOptions = {
     ...options,
     composite: 'add',
     easing,
-    namedEffect: {
-      ...namedEffect,
-      travel: TRAVEL,
-    },
+    fill,
+    namedEffect: { ...namedEffect, travel: TRAVEL },
   } as TimeAnimationOptions;
   const revealOptions = {
     ...options,
     easing,
-    namedEffect: {
-      ...namedEffect,
-      minimum,
-      from: clipFrom,
-    },
+    fill,
+    namedEffect: { ...namedEffect, minimum, from: clipFrom },
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, { ...options, easing }, entranceGroup, asWeb, suffix),
+    {
+      ...options,
+      easing,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
     // the layout rotation comes first, so the motion moves along the element's rotated axes
-    useLayoutRotation(transformOptions, entranceGroup, { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPreset(
-      getMotionTransRot,
-      transformOptions,
-      entranceGroup,
-      {
-        defaultDirection: DEFAULTS.from,
-        directionType: sideDirection,
-      },
-      asWeb,
-      suffix,
-    ),
-    useDirectionalPreset(
-      getMotionReveal,
-      revealOptions,
-      entranceGroup,
-      {
-        defaultDirection: sideDirection.opposite(DEFAULTS.from) as EffectFourDirections,
-        directionType: sideDirection,
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...transformOptions,
+      composite: 'replace' as const,
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotionTransRot(
+        toMotionRange(sideDirection, clipFrom, 'in'),
+        { travel: TRAVEL },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...revealOptions,
+      ...getMotionReveal(toMotionRange(sideDirection, from, 'in'), { minimum }, asWeb, suffix),
+    },
   ];
 }

@@ -1,15 +1,14 @@
-import type { DomApi, FlipScroll, ScrubAnimationOptions } from '../../types';
+import type { DomApi, FlipScroll, ScrubAnimationOptions, AnimationData } from '../../types';
 import { AXIS_DIRECTIONS, SCROLL_RANGES } from '../../consts';
+import { sideDirection, toMotionRange } from '../../directions';
+import { getLinearScrollEasing, getScrollOverrides, parseRange } from '../../rangeUtils';
 import {
   MOTION_3D_TRANSFORM_NAME,
   getMotion3dTransform,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
+  getMotionLayoutRotation,
 } from '../../transformUtils';
 import { compareKeywordToNonDefaults } from '../../utils';
-import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
-import { scrollGroup } from '../../scrollGroup';
-import { sideDirection } from '../../directions';
 
 const DEFAULTS: Required<FlipScroll> = {
   type: 'FlipScroll',
@@ -34,41 +33,36 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<FlipScroll>;
   const { angle = DEFAULTS.angle, direction, perspective = DEFAULTS.perspective } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
 
   // mapped to a side so that 'out' flips it like any directional motion, continuing the rotation of 'in'
   const fourSideDirection = compareKeywordToNonDefaults(direction, ['vertical']) ? 'top' : 'right';
+  const side = range === 'out' ? sideDirection.opposite(fourSideDirection) : fourSideDirection;
 
   const transformOptions = {
     ...options,
-    namedEffect: {
-      ...namedEffect,
-      angle,
-      direction: fourSideDirection,
-      perspective,
-    },
+    namedEffect: { ...namedEffect, angle, direction: fourSideDirection, perspective },
   } as ScrubAnimationOptions;
 
-  return withSharedScrollRange([
-    useDirectionalPreset(
-      getMotion3dTransform,
-      transformOptions,
-      scrollGroup,
-      {
-        defaultRange: DEFAULTS.range,
-        directionType: sideDirection,
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(
-      transformOptions,
-      scrollGroup,
-      { defaultRange: DEFAULTS.range },
-      asWeb,
-      suffix,
-    ),
-  ]);
+  return [
+    {
+      ...transformOptions,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
+      ...getMotion3dTransform(
+        toMotionRange(sideDirection, side, range),
+        { angle, perspective },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, false)),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+  ];
 }

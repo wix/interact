@@ -1,5 +1,10 @@
 import { getJsEasing as parseJsEasing } from '@wix/motion';
-import type { AnimationOptions, NamedEffect, TimeAnimationOptions } from './types';
+import type {
+  AnimationOptions,
+  EffectScrollRange,
+  NamedEffect,
+  TimeAnimationOptions,
+} from './types';
 import { getEasing, roundNumber } from './utils';
 
 const CSS_EASING_KEYWORDS: Record<string, string> = {
@@ -134,4 +139,41 @@ export function getLoopEasing(
   const easing = toLinearEasing(segments, isLinear ? 1 : EASING_SAMPLES);
   // the iteration delay holds the rest state
   return activeFraction < 1 ? easing.replace(/\)$/, ', 1 100%)') : easing;
+}
+
+// the preset's own easings of a scroll animation - scroll ignores the user's easing
+export type ScrollEasingOptions = {
+  easing?: string;
+  outEasing?: string;
+  continuousEasing?: string;
+  continuousHold?: number;
+};
+
+// scroll animations use only the preset's easing, applied per range to keep in + out = continuous
+// easing - the visual easing of the in-motion
+// outEasing - the visual easing of the out-motion (defaults to the in-motion reversed)
+// continuousEasing - the in-half of continuous (defaults to easing), the out-half uses outEasing
+export function getScrollEasing(
+  range: EffectScrollRange,
+  directional: boolean,
+  easingOptions: ScrollEasingOptions = {},
+) {
+  const { easing, outEasing, continuousEasing = easing, continuousHold } = easingOptions;
+  if (range === 'in') {
+    return toCssEasing(easing);
+  }
+  if (range === 'out') {
+    // 'out' is played reversed, so its visual easing is mirrored
+    return outEasing ? mirrorEasing(outEasing) : toCssEasing(easing);
+  }
+  return getContinuousEasing(continuousEasing, outEasing, directional, continuousHold);
+}
+
+// an ongoing animation's duration and easing - the iteration delay is a hold at rest at the end of each iteration
+export function getLoopOverrides(options: AnimationOptions, loop?: LoopShape) {
+  const activeFraction = getActiveFraction(options);
+  return {
+    duration: ((options as TimeAnimationOptions).duration || 1) / activeFraction,
+    easing: loop ? getLoopEasing(loop, activeFraction) : 'linear',
+  };
 }

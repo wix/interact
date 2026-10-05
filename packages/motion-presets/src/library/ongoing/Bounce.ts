@@ -1,17 +1,23 @@
-import type { Bounce, DomApi, TimeAnimationOptions } from '../../types';
+import type { Bounce, DomApi, TimeAnimationOptions, AnimationData } from '../../types';
+import type { MotionRange } from '../../directions';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
+  getMotionLayoutRotation,
   getMotionTransRot,
-  useLayoutRotation,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
-import { useDirectionalPreset } from '../../presetUtils';
-import { ongoingGroup } from '../../ongoingGroup';
-import { sideDirection } from '../../directions';
+import { getLoopOverrides } from '../../easingUtils';
+import { parseLengthLazy } from '../../utils';
 
 const EASING = 'sineOut';
-const DIRECTION = 'top';
+// starts at the peak above its place and falls down to it
+const MOTION_RANGE: MotionRange = {
+  fromSign: -1,
+  toSign: 0,
+  vertical: true,
+  movementAngle: '90deg',
+};
 
 const DEFAULTS: Required<Bounce> = {
   type: 'Bounce',
@@ -49,31 +55,31 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<Bounce>;
   const { travel = DEFAULTS.travel } = namedEffect!;
 
   const bounceOptions = {
     ...options,
-    namedEffect: {
-      ...namedEffect,
-      direction: DIRECTION,
-      travel,
-    },
+    namedEffect: { ...namedEffect, direction: 'top', travel },
   } as TimeAnimationOptions;
 
   return [
-    useDirectionalPreset(
-      getMotionTransRot,
-      bounceOptions,
-      ongoingGroup,
-      {
-        directionType: sideDirection,
-        loop: { shape: SHAPE, easings: [EASING] },
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(bounceOptions, ongoingGroup, {}, asWeb, suffix),
+    {
+      ...bounceOptions,
+      ...getLoopOverrides(bounceOptions, { shape: SHAPE, easings: [EASING] }),
+      ...getMotionTransRot(
+        MOTION_RANGE,
+        { travel: parseLengthLazy(travel, { value: 0, unit: 'px' }) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...bounceOptions,
+      composite: 'add',
+      ...getLoopOverrides(bounceOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ];
 }

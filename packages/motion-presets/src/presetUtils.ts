@@ -12,7 +12,7 @@ import type {
   LengthValue,
   NamedEffect,
 } from './types';
-import type { LoopShape } from './easingUtils';
+import type { LoopShape, ScrollEasingOptions } from './easingUtils';
 import {
   CENTER_AND_FOUR_DIRECTIONS,
   FOUR_CORNERS_DIRECTIONS,
@@ -20,6 +20,8 @@ import {
   SCROLL_RANGES,
 } from './consts';
 import type { DirectionKind } from './directions';
+import { toMotionRange } from './directions';
+import { pivotToTransformOrigin } from './transformUtils';
 import { parseKeywordLazy, parseLengthLazy } from './utils';
 
 // what differs between the scroll, entrance and ongoing presets - each group is its own module
@@ -38,15 +40,9 @@ export type PresetGroup = {
   ): void;
 };
 
-// the resolved direction of a directional preset
-// fromSign / toSign - the sign of the motion at the start / end keyframe (0 = rest)
-// movementAngle - the 2d direction of the motion as a css angle
-export type MotionRange = {
-  fromSign: 1 | -1;
-  toSign: 0 | 1 | -1;
-  movementAngle: string;
-  vertical: boolean;
-};
+import type { MotionRange } from './directions';
+export type { MotionRange } from './directions';
+export { withSharedScrollRange } from './rangeUtils';
 
 type SpinParsingOptions = {
   directionType: DirectionKind<EffectSpinDirection>;
@@ -100,11 +96,7 @@ type TravelParsingOptions = { defaultTravel?: LengthValue };
 type ScrollRangeParsingOptions = { defaultRange?: EffectScrollRange };
 
 // the preset's own easings - scroll ignores the user's easing and ongoing replaces it with its loop
-export type EasingParsingOptions = {
-  easing?: string;
-  outEasing?: string;
-  continuousEasing?: string;
-  continuousHold?: number;
+export type EasingParsingOptions = ScrollEasingOptions & {
   // ongoing: the motion of a single iteration (see getLoopEasing)
   loop?: LoopShape;
 };
@@ -116,8 +108,6 @@ type PresetParsingOptions = DirectionParsingOptions &
   PivotParsingOptions &
   EasingParsingOptions;
 
-const SCROLL_RANGE_KEYS = ['startOffset', 'endOffset', 'startOffsetAdd', 'endOffsetAdd'] as const;
-
 function resolveGroupOverrides(
   options: AnimationOptions,
   group: PresetGroup,
@@ -128,19 +118,6 @@ function resolveGroupOverrides(
   const namedEffect = options.namedEffect as NamedEffect & { range?: EffectScrollRange };
   const range = parseKeywordLazy<EffectScrollRange>(namedEffect.range, SCROLL_RANGES, defaultRange);
   return { range, overrides: group.getOverrides(options, range, easingOptions, directional) };
-}
-
-export function getFillOverrides(options: AnimationOptions, range: EffectScrollRange) {
-  const defaultFill = range === 'out' ? 'forwards' : range === 'continuous' ? 'both' : 'backwards';
-  const { fill = defaultFill } = options;
-  return range === 'out' ? { fill, reversed: !options.reversed } : { fill };
-}
-
-function pivotToTransformOrigin(pivot: string) {
-  return {
-    x: pivot.includes('left') ? '-50%' : pivot.includes('right') ? '50%' : '0px',
-    y: pivot.includes('top') ? '-50%' : pivot.includes('bottom') ? '50%' : '0px',
-  };
 }
 
 function normalizePresetParams(
@@ -167,16 +144,6 @@ function normalizePresetParams(
     travel: parseLengthLazy(travel, defaultTravel),
     toTravel: toTravel === undefined ? undefined : parseLengthLazy(toTravel, defaultTravel),
   };
-}
-
-// makes all animations span the scroll range of the first one, e.g. a range widened by parallax
-export function withSharedScrollRange(animations: AnimationData[]) {
-  const [source, ...rest] = animations as Partial<AnimationDataForScrub>[];
-  const range = Object.fromEntries(
-    SCROLL_RANGE_KEYS.filter((key) => source[key] !== undefined).map((key) => [key, source[key]]),
-  );
-
-  return [source, ...rest.map((animation) => ({ ...animation, ...range }))] as AnimationData[];
 }
 
 export function useBasicPreset(
@@ -265,14 +232,7 @@ export function useDirectionalPreset(
         : parse(namedEffect.direction)
       : kind.opposite(parse(group.name === 'ongoing' ? namedEffect.direction : namedEffect.from));
 
-  const fromSign: 1 | -1 =
-    direction === 'left' || direction === 'top' || direction === 'counter-clockwise' ? 1 : -1;
-  const toSign: 1 | -1 | 0 = range === 'continuous' ? (-fromSign as 1 | -1) : 0;
-
-  const vertical = direction === 'vertical' || direction === 'top' || direction === 'bottom';
-  const movementAngle = kind.movementAngle(direction);
-
-  const motionRange: MotionRange = { fromSign, toSign, vertical, movementAngle };
+  const motionRange = toMotionRange(kind, direction, range);
 
   const params = normalizePresetParams(namedEffect, parsingOptions);
   group.applyParallax?.(params, range, overrides);

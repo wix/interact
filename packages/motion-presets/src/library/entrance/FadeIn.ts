@@ -1,7 +1,5 @@
-import type { TimeAnimationOptions } from '../../types';
+import type { TimeAnimationOptions, AnimationData } from '../../types';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset } from '../../presetUtils';
-import { entranceGroup } from '../../entranceGroup';
 
 const EASING = 'sineInOut';
 
@@ -15,14 +13,14 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { fill = 'backwards', namedEffect, suffix } = options;
   return [
-    useBasicPreset(
-      getMotionFade,
-      { ...options, easing: EASING },
-      entranceGroup,
-      asWeb,
-      options.suffix,
-    ),
+    {
+      ...options,
+      easing: EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
   ];
 }

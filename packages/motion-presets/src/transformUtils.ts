@@ -1,5 +1,6 @@
 import type { AnimationOptions, EffectScrollRange } from './types';
-import type { MotionRange, PresetGroup } from './presetUtils';
+import type { PresetGroup } from './presetUtils';
+import type { MotionRange } from './directions';
 import type { Parallax } from './parallaxUtils';
 import { CSS_CALC_REGEX, declareCustom, stripCalc, toKeyframeValue } from './utils';
 import { useBasicPreset } from './presetUtils';
@@ -41,6 +42,14 @@ function withoutParallax(custom: Record<string, number | string>, prefix: string
   custom[`${prefix}-parallax-from`] = '0px';
   custom[`${prefix}-parallax-to`] = '0px';
   return {};
+}
+
+// a pivot keyword as a transform origin, relative to the center
+export function pivotToTransformOrigin(pivot: string) {
+  return {
+    x: pivot.includes('left') ? '-50%' : pivot.includes('right') ? '50%' : '0px',
+    y: pivot.includes('top') ? '-50%' : pivot.includes('bottom') ? '50%' : '0px',
+  };
 }
 
 // directional 2d transformation - 2d translation (with optional parallax), rotation only around z-axis and skew

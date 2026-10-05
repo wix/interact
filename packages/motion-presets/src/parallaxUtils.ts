@@ -1,5 +1,5 @@
 import type { Length } from '@wix/motion';
-import type { RangeOffset } from './types';
+import type { EffectScrollRange, RangeOffset } from './types';
 import { declareCustom, mapRange } from './utils';
 
 const EPSILON = 0.01;
@@ -148,4 +148,19 @@ export function createParallax(
 ): Parallax {
   return (custom, prefix, asWeb) =>
     computeParallax(range, reversed, speed, center, custom, prefix, asWeb);
+}
+
+// the parallax of a scroll layer over its scroll range, centered by default on the element's rest state
+export function getScrollParallax(
+  range: EffectScrollRange,
+  { startOffset, endOffset }: { startOffset: RangeOffset; endOffset: RangeOffset },
+  speed: number,
+  center: number = range === 'continuous' ? 0.5 : range === 'out' ? 0 : 1,
+) {
+  return createParallax(
+    { startOffset, endOffset } as ParallaxRange,
+    range === 'out',
+    speed,
+    center,
+  );
 }

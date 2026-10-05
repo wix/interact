@@ -1,6 +1,21 @@
-import type { EffectFourDirections, EffectSpinDirection, EffectTwoAxes } from './types';
+import type {
+  EffectFourDirections,
+  EffectScrollRange,
+  EffectSpinDirection,
+  EffectTwoAxes,
+} from './types';
 import { AXIS_DIRECTIONS, FOUR_DIRECTIONS, SPIN_DIRECTIONS } from './consts';
 import { CSS_CALC_REGEX, parseKeywordLazy, stripCalc } from './utils';
+
+// the resolved direction of a directional preset
+// fromSign / toSign - the sign of the motion at the start / end keyframe (0 = rest)
+// movementAngle - the 2d direction of the motion as a css angle
+export type MotionRange = {
+  fromSign: 1 | -1;
+  toSign: 0 | 1 | -1;
+  movementAngle: string;
+  vertical: boolean;
+};
 
 // how a directional preset reads its direction - each kind is its own export, so a preset bundles only its kind
 export type DirectionKind<T extends string | number = string> = {
@@ -84,3 +99,19 @@ export const angleDirection: DirectionKind<number> = {
       : `calc(180deg + ${stripCalc(direction)})`,
   movementAngle: toMovementAngle,
 };
+
+// the motion range of a resolved direction - continuous moves on past the rest state to the opposite sign
+export function toMotionRange(
+  kind: DirectionKind<any>,
+  direction: string,
+  range: EffectScrollRange,
+): MotionRange {
+  const fromSign =
+    direction === 'left' || direction === 'top' || direction === 'counter-clockwise' ? 1 : -1;
+  return {
+    fromSign,
+    toSign: range === 'continuous' ? (-fromSign as 1 | -1) : 0,
+    vertical: direction === 'vertical' || direction === 'top' || direction === 'bottom',
+    movementAngle: kind.movementAngle(direction),
+  };
+}
