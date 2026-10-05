@@ -1,14 +1,19 @@
-import type { ScrubAnimationOptions, Spin3dScroll, DomApi } from '../../types';
+import type { AnimationData, ScrubAnimationOptions, Spin3dScroll, DomApi } from '../../types';
 import { SCROLL_RANGES } from '../../consts';
+import { spinDirection, toMotionRange } from '../../directions';
+import { getScrollParallax } from '../../parallaxUtils';
+import {
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
 import {
   MOTION_3D_TRANSFORM_NAME,
   getMotion3dTransform,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
+  getMotionLayoutRotation,
 } from '../../transformUtils';
-import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
-import { parallaxScrollGroup, scrollGroup } from '../../scrollGroup';
-import { spinDirection } from '../../directions';
 
 const DIRECTION = 'clockwise';
 
@@ -35,43 +40,46 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<Spin3dScroll>;
   const {
     angle = DEFAULTS.angle,
     perspective = DEFAULTS.perspective,
     speed = DEFAULTS.speed,
   } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
+  const direction = range === 'out' ? spinDirection.opposite(DIRECTION) : DIRECTION;
+  const angleXYZ = { x: angle, y: angle, z: angle };
 
   const transformOptions = {
     ...options,
     namedEffect: {
       ...namedEffect,
-      angle: { x: angle, y: angle, z: angle },
+      angle: angleXYZ,
       direction: DIRECTION,
       perspective,
       parallax: { speed },
     },
   } as ScrubAnimationOptions;
 
+  const overrides = getScrollOverrides(options, range, getLinearScrollEasing(range, true));
+
   return withSharedScrollRange([
-    useDirectionalPreset(
-      getMotion3dTransform,
-      transformOptions,
-      parallaxScrollGroup,
-      {
-        defaultRange: DEFAULTS.range,
-        directionType: spinDirection,
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(
-      transformOptions,
-      scrollGroup,
-      { defaultRange: DEFAULTS.range },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...transformOptions,
+      ...overrides,
+      ...getMotion3dTransform(
+        toMotionRange(spinDirection, direction, range),
+        { angle: angleXYZ, perspective, parallax: getScrollParallax(range, overrides, speed) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, false)),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ]);
 }
