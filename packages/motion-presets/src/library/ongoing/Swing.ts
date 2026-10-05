@@ -1,18 +1,20 @@
-import type { DomApi, Swing, TimeAnimationOptions } from '../../types';
+import type { AnimationData, DomApi, Swing, TimeAnimationOptions } from '../../types';
 import { CENTER_AND_FOUR_DIRECTIONS, FOUR_DIRECTIONS } from '../../consts';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
+  getMotionLayoutRotation,
   getMotionTransRot,
-  useLayoutRotation,
+  pivotToTransformOrigin,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
-import { getEasingFamily } from '../../utils';
-import { useDirectionalPreset } from '../../presetUtils';
-import { ongoingGroup } from '../../ongoingGroup';
-import { spinDirection } from '../../directions';
+import { getLoopOverrides } from '../../easingUtils';
+import { getEasingFamily, parseKeywordLazy } from '../../utils';
+import { spinDirection, toMotionRange } from '../../directions';
 
 const DEFAULT_EASING = 'sineInOut';
+// the positive angle is a counter-clockwise spin's peak
+const DIRECTION = 'counter-clockwise';
 
 const DEFAULTS: Required<Swing> = {
   type: 'Swing',
@@ -47,7 +49,7 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<Swing>;
   const { angle = DEFAULTS.angle, pivot = DEFAULTS.pivot } = namedEffect!;
   const ease = getEasingFamily(easing);
@@ -58,27 +60,32 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     namedEffect: {
       ...namedEffect,
       angle,
-      // the positive angle is a counter-clockwise spin's peak
-      direction: 'counter-clockwise',
+      direction: DIRECTION,
       pivot,
     },
   } as TimeAnimationOptions;
 
+  const transformOrigin = pivotToTransformOrigin(
+    parseKeywordLazy(pivot, CENTER_AND_FOUR_DIRECTIONS, DEFAULTS.pivot),
+  );
+
   return [
     // the layout rotation comes first, so the pivot is on the element's rotated side
-    useLayoutRotation(swingOptions, ongoingGroup, { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPreset(
-      getMotionTransRot,
-      swingOptions,
-      ongoingGroup,
-      {
-        directionType: spinDirection,
-        pivots: CENTER_AND_FOUR_DIRECTIONS,
-        defaultPivot: DEFAULTS.pivot,
-        loop: { shape: SHAPE, easings: [ease.out, ease.inOut] },
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...swingOptions,
+      composite: 'replace',
+      ...getLoopOverrides(swingOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...swingOptions,
+      ...getLoopOverrides(swingOptions, { shape: SHAPE, easings: [ease.out, ease.inOut] }),
+      ...getMotionTransRot(
+        toMotionRange(spinDirection, DIRECTION, 'in'),
+        { angle, transformOrigin },
+        asWeb,
+        suffix,
+      ),
+    },
   ];
 }

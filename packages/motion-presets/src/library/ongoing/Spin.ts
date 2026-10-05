@@ -1,14 +1,13 @@
-import type { DomApi, Spin, TimeAnimationOptions } from '../../types';
+import type { AnimationData, DomApi, Spin, TimeAnimationOptions } from '../../types';
 import { SPIN_DIRECTIONS } from '../../consts';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
+  getMotionLayoutRotation,
   getMotionTransRot,
-  useLayoutRotation,
 } from '../../transformUtils';
-import { useDirectionalPreset } from '../../presetUtils';
-import { ongoingGroup } from '../../ongoingGroup';
-import { spinDirection } from '../../directions';
+import { getLoopOverrides } from '../../easingUtils';
+import { spinDirection, toMotionRange } from '../../directions';
 
 const DEFAULT_EASING = 'linear';
 const ANGLE = 360;
@@ -38,7 +37,7 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<Spin>;
 
   const spinOptions = {
@@ -49,19 +48,24 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     },
   } as TimeAnimationOptions;
 
+  const direction = spinDirection.parse(namedEffect?.direction, DEFAULTS.direction);
+
   return [
-    useDirectionalPreset(
-      getMotionTransRot,
-      spinOptions,
-      ongoingGroup,
-      {
-        defaultDirection: DEFAULTS.direction,
-        directionType: spinDirection,
-        loop: { shape: SHAPE, easings: [easing] },
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(spinOptions, ongoingGroup, {}, asWeb, suffix),
+    {
+      ...spinOptions,
+      ...getLoopOverrides(spinOptions, { shape: SHAPE, easings: [easing] }),
+      ...getMotionTransRot(
+        toMotionRange(spinDirection, direction, 'in'),
+        { angle: ANGLE },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...spinOptions,
+      composite: 'add',
+      ...getLoopOverrides(spinOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ];
 }

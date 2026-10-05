@@ -1,16 +1,16 @@
-import type { DomApi, Fold, TimeAnimationOptions } from '../../types';
+import type { AnimationData, DomApi, Fold, TimeAnimationOptions } from '../../types';
 import { CENTER_AND_FOUR_DIRECTIONS, FOUR_DIRECTIONS } from '../../consts';
 import {
   MOTION_3D_TRANSFORM_NAME,
   MOTION_LAYOUT_ROTATION_NAME,
   getMotion3dTransform,
-  useLayoutRotation,
+  getMotionLayoutRotation,
+  pivotToTransformOrigin,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
-import { getEasingFamily } from '../../utils';
-import { useDirectionalPreset } from '../../presetUtils';
-import { ongoingGroup } from '../../ongoingGroup';
-import { sideDirection } from '../../directions';
+import { getLoopOverrides } from '../../easingUtils';
+import { getEasingFamily, parseKeywordLazy } from '../../utils';
+import { sideDirection, toMotionRange } from '../../directions';
 
 const DEFAULT_EASING = 'cubicInOut';
 
@@ -49,7 +49,7 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<Fold>;
   const {
     angle = DEFAULTS.angle,
@@ -71,22 +71,28 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     },
   } as TimeAnimationOptions;
 
+  const side = sideDirection.opposite(sideDirection.parse(pivot, DEFAULTS.pivot));
+  const transformOrigin = pivotToTransformOrigin(
+    parseKeywordLazy(pivot, CENTER_AND_FOUR_DIRECTIONS, DEFAULTS.pivot),
+  );
+
   return [
     // the layout rotation comes first, so the pivot is on the element's rotated side
-    useLayoutRotation(foldOptions, ongoingGroup, { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPreset(
-      getMotion3dTransform,
-      foldOptions,
-      ongoingGroup,
-      {
-        defaultDirection: DEFAULTS.pivot,
-        directionType: sideDirection,
-        pivots: CENTER_AND_FOUR_DIRECTIONS,
-        defaultPivot: DEFAULTS.pivot,
-        loop: { shape: SHAPE, easings: [ease.out, 'sineInOut'] },
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...foldOptions,
+      composite: 'replace',
+      ...getLoopOverrides(foldOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...foldOptions,
+      ...getLoopOverrides(foldOptions, { shape: SHAPE, easings: [ease.out, 'sineInOut'] }),
+      ...getMotion3dTransform(
+        toMotionRange(sideDirection, side, 'in'),
+        { angle, perspective, transformOrigin },
+        asWeb,
+        suffix,
+      ),
+    },
   ];
 }

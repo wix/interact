@@ -1,15 +1,15 @@
-import type { DomApi, Poke, TimeAnimationOptions } from '../../types';
+import type { AnimationData, DomApi, Poke, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
+  getMotionLayoutRotation,
   getMotionTransRot,
-  useLayoutRotation,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
-import { useDirectionalPreset } from '../../presetUtils';
-import { ongoingGroup } from '../../ongoingGroup';
-import { sideDirection } from '../../directions';
+import { getLoopOverrides } from '../../easingUtils';
+import { parseLengthLazy } from '../../utils';
+import { sideDirection, toMotionRange } from '../../directions';
 
 const DEFAULTS: Required<Poke> = {
   type: 'Poke',
@@ -44,7 +44,7 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<Poke>;
   const { travel = DEFAULTS.travel } = namedEffect!;
 
@@ -56,19 +56,27 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     },
   } as TimeAnimationOptions;
 
+  // the keyframes start at their peak, towards the direction
+  const side = sideDirection.opposite(
+    sideDirection.parse(namedEffect?.direction, DEFAULTS.direction),
+  );
+
   return [
-    useDirectionalPreset(
-      getMotionTransRot,
-      pokeOptions,
-      ongoingGroup,
-      {
-        defaultDirection: DEFAULTS.direction,
-        directionType: sideDirection,
-        loop: { shape: SHAPE },
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(pokeOptions, ongoingGroup, {}, asWeb, suffix),
+    {
+      ...pokeOptions,
+      ...getLoopOverrides(pokeOptions, { shape: SHAPE }),
+      ...getMotionTransRot(
+        toMotionRange(sideDirection, side, 'in'),
+        { travel: parseLengthLazy(travel, { value: 0, unit: 'px' }) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...pokeOptions,
+      composite: 'add',
+      ...getLoopOverrides(pokeOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ];
 }

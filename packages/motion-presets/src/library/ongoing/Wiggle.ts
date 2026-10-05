@@ -1,16 +1,26 @@
-import type { DomApi, TimeAnimationOptions, Wiggle } from '../../types';
+import type { AnimationData, DomApi, TimeAnimationOptions, Wiggle } from '../../types';
+import type { MotionRange } from '../../directions';
 import {
   MOTION_3D_TRANSFORM_NAME,
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
   getMotion3dTransform,
+  getMotionLayoutRotation,
   getMotionTransRot,
-  useLayoutRotation,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
-import { useDirectionalPreset, useDirectionalPresetAsBasic } from '../../presetUtils';
-import { ongoingGroup } from '../../ongoingGroup';
-import { sideDirection } from '../../directions';
+import { getLoopOverrides } from '../../easingUtils';
+import { parseLengthLazy } from '../../utils';
+
+// the rotation's sign is set by its angle, the lift starts at its peak above its place
+const MOTION_RANGE: MotionRange = {
+  fromSign: -1,
+  toSign: 0,
+  vertical: true,
+  movementAngle: '90deg',
+};
+// no z-motion, so the perspective has no effect
+const PERSPECTIVE = 800;
 
 const DEFAULTS: Required<Wiggle> = {
   type: 'Wiggle',
@@ -53,19 +63,19 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<Wiggle>;
   const { angle = DEFAULTS.angle, travel = DEFAULTS.travel } = namedEffect!;
+  // the keyframes start at the negative sign, so the first peak is +angle
+  const rotation = { z: -angle };
 
   const rotationOptions = {
     ...options,
     composite: 'add',
     namedEffect: {
       ...namedEffect,
-      // the keyframes start at the negative sign, so the first peak is +angle
-      angle: { z: -angle },
-      // no z-motion, so the perspective has no effect
-      perspective: 800,
+      angle: rotation,
+      perspective: PERSPECTIVE,
       travel: 0,
     },
   } as TimeAnimationOptions;
@@ -82,22 +92,31 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   // the lift comes after the rotations, so it is along the element's tilted axes
   return [
-    useLayoutRotation(options, ongoingGroup, { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPresetAsBasic(
-      getMotion3dTransform,
-      rotationOptions,
-      ongoingGroup,
-      { loop: { shape: ROTATION_SHAPE } },
-      asWeb,
-      suffix,
-    ),
-    useDirectionalPreset(
-      getMotionTransRot,
-      liftOptions,
-      ongoingGroup,
-      { directionType: sideDirection, loop: { shape: LIFT_SHAPE } },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...options,
+      composite: 'replace',
+      ...getLoopOverrides(options),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...rotationOptions,
+      ...getLoopOverrides(rotationOptions, { shape: ROTATION_SHAPE }),
+      ...getMotion3dTransform(
+        MOTION_RANGE,
+        { angle: rotation, perspective: PERSPECTIVE },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...liftOptions,
+      ...getLoopOverrides(liftOptions, { shape: LIFT_SHAPE }),
+      ...getMotionTransRot(
+        MOTION_RANGE,
+        { travel: parseLengthLazy(travel, { value: 0, unit: 'px' }) },
+        asWeb,
+        suffix,
+      ),
+    },
   ];
 }

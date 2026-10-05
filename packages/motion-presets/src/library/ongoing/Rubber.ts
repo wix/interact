@@ -1,13 +1,20 @@
-import type { DomApi, Rubber, TimeAnimationOptions } from '../../types';
+import type { AnimationData, DomApi, Rubber, TimeAnimationOptions } from '../../types';
+import type { MotionRange } from '../../directions';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_SCALE_NAME,
   getMotionScale,
-  useLayoutRotation,
+  getMotionLayoutRotation,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
-import { useDirectionalPresetAsBasic } from '../../presetUtils';
-import { ongoingGroup } from '../../ongoingGroup';
+import { getLoopOverrides } from '../../easingUtils';
+
+const MOTION_RANGE: MotionRange = {
+  fromSign: -1,
+  toSign: 0,
+  vertical: true,
+  movementAngle: '90deg',
+};
 
 const DEFAULTS: Required<Rubber> = {
   type: 'Rubber',
@@ -39,28 +46,31 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<Rubber>;
   const { stretch = DEFAULTS.stretch } = namedEffect!;
+  const scale = { x: 1 - stretch, y: 1 + stretch };
 
   const scaleOptions = {
     ...options,
     namedEffect: {
       ...namedEffect,
-      scale: { x: 1 - stretch, y: 1 + stretch },
+      scale,
     },
   } as TimeAnimationOptions;
 
   return [
     // the layout rotation comes first, so the stretch is along the element's rotated axes
-    useLayoutRotation(options, ongoingGroup, { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPresetAsBasic(
-      getMotionScale,
-      scaleOptions,
-      ongoingGroup,
-      { loop: { shape: SHAPE } },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...options,
+      composite: 'replace',
+      ...getLoopOverrides(options),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...scaleOptions,
+      ...getLoopOverrides(scaleOptions, { shape: SHAPE }),
+      ...getMotionScale(MOTION_RANGE, { scale }, asWeb, suffix),
+    },
   ];
 }
