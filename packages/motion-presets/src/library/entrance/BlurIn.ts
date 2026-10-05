@@ -1,12 +1,10 @@
-import type { BlurIn, TimeAnimationOptions } from '../../types';
+import type { AnimationData, BlurIn, TimeAnimationOptions } from '../../types';
 import {
   getMotionBlur,
   getMotionFade,
   MOTION_BLUR_NAME,
   MOTION_FADE_NAME,
 } from '../../fadeBlurUtils';
-import { useBasicPreset } from '../../presetUtils';
-import { entranceGroup } from '../../entranceGroup';
 
 const FADE_IN_DURATION_FACTOR = 0.7;
 const FADE_IN_EASING = 'sineIn';
@@ -29,26 +27,29 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<BlurIn>;
   const { blur = DEFAULTS.blur } = namedEffect!;
+  const { fill = 'backwards' } = options;
 
-  const fadeOptions = {
-    ...options,
-    duration: options.duration! * FADE_IN_DURATION_FACTOR,
-    easing: FADE_IN_EASING,
-  };
   const blurOptions = {
     ...options,
     easing,
-    namedEffect: {
-      ...namedEffect,
-      blur,
-    },
+    fill,
+    namedEffect: { ...namedEffect, blur },
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
-    useBasicPreset(getMotionBlur, blurOptions, entranceGroup, asWeb, suffix),
+    {
+      ...options,
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    {
+      ...blurOptions,
+      ...getMotionBlur({ blur }, asWeb, suffix),
+    },
   ];
 }

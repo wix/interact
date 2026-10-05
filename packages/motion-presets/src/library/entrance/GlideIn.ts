@@ -1,14 +1,13 @@
-import type { GlideIn, LengthValue, TimeAnimationOptions } from '../../types';
+import type { AnimationData, GlideIn, LengthValue, TimeAnimationOptions } from '../../types';
 import {
   MOTION_TRANS_ROT_NAME,
   getMotionTransRot,
+  getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
 } from '../../transformUtils';
+import { parseLengthLazy } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
-import { entranceGroup } from '../../entranceGroup';
-import { angleDirection } from '../../directions';
+import { angleDirection, toMotionRange } from '../../directions';
 
 const FADE_IN_EASING = 'step-start';
 
@@ -34,29 +33,35 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { easing = DEFAULT_EASING, suffix } = options as TimeAnimationOptions<GlideIn>;
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<GlideIn>;
+  const { fill = 'backwards' } = options;
+  const from = angleDirection.parse(namedEffect?.from, DEFAULTS.from as number);
 
   return [
-    useBasicPreset(
-      getMotionFade,
-      { ...options, easing: FADE_IN_EASING },
-      entranceGroup,
-      asWeb,
-      suffix,
-    ),
-    useDirectionalPreset(
-      getMotionTransRot,
-      { ...options, easing },
-      entranceGroup,
-      {
-        defaultDirection: DEFAULTS.from as number,
-        defaultTravel: DEFAULTS.travel as LengthValue,
-        directionType: angleDirection,
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation({ ...options, easing }, entranceGroup, {}, asWeb, suffix),
+    {
+      ...options,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    {
+      ...options,
+      easing,
+      fill,
+      ...getMotionTransRot(
+        toMotionRange(angleDirection, angleDirection.opposite(from), 'in'),
+        { travel: parseLengthLazy(namedEffect?.travel, DEFAULTS.travel as LengthValue) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...options,
+      composite: 'add' as const,
+      easing,
+      fill,
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ];
 }

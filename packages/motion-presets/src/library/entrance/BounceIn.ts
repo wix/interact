@@ -1,4 +1,5 @@
 import type {
+  AnimationData,
   BounceIn,
   EffectFourDirections,
   LengthValue,
@@ -10,14 +11,12 @@ import {
   MOTION_3D_TRANSFORM_NAME,
   getMotionTransRot,
   getMotion3dTransform,
+  getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
 } from '../../transformUtils';
-import { compareKeywordToNonDefaults } from '../../utils';
+import { compareKeywordToNonDefaults, parseLengthLazy } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
-import { entranceGroup } from '../../entranceGroup';
-import { sideDirection } from '../../directions';
+import { sideDirection, toMotionRange } from '../../directions';
 
 // BounceIn uses easing to create the bouncing movement and uses only 2 keyframes
 const BOUNCE_IN_EASING = `linear(${[
@@ -93,45 +92,50 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<BounceIn>;
-  const { from, perspective = DEFAULTS.perspective } = namedEffect!;
+  const { from, perspective = DEFAULTS.perspective, travel } = namedEffect!;
+  const { fill = 'backwards' } = options;
 
   // 'back' bounces along the z-axis, the sides along their own axis
   const isBack = compareKeywordToNonDefaults(from, ['back']);
-  const preset = isBack ? getMotion3dTransform : getMotionTransRot;
+  // from 'top' starts at the negative sign - the z travel then starts behind the element
+  const side = isBack ? 'top' : from;
+  const motionRange = toMotionRange(
+    sideDirection,
+    sideDirection.opposite(sideDirection.parse(side, DEFAULTS.from as EffectFourDirections)),
+    'in',
+  );
+  const transformParams = {
+    perspective,
+    travel: parseLengthLazy(travel, DEFAULTS.travel as LengthValue),
+  };
 
   const transformOptions = {
     ...options,
     easing: BOUNCE_IN_EASING,
-    namedEffect: {
-      ...namedEffect,
-      // from 'top' starts at the negative sign - the z travel then starts behind the element
-      from: isBack ? 'top' : from,
-      perspective,
-    },
+    fill,
+    namedEffect: { ...namedEffect, from: side, perspective },
   } as TimeAnimationOptions;
 
-  const fadeOptions = {
-    ...options,
-    duration: options.duration! * FADE_IN_DURATION_FACTOR,
-    easing: FADE_IN_EASING,
-  };
-
   return [
-    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
-    useDirectionalPreset(
-      preset,
-      transformOptions,
-      entranceGroup,
-      {
-        defaultDirection: DEFAULTS.from as EffectFourDirections,
-        defaultTravel: DEFAULTS.travel as LengthValue,
-        directionType: sideDirection,
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(transformOptions, entranceGroup, {}, asWeb, suffix),
+    {
+      ...options,
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...(isBack
+        ? getMotion3dTransform(motionRange, transformParams, asWeb, suffix)
+        : getMotionTransRot(motionRange, transformParams, asWeb, suffix)),
+    },
+    {
+      ...transformOptions,
+      composite: 'add' as const,
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ];
 }

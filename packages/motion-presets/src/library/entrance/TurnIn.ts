@@ -1,16 +1,15 @@
-import type { TimeAnimationOptions, TurnIn } from '../../types';
+import type { AnimationData, TimeAnimationOptions, TurnIn } from '../../types';
 import { FOUR_CORNERS_DIRECTIONS } from '../../consts';
 import {
   MOTION_TRANS_ROT_NAME,
   getMotionTransRot,
+  getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
+  pivotToTransformOrigin,
 } from '../../transformUtils';
-import { compareKeywordToNonDefaults } from '../../utils';
+import { compareKeywordToNonDefaults, parseKeywordLazy } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
-import { entranceGroup } from '../../entranceGroup';
-import { spinDirection } from '../../directions';
+import { spinDirection, toMotionRange } from '../../directions';
 
 const FADE_IN_EASING = 'sineIn';
 const FADE_IN_DURATION_FACTOR = 0.6;
@@ -37,44 +36,47 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<TurnIn>;
   const { pivot } = namedEffect!;
+  const { fill = 'backwards' } = options;
 
   // TurnIn always comes from the top - so it is clockwise when rotating around the left side
   const direction = compareKeywordToNonDefaults(pivot, ['top-right', 'bottom-right'])
     ? 'counter-clockwise'
     : 'clockwise';
+  const transformOrigin = pivotToTransformOrigin(
+    parseKeywordLazy(pivot, FOUR_CORNERS_DIRECTIONS, DEFAULTS.pivot),
+  );
 
-  const fadeOptions = {
-    ...options,
-    duration: options.duration! * FADE_IN_DURATION_FACTOR,
-    easing: FADE_IN_EASING,
-  };
   const transformOptions = {
     ...options,
     easing,
-    namedEffect: {
-      ...namedEffect,
-      angle: ROTATION_ANGLE,
-      direction,
-    },
+    fill,
+    namedEffect: { ...namedEffect, angle: ROTATION_ANGLE, direction },
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
-    useDirectionalPreset(
-      getMotionTransRot,
-      transformOptions,
-      entranceGroup,
-      {
-        defaultPivot: DEFAULTS.pivot,
-        directionType: spinDirection,
-        pivots: FOUR_CORNERS_DIRECTIONS,
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(transformOptions, entranceGroup, {}, asWeb, suffix),
+    {
+      ...options,
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotionTransRot(
+        toMotionRange(spinDirection, direction, 'in'),
+        { angle: ROTATION_ANGLE, transformOrigin },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transformOptions,
+      composite: 'add' as const,
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ];
 }

@@ -1,10 +1,8 @@
-import { ShuttersIn, TimeAnimationOptions } from '../../types';
+import type { AnimationData, ShuttersIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 import { MOTION_SHUTTERS_NAME, getMotionShutters } from '../../clipUtils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
-import { entranceGroup } from '../../entranceGroup';
-import { sideDirection } from '../../directions';
+import { sideDirection, toMotionRange } from '../../directions';
 
 const FADE_IN_EASING = 'step-start';
 
@@ -31,37 +29,38 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const {
     easing = DEFAULT_EASING,
     namedEffect,
     suffix,
   } = options as TimeAnimationOptions<ShuttersIn>;
   const { shutters = DEFAULTS.shutters, staggered = DEFAULTS.staggered } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  const from = sideDirection.parse(namedEffect?.from, DEFAULTS.from);
 
-  const fadeOptions = { ...options, easing: FADE_IN_EASING };
   const shuttersOptions = {
     ...options,
     easing,
-    namedEffect: {
-      ...namedEffect,
-      shutters,
-      staggered,
-    },
+    fill,
+    namedEffect: { ...namedEffect, shutters, staggered },
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, entranceGroup, asWeb, suffix),
-    useDirectionalPreset(
-      getMotionShutters,
-      shuttersOptions,
-      entranceGroup,
-      {
-        defaultDirection: DEFAULTS.from,
-        directionType: sideDirection,
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...options,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    {
+      ...shuttersOptions,
+      ...getMotionShutters(
+        toMotionRange(sideDirection, sideDirection.opposite(from), 'in'),
+        { shutters, staggered },
+        asWeb,
+        suffix,
+      ),
+    },
   ];
 }
