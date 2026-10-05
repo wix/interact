@@ -13,6 +13,7 @@ import {
   getMotionLayoutRotation,
   getMotionScale,
   getMotionTransRot,
+  pivotToTransformOrigin,
   useLayoutRotation,
 } from '../transformUtils';
 
@@ -206,5 +207,14 @@ describe('layout rotation', () => {
     expect(
       useLayoutRotation(structuredClone(options), scrollGroup, { defaultRange: 'out' }),
     ).toMatchSnapshot();
+  });
+});
+
+describe('pivotToTransformOrigin', () => {
+  test('maps a pivot keyword to an origin relative to the center', () => {
+    expect(pivotToTransformOrigin('center')).toEqual({ x: '0px', y: '0px' });
+    expect(pivotToTransformOrigin('top-left')).toEqual({ x: '-50%', y: '-50%' });
+    expect(pivotToTransformOrigin('bottom-right')).toEqual({ x: '50%', y: '50%' });
+    expect(pivotToTransformOrigin('right')).toEqual({ x: '50%', y: '0px' });
   });
 });

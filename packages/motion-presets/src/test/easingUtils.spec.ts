@@ -4,6 +4,8 @@ import {
   getActiveFraction,
   getContinuousEasing,
   getLoopEasing,
+  getLoopOverrides,
+  getScrollEasing,
   getWrapEasing,
   linearEasing,
   mirrorEasing,
@@ -242,5 +244,65 @@ describe('getLoopEasing', () => {
     // second and third segments use sineOut: progress = ease(t), then 1 - ease(t)
     expect(valueAt(points, 50)).toBeCloseTo(Math.sin(Math.PI / 4), 1);
     expect(valueAt(points, 250 / 3)).toBeCloseTo(1 - Math.sin(Math.PI / 4), 1);
+  });
+});
+
+describe('getScrollEasing', () => {
+  test('in uses the preset easing, defaulting to linear', () => {
+    expect(getScrollEasing('in', false, { easing: 'sineOut' })).toBe(
+      'cubic-bezier(0.39, 0.575, 0.565, 1)',
+    );
+    expect(getScrollEasing('in', false)).toBe('linear');
+  });
+
+  test('out uses easing as is, or mirrors outEasing since it is played reversed', () => {
+    expect(getScrollEasing('out', false, { easing: 'ease-in' })).toBe(
+      'cubic-bezier(0.42, 0, 1, 1)',
+    );
+    expect(getScrollEasing('out', false, { easing: 'ease-in', outEasing: 'ease-out' })).toBe(
+      'cubic-bezier(0.42, 0, 1, 1)',
+    );
+    expect(getScrollEasing('out', false, { outEasing: 'ease-in' })).toBe(
+      'cubic-bezier(0, 0, 0.58, 1)',
+    );
+  });
+
+  test('continuous: back and forth, or linear for directional linear motion', () => {
+    expect(getScrollEasing('continuous', false)).toBe('linear(0 0%, 1 50%, 1 50%, 0 100%)');
+    expect(getScrollEasing('continuous', true)).toBe('linear');
+  });
+
+  test('continuous: continuousEasing overrides easing and continuousHold holds in the middle', () => {
+    expect(
+      getScrollEasing('continuous', false, {
+        easing: 'sineOut',
+        continuousEasing: 'linear',
+        continuousHold: 0.2,
+      }),
+    ).toBe('linear(0 0%, 1 40%, 1 60%, 0 100%)');
+  });
+});
+
+describe('getLoopOverrides', () => {
+  test('easing is linear without a loop', () => {
+    expect(getLoopOverrides({ duration: 1000, namedEffect: { type: 'X' } } as any)).toEqual({
+      duration: 1000,
+      easing: 'linear',
+    });
+  });
+
+  test('iterationDelay stretches the duration and holds rest at the end of the loop easing', () => {
+    expect(
+      getLoopOverrides(
+        { duration: 1000, namedEffect: { type: 'X', iterationDelay: 1000 } } as any,
+        {
+          shape: [
+            [0, 0],
+            [1, 0.5],
+            [0, 1],
+          ],
+        },
+      ),
+    ).toEqual({ duration: 2000, easing: 'linear(1 0%, 0 25%, 0 25%, 1 50%, 1 100%)' });
   });
 });
