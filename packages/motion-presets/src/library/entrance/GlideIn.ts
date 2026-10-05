@@ -58,7 +58,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
     },
     {
       ...options,
-      composite: 'add' as const,
+      composite: 'add',
       easing,
       fill,
       ...getMotionLayoutRotation({}, asWeb, suffix),

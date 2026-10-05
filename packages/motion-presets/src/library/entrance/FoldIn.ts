@@ -65,7 +65,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
     // the layout rotation comes first, so the motion moves along the element's rotated axes
     {
       ...transformOptions,
-      composite: 'replace' as const,
+      composite: 'replace',
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
     {

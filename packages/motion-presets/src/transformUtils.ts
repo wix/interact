@@ -1,9 +1,6 @@
-import type { AnimationOptions, EffectScrollRange } from './types';
-import type { PresetGroup } from './presetUtils';
 import type { MotionRange } from './directions';
 import type { Parallax } from './parallaxUtils';
 import { CSS_CALC_REGEX, declareCustom, stripCalc, toKeyframeValue } from './utils';
-import { useBasicPreset } from './presetUtils';
 
 export const MOTION_TRANS_ROT_NAME = 'motion-trans-rot';
 export const MOTION_SCALE_NAME = 'motion-scale';
@@ -245,24 +242,4 @@ export function getMotionLayoutRotation(
     custom: {},
     keyframes: [{ transform: rotate }, { transform: rotate }],
   };
-}
-
-// the layout rotation layer of a preset's transform stack - 'replace' when it is the first transform layer
-// when added on top of another layer it must share that layer's options and range, so it never outlives it
-export function useLayoutRotation(
-  options: AnimationOptions,
-  group: PresetGroup,
-  layer: { composite?: CompositeOperation; defaultRange?: EffectScrollRange } = {},
-  asWeb: boolean = true,
-  suffix: string = '',
-) {
-  const { composite = 'add', defaultRange } = layer;
-  return useBasicPreset(
-    getMotionLayoutRotation,
-    Object.assign({}, options, { composite }),
-    group,
-    asWeb,
-    suffix,
-    { defaultRange },
-  );
 }

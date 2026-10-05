@@ -17,6 +17,14 @@ export type MotionRange = {
   vertical: boolean;
 };
 
+// the motion range of a layer that moves in no direction, e.g. a scale
+export const UNDIRECTED_MOTION_RANGE: MotionRange = {
+  fromSign: -1,
+  toSign: 0,
+  vertical: true,
+  movementAngle: '90deg',
+};
+
 // how a directional preset reads its direction - each kind is its own export, so a preset bundles only its kind
 export type DirectionKind<T extends string | number = string> = {
   // sided directions name a side, so entrance and ongoing presets start from the opposite one

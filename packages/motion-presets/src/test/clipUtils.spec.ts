@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import type { MotionRange } from '../presetUtils';
+import type { MotionRange } from '../directions';
 import {
   MOTION_REVEAL_NAME,
   MOTION_SHAPE_NAME,

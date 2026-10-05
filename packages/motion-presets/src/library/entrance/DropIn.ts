@@ -1,5 +1,4 @@
 import type { AnimationData, DropIn, TimeAnimationOptions } from '../../types';
-import type { MotionRange } from '../../directions';
 import {
   MOTION_SCALE_NAME,
   getMotionScale,
@@ -7,17 +6,10 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
 } from '../../transformUtils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { UNDIRECTED_MOTION_RANGE } from '../../directions';
 
 const FADE_IN_DURATION_FACTOR = 0.8;
 const FADE_IN_EASING = 'quadOut';
-
-// the scale is non-directional
-const MOTION_RANGE: MotionRange = {
-  fromSign: -1,
-  toSign: 0,
-  movementAngle: '90deg',
-  vertical: true,
-};
 
 const DEFAULT_EASING = 'quintInOut';
 const DEFAULTS: Required<DropIn> = {
@@ -61,12 +53,12 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
     },
     {
       ...transformOptions,
-      composite: 'replace' as const,
+      composite: 'replace',
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
     {
       ...transformOptions,
-      ...getMotionScale(MOTION_RANGE, { scale }, asWeb, suffix),
+      ...getMotionScale(UNDIRECTED_MOTION_RANGE, { scale }, asWeb, suffix),
     },
   ];
 }

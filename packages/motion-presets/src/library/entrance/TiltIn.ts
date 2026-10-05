@@ -122,7 +122,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
     },
     {
       ...transform3dOptions,
-      composite: 'add' as const,
+      composite: 'add',
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
     {

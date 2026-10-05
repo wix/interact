@@ -1,5 +1,4 @@
 import type { AnimationData, DomApi, TimeAnimationOptions, Wiggle } from '../../types';
-import type { MotionRange } from '../../directions';
 import {
   MOTION_3D_TRANSFORM_NAME,
   MOTION_LAYOUT_ROTATION_NAME,
@@ -11,14 +10,8 @@ import {
 import type { LoopPoint } from '../../easingUtils';
 import { getLoopOverrides } from '../../easingUtils';
 import { parseLengthLazy } from '../../utils';
+import { UNDIRECTED_MOTION_RANGE } from '../../directions';
 
-// the rotation's sign is set by its angle, the lift starts at its peak above its place
-const MOTION_RANGE: MotionRange = {
-  fromSign: -1,
-  toSign: 0,
-  vertical: true,
-  movementAngle: '90deg',
-};
 // no z-motion, so the perspective has no effect
 const PERSPECTIVE = 800;
 
@@ -102,7 +95,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...rotationOptions,
       ...getLoopOverrides(rotationOptions, { shape: ROTATION_SHAPE }),
       ...getMotion3dTransform(
-        MOTION_RANGE,
+        // the rotation's sign is set by its angle, the lift starts at its peak above its place
+        UNDIRECTED_MOTION_RANGE,
         { angle: rotation, perspective: PERSPECTIVE },
         asWeb,
         suffix,
@@ -112,7 +106,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...liftOptions,
       ...getLoopOverrides(liftOptions, { shape: LIFT_SHAPE }),
       ...getMotionTransRot(
-        MOTION_RANGE,
+        UNDIRECTED_MOTION_RANGE,
         { travel: parseLengthLazy(travel, { value: 0, unit: 'px' }) },
         asWeb,
         suffix,

@@ -1,9 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import type { MotionRange } from '../presetUtils';
-import { entranceGroup } from '../entranceGroup';
+import type { MotionRange } from '../directions';
 import { createParallax } from '../parallaxUtils';
-import { scrollGroup } from '../scrollGroup';
 import {
   MOTION_3D_TRANSFORM_NAME,
   MOTION_LAYOUT_ROTATION_NAME,
@@ -14,7 +12,6 @@ import {
   getMotionScale,
   getMotionTransRot,
   pivotToTransformOrigin,
-  useLayoutRotation,
 } from '../transformUtils';
 
 const RANGES: Record<string, MotionRange> = {
@@ -192,21 +189,6 @@ describe('layout rotation', () => {
       { transform: 'rotate(var(--motion-rotate, 0deg))' },
       { transform: 'rotate(var(--motion-rotate, 0deg))' },
     ]);
-  });
-
-  test('useLayoutRotation composites add by default, or as given', () => {
-    const options = { namedEffect: { type: 'X' }, duration: 100 } as any;
-    expect(useLayoutRotation(options, entranceGroup).composite).toBe('add');
-    expect(useLayoutRotation(options, entranceGroup, { composite: 'replace' }).composite).toBe(
-      'replace',
-    );
-  });
-
-  test('useLayoutRotation keeps the scroll range of its default range', () => {
-    const options = { namedEffect: { type: 'X' } } as any;
-    expect(
-      useLayoutRotation(structuredClone(options), scrollGroup, { defaultRange: 'out' }),
-    ).toMatchSnapshot();
   });
 });
 

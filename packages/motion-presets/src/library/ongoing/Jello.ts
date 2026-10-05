@@ -1,5 +1,4 @@
 import type { AnimationData, DomApi, Jello, TimeAnimationOptions } from '../../types';
-import type { MotionRange } from '../../directions';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
@@ -8,13 +7,7 @@ import {
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { getLoopOverrides } from '../../easingUtils';
-
-const MOTION_RANGE: MotionRange = {
-  fromSign: -1,
-  toSign: 0,
-  vertical: true,
-  movementAngle: '90deg',
-};
+import { UNDIRECTED_MOTION_RANGE } from '../../directions';
 
 const DEFAULTS: Required<Jello> = {
   type: 'Jello',
@@ -71,7 +64,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
     {
       ...jelloOptions,
       ...getLoopOverrides(jelloOptions, { shape: SHAPE }),
-      ...getMotionTransRot(MOTION_RANGE, { skew: skewY }, asWeb, suffix),
+      ...getMotionTransRot(UNDIRECTED_MOTION_RANGE, { skew: skewY }, asWeb, suffix),
     },
   ];
 }

@@ -65,7 +65,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
     },
     {
       ...transformOptions,
-      composite: 'replace' as const,
+      composite: 'replace',
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
     {
