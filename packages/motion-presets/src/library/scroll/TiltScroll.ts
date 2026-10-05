@@ -11,6 +11,7 @@ import {
 import { compareKeywordToNonDefaults } from '../../utils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 import { parallaxScrollGroup, scrollGroup } from '../../scrollGroup';
+import { spinDirection } from '../../directions';
 
 const [ROTATION_X, ROTATION_Y, ROTATION_Z] = [10, 25, 25];
 const ROTATION_Z_EASING = 'sineInOut';
@@ -74,7 +75,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       parallaxScrollGroup,
       {
         defaultRange: DEFAULTS.range,
-        directionType: 'spin',
+        directionType: spinDirection,
       },
       asWeb,
       suffix,
@@ -86,7 +87,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
-        directionType: 'spin',
+        directionType: spinDirection,
         easing: ROTATION_Z_EASING,
         outEasing: ROTATION_Z_EASING,
       },

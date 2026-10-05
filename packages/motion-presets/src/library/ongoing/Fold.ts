@@ -1,5 +1,5 @@
 import type { DomApi, Fold, TimeAnimationOptions } from '../../types';
-import { FOUR_DIRECTIONS } from '../../consts';
+import { CENTER_AND_FOUR_DIRECTIONS, FOUR_DIRECTIONS } from '../../consts';
 import {
   MOTION_3D_TRANSFORM_NAME,
   MOTION_LAYOUT_ROTATION_NAME,
@@ -10,6 +10,7 @@ import type { LoopPoint } from '../../easingUtils';
 import { getEasingFamily } from '../../utils';
 import { useDirectionalPreset } from '../../presetUtils';
 import { ongoingGroup } from '../../ongoingGroup';
+import { sideDirection } from '../../directions';
 
 const DEFAULT_EASING = 'cubicInOut';
 
@@ -79,8 +80,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ongoingGroup,
       {
         defaultDirection: DEFAULTS.pivot,
-        directionType: 'four-sides',
-        pivotType: 'four-sides',
+        directionType: sideDirection,
+        pivots: CENTER_AND_FOUR_DIRECTIONS,
         defaultPivot: DEFAULTS.pivot,
         loop: { shape: SHAPE, easings: [ease.out, 'sineInOut'] },
       },

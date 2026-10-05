@@ -1,5 +1,5 @@
 import type { DomApi, Swing, TimeAnimationOptions } from '../../types';
-import { FOUR_DIRECTIONS } from '../../consts';
+import { CENTER_AND_FOUR_DIRECTIONS, FOUR_DIRECTIONS } from '../../consts';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
@@ -10,6 +10,7 @@ import type { LoopPoint } from '../../easingUtils';
 import { getEasingFamily } from '../../utils';
 import { useDirectionalPreset } from '../../presetUtils';
 import { ongoingGroup } from '../../ongoingGroup';
+import { spinDirection } from '../../directions';
 
 const DEFAULT_EASING = 'sineInOut';
 
@@ -71,8 +72,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       swingOptions,
       ongoingGroup,
       {
-        directionType: 'spin',
-        pivotType: 'four-sides',
+        directionType: spinDirection,
+        pivots: CENTER_AND_FOUR_DIRECTIONS,
         defaultPivot: DEFAULTS.pivot,
         loop: { shape: SHAPE, easings: [ease.out, ease.inOut] },
       },

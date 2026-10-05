@@ -15,6 +15,7 @@ import {
   useDirectionalPresetAsBasic,
 } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { axisDirection } from '../../directions';
 
 const FADE_IN_EASING = 'quadOut';
 const TRANSFORM_2D_IN_DURATION_FACTOR = 0.85;
@@ -73,7 +74,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       entranceGroup,
       {
         defaultDirection: DEFAULTS.direction,
-        directionType: 'axis',
+        directionType: axisDirection,
       },
       asWeb,
       suffix,

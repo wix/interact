@@ -24,10 +24,12 @@ const NINE_DIRECTIONS = [
   'top-left',
   'center',
 ] as const;
+const CENTER_AND_FOUR_DIRECTIONS = ['center', 'top', 'right', 'bottom', 'left'] as const;
 const FOUR_CORNERS_DIRECTIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;
 const SHAPES = ['rectangle', 'ellipse', 'circle', 'diamond', 'window'] as const;
 
 export {
+  CENTER_AND_FOUR_DIRECTIONS,
   FOUR_DIRECTIONS,
   AXIS_DIRECTIONS,
   SCROLL_RANGES,

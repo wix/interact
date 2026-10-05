@@ -9,6 +9,7 @@ import {
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { sideDirection } from '../../directions';
 
 const EASING = 'quadOut';
 const ROTATION_ANGLE = 180;
@@ -60,7 +61,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       {
         defaultDepth: DEFAULTS.depth as LengthValue,
         defaultDirection: DEFAULTS.from,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,

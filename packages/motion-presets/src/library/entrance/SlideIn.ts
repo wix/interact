@@ -9,8 +9,9 @@ import {
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { oppositeDirection, useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { sideDirection } from '../../directions';
 
 const TRAVEL = '100%';
 
@@ -44,9 +45,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const { start: minimum = DEFAULTS.start } = namedEffect!;
 
   // SlideIn reveals in the opposite direction to the movement to create its entrance feel
-  const clipFrom = oppositeDirection(
+  const clipFrom = sideDirection.opposite(
     parseKeywordLazy(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from),
-    'four-sides',
   );
 
   const transformOptions = {
@@ -78,7 +78,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       entranceGroup,
       {
         defaultDirection: DEFAULTS.from,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,
@@ -88,8 +88,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       revealOptions,
       entranceGroup,
       {
-        defaultDirection: oppositeDirection(DEFAULTS.from, 'four-sides') as EffectFourDirections,
-        directionType: 'four-sides',
+        defaultDirection: sideDirection.opposite(DEFAULTS.from) as EffectFourDirections,
+        directionType: sideDirection,
       },
       asWeb,
       suffix,

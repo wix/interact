@@ -14,6 +14,7 @@ import {
   useDirectionalPresetAsBasic,
 } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { angleDirection } from '../../directions';
 
 const FADE_IN_DURATION_FACTOR = 0.7;
 
@@ -75,7 +76,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       {
         defaultDirection: DEFAULTS.from as number,
         defaultTravel: DEFAULTS.travel as LengthValue,
-        directionType: 'angle',
+        directionType: angleDirection,
       },
       asWeb,
       suffix,

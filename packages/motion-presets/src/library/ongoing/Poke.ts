@@ -9,6 +9,7 @@ import {
 import type { LoopPoint } from '../../easingUtils';
 import { useDirectionalPreset } from '../../presetUtils';
 import { ongoingGroup } from '../../ongoingGroup';
+import { sideDirection } from '../../directions';
 
 const DEFAULTS: Required<Poke> = {
   type: 'Poke',
@@ -62,7 +63,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ongoingGroup,
       {
         defaultDirection: DEFAULTS.direction,
-        directionType: 'four-sides',
+        directionType: sideDirection,
         loop: { shape: SHAPE },
       },
       asWeb,

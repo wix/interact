@@ -4,6 +4,7 @@ import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { sideDirection } from '../../directions';
 
 const DEFAULT_EASING = 'cubicInOut';
 const DEFAULTS: Required<RevealIn> = {
@@ -34,7 +35,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       entranceGroup,
       {
         defaultDirection: DEFAULTS.from,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,

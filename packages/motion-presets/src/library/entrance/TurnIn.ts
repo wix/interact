@@ -10,6 +10,7 @@ import { compareKeywordToNonDefaults } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { spinDirection } from '../../directions';
 
 const FADE_IN_EASING = 'sineIn';
 const FADE_IN_DURATION_FACTOR = 0.6;
@@ -68,8 +69,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       entranceGroup,
       {
         defaultPivot: DEFAULTS.pivot,
-        directionType: 'spin',
-        pivotType: 'four-corners',
+        directionType: spinDirection,
+        pivots: FOUR_CORNERS_DIRECTIONS,
       },
       asWeb,
       suffix,

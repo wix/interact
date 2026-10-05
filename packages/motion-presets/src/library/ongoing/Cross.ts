@@ -17,6 +17,7 @@ import { parseKeywordLazy } from '../../utils';
 import { getActiveFraction, getWrapEasing } from '../../easingUtils';
 import { useDirectionalPreset } from '../../presetUtils';
 import { ongoingGroup } from '../../ongoingGroup';
+import { angleDirection } from '../../directions';
 
 const DEFAULTS: Required<Cross> = {
   type: 'Cross',
@@ -86,7 +87,7 @@ export function style(options: TimeAnimationOptions, asWeb = false, layout?: Lay
     crossOptions,
     ongoingGroup,
     {
-      directionType: 'angle',
+      directionType: angleDirection,
     },
     asWeb,
     suffix,

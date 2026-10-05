@@ -9,6 +9,7 @@ import {
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { axisDirection } from '../../directions';
 
 const FADE_IN_EASING = 'quadOut';
 
@@ -62,7 +63,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       entranceGroup,
       {
         defaultDirection: DEFAULTS.direction,
-        directionType: 'axis',
+        directionType: axisDirection,
       },
       asWeb,
       suffix,

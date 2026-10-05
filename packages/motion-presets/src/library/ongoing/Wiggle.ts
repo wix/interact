@@ -10,6 +10,7 @@ import {
 import type { LoopPoint } from '../../easingUtils';
 import { useDirectionalPreset, useDirectionalPresetAsBasic } from '../../presetUtils';
 import { ongoingGroup } from '../../ongoingGroup';
+import { sideDirection } from '../../directions';
 
 const DEFAULTS: Required<Wiggle> = {
   type: 'Wiggle',
@@ -94,7 +95,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       getMotionTransRot,
       liftOptions,
       ongoingGroup,
-      { directionType: 'four-sides', loop: { shape: LIFT_SHAPE } },
+      { directionType: sideDirection, loop: { shape: LIFT_SHAPE } },
       asWeb,
       suffix,
     ),

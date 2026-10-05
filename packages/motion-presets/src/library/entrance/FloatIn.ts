@@ -9,6 +9,7 @@ import {
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { sideDirection } from '../../directions';
 
 const TRAVEL = '120px';
 const EASING = 'sineInOut';
@@ -53,7 +54,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       entranceGroup,
       {
         defaultDirection: DEFAULTS.from,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,

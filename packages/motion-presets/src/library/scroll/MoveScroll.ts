@@ -9,6 +9,7 @@ import {
 import { compareKeywordToNonDefaults, parseLength } from '../../utils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 import { scrollGroup } from '../../scrollGroup';
+import { angleDirection } from '../../directions';
 
 const DEFAULTS: Required<MoveScroll> = {
   type: 'MoveScroll',
@@ -66,7 +67,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
           defaultDirection: DEFAULTS.direction as number,
           defaultRange: DEFAULTS.range,
           defaultTravel: DEFAULTS.travel,
-          directionType: 'angle',
+          directionType: angleDirection,
         },
         asWeb,
         suffix,

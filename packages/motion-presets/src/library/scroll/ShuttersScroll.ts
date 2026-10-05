@@ -4,6 +4,7 @@ import { MOTION_SHUTTERS_NAME, getMotionShutters } from '../../clipUtils';
 import { compareKeywordToNonDefaults } from '../../utils';
 import { useDirectionalPreset } from '../../presetUtils';
 import { scrollGroup } from '../../scrollGroup';
+import { sideDirection } from '../../directions';
 
 const EASING = 'sineOut';
 const IN_EASING = 'sineIn';
@@ -76,7 +77,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
+        directionType: sideDirection,
         ...easingOptions,
       },
       asWeb,

@@ -9,6 +9,7 @@ import {
 import { compareKeywordToNonDefaults } from '../../utils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 import { scrollGroup } from '../../scrollGroup';
+import { sideDirection } from '../../directions';
 
 const DEPTH = '300px';
 const ROTATION_ANGLE = 68;
@@ -59,7 +60,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       scrollGroup,
       {
         defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,

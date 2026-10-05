@@ -13,6 +13,7 @@ import { compareKeywordToNonDefaults } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { axisDirection, sideDirection, spinDirection } from '../../directions';
 
 const FADE_IN_EASING = 'cubicOut';
 const FADE_IN_DURATION_FACTOR = 0.2;
@@ -107,7 +108,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       entranceGroup,
       {
         defaultDepth: DEFAULTS.depth as LengthValue,
-        directionType: 'axis',
+        directionType: axisDirection,
       },
       asWeb,
       suffix,
@@ -117,7 +118,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       transform2dOptions,
       entranceGroup,
       {
-        directionType: 'spin',
+        directionType: spinDirection,
       },
       asWeb,
       suffix,
@@ -128,7 +129,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       revealOptions,
       entranceGroup,
       {
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,

@@ -17,6 +17,7 @@ import { compareKeywordToNonDefaults } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { sideDirection } from '../../directions';
 
 // BounceIn uses easing to create the bouncing movement and uses only 2 keyframes
 const BOUNCE_IN_EASING = `linear(${[
@@ -126,7 +127,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       {
         defaultDirection: DEFAULTS.from as EffectFourDirections,
         defaultTravel: DEFAULTS.travel as LengthValue,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,

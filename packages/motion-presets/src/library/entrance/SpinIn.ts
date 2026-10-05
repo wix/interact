@@ -15,6 +15,7 @@ import {
   useDirectionalPresetAsBasic,
 } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { spinDirection } from '../../directions';
 
 const FADE_IN_EASING = 'cubicIn';
 
@@ -73,7 +74,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       entranceGroup,
       {
         defaultDirection: DEFAULTS.direction,
-        directionType: 'spin',
+        directionType: spinDirection,
       },
       asWeb,
       suffix,

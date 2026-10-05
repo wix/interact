@@ -14,6 +14,7 @@ import {
   withSharedScrollRange,
 } from '../../presetUtils';
 import { scrollGroup } from '../../scrollGroup';
+import { spinDirection } from '../../directions';
 
 const DEFAULTS: Required<SpinScroll> = {
   type: 'SpinScroll',
@@ -67,7 +68,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
-        directionType: 'spin',
+        directionType: spinDirection,
       },
       asWeb,
       suffix,

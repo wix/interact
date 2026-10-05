@@ -10,6 +10,7 @@ import {
 import { parseKeywordLazy } from '../../utils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 import { scrollGroup } from '../../scrollGroup';
+import { sideDirection } from '../../directions';
 
 const DEFAULTS: Required<SkewPanScroll> = {
   type: 'SkewPanScroll',
@@ -64,7 +65,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,

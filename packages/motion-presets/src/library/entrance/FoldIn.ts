@@ -1,5 +1,5 @@
 import type { FoldIn, TimeAnimationOptions } from '../../types';
-import { FOUR_DIRECTIONS } from '../../consts';
+import { CENTER_AND_FOUR_DIRECTIONS, FOUR_DIRECTIONS } from '../../consts';
 import {
   MOTION_3D_TRANSFORM_NAME,
   getMotion3dTransform,
@@ -9,6 +9,7 @@ import {
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
 import { entranceGroup } from '../../entranceGroup';
+import { sideDirection } from '../../directions';
 
 const FADE_IN_EASING = 'quadOut';
 
@@ -65,8 +66,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       {
         defaultDirection: DEFAULTS.pivot,
         defaultPivot: DEFAULTS.pivot,
-        directionType: 'four-sides',
-        pivotType: 'four-sides',
+        directionType: sideDirection,
+        pivots: CENTER_AND_FOUR_DIRECTIONS,
       },
       asWeb,
       suffix,

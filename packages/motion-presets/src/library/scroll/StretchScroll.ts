@@ -16,6 +16,7 @@ import {
   useDirectionalPresetAsBasic,
 } from '../../presetUtils';
 import { scrollGroup } from '../../scrollGroup';
+import { sideDirection } from '../../directions';
 
 // samples of the previous implementation: fading over 0 -> 65% (in) or 35% -> 100% (out) keyframes with 'backInOut'
 const FADE_EASING = linearEasing([
@@ -124,7 +125,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       {
         defaultDirection: DIRECTION,
         defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
+        directionType: sideDirection,
         easing: EASING,
         outEasing: EASING,
       },

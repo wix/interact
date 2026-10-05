@@ -8,6 +8,7 @@ import {
 import type { LoopPoint } from '../../easingUtils';
 import { useDirectionalPreset } from '../../presetUtils';
 import { ongoingGroup } from '../../ongoingGroup';
+import { sideDirection } from '../../directions';
 
 const EASING = 'sineOut';
 const DIRECTION = 'top';
@@ -67,7 +68,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       bounceOptions,
       ongoingGroup,
       {
-        directionType: 'four-sides',
+        directionType: sideDirection,
         loop: { shape: SHAPE, easings: [EASING] },
       },
       asWeb,

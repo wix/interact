@@ -95,7 +95,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       {
         defaultPivot: DEFAULTS.pivot,
         defaultRange: DEFAULTS.range,
-        pivotType: 'all',
       },
       asWeb,
       suffix,

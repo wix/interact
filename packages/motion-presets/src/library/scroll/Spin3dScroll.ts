@@ -8,6 +8,7 @@ import {
 } from '../../transformUtils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 import { parallaxScrollGroup, scrollGroup } from '../../scrollGroup';
+import { spinDirection } from '../../directions';
 
 const DIRECTION = 'clockwise';
 
@@ -60,7 +61,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       parallaxScrollGroup,
       {
         defaultRange: DEFAULTS.range,
-        directionType: 'spin',
+        directionType: spinDirection,
       },
       asWeb,
       suffix,

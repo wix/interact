@@ -10,6 +10,7 @@ import {
 import { parseKeywordLazy } from '../../utils';
 import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 import { scrollGroup } from '../../scrollGroup';
+import { sideDirection } from '../../directions';
 
 const DEFAULTS: Required<PanScroll> = {
   type: 'PanScroll',
@@ -69,7 +70,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
         defaultTravel: DEFAULTS.distance,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,

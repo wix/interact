@@ -16,6 +16,7 @@ import {
   withSharedScrollRange,
 } from '../../presetUtils';
 import { scrollGroup } from '../../scrollGroup';
+import { sideDirection } from '../../directions';
 
 const DEFAULTS: Required<TurnScroll> = {
   type: 'TurnScroll',
@@ -83,7 +84,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,

@@ -8,6 +8,7 @@ import {
 } from '../../transformUtils';
 import { useDirectionalPreset } from '../../presetUtils';
 import { ongoingGroup } from '../../ongoingGroup';
+import { axisDirection } from '../../directions';
 
 const DEFAULT_EASING = 'linear';
 const ANGLE = 360;
@@ -62,7 +63,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ongoingGroup,
       {
         defaultDirection: DEFAULTS.direction,
-        directionType: 'axis',
+        directionType: axisDirection,
         loop: { shape: SHAPE, easings: [easing] },
       },
       asWeb,

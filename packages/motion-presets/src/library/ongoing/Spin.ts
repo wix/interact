@@ -8,6 +8,7 @@ import {
 } from '../../transformUtils';
 import { useDirectionalPreset } from '../../presetUtils';
 import { ongoingGroup } from '../../ongoingGroup';
+import { spinDirection } from '../../directions';
 
 const DEFAULT_EASING = 'linear';
 const ANGLE = 360;
@@ -55,7 +56,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ongoingGroup,
       {
         defaultDirection: DEFAULTS.direction,
-        directionType: 'spin',
+        directionType: spinDirection,
         loop: { shape: SHAPE, easings: [easing] },
       },
       asWeb,

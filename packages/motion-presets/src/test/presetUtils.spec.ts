@@ -1,13 +1,14 @@
 import { describe, expect, test } from 'vitest';
 
 import type { MotionRange } from '../presetUtils';
+import { CENTER_AND_FOUR_DIRECTIONS, FOUR_CORNERS_DIRECTIONS } from '../consts';
+import { angleDirection, sideDirection, spinDirection } from '../directions';
 import { entranceGroup } from '../entranceGroup';
 import { ongoingGroup } from '../ongoingGroup';
 import { parallaxScrollGroup, scrollGroup } from '../scrollGroup';
 import type { Parallax } from '../parallaxUtils';
 import { createParallax } from '../parallaxUtils';
 import {
-  oppositeDirection,
   useBasicPreset,
   useDirectionalPreset,
   useDirectionalPresetAsBasic,
@@ -213,7 +214,7 @@ describe('useDirectionalPreset', () => {
   };
 
   describe('four-sides', () => {
-    const sides = { directionType: 'four-sides' };
+    const sides = { directionType: sideDirection };
 
     test('entrance starts at the `from` side', () => {
       expect(run(entranceGroup, { from: 'left' }, sides).motionRange).toEqual({
@@ -316,7 +317,7 @@ describe('useDirectionalPreset', () => {
   });
 
   describe('spin', () => {
-    const spin = { directionType: 'spin' };
+    const spin = { directionType: spinDirection };
 
     test('clockwise starts negative, counter-clockwise positive, no movement angle', () => {
       expect(run(entranceGroup, { direction: 'clockwise' }, spin).motionRange).toEqual({
@@ -339,7 +340,7 @@ describe('useDirectionalPreset', () => {
   });
 
   describe('angle', () => {
-    const angle = { directionType: 'angle' };
+    const angle = { directionType: angleDirection };
 
     test('scroll uses numeric and css angles as is', () => {
       expect(run(scrollGroup, { direction: 45 }, angle).motionRange).toMatchObject({
@@ -433,9 +434,9 @@ describe('useDirectionalPreset', () => {
       });
     });
 
-    test('limits the pivot by pivotType', () => {
+    test('limits the pivot to the given pivots', () => {
       expect(
-        run(entranceGroup, { pivot: 'top-left' }, { pivotType: 'four-sides' }).params
+        run(entranceGroup, { pivot: 'top-left' }, { pivots: CENTER_AND_FOUR_DIRECTIONS }).params
           .transformOrigin,
       ).toEqual({
         x: '0px',
@@ -445,11 +446,12 @@ describe('useDirectionalPreset', () => {
         run(
           entranceGroup,
           { pivot: 'top' },
-          { pivotType: 'four-corners', defaultPivot: 'bottom-left' },
+          { pivots: FOUR_CORNERS_DIRECTIONS, defaultPivot: 'bottom-left' },
         ).params.transformOrigin,
       ).toEqual({ x: '-50%', y: '50%' });
       expect(
-        run(entranceGroup, { pivot: 'top' }, { pivotType: 'four-sides' }).params.transformOrigin,
+        run(entranceGroup, { pivot: 'top' }, { pivots: CENTER_AND_FOUR_DIRECTIONS }).params
+          .transformOrigin,
       ).toEqual({
         x: '0px',
         y: '-50%',
@@ -552,27 +554,5 @@ describe('withSharedScrollRange', () => {
       startOffsetAdd: '5vh',
     });
     expect('endOffsetAdd' in third).toBe(false);
-  });
-});
-
-describe('oppositeDirection', () => {
-  test('axis keeps its direction', () => {
-    expect(oppositeDirection('vertical', 'axis')).toBe('vertical');
-  });
-
-  test('spin swaps', () => {
-    expect(oppositeDirection('clockwise', 'spin')).toBe('counter-clockwise');
-    expect(oppositeDirection('counter-clockwise', 'spin')).toBe('clockwise');
-  });
-
-  test('four-sides uses the opposite side', () => {
-    expect(oppositeDirection('top', 'four-sides')).toBe('bottom');
-    expect(oppositeDirection('left', 'four-sides')).toBe('right');
-  });
-
-  test('angle uses the opposite side or turns the angle around', () => {
-    expect(oppositeDirection('right', 'angle')).toBe('left');
-    expect(oppositeDirection('45deg', 'angle')).toBe('calc(180deg + 45deg)');
-    expect(oppositeDirection('calc(10deg + 5deg)', 'angle')).toBe('calc(180deg + (10deg + 5deg))');
   });
 });

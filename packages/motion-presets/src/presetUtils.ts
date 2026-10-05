@@ -14,14 +14,14 @@ import type {
 } from './types';
 import type { LoopShape } from './easingUtils';
 import {
-  AXIS_DIRECTIONS,
+  CENTER_AND_FOUR_DIRECTIONS,
   FOUR_CORNERS_DIRECTIONS,
-  FOUR_DIRECTIONS,
   NINE_DIRECTIONS,
   SCROLL_RANGES,
-  SPIN_DIRECTIONS,
 } from './consts';
-import { CSS_CALC_REGEX, parseKeywordLazy, parseLengthLazy, stripCalc } from './utils';
+import type { DirectionKind } from './directions';
+import { axisDirection } from './directions';
+import { parseKeywordLazy, parseLengthLazy } from './utils';
 
 // what differs between the scroll, entrance and ongoing presets - each group is its own module
 export type PresetGroup = {
@@ -50,22 +50,22 @@ export type MotionRange = {
 };
 
 type SpinParsingOptions = {
-  directionType?: 'spin';
+  directionType: DirectionKind<EffectSpinDirection>;
   defaultDirection?: EffectSpinDirection;
 };
 
 type AxisParsingOptions = {
-  directionType?: 'axis';
+  directionType?: DirectionKind<EffectTwoAxes>;
   defaultDirection?: EffectTwoAxes;
 };
 
 type FourSidesParsingOptions = {
-  directionType?: 'four-sides';
+  directionType: DirectionKind<EffectFourDirections>;
   defaultDirection?: EffectFourDirections;
 };
 
 type AngleParsingOptions = {
-  directionType?: 'angle';
+  directionType: DirectionKind<number>;
   defaultDirection?: number;
 };
 
@@ -75,18 +75,19 @@ type DirectionParsingOptions =
   | AngleParsingOptions
   | SpinParsingOptions;
 
+// pivots - the pivot keywords the preset accepts
 type PivotSideParsingOptions = {
-  pivotType?: 'four-sides';
+  pivots: typeof CENTER_AND_FOUR_DIRECTIONS;
   defaultPivot?: EffectFourDirections | 'center';
 };
 
 type PivotCornerParsingOptions = {
-  pivotType?: 'four-corners';
+  pivots: typeof FOUR_CORNERS_DIRECTIONS;
   defaultPivot?: EffectFourCorners;
 };
 
 type PivotAllParsingOptions = {
-  pivotType?: 'all';
+  pivots?: typeof NINE_DIRECTIONS;
   defaultPivot?: EffectNineDirections;
 };
 
@@ -116,91 +117,7 @@ type PresetParsingOptions = DirectionParsingOptions &
   PivotParsingOptions &
   EasingParsingOptions;
 
-const CSS_ANGLE_REGEX = /^(-?\d*\.?\d+)(deg|rad|grad|turn)$/;
-
 const SCROLL_RANGE_KEYS = ['startOffset', 'endOffset', 'startOffsetAdd', 'endOffsetAdd'] as const;
-
-// the axis of each side - the side's sign is MotionRange.fromSign
-const DIRECTION_2D_MAP = {
-  top: '90deg',
-  left: '0deg',
-  bottom: '90deg',
-  right: '0deg',
-  vertical: '90deg',
-  horizontal: '0deg',
-};
-
-function parseDirectionAngle(direction: number | string | undefined, defaultValue: number) {
-  if (typeof direction === 'number') {
-    return `${direction}deg`;
-  }
-
-  if (typeof direction === 'string') {
-    const trimmed = direction.trim().toLowerCase();
-    if (CSS_ANGLE_REGEX.test(trimmed) || CSS_CALC_REGEX.test(trimmed)) {
-      return trimmed;
-    }
-    if (trimmed && !isNaN(Number(trimmed))) {
-      return `${Number(trimmed)}deg`;
-    }
-  }
-
-  return `${defaultValue}deg`;
-}
-
-function parseDirectionForPreset(
-  direction: number | string | undefined,
-  options: DirectionParsingOptions,
-) {
-  const { directionType = 'axis', defaultDirection } = options;
-  if (directionType === 'axis') {
-    return parseKeywordLazy(
-      direction,
-      AXIS_DIRECTIONS,
-      (defaultDirection || 'vertical') as EffectTwoAxes,
-    );
-  }
-  if (directionType === 'spin') {
-    return parseKeywordLazy(
-      direction,
-      SPIN_DIRECTIONS,
-      (defaultDirection || 'clockwise') as EffectSpinDirection,
-    );
-  }
-  if (directionType === 'four-sides') {
-    return parseKeywordLazy(
-      direction,
-      FOUR_DIRECTIONS,
-      (defaultDirection || 'right') as EffectFourDirections,
-    );
-  }
-  return (
-    parseKeywordLazy(direction, FOUR_DIRECTIONS, '') ||
-    parseDirectionAngle(direction, (defaultDirection || 0) as number)
-  );
-}
-
-export function oppositeDirection(
-  direction: string,
-  type: DirectionParsingOptions['directionType'],
-) {
-  if (type === 'axis') {
-    return direction;
-  }
-  if (type === 'spin') {
-    const index = SPIN_DIRECTIONS.findIndex((d) => d === direction);
-    return SPIN_DIRECTIONS[(index + 1) % 2];
-  }
-  if (type === 'four-sides') {
-    const index = FOUR_DIRECTIONS.findIndex((d) => d === direction);
-    return FOUR_DIRECTIONS[(index + 2) % 4];
-  }
-  const index = FOUR_DIRECTIONS.findIndex((d) => d === direction);
-  if (index !== -1) {
-    return FOUR_DIRECTIONS[(index + 2) % 4];
-  }
-  return `calc(180deg + ${stripCalc(direction)})`;
-}
 
 function resolveGroupOverrides(
   options: AnimationOptions,
@@ -241,20 +158,13 @@ function normalizePresetParams(
     defaultDepth = { value: 0, unit: 'px' },
     defaultPivot = 'center',
     defaultTravel = { value: 0, unit: 'px' },
-    pivotType = 'all',
+    pivots = NINE_DIRECTIONS,
   } = options;
-
-  const pivotKeywords =
-    pivotType === 'all'
-      ? NINE_DIRECTIONS
-      : pivotType === 'four-corners'
-        ? FOUR_CORNERS_DIRECTIONS
-        : ['center', ...FOUR_DIRECTIONS];
 
   return {
     ...namedEffect,
     depth: parseLengthLazy(depth, defaultDepth),
-    transformOrigin: pivotToTransformOrigin(parseKeywordLazy(pivot, pivotKeywords, defaultPivot)),
+    transformOrigin: pivotToTransformOrigin(parseKeywordLazy(pivot, pivots, defaultPivot)),
     travel: parseLengthLazy(travel, defaultTravel),
     toTravel: toTravel === undefined ? undefined : parseLengthLazy(toTravel, defaultTravel),
   };
@@ -335,7 +245,9 @@ export function useDirectionalPreset(
     from?: number | string;
   };
 
-  const { directionType = 'axis', defaultRange = 'in' } = parsingOptions;
+  const { directionType: kind = axisDirection, defaultRange = 'in' } = parsingOptions;
+  const parse = (direction: number | string | undefined) =>
+    kind.parse(direction, parsingOptions.defaultDirection as never);
 
   const { range, overrides } = resolveGroupOverrides(
     options,
@@ -347,32 +259,19 @@ export function useDirectionalPreset(
 
   // range out is opposite direction reversed
   // entrance starts at the 'from' side, ongoing moves first towards its direction (the keyframes start at their peak)
-  const isSided = directionType !== 'axis' && directionType !== 'spin';
   const direction =
-    !isSided || group.name === 'scroll'
+    !kind.sided || group.name === 'scroll'
       ? range === 'out'
-        ? oppositeDirection(
-            parseDirectionForPreset(namedEffect.direction, parsingOptions),
-            directionType,
-          )
-        : parseDirectionForPreset(namedEffect.direction, parsingOptions)
-      : oppositeDirection(
-          parseDirectionForPreset(
-            group.name === 'ongoing' ? namedEffect.direction : namedEffect.from,
-            parsingOptions,
-          ),
-          directionType,
-        );
+        ? kind.opposite(parse(namedEffect.direction))
+        : parse(namedEffect.direction)
+      : kind.opposite(parse(group.name === 'ongoing' ? namedEffect.direction : namedEffect.from));
 
   const fromSign: 1 | -1 =
     direction === 'left' || direction === 'top' || direction === 'counter-clockwise' ? 1 : -1;
   const toSign: 1 | -1 | 0 = range === 'continuous' ? (-fromSign as 1 | -1) : 0;
 
   const vertical = direction === 'vertical' || direction === 'top' || direction === 'bottom';
-  const movementAngle =
-    parsingOptions.directionType === 'spin'
-      ? '0deg'
-      : DIRECTION_2D_MAP[direction as EffectFourDirections | EffectTwoAxes] || direction;
+  const movementAngle = kind.movementAngle(direction);
 
   const motionRange: MotionRange = { fromSign, toSign, vertical, movementAngle };
 

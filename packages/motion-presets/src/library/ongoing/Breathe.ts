@@ -12,6 +12,7 @@ import type { LoopPoint } from '../../easingUtils';
 import { getEasingFamily, parseKeywordLazy } from '../../utils';
 import { useDirectionalPreset } from '../../presetUtils';
 import { ongoingGroup } from '../../ongoingGroup';
+import { axisDirection } from '../../directions';
 
 const DEFAULT_EASING = 'sineInOut';
 const DIRECTIONS = [...AXIS_DIRECTIONS, 'center'] as const;
@@ -80,7 +81,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       breatheOptions,
       ongoingGroup,
       {
-        directionType: 'axis',
+        directionType: axisDirection,
         loop: { shape: SHAPE, easings: [ease.out, ease.inOut] },
       },
       asWeb,

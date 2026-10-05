@@ -8,8 +8,9 @@ import {
   useLayoutRotation,
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
-import { oppositeDirection, useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
+import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 import { scrollGroup } from '../../scrollGroup';
+import { sideDirection } from '../../directions';
 
 const TRAVEL = '100%';
 
@@ -38,9 +39,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<SlideScroll>;
 
   // SlideScroll reveals in the opposite direction to the movement to create its entrance-exit feel
-  const clipDirection = oppositeDirection(
+  const clipDirection = sideDirection.opposite(
     parseKeywordLazy(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction),
-    'four-sides',
   );
 
   const transformOptions = {
@@ -75,7 +75,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,
@@ -85,12 +85,9 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       revealOptions,
       scrollGroup,
       {
-        defaultDirection: oppositeDirection(
-          DEFAULTS.direction,
-          'four-sides',
-        ) as EffectFourDirections,
+        defaultDirection: sideDirection.opposite(DEFAULTS.direction) as EffectFourDirections,
         defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,

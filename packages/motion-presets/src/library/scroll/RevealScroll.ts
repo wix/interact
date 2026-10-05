@@ -3,6 +3,7 @@ import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
 import { useDirectionalPreset } from '../../presetUtils';
 import { scrollGroup } from '../../scrollGroup';
+import { sideDirection } from '../../directions';
 
 const DEFAULTS: Required<RevealScroll> = {
   type: 'RevealScroll',
@@ -34,7 +35,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       {
         defaultDirection: DEFAULTS.direction,
         defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
+        directionType: sideDirection,
       },
       asWeb,
       suffix,
