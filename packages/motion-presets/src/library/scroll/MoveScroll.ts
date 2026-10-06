@@ -1,13 +1,19 @@
-import type { DomApi, MoveScroll, ScrubAnimationOptions } from '../../types';
+import type { AnimationData, DomApi, MoveScroll, ScrubAnimationOptions } from '../../types';
 import { SCROLL_RANGES } from '../../consts';
+import { angleDirection, toMotionRange } from '../../directions';
+import {
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
 import {
   MOTION_TRANS_ROT_NAME,
   getMotionTransRot,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
+  getMotionLayoutRotation,
 } from '../../transformUtils';
-import { compareKeywordToNonDefaults, parseLength } from '../../utils';
-import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
+import { compareKeywordToNonDefaults, parseLength, parseLengthLazy } from '../../utils';
 
 const DEFAULTS: Required<MoveScroll> = {
   type: 'MoveScroll',
@@ -30,9 +36,10 @@ export function web(options: ScrubAnimationOptions, _?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<MoveScroll>;
-  const { direction = DEFAULTS.direction, range, travel: inputTravel } = namedEffect!;
+  const { direction = DEFAULTS.direction, range: inputRange, travel: inputTravel } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
 
   // when y direction is positive - moving against the scroll - we need to widen the range like with parallax
   // TODO - teach fizban some more math operations to allow using calc here and accept any string as direction or travel
@@ -47,32 +54,37 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   if (yDirection === 1) {
     const travelY = travel.value * Math.sin((direction * Math.PI) / 180);
     const unit = travel.unit;
-    if (!compareKeywordToNonDefaults(range, ['out'])) {
+    if (!compareKeywordToNonDefaults(inputRange, ['out'])) {
       startOffsetAdd = `${-travelY}${unit}`;
     }
-    if (compareKeywordToNonDefaults(range, ['out', 'continuous'])) {
+    if (compareKeywordToNonDefaults(inputRange, ['out', 'continuous'])) {
       endOffsetAdd = `${travelY}${unit}`;
     }
   }
 
+  // range out is opposite direction reversed
+  const parsedDirection = angleDirection.parse(namedEffect!.direction, DEFAULTS.direction);
+  const motionDirection =
+    range === 'out' ? angleDirection.opposite(parsedDirection) : parsedDirection;
+
   return withSharedScrollRange([
     {
-      ...useDirectionalPreset(
-        getMotionTransRot,
-        options,
-        'scroll',
-        {
-          defaultDirection: DEFAULTS.direction as number,
-          defaultRange: DEFAULTS.range,
-          defaultTravel: DEFAULTS.travel,
-          directionType: 'angle',
-        },
+      ...options,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
+      ...getMotionTransRot(
+        toMotionRange(angleDirection, motionDirection, range),
+        { travel: parseLengthLazy(inputTravel, DEFAULTS.travel) },
         asWeb,
         suffix,
       ),
       startOffsetAdd,
       endOffsetAdd,
     },
-    useLayoutRotation(options, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    {
+      ...options,
+      composite: 'add',
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, false)),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ]);
 }

@@ -1,18 +1,15 @@
-import type { ExpandIn, LengthValue, TimeAnimationOptions } from '../../types';
+import type { AnimationData, ExpandIn, LengthValue, TimeAnimationOptions } from '../../types';
 import {
   MOTION_SCALE_NAME,
   MOTION_TRANS_ROT_NAME,
   getMotionScale,
   getMotionTransRot,
+  getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
 } from '../../transformUtils';
+import { parseLengthLazy } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import {
-  useBasicPreset,
-  useDirectionalPreset,
-  useDirectionalPresetAsBasic,
-} from '../../presetUtils';
+import { angleDirection, toMotionRange } from '../../directions';
 
 const FADE_IN_DURATION_FACTOR = 0.7;
 
@@ -43,43 +40,49 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const {
     easing = DEFAULT_EASING,
     namedEffect,
     suffix,
   } = options as TimeAnimationOptions<ExpandIn>;
-  const { scale = DEFAULTS.scale } = namedEffect!;
+  const { scale = DEFAULTS.scale, travel } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  const from = angleDirection.parse(namedEffect?.from, DEFAULTS.from as number);
+  const motionRange = toMotionRange(angleDirection, angleDirection.opposite(from), 'in');
 
-  const fadeOptions = {
-    ...options,
-    duration: options.duration! * FADE_IN_DURATION_FACTOR,
-    easing,
-  };
   const transformOptions = {
     ...options,
     easing,
-    namedEffect: {
-      ...namedEffect,
-      scale,
-    },
+    fill,
+    namedEffect: { ...namedEffect, scale },
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useDirectionalPreset(
-      getMotionTransRot,
-      transformOptions,
-      'entrance',
-      {
-        defaultDirection: DEFAULTS.from as number,
-        defaultTravel: DEFAULTS.travel as LengthValue,
-        directionType: 'angle',
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
-    useDirectionalPresetAsBasic(getMotionScale, transformOptions, 'entrance', {}, asWeb, suffix),
+    {
+      ...options,
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
+      easing,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotionTransRot(
+        motionRange,
+        { travel: parseLengthLazy(travel, DEFAULTS.travel as LengthValue) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotionScale(motionRange, { scale }, asWeb, suffix),
+    },
   ];
 }

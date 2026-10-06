@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import type { MotionRange } from '../presetUtils';
+import type { MotionRange } from '../directions';
+import { createParallax } from '../parallaxUtils';
 import {
   MOTION_3D_TRANSFORM_NAME,
   MOTION_LAYOUT_ROTATION_NAME,
@@ -10,7 +11,7 @@ import {
   getMotionLayoutRotation,
   getMotionScale,
   getMotionTransRot,
-  useLayoutRotation,
+  pivotToTransformOrigin,
 } from '../transformUtils';
 
 const RANGES: Record<string, MotionRange> = {
@@ -78,7 +79,7 @@ describe('getMotionTransRot', () => {
   test('parallax adds range offsets and parallax custom properties', () => {
     const data = getMotionTransRot(
       { ...RANGES.inVertical },
-      { parallax: { range: COVER, speed: 0.5, center: 0.5 } },
+      { parallax: createParallax(COVER, false, 0.5, 0.5) },
       false,
     ) as any;
     expect(data).toMatchSnapshot();
@@ -189,19 +190,13 @@ describe('layout rotation', () => {
       { transform: 'rotate(var(--motion-rotate, 0deg))' },
     ]);
   });
+});
 
-  test('useLayoutRotation composites add by default, or as given', () => {
-    const options = { namedEffect: { type: 'X' }, duration: 100 } as any;
-    expect(useLayoutRotation(options, 'entrance').composite).toBe('add');
-    expect(useLayoutRotation(options, 'entrance', { composite: 'replace' }).composite).toBe(
-      'replace',
-    );
-  });
-
-  test('useLayoutRotation keeps the scroll range of its default range', () => {
-    const options = { namedEffect: { type: 'X' } } as any;
-    expect(
-      useLayoutRotation(structuredClone(options), 'scroll', { defaultRange: 'out' }),
-    ).toMatchSnapshot();
+describe('pivotToTransformOrigin', () => {
+  test('maps a pivot keyword to an origin relative to the center', () => {
+    expect(pivotToTransformOrigin('center')).toEqual({ x: '0px', y: '0px' });
+    expect(pivotToTransformOrigin('top-left')).toEqual({ x: '-50%', y: '-50%' });
+    expect(pivotToTransformOrigin('bottom-right')).toEqual({ x: '50%', y: '50%' });
+    expect(pivotToTransformOrigin('right')).toEqual({ x: '50%', y: '0px' });
   });
 });

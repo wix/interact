@@ -1,14 +1,20 @@
-import type { DomApi, PanScroll, ScrubAnimationOptions } from '../../types';
+import type { AnimationData, DomApi, PanScroll, ScrubAnimationOptions } from '../../types';
 import { SCROLL_RANGES, TWO_SIDES_DIRECTIONS } from '../../consts';
+import { sideDirection, toMotionRange } from '../../directions';
 import { getOffscreenTravels, measureLayout } from '../../layoutUtils';
+import {
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
+  getMotionLayoutRotation,
   getMotionTransRot,
-  useLayoutRotation,
 } from '../../transformUtils';
-import { parseKeywordLazy } from '../../utils';
-import { useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
+import { parseKeywordLazy, parseLengthLazy } from '../../utils';
 
 const DEFAULTS: Required<PanScroll> = {
   type: 'PanScroll',
@@ -42,13 +48,15 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<PanScroll>;
   const { direction, distance, startFromOffScreen = DEFAULTS.startFromOffScreen } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
 
   // offscreen - from fully outside the viewport on one side to fully outside on the other side
   const side = parseKeywordLazy(direction, TWO_SIDES_DIRECTIONS, DEFAULTS.direction);
-  const travels = startFromOffScreen ? getOffscreenTravels(side) : { travel: distance };
+  const offscreenTravels = startFromOffScreen ? getOffscreenTravels(side) : undefined;
+  const travels = offscreenTravels || { travel: distance };
 
   const panOptions = {
     ...options,
@@ -59,20 +67,30 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     },
   } as ScrubAnimationOptions;
 
+  // 'out' is the reversed 'in' of the opposite direction, so its travel is the one towards the original direction
+  const motionTravels = offscreenTravels
+    ? range === 'out'
+      ? { travel: offscreenTravels.toTravel, toTravel: offscreenTravels.travel }
+      : offscreenTravels
+    : { travel: parseLengthLazy(distance, DEFAULTS.distance) };
+  const motionSide = range === 'out' ? sideDirection.opposite(side) : side;
+
   return withSharedScrollRange([
-    useDirectionalPreset(
-      getMotionTransRot,
-      panOptions,
-      'scroll',
-      {
-        defaultDirection: DEFAULTS.direction,
-        defaultRange: DEFAULTS.range,
-        defaultTravel: DEFAULTS.distance,
-        directionType: 'four-sides',
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(panOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
+    {
+      ...panOptions,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
+      ...getMotionTransRot(
+        toMotionRange(sideDirection, motionSide, range),
+        motionTravels,
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...panOptions,
+      composite: 'add',
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, false)),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ]);
 }

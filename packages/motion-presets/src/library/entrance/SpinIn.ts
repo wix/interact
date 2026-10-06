@@ -1,19 +1,15 @@
-import type { SpinIn, TimeAnimationOptions } from '../../types';
+import type { AnimationData, SpinIn, TimeAnimationOptions } from '../../types';
 import { SPIN_DIRECTIONS } from '../../consts';
 import {
   MOTION_SCALE_NAME,
   MOTION_TRANS_ROT_NAME,
   getMotionScale,
   getMotionTransRot,
+  getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
 } from '../../transformUtils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import {
-  useBasicPreset,
-  useDirectionalPreset,
-  useDirectionalPresetAsBasic,
-} from '../../presetUtils';
+import { spinDirection, toMotionRange } from '../../directions';
 
 const FADE_IN_EASING = 'cubicIn';
 
@@ -44,40 +40,45 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<SpinIn>;
   const { scale = DEFAULTS.scale, spins = DEFAULTS.spins } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  const angle = 360 * spins;
+  const motionRange = toMotionRange(
+    spinDirection,
+    spinDirection.parse(namedEffect?.direction, DEFAULTS.direction),
+    'in',
+  );
 
-  // the fade shortens with the starting scale - growing from 0 needs no fade
-  const fadeOptions = {
-    ...options,
-    duration: options.duration! * Math.min(scale, 1),
-    easing: FADE_IN_EASING,
-  };
   const transformOptions = {
     ...options,
     easing,
-    namedEffect: {
-      ...namedEffect,
-      angle: 360 * spins,
-      scale,
-    },
+    fill,
+    namedEffect: { ...namedEffect, angle, scale },
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useDirectionalPreset(
-      getMotionTransRot,
-      transformOptions,
-      'entrance',
-      {
-        defaultDirection: DEFAULTS.direction,
-        directionType: 'spin',
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
-    useDirectionalPresetAsBasic(getMotionScale, transformOptions, 'entrance', {}, asWeb, suffix),
+    // the fade shortens with the starting scale - growing from 0 needs no fade
+    {
+      ...options,
+      duration: options.duration! * Math.min(scale, 1),
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotionTransRot(motionRange, { angle }, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotionScale(motionRange, { scale }, asWeb, suffix),
+    },
   ];
 }

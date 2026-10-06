@@ -1,13 +1,13 @@
-import type { FlipIn, TimeAnimationOptions } from '../../types';
+import type { AnimationData, FlipIn, TimeAnimationOptions } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
 import {
   MOTION_3D_TRANSFORM_NAME,
   getMotion3dTransform,
+  getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
 } from '../../transformUtils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { axisDirection, toMotionRange } from '../../directions';
 
 const FADE_IN_EASING = 'quadOut';
 
@@ -35,36 +35,41 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<FlipIn>;
   const { angle = DEFAULTS.angle, perspective = DEFAULTS.perspective } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  const direction = axisDirection.parse(namedEffect?.direction, DEFAULTS.direction);
 
-  const fadeOptions = { ...options, easing: FADE_IN_EASING };
   const transformOptions = {
     ...options,
     composite: 'add',
     easing,
-    namedEffect: {
-      ...namedEffect,
-      angle,
-      perspective,
-    },
+    fill,
+    namedEffect: { ...namedEffect, angle, perspective },
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    {
+      ...options,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
     // the layout rotation comes first, so the motion moves along the element's rotated axes
-    useLayoutRotation(transformOptions, 'entrance', { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPreset(
-      getMotion3dTransform,
-      transformOptions,
-      'entrance',
-      {
-        defaultDirection: DEFAULTS.direction,
-        directionType: 'axis',
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...transformOptions,
+      composite: 'replace',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotion3dTransform(
+        toMotionRange(axisDirection, direction, 'in'),
+        { angle, perspective },
+        asWeb,
+        suffix,
+      ),
+    },
   ];
 }

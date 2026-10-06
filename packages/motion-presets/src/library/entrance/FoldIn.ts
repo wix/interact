@@ -1,13 +1,15 @@
-import type { FoldIn, TimeAnimationOptions } from '../../types';
-import { FOUR_DIRECTIONS } from '../../consts';
+import type { AnimationData, FoldIn, TimeAnimationOptions } from '../../types';
+import { CENTER_AND_FOUR_DIRECTIONS, FOUR_DIRECTIONS } from '../../consts';
 import {
   MOTION_3D_TRANSFORM_NAME,
   getMotion3dTransform,
+  getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
+  pivotToTransformOrigin,
 } from '../../transformUtils';
+import { parseKeywordLazy } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { sideDirection, toMotionRange } from '../../directions';
 
 const FADE_IN_EASING = 'quadOut';
 
@@ -35,40 +37,45 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<FoldIn>;
   const { angle = DEFAULTS.angle, perspective = DEFAULTS.perspective, pivot } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  // folds in from its pivot side
+  const from = sideDirection.parse(pivot, DEFAULTS.pivot);
+  const transformOrigin = pivotToTransformOrigin(
+    parseKeywordLazy(pivot, CENTER_AND_FOUR_DIRECTIONS, DEFAULTS.pivot),
+  );
 
-  const fadeOptions = { ...options, easing: FADE_IN_EASING };
   const transformOptions = {
     ...options,
     composite: 'add',
     easing,
-    namedEffect: {
-      ...namedEffect,
-      angle,
-      // folds in from its pivot side
-      from: pivot,
-      perspective,
-    },
+    fill,
+    namedEffect: { ...namedEffect, angle, from: pivot, perspective },
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
+    {
+      ...options,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
     // the layout rotation comes first, so the motion moves along the element's rotated axes
-    useLayoutRotation(transformOptions, 'entrance', { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPreset(
-      getMotion3dTransform,
-      transformOptions,
-      'entrance',
-      {
-        defaultDirection: DEFAULTS.pivot,
-        defaultPivot: DEFAULTS.pivot,
-        directionType: 'four-sides',
-        pivotType: 'four-sides',
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...transformOptions,
+      composite: 'replace',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotion3dTransform(
+        toMotionRange(sideDirection, sideDirection.opposite(from), 'in'),
+        { angle, perspective, transformOrigin },
+        asWeb,
+        suffix,
+      ),
+    },
   ];
 }

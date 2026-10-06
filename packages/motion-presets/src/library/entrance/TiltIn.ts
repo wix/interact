@@ -1,4 +1,4 @@
-import type { LengthValue, TiltIn, TimeAnimationOptions } from '../../types';
+import type { AnimationData, LengthValue, TiltIn, TimeAnimationOptions } from '../../types';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
 import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
 import {
@@ -6,12 +6,12 @@ import {
   MOTION_3D_TRANSFORM_NAME,
   getMotionTransRot,
   getMotion3dTransform,
+  getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
 } from '../../transformUtils';
-import { compareKeywordToNonDefaults } from '../../utils';
+import { compareKeywordToNonDefaults, parseLengthLazy } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { axisDirection, sideDirection, spinDirection, toMotionRange } from '../../directions';
 
 const FADE_IN_EASING = 'cubicOut';
 const FADE_IN_DURATION_FACTOR = 0.2;
@@ -51,18 +51,15 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<TiltIn>;
-  const { from, perspective = DEFAULTS.perspective } = namedEffect!;
+  const { depth, from, perspective = DEFAULTS.perspective } = namedEffect!;
+  const { fill = 'backwards' } = options;
 
-  const fadeOptions = {
-    ...options,
-    duration: options.duration! * FADE_IN_DURATION_FACTOR,
-    easing: FADE_IN_EASING,
-  };
   const transform3dOptions = {
     ...options,
     easing,
+    fill,
     namedEffect: {
       ...namedEffect,
       angle: ROTATION_3D_ANGLE,
@@ -81,56 +78,61 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     composite: 'add',
     duration: options.duration! * ROTATE_2D_IN_DURATION_FACTOR,
     easing,
-    namedEffect: {
-      ...namedEffect,
-      angle: ROTATION_2D_ANGLE,
-      direction,
-    },
+    fill,
+    namedEffect: { ...namedEffect, angle: ROTATION_2D_ANGLE, direction },
   } as TimeAnimationOptions;
 
   const revealOptions = {
     ...options,
     duration: options.duration! * CLIP_PATH_DURATION_FACTOR,
     easing,
-    namedEffect: {
-      ...namedEffect,
-      from: CLIP_DIRECTION as TiltIn['from'],
-    },
+    fill,
+    namedEffect: { ...namedEffect, from: CLIP_DIRECTION as TiltIn['from'] },
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useDirectionalPreset(
-      getMotion3dTransform,
-      transform3dOptions,
-      'entrance',
-      {
-        defaultDepth: DEFAULTS.depth as LengthValue,
-        directionType: 'axis',
-      },
-      asWeb,
-      suffix,
-    ),
-    useDirectionalPreset(
-      getMotionTransRot,
-      transform2dOptions,
-      'entrance',
-      {
-        directionType: 'spin',
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(transform3dOptions, 'entrance', {}, asWeb, suffix),
-    useDirectionalPreset(
-      getMotionReveal,
-      revealOptions,
-      'entrance',
-      {
-        directionType: 'four-sides',
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...options,
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    {
+      ...transform3dOptions,
+      ...getMotion3dTransform(
+        toMotionRange(axisDirection, TILT_DIRECTION, 'in'),
+        {
+          angle: ROTATION_3D_ANGLE,
+          depth: parseLengthLazy(depth, DEFAULTS.depth as LengthValue),
+          perspective,
+        },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transform2dOptions,
+      ...getMotionTransRot(
+        toMotionRange(spinDirection, direction, 'in'),
+        { angle: ROTATION_2D_ANGLE },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transform3dOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...revealOptions,
+      ...getMotionReveal(
+        toMotionRange(sideDirection, sideDirection.opposite(CLIP_DIRECTION), 'in'),
+        {},
+        asWeb,
+        suffix,
+      ),
+    },
   ];
 }

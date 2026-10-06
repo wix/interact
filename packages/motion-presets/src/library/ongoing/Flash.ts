@@ -1,6 +1,6 @@
-import type { DomApi, Flash, TimeAnimationOptions } from '../../types';
+import type { DomApi, Flash, TimeAnimationOptions, AnimationData } from '../../types';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset } from '../../presetUtils';
+import { getLoopOverrides } from '../../easingUtils';
 
 const DEFAULT_EASING = 'cubicInOut';
 
@@ -28,12 +28,14 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, suffix } = options;
 
   return [
-    useBasicPreset(getMotionFade, options, 'ongoing', asWeb, suffix, {
-      loop: { shape: SHAPE, easings: [easing] },
-    }),
+    {
+      ...options,
+      ...getLoopOverrides(options, { shape: SHAPE, easings: [easing] }),
+      ...getMotionFade({}, asWeb, suffix),
+    },
   ];
 }

@@ -1,14 +1,20 @@
-import type { DomApi, EffectFourDirections, ScrubAnimationOptions, SlideScroll } from '../../types';
+import type { AnimationData, DomApi, ScrubAnimationOptions, SlideScroll } from '../../types';
 import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
+import { sideDirection, toMotionRange } from '../../directions';
+import {
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
 import {
   MOTION_TRANS_ROT_NAME,
   getMotionTransRot,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
+  getMotionLayoutRotation,
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
-import { oppositeDirection, useDirectionalPreset, withSharedScrollRange } from '../../presetUtils';
 
 const TRAVEL = '100%';
 
@@ -33,14 +39,16 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<SlideScroll>;
+  const range = parseRange(namedEffect, DEFAULTS.range);
+  const direction = parseKeywordLazy(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction);
 
   // SlideScroll reveals in the opposite direction to the movement to create its entrance-exit feel
-  const clipDirection = oppositeDirection(
-    parseKeywordLazy(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction),
-    'four-sides',
-  );
+  const clipDirection = sideDirection.opposite(direction);
+
+  // range out is opposite direction reversed
+  const toSide = (side: string) => (range === 'out' ? sideDirection.opposite(side) : side);
 
   const transformOptions = {
     ...options,
@@ -60,39 +68,31 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
 
   return withSharedScrollRange([
     // the layout rotation comes first, so the motion moves along the element's rotated axes
-    useLayoutRotation(
-      transformOptions,
-      'scroll',
-      { composite: 'replace', defaultRange: DEFAULTS.range },
-      asWeb,
-      suffix,
-    ),
-    useDirectionalPreset(
-      getMotionTransRot,
-      transformOptions,
-      'scroll',
-      {
-        defaultDirection: DEFAULTS.direction,
-        defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
-      },
-      asWeb,
-      suffix,
-    ),
-    useDirectionalPreset(
-      getMotionReveal,
-      revealOptions,
-      'scroll',
-      {
-        defaultDirection: oppositeDirection(
-          DEFAULTS.direction,
-          'four-sides',
-        ) as EffectFourDirections,
-        defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...transformOptions,
+      composite: 'replace',
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, false)),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
+      ...getMotionTransRot(
+        toMotionRange(sideDirection, toSide(direction), range),
+        { travel: TRAVEL },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...revealOptions,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
+      ...getMotionReveal(
+        toMotionRange(sideDirection, toSide(clipDirection), range),
+        {},
+        asWeb,
+        suffix,
+      ),
+    },
   ]);
 }

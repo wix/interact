@@ -1,8 +1,8 @@
-import type { RevealIn, TimeAnimationOptions } from '../../types';
+import type { AnimationData, RevealIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { sideDirection, toMotionRange } from '../../directions';
 
 const DEFAULT_EASING = 'cubicInOut';
 const DEFAULTS: Required<RevealIn> = {
@@ -22,21 +22,32 @@ export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { easing = DEFAULT_EASING, suffix } = options as TimeAnimationOptions<RevealIn>;
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const {
+    easing = DEFAULT_EASING,
+    namedEffect,
+    suffix,
+  } = options as TimeAnimationOptions<RevealIn>;
+  const { fill = 'backwards' } = options;
+  const from = sideDirection.parse(namedEffect?.from, DEFAULTS.from);
 
   return [
-    useBasicPreset(getMotionFade, { ...options, easing }, 'entrance', asWeb, suffix),
-    useDirectionalPreset(
-      getMotionReveal,
-      { ...options, easing },
-      'entrance',
-      {
-        defaultDirection: DEFAULTS.from,
-        directionType: 'four-sides',
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...options,
+      easing,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    {
+      ...options,
+      easing,
+      fill,
+      ...getMotionReveal(
+        toMotionRange(sideDirection, sideDirection.opposite(from), 'in'),
+        {},
+        asWeb,
+        suffix,
+      ),
+    },
   ];
 }

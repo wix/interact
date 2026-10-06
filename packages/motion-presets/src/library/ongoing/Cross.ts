@@ -1,4 +1,10 @@
-import type { Cross, DomApi, EffectEightDirections, TimeAnimationOptions } from '../../types';
+import type {
+  AnimationData,
+  Cross,
+  DomApi,
+  EffectEightDirections,
+  TimeAnimationOptions,
+} from '../../types';
 import { EIGHT_DIRECTIONS } from '../../consts';
 import type { Layout } from '../../layoutUtils';
 import {
@@ -10,12 +16,12 @@ import {
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
+  getMotionLayoutRotation,
   getMotionTransRot,
-  useLayoutRotation,
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
-import { getActiveFraction, getWrapEasing } from '../../easingUtils';
-import { useDirectionalPreset } from '../../presetUtils';
+import { getActiveFraction, getLoopOverrides, getWrapEasing } from '../../easingUtils';
+import { angleDirection, toMotionRange } from '../../directions';
 
 const DEFAULTS: Required<Cross> = {
   type: 'Cross',
@@ -53,11 +59,17 @@ export function web(options: TimeAnimationOptions, dom?: DomApi) {
 
 // crosses its container towards the direction - from its place to fully outside the container,
 // then from fully outside the opposite side back to its place, at a constant speed
-export function style(options: TimeAnimationOptions, asWeb = false, layout?: Layout) {
+export function style(
+  options: TimeAnimationOptions,
+  asWeb = false,
+  layout?: Layout,
+): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<Cross>;
   const direction = parseKeywordLazy(namedEffect?.direction, EIGHT_DIRECTIONS, DEFAULTS.direction);
   const opposite = getOppositeDirection(direction);
   const activeFraction = getActiveFraction(options);
+  const travel = getOffscreenTravel(direction);
+  const toTravel = getOffscreenTravel(opposite);
 
   const crossOptions = {
     ...options,
@@ -65,8 +77,8 @@ export function style(options: TimeAnimationOptions, asWeb = false, layout?: Lay
       ...namedEffect,
       direction: DIRECTION_ANGLES[direction],
       range: 'continuous',
-      travel: getOffscreenTravel(direction),
-      toTravel: getOffscreenTravel(opposite),
+      travel,
+      toTravel,
     },
   } as TimeAnimationOptions;
 
@@ -80,16 +92,20 @@ export function style(options: TimeAnimationOptions, asWeb = false, layout?: Lay
     return travel / (travel + toTravel || 1);
   };
 
-  const cross = useDirectionalPreset(
-    getMotionTransRot,
-    crossOptions,
-    'ongoing',
-    {
-      directionType: 'angle',
-    },
-    asWeb,
-    suffix,
-  );
+  const cross = {
+    ...crossOptions,
+    ...getLoopOverrides(crossOptions),
+    ...getMotionTransRot(
+      toMotionRange(
+        angleDirection,
+        angleDirection.opposite(angleDirection.parse(DIRECTION_ANGLES[direction])),
+        'continuous',
+      ),
+      { travel, toTravel },
+      asWeb,
+      suffix,
+    ),
+  };
 
   return [
     layout
@@ -102,6 +118,11 @@ export function style(options: TimeAnimationOptions, asWeb = false, layout?: Lay
           },
         }
       : { ...cross, easing: getWrapEasing(0.5, activeFraction) },
-    useLayoutRotation(crossOptions, 'ongoing', {}, asWeb, suffix),
+    {
+      ...crossOptions,
+      composite: 'add',
+      ...getLoopOverrides(crossOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ];
 }

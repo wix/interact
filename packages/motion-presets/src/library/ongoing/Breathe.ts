@@ -1,16 +1,17 @@
-import type { Breathe, DomApi, TimeAnimationOptions } from '../../types';
+import type { AnimationData, Breathe, DomApi, TimeAnimationOptions } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
 import {
   MOTION_3D_TRANSFORM_NAME,
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
   getMotion3dTransform,
+  getMotionLayoutRotation,
   getMotionTransRot,
-  useLayoutRotation,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
-import { getEasingFamily, parseKeywordLazy } from '../../utils';
-import { useDirectionalPreset } from '../../presetUtils';
+import { getLoopOverrides } from '../../easingUtils';
+import { getEasingFamily, parseKeywordLazy, parseLengthLazy } from '../../utils';
+import { axisDirection, toMotionRange } from '../../directions';
 
 const DEFAULT_EASING = 'sineInOut';
 const DIRECTIONS = [...AXIS_DIRECTIONS, 'center'] as const;
@@ -55,36 +56,41 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<Breathe>;
   const { perspective = DEFAULTS.perspective, travel = DEFAULTS.travel } = namedEffect!;
   const direction = parseKeywordLazy(namedEffect?.direction, DIRECTIONS, DEFAULTS.direction);
   const ease = getEasingFamily(easing);
   const isCenter = direction === 'center';
+  // center moves along the z-axis
+  const axis = isCenter ? 'vertical' : direction;
 
   const breatheOptions = {
     ...options,
     namedEffect: {
       ...namedEffect,
-      // center moves along the z-axis
-      direction: isCenter ? 'vertical' : direction,
+      direction: axis,
       perspective,
       travel,
     },
   } as TimeAnimationOptions;
 
+  const motionRange = toMotionRange(axisDirection, axis, 'in');
+  const params = { perspective, travel: parseLengthLazy(travel, { value: 0, unit: 'px' }) };
+
   return [
-    useDirectionalPreset(
-      isCenter ? getMotion3dTransform : getMotionTransRot,
-      breatheOptions,
-      'ongoing',
-      {
-        directionType: 'axis',
-        loop: { shape: SHAPE, easings: [ease.out, ease.inOut] },
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(breatheOptions, 'ongoing', {}, asWeb, suffix),
+    {
+      ...breatheOptions,
+      ...getLoopOverrides(breatheOptions, { shape: SHAPE, easings: [ease.out, ease.inOut] }),
+      ...(isCenter
+        ? getMotion3dTransform(motionRange, params, asWeb, suffix)
+        : getMotionTransRot(motionRange, params, asWeb, suffix)),
+    },
+    {
+      ...breatheOptions,
+      composite: 'add',
+      ...getLoopOverrides(breatheOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ];
 }

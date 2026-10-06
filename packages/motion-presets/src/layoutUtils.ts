@@ -1,6 +1,6 @@
 import { toCSSPropertyName } from '@wix/motion';
 import type { DomApi, EffectEightDirections, EffectFourDirections } from './types';
-import { oppositeDirection } from './presetUtils';
+import { sideDirection } from './directions';
 import { getElementOffset } from './utils';
 
 export type LayoutContainer = 'viewport' | 'parent';
@@ -110,9 +110,7 @@ export function getOffscreenDistance(layout: Layout, direction: EffectEightDirec
 }
 
 export function getOppositeDirection(direction: EffectEightDirections) {
-  return sidesOf(direction)
-    .map((side) => oppositeDirection(side, 'four-sides'))
-    .join('-') as EffectEightDirections;
+  return sidesOf(direction).map(sideDirection.opposite).join('-') as EffectEightDirections;
 }
 
 // travels for moving towards `direction` from fully offscreen on the other side to fully offscreen on that side

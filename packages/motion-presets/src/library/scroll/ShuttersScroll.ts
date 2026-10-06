@@ -1,8 +1,10 @@
-import type { ScrubAnimationOptions, ShuttersScroll, DomApi } from '../../types';
+import type { ScrubAnimationOptions, ShuttersScroll, DomApi, AnimationData } from '../../types';
 import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 import { MOTION_SHUTTERS_NAME, getMotionShutters } from '../../clipUtils';
+import { sideDirection, toMotionRange } from '../../directions';
+import { getScrollEasing } from '../../easingUtils';
+import { getScrollOverrides, parseRange } from '../../rangeUtils';
 import { compareKeywordToNonDefaults } from '../../utils';
-import { useDirectionalPreset } from '../../presetUtils';
 
 const EASING = 'sineOut';
 const IN_EASING = 'sineIn';
@@ -42,9 +44,18 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<ShuttersScroll>;
-  const { range, shutters = DEFAULTS.shutters, staggered = DEFAULTS.staggered } = namedEffect!;
+  const {
+    range: inputRange,
+    shutters = DEFAULTS.shutters,
+    staggered = DEFAULTS.staggered,
+  } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
+
+  // range out is opposite direction reversed
+  const direction = sideDirection.parse(namedEffect!.direction, DEFAULTS.direction);
+  const side = range === 'out' ? sideDirection.opposite(direction) : direction;
 
   const shuttersOptions = {
     ...options,
@@ -56,7 +67,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   } as ScrubAnimationOptions;
 
   // staggered continuous motion has its timing set on its keyframes by getMotionShutters
-  const isContinuous = compareKeywordToNonDefaults(range, ['continuous']);
+  const isContinuous = compareKeywordToNonDefaults(inputRange, ['continuous']);
   const easingOptions =
     isContinuous && staggered
       ? {}
@@ -68,18 +79,15 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         };
 
   return [
-    useDirectionalPreset(
-      getMotionShutters,
-      shuttersOptions,
-      'scroll',
-      {
-        defaultDirection: DEFAULTS.direction,
-        defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
-        ...easingOptions,
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...shuttersOptions,
+      ...getScrollOverrides(options, range, getScrollEasing(range, true, easingOptions)),
+      ...getMotionShutters(
+        toMotionRange(sideDirection, side, range),
+        { shutters, staggered },
+        asWeb,
+        suffix,
+      ),
+    },
   ];
 }

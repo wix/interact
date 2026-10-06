@@ -1,20 +1,22 @@
-import type { DomApi, ScrubAnimationOptions, TurnScroll } from '../../types';
+import type { AnimationData, DomApi, ScrubAnimationOptions, TurnScroll } from '../../types';
 import { SCROLL_RANGES, SPIN_DIRECTIONS, TWO_SIDES_DIRECTIONS } from '../../consts';
+import { sideDirection, toMotionRange } from '../../directions';
 import { getOffscreenTravels, measureLayout } from '../../layoutUtils';
+import {
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_SCALE_NAME,
   MOTION_TRANS_ROT_NAME,
   getMotionScale,
   getMotionTransRot,
-  useLayoutRotation,
+  getMotionLayoutRotation,
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
-import {
-  useDirectionalPreset,
-  useDirectionalPresetAsBasic,
-  withSharedScrollRange,
-} from '../../presetUtils';
 
 const DEFAULTS: Required<TurnScroll> = {
   type: 'TurnScroll',
@@ -50,53 +52,56 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
 }
 
 // moves from fully outside the viewport on one side to fully outside on the other side while turning
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<TurnScroll>;
   const { angle = DEFAULTS.angle, scale = DEFAULTS.scale } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
   const side = parseKeywordLazy(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULTS.direction);
   const spin = parseKeywordLazy(namedEffect?.spin, SPIN_DIRECTIONS, DEFAULTS.spin);
+  const direction = range === 'out' ? sideDirection.opposite(side) : side;
+
+  // the rotation shares the motion's sign - a positive angle turns clockwise when moving right
+  const turnAngle = angle * (spin === 'clockwise' ? 1 : -1) * (side === 'right' ? 1 : -1);
 
   const turnOptions = {
     ...options,
     namedEffect: {
       ...namedEffect,
-      // the rotation shares the motion's sign - a positive angle turns clockwise when moving right
-      angle: angle * (spin === 'clockwise' ? 1 : -1) * (side === 'right' ? 1 : -1),
+      angle: turnAngle,
       direction: side,
       ...getOffscreenTravels(side),
     },
   } as ScrubAnimationOptions;
   const scaleOptions = {
     ...options,
-    namedEffect: {
-      ...namedEffect,
-      scale,
-    },
+    namedEffect: { ...namedEffect, scale },
   } as ScrubAnimationOptions;
 
+  const motionRange = toMotionRange(sideDirection, direction, range);
+  const scaleOverrides = getScrollOverrides(options, range, getLinearScrollEasing(range, false));
+
   return withSharedScrollRange([
-    useDirectionalPreset(
-      getMotionTransRot,
-      turnOptions,
-      'scroll',
-      {
-        defaultDirection: DEFAULTS.direction,
-        defaultRange: DEFAULTS.range,
-        directionType: 'four-sides',
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(turnOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
-    useDirectionalPresetAsBasic(
-      getMotionScale,
-      scaleOptions,
-      'scroll',
-      {
-        defaultRange: DEFAULTS.range,
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...turnOptions,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
+      // 'out' is the reversed 'in' of the opposite direction, so its travels are those towards that direction
+      ...getMotionTransRot(
+        motionRange,
+        { angle: turnAngle, ...getOffscreenTravels(direction as typeof side) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...turnOptions,
+      composite: 'add',
+      ...scaleOverrides,
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...scaleOptions,
+      ...scaleOverrides,
+      ...getMotionScale(motionRange, { scale }, asWeb, suffix),
+    },
   ]);
 }

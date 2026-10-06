@@ -1,5 +1,5 @@
 import type { Shape } from './types';
-import type { MotionRange } from './presetUtils';
+import type { MotionRange } from './directions';
 import { SHAPES } from './consts';
 import { declareCustom, getEasing, mapRange, stripCalc, toKeyframeValue } from './utils';
 

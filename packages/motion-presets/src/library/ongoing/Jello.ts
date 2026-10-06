@@ -1,12 +1,13 @@
-import type { DomApi, Jello, TimeAnimationOptions } from '../../types';
+import type { AnimationData, DomApi, Jello, TimeAnimationOptions } from '../../types';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_TRANS_ROT_NAME,
   getMotionTransRot,
-  useLayoutRotation,
+  getMotionLayoutRotation,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
-import { useDirectionalPresetAsBasic } from '../../presetUtils';
+import { getLoopOverrides } from '../../easingUtils';
+import { UNDIRECTED_MOTION_RANGE } from '../../directions';
 
 const DEFAULTS: Required<Jello> = {
   type: 'Jello',
@@ -37,30 +38,33 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<Jello>;
   const { skew = DEFAULTS.skew } = namedEffect!;
+  // the keyframes start at the negative sign, so the first peak is +skew
+  const skewY = { y: -skew };
 
   const jelloOptions = {
     ...options,
     composite: 'add',
     namedEffect: {
       ...namedEffect,
-      // the keyframes start at the negative sign, so the first peak is +skew
-      skew: { y: -skew },
+      skew: skewY,
     },
   } as TimeAnimationOptions;
 
   return [
     // the layout rotation comes first, so the skew is along the element's rotated axes
-    useLayoutRotation(jelloOptions, 'ongoing', { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPresetAsBasic(
-      getMotionTransRot,
-      jelloOptions,
-      'ongoing',
-      { loop: { shape: SHAPE } },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...jelloOptions,
+      composite: 'replace',
+      ...getLoopOverrides(jelloOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...jelloOptions,
+      ...getLoopOverrides(jelloOptions, { shape: SHAPE }),
+      ...getMotionTransRot(UNDIRECTED_MOTION_RANGE, { skew: skewY }, asWeb, suffix),
+    },
   ];
 }

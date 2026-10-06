@@ -1,18 +1,20 @@
-import type { DomApi, ScrubAnimationOptions, SpinScroll } from '../../types';
+import type { AnimationData, DomApi, ScrubAnimationOptions, SpinScroll } from '../../types';
 import { SCROLL_RANGES, SPIN_DIRECTIONS } from '../../consts';
+import { spinDirection, toMotionRange } from '../../directions';
+import {
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
 import {
   MOTION_SCALE_NAME,
   MOTION_TRANS_ROT_NAME,
   getMotionScale,
   getMotionTransRot,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
+  getMotionLayoutRotation,
 } from '../../transformUtils';
-import {
-  useDirectionalPreset,
-  useDirectionalPresetAsBasic,
-  withSharedScrollRange,
-} from '../../presetUtils';
 
 const DEFAULTS: Required<SpinScroll> = {
   type: 'SpinScroll',
@@ -39,48 +41,42 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<SpinScroll>;
   const { scale = DEFAULTS.scale, spins = DEFAULTS.spins } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
+  const spin = spinDirection.parse(namedEffect!.direction, DEFAULTS.direction);
+  const direction = range === 'out' ? spinDirection.opposite(spin) : spin;
+  const angle = 360 * spins;
 
   const spinOptions = {
     ...options,
-    namedEffect: {
-      ...namedEffect,
-      angle: 360 * spins,
-    },
+    namedEffect: { ...namedEffect, angle },
   } as ScrubAnimationOptions;
   const scaleOptions = {
     ...options,
-    namedEffect: {
-      ...namedEffect,
-      scale,
-    },
+    namedEffect: { ...namedEffect, scale },
   } as ScrubAnimationOptions;
 
+  const motionRange = toMotionRange(spinDirection, direction, range);
+  const scaleOverrides = getScrollOverrides(options, range, getLinearScrollEasing(range, false));
+
   return withSharedScrollRange([
-    useDirectionalPreset(
-      getMotionTransRot,
-      spinOptions,
-      'scroll',
-      {
-        defaultDirection: DEFAULTS.direction,
-        defaultRange: DEFAULTS.range,
-        directionType: 'spin',
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(spinOptions, 'scroll', { defaultRange: DEFAULTS.range }, asWeb, suffix),
-    useDirectionalPresetAsBasic(
-      getMotionScale,
-      scaleOptions,
-      'scroll',
-      {
-        defaultRange: DEFAULTS.range,
-      },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...spinOptions,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
+      ...getMotionTransRot(motionRange, { angle }, asWeb, suffix),
+    },
+    {
+      ...spinOptions,
+      composite: 'add',
+      ...scaleOverrides,
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...scaleOptions,
+      ...scaleOverrides,
+      ...getMotionScale(motionRange, { scale }, asWeb, suffix),
+    },
   ]);
 }

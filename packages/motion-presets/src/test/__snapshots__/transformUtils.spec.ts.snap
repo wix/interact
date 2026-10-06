@@ -578,39 +578,3 @@ exports[`layout rotation > constant --motion-rotate on both keyframes 1`] = `
   "name": "motion-layout-rotation-s",
 }
 `;
-
-exports[`layout rotation > useLayoutRotation keeps the scroll range of its default range 1`] = `
-{
-  "composite": "add",
-  "custom": {},
-  "easing": "linear",
-  "endOffset": {
-    "name": "cover",
-    "offset": {
-      "unit": "percentage",
-      "value": 100,
-    },
-  },
-  "fill": "forwards",
-  "keyframes": [
-    {
-      "transform": "rotate(var(--motion-rotate, 0deg))",
-    },
-    {
-      "transform": "rotate(var(--motion-rotate, 0deg))",
-    },
-  ],
-  "name": "motion-layout-rotation",
-  "namedEffect": {
-    "type": "X",
-  },
-  "reversed": true,
-  "startOffset": {
-    "name": "cover",
-    "offset": {
-      "unit": "percentage",
-      "value": 50,
-    },
-  },
-}
-`;

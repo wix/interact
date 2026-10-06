@@ -1,11 +1,12 @@
-import type { DomApi, Pulse, TimeAnimationOptions } from '../../types';
+import type { AnimationData, DomApi, Pulse, TimeAnimationOptions } from '../../types';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
   MOTION_SCALE_NAME,
   getMotionScale,
-  useLayoutRotation,
+  getMotionLayoutRotation,
 } from '../../transformUtils';
-import { useDirectionalPresetAsBasic } from '../../presetUtils';
+import { getLoopOverrides } from '../../easingUtils';
+import { UNDIRECTED_MOTION_RANGE } from '../../directions';
 
 const DEFAULTS: Required<Pulse> = {
   type: 'Pulse',
@@ -35,7 +36,7 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<Pulse>;
   const { scale = DEFAULTS.scale } = namedEffect!;
 
@@ -48,14 +49,16 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   } as TimeAnimationOptions;
 
   return [
-    useLayoutRotation(options, 'ongoing', { composite: 'replace' }, asWeb, suffix),
-    useDirectionalPresetAsBasic(
-      getMotionScale,
-      scaleOptions,
-      'ongoing',
-      { loop: { shape: SHAPE } },
-      asWeb,
-      suffix,
-    ),
+    {
+      ...options,
+      composite: 'replace',
+      ...getLoopOverrides(options),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...scaleOptions,
+      ...getLoopOverrides(scaleOptions, { shape: SHAPE }),
+      ...getMotionScale(UNDIRECTED_MOTION_RANGE, { scale }, asWeb, suffix),
+    },
   ];
 }

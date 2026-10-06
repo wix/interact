@@ -1,13 +1,20 @@
-import type { CurveIn, DomApi, LengthValue, TimeAnimationOptions } from '../../types';
+import type {
+  AnimationData,
+  CurveIn,
+  DomApi,
+  LengthValue,
+  TimeAnimationOptions,
+} from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 import {
   MOTION_3D_TRANSFORM_NAME,
   getMotion3dTransform,
+  getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
-  useLayoutRotation,
 } from '../../transformUtils';
+import { parseLengthLazy } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
-import { useBasicPreset, useDirectionalPreset } from '../../presetUtils';
+import { sideDirection, toMotionRange } from '../../directions';
 
 const EASING = 'quadOut';
 const ROTATION_ANGLE = 180;
@@ -35,35 +42,43 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<CurveIn>;
-  const { perspective = DEFAULTS.perspective } = namedEffect!;
+  const { depth, perspective = DEFAULTS.perspective } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  const from = sideDirection.parse(namedEffect?.from, DEFAULTS.from);
 
-  const fadeOptions = { ...options, easing: EASING };
   const transformOptions = {
     ...options,
     easing: EASING,
-    namedEffect: {
-      ...namedEffect,
-      angle: ROTATION_ANGLE,
-      perspective,
-    },
+    fill,
+    namedEffect: { ...namedEffect, angle: ROTATION_ANGLE, perspective },
   } as TimeAnimationOptions;
 
   return [
-    useBasicPreset(getMotionFade, fadeOptions, 'entrance', asWeb, suffix),
-    useDirectionalPreset(
-      getMotion3dTransform,
-      transformOptions,
-      'entrance',
-      {
-        defaultDepth: DEFAULTS.depth as LengthValue,
-        defaultDirection: DEFAULTS.from,
-        directionType: 'four-sides',
-      },
-      asWeb,
-      suffix,
-    ),
-    useLayoutRotation(transformOptions, 'entrance', {}, asWeb, suffix),
+    {
+      ...options,
+      easing: EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotion3dTransform(
+        toMotionRange(sideDirection, sideDirection.opposite(from), 'in'),
+        {
+          angle: ROTATION_ANGLE,
+          depth: parseLengthLazy(depth, DEFAULTS.depth as LengthValue),
+          perspective,
+        },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
   ];
 }
