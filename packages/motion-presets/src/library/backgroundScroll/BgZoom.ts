@@ -98,6 +98,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ...options,
       easing,
       part: 'BG_IMG',
+      custom,
       composite: isIn ? ('add' as const) : ('replace' as const),
       startOffset: {
         name: 'cover',
@@ -133,6 +134,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     animations.splice(1, 0, {
       ...options,
       part: 'BG_IMG',
+      custom,
       easing: 'linear',
       startOffset: {
         name: 'cover',
