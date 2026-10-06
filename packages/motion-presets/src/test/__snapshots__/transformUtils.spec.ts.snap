@@ -1,0 +1,580 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`getMotion3dTransform > angle asWeb=false 1`] = `
+{
+  "custom": {
+    "--motion-transform-3d-s-angle-x": "0deg",
+    "--motion-transform-3d-s-angle-y": "30deg",
+    "--motion-transform-3d-s-angle-z": "0deg",
+    "--motion-transform-3d-s-from": -1,
+    "--motion-transform-3d-s-origin-x": "0px",
+    "--motion-transform-3d-s-origin-y": "0px",
+    "--motion-transform-3d-s-origin-z": "-100px",
+    "--motion-transform-3d-s-parallax-from": "0px",
+    "--motion-transform-3d-s-parallax-to": "0px",
+    "--motion-transform-3d-s-perspective": "800px",
+    "--motion-transform-3d-s-to": 0,
+    "--motion-transform-3d-s-travel-x": "0px",
+    "--motion-transform-3d-s-travel-y": "0px",
+    "--motion-transform-3d-s-travel-z": "50px",
+  },
+  "keyframes": [
+    {
+      "transform": "perspective(var(--motion-transform-3d-s-perspective, 0px)) translate3d(var(--motion-transform-3d-s-origin-x, 0px), var(--motion-transform-3d-s-origin-y, 0px), var(--motion-transform-3d-s-origin-z, 0px)) translate3d(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-x, 0px)), calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-y, 0px) + var(--motion-transform-3d-s-parallax-from, 0px)), calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-z, 0px))) rotateX(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-x, 0deg))) rotateY(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-y, 0deg))) rotateZ(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-z, 0deg))) translate3d(calc(-1 * var(--motion-transform-3d-s-origin-x, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-y, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-z, 0px)))",
+    },
+    {
+      "transform": "perspective(var(--motion-transform-3d-s-perspective, 0px)) translate3d(var(--motion-transform-3d-s-origin-x, 0px), var(--motion-transform-3d-s-origin-y, 0px), var(--motion-transform-3d-s-origin-z, 0px)) translate3d(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-x, 0px)), calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-y, 0px) + var(--motion-transform-3d-s-parallax-to, 0px)), calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-z, 0px))) rotateX(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-x, 0deg))) rotateY(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-y, 0deg))) rotateZ(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-z, 0deg))) translate3d(calc(-1 * var(--motion-transform-3d-s-origin-x, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-y, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-z, 0px)))",
+    },
+  ],
+  "name": "motion-3d-transform-s",
+}
+`;
+
+exports[`getMotion3dTransform > angle asWeb=true 1`] = `
+{
+  "custom": {
+    "--motion-transform-3d-s-angle-x": "0deg",
+    "--motion-transform-3d-s-angle-y": "30deg",
+    "--motion-transform-3d-s-angle-z": "0deg",
+    "--motion-transform-3d-s-from": -1,
+    "--motion-transform-3d-s-origin-x": "0px",
+    "--motion-transform-3d-s-origin-y": "0px",
+    "--motion-transform-3d-s-origin-z": "-100px",
+    "--motion-transform-3d-s-parallax-from": "0px",
+    "--motion-transform-3d-s-parallax-to": "0px",
+    "--motion-transform-3d-s-perspective": "800px",
+    "--motion-transform-3d-s-to": 0,
+    "--motion-transform-3d-s-travel-x": "0px",
+    "--motion-transform-3d-s-travel-y": "0px",
+    "--motion-transform-3d-s-travel-z": "50px",
+  },
+  "keyframes": [
+    {
+      "transform": "perspective(800px) translate3d(0px, 0px, -100px) translate3d(calc(-1 * 0px), calc(-1 * 0px + 0px), calc(-1 * 50px)) rotateX(calc(-1 * 0deg)) rotateY(calc(-1 * 30deg)) rotateZ(calc(-1 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * -100px))",
+    },
+    {
+      "transform": "perspective(800px) translate3d(0px, 0px, -100px) translate3d(calc(0 * 0px), calc(0 * 0px + 0px), calc(0 * 50px)) rotateX(calc(0 * 0deg)) rotateY(calc(0 * 30deg)) rotateZ(calc(0 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * -100px))",
+    },
+  ],
+  "name": "motion-3d-transform-s",
+}
+`;
+
+exports[`getMotion3dTransform > continuous asWeb=false 1`] = `
+{
+  "custom": {
+    "--motion-transform-3d-s-angle-x": "0deg",
+    "--motion-transform-3d-s-angle-y": "30deg",
+    "--motion-transform-3d-s-angle-z": "0deg",
+    "--motion-transform-3d-s-from": -1,
+    "--motion-transform-3d-s-origin-x": "0px",
+    "--motion-transform-3d-s-origin-y": "0px",
+    "--motion-transform-3d-s-origin-z": "-100px",
+    "--motion-transform-3d-s-parallax-from": "0px",
+    "--motion-transform-3d-s-parallax-to": "0px",
+    "--motion-transform-3d-s-perspective": "800px",
+    "--motion-transform-3d-s-to": 1,
+    "--motion-transform-3d-s-travel-x": "0px",
+    "--motion-transform-3d-s-travel-y": "0px",
+    "--motion-transform-3d-s-travel-z": "50px",
+  },
+  "keyframes": [
+    {
+      "transform": "perspective(var(--motion-transform-3d-s-perspective, 0px)) translate3d(var(--motion-transform-3d-s-origin-x, 0px), var(--motion-transform-3d-s-origin-y, 0px), var(--motion-transform-3d-s-origin-z, 0px)) translate3d(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-x, 0px)), calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-y, 0px) + var(--motion-transform-3d-s-parallax-from, 0px)), calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-z, 0px))) rotateX(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-x, 0deg))) rotateY(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-y, 0deg))) rotateZ(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-z, 0deg))) translate3d(calc(-1 * var(--motion-transform-3d-s-origin-x, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-y, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-z, 0px)))",
+    },
+    {
+      "transform": "perspective(var(--motion-transform-3d-s-perspective, 0px)) translate3d(var(--motion-transform-3d-s-origin-x, 0px), var(--motion-transform-3d-s-origin-y, 0px), var(--motion-transform-3d-s-origin-z, 0px)) translate3d(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-x, 0px)), calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-y, 0px) + var(--motion-transform-3d-s-parallax-to, 0px)), calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-z, 0px))) rotateX(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-x, 0deg))) rotateY(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-y, 0deg))) rotateZ(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-z, 0deg))) translate3d(calc(-1 * var(--motion-transform-3d-s-origin-x, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-y, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-z, 0px)))",
+    },
+  ],
+  "name": "motion-3d-transform-s",
+}
+`;
+
+exports[`getMotion3dTransform > continuous asWeb=true 1`] = `
+{
+  "custom": {
+    "--motion-transform-3d-s-angle-x": "0deg",
+    "--motion-transform-3d-s-angle-y": "30deg",
+    "--motion-transform-3d-s-angle-z": "0deg",
+    "--motion-transform-3d-s-from": -1,
+    "--motion-transform-3d-s-origin-x": "0px",
+    "--motion-transform-3d-s-origin-y": "0px",
+    "--motion-transform-3d-s-origin-z": "-100px",
+    "--motion-transform-3d-s-parallax-from": "0px",
+    "--motion-transform-3d-s-parallax-to": "0px",
+    "--motion-transform-3d-s-perspective": "800px",
+    "--motion-transform-3d-s-to": 1,
+    "--motion-transform-3d-s-travel-x": "0px",
+    "--motion-transform-3d-s-travel-y": "0px",
+    "--motion-transform-3d-s-travel-z": "50px",
+  },
+  "keyframes": [
+    {
+      "transform": "perspective(800px) translate3d(0px, 0px, -100px) translate3d(calc(-1 * 0px), calc(-1 * 0px + 0px), calc(-1 * 50px)) rotateX(calc(-1 * 0deg)) rotateY(calc(-1 * 30deg)) rotateZ(calc(-1 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * -100px))",
+    },
+    {
+      "transform": "perspective(800px) translate3d(0px, 0px, -100px) translate3d(calc(1 * 0px), calc(1 * 0px + 0px), calc(1 * 50px)) rotateX(calc(1 * 0deg)) rotateY(calc(1 * 30deg)) rotateZ(calc(1 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * -100px))",
+    },
+  ],
+  "name": "motion-3d-transform-s",
+}
+`;
+
+exports[`getMotion3dTransform > inHorizontal asWeb=false 1`] = `
+{
+  "custom": {
+    "--motion-transform-3d-s-angle-x": "0deg",
+    "--motion-transform-3d-s-angle-y": "30deg",
+    "--motion-transform-3d-s-angle-z": "0deg",
+    "--motion-transform-3d-s-from": -1,
+    "--motion-transform-3d-s-origin-x": "0px",
+    "--motion-transform-3d-s-origin-y": "0px",
+    "--motion-transform-3d-s-origin-z": "-100px",
+    "--motion-transform-3d-s-parallax-from": "0px",
+    "--motion-transform-3d-s-parallax-to": "0px",
+    "--motion-transform-3d-s-perspective": "800px",
+    "--motion-transform-3d-s-to": 0,
+    "--motion-transform-3d-s-travel-x": "0px",
+    "--motion-transform-3d-s-travel-y": "0px",
+    "--motion-transform-3d-s-travel-z": "50px",
+  },
+  "keyframes": [
+    {
+      "transform": "perspective(var(--motion-transform-3d-s-perspective, 0px)) translate3d(var(--motion-transform-3d-s-origin-x, 0px), var(--motion-transform-3d-s-origin-y, 0px), var(--motion-transform-3d-s-origin-z, 0px)) translate3d(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-x, 0px)), calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-y, 0px) + var(--motion-transform-3d-s-parallax-from, 0px)), calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-z, 0px))) rotateX(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-x, 0deg))) rotateY(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-y, 0deg))) rotateZ(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-z, 0deg))) translate3d(calc(-1 * var(--motion-transform-3d-s-origin-x, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-y, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-z, 0px)))",
+    },
+    {
+      "transform": "perspective(var(--motion-transform-3d-s-perspective, 0px)) translate3d(var(--motion-transform-3d-s-origin-x, 0px), var(--motion-transform-3d-s-origin-y, 0px), var(--motion-transform-3d-s-origin-z, 0px)) translate3d(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-x, 0px)), calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-y, 0px) + var(--motion-transform-3d-s-parallax-to, 0px)), calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-z, 0px))) rotateX(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-x, 0deg))) rotateY(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-y, 0deg))) rotateZ(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-z, 0deg))) translate3d(calc(-1 * var(--motion-transform-3d-s-origin-x, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-y, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-z, 0px)))",
+    },
+  ],
+  "name": "motion-3d-transform-s",
+}
+`;
+
+exports[`getMotion3dTransform > inHorizontal asWeb=true 1`] = `
+{
+  "custom": {
+    "--motion-transform-3d-s-angle-x": "0deg",
+    "--motion-transform-3d-s-angle-y": "30deg",
+    "--motion-transform-3d-s-angle-z": "0deg",
+    "--motion-transform-3d-s-from": -1,
+    "--motion-transform-3d-s-origin-x": "0px",
+    "--motion-transform-3d-s-origin-y": "0px",
+    "--motion-transform-3d-s-origin-z": "-100px",
+    "--motion-transform-3d-s-parallax-from": "0px",
+    "--motion-transform-3d-s-parallax-to": "0px",
+    "--motion-transform-3d-s-perspective": "800px",
+    "--motion-transform-3d-s-to": 0,
+    "--motion-transform-3d-s-travel-x": "0px",
+    "--motion-transform-3d-s-travel-y": "0px",
+    "--motion-transform-3d-s-travel-z": "50px",
+  },
+  "keyframes": [
+    {
+      "transform": "perspective(800px) translate3d(0px, 0px, -100px) translate3d(calc(-1 * 0px), calc(-1 * 0px + 0px), calc(-1 * 50px)) rotateX(calc(-1 * 0deg)) rotateY(calc(-1 * 30deg)) rotateZ(calc(-1 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * -100px))",
+    },
+    {
+      "transform": "perspective(800px) translate3d(0px, 0px, -100px) translate3d(calc(0 * 0px), calc(0 * 0px + 0px), calc(0 * 50px)) rotateX(calc(0 * 0deg)) rotateY(calc(0 * 30deg)) rotateZ(calc(0 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * -100px))",
+    },
+  ],
+  "name": "motion-3d-transform-s",
+}
+`;
+
+exports[`getMotion3dTransform > inVertical asWeb=false 1`] = `
+{
+  "custom": {
+    "--motion-transform-3d-s-angle-x": "-30deg",
+    "--motion-transform-3d-s-angle-y": "0deg",
+    "--motion-transform-3d-s-angle-z": "0deg",
+    "--motion-transform-3d-s-from": 1,
+    "--motion-transform-3d-s-origin-x": "0px",
+    "--motion-transform-3d-s-origin-y": "0px",
+    "--motion-transform-3d-s-origin-z": "-100px",
+    "--motion-transform-3d-s-parallax-from": "0px",
+    "--motion-transform-3d-s-parallax-to": "0px",
+    "--motion-transform-3d-s-perspective": "800px",
+    "--motion-transform-3d-s-to": 0,
+    "--motion-transform-3d-s-travel-x": "0px",
+    "--motion-transform-3d-s-travel-y": "0px",
+    "--motion-transform-3d-s-travel-z": "50px",
+  },
+  "keyframes": [
+    {
+      "transform": "perspective(var(--motion-transform-3d-s-perspective, 0px)) translate3d(var(--motion-transform-3d-s-origin-x, 0px), var(--motion-transform-3d-s-origin-y, 0px), var(--motion-transform-3d-s-origin-z, 0px)) translate3d(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-x, 0px)), calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-y, 0px) + var(--motion-transform-3d-s-parallax-from, 0px)), calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-travel-z, 0px))) rotateX(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-x, 0deg))) rotateY(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-y, 0deg))) rotateZ(calc(var(--motion-transform-3d-s-from, -1) * var(--motion-transform-3d-s-angle-z, 0deg))) translate3d(calc(-1 * var(--motion-transform-3d-s-origin-x, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-y, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-z, 0px)))",
+    },
+    {
+      "transform": "perspective(var(--motion-transform-3d-s-perspective, 0px)) translate3d(var(--motion-transform-3d-s-origin-x, 0px), var(--motion-transform-3d-s-origin-y, 0px), var(--motion-transform-3d-s-origin-z, 0px)) translate3d(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-x, 0px)), calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-y, 0px) + var(--motion-transform-3d-s-parallax-to, 0px)), calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-travel-z, 0px))) rotateX(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-x, 0deg))) rotateY(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-y, 0deg))) rotateZ(calc(var(--motion-transform-3d-s-to, 1) * var(--motion-transform-3d-s-angle-z, 0deg))) translate3d(calc(-1 * var(--motion-transform-3d-s-origin-x, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-y, 0px)), calc(-1 * var(--motion-transform-3d-s-origin-z, 0px)))",
+    },
+  ],
+  "name": "motion-3d-transform-s",
+}
+`;
+
+exports[`getMotion3dTransform > inVertical asWeb=true 1`] = `
+{
+  "custom": {
+    "--motion-transform-3d-s-angle-x": "-30deg",
+    "--motion-transform-3d-s-angle-y": "0deg",
+    "--motion-transform-3d-s-angle-z": "0deg",
+    "--motion-transform-3d-s-from": 1,
+    "--motion-transform-3d-s-origin-x": "0px",
+    "--motion-transform-3d-s-origin-y": "0px",
+    "--motion-transform-3d-s-origin-z": "-100px",
+    "--motion-transform-3d-s-parallax-from": "0px",
+    "--motion-transform-3d-s-parallax-to": "0px",
+    "--motion-transform-3d-s-perspective": "800px",
+    "--motion-transform-3d-s-to": 0,
+    "--motion-transform-3d-s-travel-x": "0px",
+    "--motion-transform-3d-s-travel-y": "0px",
+    "--motion-transform-3d-s-travel-z": "50px",
+  },
+  "keyframes": [
+    {
+      "transform": "perspective(800px) translate3d(0px, 0px, -100px) translate3d(calc(1 * 0px), calc(1 * 0px + 0px), calc(1 * 50px)) rotateX(calc(1 * -30deg)) rotateY(calc(1 * 0deg)) rotateZ(calc(1 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * -100px))",
+    },
+    {
+      "transform": "perspective(800px) translate3d(0px, 0px, -100px) translate3d(calc(0 * 0px), calc(0 * 0px + 0px), calc(0 * 50px)) rotateX(calc(0 * -30deg)) rotateY(calc(0 * 0deg)) rotateZ(calc(0 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * -100px))",
+    },
+  ],
+  "name": "motion-3d-transform-s",
+}
+`;
+
+exports[`getMotionScale > asWeb=false 1`] = `
+{
+  "composite": "add",
+  "custom": {
+    "--motion-scale-s-origin-x": "50%",
+    "--motion-scale-s-origin-y": "0px",
+    "--motion-scale-s-origin-z": "0px",
+    "--motion-scale-s-scale-x": 0.5,
+    "--motion-scale-s-scale-y": 2,
+  },
+  "keyframes": [
+    {
+      "transform": "translate3d(var(--motion-scale-s-origin-x, 0px), var(--motion-scale-s-origin-y, 0px), var(--motion-scale-s-origin-z, 0px)) scale(var(--motion-scale-s-scale-x, 1), var(--motion-scale-s-scale-y, 1)) translate3d(calc(-1 * var(--motion-scale-s-origin-x, 0px)), calc(-1 * var(--motion-scale-s-origin-y, 0px)), calc(-1 * var(--motion-scale-s-origin-z, 0px)))",
+    },
+    {
+      "transform": "translate3d(var(--motion-scale-s-origin-x, 0px), var(--motion-scale-s-origin-y, 0px), var(--motion-scale-s-origin-z, 0px)) scale(1, 1) translate3d(calc(-1 * var(--motion-scale-s-origin-x, 0px)), calc(-1 * var(--motion-scale-s-origin-y, 0px)), calc(-1 * var(--motion-scale-s-origin-z, 0px)))",
+    },
+  ],
+  "name": "motion-scale-s",
+}
+`;
+
+exports[`getMotionScale > asWeb=true 1`] = `
+{
+  "composite": "add",
+  "custom": {
+    "--motion-scale-s-origin-x": "50%",
+    "--motion-scale-s-origin-y": "0px",
+    "--motion-scale-s-origin-z": "0px",
+    "--motion-scale-s-scale-x": 0.5,
+    "--motion-scale-s-scale-y": 2,
+  },
+  "keyframes": [
+    {
+      "transform": "translate3d(50%, 0px, 0px) scale(0.5, 2) translate3d(calc(-1 * 50%), calc(-1 * 0px), calc(-1 * 0px))",
+    },
+    {
+      "transform": "translate3d(50%, 0px, 0px) scale(1, 1) translate3d(calc(-1 * 50%), calc(-1 * 0px), calc(-1 * 0px))",
+    },
+  ],
+  "name": "motion-scale-s",
+}
+`;
+
+exports[`getMotionTransRot > angle asWeb=false 1`] = `
+{
+  "custom": {
+    "--motion-trans-rot-s-angle": "90deg",
+    "--motion-trans-rot-s-direction": "45deg",
+    "--motion-trans-rot-s-from": -1,
+    "--motion-trans-rot-s-origin-x": "0px",
+    "--motion-trans-rot-s-origin-y": "0px",
+    "--motion-trans-rot-s-origin-z": "0px",
+    "--motion-trans-rot-s-parallax-from": "0px",
+    "--motion-trans-rot-s-parallax-to": "0px",
+    "--motion-trans-rot-s-skew-x": "10deg",
+    "--motion-trans-rot-s-skew-y": "0deg",
+    "--motion-trans-rot-s-to": 0,
+    "--motion-trans-rot-s-to-travel": "100px",
+    "--motion-trans-rot-s-travel": "100px",
+  },
+  "keyframes": [
+    {
+      "transform": "translate3d(var(--motion-trans-rot-s-origin-x, 0px), var(--motion-trans-rot-s-origin-y, 0px), var(--motion-trans-rot-s-origin-z, 0px)) translate(calc(var(--motion-trans-rot-s-from, -1) * cos(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-travel, 0px)), calc(var(--motion-trans-rot-s-from, -1) * sin(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-travel, 0px) + var(--motion-trans-rot-s-parallax-from, 0px))) rotate(calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-angle, 0deg))) skew(calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-skew-x, 0deg)), calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-skew-y, 0deg))) translate3d(calc(-1 * var(--motion-trans-rot-s-origin-x, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-y, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-z, 0px)))",
+    },
+    {
+      "transform": "translate3d(var(--motion-trans-rot-s-origin-x, 0px), var(--motion-trans-rot-s-origin-y, 0px), var(--motion-trans-rot-s-origin-z, 0px)) translate(calc(var(--motion-trans-rot-s-to, 1) * cos(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-to-travel, 0px)), calc(var(--motion-trans-rot-s-to, 1) * sin(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-to-travel, 0px) + var(--motion-trans-rot-s-parallax-to, 0px))) rotate(calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-angle, 0deg))) skew(calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-skew-x, 0deg)), calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-skew-y, 0deg))) translate3d(calc(-1 * var(--motion-trans-rot-s-origin-x, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-y, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-z, 0px)))",
+    },
+  ],
+  "name": "motion-trans-rot-s",
+}
+`;
+
+exports[`getMotionTransRot > angle asWeb=true 1`] = `
+{
+  "custom": {
+    "--motion-trans-rot-s-angle": "90deg",
+    "--motion-trans-rot-s-direction": "45deg",
+    "--motion-trans-rot-s-from": -1,
+    "--motion-trans-rot-s-origin-x": "0px",
+    "--motion-trans-rot-s-origin-y": "0px",
+    "--motion-trans-rot-s-origin-z": "0px",
+    "--motion-trans-rot-s-parallax-from": "0px",
+    "--motion-trans-rot-s-parallax-to": "0px",
+    "--motion-trans-rot-s-skew-x": "10deg",
+    "--motion-trans-rot-s-skew-y": "0deg",
+    "--motion-trans-rot-s-to": 0,
+    "--motion-trans-rot-s-to-travel": "100px",
+    "--motion-trans-rot-s-travel": "100px",
+  },
+  "keyframes": [
+    {
+      "transform": "translate3d(0px, 0px, 0px) translate(calc(-1 * cos(45deg) * 100px), calc(-1 * sin(45deg) * 100px + 0px)) rotate(calc(-1 * 90deg)) skew(calc(-1 * 10deg), calc(-1 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * 0px))",
+    },
+    {
+      "transform": "translate3d(0px, 0px, 0px) translate(calc(0 * cos(45deg) * 100px), calc(0 * sin(45deg) * 100px + 0px)) rotate(calc(0 * 90deg)) skew(calc(0 * 10deg), calc(0 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * 0px))",
+    },
+  ],
+  "name": "motion-trans-rot-s",
+}
+`;
+
+exports[`getMotionTransRot > continuous asWeb=false 1`] = `
+{
+  "custom": {
+    "--motion-trans-rot-s-angle": "90deg",
+    "--motion-trans-rot-s-direction": "0deg",
+    "--motion-trans-rot-s-from": -1,
+    "--motion-trans-rot-s-origin-x": "0px",
+    "--motion-trans-rot-s-origin-y": "0px",
+    "--motion-trans-rot-s-origin-z": "0px",
+    "--motion-trans-rot-s-parallax-from": "0px",
+    "--motion-trans-rot-s-parallax-to": "0px",
+    "--motion-trans-rot-s-skew-x": "10deg",
+    "--motion-trans-rot-s-skew-y": "0deg",
+    "--motion-trans-rot-s-to": 1,
+    "--motion-trans-rot-s-to-travel": "100px",
+    "--motion-trans-rot-s-travel": "100px",
+  },
+  "keyframes": [
+    {
+      "transform": "translate3d(var(--motion-trans-rot-s-origin-x, 0px), var(--motion-trans-rot-s-origin-y, 0px), var(--motion-trans-rot-s-origin-z, 0px)) translate(calc(var(--motion-trans-rot-s-from, -1) * cos(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-travel, 0px)), calc(var(--motion-trans-rot-s-from, -1) * sin(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-travel, 0px) + var(--motion-trans-rot-s-parallax-from, 0px))) rotate(calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-angle, 0deg))) skew(calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-skew-x, 0deg)), calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-skew-y, 0deg))) translate3d(calc(-1 * var(--motion-trans-rot-s-origin-x, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-y, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-z, 0px)))",
+    },
+    {
+      "transform": "translate3d(var(--motion-trans-rot-s-origin-x, 0px), var(--motion-trans-rot-s-origin-y, 0px), var(--motion-trans-rot-s-origin-z, 0px)) translate(calc(var(--motion-trans-rot-s-to, 1) * cos(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-to-travel, 0px)), calc(var(--motion-trans-rot-s-to, 1) * sin(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-to-travel, 0px) + var(--motion-trans-rot-s-parallax-to, 0px))) rotate(calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-angle, 0deg))) skew(calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-skew-x, 0deg)), calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-skew-y, 0deg))) translate3d(calc(-1 * var(--motion-trans-rot-s-origin-x, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-y, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-z, 0px)))",
+    },
+  ],
+  "name": "motion-trans-rot-s",
+}
+`;
+
+exports[`getMotionTransRot > continuous asWeb=true 1`] = `
+{
+  "custom": {
+    "--motion-trans-rot-s-angle": "90deg",
+    "--motion-trans-rot-s-direction": "0deg",
+    "--motion-trans-rot-s-from": -1,
+    "--motion-trans-rot-s-origin-x": "0px",
+    "--motion-trans-rot-s-origin-y": "0px",
+    "--motion-trans-rot-s-origin-z": "0px",
+    "--motion-trans-rot-s-parallax-from": "0px",
+    "--motion-trans-rot-s-parallax-to": "0px",
+    "--motion-trans-rot-s-skew-x": "10deg",
+    "--motion-trans-rot-s-skew-y": "0deg",
+    "--motion-trans-rot-s-to": 1,
+    "--motion-trans-rot-s-to-travel": "100px",
+    "--motion-trans-rot-s-travel": "100px",
+  },
+  "keyframes": [
+    {
+      "transform": "translate3d(0px, 0px, 0px) translate(calc(-1 * cos(0deg) * 100px), calc(-1 * sin(0deg) * 100px + 0px)) rotate(calc(-1 * 90deg)) skew(calc(-1 * 10deg), calc(-1 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * 0px))",
+    },
+    {
+      "transform": "translate3d(0px, 0px, 0px) translate(calc(1 * cos(0deg) * 100px), calc(1 * sin(0deg) * 100px + 0px)) rotate(calc(1 * 90deg)) skew(calc(1 * 10deg), calc(1 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * 0px))",
+    },
+  ],
+  "name": "motion-trans-rot-s",
+}
+`;
+
+exports[`getMotionTransRot > inHorizontal asWeb=false 1`] = `
+{
+  "custom": {
+    "--motion-trans-rot-s-angle": "90deg",
+    "--motion-trans-rot-s-direction": "0deg",
+    "--motion-trans-rot-s-from": -1,
+    "--motion-trans-rot-s-origin-x": "0px",
+    "--motion-trans-rot-s-origin-y": "0px",
+    "--motion-trans-rot-s-origin-z": "0px",
+    "--motion-trans-rot-s-parallax-from": "0px",
+    "--motion-trans-rot-s-parallax-to": "0px",
+    "--motion-trans-rot-s-skew-x": "10deg",
+    "--motion-trans-rot-s-skew-y": "0deg",
+    "--motion-trans-rot-s-to": 0,
+    "--motion-trans-rot-s-to-travel": "100px",
+    "--motion-trans-rot-s-travel": "100px",
+  },
+  "keyframes": [
+    {
+      "transform": "translate3d(var(--motion-trans-rot-s-origin-x, 0px), var(--motion-trans-rot-s-origin-y, 0px), var(--motion-trans-rot-s-origin-z, 0px)) translate(calc(var(--motion-trans-rot-s-from, -1) * cos(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-travel, 0px)), calc(var(--motion-trans-rot-s-from, -1) * sin(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-travel, 0px) + var(--motion-trans-rot-s-parallax-from, 0px))) rotate(calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-angle, 0deg))) skew(calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-skew-x, 0deg)), calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-skew-y, 0deg))) translate3d(calc(-1 * var(--motion-trans-rot-s-origin-x, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-y, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-z, 0px)))",
+    },
+    {
+      "transform": "translate3d(var(--motion-trans-rot-s-origin-x, 0px), var(--motion-trans-rot-s-origin-y, 0px), var(--motion-trans-rot-s-origin-z, 0px)) translate(calc(var(--motion-trans-rot-s-to, 1) * cos(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-to-travel, 0px)), calc(var(--motion-trans-rot-s-to, 1) * sin(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-to-travel, 0px) + var(--motion-trans-rot-s-parallax-to, 0px))) rotate(calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-angle, 0deg))) skew(calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-skew-x, 0deg)), calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-skew-y, 0deg))) translate3d(calc(-1 * var(--motion-trans-rot-s-origin-x, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-y, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-z, 0px)))",
+    },
+  ],
+  "name": "motion-trans-rot-s",
+}
+`;
+
+exports[`getMotionTransRot > inHorizontal asWeb=true 1`] = `
+{
+  "custom": {
+    "--motion-trans-rot-s-angle": "90deg",
+    "--motion-trans-rot-s-direction": "0deg",
+    "--motion-trans-rot-s-from": -1,
+    "--motion-trans-rot-s-origin-x": "0px",
+    "--motion-trans-rot-s-origin-y": "0px",
+    "--motion-trans-rot-s-origin-z": "0px",
+    "--motion-trans-rot-s-parallax-from": "0px",
+    "--motion-trans-rot-s-parallax-to": "0px",
+    "--motion-trans-rot-s-skew-x": "10deg",
+    "--motion-trans-rot-s-skew-y": "0deg",
+    "--motion-trans-rot-s-to": 0,
+    "--motion-trans-rot-s-to-travel": "100px",
+    "--motion-trans-rot-s-travel": "100px",
+  },
+  "keyframes": [
+    {
+      "transform": "translate3d(0px, 0px, 0px) translate(calc(-1 * cos(0deg) * 100px), calc(-1 * sin(0deg) * 100px + 0px)) rotate(calc(-1 * 90deg)) skew(calc(-1 * 10deg), calc(-1 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * 0px))",
+    },
+    {
+      "transform": "translate3d(0px, 0px, 0px) translate(calc(0 * cos(0deg) * 100px), calc(0 * sin(0deg) * 100px + 0px)) rotate(calc(0 * 90deg)) skew(calc(0 * 10deg), calc(0 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * 0px))",
+    },
+  ],
+  "name": "motion-trans-rot-s",
+}
+`;
+
+exports[`getMotionTransRot > inVertical asWeb=false 1`] = `
+{
+  "custom": {
+    "--motion-trans-rot-s-angle": "90deg",
+    "--motion-trans-rot-s-direction": "90deg",
+    "--motion-trans-rot-s-from": 1,
+    "--motion-trans-rot-s-origin-x": "0px",
+    "--motion-trans-rot-s-origin-y": "0px",
+    "--motion-trans-rot-s-origin-z": "0px",
+    "--motion-trans-rot-s-parallax-from": "0px",
+    "--motion-trans-rot-s-parallax-to": "0px",
+    "--motion-trans-rot-s-skew-x": "10deg",
+    "--motion-trans-rot-s-skew-y": "0deg",
+    "--motion-trans-rot-s-to": 0,
+    "--motion-trans-rot-s-to-travel": "100px",
+    "--motion-trans-rot-s-travel": "100px",
+  },
+  "keyframes": [
+    {
+      "transform": "translate3d(var(--motion-trans-rot-s-origin-x, 0px), var(--motion-trans-rot-s-origin-y, 0px), var(--motion-trans-rot-s-origin-z, 0px)) translate(calc(var(--motion-trans-rot-s-from, -1) * cos(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-travel, 0px)), calc(var(--motion-trans-rot-s-from, -1) * sin(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-travel, 0px) + var(--motion-trans-rot-s-parallax-from, 0px))) rotate(calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-angle, 0deg))) skew(calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-skew-x, 0deg)), calc(var(--motion-trans-rot-s-from, -1) * var(--motion-trans-rot-s-skew-y, 0deg))) translate3d(calc(-1 * var(--motion-trans-rot-s-origin-x, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-y, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-z, 0px)))",
+    },
+    {
+      "transform": "translate3d(var(--motion-trans-rot-s-origin-x, 0px), var(--motion-trans-rot-s-origin-y, 0px), var(--motion-trans-rot-s-origin-z, 0px)) translate(calc(var(--motion-trans-rot-s-to, 1) * cos(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-to-travel, 0px)), calc(var(--motion-trans-rot-s-to, 1) * sin(var(--motion-trans-rot-s-direction, 0deg)) * var(--motion-trans-rot-s-to-travel, 0px) + var(--motion-trans-rot-s-parallax-to, 0px))) rotate(calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-angle, 0deg))) skew(calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-skew-x, 0deg)), calc(var(--motion-trans-rot-s-to, 1) * var(--motion-trans-rot-s-skew-y, 0deg))) translate3d(calc(-1 * var(--motion-trans-rot-s-origin-x, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-y, 0px)), calc(-1 * var(--motion-trans-rot-s-origin-z, 0px)))",
+    },
+  ],
+  "name": "motion-trans-rot-s",
+}
+`;
+
+exports[`getMotionTransRot > inVertical asWeb=true 1`] = `
+{
+  "custom": {
+    "--motion-trans-rot-s-angle": "90deg",
+    "--motion-trans-rot-s-direction": "90deg",
+    "--motion-trans-rot-s-from": 1,
+    "--motion-trans-rot-s-origin-x": "0px",
+    "--motion-trans-rot-s-origin-y": "0px",
+    "--motion-trans-rot-s-origin-z": "0px",
+    "--motion-trans-rot-s-parallax-from": "0px",
+    "--motion-trans-rot-s-parallax-to": "0px",
+    "--motion-trans-rot-s-skew-x": "10deg",
+    "--motion-trans-rot-s-skew-y": "0deg",
+    "--motion-trans-rot-s-to": 0,
+    "--motion-trans-rot-s-to-travel": "100px",
+    "--motion-trans-rot-s-travel": "100px",
+  },
+  "keyframes": [
+    {
+      "transform": "translate3d(0px, 0px, 0px) translate(calc(1 * cos(90deg) * 100px), calc(1 * sin(90deg) * 100px + 0px)) rotate(calc(1 * 90deg)) skew(calc(1 * 10deg), calc(1 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * 0px))",
+    },
+    {
+      "transform": "translate3d(0px, 0px, 0px) translate(calc(0 * cos(90deg) * 100px), calc(0 * sin(90deg) * 100px + 0px)) rotate(calc(0 * 90deg)) skew(calc(0 * 10deg), calc(0 * 0deg)) translate3d(calc(-1 * 0px), calc(-1 * 0px), calc(-1 * 0px))",
+    },
+  ],
+  "name": "motion-trans-rot-s",
+}
+`;
+
+exports[`getMotionTransRot > parallax adds range offsets and parallax custom properties 1`] = `
+{
+  "custom": {
+    "--motion-trans-rot-angle": "0deg",
+    "--motion-trans-rot-direction": "90deg",
+    "--motion-trans-rot-from": 1,
+    "--motion-trans-rot-origin-x": "0px",
+    "--motion-trans-rot-origin-y": "0px",
+    "--motion-trans-rot-origin-z": "0px",
+    "--motion-trans-rot-parallax-center": 0.5,
+    "--motion-trans-rot-parallax-from": "calc(var(--motion-trans-rot-parallax-center, 0.5) * (1 - var(--motion-trans-rot-parallax-inv-speed, 1)) * var(--motion-trans-rot-parallax-travel, 0px))",
+    "--motion-trans-rot-parallax-inv-speed": 2,
+    "--motion-trans-rot-parallax-to": "calc((var(--motion-trans-rot-parallax-center, 0.5) - 1) * (1 - var(--motion-trans-rot-parallax-inv-speed, 1)) * var(--motion-trans-rot-parallax-travel, 0px))",
+    "--motion-trans-rot-parallax-travel": "(100% + 100vh)",
+    "--motion-trans-rot-skew-x": "0deg",
+    "--motion-trans-rot-skew-y": "0deg",
+    "--motion-trans-rot-to": 0,
+    "--motion-trans-rot-to-travel": "0px",
+    "--motion-trans-rot-travel": "0px",
+  },
+  "endOffset": {
+    "name": "entry-crossing",
+    "offset": {
+      "unit": "percentage",
+      "value": 150,
+    },
+  },
+  "endOffsetAdd": "150vh",
+  "keyframes": [
+    {
+      "transform": "translate3d(var(--motion-trans-rot-origin-x, 0px), var(--motion-trans-rot-origin-y, 0px), var(--motion-trans-rot-origin-z, 0px)) translate(calc(var(--motion-trans-rot-from, -1) * cos(var(--motion-trans-rot-direction, 0deg)) * var(--motion-trans-rot-travel, 0px)), calc(var(--motion-trans-rot-from, -1) * sin(var(--motion-trans-rot-direction, 0deg)) * var(--motion-trans-rot-travel, 0px) + var(--motion-trans-rot-parallax-from, 0px))) rotate(calc(var(--motion-trans-rot-from, -1) * var(--motion-trans-rot-angle, 0deg))) skew(calc(var(--motion-trans-rot-from, -1) * var(--motion-trans-rot-skew-x, 0deg)), calc(var(--motion-trans-rot-from, -1) * var(--motion-trans-rot-skew-y, 0deg))) translate3d(calc(-1 * var(--motion-trans-rot-origin-x, 0px)), calc(-1 * var(--motion-trans-rot-origin-y, 0px)), calc(-1 * var(--motion-trans-rot-origin-z, 0px)))",
+    },
+    {
+      "transform": "translate3d(var(--motion-trans-rot-origin-x, 0px), var(--motion-trans-rot-origin-y, 0px), var(--motion-trans-rot-origin-z, 0px)) translate(calc(var(--motion-trans-rot-to, 1) * cos(var(--motion-trans-rot-direction, 0deg)) * var(--motion-trans-rot-to-travel, 0px)), calc(var(--motion-trans-rot-to, 1) * sin(var(--motion-trans-rot-direction, 0deg)) * var(--motion-trans-rot-to-travel, 0px) + var(--motion-trans-rot-parallax-to, 0px))) rotate(calc(var(--motion-trans-rot-to, 1) * var(--motion-trans-rot-angle, 0deg))) skew(calc(var(--motion-trans-rot-to, 1) * var(--motion-trans-rot-skew-x, 0deg)), calc(var(--motion-trans-rot-to, 1) * var(--motion-trans-rot-skew-y, 0deg))) translate3d(calc(-1 * var(--motion-trans-rot-origin-x, 0px)), calc(-1 * var(--motion-trans-rot-origin-y, 0px)), calc(-1 * var(--motion-trans-rot-origin-z, 0px)))",
+    },
+  ],
+  "name": "motion-trans-rot",
+  "startOffset": {
+    "name": "entry-crossing",
+    "offset": {
+      "unit": "percentage",
+      "value": -50,
+    },
+  },
+  "startOffsetAdd": "-50vh",
+}
+`;
+
+exports[`layout rotation > constant --motion-rotate on both keyframes 1`] = `
+{
+  "custom": {},
+  "keyframes": [
+    {
+      "transform": "rotate(var(--motion-rotate, 0deg))",
+    },
+    {
+      "transform": "rotate(var(--motion-rotate, 0deg))",
+    },
+  ],
+  "name": "motion-layout-rotation-s",
+}
+`;

@@ -1,121 +1,23 @@
 import { describe, expect, test } from 'vitest';
-
 import * as ParallaxScroll from '../ParallaxScroll';
-import type { ParallaxScroll as ParallaxScrollType, ScrubAnimationOptions } from '../../../types';
-import { baseMockOptions } from './testUtils';
+import { scrollOptions } from './testUtils';
 
 describe('ParallaxScroll', () => {
-  describe('web', () => {
-    test('default values', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as ParallaxScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'both',
-          easing: 'linear',
-          startOffsetAdd: '-25vh',
-          endOffsetAdd: '25vh',
-          keyframes: [
-            {
-              transform: 'translateY(calc(-1 * 25vh)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateY(25vh) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = ParallaxScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom parallaxFactor', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { parallaxFactor: 0.75 } as ParallaxScrollType,
-      };
-
-      const expectedResult = [
-        {
-          startOffsetAdd: '-37.5vh',
-          endOffsetAdd: '37.5vh',
-          keyframes: [
-            {
-              transform: 'translateY(calc(-1 * 37.5vh)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateY(37.5vh) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = ParallaxScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
+  test('is always continuous', () => {
+    const [parallax] = ParallaxScroll.style(
+      scrollOptions({ type: 'ParallaxScroll', range: 'in' }),
+      true,
+    ) as any[];
+    expect(parallax.fill).toBe('both');
+    expect(parallax.custom['--motion-trans-rot-to']).toBe(1);
   });
 
-  describe('style', () => {
-    test('default values', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as ParallaxScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'both',
-          easing: 'linear',
-          startOffsetAdd: '-25vh',
-          endOffsetAdd: '25vh',
-          keyframes: [
-            {
-              transform:
-                'translateY(calc(-1 * var(--motion-parallax-to))) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateY(var(--motion-parallax-to)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = ParallaxScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom parallaxFactor', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { parallaxFactor: 0.75 } as ParallaxScrollType,
-      };
-
-      const expectedResult = [
-        {
-          startOffsetAdd: '-37.5vh',
-          endOffsetAdd: '37.5vh',
-          keyframes: [
-            {
-              transform:
-                'translateY(calc(-1 * var(--motion-parallax-to))) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform: 'translateY(var(--motion-parallax-to)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = ParallaxScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
+  test('passes center and speed to the parallax', () => {
+    const [parallax] = ParallaxScroll.style(
+      scrollOptions({ type: 'ParallaxScroll', center: 0.2, speed: 0.5 }),
+      true,
+    ) as any[];
+    expect(parallax.custom['--motion-trans-rot-parallax-center']).toBe(0.2);
+    expect(parallax.custom['--motion-trans-rot-parallax-inv-speed']).toBe(2);
   });
 });

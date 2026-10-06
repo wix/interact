@@ -1,62 +1,84 @@
-import type { SpinIn, TimeAnimationOptions } from '../../types';
-import { toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
+import type { AnimationData, SpinIn, TimeAnimationOptions } from '../../types';
 import { SPIN_DIRECTIONS } from '../../consts';
+import {
+  MOTION_SCALE_NAME,
+  MOTION_TRANS_ROT_NAME,
+  getMotionScale,
+  getMotionTransRot,
+  getMotionLayoutRotation,
+  MOTION_LAYOUT_ROTATION_NAME,
+} from '../../transformUtils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { spinDirection, toMotionRange } from '../../directions';
 
-const DEFAULT_DIRECTION: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
+const FADE_IN_EASING = 'cubicIn';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-spinIn'];
-}
-
-const DIRECTION_MAP = {
-  clockwise: -1,
-  'counter-clockwise': 1,
+const DEFAULT_EASING = 'cubicInOut';
+const DEFAULTS: Required<SpinIn> = {
+  type: 'SpinIn',
+  direction: 'clockwise',
+  scale: 0,
+  spins: 0.5,
 };
+
+export const schema = {
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: DEFAULTS.direction },
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+  spins: { type: 'number', min: 0, default: DEFAULTS.spins },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [
+    MOTION_FADE_NAME,
+    MOTION_TRANS_ROT_NAME,
+    MOTION_LAYOUT_ROTATION_NAME,
+    MOTION_SCALE_NAME,
+  ].map((name) => name + suffix);
+}
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as SpinIn;
-  const direction = parseDirection(namedEffect?.direction, SPIN_DIRECTIONS, DEFAULT_DIRECTION);
-  const { spins = 0.5, initialScale = 0 } = namedEffect;
-  const [fadeIn, spinIn] = getNames(options);
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<SpinIn>;
+  const { scale = DEFAULTS.scale, spins = DEFAULTS.spins } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  const angle = 360 * spins;
+  const motionRange = toMotionRange(
+    spinDirection,
+    spinDirection.parse(namedEffect?.direction, DEFAULTS.direction),
+    'in',
+  );
 
-  const easing = options.easing || 'cubicInOut';
-  const transformRotate = (DIRECTION_MAP[direction] > 0 ? 1 : -1) * 360 * spins;
-
-  const custom = {
-    '--motion-scale': `${initialScale}`,
-    '--motion-rotate': `${transformRotate}deg`,
-  };
+  const transformOptions = {
+    ...options,
+    easing,
+    fill,
+    namedEffect: { ...namedEffect, angle, scale },
+  } as TimeAnimationOptions;
 
   return [
+    // the fade shortens with the starting scale - growing from 0 needs no fade
     {
       ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing: 'cubicIn',
-      duration: options.duration! * initialScale,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      duration: options.duration! * Math.min(scale, 1),
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
     },
     {
-      ...options,
-      name: spinIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          scale: toKeyframeValue(custom, '--motion-scale', asWeb),
-          rotate: toKeyframeValue(custom, '--motion-rotate', asWeb),
-        },
-        {
-          scale: '1',
-          rotate: `0deg`,
-        },
-      ],
+      ...transformOptions,
+      ...getMotionTransRot(motionRange, { angle }, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotionScale(motionRange, { scale }, asWeb, suffix),
     },
   ];
 }

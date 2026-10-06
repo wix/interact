@@ -1,193 +1,36 @@
 import { describe, expect, test } from 'vitest';
 
-import * as PulseAnimation from '../Pulse';
-import { Pulse, TimeAnimationOptions, AnimationData } from '../../../types';
-import { baseMockOptions } from './testUtils';
+import * as Pulse from '../Pulse';
+import type { TimeAnimationOptions } from '../../../types';
+import { progressAt } from './testUtils';
+
+const options = (namedEffect = {}) =>
+  ({ duration: 1000, namedEffect: { type: 'Pulse', ...namedEffect } }) as TimeAnimationOptions;
 
 describe('Pulse', () => {
-  describe('web() method', () => {
-    test('default values', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as Pulse,
-      };
+  test('layout rotation replaces, the scale is added on top', () => {
+    const [rotation, scale] = Pulse.style(options());
+    expect(rotation.composite).toBe('replace');
+    expect(scale.composite).toBe('add');
+  });
 
-      const expectedResult: Partial<AnimationData>[] = [
-        {
-          name: 'motion-pulse-1',
-          duration: 1,
-          custom: {
-            '--motion-pulse-offset': 0,
-          },
-          keyframes: [
-            {
-              offset: 0.27,
-              transform: 'scale(calc(0.96 - 0))',
-            },
-            {
-              offset: 0.45,
-              transform: 'scale(1)',
-            },
-            {
-              offset: 0.72,
-              transform: 'scale(calc(0.93 - 0))',
-            },
-            {
-              offset: 1,
-              transform: 'scale(1)',
-            },
-          ],
-        },
-      ];
-
-      const result = PulseAnimation.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
+  test('scales to 0.93 by default', () => {
+    const [, scale] = Pulse.style(options());
+    expect(scale.custom).toMatchObject({
+      '--motion-scale-scale-x': 0.93,
+      '--motion-scale-scale-y': 0.93,
     });
-
-    test('custom intensity and duration', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 1000,
-        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Pulse,
-      };
-
-      const expectedResult: Partial<AnimationData>[] = [
-        {
-          name: 'motion-pulse-067',
-          duration: 1500,
-          custom: {
-            '--motion-pulse-offset': 0.096,
-          },
-          keyframes: [
-            {
-              offset: 0.18090000000000003,
-              transform: 'scale(calc(0.96 - 0.096))',
-            },
-            {
-              offset: 0.30150000000000005,
-              transform: 'scale(1)',
-            },
-            {
-              offset: 0.4824,
-              transform: 'scale(calc(0.93 - 0.096))',
-            },
-            {
-              offset: 0.67,
-              transform: 'scale(1)',
-            },
-            {
-              offset: 1,
-              transform: 'scale(1)',
-            },
-          ],
-        },
-      ];
-
-      const result = PulseAnimation.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
+    expect(Pulse.style(options({ scale: 0.8 }))[1].custom).toMatchObject({
+      '--motion-scale-scale-x': 0.8,
     });
   });
 
-  describe('style() method', () => {
-    test('default values', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as Pulse,
-      };
-
-      const expectedResult: Partial<AnimationData>[] = [
-        {
-          name: 'motion-pulse-1',
-          duration: 1,
-          custom: {
-            '--motion-pulse-offset': 0,
-          },
-          keyframes: [
-            {
-              offset: 0.27,
-              transform: 'scale(calc(0.96 - var(--motion-pulse-offset)))',
-            },
-            {
-              offset: 0.45,
-              transform: 'scale(1)',
-            },
-            {
-              offset: 0.72,
-              transform: 'scale(calc(0.93 - var(--motion-pulse-offset)))',
-            },
-            {
-              offset: 1,
-              transform: 'scale(1)',
-            },
-          ],
-        },
-      ];
-
-      const result = PulseAnimation.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom intensity and duration', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 1000,
-        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Pulse,
-      };
-
-      const expectedResult: Partial<AnimationData>[] = [
-        {
-          name: 'motion-pulse-067',
-          duration: 1500,
-          custom: {
-            '--motion-pulse-offset': 0.096,
-          },
-          keyframes: [
-            {
-              offset: 0.18090000000000003,
-              transform: 'scale(calc(0.96 - var(--motion-pulse-offset)))',
-            },
-            {
-              offset: 0.30150000000000005,
-              transform: 'scale(1)',
-            },
-            {
-              offset: 0.4824,
-              transform: 'scale(calc(0.93 - var(--motion-pulse-offset)))',
-            },
-            {
-              offset: 0.67,
-              transform: 'scale(1)',
-            },
-            {
-              offset: 1,
-              transform: 'scale(1)',
-            },
-          ],
-        },
-      ];
-
-      const result = PulseAnimation.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('style method should populate custom properties correctly', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { intensity: 0.5 } as Pulse,
-      };
-
-      const result = PulseAnimation.style(mockOptions);
-
-      expect(result[0]).toHaveProperty('custom');
-      expect(result[0].custom).toHaveProperty('--motion-pulse-offset');
-
-      // Verify the custom property contains the expected calculated value
-      expect(typeof result[0].custom!['--motion-pulse-offset']).toBe('number');
-      expect(result[0].custom!['--motion-pulse-offset']).toBe(0.06); // 0.5 intensity maps to 0.06 offset
-    });
+  test('beats lightly (4/7 of the scale) and then fully, starting and ending at rest', () => {
+    const [, { easing }] = Pulse.style(options());
+    expect(progressAt(easing!, 0)).toBe(1);
+    expect(progressAt(easing!, 27)).toBeCloseTo(3 / 7, 3);
+    expect(progressAt(easing!, 45)).toBe(1);
+    expect(progressAt(easing!, 72)).toBe(0);
+    expect(progressAt(easing!, 100)).toBe(1);
   });
 });

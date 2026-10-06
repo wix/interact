@@ -2,8 +2,8 @@ import {
   getCssUnits,
   getMouseTransitionEasing,
   mapRange,
-  parseLength,
   parseDirection,
+  parseLength,
 } from '../../utils';
 import type {
   ScrubAnimationOptions,

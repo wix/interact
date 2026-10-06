@@ -1,133 +1,102 @@
-import type {
-  AnimationFillMode,
-  ScrubAnimationOptions,
-  ShrinkScroll,
-  DomApi,
-  EffectNineDirections,
-} from '../../types';
-import { toKeyframeValue, parseDirection } from '../../utils';
-import { NINE_DIRECTIONS } from '../../consts';
+import type { AnimationData, ScrubAnimationOptions, ShrinkScroll, DomApi } from '../../types';
+import { NINE_DIRECTIONS, SCROLL_RANGES } from '../../consts';
+import { axisDirection, toMotionRange } from '../../directions';
+import { getScrollParallax } from '../../parallaxUtils';
+import {
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
+import {
+  MOTION_SCALE_NAME,
+  MOTION_TRANS_ROT_NAME,
+  getMotionScale,
+  getMotionTransRot,
+  MOTION_LAYOUT_ROTATION_NAME,
+  getMotionLayoutRotation,
+  pivotToTransformOrigin,
+} from '../../transformUtils';
+import { compareKeywordToNonDefaults, parseKeywordLazy } from '../../utils';
 
-const MAX_Y_TRAVEL = 40;
-const DEFAULT_DIRECTION: EffectNineDirections = 'center';
+const EPSILON = 0.01;
+const DIRECTION = 'vertical';
 
-const directionMap = {
-  top: [0, -50],
-  'top-right': [50, -50],
-  right: [50, 0],
-  'bottom-right': [50, 50],
-  bottom: [0, 50],
-  'bottom-left': [-50, 50],
-  left: [-50, 0],
-  'top-left': [-50, -50],
-  center: [0, 0],
+const DEFAULTS: Required<ShrinkScroll> = {
+  type: 'ShrinkScroll',
+  pivot: 'center',
+  range: 'in',
+  scale: 1.2,
+  speed: 1,
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-shrinkScroll'];
+export const schema = {
+  pivot: { type: 'enum', values: NINE_DIRECTIONS, default: DEFAULTS.pivot },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+  speed: { type: 'number', min: 0, default: DEFAULTS.speed },
+};
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map(
+    (name) => name + suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as ShrinkScroll;
-  const { range = 'in', scale = range === 'in' ? 1.2 : 0.8, speed = 0 } = namedEffect;
-  const direction = parseDirection(namedEffect?.direction, NINE_DIRECTIONS, DEFAULT_DIRECTION);
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<ShrinkScroll>;
+  const { scale: inputScale = DEFAULTS.scale, speed = DEFAULTS.speed } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
+  const transformOrigin = pivotToTransformOrigin(
+    parseKeywordLazy(namedEffect!.pivot, NINE_DIRECTIONS, DEFAULTS.pivot),
+  );
 
-  const scaleFrom = scale;
-  const scaleTo = scale;
-  const travelY = speed;
-  const travel = travelY * MAX_Y_TRAVEL;
+  const isIn = !compareKeywordToNonDefaults(namedEffect!.range, ['out', 'continuous']);
 
-  const fromValues = {
-    scale: range === 'out' ? 1 : scaleFrom,
-    travel: range === 'out' ? 0 : -travel,
-  };
-  const toValues = {
-    scale: range === 'in' ? 1 : scaleTo,
-    travel: range === 'in' ? 0 : travel,
-  };
+  // ShrinkScroll always goes down in scale, so scale should be bigger than 1 for 'in' and smaller than 1 otherwise
+  // in case the scale is not in the correct range, we take its inverse
+  const invScale = 1 / Math.max(inputScale, EPSILON);
+  const scale = isIn ? Math.max(inputScale, invScale) : Math.min(inputScale, invScale);
 
-  const offset = Math.abs(travel);
-  const startOffsetAdd = range === 'out' ? '0px' : `${-offset}vh`;
-  const endOffsetAdd = range === 'in' ? '0px' : `${offset}vh`;
+  // parallax is a directional motion, so it continues through 'continuous' while the scale goes back and forth
+  const parallaxOptions = {
+    ...options,
+    namedEffect: { ...namedEffect, parallax: { speed } },
+  } as ScrubAnimationOptions;
+  const scaleOptions = {
+    ...options,
+    namedEffect: { ...namedEffect, scale },
+  } as ScrubAnimationOptions;
 
-  const [trnsX, trnsY] = directionMap[direction] || [0, 0];
+  const parallaxOverrides = getScrollOverrides(options, range, getLinearScrollEasing(range, true));
+  const scaleOverrides = getScrollOverrides(options, range, getLinearScrollEasing(range, false));
+  const motionRange = toMotionRange(axisDirection, DIRECTION, range);
 
-  const [shrinkScroll] = getNames(options);
-
-  const custom = {
-    '--motion-travel-from': `${fromValues.travel}vh`,
-    '--motion-travel-to': `${toValues.travel}vh`,
-    '--motion-shrink-from': fromValues.scale,
-    '--motion-shrink-to': toValues.scale,
-    '--motion-trans-x': `${trnsX}%`,
-    '--motion-trans-y': `${trnsY}%`,
-  };
-
-  return [
+  return withSharedScrollRange([
     {
-      ...options,
-      name: shrinkScroll,
-      fill,
-      easing,
-      custom,
-      startOffsetAdd,
-      endOffsetAdd,
-      keyframes: [
-        {
-          transform: `translateY(${toKeyframeValue(
-            custom,
-            '--motion-travel-from',
-            asWeb,
-          )}) translate(${toKeyframeValue(custom, '--motion-trans-x', asWeb)}, ${toKeyframeValue(
-            custom,
-            '--motion-trans-y',
-            asWeb,
-          )}) scale(${toKeyframeValue(
-            custom,
-            '--motion-shrink-from',
-            asWeb,
-          )}) translate(calc(-1 * ${toKeyframeValue(
-            custom,
-            '--motion-trans-x',
-            asWeb,
-          )}), calc(-1 * ${toKeyframeValue(
-            custom,
-            '--motion-trans-y',
-            asWeb,
-          )})) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
-        },
-        {
-          transform: `translateY(${toKeyframeValue(
-            custom,
-            '--motion-travel-to',
-            asWeb,
-          )}) translate(${toKeyframeValue(custom, '--motion-trans-x', asWeb)}, ${toKeyframeValue(
-            custom,
-            '--motion-trans-y',
-            asWeb,
-          )}) scale(${toKeyframeValue(
-            custom,
-            '--motion-shrink-to',
-            asWeb,
-          )}) translate(calc(-1 * ${toKeyframeValue(
-            custom,
-            '--motion-trans-x',
-            asWeb,
-          )}), calc(-1 * ${toKeyframeValue(
-            custom,
-            '--motion-trans-y',
-            asWeb,
-          )})) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
-        },
-      ],
+      ...parallaxOptions,
+      ...parallaxOverrides,
+      ...getMotionTransRot(
+        motionRange,
+        { parallax: getScrollParallax(range, parallaxOverrides, speed), transformOrigin },
+        asWeb,
+        suffix,
+      ),
     },
-  ];
+    {
+      ...parallaxOptions,
+      composite: 'add',
+      ...scaleOverrides,
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...scaleOptions,
+      ...scaleOverrides,
+      ...getMotionScale(motionRange, { scale, transformOrigin }, asWeb, suffix),
+    },
+  ]);
 }

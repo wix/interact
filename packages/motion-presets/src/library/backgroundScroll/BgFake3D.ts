@@ -84,7 +84,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       name: bgFake3DStretch,
       part: 'BG_IMG',
       easing: 'linear',
-      composite: 'add' as const,
+      composite: 'add',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -110,7 +110,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       name: bgFake3DZoom,
       part: 'BG_IMG',
       easing: 'sineIn',
-      composite: 'add' as const,
+      composite: 'add',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },

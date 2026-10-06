@@ -1,99 +1,88 @@
-import type { TimeAnimationOptions } from '../../types';
+import type { AnimationData, ExpandIn, LengthValue, TimeAnimationOptions } from '../../types';
 import {
-  getCssUnits,
-  toKeyframeValue,
-  parseLength,
-  parseDirection,
-  getEntranceFill,
-} from '../../utils';
-import type { ExpandIn } from '../../types';
-import { FOUR_DIRECTIONS } from '../../consts';
+  MOTION_SCALE_NAME,
+  MOTION_TRANS_ROT_NAME,
+  getMotionScale,
+  getMotionTransRot,
+  getMotionLayoutRotation,
+  MOTION_LAYOUT_ROTATION_NAME,
+} from '../../transformUtils';
+import { parseLengthLazy } from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { angleDirection, toMotionRange } from '../../directions';
 
-const DEFAULT_DIRECTION = 90;
-const DEFAULT_DISTANCE = { value: 120, unit: 'percentage' };
-const DIRECTION_KEYWORD_TO_ANGLE: Record<string, number> = {
-  top: 90,
-  right: 0,
-  bottom: 270,
-  left: 180,
+const FADE_IN_DURATION_FACTOR = 0.7;
+
+const DEFAULT_EASING = 'cubicInOut';
+const DEFAULTS: Required<ExpandIn> = {
+  type: 'ExpandIn',
+  from: 270, // from top
+  scale: 0,
+  travel: { value: 120, unit: 'percentage' },
 };
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-expandIn'];
+export const schema = {
+  from: { type: 'angle', default: DEFAULTS.from },
+  scale: { type: 'number', min: 0, max: 1, default: DEFAULTS.scale },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [
+    MOTION_FADE_NAME,
+    MOTION_TRANS_ROT_NAME,
+    MOTION_LAYOUT_ROTATION_NAME,
+    MOTION_SCALE_NAME,
+  ].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as ExpandIn;
-  const { initialScale = 0 } = namedEffect;
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const {
+    easing = DEFAULT_EASING,
+    namedEffect,
+    suffix,
+  } = options as TimeAnimationOptions<ExpandIn>;
+  const { scale = DEFAULTS.scale, travel } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  const from = angleDirection.parse(namedEffect?.from, DEFAULTS.from as number);
+  const motionRange = toMotionRange(angleDirection, angleDirection.opposite(from), 'in');
 
-  const parsedDirection = parseDirection(
-    namedEffect?.direction,
-    FOUR_DIRECTIONS,
-    DEFAULT_DIRECTION,
-    true,
-  );
-  const direction =
-    typeof parsedDirection === 'string'
-      ? DIRECTION_KEYWORD_TO_ANGLE[parsedDirection]
-      : parsedDirection;
-
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-
-  const [fadeIn, expandIn] = getNames(options);
-
-  const easing = options.easing || 'cubicInOut';
-  const angleInRad = (direction * Math.PI) / 180;
-  const unit = getCssUnits(distance.unit);
-
-  const x = `${(Math.cos(angleInRad) * distance.value) | 0}${unit}`;
-  const y = `${(Math.sin(angleInRad) * distance.value * -1) | 0}${unit}`;
-
-  const custom = {
-    '--motion-translate-x': `${x}`,
-    '--motion-translate-y': `${y}`,
-    '--motion-scale': `${initialScale}`,
-  };
+  const transformOptions = {
+    ...options,
+    easing,
+    fill,
+    namedEffect: { ...namedEffect, scale },
+  } as TimeAnimationOptions;
 
   return [
     {
       ...options,
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
       easing,
-      duration: options.duration! * 0.7,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
     },
     {
-      ...options,
-      easing,
-      name: expandIn,
-      fill: getEntranceFill(options),
-      custom,
-      keyframes: [
-        {
-          transform: `translate(${toKeyframeValue(
-            custom,
-            '--motion-translate-x',
-            asWeb,
-          )}, ${toKeyframeValue(
-            custom,
-            '--motion-translate-y',
-            asWeb,
-          )}) rotate(var(--motion-rotate, 0deg)) scale(${toKeyframeValue(
-            custom,
-            '--motion-scale',
-            asWeb,
-          )})`,
-        },
-        {
-          transform: 'translate(0px, 0px) rotate(var(--motion-rotate, 0deg)) scale(1)',
-        },
-      ],
+      ...transformOptions,
+      ...getMotionTransRot(
+        motionRange,
+        { travel: parseLengthLazy(travel, DEFAULTS.travel as LengthValue) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotionScale(motionRange, { scale }, asWeb, suffix),
     },
   ];
 }

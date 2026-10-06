@@ -1,0 +1,67 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`getMotionBlur > asWeb=false 1`] = `
+{
+  "composite": "add",
+  "custom": {
+    "--motion-blur-s": "8px",
+  },
+  "keyframes": [
+    {
+      "filter": "blur(var(--motion-blur-s, 0px))",
+    },
+    {
+      "filter": "blur(0px)",
+    },
+  ],
+  "name": "motion-blur-s",
+}
+`;
+
+exports[`getMotionBlur > asWeb=true 1`] = `
+{
+  "composite": "add",
+  "custom": {
+    "--motion-blur-s": "8px",
+  },
+  "keyframes": [
+    {
+      "filter": "blur(8px)",
+    },
+    {
+      "filter": "blur(0px)",
+    },
+  ],
+  "name": "motion-blur-s",
+}
+`;
+
+exports[`getMotionFade > asWeb=false 1`] = `
+{
+  "custom": {
+    "--motion-opacity-s": 0.2,
+  },
+  "keyframes": [
+    {
+      "offset": 0,
+      "opacity": "var(--motion-opacity-s, 0)",
+    },
+  ],
+  "name": "motion-fade-s",
+}
+`;
+
+exports[`getMotionFade > asWeb=true 1`] = `
+{
+  "custom": {
+    "--motion-opacity-s": 0.2,
+  },
+  "keyframes": [
+    {
+      "offset": 0,
+      "opacity": 0.2,
+    },
+  ],
+  "name": "motion-fade-s",
+}
+`;
