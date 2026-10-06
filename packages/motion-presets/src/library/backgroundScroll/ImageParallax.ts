@@ -58,6 +58,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: imageParallax,
+      custom,
       part: 'BG_MEDIA',
       startOffset: {
         name: isPage ? 'contain' : 'cover',
