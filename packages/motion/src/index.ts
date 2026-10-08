@@ -1,5 +1,5 @@
 export * from './motion';
 export * from './types';
-export { registerEffects } from './api/registry';
+export { registerEffects, getRegisteredEffect } from './api/registry';
 export * from './utils';
 export * from './easings';

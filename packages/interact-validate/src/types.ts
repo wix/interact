@@ -25,6 +25,16 @@ export type ValidationResult = {
   errors: ValidationError[];
 };
 
+export type EffectParamSchema = {
+  type: string;
+  values?: readonly unknown[];
+  min?: number;
+  max?: number;
+  default?: unknown;
+};
+
+export type EffectSchema = Record<string, EffectParamSchema>;
+
 export type ValidateOptions = {
   strict?: boolean;
   max?: number;
