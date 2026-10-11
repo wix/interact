@@ -268,7 +268,7 @@ For complete control, use custom effects with JavaScript functions:
 ```typescript
 {
     key: 'particle-system',
-    customEffect: (element, progress, params) => {
+    customEffect: (element, progress) => {
         const particles = element.querySelectorAll('.particle');
 
         particles.forEach((particle, index) => {

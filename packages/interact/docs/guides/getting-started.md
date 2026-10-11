@@ -100,17 +100,18 @@ const config: InteractConfig = {
       trigger: 'hover', // What user action starts it
       effects: [
         {
+          selector: 'img', // Animate a child, never the hovered element itself
           keyframeEffect: {
             name: 'scale',
-            keyframes: [{ scale: 2 }],
+            keyframes: [{ scale: 1.2 }],
           },
           duration: 300, // Animation duration in milliseconds
           easing: 'ease-out', // Animation timing
+          fill: 'both',
         },
       ],
     },
   ],
-  effects: {},
 };
 ```
 
@@ -179,17 +180,18 @@ const config = {
       trigger: 'hover', // What user action starts it
       effects: [
         {
+          selector: 'img', // Animate a child, never the hovered element itself
           keyframeEffect: {
             name: 'scale',
-            keyframes: [{ scale: 2 }],
+            keyframes: [{ scale: 1.2 }],
           },
           duration: 300, // Animation duration in milliseconds
           easing: 'ease-out', // Animation timing
+          fill: 'both',
         },
       ],
     },
   ],
-  effects: {},
 };
 
 // Initialize the interaction
@@ -378,7 +380,6 @@ const config: InteractConfig = {
       ],
     },
   ],
-  effects: {},
 };
 
 // Full type inference

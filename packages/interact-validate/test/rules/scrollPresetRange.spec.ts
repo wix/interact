@@ -31,7 +31,7 @@ describe('scrollPresetRange', () => {
         {
           key: 'el',
           trigger: 'viewProgress',
-          effects: [{ namedEffect: { type: 'ParallaxScroll', range: 'sideways' }, fill: 'both' }],
+          effects: [{ namedEffect: { type: 'FadeScroll', range: 'sideways' }, fill: 'both' }],
         },
       ],
     });
@@ -48,6 +48,20 @@ describe('scrollPresetRange', () => {
             key: 'el',
             trigger: 'viewProgress',
             effects: [{ namedEffect: { type: 'FadeScroll', range: 'continuous' }, fill: 'both' }],
+          },
+        ],
+      });
+      const scrollCodes = ['SCROLL_PRESET_MISSING_RANGE', 'SCROLL_PRESET_BAD_RANGE'];
+      expect(result.errors.filter((e) => scrollCodes.includes(e.code))).toHaveLength(0);
+    });
+
+    it('does not warn for ParallaxScroll, which has no range option', () => {
+      const result = validateInteractConfig({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewProgress',
+            effects: [{ namedEffect: { type: 'ParallaxScroll' }, fill: 'both' }],
           },
         ],
       });

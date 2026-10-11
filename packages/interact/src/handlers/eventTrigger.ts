@@ -194,6 +194,10 @@ function addEventTriggerHandler(
   } else {
     const events = genericConfig.toggle ?? [];
     events.forEach((eventType) => {
+      if (eventType === 'keydown') {
+        // A keydown listener is useless on an element the keyboard cannot reach.
+        source.tabIndex = 0;
+      }
       const passive = eventType !== 'keydown';
       const opts = { once, passive };
       addListener(source, eventType, opts);

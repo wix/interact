@@ -38,7 +38,7 @@ function isValidMediaQuery(query: string): boolean {
 
 export const Condition = z
   .object({
-    type: z.enum(['media', 'container', 'selector']),
+    type: z.enum(['media', 'selector']),
     predicate: z.string().min(1),
   })
   .strict()

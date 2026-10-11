@@ -544,7 +544,6 @@ type ScrubEffect = {
   rangeEnd?: RangeOffset;
   centeredToTarget?: boolean;
   transitionDuration?: number;
-  transitionDelay?: number;
   transitionEasing?: ScrubTransitionEasing;
 } & EffectProperty;
 ```
@@ -555,7 +554,6 @@ type ScrubEffect = {
 - `rangeEnd` - Scroll position where animation ends
 - `centeredToTarget` - Whether to center scroll range on target element
 - `transitionDuration` - Smooth transition duration when entering/exiting scrub
-- `transitionDelay` - Delay for scrub transition
 - `transitionEasing` - Easing for scrub transition
 
 **Examples:**
@@ -874,14 +872,14 @@ Defines conditional logic for interactions.
 
 ```typescript
 type Condition = {
-  type: 'media' | 'container' | 'selector';
+  type: 'media' | 'selector';
   predicate: string;
 };
 ```
 
 **Properties:**
 
-- `type` - `'media'` (media query), `'container'` (container query), or `'selector'`
+- `type` - `'media'` (media query) or `'selector'` (an ancestor/state selector)
 - `predicate` - The query string or selector to evaluate
 
 **Examples:**
@@ -903,10 +901,10 @@ const reducedMotion: Condition = {
   predicate: '(prefers-reduced-motion: reduce)',
 };
 
-// Container query condition
-const wideContainer: Condition = {
-  type: 'container',
-  predicate: '(min-width: 400px)',
+// Selector condition — only applies inside a themed ancestor
+const darkTheme: Condition = {
+  type: 'selector',
+  predicate: '.theme-dark &',
 };
 ```
 

@@ -2978,6 +2978,18 @@ describe('interact (mini)', () => {
           expect.any(Object),
         );
       });
+
+      it('should make the source focusable so the keydown listener is reachable', () => {
+        Interact.setup({ allowA11yTriggers: true });
+        Interact.create(getA11yConfig('click', 'click-tabindex'));
+        a11yElement = document.createElement('div');
+
+        expect(a11yElement.tabIndex).toBe(-1);
+
+        add(a11yElement, 'click-tabindex');
+
+        expect(a11yElement.tabIndex).toBe(0);
+      });
     });
 
     describe('hover trigger with allowA11yTriggers flag', () => {

@@ -185,7 +185,7 @@ const css = generate(config, { plugins: { splitText: splitTextStyle } });
 
 On first paint the container is hidden; once the runtime plugin splits it and sets `data-splittext-ready`, the hide rule stops matching and the (individually-hidden) spans take over their entrance animation — no flash of un-split text. Without `hideUntilReady`, `splitTextStyle` emits nothing.
 
-> Plugin styles are emitted verbatim and unconditionally. If a rule should be scoped to a media query or condition, have the generator build that itself (it receives the interaction/effect `config`).
+> Plugin styles are emitted as returned, wrapped in the media `conditions` of the owning interaction/effect. Selector-type conditions are **not** applied — if a rule needs that scoping, have the generator build it itself (it receives the interaction/effect `config`).
 
 ## Validation
 

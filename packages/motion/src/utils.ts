@@ -1,4 +1,10 @@
-import { cssEasings, jsEasings, jsEasingsInCSS, cubicBezierCalc } from './easings';
+import {
+  cssEasings,
+  jsEasings,
+  jsEasingsInCSS,
+  cubicBezierCalc,
+  scrubTransitionEasings,
+} from './easings';
 
 export function getCssUnits(unit: 'percentage' | string) {
   return unit === 'percentage' ? '%' : unit || 'px';
@@ -325,7 +331,10 @@ export function getJsEasing(
 
   if (named) return named;
 
-  return parseCubicBezier(easing) ?? parseCssLinear(easing) ?? jsEasings.linear;
+  const scrub = scrubTransitionEasings[easing as keyof typeof scrubTransitionEasings];
+  const value = scrub ?? easing;
+
+  return parseCubicBezier(value) ?? parseCssLinear(value) ?? jsEasings.linear;
 }
 
 export function getJsEasingInCSS(

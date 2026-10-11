@@ -1,6 +1,6 @@
 # Conditions and Media Queries
 
-Conditions allow you to create responsive interactions that adapt to different screen sizes, user preferences, and environmental factors. This guide explains how to build adaptive interactions using media queries and container queries.
+Conditions allow you to create responsive interactions that adapt to different screen sizes, user preferences, and environmental factors. This guide explains how to build adaptive interactions using media queries and selector conditions.
 
 ## Overview of Conditions
 
@@ -8,7 +8,7 @@ Conditions in `@wix/interact` act as filters that determine when interactions sh
 
 - **Create responsive animations** that work across devices
 - **Respect user preferences** like reduced motion
-- **Adapt to container sizes** with container queries
+- **Scope effects to a theme or state** with selector conditions
 - **Build progressive enhancement** for different capabilities
 
 ## Types of Conditions
@@ -36,20 +36,21 @@ Use CSS media queries to target device characteristics:
 }
 ```
 
-### Container Conditions
+### Selector Conditions
 
-Use container queries to respond to element size:
+Use a selector to gate an effect on an ancestor or a state class. `&` stands for the element the
+effect applies to; without it the predicate is appended to the element's own selector:
 
 ```typescript
 {
     conditions: {
-        'large-card': {
-            type: 'container',
-            predicate: '(min-width: 400px)'
+        'dark-theme': {
+            type: 'selector',
+            predicate: '.theme-dark &'
         },
-        'tall-container': {
-            type: 'container',
-            predicate: '(min-height: 300px)'
+        'is-featured': {
+            type: 'selector',
+            predicate: '.featured'
         }
     }
 }
@@ -58,7 +59,7 @@ Use container queries to respond to element size:
 ## Cascading of effects
 
 Interact allows you to apply multiple effects on the same target and have them cascade, just like they do in CSS.
-This allows you to have different variations of effects for different `media`/`contianer` `conditions` and have only one of them apply, base on the current environment of the user.
+This allows you to have different variations of effects for different `media`/`selector` `conditions` and have only one of them apply, based on the current environment of the user.
 
 **Important**: In order to use this cascading behavior, `conditions` need to be set on the Effect-level, and not on the Interaction-level.
 
@@ -396,24 +397,24 @@ const breakpointConfig: InteractConfig = {
 };
 ```
 
-## Container Query Patterns
+## Layout Patterns
 
 ### Responsive Cards
 
 ```typescript
-const containerConfig: InteractConfig = {
+const cardConfig: InteractConfig = {
   conditions: {
     'card-large': {
-      type: 'container',
-      predicate: '(min-width: 350px)',
+      type: 'media',
+      predicate: '(min-width: 900px)',
     },
     'card-small': {
-      type: 'container',
-      predicate: '(max-width: 349px)',
+      type: 'media',
+      predicate: '(max-width: 899px)',
     },
     'card-tall': {
-      type: 'container',
-      predicate: '(min-height: 400px)',
+      type: 'media',
+      predicate: '(min-height: 800px)',
     },
   },
 
@@ -479,11 +480,11 @@ const containerConfig: InteractConfig = {
 const layoutConfig: InteractConfig = {
   conditions: {
     'sidebar-layout': {
-      type: 'container',
+      type: 'media',
       predicate: '(min-width: 1200px)',
     },
     'stack-layout': {
-      type: 'container',
+      type: 'media',
       predicate: '(max-width: 1199px)',
     },
   },
@@ -551,18 +552,18 @@ const complexConfig: InteractConfig = {
       type: 'media',
       predicate: '(min-resolution: 144dpi)',
     },
-    'wide-container': {
-      type: 'container',
+    'wide-viewport': {
+      type: 'media',
       predicate: '(min-width: 600px)',
     },
   },
 
   interactions: [
-    // Complex animation: desktop + motion ok + wide container
+    // Complex animation: desktop + motion ok + wide viewport
     {
       key: 'hero-animation',
       trigger: 'viewEnter',
-      conditions: ['desktop', 'motion-ok', 'wide-container'],
+      conditions: ['desktop', 'motion-ok', 'wide-viewport'],
       effects: [
         {
           key: 'hero-background',
@@ -787,9 +788,9 @@ const productGridConfig: InteractConfig = {
       type: 'media',
       predicate: '(max-width: 767px)',
     },
-    'large-product-card': {
-      type: 'container',
-      predicate: '(min-width: 300px)',
+    'roomy-grid': {
+      type: 'media',
+      predicate: '(min-width: 1280px)',
     },
     'motion-ok': {
       type: 'media',
@@ -802,7 +803,7 @@ const productGridConfig: InteractConfig = {
     {
       key: 'product-card',
       trigger: 'hover',
-      conditions: ['desktop', 'large-product-card', 'motion-ok'],
+      conditions: ['desktop', 'roomy-grid', 'motion-ok'],
       effects: [
         {
           key: 'product-image',
@@ -894,7 +895,7 @@ const navigationConfig: InteractConfig = {
       predicate: '(min-width: 768px)',
     },
     'narrow-header': {
-      type: 'container',
+      type: 'media',
       predicate: '(max-width: 800px)',
     },
   },

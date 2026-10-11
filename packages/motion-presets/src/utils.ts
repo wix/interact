@@ -1,4 +1,4 @@
-import { cssEasings, jsEasings } from '@wix/motion';
+import { cssEasings, jsEasings, scrubTransitionEasings } from '@wix/motion';
 import type {
   EffectFourDirections,
   EffectScrollRange,
@@ -187,18 +187,8 @@ export function getEasingFamily(easing: string) {
   };
 }
 
-const MOUSE_TRANSITION_EASING_MAP: Record<ScrubTransitionEasing, string> = {
-  linear: 'linear',
-  easeOut: 'ease-out',
-  hardBackOut: 'cubic-bezier(0.58, 2.5, 0, 0.95)',
-  elastic:
-    'linear( 0, 0.2178 2.1%, 1.1144 8.49%, 1.2959 10.7%, 1.3463 11.81%, 1.3705 12.94%, 1.3726, 1.3643 14.48%, 1.3151 16.2%, 1.0317 21.81%, 0.941 24.01%, 0.8912 25.91%, 0.8694 27.84%, 0.8698 29.21%, 0.8824 30.71%, 1.0122 38.33%, 1.0357, 1.046 42.71%, 1.0416 45.7%, 0.9961 53.26%, 0.9839 57.54%, 0.9853 60.71%, 1.0012 68.14%, 1.0056 72.24%, 0.9981 86.66%, 1 )',
-  bounce:
-    'linear( 0, 0.0039, 0.0157, 0.0352, 0.0625 9.09%, 0.1407, 0.25, 0.3908, 0.5625, 0.7654, 1, 0.8907, 0.8125 45.45%, 0.7852, 0.7657, 0.7539, 0.75, 0.7539, 0.7657, 0.7852, 0.8125 63.64%, 0.8905, 1 72.73%, 0.9727, 0.9532, 0.9414, 0.9375, 0.9414, 0.9531, 0.9726, 1, 0.9883, 0.9844, 0.9883, 1 )',
-};
-
 export function getMouseTransitionEasing(value?: ScrubTransitionEasing) {
-  return (value && MOUSE_TRANSITION_EASING_MAP[value]) || 'linear';
+  return (value && scrubTransitionEasings[value]) || 'linear';
 }
 
 export function deg2rad(angleInDeg: number): number {

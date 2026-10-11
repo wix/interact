@@ -73,6 +73,23 @@ describe('easings/cubicBezierCalc', () => {
   });
 });
 
+describe('utils/getJsEasing() — ScrubTransitionEasing values', () => {
+  const linearAt = (t: number) => getJsEasing('linear')!(t);
+
+  test.each(['hardBackOut', 'easeOut', 'elastic', 'bounce'])(
+    '%s resolves to a curve that is not linear',
+    (name) => {
+      const easing = getJsEasing(name)!;
+
+      expect(easing).toBeTypeOf('function');
+      // Every one of these silently collapsed to linear before the
+      // scrubTransitionEasings lookup was added.
+      const differs = SAMPLES.some((t) => Math.abs(easing(t) - linearAt(t)) > 1e-3);
+      expect(differs).toBe(true);
+    },
+  );
+});
+
 describe('utils/getJsEasingInCSS()', () => {
   test('returns undefined for falsy easing', () => {
     expect(getJsEasingInCSS()).toBeUndefined();

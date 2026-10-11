@@ -86,7 +86,7 @@ Adaptive animations for different screen sizes.
 - [**Mobile-first Animations**](responsive-interactions.md#mobile) - Touch-friendly effects
 - [**Desktop Enhancements**](responsive-interactions.md#desktop) - Mouse-specific interactions
 - [**Conditional Effects**](responsive-interactions.md#conditional) - Media query based
-- [**Container Queries**](responsive-interactions.md#container) - Element-based conditions
+- [**Selector Conditions**](responsive-interactions.md#selector) - Ancestor/state-based conditions
 
 ### 📋 **List Patterns**
 

@@ -171,7 +171,6 @@ type ScrubAnimationDataBase<TNamedEffect extends NamedEffect = NamedEffect> = {
   alternate?: boolean;
   reversed?: boolean;
   transitionDuration?: number;
-  transitionDelay?: number;
   transitionEasing?: ScrubTransitionEasing;
   centeredToTarget?: boolean;
 };
@@ -263,7 +262,8 @@ export type EffectModule =
   | AnimationEffectAPI<'scrub'>
   | ScrollEffectModule
   | MouseEffectModule
-  | WebAnimationEffectFactory<'scrub'>;
+  | WebAnimationEffectFactory<'scrub'>
+  | MouseAnimationFactoryCreate;
 
 export type SequenceOptions = {
   delay?: number;

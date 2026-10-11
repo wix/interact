@@ -6,6 +6,7 @@ import {
   addHandlerToMap,
   removeElementFromHandlerMap,
 } from './utilities';
+import { matchesSelectorCondition } from '../utils';
 import fastdom from 'fastdom';
 
 const SAFE_OBSERVER_CONFIG: IntersectionObserverInit = {
@@ -98,7 +99,12 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
   const threshold = options.threshold ?? DEFAULT_THRESHOLD;
 
   const config: IntersectionObserverInit = isSafeMode
-    ? SAFE_OBSERVER_CONFIG
+    ? {
+        ...SAFE_OBSERVER_CONFIG,
+        // Safe mode drops the threshold, but the authored `inset` still decides
+        // where in the viewport the trigger fires.
+        ...(options.inset ? { rootMargin: insetToRootMargin(options.inset) } : null),
+      }
     : {
         root: null,
         rootMargin: options.inset ? insetToRootMargin(options.inset) : '0px',
@@ -122,11 +128,9 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
               return;
             }
 
-            const threshold = Array.isArray(options.threshold)
-              ? Math.min(...options.threshold)
-              : options.threshold;
+            const minThreshold = Array.isArray(threshold) ? Math.min(...threshold) : threshold;
 
-            const needsSafeObserver = threshold && sourceHeight * threshold > rootHeight;
+            const needsSafeObserver = minThreshold > 0 && sourceHeight * minThreshold > rootHeight;
 
             if (needsSafeObserver) {
               fastdom.mutate(() => {
@@ -196,7 +200,7 @@ function addViewEnterHandler(
   };
 
   const handler = (isIntersecting?: boolean, isFullExit?: boolean) => {
-    if (selectorCondition && !target.matches(selectorCondition)) return;
+    if (selectorCondition && !matchesSelectorCondition(target, selectorCondition)) return;
 
     if (type === 'once') {
       if (isIntersecting && !onceDone) {
