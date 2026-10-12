@@ -12,7 +12,7 @@ import {
   IInteractElement,
   InteractPlugin,
 } from '../types';
-import { getInterpolatedKey } from './utilities';
+import { getElementHash, getInterpolatedKey } from './utilities';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
@@ -456,15 +456,10 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
        *  -> Config.effects.effect.key
        *  -> Config.interactions.interaction.key
        */
-      let target = effect.key;
-
-      if (!target && (effect as EffectRef).effectId) {
-        const referencedEffect = effectMap[(effect as EffectRef).effectId];
-
-        if (referencedEffect) {
-          target = referencedEffect.key;
-        }
-      }
+      const referencedEffect = (effect as EffectRef).effectId
+        ? effectMap[(effect as EffectRef).effectId]
+        : undefined;
+      let target = effect.key || referencedEffect?.key;
 
       if (!(effect as EffectRef).effectId) {
         (effect as EffectRef).effectId = `eff-${configIndex}-${effects.length - 1 - effectIndex}`;
@@ -473,7 +468,6 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
       // if no target is specified, use the source element as the target
       target = target || source;
       effect.key = target;
-      const effectId = (effect as EffectRef).effectId;
 
       if (listContainer && effect.listContainer) {
         // we do not support having 2 separate lists for same interaction
@@ -482,7 +476,8 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
         }
       }
 
-      const interactionId = `${source}::${target}::${effectId}::${interactionIdx}`;
+      const targetHash = getElementHash({ ...referencedEffect, ...effect, key: target });
+      const interactionId = `${source}::${targetHash}::${interactionIdx}`;
       effect.interactionId = interactionId;
       interactions[source].interactionIds.add(interactionId);
 

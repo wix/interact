@@ -1639,6 +1639,97 @@ describe('interact (web)', () => {
         );
       });
 
+      it('should cascade effects on the same target regardless of effectId', async () => {
+        const { getWebAnimation } = await import('@wix/motion');
+        mockMatchMedia(['min-width: 1024px']);
+
+        const config: InteractConfig = {
+          conditions: {
+            desktop: { type: 'media', predicate: 'min-width: 1024px' },
+            mobile: { type: 'media', predicate: 'max-width: 767px' },
+          },
+          interactions: [
+            {
+              trigger: 'click',
+              key: 'cascade-source',
+              effects: [
+                { key: 'cascade-target', effectId: 'fade' },
+                { key: 'cascade-target', effectId: 'slide', conditions: ['desktop'] },
+                { key: 'cascade-target', effectId: 'bounce', conditions: ['mobile'] },
+                { effectId: 'fade' },
+                { effectId: 'slide', conditions: ['desktop'] },
+              ],
+            },
+          ],
+          effects: {
+            fade: { namedEffect: { type: 'FadeIn' } as NamedEffect, duration: 500 },
+            slide: { namedEffect: { type: 'SlideIn' } as NamedEffect, duration: 800 },
+            bounce: { namedEffect: { type: 'BounceIn' } as NamedEffect, duration: 600 },
+          },
+        };
+
+        Interact.create(config, { useCustomElement: true });
+
+        const sourceElement = document.createElement('interact-element') as IInteractElement;
+        sourceElement.append(document.createElement('div'));
+
+        const targetElement = document.createElement('interact-element') as IInteractElement;
+        targetElement.append(document.createElement('div'));
+
+        add(sourceElement, 'cascade-source');
+        add(targetElement, 'cascade-target');
+
+        expect(getWebAnimation).toHaveBeenCalledTimes(2);
+        expect(getWebAnimation).toHaveBeenCalledWith(
+          targetElement.firstElementChild,
+          expect.objectContaining({ namedEffect: expect.objectContaining({ type: 'SlideIn' }) }),
+          undefined,
+          { reducedMotion: false },
+        );
+        expect(getWebAnimation).toHaveBeenCalledWith(
+          sourceElement.firstElementChild,
+          expect.objectContaining({ namedEffect: expect.objectContaining({ type: 'SlideIn' }) }),
+          undefined,
+          { reducedMotion: false },
+        );
+      });
+
+      it('should not cascade effects on different selectors of the same key', async () => {
+        const { getWebAnimation } = await import('@wix/motion');
+        mockMatchMedia([]);
+
+        const config: InteractConfig = {
+          interactions: [
+            {
+              trigger: 'click',
+              key: 'cascade-source',
+              effects: [
+                { key: 'cascade-target', selector: '.a', effectId: 'fade' },
+                { key: 'cascade-target', selector: '.b', effectId: 'fade' },
+              ],
+            },
+          ],
+          effects: {
+            fade: { namedEffect: { type: 'FadeIn' } as NamedEffect, duration: 500 },
+          },
+        };
+
+        Interact.create(config, { useCustomElement: true });
+
+        const sourceElement = document.createElement('interact-element') as IInteractElement;
+        sourceElement.append(document.createElement('div'));
+
+        const targetElement = document.createElement('interact-element') as IInteractElement;
+        const targetDiv = document.createElement('div');
+        targetDiv.innerHTML = '<span class="a"></span><span class="b"></span>';
+        targetElement.append(targetDiv);
+
+        add(sourceElement, 'cascade-source');
+        add(targetElement, 'cascade-target');
+
+        expect(getWebAnimation).toHaveBeenCalledTimes(2);
+      });
+
       it('should apply default effect when no conditions match', async () => {
         const { getWebAnimation } = await import('@wix/motion');
         const config = createCascadingTestConfig({}, []); // No matching conditions
