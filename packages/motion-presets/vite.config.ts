@@ -22,6 +22,9 @@ export default defineConfig(() => ({
       external: ['@wix/motion'],
       output: {
         compact: true,
+        // one file per module, so bundlers can drop unused presets via "sideEffects": false
+        preserveModules: true,
+        preserveModulesRoot: 'src',
         globals: {
           '@wix/motion': 'Motion',
         },

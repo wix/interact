@@ -1,65 +1,70 @@
-import type { Jello, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, toKeyframeValue, mapRange } from '../../utils';
+import type { AnimationData, DomApi, Jello, TimeAnimationOptions } from '../../types';
+import {
+  MOTION_LAYOUT_ROTATION_NAME,
+  MOTION_TRANS_ROT_NAME,
+  getMotionTransRot,
+  getMotionLayoutRotation,
+} from '../../transformUtils';
+import type { LoopPoint } from '../../easingUtils';
+import { getLoopOverrides } from '../../easingUtils';
+import { UNDIRECTED_MOTION_RANGE } from '../../directions';
 
-const JELLO_FACTOR_SOFT = 1;
-const JELLO_FACTOR_HARD = 4;
+const DEFAULTS: Required<Jello> = {
+  type: 'Jello',
+  iterationDelay: 0,
+  skew: 12.25,
+};
 
-const SKEW_Y_KEYFRAMES = [
-  { keyframe: 24, skewY: 7 },
-  { keyframe: 38, skewY: -2 },
-  { keyframe: 58, skewY: 4 },
-  { keyframe: 80, skewY: -2 },
-  { keyframe: 100, skewY: 0 },
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  skew: { type: 'number', default: DEFAULTS.skew },
+};
+
+// a damped wobble, first to the positive skew
+const SHAPE: LoopPoint[] = [
+  [0, 0],
+  [1, 0.24],
+  [-2 / 7, 0.38],
+  [4 / 7, 0.58],
+  [-2 / 7, 0.8],
+  [0, 1],
 ];
 
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_LAYOUT_ROTATION_NAME, MOTION_TRANS_ROT_NAME].map((name) => name + suffix);
+}
+
+export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as Jello;
-  const { intensity = 0.25 } = namedEffect;
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as TimeAnimationOptions<Jello>;
+  const { skew = DEFAULTS.skew } = namedEffect!;
+  // the keyframes start at the negative sign, so the first peak is +skew
+  const skewY = { y: -skew };
 
-  const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const [name] = getNames(options);
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
-
-  const jelloFactor = mapRange(0, 1, JELLO_FACTOR_SOFT, JELLO_FACTOR_HARD, intensity);
-
-  // Create CSS custom properties for the jello configuration
-  const custom: Record<string, string | number> = {
-    '--motion-skew-y': jelloFactor,
-  };
-
-  const keyframes = SKEW_Y_KEYFRAMES.map(({ keyframe, skewY }) => {
-    const offset = (keyframe / 100) * timingFactor;
-
-    return {
-      offset,
-      transform: `rotateZ(var(--motion-rotate, 0deg)) skewY(calc(${toKeyframeValue(
-        custom,
-        '--motion-skew-y',
-        asWeb,
-      )} * ${skewY}deg))`,
-    };
-  });
+  const jelloOptions = {
+    ...options,
+    composite: 'add',
+    namedEffect: {
+      ...namedEffect,
+      skew: skewY,
+    },
+  } as TimeAnimationOptions;
 
   return [
+    // the layout rotation comes first, so the skew is along the element's rotated axes
     {
-      ...options,
-      name,
-      easing: 'linear',
-      duration: duration + iterationDelay,
-      custom,
-      keyframes,
+      ...jelloOptions,
+      composite: 'replace',
+      ...getLoopOverrides(jelloOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...jelloOptions,
+      ...getLoopOverrides(jelloOptions, { shape: SHAPE }),
+      ...getMotionTransRot(UNDIRECTED_MOTION_RANGE, { skew: skewY }, asWeb, suffix),
     },
   ];
-}
-
-export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Jello)?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
-
-  return [`motion-jello-${timingFactor}`];
 }

@@ -1,199 +1,36 @@
 import { describe, expect, test } from 'vitest';
 
-import * as JelloAnimation from '../Jello';
-import { Jello, TimeAnimationOptions } from '../../../types';
-import { baseMockOptions } from './testUtils';
+import * as Jello from '../Jello';
+import type { TimeAnimationOptions } from '../../../types';
+import { progressAt } from './testUtils';
 
-describe('Jello.web()', () => {
-  test('default values', () => {
-    const mockOptions: TimeAnimationOptions = {
-      ...baseMockOptions,
-      namedEffect: {} as Jello,
-    };
+const options = (namedEffect = {}) =>
+  ({ duration: 1000, namedEffect: { type: 'Jello', ...namedEffect } }) as TimeAnimationOptions;
 
-    const expectedResult = [
-      {
-        name: 'motion-jello-1',
-        duration: 1,
-        easing: 'linear',
-        custom: {
-          '--motion-skew-y': 1.75,
-        },
-        keyframes: [
-          {
-            offset: 0.24,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(1.75 * 7deg))',
-          },
-          {
-            offset: 0.38,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(1.75 * -2deg))',
-          },
-          {
-            offset: 0.58,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(1.75 * 4deg))',
-          },
-          {
-            offset: 0.8,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(1.75 * -2deg))',
-          },
-          {
-            offset: 1,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(1.75 * 0deg))',
-          },
-        ],
-      },
-    ];
-
-    const result = JelloAnimation.web(mockOptions);
-
-    expect(result).toMatchObject(expectedResult);
+describe('Jello', () => {
+  test('layout rotation first, then the skew added along the rotated axes', () => {
+    const [rotation, jello] = Jello.style(options());
+    expect(rotation.composite).toBe('replace');
+    expect(jello.composite).toBe('add');
   });
 
-  test('custom intensity and duration', () => {
-    const mockOptions: TimeAnimationOptions = {
-      ...baseMockOptions,
-      duration: 1000,
-      namedEffect: { intensity: 0.8, iterationDelay: 500 } as Jello,
+  test('first peak is the positive skew (12.25deg by default)', () => {
+    const skewY = (namedEffect = {}) => {
+      const custom = Jello.style(options(namedEffect))[1].custom as Record<string, string | number>;
+      return (
+        (custom['--motion-trans-rot-from'] as number) *
+        parseFloat(custom['--motion-trans-rot-skew-y'] as string)
+      );
     };
-
-    const expectedResult = [
-      {
-        name: 'motion-jello-067',
-        duration: 1500,
-        easing: 'linear',
-        custom: {
-          '--motion-skew-y': 3.4000000000000004,
-        },
-        keyframes: [
-          {
-            offset: 0.1608,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(3.4000000000000004 * 7deg))',
-          },
-          {
-            offset: 0.2546,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(3.4000000000000004 * -2deg))',
-          },
-          {
-            offset: 0.3886,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(3.4000000000000004 * 4deg))',
-          },
-          {
-            offset: 0.536,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(3.4000000000000004 * -2deg))',
-          },
-          {
-            offset: 0.67,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(3.4000000000000004 * 0deg))',
-          },
-        ],
-      },
-    ];
-
-    const result = JelloAnimation.web(mockOptions);
-
-    expect(result).toMatchObject(expectedResult);
-  });
-});
-
-describe('Jello.style()', () => {
-  test('default values', () => {
-    const mockOptions: TimeAnimationOptions = {
-      ...baseMockOptions,
-      namedEffect: {} as Jello,
-    };
-
-    const expectedResult = [
-      {
-        name: 'motion-jello-1',
-        duration: 1,
-        easing: 'linear',
-        custom: {
-          '--motion-skew-y': 1.75,
-        },
-        keyframes: [
-          {
-            offset: 0.24,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 7deg))',
-          },
-          {
-            offset: 0.38,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * -2deg))',
-          },
-          {
-            offset: 0.58,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 4deg))',
-          },
-          {
-            offset: 0.8,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * -2deg))',
-          },
-          {
-            offset: 1,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 0deg))',
-          },
-        ],
-      },
-    ];
-
-    const result = JelloAnimation.style(mockOptions);
-
-    expect(result).toMatchObject(expectedResult);
+    expect(skewY()).toBe(12.25);
+    expect(skewY({ skew: 7 })).toBe(7);
   });
 
-  test('custom intensity and duration', () => {
-    const mockOptions: TimeAnimationOptions = {
-      ...baseMockOptions,
-      duration: 1000,
-      namedEffect: { intensity: 0.8, iterationDelay: 500 } as Jello,
-    };
-
-    const expectedResult = [
-      {
-        name: 'motion-jello-067',
-        duration: 1500,
-        easing: 'linear',
-        custom: {
-          '--motion-skew-y': 3.4000000000000004,
-        },
-        keyframes: [
-          {
-            offset: 0.1608,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 7deg))',
-          },
-          {
-            offset: 0.2546,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * -2deg))',
-          },
-          {
-            offset: 0.3886,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 4deg))',
-          },
-          {
-            offset: 0.536,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * -2deg))',
-          },
-          {
-            offset: 0.67,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 0deg))',
-          },
-        ],
-      },
-    ];
-
-    const result = JelloAnimation.style(mockOptions);
-
-    expect(result).toMatchObject(expectedResult);
+  test('a linear damped wobble', () => {
+    const [, { easing }] = Jello.style(options());
+    expect(progressAt(easing!, 24)).toBe(0);
+    expect(progressAt(easing!, 38)).toBeCloseTo(1 + 2 / 7, 4);
+    expect(progressAt(easing!, 58)).toBeCloseTo(1 - 4 / 7, 4);
+    expect(progressAt(easing!, 100)).toBe(1);
   });
 });

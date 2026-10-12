@@ -294,7 +294,7 @@ animation no-ops. Apply them every time, even if you don't open a reference file
 
 9. **Scroll presets carry a `range`.** Every `*Scroll` preset needs
    `range: 'in' | 'out' | 'continuous'` in its `namedEffect`
-   (prefer `'continuous'`) — **except** `ParallaxScroll`, which takes `parallaxFactor` instead.
+   (prefer `'continuous'`) — **except** `ParallaxScroll`, which takes `speed` instead.
 
 10. **Lists: one keyed wrapper, fan out by `selector` or `listContainer` — never
     duplicate keys.** Keys are unique (one controller per key), so never put the

@@ -142,6 +142,7 @@ export type MotionKeyframeEffect = {
 
 export type TimeAnimationOptions<TNamedEffect extends NamedEffect = NamedEffect> = {
   id?: string;
+  suffix?: string;
   keyframeEffect?: MotionKeyframeEffect;
   namedEffect?: TNamedEffect;
   customEffect?: CustomEffect;
@@ -159,6 +160,7 @@ export type PointerMoveAxis = 'x' | 'y';
 
 type ScrubAnimationDataBase<TNamedEffect extends NamedEffect = NamedEffect> = {
   id?: string;
+  suffix?: string;
   keyframeEffect?: MotionKeyframeEffect;
   namedEffect?: TNamedEffect;
   customEffect?: CustomEffect;

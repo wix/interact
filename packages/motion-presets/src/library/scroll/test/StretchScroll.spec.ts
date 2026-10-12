@@ -1,327 +1,51 @@
 import { describe, expect, test } from 'vitest';
-
 import * as StretchScroll from '../StretchScroll';
-import type { StretchScroll as StretchScrollType, ScrubAnimationOptions } from '../../../types';
-import { baseMockOptions } from './testUtils';
+import { MOTION_FADE_NAME } from '../../../fadeBlurUtils';
+import {
+  MOTION_LAYOUT_ROTATION_NAME,
+  MOTION_SCALE_NAME,
+  MOTION_TRANS_ROT_NAME,
+} from '../../../transformUtils';
+import { getEasing } from '../../../utils';
+import { byName, scrollOptions } from './testUtils';
+
+const stretchOf = (namedEffect: Record<string, unknown>, asWeb = true) =>
+  StretchScroll.style(scrollOptions({ type: 'StretchScroll', ...namedEffect }), asWeb) as any[];
 
 describe('StretchScroll', () => {
-  describe('web', () => {
-    test('default values', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as StretchScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'forwards',
-          easing: 'backInOut',
-          keyframes: [
-            {
-              scale: '1 1',
-              translate: '0 0',
-            },
-            {
-              scale: '0.4 1.6',
-              translate: '0 calc(100% * (1 - 1.6))',
-            },
-          ],
-        },
-        {
-          fill: 'forwards',
-          easing: 'backInOut',
-          keyframes: [
-            {
-              opacity: 1,
-              offset: 0.35,
-            },
-            {
-              opacity: 0,
-              offset: 1,
-            },
-          ],
-        },
-      ];
-
-      const result = StretchScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom stretch value', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { stretch: 0.8 } as StretchScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              scale: '1 1',
-              translate: '0 0',
-            },
-            {
-              scale: '0.2 1.8',
-              translate: '0 calc(100% * (1 - 1.8))',
-            },
-          ],
-        },
-        {
-          keyframes: [
-            {
-              opacity: 1,
-              offset: 0.35,
-            },
-            {
-              opacity: 0,
-              offset: 1,
-            },
-          ],
-        },
-      ];
-
-      const result = StretchScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - in', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'in' } as StretchScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'backwards',
-          keyframes: [
-            {
-              scale: '0.4 1.6',
-              translate: '0 calc(-100% * (1 - 1.6))',
-            },
-            {
-              scale: '1 1',
-              translate: '0 0',
-            },
-          ],
-        },
-        {
-          fill: 'backwards',
-          keyframes: [
-            {
-              opacity: 0,
-              offset: 0,
-            },
-            {
-              opacity: 1,
-              offset: 0.65,
-            },
-          ],
-        },
-      ];
-
-      const result = StretchScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - continuous', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        fill: 'both',
-        namedEffect: { range: 'continuous' } as StretchScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'both',
-          easing: 'linear',
-          keyframes: [
-            {
-              scale: '0.4 1.6',
-              translate: '0 calc(-100% * (1 - 1.6))',
-              easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-            },
-            {
-              scale: '1 1',
-              translate: '0 0',
-              easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-            },
-            {
-              scale: '0.4 1.6',
-              translate: '0 calc(100% * (1 - 1.6))',
-            },
-          ],
-        },
-        {
-          fill: 'both',
-          easing: 'linear',
-          keyframes: [
-            {
-              opacity: 0,
-              offset: 0,
-            },
-            {
-              opacity: 1,
-              offset: 0.325,
-            },
-            {
-              opacity: 1,
-              offset: 0.7,
-            },
-            {
-              opacity: 0,
-              offset: 1,
-            },
-          ],
-        },
-      ];
-
-      const result = StretchScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
+  test('keeps the layout rotation last, so the stretch is along the screen axes', () => {
+    expect(stretchOf({}).map((animation) => animation.name)).toEqual([
+      MOTION_FADE_NAME,
+      MOTION_TRANS_ROT_NAME,
+      MOTION_SCALE_NAME,
+      MOTION_LAYOUT_ROTATION_NAME,
+    ]);
   });
 
-  describe('style', () => {
-    test('default values', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as StretchScrollType,
-      };
+  test('stretches by scaling x down and y up', () => {
+    const custom = byName(stretchOf({ stretch: 0.5 }), MOTION_SCALE_NAME).custom;
+    expect(custom['--motion-scale-scale-x']).toBe(0.5);
+    expect(custom['--motion-scale-scale-y']).toBe(1.5);
+  });
 
-      const expectedResult = [
-        {
-          fill: 'forwards',
-          easing: 'backInOut',
-          keyframes: [
-            {
-              scale: 'var(--motion-stretch-scale-x-from) var(--motion-stretch-scale-y-from)',
-              translate: '0 var(--motion-stretch-trans-from)',
-            },
-            {
-              scale: 'var(--motion-stretch-scale-x-to) var(--motion-stretch-scale-y-to)',
-              translate: '0 var(--motion-stretch-trans-to)',
-            },
-          ],
-        },
-        {
-          fill: 'forwards',
-          easing: 'backInOut',
-          keyframes: [
-            {
-              opacity: 1,
-              offset: 0.35,
-            },
-            {
-              opacity: 0,
-              offset: 1,
-            },
-          ],
-        },
-      ];
+  test('moves up by the extra height - from the scale value or its custom-property in CSS', () => {
+    const web = byName(stretchOf({ stretch: 0.5 }), MOTION_TRANS_ROT_NAME).custom;
+    expect(web['--motion-trans-rot-direction']).toBe('90deg');
+    expect(web['--motion-trans-rot-travel']).toBe('calc(100% * (1.5 - 1))');
 
-      const result = StretchScroll.style(mockOptions);
+    const css = stretchOf({}, false);
+    const scaleY = Object.keys(byName(css, MOTION_SCALE_NAME).custom).find((key) =>
+      key.endsWith('-scale-y'),
+    );
+    expect(byName(css, MOTION_TRANS_ROT_NAME).custom['--motion-trans-rot-travel']).toBe(
+      `calc(100% * (var(${scaleY}, 1) - 1))`,
+    );
+  });
 
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - in', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'in' } as StretchScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'backwards',
-          keyframes: [
-            {
-              scale: 'var(--motion-stretch-scale-x-from) var(--motion-stretch-scale-y-from)',
-              translate: '0 var(--motion-stretch-trans-from)',
-            },
-            {
-              scale: 'var(--motion-stretch-scale-x-to) var(--motion-stretch-scale-y-to)',
-              translate: '0 var(--motion-stretch-trans-to)',
-            },
-          ],
-        },
-        {
-          fill: 'backwards',
-          keyframes: [
-            {
-              opacity: 0,
-              offset: 0,
-            },
-            {
-              opacity: 1,
-              offset: 0.65,
-            },
-          ],
-        },
-      ];
-
-      const result = StretchScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - continuous', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        fill: 'both',
-        namedEffect: { range: 'continuous' } as StretchScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'both',
-          easing: 'linear',
-          keyframes: [
-            {
-              scale: 'var(--motion-stretch-scale-x-from) var(--motion-stretch-scale-y-from)',
-              translate: '0 var(--motion-stretch-trans-from)',
-              easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-            },
-            {
-              scale: 'var(--motion-stretch-scale-x-to) var(--motion-stretch-scale-y-to)',
-              translate: '0 var(--motion-stretch-trans-to)',
-              easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-            },
-            {
-              scale: 'var(--motion-stretch-scale-x-from) var(--motion-stretch-scale-y-from)',
-              translate: '0 calc(100% * (1 - var(--motion-stretch-scale-y-from)))',
-            },
-          ],
-        },
-        {
-          fill: 'both',
-          easing: 'linear',
-          keyframes: [
-            {
-              opacity: 0,
-              offset: 0,
-            },
-            {
-              opacity: 1,
-              offset: 0.325,
-            },
-            {
-              opacity: 1,
-              offset: 0.7,
-            },
-            {
-              opacity: 0,
-              offset: 1,
-            },
-          ],
-        },
-      ];
-
-      const result = StretchScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
+  test('fades with its own curves and moves with backInOut', () => {
+    const [fadeIn, moveIn] = stretchOf({ range: 'in' });
+    expect(fadeIn.easing).toMatch(/^linear\(0 0%, 0 33.9%/);
+    expect(moveIn.easing).toBe(getEasing('backInOut'));
+    expect(stretchOf({ range: 'continuous' })[0].easing).toMatch(/^linear\(/);
   });
 });

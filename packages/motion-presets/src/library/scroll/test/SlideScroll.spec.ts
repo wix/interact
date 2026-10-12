@@ -1,207 +1,30 @@
 import { describe, expect, test } from 'vitest';
-
 import * as SlideScroll from '../SlideScroll';
-import type { SlideScroll as SlideScrollType, ScrubAnimationOptions } from '../../../types';
-import { baseMockOptions } from './testUtils';
+import { MOTION_LAYOUT_ROTATION_NAME, MOTION_TRANS_ROT_NAME } from '../../../transformUtils';
+import { MOTION_REVEAL_NAME } from '../../../clipUtils';
+import { scrollOptions } from './testUtils';
 
 describe('SlideScroll', () => {
-  describe('web', () => {
-    test('default values', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as SlideScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'backwards',
-          keyframes: [
-            {
-              clipPath: 'var(--motion-clip-from, polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%))',
-              transform: 'rotate(var(--motion-rotate, 0)) translate(0, 100%)',
-            },
-            {
-              clipPath: 'var(--motion-clip-to, polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%))',
-              transform: 'rotate(var(--motion-rotate, 0)) translate(0, 0)',
-            },
-          ],
-        },
-      ];
-
-      const result = SlideScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - left', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'left' } as SlideScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              clipPath: 'var(--motion-clip-from, polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%))',
-              transform: 'rotate(var(--motion-rotate, 0)) translate(-100%, 0)',
-            },
-            {
-              clipPath: 'var(--motion-clip-to, polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%))',
-              transform: 'rotate(var(--motion-rotate, 0)) translate(0, 0)',
-            },
-          ],
-        },
-      ];
-
-      const result = SlideScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - out', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'out' } as SlideScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'forwards',
-          keyframes: [
-            {
-              clipPath: 'var(--motion-clip-from, polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%))',
-              transform: 'rotate(var(--motion-rotate, 0)) translate(0, 0)',
-            },
-            {
-              clipPath: 'var(--motion-clip-to, polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%))',
-              transform: 'rotate(var(--motion-rotate, 0)) translate(0, 100%)',
-            },
-          ],
-        },
-      ];
-
-      const result = SlideScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - continuous', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'continuous' } as SlideScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              clipPath: 'var(--motion-clip-from, polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%))',
-              transform: 'rotate(var(--motion-rotate, 0)) translate(0, 100%)',
-            },
-            {
-              clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-              transform: 'rotate(var(--motion-rotate, 0)) translate(0, 0)',
-            },
-            {
-              clipPath: 'var(--motion-clip-to, polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%))',
-              transform: 'rotate(var(--motion-rotate, 0)) translate(0, -100%)',
-            },
-          ],
-        },
-      ];
-
-      const result = SlideScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
+  test('moves along the rotated axes - the layout rotation replaces and the motion adds', () => {
+    const [rotation, motion, reveal] = SlideScroll.style(
+      scrollOptions({ type: 'SlideScroll' }),
+      true,
+    ) as any[];
+    expect([rotation.name, motion.name, reveal.name]).toEqual([
+      MOTION_LAYOUT_ROTATION_NAME,
+      MOTION_TRANS_ROT_NAME,
+      MOTION_REVEAL_NAME,
+    ]);
+    expect(rotation.composite).toBe('replace');
+    expect(motion.composite).toBe('add');
   });
 
-  describe('style', () => {
-    test('default values', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as SlideScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'backwards',
-          keyframes: [
-            {
-              clipPath: 'var(--motion-clip-from, polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%))',
-              transform:
-                'rotate(var(--motion-rotate, 0)) translate(var(--motion-translate-from-x), var(--motion-translate-from-y))',
-            },
-            {
-              clipPath: 'var(--motion-clip-to, polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%))',
-              transform:
-                'rotate(var(--motion-rotate, 0)) translate(var(--motion-translate-to-x), var(--motion-translate-to-y))',
-            },
-          ],
-        },
-      ];
-
-      const result = SlideScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - left', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'left' } as SlideScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              clipPath: 'var(--motion-clip-from, polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%))',
-              transform:
-                'rotate(var(--motion-rotate, 0)) translate(var(--motion-translate-from-x), var(--motion-translate-from-y))',
-            },
-            {
-              clipPath: 'var(--motion-clip-to, polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%))',
-              transform:
-                'rotate(var(--motion-rotate, 0)) translate(var(--motion-translate-to-x), var(--motion-translate-to-y))',
-            },
-          ],
-        },
-      ];
-
-      const result = SlideScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - out', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'out' } as SlideScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'forwards',
-          keyframes: [
-            {
-              clipPath: 'var(--motion-clip-from, polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%))',
-              transform:
-                'rotate(var(--motion-rotate, 0)) translate(var(--motion-translate-from-x), var(--motion-translate-from-y))',
-            },
-            {
-              clipPath: 'var(--motion-clip-to, polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%))',
-              transform:
-                'rotate(var(--motion-rotate, 0)) translate(var(--motion-translate-to-x), var(--motion-translate-to-y))',
-            },
-          ],
-        },
-      ];
-
-      const result = SlideScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
+  test('reveals from the side opposite to the movement', () => {
+    const [, motion, reveal] = SlideScroll.style(
+      scrollOptions({ type: 'SlideScroll', direction: 'left' }),
+      true,
+    ) as any[];
+    expect(motion.custom['--motion-trans-rot-travel']).toBe('100%');
+    expect(motion.custom['--motion-trans-rot-from']).toBe(-reveal.custom['--motion-reveal-from']);
   });
 });

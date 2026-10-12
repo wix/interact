@@ -1,622 +1,85 @@
 import { describe, expect, test } from 'vitest';
 
 import * as Cross from '../Cross';
-import { Cross as CrossType, TimeAnimationOptions } from '../../../types';
-import { baseMockOptions } from './testUtils';
+import { getWrapEasing } from '../../../easingUtils';
+import { getOffscreenTravel } from '../../../layoutUtils';
+import type { DomApi, TimeAnimationOptions } from '../../../types';
+
+const options = (namedEffect = {}) =>
+  ({ duration: 1000, namedEffect: { type: 'Cross', ...namedEffect } }) as TimeAnimationOptions;
+
+// an element 100px wide at left 100px, in a 1000px wide container
+function fakeDom() {
+  const parent = document.createElement('div');
+  const target = document.createElement('div');
+  parent.append(target);
+  const define = (el: HTMLElement, props: Record<string, unknown>) =>
+    Object.entries(props).forEach(([key, value]) =>
+      Object.defineProperty(el, key, { value, configurable: true }),
+    );
+  define(parent, {
+    offsetWidth: 1000,
+    offsetHeight: 500,
+    offsetLeft: 0,
+    offsetTop: 0,
+    offsetParent: null,
+  });
+  define(target, {
+    offsetWidth: 100,
+    offsetHeight: 50,
+    offsetLeft: 100,
+    offsetTop: 200,
+    offsetParent: parent,
+  });
+  const run = (fn: (el: HTMLElement) => void) => fn(target);
+  return { target, dom: { measure: run, mutate: run } as unknown as DomApi };
+}
 
 describe('Cross', () => {
-  describe('web function', () => {
-    test('default values', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as CrossType,
-      };
+  test('prepare measures the layout in its parent, for the CSS animation', () => {
+    const { target, dom } = fakeDom();
+    Cross.prepare(options(), dom);
+    expect(target.style.getPropertyValue('--motion-left')).toBe('100px');
+    expect(target.style.getPropertyValue('--motion-container-width')).toBe('1000px');
+  });
 
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: {} as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 1,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0 0',
-            },
-            {
-              easing: 'step-start',
-              offset: 0,
-              translate: 'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
-            },
-            {
-              offset: 0,
-              translate: 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-          ],
-        },
-      ];
-
-      const result = Cross.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
+  test('continuous keyframes from the direction side to the opposite side', () => {
+    const [cross, rotation] = Cross.style(options());
+    expect(cross.custom).toMatchObject({
+      '--motion-trans-rot-direction': 'calc(180deg + 0deg)',
+      '--motion-trans-rot-from': -1,
+      '--motion-trans-rot-to': 1,
+      '--motion-trans-rot-travel': getOffscreenTravel('right'),
+      '--motion-trans-rot-to-travel': getOffscreenTravel('left'),
     });
+    expect(rotation.composite).toBe('add');
+  });
 
-    test('custom duration', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 1000,
-        namedEffect: { iterationDelay: 500 } as CrossType,
-      };
-
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: {} as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 1500,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0 0',
-            },
-            {
-              easing: 'step-start',
-              offset: 0,
-              translate: 'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
-            },
-            {
-              offset: 0,
-              translate: 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
-            },
-            {
-              offset: 0.67,
-              translate: '0 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-          ],
-        },
+  test('maps the eight directions to css angles', () => {
+    const angle = (direction: string) =>
+      (Cross.style(options({ direction }))[0].custom as Record<string, string>)[
+        '--motion-trans-rot-direction'
       ];
+    expect(angle('bottom-right')).toBe('calc(180deg + 45deg)');
+    expect(angle('bottom')).toBe('calc(180deg + 90deg)');
+    expect(angle('left')).toBe('calc(180deg + 180deg)');
+    expect(angle('top')).toBe('calc(180deg + 270deg)');
+    expect(angle('top-right')).toBe('calc(180deg + 315deg)');
+  });
 
-      const result = Cross.web(mockOptions);
+  test('without measurements it wraps in the middle', () => {
+    const [cross] = Cross.style(options({ iterationDelay: 1000 }));
+    expect(cross.easing).toBe(getWrapEasing(0.5, 0.5));
+    expect(cross.duration).toBe(2000);
+    expect('timing' in cross).toBe(false);
+  });
 
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - top', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'top' } as CrossType,
-      };
-
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: { direction: 'top' } as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 1,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0 0',
-            },
-            {
-              easing: 'step-start',
-              offset: 0,
-              translate: '0 calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%))',
-            },
-            {
-              offset: 0,
-              translate: '0 calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-          ],
-        },
-      ];
-
-      const result = Cross.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - bottom', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'bottom' } as CrossType,
-      };
-
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: { direction: 'bottom' } as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 1,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0 0',
-            },
-            {
-              easing: 'step-start',
-              offset: 0,
-              translate: '0 calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))',
-            },
-            {
-              offset: 0,
-              translate: '0 calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%))',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-          ],
-        },
-      ];
-
-      const result = Cross.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - left', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'left' } as CrossType,
-      };
-
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: { direction: 'left' } as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 1,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0 0',
-            },
-            {
-              easing: 'step-start',
-              offset: 0,
-              translate: 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
-            },
-            {
-              offset: 0,
-              translate: 'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-          ],
-        },
-      ];
-
-      const result = Cross.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - top-left', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'top-left' } as CrossType,
-      };
-
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: { direction: 'top-left' } as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 1,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0 0',
-            },
-            {
-              easing: 'step-start',
-              offset: 0,
-              translate:
-                'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
-            },
-            {
-              offset: 0,
-              translate:
-                'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-          ],
-        },
-      ];
-
-      const result = Cross.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - top-right', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'top-right' } as CrossType,
-      };
-
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: { direction: 'top-right' } as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 1,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0 0',
-            },
-            {
-              easing: 'step-start',
-              offset: 0,
-              translate:
-                'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
-            },
-            {
-              offset: 0,
-              translate:
-                'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-          ],
-        },
-      ];
-
-      const result = Cross.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - bottom-left', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'bottom-left' } as CrossType,
-      };
-
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: { direction: 'bottom-left' } as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 1,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0 0',
-            },
-            {
-              easing: 'step-start',
-              offset: 0,
-              translate:
-                'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
-            },
-            {
-              offset: 0,
-              translate:
-                'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-          ],
-        },
-      ];
-
-      const result = Cross.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - bottom-right', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'bottom-right' } as CrossType,
-      };
-
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: { direction: 'bottom-right' } as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 1,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0 0',
-            },
-            {
-              easing: 'step-start',
-              offset: 0,
-              translate:
-                'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
-            },
-            {
-              offset: 0,
-              translate:
-                'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-          ],
-        },
-      ];
-
-      const result = Cross.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('no duration specified uses default', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: undefined,
-        namedEffect: {} as CrossType,
-      };
-
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: {} as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 1,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-        },
-      ];
-
-      const result = Cross.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('equal duration and delay', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 1000,
-        namedEffect: { iterationDelay: 1000 } as CrossType,
-      };
-
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: {} as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 2000,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0 0',
-            },
-            {
-              easing: 'step-start',
-              offset: 0,
-              translate: 'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
-            },
-            {
-              offset: 0,
-              translate: 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
-            },
-            {
-              offset: 0.5,
-              translate: '0 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-          ],
-        },
-      ];
-
-      const result = Cross.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('delay longer than duration', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 500,
-        namedEffect: { iterationDelay: 1500 } as CrossType,
-      };
-
-      const expectedResult = [
-        {
-          ...baseMockOptions,
-          namedEffect: {} as CrossType,
-          name: 'motion-cross',
-          easing: 'linear',
-          duration: 2000,
-          custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0 0',
-            },
-            {
-              easing: 'step-start',
-              offset: 0,
-              translate: 'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
-            },
-            {
-              offset: 0,
-              translate: 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
-            },
-            {
-              offset: 0.25,
-              translate: '0 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
-            },
-          ],
-        },
-      ];
-
-      const result = Cross.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
+  test('web wraps where the measured distances meet, after measuring', () => {
+    const { target, dom } = fakeDom();
+    const [cross] = Cross.web(options(), dom) as any[];
+    // right: 1000 - 100 = 900, left: 100 + 100 = 200
+    expect(cross.timing.easing).toBe(getWrapEasing(900 / 1100));
+    expect(target.style.getPropertyValue('--motion-left')).toBe('100px');
+    expect(target.style.getPropertyValue('--motion-container-width')).toBe('1000px');
   });
 });
