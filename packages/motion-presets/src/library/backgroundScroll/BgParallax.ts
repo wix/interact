@@ -39,6 +39,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgParallax,
+      custom,
       part: 'BG_MEDIA',
       startOffset: {
         name: 'cover',
