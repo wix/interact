@@ -471,6 +471,39 @@ describe('css._generate', () => {
       expect(animDeclOnInitial!.value).toContain('myAnim');
     });
 
+    it('should reset clip-path before a viewEnter entrance starts, so a clipped first keyframe cannot hide the target from its observer', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            effects: [
+              {
+                effectId: 'clipIn',
+                duration: 500,
+                fill: 'backwards',
+                keyframeEffect: {
+                  name: 'clipIn',
+                  keyframes: [
+                    { clipPath: 'polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)' },
+                    { clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const css = generate(config);
+      const initial = css.match(
+        /\[data-interact-key="el"\][^{]*:not\(\[data-interact-enter\]\)\s*\{([^}]*)\}/,
+      );
+      expect(initial).not.toBeNull();
+      expect(initial![1]).toMatch(/clip-path:\s*none\s*!important/);
+    });
+
     it('should inline animation declarations when initial is false (click trigger)', () => {
       const config: InteractConfig = {
         effects: {},

@@ -37,8 +37,13 @@ import type { ListKind, ListSlots } from './cssUtils';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { getCSSAnimation, MotionKeyframeEffect, TriggerVariant } from '@wix/motion';
 
+// Before a viewEnter animation starts, its target must keep its own box: the IntersectionObserver that
+// triggers it measures that box. Transforms are reset for that, and so is clip-path: an entrance whose
+// backwards-filled first keyframe clips to nothing (TiltIn, ShuttersIn, Reveal...) would otherwise hide its
+// target from the observer, so it never enters the view and never plays.
 export const DEFAULT_INITIAL = [
   { name: 'visibility', value: 'hidden' },
+  { name: 'clip-path', value: 'none', important: true },
   { name: 'transform', value: 'none', important: true },
   { name: 'translate', value: 'none', important: true },
   { name: 'scale', value: 'none', important: true },
