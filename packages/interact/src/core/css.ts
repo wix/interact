@@ -648,18 +648,16 @@ export function getKeyframeSlots(config: InteractConfig): Map<string, string> {
   ctx.targetsMap.forEach(({ keyframeEntries }) => {
     const used = new Set<string>();
     keyframeEntries.forEach((members) => {
-      const isTaken = (slot: number) =>
-        members.some(({ getNames }) => getNames(suffixOf(slot)).some((name) => used.has(name)));
+      const namesAt = (slot: number) => members.flatMap(({ getNames }) => getNames(suffixOf(slot)));
       let slot = 0;
-      while (isTaken(slot)) {
-        slot++;
+      let names = namesAt(slot);
+      while (names.some((name) => used.has(name))) {
+        names = namesAt(++slot);
       }
-      members.forEach(({ slotKey, getNames }) => {
-        getNames(suffixOf(slot)).forEach((name) => used.add(name));
-        if (slot) {
-          slots.set(slotKey, suffixOf(slot)!);
-        }
-      });
+      names.forEach((name) => used.add(name));
+      if (slot) {
+        members.forEach(({ slotKey }) => slots.set(slotKey, suffixOf(slot)!));
+      }
     });
   });
 

@@ -484,10 +484,11 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
         : undefined;
       let target = effect.key || referencedEffect?.key;
 
+      const configEffectIndex = effects.length - 1 - effectIndex;
       if (!(effect as EffectRef).effectId) {
-        (effect as EffectRef).effectId = `eff-${configIndex}-${effects.length - 1 - effectIndex}`;
+        (effect as EffectRef).effectId = `eff-${configIndex}-${configEffectIndex}`;
       }
-      const suffix = slots.get(getSlotKey(configIndex, effects.length - 1 - effectIndex));
+      const suffix = slots.get(getSlotKey(configIndex, configEffectIndex));
       if (suffix) {
         (effect as { suffix?: string }).suffix = suffix;
       }
