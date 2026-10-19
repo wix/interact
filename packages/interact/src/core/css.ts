@@ -618,7 +618,7 @@ function parseConfig(
     plugins,
   };
 
-  const cssRules = (config.interactions || []).flatMap((interaction, interactionIdx) =>
+  const cssRules = config.interactions.flatMap((interaction, interactionIdx) =>
     parseInteraction(ctx, interaction, interactionIdx),
   );
 

@@ -419,7 +419,7 @@ function withSlots<T extends SequenceConfig | SequenceConfigRef>(
 function parseConfig(config: InteractConfig, useCustomElement: boolean = false): InteractCache {
   const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {} } = config;
   const interactions: InteractCache['interactions'] = {};
-  const slots = getKeyframeSlots(config);
+  const slots = config.interactions ? getKeyframeSlots(config) : new Map<string, string>();
 
   config.interactions?.forEach((interaction_, configIndex) => {
     const source = interaction_.key;
