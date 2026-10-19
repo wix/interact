@@ -30,6 +30,7 @@ vi.mock('@wix/motion', () => {
     createAnimationGroups: vi.fn().mockReturnValue([]),
     getSequence: vi.fn().mockReturnValue({ animationGroups: [], addGroups: vi.fn() }),
     registerEffects: vi.fn(),
+    getRegisteredEffect: vi.fn(),
     MotionKeyframeEffect: class {},
     TriggerVariant: {},
   };
