@@ -2,7 +2,11 @@ import { getCssUnits, getMouseTransitionEasing, mapRange, parseLength } from '..
 import { CustomMouse } from './CustomMouse';
 import { ScrubAnimationOptions, AnimationExtraOptions, BlobMouse, Progress } from '../../types';
 
-const DEFAULT_DISTANCE = { value: 200, unit: 'px' };
+export const schema = {
+  distance: { type: 'length', default: { value: 200, unit: 'px' } },
+  inverted: { type: 'bool', default: false },
+  scale: { type: 'number', min: 0, default: 1.4 },
+} as const;
 
 class BlobMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
@@ -36,8 +40,8 @@ class BlobMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as BlobMouse;
-  const { inverted = false, scale = 1.4 } = namedEffect;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
+  const { inverted = schema.inverted.default, scale = schema.scale.default } = namedEffect;
+  const distance = parseLength(namedEffect.distance, schema.distance.default);
 
   const invert = inverted ? -1 : 1;
   const animationOptions = {
@@ -51,3 +55,5 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
 
   return (target: HTMLElement) => new BlobMouseAnimation(target, animationOptions);
 }
+
+create.schema = schema;

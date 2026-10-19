@@ -2,11 +2,15 @@ import type { EffectFourDirections, FoldIn, TimeAnimationOptions } from '../../t
 import { parseDirection, toKeyframeValue, getEntranceFill } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-foldIn'];
-}
+export const schema = {
+  angle: { type: 'number', default: -90 },
+  perspective: { type: 'number', min: 0, default: 800 },
+  pivot: { type: 'enum', values: FOUR_DIRECTIONS, default: 'top' },
+} as const;
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'top';
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-foldIn'].map((name) => name + suffix);
+}
 
 const PARAM_MAP: Record<
   EffectFourDirections,
@@ -31,13 +35,17 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as FoldIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { initialRotate = 90, perspective = 800 } = namedEffect;
+  const direction = parseDirection<EffectFourDirections>(
+    namedEffect?.pivot,
+    FOUR_DIRECTIONS,
+    schema.pivot.default,
+  );
+  const { angle = schema.angle.default, perspective = schema.perspective.default } = namedEffect;
   const [fadeIn, foldIn] = getNames(options);
   const easing = options.easing || 'backOut';
   const { x, y } = PARAM_MAP[direction].origin;
 
-  const from = getRotateFrom(direction, initialRotate);
+  const from = getRotateFrom(direction, -angle);
 
   const custom = {
     '--motion-perspective': `${perspective}px`,

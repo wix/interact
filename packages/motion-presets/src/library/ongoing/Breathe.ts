@@ -10,9 +10,14 @@ import {
 } from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DISTANCE = { value: 25, unit: 'px' };
 const DIRECTIONS = [...AXIS_DIRECTIONS, 'center'] as const;
-const DEFAULT_DIRECTION: (typeof DIRECTIONS)[number] = 'vertical';
+
+export const schema = {
+  direction: { type: 'enum', values: DIRECTIONS, default: 'vertical' },
+  iterationDelay: { type: 'number', min: 0, default: 0 },
+  perspective: { type: 'number', min: 0, default: 800 },
+  travel: { type: 'length', default: { value: 25, unit: 'px' } },
+} as const;
 
 const DIRECTION_MAP = {
   vertical: { x: 0, y: 1, z: 0 },
@@ -34,13 +39,17 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Breathe;
-  const direction = parseDirection(namedEffect?.direction, DIRECTIONS, DEFAULT_DIRECTION);
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-  const { perspective = 800 } = namedEffect;
+  const direction = parseDirection<(typeof DIRECTIONS)[number]>(
+    namedEffect?.direction,
+    DIRECTIONS,
+    schema.direction.default,
+  );
+  const distance = parseLength(namedEffect.travel, schema.travel.default);
+  const { perspective = schema.perspective.default } = namedEffect;
 
   const easing = options.easing || 'sineInOut';
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
   const totalDuration = duration + iterationDelay;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
@@ -117,8 +126,10 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Breathe)?.iterationDelay || 0;
+  const iterationDelay =
+    (options.namedEffect as Breathe)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
+  const { suffix = '' } = options;
 
-  return [`motion-breathe-${timingFactor}`];
+  return [`motion-breathe-${timingFactor}`].map((name) => name + suffix);
 }

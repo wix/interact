@@ -6,13 +6,17 @@ import {
   EffectTwoSides,
 } from '../../types';
 import { getCssUnits, toKeyframeValue, parseDirection, parseLength } from '../../utils';
-import { TWO_SIDES_DIRECTIONS } from '../../consts';
+import { SCROLL_RANGES, TWO_SIDES_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectTwoSides = 'left';
-const DEFAULT_DISTANCE = { value: 400, unit: 'px' };
+export const schema = {
+  direction: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: 'right' },
+  distance: { type: 'length', default: { value: 400, unit: 'px' } },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+  startFromOffScreen: { type: 'bool', default: true },
+} as const;
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-panScroll'];
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return ['motion-panScroll'].map((name) => name + suffix);
 }
 
 export function prepare(options: ScrubAnimationOptions, dom?: DomApi) {
@@ -38,9 +42,15 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as PanScroll;
-  const direction = parseDirection(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULT_DIRECTION);
-  const { startFromOffScreen = true, range = 'in' } = namedEffect;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
+  const toDirection = parseDirection<EffectTwoSides>(
+    namedEffect?.direction,
+    TWO_SIDES_DIRECTIONS,
+    schema.direction.default,
+  );
+  const { startFromOffScreen = schema.startFromOffScreen.default, range = schema.range.default } =
+    namedEffect;
+  const direction = range === 'out' ? toDirection : toDirection === 'left' ? 'right' : 'left';
+  const distance = parseLength(namedEffect.distance, schema.distance.default);
   const travel = distance.value * (direction === 'left' ? 1 : -1);
   let startX = `${-travel}${getCssUnits(distance.unit)}`;
   let endX = `${travel}${getCssUnits(distance.unit)}`;

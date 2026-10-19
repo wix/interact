@@ -3,23 +3,30 @@ import type {
   ScrubAnimationOptions,
   TiltScroll,
   DomApi,
-  EffectTwoSides,
+  EffectSpinDirection,
 } from '../../types';
 import { cssEasings as easings } from '@wix/motion';
 import { toKeyframeValue, parseDirection } from '../../utils';
-import { TWO_SIDES_DIRECTIONS } from '../../consts';
+import { SCROLL_RANGES, SPIN_DIRECTIONS } from '../../consts';
 
 const MAX_Y_TRAVEL = 40;
+const EPSILON = 0.01;
 const [ROTATION_X, ROTATION_Y, ROTATION_Z] = [10, 25, 25];
-const DEFAULT_DIRECTION: EffectTwoSides = 'right';
+
+export const schema = {
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: 'counter-clockwise' },
+  perspective: { type: 'number', min: 0, default: 400 },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+  speed: { type: 'number', min: 0, default: 1 },
+} as const;
 
 const DIRECTIONS_MAP = {
-  right: 1,
-  left: -1,
+  'counter-clockwise': 1,
+  clockwise: -1,
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-tiltScrollTranslate', 'motion-tiltScrollRotate'];
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return ['motion-tiltScrollTranslate', 'motion-tiltScrollRotate'].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -28,16 +35,20 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as TiltScroll;
-  const direction = parseDirection(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULT_DIRECTION);
-  const { parallaxFactor = 0, perspective = 400 } = namedEffect;
-  const { range = 'in' } = namedEffect;
+  const direction = parseDirection<EffectSpinDirection>(
+    namedEffect?.direction,
+    SPIN_DIRECTIONS,
+    schema.direction.default,
+  );
+  const { speed = schema.speed.default, perspective = schema.perspective.default } = namedEffect;
+  const { range = schema.range.default } = namedEffect;
   const easing = 'linear';
   const fill = (
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
   ) as AnimationFillMode;
 
-  const travelY = MAX_Y_TRAVEL * parallaxFactor;
-  const dir = DIRECTIONS_MAP[direction];
+  const travelY = MAX_Y_TRAVEL * (1 - 1 / Math.max(speed, EPSILON));
+  const dir = DIRECTIONS_MAP[direction] * (range === 'in' ? 1 : -1);
 
   const from = {
     x: ROTATION_X * (range === 'out' ? 0 : -1),

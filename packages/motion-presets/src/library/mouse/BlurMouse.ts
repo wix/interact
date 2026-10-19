@@ -10,8 +10,14 @@ import { quadInOut } from '@wix/motion';
 import { CustomMouse } from './CustomMouse';
 import { ScrubAnimationOptions, AnimationExtraOptions, BlurMouse, Progress } from '../../types';
 
-const DEFAULT_DISTANCE = { value: 80, unit: 'px' };
-const DEFAULT_ANGLE = 5;
+export const schema = {
+  angle: { type: 'number', default: 5 },
+  blur: { type: 'number', min: 0, default: 20 },
+  distance: { type: 'length', default: { value: 80, unit: 'px' } },
+  inverted: { type: 'bool', default: false },
+  perspective: { type: 'number', min: 0, default: 600 },
+  scale: { type: 'number', min: 0, default: 0.3 },
+} as const;
 
 class BlurMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
@@ -61,10 +67,14 @@ class BlurMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as BlurMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-  const angle = parseDirection(namedEffect.angle, [], DEFAULT_ANGLE, true) as number;
-  const { scale = 0.3, blur = 20, perspective = 600 } = namedEffect;
+  const inverted = namedEffect.inverted ?? schema.inverted.default;
+  const distance = parseLength(namedEffect.distance, schema.distance.default);
+  const angle = parseDirection(namedEffect.angle, [], schema.angle.default, true) as number;
+  const {
+    scale = schema.scale.default,
+    blur = schema.blur.default,
+    perspective = schema.perspective.default,
+  } = namedEffect;
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration
@@ -82,3 +92,5 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
 
   return (target: HTMLElement) => new BlurMouseAnimation(target, animationOptions);
 }
+
+create.schema = schema;

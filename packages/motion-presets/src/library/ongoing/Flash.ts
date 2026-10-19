@@ -1,6 +1,10 @@
 import type { TimeAnimationOptions, DomApi, AnimationExtraOptions, Flash } from '../../types';
 import { getEasing, getTimingFactor } from '../../utils';
 
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: 0 },
+} as const;
+
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
   return style(options, true);
 }
@@ -8,7 +12,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, _asWeb = false) {
   const namedEffect = options.namedEffect as Flash;
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
   const easing = getEasing(options.easing || 'cubicInOut');
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
@@ -46,8 +50,10 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, _as
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Flash)?.iterationDelay || 0;
+  const iterationDelay =
+    (options.namedEffect as Flash)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
+  const { suffix = '' } = options;
 
-  return [`motion-flash-${timingFactor}`];
+  return [`motion-flash-${timingFactor}`].map((name) => name + suffix);
 }

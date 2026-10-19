@@ -135,11 +135,11 @@ describe('Rubber', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  test('custom intensity - style method', () => {
+  test('custom stretch - style method', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       duration: 1000,
-      namedEffect: { intensity: 0.8, iterationDelay: 1000 } as RubberType,
+      namedEffect: { stretch: 0.13, iterationDelay: 1000 } as RubberType,
     };
 
     const expectedResult = [
@@ -201,11 +201,11 @@ describe('Rubber', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('custom intensity - web method', () => {
+  test('custom stretch - web method', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       duration: 1000,
-      namedEffect: { intensity: 0.8, iterationDelay: 1000 } as RubberType,
+      namedEffect: { stretch: 0.13, iterationDelay: 1000 } as RubberType,
     };
 
     const expectedResult = [

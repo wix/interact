@@ -30,10 +30,10 @@ describe('FlipScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom rotate value', () => {
+    test('custom angle value', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { rotate: 180 } as FlipScrollType,
+        namedEffect: { angle: 180 } as FlipScrollType,
       };
 
       const expectedResult = [
@@ -159,10 +159,10 @@ describe('FlipScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom rotate value', () => {
+    test('custom angle value', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { rotate: 180 } as FlipScrollType,
+        namedEffect: { angle: 180 } as FlipScrollType,
       };
 
       const expectedResult = [

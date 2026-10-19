@@ -6,12 +6,16 @@ import {
   parseLength,
   parseDirection,
 } from '../../utils';
+import { SCROLL_RANGES } from '../../consts';
 
-const DEFAULT_ANGLE = 120;
-const DEFAULT_DISTANCE = { value: 400, unit: 'px' };
+export const schema = {
+  direction: { type: 'number', default: -60 },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+  travel: { type: 'length', default: { value: 400, unit: 'px' } },
+} as const;
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-moveScroll'];
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return ['motion-moveScroll'].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _?: DomApi, config?: Record<string, any>) {
@@ -20,15 +24,21 @@ export function web(options: ScrubAnimationOptions, _?: DomApi, config?: Record<
 
 export function style(options: ScrubAnimationOptions, config?: Record<string, any>, asWeb = false) {
   const namedEffect = options.namedEffect as MoveScroll;
-  const angle = parseDirection(namedEffect?.angle, [], DEFAULT_ANGLE, true);
-  const { range = 'in' } = namedEffect;
+  const direction = parseDirection<number>(
+    namedEffect?.direction,
+    [],
+    schema.direction.default,
+    true,
+  );
+  const { range = schema.range.default } = namedEffect;
+  const angle = range === 'out' ? direction : direction + 180;
 
   const easing = 'linear';
   const fill = (
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
   ) as AnimationFillMode;
 
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
+  const distance = parseLength(namedEffect.travel, schema.travel.default);
 
   let [travelX, travelY] = transformPolarToXY(angle, distance.value);
   const unit = getCssUnits(distance.unit);

@@ -116,4 +116,19 @@ describe('BlurIn', () => {
 
     expect(result).toMatchObject(expectedResult);
   });
+
+  test('BlurIn appends the suffix to the animation names', () => {
+    const mockOptions = {
+      ...baseMockOptions,
+      duration: 1000,
+      suffix: '-1',
+      namedEffect: {} as BlurInType,
+    };
+
+    expect(BlurIn.getNames(mockOptions)).toEqual(['motion-fadeIn-1', 'motion-blurIn-1']);
+    expect(BlurIn.style(mockOptions).map(({ name }) => name)).toEqual([
+      'motion-fadeIn-1',
+      'motion-blurIn-1',
+    ]);
+  });
 });

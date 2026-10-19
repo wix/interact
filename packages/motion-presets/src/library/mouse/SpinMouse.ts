@@ -8,8 +8,12 @@ import {
 import { getMouseTransitionEasing, getAngleInDeg, parseDirection } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 
-const DEFAULT_AXIS: MouseEffectAxis = 'both';
 const AXES = ['both', 'horizontal', 'vertical'] as const;
+
+export const schema = {
+  axis: { type: 'enum', values: AXES, default: 'both' },
+  inverted: { type: 'bool', default: false },
+} as const;
 
 class SpinMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
@@ -34,8 +38,8 @@ class SpinMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing = 'linear' } = options;
   const namedEffect = options.namedEffect as SpinMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const axis = parseDirection(namedEffect.axis, AXES, DEFAULT_AXIS) as MouseEffectAxis;
+  const inverted = namedEffect.inverted ?? schema.inverted.default;
+  const axis = parseDirection(namedEffect.axis, AXES, schema.axis.default) as MouseEffectAxis;
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration
@@ -51,3 +55,5 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
 export function web(options: ScrubAnimationOptions & AnimationExtraOptions) {
   return create(options);
 }
+
+create.schema = schema;

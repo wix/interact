@@ -33,12 +33,12 @@ describe('GlideIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('GlideIn animation with custom direction and distance', () => {
-    const direction = 45;
-    const distance = { value: 200, unit: 'px' };
+  test('GlideIn animation with custom from and travel', () => {
+    const from = 315;
+    const travel = { value: 200, unit: 'px' };
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction, distance } as GlideInType,
+      namedEffect: { from, travel } as GlideInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -98,12 +98,12 @@ describe('GlideIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('GlideIn style animation with custom direction and distance', () => {
-    const direction = 45;
-    const distance = { value: 200, unit: 'px' };
+  test('GlideIn style animation with custom from and travel', () => {
+    const from = 315;
+    const travel = { value: 200, unit: 'px' };
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction, distance } as GlideInType,
+      namedEffect: { from, travel } as GlideInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [

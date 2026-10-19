@@ -14,9 +14,14 @@ import {
   MouseEffectAxis,
 } from '../../types';
 
-const DEFAULT_DISTANCE = { value: 80, unit: 'px' };
-const DEFAULT_AXIS: MouseEffectAxis = 'both';
 const AXES = ['both', 'horizontal', 'vertical'] as const;
+
+export const schema = {
+  axis: { type: 'enum', values: AXES, default: 'both' },
+  distance: { type: 'length', default: { value: 80, unit: 'px' } },
+  inverted: { type: 'bool', default: false },
+  scale: { type: 'number', min: 0, default: 1.4 },
+} as const;
 
 class ScaleMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
@@ -61,10 +66,10 @@ class ScaleMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as ScaleMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-  const axis = parseDirection(namedEffect.axis, AXES, DEFAULT_AXIS) as MouseEffectAxis;
-  const { scale = 1.4 } = namedEffect;
+  const inverted = namedEffect.inverted ?? schema.inverted.default;
+  const distance = parseLength(namedEffect.distance, schema.distance.default);
+  const axis = parseDirection(namedEffect.axis, AXES, schema.axis.default) as MouseEffectAxis;
+  const { scale = schema.scale.default } = namedEffect;
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration
@@ -78,3 +83,5 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
 
   return (target: HTMLElement) => new ScaleMouseAnimation(target, animationOptions);
 }
+
+create.schema = schema;

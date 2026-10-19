@@ -6,10 +6,17 @@ import type {
   EffectNineDirections,
 } from '../../types';
 import { toKeyframeValue, parseDirection } from '../../utils';
-import { NINE_DIRECTIONS } from '../../consts';
+import { NINE_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 
 const MAX_Y_TRAVEL = 40;
-const DEFAULT_DIRECTION: EffectNineDirections = 'center';
+const EPSILON = 0.01;
+
+export const schema = {
+  pivot: { type: 'enum', values: NINE_DIRECTIONS, default: 'center' },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+  scale: { type: 'number', min: 0, default: 1.2 },
+  speed: { type: 'number', min: 0, default: 1 },
+} as const;
 
 const directionMap = {
   top: [0, -50],
@@ -23,8 +30,8 @@ const directionMap = {
   center: [0, 0],
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-shrinkScroll'];
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return ['motion-shrinkScroll'].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -33,16 +40,26 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ShrinkScroll;
-  const { range = 'in', scale = range === 'in' ? 1.2 : 0.8, speed = 0 } = namedEffect;
-  const direction = parseDirection(namedEffect?.direction, NINE_DIRECTIONS, DEFAULT_DIRECTION);
+  const {
+    range = schema.range.default,
+    scale: inputScale = schema.scale.default,
+    speed = schema.speed.default,
+  } = namedEffect;
+  const direction = parseDirection<EffectNineDirections>(
+    namedEffect?.pivot,
+    NINE_DIRECTIONS,
+    schema.pivot.default,
+  );
   const easing = 'linear';
   const fill = (
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
   ) as AnimationFillMode;
 
+  const invScale = 1 / Math.max(inputScale, EPSILON);
+  const scale = range === 'in' ? Math.max(inputScale, invScale) : Math.min(inputScale, invScale);
   const scaleFrom = scale;
   const scaleTo = scale;
-  const travelY = speed;
+  const travelY = 1 / Math.max(speed, EPSILON) - 1;
   const travel = travelY * MAX_Y_TRAVEL;
 
   const fromValues = {

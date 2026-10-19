@@ -1,8 +1,12 @@
 import type { BlurIn, TimeAnimationOptions } from '../../types';
 import { toKeyframeValue, getEntranceFill } from '../../utils';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-blurIn'];
+export const schema = {
+  blur: { type: 'number', min: 0, default: 6 },
+} as const;
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-blurIn'].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -10,7 +14,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { blur = 6 } = options.namedEffect as BlurIn;
+  const { blur = schema.blur.default } = options.namedEffect as BlurIn;
   const [fadeIn, blurIn] = getNames(options);
 
   const easing = options.easing || 'linear';

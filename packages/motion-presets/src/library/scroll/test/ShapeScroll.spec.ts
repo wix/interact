@@ -129,10 +129,10 @@ describe('ShapeScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom intensity', () => {
+    test('custom start', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { intensity: 0.75 } as ShapeScrollType,
+        namedEffect: { start: 0.25 } as ShapeScrollType,
       };
 
       const expectedResult = [

@@ -33,10 +33,10 @@ describe('SlideScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as SlideScrollType,
+        namedEffect: { direction: 'right' } as SlideScrollType,
       };
 
       const expectedResult = [
@@ -62,7 +62,7 @@ describe('SlideScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as SlideScrollType,
+        namedEffect: { range: 'out', direction: 'bottom' } as SlideScrollType,
       };
 
       const expectedResult = [
@@ -147,10 +147,10 @@ describe('SlideScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as SlideScrollType,
+        namedEffect: { direction: 'right' } as SlideScrollType,
       };
 
       const expectedResult = [
@@ -178,7 +178,7 @@ describe('SlideScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as SlideScrollType,
+        namedEffect: { range: 'out', direction: 'bottom' } as SlideScrollType,
       };
 
       const expectedResult = [

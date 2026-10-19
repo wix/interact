@@ -2,10 +2,13 @@ import type { EffectFourDirections, SlideIn, TimeAnimationOptions } from '../../
 import { getClipPolygonParams, parseDirection, getEntranceFill } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'left';
+export const schema = {
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: 'left' },
+  start: { type: 'number', min: 0, max: 1, default: 0 },
+} as const;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-slideIn', 'motion-fadeIn'];
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-slideIn', 'motion-fadeIn'].map((name) => name + suffix);
 }
 
 const PARAM_MAP: Record<
@@ -24,12 +27,16 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions) {
   const namedEffect = options.namedEffect as SlideIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { initialTranslate = 1 } = namedEffect;
+  const direction = parseDirection<EffectFourDirections>(
+    namedEffect?.from,
+    FOUR_DIRECTIONS,
+    schema.from.default,
+  );
+  const { start: startTranslate = schema.start.default } = namedEffect;
   const [slideIn, fadeIn] = getNames(options);
 
   const easing = options.easing || 'cubicInOut';
-  const minimum = 100 - initialTranslate * 100;
+  const minimum = startTranslate * 100;
 
   const start = getClipPolygonParams({
     direction: PARAM_MAP[direction].clip,

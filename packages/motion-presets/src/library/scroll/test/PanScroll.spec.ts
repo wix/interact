@@ -59,10 +59,10 @@ describe('PanScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - right', () => {
+    test('custom direction - left', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as PanScrollType,
+        namedEffect: { direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [
@@ -87,7 +87,7 @@ describe('PanScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as PanScrollType,
+        namedEffect: { range: 'out', direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [
@@ -191,10 +191,10 @@ describe('PanScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - right', () => {
+    test('custom direction - left', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as PanScrollType,
+        namedEffect: { direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [
@@ -218,7 +218,7 @@ describe('PanScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as PanScrollType,
+        namedEffect: { range: 'out', direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [

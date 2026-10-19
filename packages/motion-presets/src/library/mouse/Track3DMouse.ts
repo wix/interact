@@ -14,10 +14,15 @@ import {
 } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 
-const DEFAULT_DISTANCE = { value: 200, unit: 'px' };
-const DEFAULT_ANGLE = 5;
-const DEFAULT_AXIS: MouseEffectAxis = 'both';
 const AXES = ['both', 'horizontal', 'vertical'] as const;
+
+export const schema = {
+  angle: { type: 'number', default: 5 },
+  axis: { type: 'enum', values: AXES, default: 'both' },
+  distance: { type: 'length', default: { value: 200, unit: 'px' } },
+  inverted: { type: 'bool', default: false },
+  perspective: { type: 'number', min: 0, default: 800 },
+} as const;
 
 class Track3DMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
@@ -53,11 +58,11 @@ class Track3DMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as Track3DMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-  const angle = parseDirection(namedEffect.angle, [], DEFAULT_ANGLE, true) as number;
-  const axis = parseDirection(namedEffect.axis, AXES, DEFAULT_AXIS) as MouseEffectAxis;
-  const { perspective = 800 } = namedEffect;
+  const inverted = namedEffect.inverted ?? schema.inverted.default;
+  const distance = parseLength(namedEffect.distance, schema.distance.default);
+  const angle = parseDirection(namedEffect.angle, [], schema.angle.default, true) as number;
+  const axis = parseDirection(namedEffect.axis, AXES, schema.axis.default) as MouseEffectAxis;
+  const { perspective = schema.perspective.default } = namedEffect;
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration
@@ -72,3 +77,5 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
 
   return (target: HTMLElement) => new Track3DMouseAnimation(target, animationOptions);
 }
+
+create.schema = schema;

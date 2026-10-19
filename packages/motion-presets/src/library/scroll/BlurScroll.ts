@@ -1,8 +1,14 @@
 import type { AnimationFillMode, BlurScroll, ScrubAnimationOptions, DomApi } from '../../types';
 import { toKeyframeValue } from '../../utils';
+import { SCROLL_RANGES } from '../../consts';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-blurScroll'];
+export const schema = {
+  blur: { type: 'number', min: 0, default: 6 },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+} as const;
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return ['motion-blurScroll'].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -10,7 +16,8 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const { blur = 6, range = 'in' } = options.namedEffect as BlurScroll;
+  const { blur = schema.blur.default, range = schema.range.default } =
+    options.namedEffect as BlurScroll;
 
   const fromValue = range === 'out' ? 0 : blur;
   const toValue = range === 'out' ? blur : 0;

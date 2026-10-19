@@ -51,7 +51,7 @@ describe('TiltScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as TiltScrollType,
+        namedEffect: { range: 'out', direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
@@ -92,7 +92,7 @@ describe('TiltScroll', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
         fill: 'both',
-        namedEffect: { range: 'continuous' } as TiltScrollType,
+        namedEffect: { range: 'continuous', direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
@@ -129,10 +129,10 @@ describe('TiltScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - clockwise', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TiltScrollType,
+        namedEffect: { direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
@@ -163,10 +163,10 @@ describe('TiltScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom parallaxFactor', () => {
+    test('custom speed', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { parallaxFactor: 0.5 } as TiltScrollType,
+        namedEffect: { speed: 2 } as TiltScrollType,
       };
 
       const expectedResult = [
@@ -245,7 +245,7 @@ describe('TiltScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as TiltScrollType,
+        namedEffect: { range: 'out', direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
@@ -291,7 +291,7 @@ describe('TiltScroll', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
         fill: 'both',
-        namedEffect: { range: 'continuous' } as TiltScrollType,
+        namedEffect: { range: 'continuous', direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
@@ -333,10 +333,10 @@ describe('TiltScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - clockwise', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TiltScrollType,
+        namedEffect: { direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
@@ -372,10 +372,10 @@ describe('TiltScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom parallaxFactor', () => {
+    test('custom speed', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { parallaxFactor: 0.5 } as TiltScrollType,
+        namedEffect: { speed: 2 } as TiltScrollType,
       };
 
       const expectedResult = [

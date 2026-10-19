@@ -41,8 +41,8 @@ describe('FoldIn', () => {
       ...baseMockOptions,
       easing: 'cubicInOut',
       namedEffect: {
-        direction: 'left',
-        initialRotate: 45,
+        pivot: 'left',
+        angle: -45,
       } as FoldInType,
     };
 
@@ -117,8 +117,8 @@ describe('FoldIn', () => {
       ...baseMockOptions,
       easing: 'cubicInOut',
       namedEffect: {
-        direction: 'left',
-        initialRotate: 45,
+        pivot: 'left',
+        angle: -45,
       } as FoldInType,
     };
 

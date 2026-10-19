@@ -20,7 +20,7 @@ describe('GrowScroll', () => {
           keyframes: [
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(0) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(0vh) translate(0%, 0%) scale(0.25) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
             },
             {
               transform:
@@ -64,10 +64,10 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - top-right', () => {
+    test('custom pivot - top-right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'top-right' } as GrowScrollType,
+        namedEffect: { pivot: 'top-right', scale: 0 } as GrowScrollType,
       };
 
       const expectedResult = [
@@ -90,10 +90,10 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - bottom-left', () => {
+    test('custom pivot - bottom-left', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'bottom-left' } as GrowScrollType,
+        namedEffect: { pivot: 'bottom-left', scale: 0 } as GrowScrollType,
       };
 
       const expectedResult = [
@@ -116,10 +116,10 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - bottom-right', () => {
+    test('custom pivot - bottom-right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'bottom-right' } as GrowScrollType,
+        namedEffect: { pivot: 'bottom-right', scale: 0 } as GrowScrollType,
       };
 
       const expectedResult = [
@@ -142,10 +142,10 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - top-left', () => {
+    test('custom pivot - top-left', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'top-left' } as GrowScrollType,
+        namedEffect: { pivot: 'top-left', scale: 0 } as GrowScrollType,
       };
 
       const expectedResult = [
@@ -168,10 +168,10 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - bottom', () => {
+    test('custom pivot - bottom', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'bottom' } as GrowScrollType,
+        namedEffect: { pivot: 'bottom', scale: 0 } as GrowScrollType,
       };
 
       const expectedResult = [
@@ -194,10 +194,10 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - top', () => {
+    test('custom pivot - top', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'top' } as GrowScrollType,
+        namedEffect: { pivot: 'top', scale: 0 } as GrowScrollType,
       };
 
       const expectedResult = [
@@ -220,10 +220,10 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom pivot - left', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as GrowScrollType,
+        namedEffect: { pivot: 'left', scale: 0 } as GrowScrollType,
       };
 
       const expectedResult = [
@@ -246,10 +246,10 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - right', () => {
+    test('custom pivot - right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as GrowScrollType,
+        namedEffect: { pivot: 'right', scale: 0 } as GrowScrollType,
       };
 
       const expectedResult = [
@@ -275,17 +275,17 @@ describe('GrowScroll', () => {
     test('custom speed', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { speed: 0.5 } as GrowScrollType,
+        namedEffect: { speed: 0.5, scale: 0 } as GrowScrollType,
       };
 
       const expectedResult = [
         {
-          startOffsetAdd: '-20vh',
+          startOffsetAdd: '-40vh',
           endOffsetAdd: '0px',
           keyframes: [
             {
               transform:
-                'translateY(-20vh) translate(0%, 0%) scale(0) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(-40vh) translate(0%, 0%) scale(0) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
             },
             {
               transform:
@@ -360,10 +360,10 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - top-right', () => {
+    test('custom pivot - top-right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'top-right' } as GrowScrollType,
+        namedEffect: { pivot: 'top-right', scale: 0 } as GrowScrollType,
       };
 
       const expectedResult = [

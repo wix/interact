@@ -1,6 +1,12 @@
 import { cssEasings as easings } from '@wix/motion';
 import type { AnimationFillMode, ScrubAnimationOptions, StretchScroll, DomApi } from '../../types';
 import { roundNumber, toKeyframeValue } from '../../utils';
+import { SCROLL_RANGES } from '../../consts';
+
+export const schema = {
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'out' },
+  stretch: { type: 'number', min: -1, max: 1, default: 0.6 },
+} as const;
 
 const opacityKeyframesMap = {
   in: [
@@ -20,11 +26,12 @@ const opacityKeyframesMap = {
 };
 
 export function getNames(options: ScrubAnimationOptions) {
-  const { range = 'out' } = options.namedEffect as StretchScroll;
+  const { range = schema.range.default } = options.namedEffect as StretchScroll;
+  const { suffix = '' } = options;
   return [
     `motion-stretchScrollScale${range === 'continuous' ? '-continuous' : ''}`,
     `motion-stretchScrollOpacity-${range}`,
-  ];
+  ].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -32,7 +39,8 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const { stretch = 0.6, range = 'out' } = options.namedEffect as StretchScroll;
+  const { stretch = schema.stretch.default, range = schema.range.default } =
+    options.namedEffect as StretchScroll;
   const easing = range === 'continuous' ? 'linear' : 'backInOut';
   const fill = (
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill

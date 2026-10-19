@@ -58,10 +58,10 @@ describe('TurnScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TurnScrollType,
+        namedEffect: { direction: 'right' } as TurnScrollType,
       };
 
       const expectedResult = [
@@ -216,10 +216,10 @@ describe('TurnScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TurnScrollType,
+        namedEffect: { direction: 'right' } as TurnScrollType,
       };
 
       const expectedResult = [

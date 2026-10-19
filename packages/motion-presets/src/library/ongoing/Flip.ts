@@ -2,7 +2,11 @@ import type { AnimationExtraOptions, DomApi, Flip, TimeAnimationOptions } from '
 import { getEasing, getTimingFactor, toKeyframeValue, parseDirection } from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: (typeof AXIS_DIRECTIONS)[number] = 'horizontal';
+export const schema = {
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: 'horizontal' },
+  iterationDelay: { type: 'number', min: 0, default: 0 },
+  perspective: { type: 'number', min: 0, default: 800 },
+} as const;
 
 const DIRECTION_MAP = {
   vertical: { x: '1', y: '0' },
@@ -15,11 +19,15 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Flip;
-  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULT_DIRECTION);
-  const { perspective = 800 } = namedEffect;
+  const direction = parseDirection<(typeof AXIS_DIRECTIONS)[number]>(
+    namedEffect?.direction,
+    AXIS_DIRECTIONS,
+    schema.direction.default,
+  );
+  const { perspective = schema.perspective.default } = namedEffect;
 
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
   const offset = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
@@ -71,8 +79,10 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Flip)?.iterationDelay || 0;
+  const iterationDelay =
+    (options.namedEffect as Flip)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
+  const { suffix = '' } = options;
 
-  return [`motion-flip-${timingFactor}`];
+  return [`motion-flip-${timingFactor}`].map((name) => name + suffix);
 }

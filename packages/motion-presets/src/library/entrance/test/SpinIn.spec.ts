@@ -44,7 +44,7 @@ describe('SpinIn', () => {
       namedEffect: {
         direction: 'counter-clockwise',
         spins: 2,
-        initialScale: 1,
+        scale: 1,
       } as SpinInType,
     };
 
@@ -120,7 +120,7 @@ describe('SpinIn', () => {
       namedEffect: {
         direction: 'counter-clockwise',
         spins: 2,
-        initialScale: 1,
+        scale: 1,
       } as SpinInType,
     };
 

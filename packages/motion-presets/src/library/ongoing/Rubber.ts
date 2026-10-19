@@ -1,8 +1,12 @@
 import type { Rubber, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, roundNumber, toKeyframeValue, mapRange } from '../../utils';
+import { getTimingFactor, roundNumber, toKeyframeValue } from '../../utils';
 
-const RUBBER_OFFSET_SOFT = 0;
-const RUBBER_OFFSET_HARD = 0.1;
+const BASE_STRETCH = 0.05;
+
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: 0 },
+  stretch: { type: 'number', min: -1, max: 1, default: 0.1 },
+} as const;
 
 const SCALE_KEYFRAMES = [
   { keyframe: 45, scaleX: 1.03, scaleY: 0.93 },
@@ -19,14 +23,14 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Rubber;
-  const { intensity = 0.5 } = namedEffect;
+  const { stretch = schema.stretch.default } = namedEffect;
 
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const rubberOffset = mapRange(0, 1, RUBBER_OFFSET_SOFT, RUBBER_OFFSET_HARD, intensity);
+  const rubberOffset = stretch - BASE_STRETCH;
 
   // Create CSS custom properties for the rubber configuration
   const custom: Record<string, string | number> = {};
@@ -70,8 +74,10 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Rubber)?.iterationDelay || 0;
+  const iterationDelay =
+    (options.namedEffect as Rubber)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
+  const { suffix = '' } = options;
 
-  return [`motion-rubber-${timingFactor}`];
+  return [`motion-rubber-${timingFactor}`].map((name) => name + suffix);
 }

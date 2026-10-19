@@ -1,10 +1,19 @@
 import type { AnimationFillMode, ScrubAnimationOptions, Spin3dScroll, DomApi } from '../../types';
 import { toKeyframeValue } from '../../utils';
+import { SCROLL_RANGES } from '../../consts';
 
 const MAX_Y_TRAVEL = 40;
+const EPSILON = 0.01;
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-spin3dScroll'];
+export const schema = {
+  angle: { type: 'number', default: 100 },
+  perspective: { type: 'number', min: 0, default: 1000 },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+  speed: { type: 'number', min: 0, default: 1 },
+} as const;
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return ['motion-spin3dScroll'].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -13,17 +22,18 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const {
-    rotate = -100,
-    speed = 0,
-    range = 'in',
-    perspective = 1000,
+    angle = schema.angle.default,
+    speed = schema.speed.default,
+    range = schema.range.default,
+    perspective = schema.perspective.default,
   } = options.namedEffect as Spin3dScroll;
+  const rotate = -angle;
   const easing = 'linear';
   const fill = (
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
   ) as AnimationFillMode;
 
-  const travel = speed * MAX_Y_TRAVEL;
+  const travel = (1 / Math.max(speed, EPSILON) - 1) * MAX_Y_TRAVEL;
 
   const fromValues = {
     rotationX: range === 'out' ? 0 : -2 * rotate,

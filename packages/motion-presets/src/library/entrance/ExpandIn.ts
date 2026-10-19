@@ -9,8 +9,12 @@ import {
 import type { ExpandIn } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION = 90;
-const DEFAULT_DISTANCE = { value: 120, unit: 'percentage' };
+export const schema = {
+  from: { type: 'angle', default: 270 },
+  scale: { type: 'number', min: 0, max: 1, default: 0 },
+  travel: { type: 'length', default: { value: 120, unit: 'percentage' } },
+} as const;
+
 const DIRECTION_KEYWORD_TO_ANGLE: Record<string, number> = {
   top: 90,
   right: 0,
@@ -18,8 +22,8 @@ const DIRECTION_KEYWORD_TO_ANGLE: Record<string, number> = {
   left: 180,
 };
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-expandIn'];
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-expandIn'].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -28,20 +32,20 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ExpandIn;
-  const { initialScale = 0 } = namedEffect;
+  const { scale = schema.scale.default } = namedEffect;
 
-  const parsedDirection = parseDirection(
-    namedEffect?.direction,
+  const parsedDirection = parseDirection<number | string>(
+    namedEffect?.from,
     FOUR_DIRECTIONS,
-    DEFAULT_DIRECTION,
+    schema.from.default,
     true,
   );
   const direction =
     typeof parsedDirection === 'string'
       ? DIRECTION_KEYWORD_TO_ANGLE[parsedDirection]
-      : parsedDirection;
+      : 360 - parsedDirection;
 
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
+  const distance = parseLength(namedEffect.travel, schema.travel.default);
 
   const [fadeIn, expandIn] = getNames(options);
 
@@ -55,7 +59,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const custom = {
     '--motion-translate-x': `${x}`,
     '--motion-translate-y': `${y}`,
-    '--motion-scale': `${initialScale}`,
+    '--motion-scale': `${scale}`,
   };
 
   return [

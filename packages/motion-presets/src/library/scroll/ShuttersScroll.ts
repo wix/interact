@@ -10,15 +10,21 @@ import {
   getShuttersClipPaths,
   getEasing,
   toKeyframeValue,
-  FOUR_DIRECTIONS,
   parseDirection,
 } from '../../utils';
+import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'right';
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: 'right' },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+  shutters: { type: 'number', min: 1, int: true, default: 12 },
+  staggered: { type: 'bool', default: true },
+} as const;
 
 export function getNames(options: ScrubAnimationOptions) {
-  const { range = 'in' } = options.namedEffect as ShuttersScroll;
-  return [`motion-shuttersScroll-${range === 'continuous' ? '-continuous' : ''}`];
+  const { range = schema.range.default } = options.namedEffect as ShuttersScroll;
+  const { suffix = '' } = options;
+  return [`motion-shuttersScroll-${range === 'continuous' ? '-continuous' : ''}${suffix}`];
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -27,15 +33,23 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ShuttersScroll;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { shutters = 12, staggered = true, range = 'in' } = namedEffect;
+  const direction = parseDirection<EffectFourDirections>(
+    namedEffect?.direction,
+    FOUR_DIRECTIONS,
+    schema.direction.default,
+  );
+  const {
+    shutters = schema.shutters.default,
+    staggered = schema.staggered.default,
+    range = schema.range.default,
+  } = namedEffect;
   const fill = (
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
   ) as AnimationFillMode;
 
   const easing = range === 'in' ? getEasing('sineIn') : getEasing('sineOut');
 
-  const directionOpp = getOppositeDirection(FOUR_DIRECTIONS, direction);
+  const directionOpp = getOppositeDirection([...FOUR_DIRECTIONS], direction);
 
   const { clipStart, clipEnd } = getShuttersClipPaths(
     range === 'out' ? directionOpp : direction,

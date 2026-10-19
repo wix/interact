@@ -1,8 +1,12 @@
 import type { TimeAnimationOptions, DropIn } from '../../types';
 import { toKeyframeValue, getEntranceFill } from '../../utils';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-dropIn'];
+export const schema = {
+  scale: { type: 'number', min: 1, default: 1.6 },
+} as const;
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-dropIn'].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -10,13 +14,13 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { initialScale = 1.6 } = options.namedEffect as DropIn;
+  const { scale = schema.scale.default } = options.namedEffect as DropIn;
   const [fadeIn, dropIn] = getNames(options);
 
   const easing = options.easing || 'quintInOut';
 
   const custom = {
-    '--motion-scale': `${initialScale}`,
+    '--motion-scale': `${scale}`,
   };
 
   return [

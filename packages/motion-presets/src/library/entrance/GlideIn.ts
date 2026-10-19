@@ -8,18 +8,21 @@ import {
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION = 180;
-const DEFAULT_DISTANCE = { value: 100, unit: 'percentage' };
+export const schema = {
+  from: { type: 'angle', default: 180 },
+  travel: { type: 'length', default: { value: 100, unit: 'percentage' } },
+} as const;
+
 const DIRECTION_KEYWORD_TO_ANGLE: Record<string, number> = {
-  top: 90,
+  top: 270,
   right: 0,
-  bottom: 270,
+  bottom: 90,
   left: 180,
 };
 const ALLOW_ANGLES = true;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-glideIn', 'motion-fadeIn'];
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-glideIn', 'motion-fadeIn'].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -29,10 +32,10 @@ export function web(options: TimeAnimationOptions) {
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as GlideIn;
 
-  const parsedDirection = parseDirection(
-    namedEffect?.direction,
+  const parsedDirection = parseDirection<number | string>(
+    namedEffect?.from,
     FOUR_DIRECTIONS,
-    DEFAULT_DIRECTION,
+    schema.from.default,
     ALLOW_ANGLES,
   );
   const direction =
@@ -40,7 +43,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ? DIRECTION_KEYWORD_TO_ANGLE[parsedDirection]
       : parsedDirection;
 
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
+  const distance = parseLength(namedEffect.travel, schema.travel.default);
 
   const angleInRad = (direction * Math.PI) / 180;
   const unit = getCssUnits(distance.unit);
@@ -48,7 +51,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const easing = options.easing || 'quintInOut';
 
   const translateX = `${(Math.cos(angleInRad) * distance.value) | 0}${unit}`;
-  const translateY = `${(Math.sin(angleInRad) * distance.value * -1) | 0}${unit}`;
+  const translateY = `${(Math.sin(angleInRad) * distance.value) | 0}${unit}`;
 
   const custom = {
     '--motion-translate-x': `${translateX}`,

@@ -7,6 +7,7 @@ import type {
   AnimationFillMode,
   TimeAnimationOptions,
 } from '@wix/motion';
+import type { LengthInput, LengthValue } from './types';
 
 export type Direction =
   | 'initial'
@@ -387,14 +388,6 @@ export function getTimingFactor(
   const timingFactor = roundNumber(duration_ / (duration_ + delay_));
   return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
 }
-
-export type LengthValue = { value: number; unit: string };
-export type LengthInput =
-  | string
-  | number
-  | LengthValue
-  | { value: number; unit?: string }
-  | undefined;
 
 const CSS_UNIT_REGEX = /^(-?\d*\.?\d+)(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/i;
 

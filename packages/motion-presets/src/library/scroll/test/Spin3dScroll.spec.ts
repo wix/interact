@@ -36,10 +36,10 @@ describe('Spin3dScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom rotate value', () => {
+    test('custom angle value', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { rotate: -50 } as Spin3dScrollType,
+        namedEffect: { angle: 50 } as Spin3dScrollType,
       };
 
       const expectedResult = [
@@ -124,7 +124,7 @@ describe('Spin3dScroll', () => {
     test('custom speed', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { speed: 0.5 } as Spin3dScrollType,
+        namedEffect: { speed: 2 / 3 } as Spin3dScrollType,
       };
 
       const expectedResult = [
@@ -184,10 +184,10 @@ describe('Spin3dScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom rotate value', () => {
+    test('custom angle value', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { rotate: -50 } as Spin3dScrollType,
+        namedEffect: { angle: 50 } as Spin3dScrollType,
       };
 
       const expectedResult = [
@@ -281,7 +281,7 @@ describe('Spin3dScroll', () => {
     test('custom speed', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { speed: 0.5 } as Spin3dScrollType,
+        namedEffect: { speed: 2 / 3 } as Spin3dScrollType,
       };
 
       const expectedResult = [

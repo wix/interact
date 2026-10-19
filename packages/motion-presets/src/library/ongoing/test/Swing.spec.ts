@@ -62,7 +62,7 @@ describe('Swing', () => {
         ...baseMockOptions,
         duration: 1000,
         easing: 'linear',
-        namedEffect: { swing: 30, iterationDelay: 500 } as SwingType,
+        namedEffect: { angle: 30, iterationDelay: 500 } as SwingType,
       };
 
       const result = Swing.style(mockOptions);
@@ -111,10 +111,10 @@ describe('Swing', () => {
       expect(keyframes[8].offset).toBe(1);
     });
 
-    test('custom direction - right', () => {
+    test('custom pivot - right', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as SwingType,
+        namedEffect: { pivot: 'right' } as SwingType,
       };
 
       const result = Swing.style(mockOptions);
@@ -129,10 +129,10 @@ describe('Swing', () => {
       );
     });
 
-    test('custom direction - left', () => {
+    test('custom pivot - left', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as SwingType,
+        namedEffect: { pivot: 'left' } as SwingType,
       };
 
       const result = Swing.style?.(mockOptions);
@@ -143,10 +143,10 @@ describe('Swing', () => {
       });
     });
 
-    test('custom direction - bottom', () => {
+    test('custom pivot - bottom', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'bottom' } as SwingType,
+        namedEffect: { pivot: 'bottom' } as SwingType,
       };
 
       const result = Swing.style?.(mockOptions);
@@ -215,7 +215,7 @@ describe('Swing', () => {
         ...baseMockOptions,
         duration: 1000,
         easing: 'linear',
-        namedEffect: { swing: 30, iterationDelay: 500 } as SwingType,
+        namedEffect: { angle: 30, iterationDelay: 500 } as SwingType,
       };
 
       const result = Swing.web(mockOptions);
@@ -279,10 +279,10 @@ describe('Swing', () => {
       expect(keyframes[8].offset).toBe(1);
     });
 
-    test('custom direction - right with web output', () => {
+    test('custom pivot - right with web output', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as SwingType,
+        namedEffect: { pivot: 'right' } as SwingType,
       };
 
       const result = Swing.web(mockOptions);

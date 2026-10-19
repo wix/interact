@@ -3,16 +3,23 @@ import {
   getEasing,
   toKeyframeValue,
   parseDirection,
+  parseLength,
+  getCssUnits,
   getEntranceFill,
 } from '../../utils';
 import type { BounceIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DIRECTIONS = [...FOUR_DIRECTIONS, 'center'] as const;
-const DEFAULT_DIRECTION: (typeof DIRECTIONS)[number] = 'bottom';
+const DIRECTIONS = [...FOUR_DIRECTIONS, 'back'] as const;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-bounceIn'];
+export const schema = {
+  from: { type: 'enum', values: DIRECTIONS, default: 'bottom' },
+  perspective: { type: 'number', min: 0, default: 800 },
+  travel: { type: 'length', default: { value: 50, unit: 'px' } },
+} as const;
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-bounceIn'].map((name) => name + suffix);
 }
 
 const { in: easeIn, out: easeOut } = getEasingFamily('sineIn');
@@ -34,7 +41,7 @@ const TRANSLATE_DIRECTION_MAP = {
   right: { y: 0, x: 1, z: 0 },
   bottom: { y: 1, x: 0, z: 0 },
   left: { y: 0, x: -1, z: 0 },
-  center: { x: 0, y: 0, z: -1 },
+  back: { x: 0, y: 0, z: -1 },
 };
 
 export function web(options: TimeAnimationOptions) {
@@ -43,11 +50,17 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as BounceIn;
-  const direction = parseDirection(namedEffect?.direction, DIRECTIONS, DEFAULT_DIRECTION);
-  const distanceFactor = namedEffect?.distanceFactor || 1;
-  const { perspective = 800 } = namedEffect || {};
+  const direction = parseDirection<(typeof DIRECTIONS)[number]>(
+    namedEffect?.from,
+    DIRECTIONS,
+    schema.from.default,
+  );
+  const travel = parseLength(namedEffect?.travel, schema.travel.default);
+  const distanceFactor = travel.value / schema.travel.default.value;
+  const unit = getCssUnits(travel.unit);
+  const { perspective = schema.perspective.default } = namedEffect || {};
   const [fadeIn, bounceIn] = getNames(options);
-  const perspectiveValue = direction === 'center' ? `perspective(${perspective}px)` : ' ';
+  const perspectiveValue = direction === 'back' ? `perspective(${perspective}px)` : ' ';
   const { x, y, z } = TRANSLATE_DIRECTION_MAP[direction];
 
   const custom = {
@@ -75,11 +88,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       perspective_ as string
     ).trim()} translate3d(calc(${directionX} * ${distanceFactor_} * ${
       translate / 2
-    }px), calc(${directionY} * ${distanceFactor_} * ${
+    }${unit}), calc(${directionY} * ${distanceFactor_} * ${
       translate / 2
-    }px), calc(${directionZ} * ${distanceFactor_} * ${
+    }${unit}), calc(${directionZ} * ${distanceFactor_} * ${
       translate / 2
-    }px)) rotateZ(var(--motion-rotate, 0deg))`,
+    }${unit})) rotateZ(var(--motion-rotate, 0deg))`,
   }));
 
   return [

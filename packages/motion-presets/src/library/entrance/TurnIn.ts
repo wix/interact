@@ -1,10 +1,13 @@
 import type { TurnIn, TimeAnimationOptions, EffectFourCorners } from '../../types';
 import { toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
 import { FOUR_CORNERS_DIRECTIONS } from '../../consts';
-const DEFAULT_DIRECTION: EffectFourCorners = 'top-left';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-turnIn'];
+export const schema = {
+  pivot: { type: 'enum', values: FOUR_CORNERS_DIRECTIONS, default: 'top-left' },
+} as const;
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-turnIn'].map((name) => name + suffix);
 }
 
 const DIRECTION_TO_TRANSFORM_MAP: Record<
@@ -23,10 +26,10 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as TurnIn;
-  const direction = parseDirection(
-    namedEffect?.direction,
+  const direction = parseDirection<EffectFourCorners>(
+    namedEffect?.pivot,
     FOUR_CORNERS_DIRECTIONS,
-    DEFAULT_DIRECTION,
+    schema.pivot.default,
   );
   const [fadeIn, turnIn] = getNames(options);
 

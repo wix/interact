@@ -45,11 +45,11 @@ describe('Pulse', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom intensity and duration', () => {
+    test('custom scale and duration', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Pulse,
+        namedEffect: { scale: 0.834, iterationDelay: 500 } as Pulse,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -130,11 +130,11 @@ describe('Pulse', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom intensity and duration', () => {
+    test('custom scale and duration', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Pulse,
+        namedEffect: { scale: 0.834, iterationDelay: 500 } as Pulse,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -177,7 +177,7 @@ describe('Pulse', () => {
     test('style method should populate custom properties correctly', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { intensity: 0.5 } as Pulse,
+        namedEffect: { scale: 0.87 } as Pulse,
       };
 
       const result = PulseAnimation.style(mockOptions);
@@ -187,7 +187,7 @@ describe('Pulse', () => {
 
       // Verify the custom property contains the expected calculated value
       expect(typeof result[0].custom!['--motion-pulse-offset']).toBe('number');
-      expect(result[0].custom!['--motion-pulse-offset']).toBe(0.06); // 0.5 intensity maps to 0.06 offset
+      expect(result[0].custom!['--motion-pulse-offset']).toBe(0.06); // scale 0.87 maps to 0.06 offset
     });
   });
 });

@@ -1,8 +1,12 @@
 import type { TimeAnimationOptions, Bounce, AnimationExtraOptions, DomApi } from '../../types';
-import { getEasing, getTimingFactor, toKeyframeValue, mapRange } from '../../utils';
+import { getEasing, getTimingFactor, toKeyframeValue, parseLength, getCssUnits } from '../../utils';
 
-const BOUNCE_FACTOR_SOFT = 1;
-const BOUNCE_FACTOR_HARD = 3;
+const PEAK_TRANSLATE = 49;
+
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: 0 },
+  travel: { type: 'length', default: { value: 49, unit: 'px' } },
+} as const;
 
 const TRANSLATE_Y_KEYFRAMES = [
   { keyframe: 0, translateY: 0 },
@@ -26,14 +30,15 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Bounce;
-  const { intensity = 0 } = namedEffect;
+  const travel = parseLength(namedEffect.travel, schema.travel.default);
+  const unit = getCssUnits(travel.unit);
 
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const bounceFactor = mapRange(0, 1, BOUNCE_FACTOR_SOFT, BOUNCE_FACTOR_HARD, intensity);
+  const bounceFactor = travel.value / PEAK_TRANSLATE;
 
   const easing = getEasing('sineOut');
 
@@ -43,7 +48,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   const keyframes = TRANSLATE_Y_KEYFRAMES.map(({ keyframe, translateY }) => ({
     offset: (keyframe / 100) * timingFactor,
-    translate: `0px calc(${translateY / 2}px * ${toKeyframeValue(
+    translate: `0px calc(${translateY / 2}${unit} * ${toKeyframeValue(
       custom,
       '--motion-bounce-factor',
       asWeb,
@@ -64,8 +69,10 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Bounce)?.iterationDelay || 0;
+  const iterationDelay =
+    (options.namedEffect as Bounce)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
+  const { suffix = '' } = options;
 
-  return [`motion-bounce-${timingFactor}`];
+  return [`motion-bounce-${timingFactor}`].map((name) => name + suffix);
 }

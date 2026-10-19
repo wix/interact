@@ -1,24 +1,29 @@
 import type {
   AnimationFillMode,
   DomApi,
+  EffectSpinDirection,
   EffectTwoSides,
   ScrubAnimationOptions,
   TurnScroll,
 } from '../../types';
 import { toKeyframeValue, parseDirection } from '../../utils';
-import { SPIN_DIRECTIONS, TWO_SIDES_DIRECTIONS } from '../../consts';
+import { SCROLL_RANGES, SPIN_DIRECTIONS, TWO_SIDES_DIRECTIONS } from '../../consts';
 
-const ELEMENT_ROTATION = 45;
-const DEFAULT_DIRECTION: EffectTwoSides = 'right';
-const DEFAULT_SPIN: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
+export const schema = {
+  angle: { type: 'number', default: 45 },
+  direction: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: 'left' },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+  scale: { type: 'number', min: 0, default: 1 },
+  spin: { type: 'enum', values: SPIN_DIRECTIONS, default: 'clockwise' },
+} as const;
 
 const ROTATE_DIRECTION_MAP = {
   clockwise: 1,
   'counter-clockwise': -1,
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-turnScroll'];
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return ['motion-turnScroll'].map((name) => name + suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -44,9 +49,22 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as TurnScroll;
-  const direction = parseDirection(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULT_DIRECTION);
-  const spin = parseDirection(namedEffect?.spin, SPIN_DIRECTIONS, DEFAULT_SPIN);
-  const { scale = 1, range = 'in' } = namedEffect;
+  const toDirection = parseDirection<EffectTwoSides>(
+    namedEffect?.direction,
+    TWO_SIDES_DIRECTIONS,
+    schema.direction.default,
+  );
+  const direction: EffectTwoSides = toDirection === 'left' ? 'right' : 'left';
+  const spin = parseDirection<EffectSpinDirection>(
+    namedEffect?.spin,
+    SPIN_DIRECTIONS,
+    schema.spin.default,
+  );
+  const {
+    angle = schema.angle.default,
+    scale = schema.scale.default,
+    range = schema.range.default,
+  } = namedEffect;
   const easing = 'linear';
   const fill = (
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
@@ -61,7 +79,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const endXLeft = `calc(100vw - ${toKeyframeValue({}, '--motion-left', false, '0px')})`;
   const [startX, endX] = direction === 'left' ? [startXLeft, endXLeft] : [endXLeft, startXLeft];
 
-  const rotate = ELEMENT_ROTATION * ROTATE_DIRECTION_MAP[spin];
+  const rotate = angle * ROTATE_DIRECTION_MAP[spin];
 
   const fromValues = {
     rotation: range === 'out' ? 0 : -rotate,

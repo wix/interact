@@ -5,10 +5,20 @@ import type {
   AnimationExtraOptions,
   EffectFourDirections,
 } from '../../types';
-import { getTimingFactor, toKeyframeValue, mapRange, parseDirection } from '../../utils';
+import {
+  getCssUnits,
+  getTimingFactor,
+  toKeyframeValue,
+  parseDirection,
+  parseLength,
+} from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'right';
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: 'right' },
+  iterationDelay: { type: 'number', min: 0, default: 0 },
+  travel: { type: 'length', default: { value: 62.5, unit: 'px' } },
+} as const;
 
 const TRANSLATE_KEYFRAMES = [
   { keyframe: 17, translate: 7 },
@@ -20,8 +30,7 @@ const TRANSLATE_KEYFRAMES = [
   { keyframe: 100, translate: 0 },
 ];
 
-const POKE_FACTOR_SOFT = 1;
-const POKE_FACTOR_HARD = 4;
+const PEAK_TRANSLATE = 25;
 
 const DIRECTION_MAP = {
   top: { x: 0, y: -1 },
@@ -36,16 +45,21 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Poke;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { intensity = 0.5 } = namedEffect;
+  const direction = parseDirection<EffectFourDirections>(
+    namedEffect?.direction,
+    FOUR_DIRECTIONS,
+    schema.direction.default,
+  );
+  const travel = parseLength(namedEffect.travel, schema.travel.default);
+  const unit = getCssUnits(travel.unit);
 
   const duration = options.duration || 1;
-  const iterationDelay = +(namedEffect?.iterationDelay || 0);
+  const iterationDelay = +(namedEffect?.iterationDelay || schema.iterationDelay.default);
   const { x, y } = DIRECTION_MAP[direction];
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const pokeFactor = mapRange(0, 1, POKE_FACTOR_SOFT, POKE_FACTOR_HARD, intensity);
+  const pokeFactor = travel.value / PEAK_TRANSLATE;
 
   // Create CSS custom properties for the poke configuration
   const custom: Record<string, string | number> = {
@@ -58,11 +72,11 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       custom,
       '--motion-translate-x',
       asWeb,
-    )} * ${translate}px) calc(${toKeyframeValue(
+    )} * ${translate}${unit}) calc(${toKeyframeValue(
       custom,
       '--motion-translate-y',
       asWeb,
-    )} * ${translate}px)`;
+    )} * ${translate}${unit})`;
 
     return {
       offset: (keyframe / 100) * timingFactor,
@@ -83,8 +97,10 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Poke)?.iterationDelay || 0;
+  const iterationDelay =
+    (options.namedEffect as Poke)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true) as string;
+  const { suffix = '' } = options;
 
-  return [`motion-poke-${timingFactor}`];
+  return [`motion-poke-${timingFactor}`].map((name) => name + suffix);
 }

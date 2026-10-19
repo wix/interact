@@ -2,10 +2,14 @@ import type { SpinIn, TimeAnimationOptions } from '../../types';
 import { toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
 import { SPIN_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
+export const schema = {
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: 'clockwise' },
+  scale: { type: 'number', min: 0, default: 0 },
+  spins: { type: 'number', min: 0, default: 0.5 },
+} as const;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-spinIn'];
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-spinIn'].map((name) => name + suffix);
 }
 
 const DIRECTION_MAP = {
@@ -19,8 +23,12 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as SpinIn;
-  const direction = parseDirection(namedEffect?.direction, SPIN_DIRECTIONS, DEFAULT_DIRECTION);
-  const { spins = 0.5, initialScale = 0 } = namedEffect;
+  const direction = parseDirection<(typeof SPIN_DIRECTIONS)[number]>(
+    namedEffect?.direction,
+    SPIN_DIRECTIONS,
+    schema.direction.default,
+  );
+  const { spins = schema.spins.default, scale: initialScale = schema.scale.default } = namedEffect;
   const [fadeIn, spinIn] = getNames(options);
 
   const easing = options.easing || 'cubicInOut';

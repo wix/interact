@@ -58,10 +58,10 @@ describe('SkewPanScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as SkewPanScrollType,
+        namedEffect: { direction: 'right' } as SkewPanScrollType,
       };
 
       const expectedResult = [
@@ -86,7 +86,7 @@ describe('SkewPanScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as SkewPanScrollType,
+        namedEffect: { range: 'out', direction: 'right' } as SkewPanScrollType,
       };
 
       const expectedResult = [
@@ -98,7 +98,7 @@ describe('SkewPanScroll', () => {
             },
             {
               transform:
-                'translateX(calc(100vw - var(--motion-left, 0px))) skewX(10deg) rotate(var(--motion-rotate, 0))',
+                'translateX(calc(100vw - var(--motion-left, 0px))) skewX(-10deg) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -165,10 +165,10 @@ describe('SkewPanScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as SkewPanScrollType,
+        namedEffect: { direction: 'right' } as SkewPanScrollType,
       };
 
       const expectedResult = [
@@ -194,7 +194,7 @@ describe('SkewPanScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as SkewPanScrollType,
+        namedEffect: { range: 'out', direction: 'right' } as SkewPanScrollType,
       };
 
       const expectedResult = [

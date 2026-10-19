@@ -1,11 +1,25 @@
 import { parseDirection, toKeyframeValue, getEntranceFill } from '../../utils';
-import type { EffectFourDirections, FlipIn, TimeAnimationOptions } from '../../types';
-import { FOUR_DIRECTIONS } from '../../consts';
+import type {
+  EffectFourDirections,
+  EffectTwoAxes,
+  FlipIn,
+  TimeAnimationOptions,
+} from '../../types';
+import { AXIS_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'top';
+export const schema = {
+  angle: { type: 'number', default: 90 },
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: 'vertical' },
+  perspective: { type: 'number', min: 0, default: 800 },
+} as const;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-flipIn'];
+const AXIS_TO_DIRECTION: Record<EffectTwoAxes, EffectFourDirections> = {
+  vertical: 'top',
+  horizontal: 'left',
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-flipIn'].map((name) => name + suffix);
 }
 
 function getRotateFrom(direction: EffectFourDirections, rotate: number) {
@@ -28,12 +42,17 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as FlipIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { initialRotate = 90, perspective = 800 } = namedEffect;
+  const axis = parseDirection<EffectTwoAxes>(
+    namedEffect?.direction,
+    AXIS_DIRECTIONS,
+    schema.direction.default,
+  );
+  const direction = AXIS_TO_DIRECTION[axis];
+  const { angle = schema.angle.default, perspective = schema.perspective.default } = namedEffect;
   const [fadeIn, flipIn] = getNames(options);
   const easing = options.easing || 'backOut';
 
-  const from = getRotateFrom(direction, initialRotate);
+  const from = getRotateFrom(direction, angle);
 
   const custom = {
     '--motion-perspective': `${perspective}px`,

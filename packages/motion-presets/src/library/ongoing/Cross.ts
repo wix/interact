@@ -11,7 +11,10 @@ import type {
 } from '../../types';
 import { getElementOffset, getTimingFactor, parseDirection } from '../../utils';
 
-const DEFAULT_DIRECTION: EffectEightDirections = 'right';
+export const schema = {
+  direction: { type: 'enum', values: EIGHT_DIRECTIONS, default: 'right' },
+  iterationDelay: { type: 'number', min: 0, default: 0 },
+} as const;
 
 const FOUR_DIRECTIONS_TRANSLATIONS = {
   // 100cqw - left
@@ -166,9 +169,13 @@ function generateTranslate(direction: keyof typeof FOUR_CORNERS_TRANSLATIONS) {
 
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?: DomApi) {
   const namedEffect = options.namedEffect as Cross;
-  const direction = parseDirection(namedEffect?.direction, EIGHT_DIRECTIONS, DEFAULT_DIRECTION);
+  const direction = parseDirection<EffectEightDirections>(
+    namedEffect?.direction,
+    EIGHT_DIRECTIONS,
+    schema.direction.default,
+  );
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
@@ -281,6 +288,6 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?:
   ];
 }
 
-export function getNames(_: TimeAnimationOptions & AnimationExtraOptions) {
-  return ['motion-cross'];
+export function getNames({ suffix = '' }: TimeAnimationOptions & AnimationExtraOptions) {
+  return ['motion-cross'].map((name) => name + suffix);
 }

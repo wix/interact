@@ -3,8 +3,12 @@ import { toKeyframeValue, parseDirection, parseLength, getEntranceFill } from '.
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const ROTATION_ANGLE = 80;
-const DEFAULT_DIRECTION: EffectFourDirections = 'right';
-const DEFAULT_DEPTH = { value: 200, unit: 'px' };
+
+export const schema = {
+  depth: { type: 'length', default: { value: 100, unit: 'px' } },
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: 'right' },
+  perspective: { type: 'number', min: 0, default: 800 },
+} as const;
 
 const DIRECTION_MAP: Record<EffectFourDirections, { x: number; y: number; sign: number }> = {
   top: { x: 1, y: 0, sign: 1 },
@@ -17,16 +21,20 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-arcIn'];
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-arcIn'].map((name) => name + suffix);
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ArcIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
+  const direction = parseDirection<EffectFourDirections>(
+    namedEffect?.from,
+    FOUR_DIRECTIONS,
+    schema.from.default,
+  );
 
-  const depth = parseLength(namedEffect.depth, DEFAULT_DEPTH);
-  const { perspective = 800 } = namedEffect;
+  const depth = parseLength(namedEffect.depth, schema.depth.default);
+  const { perspective = schema.perspective.default } = namedEffect;
   const [fadeIn, arcIn] = getNames(options);
 
   const easing = options.easing || 'quintInOut';
@@ -39,8 +47,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     '--motion-arc-x': `${x}`,
     '--motion-arc-y': `${y}`,
     '--motion-arc-sign': `${sign}`,
-    '--motion-depth-negative': `calc(-1 * ${depthValue} / 2)`,
-    '--motion-depth-positive': `calc(${depthValue} / 2)`,
+    '--motion-depth-negative': `calc(-1 * ${depthValue})`,
+    '--motion-depth-positive': depthValue,
   };
 
   return [

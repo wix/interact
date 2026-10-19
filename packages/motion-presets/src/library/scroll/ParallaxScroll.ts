@@ -1,10 +1,16 @@
 import type { ScrubAnimationOptions, ParallaxScroll, AnimationFillMode, DomApi } from '../../types';
 import { toKeyframeValue } from '../../utils';
 
-const DEFAULT_PARALLAX_FACTOR = 0.5;
+const PARALLAX_FACTOR_AT_DEFAULT_SPEED = 0.5;
+const EPSILON = 0.01;
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-parallaxScroll'];
+export const schema = {
+  center: { type: 'number', min: 0, max: 1, default: 0.5 },
+  speed: { type: 'number', min: 0, default: 0.7159 },
+} as const;
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return ['motion-parallaxScroll'].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -13,11 +19,16 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ParallaxScroll;
-  const { parallaxFactor = DEFAULT_PARALLAX_FACTOR } = namedEffect;
+  const { speed = schema.speed.default, center: inputCenter = schema.center.default } = namedEffect;
   const easing = 'linear';
 
-  const start = `${-50 * parallaxFactor}vh`;
-  const end = `${50 * parallaxFactor}vh`;
+  const parallaxFactor =
+    (PARALLAX_FACTOR_AT_DEFAULT_SPEED * (1 / Math.max(speed, EPSILON) - 1)) /
+    (1 / schema.speed.default - 1);
+  const center = Math.min(1 - EPSILON, Math.max(0, inputCenter));
+
+  const start = `${-100 * parallaxFactor * center}vh`;
+  const end = `${100 * parallaxFactor * (1 - center)}vh`;
 
   const [parallaxScroll] = getNames(options);
 
@@ -37,7 +48,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          transform: `translateY(calc(-1 * ${toKeyframeValue(
+          transform: `translateY(calc(${-center / (1 - center)} * ${toKeyframeValue(
             custom,
             '--motion-parallax-to',
             asWeb,

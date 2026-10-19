@@ -46,11 +46,11 @@ describe('Wiggle', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom duration and intensity', () => {
+    test('custom duration, angle and travel', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Wiggle,
+        namedEffect: { angle: 34, travel: 34, iterationDelay: 500 } as Wiggle,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -142,11 +142,11 @@ describe('Wiggle', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom intensity and duration', () => {
+    test('custom angle, travel and duration', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Wiggle,
+        namedEffect: { angle: 34, travel: 34, iterationDelay: 500 } as Wiggle,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -199,7 +199,7 @@ describe('Wiggle', () => {
     test('style method should populate custom properties correctly', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { intensity: 0.5 } as Wiggle,
+        namedEffect: { angle: 25, travel: 25 } as Wiggle,
       };
 
       const result = WiggleAnimation.style?.(mockOptions);

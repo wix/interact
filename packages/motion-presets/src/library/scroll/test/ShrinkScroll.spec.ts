@@ -39,7 +39,7 @@ describe('ShrinkScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as ShrinkScrollType,
+        namedEffect: { range: 'out', scale: 0.8 } as ShrinkScrollType,
       };
 
       const expectedResult = [
@@ -65,10 +65,10 @@ describe('ShrinkScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - top-right', () => {
+    test('custom pivot - top-right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'top-right' } as ShrinkScrollType,
+        namedEffect: { pivot: 'top-right' } as ShrinkScrollType,
       };
 
       const expectedResult = [
@@ -120,7 +120,7 @@ describe('ShrinkScroll', () => {
     test('custom speed', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { speed: 0.5 } as ShrinkScrollType,
+        namedEffect: { speed: 2 / 3 } as ShrinkScrollType,
       };
 
       const expectedResult = [
@@ -180,7 +180,7 @@ describe('ShrinkScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as ShrinkScrollType,
+        namedEffect: { range: 'out', scale: 0.8 } as ShrinkScrollType,
       };
 
       const expectedResult = [
@@ -206,10 +206,10 @@ describe('ShrinkScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - top-right', () => {
+    test('custom pivot - top-right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'top-right' } as ShrinkScrollType,
+        namedEffect: { pivot: 'top-right' } as ShrinkScrollType,
       };
 
       const expectedResult = [

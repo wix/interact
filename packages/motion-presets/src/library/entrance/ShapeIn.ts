@@ -1,8 +1,13 @@
 import type { Shape, ShapeIn, TimeAnimationOptions } from '../../types';
 import { toKeyframeValue, getEntranceFill } from '../../utils';
+import { SHAPES } from '../../consts';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-shapeIn'];
+export const schema = {
+  shape: { type: 'enum', values: SHAPES, default: 'rectangle' },
+} as const;
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-shapeIn'].map((name) => name + suffix);
 }
 
 const shapes: Record<Shape, { start: string; end: string }> = {
@@ -24,7 +29,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { shape = 'rectangle' } = options.namedEffect as ShapeIn;
+  const { shape = schema.shape.default } = options.namedEffect as ShapeIn;
   const [fadeIn, shapeIn] = getNames(options);
   const easing = options.easing || 'cubicInOut';
 

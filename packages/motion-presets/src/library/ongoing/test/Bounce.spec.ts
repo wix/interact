@@ -97,18 +97,18 @@ describe('Bounce', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom duration and intensity', () => {
+    test('custom duration and travel', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { type: 'Bounce', intensity: 0.8, iterationDelay: 500 },
+        namedEffect: { type: 'Bounce', travel: 127.4, iterationDelay: 500 },
       };
 
       const expectedResult = [
         {
           id: 'test-id',
           duration: 1500,
-          namedEffect: { type: 'Bounce', intensity: 0.8, iterationDelay: 500 },
+          namedEffect: { type: 'Bounce', travel: 127.4, iterationDelay: 500 },
           name: 'motion-bounce-067',
           easing: 'linear',
           custom: {
@@ -282,18 +282,18 @@ describe('Bounce', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom duration and intensity', () => {
+    test('custom duration and travel', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { type: 'Bounce', intensity: 0.8, iterationDelay: 500 },
+        namedEffect: { type: 'Bounce', travel: 127.4, iterationDelay: 500 },
       };
 
       const expectedResult = [
         {
           id: 'test-id',
           duration: 1500,
-          namedEffect: { type: 'Bounce', intensity: 0.8, iterationDelay: 500 },
+          namedEffect: { type: 'Bounce', travel: 127.4, iterationDelay: 500 },
           name: 'motion-bounce-067',
           easing: 'linear',
           custom: {
@@ -443,6 +443,18 @@ describe('Bounce', () => {
       const result = Bounce.getNames(mockOptions);
 
       expect(result).toEqual(expectedResult);
+    });
+
+    test('suffix', () => {
+      const mockOptions: TimeAnimationOptions = {
+        ...baseMockOptions,
+        duration: 1000,
+        suffix: '-1a',
+        namedEffect: { type: 'Bounce', iterationDelay: 500 },
+      };
+
+      expect(Bounce.getNames(mockOptions)).toEqual(['motion-bounce-067-1a']);
+      expect(Bounce.style(mockOptions)[0].name).toBe('motion-bounce-067-1a');
     });
   });
 });

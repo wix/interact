@@ -1,8 +1,10 @@
 import type { Pulse, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, toKeyframeValue, mapRange } from '../../utils';
+import { getTimingFactor, roundNumber, toKeyframeValue } from '../../utils';
 
-const PULSE_OFFSET_SOFT = 0;
-const PULSE_OFFSET_HARD = 0.12;
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: 0 },
+  scale: { type: 'number', min: 0, default: 0.93 },
+} as const;
 
 const SCALE_KEYFRAMES = [
   { keyframe: 27, scale: 0.96 },
@@ -17,14 +19,14 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Pulse;
-  const { intensity = 0 } = namedEffect;
+  const { scale: minScale = schema.scale.default } = namedEffect;
 
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const pulseOffset = mapRange(0, 1, PULSE_OFFSET_SOFT, PULSE_OFFSET_HARD, intensity);
+  const pulseOffset = roundNumber(schema.scale.default - minScale, 4);
 
   // Create CSS custom properties for the pulse configuration
   const custom: Record<string, string | number> = {
@@ -64,8 +66,10 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Pulse)?.iterationDelay || 0;
+  const iterationDelay =
+    (options.namedEffect as Pulse)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
+  const { suffix = '' } = options;
 
-  return [`motion-pulse-${timingFactor}`];
+  return [`motion-pulse-${timingFactor}`].map((name) => name + suffix);
 }

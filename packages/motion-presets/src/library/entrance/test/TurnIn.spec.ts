@@ -39,7 +39,7 @@ describe('TurnIn', () => {
   test('TurnIn animation with bottom-right direction', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'bottom-right' } as TurnInType,
+      namedEffect: { pivot: 'bottom-right' } as TurnInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -65,7 +65,7 @@ describe('TurnIn', () => {
   test('TurnIn animation with top-right direction', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'top-right' } as TurnInType,
+      namedEffect: { pivot: 'top-right' } as TurnInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -91,7 +91,7 @@ describe('TurnIn', () => {
   test('TurnIn animation with bottom-left direction', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'bottom-left' } as TurnInType,
+      namedEffect: { pivot: 'bottom-left' } as TurnInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -184,7 +184,7 @@ describe('TurnIn', () => {
   test('TurnIn.style animation with bottom-right direction', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'bottom-right' } as TurnInType,
+      namedEffect: { pivot: 'bottom-right' } as TurnInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [

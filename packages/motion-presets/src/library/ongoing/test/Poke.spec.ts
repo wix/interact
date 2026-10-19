@@ -82,11 +82,11 @@ describe('Poke', () => {
       expect(result[0].keyframes[6].offset).toBeCloseTo(0.67, 2);
     });
 
-    test('Poke animation with custom intensity', () => {
+    test('Poke animation with custom travel', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { intensity: 0.8 } as Poke,
+        namedEffect: { travel: 85 } as Poke,
       };
 
       const result = PokeAnimation.web(mockOptions);
