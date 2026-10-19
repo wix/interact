@@ -68,10 +68,20 @@ export type StyleProperty = {
 
 export type TransitionProperty = StyleProperty & TransitionOptions;
 
+/**
+ * Declarations a state sets on another element of its key, which `selector` finds the way an
+ * effect's `selector` does: inside the key's element.
+ */
+export type ElementStyle = {
+  selector: string;
+  styleProperties: StyleProperty[];
+};
+
 export type StateEffect = {
   key?: string;
   effectId?: string;
   stateAction?: StateAction;
+  elementStyles?: ElementStyle[];
 } & {
   transition?: TransitionOptions & {
     styleProperties: StyleProperty[];

@@ -12,7 +12,7 @@ import {
   IInteractElement,
   InteractPlugin,
 } from '../types';
-import { getElementHash, getInterpolatedKey } from './utilities';
+import { getCodeStates, getElementHash, getInterpolatedKey } from './utilities';
 import { getKeyframeSlots, getSlotKey } from './css';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
@@ -391,6 +391,7 @@ function _ensureInteractionEntry(
       sequences: {},
       interactionIds: new Set(),
       selectors: new Set(),
+      codeStates: [],
     };
   }
 
@@ -571,6 +572,10 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
         }
       });
     });
+  });
+
+  getCodeStates(config).forEach((effect) => {
+    _ensureInteractionEntry(interactions, effect.key).codeStates.push(effect);
   });
 
   return {

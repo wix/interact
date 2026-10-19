@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>State looks</title>
+    <style>
+      .card {
+        width: 240px;
+        padding: 24px;
+        border: 1px solid #999;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      Build first (`yarn workspace @wix/interact build`), then serve the repo root and open this page.
+      Hover the card: the hover state scales the card (its own look) and colors its title, an element
+      style of the same state. The button toggles `selected` from code: no interaction sets it, so
+      its look is a code state in `config.effects`.
+    -->
+    <interact-element data-interact-key="card">
+      <div class="card"><h2 class="title">Title</h2></div>
+    </interact-element>
+    <button id="toggle">Toggle "selected" from code</button>
+    <script type="module">
+      import { Interact, generate } from '../dist/es/web.js';
+
+      const config = {
+        effects: {
+          selected: {
+            key: 'card',
+            selector: '.card',
+            transition: { styleProperties: [{ name: 'background-color', value: 'gold' }] },
+          },
+        },
+        interactions: [
+          {
+            key: 'card',
+            trigger: 'hover',
+            selector: '.card',
+            effects: [
+              {
+                key: 'card',
+                selector: '.card',
+                effectId: 'hovered',
+                transition: {
+                  styleProperties: [
+                    { name: 'transition', value: 'all 0.3s ease 0s' },
+                    { name: 'transform', value: 'scale(1.05)' },
+                  ],
+                },
+                elementStyles: [
+                  {
+                    selector: '.card .title',
+                    styleProperties: [
+                      { name: 'transition', value: 'all 0.3s ease 0s' },
+                      { name: 'color', value: 'crimson' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      document.head.insertAdjacentHTML('beforeend', `<style>${generate(config)}</style>`);
+      Interact.create(config);
+
+      document.getElementById('toggle').addEventListener('click', () => {
+        document.querySelector('interact-element').toggleEffect('selected', 'toggle');
+      });
+    </script>
+  </body>
+</html>
