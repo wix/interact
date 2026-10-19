@@ -1,5 +1,5 @@
 import { ScrubAnimationOptions, AnimationExtraOptions, BounceMouse, TrackMouse } from '../../types';
-import { parseLength } from '../../utils';
+import { parseLengthOrCalc } from '../../utils';
 import createTrack, { AXES } from './TrackMouse';
 
 export const schema = {
@@ -10,7 +10,7 @@ export const schema = {
 
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const namedEffect = options.namedEffect as BounceMouse;
-  const distance = parseLength(namedEffect.distance, schema.distance.default);
+  const distance = parseLengthOrCalc(namedEffect.distance, schema.distance.default);
   const { transitionEasing = 'elastic' } = options;
   return createTrack({
     ...options,

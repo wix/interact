@@ -24,6 +24,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as ArcScroll;
   const direction = parseDirection<(typeof AXIS_DIRECTIONS)[number]>(
     namedEffect?.direction,
@@ -43,9 +44,9 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [arcScroll] = getNames(options);
 
   const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-arc-from': `${rotateAxis}(${fromValue}deg)`,
-    '--motion-arc-to': `${rotateAxis}(${toValue}deg)`,
+    [`--motion-perspective${suffix}`]: `${perspective}px`,
+    [`--motion-arc-from${suffix}`]: `${rotateAxis}(${fromValue}deg)`,
+    [`--motion-arc-to${suffix}`]: `${rotateAxis}(${toValue}deg)`,
   };
 
   return [
@@ -57,16 +58,16 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(-300px) ${toKeyframeValue(
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) translateZ(-300px) ${toKeyframeValue(
             custom,
-            '--motion-arc-from',
+            `--motion-arc-from${suffix}`,
             asWeb,
           )} translateZ(300px) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0deg')})`,
         },
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(-300px) ${toKeyframeValue(
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) translateZ(-300px) ${toKeyframeValue(
             custom,
-            '--motion-arc-to',
+            `--motion-arc-to${suffix}`,
             asWeb,
           )} translateZ(300px) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0deg')})`,
         },

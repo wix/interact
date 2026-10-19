@@ -29,6 +29,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const { shape = schema.shape.default } = options.namedEffect as ShapeIn;
   const [fadeIn, shapeIn] = getNames(options);
   const easing = options.easing || 'cubicInOut';
@@ -36,8 +37,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const { start, end } = shapes[shape];
 
   const custom = {
-    '--motion-shape-start': start,
-    '--motion-shape-end': end,
+    [`--motion-shape-start${suffix}`]: start,
+    [`--motion-shape-end${suffix}`]: end,
   };
 
   return [
@@ -58,10 +59,10 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          clipPath: toKeyframeValue(custom, '--motion-shape-start', asWeb),
+          clipPath: toKeyframeValue(custom, `--motion-shape-start${suffix}`, asWeb),
         },
         {
-          clipPath: toKeyframeValue(custom, '--motion-shape-end', asWeb),
+          clipPath: toKeyframeValue(custom, `--motion-shape-end${suffix}`, asWeb),
         },
       ],
     },

@@ -18,6 +18,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Pulse;
   const { scale: minScale = schema.scale.default } = namedEffect;
 
@@ -30,7 +31,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   // Create CSS custom properties for the pulse configuration
   const custom: Record<string, string | number> = {
-    '--motion-pulse-offset': pulseOffset,
+    [`--motion-pulse-offset${suffix}`]: pulseOffset,
   };
 
   const keyframes = SCALE_KEYFRAMES.map(({ keyframe, scale }) => {
@@ -40,7 +41,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       offset,
       transform: `scale(${
         scale < 1
-          ? `calc(${scale} - ${toKeyframeValue(custom, '--motion-pulse-offset', asWeb)})`
+          ? `calc(${scale} - ${toKeyframeValue(custom, `--motion-pulse-offset${suffix}`, asWeb)})`
           : '1'
       })`,
     };

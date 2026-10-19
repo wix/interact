@@ -9,7 +9,7 @@ import {
   getCssUnits,
   getMouseTransitionEasing,
   mapRange,
-  parseLength,
+  parseLengthOrCalc,
   parseDirection,
 } from '../../utils';
 import { CustomMouse } from './CustomMouse';
@@ -25,6 +25,7 @@ export const schema = {
 class TrackMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
     const { invert, distance, axis } = this.options;
+    const distanceValue = typeof distance === 'string' ? 1 : distance.value;
 
     let translateX = 0;
     let translateY = 0;
@@ -33,16 +34,19 @@ class TrackMouseAnimation extends CustomMouse {
     // if progressX === 0.5, translateX === 0
     // if progressX === 1, translateX === distance
     if (axis === 'both' || axis === 'horizontal') {
-      translateX = mapRange(0, 1, -distance.value, distance.value, progressX) * invert;
+      translateX = mapRange(0, 1, -distanceValue, distanceValue, progressX) * invert;
     }
 
     if (axis === 'both' || axis === 'vertical') {
-      translateY = mapRange(0, 1, -distance.value, distance.value, progressY) * invert;
+      translateY = mapRange(0, 1, -distanceValue, distanceValue, progressY) * invert;
     }
 
-    const units = getCssUnits(distance.unit);
+    const toLength = (value: number) =>
+      typeof distance === 'string'
+        ? `calc(${value} * ${distance})`
+        : `${value}${getCssUnits(distance.unit)}`;
 
-    this.target.style.transform = `translateX(${translateX}${units}) translateY(${translateY}${units}) rotate(var(--motion-rotate, 0deg))`;
+    this.target.style.transform = `translateX(${toLength(translateX)}) translateY(${toLength(translateY)}) rotate(var(--motion-rotate, 0deg))`;
   }
   cancel() {
     this.target.style.transform = '';
@@ -54,7 +58,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as TrackMouse;
   const inverted = namedEffect.inverted ?? schema.inverted.default;
-  const distance = parseLength(namedEffect.distance, schema.distance.default);
+  const distance = parseLengthOrCalc(namedEffect.distance, schema.distance.default);
   const axis = parseDirection(namedEffect.axis, AXES, schema.axis.default) as MouseEffectAxis;
   const invert = inverted ? -1 : 1;
   const animationOptions = {

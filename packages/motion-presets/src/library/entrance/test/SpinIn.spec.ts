@@ -156,4 +156,14 @@ describe('SpinIn', () => {
 
     expect(result).toMatchObject(expectedResult);
   });
+
+  test('SpinIn fade lasts at most the animation duration', () => {
+    const result = SpinIn.style?.({
+      ...baseMockOptions,
+      duration: 1000,
+      namedEffect: { scale: 2 } as SpinInType,
+    });
+
+    expect(result?.[0].duration).toBe(1000);
+  });
 });

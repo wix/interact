@@ -1,5 +1,5 @@
 import type { ArcIn, TimeAnimationOptions, EffectFourDirections, DomApi } from '../../types';
-import { toKeyframeValue, parseDirection, parseLength, getEntranceFill } from '../../utils';
+import { toKeyframeValue, parseDirection, parseLengthOrCalc, getEntranceFill } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const ROTATION_ANGLE = 80;
@@ -26,6 +26,7 @@ export function getNames({ suffix = '' }: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as ArcIn;
   const direction = parseDirection<EffectFourDirections>(
     namedEffect?.from,
@@ -33,22 +34,25 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     schema.from.default,
   );
 
-  const depth = parseLength(namedEffect.depth, schema.depth.default);
+  const depth = parseLengthOrCalc(namedEffect.depth, schema.depth.default);
   const { perspective = schema.perspective.default } = namedEffect;
   const [fadeIn, arcIn] = getNames(options);
 
   const easing = options.easing || 'quintInOut';
 
   const { x, y, sign } = DIRECTION_MAP[direction];
-  const depthValue = `${depth.value}${depth.unit === 'percentage' ? '%' : depth.unit}`;
+  const depthValue =
+    typeof depth === 'string'
+      ? depth
+      : `${depth.value}${depth.unit === 'percentage' ? '%' : depth.unit}`;
 
   const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-arc-x': `${x}`,
-    '--motion-arc-y': `${y}`,
-    '--motion-arc-sign': `${sign}`,
-    '--motion-depth-negative': `calc(-1 * ${depthValue})`,
-    '--motion-depth-positive': depthValue,
+    [`--motion-perspective${suffix}`]: `${perspective}px`,
+    [`--motion-arc-x${suffix}`]: `${x}`,
+    [`--motion-arc-y${suffix}`]: `${y}`,
+    [`--motion-arc-sign${suffix}`]: `${sign}`,
+    [`--motion-depth-negative${suffix}`]: `calc(-1 * ${depthValue})`,
+    [`--motion-depth-positive${suffix}`]: depthValue,
   };
 
   return [
@@ -69,26 +73,26 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(custom, '--motion-depth-negative', asWeb)}) rotateX(calc(${toKeyframeValue(
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) translateZ(${toKeyframeValue(custom, `--motion-depth-negative${suffix}`, asWeb)}) rotateX(calc(${toKeyframeValue(
             custom,
-            '--motion-arc-x',
+            `--motion-arc-x${suffix}`,
             asWeb,
           )} * ${toKeyframeValue(
             custom,
-            '--motion-arc-sign',
+            `--motion-arc-sign${suffix}`,
             asWeb,
           )} * ${ROTATION_ANGLE}deg)) rotateY(calc(${toKeyframeValue(
             custom,
-            '--motion-arc-y',
+            `--motion-arc-y${suffix}`,
             asWeb,
           )} * ${toKeyframeValue(
             custom,
-            '--motion-arc-sign',
+            `--motion-arc-sign${suffix}`,
             asWeb,
-          )} * ${ROTATION_ANGLE}deg)) translateZ(${toKeyframeValue(custom, '--motion-depth-positive', asWeb)}) rotate(var(--motion-rotate, 0deg))`,
+          )} * ${ROTATION_ANGLE}deg)) translateZ(${toKeyframeValue(custom, `--motion-depth-positive${suffix}`, asWeb)}) rotate(var(--motion-rotate, 0deg))`,
         },
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(custom, '--motion-depth-negative', asWeb)}) rotateX(0deg) rotateY(0deg) translateZ(${toKeyframeValue(custom, '--motion-depth-positive', asWeb)}) rotate(var(--motion-rotate, 0deg))`,
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) translateZ(${toKeyframeValue(custom, `--motion-depth-negative${suffix}`, asWeb)}) rotateX(0deg) rotateY(0deg) translateZ(${toKeyframeValue(custom, `--motion-depth-positive${suffix}`, asWeb)}) rotate(var(--motion-rotate, 0deg))`,
         },
       ],
     },

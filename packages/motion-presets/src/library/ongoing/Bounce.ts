@@ -1,5 +1,12 @@
 import type { TimeAnimationOptions, Bounce, AnimationExtraOptions, DomApi } from '../../types';
-import { getEasing, getTimingFactor, toKeyframeValue, parseLength, getCssUnits } from '../../utils';
+import {
+  getEasing,
+  getTimingFactor,
+  toKeyframeValue,
+  parseLengthOrCalc,
+  scaleLength,
+  roundNumber,
+} from '../../utils';
 
 const PEAK_TRANSLATE = 49;
 
@@ -24,35 +31,31 @@ const TRANSLATE_Y_KEYFRAMES = [
   { keyframe: 100, translateY: 0 },
 ];
 
+const roundUnit = (value: number) => roundNumber(value, 6);
+
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Bounce;
-  const travel = parseLength(namedEffect.travel, schema.travel.default);
-  const unit = getCssUnits(travel.unit);
+  const travel = parseLengthOrCalc(namedEffect.travel, schema.travel.default);
 
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const bounceFactor = travel.value / PEAK_TRANSLATE;
-
   const easing = getEasing('sineOut');
 
   const custom = {
-    '--motion-bounce-factor': bounceFactor,
+    [`--motion-bounce-unit${suffix}`]: scaleLength(travel, 1 / PEAK_TRANSLATE, roundUnit),
   };
 
   const keyframes = TRANSLATE_Y_KEYFRAMES.map(({ keyframe, translateY }) => ({
     offset: (keyframe / 100) * timingFactor,
-    translate: `0px calc(${translateY / 2}${unit} * ${toKeyframeValue(
-      custom,
-      '--motion-bounce-factor',
-      asWeb,
-    )})`,
+    translate: `0px calc(${translateY / 2} * ${toKeyframeValue(custom, `--motion-bounce-unit${suffix}`, asWeb)})`,
     easing,
   }));
 

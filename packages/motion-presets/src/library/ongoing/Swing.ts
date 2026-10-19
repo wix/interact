@@ -44,6 +44,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Swing;
   const direction = parseDirection<EffectFourDirections>(
     namedEffect?.pivot,
@@ -64,60 +65,61 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   // Create CSS custom properties for the swing configuration
   const custom: Record<string, string | number> = {
-    '--motion-swing-deg': `${swing}deg`,
-    '--motion-trans-x': `${x * TRANSLATE_DISTANCE}%`,
-    '--motion-trans-y': `${y * TRANSLATE_DISTANCE}%`,
-    '--motion-ease-in': getEasing(ease.in),
-    '--motion-ease-inout': getEasing(ease.inOut),
-    '--motion-ease-out': getEasing(ease.out),
+    [`--motion-swing-deg${suffix}`]: `${swing}deg`,
+    [`--motion-trans-x${suffix}`]: `${x * TRANSLATE_DISTANCE}%`,
+    [`--motion-trans-y${suffix}`]: `${y * TRANSLATE_DISTANCE}%`,
+    [`--motion-ease-in${suffix}`]: getEasing(ease.in),
+    [`--motion-ease-inout${suffix}`]: getEasing(ease.inOut),
+    [`--motion-ease-out${suffix}`]: getEasing(ease.out),
   };
 
   const translateBefore = `translate(${toKeyframeValue(
     custom,
-    '--motion-trans-x',
+    `--motion-trans-x${suffix}`,
     asWeb,
-  )}, ${toKeyframeValue(custom, '--motion-trans-y', asWeb)})`;
+  )}, ${toKeyframeValue(custom, `--motion-trans-y${suffix}`, asWeb)})`;
 
   const translateAfter = `translate(calc(${toKeyframeValue(
     custom,
-    '--motion-trans-x',
+    `--motion-trans-x${suffix}`,
     asWeb,
-  )} * -1), calc(${toKeyframeValue(custom, '--motion-trans-y', asWeb)} * -1))`;
+  )} * -1), calc(${toKeyframeValue(custom, `--motion-trans-y${suffix}`, asWeb)} * -1))`;
 
-  const keyframes = iterationDelay
-    ? FACTORS_SEQUENCE.map(({ factor, timeFactor }) => {
-        const keyframeOffset = timeFactor * timingFactor;
+  const keyframes =
+    timingFactor < 1
+      ? FACTORS_SEQUENCE.map(({ factor, timeFactor }) => {
+          const keyframeOffset = timeFactor * timingFactor;
 
-        return {
-          offset: keyframeOffset,
-          easing: toKeyframeValue(custom, '--motion-ease-inout', asWeb),
-          transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${toKeyframeValue(
-            custom,
-            '--motion-swing-deg',
-            asWeb,
-          )} * ${factor})) ${translateAfter}`,
-        };
-      })
-    : [
-        {
-          offset: 0.25,
-          easing: toKeyframeValue(custom, '--motion-ease-inout', asWeb),
-          transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(${toKeyframeValue(
-            custom,
-            '--motion-swing-deg',
-            asWeb,
-          )}) ${translateAfter}`,
-        },
-        {
-          offset: 0.75,
-          easing: toKeyframeValue(custom, '--motion-ease-in', asWeb),
-          transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${toKeyframeValue(
-            custom,
-            '--motion-swing-deg',
-            asWeb,
-          )} * -1)) ${translateAfter}`,
-        },
-      ];
+          return {
+            offset: keyframeOffset,
+            easing: toKeyframeValue(custom, `--motion-ease-inout${suffix}`, asWeb),
+            transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${toKeyframeValue(
+              custom,
+              `--motion-swing-deg${suffix}`,
+              asWeb,
+            )} * ${factor})) ${translateAfter}`,
+          };
+        })
+      : [
+          {
+            offset: 0.25,
+            easing: toKeyframeValue(custom, `--motion-ease-inout${suffix}`, asWeb),
+            transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(${toKeyframeValue(
+              custom,
+              `--motion-swing-deg${suffix}`,
+              asWeb,
+            )}) ${translateAfter}`,
+          },
+          {
+            offset: 0.75,
+            easing: toKeyframeValue(custom, `--motion-ease-in${suffix}`, asWeb),
+            transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${toKeyframeValue(
+              custom,
+              `--motion-swing-deg${suffix}`,
+              asWeb,
+            )} * -1)) ${translateAfter}`,
+          },
+        ];
 
   return [
     {
@@ -129,7 +131,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       keyframes: [
         {
           offset: 0,
-          easing: toKeyframeValue(custom, '--motion-ease-out', asWeb),
+          easing: toKeyframeValue(custom, `--motion-ease-out${suffix}`, asWeb),
           transform: `rotateZ(var(--motion-rotate, 0deg)) ${translateBefore} rotate(0deg) ${translateAfter}`,
         },
         ...keyframes,

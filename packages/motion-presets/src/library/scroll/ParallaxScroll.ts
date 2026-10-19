@@ -18,6 +18,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as ParallaxScroll;
   const { speed = schema.speed.default, center: inputCenter = schema.center.default } = namedEffect;
   const easing = 'linear';
@@ -33,7 +34,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [parallaxScroll] = getNames(options);
 
   const custom = {
-    '--motion-parallax-to': end,
+    [`--motion-parallax-from${suffix}`]: start,
+    [`--motion-parallax-to${suffix}`]: end,
   };
 
   // use transform: translateY(<value>) and not translate: 0 <value> because of WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=276281
@@ -48,16 +50,16 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          transform: `translateY(calc(${-center / (1 - center)} * ${toKeyframeValue(
+          transform: `translateY(${toKeyframeValue(
             custom,
-            '--motion-parallax-to',
+            `--motion-parallax-from${suffix}`,
             asWeb,
-          )})) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
+          )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
         },
         {
           transform: `translateY(${toKeyframeValue(
             custom,
-            '--motion-parallax-to',
+            `--motion-parallax-to${suffix}`,
             asWeb,
           )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
         },

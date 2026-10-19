@@ -48,6 +48,7 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as TurnScroll;
   const toDirection = parseDirection<EffectTwoSides>(
     namedEffect?.direction,
@@ -95,12 +96,12 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [turnScroll] = getNames(options);
 
   const custom = {
-    '--motion-turn-translate-from': fromValues.translate,
-    '--motion-turn-translate-to': toValues.translate,
-    '--motion-turn-scale-from': fromValues.scale,
-    '--motion-turn-scale-to': toValues.scale,
-    '--motion-turn-rotation-from': `${fromValues.rotation}deg`,
-    '--motion-turn-rotation-to': `${toValues.rotation}deg`,
+    [`--motion-turn-translate-from${suffix}`]: fromValues.translate,
+    [`--motion-turn-translate-to${suffix}`]: toValues.translate,
+    [`--motion-turn-scale-from${suffix}`]: fromValues.scale,
+    [`--motion-turn-scale-to${suffix}`]: toValues.scale,
+    [`--motion-turn-rotation-from${suffix}`]: `${fromValues.rotation}deg`,
+    [`--motion-turn-rotation-to${suffix}`]: `${toValues.rotation}deg`,
   };
 
   return [
@@ -114,34 +115,34 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         {
           transform: `translateX(${toKeyframeValue(
             custom,
-            '--motion-turn-translate-from',
+            `--motion-turn-translate-from${suffix}`,
             asWeb,
           )}) scale(${toKeyframeValue(
             custom,
-            '--motion-turn-scale-from',
+            `--motion-turn-scale-from${suffix}`,
             asWeb,
           )}) rotate(calc(${toKeyframeValue(
             {},
             '--motion-rotate',
             false,
             '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-turn-rotation-from', asWeb)}))`,
+          )} + ${toKeyframeValue(custom, `--motion-turn-rotation-from${suffix}`, asWeb)}))`,
         },
         {
           transform: `translateX(${toKeyframeValue(
             custom,
-            '--motion-turn-translate-to',
+            `--motion-turn-translate-to${suffix}`,
             asWeb,
           )}) scale(${toKeyframeValue(
             custom,
-            '--motion-turn-scale-to',
+            `--motion-turn-scale-to${suffix}`,
             asWeb,
           )}) rotate(calc(${toKeyframeValue(
             {},
             '--motion-rotate',
             false,
             '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-turn-rotation-to', asWeb)}))`,
+          )} + ${toKeyframeValue(custom, `--motion-turn-rotation-to${suffix}`, asWeb)}))`,
         },
       ],
     },

@@ -41,6 +41,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as FlipIn;
   const axis = parseDirection<EffectTwoAxes>(
     namedEffect?.direction,
@@ -55,9 +56,9 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const from = getRotateFrom(direction, angle);
 
   const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-rotate-x': `${from.x}deg`,
-    '--motion-rotate-y': `${from.y}deg`,
+    [`--motion-perspective${suffix}`]: `${perspective}px`,
+    [`--motion-rotate-x${suffix}`]: `${from.x}deg`,
+    [`--motion-rotate-y${suffix}`]: `${from.y}deg`,
   };
 
   return [
@@ -77,10 +78,10 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(var(--motion-rotate-x, ${custom['--motion-rotate-x']})) rotateY(var(--motion-rotate-y, ${custom['--motion-rotate-y']}))`,
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(var(--motion-rotate-x${suffix}, ${custom[`--motion-rotate-x${suffix}`]})) rotateY(var(--motion-rotate-y${suffix}, ${custom[`--motion-rotate-y${suffix}`]}))`,
         },
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(0deg) rotateY(0deg)`,
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(0deg) rotateY(0deg)`,
         },
       ],
     },

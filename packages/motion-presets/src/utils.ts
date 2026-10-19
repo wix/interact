@@ -298,9 +298,10 @@ export function getElementOffset(element: HTMLElement, parent?: HTMLElement) {
 
 const generateShuttersClipPath = (
   direction: EffectFourDirections,
-  shutterCount: number,
+  shutters: number,
   staggered: boolean,
 ) => {
+  const shutterCount = Math.max(1, Math.round(shutters) || 1);
   const isTopOrLeft = direction === 'top' || direction === 'left';
   const iterStart = isTopOrLeft ? shutterCount : 0;
   const iterEnd = isTopOrLeft ? 0 : shutterCount;
@@ -444,6 +445,36 @@ export function parseLength(input: LengthInput, defaultValue: LengthValue): Leng
   }
 
   return defaultValue;
+}
+
+const CSS_CALC_REGEX = /^calc\(.+\)$/i;
+
+export function parseLengthOrCalc(input: LengthInput, defaultValue: LengthValue) {
+  if (typeof input === 'string' && CSS_CALC_REGEX.test(input.trim())) {
+    return input.trim();
+  }
+  return parseLength(input, defaultValue);
+}
+
+const CSS_ANGLE_REGEX = /^-?\d*\.?\d+(rad|grad|turn)$/i;
+
+export function parseCssAngle(input: unknown) {
+  if (typeof input !== 'string') {
+    return undefined;
+  }
+  const trimmed = input.trim();
+  return CSS_ANGLE_REGEX.test(trimmed) || CSS_CALC_REGEX.test(trimmed) ? trimmed : undefined;
+}
+
+export function scaleLength(
+  length: LengthValue | string,
+  factor: number = 1,
+  round: (value: number) => number = (value) => value,
+) {
+  if (typeof length === 'string') {
+    return factor === 1 ? length : `calc(${factor} * ${length})`;
+  }
+  return `${round(length.value * factor)}${getCssUnits(length.unit)}`;
 }
 
 export type DirectionKeywords = readonly string[];

@@ -20,7 +20,7 @@ describe('ParallaxScroll', () => {
           endOffsetAdd: '25vh',
           keyframes: [
             {
-              transform: 'translateY(calc(-1 * 25vh)) rotate(var(--motion-rotate, 0))',
+              transform: 'translateY(-25vh) rotate(var(--motion-rotate, 0))',
             },
             {
               transform: 'translateY(25vh) rotate(var(--motion-rotate, 0))',
@@ -46,8 +46,7 @@ describe('ParallaxScroll', () => {
           endOffsetAdd: '62.9971840901091vh',
           keyframes: [
             {
-              transform:
-                'translateY(calc(-1 * 62.9971840901091vh)) rotate(var(--motion-rotate, 0))',
+              transform: 'translateY(-62.9971840901091vh) rotate(var(--motion-rotate, 0))',
             },
             {
               transform: 'translateY(62.9971840901091vh) rotate(var(--motion-rotate, 0))',
@@ -77,8 +76,7 @@ describe('ParallaxScroll', () => {
           endOffsetAdd: '25vh',
           keyframes: [
             {
-              transform:
-                'translateY(calc(-1 * var(--motion-parallax-to))) rotate(var(--motion-rotate, 0))',
+              transform: 'translateY(var(--motion-parallax-from)) rotate(var(--motion-rotate, 0))',
             },
             {
               transform: 'translateY(var(--motion-parallax-to)) rotate(var(--motion-rotate, 0))',
@@ -104,8 +102,7 @@ describe('ParallaxScroll', () => {
           endOffsetAdd: '37.5vh',
           keyframes: [
             {
-              transform:
-                'translateY(calc(-0.3333333333333333 * var(--motion-parallax-to))) rotate(var(--motion-rotate, 0))',
+              transform: 'translateY(var(--motion-parallax-from)) rotate(var(--motion-rotate, 0))',
             },
             {
               transform: 'translateY(var(--motion-parallax-to)) rotate(var(--motion-rotate, 0))',

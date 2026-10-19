@@ -14,13 +14,14 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const { blur = schema.blur.default } = options.namedEffect as BlurIn;
   const [fadeIn, blurIn] = getNames(options);
 
   const easing = options.easing || 'linear';
 
   const custom = {
-    '--motion-blur': `${blur}px`,
+    [`--motion-blur${suffix}`]: `${blur}px`,
   };
 
   return [
@@ -42,7 +43,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          filter: `blur(${toKeyframeValue(custom, '--motion-blur', asWeb)})`,
+          filter: `blur(${toKeyframeValue(custom, `--motion-blur${suffix}`, asWeb)})`,
         },
         {
           filter: 'blur(0px)',

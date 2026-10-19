@@ -306,4 +306,19 @@ describe('ArcIn', () => {
 
     expect(result).toMatchObject(expectedResult);
   });
+
+  test('ArcIn animation with calc() depth', () => {
+    const mockOptions = {
+      ...baseMockOptions,
+      duration: 1000,
+      namedEffect: { depth: 'calc(10vh + 20px)' } as ArcInType,
+    };
+
+    const result = ArcIn.style?.(mockOptions);
+
+    expect(result?.[1].custom).toMatchObject({
+      '--motion-depth-negative': 'calc(-1 * calc(10vh + 20px))',
+      '--motion-depth-positive': 'calc(10vh + 20px)',
+    });
+  });
 });

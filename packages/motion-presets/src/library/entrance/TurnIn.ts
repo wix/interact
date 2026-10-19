@@ -25,6 +25,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as TurnIn;
   const direction = parseDirection<EffectFourCorners>(
     namedEffect?.pivot,
@@ -37,13 +38,13 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const { x, y, angle } = DIRECTION_TO_TRANSFORM_MAP[direction];
 
   const custom = {
-    '--motion-origin': `${x}%, ${y}%`,
-    '--motion-origin-invert': `${-x}%, ${-y}%`,
-    '--motion-rotate-z': `${angle}deg`,
+    [`--motion-origin${suffix}`]: `${x}%, ${y}%`,
+    [`--motion-origin-invert${suffix}`]: `${-x}%, ${-y}%`,
+    [`--motion-rotate-z${suffix}`]: `${angle}deg`,
   };
 
-  const origin = toKeyframeValue(custom, '--motion-origin', asWeb);
-  const invertedOrigin = toKeyframeValue(custom, '--motion-origin-invert', asWeb);
+  const origin = toKeyframeValue(custom, `--motion-origin${suffix}`, asWeb);
+  const invertedOrigin = toKeyframeValue(custom, `--motion-origin-invert${suffix}`, asWeb);
 
   return [
     {
@@ -65,7 +66,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
         {
           transform: `translate(${origin}) rotate(${toKeyframeValue(
             custom,
-            '--motion-rotate-z',
+            `--motion-rotate-z${suffix}`,
             asWeb,
           )}) translate(${invertedOrigin}) rotate(var(--motion-rotate, 0deg))`,
         },

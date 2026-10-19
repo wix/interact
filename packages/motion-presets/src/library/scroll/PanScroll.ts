@@ -5,7 +5,7 @@ import {
   AnimationFillMode,
   EffectTwoSides,
 } from '../../types';
-import { getCssUnits, toKeyframeValue, parseDirection, parseLength } from '../../utils';
+import { toKeyframeValue, parseDirection, parseLengthOrCalc, scaleLength } from '../../utils';
 import { SCROLL_RANGES, TWO_SIDES_DIRECTIONS } from '../../consts';
 
 export const schema = {
@@ -20,7 +20,9 @@ export function getNames({ suffix = '' }: ScrubAnimationOptions) {
 }
 
 export function prepare(options: ScrubAnimationOptions, dom?: DomApi) {
-  if (options.namedEffect && (options.namedEffect as PanScroll).startFromOffScreen && dom) {
+  const { startFromOffScreen = schema.startFromOffScreen.default } = (options.namedEffect ||
+    {}) as PanScroll;
+  if (startFromOffScreen && dom) {
     let left = 0;
     dom.measure((target) => {
       if (!target) {
@@ -41,6 +43,7 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as PanScroll;
   const toDirection = parseDirection<EffectTwoSides>(
     namedEffect?.direction,
@@ -50,10 +53,10 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const { startFromOffScreen = schema.startFromOffScreen.default, range = schema.range.default } =
     namedEffect;
   const direction = range === 'out' ? toDirection : toDirection === 'left' ? 'right' : 'left';
-  const distance = parseLength(namedEffect.distance, schema.distance.default);
-  const travel = distance.value * (direction === 'left' ? 1 : -1);
-  let startX = `${-travel}${getCssUnits(distance.unit)}`;
-  let endX = `${travel}${getCssUnits(distance.unit)}`;
+  const distance = parseLengthOrCalc(namedEffect.distance, schema.distance.default);
+  const sign = direction === 'left' ? 1 : -1;
+  let startX = scaleLength(distance, -sign);
+  let endX = scaleLength(distance, sign);
   if (startFromOffScreen) {
     const startXLeft = `calc(${toKeyframeValue(
       {},
@@ -75,8 +78,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [panScroll] = getNames(options);
 
   const custom = {
-    '--motion-pan-from': fromValue,
-    '--motion-pan-to': toValue,
+    [`--motion-pan-from${suffix}`]: fromValue,
+    [`--motion-pan-to${suffix}`]: toValue,
   };
 
   // use transform: translateX(<value>) and not translate: <value> because of WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=276281
@@ -91,14 +94,14 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         {
           transform: `translateX(${toKeyframeValue(
             custom,
-            '--motion-pan-from',
+            `--motion-pan-from${suffix}`,
             asWeb,
           )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
         },
         {
           transform: `translateX(${toKeyframeValue(
             custom,
-            '--motion-pan-to',
+            `--motion-pan-to${suffix}`,
             asWeb,
           )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
         },

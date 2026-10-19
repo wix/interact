@@ -22,6 +22,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as SpinIn;
   const direction = parseDirection<(typeof SPIN_DIRECTIONS)[number]>(
     namedEffect?.direction,
@@ -35,8 +36,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const transformRotate = (DIRECTION_MAP[direction] > 0 ? 1 : -1) * 360 * spins;
 
   const custom = {
-    '--motion-scale': `${initialScale}`,
-    '--motion-rotate': `${transformRotate}deg`,
+    [`--motion-scale${suffix}`]: `${initialScale}`,
+    [`--motion-rotate${suffix}`]: `${transformRotate}deg`,
   };
 
   return [
@@ -45,7 +46,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       name: fadeIn,
       fill: getEntranceFill(options),
       easing: 'cubicIn',
-      duration: options.duration! * initialScale,
+      duration: options.duration! * Math.min(initialScale, 1),
       custom: {},
       keyframes: [{ offset: 0, opacity: 0 }],
     },
@@ -57,8 +58,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          scale: toKeyframeValue(custom, '--motion-scale', asWeb),
-          rotate: toKeyframeValue(custom, '--motion-rotate', asWeb),
+          scale: toKeyframeValue(custom, `--motion-scale${suffix}`, asWeb),
+          rotate: toKeyframeValue(custom, `--motion-rotate${suffix}`, asWeb),
         },
         {
           scale: '1',

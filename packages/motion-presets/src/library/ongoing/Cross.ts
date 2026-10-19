@@ -4,10 +4,9 @@ import type {
   Cross,
   DomApi,
   EffectEightDirections,
-  HorizontalOffsetByDirectionParams,
+  EffectFourDirections,
   OffsetByDirectionParams,
   TimeAnimationOptions,
-  VerticalOffsetByDirectionParams,
 } from '../../types';
 import { getElementOffset, getTimingFactor, parseDirection } from '../../utils';
 
@@ -74,84 +73,34 @@ const TRANSLATE_BY_DIRECTION_MAP = {
   },
 };
 
-const GET_OFFSET_BY_DIRECTION_MAP = {
-  // (width + left) / (100cqw + width)
-  left: ({ left, width, parentWidth }: HorizontalOffsetByDirectionParams) =>
-    (width + left) / (parentWidth + width || 1),
-  // (100cqw - left) / (100cqw + width)
-  right: ({ left, width, parentWidth }: HorizontalOffsetByDirectionParams) =>
-    (parentWidth - left) / (parentWidth + width || 1),
-  // (100cqh - top) / (100cqh + height)
-  bottom: ({ top, height, parentHeight }: VerticalOffsetByDirectionParams) =>
-    (parentHeight - top) / (parentHeight + height || 1),
-  // (height + top) / (100cqh + height)
-  top: ({ top, height, parentHeight }: VerticalOffsetByDirectionParams) =>
-    (height + top) / (parentHeight + height || 1),
-  // min(<left>, <top>)
-  'bottom-right': ({
-    left,
-    top,
-    width,
-    height,
-    parentWidth,
-    parentHeight,
-  }: OffsetByDirectionParams) => {
-    const leftDistance = width + left;
-    const topDistance = parentHeight - top;
-
-    return leftDistance < topDistance
-      ? leftDistance / (parentWidth + width || 1)
-      : topDistance / (parentHeight + height || 1);
-  },
-  // min(<right>, <top>)
-  'bottom-left': ({
-    left,
-    top,
-    width,
-    height,
-    parentWidth,
-    parentHeight,
-  }: OffsetByDirectionParams) => {
-    const rightDistance = parentWidth - left;
-    const topDistance = parentHeight - top;
-
-    return rightDistance < topDistance
-      ? rightDistance / (parentWidth + width || 1)
-      : topDistance / (parentHeight + height || 1);
-  },
-  // min(<left>, <bottom>)
-  'top-right': ({
-    left,
-    top,
-    width,
-    height,
-    parentWidth,
-    parentHeight,
-  }: OffsetByDirectionParams) => {
-    const leftDistance = parentWidth - left;
-    const bottomDistance = height + top;
-
-    return leftDistance < bottomDistance
-      ? leftDistance / (parentWidth + width || 1)
-      : bottomDistance / (parentHeight + height || 1);
-  },
-  // min(<right>, <bottom>)
-  'top-left': ({
-    left,
-    top,
-    width,
-    height,
-    parentWidth,
-    parentHeight,
-  }: OffsetByDirectionParams) => {
-    const rightDistance = parentWidth - left;
-    const bottomDistance = height + top;
-
-    return rightDistance < bottomDistance
-      ? rightDistance / (parentWidth + width || 1)
-      : bottomDistance / (parentHeight + height || 1);
-  },
+const SIDE_DISTANCE: Record<EffectFourDirections, (params: OffsetByDirectionParams) => number> = {
+  left: ({ left, width }) => left + width,
+  right: ({ left, parentWidth }) => parentWidth - left,
+  top: ({ top, height }) => top + height,
+  bottom: ({ top, parentHeight }) => parentHeight - top,
 };
+
+const OPPOSITE_SIDE: Record<EffectFourDirections, EffectFourDirections> = {
+  left: 'right',
+  right: 'left',
+  top: 'bottom',
+  bottom: 'top',
+};
+
+function getDistance(sides: EffectFourDirections[], params: OffsetByDirectionParams) {
+  return Math.min(...sides.map((side) => SIDE_DISTANCE[side](params)));
+}
+
+function getOffsetByDirection(direction: EffectEightDirections, params: OffsetByDirectionParams) {
+  const sides = direction.split('-') as EffectFourDirections[];
+  const toDistance = getDistance(sides, params);
+  const fromDistance = getDistance(
+    sides.map((side) => OPPOSITE_SIDE[side]),
+    params,
+  );
+
+  return toDistance / (toDistance + fromDistance || 1);
+}
 
 function generateTranslate(direction: keyof typeof FOUR_CORNERS_TRANSLATIONS) {
   const _from = FOUR_CORNERS_TRANSLATIONS[direction].from;
@@ -189,9 +138,40 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?:
     '--motion-parent-height': '100vh',
   };
 
-  /*
-   * Prepare function
-   */
+  let from, to;
+  if (direction in TRANSLATE_BY_DIRECTION_MAP) {
+    from = TRANSLATE_BY_DIRECTION_MAP[direction as keyof typeof TRANSLATE_BY_DIRECTION_MAP].from;
+    to = TRANSLATE_BY_DIRECTION_MAP[direction as keyof typeof TRANSLATE_BY_DIRECTION_MAP].to;
+  } else {
+    const cornerFromTo = generateTranslate(direction as keyof typeof FOUR_CORNERS_TRANSLATIONS);
+    from = cornerFromTo.from;
+    to = cornerFromTo.to;
+  }
+
+  const keyframes = [
+    {
+      offset: 0,
+      translate: '0 0',
+    },
+    {
+      offset: 0,
+      translate: to,
+      easing: 'step-start',
+    },
+    {
+      offset: 0,
+      translate: from,
+    },
+    {
+      offset: timingFactor,
+      translate: '0 0',
+    },
+    {
+      offset: 1,
+      translate: '0 0',
+    },
+  ];
+
   let left = 0;
   let top = 0;
   let width = 0;
@@ -200,6 +180,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?:
   let parentHeight = 0;
 
   if (dom) {
+    // @wix/motion reads the keyframes before measuring, so the wrap offset is updated in place
     dom.measure((target) => {
       if (!target) {
         return;
@@ -216,6 +197,18 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?:
       height = targetHeight;
       parentWidth = parentRect.width;
       parentHeight = parentRect.height;
+
+      const toDurationOffset =
+        getOffsetByDirection(direction, {
+          left,
+          top,
+          width,
+          height,
+          parentWidth,
+          parentHeight,
+        }) * timingFactor;
+      keyframes[1].offset = toDurationOffset;
+      keyframes[2].offset = toDurationOffset;
     });
 
     dom.mutate((target) => {
@@ -235,55 +228,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?:
       easing: 'linear',
       duration: duration + iterationDelay,
       custom,
-      get keyframes() {
-        // Calculate the timing offset for keyframes
-        const toDurationOffset =
-          GET_OFFSET_BY_DIRECTION_MAP[direction]({
-            left,
-            top,
-            width,
-            height,
-            parentWidth,
-            parentHeight,
-          }) * timingFactor;
-
-        let from, to;
-        if (direction in TRANSLATE_BY_DIRECTION_MAP) {
-          from =
-            TRANSLATE_BY_DIRECTION_MAP[direction as keyof typeof TRANSLATE_BY_DIRECTION_MAP].from;
-          to = TRANSLATE_BY_DIRECTION_MAP[direction as keyof typeof TRANSLATE_BY_DIRECTION_MAP].to;
-        } else {
-          const cornerFromTo = generateTranslate(
-            direction as keyof typeof FOUR_CORNERS_TRANSLATIONS,
-          );
-          from = cornerFromTo.from;
-          to = cornerFromTo.to;
-        }
-
-        return [
-          {
-            offset: 0,
-            translate: '0 0',
-          },
-          {
-            offset: toDurationOffset,
-            translate: to,
-            easing: 'step-start',
-          },
-          {
-            offset: toDurationOffset,
-            translate: from,
-          },
-          {
-            offset: timingFactor,
-            translate: '0 0',
-          },
-          {
-            offset: 1,
-            translate: '0 0',
-          },
-        ];
-      },
+      keyframes,
     },
   ];
 }

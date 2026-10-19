@@ -32,6 +32,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as RevealScroll;
   const { range = schema.range.default } = namedEffect;
   const toDirection = parseDirection<EffectFourDirections>(
@@ -49,16 +50,26 @@ export function style(options: ScrubAnimationOptions) {
   const [revealScroll] = getNames(options);
 
   const custom = {
-    '--motion-clip-from': getRevealClipFrom(direction, range),
-    '--motion-clip-to': getRevealClipTo(direction, range),
+    [`--motion-clip-from${suffix}`]: getRevealClipFrom(direction, range),
+    [`--motion-clip-to${suffix}`]: getRevealClipTo(direction, range),
   };
 
   const keyframes = [
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-from', false, custom['--motion-clip-from']),
+      clipPath: toKeyframeValue(
+        {},
+        `--motion-clip-from${suffix}`,
+        false,
+        custom[`--motion-clip-from${suffix}`],
+      ),
     },
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-to', false, custom['--motion-clip-to']),
+      clipPath: toKeyframeValue(
+        {},
+        `--motion-clip-to${suffix}`,
+        false,
+        custom[`--motion-clip-to${suffix}`],
+      ),
     },
   ];
 

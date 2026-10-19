@@ -39,6 +39,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as SlideScroll;
   const { range = schema.range.default } = namedEffect;
   const toDirection = parseDirection<EffectFourDirections>(
@@ -61,17 +62,22 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       : DIRECTION_TRANSLATION_MAP[range === 'out' ? direction : oppositeDirection];
 
   const custom = {
-    '--motion-clip-from': getRevealClipFrom(direction, range),
-    '--motion-clip-to': getRevealClipTo(direction, range),
-    '--motion-translate-from-x': translateFrom.x,
-    '--motion-translate-from-y': translateFrom.y,
-    '--motion-translate-to-x': translateTo.x,
-    '--motion-translate-to-y': translateTo.y,
+    [`--motion-clip-from${suffix}`]: getRevealClipFrom(direction, range),
+    [`--motion-clip-to${suffix}`]: getRevealClipTo(direction, range),
+    [`--motion-translate-from-x${suffix}`]: translateFrom.x,
+    [`--motion-translate-from-y${suffix}`]: translateFrom.y,
+    [`--motion-translate-to-x${suffix}`]: translateTo.x,
+    [`--motion-translate-to-y${suffix}`]: translateTo.y,
   };
 
   const keyframes = [
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-from', false, custom['--motion-clip-from']),
+      clipPath: toKeyframeValue(
+        {},
+        `--motion-clip-from${suffix}`,
+        false,
+        custom[`--motion-clip-from${suffix}`],
+      ),
       transform: `rotate(${toKeyframeValue(
         {},
         '--motion-rotate',
@@ -79,12 +85,17 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         '0',
       )}) translate(${toKeyframeValue(
         custom,
-        `--motion-translate-from-x`,
+        `--motion-translate-from-x${suffix}`,
         asWeb,
-      )}, ${toKeyframeValue(custom, `--motion-translate-from-y`, asWeb)})`,
+      )}, ${toKeyframeValue(custom, `--motion-translate-from-y${suffix}`, asWeb)})`,
     },
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-to', false, custom['--motion-clip-to']),
+      clipPath: toKeyframeValue(
+        {},
+        `--motion-clip-to${suffix}`,
+        false,
+        custom[`--motion-clip-to${suffix}`],
+      ),
       transform: `rotate(${toKeyframeValue(
         {},
         '--motion-rotate',
@@ -92,9 +103,9 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         '0',
       )}) translate(${toKeyframeValue(
         custom,
-        `--motion-translate-to-x`,
+        `--motion-translate-to-x${suffix}`,
         asWeb,
-      )}, ${toKeyframeValue(custom, `--motion-translate-to-y`, asWeb)})`,
+      )}, ${toKeyframeValue(custom, `--motion-translate-to-y${suffix}`, asWeb)})`,
     },
   ];
 

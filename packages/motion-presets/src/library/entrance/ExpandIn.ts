@@ -2,7 +2,9 @@ import type { TimeAnimationOptions } from '../../types';
 import {
   getCssUnits,
   toKeyframeValue,
-  parseLength,
+  parseLengthOrCalc,
+  parseCssAngle,
+  scaleLength,
   parseDirection,
   getEntranceFill,
 } from '../../utils';
@@ -31,6 +33,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as ExpandIn;
   const { scale = schema.scale.default } = namedEffect;
 
@@ -45,21 +48,29 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ? DIRECTION_KEYWORD_TO_ANGLE[parsedDirection]
       : 360 - parsedDirection;
 
-  const distance = parseLength(namedEffect.travel, schema.travel.default);
+  const distance = parseLengthOrCalc(namedEffect.travel, schema.travel.default);
+  const cssAngle = parseCssAngle(namedEffect?.from);
 
   const [fadeIn, expandIn] = getNames(options);
 
   const easing = options.easing || 'cubicInOut';
-  const angleInRad = (direction * Math.PI) / 180;
-  const unit = getCssUnits(distance.unit);
 
-  const x = `${(Math.cos(angleInRad) * distance.value) | 0}${unit}`;
-  const y = `${(Math.sin(angleInRad) * distance.value * -1) | 0}${unit}`;
+  let x, y;
+  if (cssAngle || typeof distance === 'string') {
+    const angle = cssAngle || `${360 - direction}deg`;
+    x = `calc(cos(${angle}) * ${scaleLength(distance)})`;
+    y = `calc(sin(${angle}) * ${scaleLength(distance)})`;
+  } else {
+    const angleInRad = (direction * Math.PI) / 180;
+    const unit = getCssUnits(distance.unit);
+    x = `${(Math.cos(angleInRad) * distance.value) | 0}${unit}`;
+    y = `${(Math.sin(angleInRad) * distance.value * -1) | 0}${unit}`;
+  }
 
   const custom = {
-    '--motion-translate-x': `${x}`,
-    '--motion-translate-y': `${y}`,
-    '--motion-scale': `${scale}`,
+    [`--motion-translate-x${suffix}`]: `${x}`,
+    [`--motion-translate-y${suffix}`]: `${y}`,
+    [`--motion-scale${suffix}`]: `${scale}`,
   };
 
   return [
@@ -82,15 +93,15 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
         {
           transform: `translate(${toKeyframeValue(
             custom,
-            '--motion-translate-x',
+            `--motion-translate-x${suffix}`,
             asWeb,
           )}, ${toKeyframeValue(
             custom,
-            '--motion-translate-y',
+            `--motion-translate-y${suffix}`,
             asWeb,
           )}) rotate(var(--motion-rotate, 0deg)) scale(${toKeyframeValue(
             custom,
-            '--motion-scale',
+            `--motion-scale${suffix}`,
             asWeb,
           )})`,
         },

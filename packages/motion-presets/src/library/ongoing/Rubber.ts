@@ -22,6 +22,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Rubber;
   const { stretch = schema.stretch.default } = namedEffect;
 
@@ -44,8 +45,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     const adjustedScaleY = roundNumber(scaleY - offset, 4);
 
     // Create custom property keys for this keyframe
-    const scaleXKey = `--motion-scale-x-${keyframe}`;
-    const scaleYKey = `--motion-scale-y-${keyframe}`;
+    const scaleXKey = `--motion-scale-x${suffix}-${keyframe}`;
+    const scaleYKey = `--motion-scale-y${suffix}-${keyframe}`;
 
     // Add the scale values to custom properties
     custom[scaleXKey] = adjustedScaleX;

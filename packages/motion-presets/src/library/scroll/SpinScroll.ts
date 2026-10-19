@@ -23,6 +23,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as SpinScroll;
   const direction = parseDirection<(typeof SPIN_DIRECTIONS)[number]>(
     namedEffect?.direction,
@@ -49,10 +50,10 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [spinScroll] = getNames(options);
 
   const custom = {
-    '--motion-spin-from': `${spinDirection * fromValue}deg`,
-    '--motion-spin-to': `${spinDirection * toValue}deg`,
-    '--motion-spin-scale-from': isIn ? scale : 1,
-    '--motion-spin-scale-to': isIn ? 1 : scale,
+    [`--motion-spin-from${suffix}`]: `${spinDirection * fromValue}deg`,
+    [`--motion-spin-to${suffix}`]: `${spinDirection * toValue}deg`,
+    [`--motion-spin-scale-from${suffix}`]: isIn ? scale : 1,
+    [`--motion-spin-scale-to${suffix}`]: isIn ? 1 : scale,
   };
 
   return [
@@ -66,26 +67,26 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         {
           transform: `scale(${toKeyframeValue(
             custom,
-            '--motion-spin-scale-from',
+            `--motion-spin-scale-from${suffix}`,
             asWeb,
           )}) rotate(calc(${toKeyframeValue(
             {},
             '--motion-rotate',
             false,
             '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-spin-from', asWeb)}))`,
+          )} + ${toKeyframeValue(custom, `--motion-spin-from${suffix}`, asWeb)}))`,
         },
         {
           transform: `scale(${toKeyframeValue(
             custom,
-            '--motion-spin-scale-to',
+            `--motion-spin-scale-to${suffix}`,
             asWeb,
           )}) rotate(calc(${toKeyframeValue(
             {},
             '--motion-rotate',
             false,
             '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-spin-to', asWeb)}))`,
+          )} + ${toKeyframeValue(custom, `--motion-spin-to${suffix}`, asWeb)}))`,
         },
       ],
     },

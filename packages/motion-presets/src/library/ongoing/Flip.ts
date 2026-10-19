@@ -18,6 +18,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Flip;
   const direction = parseDirection<(typeof AXIS_DIRECTIONS)[number]>(
     namedEffect?.direction,
@@ -35,22 +36,22 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const easing = options.easing || 'linear';
 
   const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-rotate-x': rotationAxes.x,
-    '--motion-rotate-y': rotationAxes.y,
+    [`--motion-perspective${suffix}`]: `${perspective}px`,
+    [`--motion-rotate-x${suffix}`]: rotationAxes.x,
+    [`--motion-rotate-y${suffix}`]: rotationAxes.y,
   };
 
   const rotateStart = `rotate3d(${toKeyframeValue(
     custom,
-    '--motion-rotate-x',
+    `--motion-rotate-x${suffix}`,
     asWeb,
-  )}, ${toKeyframeValue(custom, '--motion-rotate-y', asWeb)}, 0, 0deg)`;
+  )}, ${toKeyframeValue(custom, `--motion-rotate-y${suffix}`, asWeb)}, 0, 0deg)`;
 
   const rotateEnd = `rotate3d(${toKeyframeValue(
     custom,
-    '--motion-rotate-x',
+    `--motion-rotate-x${suffix}`,
     asWeb,
-  )}, ${toKeyframeValue(custom, '--motion-rotate-y', asWeb)}, 0, 360deg)`;
+  )}, ${toKeyframeValue(custom, `--motion-rotate-y${suffix}`, asWeb)}, 0, 360deg)`;
 
   return [
     {
@@ -62,16 +63,16 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       keyframes: [
         {
           offset: 0,
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateStart}`,
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateStart}`,
           easing: getEasing(easing),
         },
         {
           offset,
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateEnd}`,
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateEnd}`,
         },
         {
           offset: 1,
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateEnd}`,
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateEnd}`,
         },
       ],
     },

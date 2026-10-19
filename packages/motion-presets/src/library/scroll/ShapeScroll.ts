@@ -49,6 +49,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const { start: startOpen = schema.start.default, range = schema.range.default } =
     options.namedEffect as ShapeScroll;
   let { shape = schema.shape.default } = options.namedEffect as ShapeScroll;
@@ -65,24 +66,24 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [shapeScroll] = getNames(options);
 
   const custom = {
-    '--motion-clip-from': range === 'out' ? end : start,
-    '--motion-clip-to': range === 'out' ? start : end,
+    [`--motion-clip-from${suffix}`]: range === 'out' ? end : start,
+    [`--motion-clip-to${suffix}`]: range === 'out' ? start : end,
   };
 
   const easing = getEasing('circInOut');
 
   const keyframes = [
     {
-      clipPath: toKeyframeValue(custom, `--motion-clip-from`, asWeb),
+      clipPath: toKeyframeValue(custom, `--motion-clip-from${suffix}`, asWeb),
       easing,
     },
-    { clipPath: toKeyframeValue(custom, `--motion-clip-to`, asWeb) },
+    { clipPath: toKeyframeValue(custom, `--motion-clip-to${suffix}`, asWeb) },
   ];
 
   if (range === 'continuous') {
     keyframes[1].easing = easing;
     keyframes.push({
-      clipPath: toKeyframeValue(custom, `--motion-clip-from`, asWeb),
+      clipPath: toKeyframeValue(custom, `--motion-clip-from${suffix}`, asWeb),
     });
   }
 

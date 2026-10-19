@@ -4,7 +4,8 @@ import {
   getTimingFactor,
   roundNumber,
   toKeyframeValue,
-  parseLength,
+  parseLengthOrCalc,
+  scaleLength,
 } from '../../utils';
 
 const PEAK_ROTATE = 10;
@@ -29,22 +30,22 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Wiggle;
   const { angle = schema.angle.default } = namedEffect;
-  const travel = parseLength(namedEffect.travel, schema.travel.default);
+  const travel = parseLengthOrCalc(namedEffect.travel, schema.travel.default);
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
   const wiggleFactor = angle / PEAK_ROTATE;
-  const translateFactor = travel.value / PEAK_TRANSLATE;
 
   let currentRotation = 0;
 
   // Create CSS custom properties for the wiggle configuration
   const custom: Record<string, string | number> = {
-    '--motion-wiggle-factor': wiggleFactor,
+    [`--motion-wiggle-factor${suffix}`]: wiggleFactor,
   };
 
   const keyframes = TRANSFORM_KEYFRAMES.map(({ keyframe, transY, accRotate }) => {
@@ -52,10 +53,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     const rotateValue = `calc(var(--motion-rotate, 0deg) + ${roundNumber(
       currentRotation + accRotate * wiggleFactor,
     )}deg)`;
-    const translateYValue = `${transY * translateFactor}${getCssUnits(travel.unit)}`;
+    const translateYValue =
+      typeof travel === 'string'
+        ? scaleLength(travel, transY / PEAK_TRANSLATE)
+        : `${transY * (travel.value / PEAK_TRANSLATE)}${getCssUnits(travel.unit)}`;
 
-    const rotateKey = `--motion-rotate-${keyframe}`;
-    const translateYKey = `--motion-translate-y-${keyframe}`;
+    const rotateKey = `--motion-rotate${suffix}-${keyframe}`;
+    const translateYKey = `--motion-translate-y${suffix}-${keyframe}`;
 
     // For non-web usage, add the values to custom properties
     custom[rotateKey] = rotateValue;

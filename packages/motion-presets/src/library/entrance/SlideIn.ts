@@ -26,6 +26,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as SlideIn;
   const direction = parseDirection<EffectFourDirections>(
     namedEffect?.from,
@@ -45,9 +46,9 @@ export function style(options: TimeAnimationOptions) {
   const clipEnd = getClipPolygonParams({ direction: 'initial' });
 
   const custom = {
-    '--motion-clip-start': start,
-    '--motion-translate-x': `${PARAM_MAP[direction].dx * 100}%`,
-    '--motion-translate-y': `${PARAM_MAP[direction].dy * 100}%`,
+    [`--motion-clip-start${suffix}`]: start,
+    [`--motion-translate-x${suffix}`]: `${PARAM_MAP[direction].dx * 100}%`,
+    [`--motion-translate-y${suffix}`]: `${PARAM_MAP[direction].dy * 100}%`,
   };
 
   return [
@@ -59,8 +60,8 @@ export function style(options: TimeAnimationOptions) {
       custom,
       keyframes: [
         {
-          transform: `rotate(var(--motion-rotate, 0deg)) translate(var(--motion-translate-x, ${custom['--motion-translate-x']}), var(--motion-translate-y, ${custom['--motion-translate-y']}))`,
-          clipPath: `var(--motion-clip-start, ${custom['--motion-clip-start']})`,
+          transform: `rotate(var(--motion-rotate, 0deg)) translate(var(--motion-translate-x${suffix}, ${custom[`--motion-translate-x${suffix}`]}), var(--motion-translate-y${suffix}, ${custom[`--motion-translate-y${suffix}`]}))`,
+          clipPath: `var(--motion-clip-start${suffix}, ${custom[`--motion-clip-start${suffix}`]})`,
         },
         {
           transform: 'rotate(var(--motion-rotate, 0deg)) translate(0px, 0px)',

@@ -16,6 +16,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const { opacity = schema.opacity.default, range = schema.range.default } =
     options.namedEffect as FadeScroll;
   const isOut = range === 'out';
@@ -29,8 +30,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [fadeScroll] = getNames(options);
 
   const custom = {
-    '--motion-fade-from': fromValue,
-    '--motion-fade-to': toValue,
+    [`--motion-fade-from${suffix}`]: fromValue,
+    [`--motion-fade-to${suffix}`]: toValue,
   };
 
   return [
@@ -42,10 +43,10 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          opacity: toKeyframeValue(custom, '--motion-fade-from', asWeb),
+          opacity: toKeyframeValue(custom, `--motion-fade-from${suffix}`, asWeb),
         },
         {
-          opacity: toKeyframeValue(custom, '--motion-fade-to', asWeb),
+          opacity: toKeyframeValue(custom, `--motion-fade-to${suffix}`, asWeb),
         },
       ],
     },

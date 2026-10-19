@@ -9,7 +9,7 @@ import {
   getCssUnits,
   getMouseTransitionEasing,
   mapRange,
-  parseLength,
+  parseLengthOrCalc,
   parseDirection,
 } from '../../utils';
 import { circInOut } from '@wix/motion';
@@ -31,14 +31,15 @@ class SkewMouseAnimation extends CustomMouse {
     let skewX = 0;
     let skewY = 0;
     const { distance, angle, axis, invert } = this.options;
+    const distanceValue = typeof distance === 'string' ? 1 : distance.value;
 
     // distance
     if (axis !== 'vertical') {
-      translateX = mapRange(0, 1, -distance.value, distance.value, progressX) * invert;
+      translateX = mapRange(0, 1, -distanceValue, distanceValue, progressX) * invert;
       skewX = mapRange(0, 1, angle, -angle, progressX) * invert;
     }
     if (axis !== 'horizontal') {
-      translateY = mapRange(0, 1, -distance.value, distance.value, progressY) * invert;
+      translateY = mapRange(0, 1, -distanceValue, distanceValue, progressY) * invert;
       skewY = mapRange(0, 1, angle, -angle, progressY) * invert;
     }
     if (axis === 'both') {
@@ -53,9 +54,12 @@ class SkewMouseAnimation extends CustomMouse {
       skewY *= mapRange(0, 1, 1, -1, circInOut(progressX));
     }
 
-    const units = getCssUnits(distance.unit);
+    const toLength = (value: number) =>
+      typeof distance === 'string'
+        ? `calc(${value} * ${distance})`
+        : `${value}${getCssUnits(distance.unit)}`;
 
-    const transform = `translateX(${translateX}${units}) translateY(${translateY}${units}) skew(${skewX}deg, ${skewY}deg) rotate(var(--motion-rotate, 0deg))`;
+    const transform = `translateX(${toLength(translateX)}) translateY(${toLength(translateY)}) skew(${skewX}deg, ${skewY}deg) rotate(var(--motion-rotate, 0deg))`;
 
     this.target.style.transform = transform;
   }
@@ -70,7 +74,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as SkewMouse;
   const inverted = namedEffect.inverted ?? schema.inverted.default;
-  const distance = parseLength(namedEffect.distance, schema.distance.default);
+  const distance = parseLengthOrCalc(namedEffect.distance, schema.distance.default);
   const angle = parseDirection(namedEffect.angle, [], schema.angle.default, true) as number;
   const axis = parseDirection(namedEffect.axis, AXES, schema.axis.default) as MouseEffectAxis;
   const invert = inverted ? -1 : 1;

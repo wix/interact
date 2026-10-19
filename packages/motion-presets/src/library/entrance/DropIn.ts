@@ -14,13 +14,14 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const { scale = schema.scale.default } = options.namedEffect as DropIn;
   const [fadeIn, dropIn] = getNames(options);
 
   const easing = options.easing || 'quintInOut';
 
   const custom = {
-    '--motion-scale': `${scale}`,
+    [`--motion-scale${suffix}`]: `${scale}`,
   };
 
   return [
@@ -41,7 +42,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          scale: toKeyframeValue(custom, '--motion-scale', asWeb),
+          scale: toKeyframeValue(custom, `--motion-scale${suffix}`, asWeb),
         },
         {
           scale: '1',

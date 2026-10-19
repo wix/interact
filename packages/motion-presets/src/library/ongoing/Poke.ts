@@ -6,11 +6,12 @@ import type {
   EffectFourDirections,
 } from '../../types';
 import {
-  getCssUnits,
+  scaleLength,
+  roundNumber,
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
-  parseLength,
+  parseLengthOrCalc,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -39,19 +40,21 @@ const DIRECTION_MAP = {
   left: { x: -1, y: 0 },
 };
 
+const roundUnit = (value: number) => roundNumber(value, 6);
+
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Poke;
   const direction = parseDirection<EffectFourDirections>(
     namedEffect?.direction,
     FOUR_DIRECTIONS,
     schema.direction.default,
   );
-  const travel = parseLength(namedEffect.travel, schema.travel.default);
-  const unit = getCssUnits(travel.unit);
+  const travel = parseLengthOrCalc(namedEffect.travel, schema.travel.default);
 
   const duration = options.duration || 1;
   const iterationDelay = +(namedEffect?.iterationDelay || schema.iterationDelay.default);
@@ -59,24 +62,26 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const pokeFactor = travel.value / PEAK_TRANSLATE;
+  const pokeUnit = scaleLength(travel, 1 / PEAK_TRANSLATE, roundUnit);
 
   // Create CSS custom properties for the poke configuration
   const custom: Record<string, string | number> = {
-    '--motion-translate-x': x * pokeFactor,
-    '--motion-translate-y': y * pokeFactor,
+    [`--motion-translate-x${suffix}`]: x,
+    [`--motion-translate-y${suffix}`]: y,
+    [`--motion-poke-unit${suffix}`]: pokeUnit,
   };
 
+  const pokeUnit_ = toKeyframeValue(custom, `--motion-poke-unit${suffix}`, asWeb);
   const keyframes = TRANSLATE_KEYFRAMES.map(({ keyframe, translate }) => {
     const translateValue = `calc(${toKeyframeValue(
       custom,
-      '--motion-translate-x',
+      `--motion-translate-x${suffix}`,
       asWeb,
-    )} * ${translate}${unit}) calc(${toKeyframeValue(
+    )} * ${translate} * ${pokeUnit_}) calc(${toKeyframeValue(
       custom,
-      '--motion-translate-y',
+      `--motion-translate-y${suffix}`,
       asWeb,
-    )} * ${translate}${unit})`;
+    )} * ${translate} * ${pokeUnit_})`;
 
     return {
       offset: (keyframe / 100) * timingFactor,

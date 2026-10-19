@@ -39,6 +39,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as GrowScroll;
   const {
     range = schema.range.default,
@@ -80,12 +81,12 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [growScroll] = getNames(options);
 
   const custom = {
-    '--motion-travel-from': `${fromValues.travel}vh`,
-    '--motion-travel-to': `${toValues.travel}vh`,
-    '--motion-grow-from': fromValues.scale,
-    '--motion-grow-to': toValues.scale,
-    '--motion-trans-x': `${trnsX}%`,
-    '--motion-trans-y': `${trnsY}%`,
+    [`--motion-travel-from${suffix}`]: `${fromValues.travel}vh`,
+    [`--motion-travel-to${suffix}`]: `${toValues.travel}vh`,
+    [`--motion-grow-from${suffix}`]: fromValues.scale,
+    [`--motion-grow-to${suffix}`]: toValues.scale,
+    [`--motion-trans-x${suffix}`]: `${trnsX}%`,
+    [`--motion-trans-y${suffix}`]: `${trnsY}%`,
   };
 
   return [
@@ -101,46 +102,46 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         {
           transform: `translateY(${toKeyframeValue(
             custom,
-            '--motion-travel-from',
+            `--motion-travel-from${suffix}`,
             asWeb,
-          )}) translate(${toKeyframeValue(custom, '--motion-trans-x', asWeb)}, ${toKeyframeValue(
+          )}) translate(${toKeyframeValue(custom, `--motion-trans-x${suffix}`, asWeb)}, ${toKeyframeValue(
             custom,
-            '--motion-trans-y',
+            `--motion-trans-y${suffix}`,
             asWeb,
           )}) scale(${toKeyframeValue(
             custom,
-            '--motion-grow-from',
+            `--motion-grow-from${suffix}`,
             asWeb,
           )}) translate(calc(-1 * ${toKeyframeValue(
             custom,
-            '--motion-trans-x',
+            `--motion-trans-x${suffix}`,
             asWeb,
           )}), calc(-1 * ${toKeyframeValue(
             custom,
-            '--motion-trans-y',
+            `--motion-trans-y${suffix}`,
             asWeb,
           )})) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
         },
         {
           transform: `translateY(${toKeyframeValue(
             custom,
-            '--motion-travel-to',
+            `--motion-travel-to${suffix}`,
             asWeb,
-          )}) translate(${toKeyframeValue(custom, '--motion-trans-x', asWeb)}, ${toKeyframeValue(
+          )}) translate(${toKeyframeValue(custom, `--motion-trans-x${suffix}`, asWeb)}, ${toKeyframeValue(
             custom,
-            '--motion-trans-y',
+            `--motion-trans-y${suffix}`,
             asWeb,
           )}) scale(${toKeyframeValue(
             custom,
-            '--motion-grow-to',
+            `--motion-grow-to${suffix}`,
             asWeb,
           )}) translate(calc(-1 * ${toKeyframeValue(
             custom,
-            '--motion-trans-x',
+            `--motion-trans-x${suffix}`,
             asWeb,
           )}), calc(-1 * ${toKeyframeValue(
             custom,
-            '--motion-trans-y',
+            `--motion-trans-y${suffix}`,
             asWeb,
           )})) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
         },

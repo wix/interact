@@ -22,9 +22,11 @@ export const schema = {
 } as const;
 
 export function getNames(options: ScrubAnimationOptions) {
-  const { range = schema.range.default } = options.namedEffect as ShuttersScroll;
+  const { range = schema.range.default, staggered = schema.staggered.default } =
+    options.namedEffect as ShuttersScroll;
   const { suffix = '' } = options;
-  return [`motion-shuttersScroll-${range === 'continuous' ? '-continuous' : ''}${suffix}`];
+  const stagger = range === 'continuous' && staggered ? '-staggered' : '';
+  return [`motion-shuttersScroll-${range}${stagger}${suffix}`];
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -32,6 +34,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as ShuttersScroll;
   const direction = parseDirection<EffectFourDirections>(
     namedEffect?.direction,
@@ -58,8 +61,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   );
 
   const custom = {
-    '--motion-shutters-clip-start': range === 'out' ? clipEnd : clipStart,
-    '--motion-shutters-clip-end': range === 'out' ? clipStart : clipEnd,
+    [`--motion-shutters-clip-start${suffix}`]: range === 'out' ? clipEnd : clipStart,
+    [`--motion-shutters-clip-end${suffix}`]: range === 'out' ? clipStart : clipEnd,
   };
 
   const [shuttersScroll] = getNames(options);
@@ -70,11 +73,11 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     offset?: number;
   }[] = [
     {
-      clipPath: toKeyframeValue(custom, '--motion-shutters-clip-start', asWeb),
+      clipPath: toKeyframeValue(custom, `--motion-shutters-clip-start${suffix}`, asWeb),
       easing,
     },
     {
-      clipPath: toKeyframeValue(custom, '--motion-shutters-clip-end', asWeb),
+      clipPath: toKeyframeValue(custom, `--motion-shutters-clip-end${suffix}`, asWeb),
     },
   ];
 
@@ -89,24 +92,24 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       true,
     );
     Object.assign(custom, {
-      '--motion-shutters-clip-opp-end': oppClipEnd,
-      '--motion-shutters-clip-opp-start': oppClipStart,
+      [`--motion-shutters-clip-opp-end${suffix}`]: oppClipEnd,
+      [`--motion-shutters-clip-opp-start${suffix}`]: oppClipStart,
     });
 
     const secondOffset = staggered ? 0.55 : 0.6;
     keyframes.push(
       {
-        clipPath: toKeyframeValue(custom, '--motion-shutters-clip-end', asWeb),
+        clipPath: toKeyframeValue(custom, `--motion-shutters-clip-end${suffix}`, asWeb),
         offset: secondOffset,
         easing,
       },
       {
-        clipPath: toKeyframeValue(custom, '--motion-shutters-clip-opp-end', asWeb),
+        clipPath: toKeyframeValue(custom, `--motion-shutters-clip-opp-end${suffix}`, asWeb),
         offset: secondOffset,
         easing,
       },
       {
-        clipPath: toKeyframeValue(custom, '--motion-shutters-clip-opp-start', asWeb),
+        clipPath: toKeyframeValue(custom, `--motion-shutters-clip-opp-start${suffix}`, asWeb),
       },
     );
   }

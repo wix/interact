@@ -21,6 +21,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const {
     angle = schema.angle.default,
     speed = schema.speed.default,
@@ -55,15 +56,15 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [spin3dScroll] = getNames(options);
 
   const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-travel-from': `${fromValues.travel}vh`,
-    '--motion-travel-to': `${toValues.travel}vh`,
-    '--motion-rot-x-from': `${fromValues.rotationX}deg`,
-    '--motion-rot-x-to': `${toValues.rotationX}deg`,
-    '--motion-rot-y-from': `${fromValues.rotationY}deg`,
-    '--motion-rot-y-to': `${toValues.rotationY}deg`,
-    '--motion-rot-z-from': `${fromValues.rotationZ}deg`,
-    '--motion-rot-z-to': `${toValues.rotationZ}deg`,
+    [`--motion-perspective${suffix}`]: `${perspective}px`,
+    [`--motion-travel-from${suffix}`]: `${fromValues.travel}vh`,
+    [`--motion-travel-to${suffix}`]: `${toValues.travel}vh`,
+    [`--motion-rot-x-from${suffix}`]: `${fromValues.rotationX}deg`,
+    [`--motion-rot-x-to${suffix}`]: `${toValues.rotationX}deg`,
+    [`--motion-rot-y-from${suffix}`]: `${fromValues.rotationY}deg`,
+    [`--motion-rot-y-to${suffix}`]: `${toValues.rotationY}deg`,
+    [`--motion-rot-z-from${suffix}`]: `${fromValues.rotationZ}deg`,
+    [`--motion-rot-z-to${suffix}`]: `${toValues.rotationZ}deg`,
   };
 
   return [
@@ -77,36 +78,36 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       endOffsetAdd,
       keyframes: [
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateY(${toKeyframeValue(
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) translateY(${toKeyframeValue(
             custom,
-            '--motion-travel-from',
+            `--motion-travel-from${suffix}`,
             asWeb,
           )}) rotateZ(calc(${toKeyframeValue(
             {},
             '--motion-rotate',
             false,
             '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-rot-z-from', asWeb)})) rotateY(${toKeyframeValue(
+          )} + ${toKeyframeValue(custom, `--motion-rot-z-from${suffix}`, asWeb)})) rotateY(${toKeyframeValue(
             custom,
-            '--motion-rot-y-from',
+            `--motion-rot-y-from${suffix}`,
             asWeb,
-          )}) rotateX(${toKeyframeValue(custom, '--motion-rot-x-from', asWeb)})`,
+          )}) rotateX(${toKeyframeValue(custom, `--motion-rot-x-from${suffix}`, asWeb)})`,
         },
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateY(${toKeyframeValue(
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) translateY(${toKeyframeValue(
             custom,
-            '--motion-travel-to',
+            `--motion-travel-to${suffix}`,
             asWeb,
           )}) rotateZ(calc(${toKeyframeValue(
             {},
             '--motion-rotate',
             false,
             '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-rot-z-to', asWeb)})) rotateY(${toKeyframeValue(
+          )} + ${toKeyframeValue(custom, `--motion-rot-z-to${suffix}`, asWeb)})) rotateY(${toKeyframeValue(
             custom,
-            '--motion-rot-y-to',
+            `--motion-rot-y-to${suffix}`,
             asWeb,
-          )}) rotateX(${toKeyframeValue(custom, '--motion-rot-x-to', asWeb)})`,
+          )}) rotateX(${toKeyframeValue(custom, `--motion-rot-x-to${suffix}`, asWeb)})`,
         },
       ],
     },

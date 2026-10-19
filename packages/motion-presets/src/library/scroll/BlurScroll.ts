@@ -16,6 +16,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const { blur = schema.blur.default, range = schema.range.default } =
     options.namedEffect as BlurScroll;
 
@@ -29,8 +30,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [blurScroll] = getNames(options);
 
   const custom = {
-    '--motion-blur-from': `${fromValue}px`,
-    '--motion-blur-to': `${toValue}px`,
+    [`--motion-blur-from${suffix}`]: `${fromValue}px`,
+    [`--motion-blur-to${suffix}`]: `${toValue}px`,
   };
 
   return [
@@ -43,10 +44,10 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          filter: `blur(${toKeyframeValue(custom, '--motion-blur-from', asWeb)})`,
+          filter: `blur(${toKeyframeValue(custom, `--motion-blur-from${suffix}`, asWeb)})`,
         },
         {
-          filter: `blur(${toKeyframeValue(custom, '--motion-blur-to', asWeb)})`,
+          filter: `blur(${toKeyframeValue(custom, `--motion-blur-to${suffix}`, asWeb)})`,
         },
       ],
     },

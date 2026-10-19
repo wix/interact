@@ -156,4 +156,17 @@ describe('CurveIn', () => {
       expect(result).toMatchObject(expectedResult);
     });
   });
+
+  test.each([
+    ['top', 'rotateX(180deg) rotateY(0deg)'],
+    ['bottom', 'rotateX(-180deg) rotateY(0deg)'],
+  ] as const)('CurveIn curves vertically from %s', (from, rotation) => {
+    const [curveIn] = CurveIn.web({
+      ...baseMockOptions,
+      duration: 1000,
+      namedEffect: { from } as CurveInType,
+    });
+
+    expect((curveIn.keyframes[0] as { transform: string }).transform).toContain(rotation);
+  });
 });

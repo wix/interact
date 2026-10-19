@@ -23,6 +23,7 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as FlipScroll;
   const direction = parseDirection<(typeof AXIS_DIRECTIONS)[number]>(
     namedEffect?.direction,
@@ -47,9 +48,9 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [flipScroll] = getNames(options);
 
   const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-flip-from': `${rotationAxis}(${fromValue}deg)`,
-    '--motion-flip-to': `${rotationAxis}(${toValue}deg)`,
+    [`--motion-perspective${suffix}`]: `${perspective}px`,
+    [`--motion-flip-from${suffix}`]: `${rotationAxis}(${fromValue}deg)`,
+    [`--motion-flip-to${suffix}`]: `${rotationAxis}(${toValue}deg)`,
   };
 
   return [
@@ -61,16 +62,16 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) ${toKeyframeValue(
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) ${toKeyframeValue(
             custom,
-            '--motion-flip-from',
+            `--motion-flip-from${suffix}`,
             asWeb,
           )} rotate(${toKeyframeValue({}, '--motion-rotate', false, '0deg')})`,
         },
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) ${toKeyframeValue(
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) ${toKeyframeValue(
             custom,
-            '--motion-flip-to',
+            `--motion-flip-to${suffix}`,
             asWeb,
           )} rotate(${toKeyframeValue({}, '--motion-rotate', false, '0deg')})`,
         },

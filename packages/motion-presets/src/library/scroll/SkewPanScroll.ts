@@ -45,6 +45,7 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as SkewPanScroll;
   const toDirection = parseDirection<EffectTwoSides>(
     namedEffect?.direction,
@@ -81,10 +82,10 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [skewPanScroll] = getNames(options);
 
   const custom = {
-    '--motion-skewpan-start-x': fromValues.translate,
-    '--motion-skewpan-end-x': toValues.translate,
-    '--motion-skewpan-from-skew': `${fromValues.skew}deg`,
-    '--motion-skewpan-to-skew': `${toValues.skew}deg`,
+    [`--motion-skewpan-start-x${suffix}`]: fromValues.translate,
+    [`--motion-skewpan-end-x${suffix}`]: toValues.translate,
+    [`--motion-skewpan-from-skew${suffix}`]: `${fromValues.skew}deg`,
+    [`--motion-skewpan-to-skew${suffix}`]: `${toValues.skew}deg`,
   };
 
   return [
@@ -98,22 +99,22 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         {
           transform: `translateX(${toKeyframeValue(
             custom,
-            '--motion-skewpan-start-x',
+            `--motion-skewpan-start-x${suffix}`,
             asWeb,
           )}) skewX(${toKeyframeValue(
             custom,
-            '--motion-skewpan-from-skew',
+            `--motion-skewpan-from-skew${suffix}`,
             asWeb,
           )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
         },
         {
           transform: `translateX(${toKeyframeValue(
             custom,
-            '--motion-skewpan-end-x',
+            `--motion-skewpan-end-x${suffix}`,
             asWeb,
           )}) skewX(${toKeyframeValue(
             custom,
-            '--motion-skewpan-to-skew',
+            `--motion-skewpan-to-skew${suffix}`,
             asWeb,
           )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
         },

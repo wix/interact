@@ -21,6 +21,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Jello;
   const { skew = schema.skew.default } = namedEffect;
 
@@ -33,7 +34,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   // Create CSS custom properties for the jello configuration
   const custom: Record<string, string | number> = {
-    '--motion-skew-y': jelloFactor,
+    [`--motion-skew-y${suffix}`]: jelloFactor,
   };
 
   const keyframes = SKEW_Y_KEYFRAMES.map(({ keyframe, skewY }) => {
@@ -43,7 +44,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       offset,
       transform: `rotateZ(var(--motion-rotate, 0deg)) skewY(calc(${toKeyframeValue(
         custom,
-        '--motion-skew-y',
+        `--motion-skew-y${suffix}`,
         asWeb,
       )} * ${skewY}deg))`,
     };

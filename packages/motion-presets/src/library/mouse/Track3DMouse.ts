@@ -9,7 +9,7 @@ import {
   getCssUnits,
   getMouseTransitionEasing,
   mapRange,
-  parseLength,
+  parseLengthOrCalc,
   parseDirection,
 } from '../../utils';
 import { CustomMouse } from './CustomMouse';
@@ -27,6 +27,7 @@ export const schema = {
 class Track3DMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
     const { invert, distance, angle, axis, perspective } = this.options;
+    const distanceValue = typeof distance === 'string' ? 1 : distance.value;
 
     let translateX = 0;
     let translateY = 0;
@@ -37,16 +38,19 @@ class Track3DMouseAnimation extends CustomMouse {
     // if progressX === 1, translateX === distance
     // if progressX === 0, rotateX === -angle, if progressX === 0.5, rotateX === 0, if progressX === 1, rotateX === angle
     if (axis === 'both' || axis === 'horizontal') {
-      translateX = mapRange(0, 1, -distance.value, distance.value, progressX);
+      translateX = mapRange(0, 1, -distanceValue, distanceValue, progressX);
       rotateY = mapRange(0, 1, -angle, angle, progressX) * invert;
     }
     if (axis === 'both' || axis === 'vertical') {
-      translateY = mapRange(0, 1, -distance.value, distance.value, progressY);
+      translateY = mapRange(0, 1, -distanceValue, distanceValue, progressY);
       rotateX = mapRange(0, 1, angle, -angle, progressY) * invert;
     }
-    const units = getCssUnits(distance.unit);
+    const toLength = (value: number) =>
+      typeof distance === 'string'
+        ? `calc(${value} * ${distance})`
+        : `${value}${getCssUnits(distance.unit)}`;
 
-    this.target.style.transform = `perspective(${perspective}px) translateX(${translateX}${units}) translateY(${translateY}${units}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotate(var(--motion-rotate, 0deg))`;
+    this.target.style.transform = `perspective(${perspective}px) translateX(${toLength(translateX)}) translateY(${toLength(translateY)}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotate(var(--motion-rotate, 0deg))`;
   }
 
   cancel() {
@@ -59,7 +63,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as Track3DMouse;
   const inverted = namedEffect.inverted ?? schema.inverted.default;
-  const distance = parseLength(namedEffect.distance, schema.distance.default);
+  const distance = parseLengthOrCalc(namedEffect.distance, schema.distance.default);
   const angle = parseDirection(namedEffect.angle, [], schema.angle.default, true) as number;
   const axis = parseDirection(namedEffect.axis, AXES, schema.axis.default) as MouseEffectAxis;
   const { perspective = schema.perspective.default } = namedEffect;

@@ -15,6 +15,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as RevealIn;
   const direction = parseDirection<EffectFourDirections>(
     namedEffect?.from,
@@ -28,7 +29,7 @@ export function style(options: TimeAnimationOptions) {
   const end = getClipPolygonParams({ direction: 'initial' });
 
   const custom = {
-    '--motion-clip-start': start,
+    [`--motion-clip-start${suffix}`]: start,
   };
 
   return [
@@ -40,7 +41,7 @@ export function style(options: TimeAnimationOptions) {
       custom,
       keyframes: [
         {
-          clipPath: `var(--motion-clip-start, ${start})`,
+          clipPath: `var(--motion-clip-start${suffix}, ${start})`,
         },
         {
           clipPath: end,

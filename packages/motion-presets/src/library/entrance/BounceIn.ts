@@ -3,8 +3,9 @@ import {
   getEasing,
   toKeyframeValue,
   parseDirection,
-  parseLength,
-  getCssUnits,
+  parseLengthOrCalc,
+  scaleLength,
+  roundNumber,
   getEntranceFill,
 } from '../../utils';
 import type { BounceIn, TimeAnimationOptions } from '../../types';
@@ -44,55 +45,55 @@ const TRANSLATE_DIRECTION_MAP = {
   back: { x: 0, y: 0, z: -1 },
 };
 
+const roundUnit = (value: number) => roundNumber(value, 6);
+
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as BounceIn;
   const direction = parseDirection<(typeof DIRECTIONS)[number]>(
     namedEffect?.from,
     DIRECTIONS,
     schema.from.default,
   );
-  const travel = parseLength(namedEffect?.travel, schema.travel.default);
-  const distanceFactor = travel.value / schema.travel.default.value;
-  const unit = getCssUnits(travel.unit);
+  const travel = parseLengthOrCalc(namedEffect?.travel, schema.travel.default);
+  const distanceUnit = scaleLength(travel, 1 / schema.travel.default.value, roundUnit);
   const { perspective = schema.perspective.default } = namedEffect || {};
   const [fadeIn, bounceIn] = getNames(options);
   const perspectiveValue = direction === 'back' ? `perspective(${perspective}px)` : ' ';
   const { x, y, z } = TRANSLATE_DIRECTION_MAP[direction];
 
   const custom = {
-    '--motion-direction-x': x,
-    '--motion-direction-y': y,
-    '--motion-direction-z': z,
-    '--motion-distance-factor': distanceFactor,
-    '--motion-perspective': perspectiveValue,
-    '--motion-ease-in': getEasing(easeOut),
-    '--motion-ease-out': getEasing(easeIn),
+    [`--motion-direction-x${suffix}`]: x,
+    [`--motion-direction-y${suffix}`]: y,
+    [`--motion-direction-z${suffix}`]: z,
+    [`--motion-distance-unit${suffix}`]: distanceUnit,
+    [`--motion-perspective${suffix}`]: perspectiveValue,
+    [`--motion-ease-in${suffix}`]: getEasing(easeOut),
+    [`--motion-ease-out${suffix}`]: getEasing(easeIn),
   };
 
-  const easeIn_ = toKeyframeValue(custom, '--motion-ease-in', asWeb);
-  const easeOut_ = toKeyframeValue(custom, '--motion-ease-out', asWeb);
-  const distanceFactor_ = toKeyframeValue(custom, '--motion-distance-factor', asWeb);
-  const perspective_ = toKeyframeValue(custom, '--motion-perspective', asWeb, '');
-  const directionX = toKeyframeValue(custom, '--motion-direction-x', asWeb);
-  const directionY = toKeyframeValue(custom, '--motion-direction-y', asWeb);
-  const directionZ = toKeyframeValue(custom, '--motion-direction-z', asWeb);
+  const easeIn_ = toKeyframeValue(custom, `--motion-ease-in${suffix}`, asWeb);
+  const easeOut_ = toKeyframeValue(custom, `--motion-ease-out${suffix}`, asWeb);
+  const distanceUnit_ = toKeyframeValue(custom, `--motion-distance-unit${suffix}`, asWeb);
+  const perspective_ = toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb, '');
+  const directionX = toKeyframeValue(custom, `--motion-direction-x${suffix}`, asWeb);
+  const directionY = toKeyframeValue(custom, `--motion-direction-y${suffix}`, asWeb);
+  const directionZ = toKeyframeValue(custom, `--motion-direction-z${suffix}`, asWeb);
 
   const keyframes = BOUNCE_KEYFRAMES.map(({ offset, translate }, index) => ({
     offset: offset / 100,
     animationTimingFunction: index % 2 ? easeIn_ : easeOut_,
     transform: `${(
       perspective_ as string
-    ).trim()} translate3d(calc(${directionX} * ${distanceFactor_} * ${
+    ).trim()} translate3d(calc(${directionX} * ${distanceUnit_} * ${
       translate / 2
-    }${unit}), calc(${directionY} * ${distanceFactor_} * ${
+    }), calc(${directionY} * ${distanceUnit_} * ${
       translate / 2
-    }${unit}), calc(${directionZ} * ${distanceFactor_} * ${
-      translate / 2
-    }${unit})) rotateZ(var(--motion-rotate, 0deg))`,
+    }), calc(${directionZ} * ${distanceUnit_} * ${translate / 2})) rotateZ(var(--motion-rotate, 0deg))`,
   }));
 
   return [

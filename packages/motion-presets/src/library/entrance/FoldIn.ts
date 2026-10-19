@@ -34,6 +34,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as FoldIn;
   const direction = parseDirection<EffectFourDirections>(
     namedEffect?.pivot,
@@ -48,11 +49,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const from = getRotateFrom(direction, -angle);
 
   const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-origin-x': `${x}%`,
-    '--motion-origin-y': `${y}%`,
-    '--motion-rotate-x': `${from.x}deg`,
-    '--motion-rotate-y': `${from.y}deg`,
+    [`--motion-perspective${suffix}`]: `${perspective}px`,
+    [`--motion-origin-x${suffix}`]: `${x}%`,
+    [`--motion-origin-y${suffix}`]: `${y}%`,
+    [`--motion-rotate-x${suffix}`]: `${from.x}deg`,
+    [`--motion-rotate-y${suffix}`]: `${from.y}deg`,
   };
 
   return [
@@ -72,10 +73,10 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          transform: `rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x, ${custom['--motion-origin-x']}), var(--motion-origin-y, ${custom['--motion-origin-y']})) perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotateX(var(--motion-rotate-x, ${custom['--motion-rotate-x']})) rotateY(var(--motion-rotate-y, ${custom['--motion-rotate-y']})) translate(calc(-1 * var(--motion-origin-x, ${custom['--motion-origin-x']})), calc(-1 * var(--motion-origin-y, ${custom['--motion-origin-y']})))`,
+          transform: `rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x${suffix}, ${custom[`--motion-origin-x${suffix}`]}), var(--motion-origin-y${suffix}, ${custom[`--motion-origin-y${suffix}`]})) perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) rotateX(var(--motion-rotate-x${suffix}, ${custom[`--motion-rotate-x${suffix}`]})) rotateY(var(--motion-rotate-y${suffix}, ${custom[`--motion-rotate-y${suffix}`]})) translate(calc(-1 * var(--motion-origin-x${suffix}, ${custom[`--motion-origin-x${suffix}`]})), calc(-1 * var(--motion-origin-y${suffix}, ${custom[`--motion-origin-y${suffix}`]})))`,
         },
         {
-          transform: `rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x, ${custom['--motion-origin-x']}), var(--motion-origin-y, ${custom['--motion-origin-y']})) perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotateX(0deg) rotateY(0deg) translate(calc(-1 * var(--motion-origin-x, ${custom['--motion-origin-x']})), calc(-1 * var(--motion-origin-y, ${custom['--motion-origin-y']})))`,
+          transform: `rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x${suffix}, ${custom[`--motion-origin-x${suffix}`]}), var(--motion-origin-y${suffix}, ${custom[`--motion-origin-y${suffix}`]})) perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) rotateX(0deg) rotateY(0deg) translate(calc(-1 * var(--motion-origin-x${suffix}, ${custom[`--motion-origin-x${suffix}`]})), calc(-1 * var(--motion-origin-y${suffix}, ${custom[`--motion-origin-y${suffix}`]})))`,
         },
       ],
     },

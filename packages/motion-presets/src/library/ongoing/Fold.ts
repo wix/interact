@@ -55,6 +55,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Fold;
   const direction = parseDirection<EffectFourDirections>(
     namedEffect.pivot,
@@ -77,56 +78,59 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   // Create CSS custom properties for the fold configuration
   const custom: Record<string, string | number> = {
-    '--motion-origin-x': `${x}%`,
-    '--motion-origin-y': `${y}%`,
-    '--motion-rotate-angle': `${angle}deg`,
-    '--motion-rotate-x': `${rotation.x}`,
-    '--motion-rotate-y': `${rotation.y}`,
+    [`--motion-origin-x${suffix}`]: `${x}%`,
+    [`--motion-origin-y${suffix}`]: `${y}%`,
+    [`--motion-rotate-angle${suffix}`]: `${angle}deg`,
+    [`--motion-rotate-x${suffix}`]: `${rotation.x}`,
+    [`--motion-rotate-y${suffix}`]: `${rotation.y}`,
+    [`--motion-perspective${suffix}`]: `${perspective}px`,
   };
 
   const transformLeft = `rotateZ(var(--motion-rotate, 0deg)) translateX(${toKeyframeValue(
     custom,
-    '--motion-origin-x',
+    `--motion-origin-x${suffix}`,
     asWeb,
-  )}) translateY(${toKeyframeValue(custom, '--motion-origin-y', asWeb)}) perspective(${perspective}px)`;
+  )}) translateY(${toKeyframeValue(custom, `--motion-origin-y${suffix}`, asWeb)}) perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)})`;
   const transformRight = `translateX(calc(-1 * ${toKeyframeValue(
     custom,
-    '--motion-origin-x',
+    `--motion-origin-x${suffix}`,
     asWeb,
-  )})) translateY(calc(-1 * ${toKeyframeValue(custom, '--motion-origin-y', asWeb)}))`;
+  )})) translateY(calc(-1 * ${toKeyframeValue(custom, `--motion-origin-y${suffix}`, asWeb)}))`;
 
+  const angle_ = toKeyframeValue(custom, `--motion-rotate-angle${suffix}`, asWeb);
   const getTransform = (value: number) =>
     `${transformLeft} rotateX(calc(${toKeyframeValue(
       custom,
-      '--motion-rotate-x',
+      `--motion-rotate-x${suffix}`,
       asWeb,
-    )} * ${value} * ${angle}deg)) rotateY(calc(${toKeyframeValue(
+    )} * ${value} * ${angle_})) rotateY(calc(${toKeyframeValue(
       custom,
-      '--motion-rotate-y',
+      `--motion-rotate-y${suffix}`,
       asWeb,
-    )} * ${value} * ${angle}deg)) ${transformRight}`;
+    )} * ${value} * ${angle_})) ${transformRight}`;
 
-  const keyframes = iterationDelay
-    ? KEYFRAME_FACTORS.map(({ fold, frameFactor }) => {
-        const keyframeOffset = frameFactor * timingFactor;
-        return {
-          offset: keyframeOffset,
-          easing: getEasing('sineInOut'),
-          transform: getTransform(fold),
-        };
-      })
-    : [
-        {
-          offset: 0.25,
-          easing: getEasing(ease.inOut),
-          transform: getTransform(1),
-        },
-        {
-          offset: 0.75,
-          easing: getEasing(ease.in),
-          transform: getTransform(-1),
-        },
-      ];
+  const keyframes =
+    timingFactor < 1
+      ? KEYFRAME_FACTORS.map(({ fold, frameFactor }) => {
+          const keyframeOffset = frameFactor * timingFactor;
+          return {
+            offset: keyframeOffset,
+            easing: getEasing('sineInOut'),
+            transform: getTransform(fold),
+          };
+        })
+      : [
+          {
+            offset: 0.25,
+            easing: getEasing(ease.inOut),
+            transform: getTransform(1),
+          },
+          {
+            offset: 0.75,
+            easing: getEasing(ease.in),
+            transform: getTransform(-1),
+          },
+        ];
 
   const transform_0 = getTransform(0);
 

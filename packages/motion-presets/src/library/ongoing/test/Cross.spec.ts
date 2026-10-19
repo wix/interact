@@ -1,7 +1,12 @@
 import { describe, expect, test } from 'vitest';
 
 import * as Cross from '../Cross';
-import { Cross as CrossType, TimeAnimationOptions } from '../../../types';
+import {
+  Cross as CrossType,
+  DomApi,
+  EffectEightDirections,
+  TimeAnimationOptions,
+} from '../../../types';
 import { baseMockOptions } from './testUtils';
 
 describe('Cross', () => {
@@ -617,6 +622,111 @@ describe('Cross', () => {
       const result = Cross.web(mockOptions);
 
       expect(result).toMatchObject(expectedResult);
+    });
+  });
+
+  describe('measured', () => {
+    const layout = { left: 200, top: 100, width: 100, height: 50 };
+    const parentSize = { width: 1000, height: 800 };
+
+    function createDom() {
+      const properties: Record<string, string> = {};
+      const parent = { offsetParent: null, getBoundingClientRect: () => parentSize };
+      const target = {
+        offsetLeft: layout.left,
+        offsetTop: layout.top,
+        offsetParent: parent,
+        getBoundingClientRect: () => ({ width: layout.width, height: layout.height }),
+        style: { setProperty: (name: string, value: string) => (properties[name] = value) },
+      } as unknown as HTMLElement;
+      const measures: ((target: HTMLElement | null) => void)[] = [];
+      const mutations: ((target: HTMLElement | null) => void)[] = [];
+      const dom: DomApi = {
+        measure: (fn) => measures.push(fn),
+        mutate: (fn) => mutations.push(fn),
+      };
+      const flush = () => {
+        measures.forEach((fn) => fn(target));
+        mutations.forEach((fn) => fn(target));
+      };
+      return { dom, flush, properties };
+    }
+
+    function evaluateLength(value: string, properties: Record<string, string>) {
+      const expression = value
+        .replace(/var\((--[\w-]+), [^()]+\)/g, (_, name) => `${parseFloat(properties[name])}`)
+        .replace(/min\(/g, 'Math.min(')
+        .replace(/calc\(/g, '(');
+      return new Function(`return ${expression}`)() as number;
+    }
+
+    function evaluateTranslate(translate: string, properties: Record<string, string>) {
+      let depth = 0;
+      const split = [...translate].findIndex((char) => {
+        depth += char === '(' ? 1 : char === ')' ? -1 : 0;
+        return char === ' ' && depth === 0;
+      });
+      return [translate.slice(0, split), translate.slice(split + 1)].map((value) =>
+        evaluateLength(value, properties),
+      );
+    }
+
+    // the element's distances (px) to fully leave its 1000x800 parent through each side
+    const right = 800;
+    const left = 300;
+    const bottom = 700;
+    const top = 150;
+
+    const cases: [EffectEightDirections, [number, number], [number, number]][] = [
+      ['right', [right, 0], [-left, 0]],
+      ['left', [-left, 0], [right, 0]],
+      ['bottom', [0, bottom], [0, -top]],
+      ['top', [0, -top], [0, bottom]],
+      ['bottom-right', [bottom, bottom], [-top, -top]],
+      ['bottom-left', [-left, left], [top, -top]],
+      ['top-right', [top, -top], [-left, left]],
+      ['top-left', [-top, -top], [bottom, bottom]],
+    ];
+
+    test.each(cases)(
+      'moves towards %s before wrapping around from the opposite side',
+      (direction, expectedTo, expectedFrom) => {
+        const { dom, flush, properties } = createDom();
+        const [effect] = Cross.web(
+          { ...baseMockOptions, duration: 1000, namedEffect: { direction } as CrossType },
+          dom,
+        );
+        const { keyframes } = { ...effect };
+
+        flush();
+
+        const [, to, from] = keyframes;
+        const toDistance = Math.max(...expectedTo.map(Math.abs));
+        const fromDistance = Math.max(...expectedFrom.map(Math.abs));
+
+        expect(to.offset).toBeCloseTo(toDistance / (toDistance + fromDistance));
+        expect(from.offset).toBe(to.offset);
+        expect(evaluateTranslate(to.translate as string, properties)).toEqual(expectedTo);
+        expect(evaluateTranslate(from.translate as string, properties)).toEqual(expectedFrom);
+      },
+    );
+
+    test('scales the wrap point by the iteration delay', () => {
+      const { dom, flush } = createDom();
+      const [effect] = Cross.web(
+        { ...baseMockOptions, duration: 1000, namedEffect: { iterationDelay: 1000 } as CrossType },
+        dom,
+      );
+
+      flush();
+
+      expect(effect.keyframes.map(({ offset }) => offset)).toEqual([
+        0,
+        (right / (right + left)) * 0.5,
+        (right / (right + left)) * 0.5,
+        0.5,
+        1,
+      ]);
     });
   });
 });

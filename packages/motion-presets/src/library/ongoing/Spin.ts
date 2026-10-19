@@ -17,6 +17,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Spin;
   const direction = parseDirection<(typeof SPIN_DIRECTIONS)[number]>(
     namedEffect?.direction,
@@ -34,7 +35,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const transformRotate = (DIRECTION_MAP[direction] > 0 ? 1 : -1) * 360;
 
   const custom = {
-    '--motion-rotate-start': `calc(var(--motion-rotate, 0deg) + ${transformRotate}deg)`,
+    [`--motion-rotate-start${suffix}`]: `calc(var(--motion-rotate, 0deg) + ${transformRotate}deg)`,
   };
 
   return [
@@ -48,7 +49,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
         {
           offset: 0,
           easing: getEasing(easing),
-          rotate: toKeyframeValue(custom, '--motion-rotate-start', asWeb),
+          rotate: toKeyframeValue(custom, `--motion-rotate-start${suffix}`, asWeb),
         },
         {
           offset: timingFactor,

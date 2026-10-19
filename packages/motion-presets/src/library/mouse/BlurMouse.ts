@@ -3,7 +3,7 @@ import {
   getMouseTransitionEasing,
   distance2d,
   mapRange,
-  parseLength,
+  parseLengthOrCalc,
   parseDirection,
 } from '../../utils';
 import { quadInOut } from '@wix/motion';
@@ -22,9 +22,10 @@ export const schema = {
 class BlurMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
     const { distance, angle, scale, invert, blur, perspective } = this.options;
+    const distanceValue = typeof distance === 'string' ? 1 : distance.value;
 
-    const translateX = mapRange(0, 1, -distance.value, distance.value, progressX) * invert;
-    const translateY = mapRange(0, 1, -distance.value, distance.value, progressY) * invert;
+    const translateX = mapRange(0, 1, -distanceValue, distanceValue, progressX) * invert;
+    const translateY = mapRange(0, 1, -distanceValue, distanceValue, progressY) * invert;
 
     // if progressX === 0 || progressX === 1, scaleX === scale, if progressX === 0.5, scaleX === 1
     const scaleX =
@@ -44,9 +45,12 @@ class BlurMouseAnimation extends CustomMouse {
     const rotateX = mapRange(0, 1, -angle, angle, progressY) * invert;
     const rotateY = mapRange(0, 1, angle, -angle, progressX) * invert;
 
-    const units = getCssUnits(distance.unit);
+    const toLength = (value: number) =>
+      typeof distance === 'string'
+        ? `calc(${value} * ${distance})`
+        : `${value}${getCssUnits(distance.unit)}`;
 
-    const transform = `perspective(${perspective}px) translateX(${translateX}${units}) translateY(${translateY}${units}) scale(${maxScale}, ${maxScale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotate(var(--motion-rotate, 0deg))`;
+    const transform = `perspective(${perspective}px) translateX(${toLength(translateX)}) translateY(${toLength(translateY)}) scale(${maxScale}, ${maxScale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotate(var(--motion-rotate, 0deg))`;
 
     const progressDistance = distance2d([0.5, 0.5], [progressX, progressY]);
     const blurFilter = Math.round(mapRange(0, 1, 0, blur, quadInOut(progressDistance)));
@@ -68,7 +72,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as BlurMouse;
   const inverted = namedEffect.inverted ?? schema.inverted.default;
-  const distance = parseLength(namedEffect.distance, schema.distance.default);
+  const distance = parseLengthOrCalc(namedEffect.distance, schema.distance.default);
   const angle = parseDirection(namedEffect.angle, [], schema.angle.default, true) as number;
   const {
     scale = schema.scale.default,
