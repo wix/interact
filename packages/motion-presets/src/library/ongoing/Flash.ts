@@ -1,5 +1,5 @@
 import type { TimeAnimationOptions, DomApi, AnimationExtraOptions, Flash } from '../../types';
-import { getEasing, getTimingFactor } from '../../utils';
+import { getEasing, getTimingFactor, holdAtRest, getEasingKey } from '../../utils';
 
 export const schema = {
   iterationDelay: { type: 'number', min: 0, default: 0 },
@@ -24,13 +24,9 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, _as
       easing,
     },
     {
-      offset: 0.5 * timingFactor,
+      offset: 0.5,
       opacity: 0,
       easing,
-    },
-    {
-      offset: timingFactor,
-      opacity: 1,
     },
     {
       offset: 1,
@@ -44,7 +40,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, _as
       name,
       easing: 'linear',
       duration: duration + iterationDelay,
-      keyframes,
+      keyframes: holdAtRest(keyframes, timingFactor),
     },
   ];
 }
@@ -54,6 +50,7 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
     (options.namedEffect as Flash)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
   const { suffix = '' } = options;
+  const easingKey = getEasingKey(options.easing);
 
-  return [`motion-flash-${timingFactor}`].map((name) => name + suffix);
+  return [`motion-flash-${timingFactor}`].map((name) => name + easingKey + suffix);
 }

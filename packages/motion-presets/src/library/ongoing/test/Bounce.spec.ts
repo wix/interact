@@ -15,77 +15,86 @@ describe('Bounce', () => {
       const expectedResult = [
         {
           id: 'test-id',
-          namedEffect: { type: 'Bounce' },
+          namedEffect: {
+            type: 'Bounce',
+          },
           name: 'motion-bounce-1',
           easing: 'linear',
           duration: 1,
           custom: {
-            '--motion-bounce-unit': '1px',
+            '--motion-bounce-y-1': '-27.5px',
+            '--motion-bounce-y-2': '-43.5px',
+            '--motion-bounce-y-3': '-49px',
+            '--motion-bounce-y-4': '-43.5px',
+            '--motion-bounce-y-5': '-27.5px',
+            '--motion-bounce-y-7': '-11.5px',
+            '--motion-bounce-y-9': '-2.5px',
+            '--motion-bounce-y-11': '-1px',
           },
           keyframes: [
             {
               offset: 0,
-              translate: '0px calc(0 * var(--motion-bounce-unit))',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.08800000000000001,
-              translate: '0px calc(-27.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-1)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.17600000000000002,
-              translate: '0px calc(-43.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-2)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.265,
-              translate: '0px calc(-49 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-3)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.353,
-              translate: '0px calc(-43.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-4)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.441,
-              translate: '0px calc(-27.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-5)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.531,
-              translate: '0px calc(0 * var(--motion-bounce-unit))',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.662,
-              translate: '0px calc(-11.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-7)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.81,
-              translate: '0px calc(0 * var(--motion-bounce-unit))',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.868,
-              translate: '0px calc(-2.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-9)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.941,
-              translate: '0px calc(0 * var(--motion-bounce-unit))',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.971,
-              translate: '0px calc(-1 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-11)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 1,
-              translate: '0px calc(0 * var(--motion-bounce-unit))',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
           ],
@@ -108,76 +117,92 @@ describe('Bounce', () => {
         {
           id: 'test-id',
           duration: 1500,
-          namedEffect: { type: 'Bounce', travel: 127.4, iterationDelay: 500 },
+          namedEffect: {
+            type: 'Bounce',
+            travel: 127.4,
+            iterationDelay: 500,
+          },
           name: 'motion-bounce-067',
           easing: 'linear',
           custom: {
-            '--motion-bounce-unit': '2.6px',
+            '--motion-bounce-y-1': '-71.5px',
+            '--motion-bounce-y-2': '-113.1px',
+            '--motion-bounce-y-3': '-127.4px',
+            '--motion-bounce-y-4': '-113.1px',
+            '--motion-bounce-y-5': '-71.5px',
+            '--motion-bounce-y-7': '-29.9px',
+            '--motion-bounce-y-9': '-6.5px',
+            '--motion-bounce-y-11': '-2.6px',
           },
           keyframes: [
             {
               offset: 0,
-              translate: '0px calc(0 * var(--motion-bounce-unit))',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.05896000000000001,
-              translate: '0px calc(-27.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-1)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.11792000000000002,
-              translate: '0px calc(-43.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-2)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.17755,
-              translate: '0px calc(-49 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-3)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.23651,
-              translate: '0px calc(-43.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-4)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.29547,
-              translate: '0px calc(-27.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-5)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.35577000000000003,
-              translate: '0px calc(0 * var(--motion-bounce-unit))',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.44354000000000005,
-              translate: '0px calc(-11.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-7)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.5427000000000001,
-              translate: '0px calc(0 * var(--motion-bounce-unit))',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.5815600000000001,
-              translate: '0px calc(-2.5 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-9)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.63047,
-              translate: '0px calc(0 * var(--motion-bounce-unit))',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.65057,
-              translate: '0px calc(-1 * var(--motion-bounce-unit))',
+              translate: '0px var(--motion-bounce-y-11)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.67,
-              translate: '0px calc(0 * var(--motion-bounce-unit))',
+              translate: '0px 0px',
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
+            },
+            {
+              offset: 1,
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
           ],
@@ -200,77 +225,86 @@ describe('Bounce', () => {
       const expectedResult = [
         {
           id: 'test-id',
-          namedEffect: { type: 'Bounce' },
+          namedEffect: {
+            type: 'Bounce',
+          },
           name: 'motion-bounce-1',
           easing: 'linear',
           duration: 1,
           custom: {
-            '--motion-bounce-unit': '1px',
+            '--motion-bounce-y-1': '-27.5px',
+            '--motion-bounce-y-2': '-43.5px',
+            '--motion-bounce-y-3': '-49px',
+            '--motion-bounce-y-4': '-43.5px',
+            '--motion-bounce-y-5': '-27.5px',
+            '--motion-bounce-y-7': '-11.5px',
+            '--motion-bounce-y-9': '-2.5px',
+            '--motion-bounce-y-11': '-1px',
           },
           keyframes: [
             {
               offset: 0,
-              translate: '0px calc(0 * 1px)',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.08800000000000001,
-              translate: '0px calc(-27.5 * 1px)',
+              translate: '0px -27.5px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.17600000000000002,
-              translate: '0px calc(-43.5 * 1px)',
+              translate: '0px -43.5px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.265,
-              translate: '0px calc(-49 * 1px)',
+              translate: '0px -49px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.353,
-              translate: '0px calc(-43.5 * 1px)',
+              translate: '0px -43.5px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.441,
-              translate: '0px calc(-27.5 * 1px)',
+              translate: '0px -27.5px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.531,
-              translate: '0px calc(0 * 1px)',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.662,
-              translate: '0px calc(-11.5 * 1px)',
+              translate: '0px -11.5px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.81,
-              translate: '0px calc(0 * 1px)',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.868,
-              translate: '0px calc(-2.5 * 1px)',
+              translate: '0px -2.5px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.941,
-              translate: '0px calc(0 * 1px)',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.971,
-              translate: '0px calc(-1 * 1px)',
+              translate: '0px -1px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 1,
-              translate: '0px calc(0 * 1px)',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
           ],
@@ -293,76 +327,92 @@ describe('Bounce', () => {
         {
           id: 'test-id',
           duration: 1500,
-          namedEffect: { type: 'Bounce', travel: 127.4, iterationDelay: 500 },
+          namedEffect: {
+            type: 'Bounce',
+            travel: 127.4,
+            iterationDelay: 500,
+          },
           name: 'motion-bounce-067',
           easing: 'linear',
           custom: {
-            '--motion-bounce-unit': '2.6px',
+            '--motion-bounce-y-1': '-71.5px',
+            '--motion-bounce-y-2': '-113.1px',
+            '--motion-bounce-y-3': '-127.4px',
+            '--motion-bounce-y-4': '-113.1px',
+            '--motion-bounce-y-5': '-71.5px',
+            '--motion-bounce-y-7': '-29.9px',
+            '--motion-bounce-y-9': '-6.5px',
+            '--motion-bounce-y-11': '-2.6px',
           },
           keyframes: [
             {
               offset: 0,
-              translate: '0px calc(0 * 2.6px)',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.05896000000000001,
-              translate: '0px calc(-27.5 * 2.6px)',
+              translate: '0px -71.5px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.11792000000000002,
-              translate: '0px calc(-43.5 * 2.6px)',
+              translate: '0px -113.1px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.17755,
-              translate: '0px calc(-49 * 2.6px)',
+              translate: '0px -127.4px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.23651,
-              translate: '0px calc(-43.5 * 2.6px)',
+              translate: '0px -113.1px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.29547,
-              translate: '0px calc(-27.5 * 2.6px)',
+              translate: '0px -71.5px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.35577000000000003,
-              translate: '0px calc(0 * 2.6px)',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.44354000000000005,
-              translate: '0px calc(-11.5 * 2.6px)',
+              translate: '0px -29.9px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.5427000000000001,
-              translate: '0px calc(0 * 2.6px)',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.5815600000000001,
-              translate: '0px calc(-2.5 * 2.6px)',
+              translate: '0px -6.5px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.63047,
-              translate: '0px calc(0 * 2.6px)',
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.65057,
-              translate: '0px calc(-1 * 2.6px)',
+              translate: '0px -2.6px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
               offset: 0.67,
-              translate: '0px calc(0 * 2.6px)',
+              translate: '0px 0px',
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
+            },
+            {
+              offset: 1,
+              translate: '0px 0px',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
           ],
@@ -456,5 +506,24 @@ describe('Bounce', () => {
       expect(Bounce.getNames(mockOptions)).toEqual(['motion-bounce-067-1a']);
       expect(Bounce.style(mockOptions)[0].name).toBe('motion-bounce-067-1a');
     });
+  });
+});
+
+describe('Bounce travel', () => {
+  const peakOf = (travel: unknown) => {
+    const { keyframes } = Bounce.web({
+      ...baseMockOptions,
+      namedEffect: { travel } as any,
+    })[0];
+    return keyframes.map(({ translate }) => (translate as string).replace(/^0px /, ''));
+  };
+
+  test.each([49, 98, 33.3])('the peak is the travel %spx', (travel) => {
+    const ys = peakOf({ value: travel, unit: 'px' }).map(parseFloat);
+    expect(Math.min(...ys)).toBe(-travel);
+  });
+
+  test('the peak is a calc travel', () => {
+    expect(peakOf('calc(1vh + 10px)')).toContain('calc(-1 * calc(1vh + 10px))');
   });
 });

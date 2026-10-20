@@ -20,17 +20,17 @@ describe('Spin', () => {
           easing: 'linear',
           duration: 1000,
           custom: {
-            '--motion-rotate-start': 'calc(var(--motion-rotate, 0deg) + -360deg)',
+            '--motion-rotate-start': '-360deg',
           },
           keyframes: [
             {
               offset: 0,
               easing: 'linear',
-              rotate: 'calc(var(--motion-rotate, 0deg) + -360deg)',
+              rotate: '-360deg',
             },
             {
               offset: 1,
-              rotate: 'var(--motion-rotate, 0deg)',
+              rotate: '0deg',
             },
           ],
         },
@@ -52,22 +52,28 @@ describe('Spin', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-spin-067',
+          name: 'motion-spin-067-quintInOut',
           easing: 'linear',
-          namedEffect: { iterationDelay: 500 } as Spin,
+          namedEffect: {
+            iterationDelay: 500,
+          } as Spin,
           duration: 1500,
           custom: {
-            '--motion-rotate-start': 'calc(var(--motion-rotate, 0deg) + -360deg)',
+            '--motion-rotate-start': '-360deg',
           },
           keyframes: [
             {
               offset: 0,
               easing: 'cubic-bezier(0.86, 0, 0.07, 1)',
-              rotate: 'calc(var(--motion-rotate, 0deg) + -360deg)',
+              rotate: '-360deg',
             },
             {
               offset: 0.67,
-              rotate: 'var(--motion-rotate, 0deg)',
+              rotate: '0deg',
+            },
+            {
+              offset: 1,
+              rotate: '0deg',
             },
           ],
         },
@@ -89,17 +95,17 @@ describe('Spin', () => {
         {
           name: 'motion-spin-1',
           custom: {
-            '--motion-rotate-start': 'calc(var(--motion-rotate, 0deg) + 360deg)',
+            '--motion-rotate-start': '360deg',
           },
           keyframes: [
             {
               offset: 0,
               easing: 'linear',
-              rotate: 'calc(var(--motion-rotate, 0deg) + 360deg)',
+              rotate: '360deg',
             },
             {
               offset: 1,
-              rotate: 'var(--motion-rotate, 0deg)',
+              rotate: '0deg',
             },
           ],
         },
@@ -126,7 +132,7 @@ describe('Spin', () => {
           easing: 'linear',
           duration: 1000,
           custom: {
-            '--motion-rotate-start': 'calc(var(--motion-rotate, 0deg) + -360deg)',
+            '--motion-rotate-start': '-360deg',
           },
           keyframes: [
             {
@@ -136,7 +142,7 @@ describe('Spin', () => {
             },
             {
               offset: 1,
-              rotate: 'var(--motion-rotate, 0deg)',
+              rotate: '0deg',
             },
           ],
         },
@@ -159,10 +165,12 @@ describe('Spin', () => {
         {
           name: 'motion-spin-08',
           easing: 'linear',
-          namedEffect: { iterationDelay: 200 } as Spin,
+          namedEffect: {
+            iterationDelay: 200,
+          } as Spin,
           duration: 1000,
           custom: {
-            '--motion-rotate-start': 'calc(var(--motion-rotate, 0deg) + -360deg)',
+            '--motion-rotate-start': '-360deg',
           },
           keyframes: [
             {
@@ -171,8 +179,12 @@ describe('Spin', () => {
               rotate: 'var(--motion-rotate-start)',
             },
             {
-              offset: 0.8, // duration / (duration + delay)
-              rotate: 'var(--motion-rotate, 0deg)',
+              offset: 0.8,
+              rotate: '0deg',
+            },
+            {
+              offset: 1,
+              rotate: '0deg',
             },
           ],
         },
@@ -194,7 +206,7 @@ describe('Spin', () => {
         {
           name: 'motion-spin-1',
           custom: {
-            '--motion-rotate-start': 'calc(var(--motion-rotate, 0deg) + 360deg)',
+            '--motion-rotate-start': '360deg',
           },
           keyframes: [
             {
@@ -204,7 +216,7 @@ describe('Spin', () => {
             },
             {
               offset: 1,
-              rotate: 'var(--motion-rotate, 0deg)',
+              rotate: '0deg',
             },
           ],
         },
@@ -215,4 +227,24 @@ describe('Spin', () => {
       expect(result).toMatchObject(expectedResult);
     });
   });
+});
+
+describe('Spin rotation', () => {
+  test.each(['clockwise', 'counter-clockwise'])(
+    'turns %s without adding the layout rotation',
+    (direction) => {
+      for (const method of [SpinAnimation.web, SpinAnimation.style]) {
+        const [animation] = method({
+          ...baseMockOptions,
+          namedEffect: { direction } as Spin,
+        });
+        expect(JSON.stringify(animation)).not.toContain('--motion-rotate,');
+        expect(animation.keyframes.at(-1)!.rotate).toBe('0deg');
+      }
+      expect(
+        SpinAnimation.web({ ...baseMockOptions, namedEffect: { direction } as Spin })[0]
+          .keyframes[0].rotate,
+      ).toBe(direction === 'clockwise' ? '-360deg' : '360deg');
+    },
+  );
 });

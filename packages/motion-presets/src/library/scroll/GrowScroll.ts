@@ -5,10 +5,9 @@ import type {
   DomApi,
   EffectNineDirections,
 } from '../../types';
-import { toKeyframeValue, parseDirection } from '../../utils';
+import { toKeyframeValue, parseDirection, getScrollParallax } from '../../utils';
 import { NINE_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 
-const MAX_Y_TRAVEL = 40;
 const EPSILON = 0.01;
 
 export const schema = {
@@ -60,29 +59,22 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const scale = range === 'in' ? Math.min(inputScale, invScale) : Math.max(inputScale, invScale);
   const scaleFrom = scale;
   const scaleTo = scale;
-  const travelY = 1 / Math.max(speed, EPSILON) - 1;
-  const travel = travelY * MAX_Y_TRAVEL;
+  const { from, to, ...scrollRange } = getScrollParallax(range, options, speed);
 
   const fromValues = {
     scale: range === 'out' ? 1 : scaleFrom,
-    travel: range === 'out' ? 0 : -travel,
   };
   const toValues = {
     scale: range === 'in' ? 1 : scaleTo,
-    travel: range === 'in' ? 0 : travel,
   };
-
-  const offset = Math.abs(travel);
-  const startOffsetAdd = range === 'out' ? '0px' : `${-offset}vh`;
-  const endOffsetAdd = range === 'in' ? '0px' : `${offset}vh`;
 
   const [trnsX, trnsY] = directionMap[direction] || [0, 0];
 
   const [growScroll] = getNames(options);
 
   const custom = {
-    [`--motion-travel-from${suffix}`]: `${fromValues.travel}vh`,
-    [`--motion-travel-to${suffix}`]: `${toValues.travel}vh`,
+    [`--motion-travel-from${suffix}`]: from,
+    [`--motion-travel-to${suffix}`]: to,
     [`--motion-grow-from${suffix}`]: fromValues.scale,
     [`--motion-grow-to${suffix}`]: toValues.scale,
     [`--motion-trans-x${suffix}`]: `${trnsX}%`,
@@ -95,8 +87,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       name: growScroll,
       fill,
       easing,
-      startOffsetAdd,
-      endOffsetAdd,
+      ...scrollRange,
       custom,
       keyframes: [
         {

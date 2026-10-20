@@ -17,28 +17,32 @@ describe('Jello.web()', () => {
         duration: 1,
         easing: 'linear',
         custom: {
-          '--motion-skew-y': 1.75,
+          '--motion-skew-y-24': '12.25deg',
+          '--motion-skew-y-38': '-3.5deg',
+          '--motion-skew-y-58': '7deg',
+          '--motion-skew-y-80': '-3.5deg',
+          '--motion-skew-y-100': '0deg',
         },
         keyframes: [
           {
             offset: 0.24,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(1.75 * 7deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(12.25deg)',
           },
           {
             offset: 0.38,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(1.75 * -2deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(-3.5deg)',
           },
           {
             offset: 0.58,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(1.75 * 4deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(7deg)',
           },
           {
             offset: 0.8,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(1.75 * -2deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(-3.5deg)',
           },
           {
             offset: 1,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(1.75 * 0deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(0deg)',
           },
         ],
       },
@@ -62,28 +66,36 @@ describe('Jello.web()', () => {
         duration: 1500,
         easing: 'linear',
         custom: {
-          '--motion-skew-y': 3.4,
+          '--motion-skew-y-24': '23.8deg',
+          '--motion-skew-y-38': '-6.8deg',
+          '--motion-skew-y-58': '13.6deg',
+          '--motion-skew-y-80': '-6.8deg',
+          '--motion-skew-y-100': '0deg',
         },
         keyframes: [
           {
             offset: 0.1608,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(3.4 * 7deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(23.8deg)',
           },
           {
             offset: 0.2546,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(3.4 * -2deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(-6.8deg)',
           },
           {
             offset: 0.3886,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(3.4 * 4deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(13.6deg)',
           },
           {
             offset: 0.536,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(3.4 * -2deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(-6.8deg)',
           },
           {
             offset: 0.67,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(3.4 * 0deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(0deg)',
+          },
+          {
+            offset: 1,
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(0deg)',
           },
         ],
       },
@@ -108,33 +120,32 @@ describe('Jello.style()', () => {
         duration: 1,
         easing: 'linear',
         custom: {
-          '--motion-skew-y': 1.75,
+          '--motion-skew-y-24': '12.25deg',
+          '--motion-skew-y-38': '-3.5deg',
+          '--motion-skew-y-58': '7deg',
+          '--motion-skew-y-80': '-3.5deg',
+          '--motion-skew-y-100': '0deg',
         },
         keyframes: [
           {
             offset: 0.24,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 7deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(var(--motion-skew-y-24))',
           },
           {
             offset: 0.38,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * -2deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(var(--motion-skew-y-38))',
           },
           {
             offset: 0.58,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 4deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(var(--motion-skew-y-58))',
           },
           {
             offset: 0.8,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * -2deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(var(--motion-skew-y-80))',
           },
           {
             offset: 1,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 0deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(var(--motion-skew-y-100))',
           },
         ],
       },
@@ -158,33 +169,36 @@ describe('Jello.style()', () => {
         duration: 1500,
         easing: 'linear',
         custom: {
-          '--motion-skew-y': 3.4,
+          '--motion-skew-y-24': '23.8deg',
+          '--motion-skew-y-38': '-6.8deg',
+          '--motion-skew-y-58': '13.6deg',
+          '--motion-skew-y-80': '-6.8deg',
+          '--motion-skew-y-100': '0deg',
         },
         keyframes: [
           {
             offset: 0.1608,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 7deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(var(--motion-skew-y-24))',
           },
           {
             offset: 0.2546,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * -2deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(var(--motion-skew-y-38))',
           },
           {
             offset: 0.3886,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 4deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(var(--motion-skew-y-58))',
           },
           {
             offset: 0.536,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * -2deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(var(--motion-skew-y-80))',
           },
           {
             offset: 0.67,
-            transform:
-              'rotateZ(var(--motion-rotate, 0deg)) skewY(calc(var(--motion-skew-y) * 0deg))',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(var(--motion-skew-y-100))',
+          },
+          {
+            offset: 1,
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) skewY(var(--motion-skew-y-100))',
           },
         ],
       },
@@ -193,5 +207,18 @@ describe('Jello.style()', () => {
     const result = JelloAnimation.style(mockOptions);
 
     expect(result).toMatchObject(expectedResult);
+  });
+});
+
+describe('Jello skew', () => {
+  test.each([12.25, 7, 28, -10])('the peak is the skew %s', (skew) => {
+    const skews = JelloAnimation.web({
+      ...baseMockOptions,
+      namedEffect: { skew } as Jello,
+    })[0].keyframes.map(({ transform }) =>
+      parseFloat((transform as string).match(/skewY\((-?[\d.]+)deg\)/)![1]),
+    );
+    expect(skews[0]).toBe(skew);
+    expect(Math.max(...skews.map(Math.abs))).toBe(Math.abs(skew));
   });
 });

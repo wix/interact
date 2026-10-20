@@ -78,6 +78,10 @@ describe('Wiggle', () => {
               offset: 0.67,
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + 0deg)) translateY(0px)',
             },
+            {
+              offset: 1,
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 0deg)) translateY(0px)',
+            },
           ],
         },
       ];
@@ -187,6 +191,11 @@ describe('Wiggle', () => {
               transform:
                 'rotate(var(--motion-rotate-100)) translateY(var(--motion-translate-y-100))',
             },
+            {
+              offset: 1,
+              transform:
+                'rotate(var(--motion-rotate-100)) translateY(var(--motion-translate-y-100))',
+            },
           ],
         },
       ];
@@ -220,5 +229,28 @@ describe('Wiggle', () => {
       expect(typeof result[0].custom!['--motion-rotate-18']).toBe('string');
       expect(typeof result[0].custom!['--motion-translate-y-18']).toBe('string');
     });
+  });
+});
+
+describe('Wiggle angle and travel', () => {
+  test.each([
+    [25, 25],
+    [10, 34],
+    [-40, 7],
+  ])('peaks at angle %s and lift %s', (angle, travel) => {
+    const { keyframes } = WiggleAnimation.web({
+      ...baseMockOptions,
+      namedEffect: { angle, travel: { value: travel, unit: 'px' } } as Wiggle,
+    })[0];
+    const rotations = keyframes.map(({ transform }) =>
+      parseFloat((transform as string).match(/\+ (-?[\d.]+)deg/)![1]),
+    );
+    const lifts = keyframes.map(({ transform }) =>
+      parseFloat((transform as string).match(/translateY\((-?[\d.]+)px\)/)![1]),
+    );
+    expect(rotations[0]).toBe(angle);
+    expect(Math.max(...rotations.map(Math.abs))).toBe(Math.abs(angle));
+    expect(lifts[0]).toBe(-travel);
+    expect(Math.max(...lifts.map(Math.abs))).toBe(travel);
   });
 });

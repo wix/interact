@@ -9,6 +9,7 @@ import {
   scaleLength,
   roundNumber,
   getTimingFactor,
+  holdAtRest,
   toKeyframeValue,
   parseDirection,
   parseLengthOrCalc,
@@ -22,16 +23,14 @@ export const schema = {
 } as const;
 
 const TRANSLATE_KEYFRAMES = [
-  { keyframe: 17, translate: 7 },
-  { keyframe: 32, translate: 25 },
-  { keyframe: 48, translate: 8 },
-  { keyframe: 56, translate: 11 },
-  { keyframe: 66, translate: 25 },
-  { keyframe: 83, translate: 4 },
+  { keyframe: 17, translate: 0.28 },
+  { keyframe: 32, translate: 1 },
+  { keyframe: 48, translate: 0.32 },
+  { keyframe: 56, translate: 0.44 },
+  { keyframe: 66, translate: 1 },
+  { keyframe: 83, translate: 0.16 },
   { keyframe: 100, translate: 0 },
 ];
-
-const PEAK_TRANSLATE = 25;
 
 const DIRECTION_MAP = {
   top: { x: 0, y: -1 },
@@ -62,30 +61,32 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const pokeUnit = scaleLength(travel, 1 / PEAK_TRANSLATE, roundUnit);
-
   // Create CSS custom properties for the poke configuration
   const custom: Record<string, string | number> = {
     [`--motion-translate-x${suffix}`]: x,
     [`--motion-translate-y${suffix}`]: y,
-    [`--motion-poke-unit${suffix}`]: pokeUnit,
   };
 
-  const pokeUnit_ = toKeyframeValue(custom, `--motion-poke-unit${suffix}`, asWeb);
   const keyframes = TRANSLATE_KEYFRAMES.map(({ keyframe, translate }) => {
-    const translateValue = `calc(${toKeyframeValue(
-      custom,
-      `--motion-translate-x${suffix}`,
-      asWeb,
-    )} * ${translate} * ${pokeUnit_}) calc(${toKeyframeValue(
-      custom,
-      `--motion-translate-y${suffix}`,
-      asWeb,
-    )} * ${translate} * ${pokeUnit_})`;
+    const travelKey = `--motion-poke-travel${suffix}-${keyframe}`;
+    if (translate) {
+      custom[travelKey] = scaleLength(travel, translate, roundUnit);
+    }
+    const travel_ = toKeyframeValue(custom, travelKey, asWeb);
 
     return {
-      offset: (keyframe / 100) * timingFactor,
-      translate: translateValue,
+      offset: keyframe / 100,
+      translate: translate
+        ? `calc(${toKeyframeValue(
+            custom,
+            `--motion-translate-x${suffix}`,
+            asWeb,
+          )} * ${travel_}) calc(${toKeyframeValue(
+            custom,
+            `--motion-translate-y${suffix}`,
+            asWeb,
+          )} * ${travel_})`
+        : '0px 0px',
     };
   });
 
@@ -96,7 +97,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       easing: 'linear',
       duration: duration + iterationDelay,
       custom,
-      keyframes,
+      keyframes: holdAtRest(keyframes, timingFactor),
     },
   ];
 }

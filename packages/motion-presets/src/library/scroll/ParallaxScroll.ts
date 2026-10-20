@@ -1,8 +1,5 @@
 import type { ScrubAnimationOptions, ParallaxScroll, AnimationFillMode, DomApi } from '../../types';
-import { toKeyframeValue } from '../../utils';
-
-const PARALLAX_FACTOR_AT_DEFAULT_SPEED = 0.5;
-const EPSILON = 0.01;
+import { getScrollParallax, toKeyframeValue } from '../../utils';
 
 export const schema = {
   center: { type: 'number', min: 0, max: 1, default: 0.5 },
@@ -20,22 +17,16 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const { suffix = '' } = options;
   const namedEffect = options.namedEffect as ParallaxScroll;
-  const { speed = schema.speed.default, center: inputCenter = schema.center.default } = namedEffect;
+  const { speed = schema.speed.default, center = schema.center.default } = namedEffect;
   const easing = 'linear';
 
-  const parallaxFactor =
-    (PARALLAX_FACTOR_AT_DEFAULT_SPEED * (1 / Math.max(speed, EPSILON) - 1)) /
-    (1 / schema.speed.default - 1);
-  const center = Math.min(1 - EPSILON, Math.max(0, inputCenter));
-
-  const start = `${-100 * parallaxFactor * center}vh`;
-  const end = `${100 * parallaxFactor * (1 - center)}vh`;
+  const { from, to, ...scrollRange } = getScrollParallax('continuous', options, speed, center);
 
   const [parallaxScroll] = getNames(options);
 
   const custom = {
-    [`--motion-parallax-from${suffix}`]: start,
-    [`--motion-parallax-to${suffix}`]: end,
+    [`--motion-parallax-from${suffix}`]: from,
+    [`--motion-parallax-to${suffix}`]: to,
   };
 
   // use transform: translateY(<value>) and not translate: 0 <value> because of WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=276281
@@ -45,8 +36,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       name: parallaxScroll,
       fill: 'both' as AnimationFillMode,
       easing,
-      startOffsetAdd: start,
-      endOffsetAdd: end,
+      ...scrollRange,
       custom,
       keyframes: [
         {

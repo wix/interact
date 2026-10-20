@@ -16,16 +16,16 @@ describe('ShrinkScroll', () => {
         {
           fill: 'backwards',
           easing: 'linear',
-          startOffsetAdd: '0vh',
+          startOffsetAdd: '0px',
           endOffsetAdd: '0px',
           keyframes: [
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1.2) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(0px) translate(0%, 0%) scale(1.2) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
             },
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(0px) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -46,15 +46,15 @@ describe('ShrinkScroll', () => {
         {
           fill: 'forwards',
           startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          endOffsetAdd: '0px',
           keyframes: [
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(0px) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
             },
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(0.8) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(0px) translate(0%, 0%) scale(0.8) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -76,11 +76,11 @@ describe('ShrinkScroll', () => {
           keyframes: [
             {
               transform:
-                'translateY(0vh) translate(50%, -50%) scale(1.2) translate(calc(-1 * 50%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
+                'translateY(0px) translate(50%, -50%) scale(1.2) translate(calc(-1 * 50%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
             },
             {
               transform:
-                'translateY(0vh) translate(50%, -50%) scale(1) translate(calc(-1 * 50%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
+                'translateY(0px) translate(50%, -50%) scale(1) translate(calc(-1 * 50%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -102,11 +102,11 @@ describe('ShrinkScroll', () => {
           keyframes: [
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1.5) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(0px) translate(0%, 0%) scale(1.5) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
             },
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(0px) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -120,21 +120,25 @@ describe('ShrinkScroll', () => {
     test('custom speed', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { speed: 2 / 3 } as ShrinkScrollType,
+        namedEffect: { speed: 0.25 } as ShrinkScrollType,
+        startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+        endOffset: { name: 'cover', offset: { value: 50, unit: 'percentage' } },
       };
 
       const expectedResult = [
         {
-          startOffsetAdd: '-20vh',
-          endOffsetAdd: '0px',
+          startOffset: { name: 'entry-crossing', offset: { value: -150, unit: 'percentage' } },
+          startOffsetAdd: '-150vh',
+          endOffset: { name: 'entry-crossing', offset: { value: 50, unit: 'percentage' } },
+          endOffsetAdd: '50vh',
           keyframes: [
             {
               transform:
-                'translateY(-20vh) translate(0%, 0%) scale(1.2) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(calc(-150% + -150vh)) translate(0%, 0%) scale(1.2) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
             },
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(0px) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -157,7 +161,7 @@ describe('ShrinkScroll', () => {
         {
           fill: 'backwards',
           easing: 'linear',
-          startOffsetAdd: '0vh',
+          startOffsetAdd: '0px',
           endOffsetAdd: '0px',
           keyframes: [
             {
@@ -187,7 +191,7 @@ describe('ShrinkScroll', () => {
         {
           fill: 'forwards',
           startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          endOffsetAdd: '0px',
           keyframes: [
             {
               transform:

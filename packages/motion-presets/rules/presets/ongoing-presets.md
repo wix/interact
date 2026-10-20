@@ -172,7 +172,7 @@ Visual: Element stretches non-uniformly on X and Y axes, creating a rubber-band 
 
 Parameters:
 
-- `stretch`: number — -1 to 1, the stretch amplitude (default: `0.1`)
+- `stretch`: number — -1 to 1, the stretch amount at the first squash: scaleX = 1 + stretch, scaleY = 1 - stretch (default: `0.1`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript

@@ -116,7 +116,7 @@ Parameters:
 - `pivot`: EffectNineDirections — origin point for scaling (default: `'center'`)
 - `range`: 'in' | 'out' | 'continuous' (default: `'in'`)
 - `scale`: number — starting scale on 'in', ending scale otherwise; inverted to below 1 for 'in' and above 1 otherwise (default: `0.25`, i.e. `4` for 'out')
-- `speed`: number — approximate visual speed relative to the scroll, 1 = moves with the page (default: `1`)
+- `speed`: number — visual speed relative to the scroll, 1 = moves with the page (default: `1`)
 
 ```typescript
 { type: 'GrowScroll', pivot: 'top-left', scale: 0.5 }
@@ -163,7 +163,7 @@ Visual: Element moves at a different speed than the scroll, creating a depth ill
 
 Parameters:
 
-- `speed`: number — approximate visual speed relative to the scroll; 1 = moves with the page, below 1 = slower (default: `0.7159`)
+- `speed`: number — visual speed relative to the scroll; 1 = moves with the page, below 1 = slower (default: `0.7159`)
 - `center`: number — 0 to 1, point of the scroll range where the element is at its natural position (default: `0.5`)
 
 ```typescript
@@ -212,7 +212,7 @@ Parameters:
 - `pivot`: EffectNineDirections — shrink origin (default: `'center'`)
 - `range`: 'in' | 'out' | 'continuous' (default: `'in'`)
 - `scale`: number — starting scale on 'in', ending scale otherwise; inverted to above 1 for 'in' and below 1 otherwise (default: `1.2`, i.e. `1/1.2` for 'out')
-- `speed`: number — approximate visual speed relative to the scroll, 1 = moves with the page (default: `1`)
+- `speed`: number — visual speed relative to the scroll, 1 = moves with the page (default: `1`)
 
 ```typescript
 { type: 'ShrinkScroll', pivot: 'bottom', scale: 2 }
@@ -275,7 +275,7 @@ Visual: Element performs a 3D spin with rotation on multiple axes as it scrolls.
 Parameters:
 
 - `angle`: number — rotation amount in degrees, applied on all axes (default: `100`)
-- `speed`: number — approximate visual speed relative to the scroll, 1 = moves with the page (default: `1`)
+- `speed`: number — visual speed relative to the scroll, 1 = moves with the page (default: `1`)
 - `range`: 'in' | 'out' | 'continuous' (default: `'in'`)
 - `perspective`: number — 3D perspective in px (default: `1000`)
 
@@ -324,7 +324,7 @@ Visual: Element tilts in 3D and perspective, with optional parallax vertical mov
 Parameters:
 
 - `direction`: 'clockwise' | 'counter-clockwise' — z-rotation direction (default: `'counter-clockwise'`)
-- `speed`: number — approximate visual speed relative to the scroll, 1 = moves with the page (default: `1`)
+- `speed`: number — visual speed relative to the scroll, 1 = moves with the page (default: `1`)
 - `perspective`: number — 3D perspective in px (default: `400`)
 - `range`: 'in' | 'out' | 'continuous' (default: `'in'`)
 

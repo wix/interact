@@ -71,12 +71,12 @@ These are set on the effect configuration level, not on the preset itself:
 
 **Ongoing-specific preset parameter:**
 
-- `iterationDelay`: Idle time in ms appended after each active iteration cycle. Available on all ongoing presets. This compresses the active animation keyframes into a fraction of the total iteration duration, creating a pause between repetitions. Set on the `namedEffect`, not on the animation options.
+- `iterationDelay`: Idle time in ms appended after each active iteration cycle. Available on all ongoing presets. The element holds at rest for this time after each iteration; the motion's shape is unchanged. Set on the `namedEffect`, not on the animation options.
 
 **Scroll-specific animation options:**
 
 - `rangeStart` / `rangeEnd`: `RangeOffset` controlling when the scroll animation starts/ends
-- `transitionDuration` / `transitionDelay` / `transitionEasing`: Transition smoothing
+- `transitionDuration` / `transitionEasing`: Transition smoothing
 
 ### Overloaded Parameter Names
 

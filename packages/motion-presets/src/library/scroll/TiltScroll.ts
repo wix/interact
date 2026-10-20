@@ -6,11 +6,9 @@ import type {
   EffectSpinDirection,
 } from '../../types';
 import { cssEasings as easings } from '@wix/motion';
-import { toKeyframeValue, parseDirection } from '../../utils';
+import { toKeyframeValue, parseDirection, getScrollParallax } from '../../utils';
 import { SCROLL_RANGES, SPIN_DIRECTIONS } from '../../consts';
 
-const MAX_Y_TRAVEL = 40;
-const EPSILON = 0.01;
 const [ROTATION_X, ROTATION_Y, ROTATION_Z] = [10, 25, 25];
 
 export const schema = {
@@ -48,31 +46,30 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
   ) as AnimationFillMode;
 
-  const travelY = MAX_Y_TRAVEL * (1 - 1 / Math.max(speed, EPSILON));
+  const {
+    from: travelFrom,
+    to: travelTo,
+    ...scrollRange
+  } = getScrollParallax(range, options, speed);
   const dir = DIRECTIONS_MAP[direction] * (range === 'in' ? 1 : -1);
 
   const from = {
     x: ROTATION_X * (range === 'out' ? 0 : -1),
     y: ROTATION_Y * (range === 'out' ? 0 : -1),
     z: ROTATION_Z * dir * (range === 'out' ? 0 : range === 'in' ? 1 : -1),
-    transY: range === 'out' ? 0 : travelY,
   };
   const to = {
     x: ROTATION_X * (range === 'in' ? 0 : range === 'out' ? -1 : 1),
     y: ROTATION_Y * (range === 'in' ? 0 : range === 'out' ? -1 : 0.5),
     z: ROTATION_Z * dir * (range === 'in' ? 0 : range === 'out' ? 1 : 1.25),
-    transY: range === 'in' ? 0 : -1 * travelY,
   };
-
-  const startOffsetAdd = range === 'out' ? '0px' : `${-1 * Math.abs(travelY)}vh`;
-  const endOffsetAdd = range === 'in' ? '0px' : `${Math.abs(travelY)}vh`;
 
   const [tiltScrollTranslate, tiltScrollRotate] = getNames(options);
 
   const custom = {
     [`--motion-perspective${suffix}`]: `${perspective}px`,
-    [`--motion-tilt-y-from${suffix}`]: `${from.transY}vh`,
-    [`--motion-tilt-y-to${suffix}`]: `${to.transY}vh`,
+    [`--motion-tilt-y-from${suffix}`]: travelFrom,
+    [`--motion-tilt-y-to${suffix}`]: travelTo,
     [`--motion-tilt-x-from${suffix}`]: `${from.x}deg`,
     [`--motion-tilt-x-to${suffix}`]: `${to.x}deg`,
     [`--motion-tilt-y-rot-from${suffix}`]: `${from.y}deg`,
@@ -87,8 +84,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       name: tiltScrollTranslate,
       fill,
       easing,
-      startOffsetAdd,
-      endOffsetAdd,
+      ...scrollRange,
       custom,
       keyframes: [
         {
@@ -120,8 +116,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       name: tiltScrollRotate,
       fill,
       easing: easings.sineInOut,
-      startOffsetAdd,
-      endOffsetAdd,
+      ...scrollRange,
       composite: 'add' as const, // add this animation on top of the previous one
       custom,
       keyframes: [

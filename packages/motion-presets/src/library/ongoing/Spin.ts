@@ -1,5 +1,12 @@
 import type { AnimationExtraOptions, DomApi, Spin, TimeAnimationOptions } from '../../types';
-import { getEasing, getTimingFactor, toKeyframeValue, parseDirection } from '../../utils';
+import {
+  getEasing,
+  getTimingFactor,
+  holdAtRest,
+  toKeyframeValue,
+  parseDirection,
+  getEasingKey,
+} from '../../utils';
 import { SPIN_DIRECTIONS } from '../../consts';
 
 export const schema = {
@@ -35,7 +42,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const transformRotate = (DIRECTION_MAP[direction] > 0 ? 1 : -1) * 360;
 
   const custom = {
-    [`--motion-rotate-start${suffix}`]: `calc(var(--motion-rotate, 0deg) + ${transformRotate}deg)`,
+    [`--motion-rotate-start${suffix}`]: `${transformRotate}deg`,
   };
 
   return [
@@ -45,17 +52,20 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       easing: 'linear',
       duration: duration + iterationDelay,
       custom,
-      keyframes: [
-        {
-          offset: 0,
-          easing: getEasing(easing),
-          rotate: toKeyframeValue(custom, `--motion-rotate-start${suffix}`, asWeb),
-        },
-        {
-          offset: timingFactor,
-          rotate: `var(--motion-rotate, 0deg)`,
-        },
-      ],
+      keyframes: holdAtRest(
+        [
+          {
+            offset: 0,
+            easing: getEasing(easing),
+            rotate: toKeyframeValue(custom, `--motion-rotate-start${suffix}`, asWeb),
+          },
+          {
+            offset: 1,
+            rotate: '0deg',
+          },
+        ],
+        timingFactor,
+      ),
     },
   ];
 }
@@ -65,6 +75,7 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
     (options.namedEffect as Spin)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
   const { suffix = '' } = options;
+  const easingKey = getEasingKey(options.easing);
 
-  return [`motion-spin-${timingFactor}`].map((name) => name + suffix);
+  return [`motion-spin-${timingFactor}`].map((name) => name + easingKey + suffix);
 }

@@ -27,8 +27,10 @@ describe('Flash', () => {
               opacity: 0,
               easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)',
             },
-            { offset: 1, opacity: 1 },
-            { offset: 1, opacity: 1 },
+            {
+              offset: 1,
+              opacity: 1,
+            },
           ],
         },
       ];
@@ -55,9 +57,19 @@ describe('Flash', () => {
               opacity: 1,
               easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)',
             },
-            { offset: 0.335, opacity: 0 },
-            { offset: 0.67, opacity: 1 },
-            { offset: 1, opacity: 1 },
+            {
+              offset: 0.335,
+              opacity: 0,
+              easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)',
+            },
+            {
+              offset: 0.67,
+              opacity: 1,
+            },
+            {
+              offset: 1,
+              opacity: 1,
+            },
           ],
         },
       ];
@@ -76,7 +88,7 @@ describe('Flash', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-flash-1',
+          name: 'motion-flash-1-sineIn',
           duration: 1,
           keyframes: [
             {
@@ -89,8 +101,10 @@ describe('Flash', () => {
               opacity: 0,
               easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             },
-            { offset: 1, opacity: 1 },
-            { offset: 1, opacity: 1 },
+            {
+              offset: 1,
+              opacity: 1,
+            },
           ],
         },
       ];
@@ -123,8 +137,10 @@ describe('Flash', () => {
               opacity: 0,
               easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)',
             },
-            { offset: 1, opacity: 1 },
-            { offset: 1, opacity: 1 },
+            {
+              offset: 1,
+              opacity: 1,
+            },
           ],
         },
       ];
@@ -151,9 +167,19 @@ describe('Flash', () => {
               opacity: 1,
               easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)',
             },
-            { offset: 0.335, opacity: 0 },
-            { offset: 0.67, opacity: 1 },
-            { offset: 1, opacity: 1 },
+            {
+              offset: 0.335,
+              opacity: 0,
+              easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)',
+            },
+            {
+              offset: 0.67,
+              opacity: 1,
+            },
+            {
+              offset: 1,
+              opacity: 1,
+            },
           ],
         },
       ];
@@ -172,7 +198,7 @@ describe('Flash', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-flash-1',
+          name: 'motion-flash-1-sineIn',
           duration: 1,
           keyframes: [
             {
@@ -185,8 +211,10 @@ describe('Flash', () => {
               opacity: 0,
               easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             },
-            { offset: 1, opacity: 1 },
-            { offset: 1, opacity: 1 },
+            {
+              offset: 1,
+              opacity: 1,
+            },
           ],
         },
       ];

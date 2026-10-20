@@ -8,7 +8,13 @@ import type {
   OffsetByDirectionParams,
   TimeAnimationOptions,
 } from '../../types';
-import { getElementOffset, getTimingFactor, parseDirection } from '../../utils';
+import {
+  getElementOffset,
+  getTimingFactor,
+  holdAtRest,
+  parseDirection,
+  toKeyframeValue,
+} from '../../utils';
 
 export const schema = {
   direction: { type: 'enum', values: EIGHT_DIRECTIONS, default: 'right' },
@@ -116,62 +122,13 @@ function generateTranslate(direction: keyof typeof FOUR_CORNERS_TRANSLATIONS) {
   };
 }
 
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?: DomApi) {
-  const namedEffect = options.namedEffect as Cross;
-  const direction = parseDirection<EffectEightDirections>(
-    namedEffect?.direction,
-    EIGHT_DIRECTIONS,
-    schema.direction.default,
-  );
-  const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
-  const [name] = getNames(options);
+const WRAP_GAP = 0.0001;
 
-  // Create CSS custom properties for the Cross configuration
-  const custom: Record<string, string | number> = {
-    '--motion-left': '0px',
-    '--motion-top': '0px',
-    '--motion-width': '100%',
-    '--motion-height': '100%',
-    '--motion-parent-width': '100vw',
-    '--motion-parent-height': '100vh',
-  };
-
-  let from, to;
-  if (direction in TRANSLATE_BY_DIRECTION_MAP) {
-    from = TRANSLATE_BY_DIRECTION_MAP[direction as keyof typeof TRANSLATE_BY_DIRECTION_MAP].from;
-    to = TRANSLATE_BY_DIRECTION_MAP[direction as keyof typeof TRANSLATE_BY_DIRECTION_MAP].to;
-  } else {
-    const cornerFromTo = generateTranslate(direction as keyof typeof FOUR_CORNERS_TRANSLATIONS);
-    from = cornerFromTo.from;
-    to = cornerFromTo.to;
-  }
-
-  const keyframes = [
-    {
-      offset: 0,
-      translate: '0 0',
-    },
-    {
-      offset: 0,
-      translate: to,
-      easing: 'step-start',
-    },
-    {
-      offset: 0,
-      translate: from,
-    },
-    {
-      offset: timingFactor,
-      translate: '0 0',
-    },
-    {
-      offset: 1,
-      translate: '0 0',
-    },
-  ];
-
+function measure(
+  direction: EffectEightDirections,
+  dom: DomApi,
+  onMeasure?: (wrap: number) => void,
+) {
   let left = 0;
   let top = 0;
   let width = 0;
@@ -179,47 +136,120 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?:
   let parentWidth = 0;
   let parentHeight = 0;
 
+  dom.measure((target) => {
+    if (!target) {
+      return;
+    }
+
+    const { width: targetWidth, height: targetHeight } = target.getBoundingClientRect();
+    const parent = target.offsetParent as HTMLElement;
+    const parentRect = parent?.getBoundingClientRect() || ({} as DOMRect);
+    const offset = getElementOffset(target, parent);
+
+    left = offset.left;
+    top = offset.top;
+    width = targetWidth;
+    height = targetHeight;
+    parentWidth = parentRect.width;
+    parentHeight = parentRect.height;
+
+    onMeasure?.(
+      getOffsetByDirection(direction, {
+        left,
+        top,
+        width,
+        height,
+        parentWidth,
+        parentHeight,
+      }),
+    );
+  });
+
+  dom.mutate((target) => {
+    target?.style.setProperty('--motion-left', `${left}px`);
+    target?.style.setProperty('--motion-top', `${top}px`);
+    target?.style.setProperty('--motion-width', `${width}px`);
+    target?.style.setProperty('--motion-height', `${height}px`);
+    target?.style.setProperty('--motion-parent-width', `${parentWidth}px`);
+    target?.style.setProperty('--motion-parent-height', `${parentHeight}px`);
+  });
+}
+
+function getDirection(options: TimeAnimationOptions & AnimationExtraOptions) {
+  return parseDirection<EffectEightDirections>(
+    (options.namedEffect as Cross)?.direction,
+    EIGHT_DIRECTIONS,
+    schema.direction.default,
+  );
+}
+
+export function prepare(options: TimeAnimationOptions & AnimationExtraOptions, dom?: DomApi) {
   if (dom) {
+    measure(getDirection(options), dom);
+  }
+}
+
+export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?: DomApi) {
+  const animations = style(options, true);
+  const timingFactor = getTimingFactor(
+    options.duration || 1,
+    (options.namedEffect as Cross)?.iterationDelay || schema.iterationDelay.default,
+  ) as number;
+
+  if (dom) {
+    const { keyframes } = animations[0];
     // @wix/motion reads the keyframes before measuring, so the wrap offset is updated in place
-    dom.measure((target) => {
-      if (!target) {
-        return;
-      }
-
-      const { width: targetWidth, height: targetHeight } = target.getBoundingClientRect();
-      const parent = target.offsetParent as HTMLElement;
-      const parentRect = parent?.getBoundingClientRect() || ({} as DOMRect);
-      const offset = getElementOffset(target, parent);
-
-      left = offset.left;
-      top = offset.top;
-      width = targetWidth;
-      height = targetHeight;
-      parentWidth = parentRect.width;
-      parentHeight = parentRect.height;
-
-      const toDurationOffset =
-        getOffsetByDirection(direction, {
-          left,
-          top,
-          width,
-          height,
-          parentWidth,
-          parentHeight,
-        }) * timingFactor;
-      keyframes[1].offset = toDurationOffset;
-      keyframes[2].offset = toDurationOffset;
-    });
-
-    dom.mutate((target) => {
-      target?.style.setProperty('--motion-left', `${left}px`);
-      target?.style.setProperty('--motion-top', `${top}px`);
-      target?.style.setProperty('--motion-width', `${width}px`);
-      target?.style.setProperty('--motion-height', `${height}px`);
-      target?.style.setProperty('--motion-parent-width', `${parentWidth}px`);
-      target?.style.setProperty('--motion-parent-height', `${parentHeight}px`);
+    measure(getDirection(options), dom, (wrap) => {
+      keyframes[1].offset = wrap * timingFactor;
+      keyframes[2].offset = Math.min(wrap + WRAP_GAP, 1) * timingFactor;
     });
   }
+
+  return animations;
+}
+
+// unmeasured, the wrap is halfway - the distances to both sides are assumed equal
+export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
+  const namedEffect = options.namedEffect as Cross;
+  const direction = getDirection(options);
+  const duration = options.duration || 1;
+  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
+  const [name] = getNames(options);
+
+  const { from, to } =
+    direction in TRANSLATE_BY_DIRECTION_MAP
+      ? TRANSLATE_BY_DIRECTION_MAP[direction as keyof typeof TRANSLATE_BY_DIRECTION_MAP]
+      : generateTranslate(direction as keyof typeof FOUR_CORNERS_TRANSLATIONS);
+
+  const custom: Record<string, string | number> = {
+    [`--motion-cross-from${suffix}`]: from,
+    [`--motion-cross-to${suffix}`]: to,
+  };
+
+  const keyframes = holdAtRest(
+    [
+      {
+        offset: 0,
+        translate: '0 0',
+      },
+      {
+        offset: 0.5,
+        translate: toKeyframeValue(custom, `--motion-cross-to${suffix}`, asWeb),
+        easing: 'step-start',
+      },
+      {
+        offset: 0.5 + WRAP_GAP,
+        translate: toKeyframeValue(custom, `--motion-cross-from${suffix}`, asWeb),
+      },
+      {
+        offset: 1,
+        translate: '0 0',
+      },
+    ],
+    timingFactor,
+  );
 
   return [
     {
@@ -233,6 +263,11 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?:
   ];
 }
 
-export function getNames({ suffix = '' }: TimeAnimationOptions & AnimationExtraOptions) {
-  return ['motion-cross'].map((name) => name + suffix);
+export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
+  const iterationDelay =
+    (options.namedEffect as Cross)?.iterationDelay || schema.iterationDelay.default;
+  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
+  const { suffix = '' } = options;
+
+  return [`motion-cross-${timingFactor}`].map((name) => name + suffix);
 }

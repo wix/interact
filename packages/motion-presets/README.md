@@ -203,7 +203,7 @@ Supported units: `px`, `em`, `rem`, `vh`, `vw`, `vmin`, `vmax`, `percentage`.
 
 ### `iterationDelay` (ongoing only)
 
-Adds an idle pause between loop cycles. Set on the `namedEffect`:
+Adds an idle pause at rest after each loop cycle, without changing the motion itself. Set on the `namedEffect`:
 
 ```typescript
 namedEffect: { type: 'Bounce', iterationDelay: 1000 } // 1 s pause after each cycle

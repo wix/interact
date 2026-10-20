@@ -25,19 +25,19 @@ describe('Breathe', () => {
           },
           keyframes: [
             {
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               offset: 0,
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               transform: ' translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               offset: 0.25,
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               transform:
                 ' translate3d(calc(0 * 25px), calc(1 * 25px), calc(0 * 25px)) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               offset: 0.75,
+              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               transform:
                 ' translate3d(calc(0 * -1 * 25px), calc(1 * -1 * 25px), calc(0 * -1 * 25px)) rotateZ(var(--motion-rotate, 0deg))',
             },
@@ -74,39 +74,25 @@ describe('Breathe', () => {
           },
           keyframes: [
             {
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               offset: 0,
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               transform: ' translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
+              offset: 0.1675,
               easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.067,
               transform:
-                ' translate3d(calc(0 * 25px * 1), calc(1 * 25px * 1), calc(0 * 25px * 1)) rotateZ(var(--motion-rotate, 0deg))',
+                ' translate3d(calc(0 * 25px), calc(1 * 25px), calc(0 * 25px)) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.20234,
+              offset: 0.5025000000000001,
+              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               transform:
-                ' translate3d(calc(0 * 25px * -1), calc(1 * 25px * -1), calc(0 * 25px * -1)) rotateZ(var(--motion-rotate, 0deg))',
+                ' translate3d(calc(0 * -1 * 25px), calc(1 * -1 * 25px), calc(0 * -1 * 25px)) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.33768000000000004,
-              transform:
-                ' translate3d(calc(0 * 25px * 1), calc(1 * 25px * 1), calc(0 * 25px * 1)) rotateZ(var(--motion-rotate, 0deg))',
-            },
-            {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.47235,
-              transform:
-                ' translate3d(calc(0 * 25px * -0.7), calc(1 * 25px * -0.7), calc(0 * 25px * -0.7)) rotateZ(var(--motion-rotate, 0deg))',
-            },
-            {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.56213,
-              transform:
-                ' translate3d(calc(0 * 25px * 0.6), calc(1 * 25px * 0.6), calc(0 * 25px * 0.6)) rotateZ(var(--motion-rotate, 0deg))',
+              offset: 0.67,
+              transform: ' translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
               offset: 1,
@@ -139,19 +125,19 @@ describe('Breathe', () => {
           },
           keyframes: [
             {
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               offset: 0,
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               transform: ' translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               offset: 0.25,
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               transform:
                 ' translate3d(calc(0 * 50%), calc(1 * 50%), calc(0 * 50%)) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               offset: 0.75,
+              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               transform:
                 ' translate3d(calc(0 * -1 * 50%), calc(1 * -1 * 50%), calc(0 * -1 * 50%)) rotateZ(var(--motion-rotate, 0deg))',
             },
@@ -177,7 +163,7 @@ describe('Breathe', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-breathe-1',
+          name: 'motion-breathe-1-easeIn',
           duration: 1,
           custom: {
             '--motion-breathe-perspective': '',
@@ -188,19 +174,19 @@ describe('Breathe', () => {
           },
           keyframes: [
             {
-              easing: 'ease-out',
               offset: 0,
+              easing: 'ease-out',
               transform: ' translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'ease-in-out',
               offset: 0.25,
+              easing: 'ease-in-out',
               transform:
                 ' translate3d(calc(0 * 25px), calc(1 * 25px), calc(0 * 25px)) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'ease-in',
               offset: 0.75,
+              easing: 'ease-in',
               transform:
                 ' translate3d(calc(0 * -1 * 25px), calc(1 * -1 * 25px), calc(0 * -1 * 25px)) rotateZ(var(--motion-rotate, 0deg))',
             },
@@ -236,19 +222,19 @@ describe('Breathe', () => {
           },
           keyframes: [
             {
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               offset: 0,
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               transform: ' translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               offset: 0.25,
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               transform:
                 ' translate3d(calc(1 * 25px), calc(0 * 25px), calc(0 * 25px)) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               offset: 0.75,
+              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               transform:
                 ' translate3d(calc(1 * -1 * 25px), calc(0 * -1 * 25px), calc(0 * -1 * 25px)) rotateZ(var(--motion-rotate, 0deg))',
             },
@@ -284,20 +270,20 @@ describe('Breathe', () => {
           },
           keyframes: [
             {
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               offset: 0,
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               transform:
                 'perspective(800px) translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               offset: 0.25,
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               transform:
                 'perspective(800px) translate3d(calc(0 * 25px), calc(0 * 25px), calc(1 * 25px)) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               offset: 0.75,
+              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               transform:
                 'perspective(800px) translate3d(calc(0 * -1 * 25px), calc(0 * -1 * 25px), calc(1 * -1 * 25px)) rotateZ(var(--motion-rotate, 0deg))',
             },
@@ -336,20 +322,20 @@ describe('Breathe', () => {
           },
           keyframes: [
             {
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               offset: 0,
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               offset: 0.25,
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * var(--motion-breathe-distance)), calc(var(--motion-breathe-y) * var(--motion-breathe-distance)), calc(var(--motion-breathe-z) * var(--motion-breathe-distance))) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               offset: 0.75,
+              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * -1 * var(--motion-breathe-distance)), calc(var(--motion-breathe-y) * -1 * var(--motion-breathe-distance)), calc(var(--motion-breathe-z) * -1 * var(--motion-breathe-distance))) rotateZ(var(--motion-rotate, 0deg))',
             },
@@ -387,40 +373,27 @@ describe('Breathe', () => {
           },
           keyframes: [
             {
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               offset: 0,
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
+              offset: 0.1675,
               easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.067,
               transform:
-                'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * var(--motion-breathe-distance) * 1), calc(var(--motion-breathe-y) * var(--motion-breathe-distance) * 1), calc(var(--motion-breathe-z) * var(--motion-breathe-distance) * 1)) rotateZ(var(--motion-rotate, 0deg))',
+                'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * var(--motion-breathe-distance)), calc(var(--motion-breathe-y) * var(--motion-breathe-distance)), calc(var(--motion-breathe-z) * var(--motion-breathe-distance))) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.20234,
+              offset: 0.5025000000000001,
+              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               transform:
-                'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * var(--motion-breathe-distance) * -1), calc(var(--motion-breathe-y) * var(--motion-breathe-distance) * -1), calc(var(--motion-breathe-z) * var(--motion-breathe-distance) * -1)) rotateZ(var(--motion-rotate, 0deg))',
+                'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * -1 * var(--motion-breathe-distance)), calc(var(--motion-breathe-y) * -1 * var(--motion-breathe-distance)), calc(var(--motion-breathe-z) * -1 * var(--motion-breathe-distance))) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.33768000000000004,
+              offset: 0.67,
               transform:
-                'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * var(--motion-breathe-distance) * 1), calc(var(--motion-breathe-y) * var(--motion-breathe-distance) * 1), calc(var(--motion-breathe-z) * var(--motion-breathe-distance) * 1)) rotateZ(var(--motion-rotate, 0deg))',
-            },
-            {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.47235,
-              transform:
-                'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * var(--motion-breathe-distance) * -0.7), calc(var(--motion-breathe-y) * var(--motion-breathe-distance) * -0.7), calc(var(--motion-breathe-z) * var(--motion-breathe-distance) * -0.7)) rotateZ(var(--motion-rotate, 0deg))',
-            },
-            {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.56213,
-              transform:
-                'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * var(--motion-breathe-distance) * 0.6), calc(var(--motion-breathe-y) * var(--motion-breathe-distance) * 0.6), calc(var(--motion-breathe-z) * var(--motion-breathe-distance) * 0.6)) rotateZ(var(--motion-rotate, 0deg))',
+                'var(--motion-breathe-perspective, ) translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
               offset: 1,
@@ -454,20 +427,20 @@ describe('Breathe', () => {
           },
           keyframes: [
             {
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               offset: 0,
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               offset: 0.25,
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * var(--motion-breathe-distance)), calc(var(--motion-breathe-y) * var(--motion-breathe-distance)), calc(var(--motion-breathe-z) * var(--motion-breathe-distance))) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               offset: 0.75,
+              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * -1 * var(--motion-breathe-distance)), calc(var(--motion-breathe-y) * -1 * var(--motion-breathe-distance)), calc(var(--motion-breathe-z) * -1 * var(--motion-breathe-distance))) rotateZ(var(--motion-rotate, 0deg))',
             },
@@ -504,20 +477,20 @@ describe('Breathe', () => {
           },
           keyframes: [
             {
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               offset: 0,
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               offset: 0.25,
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * var(--motion-breathe-distance)), calc(var(--motion-breathe-y) * var(--motion-breathe-distance)), calc(var(--motion-breathe-z) * var(--motion-breathe-distance))) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               offset: 0.75,
+              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * -1 * var(--motion-breathe-distance)), calc(var(--motion-breathe-y) * -1 * var(--motion-breathe-distance)), calc(var(--motion-breathe-z) * -1 * var(--motion-breathe-distance))) rotateZ(var(--motion-rotate, 0deg))',
             },
@@ -554,20 +527,20 @@ describe('Breathe', () => {
           },
           keyframes: [
             {
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               offset: 0,
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               offset: 0.25,
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * var(--motion-breathe-distance)), calc(var(--motion-breathe-y) * var(--motion-breathe-distance)), calc(var(--motion-breathe-z) * var(--motion-breathe-distance))) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
-              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               offset: 0.75,
+              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * -1 * var(--motion-breathe-distance)), calc(var(--motion-breathe-y) * -1 * var(--motion-breathe-distance)), calc(var(--motion-breathe-z) * -1 * var(--motion-breathe-distance))) rotateZ(var(--motion-rotate, 0deg))',
             },

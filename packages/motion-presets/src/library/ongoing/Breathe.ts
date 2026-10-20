@@ -4,9 +4,11 @@ import {
   getEasing,
   getEasingFamily,
   getTimingFactor,
+  holdAtRest,
   toKeyframeValue,
   parseDirection,
   parseLengthOrCalc,
+  getEasingKey,
 } from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
 
@@ -24,14 +26,6 @@ const DIRECTION_MAP = {
   horizontal: { x: 1, y: 0, z: 0 },
   center: { x: 0, y: 0, z: 1 },
 };
-
-const FACTORS_SEQUENCE = [
-  { translateFactor: 1, timeFactor: 0.1 },
-  { translateFactor: -1, timeFactor: 0.302 },
-  { translateFactor: 1, timeFactor: 0.504 },
-  { translateFactor: -0.7, timeFactor: 0.705 },
-  { translateFactor: 0.6, timeFactor: 0.839 },
-];
 
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
   return style(options, true);
@@ -82,19 +76,20 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   )}`;
   const breatheDistance = `${toKeyframeValue(custom, `--motion-breathe-distance${suffix}`, asWeb)}`;
 
-  const keyframes =
-    timingFactor < 1
-      ? FACTORS_SEQUENCE.map(({ translateFactor, timeFactor }) => {
-          const keyframeOffset = timeFactor * timingFactor;
-          const distancePart = `${breatheDistance} * ${translateFactor}`;
-
-          return {
-            offset: keyframeOffset,
-            easing: getEasing(ease.inOut),
-            transform: `${breathePerspective} translate3d(calc(${breatheX} * ${distancePart}), calc(${breatheY} * ${distancePart}), calc(${breatheZ} * ${distancePart})) rotateZ(var(--motion-rotate, 0deg))`,
-          };
-        })
-      : [
+  return [
+    {
+      ...options,
+      name,
+      easing: 'linear',
+      duration: totalDuration,
+      custom,
+      keyframes: holdAtRest(
+        [
+          {
+            offset: 0,
+            easing: getEasing(ease.out),
+            transform: `${breathePerspective} translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))`,
+          },
           {
             offset: 0.25,
             easing: getEasing(ease.inOut),
@@ -105,27 +100,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
             easing: getEasing(ease.in),
             transform: `${breathePerspective} translate3d(calc(${breatheX} * -1 * ${breatheDistance}), calc(${breatheY} * -1 * ${breatheDistance}), calc(${breatheZ} * -1 * ${breatheDistance})) rotateZ(var(--motion-rotate, 0deg))`,
           },
-        ];
-
-  return [
-    {
-      ...options,
-      name,
-      easing: 'linear',
-      duration: totalDuration,
-      custom,
-      keyframes: [
-        {
-          offset: 0,
-          easing: getEasing(ease.out),
-          transform: `${breathePerspective} translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))`,
-        },
-        ...keyframes,
-        {
-          offset: 1,
-          transform: `${breathePerspective} translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))`,
-        },
-      ],
+          {
+            offset: 1,
+            transform: `${breathePerspective} translate3d(0, 0, 0) rotateZ(var(--motion-rotate, 0deg))`,
+          },
+        ],
+        timingFactor,
+      ),
     },
   ];
 }
@@ -135,6 +116,7 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
     (options.namedEffect as Breathe)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
   const { suffix = '' } = options;
+  const easingKey = getEasingKey(options.easing);
 
-  return [`motion-breathe-${timingFactor}`].map((name) => name + suffix);
+  return [`motion-breathe-${timingFactor}`].map((name) => name + easingKey + suffix);
 }

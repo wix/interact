@@ -164,7 +164,6 @@ const viewProgressEffectFields = {
 const pointerMoveEffectFields = {
   centeredToTarget: z.boolean().optional(),
   transitionDuration: z.number().int().nonnegative().optional(),
-  transitionDelay: z.number().int().nonnegative().optional(),
   transitionEasing: z.enum(['linear', 'hardBackOut', 'easeOut', 'elastic', 'bounce']).optional(),
 };
 

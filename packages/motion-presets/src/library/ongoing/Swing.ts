@@ -9,8 +9,10 @@ import {
   getEasing,
   getEasingFamily,
   getTimingFactor,
+  holdAtRest,
   toKeyframeValue,
   parseDirection,
+  getEasingKey,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -28,16 +30,6 @@ const DIRECTION_MAP = {
 };
 
 const TRANSLATE_DISTANCE = 50;
-
-const FACTORS_SEQUENCE = [
-  { factor: 1, timeFactor: 0.0934 },
-  { factor: -1, timeFactor: 0.28 },
-  { factor: 0.6, timeFactor: 0.466 },
-  { factor: -0.3, timeFactor: 0.653 },
-  { factor: 0.2, timeFactor: 0.839 },
-  { factor: -0.05, timeFactor: 1.026 },
-  { factor: 0, timeFactor: 1.175 },
-];
 
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
   return style(options, true);
@@ -68,9 +60,6 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     [`--motion-swing-deg${suffix}`]: `${swing}deg`,
     [`--motion-trans-x${suffix}`]: `${x * TRANSLATE_DISTANCE}%`,
     [`--motion-trans-y${suffix}`]: `${y * TRANSLATE_DISTANCE}%`,
-    [`--motion-ease-in${suffix}`]: getEasing(ease.in),
-    [`--motion-ease-inout${suffix}`]: getEasing(ease.inOut),
-    [`--motion-ease-out${suffix}`]: getEasing(ease.out),
   };
 
   const translateBefore = `translate(${toKeyframeValue(
@@ -85,41 +74,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     asWeb,
   )} * -1), calc(${toKeyframeValue(custom, `--motion-trans-y${suffix}`, asWeb)} * -1))`;
 
-  const keyframes =
-    timingFactor < 1
-      ? FACTORS_SEQUENCE.map(({ factor, timeFactor }) => {
-          const keyframeOffset = timeFactor * timingFactor;
-
-          return {
-            offset: keyframeOffset,
-            easing: toKeyframeValue(custom, `--motion-ease-inout${suffix}`, asWeb),
-            transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${toKeyframeValue(
-              custom,
-              `--motion-swing-deg${suffix}`,
-              asWeb,
-            )} * ${factor})) ${translateAfter}`,
-          };
-        })
-      : [
-          {
-            offset: 0.25,
-            easing: toKeyframeValue(custom, `--motion-ease-inout${suffix}`, asWeb),
-            transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(${toKeyframeValue(
-              custom,
-              `--motion-swing-deg${suffix}`,
-              asWeb,
-            )}) ${translateAfter}`,
-          },
-          {
-            offset: 0.75,
-            easing: toKeyframeValue(custom, `--motion-ease-in${suffix}`, asWeb),
-            transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${toKeyframeValue(
-              custom,
-              `--motion-swing-deg${suffix}`,
-              asWeb,
-            )} * -1)) ${translateAfter}`,
-          },
-        ];
+  const swing_ = toKeyframeValue(custom, `--motion-swing-deg${suffix}`, asWeb);
 
   return [
     {
@@ -128,18 +83,30 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       easing: 'linear',
       duration: totalDuration,
       custom,
-      keyframes: [
-        {
-          offset: 0,
-          easing: toKeyframeValue(custom, `--motion-ease-out${suffix}`, asWeb),
-          transform: `rotateZ(var(--motion-rotate, 0deg)) ${translateBefore} rotate(0deg) ${translateAfter}`,
-        },
-        ...keyframes,
-        {
-          offset: 1,
-          transform: `rotateZ(var(--motion-rotate, 0deg)) ${translateBefore} rotate(0deg) ${translateAfter}`,
-        },
-      ],
+      keyframes: holdAtRest(
+        [
+          {
+            offset: 0,
+            easing: getEasing(ease.out),
+            transform: `rotateZ(var(--motion-rotate, 0deg)) ${translateBefore} rotate(0deg) ${translateAfter}`,
+          },
+          {
+            offset: 0.25,
+            easing: getEasing(ease.inOut),
+            transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(${swing_}) ${translateAfter}`,
+          },
+          {
+            offset: 0.75,
+            easing: getEasing(ease.in),
+            transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${swing_} * -1)) ${translateAfter}`,
+          },
+          {
+            offset: 1,
+            transform: `rotateZ(var(--motion-rotate, 0deg)) ${translateBefore} rotate(0deg) ${translateAfter}`,
+          },
+        ],
+        timingFactor,
+      ),
     },
   ];
 }
@@ -149,6 +116,7 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
     (options.namedEffect as Swing)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
   const { suffix = '' } = options;
+  const easingKey = getEasingKey(options.easing);
 
-  return [`motion-swing-${timingFactor}`].map((name) => name + suffix);
+  return [`motion-swing-${timingFactor}`].map((name) => name + easingKey + suffix);
 }

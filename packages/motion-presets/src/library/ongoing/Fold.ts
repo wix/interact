@@ -9,8 +9,10 @@ import {
   getEasing,
   getEasingFamily,
   getTimingFactor,
+  holdAtRest,
   toKeyframeValue,
   parseDirection,
+  getEasingKey,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -39,16 +41,6 @@ const DIRECTION_MAP = {
     origin: { x: -50, y: 0 },
   },
 };
-
-const KEYFRAME_FACTORS = [
-  { fold: 1, frameFactor: 0.1 },
-  { fold: -0.7, frameFactor: 0.302 },
-  { fold: 0.6, frameFactor: 0.504 },
-  { fold: -0.3, frameFactor: 0.686 },
-  { fold: 0.2, frameFactor: 0.847 },
-  { fold: -0.05, frameFactor: 1.049 },
-  { fold: 0, frameFactor: 1.189 },
-];
 
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
   return style(options, true);
@@ -109,17 +101,22 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       asWeb,
     )} * ${value} * ${angle_})) ${transformRight}`;
 
-  const keyframes =
-    timingFactor < 1
-      ? KEYFRAME_FACTORS.map(({ fold, frameFactor }) => {
-          const keyframeOffset = frameFactor * timingFactor;
-          return {
-            offset: keyframeOffset,
-            easing: getEasing('sineInOut'),
-            transform: getTransform(fold),
-          };
-        })
-      : [
+  const transform_0 = getTransform(0);
+
+  return [
+    {
+      ...options,
+      name,
+      easing: 'linear',
+      duration: totalDuration,
+      custom,
+      keyframes: holdAtRest(
+        [
+          {
+            offset: 0,
+            easing: getEasing(ease.out),
+            transform: transform_0,
+          },
           {
             offset: 0.25,
             easing: getEasing(ease.inOut),
@@ -130,29 +127,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
             easing: getEasing(ease.in),
             transform: getTransform(-1),
           },
-        ];
-
-  const transform_0 = getTransform(0);
-
-  return [
-    {
-      ...options,
-      name,
-      easing: 'linear',
-      duration: totalDuration,
-      custom,
-      keyframes: [
-        {
-          offset: 0,
-          easing: getEasing(ease.out),
-          transform: transform_0,
-        },
-        ...keyframes,
-        {
-          offset: 1,
-          transform: transform_0,
-        },
-      ],
+          {
+            offset: 1,
+            transform: transform_0,
+          },
+        ],
+        timingFactor,
+      ),
     },
   ];
 }
@@ -163,12 +144,13 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
     (options.namedEffect as Fold)?.iterationDelay || schema.iterationDelay.default
   );
   const { suffix = '' } = options;
+  const easingKey = getEasingKey(options.easing);
 
   if (!iterationDelay) {
-    return ['motion-fold'].map((name) => name + suffix);
+    return ['motion-fold'].map((name) => name + easingKey + suffix);
   }
 
   const timingFactor = getTimingFactor(duration, iterationDelay, true) as string;
 
-  return [`motion-fold-${timingFactor}`].map((name) => name + suffix);
+  return [`motion-fold-${timingFactor}`].map((name) => name + easingKey + suffix);
 }

@@ -19,18 +19,16 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: {} as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {},
+          name: 'motion-cross-1',
           easing: 'linear',
           duration: 1,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
+            '--motion-cross-to':
+              'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
           },
           keyframes: [
             {
@@ -38,17 +36,13 @@ describe('Cross', () => {
               translate: '0 0',
             },
             {
-              easing: 'step-start',
-              offset: 0,
+              offset: 0.5,
               translate: 'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
+              easing: 'step-start',
             },
             {
-              offset: 0,
+              offset: 0.5001,
               translate: 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
             },
             {
               offset: 1,
@@ -72,18 +66,18 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: {} as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {
+            iterationDelay: 500,
+          },
+          name: 'motion-cross-067',
           easing: 'linear',
           duration: 1500,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
+            '--motion-cross-to':
+              'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
           },
           keyframes: [
             {
@@ -91,12 +85,12 @@ describe('Cross', () => {
               translate: '0 0',
             },
             {
-              easing: 'step-start',
-              offset: 0,
+              offset: 0.335,
               translate: 'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
+              easing: 'step-start',
             },
             {
-              offset: 0,
+              offset: 0.335067,
               translate: 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
             },
             {
@@ -124,18 +118,17 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: { direction: 'top' } as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {
+            direction: 'top',
+          },
+          name: 'motion-cross-1',
           easing: 'linear',
           duration: 1,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              '0 calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))',
+            '--motion-cross-to': '0 calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%))',
           },
           keyframes: [
             {
@@ -143,17 +136,13 @@ describe('Cross', () => {
               translate: '0 0',
             },
             {
-              easing: 'step-start',
-              offset: 0,
+              offset: 0.5,
               translate: '0 calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%))',
+              easing: 'step-start',
             },
             {
-              offset: 0,
+              offset: 0.5001,
               translate: '0 calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
             },
             {
               offset: 1,
@@ -176,18 +165,18 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: { direction: 'bottom' } as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {
+            direction: 'bottom',
+          },
+          name: 'motion-cross-1',
           easing: 'linear',
           duration: 1,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              '0 calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%))',
+            '--motion-cross-to':
+              '0 calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))',
           },
           keyframes: [
             {
@@ -195,17 +184,13 @@ describe('Cross', () => {
               translate: '0 0',
             },
             {
-              easing: 'step-start',
-              offset: 0,
+              offset: 0.5,
               translate: '0 calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))',
+              easing: 'step-start',
             },
             {
-              offset: 0,
+              offset: 0.5001,
               translate: '0 calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%))',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
             },
             {
               offset: 1,
@@ -228,18 +213,17 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: { direction: 'left' } as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {
+            direction: 'left',
+          },
+          name: 'motion-cross-1',
           easing: 'linear',
           duration: 1,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
+            '--motion-cross-to': 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
           },
           keyframes: [
             {
@@ -247,17 +231,13 @@ describe('Cross', () => {
               translate: '0 0',
             },
             {
-              easing: 'step-start',
-              offset: 0,
+              offset: 0.5,
               translate: 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
+              easing: 'step-start',
             },
             {
-              offset: 0,
+              offset: 0.5001,
               translate: 'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
             },
             {
               offset: 1,
@@ -280,18 +260,18 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: { direction: 'top-left' } as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {
+            direction: 'top-left',
+          },
+          name: 'motion-cross-1',
           easing: 'linear',
           duration: 1,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
+            '--motion-cross-to':
+              'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
           },
           keyframes: [
             {
@@ -299,19 +279,15 @@ describe('Cross', () => {
               translate: '0 0',
             },
             {
-              easing: 'step-start',
-              offset: 0,
+              offset: 0.5,
               translate:
                 'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
+              easing: 'step-start',
             },
             {
-              offset: 0,
+              offset: 0.5001,
               translate:
                 'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
             },
             {
               offset: 1,
@@ -334,18 +310,18 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: { direction: 'top-right' } as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {
+            direction: 'top-right',
+          },
+          name: 'motion-cross-1',
           easing: 'linear',
           duration: 1,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
+            '--motion-cross-to':
+              'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
           },
           keyframes: [
             {
@@ -353,19 +329,15 @@ describe('Cross', () => {
               translate: '0 0',
             },
             {
-              easing: 'step-start',
-              offset: 0,
+              offset: 0.5,
               translate:
                 'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
+              easing: 'step-start',
             },
             {
-              offset: 0,
+              offset: 0.5001,
               translate:
                 'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
             },
             {
               offset: 1,
@@ -388,18 +360,18 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: { direction: 'bottom-left' } as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {
+            direction: 'bottom-left',
+          },
+          name: 'motion-cross-1',
           easing: 'linear',
           duration: 1,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
+            '--motion-cross-to':
+              'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
           },
           keyframes: [
             {
@@ -407,19 +379,15 @@ describe('Cross', () => {
               translate: '0 0',
             },
             {
-              easing: 'step-start',
-              offset: 0,
+              offset: 0.5,
               translate:
                 'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
+              easing: 'step-start',
             },
             {
-              offset: 0,
+              offset: 0.5001,
               translate:
                 'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
             },
             {
               offset: 1,
@@ -442,18 +410,18 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: { direction: 'bottom-right' } as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {
+            direction: 'bottom-right',
+          },
+          name: 'motion-cross-1',
           easing: 'linear',
           duration: 1,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
+            '--motion-cross-to':
+              'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
           },
           keyframes: [
             {
@@ -461,19 +429,15 @@ describe('Cross', () => {
               translate: '0 0',
             },
             {
-              easing: 'step-start',
-              offset: 0,
+              offset: 0.5,
               translate:
                 'calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1) calc(min(calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)), calc(var(--motion-parent-height, 100vh) - var(--motion-top, 0px))) * 1)',
+              easing: 'step-start',
             },
             {
-              offset: 0,
+              offset: 0.5001,
               translate:
                 'calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1) calc(min(calc(calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) * -1), calc(calc(var(--motion-top, 0px) * -1 - var(--motion-height, 100%)) * -1)) * -1)',
-            },
-            {
-              offset: 1,
-              translate: '0 0',
             },
             {
               offset: 1,
@@ -497,18 +461,16 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: {} as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {},
+          name: 'motion-cross-1',
           easing: 'linear',
           duration: 1,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
+            '--motion-cross-to':
+              'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
           },
         },
       ];
@@ -527,18 +489,18 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: {} as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {
+            iterationDelay: 1000,
+          },
+          name: 'motion-cross-05',
           easing: 'linear',
           duration: 2000,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
+            '--motion-cross-to':
+              'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
           },
           keyframes: [
             {
@@ -546,12 +508,12 @@ describe('Cross', () => {
               translate: '0 0',
             },
             {
-              easing: 'step-start',
-              offset: 0,
+              offset: 0.25,
               translate: 'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
+              easing: 'step-start',
             },
             {
-              offset: 0,
+              offset: 0.25005,
               translate: 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
             },
             {
@@ -580,18 +542,18 @@ describe('Cross', () => {
 
       const expectedResult = [
         {
-          ...baseMockOptions,
-          namedEffect: {} as CrossType,
-          name: 'motion-cross',
+          id: 'test-id',
+          namedEffect: {
+            iterationDelay: 1500,
+          },
+          name: 'motion-cross-025',
           easing: 'linear',
           duration: 2000,
           custom: {
-            '--motion-left': '0px',
-            '--motion-top': '0px',
-            '--motion-width': '100%',
-            '--motion-height': '100%',
-            '--motion-parent-width': '100vw',
-            '--motion-parent-height': '100vh',
+            '--motion-cross-from':
+              'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
+            '--motion-cross-to':
+              'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
           },
           keyframes: [
             {
@@ -599,12 +561,12 @@ describe('Cross', () => {
               translate: '0 0',
             },
             {
-              easing: 'step-start',
-              offset: 0,
+              offset: 0.125,
               translate: 'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
+              easing: 'step-start',
             },
             {
-              offset: 0,
+              offset: 0.125025,
               translate: 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
             },
             {
@@ -705,7 +667,7 @@ describe('Cross', () => {
         const fromDistance = Math.max(...expectedFrom.map(Math.abs));
 
         expect(to.offset).toBeCloseTo(toDistance / (toDistance + fromDistance));
-        expect(from.offset).toBe(to.offset);
+        expect(from.offset).toBeCloseTo(to.offset! + 0.0001, 8);
         expect(evaluateTranslate(to.translate as string, properties)).toEqual(expectedTo);
         expect(evaluateTranslate(from.translate as string, properties)).toEqual(expectedFrom);
       },
@@ -723,10 +685,61 @@ describe('Cross', () => {
       expect(effect.keyframes.map(({ offset }) => offset)).toEqual([
         0,
         (right / (right + left)) * 0.5,
-        (right / (right + left)) * 0.5,
+        (right / (right + left) + 0.0001) * 0.5,
         0.5,
         1,
       ]);
+    });
+  });
+});
+
+describe('Cross CSS', () => {
+  test('style keyframes read the translations from suffixed custom properties', () => {
+    const [animation] = Cross.style({
+      ...baseMockOptions,
+      duration: 1000,
+      suffix: '-s1',
+      namedEffect: { direction: 'right', iterationDelay: 1000 } as CrossType,
+    } as TimeAnimationOptions);
+
+    expect(animation.name).toBe('motion-cross-05-s1');
+    expect(animation.custom).toEqual({
+      '--motion-cross-from-s1': 'calc(var(--motion-left, 0px) * -1 - var(--motion-width, 100%)) 0',
+      '--motion-cross-to-s1': 'calc(var(--motion-parent-width, 100vw) - var(--motion-left, 0px)) 0',
+    });
+    expect(animation.keyframes).toEqual([
+      { offset: 0, translate: '0 0' },
+      { offset: 0.25, translate: 'var(--motion-cross-to-s1)', easing: 'step-start' },
+      { offset: 0.5001 * 0.5, translate: 'var(--motion-cross-from-s1)' },
+      { offset: 0.5, translate: '0 0' },
+      { offset: 1, translate: '0 0' },
+    ]);
+  });
+
+  test('prepare measures the element in its parent into custom properties', () => {
+    const properties: Record<string, string> = {};
+    const parent = {
+      offsetParent: null,
+      getBoundingClientRect: () => ({ width: 1000, height: 800 }),
+    };
+    const target = {
+      offsetLeft: 200,
+      offsetTop: 100,
+      offsetParent: parent,
+      getBoundingClientRect: () => ({ width: 100, height: 50 }),
+      style: { setProperty: (name: string, value: string) => (properties[name] = value) },
+    } as unknown as HTMLElement;
+    const dom: DomApi = { measure: (fn) => fn(target), mutate: (fn) => fn(target) };
+
+    Cross.prepare({ ...baseMockOptions, namedEffect: {} as CrossType }, dom);
+
+    expect(properties).toEqual({
+      '--motion-left': '200px',
+      '--motion-top': '100px',
+      '--motion-width': '100px',
+      '--motion-height': '50px',
+      '--motion-parent-width': '1000px',
+      '--motion-parent-height': '800px',
     });
   });
 });

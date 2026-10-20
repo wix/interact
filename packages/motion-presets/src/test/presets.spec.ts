@@ -70,7 +70,7 @@ const expectValidDefaults = (schema: Record<string, Field>) => {
 
 describe.each(presets)('$group $name', ({ group, name, module }) => {
   const schema = module.schema!;
-  const render = module.style ?? module.web;
+  const render = module.style!;
 
   test('implicit defaults equal the schema defaults', () => {
     const implicit = render(optionsFor(group, { type: name }));
@@ -83,7 +83,7 @@ describe.each(presets)('$group $name', ({ group, name, module }) => {
     expect(namesOf(render(structuredClone(options)))).toEqual(module.getNames(options));
   });
 
-  test.skipIf(!module.style)('web and style return the same animations', () => {
+  test('web and style return the same animations', () => {
     const webAnimations = module.web(optionsFor(group, { type: name }));
     const styleAnimations = module.style!(optionsFor(group, { type: name }));
     expect(namesOf(webAnimations)).toEqual(namesOf(styleAnimations));
@@ -171,6 +171,8 @@ const withoutVarFallbacks = (css: string) => {
   return result;
 };
 
+const EASINGS = [undefined, 'linear', 'quadIn', 'cubic-bezier(0.1, 0.2, 0.3, 0.4)'];
+
 test('each keyframes name always has the same keyframes', () => {
   const groups = { entrance, scroll, ongoing, backgroundScroll };
   const groupOptions: Record<string, Record<string, unknown>[]> = {
@@ -187,17 +189,18 @@ test('each keyframes name always has the same keyframes', () => {
     for (const [type, module] of Object.entries(modules as Record<string, PresetModule>)) {
       if (!module.style) continue;
       for (const options of groupOptions[group] ?? [{}])
-        for (const params of sampleParams(module.schema))
-          for (const extra of extraParams[group] ?? [{}]) {
-            const namedEffect = { type, ...params, ...extra };
-            for (const { name, keyframes } of module.style(
-              structuredClone({ ...options, namedEffect }),
-            )) {
-              const css = withoutVarFallbacks(JSON.stringify(keyframes));
-              if (!keyframesByName.has(name)) keyframesByName.set(name, css);
-              else if (keyframesByName.get(name) !== css) collisions.add(name);
+        for (const easing of EASINGS)
+          for (const params of sampleParams(module.schema))
+            for (const extra of extraParams[group] ?? [{}]) {
+              const namedEffect = { type, ...params, ...extra };
+              for (const { name, keyframes } of module.style(
+                structuredClone({ ...options, easing, namedEffect }),
+              )) {
+                const css = withoutVarFallbacks(JSON.stringify(keyframes));
+                if (!keyframesByName.has(name)) keyframesByName.set(name, css);
+                else if (keyframesByName.get(name) !== css) collisions.add(name);
+              }
             }
-          }
     }
   }
 
@@ -206,19 +209,50 @@ test('each keyframes name always has the same keyframes', () => {
 
 const EXTERNAL_PROPERTIES = ['--motion-rotate', '--motion-left'];
 
-describe.each(presets.filter(({ module }) => module.style))(
-  '$group $name custom properties',
-  ({ group, name, module }) => {
-    test.each(sampleParams(module.schema))('are suffixed for %o', (params) => {
-      const options = { ...optionsFor(group, { type: name, ...params }), suffix: '-s1' };
-      for (const { custom = {}, keyframes } of module.style!(options)) {
-        for (const key of Object.keys(custom)) expect(key).toContain('-s1');
-        const referenced = [...JSON.stringify(keyframes).matchAll(/var\((--[\w-]+)/g)].map(
-          ([, property]) => property,
+describe.each(presets)('$group $name custom properties', ({ group, name, module }) => {
+  test.each(sampleParams(module.schema))('are suffixed for %o', (params) => {
+    const options = { ...optionsFor(group, { type: name, ...params }), suffix: '-s1' };
+    for (const { custom = {}, keyframes } of module.style!(options)) {
+      for (const key of Object.keys(custom)) expect(key).toContain('-s1');
+      const referenced = [...JSON.stringify(keyframes).matchAll(/var\((--[\w-]+)/g)].map(
+        ([, property]) => property,
+      );
+      for (const property of referenced)
+        expect([...Object.keys(custom), ...EXTERNAL_PROPERTIES]).toContain(property);
+    }
+  });
+});
+
+describe.each(presets.filter(({ group }) => group === 'ongoing'))(
+  'ongoing $name iteration delay',
+  ({ name, module }) => {
+    const { iterationDelay: _, ...schema } = module.schema!;
+    test.each(
+      sampleParams(schema).flatMap((params) => [
+        { params, duration: 1000, iterationDelay: 500, timingFactor: 0.67 },
+        { params, duration: 500, iterationDelay: 1000, timingFactor: 0.33 },
+      ]),
+    )(
+      'holds the rest after the undelayed motion for $params, $duration + $iterationDelay',
+      ({ params, duration, iterationDelay, timingFactor }) => {
+        const [undelayed] = module.style!(
+          structuredClone({ duration, namedEffect: { type: name, ...params } }),
         );
-        for (const property of referenced)
-          expect([...Object.keys(custom), ...EXTERNAL_PROPERTIES]).toContain(property);
-      }
-    });
+        const [delayed] = module.style!(
+          structuredClone({ duration, namedEffect: { type: name, ...params, iterationDelay } }),
+        );
+        const keyframes = undelayed.keyframes.map((keyframe: { offset: number }) => ({
+          ...keyframe,
+          offset: keyframe.offset * timingFactor,
+        }));
+
+        expect(delayed.duration).toBe(duration + iterationDelay);
+        expect(delayed.custom).toEqual(undelayed.custom);
+        expect(delayed.keyframes).toEqual([
+          ...keyframes,
+          { ...undelayed.keyframes[undelayed.keyframes.length - 1], offset: 1 },
+        ]);
+      },
+    );
   },
 );

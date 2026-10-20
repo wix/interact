@@ -2,13 +2,14 @@ import type { TimeAnimationOptions, Bounce, AnimationExtraOptions, DomApi } from
 import {
   getEasing,
   getTimingFactor,
+  holdAtRest,
   toKeyframeValue,
   parseLengthOrCalc,
   scaleLength,
   roundNumber,
 } from '../../utils';
 
-const PEAK_TRANSLATE = 49;
+const PEAK_TRANSLATE = 98;
 
 export const schema = {
   iterationDelay: { type: 'number', min: 0, default: 0 },
@@ -49,15 +50,20 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   const easing = getEasing('sineOut');
 
-  const custom = {
-    [`--motion-bounce-unit${suffix}`]: scaleLength(travel, 1 / PEAK_TRANSLATE, roundUnit),
-  };
+  const custom: Record<string, string | number> = {};
 
-  const keyframes = TRANSLATE_Y_KEYFRAMES.map(({ keyframe, translateY }) => ({
-    offset: (keyframe / 100) * timingFactor,
-    translate: `0px calc(${translateY / 2} * ${toKeyframeValue(custom, `--motion-bounce-unit${suffix}`, asWeb)})`,
-    easing,
-  }));
+  const keyframes = TRANSLATE_Y_KEYFRAMES.map(({ keyframe, translateY }, index) => {
+    const translateYKey = `--motion-bounce-y${suffix}-${index}`;
+    if (translateY) {
+      custom[translateYKey] = scaleLength(travel, translateY / PEAK_TRANSLATE, roundUnit);
+    }
+
+    return {
+      offset: keyframe / 100,
+      translate: `0px ${translateY ? toKeyframeValue(custom, translateYKey, asWeb) : '0px'}`,
+      easing,
+    };
+  });
 
   return [
     {
@@ -66,7 +72,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       easing: 'linear',
       duration: duration + iterationDelay,
       custom,
-      keyframes,
+      keyframes: holdAtRest(keyframes, timingFactor),
     },
   ];
 }

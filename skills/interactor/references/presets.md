@@ -92,7 +92,7 @@ text into spans, then stagger them with a sequence — see `plugins.md`.
 **All share `range: 'in' | 'out' | 'continuous'`** (in = animate in on enter, out =
 animate out on exit, continuous = pass through idle across the full range; prefer
 `'continuous'`) — **except `ParallaxScroll`**. Use `fill: 'both'`. `direction` is
-where the motion goes; `speed` is the approximate visual speed relative to the
+where the motion goes; `speed` is the visual speed relative to the
 scroll (`1` = moves with the page).
 
 > **Two different "range"s — don't confuse them.** The `range` above is a **preset
@@ -131,7 +131,7 @@ range: 'continuous' }`). It is unrelated to the effect-level **`rangeStart`/
 
 Run with `iterations: Infinity` (or large) for a perpetual loop, or attach to a
 trigger. **All accept `iterationDelay`** (ms, default `0`) inside `namedEffect` — an
-idle pause appended after each cycle.
+idle hold at rest appended after each cycle (the motion itself is unchanged).
 
 | Preset    | Params (default)                                                                                         |
 | :-------- | :------------------------------------------------------------------------------------------------------- |

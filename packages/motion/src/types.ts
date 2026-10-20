@@ -173,7 +173,6 @@ type ScrubAnimationDataBase<TNamedEffect extends NamedEffect = NamedEffect> = {
   alternate?: boolean;
   reversed?: boolean;
   transitionDuration?: number;
-  transitionDelay?: number;
   transitionEasing?: ScrubTransitionEasing;
   centeredToTarget?: boolean;
 };
