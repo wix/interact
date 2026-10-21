@@ -45,6 +45,7 @@ import type { AnimationEffectAPI } from '@wix/motion';
 
 export const DEFAULT_INITIAL = [
   { name: 'visibility', value: 'hidden' },
+  { name: 'clip-path', value: 'none', important: true },
   { name: 'transform', value: 'none', important: true },
   { name: 'translate', value: 'none', important: true },
   { name: 'scale', value: 'none', important: true },
