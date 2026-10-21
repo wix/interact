@@ -289,6 +289,8 @@ For `triggerType: 'repeat'`/`'alternate'`/`'state'`, manually apply the starting
 
 For `viewProgress` interactions, `generate()` emits `view-timeline` declarations and `animation-timeline`/`animation-range` custom properties. This produces fully native scroll-driven animations that work before JavaScript loads — the browser drives the animation based on the element's scroll position, with zero JS overhead.
 
+A named view timeline is visible only to its source element and its descendants, so when an effect targets another element (e.g. a sibling of the source), `generate()` also adds the trigger's timeline name to a `:root { timeline-scope: ... }` rule.
+
 ### Examples
 
 #### Entrance animation (viewEnter)
