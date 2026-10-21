@@ -95,6 +95,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.5.19] - 2026-10-21
+
+#### Changed
+
+- Bump `@wix/motion` dependency to `^2.1.16`
+
 ### [2.5.18] - 2026-10-19
 
 #### Changed
@@ -377,6 +383,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion
+
+### [2.1.16] - 2026-10-21
+
+#### Added
+
+- Export `getRegisteredEffect()`; it accepts an optional `warn` argument (default `true`) to skip the missing-preset warning (#338)
+- Optional `suffix` on `TimeAnimationOptions` and scrub animation data (#338)
 
 ### [2.1.15] - 2026-09-21
 
