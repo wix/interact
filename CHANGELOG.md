@@ -95,6 +95,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.5.18] - 2026-10-19
+
+#### Changed
+
+- `generate()` assigns keyframe slots to colliding effects: effects on the same target that would write conflicting animation list entries get their own slot, while effects of the same entry share one and cascade over each other. The runtime resolves an effect's slot from its position in the config, matching the generated CSS (#338)
+- `view-timeline` is emitted as a list property: each `viewProgress` interaction declares its timeline on its source under its own conditions, so several `viewProgress` interactions can share a source (#338)
+- Sequence resolution for CSS no longer copies the sequence's conditions onto the config's effects, and skips unresolved sequence references (#338)
+
+#### Fixed
+
+- `viewEnter` entrance initial-state rule now resets `clip-path` (`clip-path: none !important`), so entrances whose first keyframe clips the element away (e.g. TiltIn, ShuttersIn, Reveal) no longer hide their own trigger from the IntersectionObserver and never play (#335)
+
 ### [2.5.17] - 2026-10-12
 
 #### Fixed
