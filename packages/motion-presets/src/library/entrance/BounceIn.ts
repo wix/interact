@@ -5,7 +5,6 @@ import {
   parseDirection,
   parseLengthOrCalc,
   scaleLength,
-  roundNumber,
   getEntranceFill,
 } from '../../utils';
 import type { BounceIn, TimeAnimationOptions } from '../../types';
@@ -45,8 +44,6 @@ const TRANSLATE_DIRECTION_MAP = {
   back: { x: 0, y: 0, z: -1 },
 };
 
-const roundUnit = (value: number) => roundNumber(value, 6);
-
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
@@ -59,8 +56,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     DIRECTIONS,
     schema.from.default,
   );
-  const travel = parseLengthOrCalc(namedEffect?.travel, schema.travel.default);
-  const distanceUnit = scaleLength(travel, 1 / schema.travel.default.value, roundUnit);
+  const travel = scaleLength(parseLengthOrCalc(namedEffect?.travel, schema.travel.default));
   const { perspective = schema.perspective.default } = namedEffect || {};
   const [fadeIn, bounceIn] = getNames(options);
   const perspectiveValue = direction === 'back' ? `perspective(${perspective}px)` : ' ';
@@ -70,7 +66,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     [`--motion-direction-x${suffix}`]: x,
     [`--motion-direction-y${suffix}`]: y,
     [`--motion-direction-z${suffix}`]: z,
-    [`--motion-distance-unit${suffix}`]: distanceUnit,
+    [`--motion-distance${suffix}`]: travel,
     [`--motion-perspective${suffix}`]: perspectiveValue,
     [`--motion-ease-in${suffix}`]: getEasing(easeOut),
     [`--motion-ease-out${suffix}`]: getEasing(easeIn),
@@ -78,7 +74,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   const easeIn_ = toKeyframeValue(custom, `--motion-ease-in${suffix}`, asWeb);
   const easeOut_ = toKeyframeValue(custom, `--motion-ease-out${suffix}`, asWeb);
-  const distanceUnit_ = toKeyframeValue(custom, `--motion-distance-unit${suffix}`, asWeb);
+  const distance = toKeyframeValue(custom, `--motion-distance${suffix}`, asWeb);
   const perspective_ = toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb, '');
   const directionX = toKeyframeValue(custom, `--motion-direction-x${suffix}`, asWeb);
   const directionY = toKeyframeValue(custom, `--motion-direction-y${suffix}`, asWeb);
@@ -89,11 +85,11 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     animationTimingFunction: index % 2 ? easeIn_ : easeOut_,
     transform: `${(
       perspective_ as string
-    ).trim()} translate3d(calc(${directionX} * ${distanceUnit_} * ${
-      translate / 2
-    }), calc(${directionY} * ${distanceUnit_} * ${
-      translate / 2
-    }), calc(${directionZ} * ${distanceUnit_} * ${translate / 2})) rotateZ(var(--motion-rotate, 0deg))`,
+    ).trim()} translate3d(calc(${directionX} * ${distance} * ${
+      translate / 100
+    }), calc(${directionY} * ${distance} * ${
+      translate / 100
+    }), calc(${directionZ} * ${distance} * ${translate / 100})) rotateZ(var(--motion-rotate, 0deg))`,
   }));
 
   return [

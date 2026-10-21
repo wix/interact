@@ -23,61 +23,61 @@ describe('BounceIn', () => {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0,
             transform:
-              ' translate3d(calc(0 * 1px * 50), calc(1 * 1px * 50), calc(0 * 1px * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 1), calc(1 * 50px * 1), calc(0 * 50px * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.3,
             transform:
-              ' translate3d(calc(0 * 1px * 0), calc(1 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0), calc(1 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.42,
             transform:
-              ' translate3d(calc(0 * 1px * 17.5), calc(1 * 1px * 17.5), calc(0 * 1px * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0.35), calc(1 * 50px * 0.35), calc(0 * 50px * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.54,
             transform:
-              ' translate3d(calc(0 * 1px * 0), calc(1 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0), calc(1 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.62,
             transform:
-              ' translate3d(calc(0 * 1px * 10.5), calc(1 * 1px * 10.5), calc(0 * 1px * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0.21), calc(1 * 50px * 0.21), calc(0 * 50px * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.74,
             transform:
-              ' translate3d(calc(0 * 1px * 0), calc(1 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0), calc(1 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.82,
             transform:
-              ' translate3d(calc(0 * 1px * 4.5), calc(1 * 1px * 4.5), calc(0 * 1px * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0.09), calc(1 * 50px * 0.09), calc(0 * 50px * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.9,
             transform:
-              ' translate3d(calc(0 * 1px * 0), calc(1 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0), calc(1 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.95,
             transform:
-              ' translate3d(calc(0 * 1px * 1), calc(1 * 1px * 1), calc(0 * 1px * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0.02), calc(1 * 50px * 0.02), calc(0 * 50px * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 1,
             transform:
-              ' translate3d(calc(0 * 1px * 0), calc(1 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0), calc(1 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -104,61 +104,61 @@ describe('BounceIn', () => {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0,
             transform:
-              ' translate3d(calc(0 * 2px * 50), calc(1 * 2px * 50), calc(0 * 2px * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 100px * 1), calc(1 * 100px * 1), calc(0 * 100px * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.3,
             transform:
-              ' translate3d(calc(0 * 2px * 0), calc(1 * 2px * 0), calc(0 * 2px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 100px * 0), calc(1 * 100px * 0), calc(0 * 100px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.42,
             transform:
-              ' translate3d(calc(0 * 2px * 17.5), calc(1 * 2px * 17.5), calc(0 * 2px * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 100px * 0.35), calc(1 * 100px * 0.35), calc(0 * 100px * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.54,
             transform:
-              ' translate3d(calc(0 * 2px * 0), calc(1 * 2px * 0), calc(0 * 2px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 100px * 0), calc(1 * 100px * 0), calc(0 * 100px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.62,
             transform:
-              ' translate3d(calc(0 * 2px * 10.5), calc(1 * 2px * 10.5), calc(0 * 2px * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 100px * 0.21), calc(1 * 100px * 0.21), calc(0 * 100px * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.74,
             transform:
-              ' translate3d(calc(0 * 2px * 0), calc(1 * 2px * 0), calc(0 * 2px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 100px * 0), calc(1 * 100px * 0), calc(0 * 100px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.82,
             transform:
-              ' translate3d(calc(0 * 2px * 4.5), calc(1 * 2px * 4.5), calc(0 * 2px * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 100px * 0.09), calc(1 * 100px * 0.09), calc(0 * 100px * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.9,
             transform:
-              ' translate3d(calc(0 * 2px * 0), calc(1 * 2px * 0), calc(0 * 2px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 100px * 0), calc(1 * 100px * 0), calc(0 * 100px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.95,
             transform:
-              ' translate3d(calc(0 * 2px * 1), calc(1 * 2px * 1), calc(0 * 2px * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 100px * 0.02), calc(1 * 100px * 0.02), calc(0 * 100px * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 1,
             transform:
-              ' translate3d(calc(0 * 2px * 0), calc(1 * 2px * 0), calc(0 * 2px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 100px * 0), calc(1 * 100px * 0), calc(0 * 100px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -185,61 +185,61 @@ describe('BounceIn', () => {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0,
             transform:
-              ' translate3d(calc(0 * 1px * 50), calc(-1 * 1px * 50), calc(0 * 1px * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 1), calc(-1 * 50px * 1), calc(0 * 50px * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.3,
             transform:
-              ' translate3d(calc(0 * 1px * 0), calc(-1 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0), calc(-1 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.42,
             transform:
-              ' translate3d(calc(0 * 1px * 17.5), calc(-1 * 1px * 17.5), calc(0 * 1px * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0.35), calc(-1 * 50px * 0.35), calc(0 * 50px * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.54,
             transform:
-              ' translate3d(calc(0 * 1px * 0), calc(-1 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0), calc(-1 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.62,
             transform:
-              ' translate3d(calc(0 * 1px * 10.5), calc(-1 * 1px * 10.5), calc(0 * 1px * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0.21), calc(-1 * 50px * 0.21), calc(0 * 50px * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.74,
             transform:
-              ' translate3d(calc(0 * 1px * 0), calc(-1 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0), calc(-1 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.82,
             transform:
-              ' translate3d(calc(0 * 1px * 4.5), calc(-1 * 1px * 4.5), calc(0 * 1px * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0.09), calc(-1 * 50px * 0.09), calc(0 * 50px * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.9,
             transform:
-              ' translate3d(calc(0 * 1px * 0), calc(-1 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0), calc(-1 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.95,
             transform:
-              ' translate3d(calc(0 * 1px * 1), calc(-1 * 1px * 1), calc(0 * 1px * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0.02), calc(-1 * 50px * 0.02), calc(0 * 50px * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 1,
             transform:
-              ' translate3d(calc(0 * 1px * 0), calc(-1 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(0 * 50px * 0), calc(-1 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -266,61 +266,61 @@ describe('BounceIn', () => {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0,
             transform:
-              ' translate3d(calc(1 * 1px * 50), calc(0 * 1px * 50), calc(0 * 1px * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(1 * 50px * 1), calc(0 * 50px * 1), calc(0 * 50px * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.3,
             transform:
-              ' translate3d(calc(1 * 1px * 0), calc(0 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(1 * 50px * 0), calc(0 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.42,
             transform:
-              ' translate3d(calc(1 * 1px * 17.5), calc(0 * 1px * 17.5), calc(0 * 1px * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(1 * 50px * 0.35), calc(0 * 50px * 0.35), calc(0 * 50px * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.54,
             transform:
-              ' translate3d(calc(1 * 1px * 0), calc(0 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(1 * 50px * 0), calc(0 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.62,
             transform:
-              ' translate3d(calc(1 * 1px * 10.5), calc(0 * 1px * 10.5), calc(0 * 1px * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(1 * 50px * 0.21), calc(0 * 50px * 0.21), calc(0 * 50px * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.74,
             transform:
-              ' translate3d(calc(1 * 1px * 0), calc(0 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(1 * 50px * 0), calc(0 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.82,
             transform:
-              ' translate3d(calc(1 * 1px * 4.5), calc(0 * 1px * 4.5), calc(0 * 1px * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(1 * 50px * 0.09), calc(0 * 50px * 0.09), calc(0 * 50px * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.9,
             transform:
-              ' translate3d(calc(1 * 1px * 0), calc(0 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(1 * 50px * 0), calc(0 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.95,
             transform:
-              ' translate3d(calc(1 * 1px * 1), calc(0 * 1px * 1), calc(0 * 1px * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(1 * 50px * 0.02), calc(0 * 50px * 0.02), calc(0 * 50px * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 1,
             transform:
-              ' translate3d(calc(1 * 1px * 0), calc(0 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(1 * 50px * 0), calc(0 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -347,61 +347,61 @@ describe('BounceIn', () => {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0,
             transform:
-              ' translate3d(calc(-1 * 1px * 50), calc(0 * 1px * 50), calc(0 * 1px * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(-1 * 50px * 1), calc(0 * 50px * 1), calc(0 * 50px * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.3,
             transform:
-              ' translate3d(calc(-1 * 1px * 0), calc(0 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(-1 * 50px * 0), calc(0 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.42,
             transform:
-              ' translate3d(calc(-1 * 1px * 17.5), calc(0 * 1px * 17.5), calc(0 * 1px * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(-1 * 50px * 0.35), calc(0 * 50px * 0.35), calc(0 * 50px * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.54,
             transform:
-              ' translate3d(calc(-1 * 1px * 0), calc(0 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(-1 * 50px * 0), calc(0 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.62,
             transform:
-              ' translate3d(calc(-1 * 1px * 10.5), calc(0 * 1px * 10.5), calc(0 * 1px * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(-1 * 50px * 0.21), calc(0 * 50px * 0.21), calc(0 * 50px * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.74,
             transform:
-              ' translate3d(calc(-1 * 1px * 0), calc(0 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(-1 * 50px * 0), calc(0 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.82,
             transform:
-              ' translate3d(calc(-1 * 1px * 4.5), calc(0 * 1px * 4.5), calc(0 * 1px * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(-1 * 50px * 0.09), calc(0 * 50px * 0.09), calc(0 * 50px * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.9,
             transform:
-              ' translate3d(calc(-1 * 1px * 0), calc(0 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(-1 * 50px * 0), calc(0 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.95,
             transform:
-              ' translate3d(calc(-1 * 1px * 1), calc(0 * 1px * 1), calc(0 * 1px * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(-1 * 50px * 0.02), calc(0 * 50px * 0.02), calc(0 * 50px * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 1,
             transform:
-              ' translate3d(calc(-1 * 1px * 0), calc(0 * 1px * 0), calc(0 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              ' translate3d(calc(-1 * 50px * 0), calc(0 * 50px * 0), calc(0 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -428,61 +428,61 @@ describe('BounceIn', () => {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0,
             transform:
-              'perspective(800px) translate3d(calc(0 * 1px * 50), calc(0 * 1px * 50), calc(-1 * 1px * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              'perspective(800px) translate3d(calc(0 * 50px * 1), calc(0 * 50px * 1), calc(-1 * 50px * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.3,
             transform:
-              'perspective(800px) translate3d(calc(0 * 1px * 0), calc(0 * 1px * 0), calc(-1 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'perspective(800px) translate3d(calc(0 * 50px * 0), calc(0 * 50px * 0), calc(-1 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.42,
             transform:
-              'perspective(800px) translate3d(calc(0 * 1px * 17.5), calc(0 * 1px * 17.5), calc(-1 * 1px * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'perspective(800px) translate3d(calc(0 * 50px * 0.35), calc(0 * 50px * 0.35), calc(-1 * 50px * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.54,
             transform:
-              'perspective(800px) translate3d(calc(0 * 1px * 0), calc(0 * 1px * 0), calc(-1 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'perspective(800px) translate3d(calc(0 * 50px * 0), calc(0 * 50px * 0), calc(-1 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.62,
             transform:
-              'perspective(800px) translate3d(calc(0 * 1px * 10.5), calc(0 * 1px * 10.5), calc(-1 * 1px * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'perspective(800px) translate3d(calc(0 * 50px * 0.21), calc(0 * 50px * 0.21), calc(-1 * 50px * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.74,
             transform:
-              'perspective(800px) translate3d(calc(0 * 1px * 0), calc(0 * 1px * 0), calc(-1 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'perspective(800px) translate3d(calc(0 * 50px * 0), calc(0 * 50px * 0), calc(-1 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.82,
             transform:
-              'perspective(800px) translate3d(calc(0 * 1px * 4.5), calc(0 * 1px * 4.5), calc(-1 * 1px * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'perspective(800px) translate3d(calc(0 * 50px * 0.09), calc(0 * 50px * 0.09), calc(-1 * 50px * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 0.9,
             transform:
-              'perspective(800px) translate3d(calc(0 * 1px * 0), calc(0 * 1px * 0), calc(-1 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'perspective(800px) translate3d(calc(0 * 50px * 0), calc(0 * 50px * 0), calc(-1 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
             offset: 0.95,
             transform:
-              'perspective(800px) translate3d(calc(0 * 1px * 1), calc(0 * 1px * 1), calc(-1 * 1px * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              'perspective(800px) translate3d(calc(0 * 50px * 0.02), calc(0 * 50px * 0.02), calc(-1 * 50px * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             offset: 1,
             transform:
-              'perspective(800px) translate3d(calc(0 * 1px * 0), calc(0 * 1px * 0), calc(-1 * 1px * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'perspective(800px) translate3d(calc(0 * 50px * 0), calc(0 * 50px * 0), calc(-1 * 50px * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -518,7 +518,7 @@ describe('BounceIn style method', () => {
           '--motion-direction-x': 0,
           '--motion-direction-y': 1,
           '--motion-direction-z': 0,
-          '--motion-distance-unit': '1px',
+          '--motion-distance': '50px',
           '--motion-perspective': ' ',
           '--motion-ease-in': 'cubic-bezier(0.39, 0.575, 0.565, 1)',
           '--motion-ease-out': 'cubic-bezier(0.47, 0, 0.745, 0.715)',
@@ -528,61 +528,61 @@ describe('BounceIn style method', () => {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 1), calc(var(--motion-direction-y) * var(--motion-distance) * 1), calc(var(--motion-direction-z) * var(--motion-distance) * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.3,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.42,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.35), calc(var(--motion-direction-y) * var(--motion-distance) * 0.35), calc(var(--motion-direction-z) * var(--motion-distance) * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.54,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.62,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.21), calc(var(--motion-direction-y) * var(--motion-distance) * 0.21), calc(var(--motion-direction-z) * var(--motion-distance) * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.74,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.82,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.09), calc(var(--motion-direction-y) * var(--motion-distance) * 0.09), calc(var(--motion-direction-z) * var(--motion-distance) * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.9,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.95,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.02), calc(var(--motion-direction-y) * var(--motion-distance) * 0.02), calc(var(--motion-direction-z) * var(--motion-distance) * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 1,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -612,7 +612,7 @@ describe('BounceIn style method', () => {
           '--motion-direction-x': 0,
           '--motion-direction-y': 1,
           '--motion-direction-z': 0,
-          '--motion-distance-unit': '2px',
+          '--motion-distance': '100px',
           '--motion-perspective': ' ',
           '--motion-ease-in': 'cubic-bezier(0.39, 0.575, 0.565, 1)',
           '--motion-ease-out': 'cubic-bezier(0.47, 0, 0.745, 0.715)',
@@ -622,61 +622,61 @@ describe('BounceIn style method', () => {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 1), calc(var(--motion-direction-y) * var(--motion-distance) * 1), calc(var(--motion-direction-z) * var(--motion-distance) * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.3,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.42,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.35), calc(var(--motion-direction-y) * var(--motion-distance) * 0.35), calc(var(--motion-direction-z) * var(--motion-distance) * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.54,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.62,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.21), calc(var(--motion-direction-y) * var(--motion-distance) * 0.21), calc(var(--motion-direction-z) * var(--motion-distance) * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.74,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.82,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.09), calc(var(--motion-direction-y) * var(--motion-distance) * 0.09), calc(var(--motion-direction-z) * var(--motion-distance) * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.9,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.95,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.02), calc(var(--motion-direction-y) * var(--motion-distance) * 0.02), calc(var(--motion-direction-z) * var(--motion-distance) * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 1,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -706,7 +706,7 @@ describe('BounceIn style method', () => {
           '--motion-direction-x': 0,
           '--motion-direction-y': -1,
           '--motion-direction-z': 0,
-          '--motion-distance-unit': '1px',
+          '--motion-distance': '50px',
           '--motion-perspective': ' ',
           '--motion-ease-in': 'cubic-bezier(0.39, 0.575, 0.565, 1)',
           '--motion-ease-out': 'cubic-bezier(0.47, 0, 0.745, 0.715)',
@@ -716,61 +716,61 @@ describe('BounceIn style method', () => {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 1), calc(var(--motion-direction-y) * var(--motion-distance) * 1), calc(var(--motion-direction-z) * var(--motion-distance) * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.3,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.42,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.35), calc(var(--motion-direction-y) * var(--motion-distance) * 0.35), calc(var(--motion-direction-z) * var(--motion-distance) * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.54,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.62,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.21), calc(var(--motion-direction-y) * var(--motion-distance) * 0.21), calc(var(--motion-direction-z) * var(--motion-distance) * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.74,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.82,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.09), calc(var(--motion-direction-y) * var(--motion-distance) * 0.09), calc(var(--motion-direction-z) * var(--motion-distance) * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.9,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.95,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.02), calc(var(--motion-direction-y) * var(--motion-distance) * 0.02), calc(var(--motion-direction-z) * var(--motion-distance) * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 1,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -800,7 +800,7 @@ describe('BounceIn style method', () => {
           '--motion-direction-x': 1,
           '--motion-direction-y': 0,
           '--motion-direction-z': 0,
-          '--motion-distance-unit': '1px',
+          '--motion-distance': '50px',
           '--motion-perspective': ' ',
           '--motion-ease-in': 'cubic-bezier(0.39, 0.575, 0.565, 1)',
           '--motion-ease-out': 'cubic-bezier(0.47, 0, 0.745, 0.715)',
@@ -810,61 +810,61 @@ describe('BounceIn style method', () => {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 1), calc(var(--motion-direction-y) * var(--motion-distance) * 1), calc(var(--motion-direction-z) * var(--motion-distance) * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.3,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.42,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.35), calc(var(--motion-direction-y) * var(--motion-distance) * 0.35), calc(var(--motion-direction-z) * var(--motion-distance) * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.54,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.62,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.21), calc(var(--motion-direction-y) * var(--motion-distance) * 0.21), calc(var(--motion-direction-z) * var(--motion-distance) * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.74,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.82,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.09), calc(var(--motion-direction-y) * var(--motion-distance) * 0.09), calc(var(--motion-direction-z) * var(--motion-distance) * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.9,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.95,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.02), calc(var(--motion-direction-y) * var(--motion-distance) * 0.02), calc(var(--motion-direction-z) * var(--motion-distance) * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 1,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -894,7 +894,7 @@ describe('BounceIn style method', () => {
           '--motion-direction-x': -1,
           '--motion-direction-y': 0,
           '--motion-direction-z': 0,
-          '--motion-distance-unit': '1px',
+          '--motion-distance': '50px',
           '--motion-perspective': ' ',
           '--motion-ease-in': 'cubic-bezier(0.39, 0.575, 0.565, 1)',
           '--motion-ease-out': 'cubic-bezier(0.47, 0, 0.745, 0.715)',
@@ -904,61 +904,61 @@ describe('BounceIn style method', () => {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 1), calc(var(--motion-direction-y) * var(--motion-distance) * 1), calc(var(--motion-direction-z) * var(--motion-distance) * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.3,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.42,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.35), calc(var(--motion-direction-y) * var(--motion-distance) * 0.35), calc(var(--motion-direction-z) * var(--motion-distance) * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.54,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.62,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.21), calc(var(--motion-direction-y) * var(--motion-distance) * 0.21), calc(var(--motion-direction-z) * var(--motion-distance) * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.74,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.82,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.09), calc(var(--motion-direction-y) * var(--motion-distance) * 0.09), calc(var(--motion-direction-z) * var(--motion-distance) * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.9,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.95,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.02), calc(var(--motion-direction-y) * var(--motion-distance) * 0.02), calc(var(--motion-direction-z) * var(--motion-distance) * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 1,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -988,7 +988,7 @@ describe('BounceIn style method', () => {
           '--motion-direction-x': 0,
           '--motion-direction-y': 0,
           '--motion-direction-z': -1,
-          '--motion-distance-unit': '1px',
+          '--motion-distance': '50px',
           '--motion-perspective': 'perspective(800px)',
           '--motion-ease-in': 'cubic-bezier(0.39, 0.575, 0.565, 1)',
           '--motion-ease-out': 'cubic-bezier(0.47, 0, 0.745, 0.715)',
@@ -998,61 +998,61 @@ describe('BounceIn style method', () => {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 50), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 50)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 1), calc(var(--motion-direction-y) * var(--motion-distance) * 1), calc(var(--motion-direction-z) * var(--motion-distance) * 1)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.3,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.42,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 17.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 17.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.35), calc(var(--motion-direction-y) * var(--motion-distance) * 0.35), calc(var(--motion-direction-z) * var(--motion-distance) * 0.35)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.54,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.62,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 10.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 10.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.21), calc(var(--motion-direction-y) * var(--motion-distance) * 0.21), calc(var(--motion-direction-z) * var(--motion-distance) * 0.21)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.74,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.82,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 4.5), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 4.5)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.09), calc(var(--motion-direction-y) * var(--motion-distance) * 0.09), calc(var(--motion-direction-z) * var(--motion-distance) * 0.09)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 0.9,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-out)',
             offset: 0.95,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 1), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 1)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0.02), calc(var(--motion-direction-y) * var(--motion-distance) * 0.02), calc(var(--motion-direction-z) * var(--motion-distance) * 0.02)) rotateZ(var(--motion-rotate, 0deg))',
           },
           {
             animationTimingFunction: 'var(--motion-ease-in)',
             offset: 1,
             transform:
-              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-y) * var(--motion-distance-unit) * 0), calc(var(--motion-direction-z) * var(--motion-distance-unit) * 0)) rotateZ(var(--motion-rotate, 0deg))',
+              'var(--motion-perspective, ) translate3d(calc(var(--motion-direction-x) * var(--motion-distance) * 0), calc(var(--motion-direction-y) * var(--motion-distance) * 0), calc(var(--motion-direction-z) * var(--motion-distance) * 0)) rotateZ(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -1075,11 +1075,11 @@ describe('BounceIn style method', () => {
 
     expect(result[1].keyframes.slice(0, 3)).toMatchObject([
       {
-        transform: ` translate3d(calc(0 * calc(0.02 * ${travel}) * 50), calc(1 * calc(0.02 * ${travel}) * 50), calc(0 * calc(0.02 * ${travel}) * 50)) rotateZ(var(--motion-rotate, 0deg))`,
+        transform: ` translate3d(calc(0 * ${travel} * 1), calc(1 * ${travel} * 1), calc(0 * ${travel} * 1)) rotateZ(var(--motion-rotate, 0deg))`,
       },
       {},
       {
-        transform: ` translate3d(calc(0 * calc(0.02 * ${travel}) * 17.5), calc(1 * calc(0.02 * ${travel}) * 17.5), calc(0 * calc(0.02 * ${travel}) * 17.5)) rotateZ(var(--motion-rotate, 0deg))`,
+        transform: ` translate3d(calc(0 * ${travel} * 0.35), calc(1 * ${travel} * 0.35), calc(0 * ${travel} * 0.35)) rotateZ(var(--motion-rotate, 0deg))`,
       },
     ]);
   });
