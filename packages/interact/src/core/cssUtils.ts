@@ -290,3 +290,12 @@ export function buildListsRule(
 
   return `${joinedSelector} {\n${declarations.map(({ name, value }) => `  ${name}: ${value};`).join('\n')}\n}`;
 }
+
+// a source's view-timeline only reaches its descendants, so its other targets need the name scoped on a common ancestor
+export function buildTimelineScopeRule(timelineNames: string[]): string {
+  if (timelineNames.length === 0) {
+    return '';
+  }
+
+  return `:root {\n  timeline-scope: ${timelineNames.join(', ')};\n}`;
+}

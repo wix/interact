@@ -30,6 +30,7 @@ import {
   buildAtPropertyRules,
   getCustomPropName,
   buildSequenceListsRule,
+  buildTimelineScopeRule,
   LIST_KINDS,
   listKind,
 } from './cssUtils';
@@ -81,6 +82,8 @@ type GenerateContext = {
   keyframeSlots: Map<string, string>;
   // only collecting the effects' list entries for getKeyframeSlots, without generating CSS
   collectSlots: boolean;
+  // timelines that animate elements outside their source, which need a timeline-scope to resolve
+  scopedTimelines: string[];
   useFirstChild: boolean;
   plugins?: InteractPluginStyles;
 };
@@ -543,8 +546,9 @@ function parseInteraction(
     componentId: '',
   } as TriggerVariant;
   const visited = new Set<string>();
+  const isViewProgress = trigger === 'viewProgress';
 
-  if (trigger === 'viewProgress') {
+  if (isViewProgress) {
     cssRules.push(triggerToCSS(ctx, interaction, motionTrigger.id, visited));
   }
 
@@ -582,6 +586,13 @@ function parseInteraction(
     ),
   );
 
+  if (isViewProgress) {
+    const sourceHash = getElementHash(interaction);
+    if ([...visited].some((targetHash) => targetHash !== sourceHash)) {
+      ctx.scopedTimelines.push(`--${motionTrigger.id}`);
+    }
+  }
+
   visited.forEach((targetHash) => endInteraction(ctx.targetsMap.get(targetHash)!));
 
   return cssRules;
@@ -615,6 +626,7 @@ function parseConfig(
     keyframesMap: new Map<string, Keyframe[]>(),
     keyframeSlots: collectSlots ? new Map() : getKeyframeSlots(config),
     collectSlots,
+    scopedTimelines: [],
     useFirstChild,
     plugins,
   };
@@ -671,6 +683,7 @@ export function _generate(
 ): {
   cssRules: CSSRuleData[];
   listsRule: string;
+  timelineScopeRule: string;
   keyframes: Map<string, Keyframe[]>;
   atProperty: string[];
 } {
@@ -696,7 +709,9 @@ export function _generate(
     timelineLength,
   );
 
-  return { keyframes: ctx.keyframesMap, atProperty, cssRules, listsRule };
+  const timelineScopeRule = buildTimelineScopeRule(ctx.scopedTimelines);
+
+  return { keyframes: ctx.keyframesMap, atProperty, cssRules, listsRule, timelineScopeRule };
 }
 /**
  * Generates CSS for animations from an InteractConfig.
@@ -714,13 +729,17 @@ export function _generate(
  * @returns string containing all of the CSS rules needed for time-based animations
  */
 export function generate(config: InteractConfig, options?: boolean | GenerateOptions): string {
-  const { cssRules, keyframes, atProperty, listsRule } = _generate(config, options);
+  const { cssRules, keyframes, atProperty, listsRule, timelineScopeRule } = _generate(
+    config,
+    options,
+  );
 
   const css = [
     ...atProperty,
     ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),
     ...cssRules.map(CSSRuleToString),
     listsRule,
+    timelineScopeRule,
   ].filter((rule) => rule);
 
   return css.join('\n');

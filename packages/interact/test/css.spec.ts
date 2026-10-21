@@ -1906,6 +1906,37 @@ describe('css._generate', () => {
       expect(desktop).toMatchObject({ name: '--vw-tmln-1', value: '--trigger-1' });
       expect(desktop.media).toContain('min-width: 1024px');
     });
+
+    it('scopes the timelines that animate elements outside their source', () => {
+      const config: InteractConfig = {
+        interactions: [
+          { key: 'a', trigger: 'viewProgress', effects: [scrub('self')] },
+          { key: 'a', trigger: 'viewProgress', effects: [{ ...scrub('other'), key: 'b' }] },
+          {
+            key: 'a',
+            trigger: 'viewProgress',
+            sequences: [{ effects: [scrub('seq-self'), { ...scrub('seq-other'), key: 'c' }] }],
+          },
+        ],
+      };
+
+      expect(_generate(config).timelineScopeRule).toBe(
+        ':root {\n  timeline-scope: --trigger-1, --trigger-2;\n}',
+      );
+      expect(generate(config)).toContain('timeline-scope: --trigger-1, --trigger-2;');
+    });
+
+    it('does not scope timelines that only animate their source', () => {
+      const config: InteractConfig = {
+        interactions: [
+          { key: 'a', trigger: 'viewProgress', effects: [scrub('in')] },
+          { key: 'b', trigger: 'viewProgress', effects: [scrub('other')] },
+        ],
+      };
+
+      expect(_generate(config).timelineScopeRule).toBe('');
+      expect(generate(config)).not.toContain('timeline-scope');
+    });
   });
 
   describe('_generate endpoint edge cases', () => {
