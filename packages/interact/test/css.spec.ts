@@ -1906,6 +1906,39 @@ describe('css._generate', () => {
       expect(desktop).toMatchObject({ name: '--vw-tmln-1', value: '--trigger-1' });
       expect(desktop.media).toContain('min-width: 1024px');
     });
+
+    // a named view timeline is only visible to its source's subtree, so a sibling target can't find it
+    it('scopes the timelines that animate other elements to the page', () => {
+      const css = generate({
+        interactions: [
+          { key: 'a', trigger: 'viewProgress', effects: [{ ...scrub('sibling'), key: 'b' }] },
+          { key: 'a', trigger: 'viewProgress', effects: [scrub('self')] },
+          {
+            key: 'c',
+            selector: '.source',
+            trigger: 'viewProgress',
+            effects: [{ ...scrub('other'), selector: '.target' }],
+          },
+        ],
+      });
+
+      expect(css).toContain(':root {\n  timeline-scope: --trigger-0, --trigger-2;\n}');
+    });
+
+    it('does not scope the timelines that only animate their source', () => {
+      const css = generate({
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'viewProgress',
+            effects: [scrub('in'), { ...scrub('out'), key: 'a' }],
+          },
+          { key: 'a', trigger: 'viewEnter', effects: [{ ...scrub('enter'), key: 'b' }] },
+        ],
+      });
+
+      expect(css).not.toContain('timeline-scope');
+    });
   });
 
   describe('_generate endpoint edge cases', () => {

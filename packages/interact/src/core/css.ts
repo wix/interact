@@ -79,6 +79,8 @@ type GenerateContext = {
   targetsMap: TargetsMap;
   keyframesMap: Map<string, Keyframe[]>;
   keyframeSlots: Map<string, string>;
+  // view timelines whose targets may be outside their source's subtree
+  scopedTimelines: string[];
   // only collecting the effects' list entries for getKeyframeSlots, without generating CSS
   collectSlots: boolean;
   useFirstChild: boolean;
@@ -582,6 +584,12 @@ function parseInteraction(
     ),
   );
 
+  // a named view timeline is visible only in its source's subtree, so targets outside it, e.g. siblings,
+  // need its name scoped to the page (visited holds the source and every target)
+  if (trigger === 'viewProgress' && visited.size > 1) {
+    ctx.scopedTimelines.push(`--${motionTrigger.id}`);
+  }
+
   visited.forEach((targetHash) => endInteraction(ctx.targetsMap.get(targetHash)!));
 
   return cssRules;
@@ -614,6 +622,7 @@ function parseConfig(
     targetsMap: new Map<string, TargetContext>(),
     keyframesMap: new Map<string, Keyframe[]>(),
     keyframeSlots: collectSlots ? new Map() : getKeyframeSlots(config),
+    scopedTimelines: [],
     collectSlots,
     useFirstChild,
     plugins,
@@ -673,6 +682,7 @@ export function _generate(
   listsRule: string;
   keyframes: Map<string, Keyframe[]>;
   atProperty: string[];
+  timelineScopeRule: string;
 } {
   const { ctx, cssRules } = parseConfig(config, normalizeGenerateOptions(options));
 
@@ -696,7 +706,12 @@ export function _generate(
     timelineLength,
   );
 
-  return { keyframes: ctx.keyframesMap, atProperty, cssRules, listsRule };
+  // trigger names are unique in a config, and a target inside its source still resolves the source's timeline first
+  const timelineScopeRule = ctx.scopedTimelines.length
+    ? `:root {\n  timeline-scope: ${ctx.scopedTimelines.join(', ')};\n}`
+    : '';
+
+  return { keyframes: ctx.keyframesMap, atProperty, cssRules, listsRule, timelineScopeRule };
 }
 /**
  * Generates CSS for animations from an InteractConfig.
@@ -714,13 +729,17 @@ export function _generate(
  * @returns string containing all of the CSS rules needed for time-based animations
  */
 export function generate(config: InteractConfig, options?: boolean | GenerateOptions): string {
-  const { cssRules, keyframes, atProperty, listsRule } = _generate(config, options);
+  const { cssRules, keyframes, atProperty, listsRule, timelineScopeRule } = _generate(
+    config,
+    options,
+  );
 
   const css = [
     ...atProperty,
     ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),
     ...cssRules.map(CSSRuleToString),
     listsRule,
+    timelineScopeRule,
   ].filter((rule) => rule);
 
   return css.join('\n');
