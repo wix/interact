@@ -2538,6 +2538,153 @@ describe('interact (mini)', () => {
       expect(mockAnimation.play).toHaveBeenCalled();
     });
 
+    describe('scrub triggers on a list (repeater pattern)', () => {
+      // Every other list item, e.g. a repeater pattern that alternates the effect
+      const evenItemsConditions: InteractConfig['conditions'] = {
+        evenItems: {
+          type: 'selector',
+          predicate: ':nth-child(2n)',
+        },
+      };
+
+      function createListElement() {
+        const root = document.createElement('div');
+        const list = document.createElement('div');
+        list.setAttribute('role', 'list');
+        const items = Array.from({ length: 4 }, () => document.createElement('div'));
+        list.append(...items);
+        root.append(list);
+
+        return { root, items };
+      }
+
+      function getViewProgressListConfig(): InteractConfig {
+        return {
+          conditions: evenItemsConditions,
+          interactions: [
+            {
+              trigger: 'viewProgress',
+              key: 'repeater-scroll',
+              effects: [
+                {
+                  key: 'repeater-scroll',
+                  listContainer: '[role="list"]',
+                  effectId: 'repeater-fade-scroll',
+                  conditions: ['evenItems'],
+                },
+              ],
+            },
+          ],
+          effects: {
+            'repeater-fade-scroll': {
+              namedEffect: {
+                type: 'FadeScroll',
+                range: 'in',
+                opacity: 0,
+              } as NamedEffect,
+              rangeStart: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+              rangeEnd: { name: 'cover', offset: { value: 100, unit: 'percentage' } },
+            },
+          },
+        };
+      }
+
+      it('should only create viewProgress animations for items matching the selector condition', async () => {
+        const { getWebAnimation: getWebAnimationFn } = await import('@wix/motion');
+        const getWebAnimation = getWebAnimationFn as unknown as MockInstance;
+        const mockAnimation = {
+          play: vi.fn(),
+          cancel: vi.fn(),
+          ready: Promise.resolve(),
+        };
+        getWebAnimation.mockReturnValue(mockAnimation);
+
+        Interact.create(getViewProgressListConfig());
+
+        const { root, items } = createListElement();
+
+        add(root, 'repeater-scroll');
+
+        expect(getWebAnimation).toHaveBeenCalledTimes(2);
+        expect(getWebAnimation.mock.calls[0][0]).toBe(items[1]);
+        expect(getWebAnimation.mock.calls[1][0]).toBe(items[3]);
+        expect(mockAnimation.play).toHaveBeenCalledTimes(2);
+      });
+
+      it('should only create viewProgress scroll scenes for items matching the selector condition with fizban polyfill', async () => {
+        // Remove ViewTimeline support
+        delete (window as any).ViewTimeline;
+        const { getScrubScene: getScrubSceneFn } = await import('@wix/motion');
+        const getScrubScene = getScrubSceneFn as unknown as MockInstance;
+        const { Scroll } = await import('fizban');
+        Scroll.mockImplementation(function (this: any) {
+          Object.assign(this, { start: vi.fn(), destroy: vi.fn() });
+        });
+
+        Interact.create(getViewProgressListConfig());
+
+        const { root, items } = createListElement();
+
+        add(root, 'repeater-scroll');
+
+        expect(getScrubScene).toHaveBeenCalledTimes(2);
+        expect(getScrubScene.mock.calls[0][0]).toBe(items[1]);
+        expect(getScrubScene.mock.calls[1][0]).toBe(items[3]);
+        expect(Scroll).toHaveBeenCalledTimes(2);
+        Scroll.mockRestore();
+      });
+
+      it('should only apply pointerMove effects to items matching the selector condition', async () => {
+        const { getScrubScene: getScrubSceneFn } = await import('@wix/motion');
+        const getScrubScene = getScrubSceneFn as unknown as MockInstance;
+        const { Pointer } = await import('kuliso');
+        Pointer.mockImplementation(function (this: any) {
+          Object.assign(this, { start: vi.fn(), destroy: vi.fn() });
+        });
+
+        Interact.create({
+          conditions: evenItemsConditions,
+          interactions: [
+            {
+              trigger: 'pointerMove',
+              key: 'repeater-mouse',
+              params: {
+                hitArea: 'root',
+              },
+              effects: [
+                {
+                  key: 'repeater-mouse',
+                  listContainer: '[role="list"]',
+                  effectId: 'repeater-track-mouse',
+                  conditions: ['evenItems'],
+                },
+              ],
+            },
+          ],
+          effects: {
+            'repeater-track-mouse': {
+              namedEffect: {
+                type: 'TrackMouse',
+                distance: { value: 20, unit: 'px' },
+                axis: 'both',
+                power: 'medium',
+              } as NamedEffect,
+              centeredToTarget: true,
+            },
+          },
+        });
+
+        const { root, items } = createListElement();
+
+        add(root, 'repeater-mouse');
+
+        expect(getScrubScene).toHaveBeenCalledTimes(2);
+        expect(getScrubScene.mock.calls[0][0]).toBe(items[1]);
+        expect(getScrubScene.mock.calls[1][0]).toBe(items[3]);
+        expect(Pointer).toHaveBeenCalledTimes(2);
+      });
+    });
+
     it('should not apply selector condition type to media query listeners', () => {
       // Selector conditions should NOT create matchMedia listeners (only media conditions do)
       const config: InteractConfig = {
