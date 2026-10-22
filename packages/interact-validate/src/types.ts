@@ -30,6 +30,7 @@ export type EffectParamSchema = {
   values?: readonly unknown[];
   min?: number;
   max?: number;
+  int?: boolean;
   default?: unknown;
 };
 

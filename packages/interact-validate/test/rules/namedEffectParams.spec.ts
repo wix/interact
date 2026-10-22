@@ -7,6 +7,8 @@ const Move = {
     from: { type: 'enum', values: ['left', 'right'], default: 'left' },
     angle: { type: 'angle', default: 0 },
     travel: { type: 'length', default: { value: 10, unit: 'px' } },
+    depth: { type: 'lengthObject', default: { value: 10, unit: 'px' } },
+    count: { type: 'number', int: true, min: 1, default: 1 },
     scale: { type: 'number', min: 0, max: 1, default: 0.5 },
     fade: { type: 'bool', default: true },
   },
@@ -38,6 +40,8 @@ describe('namedEffectParams', () => {
         from: 'right',
         angle: '45deg',
         travel: { value: 20, unit: '%' },
+        depth: { value: -5, unit: 'em' },
+        count: 3,
         scale: 1,
         fade: false,
       }),
@@ -55,9 +59,13 @@ describe('namedEffectParams', () => {
       travel: '10 apples',
       scale: 2,
       fade: 'yes',
+      depth: '10px',
+      count: 1.5,
     });
     expect(errors.map((e) => e.path.at(-1)).sort()).toEqual([
       'angle',
+      'count',
+      'depth',
       'fade',
       'from',
       'scale',
@@ -74,6 +82,8 @@ describe('namedEffectParams', () => {
       'from',
     ]);
     expect(paramErrors({ travel: { value: 'far', unit: 'px' } })).toHaveLength(1);
+    expect(paramErrors({ depth: { value: 'calc(1px + 2px)', unit: 'px' } })).toHaveLength(1);
+    expect(paramErrors({ depth: 10 })).toHaveLength(1);
   });
 
   it('warns (NAMED_EFFECT_UNKNOWN_PARAM) on params the schema does not declare', () => {
