@@ -95,6 +95,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.5.20] - 2026-10-22
+
+#### Fixed
+
+- `generate()` emits a `:root { timeline-scope: ... }` rule for `viewProgress` triggers whose effects target an element other than the source, so a target outside the source's subtree (e.g. a sibling) binds to the source's view timeline instead of staying frozen with a `null` timeline (#345)
+- `viewProgress` and `pointerMove` honor an effect's `selector` condition: no scroll or pointer animation is created for a target that doesn't match it, matching `click`, `hover`, `viewEnter`, `animationEnd` and the `generate()` CSS (#344)
+
 ### [2.5.19] - 2026-10-21
 
 #### Changed
