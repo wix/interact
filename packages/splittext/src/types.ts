@@ -1,26 +1,30 @@
 export type SplitType = 'chars' | 'words' | 'lines' | 'sentences';
 
-export interface WrapperClassConfig {
+export type WrapperClassConfig = {
   chars?: string;
   words?: string;
   lines?: string;
   sentences?: string;
-}
+};
 
-export interface WrapperStyleConfig {
-  chars?: Partial<CSSStyleDeclaration>;
-  words?: Partial<CSSStyleDeclaration>;
-  lines?: Partial<CSSStyleDeclaration>;
-  sentences?: Partial<CSSStyleDeclaration>;
-}
+/** Serializable inline-style values (CSS property → string or number). */
+export type CssStyleRecord = Record<string, string | number>;
 
-export interface WrapperAttrsConfig {
+export type WrapperStyleConfig = {
+  chars?: CssStyleRecord;
+  words?: CssStyleRecord;
+  lines?: CssStyleRecord;
+  sentences?: CssStyleRecord;
+};
+
+export type WrapperAttrsConfig = {
   chars?: Record<string, string>;
   words?: Record<string, string>;
   lines?: Record<string, string>;
   sentences?: Record<string, string>;
-}
+};
 
+/** Options for {@link splitText} and the `$splitText` Interact plugin (except `container`). */
 export interface SplitTextOptions {
   /**
    * Split types to build. When specified, splitting runs eagerly on invocation;
@@ -45,7 +49,7 @@ export interface SplitTextOptions {
    * Inline styles applied to every wrapper `<span>`. Accepts either a global
    * `CSSStyleDeclaration` partial (applied to all types) or a per-type config.
    */
-  wrapperStyle?: Partial<CSSStyleDeclaration> | WrapperStyleConfig;
+  wrapperStyle?: CssStyleRecord | WrapperStyleConfig;
 
   /**
    * Custom HTML attributes applied to every wrapper `<span>`. Accepts either a
@@ -149,6 +153,20 @@ export interface SplitTextOptions {
   ignore?: string | ((node: Node) => boolean);
 }
 
+/** Config accepted under `$splitText` in an InteractConfig on an interaction or effect. */
+export interface SplitTextPluginConfig extends SplitTextOptions {
+  container: string;
+  /**
+   * Hide the container until the split has been applied, to prevent a flash of the un-split text
+   * before an entrance/scroll animation runs. Emits SSR CSS via {@link splitTextStyle} and is
+   * revealed once the runtime plugin marks the container ready.
+   */
+  hideUntilReady?: boolean;
+}
+
+/**
+ * Live DOM handle returned by {@link splitText}. Not part of the JSON schema surface.
+ */
 export interface SplitTextResult {
   /** Split into individual grapheme clusters. DOM is mutated on first access. */
   readonly chars: HTMLSpanElement[];

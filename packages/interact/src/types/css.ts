@@ -19,7 +19,8 @@ export type ListPropertyName =
   | 'transition'
   | 'animation-composition'
   | 'animation-timeline'
-  | 'animation-range';
+  | 'animation-range'
+  | 'view-timeline';
 
 export type CSSRuleData = {
   key: string;

@@ -106,6 +106,7 @@ export function resolveSequenceForCSS(
   interaction: Interaction,
   config: InteractConfig,
   fallbackId?: string,
+  getSlotKey?: (effectIndex: number) => string,
 ): ResolvedSequence | null {
   const { sequences = {}, conditions: configConditions = {} } = config;
 
@@ -128,6 +129,9 @@ export function resolveSequenceForCSS(
   if (typeof offsetEasing === 'function') {
     return null; // CSS does not support JS functions for easing
   }
+  if (!effects) {
+    return null; // an unresolved sequence reference
+  }
 
   if (!triggerType) {
     triggerType = TIME_TRIGGER_TO_DEFAULT_TYPE.get(interaction.trigger)!;
@@ -138,17 +142,13 @@ export function resolveSequenceForCSS(
   ];
   // resolving effects and cascading the conditions from sequence
   const resolvedEffects = effects.map((effect, index) => {
-    if (!effect.conditions) {
-      effect.conditions = [...conditions];
-    } else {
-      effect.conditions.push(...conditions);
-    }
-    return resolveEffectForCSS(
-      { ...effect, triggerType },
+    const resolved = resolveEffectForCSS(
+      { ...effect, triggerType, conditions: [...(effect.conditions || []), ...conditions] },
       interaction,
       config,
       `${sequenceId}-eff-${index}`,
     );
+    return resolved && Object.assign(resolved, { slotKey: getSlotKey?.(index) });
   });
 
   // removing unsupported effects and the whole sequence if all are unsupported

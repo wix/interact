@@ -127,6 +127,17 @@ const ExperienceSchema = z.object({
 
 > `InteractConfigSchema` carries a `.transform()`, so a successful `.parse()` returns the config augmented with an internal `warnings` array (`validateInteractConfig` consumes that for you). `customEffect` and function-valued `offsetEasing` are accepted as opaque functions and not deep-validated (a function `offsetEasing` does raise the `FUNCTION_OFFSET_EASING` warning, since `generate()` cannot compile it to CSS). Interactions and effects also accept `$`-prefixed plugin fields (e.g. `$splitText`) — config routed to `Interact.use()` plugins. Their schemas use `.catchall(z.unknown())` + a key check rather than `.strict()`: `$`-prefixed fields are accepted with opaque values, while any non-prefixed unknown key is still rejected as `SCHEMA_UNRECOGNIZED_KEYS`.
 
+### `@wix/splittext` plugin config
+
+`validateInteractConfig` does not inspect `$splitText` payloads. To validate `SplitTextOptions` / `SplitTextPluginConfig` statically, use the dedicated subpath (requires `@wix/splittext` as a peer for types):
+
+```ts
+import {
+  SplitTextPluginConfigSchema,
+  validateSplitTextPluginConfig,
+} from '@wix/interact-validate/splittext';
+```
+
 ## Severity model
 
 Every issue is `'error'` or `'warning'`. `valid` is `true` **iff** no `'error'` remains.

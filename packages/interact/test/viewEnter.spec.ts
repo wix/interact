@@ -122,6 +122,31 @@ describe('viewEnter handler', () => {
 
       expect(unobserveSpy).toHaveBeenCalledWith(element);
     });
+
+    it('should keep the handler until the animation finishes', async () => {
+      const { getAnimation } = await import('@wix/motion');
+      const animation = (getAnimation as any)();
+
+      viewEnterHandler.add(
+        element,
+        target,
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'once' },
+        {},
+        {},
+      );
+
+      getMainObserverCallback()([createEntry()]);
+
+      const finish = animation.onFinish.mock.calls[0][0];
+      viewEnterHandler.remove(element);
+
+      expect(animation.cancel).toHaveBeenCalledTimes(1);
+
+      finish();
+      viewEnterHandler.remove(target);
+
+      expect(animation.cancel).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('Safe flow', () => {

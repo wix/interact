@@ -12,7 +12,8 @@ import {
   IInteractElement,
   InteractPlugin,
 } from '../types';
-import { getInterpolatedKey } from './utilities';
+import { getElementHash, getInterpolatedKey } from './utilities';
+import { getKeyframeSlots, getSlotKey } from './css';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
@@ -398,9 +399,29 @@ function _ensureInteractionEntry(
   return interactions[key];
 }
 
+// the sequence's effects in their slots - copied, since a referenced sequence can be in different slots
+function withSlots<T extends SequenceConfig | SequenceConfigRef>(
+  sequence: T,
+  getKey: (effectIndex: number) => string,
+  slots: Map<string, string>,
+): T {
+  const { effects = [] } = sequence as Partial<SequenceConfig>;
+  if (!effects.some((_, index) => slots.has(getKey(index)))) {
+    return sequence;
+  }
+  return {
+    ...sequence,
+    effects: effects.map((effect, index) => {
+      const suffix = slots.get(getKey(index));
+      return suffix ? { ...effect, suffix } : effect;
+    }),
+  };
+}
+
 function parseConfig(config: InteractConfig, useCustomElement: boolean = false): InteractCache {
   const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {} } = config;
   const interactions: InteractCache['interactions'] = {};
+  const slots = config.interactions ? getKeyframeSlots(config) : new Map<string, string>();
 
   config.interactions?.forEach((interaction_, configIndex) => {
     const source = interaction_.key;
@@ -441,7 +462,9 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
     const interaction = {
       ...rest,
       effects: effects.length > 0 ? effects : undefined,
-      sequences: processedSequences,
+      sequences: processedSequences?.map((seq, sequenceIndex) =>
+        withSlots(seq, (effectIndex) => getSlotKey(configIndex, effectIndex, sequenceIndex), slots),
+      ),
     } as Interaction;
 
     interactions[source].triggers.push(interaction);
@@ -458,24 +481,23 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
        *  -> Config.effects.effect.key
        *  -> Config.interactions.interaction.key
        */
-      let target = effect.key;
+      const referencedEffect = (effect as EffectRef).effectId
+        ? effectMap[(effect as EffectRef).effectId]
+        : undefined;
+      let target = effect.key || referencedEffect?.key;
 
-      if (!target && (effect as EffectRef).effectId) {
-        const referencedEffect = effectMap[(effect as EffectRef).effectId];
-
-        if (referencedEffect) {
-          target = referencedEffect.key;
-        }
-      }
-
+      const configEffectIndex = effects.length - 1 - effectIndex;
       if (!(effect as EffectRef).effectId) {
-        (effect as EffectRef).effectId = `eff-${configIndex}-${effects.length - 1 - effectIndex}`;
+        (effect as EffectRef).effectId = `eff-${configIndex}-${configEffectIndex}`;
+      }
+      const suffix = slots.get(getSlotKey(configIndex, configEffectIndex));
+      if (suffix) {
+        (effect as { suffix?: string }).suffix = suffix;
       }
 
       // if no target is specified, use the source element as the target
       target = target || source;
       effect.key = target;
-      const effectId = (effect as EffectRef).effectId;
 
       if (listContainer && effect.listContainer) {
         // we do not support having 2 separate lists for same interaction
@@ -484,7 +506,8 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
         }
       }
 
-      const interactionId = `${source}::${target}::${effectId}::${interactionIdx}`;
+      const targetHash = getElementHash({ ...referencedEffect, ...effect, key: target });
+      const interactionId = `${source}::${targetHash}::${interactionIdx}`;
       effect.interactionId = interactionId;
       interactions[source].interactionIds.add(interactionId);
 

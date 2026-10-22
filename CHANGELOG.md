@@ -16,6 +16,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `@wix/splittext/plugin` entry points: `splitTextPlugin` for `Interact.use()`, and `splitTextStyle` for `generate()` (#275)
 - `hideUntilReady`: `splitTextStyle` hides the container until the runtime split sets `data-splittext-ready` (#275)
+- `SplitTextPluginConfig` exported from the main package types; documents `$splitText` fields including `container` and `hideUntilReady` (#329)
+- README section on validating options and plugin config with `@wix/interact-validate/splittext` (#329)
+
+#### Changed
+
+- `wrapperStyle` uses serializable `CssStyleRecord` values instead of `Partial<CSSStyleDeclaration>` so configs validate and round-trip as JSON (#329)
+- Wrapper config types (`WrapperClassConfig`, `WrapperStyleConfig`, `WrapperAttrsConfig`) exported as type aliases with expanded JSDoc on `SplitTextOptions` (#329)
 
 ### [0.1.2] - 2026-07-14
 
@@ -38,6 +45,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 #### Added
 
 - Plugin fields: `$`-prefixed keys on interactions and effects are accepted; every other unknown key is still reported as `SCHEMA_UNRECOGNIZED_KEYS` (#275)
+- `@wix/interact-validate/splittext` subpath: zod schemas and `validateSplitTextOptions()` / `validateSplitTextPluginConfig()` (plus `assertValid*` helpers) for `SplitTextOptions` and `SplitTextPluginConfig` (#329)
+- Optional peer dependency on `@wix/splittext` for split-text config types (#329)
 - `FUNCTION_OFFSET_EASING` semantic warning when a sequence's `offsetEasing` is a function — `generate()` cannot compile it to CSS (#289)
 
 #### Fixed
@@ -85,6 +94,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact
+
+### [2.5.20] - 2026-10-22
+
+#### Fixed
+
+- `generate()` emits a `:root { timeline-scope: ... }` rule for `viewProgress` triggers whose effects target an element other than the source, so a target outside the source's subtree (e.g. a sibling) binds to the source's view timeline instead of staying frozen with a `null` timeline (#345)
+- `viewProgress` and `pointerMove` honor an effect's `selector` condition: no scroll or pointer animation is created for a target that doesn't match it, matching `click`, `hover`, `viewEnter`, `animationEnd` and the `generate()` CSS (#344)
+
+### [2.5.19] - 2026-10-21
+
+#### Changed
+
+- Bump `@wix/motion` dependency to `^2.1.16`
+
+### [2.5.18] - 2026-10-19
+
+#### Changed
+
+- `generate()` assigns keyframe slots to colliding effects: effects on the same target that would write conflicting animation list entries get their own slot, while effects of the same entry share one and cascade over each other. The runtime resolves an effect's slot from its position in the config, matching the generated CSS (#338)
+- `view-timeline` is emitted as a list property: each `viewProgress` interaction declares its timeline on its source under its own conditions, so several `viewProgress` interactions can share a source (#338)
+- Sequence resolution for CSS no longer copies the sequence's conditions onto the config's effects, and skips unresolved sequence references (#338)
+
+#### Fixed
+
+- `viewEnter` entrance initial-state rule now resets `clip-path` (`clip-path: none !important`), so entrances whose first keyframe clips the element away (e.g. TiltIn, ShuttersIn, Reveal) no longer hide their own trigger from the IntersectionObserver and never play (#335)
+
+### [2.5.17] - 2026-10-12
+
+#### Fixed
+
+- Runtime interaction IDs and media-query listener keys now incorporate a stable hash of the resolved effect target (selector, list item, etc.) instead of `effectId`, so distinct effects on the same element no longer share one controller and cascade each other's updates (#336)
+
+### [2.5.15] - 2026-09-14
+
+#### Fixed
+
+- `viewEnter` with `once`: keep the handler registered until the entrance animation finishes so `destroy()` / `remove` can still cancel in-flight animations; unobserve the source when no handlers remain (#324)
 
 ### [2.5.14] - 2026-09-06
 
@@ -345,6 +391,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion
 
+### [2.1.16] - 2026-10-21
+
+#### Added
+
+- Export `getRegisteredEffect()`; it accepts an optional `warn` argument (default `true`) to skip the missing-preset warning (#338)
+- Optional `suffix` on `TimeAnimationOptions` and scrub animation data (#338)
+
+### [2.1.15] - 2026-09-21
+
+#### Changed
+
+- Republish aligning monorepo dependents on `@wix/motion@2.1.15`; no API changes since 2.1.9 (#327)
+
 ### [2.1.9] - 2026-08-13
 
 #### Added
@@ -447,6 +506,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion-presets
+
+### [1.0.7] - 2026-09-21
+
+#### Changed
+
+- Bump `@wix/motion` dependency to `^2.1.15` (#327)
 
 ### [1.0.6] - 2026-09-02
 
