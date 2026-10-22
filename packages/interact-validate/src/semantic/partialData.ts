@@ -1,43 +1,4 @@
-import type { Path, SemanticIssue, AnyEffect, AnyInteraction } from '../types';
-
-const SCROLL_RANGE_VALUES = ['in', 'out', 'continuous'];
-
-// Scroll presets (the `*Scroll` motion-presets) all end with `Scroll`; no other
-// preset category does. Used to flag a missing/invalid `range` on `viewProgress`.
-function isScrollPresetType(type: unknown): boolean {
-  return typeof type === 'string' && /Scroll$/.test(type);
-}
-
-// `*Scroll` namedEffect on viewProgress without a valid `range`
-export function checkScrollPresetRange(
-  path: Path,
-  effect: AnyEffect,
-  owner?: AnyInteraction,
-): SemanticIssue[] {
-  if (!owner || owner.trigger !== 'viewProgress') return [];
-  const named = effect.namedEffect;
-  if (!named || !isScrollPresetType(named.type)) return [];
-  if (named.range === undefined) {
-    return [
-      {
-        code: 'custom',
-        params: { domainCode: 'SCROLL_PRESET_MISSING_RANGE' },
-        path: [...path, 'namedEffect', 'range'],
-        message: `Scroll preset '${named.type}' on viewProgress requires \`range: 'in' | 'out' | 'continuous'\` (prefer 'continuous').`,
-      },
-    ];
-  } else if (typeof named.range !== 'string' || !SCROLL_RANGE_VALUES.includes(named.range)) {
-    return [
-      {
-        code: 'custom',
-        params: { domainCode: 'SCROLL_PRESET_BAD_RANGE' },
-        path: [...path, 'namedEffect', 'range'],
-        message: `Scroll preset \`range\` must be 'in', 'out', or 'continuous' (prefer 'continuous'); got ${JSON.stringify(named.range)}.`,
-      },
-    ];
-  }
-  return [];
-}
+import type { Path, SemanticIssue, AnyEffect } from '../types';
 
 // state effect that toggles nothing (empty style arrays)
 export function checkEmptyStyleProperties(path: Path, effect: AnyEffect): SemanticIssue[] {

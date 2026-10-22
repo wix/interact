@@ -17,6 +17,7 @@ import { getKeyframeSlots, getSlotKey } from './css';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
+  getRegisteredEffect,
   getSequence as getMotionSequence,
   createAnimationGroups,
   Sequence,
@@ -246,6 +247,7 @@ export class Interact {
   }
 
   static registerEffects = registerEffects;
+  static getRegisteredEffect = getRegisteredEffect;
 
   /**
    * Registers a plugin under a name. When the config carries a plugin field (e.g. `$splitText`) with a matching key
