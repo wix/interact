@@ -101,6 +101,7 @@ export function createTransitionCSS({
   effectId,
   transition,
   transitionProperties,
+  elementStyles = [],
   childSelector = '> :first-child',
   selectorCondition,
 }: CreateTransitionCSSParams): string[] {
@@ -108,38 +109,29 @@ export function createTransitionCSS({
     transition,
     transitionProperties,
   });
-
-  const styleProperties = getStateStyleProperties({ transition, transitionProperties }).map(
-    (property) => `${property.name}: ${property.value};`,
-  );
   const escapedKey = key.replace(/"/g, "'");
+  const withCondition = (selector: string) =>
+    selectorCondition ? applySelectorCondition(selector, selectorCondition) : selector;
 
-  // Build selectors, applying condition if present
-  const stateSelector = `:is(:state(${effectId}), :--${effectId}) ${childSelector}`;
-  const dataAttrSelector = `[data-interact-effect~="${effectId}"] ${childSelector}`;
-
-  const finalStateSelector = selectorCondition
-    ? applySelectorCondition(stateSelector, selectorCondition)
-    : stateSelector;
-  const finalDataAttrSelector = selectorCondition
-    ? applySelectorCondition(dataAttrSelector, selectorCondition)
-    : dataAttrSelector;
+  const stateRule = (selector: string, properties: StyleProperty[]) => `${withCondition(
+    `:is(:state(${effectId}), :--${effectId}) ${selector}`,
+  )},
+    ${withCondition(`[data-interact-effect~="${effectId}"] ${selector}`)} {
+      ${properties.map((property) => `${property.name}: ${property.value};`).join(`
+      `)}
+    }`;
 
   const result = [
-    `${finalStateSelector},
-    ${finalDataAttrSelector} {
-      ${styleProperties.join(`
-      `)}
-    }`,
+    stateRule(childSelector, getStateStyleProperties({ transition, transitionProperties })),
+    ...elementStyles.map(({ selector, styleProperties }) =>
+      stateRule(selector, getStateStyleProperties({ transition: { styleProperties } })),
+    ),
   ];
 
   if (transitions.length) {
     const transitionSelector = `[data-interact-key="${escapedKey}"] ${childSelector}`;
-    const finalTransitionSelector = selectorCondition
-      ? applySelectorCondition(transitionSelector, selectorCondition)
-      : transitionSelector;
 
-    result.push(`@media (prefers-reduced-motion: no-preference) { ${finalTransitionSelector} {
+    result.push(`@media (prefers-reduced-motion: no-preference) { ${withCondition(transitionSelector)} {
       transition: ${transitions.join(', ')};
     } }`);
   }

@@ -18,6 +18,8 @@ export type InteractCache = {
       sequences: Record<string, (InteractionTrigger & { sequence: SequenceConfig })[]>;
       interactionIds: Set<string>;
       selectors: Set<string>;
+      // the key's states no interaction sets, for code to toggle
+      codeStates: Effect[];
     };
   };
 };
@@ -27,6 +29,7 @@ export type CreateTransitionCSSParams = {
   effectId: string;
   transition?: StateEffect['transition'];
   transitionProperties?: TransitionProperty[];
+  elementStyles?: StateEffect['elementStyles'];
   childSelector?: string;
   selectorCondition?: string;
   useFirstChild?: boolean;

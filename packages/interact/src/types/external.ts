@@ -19,6 +19,7 @@ export type {
   TransitionOptions,
   StyleProperty,
   TransitionProperty,
+  ElementStyle,
   StateEffect,
   EffectRef,
   Effect,

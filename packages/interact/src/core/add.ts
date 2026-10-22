@@ -843,6 +843,7 @@ function addInteraction<T extends TriggerType>(
       effectId: (effect as Effect).effectId!,
       transition: (effect as StateEffect).transition,
       transitionProperties: (effect as StateEffect).transitionProperties,
+      elementStyles: (effect as StateEffect).elementStyles,
       childSelector: getSelector(effect, {
         asCombinator: true,
         addItemFilter: true,
@@ -928,7 +929,37 @@ export function add(controller: IInteractionController): boolean {
     hasEffects = addEffectsForTarget(key, controller, instance);
   }
 
-  return hasTriggers || hasEffects;
+  const { codeStates = [] } = instance.get(key) || {};
+  codeStates.forEach((effect, index) => {
+    const { conditions = [] } = effect;
+    const mql = getMediaQuery(conditions, instance.dataCache.conditions);
+
+    if (mql) {
+      instance.setupMediaQueryListener(`${key}::codeState::${index}`, mql, key, () => {
+        controller.update();
+      });
+    }
+
+    if (!mql || mql.matches) {
+      controller.renderStyle(
+        createTransitionCSS({
+          key,
+          effectId: effect.effectId!,
+          transition: (effect as StateEffect).transition,
+          transitionProperties: (effect as StateEffect).transitionProperties,
+          elementStyles: (effect as StateEffect).elementStyles,
+          childSelector: getSelector(effect, {
+            asCombinator: true,
+            addItemFilter: true,
+            useFirstChild: controller.useFirstChild,
+          }),
+          selectorCondition: getSelectorCondition(conditions, instance.dataCache.conditions),
+        }),
+      );
+    }
+  });
+
+  return hasTriggers || hasEffects || codeStates.length > 0;
 }
 
 export function addListItems(
