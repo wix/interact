@@ -72,6 +72,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgFadeBackScale,
+      custom,
       easing,
       part: 'BG_LAYER',
       startOffset: {
