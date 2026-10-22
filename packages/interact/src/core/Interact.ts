@@ -25,7 +25,7 @@ import {
 import type { SequenceOptions, AnimationGroupArgs, IndexedGroup } from '@wix/motion';
 
 function _convertToKeyTemplate(key: string) {
-  return key.replace(/\[([-\w]+)]/g, '[]');
+  return key.replace(/\[[^\]]+]/g, '[]');
 }
 
 export class Interact {
