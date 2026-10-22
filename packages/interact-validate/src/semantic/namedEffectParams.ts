@@ -10,6 +10,10 @@ const isNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value);
 const matches = (value: unknown, regex: RegExp) =>
   typeof value === 'string' && (regex.test(value.trim()) || CALC_REGEX.test(value.trim()));
+const isLengthObject = (value: unknown): value is { value: unknown; unit: string } =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as { unit?: unknown }).unit === 'string';
 
 // [is valid, expected value description] per param type - unknown types are not validated
 const PARAM_TYPES: Record<
@@ -20,10 +24,10 @@ const PARAM_TYPES: Record<
   }
 > = {
   number: {
-    isValid: (value, { min = -Infinity, max = Infinity }) =>
-      isNumber(value) && value >= min && value <= max,
-    expected: ({ min, max }) =>
-      `a number${min !== undefined ? ` >= ${min}` : ''}${max !== undefined ? ` <= ${max}` : ''}`,
+    isValid: (value, { min = -Infinity, max = Infinity, int }) =>
+      isNumber(value) && (!int || Number.isInteger(value)) && value >= min && value <= max,
+    expected: ({ min, max, int }) =>
+      `${int ? 'an integer' : 'a number'}${min !== undefined ? ` >= ${min}` : ''}${max !== undefined ? ` <= ${max}` : ''}`,
   },
   bool: {
     isValid: (value) => typeof value === 'boolean',
@@ -37,12 +41,12 @@ const PARAM_TYPES: Record<
     isValid: (value) =>
       isNumber(value) ||
       matches(value, LENGTH_REGEX) ||
-      (typeof value === 'object' &&
-        value !== null &&
-        typeof (value as { unit?: unknown }).unit === 'string' &&
-        (isNumber((value as { value?: unknown }).value) ||
-          matches((value as { value?: unknown }).value, LENGTH_REGEX))),
+      (isLengthObject(value) && (isNumber(value.value) || matches(value.value, LENGTH_REGEX))),
     expected: () => "a length (number, '<number><unit>', calc() or { value, unit })",
+  },
+  lengthObject: {
+    isValid: (value) => isLengthObject(value) && isNumber(value.value),
+    expected: () => 'a length object ({ value: number, unit })',
   },
   angle: {
     isValid: (value) =>
