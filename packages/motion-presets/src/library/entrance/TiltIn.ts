@@ -1,96 +1,138 @@
-import {
-  getClipPolygonParams,
-  toKeyframeValue,
-  parseDirection,
-  parseLength,
-  getEntranceFill,
-} from '../../utils';
-import type { TiltIn, TimeAnimationOptions, EffectTwoSides } from '../../types';
+import type { AnimationData, LengthValue, TiltIn, TimeAnimationOptions } from '../../types';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
+import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
+import {
+  MOTION_TRANS_ROT_NAME,
+  MOTION_3D_TRANSFORM_NAME,
+  getMotionTransRot,
+  getMotion3dTransform,
+  getMotionLayoutRotation,
+  MOTION_LAYOUT_ROTATION_NAME,
+} from '../../transformUtils';
+import { compareKeywordToNonDefaults, parseLengthLazy } from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { axisDirection, sideDirection, spinDirection, toMotionRange } from '../../directions';
 
-const DEFAULT_DIRECTION: EffectTwoSides = 'left';
-const DEFAULT_DEPTH = { value: 200, unit: 'px' };
+const FADE_IN_EASING = 'cubicOut';
+const FADE_IN_DURATION_FACTOR = 0.2;
+const ROTATE_2D_IN_DURATION_FACTOR = 0.8;
+const CLIP_PATH_DURATION_FACTOR = 0.8;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-tiltInRotate', 'motion-tiltInClip'];
-}
+const CLIP_DIRECTION = 'top';
+const TILT_DIRECTION = 'vertical';
+const ROTATION_2D_ANGLE = 30;
+const ROTATION_3D_ANGLE = -90;
 
-const ROTATION_MAP = {
-  left: 30,
-  right: -30,
+const DEFAULT_EASING = 'cubicOut';
+const DEFAULTS: Required<TiltIn> = {
+  type: 'TiltIn',
+  depth: { value: 100, unit: 'px' },
+  from: 'left',
+  perspective: 800,
 };
+
+export const schema = {
+  depth: { type: 'length', default: DEFAULTS.depth },
+  from: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: DEFAULTS.from },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [
+    MOTION_FADE_NAME,
+    MOTION_3D_TRANSFORM_NAME,
+    MOTION_TRANS_ROT_NAME,
+    MOTION_LAYOUT_ROTATION_NAME,
+    MOTION_REVEAL_NAME,
+  ].map((name) => name + suffix);
+}
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as TiltIn;
-  const direction = parseDirection(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULT_DIRECTION);
-  const depth = parseLength(namedEffect.depth, DEFAULT_DEPTH);
-  const { perspective = 800 } = namedEffect;
-  const [fadeIn, tiltInRotate, tiltInClip] = getNames(options);
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<TiltIn>;
+  const { depth, from, perspective = DEFAULTS.perspective } = namedEffect!;
+  const { fill = 'backwards' } = options;
 
-  const easing = options.easing || 'cubicOut';
-  const clipStart = getClipPolygonParams({ direction: 'top', minimum: 0 });
-  const rotationZ = ROTATION_MAP[direction];
-  const clipEnd = getClipPolygonParams({ direction: 'initial' });
-  const depthValue = `${depth.value}${depth.unit === 'percentage' ? '%' : depth.unit}`;
+  const transform3dOptions = {
+    ...options,
+    easing,
+    fill,
+    namedEffect: {
+      ...namedEffect,
+      angle: ROTATION_3D_ANGLE,
+      direction: TILT_DIRECTION,
+      perspective,
+    },
+  } as TimeAnimationOptions;
 
-  const rotateCustom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-depth-negative': `calc(${depthValue} / 2 * -1)`,
-    '--motion-depth-positive': `calc(${depthValue} / 2)`,
-  };
+  // TiltIn always comes from the bottom - so it is clockwise when coming from the right side
+  const direction = compareKeywordToNonDefaults(from, ['right'])
+    ? 'clockwise'
+    : 'counter-clockwise';
+  // the 2d rotation settles before the tilt ends
+  const transform2dOptions = {
+    ...options,
+    composite: 'add',
+    duration: options.duration! * ROTATE_2D_IN_DURATION_FACTOR,
+    easing,
+    fill,
+    namedEffect: { ...namedEffect, angle: ROTATION_2D_ANGLE, direction },
+  } as TimeAnimationOptions;
 
-  const clipCustom = {
-    '--motion-rotate-z': `${rotationZ}deg`,
-    '--motion-clip-start': clipStart,
-  };
+  const revealOptions = {
+    ...options,
+    duration: options.duration! * CLIP_PATH_DURATION_FACTOR,
+    easing,
+    fill,
+    namedEffect: { ...namedEffect, from: CLIP_DIRECTION as TiltIn['from'] },
+  } as TimeAnimationOptions;
 
   return [
     {
       ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      duration: options.duration! * 0.2,
-      easing: 'cubicOut',
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
     },
     {
-      ...options,
-      name: tiltInRotate,
-      fill: getEntranceFill(options),
-      easing,
-      custom: rotateCustom,
-      keyframes: [
+      ...transform3dOptions,
+      ...getMotion3dTransform(
+        toMotionRange(axisDirection, TILT_DIRECTION, 'in'),
         {
-          transform: `perspective(${toKeyframeValue(rotateCustom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(rotateCustom, '--motion-depth-negative', asWeb)}) rotateX(-90deg) translateZ(${toKeyframeValue(rotateCustom, '--motion-depth-positive', asWeb)}) rotate(var(--motion-rotate, 0deg))`,
+          angle: ROTATION_3D_ANGLE,
+          depth: parseLengthLazy(depth, DEFAULTS.depth as LengthValue),
+          perspective,
         },
-        {
-          transform: `perspective(${toKeyframeValue(rotateCustom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(rotateCustom, '--motion-depth-negative', asWeb)}) rotateX(0deg) translateZ(${toKeyframeValue(rotateCustom, '--motion-depth-positive', asWeb)}) rotate(var(--motion-rotate, 0deg))`,
-        },
-      ],
+        asWeb,
+        suffix,
+      ),
     },
     {
-      ...options,
-      name: tiltInClip,
-      fill: getEntranceFill(options),
-      easing,
-      composite: 'add' as const,
-      duration: options.duration! * 0.8,
-      custom: clipCustom,
-      keyframes: [
-        {
-          clipPath: `var(--motion-clip-start, ${clipCustom['--motion-clip-start']})`,
-          transform: `rotateZ(${toKeyframeValue(clipCustom, '--motion-rotate-z', asWeb)})`,
-        },
-        {
-          clipPath: clipEnd,
-          transform: `rotateZ(0deg)`,
-        },
-      ],
+      ...transform2dOptions,
+      ...getMotionTransRot(
+        toMotionRange(spinDirection, direction, 'in'),
+        { angle: ROTATION_2D_ANGLE },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transform3dOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...revealOptions,
+      ...getMotionReveal(
+        toMotionRange(sideDirection, sideDirection.opposite(CLIP_DIRECTION), 'in'),
+        {},
+        asWeb,
+        suffix,
+      ),
     },
   ];
 }

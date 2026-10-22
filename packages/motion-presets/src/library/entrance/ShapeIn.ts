@@ -1,64 +1,53 @@
-import type { Shape, ShapeIn, TimeAnimationOptions } from '../../types';
-import { toKeyframeValue, getEntranceFill } from '../../utils';
+import type { AnimationData, ShapeIn, TimeAnimationOptions } from '../../types';
+import { SHAPES } from '../../consts';
+import { MOTION_SHAPE_NAME, getMotionShape } from '../../clipUtils';
+import { parseKeywordLazy } from '../../utils';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-shapeIn'];
-}
+const FADE_IN_DURATION_FACTOR = 0.8;
+const FADE_IN_EASING = 'quadOut';
 
-const shapes: Record<Shape, { start: string; end: string }> = {
-  diamond: {
-    start: 'polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%)',
-    end: 'polygon(50% -50%, 150% 50%, 50% 150%, -50% 50%)',
-  },
-  window: {
-    start: 'inset(50% round 50% 50% 0% 0%)',
-    end: 'inset(-20% round 50% 50% 0% 0%)',
-  },
-  rectangle: { start: 'inset(50%)', end: 'inset(0%)' },
-  circle: { start: 'circle(0%)', end: 'circle(75%)' },
-  ellipse: { start: 'ellipse(0% 0%)', end: 'ellipse(75% 75%)' },
+const DEFAULT_EASING = 'cubicInOut';
+const DEFAULTS: Required<ShapeIn> = {
+  type: 'ShapeIn',
+  shape: 'rectangle',
 };
+
+export const schema = {
+  shape: { type: 'enum', values: SHAPES, default: DEFAULTS.shape },
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME, MOTION_SHAPE_NAME].map((name) => name + suffix);
+}
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { shape = 'rectangle' } = options.namedEffect as ShapeIn;
-  const [fadeIn, shapeIn] = getNames(options);
-  const easing = options.easing || 'cubicInOut';
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<ShapeIn>;
+  const { fill = 'backwards' } = options;
+  const shape = parseKeywordLazy(namedEffect?.shape, SHAPES, DEFAULTS.shape);
 
-  const { start, end } = shapes[shape];
-
-  const custom = {
-    '--motion-shape-start': start,
-    '--motion-shape-end': end,
-  };
+  const shapeOptions = {
+    ...options,
+    easing,
+    fill,
+    namedEffect: { ...namedEffect, shape },
+  } as TimeAnimationOptions;
 
   return [
     {
       ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing: 'quadOut',
-      duration: options.duration! * 0.8,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
     },
     {
-      ...options,
-      name: shapeIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          clipPath: toKeyframeValue(custom, '--motion-shape-start', asWeb),
-        },
-        {
-          clipPath: toKeyframeValue(custom, '--motion-shape-end', asWeb),
-        },
-      ],
+      ...shapeOptions,
+      ...getMotionShape({ shape }, asWeb, suffix),
     },
   ];
 }

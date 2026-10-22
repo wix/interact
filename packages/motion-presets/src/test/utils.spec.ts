@@ -1,6 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
-import { parseLength, parseDirection } from '../utils';
+import {
+  declareCustom,
+  parseDirection,
+  parseKeywordLazy,
+  parseLength,
+  parseLengthLazy,
+  toKeyframeValue,
+} from '../utils';
 
 describe('parseLength', () => {
   const defaultValue = { value: 100, unit: 'percentage' };
@@ -222,5 +229,70 @@ describe('parseDirection', () => {
         expect(parseDirection('45', allowedKeywords, defaultValue, false)).toBe(defaultValue);
       });
     });
+  });
+});
+
+describe('parseLengthLazy', () => {
+  const defaultValue = { value: 10, unit: 'px' };
+
+  test('returns css lengths and calc as is', () => {
+    expect(parseLengthLazy('50%', defaultValue)).toBe('50%');
+    expect(parseLengthLazy(' 2REM ', defaultValue)).toBe('2rem');
+    expect(parseLengthLazy('calc(100% - 10px)', defaultValue)).toBe('calc(100% - 10px)');
+  });
+
+  test('numbers use the default unit', () => {
+    expect(parseLengthLazy(20, defaultValue)).toBe('20px');
+    expect(parseLengthLazy('20', { value: 0, unit: 'percentage' })).toBe('20%');
+  });
+
+  test('objects', () => {
+    expect(parseLengthLazy({ value: 5, unit: 'vh' }, defaultValue)).toBe('5vh');
+    expect(parseLengthLazy({ value: 5, unit: 'percentage' }, defaultValue)).toBe('5%');
+  });
+
+  test('invalid input falls back to the default', () => {
+    expect(parseLengthLazy(undefined, defaultValue)).toBe('10px');
+    expect(parseLengthLazy('abc', defaultValue)).toBe('10px');
+    expect(parseLengthLazy({ value: NaN, unit: 'px' }, defaultValue)).toBe('10px');
+  });
+});
+
+describe('parseKeywordLazy', () => {
+  test('accepts allowed keywords case-insensitively', () => {
+    expect(parseKeywordLazy(' Left ', ['left', 'right'], 'right')).toBe('left');
+  });
+
+  test('falls back to the default', () => {
+    expect(parseKeywordLazy('up', ['left', 'right'], 'right')).toBe('right');
+    expect(parseKeywordLazy(3, ['left', 'right'], 'right')).toBe('right');
+    expect(parseKeywordLazy(undefined, ['left', 'right'], 'right')).toBe('right');
+  });
+});
+
+describe('toKeyframeValue', () => {
+  const custom = { '--a': '5px' };
+
+  test('returns the value for web animations', () => {
+    expect(toKeyframeValue(custom, '--a', true)).toBe('5px');
+  });
+
+  test('returns a var() with an optional fallback for css', () => {
+    expect(toKeyframeValue(custom, '--a')).toBe('var(--a)');
+    expect(toKeyframeValue(custom, '--a', false, '0px')).toBe('var(--a, 0px)');
+    expect(toKeyframeValue(custom, '--a', false, '')).toBe('var(--a, )');
+  });
+});
+
+describe('declareCustom', () => {
+  test('declares prefixed custom properties and returns their keyframe values', () => {
+    expect(declareCustom('--p', { x: [1, '0'], y: ['2px', '0px'] })).toEqual({
+      custom: { '--p-x': 1, '--p-y': '2px' },
+      vars: { x: 'var(--p-x, 0)', y: 'var(--p-y, 0px)' },
+    });
+  });
+
+  test('uses the values directly for web animations', () => {
+    expect(declareCustom('--p', { x: [1, '0'] }, true).vars).toEqual({ x: 1 });
   });
 });

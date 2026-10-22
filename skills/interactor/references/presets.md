@@ -22,7 +22,7 @@ CDN/quick-start or when you genuinely use most of the catalog.
 ## Two parameter layers (don't confuse them)
 
 - **Animation options** go on the **effect** (outside `namedEffect`): `duration`, `delay`, `easing`, `iterations`, `alternate`, `fill`, `reversed`; for scroll add `rangeStart`/`rangeEnd`, `transition*`.
-- **Preset parameters** go **inside `namedEffect`**: the per-preset knobs below (`direction`, `distance`, `blur`, `intensity`, …).
+- **Preset parameters** go **inside `namedEffect`**: the per-preset knobs below (`from`, `direction`, `travel`, `blur`, …).
 
 **If you don't know a param's name/type, omit it — defaults apply.** Guessing
 produces silently-wrong output. Never invent a `type`.
@@ -35,22 +35,24 @@ produces silently-wrong output. Never invent a `type`.
 ## Conventions
 
 - **Suffix encodes category:** `…In` = entrance, `…Scroll` = scroll, `…Mouse` = mouse, **no suffix** = ongoing.
-- **`direction` is overloaded** — the accepted set depends on the preset (cardinal `top/right/bottom/left`, `+center`, two-sided `left/right`, corners, 8-way, 9-way, axis `horizontal/vertical`, rotation `clockwise/counter-clockwise`, or a `0–360` number). Use the value set listed per preset.
-- **On entrances, `direction` names the edge the element comes _from_**, not where
-  it heads. `direction: 'bottom'` starts the element **below** its resting place and
+- **`from` / `direction` / `pivot` are overloaded** — the accepted set depends on the preset (cardinal `top/right/bottom/left`, `+back`, two-sided `left/right`, corners, 8-way, 9-way, axis `horizontal/vertical`, rotation `clockwise/counter-clockwise`, or a `0–360` number). Use the value set listed per preset.
+- **Entrances use `from` — the edge the element comes _from_**, not where
+  it heads. `from: 'bottom'` starts the element **below** its resting place and
   drifts it **upward** into position; `'left'` starts it to the left and moves it
-  right. So the everyday "fade **up** into place" is `direction: 'bottom'` — picking
-  `'top'` gives you the opposite, a downward drift. Verified across all four cardinals
-  on the translate-based presets (`FloatIn`, `GlideIn`, and `SlideIn`'s movement).
+  right. So the everyday "fade **up** into place" is `from: 'bottom'` — picking
+  `'top'` gives you the opposite, a downward drift.
+- **Scroll and ongoing presets use `direction` — where the motion _goes_.**
+  `SlideScroll` `direction: 'top'` moves the element upward. `pivot` names the fixed
+  edge/corner/point it rotates or scales around (`FoldIn`, `TurnIn`, `Grow/ShrinkScroll`, `Fold`, `Swing`).
 - **The clip-based entrances anchor their mask differently from each other** — don't
   assume the movement rule carries over. `RevealIn` uncovers **from** the named edge
   (`'left'` → the mask opens at the left edge and sweeps right). `SlideIn` is the
   opposite: with `'left'` the content translates in from the left while its mask opens
   from the **right** edge, which is what makes it read as sliding out from behind a
   fixed edge rather than being wiped on. If the exact reveal geometry matters, check
-  the emitted `--motion-clip-start` polygon rather than reasoning from the name.
-- **Angle convention** (numeric directions/angles): `0° = right`, increasing **counter-clockwise** → `90° = top`, `180° = left`, `270° = bottom`. Same polarity — the angle points at the edge it enters from.
-- **Distances** use `{ value, unit }` with unit ∈ `px | em | rem | vh | vw | vmin | vmax | percentage`. Strings like `'120px'` also parse.
+  the emitted `clip-path` keyframes rather than reasoning from the name.
+- **Angle convention** (numeric directions/angles): CSS convention — `0° = right`, increasing **clockwise** → `90° = bottom`, `180° = left`, `270° = top`. On entrances the angle points at the edge it enters from; on `MoveScroll` it points where the element moves.
+- **Lengths of movement** are `travel`, using `{ value, unit }` with unit ∈ `px | em | rem | vh | vw | vmin | vmax | percentage`. Strings like `'120px'` and numbers (px) also parse.
 
 ---
 
@@ -61,35 +63,38 @@ produces silently-wrong output. Never invent a `type`.
 For per-char or per-word text entrances, use the `$splitText` plugin to split
 text into spans, then stagger them with a sequence — see `plugins.md`.
 
-| Preset       | Params (default)                                                                                              | Look                                    |
-| :----------- | :------------------------------------------------------------------------------------------------------------ | :-------------------------------------- |
-| `FadeIn`     | —                                                                                                             | transparent → opaque                    |
-| `GlideIn`    | `direction` 0–360 \| cardinal (`180`/left), `distance` (`{100,'percentage'}`)                                 | glides in from off-screen — **no fade** |
-| `SlideIn`    | `direction` cardinal (`'left'`), `initialTranslate` 0–1 (`1`)                                                 | slides in behind a clip mask            |
-| `FloatIn`    | `direction` cardinal (`'left'`)                                                                               | gentle drift + fade                     |
-| `RevealIn`   | `direction` cardinal (`'left'`)                                                                               | clip-path reveal from an edge           |
-| `ExpandIn`   | `initialScale` (`0`), `direction` number\|cardinal (`90`), `distance` (`{120,'percentage'}`)                  | expands from a point + fade             |
-| `BlurIn`     | `blur` px (`6`)                                                                                               | blurred → sharp + fade                  |
-| `FlipIn`     | `direction` cardinal (`'top'`), `initialRotate` deg (`90`), `perspective` (`800`)                             | 3D flip into place                      |
-| `ArcIn`      | `direction` cardinal (`'right'`), `depth` (`{200,'px'}`), `perspective` (`800`)                               | swings in along a 3D arc                |
-| `ShuttersIn` | `direction` cardinal (`'right'`), `shutters` (`12`), `staggered` (`true`)                                     | shutter strips open — **no fade**       |
-| `CurveIn`    | `direction` `left\|right\|pseudoLeft\|pseudoRight` (`'right'`), `depth` (`{300,'px'}`), `perspective` (`200`) | 180° swing arc                          |
-| `DropIn`     | `initialScale` (`1.6`)                                                                                        | shrinks from larger to natural size     |
-| `FoldIn`     | `direction` cardinal (`'top'`), `initialRotate` deg (`90`), `perspective` (`800`)                             | unfolds at a hinged edge                |
-| `ShapeIn`    | `shape` `circle\|ellipse\|rectangle\|diamond\|window` (`'rectangle'`)                                         | expanding clip-path shape               |
-| `TiltIn`     | `direction` `left\|right` (`'left'`), `depth` (`{200,'px'}`), `perspective` (`800`)                           | 3D tilt + clip reveal                   |
-| `WinkIn`     | `direction` `horizontal\|vertical` (`'horizontal'`)                                                           | expands from the center axis            |
-| `SpinIn`     | `spins` (`0.5`), `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `initialScale` (`0`)             | spins + scales in                       |
-| `TurnIn`     | `direction` corner (`'top-left'`)                                                                             | rotates around a corner pivot           |
-| `BounceIn`   | `direction` cardinal\|`center` (`'bottom'`), `distanceFactor` (`1`), `perspective` (`800`)                    | elastic bounce in                       |
+| Preset       | Params (default)                                                                             | Look                                    |
+| :----------- | :------------------------------------------------------------------------------------------- | :-------------------------------------- |
+| `FadeIn`     | —                                                                                            | transparent → opaque                    |
+| `GlideIn`    | `from` 0–360 \| cardinal (`180`/left), `travel` (`{100,'percentage'}`)                       | glides in from off-screen — **no fade** |
+| `SlideIn`    | `from` cardinal (`'left'`), `start` 0–1 (`0`)                                                | slides in behind a clip mask            |
+| `FloatIn`    | `from` cardinal (`'left'`)                                                                   | gentle drift + fade                     |
+| `RevealIn`   | `from` cardinal (`'left'`)                                                                   | clip-path reveal from an edge           |
+| `ExpandIn`   | `scale` 0–1 (`0`), `from` number\|cardinal (`270`/top), `travel` (`{120,'percentage'}`)      | expands from a point + fade             |
+| `BlurIn`     | `blur` px (`6`)                                                                              | blurred → sharp + fade                  |
+| `FlipIn`     | `direction` `horizontal\|vertical` (`'vertical'`), `angle` deg (`90`), `perspective` (`800`) | 3D flip into place                      |
+| `ArcIn`      | `from` cardinal (`'right'`), `depth` (`{100,'px'}`), `perspective` (`800`)                   | swings in along a 3D arc                |
+| `ShuttersIn` | `from` cardinal (`'left'`), `shutters` (`12`), `staggered` (`true`)                          | shutter strips open — **no fade**       |
+| `CurveIn`    | `from` cardinal (`'right'`), `depth` (`{900,'px'}`), `perspective` (`200`)                   | 180° swing arc                          |
+| `DropIn`     | `scale` ≥1 (`1.6`)                                                                           | shrinks from larger to natural size     |
+| `FoldIn`     | `pivot` cardinal (`'top'`), `angle` deg (`-90`), `perspective` (`800`)                       | unfolds at a hinged edge                |
+| `ShapeIn`    | `shape` `circle\|ellipse\|rectangle\|diamond\|window` (`'rectangle'`)                        | expanding clip-path shape               |
+| `TiltIn`     | `from` `left\|right` (`'left'`), `depth` (`{100,'px'}`), `perspective` (`800`)               | 3D tilt + clip reveal                   |
+| `WinkIn`     | `direction` `horizontal\|vertical` (`'horizontal'`)                                          | expands from the center axis            |
+| `SpinIn`     | `spins` (`0.5`), `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `scale` (`0`)   | spins + scales in                       |
+| `TurnIn`     | `pivot` corner (`'top-left'`)                                                                | rotates around a corner pivot           |
+| `BounceIn`   | `from` cardinal\|`back` (`'bottom'`), `travel` (`{50,'px'}`), `perspective` (`800`)          | elastic bounce in                       |
 
 ---
 
 ## Scroll — for `viewProgress` (ViewTimeline)
 
 **All share `range: 'in' | 'out' | 'continuous'`** (in = animate in on enter, out =
-animate out on exit, continuous = pass through idle across the full range; prefer
-`'continuous'`) — **except `ParallaxScroll`**. Use `fill: 'both'`.
+animate out on exit — `'in'` reversed with the direction flipped, continuous = in + out,
+passing through idle; prefer `'continuous'`) — **except `ParallaxScroll`**. Use
+`fill: 'both'`. `direction` is where the motion goes; `speed` is the visual speed
+relative to the scroll (`1` = moves with the page). Scroll presets use their own
+easing — the effect's `easing` is ignored.
 
 > **Two different "range"s — don't confuse them.** The `range` above is a **preset
 > option** that lives _inside_ `namedEffect` (e.g. `namedEffect: { type: 'FadeScroll',
@@ -97,29 +102,29 @@ range: 'continuous' }`). It is unrelated to the effect-level **`rangeStart`/
 > `rangeEnd`** (the ViewTimeline scroll _window_, a `RangeOffset` — see
 > `config-schema.md`). Every `viewProgress` effect — including `ParallaxScroll` —
 > still takes `rangeStart`/`rangeEnd` to define its scroll window; `ParallaxScroll`
-> just doesn't accept the `range` _option_ (it uses `parallaxFactor`).
+> just doesn't accept the `range` _option_ (it uses `speed`).
 
-| Preset           | Params (default)                                                                                                              |
-| :--------------- | :---------------------------------------------------------------------------------------------------------------------------- |
-| `FadeScroll`     | `opacity` (`0`), `range` (`'in'`)                                                                                             |
-| `RevealScroll`   | `direction` cardinal (`'bottom'`), `range` (`'in'`)                                                                           |
-| `ParallaxScroll` | `parallaxFactor` (`0.5`) — **no `range`**                                                                                     |
-| `MoveScroll`     | `angle` deg (`120`), `distance` (`{400,'px'}`), `range` (`'in'`)                                                              |
-| `SlideScroll`    | `direction` cardinal (`'bottom'`), `range` (`'in'`)                                                                           |
-| `GrowScroll`     | `direction` 9-way (`'center'`), `scale` (`0` in / `4` out), `speed` (`0`), `range` (`'in'`)                                   |
-| `ShrinkScroll`   | `direction` 9-way (`'center'`), `scale` (`1.2` in / `0.8` out), `speed` (`0`), `range` (`'in'`)                               |
-| `TiltScroll`     | `direction` `left\|right` (`'right'`), `parallaxFactor` (`0`), `perspective` (`400`), `range` (`'in'`)                        |
-| `PanScroll`      | `direction` `left\|right` (`'left'`), `distance` (`{400,'px'}`), `startFromOffScreen` (`true`), `range` (`'in'`)              |
-| `BlurScroll`     | `blur` (`6`), `range` (`'in'`)                                                                                                |
-| `FlipScroll`     | `direction` `vertical\|horizontal` (`'horizontal'`), `rotate` deg (`240`), `perspective` (`800`), `range` (`'continuous'`)    |
-| `SpinScroll`     | `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `spins` (`0.15`), `scale` (`1`), `range` (`'in'`)                 |
-| `ArcScroll`      | `direction` `vertical\|horizontal` (`'horizontal'`), `perspective` (`500`), `range` (`'in'`)                                  |
-| `ShapeScroll`    | `shape` (`'circle'`), `intensity` (`0.5`), `range` (`'in'`)                                                                   |
-| `ShuttersScroll` | `direction` cardinal (`'right'`), `shutters` (`12`), `staggered` (`true`), `range` (`'in'`)                                   |
-| `SkewPanScroll`  | `direction` `left\|right` (`'right'`), `skew` deg (`10`), `range` (`'in'`)                                                    |
-| `Spin3dScroll`   | `rotate` deg (`-100`), `speed` (`0`), `perspective` (`1000`), `range` (`'in'`)                                                |
-| `StretchScroll`  | `stretch` (`0.6`), `range` (`'out'`)                                                                                          |
-| `TurnScroll`     | `direction` `left\|right` (`'right'`), `spin` `clockwise\|counter-clockwise` (`'clockwise'`), `scale` (`1`), `range` (`'in'`) |
+| Preset           | Params (default)                                                                                                                                 |
+| :--------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FadeScroll`     | `opacity` (`0`), `range` (`'in'`)                                                                                                                |
+| `RevealScroll`   | `direction` cardinal (`'bottom'`), `range` (`'in'`)                                                                                              |
+| `ParallaxScroll` | `speed` (`0.7159`), `center` 0–1 (`0.5`) — **no `range`**                                                                                        |
+| `MoveScroll`     | `direction` deg (`-60`), `travel` (`{400,'px'}`), `range` (`'in'`)                                                                               |
+| `SlideScroll`    | `direction` cardinal (`'top'`), `range` (`'in'`)                                                                                                 |
+| `GrowScroll`     | `pivot` 9-way (`'center'`), `scale` (`0.25`; inverted to >1 for out/continuous), `speed` (`1`), `range` (`'in'`)                                 |
+| `ShrinkScroll`   | `pivot` 9-way (`'center'`), `scale` (`1.2`; inverted to <1 for out/continuous), `speed` (`1`), `range` (`'in'`)                                  |
+| `TiltScroll`     | `direction` `clockwise\|counter-clockwise` (`'counter-clockwise'`), `speed` (`1`), `perspective` (`400`), `range` (`'in'`)                       |
+| `PanScroll`      | `direction` `left\|right` (`'right'`), `distance` (`{400,'px'}`), `startFromOffScreen` (`true`), `range` (`'in'`)                                |
+| `BlurScroll`     | `blur` (`6`), `range` (`'in'`)                                                                                                                   |
+| `FlipScroll`     | `direction` `vertical\|horizontal` (`'horizontal'`), `angle` deg (`240`), `perspective` (`800`), `range` (`'continuous'`)                        |
+| `SpinScroll`     | `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `spins` (`0.15`), `scale` (`1`), `range` (`'in'`)                                    |
+| `ArcScroll`      | `direction` `vertical\|horizontal` (`'horizontal'`), `perspective` (`500`), `range` (`'in'`)                                                     |
+| `ShapeScroll`    | `shape` (`'circle'`), `start` 0–1 (`0.5`), `range` (`'in'`)                                                                                      |
+| `ShuttersScroll` | `direction` cardinal (`'right'`), `shutters` (`12`), `staggered` (`true`), `range` (`'in'`)                                                      |
+| `SkewPanScroll`  | `direction` `left\|right` (`'left'`), `skew` deg (`10`), `range` (`'in'`)                                                                        |
+| `Spin3dScroll`   | `angle` deg (`100`), `speed` (`1`), `perspective` (`1000`), `range` (`'in'`)                                                                     |
+| `StretchScroll`  | `stretch` -1–1 (`0.6`), `range` (`'out'`)                                                                                                        |
+| `TurnScroll`     | `direction` `left\|right` (`'left'`), `spin` `clockwise\|counter-clockwise` (`'clockwise'`), `angle` deg (`45`), `scale` (`1`), `range` (`'in'`) |
 
 ---
 
@@ -127,23 +132,23 @@ range: 'continuous' }`). It is unrelated to the effect-level **`rangeStart`/
 
 Run with `iterations: Infinity` (or large) for a perpetual loop, or attach to a
 trigger. **All accept `iterationDelay`** (ms, default `0`) inside `namedEffect` — an
-idle pause appended after each cycle.
+idle hold at rest appended after each cycle (the motion itself is unchanged).
 
-| Preset    | Params (default)                                                                                           |
-| :-------- | :--------------------------------------------------------------------------------------------------------- |
-| `Pulse`   | `intensity` 0–1 (`0`)                                                                                      |
-| `Spin`    | `direction` `clockwise\|counter-clockwise` (`'clockwise'`)                                                 |
-| `Breathe` | `direction` `vertical\|horizontal\|center` (`'vertical'`), `distance` (`{25,'px'}`), `perspective` (`800`) |
-| `Bounce`  | `intensity` 0–1 (`0`)                                                                                      |
-| `Wiggle`  | `intensity` 0–1 (`0.5`)                                                                                    |
-| `Flash`   | — (only `iterationDelay`)                                                                                  |
-| `Flip`    | `direction` `vertical\|horizontal` (`'horizontal'`), `perspective` (`800`)                                 |
-| `Fold`    | `direction` cardinal (`'top'`), `angle` deg (`15`)                                                         |
-| `Jello`   | `intensity` 0–1 (`0.25`)                                                                                   |
-| `Poke`    | `direction` cardinal (`'right'`), `intensity` 0–1 (`0.5`)                                                  |
-| `Rubber`  | `intensity` 0–1 (`0.5`)                                                                                    |
-| `Swing`   | `direction` cardinal pivot (`'top'`), `swing` deg (`20`)                                                   |
-| `Cross`   | `direction` 8-way (`'right'`)                                                                              |
+| Preset    | Params (default)                                                                                         |
+| :-------- | :------------------------------------------------------------------------------------------------------- |
+| `Pulse`   | `scale` (`0.93`)                                                                                         |
+| `Spin`    | `direction` `clockwise\|counter-clockwise` (`'clockwise'`)                                               |
+| `Breathe` | `direction` `vertical\|horizontal\|center` (`'vertical'`), `travel` (`{25,'px'}`), `perspective` (`800`) |
+| `Bounce`  | `travel` (`{49,'px'}`)                                                                                   |
+| `Wiggle`  | `angle` deg (`25`), `travel` (`{25,'px'}`)                                                               |
+| `Flash`   | — (only `iterationDelay`)                                                                                |
+| `Flip`    | `direction` `vertical\|horizontal` (`'horizontal'`), `perspective` (`800`)                               |
+| `Fold`    | `pivot` cardinal (`'top'`), `angle` deg (`15`), `perspective` (`800`)                                    |
+| `Jello`   | `skew` deg (`12.25`)                                                                                     |
+| `Poke`    | `direction` cardinal (`'right'`), `travel` (`{62.5,'px'}`)                                               |
+| `Rubber`  | `stretch` -1–1 (`0.1`)                                                                                   |
+| `Swing`   | `pivot` cardinal (`'top'`), `angle` deg (`20`)                                                           |
+| `Cross`   | `direction` 8-way (`'right'`)                                                                            |
 
 ---
 

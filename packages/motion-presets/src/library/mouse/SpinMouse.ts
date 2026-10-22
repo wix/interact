@@ -5,7 +5,7 @@ import {
   Progress,
   MouseEffectAxis,
 } from '../../types';
-import { getMouseTransitionEasing, getAngleInDeg, parseDirection } from '../../utils';
+import { getAngleInDeg, getMouseTransitionEasing, parseDirection } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 
 const DEFAULT_AXIS: MouseEffectAxis = 'both';
