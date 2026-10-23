@@ -2,8 +2,10 @@ import { TimeAnimationOptions } from '../../types';
 
 import { getEntranceFill } from '../../utils';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn'];
+export const schema = {} as const;
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn'].map((name) => name + suffix);
 }
 
 export function web(options: TimeAnimationOptions) {

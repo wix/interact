@@ -11,7 +11,7 @@ describe('ArcIn', () => {
     const mockOptions = {
       ...baseMockOptions,
       duration,
-      namedEffect: { direction } as ArcInType,
+      namedEffect: { from: direction } as ArcInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -21,11 +21,11 @@ describe('ArcIn', () => {
         keyframes: [
           {
             transform:
-              'perspective(800px) translateZ(calc(-1 * 200px / 2)) rotateX(calc(0 * -1 * 80deg)) rotateY(calc(1 * -1 * 80deg)) translateZ(calc(200px / 2)) rotate(var(--motion-rotate, 0deg))',
+              'perspective(800px) translateZ(calc(-1 * 100px)) rotateX(calc(0 * -1 * 80deg)) rotateY(calc(1 * -1 * 80deg)) translateZ(100px) rotate(var(--motion-rotate, 0deg))',
           },
           {
             transform:
-              'perspective(800px) translateZ(calc(-1 * 200px / 2)) rotateX(0deg) rotateY(0deg) translateZ(calc(200px / 2)) rotate(var(--motion-rotate, 0deg))',
+              'perspective(800px) translateZ(calc(-1 * 100px)) rotateX(0deg) rotateY(0deg) translateZ(100px) rotate(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -42,7 +42,7 @@ describe('ArcIn', () => {
     const mockOptions = {
       ...baseMockOptions,
       duration,
-      namedEffect: { direction } as ArcInType,
+      namedEffect: { from: direction } as ArcInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -52,11 +52,11 @@ describe('ArcIn', () => {
         keyframes: [
           {
             transform:
-              'perspective(800px) translateZ(calc(-1 * 200px / 2)) rotateX(calc(1 * 1 * 80deg)) rotateY(calc(0 * 1 * 80deg)) translateZ(calc(200px / 2)) rotate(var(--motion-rotate, 0deg))',
+              'perspective(800px) translateZ(calc(-1 * 100px)) rotateX(calc(1 * 1 * 80deg)) rotateY(calc(0 * 1 * 80deg)) translateZ(100px) rotate(var(--motion-rotate, 0deg))',
           },
           {
             transform:
-              'perspective(800px) translateZ(calc(-1 * 200px / 2)) rotateX(0deg) rotateY(0deg) translateZ(calc(200px / 2)) rotate(var(--motion-rotate, 0deg))',
+              'perspective(800px) translateZ(calc(-1 * 100px)) rotateX(0deg) rotateY(0deg) translateZ(100px) rotate(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -73,7 +73,7 @@ describe('ArcIn', () => {
     const mockOptions = {
       ...baseMockOptions,
       duration,
-      namedEffect: { direction } as ArcInType,
+      namedEffect: { from: direction } as ArcInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -83,11 +83,11 @@ describe('ArcIn', () => {
         keyframes: [
           {
             transform:
-              'perspective(800px) translateZ(calc(-1 * 200px / 2)) rotateX(calc(1 * -1 * 80deg)) rotateY(calc(0 * -1 * 80deg)) translateZ(calc(200px / 2)) rotate(var(--motion-rotate, 0deg))',
+              'perspective(800px) translateZ(calc(-1 * 100px)) rotateX(calc(1 * -1 * 80deg)) rotateY(calc(0 * -1 * 80deg)) translateZ(100px) rotate(var(--motion-rotate, 0deg))',
           },
           {
             transform:
-              'perspective(800px) translateZ(calc(-1 * 200px / 2)) rotateX(0deg) rotateY(0deg) translateZ(calc(200px / 2)) rotate(var(--motion-rotate, 0deg))',
+              'perspective(800px) translateZ(calc(-1 * 100px)) rotateX(0deg) rotateY(0deg) translateZ(100px) rotate(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -111,11 +111,11 @@ describe('ArcIn', () => {
         keyframes: [
           {
             transform:
-              'perspective(800px) translateZ(calc(-1 * 200px / 2)) rotateX(calc(0 * 1 * 80deg)) rotateY(calc(1 * 1 * 80deg)) translateZ(calc(200px / 2)) rotate(var(--motion-rotate, 0deg))',
+              'perspective(800px) translateZ(calc(-1 * 100px)) rotateX(calc(0 * 1 * 80deg)) rotateY(calc(1 * 1 * 80deg)) translateZ(100px) rotate(var(--motion-rotate, 0deg))',
           },
           {
             transform:
-              'perspective(800px) translateZ(calc(-1 * 200px / 2)) rotateX(0deg) rotateY(0deg) translateZ(calc(200px / 2)) rotate(var(--motion-rotate, 0deg))',
+              'perspective(800px) translateZ(calc(-1 * 100px)) rotateX(0deg) rotateY(0deg) translateZ(100px) rotate(var(--motion-rotate, 0deg))',
           },
         ],
       },
@@ -132,7 +132,7 @@ describe('ArcIn', () => {
     const mockOptions = {
       ...baseMockOptions,
       duration,
-      namedEffect: { direction } as ArcInType,
+      namedEffect: { from: direction } as ArcInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -151,8 +151,8 @@ describe('ArcIn', () => {
           '--motion-arc-x': '0',
           '--motion-arc-y': '1',
           '--motion-arc-sign': '-1',
-          '--motion-depth-negative': 'calc(-1 * 200px / 2)',
-          '--motion-depth-positive': 'calc(200px / 2)',
+          '--motion-depth-negative': 'calc(-1 * 100px)',
+          '--motion-depth-positive': '100px',
         },
         keyframes: [
           {
@@ -178,7 +178,7 @@ describe('ArcIn', () => {
     const mockOptions = {
       ...baseMockOptions,
       duration,
-      namedEffect: { direction } as ArcInType,
+      namedEffect: { from: direction } as ArcInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -197,8 +197,8 @@ describe('ArcIn', () => {
           '--motion-arc-x': '1',
           '--motion-arc-y': '0',
           '--motion-arc-sign': '1',
-          '--motion-depth-negative': 'calc(-1 * 200px / 2)',
-          '--motion-depth-positive': 'calc(200px / 2)',
+          '--motion-depth-negative': 'calc(-1 * 100px)',
+          '--motion-depth-positive': '100px',
         },
         keyframes: [
           {
@@ -240,8 +240,8 @@ describe('ArcIn', () => {
           '--motion-arc-x': '0',
           '--motion-arc-y': '1',
           '--motion-arc-sign': '1',
-          '--motion-depth-negative': 'calc(-1 * 200px / 2)',
-          '--motion-depth-positive': 'calc(200px / 2)',
+          '--motion-depth-negative': 'calc(-1 * 100px)',
+          '--motion-depth-positive': '100px',
         },
         keyframes: [
           {
@@ -267,7 +267,7 @@ describe('ArcIn', () => {
     const mockOptions = {
       ...baseMockOptions,
       duration,
-      namedEffect: { direction } as ArcInType,
+      namedEffect: { from: direction } as ArcInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -286,8 +286,8 @@ describe('ArcIn', () => {
           '--motion-arc-x': '1',
           '--motion-arc-y': '0',
           '--motion-arc-sign': '-1',
-          '--motion-depth-negative': 'calc(-1 * 200px / 2)',
-          '--motion-depth-positive': 'calc(200px / 2)',
+          '--motion-depth-negative': 'calc(-1 * 100px)',
+          '--motion-depth-positive': '100px',
         },
         keyframes: [
           {
@@ -305,5 +305,20 @@ describe('ArcIn', () => {
     const result = ArcIn.style?.(mockOptions);
 
     expect(result).toMatchObject(expectedResult);
+  });
+
+  test('ArcIn animation with calc() depth', () => {
+    const mockOptions = {
+      ...baseMockOptions,
+      duration: 1000,
+      namedEffect: { depth: 'calc(10vh + 20px)' } as ArcInType,
+    };
+
+    const result = ArcIn.style?.(mockOptions);
+
+    expect(result?.[1].custom).toMatchObject({
+      '--motion-depth-negative': 'calc(-1 * calc(10vh + 20px))',
+      '--motion-depth-positive': 'calc(10vh + 20px)',
+    });
   });
 });

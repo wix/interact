@@ -259,4 +259,19 @@ describe('ShapeIn', () => {
 
     expect(result).toMatchObject(expectedResult);
   });
+
+  test('ShapeIn appends the suffix to its names', () => {
+    const mockOptions = {
+      ...baseMockOptions,
+      duration: 1000,
+      suffix: '-a',
+      namedEffect: {} as ShapeInType,
+    };
+
+    expect(ShapeIn.getNames(mockOptions)).toEqual(['motion-fadeIn-a', 'motion-shapeIn-a']);
+    expect(ShapeIn.style(mockOptions).map(({ name }) => name)).toEqual([
+      'motion-fadeIn-a',
+      'motion-shapeIn-a',
+    ]);
+  });
 });

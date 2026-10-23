@@ -1,11 +1,25 @@
 import { parseDirection, toKeyframeValue, getEntranceFill } from '../../utils';
-import type { EffectFourDirections, FlipIn, TimeAnimationOptions } from '../../types';
-import { FOUR_DIRECTIONS } from '../../consts';
+import type {
+  EffectFourDirections,
+  EffectTwoAxes,
+  FlipIn,
+  TimeAnimationOptions,
+} from '../../types';
+import { AXIS_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'top';
+export const schema = {
+  angle: { type: 'number', default: 90 },
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: 'vertical' },
+  perspective: { type: 'number', min: 0, default: 800 },
+} as const;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-flipIn'];
+const AXIS_TO_DIRECTION: Record<EffectTwoAxes, EffectFourDirections> = {
+  vertical: 'top',
+  horizontal: 'left',
+};
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-flipIn'].map((name) => name + suffix);
 }
 
 function getRotateFrom(direction: EffectFourDirections, rotate: number) {
@@ -27,18 +41,24 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as FlipIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { initialRotate = 90, perspective = 800 } = namedEffect;
+  const axis = parseDirection<EffectTwoAxes>(
+    namedEffect?.direction,
+    AXIS_DIRECTIONS,
+    schema.direction.default,
+  );
+  const direction = AXIS_TO_DIRECTION[axis];
+  const { angle = schema.angle.default, perspective = schema.perspective.default } = namedEffect;
   const [fadeIn, flipIn] = getNames(options);
   const easing = options.easing || 'backOut';
 
-  const from = getRotateFrom(direction, initialRotate);
+  const from = getRotateFrom(direction, angle);
 
   const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-rotate-x': `${from.x}deg`,
-    '--motion-rotate-y': `${from.y}deg`,
+    [`--motion-perspective${suffix}`]: `${perspective}px`,
+    [`--motion-rotate-x${suffix}`]: `${from.x}deg`,
+    [`--motion-rotate-y${suffix}`]: `${from.y}deg`,
   };
 
   return [
@@ -58,10 +78,10 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(var(--motion-rotate-x, ${custom['--motion-rotate-x']})) rotateY(var(--motion-rotate-y, ${custom['--motion-rotate-y']}))`,
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(var(--motion-rotate-x${suffix}, ${custom[`--motion-rotate-x${suffix}`]})) rotateY(var(--motion-rotate-y${suffix}, ${custom[`--motion-rotate-y${suffix}`]}))`,
         },
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(0deg) rotateY(0deg)`,
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(0deg) rotateY(0deg)`,
         },
       ],
     },

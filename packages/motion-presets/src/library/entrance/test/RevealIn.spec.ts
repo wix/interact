@@ -39,7 +39,7 @@ describe('RevealIn', () => {
   test('RevealIn animation with custom direction', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'right' } as RevealInType,
+      namedEffect: { from: 'right' } as RevealInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -103,7 +103,7 @@ describe('RevealIn', () => {
   test('RevealIn style with custom direction', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'right' } as RevealInType,
+      namedEffect: { from: 'right' } as RevealInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [

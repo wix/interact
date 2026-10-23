@@ -299,7 +299,7 @@ For scroll/pointer-driven animations:
 - **Animation Source** toggle: same Named Effect / Keyframes radio as Time effects
 - **Timing properties**: easing, iterations, alternate, fill, reversed
 - **Range** (viewProgress only): `rangeStart` / `rangeEnd` with name (entry/exit/contain/cover) + offset (value + unit)
-- **Transition params** (pointerMove only): `transitionDuration`, `transitionDelay`, `transitionEasing`, `centeredToTarget`
+- **Transition params** (pointerMove only): `transitionDuration`, `transitionEasing`, `centeredToTarget`
 
 ### Transition Effect Editor (`<pg-transition-effect-editor>`)
 

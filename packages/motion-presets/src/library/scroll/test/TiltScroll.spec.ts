@@ -15,21 +15,21 @@ describe('TiltScroll', () => {
       const expectedResult = [
         {
           fill: 'backwards',
-          startOffsetAdd: '0vh',
+          startOffsetAdd: '0px',
           endOffsetAdd: '0px',
           keyframes: [
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(-10deg) rotateY(-25deg)',
+              transform: 'perspective(400px) translateY(0px) rotateX(-10deg) rotateY(-25deg)',
             },
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(0deg) rotateY(0deg)',
+              transform: 'perspective(400px) translateY(0px) rotateX(0deg) rotateY(0deg)',
             },
           ],
         },
         {
           fill: 'backwards',
           easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-          startOffsetAdd: '0vh',
+          startOffsetAdd: '0px',
           endOffsetAdd: '0px',
           composite: 'add',
           keyframes: [
@@ -51,27 +51,27 @@ describe('TiltScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as TiltScrollType,
+        namedEffect: { range: 'out', direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
         {
           fill: 'forwards',
           startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          endOffsetAdd: '0px',
           keyframes: [
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(0deg) rotateY(0deg)',
+              transform: 'perspective(400px) translateY(0px) rotateX(0deg) rotateY(0deg)',
             },
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(-10deg) rotateY(-25deg)',
+              transform: 'perspective(400px) translateY(0px) rotateX(-10deg) rotateY(-25deg)',
             },
           ],
         },
         {
           fill: 'forwards',
           startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          endOffsetAdd: '0px',
           keyframes: [
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
@@ -92,27 +92,27 @@ describe('TiltScroll', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
         fill: 'both',
-        namedEffect: { range: 'continuous' } as TiltScrollType,
+        namedEffect: { range: 'continuous', direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
         {
           fill: 'both',
-          startOffsetAdd: '0vh',
-          endOffsetAdd: '0vh',
+          startOffsetAdd: '0px',
+          endOffsetAdd: '0px',
           keyframes: [
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(-10deg) rotateY(-25deg)',
+              transform: 'perspective(400px) translateY(0px) rotateX(-10deg) rotateY(-25deg)',
             },
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(10deg) rotateY(12.5deg)',
+              transform: 'perspective(400px) translateY(0px) rotateX(10deg) rotateY(12.5deg)',
             },
           ],
         },
         {
           fill: 'both',
-          startOffsetAdd: '0vh',
-          endOffsetAdd: '0vh',
+          startOffsetAdd: '0px',
+          endOffsetAdd: '0px',
           keyframes: [
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + -25deg))',
@@ -129,20 +129,20 @@ describe('TiltScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - clockwise', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TiltScrollType,
+        namedEffect: { direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
         {
           keyframes: [
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(-10deg) rotateY(-25deg)',
+              transform: 'perspective(400px) translateY(0px) rotateX(-10deg) rotateY(-25deg)',
             },
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(0deg) rotateY(0deg)',
+              transform: 'perspective(400px) translateY(0px) rotateX(0deg) rotateY(0deg)',
             },
           ],
         },
@@ -163,28 +163,35 @@ describe('TiltScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom parallaxFactor', () => {
+    test('custom speed', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { parallaxFactor: 0.5 } as TiltScrollType,
+        namedEffect: { speed: 2 } as TiltScrollType,
+        startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+        endOffset: { name: 'cover', offset: { value: 50, unit: 'percentage' } },
       };
 
       const expectedResult = [
         {
-          startOffsetAdd: '-20vh',
-          endOffsetAdd: '0px',
+          startOffset: { name: 'entry-crossing', offset: { value: 25, unit: 'percentage' } },
+          startOffsetAdd: '25vh',
+          endOffset: { name: 'entry-crossing', offset: { value: 50, unit: 'percentage' } },
+          endOffsetAdd: '50vh',
           keyframes: [
             {
-              transform: 'perspective(400px) translateY(20vh) rotateX(-10deg) rotateY(-25deg)',
+              transform:
+                'perspective(400px) translateY(calc(25% + 25vh)) rotateX(-10deg) rotateY(-25deg)',
             },
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(0deg) rotateY(0deg)',
+              transform: 'perspective(400px) translateY(0px) rotateX(0deg) rotateY(0deg)',
             },
           ],
         },
         {
-          startOffsetAdd: '-20vh',
-          endOffsetAdd: '0px',
+          startOffset: { name: 'entry-crossing', offset: { value: 25, unit: 'percentage' } },
+          startOffsetAdd: '25vh',
+          endOffset: { name: 'entry-crossing', offset: { value: 50, unit: 'percentage' } },
+          endOffsetAdd: '50vh',
         },
       ];
 
@@ -204,7 +211,7 @@ describe('TiltScroll', () => {
       const expectedResult = [
         {
           fill: 'backwards',
-          startOffsetAdd: '0vh',
+          startOffsetAdd: '0px',
           endOffsetAdd: '0px',
           custom: {
             '--motion-perspective': '400px',
@@ -223,7 +230,7 @@ describe('TiltScroll', () => {
         {
           fill: 'backwards',
           easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-          startOffsetAdd: '0vh',
+          startOffsetAdd: '0px',
           endOffsetAdd: '0px',
           composite: 'add',
           keyframes: [
@@ -245,14 +252,14 @@ describe('TiltScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as TiltScrollType,
+        namedEffect: { range: 'out', direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
         {
           fill: 'forwards',
           startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          endOffsetAdd: '0px',
           custom: {
             '--motion-perspective': '400px',
           },
@@ -270,7 +277,7 @@ describe('TiltScroll', () => {
         {
           fill: 'forwards',
           startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          endOffsetAdd: '0px',
           keyframes: [
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-from)))',
@@ -291,96 +298,13 @@ describe('TiltScroll', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
         fill: 'both',
-        namedEffect: { range: 'continuous' } as TiltScrollType,
+        namedEffect: { range: 'continuous', direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
         {
           fill: 'both',
-          startOffsetAdd: '0vh',
-          endOffsetAdd: '0vh',
-          custom: {
-            '--motion-perspective': '400px',
-          },
-          keyframes: [
-            {
-              transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-tilt-y-from)) rotateX(var(--motion-tilt-x-from)) rotateY(var(--motion-tilt-y-rot-from))',
-            },
-            {
-              transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-tilt-y-to)) rotateX(var(--motion-tilt-x-to)) rotateY(var(--motion-tilt-y-rot-to))',
-            },
-          ],
-        },
-        {
-          fill: 'both',
-          startOffsetAdd: '0vh',
-          endOffsetAdd: '0vh',
-          keyframes: [
-            {
-              transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-from)))',
-            },
-            {
-              transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-to)))',
-            },
-          ],
-        },
-      ];
-
-      const result = TiltScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - left', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TiltScrollType,
-      };
-
-      const expectedResult = [
-        {
-          custom: {
-            '--motion-perspective': '400px',
-          },
-          keyframes: [
-            {
-              transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-tilt-y-from)) rotateX(var(--motion-tilt-x-from)) rotateY(var(--motion-tilt-y-rot-from))',
-            },
-            {
-              transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-tilt-y-to)) rotateX(var(--motion-tilt-x-to)) rotateY(var(--motion-tilt-y-rot-to))',
-            },
-          ],
-        },
-        {
-          keyframes: [
-            {
-              transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-from)))',
-            },
-            {
-              transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-to)))',
-            },
-          ],
-        },
-      ];
-
-      const result = TiltScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom parallaxFactor', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { parallaxFactor: 0.5 } as TiltScrollType,
-      };
-
-      const expectedResult = [
-        {
-          startOffsetAdd: '-20vh',
+          startOffsetAdd: '0px',
           endOffsetAdd: '0px',
           custom: {
             '--motion-perspective': '400px',
@@ -397,8 +321,99 @@ describe('TiltScroll', () => {
           ],
         },
         {
-          startOffsetAdd: '-20vh',
+          fill: 'both',
+          startOffsetAdd: '0px',
           endOffsetAdd: '0px',
+          keyframes: [
+            {
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-from)))',
+            },
+            {
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-to)))',
+            },
+          ],
+        },
+      ];
+
+      const result = TiltScroll.style(mockOptions);
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
+    test('custom direction - clockwise', () => {
+      const mockOptions: ScrubAnimationOptions = {
+        ...baseMockOptions,
+        namedEffect: { direction: 'clockwise' } as TiltScrollType,
+      };
+
+      const expectedResult = [
+        {
+          custom: {
+            '--motion-perspective': '400px',
+          },
+          keyframes: [
+            {
+              transform:
+                'perspective(var(--motion-perspective)) translateY(var(--motion-tilt-y-from)) rotateX(var(--motion-tilt-x-from)) rotateY(var(--motion-tilt-y-rot-from))',
+            },
+            {
+              transform:
+                'perspective(var(--motion-perspective)) translateY(var(--motion-tilt-y-to)) rotateX(var(--motion-tilt-x-to)) rotateY(var(--motion-tilt-y-rot-to))',
+            },
+          ],
+        },
+        {
+          keyframes: [
+            {
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-from)))',
+            },
+            {
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-to)))',
+            },
+          ],
+        },
+      ];
+
+      const result = TiltScroll.style(mockOptions);
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
+    test('custom speed', () => {
+      const mockOptions: ScrubAnimationOptions = {
+        ...baseMockOptions,
+        namedEffect: { speed: 2 } as TiltScrollType,
+        startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+        endOffset: { name: 'cover', offset: { value: 50, unit: 'percentage' } },
+      };
+
+      const expectedResult = [
+        {
+          startOffset: { name: 'entry-crossing', offset: { value: 25, unit: 'percentage' } },
+          startOffsetAdd: '25vh',
+          endOffset: { name: 'entry-crossing', offset: { value: 50, unit: 'percentage' } },
+          endOffsetAdd: '50vh',
+          custom: {
+            '--motion-perspective': '400px',
+            '--motion-tilt-y-from': 'calc(25% + 25vh)',
+            '--motion-tilt-y-to': '0px',
+          },
+          keyframes: [
+            {
+              transform:
+                'perspective(var(--motion-perspective)) translateY(var(--motion-tilt-y-from)) rotateX(var(--motion-tilt-x-from)) rotateY(var(--motion-tilt-y-rot-from))',
+            },
+            {
+              transform:
+                'perspective(var(--motion-perspective)) translateY(var(--motion-tilt-y-to)) rotateX(var(--motion-tilt-x-to)) rotateY(var(--motion-tilt-y-rot-to))',
+            },
+          ],
+        },
+        {
+          startOffset: { name: 'entry-crossing', offset: { value: 25, unit: 'percentage' } },
+          startOffsetAdd: '25vh',
+          endOffset: { name: 'entry-crossing', offset: { value: 50, unit: 'percentage' } },
+          endOffsetAdd: '50vh',
         },
       ];
 

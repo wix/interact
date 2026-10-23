@@ -95,6 +95,6 @@ export function web(options: TimeAnimationOptions, dom?: DomApi) {
   ];
 }
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-dvd-x', 'motion-dvd-y'];
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-dvd-x', 'motion-dvd-y'].map((name) => name + suffix);
 }

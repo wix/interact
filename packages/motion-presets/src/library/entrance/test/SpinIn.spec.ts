@@ -44,7 +44,7 @@ describe('SpinIn', () => {
       namedEffect: {
         direction: 'counter-clockwise',
         spins: 2,
-        initialScale: 1,
+        scale: 1,
       } as SpinInType,
     };
 
@@ -120,7 +120,7 @@ describe('SpinIn', () => {
       namedEffect: {
         direction: 'counter-clockwise',
         spins: 2,
-        initialScale: 1,
+        scale: 1,
       } as SpinInType,
     };
 
@@ -155,5 +155,15 @@ describe('SpinIn', () => {
     const result = SpinIn.style?.(mockOptions);
 
     expect(result).toMatchObject(expectedResult);
+  });
+
+  test('SpinIn fade lasts at most the animation duration', () => {
+    const result = SpinIn.style?.({
+      ...baseMockOptions,
+      duration: 1000,
+      namedEffect: { scale: 2 } as SpinInType,
+    });
+
+    expect(result?.[0].duration).toBe(1000);
   });
 });

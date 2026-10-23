@@ -314,4 +314,15 @@ describe('SpinScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
   });
+
+  test('suffix is appended to the animation names', () => {
+    const mockOptions: ScrubAnimationOptions = {
+      ...baseMockOptions,
+      suffix: '-a',
+      namedEffect: {} as SpinScrollType,
+    };
+
+    expect(SpinScroll.getNames(mockOptions)).toEqual(['motion-spinScroll-a']);
+    expect(SpinScroll.style(mockOptions).map(({ name }) => name)).toEqual(['motion-spinScroll-a']);
+  });
 });

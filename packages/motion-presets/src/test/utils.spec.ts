@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { parseLength, parseDirection } from '../utils';
+import { parseLength, parseDirection, getShuttersClipPaths } from '../utils';
 
 describe('parseLength', () => {
   const defaultValue = { value: 100, unit: 'percentage' };
@@ -222,5 +222,14 @@ describe('parseDirection', () => {
         expect(parseDirection('45', allowedKeywords, defaultValue, false)).toBe(defaultValue);
       });
     });
+  });
+});
+
+describe('getShuttersClipPaths', () => {
+  test('rounds the shutter count to a positive integer', () => {
+    expect(getShuttersClipPaths('left', 2.4, false)).toEqual(
+      getShuttersClipPaths('left', 2, false),
+    );
+    expect(getShuttersClipPaths('top', -3, true)).toEqual(getShuttersClipPaths('top', 1, true));
   });
 });

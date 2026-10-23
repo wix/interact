@@ -1,8 +1,20 @@
 import type { TimeAnimationOptions, Bounce, AnimationExtraOptions, DomApi } from '../../types';
-import { getEasing, getTimingFactor, toKeyframeValue, mapRange } from '../../utils';
+import {
+  getEasing,
+  getTimingFactor,
+  holdAtRest,
+  toKeyframeValue,
+  parseLengthOrCalc,
+  scaleLength,
+  roundNumber,
+} from '../../utils';
 
-const BOUNCE_FACTOR_SOFT = 1;
-const BOUNCE_FACTOR_HARD = 3;
+const PEAK_TRANSLATE = 98;
+
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: 0 },
+  travel: { type: 'length', default: { value: 49, unit: 'px' } },
+} as const;
 
 const TRANSLATE_Y_KEYFRAMES = [
   { keyframe: 0, translateY: 0 },
@@ -20,36 +32,38 @@ const TRANSLATE_Y_KEYFRAMES = [
   { keyframe: 100, translateY: 0 },
 ];
 
+const roundUnit = (value: number) => roundNumber(value, 6);
+
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Bounce;
-  const { intensity = 0 } = namedEffect;
+  const travel = parseLengthOrCalc(namedEffect.travel, schema.travel.default);
 
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const bounceFactor = mapRange(0, 1, BOUNCE_FACTOR_SOFT, BOUNCE_FACTOR_HARD, intensity);
-
   const easing = getEasing('sineOut');
 
-  const custom = {
-    '--motion-bounce-factor': bounceFactor,
-  };
+  const custom: Record<string, string | number> = {};
 
-  const keyframes = TRANSLATE_Y_KEYFRAMES.map(({ keyframe, translateY }) => ({
-    offset: (keyframe / 100) * timingFactor,
-    translate: `0px calc(${translateY / 2}px * ${toKeyframeValue(
-      custom,
-      '--motion-bounce-factor',
-      asWeb,
-    )})`,
-    easing,
-  }));
+  const keyframes = TRANSLATE_Y_KEYFRAMES.map(({ keyframe, translateY }, index) => {
+    const translateYKey = `--motion-bounce-y${suffix}-${index}`;
+    if (translateY) {
+      custom[translateYKey] = scaleLength(travel, translateY / PEAK_TRANSLATE, roundUnit);
+    }
+
+    return {
+      offset: keyframe / 100,
+      translate: `0px ${translateY ? toKeyframeValue(custom, translateYKey, asWeb) : '0px'}`,
+      easing,
+    };
+  });
 
   return [
     {
@@ -58,14 +72,16 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       easing: 'linear',
       duration: duration + iterationDelay,
       custom,
-      keyframes,
+      keyframes: holdAtRest(keyframes, timingFactor),
     },
   ];
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Bounce)?.iterationDelay || 0;
+  const iterationDelay =
+    (options.namedEffect as Bounce)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
+  const { suffix = '' } = options;
 
-  return [`motion-bounce-${timingFactor}`];
+  return [`motion-bounce-${timingFactor}`].map((name) => name + suffix);
 }

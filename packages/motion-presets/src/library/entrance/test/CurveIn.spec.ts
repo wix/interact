@@ -20,11 +20,11 @@ describe('CurveIn', () => {
           keyframes: [
             {
               transform:
-                'perspective(200px) translateZ(calc(300px * -3)) rotateX(0deg) rotateY(180deg) translateZ(calc(300px * 3)) rotateZ(var(--motion-rotate, 0deg))',
+                'perspective(200px) translateZ(calc(-1 * 900px)) rotateX(0deg) rotateY(180deg) translateZ(900px) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(200px) translateZ(calc(300px * -3)) rotateX(0deg) rotateY(0deg) translateZ(calc(300px * 3)) rotateZ(var(--motion-rotate, 0deg))',
+                'perspective(200px) translateZ(calc(-1 * 900px)) rotateX(0deg) rotateY(0deg) translateZ(900px) rotateZ(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -43,7 +43,7 @@ describe('CurveIn', () => {
       const duration = 1500;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as CurveInType,
+        namedEffect: { from: 'left' } as CurveInType,
         duration,
       };
 
@@ -53,11 +53,11 @@ describe('CurveIn', () => {
           keyframes: [
             {
               transform:
-                'perspective(200px) translateZ(calc(300px * -3)) rotateX(0deg) rotateY(-180deg) translateZ(calc(300px * 3)) rotateZ(var(--motion-rotate, 0deg))',
+                'perspective(200px) translateZ(calc(-1 * 900px)) rotateX(0deg) rotateY(-180deg) translateZ(900px) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(200px) translateZ(calc(300px * -3)) rotateX(0deg) rotateY(0deg) translateZ(calc(300px * 3)) rotateZ(var(--motion-rotate, 0deg))',
+                'perspective(200px) translateZ(calc(-1 * 900px)) rotateX(0deg) rotateY(0deg) translateZ(900px) rotateZ(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -119,7 +119,7 @@ describe('CurveIn', () => {
       const duration = 1500;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as CurveInType,
+        namedEffect: { from: 'left' } as CurveInType,
         duration,
       };
 
@@ -155,5 +155,18 @@ describe('CurveIn', () => {
 
       expect(result).toMatchObject(expectedResult);
     });
+  });
+
+  test.each([
+    ['top', 'rotateX(180deg) rotateY(0deg)'],
+    ['bottom', 'rotateX(-180deg) rotateY(0deg)'],
+  ] as const)('CurveIn curves vertically from %s', (from, rotation) => {
+    const [curveIn] = CurveIn.web({
+      ...baseMockOptions,
+      duration: 1000,
+      namedEffect: { from } as CurveInType,
+    });
+
+    expect((curveIn.keyframes[0] as { transform: string }).transform).toContain(rotation);
   });
 });

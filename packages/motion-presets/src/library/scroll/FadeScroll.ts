@@ -1,8 +1,14 @@
 import type { FadeScroll, ScrubAnimationOptions, AnimationFillMode, DomApi } from '../../types';
 import { toKeyframeValue } from '../../utils';
+import { SCROLL_RANGES } from '../../consts';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-fadeScroll'];
+export const schema = {
+  opacity: { type: 'number', min: 0, max: 1, default: 0 },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+} as const;
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return ['motion-fadeScroll'].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -10,7 +16,9 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const { opacity = 0, range = 'in' } = options.namedEffect as FadeScroll;
+  const { suffix = '' } = options;
+  const { opacity = schema.opacity.default, range = schema.range.default } =
+    options.namedEffect as FadeScroll;
   const isOut = range === 'out';
   const fromValue = isOut ? toKeyframeValue({}, '--comp-opacity', false, '1') : opacity;
   const toValue = isOut ? opacity : toKeyframeValue({}, '--comp-opacity', false, '1');
@@ -22,8 +30,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [fadeScroll] = getNames(options);
 
   const custom = {
-    '--motion-fade-from': fromValue,
-    '--motion-fade-to': toValue,
+    [`--motion-fade-from${suffix}`]: fromValue,
+    [`--motion-fade-to${suffix}`]: toValue,
   };
 
   return [
@@ -35,10 +43,10 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          opacity: toKeyframeValue(custom, '--motion-fade-from', asWeb),
+          opacity: toKeyframeValue(custom, `--motion-fade-from${suffix}`, asWeb),
         },
         {
-          opacity: toKeyframeValue(custom, '--motion-fade-to', asWeb),
+          opacity: toKeyframeValue(custom, `--motion-fade-to${suffix}`, asWeb),
         },
       ],
     },

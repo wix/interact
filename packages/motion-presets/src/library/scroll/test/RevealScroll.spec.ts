@@ -107,7 +107,7 @@ describe('RevealScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as RevealScrollType,
+        namedEffect: { range: 'out', direction: 'top' } as RevealScrollType,
       };
 
       const expectedResult = [
@@ -211,7 +211,7 @@ describe('RevealScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as RevealScrollType,
+        namedEffect: { range: 'out', direction: 'top' } as RevealScrollType,
       };
 
       const expectedResult = [

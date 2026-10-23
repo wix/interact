@@ -2,10 +2,14 @@ import type { SpinIn, TimeAnimationOptions } from '../../types';
 import { toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
 import { SPIN_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
+export const schema = {
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: 'clockwise' },
+  scale: { type: 'number', min: 0, default: 0 },
+  spins: { type: 'number', min: 0, default: 0.5 },
+} as const;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-spinIn'];
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-spinIn'].map((name) => name + suffix);
 }
 
 const DIRECTION_MAP = {
@@ -18,17 +22,22 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as SpinIn;
-  const direction = parseDirection(namedEffect?.direction, SPIN_DIRECTIONS, DEFAULT_DIRECTION);
-  const { spins = 0.5, initialScale = 0 } = namedEffect;
+  const direction = parseDirection<(typeof SPIN_DIRECTIONS)[number]>(
+    namedEffect?.direction,
+    SPIN_DIRECTIONS,
+    schema.direction.default,
+  );
+  const { spins = schema.spins.default, scale: initialScale = schema.scale.default } = namedEffect;
   const [fadeIn, spinIn] = getNames(options);
 
   const easing = options.easing || 'cubicInOut';
   const transformRotate = (DIRECTION_MAP[direction] > 0 ? 1 : -1) * 360 * spins;
 
   const custom = {
-    '--motion-scale': `${initialScale}`,
-    '--motion-rotate': `${transformRotate}deg`,
+    [`--motion-scale${suffix}`]: `${initialScale}`,
+    [`--motion-rotate${suffix}`]: `${transformRotate}deg`,
   };
 
   return [
@@ -37,7 +46,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       name: fadeIn,
       fill: getEntranceFill(options),
       easing: 'cubicIn',
-      duration: options.duration! * initialScale,
+      duration: options.duration! * Math.min(initialScale, 1),
       custom: {},
       keyframes: [{ offset: 0, opacity: 0 }],
     },
@@ -49,8 +58,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          scale: toKeyframeValue(custom, '--motion-scale', asWeb),
-          rotate: toKeyframeValue(custom, '--motion-rotate', asWeb),
+          scale: toKeyframeValue(custom, `--motion-scale${suffix}`, asWeb),
+          rotate: toKeyframeValue(custom, `--motion-rotate${suffix}`, asWeb),
         },
         {
           scale: '1',

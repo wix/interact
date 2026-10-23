@@ -33,12 +33,12 @@ describe('GlideIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('GlideIn animation with custom direction and distance', () => {
-    const direction = 45;
-    const distance = { value: 200, unit: 'px' };
+  test('GlideIn animation with custom from and travel', () => {
+    const from = 315;
+    const travel = { value: 200, unit: 'px' };
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction, distance } as GlideInType,
+      namedEffect: { from, travel } as GlideInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -87,7 +87,7 @@ describe('GlideIn', () => {
         ],
       },
       {
-        name: 'motion-fadeIn',
+        name: 'motion-fadeInStep',
         custom: {},
         keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
@@ -98,12 +98,12 @@ describe('GlideIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('GlideIn style animation with custom direction and distance', () => {
-    const direction = 45;
-    const distance = { value: 200, unit: 'px' };
+  test('GlideIn style animation with custom from and travel', () => {
+    const from = 315;
+    const travel = { value: 200, unit: 'px' };
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction, distance } as GlideInType,
+      namedEffect: { from, travel } as GlideInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -124,7 +124,7 @@ describe('GlideIn', () => {
         ],
       },
       {
-        name: 'motion-fadeIn',
+        name: 'motion-fadeInStep',
         custom: {},
         keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
       },
@@ -134,4 +134,47 @@ describe('GlideIn', () => {
 
     expect(result).toMatchObject(expectedResult);
   });
+
+  test('GlideIn with calc() travel uses CSS cos()/sin() of the numeric angle', () => {
+    const result = GlideIn.style?.({
+      ...baseMockOptions,
+      namedEffect: { from: 'bottom', travel: 'calc(10vh + 20px)' } as GlideInType,
+    });
+
+    expect(result?.[0].custom).toEqual({
+      '--motion-translate-x': 'calc(cos(90deg) * calc(10vh + 20px))',
+      '--motion-translate-y': 'calc(sin(90deg) * calc(10vh + 20px))',
+    });
+  });
+
+  test.each([
+    ['0.5turn', 'calc(cos(0.5turn) * 100%)', 'calc(sin(0.5turn) * 100%)'],
+    [
+      'calc(90deg + 90deg)',
+      'calc(cos(calc(90deg + 90deg)) * 100%)',
+      'calc(sin(calc(90deg + 90deg)) * 100%)',
+    ],
+  ])('GlideIn with from %s uses CSS cos()/sin()', (from, x, y) => {
+    const result = GlideIn.style?.({
+      ...baseMockOptions,
+      namedEffect: { from } as GlideInType,
+    });
+
+    expect(result?.[0].custom).toEqual({ '--motion-translate-x': x, '--motion-translate-y': y });
+  });
+
+  test.each([180, '180deg', 'left'])(
+    'GlideIn with numeric-equivalent from %s keeps numeric output',
+    (from) => {
+      const result = GlideIn.style?.({
+        ...baseMockOptions,
+        namedEffect: { from } as GlideInType,
+      });
+
+      expect(result?.[0].custom).toEqual({
+        '--motion-translate-x': '-100%',
+        '--motion-translate-y': '0%',
+      });
+    },
+  );
 });

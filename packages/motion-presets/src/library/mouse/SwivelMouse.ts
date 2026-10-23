@@ -8,9 +8,14 @@ import {
 import { getMouseTransitionEasing, mapRange, parseDirection } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 
-const DEFAULT_ANGLE = 5;
-const DEFAULT_PIVOT_AXIS: MousePivotAxis = 'center-horizontal';
 const AXES = ['top', 'bottom', 'right', 'left', 'center-horizontal', 'center-vertical'] as const;
+
+export const schema = {
+  angle: { type: 'number', default: 5 },
+  inverted: { type: 'bool', default: false },
+  perspective: { type: 'number', min: 0, default: 800 },
+  pivotAxis: { type: 'enum', values: AXES, default: 'center-horizontal' },
+} as const;
 
 const transformOrigins: Record<MousePivotAxis, [number, number]> = {
   top: [0, -50],
@@ -51,14 +56,14 @@ class SwivelMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as SwivelMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const angle = parseDirection(namedEffect.angle, [], DEFAULT_ANGLE, true) as number;
+  const inverted = namedEffect.inverted ?? schema.inverted.default;
+  const angle = parseDirection(namedEffect.angle, [], schema.angle.default, true) as number;
   const pivotAxis = parseDirection(
     namedEffect.pivotAxis,
     AXES,
-    DEFAULT_PIVOT_AXIS,
+    schema.pivotAxis.default,
   ) as MousePivotAxis;
-  const { perspective = 800 } = namedEffect;
+  const { perspective = schema.perspective.default } = namedEffect;
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration
@@ -72,3 +77,5 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
 
   return (target: HTMLElement) => new SwivelMouseAnimation(target, animationOptions);
 }
+
+create.schema = schema;

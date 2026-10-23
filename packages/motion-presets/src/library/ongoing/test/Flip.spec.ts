@@ -28,11 +28,6 @@ describe('Flip', () => {
               transform:
                 'perspective(800px) rotateZ(var(--motion-rotate, 0deg)) rotate3d(0, 1, 0, 360deg)',
             },
-            {
-              offset: 1,
-              transform:
-                'perspective(800px) rotateZ(var(--motion-rotate, 0deg)) rotate3d(0, 1, 0, 360deg)',
-            },
           ],
         },
       ];
@@ -65,11 +60,6 @@ describe('Flip', () => {
               transform:
                 'perspective(800px) rotateZ(var(--motion-rotate, 0deg)) rotate3d(1, 0, 0, 360deg)',
             },
-            {
-              offset: 1,
-              transform:
-                'perspective(800px) rotateZ(var(--motion-rotate, 0deg)) rotate3d(1, 0, 0, 360deg)',
-            },
           ],
         },
       ];
@@ -89,9 +79,11 @@ describe('Flip', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-flip-05',
+          name: 'motion-flip-05-ease-in-out',
           easing: 'linear',
-          namedEffect: { iterationDelay: 1000 } as Flip,
+          namedEffect: {
+            iterationDelay: 1000,
+          } as Flip,
           duration: 2000,
           keyframes: [
             {
@@ -147,11 +139,6 @@ describe('Flip', () => {
               transform:
                 'perspective(var(--motion-perspective)) rotateZ(var(--motion-rotate, 0deg)) rotate3d(var(--motion-rotate-x), var(--motion-rotate-y), 0, 360deg)',
             },
-            {
-              offset: 1,
-              transform:
-                'perspective(var(--motion-perspective)) rotateZ(var(--motion-rotate, 0deg)) rotate3d(var(--motion-rotate-x), var(--motion-rotate-y), 0, 360deg)',
-            },
           ],
         },
       ];
@@ -188,11 +175,6 @@ describe('Flip', () => {
               transform:
                 'perspective(var(--motion-perspective)) rotateZ(var(--motion-rotate, 0deg)) rotate3d(var(--motion-rotate-x), var(--motion-rotate-y), 0, 360deg)',
             },
-            {
-              offset: 1,
-              transform:
-                'perspective(var(--motion-perspective)) rotateZ(var(--motion-rotate, 0deg)) rotate3d(var(--motion-rotate-x), var(--motion-rotate-y), 0, 360deg)',
-            },
           ],
         },
       ];
@@ -212,9 +194,11 @@ describe('Flip', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-flip-05',
+          name: 'motion-flip-05-ease-in-out',
           easing: 'linear',
-          namedEffect: { iterationDelay: 1000 } as Flip,
+          namedEffect: {
+            iterationDelay: 1000,
+          } as Flip,
           duration: 2000,
           custom: {
             '--motion-perspective': '800px',

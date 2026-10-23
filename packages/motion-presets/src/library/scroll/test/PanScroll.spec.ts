@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import * as PanScroll from '../PanScroll';
 import type { PanScroll as PanScrollType, ScrubAnimationOptions } from '../../../types';
@@ -59,10 +59,10 @@ describe('PanScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - right', () => {
+    test('custom direction - left', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as PanScrollType,
+        namedEffect: { direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [
@@ -87,7 +87,7 @@ describe('PanScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as PanScrollType,
+        namedEffect: { range: 'out', direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [
@@ -191,10 +191,10 @@ describe('PanScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - right', () => {
+    test('custom direction - left', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as PanScrollType,
+        namedEffect: { direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [
@@ -218,7 +218,7 @@ describe('PanScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as PanScrollType,
+        namedEffect: { range: 'out', direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [
@@ -264,6 +264,31 @@ describe('PanScroll', () => {
       const result = PanScroll.style(mockOptions);
 
       expect(result).toMatchObject(expectedResult);
+    });
+  });
+
+  describe('prepare', () => {
+    const run = (namedEffect: PanScrollType) => {
+      const target = document.createElement('div');
+      const dom = {
+        measure: vi.fn((fn: (el: HTMLElement) => void) => fn(target)),
+        mutate: vi.fn((fn: (el: HTMLElement) => void) => fn(target)),
+      };
+      PanScroll.prepare({ ...baseMockOptions, namedEffect }, dom);
+      return { dom, target };
+    };
+
+    test('measures the element by default', () => {
+      const { dom, target } = run({} as PanScrollType);
+
+      expect(dom.measure).toHaveBeenCalled();
+      expect(target.style.getPropertyValue('--motion-left')).toBe('0px');
+    });
+
+    test('does not measure when startFromOffScreen is false', () => {
+      const { dom } = run({ startFromOffScreen: false } as PanScrollType);
+
+      expect(dom.measure).not.toHaveBeenCalled();
     });
   });
 });

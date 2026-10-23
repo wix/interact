@@ -1,14 +1,16 @@
 import type { Jello, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, toKeyframeValue, mapRange } from '../../utils';
+import { getTimingFactor, holdAtRest, roundNumber, toKeyframeValue } from '../../utils';
 
-const JELLO_FACTOR_SOFT = 1;
-const JELLO_FACTOR_HARD = 4;
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: 0 },
+  skew: { type: 'number', default: 12.25 },
+} as const;
 
 const SKEW_Y_KEYFRAMES = [
-  { keyframe: 24, skewY: 7 },
-  { keyframe: 38, skewY: -2 },
-  { keyframe: 58, skewY: 4 },
-  { keyframe: 80, skewY: -2 },
+  { keyframe: 24, skewY: 1 },
+  { keyframe: 38, skewY: -2 / 7 },
+  { keyframe: 58, skewY: 4 / 7 },
+  { keyframe: 80, skewY: -2 / 7 },
   { keyframe: 100, skewY: 0 },
 ];
 
@@ -17,31 +19,29 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Jello;
-  const { intensity = 0.25 } = namedEffect;
+  const { skew = schema.skew.default } = namedEffect;
 
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
   const [name] = getNames(options);
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
 
-  const jelloFactor = mapRange(0, 1, JELLO_FACTOR_SOFT, JELLO_FACTOR_HARD, intensity);
-
   // Create CSS custom properties for the jello configuration
-  const custom: Record<string, string | number> = {
-    '--motion-skew-y': jelloFactor,
-  };
+  const custom: Record<string, string | number> = {};
 
   const keyframes = SKEW_Y_KEYFRAMES.map(({ keyframe, skewY }) => {
-    const offset = (keyframe / 100) * timingFactor;
+    const skewKey = `--motion-skew-y${suffix}-${keyframe}`;
+    custom[skewKey] = `${roundNumber(skewY * skew, 4)}deg`;
 
     return {
-      offset,
-      transform: `rotateZ(var(--motion-rotate, 0deg)) skewY(calc(${toKeyframeValue(
+      offset: keyframe / 100,
+      transform: `rotateZ(var(--motion-rotate, 0deg)) skewY(${toKeyframeValue(
         custom,
-        '--motion-skew-y',
+        skewKey,
         asWeb,
-      )} * ${skewY}deg))`,
+      )})`,
     };
   });
 
@@ -52,14 +52,16 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       easing: 'linear',
       duration: duration + iterationDelay,
       custom,
-      keyframes,
+      keyframes: holdAtRest(keyframes, timingFactor),
     },
   ];
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Jello)?.iterationDelay || 0;
+  const iterationDelay =
+    (options.namedEffect as Jello)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
+  const { suffix = '' } = options;
 
-  return [`motion-jello-${timingFactor}`];
+  return [`motion-jello-${timingFactor}`].map((name) => name + suffix);
 }

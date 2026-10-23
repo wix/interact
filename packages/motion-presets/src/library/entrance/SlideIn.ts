@@ -2,10 +2,13 @@ import type { EffectFourDirections, SlideIn, TimeAnimationOptions } from '../../
 import { getClipPolygonParams, parseDirection, getEntranceFill } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'left';
+export const schema = {
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: 'left' },
+  start: { type: 'number', min: 0, max: 1, default: 0 },
+} as const;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-slideIn', 'motion-fadeIn'];
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-slideIn', 'motion-fadeIn'].map((name) => name + suffix);
 }
 
 const PARAM_MAP: Record<
@@ -23,13 +26,18 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as SlideIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { initialTranslate = 1 } = namedEffect;
+  const direction = parseDirection<EffectFourDirections>(
+    namedEffect?.from,
+    FOUR_DIRECTIONS,
+    schema.from.default,
+  );
+  const { start: startTranslate = schema.start.default } = namedEffect;
   const [slideIn, fadeIn] = getNames(options);
 
   const easing = options.easing || 'cubicInOut';
-  const minimum = 100 - initialTranslate * 100;
+  const minimum = startTranslate * 100;
 
   const start = getClipPolygonParams({
     direction: PARAM_MAP[direction].clip,
@@ -38,9 +46,9 @@ export function style(options: TimeAnimationOptions) {
   const clipEnd = getClipPolygonParams({ direction: 'initial' });
 
   const custom = {
-    '--motion-clip-start': start,
-    '--motion-translate-x': `${PARAM_MAP[direction].dx * 100}%`,
-    '--motion-translate-y': `${PARAM_MAP[direction].dy * 100}%`,
+    [`--motion-clip-start${suffix}`]: start,
+    [`--motion-translate-x${suffix}`]: `${PARAM_MAP[direction].dx * 100}%`,
+    [`--motion-translate-y${suffix}`]: `${PARAM_MAP[direction].dy * 100}%`,
   };
 
   return [
@@ -52,8 +60,8 @@ export function style(options: TimeAnimationOptions) {
       custom,
       keyframes: [
         {
-          transform: `rotate(var(--motion-rotate, 0deg)) translate(var(--motion-translate-x, ${custom['--motion-translate-x']}), var(--motion-translate-y, ${custom['--motion-translate-y']}))`,
-          clipPath: `var(--motion-clip-start, ${custom['--motion-clip-start']})`,
+          transform: `rotate(var(--motion-rotate, 0deg)) translate(var(--motion-translate-x${suffix}, ${custom[`--motion-translate-x${suffix}`]}), var(--motion-translate-y${suffix}, ${custom[`--motion-translate-y${suffix}`]}))`,
+          clipPath: `var(--motion-clip-start${suffix}, ${custom[`--motion-clip-start${suffix}`]})`,
         },
         {
           transform: 'rotate(var(--motion-rotate, 0deg)) translate(0px, 0px)',

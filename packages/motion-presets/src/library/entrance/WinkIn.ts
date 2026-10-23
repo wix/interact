@@ -3,10 +3,13 @@ import type { TimeAnimationOptions, WinkIn } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
 
 const DIRECTIONS = AXIS_DIRECTIONS;
-const DEFAULT_DIRECTION: (typeof DIRECTIONS)[number] = 'horizontal';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-winkInClip', 'motion-winkInRotate'];
+export const schema = {
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: 'horizontal' },
+} as const;
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-fadeIn', 'motion-winkInClip', 'motion-winkInRotate'].map((name) => name + suffix);
 }
 
 const PARAM_MAP: Record<(typeof DIRECTIONS)[number], { scaleY: number; scaleX: number }> = {
@@ -19,8 +22,13 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as WinkIn;
-  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULT_DIRECTION);
+  const direction = parseDirection<(typeof DIRECTIONS)[number]>(
+    namedEffect?.direction,
+    AXIS_DIRECTIONS,
+    schema.direction.default,
+  );
   const [fadeIn, winkInClip, winkInRotate] = getNames(options);
 
   const { scaleX, scaleY } = PARAM_MAP[direction];
@@ -30,9 +38,9 @@ export function style(options: TimeAnimationOptions) {
   const end = getClipPolygonParams({ direction: 'initial' });
 
   const custom = {
-    '--motion-scale-x': scaleX,
-    '--motion-scale-y': scaleY,
-    '--motion-clip-start': start,
+    [`--motion-scale-x${suffix}`]: scaleX,
+    [`--motion-scale-y${suffix}`]: scaleY,
+    [`--motion-clip-start${suffix}`]: start,
   };
 
   return [
@@ -52,7 +60,7 @@ export function style(options: TimeAnimationOptions) {
       custom,
       keyframes: [
         {
-          clipPath: `var(--motion-clip-start, ${custom['--motion-clip-start']})`,
+          clipPath: `var(--motion-clip-start${suffix}, ${custom[`--motion-clip-start${suffix}`]})`,
         },
         {
           clipPath: end,
@@ -68,7 +76,7 @@ export function style(options: TimeAnimationOptions) {
       custom,
       keyframes: [
         {
-          transform: `rotate(var(--motion-rotate, 0deg)) scale(var(--motion-scale-x, ${custom['--motion-scale-x']}), var(--motion-scale-y, ${custom['--motion-scale-y']}))`,
+          transform: `rotate(var(--motion-rotate, 0deg)) scale(var(--motion-scale-x${suffix}, ${custom[`--motion-scale-x${suffix}`]}), var(--motion-scale-y${suffix}, ${custom[`--motion-scale-y${suffix}`]}))`,
         },
         {
           transform: 'rotate(var(--motion-rotate, 0deg)) scale(1, 1)',

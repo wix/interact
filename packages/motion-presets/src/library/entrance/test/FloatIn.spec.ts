@@ -37,7 +37,7 @@ describe('FloatIn', () => {
   test('FloatIn animation with custom direction', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'top' } as FloatInType,
+      namedEffect: { from: 'top' } as FloatInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -101,7 +101,7 @@ describe('FloatIn', () => {
   test('FloatIn style animation with custom direction', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'top' } as FloatInType,
+      namedEffect: { from: 'top' } as FloatInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [

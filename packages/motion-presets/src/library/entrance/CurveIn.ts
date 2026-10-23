@@ -1,19 +1,21 @@
-import type { CurveIn, TimeAnimationOptions, DomApi } from '../../types';
-import { toKeyframeValue, parseDirection, parseLength, getEntranceFill } from '../../utils';
-import { TWO_SIDES_DIRECTIONS } from '../../consts';
+import type { CurveIn, TimeAnimationOptions, DomApi, EffectFourDirections } from '../../types';
+import { toKeyframeValue, parseDirection, parseLengthOrCalc, getEntranceFill } from '../../utils';
+import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DEPTH = { value: 300, unit: 'px' };
-const DIRECTIONS = [...TWO_SIDES_DIRECTIONS, 'pseudoLeft', 'pseudoRight'] as const;
-const DEFAULT_DIRECTION: (typeof DIRECTIONS)[number] = 'right';
+export const schema = {
+  depth: { type: 'length', default: { value: 900, unit: 'px' } },
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: 'right' },
+  perspective: { type: 'number', min: 0, default: 200 },
+} as const;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-curveIn', 'motion-fadeIn'];
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return ['motion-curveIn', 'motion-fadeIn'].map((name) => name + suffix);
 }
 
-const PARAMS_MAP = {
-  pseudoRight: { rotationX: '180', rotationY: '0' },
+const PARAMS_MAP: Record<EffectFourDirections, { rotationX: string; rotationY: string }> = {
+  top: { rotationX: '180', rotationY: '0' },
   right: { rotationX: '0', rotationY: '180' },
-  pseudoLeft: { rotationX: '-180', rotationY: '0' },
+  bottom: { rotationX: '-180', rotationY: '0' },
   left: { rotationX: '0', rotationY: '-180' },
 };
 
@@ -22,21 +24,29 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as CurveIn;
-  const direction = parseDirection(namedEffect?.direction, DIRECTIONS, DEFAULT_DIRECTION);
-  const depth = parseLength(namedEffect.depth, DEFAULT_DEPTH);
-  const { perspective = 200 } = namedEffect;
+  const direction = parseDirection<EffectFourDirections>(
+    namedEffect?.from,
+    FOUR_DIRECTIONS,
+    schema.from.default,
+  );
+  const depth = parseLengthOrCalc(namedEffect.depth, schema.depth.default);
+  const { perspective = schema.perspective.default } = namedEffect;
   const [curveIn, fadeIn] = getNames(options);
 
   const { rotationX, rotationY } = PARAMS_MAP[direction];
-  const depthValue = `${depth.value}${depth.unit === 'percentage' ? '%' : depth.unit}`;
+  const depthValue =
+    typeof depth === 'string'
+      ? depth
+      : `${depth.value}${depth.unit === 'percentage' ? '%' : depth.unit}`;
 
   const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-rotate-x': `${rotationX}deg`,
-    '--motion-rotate-y': `${rotationY}deg`,
-    '--motion-depth-negative': `calc(${depthValue} * -3)`,
-    '--motion-depth-positive': `calc(${depthValue} * 3)`,
+    [`--motion-perspective${suffix}`]: `${perspective}px`,
+    [`--motion-rotate-x${suffix}`]: `${rotationX}deg`,
+    [`--motion-rotate-y${suffix}`]: `${rotationY}deg`,
+    [`--motion-depth-negative${suffix}`]: `calc(-1 * ${depthValue})`,
+    [`--motion-depth-positive${suffix}`]: depthValue,
   };
 
   const easing = 'quadOut';
@@ -50,18 +60,18 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(custom, '--motion-depth-negative', asWeb)}) rotateX(${toKeyframeValue(
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) translateZ(${toKeyframeValue(custom, `--motion-depth-negative${suffix}`, asWeb)}) rotateX(${toKeyframeValue(
             custom,
-            '--motion-rotate-x',
+            `--motion-rotate-x${suffix}`,
             asWeb,
           )}) rotateY(${toKeyframeValue(
             custom,
-            '--motion-rotate-y',
+            `--motion-rotate-y${suffix}`,
             asWeb,
-          )}) translateZ(${toKeyframeValue(custom, '--motion-depth-positive', asWeb)}) rotateZ(var(--motion-rotate, 0deg))`,
+          )}) translateZ(${toKeyframeValue(custom, `--motion-depth-positive${suffix}`, asWeb)}) rotateZ(var(--motion-rotate, 0deg))`,
         },
         {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(custom, '--motion-depth-negative', asWeb)}) rotateX(0deg) rotateY(0deg) translateZ(${toKeyframeValue(custom, '--motion-depth-positive', asWeb)}) rotateZ(var(--motion-rotate, 0deg))`,
+          transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) translateZ(${toKeyframeValue(custom, `--motion-depth-negative${suffix}`, asWeb)}) rotateX(0deg) rotateY(0deg) translateZ(${toKeyframeValue(custom, `--motion-depth-positive${suffix}`, asWeb)}) rotateZ(var(--motion-rotate, 0deg))`,
         },
       ],
     },

@@ -11,14 +11,20 @@ import {
   toKeyframeValue,
   INITIAL_CLIP,
   parseDirection,
+  getOppositeDirection,
+  FOUR_DIRECTIONS as CLIP_DIRECTIONS,
 } from '../../utils';
-import { FOUR_DIRECTIONS } from '../../consts';
+import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'bottom';
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: 'bottom' },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+} as const;
 
 export function getNames(options: ScrubAnimationOptions) {
-  const { range = 'in' } = options.namedEffect as RevealScroll;
-  return [`motion-revealScroll${range === 'continuous' ? '-continuous' : ''}`];
+  const { range = schema.range.default } = options.namedEffect as RevealScroll;
+  const { suffix = '' } = options;
+  return [`motion-revealScroll${range === 'continuous' ? '-continuous' : ''}${suffix}`];
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -26,9 +32,16 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as RevealScroll;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { range = 'in' } = namedEffect;
+  const { range = schema.range.default } = namedEffect;
+  const toDirection = parseDirection<EffectFourDirections>(
+    namedEffect?.direction,
+    FOUR_DIRECTIONS,
+    schema.direction.default,
+  );
+  const direction =
+    range === 'out' ? getOppositeDirection(CLIP_DIRECTIONS, toDirection) : toDirection;
   const easing = 'linear';
   const fill = (
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
@@ -37,16 +50,26 @@ export function style(options: ScrubAnimationOptions) {
   const [revealScroll] = getNames(options);
 
   const custom = {
-    '--motion-clip-from': getRevealClipFrom(direction, range),
-    '--motion-clip-to': getRevealClipTo(direction, range),
+    [`--motion-clip-from${suffix}`]: getRevealClipFrom(direction, range),
+    [`--motion-clip-to${suffix}`]: getRevealClipTo(direction, range),
   };
 
   const keyframes = [
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-from', false, custom['--motion-clip-from']),
+      clipPath: toKeyframeValue(
+        {},
+        `--motion-clip-from${suffix}`,
+        false,
+        custom[`--motion-clip-from${suffix}`],
+      ),
     },
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-to', false, custom['--motion-clip-to']),
+      clipPath: toKeyframeValue(
+        {},
+        `--motion-clip-to${suffix}`,
+        false,
+        custom[`--motion-clip-to${suffix}`],
+      ),
     },
   ];
 

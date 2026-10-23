@@ -1,8 +1,19 @@
 import type { AnimationExtraOptions, DomApi, Flip, TimeAnimationOptions } from '../../types';
-import { getEasing, getTimingFactor, toKeyframeValue, parseDirection } from '../../utils';
+import {
+  getEasing,
+  getTimingFactor,
+  holdAtRest,
+  toKeyframeValue,
+  parseDirection,
+  getEasingKey,
+} from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: (typeof AXIS_DIRECTIONS)[number] = 'horizontal';
+export const schema = {
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: 'horizontal' },
+  iterationDelay: { type: 'number', min: 0, default: 0 },
+  perspective: { type: 'number', min: 0, default: 800 },
+} as const;
 
 const DIRECTION_MAP = {
   vertical: { x: '1', y: '0' },
@@ -14,35 +25,40 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 }
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as Flip;
-  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULT_DIRECTION);
-  const { perspective = 800 } = namedEffect;
+  const direction = parseDirection<(typeof AXIS_DIRECTIONS)[number]>(
+    namedEffect?.direction,
+    AXIS_DIRECTIONS,
+    schema.direction.default,
+  );
+  const { perspective = schema.perspective.default } = namedEffect;
 
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const offset = getTimingFactor(duration, iterationDelay) as number;
+  const iterationDelay = namedEffect?.iterationDelay || schema.iterationDelay.default;
+  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
   const rotationAxes = DIRECTION_MAP[direction];
   const easing = options.easing || 'linear';
 
   const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-rotate-x': rotationAxes.x,
-    '--motion-rotate-y': rotationAxes.y,
+    [`--motion-perspective${suffix}`]: `${perspective}px`,
+    [`--motion-rotate-x${suffix}`]: rotationAxes.x,
+    [`--motion-rotate-y${suffix}`]: rotationAxes.y,
   };
 
   const rotateStart = `rotate3d(${toKeyframeValue(
     custom,
-    '--motion-rotate-x',
+    `--motion-rotate-x${suffix}`,
     asWeb,
-  )}, ${toKeyframeValue(custom, '--motion-rotate-y', asWeb)}, 0, 0deg)`;
+  )}, ${toKeyframeValue(custom, `--motion-rotate-y${suffix}`, asWeb)}, 0, 0deg)`;
 
   const rotateEnd = `rotate3d(${toKeyframeValue(
     custom,
-    '--motion-rotate-x',
+    `--motion-rotate-x${suffix}`,
     asWeb,
-  )}, ${toKeyframeValue(custom, '--motion-rotate-y', asWeb)}, 0, 360deg)`;
+  )}, ${toKeyframeValue(custom, `--motion-rotate-y${suffix}`, asWeb)}, 0, 360deg)`;
 
   return [
     {
@@ -51,28 +67,30 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       easing: 'linear',
       duration: duration + iterationDelay,
       custom,
-      keyframes: [
-        {
-          offset: 0,
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateStart}`,
-          easing: getEasing(easing),
-        },
-        {
-          offset,
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateEnd}`,
-        },
-        {
-          offset: 1,
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateEnd}`,
-        },
-      ],
+      keyframes: holdAtRest(
+        [
+          {
+            offset: 0,
+            transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateStart}`,
+            easing: getEasing(easing),
+          },
+          {
+            offset: 1,
+            transform: `perspective(${toKeyframeValue(custom, `--motion-perspective${suffix}`, asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateEnd}`,
+          },
+        ],
+        timingFactor,
+      ),
     },
   ];
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Flip)?.iterationDelay || 0;
+  const iterationDelay =
+    (options.namedEffect as Flip)?.iterationDelay || schema.iterationDelay.default;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
+  const { suffix = '' } = options;
+  const easingKey = getEasingKey(options.easing);
 
-  return [`motion-flip-${timingFactor}`];
+  return [`motion-flip-${timingFactor}`].map((name) => name + easingKey + suffix);
 }

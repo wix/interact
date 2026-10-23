@@ -2,7 +2,7 @@ import {
   getCssUnits,
   getMouseTransitionEasing,
   mapRange,
-  parseLength,
+  parseLengthOrCalc,
   parseDirection,
 } from '../../utils';
 import { CustomMouse } from './CustomMouse';
@@ -14,13 +14,19 @@ import {
   MouseEffectAxis,
 } from '../../types';
 
-const DEFAULT_DISTANCE = { value: 80, unit: 'px' };
-const DEFAULT_AXIS: MouseEffectAxis = 'both';
 const AXES = ['both', 'horizontal', 'vertical'] as const;
+
+export const schema = {
+  axis: { type: 'enum', values: AXES, default: 'both' },
+  distance: { type: 'length', default: { value: 80, unit: 'px' } },
+  inverted: { type: 'bool', default: false },
+  scale: { type: 'number', min: 0, default: 1.4 },
+} as const;
 
 class ScaleMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
     const { distance, scale, invert, axis } = this.options;
+    const distanceValue = typeof distance === 'string' ? 1 : distance.value;
 
     let translateX = 0;
     let translateY = 0;
@@ -28,7 +34,7 @@ class ScaleMouseAnimation extends CustomMouse {
     let scaleY = 1;
 
     if (axis === 'both' || axis === 'horizontal') {
-      translateX = mapRange(0, 1, -distance.value, distance.value, progressX) * invert;
+      translateX = mapRange(0, 1, -distanceValue, distanceValue, progressX) * invert;
       scaleX =
         progressX < 0.5
           ? mapRange(0, 0.5, scale, 1, progressX)
@@ -36,7 +42,7 @@ class ScaleMouseAnimation extends CustomMouse {
     }
 
     if (axis === 'both' || axis === 'vertical') {
-      translateY = mapRange(0, 1, -distance.value, distance.value, progressY) * invert;
+      translateY = mapRange(0, 1, -distanceValue, distanceValue, progressY) * invert;
       scaleY =
         progressY < 0.5
           ? mapRange(0, 0.5, scale, 1, progressY)
@@ -47,9 +53,12 @@ class ScaleMouseAnimation extends CustomMouse {
     // and the bigger scale value if scale > 1
     const scaleBoth = scale < 1 ? Math.min(scaleX, scaleY) : Math.max(scaleX, scaleY);
 
-    const units = getCssUnits(distance.unit);
+    const toLength = (value: number) =>
+      typeof distance === 'string'
+        ? `calc(${value} * ${distance})`
+        : `${value}${getCssUnits(distance.unit)}`;
 
-    this.target.style.transform = `translateX(${translateX}${units}) translateY(${translateY}${units}) scale(${scaleBoth}) rotate(var(--motion-rotate, 0deg))`;
+    this.target.style.transform = `translateX(${toLength(translateX)}) translateY(${toLength(translateY)}) scale(${scaleBoth}) rotate(var(--motion-rotate, 0deg))`;
   }
 
   cancel() {
@@ -61,10 +70,10 @@ class ScaleMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as ScaleMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-  const axis = parseDirection(namedEffect.axis, AXES, DEFAULT_AXIS) as MouseEffectAxis;
-  const { scale = 1.4 } = namedEffect;
+  const inverted = namedEffect.inverted ?? schema.inverted.default;
+  const distance = parseLengthOrCalc(namedEffect.distance, schema.distance.default);
+  const axis = parseDirection(namedEffect.axis, AXES, schema.axis.default) as MouseEffectAxis;
+  const { scale = schema.scale.default } = namedEffect;
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration
@@ -78,3 +87,5 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
 
   return (target: HTMLElement) => new ScaleMouseAnimation(target, animationOptions);
 }
+
+create.schema = schema;

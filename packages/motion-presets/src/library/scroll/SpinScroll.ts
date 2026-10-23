@@ -1,16 +1,21 @@
 import type { AnimationFillMode, DomApi, ScrubAnimationOptions, SpinScroll } from '../../types';
 import { toKeyframeValue, parseDirection } from '../../utils';
-import { SPIN_DIRECTIONS } from '../../consts';
+import { SCROLL_RANGES, SPIN_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
+export const schema = {
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: 'clockwise' },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+  scale: { type: 'number', min: 0, default: 1 },
+  spins: { type: 'number', min: 0, default: 0.15 },
+} as const;
 
 const DIRECTION_MAP = {
   clockwise: 1,
   'counter-clockwise': -1,
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-spinScroll'];
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return ['motion-spinScroll'].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -18,9 +23,18 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as SpinScroll;
-  const direction = parseDirection(namedEffect?.direction, SPIN_DIRECTIONS, DEFAULT_DIRECTION);
-  const { spins = 0.15, scale = 1, range = 'in' } = namedEffect;
+  const direction = parseDirection<(typeof SPIN_DIRECTIONS)[number]>(
+    namedEffect?.direction,
+    SPIN_DIRECTIONS,
+    schema.direction.default,
+  );
+  const {
+    spins = schema.spins.default,
+    scale = schema.scale.default,
+    range = schema.range.default,
+  } = namedEffect;
   const easing = 'linear';
   const fill = (
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
@@ -36,10 +50,10 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [spinScroll] = getNames(options);
 
   const custom = {
-    '--motion-spin-from': `${spinDirection * fromValue}deg`,
-    '--motion-spin-to': `${spinDirection * toValue}deg`,
-    '--motion-spin-scale-from': isIn ? scale : 1,
-    '--motion-spin-scale-to': isIn ? 1 : scale,
+    [`--motion-spin-from${suffix}`]: `${spinDirection * fromValue}deg`,
+    [`--motion-spin-to${suffix}`]: `${spinDirection * toValue}deg`,
+    [`--motion-spin-scale-from${suffix}`]: isIn ? scale : 1,
+    [`--motion-spin-scale-to${suffix}`]: isIn ? 1 : scale,
   };
 
   return [
@@ -53,26 +67,26 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         {
           transform: `scale(${toKeyframeValue(
             custom,
-            '--motion-spin-scale-from',
+            `--motion-spin-scale-from${suffix}`,
             asWeb,
           )}) rotate(calc(${toKeyframeValue(
             {},
             '--motion-rotate',
             false,
             '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-spin-from', asWeb)}))`,
+          )} + ${toKeyframeValue(custom, `--motion-spin-from${suffix}`, asWeb)}))`,
         },
         {
           transform: `scale(${toKeyframeValue(
             custom,
-            '--motion-spin-scale-to',
+            `--motion-spin-scale-to${suffix}`,
             asWeb,
           )}) rotate(calc(${toKeyframeValue(
             {},
             '--motion-rotate',
             false,
             '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-spin-to', asWeb)}))`,
+          )} + ${toKeyframeValue(custom, `--motion-spin-to${suffix}`, asWeb)}))`,
         },
       ],
     },

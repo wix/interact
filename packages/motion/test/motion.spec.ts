@@ -584,6 +584,31 @@ describe('motion.ts', () => {
         (AnimationGroup as Mock).mockRestore();
       });
 
+      test('should persist the animations of layered effects only', async () => {
+        const { AnimationGroup } = await import('../src/AnimationGroup');
+        (AnimationGroup as Mock).mockImplementation(function () {
+          return mockAnimationGroup;
+        });
+        const persist = vi.fn();
+        const OriginalAnimation = (globalThis as any).Animation;
+        (globalThis as any).Animation = vi.fn(function (this: any, ...args: any[]) {
+          return { ...new OriginalAnimation(...args), persist };
+        });
+        const layer = { keyframes: [{ opacity: 0 }, { opacity: 1 }], duration: 1000 };
+        registerEffects({
+          TwoLayers: { ...mockFadeInPreset, web: vi.fn(() => [layer, layer]) },
+        } as any);
+
+        getWebAnimation(mockElement, { namedEffect: { type: 'FadeIn' }, duration: 1000 });
+        expect(persist).not.toHaveBeenCalled();
+
+        getWebAnimation(mockElement, { namedEffect: { type: 'TwoLayers' }, duration: 1000 });
+        expect(persist).toHaveBeenCalledTimes(2);
+
+        (globalThis as any).Animation = OriginalAnimation;
+        (AnimationGroup as Mock).mockRestore();
+      });
+
       test('should handle HTMLElement target', async () => {
         const animationOptions: AnimationOptions = {
           namedEffect: { type: 'FadeIn', id: 'fade' },

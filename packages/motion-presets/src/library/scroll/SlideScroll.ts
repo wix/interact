@@ -12,11 +12,14 @@ import {
   getRevealClipTo,
   toKeyframeValue,
   INITIAL_CLIP,
-  FOUR_DIRECTIONS,
   parseDirection,
 } from '../../utils';
+import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'bottom';
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: 'top' },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+} as const;
 
 const DIRECTION_TRANSLATION_MAP: Record<EffectFourDirections, Translate> = {
   bottom: { x: '0', y: '100%' },
@@ -26,8 +29,9 @@ const DIRECTION_TRANSLATION_MAP: Record<EffectFourDirections, Translate> = {
 };
 
 export function getNames(options: ScrubAnimationOptions) {
-  const { range = 'in' } = options.namedEffect as SlideScroll;
-  return [`motion-slideScroll${range === 'continuous' ? '-continuous' : ''}`];
+  const { range = schema.range.default } = options.namedEffect as SlideScroll;
+  const { suffix = '' } = options;
+  return [`motion-slideScroll${range === 'continuous' ? '-continuous' : ''}${suffix}`];
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -35,14 +39,21 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
+  const { suffix = '' } = options;
   const namedEffect = options.namedEffect as SlideScroll;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { range = 'in' } = namedEffect;
+  const { range = schema.range.default } = namedEffect;
+  const toDirection = parseDirection<EffectFourDirections>(
+    namedEffect?.direction,
+    FOUR_DIRECTIONS,
+    schema.direction.default,
+  );
+  const direction =
+    range === 'out' ? toDirection : getOppositeDirection([...FOUR_DIRECTIONS], toDirection);
   const easing = 'linear';
   const fill = (
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
   ) as AnimationFillMode;
-  const oppositeDirection = getOppositeDirection(FOUR_DIRECTIONS, direction);
+  const oppositeDirection = getOppositeDirection([...FOUR_DIRECTIONS], direction);
 
   const translateFrom = range === 'out' ? { x: '0', y: '0' } : DIRECTION_TRANSLATION_MAP[direction];
   const translateTo =
@@ -51,17 +62,22 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       : DIRECTION_TRANSLATION_MAP[range === 'out' ? direction : oppositeDirection];
 
   const custom = {
-    '--motion-clip-from': getRevealClipFrom(direction, range),
-    '--motion-clip-to': getRevealClipTo(direction, range),
-    '--motion-translate-from-x': translateFrom.x,
-    '--motion-translate-from-y': translateFrom.y,
-    '--motion-translate-to-x': translateTo.x,
-    '--motion-translate-to-y': translateTo.y,
+    [`--motion-clip-from${suffix}`]: getRevealClipFrom(direction, range),
+    [`--motion-clip-to${suffix}`]: getRevealClipTo(direction, range),
+    [`--motion-translate-from-x${suffix}`]: translateFrom.x,
+    [`--motion-translate-from-y${suffix}`]: translateFrom.y,
+    [`--motion-translate-to-x${suffix}`]: translateTo.x,
+    [`--motion-translate-to-y${suffix}`]: translateTo.y,
   };
 
   const keyframes = [
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-from', false, custom['--motion-clip-from']),
+      clipPath: toKeyframeValue(
+        {},
+        `--motion-clip-from${suffix}`,
+        false,
+        custom[`--motion-clip-from${suffix}`],
+      ),
       transform: `rotate(${toKeyframeValue(
         {},
         '--motion-rotate',
@@ -69,12 +85,17 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         '0',
       )}) translate(${toKeyframeValue(
         custom,
-        `--motion-translate-from-x`,
+        `--motion-translate-from-x${suffix}`,
         asWeb,
-      )}, ${toKeyframeValue(custom, `--motion-translate-from-y`, asWeb)})`,
+      )}, ${toKeyframeValue(custom, `--motion-translate-from-y${suffix}`, asWeb)})`,
     },
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-to', false, custom['--motion-clip-to']),
+      clipPath: toKeyframeValue(
+        {},
+        `--motion-clip-to${suffix}`,
+        false,
+        custom[`--motion-clip-to${suffix}`],
+      ),
       transform: `rotate(${toKeyframeValue(
         {},
         '--motion-rotate',
@@ -82,9 +103,9 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         '0',
       )}) translate(${toKeyframeValue(
         custom,
-        `--motion-translate-to-x`,
+        `--motion-translate-to-x${suffix}`,
         asWeb,
-      )}, ${toKeyframeValue(custom, `--motion-translate-to-y`, asWeb)})`,
+      )}, ${toKeyframeValue(custom, `--motion-translate-to-y${suffix}`, asWeb)})`,
     },
   ];
 

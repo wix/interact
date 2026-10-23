@@ -1,12 +1,16 @@
 import { ScrubAnimationOptions, AnimationExtraOptions, BounceMouse, TrackMouse } from '../../types';
-import { parseLength } from '../../utils';
-import createTrack from './TrackMouse';
+import { parseLengthOrCalc } from '../../utils';
+import createTrack, { AXES } from './TrackMouse';
 
-const DEFAULT_DISTANCE = { value: 80, unit: 'px' };
+export const schema = {
+  axis: { type: 'enum', values: AXES, default: 'both' },
+  distance: { type: 'length', default: { value: 80, unit: 'px' } },
+  inverted: { type: 'bool', default: false },
+} as const;
 
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const namedEffect = options.namedEffect as BounceMouse;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
+  const distance = parseLengthOrCalc(namedEffect.distance, schema.distance.default);
   const { transitionEasing = 'elastic' } = options;
   return createTrack({
     ...options,
@@ -14,3 +18,5 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
     namedEffect: { ...options.namedEffect, distance } as TrackMouse,
   });
 }
+
+create.schema = schema;

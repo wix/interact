@@ -776,6 +776,18 @@ describe('AnimationGroup', () => {
     });
   });
 
+  describe('persist()', () => {
+    test('should call persist on all animations', () => {
+      const mockAnimation1 = createMockAnimation({ persist: vi.fn() });
+      const mockAnimation2 = createMockAnimation({ persist: vi.fn() });
+
+      new AnimationGroup([mockAnimation1, mockAnimation2]).persist();
+
+      expect(mockAnimation1.persist).toHaveBeenCalledTimes(1);
+      expect(mockAnimation2.persist).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('cancel()', () => {
     test('should call cancel on all animations', () => {
       const mockAnimation1 = createMockAnimation();

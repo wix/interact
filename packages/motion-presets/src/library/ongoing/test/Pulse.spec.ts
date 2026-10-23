@@ -17,24 +17,25 @@ describe('Pulse', () => {
           name: 'motion-pulse-1',
           duration: 1,
           custom: {
-            '--motion-pulse-offset': 0,
+            '--motion-scale-27': 0.96,
+            '--motion-scale-72': 0.93,
           },
           keyframes: [
             {
               offset: 0.27,
-              transform: 'scale(calc(0.96 - 0))',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.96)',
             },
             {
               offset: 0.45,
-              transform: 'scale(1)',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
             {
               offset: 0.72,
-              transform: 'scale(calc(0.93 - 0))',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.93)',
             },
             {
               offset: 1,
-              transform: 'scale(1)',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
           ],
         },
@@ -45,11 +46,11 @@ describe('Pulse', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom intensity and duration', () => {
+    test('custom scale and duration', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Pulse,
+        namedEffect: { scale: 0.834, iterationDelay: 500 } as Pulse,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -57,28 +58,29 @@ describe('Pulse', () => {
           name: 'motion-pulse-067',
           duration: 1500,
           custom: {
-            '--motion-pulse-offset': 0.096,
+            '--motion-scale-27': 0.9051,
+            '--motion-scale-72': 0.834,
           },
           keyframes: [
             {
               offset: 0.18090000000000003,
-              transform: 'scale(calc(0.96 - 0.096))',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.9051)',
             },
             {
               offset: 0.30150000000000005,
-              transform: 'scale(1)',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
             {
               offset: 0.4824,
-              transform: 'scale(calc(0.93 - 0.096))',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.834)',
             },
             {
               offset: 0.67,
-              transform: 'scale(1)',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
             {
               offset: 1,
-              transform: 'scale(1)',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
           ],
         },
@@ -102,24 +104,25 @@ describe('Pulse', () => {
           name: 'motion-pulse-1',
           duration: 1,
           custom: {
-            '--motion-pulse-offset': 0,
+            '--motion-scale-27': 0.96,
+            '--motion-scale-72': 0.93,
           },
           keyframes: [
             {
               offset: 0.27,
-              transform: 'scale(calc(0.96 - var(--motion-pulse-offset)))',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(var(--motion-scale-27))',
             },
             {
               offset: 0.45,
-              transform: 'scale(1)',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
             {
               offset: 0.72,
-              transform: 'scale(calc(0.93 - var(--motion-pulse-offset)))',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(var(--motion-scale-72))',
             },
             {
               offset: 1,
-              transform: 'scale(1)',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
           ],
         },
@@ -130,11 +133,11 @@ describe('Pulse', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom intensity and duration', () => {
+    test('custom scale and duration', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Pulse,
+        namedEffect: { scale: 0.834, iterationDelay: 500 } as Pulse,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -142,28 +145,29 @@ describe('Pulse', () => {
           name: 'motion-pulse-067',
           duration: 1500,
           custom: {
-            '--motion-pulse-offset': 0.096,
+            '--motion-scale-27': 0.9051,
+            '--motion-scale-72': 0.834,
           },
           keyframes: [
             {
               offset: 0.18090000000000003,
-              transform: 'scale(calc(0.96 - var(--motion-pulse-offset)))',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(var(--motion-scale-27))',
             },
             {
               offset: 0.30150000000000005,
-              transform: 'scale(1)',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
             {
               offset: 0.4824,
-              transform: 'scale(calc(0.93 - var(--motion-pulse-offset)))',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(var(--motion-scale-72))',
             },
             {
               offset: 0.67,
-              transform: 'scale(1)',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
             {
               offset: 1,
-              transform: 'scale(1)',
+              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
           ],
         },
@@ -177,17 +181,39 @@ describe('Pulse', () => {
     test('style method should populate custom properties correctly', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { intensity: 0.5 } as Pulse,
+        namedEffect: { scale: 0.87 } as Pulse,
       };
 
       const result = PulseAnimation.style(mockOptions);
 
       expect(result[0]).toHaveProperty('custom');
-      expect(result[0].custom).toHaveProperty('--motion-pulse-offset');
-
-      // Verify the custom property contains the expected calculated value
-      expect(typeof result[0].custom!['--motion-pulse-offset']).toBe('number');
-      expect(result[0].custom!['--motion-pulse-offset']).toBe(0.06); // 0.5 intensity maps to 0.06 offset
+      expect(result[0].custom).toEqual({
+        '--motion-scale-27': 0.9257,
+        '--motion-scale-72': 0.87,
+      });
     });
+  });
+});
+
+describe('Pulse scale', () => {
+  const scalesOf = (scale: number) =>
+    PulseAnimation.web({ ...baseMockOptions, namedEffect: { scale } as Pulse })[0].keyframes.map(
+      ({ transform }) => parseFloat((transform as string).match(/scale\(([^)]+)\)/)![1]),
+    );
+
+  test.each([0.93, 0.87, 0.5, 1.2])('the deeper beat is the scale %s', (scale) => {
+    const scales = scalesOf(scale);
+    const deepest = scales.reduce((a, b) => (Math.abs(b - 1) > Math.abs(a - 1) ? b : a));
+    expect(deepest).toBe(scale);
+    expect(scales[0]).toBeCloseTo(1 - (4 / 7) * (1 - scale), 4);
+  });
+
+  test('keeps the layout rotation', () => {
+    for (const { transform } of PulseAnimation.style({
+      ...baseMockOptions,
+      namedEffect: {} as Pulse,
+    })[0].keyframes) {
+      expect(transform).toMatch(/^rotateZ\(var\(--motion-rotate, 0deg\)\) scale\(/);
+    }
   });
 });

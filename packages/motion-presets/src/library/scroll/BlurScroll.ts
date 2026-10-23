@@ -1,8 +1,14 @@
 import type { AnimationFillMode, BlurScroll, ScrubAnimationOptions, DomApi } from '../../types';
 import { toKeyframeValue } from '../../utils';
+import { SCROLL_RANGES } from '../../consts';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-blurScroll'];
+export const schema = {
+  blur: { type: 'number', min: 0, default: 6 },
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+} as const;
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return ['motion-blurScroll'].map((name) => name + suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -10,7 +16,9 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const { blur = 6, range = 'in' } = options.namedEffect as BlurScroll;
+  const { suffix = '' } = options;
+  const { blur = schema.blur.default, range = schema.range.default } =
+    options.namedEffect as BlurScroll;
 
   const fromValue = range === 'out' ? 0 : blur;
   const toValue = range === 'out' ? blur : 0;
@@ -22,8 +30,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   const [blurScroll] = getNames(options);
 
   const custom = {
-    '--motion-blur-from': `${fromValue}px`,
-    '--motion-blur-to': `${toValue}px`,
+    [`--motion-blur-from${suffix}`]: `${fromValue}px`,
+    [`--motion-blur-to${suffix}`]: `${toValue}px`,
   };
 
   return [
@@ -36,10 +44,10 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       custom,
       keyframes: [
         {
-          filter: `blur(${toKeyframeValue(custom, '--motion-blur-from', asWeb)})`,
+          filter: `blur(${toKeyframeValue(custom, `--motion-blur-from${suffix}`, asWeb)})`,
         },
         {
-          filter: `blur(${toKeyframeValue(custom, '--motion-blur-to', asWeb)})`,
+          filter: `blur(${toKeyframeValue(custom, `--motion-blur-to${suffix}`, asWeb)})`,
         },
       ],
     },

@@ -6,6 +6,13 @@ import type {
   ShapeType,
 } from '../../types';
 import { toKeyframeValue, getEasing } from '../../utils';
+import { SCROLL_RANGES, SHAPES } from '../../consts';
+
+export const schema = {
+  range: { type: 'enum', values: SCROLL_RANGES, default: 'in' },
+  shape: { type: 'enum', values: SHAPES, default: 'circle' },
+  start: { type: 'number', min: 0, max: 1, default: 0.5 },
+} as const;
 
 const RESPONSIVE_SHAPES_MAP: Record<
   ShapeType,
@@ -32,8 +39,9 @@ const RESPONSIVE_SHAPES_MAP: Record<
 };
 
 export function getNames(options: ScrubAnimationOptions) {
-  const { range = 'in' } = options.namedEffect as ShapeScroll;
-  return [`motion-shapeScroll${range === 'continuous' ? '-continuous' : ''}`];
+  const { range = schema.range.default } = options.namedEffect as ShapeScroll;
+  const { suffix = '' } = options;
+  return [`motion-shapeScroll${range === 'continuous' ? '-continuous' : ''}${suffix}`];
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -41,39 +49,41 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 }
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const { intensity = 0.5, range = 'in' } = options.namedEffect as ShapeScroll;
-  let { shape = 'circle' } = options.namedEffect as ShapeScroll;
+  const { suffix = '' } = options;
+  const { start: startOpen = schema.start.default, range = schema.range.default } =
+    options.namedEffect as ShapeScroll;
+  let { shape = schema.shape.default } = options.namedEffect as ShapeScroll;
   if (!(shape in RESPONSIVE_SHAPES_MAP)) {
-    shape = 'circle';
+    shape = schema.shape.default;
   }
 
   const fill = (
     range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
   ) as AnimationFillMode;
 
-  const [start, end] = RESPONSIVE_SHAPES_MAP[shape](intensity * 100);
+  const [start, end] = RESPONSIVE_SHAPES_MAP[shape]((1 - startOpen) * 100);
 
   const [shapeScroll] = getNames(options);
 
   const custom = {
-    '--motion-clip-from': range === 'out' ? end : start,
-    '--motion-clip-to': range === 'out' ? start : end,
+    [`--motion-clip-from${suffix}`]: range === 'out' ? end : start,
+    [`--motion-clip-to${suffix}`]: range === 'out' ? start : end,
   };
 
   const easing = getEasing('circInOut');
 
   const keyframes = [
     {
-      clipPath: toKeyframeValue(custom, `--motion-clip-from`, asWeb),
+      clipPath: toKeyframeValue(custom, `--motion-clip-from${suffix}`, asWeb),
       easing,
     },
-    { clipPath: toKeyframeValue(custom, `--motion-clip-to`, asWeb) },
+    { clipPath: toKeyframeValue(custom, `--motion-clip-to${suffix}`, asWeb) },
   ];
 
   if (range === 'continuous') {
     keyframes[1].easing = easing;
     keyframes.push({
-      clipPath: toKeyframeValue(custom, `--motion-clip-from`, asWeb),
+      clipPath: toKeyframeValue(custom, `--motion-clip-from${suffix}`, asWeb),
     });
   }
 

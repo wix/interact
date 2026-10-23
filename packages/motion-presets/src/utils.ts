@@ -6,7 +6,9 @@ import type {
   ScrubTransitionEasing,
   AnimationFillMode,
   TimeAnimationOptions,
+  ScrubAnimationOptions,
 } from '@wix/motion';
+import type { LengthInput, LengthValue } from './types';
 
 export type Direction =
   | 'initial'
@@ -297,9 +299,10 @@ export function getElementOffset(element: HTMLElement, parent?: HTMLElement) {
 
 const generateShuttersClipPath = (
   direction: EffectFourDirections,
-  shutterCount: number,
+  shutters: number,
   staggered: boolean,
 ) => {
+  const shutterCount = Math.max(1, Math.round(shutters) || 1);
   const isTopOrLeft = direction === 'top' || direction === 'left';
   const iterStart = isTopOrLeft ? shutterCount : 0;
   const iterEnd = isTopOrLeft ? 0 : shutterCount;
@@ -388,14 +391,6 @@ export function getTimingFactor(
   return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
 }
 
-export type LengthValue = { value: number; unit: string };
-export type LengthInput =
-  | string
-  | number
-  | LengthValue
-  | { value: number; unit?: string }
-  | undefined;
-
 const CSS_UNIT_REGEX = /^(-?\d*\.?\d+)(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/i;
 
 /**
@@ -453,6 +448,36 @@ export function parseLength(input: LengthInput, defaultValue: LengthValue): Leng
   return defaultValue;
 }
 
+const CSS_CALC_REGEX = /^calc\(.+\)$/i;
+
+export function parseLengthOrCalc(input: LengthInput, defaultValue: LengthValue) {
+  if (typeof input === 'string' && CSS_CALC_REGEX.test(input.trim())) {
+    return input.trim();
+  }
+  return parseLength(input, defaultValue);
+}
+
+const CSS_ANGLE_REGEX = /^-?\d*\.?\d+(rad|grad|turn)$/i;
+
+export function parseCssAngle(input: unknown) {
+  if (typeof input !== 'string') {
+    return undefined;
+  }
+  const trimmed = input.trim();
+  return CSS_ANGLE_REGEX.test(trimmed) || CSS_CALC_REGEX.test(trimmed) ? trimmed : undefined;
+}
+
+export function scaleLength(
+  length: LengthValue | string,
+  factor: number = 1,
+  round: (value: number) => number = (value) => value,
+) {
+  if (typeof length === 'string') {
+    return factor === 1 ? length : `calc(${factor} * ${length})`;
+  }
+  return `${round(length.value * factor)}${getCssUnits(length.unit)}`;
+}
+
 export type DirectionKeywords = readonly string[];
 
 /**
@@ -503,4 +528,108 @@ export function parseDirection<T extends string | number>(
   }
 
   return defaultValue;
+}
+
+type ScrollOffsets = Pick<ScrubAnimationOptions, 'startOffset' | 'endOffset'>;
+type ScrollOffset = NonNullable<ScrollOffsets['startOffset']>;
+type LinearLength = Record<string, number>;
+
+// '%' is of the element's height, as in its translateY and in its entry-crossing range
+const RANGE_START_AND_SIZE: Record<NonNullable<ScrollOffset['name']>, LinearLength[]> = {
+  cover: [{}, { '%': 100, vh: 100 }],
+  entry: [{}, { '%': 100 }],
+  'entry-crossing': [{}, { '%': 100 }],
+  contain: [{ '%': 100 }, { '%': -100, vh: 100 }],
+  exit: [{ vh: 100 }, { '%': 100 }],
+  'exit-crossing': [{ vh: 100 }, { '%': 100 }],
+};
+
+function combineLengths(...terms: [number, LinearLength][]) {
+  const result: LinearLength = {};
+  terms.forEach(([factor, length]) =>
+    Object.entries(length).forEach(([unit, value]) => {
+      result[unit] = (result[unit] || 0) + factor * value;
+    }),
+  );
+  return result;
+}
+
+function linearLengthToCss(length: LinearLength) {
+  const terms = Object.entries(length)
+    .filter(([, value]) => value)
+    .map(([unit, value]) => `${value}${unit}`);
+  return terms.length > 1 ? `calc(${terms.join(' + ')})` : terms[0] || '0px';
+}
+
+// an end <length> offset is from the end of its named range, see getRange() in @wix/motion
+function getRangePosition({ name = 'cover', offset }: ScrollOffset, isEnd: boolean) {
+  const { value = 0, unit = 'percentage' } = offset || {};
+  const [start, size] = RANGE_START_AND_SIZE[name];
+  return unit === 'percentage'
+    ? combineLengths([1, start], [value / 100, size])
+    : combineLengths([1, start], [Number(isEnd), size], [value, { [unit]: 1 }]);
+}
+
+// the translateY for moving at `speed` times the scroll, at rest at `center` of the scroll range,
+// and the scroll range widened by 1 / speed around `center` so the speed is exact.
+// assumes an element smaller than the viewport, larger ones drift over entry, exit and contain ranges
+export function getScrollParallax(
+  range: EffectScrollRange,
+  {
+    startOffset = { offset: { value: 0, unit: 'percentage' } },
+    endOffset = { offset: { value: 100, unit: 'percentage' } },
+  }: ScrollOffsets,
+  speed: number,
+  center: number = range === 'continuous' ? 0.5 : range === 'out' ? 0 : 1,
+) {
+  const shrink = 1 - 1 / Math.max(speed, 0.01);
+  if (!shrink) {
+    return { from: '0px', to: '0px', startOffsetAdd: '0px', endOffsetAdd: '0px' };
+  }
+
+  const c = Math.min(1, Math.max(0, center));
+  const start = getRangePosition(startOffset, false);
+  const end = getRangePosition(endOffset, true);
+  const travel = combineLengths([1, end], [-1, start]);
+  const from = combineLengths([c * shrink, travel]);
+  const to = combineLengths([(c - 1) * shrink, travel]);
+  const { '%': startPercentage = 0, ...startOffsetAdd } = combineLengths([1, start], [1, from]);
+  const { '%': endPercentage = 0, ...endOffsetAdd } = combineLengths([1, end], [1, to]);
+
+  return {
+    from: linearLengthToCss(from),
+    to: linearLengthToCss(to),
+    startOffset: {
+      name: 'entry-crossing' as const,
+      offset: { value: startPercentage, unit: 'percentage' as const },
+    },
+    startOffsetAdd: linearLengthToCss(startOffsetAdd),
+    endOffset: {
+      name: 'entry-crossing' as const,
+      offset: { value: endPercentage, unit: 'percentage' as const },
+    },
+    endOffsetAdd: linearLengthToCss(endOffsetAdd),
+  };
+}
+
+export function holdAtRest<T extends { offset: number }>(keyframes: T[], timingFactor: number) {
+  const active = keyframes.map((keyframe) => ({
+    ...keyframe,
+    offset: keyframe.offset * timingFactor,
+  }));
+  return timingFactor < 1 ? [...active, { ...keyframes[keyframes.length - 1], offset: 1 }] : active;
+}
+
+export function getEasingKey(easing?: string) {
+  if (!easing) {
+    return '';
+  }
+  if (/^[a-zA-Z][a-zA-Z0-9-]*$/.test(easing)) {
+    return `-${easing}`;
+  }
+  let hash = 0;
+  for (const char of easing) {
+    hash = (Math.imul(31, hash) + char.charCodeAt(0)) | 0;
+  }
+  return `-${(hash >>> 0).toString(36)}`;
 }

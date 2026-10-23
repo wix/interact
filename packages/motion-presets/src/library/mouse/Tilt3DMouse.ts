@@ -2,7 +2,11 @@ import { getMouseTransitionEasing, mapRange, parseDirection } from '../../utils'
 import { CustomMouse } from './CustomMouse';
 import { ScrubAnimationOptions, AnimationExtraOptions, Tilt3DMouse, Progress } from '../../types';
 
-const DEFAULT_ANGLE = 5;
+export const schema = {
+  angle: { type: 'number', default: 5 },
+  inverted: { type: 'bool', default: false },
+  perspective: { type: 'number', min: 0, default: 800 },
+} as const;
 
 class Tilt3DMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
@@ -24,9 +28,9 @@ class Tilt3DMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as Tilt3DMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const angle = parseDirection(namedEffect.angle, [], DEFAULT_ANGLE, true) as number;
-  const { perspective = 800 } = namedEffect;
+  const inverted = namedEffect.inverted ?? schema.inverted.default;
+  const angle = parseDirection(namedEffect.angle, [], schema.angle.default, true) as number;
+  const { perspective = schema.perspective.default } = namedEffect;
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration
@@ -39,3 +43,5 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
 
   return (target: HTMLElement) => new Tilt3DMouseAnimation(target, animationOptions);
 }
+
+create.schema = schema;
