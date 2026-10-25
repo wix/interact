@@ -9,10 +9,6 @@ import type {
 import { getJsEasingInCSS } from '../utils';
 import { getEffectsData, getRanges, getNamedEffect, isNotAScrubTrigger } from './common';
 
-function getAnimationTarget(target: string | null, part: string | undefined) {
-  return target ? `#${target}${part ? `[data-motion-part~="${part}"]` : ''}` : '';
-}
-
 function getAnimationAsCSS(
   data: {
     effect: AnimationData;

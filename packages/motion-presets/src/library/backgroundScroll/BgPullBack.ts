@@ -45,6 +45,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgPullBack,
+      custom,
       easing,
       part: 'BG_MEDIA',
       startOffset: {

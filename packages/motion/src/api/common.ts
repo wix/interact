@@ -26,7 +26,9 @@ function getElementMotionPart(element: Element | null, part: string) {
 function getTargetParts(target: HTMLElement | string | null, parts?: string[]) {
   const element = typeof target === 'string' ? getElement(target) : target;
   if (parts?.length) {
-    return parts.map((part) => getElementMotionPart(element, part)).filter(Boolean) as HTMLElement[];
+    return parts
+      .map((part) => getElementMotionPart(element, part))
+      .filter(Boolean) as HTMLElement[];
   }
   return element ? [element] : [];
 }

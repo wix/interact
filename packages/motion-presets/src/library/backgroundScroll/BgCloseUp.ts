@@ -80,6 +80,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgCloseUpZoom,
+      custom,
       easing,
       part: 'BG_MEDIA',
       startOffset: {

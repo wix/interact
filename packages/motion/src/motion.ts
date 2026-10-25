@@ -63,11 +63,13 @@ function getElementAnimation(
 ): AnimationGroup | null {
   const elements = getTargetParts(target, parts);
   // somehow get the right animations
-  const animations = elements?.flatMap((el) => el.getAnimations()).filter((anim: Animation | CSSAnimation) => {
-    const id = anim.id || (anim as CSSAnimation).animationName;
-    // if no id/name just return all animations
-    return id ? id.startsWith(effectId) : true;
-  });
+  const animations = elements
+    ?.flatMap((el) => el.getAnimations())
+    .filter((anim: Animation | CSSAnimation) => {
+      const id = anim.id || (anim as CSSAnimation).animationName;
+      // if no id/name just return all animations
+      return id ? id.startsWith(effectId) : true;
+    });
 
   return animations?.length ? new AnimationGroup(animations) : null;
 }

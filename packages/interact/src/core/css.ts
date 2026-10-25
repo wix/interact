@@ -64,6 +64,7 @@ type KeyframeSlotMember = { slotKey: string; getNames: (suffix?: string) => stri
 type TargetContext = {
   key: string;
   childSelector?: string;
+  partSelectors: Set<string>;
   assigned: Set<string>;
   animation: ListCounters;
   transition: ListCounters;
@@ -99,6 +100,7 @@ function createTargetContext(key: string, childSelector?: string): TargetContext
   return {
     key,
     childSelector,
+    partSelectors: new Set<string>(),
     assigned: new Set<string>(),
     animation: createListCounters(),
     transition: createListCounters(),
@@ -278,7 +280,7 @@ function effectToCSS(
   keyframes: MotionKeyframeEffect[];
   wrote: Record<ListKind, boolean>;
 } {
-  const { assigned, childSelector } = target;
+  const { assigned, childSelector, partSelectors } = target;
   const wrote: Record<ListKind, boolean> = { animation: false, transition: false, timeline: false };
   const {
     key,
@@ -315,17 +317,17 @@ function effectToCSS(
     const animationOptions = effectToAnimationOptions(effect);
     const cssAnimations = getCSSAnimation(null, animationOptions, trigger, sequence).filter(
       (anim) => anim.name,
-    ).reduce((acc, anim) => {
+    );
+    const animationsByPart: Record<string, typeof cssAnimations> = cssAnimations.length
+      ? {}
+      : { '': [] };
+    cssAnimations.forEach((anim) => {
       const part = anim.part || '';
-      if (!acc[part]) {
-        acc[part] = [];
-      }
-      acc[part].push(anim);
-      return acc;
-    }, {} as Record<string, ReturnType<typeof getCSSAnimation>>);
+      (animationsByPart[part] ||= []).push(anim);
+    });
 
     // accumulate keyframes
-    keyframes = Object.values(cssAnimations).flat().map((anim) => ({
+    keyframes = cssAnimations.map((anim) => ({
       name: anim.name as string,
       keyframes: anim.keyframes,
     }));
@@ -333,7 +335,7 @@ function effectToCSS(
     // declare custom parameters
     // TODO - register those to define with @property to prevent unintended override
     declarations.push(
-      ...Object.values(cssAnimations).flat().flatMap(({ custom }) =>
+      ...cssAnimations.flatMap(({ custom }) =>
         Object.entries(custom || {})
           .filter(([_, value]) => value !== undefined)
           .map(([key, value]) => ({ name: key, value: value as string | number })),
@@ -343,7 +345,7 @@ function effectToCSS(
     // TODO - part animations introduce a problem with cascade where to override it you must override all parts.
     // Currently this is in play only for background scroll effects, which are not mixed with other effects in cascade,
     // but this should be fixed. style queries may help in handling this and cascade in general by setting --active-effect-id and querying it by order.
-    Object.entries(cssAnimations).forEach(([part, animations]) => {
+    Object.entries(animationsByPart).forEach(([part, animations]) => {
       const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
         _listPropertyName: propertyName,
         name: customProps[propertyName],
@@ -360,9 +362,12 @@ function effectToCSS(
           value !== LIST_PROPERTY_FALLBACKS[_listPropertyName] || assigned.has(name),
       );
       animationDeclarations.forEach(({ name }) => assigned.add(name));
-      wrote.animation = wrote.animation || (animationDeclarations.length > 0);
+      wrote.animation = wrote.animation || animationDeclarations.length > 0;
 
-      const childOrPartSelector = part ? `[data-motion-part="${part}"]` : childSelector;
+      const childOrPartSelector = part ? `[data-motion-part~="${part}"]` : childSelector;
+      if (part && animationDeclarations.length) {
+        partSelectors.add(childOrPartSelector!);
+      }
 
       if (initial) {
         // declare animation custom properties with initial dependent on data-motion-enter
@@ -715,7 +720,15 @@ export function _generate(
   const animationLength = Math.max(0, ...targets.map(({ animation }) => animation.listIndex));
   const transitionLength = Math.max(0, ...targets.map(({ transition }) => transition.listIndex));
   const timelineLength = Math.max(0, ...targets.map(({ timeline }) => timeline.listIndex));
-  const listsRule = buildListsRule(targets, animationLength, transitionLength, timelineLength);
+  const listsRule = buildListsRule(
+    targets.flatMap((target) => [
+      target,
+      ...[...target.partSelectors].map((childSelector) => ({ key: target.key, childSelector })),
+    ]),
+    animationLength,
+    transitionLength,
+    timelineLength,
+  );
 
   const animationSlotLength = Math.max(0, ...targets.map(({ animation }) => animation.slotCursor));
   const transitionSlotLength = Math.max(

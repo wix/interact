@@ -26,6 +26,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     {
       ...options,
       name: bgRotate,
+      custom,
       easing,
       part: 'BG_MEDIA',
       startOffset: {

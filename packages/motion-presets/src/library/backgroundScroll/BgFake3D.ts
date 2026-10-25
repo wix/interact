@@ -51,6 +51,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgFake3DParallax,
+      custom,
       part: 'BG_IMG',
       easing: 'sineOut',
       startOffset: {
@@ -87,6 +88,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgFake3DStretch,
+      custom,
       part: 'BG_IMG',
       easing: 'linear',
       composite: 'add' as const,
@@ -113,6 +115,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgFake3DZoom,
+      custom,
       part: 'BG_IMG',
       easing: 'sineIn',
       composite: 'add' as const,
