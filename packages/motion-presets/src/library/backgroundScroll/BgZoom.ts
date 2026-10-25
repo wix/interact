@@ -49,6 +49,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['BG_MEDIA', 'BG_IMG'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   let { direction = 'in', zoom = DEFAULT_ZOOM } = options.namedEffect as BgZoom;
   const isIn = direction === 'in';

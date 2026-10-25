@@ -73,7 +73,7 @@ function getCSSAnimationEffect(
 }
 
 function getCSSAnimation(
-  target: string | null,
+  _: string | null,
   animationOptions: AnimationOptions,
   trigger?: TriggerVariant,
   sequenceOptions?: SequenceOptions,
@@ -91,7 +91,7 @@ function getCSSAnimation(
       : {};
 
     return {
-      target: getAnimationTarget(target, item.part),
+      part: item.part,
       animation: getAnimationAsCSS(item, isViewProgress, sequenceOptions),
       composition: item.options.composite,
       custom: item.effect.custom,

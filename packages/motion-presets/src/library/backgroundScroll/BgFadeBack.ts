@@ -30,6 +30,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['BG_LAYER'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const easing = 'sineOut';
   const { scale = 0.7 } = options.namedEffect as BgFadeBack;

@@ -30,6 +30,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['BG_LAYER'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const { range = 'in' } = options.namedEffect as BgFade;
   const isOut = range === 'out';

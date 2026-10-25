@@ -10,6 +10,8 @@ export function web(options: ScrubAnimationOptions) {
   return style(options, true);
 }
 
+export const parts = ['BG_MEDIA'];
+
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const easing = 'sineOut';
   const { angle = 22, direction = 'counter-clockwise' } = options.namedEffect as BgRotate;

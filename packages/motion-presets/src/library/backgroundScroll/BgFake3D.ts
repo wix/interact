@@ -32,6 +32,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['BG_IMG'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const { stretch = 1.3, zoom = 100 / 6 } = options.namedEffect as BgFake3D;
   const scale = getScaleFromPerspectiveAndZ(zoom, PERSPECTIVE);

@@ -30,6 +30,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['BG_LAYER', 'BG_MEDIA'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const easing = 'linear';
   const { scale = 80 } = options.namedEffect as BgCloseUp;

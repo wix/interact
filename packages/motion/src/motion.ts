@@ -17,7 +17,7 @@ import { getEasing, getJsEasing } from './utils';
 import { getWebAnimation } from './api/webAnimations';
 import { getCSSAnimation } from './api/cssAnimations';
 import { prepareAnimation } from './api/prepare';
-import { getElement, getNamedEffect } from './api/common';
+import { getElement, getNamedEffect, getTargetParts } from './api/common';
 
 function getElementCSSAnimation(
   target: HTMLElement | string | null,
@@ -32,15 +32,15 @@ function getElementCSSAnimation(
   if (!namedEffect.style) {
     // if this named effect does not have a style method, attempt to get group of Web Animations
     if (animationOptions.effectId && target) {
-      return getElementAnimation(target, animationOptions.effectId);
+      return getElementAnimation(target, animationOptions.effectId, namedEffect.parts);
     }
 
     return null;
   }
 
   const effectNames = namedEffect.getNames(animationOptions);
-  const element = typeof target === 'string' ? getElement(target) : target;
-  const animations = element?.getAnimations();
+  const elements = getTargetParts(target, namedEffect.parts);
+  const animations = elements?.flatMap((el) => el.getAnimations());
   const animationNames =
     animations?.map((anim) => (anim as CSSAnimation).animationName) || ([] as string[]);
   const filteredAnimations: CSSAnimation[] = [];
@@ -59,10 +59,11 @@ function getElementCSSAnimation(
 function getElementAnimation(
   target: HTMLElement | string,
   effectId: string,
+  parts?: string[],
 ): AnimationGroup | null {
-  const element = typeof target === 'string' ? getElement(target) : target;
+  const elements = getTargetParts(target, parts);
   // somehow get the right animations
-  const animations = element?.getAnimations().filter((anim: Animation | CSSAnimation) => {
+  const animations = elements?.flatMap((el) => el.getAnimations()).filter((anim: Animation | CSSAnimation) => {
     const id = anim.id || (anim as CSSAnimation).animationName;
     // if no id/name just return all animations
     return id ? id.startsWith(effectId) : true;

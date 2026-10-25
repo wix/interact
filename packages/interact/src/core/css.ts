@@ -315,10 +315,17 @@ function effectToCSS(
     const animationOptions = effectToAnimationOptions(effect);
     const cssAnimations = getCSSAnimation(null, animationOptions, trigger, sequence).filter(
       (anim) => anim.name,
-    );
+    ).reduce((acc, anim) => {
+      const part = anim.part || '';
+      if (!acc[part]) {
+        acc[part] = [];
+      }
+      acc[part].push(anim);
+      return acc;
+    }, {} as Record<string, ReturnType<typeof getCSSAnimation>>);
 
     // accumulate keyframes
-    keyframes = cssAnimations.map((anim) => ({
+    keyframes = Object.values(cssAnimations).flat().map((anim) => ({
       name: anim.name as string,
       keyframes: anim.keyframes,
     }));
@@ -326,53 +333,70 @@ function effectToCSS(
     // declare custom parameters
     // TODO - register those to define with @property to prevent unintended override
     declarations.push(
-      ...cssAnimations.flatMap(({ custom }) =>
+      ...Object.values(cssAnimations).flat().flatMap(({ custom }) =>
         Object.entries(custom || {})
           .filter(([_, value]) => value !== undefined)
           .map(([key, value]) => ({ name: key, value: value as string | number })),
       ),
     );
 
-    const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
-      _listPropertyName: propertyName,
-      name: customProps[propertyName],
-      value: cssAnimations
-        .map((animation) => {
-          const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
-          return (
-            (animation as Record<string, unknown>)[name] || LIST_PROPERTY_FALLBACKS[propertyName]
-          );
-        })
-        .join(', '),
-    })).filter(
-      ({ _listPropertyName, name, value }) =>
-        value !== LIST_PROPERTY_FALLBACKS[_listPropertyName] || assigned.has(name),
-    );
-    animationDeclarations.forEach(({ name }) => assigned.add(name));
-    wrote.animation = animationDeclarations.length > 0;
+    // TODO - part animations introduce a problem with cascade where to override it you must override all parts.
+    // Currently this is in play only for background scroll effects, which are not mixed with other effects in cascade,
+    // but this should be fixed. style queries may help in handling this and cascade in general by setting --active-effect-id and querying it by order.
+    Object.entries(cssAnimations).forEach(([part, animations]) => {
+      const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
+        _listPropertyName: propertyName,
+        name: customProps[propertyName],
+        value: animations
+          .map((animation) => {
+            const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
+            return (
+              (animation as Record<string, unknown>)[name] || LIST_PROPERTY_FALLBACKS[propertyName]
+            );
+          })
+          .join(', '),
+      })).filter(
+        ({ _listPropertyName, name, value }) =>
+          value !== LIST_PROPERTY_FALLBACKS[_listPropertyName] || assigned.has(name),
+      );
+      animationDeclarations.forEach(({ name }) => assigned.add(name));
+      wrote.animation = wrote.animation || (animationDeclarations.length > 0);
 
-    if (initial) {
-      // declare animation custom properties with initial dependent on data-motion-enter
-      rules.push({
-        key,
-        media,
-        selectorCondition,
-        childSelector,
-        declarations: DEFAULT_INITIAL,
-        selectorSuffix: ':not([data-interact-enter])',
-      });
-      rules.push({
-        key,
-        media,
-        selectorCondition,
-        childSelector,
-        declarations: animationDeclarations,
-        selectorSuffix: ':not([data-interact-enter="done"])',
-      });
-    } else {
-      // declare animation custom properties
-      declarations.push(...animationDeclarations);
-    }
+      const childOrPartSelector = part ? `[data-interact-part="${part}"]` : childSelector;
+
+      if (initial) {
+        // declare animation custom properties with initial dependent on data-motion-enter
+        rules.push({
+          key,
+          media,
+          selectorCondition,
+          childSelector: childOrPartSelector,
+          declarations: DEFAULT_INITIAL,
+          selectorSuffix: ':not([data-interact-enter])',
+        });
+        rules.push({
+          key,
+          media,
+          selectorCondition,
+          childSelector: childOrPartSelector,
+          declarations: animationDeclarations,
+          selectorSuffix: ':not([data-interact-enter="done"])',
+        });
+      } else {
+        // declare animation custom properties
+        if (part) {
+          rules.push({
+            key,
+            media,
+            selectorCondition,
+            childSelector: childOrPartSelector,
+            declarations: animationDeclarations,
+          });
+        } else {
+          declarations.push(...animationDeclarations);
+        }
+      }
+    });
   } else if (transition || transitionProperties) {
     const properties = getStateStyleProperties(effect);
     const transitions = transitionEffectToTransitionsList(effect);

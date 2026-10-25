@@ -27,6 +27,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['BG_MEDIA'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const { direction = 'left', speed = 0.2 } = options.namedEffect as BgPan;
   const offsetPercentage = ((50 * speed) / (1 + speed)) | 0;
