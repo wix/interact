@@ -362,7 +362,7 @@ function effectToCSS(
       animationDeclarations.forEach(({ name }) => assigned.add(name));
       wrote.animation = wrote.animation || (animationDeclarations.length > 0);
 
-      const childOrPartSelector = part ? `[data-interact-part="${part}"]` : childSelector;
+      const childOrPartSelector = part ? `[data-motion-part="${part}"]` : childSelector;
 
       if (initial) {
         // declare animation custom properties with initial dependent on data-motion-enter
