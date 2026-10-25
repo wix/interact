@@ -1,6 +1,6 @@
 import { cssEasings as easings } from '@wix/motion';
 import type { AnimationFillMode, ScrubAnimationOptions, StretchScroll, DomApi } from '../../types';
-import { roundNumber, toKeyframeValue } from '../../utils';
+import { roundNumber, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 
 const opacityKeyframesMap = {
   in: [
@@ -21,10 +21,13 @@ const opacityKeyframesMap = {
 
 export function getNames(options: ScrubAnimationOptions) {
   const { range = 'out' } = options.namedEffect as StretchScroll;
-  return [
-    `motion-stretchScrollScale${range === 'continuous' ? '-continuous' : ''}`,
-    `motion-stretchScrollOpacity-${range}`,
-  ];
+  return suffixNames(
+    [
+      `motion-stretchScrollScale${range === 'continuous' ? '-continuous' : ''}`,
+      `motion-stretchScrollOpacity-${range}`,
+    ],
+    options.suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -94,7 +97,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     });
   }
 
-  return [
+  const animations = [
     {
       ...options,
       name: stretchScrollScale,
@@ -111,4 +114,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       keyframes: opacityKeyframesMap[range] || opacityKeyframesMap.out,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

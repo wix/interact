@@ -1,10 +1,10 @@
 import type { ScrubAnimationOptions, ParallaxScroll, AnimationFillMode, DomApi } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 
 const DEFAULT_PARALLAX_FACTOR = 0.5;
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-parallaxScroll'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-parallaxScroll'], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -26,7 +26,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   };
 
   // use transform: translateY(<value>) and not translate: 0 <value> because of WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=276281
-  return [
+  const animations = [
     {
       ...options,
       name: parallaxScroll,
@@ -53,4 +53,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

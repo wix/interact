@@ -7,10 +7,10 @@ import type {
   ScrubAnimationOptions,
 } from '../../types';
 import { measureCompHeight } from './utils';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgCloseUpOpacity', 'motion-bgCloseUpZoom'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgCloseUpOpacity', 'motion-bgCloseUpZoom'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -38,7 +38,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
 
   const [bgCloseUpOpacity, bgCloseUpZoom] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgCloseUpOpacity,
@@ -109,4 +109,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

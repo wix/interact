@@ -5,6 +5,8 @@ import {
   parseLength,
   parseDirection,
   getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -18,8 +20,8 @@ const DIRECTION_KEYWORD_TO_ANGLE: Record<string, number> = {
 };
 const ALLOW_ANGLES = true;
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-glideIn', 'motion-fadeIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-glideIn', 'motion-fadeIn'], options.suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -57,7 +59,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   const [glideIn, fadeIn] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: glideIn,
@@ -89,4 +91,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

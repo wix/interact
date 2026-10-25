@@ -6,13 +6,16 @@ import type {
   ScrubAnimationOptions,
   DomApi,
 } from '../../types';
-import { roundNumber, toKeyframeValue } from '../../utils';
+import { roundNumber, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight, getScaleFromPerspectiveAndZ } from './utils';
 
 const PERSPECTIVE = 100;
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgFake3DParallax', 'motion-bgFake3DStretch', 'motion-bgFake3DZoom'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(
+    ['motion-bgFake3DParallax', 'motion-bgFake3DStretch', 'motion-bgFake3DZoom'],
+    options.suffix,
+  );
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -42,7 +45,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
   const [bgFake3DParallax, bgFake3DStretch, bgFake3DZoom] = getNames(options);
   const { measures = { '--motion-comp-height': '0px' } } = options;
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgFake3DParallax,
@@ -136,4 +139,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

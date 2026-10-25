@@ -7,7 +7,7 @@ import type {
   ScrubAnimationOptions,
   DomApi,
 } from '../../types';
-import { roundNumber, toKeyframeValue } from '../../utils';
+import { roundNumber, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight, getScaleFromPerspectiveAndZ } from './utils';
 
 const PERSPECTIVE = 100;
@@ -32,7 +32,7 @@ export function getNames(options: ScrubAnimationOptions) {
     names.splice(1, 0, 'motion-bgZoomParallax');
   }
 
-  return names;
+  return suffixNames(names, options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -181,5 +181,5 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     animation.name = names[index];
   });
 
-  return animations;
+  return suffixCustomProperties(animations, options.suffix);
 }

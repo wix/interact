@@ -6,11 +6,11 @@ import type {
   ScrubAnimationOptions,
   DomApi,
 } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgParallax'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgParallax'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -35,7 +35,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
 
   const [bgParallax] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgParallax,
@@ -73,4 +73,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

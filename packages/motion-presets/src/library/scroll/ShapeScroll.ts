@@ -5,7 +5,7 @@ import type {
   ShapeScroll,
   ShapeType,
 } from '../../types';
-import { toKeyframeValue, getEasing } from '../../utils';
+import { toKeyframeValue, getEasing, suffixNames, suffixCustomProperties } from '../../utils';
 
 const RESPONSIVE_SHAPES_MAP: Record<
   ShapeType,
@@ -33,7 +33,10 @@ const RESPONSIVE_SHAPES_MAP: Record<
 
 export function getNames(options: ScrubAnimationOptions) {
   const { range = 'in' } = options.namedEffect as ShapeScroll;
-  return [`motion-shapeScroll${range === 'continuous' ? '-continuous' : ''}`];
+  return suffixNames(
+    [`motion-shapeScroll${range === 'continuous' ? '-continuous' : ''}`],
+    options.suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -77,7 +80,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     });
   }
 
-  return [
+  const animations = [
     {
       ...options,
       name: shapeScroll,
@@ -87,4 +90,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       keyframes,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

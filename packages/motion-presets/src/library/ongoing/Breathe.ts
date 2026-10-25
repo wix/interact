@@ -7,6 +7,8 @@ import {
   toKeyframeValue,
   parseDirection,
   parseLength,
+  suffixNames,
+  suffixCustomProperties,
 } from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
 
@@ -93,7 +95,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
         },
       ];
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -114,11 +116,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const iterationDelay = (options.namedEffect as Breathe)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return [`motion-breathe-${timingFactor}`];
+  return suffixNames([`motion-breathe-${timingFactor}`], options.suffix);
 }

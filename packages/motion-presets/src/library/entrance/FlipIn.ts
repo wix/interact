@@ -1,11 +1,17 @@
-import { parseDirection, toKeyframeValue, getEntranceFill } from '../../utils';
+import {
+  parseDirection,
+  toKeyframeValue,
+  getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import type { EffectFourDirections, FlipIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'top';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-flipIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn', 'motion-flipIn'], options.suffix);
 }
 
 function getRotateFrom(direction: EffectFourDirections, rotate: number) {
@@ -41,7 +47,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     '--motion-rotate-y': `${from.y}deg`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       easing: 'quadOut',
@@ -66,4 +72,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

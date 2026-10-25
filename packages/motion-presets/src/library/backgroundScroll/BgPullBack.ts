@@ -6,11 +6,11 @@ import type {
   AnimationExtraOptions,
   ScrubAnimationOptions,
 } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgPullBack'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgPullBack'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -39,7 +39,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
 
   const [bgPullBack] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgPullBack,
@@ -70,4 +70,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

@@ -5,13 +5,15 @@ import {
   toKeyframeValue,
   parseLength,
   parseDirection,
+  suffixNames,
+  suffixCustomProperties,
 } from '../../utils';
 
 const DEFAULT_ANGLE = 120;
 const DEFAULT_DISTANCE = { value: 400, unit: 'px' };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-moveScroll'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-moveScroll'], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _?: DomApi, config?: Record<string, any>) {
@@ -67,7 +69,7 @@ export function style(options: ScrubAnimationOptions, config?: Record<string, an
   };
 
   // use transform: translate(<value>) and not translate: <value> because of WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=276281
-  return [
+  const animations = [
     {
       ...options,
       name: moveScroll,
@@ -102,4 +104,6 @@ export function style(options: ScrubAnimationOptions, config?: Record<string, an
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
