@@ -55,7 +55,7 @@
   },
   "peerDependencies": {
     "@wix/interact": "^2.5.20",
-    "@wix/splittext": "^0.2.0"
+    "@wix/splittext": "^0.2.1"
   },
   "peerDependenciesMeta": {
     "@wix/splittext": {
