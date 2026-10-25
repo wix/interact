@@ -4,6 +4,8 @@ import {
   toKeyframeValue,
   parseDirection,
   getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
 } from '../../utils';
 import type { BounceIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
@@ -11,8 +13,8 @@ import { FOUR_DIRECTIONS } from '../../consts';
 const DIRECTIONS = [...FOUR_DIRECTIONS, 'center'] as const;
 const DEFAULT_DIRECTION: (typeof DIRECTIONS)[number] = 'bottom';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-bounceIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn', 'motion-bounceIn'], options.suffix);
 }
 
 const { in: easeIn, out: easeOut } = getEasingFamily('sineIn');
@@ -82,7 +84,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     }px)) rotateZ(var(--motion-rotate, 0deg))`,
   }));
 
-  return [
+  const animations = [
     {
       ...options,
       name: fadeIn,
@@ -101,4 +103,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       keyframes,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

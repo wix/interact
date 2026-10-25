@@ -1,5 +1,12 @@
 import type { TimeAnimationOptions, Bounce, AnimationExtraOptions, DomApi } from '../../types';
-import { getEasing, getTimingFactor, toKeyframeValue, mapRange } from '../../utils';
+import {
+  getEasing,
+  getTimingFactor,
+  toKeyframeValue,
+  mapRange,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 
 const BOUNCE_FACTOR_SOFT = 1;
 const BOUNCE_FACTOR_HARD = 3;
@@ -51,7 +58,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     easing,
   }));
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -61,11 +68,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       keyframes,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const iterationDelay = (options.namedEffect as Bounce)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return [`motion-bounce-${timingFactor}`];
+  return suffixNames([`motion-bounce-${timingFactor}`], options.suffix);
 }

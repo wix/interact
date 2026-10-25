@@ -1,8 +1,8 @@
 import type { FadeScroll, ScrubAnimationOptions, AnimationFillMode, DomApi } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-fadeScroll'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-fadeScroll'], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -26,7 +26,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     '--motion-fade-to': toValue,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: fadeScroll,
@@ -43,4 +43,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

@@ -5,7 +5,7 @@ import type {
   SkewPanScroll,
   EffectTwoSides,
 } from '../../types';
-import { toKeyframeValue, parseDirection } from '../../utils';
+import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectTwoSides = 'right';
@@ -15,8 +15,8 @@ const DIRECTION_MAP = {
   left: 1,
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-skewPanScroll'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-skewPanScroll'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -77,7 +77,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     '--motion-skewpan-to-skew': `${toValues.skew}deg`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: skewPanScroll,
@@ -110,4 +110,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

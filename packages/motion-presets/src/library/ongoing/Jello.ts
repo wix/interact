@@ -1,5 +1,11 @@
 import type { Jello, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, toKeyframeValue, mapRange } from '../../utils';
+import {
+  getTimingFactor,
+  toKeyframeValue,
+  mapRange,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 
 const JELLO_FACTOR_SOFT = 1;
 const JELLO_FACTOR_HARD = 4;
@@ -45,7 +51,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     };
   });
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -55,11 +61,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       keyframes,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const iterationDelay = (options.namedEffect as Jello)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return [`motion-jello-${timingFactor}`];
+  return suffixNames([`motion-jello-${timingFactor}`], options.suffix);
 }

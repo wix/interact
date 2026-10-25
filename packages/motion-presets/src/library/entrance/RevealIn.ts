@@ -1,11 +1,17 @@
 import type { RevealIn, TimeAnimationOptions, EffectFourDirections } from '../../types';
-import { getClipPolygonParams, parseDirection, getEntranceFill } from '../../utils';
+import {
+  getClipPolygonParams,
+  parseDirection,
+  getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'left';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-revealIn', 'motion-fadeIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-revealIn', 'motion-fadeIn'], options.suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -25,7 +31,7 @@ export function style(options: TimeAnimationOptions) {
     '--motion-clip-start': start,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       easing,
@@ -50,4 +56,6 @@ export function style(options: TimeAnimationOptions) {
       keyframes: [{ offset: 0, opacity: 0 }],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

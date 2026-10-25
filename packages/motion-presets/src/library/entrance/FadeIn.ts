@@ -1,9 +1,9 @@
 import { TimeAnimationOptions } from '../../types';
 
-import { getEntranceFill } from '../../utils';
+import { getEntranceFill, suffixNames, suffixCustomProperties } from '../../utils';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn'], options.suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -13,7 +13,7 @@ export function web(options: TimeAnimationOptions) {
 export function style(options: TimeAnimationOptions) {
   const [fadeIn] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: fadeIn,
@@ -22,4 +22,6 @@ export function style(options: TimeAnimationOptions) {
       keyframes: [{ offset: 0, opacity: 0 }],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

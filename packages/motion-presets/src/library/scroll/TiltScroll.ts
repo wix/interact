@@ -6,7 +6,7 @@ import type {
   EffectTwoSides,
 } from '../../types';
 import { cssEasings as easings } from '@wix/motion';
-import { toKeyframeValue, parseDirection } from '../../utils';
+import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
 
 const MAX_Y_TRAVEL = 40;
@@ -18,8 +18,8 @@ const DIRECTIONS_MAP = {
   left: -1,
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-tiltScrollTranslate', 'motion-tiltScrollRotate'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-tiltScrollTranslate', 'motion-tiltScrollRotate'], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -69,7 +69,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     '--motion-tilt-z-to': `${to.z}deg`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: tiltScrollTranslate,
@@ -132,4 +132,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

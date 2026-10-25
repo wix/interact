@@ -1,13 +1,20 @@
 import type { CurveIn, TimeAnimationOptions, DomApi } from '../../types';
-import { toKeyframeValue, parseDirection, parseLength, getEntranceFill } from '../../utils';
+import {
+  toKeyframeValue,
+  parseDirection,
+  parseLength,
+  getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DEPTH = { value: 300, unit: 'px' };
 const DIRECTIONS = [...TWO_SIDES_DIRECTIONS, 'pseudoLeft', 'pseudoRight'] as const;
 const DEFAULT_DIRECTION: (typeof DIRECTIONS)[number] = 'right';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-curveIn', 'motion-fadeIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-curveIn', 'motion-fadeIn'], options.suffix);
 }
 
 const PARAMS_MAP = {
@@ -41,7 +48,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   const easing = 'quadOut';
 
-  return [
+  const animations = [
     {
       ...options,
       name: curveIn,
@@ -74,4 +81,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       keyframes: [{ offset: 0, opacity: 0 }],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

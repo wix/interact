@@ -1,10 +1,10 @@
 import type { AnimationFillMode, ScrubAnimationOptions, Spin3dScroll, DomApi } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 
 const MAX_Y_TRAVEL = 40;
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-spin3dScroll'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-spin3dScroll'], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -56,7 +56,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     '--motion-rot-z-to': `${toValues.rotationZ}deg`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: spin3dScroll,
@@ -101,4 +101,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

@@ -5,13 +5,15 @@ import {
   toKeyframeValue,
   parseDirection,
   getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'right';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-shuttersIn', 'motion-fadeIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-shuttersIn', 'motion-fadeIn'], options.suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -33,7 +35,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   const easing = getEasing(options.easing || 'sineIn');
 
-  return [
+  const animations = [
     {
       ...options,
       easing,
@@ -57,4 +59,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

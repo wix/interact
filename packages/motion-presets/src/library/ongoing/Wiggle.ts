@@ -1,5 +1,12 @@
 import type { Wiggle, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, roundNumber, toKeyframeValue, mapRange } from '../../utils';
+import {
+  getTimingFactor,
+  roundNumber,
+  toKeyframeValue,
+  mapRange,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 
 const WIGGLE_FACTOR_SOFT = 1;
 const WIGGLE_FACTOR_HARD = 4;
@@ -59,7 +66,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     };
   });
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -69,11 +76,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       keyframes,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const iterationDelay = (options.namedEffect as Wiggle)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return [`motion-wiggle-${timingFactor}`];
+  return suffixNames([`motion-wiggle-${timingFactor}`], options.suffix);
 }

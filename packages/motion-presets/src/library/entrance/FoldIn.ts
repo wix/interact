@@ -1,9 +1,15 @@
 import type { EffectFourDirections, FoldIn, TimeAnimationOptions } from '../../types';
-import { parseDirection, toKeyframeValue, getEntranceFill } from '../../utils';
+import {
+  parseDirection,
+  toKeyframeValue,
+  getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-foldIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn', 'motion-foldIn'], options.suffix);
 }
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'top';
@@ -47,7 +53,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     '--motion-rotate-y': `${from.y}deg`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       easing: 'quadOut',
@@ -72,4 +78,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
