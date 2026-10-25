@@ -25,7 +25,7 @@ getWebAnimation(element, {
 
 **Time-based options** (used when no `trigger` is passed): `duration` (ms), `delay`, `endDelay`, `easing`, `iterations` (`0` ⇒ `Infinity`, `undefined` ⇒ `1`), `alternate`, `fill`, `reversed` — plus one of the three effect fields below.
 
-**Scrub options** (used with a `view-progress` or `pointer-move` trigger): `startOffset` / `endOffset` (scroll range), `playbackRate`, `transitionDuration` / `transitionDelay` / `transitionEasing` / `centeredToTarget` (pointer smoothing), `easing`, `iterations`, `fill`, `alternate`, `reversed` — plus one of the three effect fields. Note `duration` here is a `{ value, unit }` length/percentage, not milliseconds.
+**Scrub options** (used with a `view-progress` or `pointer-move` trigger): `startOffset` / `endOffset` (scroll range), `playbackRate`, `transitionDuration` / `transitionEasing` / `centeredToTarget` (pointer smoothing), `easing`, `iterations`, `fill`, `alternate`, `reversed` — plus one of the three effect fields. Note `duration` here is a `{ value, unit }` length/percentage, not milliseconds.
 
 ## The three effect-definition modes
 
