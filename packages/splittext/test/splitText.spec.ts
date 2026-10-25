@@ -599,6 +599,98 @@ describe('splitText', () => {
       const { chars } = splitText(target, { type: 'chars', partIndexing: false });
       expect(chars[0].style.getPropertyValue('--char-index')).toBe('');
     });
+
+    function splitWrapper(target: HTMLElement): HTMLElement {
+      return target.querySelector('[data-splittext-wrapper]')!;
+    }
+
+    it('sets --char-count on the inner wrapper (preserve mode)', () => {
+      const target = el('ABC');
+      const { chars } = splitText(target, { type: 'chars' });
+      const wrapper = splitWrapper(target);
+      expect(wrapper.style.getPropertyValue('--char-count')).toBe(String(chars.length));
+    });
+
+    it('sets --word-count on the inner wrapper', () => {
+      const target = el('One Two Three');
+      const { words } = splitText(target, { type: 'words' });
+      const wrapper = splitWrapper(target);
+      expect(wrapper.style.getPropertyValue('--word-count')).toBe(String(words.length));
+    });
+
+    it('sets --sentence-count on the inner wrapper', () => {
+      const target = el('First. Second.');
+      const { sentences } = splitText(target, { type: 'sentences' });
+      const wrapper = splitWrapper(target);
+      expect(wrapper.style.getPropertyValue('--sentence-count')).toBe(String(sentences.length));
+    });
+
+    it('sets --word-count in flatten mode with wordGlue: none', () => {
+      const target = el('Hello, World!');
+      const { words } = splitText(target, {
+        type: 'words',
+        nested: 'flatten',
+        wordGlue: 'none',
+      });
+      const wrapper = splitWrapper(target);
+      expect(wrapper.style.getPropertyValue('--word-count')).toBe(String(words.length));
+    });
+
+    it('sets --line-count on the inner wrapper', () => {
+      mockLines(2);
+      const target = el('Hello World Overflow');
+      const { lines } = splitText(target, { type: 'lines' });
+      const wrapper = splitWrapper(target);
+      expect(wrapper.style.getPropertyValue('--line-count')).toBe(String(lines.length));
+    });
+
+    it('sets global --word-count and --char-count for nested flatten splits', () => {
+      const target = el('Hi there');
+      const result = splitText(target, { type: ['words', 'chars'], nested: 'flatten' });
+      const wrapper = splitWrapper(target);
+      expect(wrapper.style.getPropertyValue('--word-count')).toBe(String(result.words.length));
+      expect(wrapper.style.getPropertyValue('--char-count')).toBe(String(result.chars.length));
+    });
+
+    it('sets --char-count for nested preserve markup', () => {
+      const target = el('Hi <strong>AB</strong>');
+      const { chars } = splitText(target, { type: 'chars', nested: 'preserve' });
+      const wrapper = splitWrapper(target);
+      expect(chars.length).toBe(5);
+      expect(wrapper.style.getPropertyValue('--char-count')).toBe('5');
+    });
+
+    it('updates count properties when lazy getters build multiple types', () => {
+      const target = el('Hi');
+      const result = splitText(target, { nested: 'flatten' });
+      void result.words;
+      void result.chars;
+      const wrapper = splitWrapper(target);
+      expect(wrapper.style.getPropertyValue('--word-count')).toBe(String(result.words.length));
+      expect(wrapper.style.getPropertyValue('--char-count')).toBe(String(result.chars.length));
+    });
+
+    it('does not set count CSS properties when partIndexing: false', () => {
+      const target = el('Hi');
+      splitText(target, { type: 'chars', partIndexing: false });
+      const wrapper = splitWrapper(target);
+      expect(wrapper.style.getPropertyValue('--char-count')).toBe('');
+      expect(wrapper.style.getPropertyValue('--word-count')).toBe('');
+    });
+
+    it('sets count properties when aria: none', () => {
+      const target = el('Hi');
+      const { chars } = splitText(target, { type: 'chars', aria: 'none' });
+      const wrapper = splitWrapper(target);
+      expect(wrapper.style.getPropertyValue('--char-count')).toBe(String(chars.length));
+    });
+
+    it('does not set --*-count on individual wrapper spans', () => {
+      const target = el('AB');
+      const { chars } = splitText(target, { type: 'chars' });
+      expect(chars[0].style.getPropertyValue('--char-count')).toBe('');
+      expect(chars[1].style.getPropertyValue('--char-count')).toBe('');
+    });
   });
 
   // -------------------------------------------------------------------------
