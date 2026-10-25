@@ -11,6 +11,8 @@ import {
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
+  suffixNames,
+  suffixCustomProperties,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -127,7 +129,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   const transform_0 = getTransform(0);
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -148,6 +150,8 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
@@ -155,10 +159,10 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
   const iterationDelay = +((options.namedEffect as Fold)?.iterationDelay || 0);
 
   if (!iterationDelay) {
-    return ['motion-fold'];
+    return suffixNames(['motion-fold'], options.suffix);
   }
 
   const timingFactor = getTimingFactor(duration, iterationDelay, true) as string;
 
-  return [`motion-fold-${timingFactor}`];
+  return suffixNames([`motion-fold-${timingFactor}`], options.suffix);
 }

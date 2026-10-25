@@ -5,7 +5,7 @@ import type {
   DomApi,
   EffectNineDirections,
 } from '../../types';
-import { toKeyframeValue, parseDirection } from '../../utils';
+import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
 import { NINE_DIRECTIONS } from '../../consts';
 
 const MAX_Y_TRAVEL = 40;
@@ -23,8 +23,8 @@ const directionMap = {
   center: [0, 0],
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-growScroll'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-growScroll'], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -71,7 +71,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     '--motion-trans-y': `${trnsY}%`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: growScroll,
@@ -130,4 +130,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

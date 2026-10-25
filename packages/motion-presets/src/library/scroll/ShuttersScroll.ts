@@ -12,13 +12,18 @@ import {
   toKeyframeValue,
   FOUR_DIRECTIONS,
   parseDirection,
+  suffixNames,
+  suffixCustomProperties,
 } from '../../utils';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'right';
 
 export function getNames(options: ScrubAnimationOptions) {
   const { range = 'in' } = options.namedEffect as ShuttersScroll;
-  return [`motion-shuttersScroll-${range === 'continuous' ? '-continuous' : ''}`];
+  return suffixNames(
+    [`motion-shuttersScroll-${range === 'continuous' ? '-continuous' : ''}`],
+    options.suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -97,7 +102,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     );
   }
 
-  return [
+  const animations = [
     {
       ...options,
       name: shuttersScroll,
@@ -107,4 +112,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       keyframes,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

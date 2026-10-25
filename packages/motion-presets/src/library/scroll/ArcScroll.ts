@@ -1,5 +1,5 @@
 import type { ArcScroll, AnimationFillMode, DomApi, ScrubAnimationOptions } from '../../types';
-import { toKeyframeValue, parseDirection } from '../../utils';
+import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
 
 const ROTATION = 68;
@@ -10,8 +10,8 @@ const ROTATE_DIRECTION_MAP = {
   horizontal: 'rotateY',
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-arcScroll'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-arcScroll'], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -39,7 +39,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     '--motion-arc-to': `${rotateAxis}(${toValue}deg)`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: arcScroll,
@@ -64,4 +64,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

@@ -1,12 +1,18 @@
-import { getClipPolygonParams, parseDirection, getEntranceFill } from '../../utils';
+import {
+  getClipPolygonParams,
+  parseDirection,
+  getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import type { TimeAnimationOptions, WinkIn } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
 
 const DIRECTIONS = AXIS_DIRECTIONS;
 const DEFAULT_DIRECTION: (typeof DIRECTIONS)[number] = 'horizontal';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-winkInClip', 'motion-winkInRotate'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn', 'motion-winkInClip', 'motion-winkInRotate'], options.suffix);
 }
 
 const PARAM_MAP: Record<(typeof DIRECTIONS)[number], { scaleY: number; scaleX: number }> = {
@@ -35,7 +41,7 @@ export function style(options: TimeAnimationOptions) {
     '--motion-clip-start': start,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       easing: 'quadOut',
@@ -76,4 +82,6 @@ export function style(options: TimeAnimationOptions) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

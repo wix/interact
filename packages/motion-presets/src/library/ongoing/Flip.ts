@@ -1,5 +1,12 @@
 import type { AnimationExtraOptions, DomApi, Flip, TimeAnimationOptions } from '../../types';
-import { getEasing, getTimingFactor, toKeyframeValue, parseDirection } from '../../utils';
+import {
+  getEasing,
+  getTimingFactor,
+  toKeyframeValue,
+  parseDirection,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: (typeof AXIS_DIRECTIONS)[number] = 'horizontal';
@@ -44,7 +51,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     asWeb,
   )}, ${toKeyframeValue(custom, '--motion-rotate-y', asWeb)}, 0, 360deg)`;
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -68,11 +75,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const iterationDelay = (options.namedEffect as Flip)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return [`motion-flip-${timingFactor}`];
+  return suffixNames([`motion-flip-${timingFactor}`], options.suffix);
 }

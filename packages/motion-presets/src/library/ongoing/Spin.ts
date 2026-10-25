@@ -1,5 +1,12 @@
 import type { AnimationExtraOptions, DomApi, Spin, TimeAnimationOptions } from '../../types';
-import { getEasing, getTimingFactor, toKeyframeValue, parseDirection } from '../../utils';
+import {
+  getEasing,
+  getTimingFactor,
+  toKeyframeValue,
+  parseDirection,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { SPIN_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
@@ -30,7 +37,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     '--motion-rotate-start': `calc(var(--motion-rotate, 0deg) + ${transformRotate}deg)`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -50,11 +57,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const iterationDelay = (options.namedEffect as Spin)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return [`motion-spin-${timingFactor}`];
+  return suffixNames([`motion-spin-${timingFactor}`], options.suffix);
 }

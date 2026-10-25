@@ -1,8 +1,8 @@
 import type { Shape, ShapeIn, TimeAnimationOptions } from '../../types';
-import { toKeyframeValue, getEntranceFill } from '../../utils';
+import { toKeyframeValue, getEntranceFill, suffixNames, suffixCustomProperties } from '../../utils';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-shapeIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn', 'motion-shapeIn'], options.suffix);
 }
 
 const shapes: Record<Shape, { start: string; end: string }> = {
@@ -35,7 +35,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     '--motion-shape-end': end,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: fadeIn,
@@ -61,4 +61,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

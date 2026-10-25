@@ -1,8 +1,8 @@
 import type { TimeAnimationOptions, DropIn } from '../../types';
-import { toKeyframeValue, getEntranceFill } from '../../utils';
+import { toKeyframeValue, getEntranceFill, suffixNames, suffixCustomProperties } from '../../utils';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-dropIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn', 'motion-dropIn'], options.suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -19,7 +19,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     '--motion-scale': `${initialScale}`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: fadeIn,
@@ -45,4 +45,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

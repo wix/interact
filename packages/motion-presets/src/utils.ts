@@ -504,3 +504,52 @@ export function parseDirection<T extends string | number>(
 
   return defaultValue;
 }
+
+export function suffixNames(names: string[], suffix?: string) {
+  return suffix ? names.map((name) => `${name}${suffix}`) : names;
+}
+
+type CSSValues = Record<string, string | number | undefined>;
+
+/**
+ * Suffixes the custom properties the animations declare, and their references, so animations of the same
+ * preset in different keyframe slots of an element don't override each other's parameters.
+ * Mutates the animations in place, keeping lazy `keyframes` getters lazy.
+ */
+export function suffixCustomProperties<T extends { custom?: CSSValues; keyframes: CSSValues[] }>(
+  animations: T[],
+  suffix?: string,
+): T[] {
+  const props = new Set(animations.flatMap(({ custom }) => Object.keys(custom || {})));
+  if (!suffix || !props.size) {
+    return animations;
+  }
+
+  const suffixValues = (values: CSSValues) =>
+    Object.fromEntries(
+      Object.entries(values).map(([key, value]) => [
+        props.has(key) ? `${key}${suffix}` : key,
+        typeof value === 'string'
+          ? value.replace(/var\((--[\w-]+)(?=\s*[,)])/g, (match, prop) =>
+              props.has(prop) ? `var(${prop}${suffix}` : match,
+            )
+          : value,
+      ]),
+    );
+
+  animations.forEach((animation) => {
+    if (animation.custom) {
+      animation.custom = suffixValues(animation.custom);
+    }
+    const { get, value } = Object.getOwnPropertyDescriptor(animation, 'keyframes')!;
+    Object.defineProperty(animation, 'keyframes', {
+      ...(get
+        ? { get: () => get.call(animation).map(suffixValues) }
+        : { value: value.map(suffixValues), writable: true }),
+      enumerable: true,
+      configurable: true,
+    });
+  });
+
+  return animations;
+}

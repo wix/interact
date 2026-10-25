@@ -5,14 +5,21 @@ import {
   AnimationFillMode,
   EffectTwoSides,
 } from '../../types';
-import { getCssUnits, toKeyframeValue, parseDirection, parseLength } from '../../utils';
+import {
+  getCssUnits,
+  toKeyframeValue,
+  parseDirection,
+  parseLength,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectTwoSides = 'left';
 const DEFAULT_DISTANCE = { value: 400, unit: 'px' };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-panScroll'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-panScroll'], options.suffix);
 }
 
 export function prepare(options: ScrubAnimationOptions, dom?: DomApi) {
@@ -70,7 +77,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   };
 
   // use transform: translateX(<value>) and not translate: <value> because of WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=276281
-  return [
+  const animations = [
     {
       ...options,
       name: panScroll,
@@ -95,4 +102,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

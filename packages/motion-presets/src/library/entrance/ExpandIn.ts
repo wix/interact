@@ -5,6 +5,8 @@ import {
   parseLength,
   parseDirection,
   getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
 } from '../../utils';
 import type { ExpandIn } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
@@ -18,8 +20,8 @@ const DIRECTION_KEYWORD_TO_ANGLE: Record<string, number> = {
   left: 180,
 };
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-expandIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn', 'motion-expandIn'], options.suffix);
 }
 
 export function web(options: TimeAnimationOptions) {
@@ -58,7 +60,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     '--motion-scale': `${initialScale}`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       easing,
@@ -96,4 +98,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

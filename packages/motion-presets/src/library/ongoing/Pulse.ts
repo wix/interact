@@ -1,5 +1,11 @@
 import type { Pulse, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, toKeyframeValue, mapRange } from '../../utils';
+import {
+  getTimingFactor,
+  toKeyframeValue,
+  mapRange,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 
 const PULSE_OFFSET_SOFT = 0;
 const PULSE_OFFSET_HARD = 0.12;
@@ -51,7 +57,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     });
   }
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -61,11 +67,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       keyframes,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const iterationDelay = (options.namedEffect as Pulse)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return [`motion-pulse-${timingFactor}`];
+  return suffixNames([`motion-pulse-${timingFactor}`], options.suffix);
 }

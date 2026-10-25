@@ -1,10 +1,16 @@
 import type { TurnIn, TimeAnimationOptions, EffectFourCorners } from '../../types';
-import { toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
+import {
+  toKeyframeValue,
+  parseDirection,
+  getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { FOUR_CORNERS_DIRECTIONS } from '../../consts';
 const DEFAULT_DIRECTION: EffectFourCorners = 'top-left';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-turnIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn', 'motion-turnIn'], options.suffix);
 }
 
 const DIRECTION_TO_TRANSFORM_MAP: Record<
@@ -42,7 +48,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const origin = toKeyframeValue(custom, '--motion-origin', asWeb);
   const invertedOrigin = toKeyframeValue(custom, '--motion-origin-invert', asWeb);
 
-  return [
+  const animations = [
     {
       ...options,
       name: fadeIn,
@@ -72,4 +78,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

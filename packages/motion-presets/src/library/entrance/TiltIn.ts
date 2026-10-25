@@ -4,6 +4,8 @@ import {
   parseDirection,
   parseLength,
   getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
 } from '../../utils';
 import type { TiltIn, TimeAnimationOptions, EffectTwoSides } from '../../types';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
@@ -11,8 +13,8 @@ import { TWO_SIDES_DIRECTIONS } from '../../consts';
 const DEFAULT_DIRECTION: EffectTwoSides = 'left';
 const DEFAULT_DEPTH = { value: 200, unit: 'px' };
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-tiltInRotate', 'motion-tiltInClip'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn', 'motion-tiltInRotate', 'motion-tiltInClip'], options.suffix);
 }
 
 const ROTATION_MAP = {
@@ -48,7 +50,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     '--motion-clip-start': clipStart,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: fadeIn,
@@ -93,4 +95,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

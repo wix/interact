@@ -1,5 +1,5 @@
 import type { AnimationFillMode, DomApi, ScrubAnimationOptions, SpinScroll } from '../../types';
-import { toKeyframeValue, parseDirection } from '../../utils';
+import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
 import { SPIN_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
@@ -9,8 +9,8 @@ const DIRECTION_MAP = {
   'counter-clockwise': -1,
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-spinScroll'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-spinScroll'], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -42,7 +42,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     '--motion-spin-scale-to': isIn ? 1 : scale,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: spinScroll,
@@ -77,4 +77,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

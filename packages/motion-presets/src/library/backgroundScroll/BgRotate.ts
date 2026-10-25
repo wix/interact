@@ -1,9 +1,9 @@
 // NOT PRODUCTION READY — background-scroll presets are experimental and excluded from public documentation.
 import type { BgRotate, RangeOffset, ScrubAnimationOptions } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgRotate'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgRotate'], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions) {
@@ -20,7 +20,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
 
   const [bgRotate] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgRotate,
@@ -45,4 +45,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

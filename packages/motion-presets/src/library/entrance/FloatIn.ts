@@ -1,11 +1,17 @@
 import type { TimeAnimationOptions, FloatIn, EffectFourDirections } from '../../types';
-import { toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
+import {
+  toKeyframeValue,
+  parseDirection,
+  getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'left';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-floatIn', 'motion-fadeIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-floatIn', 'motion-fadeIn'], options.suffix);
 }
 
 const DIRECTION_MAP = {
@@ -35,7 +41,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   const easing = 'sineInOut';
 
-  return [
+  const animations = [
     {
       ...options,
       name: floatIn,
@@ -68,4 +74,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       keyframes: [{ offset: 0, opacity: 0 }],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

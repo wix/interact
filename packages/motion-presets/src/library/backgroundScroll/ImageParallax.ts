@@ -6,11 +6,11 @@ import type {
   AnimationExtraOptions,
   ScrubAnimationOptions,
 } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight, measureSiteHeight } from './utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-imageParallax'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-imageParallax'], options.suffix);
 }
 
 export function prepare(options: ScrubAnimationOptions, dom?: DomApi) {
@@ -54,7 +54,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
 
   const [imageParallax] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: imageParallax,
@@ -86,4 +86,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
