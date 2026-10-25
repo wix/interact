@@ -16,6 +16,14 @@ const INDEX_PROP: Record<SplitType, string> = {
   sentences: '--sentence-index',
 };
 
+/** Total-count CSS custom property name per split type (set on the inner wrapper). */
+const COUNT_PROP: Record<SplitType, string> = {
+  chars: '--char-count',
+  words: '--word-count',
+  lines: '--line-count',
+  sentences: '--sentence-count',
+};
+
 const SPLIT_TYPE_KEYS = new Set<string>(['chars', 'words', 'lines', 'sentences']);
 
 /**
@@ -111,6 +119,21 @@ export function createWrapper(
   }
 
   return span;
+}
+
+/**
+ * Set inherited `--*-count` custom properties on the split content wrapper for
+ * each built type (total span count in the element).
+ */
+export function applyPartCounts(
+  wrapper: HTMLElement,
+  spansByType: Partial<Record<SplitType, HTMLSpanElement[]>>,
+  options: SplitTextOptions,
+): void {
+  if (options.partIndexing === false) return;
+  for (const [type, spans] of Object.entries(spansByType) as [SplitType, HTMLSpanElement[]][]) {
+    wrapper.style.setProperty(COUNT_PROP[type], String(spans.length));
+  }
 }
 
 const BASE_CSS = `

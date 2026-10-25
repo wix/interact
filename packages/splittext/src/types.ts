@@ -113,9 +113,11 @@ export interface SplitTextOptions {
   onSplit?: (result: SplitTextResult) => void;
 
   /**
-   * When `true` (default), sets CSS custom properties (`--char-index`,
-   * `--word-index`, `--line-index`, `--sentence-index`) on each wrapper span
-   * for use in staggered CSS animations.
+   * When `true` (default), sets CSS custom properties for staggered animations:
+   * `--char-index`, `--word-index`, `--line-index`, and `--sentence-index` on
+   * each wrapper span, and matching `--char-count`, `--word-count`,
+   * `--line-count`, and `--sentence-count` on the inner `[data-splittext-wrapper]`
+   * div (total span count per type, inherited by all parts).
    */
   partIndexing?: boolean;
 
