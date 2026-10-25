@@ -8,21 +8,17 @@ const DEFAULT_CLASS: Record<SplitType, string> = {
   sentences: 'split-s',
 };
 
-/** Long-form CSS custom property name per split type. */
-const INDEX_PROP: Record<SplitType, string> = {
-  chars: '--char-index',
-  words: '--word-index',
-  lines: '--line-index',
-  sentences: '--sentence-index',
+/** Singular stem for `--{stem}-index` / `--{stem}-count` custom properties. */
+const PART_PROP_STEM: Record<SplitType, string> = {
+  chars: 'char',
+  words: 'word',
+  lines: 'line',
+  sentences: 'sentence',
 };
 
-/** Total-count CSS custom property name per split type (set on the inner wrapper). */
-const COUNT_PROP: Record<SplitType, string> = {
-  chars: '--char-count',
-  words: '--word-count',
-  lines: '--line-count',
-  sentences: '--sentence-count',
-};
+function partCssProp(type: SplitType, suffix: 'index' | 'count'): string {
+  return `--${PART_PROP_STEM[type]}-${suffix}`;
+}
 
 const SPLIT_TYPE_KEYS = new Set<string>(['chars', 'words', 'lines', 'sentences']);
 
@@ -100,7 +96,7 @@ export function createWrapper(
 
   // CSS custom property for animation sequencing
   if (options.partIndexing !== false) {
-    span.style.setProperty(INDEX_PROP[type], String(index));
+    span.style.setProperty(partCssProp(type, 'index'), String(index));
   }
 
   const isStringContent = typeof content === 'string';
@@ -123,7 +119,8 @@ export function createWrapper(
 
 /**
  * Set inherited `--*-count` custom properties on the split content wrapper for
- * each built type (total span count in the element).
+ * each built type (total span count in the element). Called after mount, not
+ * from {@link createWrapper}, so each type is written once and inherited by all spans.
  */
 export function applyPartCounts(
   wrapper: HTMLElement,
@@ -132,7 +129,7 @@ export function applyPartCounts(
 ): void {
   if (options.partIndexing === false) return;
   for (const [type, spans] of Object.entries(spansByType) as [SplitType, HTMLSpanElement[]][]) {
-    wrapper.style.setProperty(COUNT_PROP[type], String(spans.length));
+    wrapper.style.setProperty(partCssProp(type, 'count'), String(spans.length));
   }
 }
 
