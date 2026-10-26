@@ -24,7 +24,10 @@ vi.mock('@wix/motion', async () => {
       ready: Promise.resolve(),
     }),
     getElementCSSAnimation: vi.fn().mockReturnValue(null),
-    canUseViewTimeline: vi.fn(() => 'ViewTimeline' in window),
+    watchViewTimeline: vi.fn((_: HTMLElement, onChange: (useViewTimeline: boolean) => void) => {
+      onChange('ViewTimeline' in window);
+      return vi.fn();
+    }),
     prepareAnimation: vi.fn(),
     getScrubScene: vi.fn().mockReturnValue({}),
     getEasing: vi.fn().mockImplementation((v) => v),
@@ -1125,8 +1128,11 @@ describe('interact (mini)', () => {
       // e.g. a source inside a horizontal slider: its view timeline would follow the slider
       it('should use the fizban polyfill when the source has no native ViewTimeline', async () =>
         new Promise(async (done) => {
-          const { canUseViewTimeline, getAnimation, getScrubScene } = await import('@wix/motion');
-          (canUseViewTimeline as unknown as MockInstance).mockReturnValueOnce(false);
+          const { watchViewTimeline, getAnimation, getScrubScene } = await import('@wix/motion');
+          (watchViewTimeline as unknown as MockInstance).mockImplementationOnce((_, onChange) => {
+            onChange(false);
+            return vi.fn();
+          });
           const { Scroll } = await import('fizban');
           const scrollInstance = {
             start: vi.fn(),
@@ -1141,9 +1147,14 @@ describe('interact (mini)', () => {
           add(element, 'logo-scroll');
 
           expect('ViewTimeline' in window).toBe(true);
-          expect(canUseViewTimeline).toHaveBeenCalledWith(element);
+          expect(watchViewTimeline).toHaveBeenCalledWith(element, expect.any(Function));
           expect(getAnimation).not.toHaveBeenCalled();
           expect(getScrubScene).toHaveBeenCalledTimes(1);
+          expect(getScrubScene).toHaveBeenCalledWith(
+            element,
+            expect.anything(),
+            expect.objectContaining({ useViewTimeline: false }),
+          );
           expect(Scroll).toHaveBeenCalledWith(
             expect.objectContaining({ viewSource: element, root: document.body }),
           );
@@ -1155,9 +1166,8 @@ describe('interact (mini)', () => {
         }));
 
       it('should leave CSS from generate() in place when the source has no native ViewTimeline', async () => {
-        const { canUseViewTimeline, getAnimation, getElementCSSAnimation, getScrubScene } =
+        const { watchViewTimeline, getAnimation, getElementCSSAnimation, getScrubScene } =
           await import('@wix/motion');
-        (canUseViewTimeline as unknown as MockInstance).mockReturnValueOnce(false);
         (getElementCSSAnimation as unknown as MockInstance).mockReturnValueOnce({ isCSS: true });
 
         element = document.createElement('div');
@@ -1166,6 +1176,88 @@ describe('interact (mini)', () => {
 
         expect(getAnimation).toHaveBeenCalledTimes(1);
         expect(getScrubScene).not.toHaveBeenCalled();
+        expect(watchViewTimeline).not.toHaveBeenCalled();
+      });
+
+      // e.g. a slider whose item's entrance transform ends, then content that arrives later
+      it('should switch paths when watchViewTimeline reports a change, and stop watching on remove', async () => {
+        const { watchViewTimeline, getAnimation, getScrubScene, getWebAnimation } =
+          await import('@wix/motion');
+        let report!: (useViewTimeline: boolean) => void;
+        const unwatch = vi.fn();
+        (watchViewTimeline as unknown as MockInstance).mockImplementationOnce((_, onChange) => {
+          report = onChange;
+          onChange(true);
+          return unwatch;
+        });
+        const { Scroll } = await import('fizban');
+        const scrollInstance = { start: vi.fn(), destroy: vi.fn() };
+        Scroll.mockImplementation(function (this: any) {
+          Object.assign(this, scrollInstance);
+        });
+        const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+        element = document.createElement('div');
+        add(element, 'logo-scroll');
+
+        expect(getAnimation).toHaveBeenCalledTimes(1);
+        const nativeGroup = (getWebAnimation as unknown as MockInstance).mock.results[0].value;
+        expect(nativeGroup.play).toHaveBeenCalled();
+
+        report(false);
+        expect(getScrubScene).toHaveBeenCalledWith(
+          element,
+          expect.anything(),
+          expect.objectContaining({ useViewTimeline: false }),
+        );
+        await flush();
+        expect(scrollInstance.start).toHaveBeenCalled();
+        expect(nativeGroup.cancel).toHaveBeenCalled();
+
+        report(true);
+        expect(getAnimation).toHaveBeenCalledTimes(2);
+        expect(getAnimation).toHaveBeenLastCalledWith(
+          element,
+          expect.anything(),
+          expect.objectContaining({ useViewTimeline: true }),
+        );
+        await flush();
+        expect(scrollInstance.destroy).toHaveBeenCalled();
+
+        TRIGGER_TO_HANDLER_MODULE_MAP.viewProgress.remove(element);
+        expect(unwatch).toHaveBeenCalled();
+        Scroll.mockRestore();
+      });
+
+      it('should stop the fizban polyfill before it starts, and ignore its frames already scheduled', async () => {
+        const { watchViewTimeline } = await import('@wix/motion');
+        (watchViewTimeline as unknown as MockInstance).mockImplementationOnce((_, onChange) => {
+          onChange(false);
+          return vi.fn();
+        });
+        const { Scroll } = await import('fizban');
+        Scroll.mockImplementation(function (this: any) {
+          Object.assign(this, {
+            start: vi.fn(),
+            destroy: vi.fn(),
+            // what a frame scheduled before destroy() runs, on fizban's removed effect
+            tick: () => {
+              throw new TypeError("Cannot read properties of null (reading 'tick')");
+            },
+          });
+        });
+
+        element = document.createElement('div');
+        add(element, 'logo-scroll');
+        // removed before the scenes are ready
+        TRIGGER_TO_HANDLER_MODULE_MAP.viewProgress.remove(element);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const scroll = Scroll.mock.instances[0];
+        expect(scroll.destroy).toHaveBeenCalled();
+        expect(scroll.start).not.toHaveBeenCalled();
+        expect(() => scroll.tick()).not.toThrow();
+        Scroll.mockRestore();
       });
     });
 
