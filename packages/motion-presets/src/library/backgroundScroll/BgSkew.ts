@@ -27,7 +27,7 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
-export const parts = ['BG_MEDIA'];
+export const parts = ['MEDIA_WRAPPER'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const { angle = 20, direction = 'counter-clockwise' } = options.namedEffect as BgSkew;
@@ -43,7 +43,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ...options,
       name: bgSkew,
       custom,
-      part: 'BG_MEDIA',
+      part: 'MEDIA_WRAPPER',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },

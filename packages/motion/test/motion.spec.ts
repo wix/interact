@@ -142,11 +142,11 @@ const mockBgPanPreset = {
 
 const mockBgPartsPreset = {
   style: vi.fn((options: AnimationOptions) => [
-    { ...options, name: 'bg-media', part: 'BG_MEDIA', keyframes: [{ opacity: 0 }] },
-    { ...options, name: 'bg-img', part: 'BG_IMG', keyframes: [{ opacity: 0 }] },
+    { ...options, name: 'bg-media', part: 'MEDIA_WRAPPER', keyframes: [{ opacity: 0 }] },
+    { ...options, name: 'bg-img', part: 'MEDIA', keyframes: [{ opacity: 0 }] },
   ]),
   getNames: vi.fn(() => ['bg-media', 'bg-img']),
-  parts: ['BG_MEDIA', 'BG_IMG'],
+  parts: ['MEDIA_WRAPPER', 'MEDIA'],
 };
 
 const mockParallaxScrollPreset = {
@@ -323,7 +323,7 @@ describe('motion.ts', () => {
           duration: 1000,
         } as AnimationOptions);
 
-        expect(result.map(({ part }) => part)).toEqual(['BG_MEDIA', 'BG_IMG']);
+        expect(result.map(({ part }) => part)).toEqual(['MEDIA_WRAPPER', 'MEDIA']);
       });
 
       test('should map effect data to CSS animation format', () => {
@@ -1199,8 +1199,8 @@ describe('motion.ts', () => {
         const mediaAnimation = { animationName: 'bg-media' } as CSSAnimation;
         const imgAnimation = { animationName: 'bg-img' } as CSSAnimation;
         const parts: Record<string, any> = {
-          BG_MEDIA: { getAnimations: vi.fn(() => [mediaAnimation]) },
-          BG_IMG: { getAnimations: vi.fn(() => [imgAnimation]) },
+          MEDIA_WRAPPER: { getAnimations: vi.fn(() => [mediaAnimation]) },
+          MEDIA: { getAnimations: vi.fn(() => [imgAnimation]) },
         };
         const element = {
           matches: vi.fn(() => false),
@@ -1218,7 +1218,7 @@ describe('motion.ts', () => {
           namedEffect: { type: 'BgParts', id: 'bg' },
         } as AnimationOptions);
 
-        expect(element.querySelector).toHaveBeenCalledWith('[data-motion-part~="BG_MEDIA"]');
+        expect(element.querySelector).toHaveBeenCalledWith('[data-motion-part~="MEDIA_WRAPPER"]');
         expect(element.getAnimations).not.toHaveBeenCalled();
         expect(AnimationGroup).toHaveBeenCalledWith([mediaAnimation, imgAnimation]);
       });

@@ -30,7 +30,7 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
-export const parts = ['BG_LAYER'];
+export const parts = ['MEDIA_CLIP'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const easing = 'sineOut';
@@ -45,7 +45,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ...options,
       name: bgFadeBackOpacity,
       easing: 'linear',
-      part: 'BG_LAYER',
+      part: 'MEDIA_CLIP',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -76,7 +76,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       name: bgFadeBackScale,
       custom,
       easing,
-      part: 'BG_LAYER',
+      part: 'MEDIA_CLIP',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
