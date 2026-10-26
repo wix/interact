@@ -1,5 +1,10 @@
 import type { AnimationGroup, ScrubScrollScene } from '@wix/motion';
-import { getAnimation, getScrubScene } from '@wix/motion';
+import {
+  canUseViewTimeline,
+  getAnimation,
+  getElementCSSAnimation,
+  getScrubScene,
+} from '@wix/motion';
 import { Scroll } from 'fizban';
 import type { ViewEnterParams, ScrubEffect, HandlerObjectMap, InteractOptions } from '../types';
 import {
@@ -35,7 +40,13 @@ function addViewProgressHandler(
 
   const effectOptions = effectToAnimationOptions(effect);
   let cleanup;
-  if ('ViewTimeline' in window) {
+  // A source whose scroller can't scroll on the timeline's axis (e.g. inside a horizontal slider)
+  // takes the page-based fallback, like a browser without ViewTimeline. CSS from generate() is left
+  // as it is: the fallback stacked on top of it would show only while the fallback fills.
+  if (
+    canUseViewTimeline(source) ||
+    ('ViewTimeline' in window && getElementCSSAnimation(target, effectOptions))
+  ) {
     // Use ViewTimeline for modern browsers
     const animationGroup = getAnimation(
       target,

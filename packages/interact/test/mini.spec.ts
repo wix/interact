@@ -24,6 +24,7 @@ vi.mock('@wix/motion', async () => {
       ready: Promise.resolve(),
     }),
     getElementCSSAnimation: vi.fn().mockReturnValue(null),
+    canUseViewTimeline: vi.fn(() => 'ViewTimeline' in window),
     prepareAnimation: vi.fn(),
     getScrubScene: vi.fn().mockReturnValue({}),
     getEasing: vi.fn().mockImplementation((v) => v),
@@ -1120,6 +1121,52 @@ describe('interact (mini)', () => {
             done(void 0);
           }, 0);
         }));
+
+      // e.g. a source inside a horizontal slider: its view timeline would follow the slider
+      it('should use the fizban polyfill when the source has no native ViewTimeline', async () =>
+        new Promise(async (done) => {
+          const { canUseViewTimeline, getAnimation, getScrubScene } = await import('@wix/motion');
+          (canUseViewTimeline as unknown as MockInstance).mockReturnValueOnce(false);
+          const { Scroll } = await import('fizban');
+          const scrollInstance = {
+            start: vi.fn(),
+            destroy: vi.fn(),
+          };
+          Scroll.mockImplementation(function (this: any) {
+            Object.assign(this, scrollInstance);
+          });
+
+          element = document.createElement('div');
+
+          add(element, 'logo-scroll');
+
+          expect('ViewTimeline' in window).toBe(true);
+          expect(canUseViewTimeline).toHaveBeenCalledWith(element);
+          expect(getAnimation).not.toHaveBeenCalled();
+          expect(getScrubScene).toHaveBeenCalledTimes(1);
+          expect(Scroll).toHaveBeenCalledWith(
+            expect.objectContaining({ viewSource: element, root: document.body }),
+          );
+          setTimeout(() => {
+            expect(scrollInstance.start).toHaveBeenCalled();
+            Scroll.mockRestore();
+            done(void 0);
+          }, 0);
+        }));
+
+      it('should leave CSS from generate() in place when the source has no native ViewTimeline', async () => {
+        const { canUseViewTimeline, getAnimation, getElementCSSAnimation, getScrubScene } =
+          await import('@wix/motion');
+        (canUseViewTimeline as unknown as MockInstance).mockReturnValueOnce(false);
+        (getElementCSSAnimation as unknown as MockInstance).mockReturnValueOnce({ isCSS: true });
+
+        element = document.createElement('div');
+
+        add(element, 'logo-scroll');
+
+        expect(getAnimation).toHaveBeenCalledTimes(1);
+        expect(getScrubScene).not.toHaveBeenCalled();
+      });
     });
 
     describe('listContainer', () => {
