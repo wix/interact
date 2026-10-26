@@ -53,6 +53,21 @@ function getRanges(effect: AnimationDataForScrub) {
   };
 }
 
+// the same range for the scroll fallback (fizban), which takes a percentage of the named range and
+// adds any <length> in `add`
+function getScrubRange(range: RangeOffset, add: string | undefined, isEnd?: boolean) {
+  const name = range.name || 'cover';
+  const { offset } = range;
+
+  if (!offset || offset.unit === 'percentage') {
+    return { name, offset: offset?.value, add };
+  }
+
+  // a <length> counts from the start of the named range, or from its end for an end range (see getRange)
+  const length = getLength(offset);
+  return { name, offset: isEnd ? 100 : 0, add: add ? `calc(${length} + ${add})` : length };
+}
+
 function measure(target: HTMLElement | null): MeasureCallback {
   return (fn) => fastdom.measure(() => fn(target));
 }
@@ -89,7 +104,7 @@ function getEffectsData(
   animations: AnimationData[],
   trigger?: Partial<TriggerVariant>,
   effectId?: string,
-  forCSS?: boolean,
+  viewTimeline?: boolean,
 ) {
   // process each AnimationData object into a KeyframeEffect object
   return animations.map((effect, index) => {
@@ -107,9 +122,9 @@ function getEffectsData(
       effectOptions.duration = effect.duration as number;
       effectOptions.delay = (effect as TimeAnimationOptions).delay || 0;
     } else {
-      // forCSS bypasses the runtime ViewTimeline check so that SSR / CSS generation
-      // always emits `duration: auto` for scroll-driven animations.
-      if (trigger?.trigger === 'view-progress' && (forCSS || window.ViewTimeline)) {
+      // `viewTimeline` is true when the animation runs on a native view timeline. SSR / CSS
+      // generation always passes true, so it emits `duration: auto` for scroll-driven animations.
+      if (trigger?.trigger === 'view-progress' && viewTimeline) {
         effectOptions.duration = 'auto';
       } else {
         // if ViewTimeline not supported then put a 100ms value in duration get a progress we can easily relate to
@@ -147,4 +162,5 @@ export {
   getDirection,
   getLength,
   getRanges,
+  getScrubRange,
 };

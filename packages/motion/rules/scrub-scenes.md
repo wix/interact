@@ -66,8 +66,8 @@ function getScrubScene(
 | Condition                                                                               | Returns                                                                                                               | Notes                                                                                                                                                                                         |
 | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Underlying animation couldn't be built (e.g. unregistered `namedEffect`)                | `null`                                                                                                                | Always guard for `null` before using the result.                                                                                                                                              |
-| `trigger: 'view-progress'` and `window.ViewTimeline` is **absent**                      | `ScrubScrollScene[]` — one entry per partial animation in the group                                                   | The **only** branch that emits scroll scenes. This is the polyfill path.                                                                                                                      |
-| `trigger: 'view-progress'` and `window.ViewTimeline` **exists**                         | a `ScrubPointerScene`-shaped wrapper around the native, timeline-linked `AnimationGroup`                              | The native `ViewTimeline` already drives this animation on scroll; there is nothing to scrub manually. Use `getWebAnimation` directly for the native path instead of calling `getScrubScene`. |
+| `trigger: 'view-progress'` and `canUseViewTimeline(subject)` is **false**               | `ScrubScrollScene[]` — one entry per partial animation in the group                                                   | The **only** branch that emits scroll scenes. This is the polyfill path.                                                                                                                      |
+| `trigger: 'view-progress'` and `canUseViewTimeline(subject)` is **true**                | a `ScrubPointerScene`-shaped wrapper around the native, timeline-linked `AnimationGroup`                              | The native `ViewTimeline` already drives this animation on scroll; there is nothing to scrub manually. Use `getWebAnimation` directly for the native path instead of calling `getScrubScene`. |
 | `trigger: 'pointer-move'` and `animationOptions.keyframeEffect` is set                  | single `ScrubPointerScene` wrapping an `AnimationGroup`                                                               | `effect(_, p)` computes `linearProgress = axis === 'x' ? p.x : p.y` and calls `animationGroup.progress(linearProgress)`.                                                                      |
 | `trigger: 'pointer-move'` and `namedEffect`/`customEffect` is set (no `keyframeEffect`) | single `ScrubPointerScene` wrapping a `MouseAnimationInstance` (or `CustomMouseAnimationInstance` for `customEffect`) | `effect(_, p)` calls the instance's `progress(p)`.                                                                                                                                            |
 
@@ -265,8 +265,9 @@ if (!scene) {
 
 With `trigger: 'view-progress'` (`../src/api/common.ts:106-120`):
 
-- If `window.ViewTimeline` exists (or `forCSS` is set, i.e. the `getCSSAnimation`/SSR path) →
-  `duration: 'auto'`, timeline-linked, and it auto-plays.
+- If a native timeline follows the subject (`canUseViewTimeline(subject)`: `window.ViewTimeline`
+  exists and the subject's scroll container can scroll on the block axis), or on the
+  `getCSSAnimation`/SSR path → `duration: 'auto'`, timeline-linked, and it auto-plays.
 - Otherwise → `duration: 99.99`, `delay: 0.01` (ms) so the animation's progress is externally scrubbable
   via `currentTime`, and `start`/`end` range info is written onto each animation for `getScrubScene` to
   read.
@@ -279,8 +280,11 @@ With `trigger: 'view-progress'` (`../src/api/common.ts:106-120`):
 - **MUST** call `destroy()` on every scene (loop over the array for `ScrubScrollScene[]`) on teardown.
 - **Rule**: pointer `axis` goes on the trigger (3rd arg), not inside `animationOptions`.
 - **Rule**: `startOffset`/`endOffset` belong on `animationOptions`, not on the trigger.
-- **Rule**: if `window.ViewTimeline` exists, don't call `getScrubScene` for `view-progress` — call
-  `getWebAnimation` directly and let the native timeline drive it.
+- **Rule**: if `canUseViewTimeline(subject)` is true, don't call `getScrubScene` for `view-progress` —
+  call `getWebAnimation` directly and let the native timeline drive it. Branch on it, not on
+  `window.ViewTimeline`: a subject inside a horizontal slider has no native timeline even when the
+  browser supports one. The answer can change with layout; `watchViewTimeline(subject, onChange)`
+  reports it, and passing it as the trigger's `useViewTimeline` makes both functions build that path.
 - **Rule**: `@wix/interact` (with its bundled `fizban` scroll polyfill) already implements a
   spec-accurate scroll driver and pointer driver on top of `getScrubScene` — prefer it over a hand-rolled
   driver in application code.

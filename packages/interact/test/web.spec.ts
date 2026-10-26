@@ -24,6 +24,10 @@ vi.mock('@wix/motion', async () => {
       ready: Promise.resolve(),
     }),
     getElementCSSAnimation: vi.fn().mockReturnValue(null),
+    watchViewTimeline: vi.fn((_: HTMLElement, onChange: (useViewTimeline: boolean) => void) => {
+      onChange('ViewTimeline' in window);
+      return vi.fn();
+    }),
     prepareAnimation: vi.fn(),
     getScrubScene: vi.fn().mockReturnValue({}),
     getEasing: vi.fn().mockImplementation((v) => v),

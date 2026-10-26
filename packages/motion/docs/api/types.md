@@ -155,6 +155,7 @@ type TriggerVariant = {
   id: string;
   trigger: 'view-progress' | 'pointer-move';
   componentId: string;
+  useViewTimeline?: boolean; // view-progress: force the native (true) or fallback (false) path
 };
 ```
 
@@ -345,7 +346,7 @@ Most presets implement `AnimationEffectAPI`; `ScrollEffectModule` and `MouseEffe
 
 ### `ScrubScrollScene`
 
-One entry of the array returned by `getScrubScene()` on the polyfilled (no `window.ViewTimeline`) scroll path.
+One entry of the array returned by `getScrubScene()` on the polyfilled scroll path: no `window.ViewTimeline`, or [`canUseViewTimeline()`](./core-functions.md#canuseviewtimeline) is false for the subject, e.g. inside a horizontal slider.
 
 ```typescript
 interface ScrubScrollScene {

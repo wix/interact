@@ -209,6 +209,8 @@ export type TriggerVariant = {
   id: string;
   trigger: 'view-progress' | 'pointer-move';
   componentId: string;
+  /** view-progress: whether to run on a native ViewTimeline; detected with `canUseViewTimeline()` when omitted */
+  useViewTimeline?: boolean;
 };
 
 export type AnimationGroupOptions = AnimationOptions & {

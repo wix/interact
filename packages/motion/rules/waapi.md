@@ -59,17 +59,22 @@ function getWebAnimation(
 
 ## `view-progress`: Native ViewTimeline vs Polyfill
 
-`getWebAnimation` branches on runtime `ViewTimeline` support for `trigger: { trigger: 'view-progress' }`
-(`../src/api/webAnimations.ts:116-190`):
+`getWebAnimation` branches on the trigger's `useViewTimeline`, or on `canUseViewTimeline(subject)` when
+it's omitted, for `trigger: { trigger: 'view-progress' }` (`../src/api/viewTimeline.ts`,
+`../src/api/webAnimations.ts`). `watchViewTimeline(subject, onChange)` reports when the answer changes:
 
-- **`window.ViewTimeline` present** — a native `ViewTimeline` is constructed (`subject` = `trigger.element`
+- **a native timeline can follow the subject** — `window.ViewTimeline` is present, and the subject's
+  scroll container (`timeline.source`) is the page, or can scroll on the block axis (`overflow` `auto` /
+  `scroll` with more than 1px to scroll). A native `ViewTimeline` is constructed (`subject` = `trigger.element`
   or the element resolved from `trigger.componentId`), the animation's `duration` is set to `'auto'`,
   it is linked to that timeline, and it **auto-plays** immediately (`animation.play()` is called inside
   a `fastdom.mutate`).
-- **`window.ViewTimeline` absent** — no timeline is attached. Instead `duration: 99.99ms` /
+- **`window.ViewTimeline` absent, or the scroll container can't scroll on the block axis** (a horizontal
+  slider: `overflow-x: scroll` makes it a scroll container on both axes) — no timeline is attached. Instead `duration: 99.99ms` /
   `delay: 0.01ms` are used so the animation's progress can be driven externally by setting
-  `currentTime`, and `start`/`end` range info (`{ name, offset, add }`, from `startOffset`/`endOffset`)
-  is written directly onto each `Animation` object. This is the data `getScrubScene` reads to build
+  `currentTime`, and `start`/`end` range info (`{ name, offset, add }`, from `startOffset`/`endOffset`;
+  a `<length>` offset becomes `offset: 0` or `100` plus that length in `add`) is written directly onto
+  each `Animation` object. This is the data `getScrubScene` reads to build
   `ScrubScrollScene[]` — see `./scrub-scenes.md`.
 
 ## `TimeAnimationOptions`

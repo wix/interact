@@ -18,7 +18,7 @@ documents only the lower-level `@wix/motion` primitive it is built on.
 - [Signature](#signature)
 - [Return Shape: an Array of Descriptors](#return-shape-an-array-of-descriptors)
 - [Sequence Stagger in CSS](#sequence-stagger-in-css)
-- [`forCSS` and `duration: 'auto'`](#forcss-and-duration-auto)
+- [`viewTimeline` and `duration: 'auto'`](#viewtimeline-and-duration-auto)
 - [Injecting the Output](#injecting-the-output)
 - [The `iterations` Idiom in CSS](#the-iterations-idiom-in-css)
 - [Relationship to `@wix/interact`'s `generate()`](#relationship-to-wixinteracts-generate)
@@ -124,23 +124,23 @@ so the emitted CSS is valid and FOUC-free before any JS loads.
 - **Rule:** the stagger only affects the delay slot, which is omitted entirely for `duration: 'auto'`
   (`view-progress`) animations — sequences are time-based only.
 
-## `forCSS` and `duration: 'auto'`
+## `viewTimeline` and `duration: 'auto'`
 
-`getCSSAnimation` internally calls the shared `getEffectsData(..., forCSS = true)`. For a `view-progress` trigger, this **forces `duration: 'auto'`
+`getCSSAnimation` internally calls the shared `getEffectsData(..., viewTimeline = true)`. For a `view-progress` trigger, this **forces `duration: 'auto'`
 regardless of whether the current runtime supports `window.ViewTimeline`**:
 
 ```typescript
-// ../src/api/common.ts:110-113
-// forCSS bypasses the runtime ViewTimeline check so that SSR / CSS generation
-// always emits `duration: auto` for scroll-driven animations.
-if (trigger?.trigger === 'view-progress' && (forCSS || window.ViewTimeline)) {
+// ../src/api/common.ts (getEffectsData)
+// `viewTimeline` is true when the animation runs on a native view timeline. SSR / CSS
+// generation always passes true, so it emits `duration: auto` for scroll-driven animations.
+if (trigger?.trigger === 'view-progress' && viewTimeline) {
   effectOptions.duration = 'auto';
 }
 ```
 
 This is what makes the generated CSS **FOUC-free and environment-independent**: the same CSS renders
 correctly whether or not the browser that eventually loads the page supports native `ViewTimeline`.
-Server-side code has no `window` at all — without the `forCSS` override this branch would fall
+Server-side code has no `window` at all — without passing `viewTimeline = true` this branch would fall
 through to the polyfill's `99.99ms` / `0.01ms` values, which is wrong for static CSS output (see
 `./scrub-scenes.md` for the polyfill path itself).
 
@@ -259,7 +259,7 @@ rule logic.
 - [`./custom-effects.md`](./custom-effects.md) — the `AnimationEffectAPI`/`style()` contract that
   feeds `getCSSAnimation`, and `data-motion-part` sub-targeting.
 - [`./sequences.md`](./sequences.md) — the runtime `Sequence` half of the CSS stagger contract.
-- `./scrub-scenes.md` — the native-`ViewTimeline`-vs-polyfill duration branch this file's `forCSS`
-  override bypasses.
+- `./scrub-scenes.md` — the native-`ViewTimeline`-vs-polyfill duration branch this file's
+  `viewTimeline = true` bypasses.
 - `../../interact/rules/integration.md` — `@wix/interact`'s `generate()`, which builds full
   FOUC-prevention page CSS on top of `getCSSAnimation`.

@@ -196,7 +196,8 @@ authoring your own module when a suitable preset already exists.
 ## 4. Driving scrub scenes manually
 
 `getScrubScene()` is for the cases where nothing drives progress for you automatically: the
-`view-progress` polyfill (no native `window.ViewTimeline`) and `pointer-move` effects. It returns scene
+`view-progress` polyfill (no native `window.ViewTimeline` for the subject, see
+[`canUseViewTimeline()`](../api/core-functions.md#canuseviewtimeline)) and `pointer-move` effects. It returns scene
 objects exposing `effect(_, progress)` and `destroy()`, which **you** call from your own listener.
 
 ```typescript
@@ -214,7 +215,7 @@ need to drive progress yourself outside of `@wix/interact`.
 
 ### Scroll (`view-progress` polyfill)
 
-When `window.ViewTimeline` is unavailable, `getScrubScene` returns a `ScrubScrollScene[]` — one entry per
+When the subject has no native `ViewTimeline` (no `window.ViewTimeline`, or a scroll container that can't scroll on the block axis, such as a horizontal slider), `getScrubScene` returns a `ScrubScrollScene[]` — one entry per
 partial animation, each exposing `viewSource`, `getProgress()`, `effect(_, progress)`, and `destroy()`.
 
 ```typescript
