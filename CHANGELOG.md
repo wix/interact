@@ -118,6 +118,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `generate()` writes the animation list properties of a part animation on the effect's `[data-motion-part~="<part>"]` element instead of the target, so presets that animate parts (background scroll) work in CSS mode. Overriding a part animation in the cascade only works if the overriding effect sets the same parts again, or if the conditions never match together (#364)
 
+#### Changed
+
+- Bump `@wix/motion` dependency to `^2.1.18`
+
 ### [2.5.21] - 2026-10-25
 
 #### Added
@@ -438,6 +442,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `getCSSAnimation()` returns the animation's `part` instead of a `target` selector (#364)
 
+#### Fixed
+
+- `getEffectsData()` no longer normalizes preset keyframes before `dom.measure()` runs, so lazy keyframes/ranges that depend on measured layout are read at apply time — fixing zero Cross loop offsets and background-scroll ranges that ignored component height (#347)
+
 ### [2.1.17] - 2026-10-25
 
 #### Removed
@@ -569,6 +577,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 #### Changed
 
 - Background scroll part names: `BG_LAYER` is now `MEDIA_CLIP`, `BG_MEDIA` is now `MEDIA_WRAPPER`, and `BG_IMG` is now `MEDIA`. Elements must use the new `data-motion-part` values (#364)
+- Bump `@wix/motion` dependency to `^2.1.18`
 
 #### Fixed
 
