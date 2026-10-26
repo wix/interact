@@ -288,9 +288,10 @@ animation no-ops. Apply them every time, even if you don't open a reference file
 8. **Never invent or guess.** Use only real preset names (`references/presets.md`).
    If you don't know a preset's option name/type, **omit it** and rely on defaults
    — guessing produces silently-wrong output. Never emit `DVD` (exists in types but
-   isn't registered) or any `Bg*`/`ImageParallax` preset (experimental, not
-   production-ready). For "background parallax", use the public **`ParallaxScroll`**
-   on the image element with `viewProgress`.
+   isn't registered). Emit `Bg*`/`ImageParallax` only on a section whose markup has
+   the `MEDIA_CLIP` > `MEDIA_WRAPPER` > `MEDIA` parts (see `references/presets.md`);
+   for "background parallax" on plain markup, use **`ParallaxScroll`** on the image
+   element with `viewProgress`.
 
 9. **Scroll presets carry a `range`.** Every `*Scroll` preset needs
    `range: 'in' | 'out' | 'continuous'` in its `namedEffect`
