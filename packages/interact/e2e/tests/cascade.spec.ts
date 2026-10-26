@@ -193,7 +193,12 @@ for (const mode of ['css', 'runtime'] as Mode[]) {
       ],
       [NARROW, { css: [], runtime: [] }, { css: ['motion-bgParallax'], runtime: ['parallax'] }, ''],
     ] as const) {
-      test(`all parts of an overridden effect stop @${width}`, async () => {
+      test(`all parts of an overridden effect stop @${width}`, async ({ page }) => {
+        test.skip(
+          mode === 'css' &&
+            !(await page.evaluate(() => CSS.supports('animation-timeline', 'view()'))),
+          'scroll-driven CSS animations are not supported',
+        );
         await fixture.mount(
           {
             conditions,
