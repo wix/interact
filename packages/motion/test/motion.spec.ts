@@ -140,6 +140,15 @@ const mockBgPanPreset = {
   ]),
 };
 
+const mockBgPartsPreset = {
+  style: vi.fn((options: AnimationOptions) => [
+    { ...options, name: 'bg-media', part: 'MEDIA_WRAPPER', keyframes: [{ opacity: 0 }] },
+    { ...options, name: 'bg-img', part: 'MEDIA', keyframes: [{ opacity: 0 }] },
+  ]),
+  getNames: vi.fn(() => ['bg-media', 'bg-img']),
+  parts: ['MEDIA_WRAPPER', 'MEDIA'],
+};
+
 const mockParallaxScrollPreset = {
   web: vi.fn((options: AnimationOptions) => [
     {
@@ -176,6 +185,7 @@ registerEffects({
   FadeScroll: mockFadeScrollPreset,
   GlitchIn: mockGlitchInPreset,
   BgPan: mockBgPanPreset,
+  BgParts: mockBgPartsPreset,
   ParallaxScroll: mockParallaxScrollPreset,
   Poke: mockPokePreset,
   CustomMouse,
@@ -209,7 +219,6 @@ describe('motion.ts', () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({
-          target: '#test-target',
           animation: expect.stringContaining('fade-in'),
           name: 'fade-in',
           keyframes: [{ opacity: 0 }, { opacity: 1 }],
@@ -261,7 +270,6 @@ describe('motion.ts', () => {
 
         expect(result).toHaveLength(1);
         expect(result[0]).toMatchObject({
-          target: '#test-target',
           animationTimeline: '--view-timeline-1',
           animationRange: expect.stringMatching(/entry.*exit/),
         });
@@ -309,15 +317,13 @@ describe('motion.ts', () => {
         expect(result[0].id).toBe('my-effect-1-1');
       });
 
-      test('should handle null target', () => {
-        const animationOptions: AnimationOptions = {
-          namedEffect: { type: 'FadeIn', id: 'fade' },
+      test('should expose the part of each animation', () => {
+        const result = getCSSAnimation(null, {
+          namedEffect: { type: 'BgParts', id: 'bg' },
           duration: 1000,
-        };
+        } as AnimationOptions);
 
-        const result = getCSSAnimation(null, animationOptions);
-
-        expect(result[0].target).toBe('');
+        expect(result.map(({ part }) => part)).toEqual(['MEDIA_WRAPPER', 'MEDIA']);
       });
 
       test('should map effect data to CSS animation format', () => {
@@ -331,7 +337,6 @@ describe('motion.ts', () => {
         const result = getCSSAnimation('test-target', animationOptions);
 
         expect(result[0]).toMatchObject({
-          target: '#test-target',
           animation: 'fade-in 1000ms 0ms ease-in forwards 2 paused',
           name: 'fade-in',
           keyframes: [{ opacity: 0 }, { opacity: 1 }],
@@ -1188,6 +1193,34 @@ describe('motion.ts', () => {
 
         expect(AnimationGroup).toHaveBeenCalledWith([mockCSSAnimations[0]]);
         expect(result).toBe(mockAnimationGroup);
+      });
+
+      test('should collect CSS animations from the effect parts', async () => {
+        const mediaAnimation = { animationName: 'bg-media' } as CSSAnimation;
+        const imgAnimation = { animationName: 'bg-img' } as CSSAnimation;
+        const parts: Record<string, any> = {
+          MEDIA_WRAPPER: { getAnimations: vi.fn(() => [mediaAnimation]) },
+          MEDIA: { getAnimations: vi.fn(() => [imgAnimation]) },
+        };
+        const element = {
+          matches: vi.fn(() => false),
+          querySelector: vi.fn((selector: string) => parts[selector.match(/~="(\w+)"/)![1]]),
+          getAnimations: vi.fn(() => mockCSSAnimations),
+        } as any;
+
+        const { AnimationGroup } = await import('../src/AnimationGroup');
+        (AnimationGroup as Mock).mockImplementation(function (animations: any) {
+          mockAnimationGroup.animations = animations;
+          return mockAnimationGroup;
+        });
+
+        getElementCSSAnimation(element, {
+          namedEffect: { type: 'BgParts', id: 'bg' },
+        } as AnimationOptions);
+
+        expect(element.querySelector).toHaveBeenCalledWith('[data-motion-part~="MEDIA_WRAPPER"]');
+        expect(element.getAnimations).not.toHaveBeenCalled();
+        expect(AnimationGroup).toHaveBeenCalledWith([mediaAnimation, imgAnimation]);
       });
 
       test('should fallback to getElementAnimation when no style method', async () => {

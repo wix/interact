@@ -30,6 +30,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_CLIP'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const { range = 'in' } = options.namedEffect as BgFade;
   const isOut = range === 'out';
@@ -46,7 +48,8 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgFade,
-      part: 'BG_LAYER',
+      custom,
+      part: 'MEDIA_CLIP',
       easing,
       startOffset: {
         name: 'cover',

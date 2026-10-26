@@ -32,6 +32,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const { stretch = 1.3, zoom = 100 / 6 } = options.namedEffect as BgFake3D;
   const scale = getScaleFromPerspectiveAndZ(zoom, PERSPECTIVE);
@@ -49,7 +51,8 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgFake3DParallax,
-      part: 'BG_IMG',
+      custom,
+      part: 'MEDIA',
       easing: 'sineOut',
       startOffset: {
         name: 'cover',
@@ -85,7 +88,8 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgFake3DStretch,
-      part: 'BG_IMG',
+      custom,
+      part: 'MEDIA',
       easing: 'linear',
       composite: 'add' as const,
       startOffset: {
@@ -111,7 +115,8 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgFake3DZoom,
-      part: 'BG_IMG',
+      custom,
+      part: 'MEDIA',
       easing: 'sineIn',
       composite: 'add' as const,
       startOffset: {

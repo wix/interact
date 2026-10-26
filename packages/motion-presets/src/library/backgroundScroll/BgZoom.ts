@@ -49,6 +49,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_WRAPPER', 'MEDIA'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   let { direction = 'in', zoom = DEFAULT_ZOOM } = options.namedEffect as BgZoom;
   const isIn = direction === 'in';
@@ -75,7 +77,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
   const animations: AnimationData[] = [
     {
       ...options,
-      part: 'BG_MEDIA',
+      part: 'MEDIA_WRAPPER',
       easing: 'linear',
       startOffset: {
         name: 'cover',
@@ -97,7 +99,8 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       easing,
-      part: 'BG_IMG',
+      part: 'MEDIA',
+      custom,
       composite: isIn ? ('add' as const) : ('replace' as const),
       startOffset: {
         name: 'cover',
@@ -132,7 +135,8 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
   if (isIn) {
     animations.splice(1, 0, {
       ...options,
-      part: 'BG_IMG',
+      custom,
+      part: 'MEDIA',
       easing: 'linear',
       startOffset: {
         name: 'cover',

@@ -23,6 +23,16 @@ function getElementMotionPart(element: Element | null, part: string) {
   return element?.querySelector(`[data-motion-part~="${part}"]`);
 }
 
+function getTargetParts(target: HTMLElement | string | null, parts?: string[]) {
+  const element = typeof target === 'string' ? getElement(target) : target;
+  if (parts?.length) {
+    return parts
+      .map((part) => getElementMotionPart(element, part))
+      .filter(Boolean) as HTMLElement[];
+  }
+  return element ? [element] : [];
+}
+
 function getDirection(effect: AnimationData): KeyframeEffectOptions['direction'] {
   const alternate = effect.alternate ? 'alternate' : '';
   return effect.reversed
@@ -140,6 +150,7 @@ export {
   isNotAScrubTrigger,
   getElement,
   getElementMotionPart,
+  getTargetParts,
   getNamedEffect,
   getEffectsData,
   measure,

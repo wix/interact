@@ -25,7 +25,7 @@ describe('BgZoom', () => {
           ],
         },
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'add',
           keyframes: [
             {
@@ -63,7 +63,7 @@ describe('BgZoom', () => {
           ],
         },
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'add',
           keyframes: [
             {
@@ -90,7 +90,7 @@ describe('BgZoom', () => {
       const expectedResult: Partial<AnimationData>[] = [
         {},
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'replace',
           keyframes: [
             {
@@ -129,7 +129,7 @@ describe('BgZoom', () => {
           ],
         },
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'add',
           keyframes: [
             {
@@ -167,7 +167,7 @@ describe('BgZoom', () => {
           ],
         },
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'add',
           keyframes: [
             {
@@ -194,7 +194,7 @@ describe('BgZoom', () => {
       const expectedResult = [
         {},
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'replace',
           keyframes: [
             {

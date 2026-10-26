@@ -9,10 +9,6 @@ import type {
 import { getJsEasingInCSS } from '../utils';
 import { getEffectsData, getRanges, getNamedEffect, isNotAScrubTrigger } from './common';
 
-function getAnimationTarget(target: string | null, part: string | undefined) {
-  return target ? `#${target}${part ? `[data-motion-part~="${part}"]` : ''}` : '';
-}
-
 function getAnimationAsCSS(
   data: {
     effect: AnimationData;
@@ -73,7 +69,7 @@ function getCSSAnimationEffect(
 }
 
 function getCSSAnimation(
-  target: string | null,
+  _: string | null,
   animationOptions: AnimationOptions,
   trigger?: TriggerVariant,
   sequenceOptions?: SequenceOptions,
@@ -91,7 +87,7 @@ function getCSSAnimation(
       : {};
 
     return {
-      target: getAnimationTarget(target, item.part),
+      part: item.part,
       animation: getAnimationAsCSS(item, isViewProgress, sequenceOptions),
       composition: item.options.composite,
       custom: item.effect.custom,

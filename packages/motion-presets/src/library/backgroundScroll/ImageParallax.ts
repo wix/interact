@@ -35,6 +35,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_WRAPPER'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const { speed = 1.5, reverse = false, isPage = false } = options.namedEffect as ImageParallax;
 
@@ -58,7 +60,8 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: imageParallax,
-      part: 'BG_MEDIA',
+      custom,
+      part: 'MEDIA_WRAPPER',
       startOffset: {
         name: isPage ? 'contain' : 'cover',
         offset: { unit: 'percentage', value: 0 },
