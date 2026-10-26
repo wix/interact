@@ -1,4 +1,3 @@
-// NOT PRODUCTION READY — background-scroll presets are experimental and excluded from public documentation.
 import type { BgRotate, RangeOffset, ScrubAnimationOptions } from '../../types';
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { withPartStyles } from './utils';

@@ -1,4 +1,3 @@
-// NOT PRODUCTION READY — background-scroll presets are experimental and excluded from public documentation.
 import type { ScrubAnimationOptions, DomApi } from '../../types';
 import { measureCompHeight, withPartStyles, FIXED_STYLES } from './utils';
 
