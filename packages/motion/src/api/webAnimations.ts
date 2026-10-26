@@ -19,6 +19,7 @@ import {
   getRanges,
   getNamedEffect,
   getEffectsData,
+  getViewTimeline,
   isNotAScrubTrigger,
 } from './common';
 import fastdom from 'fastdom';
@@ -111,19 +112,15 @@ function getWebAnimation(
     return null;
   }
 
-  const data = getEffectsData(animationsData, trigger, animationOptions.effectId);
-
-  let timeline: typeof window.ViewTimeline | undefined;
   const isViewProgress = trigger?.trigger === 'view-progress';
 
-  // if this is a ScrubAnimation with view-progress trigger and the browser supports the ViewTimeline API
-  if (isViewProgress && window.ViewTimeline) {
-    // generate the timeline object
-    // @ts-expect-error
-    timeline = new ViewTimeline({
-      subject: trigger.element || getElement(trigger.componentId!),
-    });
-  }
+  // a ScrubAnimation with view-progress trigger gets a native ViewTimeline when one can follow its
+  // subject, and null otherwise: no browser support, or a scroller that can't scroll on its axis
+  const timeline = isViewProgress
+    ? getViewTimeline(trigger.element || getElement(trigger.componentId!))
+    : null;
+
+  const data = getEffectsData(animationsData, trigger, animationOptions.effectId, !!timeline);
 
   // generate an Animation object for each data object
   const animations = data.map(({ effect, options: effectOptions, id, part }) => {

@@ -7,6 +7,7 @@ import {
   getElementAnimation,
   getScrubScene,
   getAnimation,
+  canUseViewTimeline,
 } from '../src/motion';
 import type { AnimationOptions, TriggerVariant } from '../src/types';
 import type { Mock } from 'vitest';
@@ -741,6 +742,114 @@ describe('motion.ts', () => {
         });
       });
 
+      describe('view-progress subject inside a scroll container', () => {
+        const scrollOptions: AnimationOptions = {
+          namedEffect: { type: 'FadeScroll', id: 'fade', range: 'in', opacity: 0 },
+        };
+
+        // the ViewTimeline's source: a box with the given overflow and scroll/client sizes
+        function aSource(
+          style: Partial<CSSStyleDeclaration>,
+          sizes: {
+            scrollHeight: number;
+            clientHeight: number;
+            scrollWidth: number;
+            clientWidth: number;
+          },
+        ) {
+          const source = document.createElement('div');
+          Object.assign(source.style, style);
+          Object.entries(sizes).forEach(([name, value]) =>
+            Object.defineProperty(source, name, { value }),
+          );
+          return source;
+        }
+
+        // a horizontal slider: scrolls on x, and overflow-y computes to auto with nothing to scroll
+        const aSlider = () =>
+          aSource(
+            { overflowX: 'scroll', overflowY: 'auto' },
+            { scrollHeight: 200, clientHeight: 200, scrollWidth: 991, clientWidth: 380 },
+          );
+
+        async function getViewProgressAnimation(source: Element | null) {
+          mockViewTimeline.source = source;
+          const { AnimationGroup } = await import('../src/AnimationGroup');
+          (AnimationGroup as Mock).mockImplementation(function (animations: any) {
+            mockAnimationGroup.animations = animations;
+            return mockAnimationGroup;
+          });
+
+          getWebAnimation(mockElement.id, scrollOptions, {
+            element: mockElement,
+            trigger: 'view-progress',
+          });
+
+          (AnimationGroup as Mock).mockRestore();
+          return mockAnimationGroup.animations[0];
+        }
+
+        test('takes the page-based fallback when the scroller cannot scroll on the block axis', async () => {
+          const animation = await getViewProgressAnimation(aSlider());
+
+          expect(animation.timeline).toBeUndefined();
+          expect((globalThis as any).KeyframeEffect).toHaveBeenCalledWith(
+            mockElement,
+            [],
+            expect.objectContaining({ duration: 99.99, delay: 0.01 }),
+          );
+          expect(animation.start).toEqual(expect.objectContaining({ name: 'cover', offset: 0 }));
+        });
+
+        test('takes the page-based fallback when the scroller hides its block-axis overflow', async () => {
+          const animation = await getViewProgressAnimation(
+            aSource(
+              { overflow: 'hidden' },
+              { scrollHeight: 400, clientHeight: 200, scrollWidth: 380, clientWidth: 380 },
+            ),
+          );
+
+          expect(animation.timeline).toBeUndefined();
+        });
+
+        test('keeps the ViewTimeline when the scroller can scroll on the block axis', async () => {
+          const animation = await getViewProgressAnimation(
+            aSource(
+              { overflowX: 'scroll', overflowY: 'auto' },
+              { scrollHeight: 400, clientHeight: 200, scrollWidth: 991, clientWidth: 380 },
+            ),
+          );
+
+          expect(animation.timeline).toBe(mockViewTimeline);
+          expect((globalThis as any).KeyframeEffect).toHaveBeenCalledWith(
+            mockElement,
+            [],
+            expect.objectContaining({ duration: 'auto' }),
+          );
+        });
+
+        test('reads the block axis as horizontal in a vertical writing mode', async () => {
+          const animation = await getViewProgressAnimation(
+            aSource(
+              { writingMode: 'vertical-rl', overflowX: 'scroll', overflowY: 'auto' },
+              { scrollHeight: 200, clientHeight: 200, scrollWidth: 991, clientWidth: 380 },
+            ),
+          );
+
+          expect(animation.timeline).toBe(mockViewTimeline);
+        });
+
+        test('keeps the ViewTimeline when its source is the page', async () => {
+          const root = document.documentElement;
+          Object.defineProperty(document, 'scrollingElement', { value: root, configurable: true });
+
+          const animation = await getViewProgressAnimation(root);
+
+          expect(animation.timeline).toBe(mockViewTimeline);
+          delete (document as any).scrollingElement;
+        });
+      });
+
       test('should set animation ranges for view-progress', async () => {
         const animationOptions: AnimationOptions = {
           namedEffect: {
@@ -1104,6 +1213,44 @@ describe('motion.ts', () => {
         });
 
         expect(result).toBeNull();
+      });
+    });
+
+    describe('canUseViewTimeline()', () => {
+      const subject = document.createElement('div');
+
+      function mockViewTimelineSource(source: Element) {
+        (globalThis as any).ViewTimeline = vi.fn(function () {
+          return { source };
+        });
+      }
+
+      test('should be false without ViewTimeline support', () => {
+        delete (globalThis as any).ViewTimeline;
+
+        expect(canUseViewTimeline(subject)).toBe(false);
+      });
+
+      test('should be false when the subject sits in a horizontal slider', () => {
+        const slider = document.createElement('div');
+        Object.assign(slider.style, { overflowX: 'scroll', overflowY: 'auto' });
+        Object.defineProperties(slider, {
+          scrollHeight: { value: 200 },
+          clientHeight: { value: 200 },
+        });
+        mockViewTimelineSource(slider);
+
+        expect(canUseViewTimeline(subject)).toBe(false);
+        expect((globalThis as any).ViewTimeline).toHaveBeenCalledWith({ subject });
+      });
+
+      test('should be true when the subject scrolls with the page', () => {
+        const root = document.documentElement;
+        Object.defineProperty(document, 'scrollingElement', { value: root, configurable: true });
+        mockViewTimelineSource(root);
+
+        expect(canUseViewTimeline(subject)).toBe(true);
+        delete (document as any).scrollingElement;
       });
     });
 
@@ -1687,6 +1834,39 @@ describe('motion.ts', () => {
         expect(mockAnimations[0].cancel).toHaveBeenCalled();
 
         (AnimationGroup as Mock).mockRestore();
+      });
+
+      test('should return ScrubScrollScene array for view-progress when the scroller cannot scroll on the block axis', async () => {
+        // a horizontal slider: scrolls on x, and overflow-y computes to auto with nothing to scroll
+        const slider = document.createElement('div');
+        Object.assign(slider.style, { overflowX: 'scroll', overflowY: 'auto' });
+        Object.defineProperties(slider, {
+          scrollHeight: { value: 200 },
+          clientHeight: { value: 200 },
+        });
+        (globalThis as any).ViewTimeline = vi.fn(function () {
+          return { source: slider };
+        });
+        const viewSource = document.createElement('div');
+
+        const { AnimationGroup } = await import('../src/AnimationGroup');
+        (AnimationGroup as Mock).mockImplementation(function (_: any) {
+          mockAnimationGroup.animations = mockAnimations;
+          return mockAnimationGroup;
+        });
+
+        const result = getScrubScene(
+          mockElement,
+          { namedEffect: { type: 'ParallaxScroll', id: 'parallax', speed: 1 } },
+          { trigger: 'view-progress', element: viewSource },
+        ) as any[];
+
+        expect(Array.isArray(result)).toBe(true);
+        expect(result).toHaveLength(2);
+        expect(result[0].viewSource).toBe(viewSource);
+
+        (AnimationGroup as Mock).mockRestore();
+        delete (globalThis as any).ViewTimeline;
       });
 
       test('should return ScrubPointerScene for pointer-move trigger', async () => {

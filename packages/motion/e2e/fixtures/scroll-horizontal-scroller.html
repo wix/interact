@@ -13,6 +13,12 @@
         height: 150vh;
       }
 
+      .box {
+        width: 200px;
+        height: 200px;
+        background: #4a90d9;
+      }
+
       /* A horizontal slider: only overflow-x is meant to scroll. */
       #h-scroller {
         overflow-x: scroll;
@@ -26,6 +32,17 @@
         height: 200px;
         background: #4a90d9;
       }
+
+      /* A scroller that does scroll on the block axis: its subject follows it, not the page. */
+      #v-scroller {
+        overflow-y: scroll;
+        height: 300px;
+        width: 380px;
+      }
+
+      #v-scroller .v-spacer {
+        height: 600px;
+      }
     </style>
   </head>
   <body>
@@ -34,6 +51,14 @@
       <div id="h-scroller-subject" data-testid="h-scroller-subject"></div>
       <div></div>
       <div></div>
+    </div>
+    <div class="spacer"></div>
+    <div id="control-subject" class="box" data-testid="control-subject"></div>
+    <div class="spacer"></div>
+    <div id="v-scroller" data-testid="v-scroller">
+      <div class="v-spacer"></div>
+      <div id="v-scroller-subject" class="box" data-testid="v-scroller-subject"></div>
+      <div class="v-spacer"></div>
     </div>
     <div class="spacer"></div>
 

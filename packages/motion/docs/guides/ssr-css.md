@@ -110,13 +110,14 @@ sheet.replaceSync(css);
 document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
 ```
 
-## `forCSS` and native `ViewTimeline` support
+## `duration: 'auto'` and native `ViewTimeline` support
 
 For a `view-progress` trigger, `getWebAnimation()` picks between a native, `ViewTimeline`-linked
 animation (`duration: 'auto'`) and a scrubbable polyfill duration (`99.99ms` / `0.01ms` delay) based on
-whether `window.ViewTimeline` exists **at runtime**. `getCSSAnimation()` can't make that runtime check —
+a check **at runtime**: `window.ViewTimeline` exists and the subject's scroll container can scroll on
+the timeline's axis (see `canUseViewTimeline()`). `getCSSAnimation()` can't make that runtime check —
 there is no `window` on the server, and even in the browser you want the same CSS regardless of which
-client renders it. So it always passes an internal `forCSS` flag that forces `duration: 'auto'` for
+client renders it. So it always passes an internal flag that forces `duration: 'auto'` for
 `view-progress` animations, independent of `window.ViewTimeline` support. This is what makes the
 generated CSS safe to render ahead of time: it's native-`ViewTimeline` CSS every time, which any browser
 that doesn't support `ViewTimeline` will simply treat as a paused/static animation rather than break.

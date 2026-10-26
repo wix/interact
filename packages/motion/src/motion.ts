@@ -17,7 +17,7 @@ import { getEasing, getJsEasing } from './utils';
 import { getWebAnimation } from './api/webAnimations';
 import { getCSSAnimation } from './api/cssAnimations';
 import { prepareAnimation } from './api/prepare';
-import { getElement, getNamedEffect } from './api/common';
+import { canUseViewTimeline, getElement, getNamedEffect } from './api/common';
 
 function getElementCSSAnimation(
   target: HTMLElement | string | null,
@@ -86,10 +86,12 @@ function getScrubScene(
   }
 
   let typeSpecificOptions = {} as Record<string, any>;
+  const isViewProgress = trigger.trigger === 'view-progress';
+  const viewSource = isViewProgress ? trigger.element || getElement(trigger.componentId!) : null;
 
-  if (trigger.trigger === 'view-progress' && !window.ViewTimeline) {
+  // the same check getWebAnimation() made: this subject has no native ViewTimeline
+  if (isViewProgress && !canUseViewTimeline(viewSource)) {
     // TODO(ameerf): consider doing this only for bgscrub to not affect the other scroll effects
-    const viewSource = trigger.element || getElement(trigger.componentId!);
     const { ready } = animation as AnimationGroup;
 
     return (animation as AnimationGroup).animations.map((partialAnimation) => {
@@ -278,6 +280,7 @@ export {
   getSequence,
   createAnimationGroups,
   getEasing,
+  canUseViewTimeline,
 };
 
 export type { AnimationGroup, Sequence };

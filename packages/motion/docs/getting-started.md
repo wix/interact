@@ -108,7 +108,7 @@ getWebAnimation(
 
 ### Without `ViewTimeline` (polyfill)
 
-When `window.ViewTimeline` isn't available, use `getScrubScene()` instead. With a `view-progress` trigger it returns `ScrubScrollScene[]` — plain objects you drive yourself from an `IntersectionObserver` or scroll listener:
+When `window.ViewTimeline` isn't available, or [`canUseViewTimeline()`](./api/core-functions.md#canuseviewtimeline) is false for the subject (e.g. it sits in a horizontal slider), use `getScrubScene()` instead. With a `view-progress` trigger it returns `ScrubScrollScene[]` — plain objects you drive yourself from an `IntersectionObserver` or scroll listener:
 
 ```typescript
 import { getScrubScene } from '@wix/motion';

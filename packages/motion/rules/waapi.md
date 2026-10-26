@@ -59,14 +59,17 @@ function getWebAnimation(
 
 ## `view-progress`: Native ViewTimeline vs Polyfill
 
-`getWebAnimation` branches on runtime `ViewTimeline` support for `trigger: { trigger: 'view-progress' }`
-(`../src/api/webAnimations.ts:116-190`):
+`getWebAnimation` branches on `getViewTimeline(subject)` for `trigger: { trigger: 'view-progress' }`
+(`../src/api/common.ts`, `../src/api/webAnimations.ts`); `canUseViewTimeline(subject)` exposes the same check:
 
-- **`window.ViewTimeline` present** — a native `ViewTimeline` is constructed (`subject` = `trigger.element`
+- **a native timeline can follow the subject** — `window.ViewTimeline` is present, and the subject's
+  scroll container (`timeline.source`) is the page, or can scroll on the block axis (`overflow` `auto` /
+  `scroll` with a scroll range). A native `ViewTimeline` is constructed (`subject` = `trigger.element`
   or the element resolved from `trigger.componentId`), the animation's `duration` is set to `'auto'`,
   it is linked to that timeline, and it **auto-plays** immediately (`animation.play()` is called inside
   a `fastdom.mutate`).
-- **`window.ViewTimeline` absent** — no timeline is attached. Instead `duration: 99.99ms` /
+- **`window.ViewTimeline` absent, or the scroll container can't scroll on the block axis** (a horizontal
+  slider: `overflow-x: scroll` makes it a scroll container on both axes) — no timeline is attached. Instead `duration: 99.99ms` /
   `delay: 0.01ms` are used so the animation's progress can be driven externally by setting
   `currentTime`, and `start`/`end` range info (`{ name, offset, add }`, from `startOffset`/`endOffset`)
   is written directly onto each `Animation` object. This is the data `getScrubScene` reads to build

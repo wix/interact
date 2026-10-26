@@ -46,8 +46,8 @@ function getWebAnimation(
 
 - Returns `null` when no effect data can be generated — e.g. an unregistered `namedEffect`, reduced motion dropping a multi-iteration animation, or a pointer factory that couldn't be built.
 - Returns `MouseAnimationInstance` only on the `pointer-move` + non-`keyframeEffect` path (i.e. a `namedEffect`/`customEffect` driven by the pointer); every other path returns an `AnimationGroup`.
-- With `{ trigger: 'view-progress' }` and `window.ViewTimeline` present, the animation is linked to a native `ViewTimeline` (`duration: 'auto'`) and plays automatically.
-- With `view-progress` but no `window.ViewTimeline`, the animation is created with a scrubbable `duration: 99.99ms` / `delay: 0.01ms`, meant to be driven via [`getScrubScene()`](#getscrubscene).
+- With `{ trigger: 'view-progress' }`, when [`canUseViewTimeline()`](#canuseviewtimeline) is true for the subject, the animation is linked to a native `ViewTimeline` (`duration: 'auto'`) and plays automatically.
+- Otherwise (no `window.ViewTimeline`, or a subject whose scroll container can't scroll on the timeline's axis, such as one inside a horizontal slider), the animation is created with a scrubbable `duration: 99.99ms` / `delay: 0.01ms`, meant to be driven via [`getScrubScene()`](#getscrubscene).
 
 ### Example
 
@@ -100,7 +100,7 @@ function getCSSAnimation(
 | ------------------ | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `target`           | `string \| null`   | Element id or CSS selector. CSS rules target selectors, so — unlike `getWebAnimation` — an `HTMLElement` reference is not accepted here.                                                                                      |
 | `animationOptions` | `AnimationOptions` | Same shape as `getWebAnimation`.                                                                                                                                                                                              |
-| `trigger`          | `TriggerVariant`   | Optional. `view-progress` animations always resolve to `duration: 'auto'` through this function, regardless of runtime `ViewTimeline` support (the SSR-safe `forCSS` path).                                                   |
+| `trigger`          | `TriggerVariant`   | Optional. `view-progress` animations always resolve to `duration: 'auto'` through this function, regardless of runtime `ViewTimeline` support (the SSR-safe path).                                                            |
 | `sequenceOptions`  | `SequenceOptions`  | Optional. When it carries a `sequenceId` and a non-zero `offset`, the delay slot of the `animation` shorthand becomes a `calc()` staggered by `--motion-<sequenceId>-index`. See [Staggered Sequences](#staggered-sequences). |
 
 ### Returns
@@ -213,7 +213,7 @@ function getScrubScene(
 
 `ScrubScrollScene[] | ScrubPointerScene | ScrubPointerScene[] | null`
 
-- `view-progress` with **no** `window.ViewTimeline` → `ScrubScrollScene[]` (one per partial animation). This is the only branch that emits scroll scenes — when `ViewTimeline` is available, use [`getWebAnimation()`](#getwebanimation) for the native path instead.
+- `view-progress` when [`canUseViewTimeline()`](#canuseviewtimeline) is false for the subject → `ScrubScrollScene[]` (one per partial animation). This is the only branch that emits scroll scenes — when it's true, use [`getWebAnimation()`](#getwebanimation) for the native path instead.
 - `pointer-move` + `keyframeEffect` → a single `ScrubPointerScene` driving an `AnimationGroup`'s progress.
 - `pointer-move` + `namedEffect` / `customEffect` → a single `ScrubPointerScene` wrapping a `MouseAnimationInstance`.
 - `null` if the underlying animation couldn't be created.
@@ -247,6 +247,22 @@ if (Array.isArray(scenes)) {
   });
 }
 ```
+
+## canUseViewTimeline
+
+Tells whether a `view-progress` effect on `subject` runs on a native `ViewTimeline`. Use it to pick between [`getWebAnimation()`](#getwebanimation) (native) and [`getScrubScene()`](#getscrubscene) (driven by you against the page's scroll); both make the same check internally.
+
+### Signature
+
+```typescript
+function canUseViewTimeline(subject: HTMLElement | null): boolean;
+```
+
+### Returns
+
+`false` without `window.ViewTimeline`, or when the subject's nearest scroll container can't scroll on the timeline's (block) axis: its overflow on that axis isn't `auto` / `scroll`, or it has nothing to scroll. A view timeline always follows that scroll container, and `overflow-x: scroll` makes a box one on both axes, so inside a horizontal slider a native timeline would never move with the page. `true` otherwise, including when the page itself scrolls the subject, or when the subject has no box yet.
+
+It reads layout, so call it when the effect is set up. The answer isn't re-checked: if the layout changes later (a slider that appears at a breakpoint), the effect keeps its path until it's set up again.
 
 ## getAnimation
 

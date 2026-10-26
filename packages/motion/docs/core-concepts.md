@@ -80,10 +80,10 @@ The trigger is the third argument to `getWebAnimation()` / `getScrubScene()`:
 
 ## Native ViewTimeline vs. the scrub polyfill
 
-`view-progress` behaves differently depending on browser support:
+`view-progress` behaves differently depending on browser support and on the subject's scroll container (see [`canUseViewTimeline()`](./api/core-functions.md#canuseviewtimeline)):
 
-- **`window.ViewTimeline` available** — `getWebAnimation()` returns a WAAPI animation linked directly to a `ViewTimeline` (`duration: 'auto'`). It auto-plays as the element scrolls through view; you don't call `.play()`.
-- **Not available** — the underlying animation gets `duration: 99.99ms` / `delay: 0.01ms` so its progress is externally scrubbable. `getScrubScene()` is what turns that into `ScrubScrollScene[]` — plain objects (`start`, `end`, `effect(scene, progress)`, `destroy()`) that you drive from your own `IntersectionObserver`/scroll listener.
+- **`window.ViewTimeline` available** and the subject's scroll container can scroll on the timeline's axis (usually the page) — `getWebAnimation()` returns a WAAPI animation linked directly to a `ViewTimeline` (`duration: 'auto'`). It auto-plays as the element scrolls through view; you don't call `.play()`.
+- **Not available, or the subject sits in a scroller that can't scroll on that axis** (e.g. a horizontal slider) — the underlying animation gets `duration: 99.99ms` / `delay: 0.01ms` so its progress is externally scrubbable. `getScrubScene()` is what turns that into `ScrubScrollScene[]` — plain objects (`start`, `end`, `effect(scene, progress)`, `destroy()`) that you drive from your own `IntersectionObserver`/scroll listener.
 - **`getCSSAnimation()`** always generates `duration: 'auto'` for `view-progress`, regardless of runtime `ViewTimeline` support — it's the SSR/FOUC-free path.
 
 If you're using `@wix/interact`, its bundled scroll polyfill, [`fizban`](https://github.com/wix-incubator/fizban), automates driving the polyfill path.
