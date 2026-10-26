@@ -1941,6 +1941,40 @@ describe('css._generate', () => {
     });
   });
 
+  describe('effect parts', () => {
+    const style = (options: { suffix?: string }) => [
+      { ...options, name: 'bg-media', part: 'MEDIA_WRAPPER', keyframes: [{ opacity: 0 }] },
+      { ...options, name: 'bg-img', part: 'MEDIA', keyframes: [{ opacity: 0 }] },
+    ];
+    registerEffects({
+      TestBgParts: { web: style, style, getNames: () => ['bg-media', 'bg-img'] },
+    } as any);
+
+    it('declares the animations of each part on that part', () => {
+      const { cssRules, listsRule } = _generate({
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'viewProgress',
+            effects: [{ effectId: 'bg', namedEffect: { type: 'TestBgParts' } as any }],
+          },
+        ],
+      });
+
+      const animationOf = (childSelector: string) =>
+        cssRules
+          .find((rule) => rule.childSelector === childSelector)
+          ?.declarations.find(({ name }) => name === '--anm-0')?.value;
+
+      expect(animationOf('[data-motion-part~="MEDIA_WRAPPER"]')).toMatch(/^bg-media /);
+      expect(animationOf('[data-motion-part~="MEDIA"]')).toMatch(/^bg-img /);
+      expect(animationOf('> :first-child')).toBeUndefined();
+      expect(listsRule).toContain(
+        '[data-interact-key="a"] > :first-child, [data-interact-key="a"] [data-motion-part~="MEDIA_WRAPPER"], [data-interact-key="a"] [data-motion-part~="MEDIA"] {',
+      );
+    });
+  });
+
   describe('_generate endpoint edge cases', () => {
     it('should return empty cssRules for empty interactions array', () => {
       const config: InteractConfig = {

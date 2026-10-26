@@ -27,6 +27,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_WRAPPER'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const { speed = 0.2 } = options.namedEffect as BgParallax;
   const custom = {
@@ -39,7 +41,8 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgParallax,
-      part: 'BG_MEDIA',
+      custom,
+      part: 'MEDIA_WRAPPER',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },

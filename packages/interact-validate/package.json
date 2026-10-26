@@ -54,7 +54,7 @@
     "zod": "^4.0.0"
   },
   "peerDependencies": {
-    "@wix/interact": "^2.5.21",
+    "@wix/interact": "^2.5.22",
     "@wix/splittext": "^0.2.1"
   },
   "peerDependenciesMeta": {
@@ -64,7 +64,7 @@
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.14",
-    "@wix/interact": "^2.5.21",
+    "@wix/interact": "^2.5.22",
     "@wix/splittext": "workspace:*",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.3",

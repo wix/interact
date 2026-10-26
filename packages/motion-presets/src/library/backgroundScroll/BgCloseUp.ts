@@ -30,6 +30,8 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_CLIP', 'MEDIA_WRAPPER'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const easing = 'linear';
   const { scale = 80 } = options.namedEffect as BgCloseUp;
@@ -43,7 +45,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ...options,
       name: bgCloseUpOpacity,
       easing,
-      part: 'BG_LAYER',
+      part: 'MEDIA_CLIP',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -78,8 +80,9 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgCloseUpZoom,
+      custom,
       easing,
-      part: 'BG_MEDIA',
+      part: 'MEDIA_WRAPPER',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },

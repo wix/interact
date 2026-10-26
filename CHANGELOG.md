@@ -112,6 +112,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.5.22] - 2026-10-26
+
+#### Added
+
+- `generate()` writes the animation list properties of a part animation on the effect's `[data-motion-part~="<part>"]` element instead of the target, so presets that animate parts (background scroll) work in CSS mode. Overriding a part animation in the cascade only works if the overriding effect sets the same parts again, or if the conditions never match together (#364)
+
 ### [2.5.21] - 2026-10-25
 
 #### Added
@@ -422,6 +428,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion
 
+### [2.1.18] - 2026-10-26
+
+#### Added
+
+- Named effects can declare the `parts` they animate. `getElementCSSAnimation()` and `getElementAnimation()` then read the animations from those `[data-motion-part~="<part>"]` elements instead of the target (#364)
+
+#### Changed
+
+- `getCSSAnimation()` returns the animation's `part` instead of a `target` selector (#364)
+
 ### [2.1.17] - 2026-10-25
 
 #### Removed
@@ -543,6 +559,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion-presets
+
+### [1.0.9] - 2026-10-26
+
+#### Added
+
+- Background scroll presets export the `parts` they animate (#364)
+
+#### Changed
+
+- Background scroll part names: `BG_LAYER` is now `MEDIA_CLIP`, `BG_MEDIA` is now `MEDIA_WRAPPER`, and `BG_IMG` is now `MEDIA`. Elements must use the new `data-motion-part` values (#364)
+
+#### Fixed
+
+- Background scroll presets declare the custom properties their keyframes use, so they work in CSS mode (#364)
 
 ### [1.0.8] - 2026-10-25
 

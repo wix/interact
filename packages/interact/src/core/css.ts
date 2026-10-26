@@ -64,6 +64,7 @@ type KeyframeSlotMember = { slotKey: string; getNames: (suffix?: string) => stri
 type TargetContext = {
   key: string;
   childSelector?: string;
+  partSelectors: Set<string>;
   assigned: Set<string>;
   animation: ListCounters;
   transition: ListCounters;
@@ -99,6 +100,7 @@ function createTargetContext(key: string, childSelector?: string): TargetContext
   return {
     key,
     childSelector,
+    partSelectors: new Set<string>(),
     assigned: new Set<string>(),
     animation: createListCounters(),
     transition: createListCounters(),
@@ -278,7 +280,7 @@ function effectToCSS(
   keyframes: MotionKeyframeEffect[];
   wrote: Record<ListKind, boolean>;
 } {
-  const { assigned, childSelector } = target;
+  const { assigned, childSelector, partSelectors } = target;
   const wrote: Record<ListKind, boolean> = { animation: false, transition: false, timeline: false };
   const {
     key,
@@ -316,6 +318,13 @@ function effectToCSS(
     const cssAnimations = getCSSAnimation(null, animationOptions, trigger, sequence).filter(
       (anim) => anim.name,
     );
+    const animationsByPart: Record<string, typeof cssAnimations> = cssAnimations.length
+      ? {}
+      : { '': [] };
+    cssAnimations.forEach((anim) => {
+      const part = anim.part || '';
+      (animationsByPart[part] ||= []).push(anim);
+    });
 
     // accumulate keyframes
     keyframes = cssAnimations.map((anim) => ({
@@ -333,46 +342,66 @@ function effectToCSS(
       ),
     );
 
-    const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
-      _listPropertyName: propertyName,
-      name: customProps[propertyName],
-      value: cssAnimations
-        .map((animation) => {
-          const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
-          return (
-            (animation as Record<string, unknown>)[name] || LIST_PROPERTY_FALLBACKS[propertyName]
-          );
-        })
-        .join(', '),
-    })).filter(
-      ({ _listPropertyName, name, value }) =>
-        value !== LIST_PROPERTY_FALLBACKS[_listPropertyName] || assigned.has(name),
-    );
-    animationDeclarations.forEach(({ name }) => assigned.add(name));
-    wrote.animation = animationDeclarations.length > 0;
+    // TODO - part animations introduce a problem with cascade where to override it you must override all parts.
+    // Currently this is in play only for background scroll effects, which are not mixed with other effects in cascade,
+    // but this should be fixed. style queries may help in handling this and cascade in general by setting --active-effect-id and querying it by order.
+    Object.entries(animationsByPart).forEach(([part, animations]) => {
+      const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
+        _listPropertyName: propertyName,
+        name: customProps[propertyName],
+        value: animations
+          .map((animation) => {
+            const name = LIST_PROPERTY_NAMES_MOTION[propertyName];
+            return (
+              (animation as Record<string, unknown>)[name] || LIST_PROPERTY_FALLBACKS[propertyName]
+            );
+          })
+          .join(', '),
+      })).filter(
+        ({ _listPropertyName, name, value }) =>
+          value !== LIST_PROPERTY_FALLBACKS[_listPropertyName] || assigned.has(name),
+      );
+      animationDeclarations.forEach(({ name }) => assigned.add(name));
+      wrote.animation = wrote.animation || animationDeclarations.length > 0;
 
-    if (initial) {
-      // declare animation custom properties with initial dependent on data-motion-enter
-      rules.push({
-        key,
-        media,
-        selectorCondition,
-        childSelector,
-        declarations: DEFAULT_INITIAL,
-        selectorSuffix: ':not([data-interact-enter])',
-      });
-      rules.push({
-        key,
-        media,
-        selectorCondition,
-        childSelector,
-        declarations: animationDeclarations,
-        selectorSuffix: ':not([data-interact-enter="done"])',
-      });
-    } else {
-      // declare animation custom properties
-      declarations.push(...animationDeclarations);
-    }
+      const childOrPartSelector = part ? `[data-motion-part~="${part}"]` : childSelector;
+      if (part && animationDeclarations.length) {
+        partSelectors.add(childOrPartSelector!);
+      }
+
+      if (initial) {
+        // declare animation custom properties with initial dependent on data-motion-enter
+        rules.push({
+          key,
+          media,
+          selectorCondition,
+          childSelector: childOrPartSelector,
+          declarations: DEFAULT_INITIAL,
+          selectorSuffix: ':not([data-interact-enter])',
+        });
+        rules.push({
+          key,
+          media,
+          selectorCondition,
+          childSelector: childOrPartSelector,
+          declarations: animationDeclarations,
+          selectorSuffix: ':not([data-interact-enter="done"])',
+        });
+      } else {
+        // declare animation custom properties
+        if (part) {
+          rules.push({
+            key,
+            media,
+            selectorCondition,
+            childSelector: childOrPartSelector,
+            declarations: animationDeclarations,
+          });
+        } else {
+          declarations.push(...animationDeclarations);
+        }
+      }
+    });
   } else if (transition || transitionProperties) {
     const properties = getStateStyleProperties(effect);
     const transitions = transitionEffectToTransitionsList(effect);
@@ -691,7 +720,15 @@ export function _generate(
   const animationLength = Math.max(0, ...targets.map(({ animation }) => animation.listIndex));
   const transitionLength = Math.max(0, ...targets.map(({ transition }) => transition.listIndex));
   const timelineLength = Math.max(0, ...targets.map(({ timeline }) => timeline.listIndex));
-  const listsRule = buildListsRule(targets, animationLength, transitionLength, timelineLength);
+  const listsRule = buildListsRule(
+    targets.flatMap((target) => [
+      target,
+      ...[...target.partSelectors].map((childSelector) => ({ key: target.key, childSelector })),
+    ]),
+    animationLength,
+    transitionLength,
+    timelineLength,
+  );
 
   const animationSlotLength = Math.max(0, ...targets.map(({ animation }) => animation.slotCursor));
   const transitionSlotLength = Math.max(

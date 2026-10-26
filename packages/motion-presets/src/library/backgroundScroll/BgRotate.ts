@@ -10,6 +10,8 @@ export function web(options: ScrubAnimationOptions) {
   return style(options, true);
 }
 
+export const parts = ['MEDIA_WRAPPER'];
+
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const easing = 'sineOut';
   const { angle = 22, direction = 'counter-clockwise' } = options.namedEffect as BgRotate;
@@ -24,8 +26,9 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     {
       ...options,
       name: bgRotate,
+      custom,
       easing,
-      part: 'BG_MEDIA',
+      part: 'MEDIA_WRAPPER',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
