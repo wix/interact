@@ -10,14 +10,15 @@ Ready-made animation presets for @wix/motion — entrance, scroll, pointer, loop
 
 ## What's Included
 
-62 ready-made animation presets across 4 categories:
+74 ready-made animation presets across 5 categories:
 
-| Category              | Count | Description                                    |
-| --------------------- | ----- | ---------------------------------------------- |
-| [Entrance](#entrance) | 19    | Play once when an element enters the viewport  |
-| [Scroll](#scroll)     | 19    | Progress tied to the element's scroll position |
-| [Ongoing](#ongoing)   | 13    | Continuous looping animations                  |
-| [Mouse](#mouse)       | 11    | Real-time response to cursor position          |
+| Category                                | Count | Description                                    |
+| --------------------------------------- | ----- | ---------------------------------------------- |
+| [Entrance](#entrance)                   | 19    | Play once when an element enters the viewport  |
+| [Scroll](#scroll)                       | 19    | Progress tied to the element's scroll position |
+| [Ongoing](#ongoing)                     | 13    | Continuous looping animations                  |
+| [Mouse](#mouse)                         | 11    | Real-time response to cursor position          |
+| [Background Scroll](#background-scroll) | 12    | A section's background media, as it scrolls    |
 
 ## Install
 
@@ -161,14 +162,37 @@ Animations driven by pointer position in real time. Transform values respond to 
 
 → [Mouse Preset Reference](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/mouse-presets.md)
 
+### Background Scroll
+
+Animations of a section's background media — parallax, reveal, zoom, pan, and more — driven by the section's scroll progress. Used with the `viewProgress` trigger on the section.
+
+They animate the section's media **parts**, which the markup marks with `data-motion-part`, and come with the static styles those parts need, applied by `@wix/interact` while the effect is active:
+
+```html
+<interact-element data-interact-key="hero">
+  <section style="position: relative">
+    <div data-motion-part="MEDIA_CLIP" style="position: absolute; inset: 0">
+      <div data-motion-part="MEDIA_WRAPPER">
+        <img data-motion-part="MEDIA" src="hero.jpg" alt="" />
+      </div>
+    </div>
+  </section>
+</interact-element>
+```
+
+**Presets (12):** BgCloseUp, BgFade, BgFadeBack, BgFake3D, BgPan, BgParallax, BgPullBack, BgReveal, BgRotate, BgSkew, BgZoom, ImageParallax
+
+→ [Background Scroll Preset Reference](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/background-scroll-presets.md)
+
 ## Choosing a Preset
 
-| Intent                       | Category | Example Presets                        |
-| ---------------------------- | -------- | -------------------------------------- |
-| Reveal content on scroll     | Entrance | FadeIn, SlideIn, FloatIn               |
-| Animate through the viewport | Scroll   | FadeScroll, ParallaxScroll, MoveScroll |
-| Draw continuous attention    | Ongoing  | Pulse, Breathe, Wiggle                 |
-| Respond to cursor position   | Mouse    | TrackMouse, Tilt3DMouse, BlurMouse     |
+| Intent                         | Category          | Example Presets                        |
+| ------------------------------ | ----------------- | -------------------------------------- |
+| Reveal content on scroll       | Entrance          | FadeIn, SlideIn, FloatIn               |
+| Animate through the viewport   | Scroll            | FadeScroll, ParallaxScroll, MoveScroll |
+| Draw continuous attention      | Ongoing           | Pulse, Breathe, Wiggle                 |
+| Respond to cursor position     | Mouse             | TrackMouse, Tilt3DMouse, BlurMouse     |
+| Animate a section's background | Background Scroll | BgParallax, BgReveal, BgZoom           |
 
 For selection by tone and atmosphere (playful, elegant, bold, soft, dramatic, modern, etc.), see the [Selection by Atmosphere](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/presets-main.md#selection-by-atmosphere) guide.
 
@@ -221,34 +245,36 @@ See [Accessibility](https://github.com/wix/interact/blob/master/packages/motion-
 
 ### Preset risk levels
 
-| Risk       | Presets                                                                                                               |
-| ---------- | --------------------------------------------------------------------------------------------------------------------- |
-| High       | SpinIn, Spin, BounceIn, Bounce, ArcIn, ArcScroll, FlipIn, FlipScroll, Spin3dScroll, Tilt3DMouse, Flash, Jello, Wiggle |
-| Medium     | TurnIn, ParallaxScroll (at high speed values)                                                                         |
-| Low / safe | FadeIn, FadeScroll, BlurIn, BlurScroll, Pulse, Breathe                                                                |
+| Risk       | Presets                                                                                                                                |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| High       | SpinIn, Spin, BounceIn, Bounce, ArcIn, ArcScroll, FlipIn, FlipScroll, Spin3dScroll, Tilt3DMouse, Flash, Jello, Wiggle                  |
+| Medium     | TurnIn, ParallaxScroll (at high speed values), BgRotate, BgSkew, BgFake3D, BgZoom, BgParallax and ImageParallax (at high speed values) |
+| Low / safe | FadeIn, FadeScroll, BlurIn, BlurScroll, Pulse, Breathe                                                                                 |
 
 ### Reduced-motion fallbacks (subset)
 
-| Original              | Fallback                  |
-| --------------------- | ------------------------- |
-| BounceIn, SpinIn      | FadeIn                    |
-| ArcIn, FlipIn, TurnIn | FadeIn                    |
-| Spin, Bounce, Wiggle  | Stop or subtle Pulse      |
-| Flash                 | Reduce frequency (<3/sec) |
-| ParallaxScroll        | Static position           |
-| All mouse presets     | Static state              |
+| Original                  | Fallback                  |
+| ------------------------- | ------------------------- |
+| BounceIn, SpinIn          | FadeIn                    |
+| ArcIn, FlipIn, TurnIn     | FadeIn                    |
+| Spin, Bounce, Wiggle      | Stop or subtle Pulse      |
+| Flash                     | Reduce frequency (<3/sec) |
+| ParallaxScroll            | Static position           |
+| Background scroll presets | BgReveal or disable       |
+| All mouse presets         | Static state              |
 
 ## AI & Agent Support
 
 **Rules files** ship with the package under [`rules/presets/`](https://github.com/wix/interact/tree/master/packages/motion-presets/rules/presets) — point your agent at them:
 
-| File                                                                                                                           | Contents                                                       |
-| ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| [`presets-main.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/presets-main.md)         | Overview, parameter standards, atmosphere guide, accessibility |
-| [`entrance-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/entrance-presets.md) | Entrance preset parameters and defaults                        |
-| [`scroll-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/scroll-presets.md)     | Scroll preset parameters and defaults                          |
-| [`ongoing-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/ongoing-presets.md)   | Ongoing preset parameters and defaults                         |
-| [`mouse-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/mouse-presets.md)       | Mouse preset parameters and defaults                           |
+| File                                                                                                                                             | Contents                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| [`presets-main.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/presets-main.md)                           | Overview, parameter standards, atmosphere guide, accessibility     |
+| [`entrance-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/entrance-presets.md)                   | Entrance preset parameters and defaults                            |
+| [`scroll-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/scroll-presets.md)                       | Scroll preset parameters and defaults                              |
+| [`ongoing-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/ongoing-presets.md)                     | Ongoing preset parameters and defaults                             |
+| [`mouse-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/mouse-presets.md)                         | Mouse preset parameters and defaults                               |
+| [`background-scroll-presets.md`](https://github.com/wix/interact/blob/master/packages/motion-presets/rules/presets/background-scroll-presets.md) | Background scroll preset parameters, defaults, and required markup |
 
 **Generation constraints** for agents:
 
@@ -256,6 +282,7 @@ See [Accessibility](https://github.com/wix/interact/blob/master/packages/motion-
 - When uncertain about a preset's parameters, omit them — the defaults will apply.
 - Always call `registerEffects()` before `generate()` and `Interact.create()` (or before `getWebAnimation()`/`getScrubScene()`) when using `namedEffect`.
 - Presets are JSON-serializable config objects.
+- Use background scroll presets only on a section whose markup has the `MEDIA_CLIP`, `MEDIA_WRAPPER`, and `MEDIA` parts.
 
 ## Related Packages
 

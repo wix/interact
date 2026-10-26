@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as BgRotate from '../BgRotate';
-import { baseMockOptions } from './testUtils';
+import { animationsOf, baseMockOptions } from './testUtils';
 import type { BgRotate as BgRotateType, AnimationData } from '../../../types';
 
 describe('BgRotate', () => {
@@ -73,7 +73,7 @@ describe('BgRotate', () => {
         },
       ];
 
-      const result = BgRotate.style(mockOptions);
+      const result = animationsOf(BgRotate.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -91,7 +91,7 @@ describe('BgRotate', () => {
         },
       ];
 
-      const result = BgRotate.style(mockOptions);
+      const result = animationsOf(BgRotate.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -109,7 +109,7 @@ describe('BgRotate', () => {
         },
       ];
 
-      const result = BgRotate.style(mockOptions);
+      const result = animationsOf(BgRotate.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });

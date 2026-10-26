@@ -112,7 +112,17 @@ function getWebAnimation(
     return null;
   }
 
-  const data = getEffectsData(animationsData, trigger, animationOptions.effectId);
+  // an animation of a part its target doesn't have has nothing to animate
+  const data = getEffectsData(animationsData, trigger, animationOptions.effectId)
+    .map((item) => ({
+      ...item,
+      effectTarget: item.part ? getElementMotionPart(element, item.part) : element,
+    }))
+    .filter(({ part, effectTarget }) => !part || effectTarget);
+
+  if (!data.length) {
+    return null;
+  }
 
   let timeline: typeof window.ViewTimeline | undefined;
   const isViewProgress = trigger?.trigger === 'view-progress';
@@ -127,9 +137,7 @@ function getWebAnimation(
   }
 
   // generate an Animation object for each data object
-  const animations = data.map(({ effect, options: effectOptions, id, part }) => {
-    const effectTarget = part ? getElementMotionPart(element, part) : element;
-
+  const animations = data.map(({ effect, options: effectOptions, id, effectTarget }) => {
     const keyframeEffect = new KeyframeEffect(effectTarget || null, [], effectOptions);
 
     // set the keyframes for the KeyframeEffect after measurements and mutations

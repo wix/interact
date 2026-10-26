@@ -30,7 +30,7 @@ produces silently-wrong output. Never invent a `type`.
 ## Hard exclusions
 
 - **Never emit `DVD`** — it exists in the TypeScript types but is _not_ registered, so it warns and no-ops at runtime.
-- **Never emit `Bg*` or `ImageParallax`** (the "background-scroll" category: `BgCloseUp`, `BgFade`, `BgFadeBack`, `BgFake3D`, `BgPan`, `BgParallax`, `BgPullBack`, `BgReveal`, `BgRotate`, `BgSkew`, `BgZoom`, `ImageParallax`). They are **experimental, not production-ready** — the source and docs explicitly forbid using them, even though they're importable. For a background-parallax look, use the public **`ParallaxScroll`** on the image element with `viewProgress`.
+- **Emit `Bg*` or `ImageParallax` only on a section with the media parts markup** (see [Background scroll](#background-scroll--for-viewprogress-on-a-section)). They animate the section's `MEDIA_CLIP` / `MEDIA_WRAPPER` / `MEDIA` parts, so they don't work without them. For a background-parallax look on plain markup, use **`ParallaxScroll`** on the image element with `viewProgress`.
 
 ## Conventions
 
@@ -173,6 +173,40 @@ gate with a `(hover: hover)` condition.
 > only when no preset fits.
 
 ---
+
+## Background scroll — for `viewProgress` on a section
+
+Animate a section's background media: put `viewProgress` on the section's key, and give it the three nested parts (`data-motion-part`), with `MEDIA_CLIP` covering the section:
+
+```html
+<interact-element data-interact-key="hero">
+  <section style="position: relative">
+    <div data-motion-part="MEDIA_CLIP" style="position: absolute; inset: 0">
+      <div data-motion-part="MEDIA_WRAPPER">
+        <img data-motion-part="MEDIA" src="hero.jpg" alt="" />
+      </div>
+    </div>
+    <!-- content -->
+  </section>
+</interact-element>
+```
+
+The presets size, position, and clip the parts themselves, and define their own scroll range — **don't** size the wrapper/media or set `rangeStart`/`rangeEnd`. The fixed-media ones (`BgParallax`, `BgReveal`, `BgFake3D`, `BgZoom` in) need `@supports (-moz-appearance: none) { body { --motion-bgreveal-will-change: transform } }` for Firefox.
+
+| Preset          | Params (default) — effect                                                                   |
+| :-------------- | :------------------------------------------------------------------------------------------ |
+| `BgParallax`    | `speed` (`0.2`) — fixed media, moves slower than the content                                |
+| `BgReveal`      | — fixed media the section reveals, like `background-attachment: fixed`                      |
+| `BgZoom`        | `direction` `in \| out` (`'in'`), `zoom` (`40`) — zooms in fixed, or out within the section |
+| `BgPan`         | `direction` `left \| right` (`'left'`), `speed` (`0.2`) — pans horizontally                 |
+| `BgFade`        | `range` `in \| out` (`'in'`) — fades in as it enters / out as it exits                      |
+| `BgFadeBack`    | `scale` (`0.7`) — shrinks back and fades out as it exits                                    |
+| `BgCloseUp`     | `scale` (`80`) — zooms toward the viewer and fades out as it exits                          |
+| `BgPullBack`    | `scale` (`50`) — pulls back from zoomed-in as it enters                                     |
+| `BgFake3D`      | `stretch` (`1.3`), `zoom` (`16.67`) — fixed media stretching and zooming in depth           |
+| `BgRotate`      | `angle` deg (`22`), `direction` `clockwise \| counter-clockwise` (`'counter-clockwise'`)    |
+| `BgSkew`        | `angle` deg (`20`), `direction` `clockwise \| counter-clockwise` (`'counter-clockwise'`)    |
+| `ImageParallax` | `speed` (`1.5`), `reverse` (`false`), `isPage` (`false`) — media moves inside its frame     |
 
 ## Choosing a preset — atmosphere guide
 

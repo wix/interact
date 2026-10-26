@@ -1,4 +1,3 @@
-// NOT PRODUCTION READY — background-scroll presets are experimental and excluded from public documentation.
 import type {
   BgSkew,
   DomApi,
@@ -7,7 +6,7 @@ import type {
   ScrubAnimationOptions,
 } from '../../types';
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
-import { measureCompHeight } from './utils';
+import { measureCompHeight, withPartStyles } from './utils';
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-bgSkew'], options.suffix);
@@ -70,5 +69,16 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     },
   ];
 
-  return suffixCustomProperties(animations, options.suffix);
+  return withPartStyles(
+    suffixCustomProperties(animations, options.suffix),
+    options,
+    {
+      MEDIA_WRAPPER: {
+        paddingBottom: `${(100 * Math.tan((angle * Math.PI) / 180)).toFixed(3)}%`,
+        marginTop: `${(-50 * Math.tan((angle * Math.PI) / 180)).toFixed(3)}%`,
+      },
+      MEDIA: { height: '100%', width: '100%', position: 'absolute' },
+    },
+    asWeb,
+  );
 }

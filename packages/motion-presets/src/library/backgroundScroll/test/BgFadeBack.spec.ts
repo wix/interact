@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as BgFadeBack from '../BgFadeBack';
-import { baseMockOptions } from './testUtils';
+import { animationsOf, baseMockOptions } from './testUtils';
 import type { BgFadeBack as BgFadeBackType, AnimationData } from '../../../types';
 
 describe('BgFadeBack', () => {
@@ -61,7 +61,7 @@ describe('BgFadeBack', () => {
         },
       ];
 
-      const result = BgFadeBack.style(mockOptions);
+      const result = animationsOf(BgFadeBack.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -81,7 +81,7 @@ describe('BgFadeBack', () => {
         },
       ];
 
-      const result = BgFadeBack.style(mockOptions);
+      const result = animationsOf(BgFadeBack.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });

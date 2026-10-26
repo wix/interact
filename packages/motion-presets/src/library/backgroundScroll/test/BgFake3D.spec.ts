@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as BgFake3D from '../BgFake3D';
-import { baseMockOptions } from './testUtils';
+import { animationsOf, baseMockOptions } from './testUtils';
 import type { BgFake3D as BgFake3DType, AnimationData } from '../../../types';
 
 describe('BgFake3D', () => {
@@ -103,7 +103,7 @@ describe('BgFake3D', () => {
         },
       ];
 
-      const result = BgFake3D.style(mockOptions);
+      const result = animationsOf(BgFake3D.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -139,7 +139,7 @@ describe('BgFake3D', () => {
         },
       ];
 
-      const result = BgFake3D.style(mockOptions);
+      const result = animationsOf(BgFake3D.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });

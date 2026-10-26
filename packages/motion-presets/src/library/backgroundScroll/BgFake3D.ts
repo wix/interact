@@ -1,4 +1,3 @@
-// NOT PRODUCTION READY — background-scroll presets are experimental and excluded from public documentation.
 import type {
   BgFake3D,
   RangeOffset,
@@ -7,7 +6,12 @@ import type {
   DomApi,
 } from '../../types';
 import { roundNumber, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
-import { measureCompHeight, getScaleFromPerspectiveAndZ } from './utils';
+import {
+  measureCompHeight,
+  getScaleFromPerspectiveAndZ,
+  withPartStyles,
+  FIXED_STYLES,
+} from './utils';
 
 const PERSPECTIVE = 100;
 
@@ -145,5 +149,10 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     },
   ];
 
-  return suffixCustomProperties(animations, options.suffix);
+  return withPartStyles(
+    suffixCustomProperties(animations, options.suffix),
+    options,
+    FIXED_STYLES,
+    asWeb,
+  );
 }

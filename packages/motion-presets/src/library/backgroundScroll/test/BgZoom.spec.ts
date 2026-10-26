@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as BgZoom from '../BgZoom';
-import { baseMockOptions } from './testUtils';
+import { animationsOf, baseMockOptions } from './testUtils';
 import type { BgZoom as BgZoomType, AnimationData } from '../../../types';
 
 describe('BgZoom', () => {
@@ -142,7 +142,7 @@ describe('BgZoom', () => {
         },
       ];
 
-      const result = BgZoom.style(mockOptions);
+      const result = animationsOf(BgZoom.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -180,7 +180,7 @@ describe('BgZoom', () => {
         },
       ];
 
-      const result = BgZoom.style(mockOptions);
+      const result = animationsOf(BgZoom.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -207,7 +207,7 @@ describe('BgZoom', () => {
         },
       ];
 
-      const result = BgZoom.style(mockOptions);
+      const result = animationsOf(BgZoom.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });

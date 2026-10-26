@@ -1,13 +1,23 @@
 import { describe, expect, test } from 'vitest';
 
 import * as backgroundScroll from '../index';
-import { baseMockOptions } from './testUtils';
+import { animationsOf, baseMockOptions } from './testUtils';
 
-type StyleOutput = { part?: string; custom?: Record<string, unknown>; keyframes: object[] };
+type StyleOutput = {
+  name?: string;
+  part?: string;
+  custom?: Record<string, unknown>;
+  style?: Record<string, unknown>;
+  keyframes: object[];
+};
 
 const presets = Object.entries(backgroundScroll).filter(([, preset]) => 'parts' in preset) as [
   string,
-  { parts: string[]; style: (options: any) => StyleOutput[] },
+  {
+    parts: string[];
+    style: (options: any) => StyleOutput[];
+    web: (options: any) => StyleOutput[];
+  },
 ][];
 
 // set on the element at runtime by prepare()
@@ -19,9 +29,9 @@ const MEASURED_PROPERTIES = [
 
 describe('background scroll presets', () => {
   test.each(presets)('%s declares the parts it animates', (_, preset) => {
-    const animatedParts = preset
-      .style({ ...baseMockOptions, namedEffect: {} })
-      .map(({ part }) => part);
+    const animatedParts = animationsOf(preset.style({ ...baseMockOptions, namedEffect: {} })).map(
+      ({ part }) => part,
+    );
 
     expect(new Set(animatedParts)).toEqual(new Set(preset.parts));
   });
@@ -36,5 +46,19 @@ describe('background scroll presets', () => {
       .filter((name) => !MEASURED_PROPERTIES.includes(name));
 
     expect(declared).toEqual(expect.arrayContaining(used));
+  });
+
+  test.each(presets)('%s clips its media to its layer', (_, preset) => {
+    const clip = preset
+      .style({ ...baseMockOptions, namedEffect: {} })
+      .find(({ name, part }) => !name && part === 'MEDIA_CLIP');
+
+    expect(clip?.style).toMatchObject({ overflow: 'clip', contain: 'layout' });
+  });
+
+  test.each(presets)('%s only animates in web()', (_, preset) => {
+    const animations = preset.web({ ...baseMockOptions, namedEffect: {} });
+
+    expect(animations.every(({ name }) => name)).toBe(true);
   });
 });

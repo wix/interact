@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as BgPullBack from '../BgPullBack';
-import { baseMockOptions } from './testUtils';
+import { animationsOf, baseMockOptions } from './testUtils';
 import type { BgPullBack as BgPullBackType, AnimationData } from '../../../types';
 
 describe('BgPullBack', () => {
@@ -70,7 +70,7 @@ describe('BgPullBack', () => {
         },
       ];
 
-      const result = BgPullBack.style(mockOptions);
+      const result = animationsOf(BgPullBack.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -93,7 +93,7 @@ describe('BgPullBack', () => {
         },
       ];
 
-      const result = BgPullBack.style(mockOptions);
+      const result = animationsOf(BgPullBack.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });

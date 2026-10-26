@@ -1,6 +1,6 @@
 ---
 name: motion-presets
-description: Reference for selecting and configuring Interact motion presets. Read when applying entrance, scroll, ongoing, or mouse animations to elements, choosing presets by atmosphere or tone, combining effects, or handling accessibility and reduced motion.
+description: Reference for selecting and configuring Interact motion presets. Read when applying entrance, scroll, ongoing, mouse, or background scroll animations to elements, choosing presets by atmosphere or tone, combining effects, or handling accessibility and reduced motion.
 ---
 
 # Motion Presets Reference
@@ -30,12 +30,13 @@ A preset is a named effect. "Preset" is used when talking about selection and co
 
 ## Preset Categories
 
-| Category | Optimized For                                      | Implementation                              | Notes                                                                   |
-| -------- | -------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------- |
-| entrance | When an element enters the viewport                | `viewEnter` (intersection observer)         | Can also be triggered by hover, click, animationend, and other triggers |
-| scroll   | Scroll position of an element relative to document | ViewTimeline (scroll progress)              | Animation progress tied to element's position in the viewport           |
-| ongoing  | Continuous loop                                    | infinite CSS/WAAPI animation                | Runs indefinitely until stopped                                         |
-| mouse    | Follow or Repel by Pointer position                | transform values driven by pointer position | Real-time response to cursor position; may behave differently on mobile |
+| Category          | Optimized For                                      | Implementation                              | Notes                                                                                                   |
+| ----------------- | -------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| entrance          | When an element enters the viewport                | `viewEnter` (intersection observer)         | Can also be triggered by hover, click, animationend, and other triggers                                 |
+| scroll            | Scroll position of an element relative to document | ViewTimeline (scroll progress)              | Animation progress tied to element's position in the viewport                                           |
+| ongoing           | Continuous loop                                    | infinite CSS/WAAPI animation                | Runs indefinitely until stopped                                                                         |
+| mouse             | Follow or Repel by Pointer position                | transform values driven by pointer position | Real-time response to cursor position; may behave differently on mobile                                 |
+| background-scroll | The background media of a section, as it scrolls   | ViewTimeline (scroll progress)              | Animates the section's media parts, which need [specific markup](./background-scroll-presets.md#markup) |
 
 For full parameter details per category, see the dedicated reference files:
 
@@ -43,6 +44,7 @@ For full parameter details per category, see the dedicated reference files:
 - [Scroll Presets](./scroll-presets.md)
 - [Ongoing Presets](./ongoing-presets.md)
 - [Mouse Presets](./mouse-presets.md)
+- [Background Scroll Presets](./background-scroll-presets.md)
 
 ## Trigger and Effect Binding
 
@@ -152,6 +154,12 @@ Bounce, Breathe, Cross, Flash, Flip, Fold, Jello, Poke, Pulse, Rubber, Spin, Swi
 AiryMouse, BlobMouse, BlurMouse, BounceMouse, ScaleMouse, SkewMouse, SpinMouse, SwivelMouse, Tilt3DMouse, Track3DMouse, TrackMouse
 
 → [Full mouse preset reference](./mouse-presets.md)
+
+### Background Scroll (12 presets)
+
+BgCloseUp, BgFade, BgFadeBack, BgFake3D, BgPan, BgParallax, BgPullBack, BgReveal, BgRotate, BgSkew, BgZoom, ImageParallax
+
+→ [Full background scroll preset reference](./background-scroll-presets.md)
 
 ## Selection by Atmosphere
 
@@ -327,6 +335,7 @@ Keywords: clean, structured, organized, directional, purposeful, direct, simple,
 1. Do not add entrance presets (or any animation that starts with opacity 0) to `<h1>` elements in the first fold
 2. Do not add scroll-in animations in the first fold
 3. Do not add scroll-out animations in the last fold
+4. For a section's background media, use background scroll presets when the markup has its [media parts](./background-scroll-presets.md#markup); otherwise animate the media element itself with a scroll preset, e.g. ParallaxScroll
 
 ## Cross-Category Parallels
 
@@ -371,6 +380,7 @@ If the host handles accessibility globally (e.g., disabling all animations on `(
 
 - TurnIn
 - ParallaxScroll at high speed values
+- Background scroll: BgRotate, BgSkew, BgFake3D, BgZoom, and BgParallax or ImageParallax at high speed values
 
 **Low risk / safe** (opacity/blur changes, minimal spatial movement):
 
@@ -387,6 +397,7 @@ If the host handles accessibility globally (e.g., disabling all animations on `(
 | Spin, Bounce, Wiggle              | Stop or subtle Pulse      |
 | Flash                             | Reduce frequency (<3/sec) |
 | ParallaxScroll                    | Static position           |
+| Background scroll presets         | BgReveal or disable       |
 | ArcScroll, FlipScroll, SpinScroll | FadeScroll or disable     |
 | All mouse presets                 | Static state              |
 

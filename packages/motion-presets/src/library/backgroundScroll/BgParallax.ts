@@ -1,4 +1,3 @@
-// NOT PRODUCTION READY — background-scroll presets are experimental and excluded from public documentation.
 import type {
   BgParallax,
   RangeOffset,
@@ -7,7 +6,7 @@ import type {
   DomApi,
 } from '../../types';
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
-import { measureCompHeight } from './utils';
+import { measureCompHeight, withPartStyles, FIXED_STYLES } from './utils';
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-bgParallax'], options.suffix);
@@ -77,5 +76,10 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     },
   ];
 
-  return suffixCustomProperties(animations, options.suffix);
+  return withPartStyles(
+    suffixCustomProperties(animations, options.suffix),
+    options,
+    FIXED_STYLES,
+    asWeb,
+  );
 }
