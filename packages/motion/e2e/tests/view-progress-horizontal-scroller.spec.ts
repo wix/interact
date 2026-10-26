@@ -33,6 +33,10 @@ const placeInScroller = (page: Page, id: string, top: number) =>
     [id, top] as const,
   );
 
+// Waits for the subject's path to switch, after a scroll that lets the check run.
+const expectPath = (page: Page, id: string, path: Reading['path']) =>
+  expect.poll(async () => (await readTimeline(page, id)).path).toBe(path);
+
 // Reads the subject just after it enters (cover progress near 0) and just before it leaves (near 1).
 async function readEnteringAndLeaving(
   page: Page,
@@ -129,14 +133,16 @@ test.describe('view-progress subject inside a horizontal scroller', () => {
   test('a slider moves to the fallback once an item stops overflowing it', async ({ page }) => {
     const id = 't-slider-subject';
     // an item's entrance transform overflows the slider at setup, so the slider can scroll
-    expect(await readTimeline(page, id)).toEqual(
-      expect.objectContaining({ path: 'native', source: 'DIV#t-slider' }),
-    );
+    await expect
+      .poll(() => readTimeline(page, id))
+      .toEqual(expect.objectContaining({ path: 'native', source: 'DIV#t-slider' }));
 
-    // the entrance ends
+    // the entrance ends, then the page scrolls
     await page.evaluate(() =>
       document.querySelector('#t-slider > .entering')!.classList.remove('entering'),
     );
+    await placeInViewport(page, id, page.viewportSize()!.height / 2);
+    await expectPath(page, id, 'fallback');
     const { entering, leaving } = await readEnteringAndLeaving(
       page,
       id,
@@ -151,11 +157,12 @@ test.describe('view-progress subject inside a horizontal scroller', () => {
 
   test('a subject moves to the fallback when a slider appears after a resize', async ({ page }) => {
     const id = 'bp-slider-subject';
-    expect(await readTimeline(page, id)).toEqual(
-      expect.objectContaining({ path: 'native', source: 'document.scrollingElement' }),
-    );
+    await expect
+      .poll(() => readTimeline(page, id))
+      .toEqual(expect.objectContaining({ path: 'native', source: 'document.scrollingElement' }));
 
     await page.setViewportSize({ width: 500, height: page.viewportSize()!.height });
+    await expectPath(page, id, 'fallback');
     const { entering, leaving } = await readEnteringAndLeaving(
       page,
       id,
@@ -183,6 +190,8 @@ test.describe('view-progress subject inside a horizontal scroller', () => {
       subject.before(content());
       subject.after(content());
     });
+    await placeInScroller(page, id, 150);
+    await expectPath(page, id, 'native');
     const { entering, leaving } = await readEnteringAndLeaving(
       page,
       id,
