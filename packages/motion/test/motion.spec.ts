@@ -915,6 +915,104 @@ describe('motion.ts', () => {
         (AnimationGroup as Mock).mockRestore();
       });
 
+      test('should read lazy keyframes after the preset measured the target', async () => {
+        registerEffects({
+          LazyKeyframes: {
+            web: (options: AnimationOptions, dom: any) => {
+              let offset = 0;
+              dom.measure(() => {
+                offset = 0.4;
+              });
+
+              return [
+                {
+                  ...options,
+                  name: 'lazy-keyframes',
+                  get keyframes() {
+                    return [
+                      { offset: 0, opacity: 0 },
+                      { offset, opacity: 1 },
+                    ];
+                  },
+                },
+              ];
+            },
+          },
+        } as any);
+
+        const fastdom = (await import('fastdom')).default;
+        // queue fastdom work like a browser frame does, so the measure runs after getWebAnimation() returns
+        const frame: Array<() => void> = [];
+        (fastdom.measure as Mock).mockImplementation((fn) => frame.push(fn));
+        (fastdom.mutate as Mock).mockImplementation((fn) => frame.push(fn));
+
+        getWebAnimation(document.createElement('div'), {
+          namedEffect: { type: 'LazyKeyframes', id: 'lazy' },
+          duration: 1000,
+        } as AnimationOptions);
+        frame.forEach((fn) => fn());
+
+        expect(mockKeyframeEffect.setKeyframes).toHaveBeenCalledWith([
+          { offset: 0, opacity: 0 },
+          { offset: 0.4, opacity: 1 },
+        ]);
+
+        (fastdom.measure as Mock).mockRestore();
+        (fastdom.mutate as Mock).mockRestore();
+      });
+
+      test('should read lazy scrub ranges after the preset measured the target', async () => {
+        registerEffects({
+          LazyRange: {
+            web: (options: AnimationOptions, dom: any) => {
+              let height = 0;
+              dom.measure(() => {
+                height = 200;
+              });
+
+              // like BgZoom and BgFake3D, both the keyframes and the range end are getters
+              return [
+                {
+                  ...options,
+                  name: 'lazy-range',
+                  get keyframes() {
+                    return [{ opacity: 0 }, { opacity: 1 }];
+                  },
+                  startOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+                  endOffset: { name: 'cover', offset: { value: 0, unit: 'percentage' } },
+                  get endOffsetAdd() {
+                    return `${height}px`;
+                  },
+                },
+              ];
+            },
+          },
+        } as any);
+
+        const { AnimationGroup } = await import('../src/AnimationGroup');
+        const fastdom = (await import('fastdom')).default;
+        const frame: Array<() => void> = [];
+        (fastdom.measure as Mock).mockImplementation((fn) => frame.push(fn));
+        (fastdom.mutate as Mock).mockImplementation((fn) => frame.push(fn));
+
+        const target = document.createElement('div');
+        getWebAnimation(
+          target,
+          { namedEffect: { type: 'LazyRange', id: 'lazy' } } as AnimationOptions,
+          {
+            trigger: 'view-progress',
+            element: target,
+          },
+        );
+        frame.forEach((fn) => fn());
+
+        const [animation] = (AnimationGroup as Mock).mock.calls[0][0];
+        expect(animation.rangeEnd).toBe('cover calc(0% + 200px)');
+
+        (fastdom.measure as Mock).mockRestore();
+        (fastdom.mutate as Mock).mockRestore();
+      });
+
       test('should handle custom ownerDocument', async () => {
         const customDocument = {
           getElementById: vi.fn(() => mockElement),

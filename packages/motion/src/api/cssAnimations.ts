@@ -6,7 +6,7 @@ import type {
   SequenceOptions,
   TriggerVariant,
 } from '../types';
-import { getJsEasingInCSS } from '../utils';
+import { getJsEasingInCSS, normalizeKeyframes } from '../utils';
 import { getEffectsData, getRanges, getNamedEffect, isNotAScrubTrigger } from './common';
 
 function getAnimationAsCSS(
@@ -92,7 +92,7 @@ function getCSSAnimation(
       composition: item.options.composite,
       custom: item.effect.custom,
       name: item.effect.name,
-      keyframes: item.effect.keyframes,
+      keyframes: normalizeKeyframes(item.effect.keyframes),
       id: item.id && `${item.id}-${index + 1}`,
       animationTimeline: isViewProgress ? `--${trigger?.id}` : '',
       animationRange: start || end ? `${start} ${end}` : '',

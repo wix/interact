@@ -11,6 +11,7 @@ import type {
 } from '../types';
 import { CustomAnimation } from '../CustomAnimation';
 import { AnimationGroup } from '../AnimationGroup';
+import { normalizeKeyframes } from '../utils';
 import {
   getElement,
   getElementMotionPart,
@@ -137,7 +138,9 @@ function getWebAnimation(
         keyframeEffect.updateTiming(effect.timing as OptionalEffectTiming);
       }
 
-      keyframeEffect.setKeyframes(effect.keyframes);
+      // keyframe property names may be authored in camelCase or kebab-case,
+      // WAAPI only understands camelCase
+      keyframeEffect.setKeyframes(normalizeKeyframes(effect.keyframes));
     });
 
     const timingOptions =
