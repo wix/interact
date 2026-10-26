@@ -824,6 +824,18 @@ describe('motion.ts', () => {
         expect(result).toBe(mockAnimationGroup);
       });
 
+      test('should skip the animations of parts the target does not have', async () => {
+        mockElement.matches = vi.fn(() => false);
+        mockElement.querySelector = vi.fn(() => null);
+
+        const result = getWebAnimation(mockElement.id, {
+          namedEffect: { type: 'BgPan', id: 'bg-pan', direction: 'left' },
+        });
+
+        expect(KeyframeEffect).not.toHaveBeenCalled();
+        expect(result).toBeNull();
+      });
+
       test('should handle animations with targeyt as inner part (data-motion-part)', async () => {
         mockElement.matches = vi.fn(() => true);
 
