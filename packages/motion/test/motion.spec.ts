@@ -772,7 +772,10 @@ describe('motion.ts', () => {
             { scrollHeight: 200, clientHeight: 200, scrollWidth: 991, clientWidth: 380 },
           );
 
-        async function getViewProgressAnimation(source: Element | null) {
+        async function getViewProgressAnimation(
+          source: Element | null,
+          { options = scrollOptions, trigger = {} as Partial<TriggerVariant> } = {},
+        ) {
           mockViewTimeline.source = source;
           const { AnimationGroup } = await import('../src/AnimationGroup');
           (AnimationGroup as Mock).mockImplementation(function (animations: any) {
@@ -780,9 +783,10 @@ describe('motion.ts', () => {
             return mockAnimationGroup;
           });
 
-          getWebAnimation(mockElement.id, scrollOptions, {
+          getWebAnimation(mockElement.id, options, {
             element: mockElement,
             trigger: 'view-progress',
+            ...trigger,
           });
 
           (AnimationGroup as Mock).mockRestore();
@@ -799,6 +803,63 @@ describe('motion.ts', () => {
             expect.objectContaining({ duration: 99.99, delay: 0.01 }),
           );
           expect(animation.start).toEqual(expect.objectContaining({ name: 'cover', offset: 0 }));
+        });
+
+        test('takes the page-based fallback when the scroller overflows by a rounding pixel', async () => {
+          // sub-pixel overflow (e.g. a 200.6px item in a 200.4px slider) reports as a 1px difference
+          const animation = await getViewProgressAnimation(
+            aSource(
+              { overflowX: 'scroll', overflowY: 'auto' },
+              { scrollHeight: 201, clientHeight: 200, scrollWidth: 991, clientWidth: 380 },
+            ),
+          );
+
+          expect(animation.timeline).toBeUndefined();
+        });
+
+        test("follows the trigger's useViewTimeline instead of detecting it", async () => {
+          const ViewTimeline = (globalThis as any).ViewTimeline;
+
+          const fallback = await getViewProgressAnimation(null, {
+            trigger: { useViewTimeline: false },
+          });
+          expect(fallback.timeline).toBeUndefined();
+          expect(ViewTimeline).not.toHaveBeenCalled();
+
+          const native = await getViewProgressAnimation(aSlider(), {
+            trigger: { useViewTimeline: true },
+          });
+          expect(native.timeline).toBe(mockViewTimeline);
+          expect(ViewTimeline).toHaveBeenCalledTimes(1);
+        });
+
+        test('writes <length> range offsets into the fallback ranges as fizban lengths', async () => {
+          const animation = await getViewProgressAnimation(aSlider(), {
+            options: {
+              ...scrollOptions,
+              startOffset: { name: 'entry', offset: { value: 100, unit: 'px' } },
+              endOffset: { name: 'exit', offset: { value: -50, unit: 'px' } },
+              endOffsetAdd: '20px',
+            } as AnimationOptions,
+          });
+
+          // the native path reads these as `entry 100px` and `exit calc(100% + -50px + 20px)`
+          expect(animation.start).toEqual({ name: 'entry', offset: 0, add: '100px' });
+          expect(animation.end).toEqual({ name: 'exit', offset: 100, add: 'calc(-50px + 20px)' });
+        });
+
+        test('keeps percentage range offsets in the fallback ranges', async () => {
+          const animation = await getViewProgressAnimation(aSlider(), {
+            options: {
+              ...scrollOptions,
+              startOffset: { name: 'cover', offset: { value: 10, unit: 'percentage' } },
+              endOffset: { offset: { value: 90, unit: 'percentage' } },
+              startOffsetAdd: '30px',
+            } as AnimationOptions,
+          });
+
+          expect(animation.start).toEqual({ name: 'cover', offset: 10, add: '30px' });
+          expect(animation.end).toEqual({ name: 'cover', offset: 90, add: undefined });
         });
 
         test('takes the page-based fallback when the scroller hides its block-axis overflow', async () => {
@@ -1242,6 +1303,18 @@ describe('motion.ts', () => {
 
         expect(canUseViewTimeline(subject)).toBe(false);
         expect((globalThis as any).ViewTimeline).toHaveBeenCalledWith({ subject });
+      });
+
+      test('should be false when the slider overflows by a rounding pixel only', () => {
+        const slider = document.createElement('div');
+        Object.assign(slider.style, { overflowX: 'scroll', overflowY: 'auto' });
+        Object.defineProperties(slider, {
+          scrollHeight: { value: 201 },
+          clientHeight: { value: 200 },
+        });
+        mockViewTimelineSource(slider);
+
+        expect(canUseViewTimeline(subject)).toBe(false);
       });
 
       test('should be true when the subject scrolls with the page', () => {
@@ -1864,6 +1937,8 @@ describe('motion.ts', () => {
         expect(Array.isArray(result)).toBe(true);
         expect(result).toHaveLength(2);
         expect(result[0].viewSource).toBe(viewSource);
+        // decided once, and the animation is built without a timeline of its own
+        expect((globalThis as any).ViewTimeline).toHaveBeenCalledTimes(1);
 
         (AnimationGroup as Mock).mockRestore();
         delete (globalThis as any).ViewTimeline;

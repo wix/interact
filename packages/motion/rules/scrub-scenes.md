@@ -283,7 +283,8 @@ With `trigger: 'view-progress'` (`../src/api/common.ts:106-120`):
 - **Rule**: if `canUseViewTimeline(subject)` is true, don't call `getScrubScene` for `view-progress` —
   call `getWebAnimation` directly and let the native timeline drive it. Branch on it, not on
   `window.ViewTimeline`: a subject inside a horizontal slider has no native timeline even when the
-  browser supports one.
+  browser supports one. The answer can change with layout; `watchViewTimeline(subject, onChange)`
+  reports it, and passing it as the trigger's `useViewTimeline` makes both functions build that path.
 - **Rule**: `@wix/interact` (with its bundled `fizban` scroll polyfill) already implements a
   spec-accurate scroll driver and pointer driver on top of `getScrubScene` — prefer it over a hand-rolled
   driver in application code.

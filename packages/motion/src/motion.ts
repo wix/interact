@@ -17,7 +17,8 @@ import { getEasing, getJsEasing } from './utils';
 import { getWebAnimation } from './api/webAnimations';
 import { getCSSAnimation } from './api/cssAnimations';
 import { prepareAnimation } from './api/prepare';
-import { canUseViewTimeline, getElement, getNamedEffect } from './api/common';
+import { getElement, getNamedEffect } from './api/common';
+import { canUseViewTimeline, resolveUseViewTimeline, watchViewTimeline } from './api/viewTimeline';
 
 function getElementCSSAnimation(
   target: HTMLElement | string | null,
@@ -78,7 +79,16 @@ function getScrubScene(
   sceneOptions: Record<string, any> = {},
 ): ScrubScrollScene[] | ScrubPointerScene | ScrubPointerScene[] | null {
   const { disabled, allowActiveEvent, ...rest } = sceneOptions;
-  const animation = getWebAnimation(target, animationOptions, trigger, rest);
+  const isViewProgress = trigger.trigger === 'view-progress';
+  const viewSource = isViewProgress ? trigger.element || getElement(trigger.componentId!) : null;
+  // decided once and passed down, so the animation and the scenes agree on the path
+  const useViewTimeline = isViewProgress && resolveUseViewTimeline(trigger, viewSource);
+  const animation = getWebAnimation(
+    target,
+    animationOptions,
+    isViewProgress ? { ...trigger, useViewTimeline } : trigger,
+    rest,
+  );
 
   // Return null if animation could not be created
   if (!animation) {
@@ -86,11 +96,9 @@ function getScrubScene(
   }
 
   let typeSpecificOptions = {} as Record<string, any>;
-  const isViewProgress = trigger.trigger === 'view-progress';
-  const viewSource = isViewProgress ? trigger.element || getElement(trigger.componentId!) : null;
 
-  // the same check getWebAnimation() made: this subject has no native ViewTimeline
-  if (isViewProgress && !canUseViewTimeline(viewSource)) {
+  // no native ViewTimeline for this subject: scenes for a scroll driver
+  if (isViewProgress && !useViewTimeline) {
     // TODO(ameerf): consider doing this only for bgscrub to not affect the other scroll effects
     const { ready } = animation as AnimationGroup;
 
@@ -281,6 +289,7 @@ export {
   createAnimationGroups,
   getEasing,
   canUseViewTimeline,
+  watchViewTimeline,
 };
 
 export type { AnimationGroup, Sequence };

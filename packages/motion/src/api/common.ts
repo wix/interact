@@ -53,6 +53,21 @@ function getRanges(effect: AnimationDataForScrub) {
   };
 }
 
+// the same range for the scroll fallback (fizban), which takes a percentage of the named range and
+// adds any <length> in `add`
+function getScrubRange(range: RangeOffset, add: string | undefined, isEnd?: boolean) {
+  const name = range.name || 'cover';
+  const { offset } = range;
+
+  if (!offset || offset.unit === 'percentage') {
+    return { name, offset: offset?.value, add };
+  }
+
+  // a <length> counts from the start of the named range, or from its end for an end range (see getRange)
+  const length = getLength(offset);
+  return { name, offset: isEnd ? 100 : 0, add: add ? `calc(${length} + ${add})` : length };
+}
+
 function measure(target: HTMLElement | null): MeasureCallback {
   return (fn) => fastdom.measure(() => fn(target));
 }
@@ -83,55 +98,6 @@ function getNamedEffect(animation: AnimationOptions) {
     return (animation_: AnimationOptions) => [{ ...animation_, keyframes: [] }];
   }
   return null;
-}
-
-/**
- * Creates the native ViewTimeline for a view-progress subject, or returns null when the effect has
- * to take the page-based fallback instead: when the browser has no ViewTimeline, or when the
- * subject's scroll container can't scroll on the timeline's axis.
- *
- * A view timeline follows the subject's nearest scroll container, and that can't be overridden.
- * `overflow-x: scroll` (a horizontal slider) makes a box a scroll container on both axes, so a
- * block-axis timeline inside a slider follows a box that never scrolls on that axis, and its
- * progress stays fixed while the page scrolls.
- *
- * This is decided once, when the effect is created. If the layout changes later, e.g. a slider
- * that appears or goes away at a breakpoint, the effect keeps its path until it is created again.
- */
-function getViewTimeline(subject: HTMLElement | null): typeof window.ViewTimeline | null {
-  if (!window.ViewTimeline) {
-    return null;
-  }
-
-  // @ts-expect-error
-  const timeline = new ViewTimeline({ subject });
-  // the browser resolves the scroll container (Chrome already lays out to construct the timeline,
-  // so the reads below add no layout of their own)
-  const source: Element | null = timeline.source;
-
-  // no box to resolve a scroller from (yet), or the page scrolls the subject
-  if (!source || source === source.ownerDocument.scrollingElement) {
-    return timeline;
-  }
-
-  // the block axis is horizontal in vertical writing modes
-  const style = getComputedStyle(source);
-  const horizontal = /^(vertical|sideways)/.test(style.writingMode);
-  const overflow = horizontal ? style.overflowX : style.overflowY;
-  const scrollRange = horizontal
-    ? source.scrollWidth - source.clientWidth
-    : source.scrollHeight - source.clientHeight;
-  const canScroll = (overflow === 'auto' || overflow === 'scroll') && scrollRange > 0;
-
-  return canScroll ? timeline : null;
-}
-
-/**
- * Whether a view-progress effect on `subject` runs on a native ViewTimeline. When it's false, drive
- * the effect with the scenes from `getScrubScene()` against the page's scroll.
- */
-function canUseViewTimeline(subject: HTMLElement | null): boolean {
-  return !!getViewTimeline(subject);
 }
 
 function getEffectsData(
@@ -187,8 +153,6 @@ function isNotAScrubTrigger(trigger?: Partial<TriggerVariant>) {
 
 export {
   isNotAScrubTrigger,
-  getViewTimeline,
-  canUseViewTimeline,
   getElement,
   getElementMotionPart,
   getNamedEffect,
@@ -198,4 +162,5 @@ export {
   getDirection,
   getLength,
   getRanges,
+  getScrubRange,
 };

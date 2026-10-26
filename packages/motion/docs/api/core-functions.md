@@ -48,6 +48,7 @@ function getWebAnimation(
 - Returns `MouseAnimationInstance` only on the `pointer-move` + non-`keyframeEffect` path (i.e. a `namedEffect`/`customEffect` driven by the pointer); every other path returns an `AnimationGroup`.
 - With `{ trigger: 'view-progress' }`, when [`canUseViewTimeline()`](#canuseviewtimeline) is true for the subject, the animation is linked to a native `ViewTimeline` (`duration: 'auto'`) and plays automatically.
 - Otherwise (no `window.ViewTimeline`, or a subject whose scroll container can't scroll on the timeline's axis, such as one inside a horizontal slider), the animation is created with a scrubbable `duration: 99.99ms` / `delay: 0.01ms`, meant to be driven via [`getScrubScene()`](#getscrubscene).
+- `useViewTimeline: true | false` on a `view-progress` trigger skips that check and builds the path you name, e.g. the answer from [`watchViewTimeline()`](#watchviewtimeline).
 
 ### Example
 
@@ -260,9 +261,30 @@ function canUseViewTimeline(subject: HTMLElement | null): boolean;
 
 ### Returns
 
-`false` without `window.ViewTimeline`, or when the subject's nearest scroll container can't scroll on the timeline's (block) axis: its overflow on that axis isn't `auto` / `scroll`, or it has nothing to scroll. A view timeline always follows that scroll container, and `overflow-x: scroll` makes a box one on both axes, so inside a horizontal slider a native timeline would never move with the page. `true` otherwise, including when the page itself scrolls the subject, or when the subject has no box yet.
+`false` without `window.ViewTimeline`, or when the subject's nearest scroll container can't scroll on the timeline's (block) axis: its overflow on that axis isn't `auto` / `scroll`, or it has a pixel or less to scroll (scroll and client sizes are rounded to whole pixels, so a 1px difference can be sub-pixel overflow alone). A view timeline always follows that scroll container, and `overflow-x: scroll` makes a box one on both axes, so inside a horizontal slider a native timeline would never move with the page. `true` otherwise, including when the page itself scrolls the subject, or when the subject has no box yet.
 
-It reads layout, so call it when the effect is set up. The answer isn't re-checked: if the layout changes later (a slider that appears at a breakpoint), the effect keeps its path until it's set up again.
+It reads layout at the time of the call. To follow layout changes, use [`watchViewTimeline()`](#watchviewtimeline).
+
+## watchViewTimeline
+
+Calls `onChange` with [`canUseViewTimeline(subject)`](#canuseviewtimeline) right away, and again each time the answer changes, until you call the returned function. Switch the effect between [`getWebAnimation()`](#getwebanimation) and [`getScrubScene()`](#getscrubscene) in `onChange`, passing the answer as the trigger's `useViewTimeline` so both build the path you picked. `@wix/interact` does this for every `viewProgress` interaction.
+
+### Signature
+
+```typescript
+function watchViewTimeline(
+  subject: HTMLElement,
+  onChange: (useViewTimeline: boolean) => void,
+): () => void;
+```
+
+### When it checks again
+
+- **On resize**, which can add or remove the scroll container (e.g. a slider below a breakpoint).
+- **On page scroll, while a native timeline follows a scroll container.** The container can lose its range, e.g. when an item's entrance transform ends, and then the timeline stops moving.
+- **When the scroll container scrolls on the block axis, while the effect is on the fallback.** Its range can arrive later, e.g. with lazy content. It takes an actual scroll on that axis, not just a range, so a passing overflow such as an item scaled on hover doesn't switch it.
+
+Checks are batched once per frame with `fastdom`. Without `window.ViewTimeline` it calls `onChange(false)` once and listens to nothing.
 
 ## getAnimation
 

@@ -43,6 +43,52 @@
       #v-scroller .v-spacer {
         height: 600px;
       }
+
+      /* Sliders whose block-axis overflow isn't a real scroll range. */
+      .slider {
+        overflow-x: scroll;
+        display: flex;
+        gap: 16px;
+        width: 380px;
+      }
+
+      .slider > div {
+        flex: 0 0 200px;
+        height: 200px;
+        background: #4a90d9;
+      }
+
+      /* sub-pixel overflow, reported as a 1px difference */
+      #r-slider {
+        height: 200.4px;
+      }
+
+      #r-slider > div {
+        height: 200.6px;
+      }
+
+      /* an item's entrance transform overflows the slider until it ends */
+      #t-slider > .entering {
+        transform: translateY(40px);
+      }
+
+      /* a slider only below a breakpoint */
+      #bp-slider {
+        overflow-x: visible;
+      }
+
+      @media (max-width: 600px) {
+        #bp-slider {
+          overflow-x: scroll;
+        }
+      }
+
+      /* a vertical scroller whose content arrives after setup */
+      #lazy-scroller {
+        overflow-y: auto;
+        height: 300px;
+        width: 380px;
+      }
     </style>
   </head>
   <body>
@@ -59,6 +105,28 @@
       <div class="v-spacer"></div>
       <div id="v-scroller-subject" class="box" data-testid="v-scroller-subject"></div>
       <div class="v-spacer"></div>
+    </div>
+    <div class="spacer"></div>
+    <div id="r-slider" class="slider" data-testid="r-slider">
+      <div id="r-slider-subject" data-testid="r-slider-subject"></div>
+      <div></div>
+      <div></div>
+    </div>
+    <div class="spacer"></div>
+    <div id="t-slider" class="slider" data-testid="t-slider">
+      <div id="t-slider-subject" data-testid="t-slider-subject"></div>
+      <div class="entering"></div>
+      <div></div>
+    </div>
+    <div class="spacer"></div>
+    <div id="bp-slider" class="slider" data-testid="bp-slider">
+      <div id="bp-slider-subject" data-testid="bp-slider-subject"></div>
+      <div></div>
+      <div></div>
+    </div>
+    <div class="spacer"></div>
+    <div id="lazy-scroller" data-testid="lazy-scroller">
+      <div id="lazy-scroller-subject" class="box" data-testid="lazy-scroller-subject"></div>
     </div>
     <div class="spacer"></div>
 

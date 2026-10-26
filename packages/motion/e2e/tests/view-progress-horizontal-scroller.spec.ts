@@ -110,4 +110,90 @@ test.describe('view-progress subject inside a horizontal scroller', () => {
     expect(entering.progress!).toBeLessThan(0.2);
     expect(leaving.progress!).toBeGreaterThan(0.8);
   });
+
+  // a 200.6px item in a 200.4px slider: scrollHeight is one more than clientHeight
+  test('a slider that overflows by a rounding pixel takes the fallback', async ({ page }) => {
+    const id = 'r-slider-subject';
+    const { entering, leaving } = await readEnteringAndLeaving(
+      page,
+      id,
+      (top) => placeInViewport(page, id, top),
+      page.viewportSize()!.height,
+    );
+
+    expect(entering.path).toBe('fallback');
+    expect(entering.progress!).toBeLessThan(0.2);
+    expect(leaving.progress!).toBeGreaterThan(0.8);
+  });
+
+  test('a slider moves to the fallback once an item stops overflowing it', async ({ page }) => {
+    const id = 't-slider-subject';
+    // an item's entrance transform overflows the slider at setup, so the slider can scroll
+    expect(await readTimeline(page, id)).toEqual(
+      expect.objectContaining({ path: 'native', source: 'DIV#t-slider' }),
+    );
+
+    // the entrance ends
+    await page.evaluate(() =>
+      document.querySelector('#t-slider > .entering')!.classList.remove('entering'),
+    );
+    const { entering, leaving } = await readEnteringAndLeaving(
+      page,
+      id,
+      (top) => placeInViewport(page, id, top),
+      page.viewportSize()!.height,
+    );
+
+    expect(entering.path).toBe('fallback');
+    expect(entering.progress!).toBeLessThan(0.2);
+    expect(leaving.progress!).toBeGreaterThan(0.8);
+  });
+
+  test('a subject moves to the fallback when a slider appears after a resize', async ({ page }) => {
+    const id = 'bp-slider-subject';
+    expect(await readTimeline(page, id)).toEqual(
+      expect.objectContaining({ path: 'native', source: 'document.scrollingElement' }),
+    );
+
+    await page.setViewportSize({ width: 500, height: page.viewportSize()!.height });
+    const { entering, leaving } = await readEnteringAndLeaving(
+      page,
+      id,
+      (top) => placeInViewport(page, id, top),
+      page.viewportSize()!.height,
+    );
+
+    expect(entering.path).toBe('fallback');
+    expect(entering.progress!).toBeLessThan(0.2);
+    expect(leaving.progress!).toBeGreaterThan(0.8);
+  });
+
+  test('a scroller whose content arrives later moves to the native timeline once it scrolls', async ({
+    page,
+  }) => {
+    const id = 'lazy-scroller-subject';
+    await page.locator('#lazy-scroller').scrollIntoViewIfNeeded();
+    // nothing to scroll yet
+    expect((await readTimeline(page, id)).path).toBe('fallback');
+
+    await page.evaluate(() => {
+      const subject = document.getElementById('lazy-scroller-subject')!;
+      const content = () =>
+        Object.assign(document.createElement('div'), { style: 'height: 600px' });
+      subject.before(content());
+      subject.after(content());
+    });
+    const { entering, leaving } = await readEnteringAndLeaving(
+      page,
+      id,
+      (top) => placeInScroller(page, id, top),
+      300,
+    );
+
+    expect(entering).toEqual(
+      expect.objectContaining({ path: 'native', source: 'DIV#lazy-scroller' }),
+    );
+    expect(entering.progress!).toBeLessThan(0.2);
+    expect(leaving.progress!).toBeGreaterThan(0.8);
+  });
 });

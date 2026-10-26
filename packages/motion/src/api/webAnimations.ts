@@ -19,9 +19,10 @@ import {
   getRanges,
   getNamedEffect,
   getEffectsData,
-  getViewTimeline,
+  getScrubRange,
   isNotAScrubTrigger,
 } from './common';
+import { resolveUseViewTimeline } from './viewTimeline';
 import fastdom from 'fastdom';
 
 function getWebAnimationEffect(
@@ -113,12 +114,18 @@ function getWebAnimation(
   }
 
   const isViewProgress = trigger?.trigger === 'view-progress';
+  let timeline: typeof window.ViewTimeline | undefined;
 
-  // a ScrubAnimation with view-progress trigger gets a native ViewTimeline when one can follow its
-  // subject, and null otherwise: no browser support, or a scroller that can't scroll on its axis
-  const timeline = isViewProgress
-    ? getViewTimeline(trigger.element || getElement(trigger.componentId!))
-    : null;
+  // a ScrubAnimation with view-progress trigger runs on a native ViewTimeline when one can follow its
+  // subject (see canUseViewTimeline()), or as the trigger's `useViewTimeline` says
+  if (isViewProgress) {
+    const subject = trigger.element || getElement(trigger.componentId!);
+
+    if (resolveUseViewTimeline(trigger, subject)) {
+      // @ts-expect-error
+      timeline = new ViewTimeline({ subject });
+    }
+  }
 
   const data = getEffectsData(animationsData, trigger, animationOptions.effectId, !!timeline);
 
@@ -171,16 +178,15 @@ function getWebAnimation(
           const endOffsetToWrite = (effect as AnimationDataForScrub).endOffset || endOffset;
 
           Object.assign(animation, {
-            start: {
-              name: startOffsetToWrite!.name,
-              offset: startOffsetToWrite!.offset?.value,
-              add: (effect as AnimationDataForScrub)!.startOffsetAdd,
-            },
-            end: {
-              name: endOffsetToWrite!.name,
-              offset: endOffsetToWrite!.offset?.value,
-              add: (effect as AnimationDataForScrub)!.endOffsetAdd,
-            },
+            start: getScrubRange(
+              startOffsetToWrite!,
+              (effect as AnimationDataForScrub).startOffsetAdd,
+            ),
+            end: getScrubRange(
+              endOffsetToWrite!,
+              (effect as AnimationDataForScrub).endOffsetAdd,
+              true,
+            ),
           });
         });
       }
