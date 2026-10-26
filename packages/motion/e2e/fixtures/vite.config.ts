@@ -21,6 +21,7 @@ export default defineConfig({
         pointer: path.resolve(__dirname, 'pointer.html'),
         'animation-group': path.resolve(__dirname, 'animation-group.html'),
         effects: path.resolve(__dirname, 'effects.html'),
+        'scroll-horizontal-scroller': path.resolve(__dirname, 'scroll-horizontal-scroller.html'),
       },
     },
   },
