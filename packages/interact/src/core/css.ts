@@ -335,9 +335,8 @@ function effectToCSS(
     // the effect's style is its target's, while presets spread their options to each of their animations
     const { style: _, ...animated } = effect;
     const animationOptions = effectToAnimationOptions(animated);
-    const cssAnimations = getCSSAnimation(null, animationOptions, trigger, sequence).filter(
-      (anim) => anim.name,
-    );
+    const allAnimations = getCSSAnimation(null, animationOptions, trigger, sequence);
+    const cssAnimations = allAnimations.filter((anim) => anim.name);
     const animationsByPart: Record<string, typeof cssAnimations> = cssAnimations.length
       ? {}
       : { '': [] };
@@ -384,11 +383,6 @@ function effectToCSS(
         partSelectors.add(childOrPartSelector!);
       }
 
-      const partStyle = Object.assign({}, ...animations.map((animation) => animation.style));
-      if (Object.keys(partStyle).length) {
-        pushStaticRule(childOrPartSelector, partStyle);
-      }
-
       if (initial) {
         // declare animation custom properties with initial dependent on data-motion-enter
         rules.push({
@@ -422,6 +416,16 @@ function effectToCSS(
         }
       }
     });
+
+    const stylesByPart: Record<string, Record<string, string | number | undefined>> = {};
+    allAnimations.forEach(({ part = '', style: partStyle }) => {
+      if (partStyle) {
+        Object.assign((stylesByPart[part] ||= {}), partStyle);
+      }
+    });
+    Object.entries(stylesByPart).forEach(([part, partStyle]) =>
+      pushStaticRule(part ? `[data-motion-part~="${part}"]` : childSelector, partStyle),
+    );
   } else if (transition || transitionProperties) {
     const properties = getStateStyleProperties(effect);
     const transitions = transitionEffectToTransitionsList(effect);

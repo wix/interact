@@ -8,7 +8,12 @@ import type {
   DomApi,
 } from '../../types';
 import { roundNumber, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
-import { measureCompHeight, getScaleFromPerspectiveAndZ } from './utils';
+import {
+  measureCompHeight,
+  getScaleFromPerspectiveAndZ,
+  withPartStyles,
+  FIXED_STYLES,
+} from './utils';
 
 const PERSPECTIVE = 100;
 const DEFAULT_ZOOM = 40;
@@ -185,5 +190,20 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     animation.name = names[index];
   });
 
-  return suffixCustomProperties(animations, options.suffix);
+  return withPartStyles(
+    suffixCustomProperties(animations, options.suffix),
+    options,
+    isIn
+      ? FIXED_STYLES
+      : {
+          MEDIA_WRAPPER: {
+            position: 'relative',
+            width: '115%',
+            height: '115%',
+            left: '-7.5%',
+            top: '-7.5%',
+          },
+        },
+    asWeb,
+  );
 }

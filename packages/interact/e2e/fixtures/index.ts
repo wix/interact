@@ -1,6 +1,14 @@
 import { Interact, generate } from '@wix/interact/web';
 import type { InteractConfig } from '@wix/interact/web';
-import { BgCloseUp, BgParallax, Tilt3DMouse } from '@wix/motion-presets';
+import {
+  BgCloseUp,
+  BgPan,
+  BgParallax,
+  BgReveal,
+  BgRotate,
+  ImageParallax,
+  Tilt3DMouse,
+} from '@wix/motion-presets';
 
 // declares a static style on each of its parts
 const staticParts = (options: object) =>
@@ -17,7 +25,16 @@ const StaticParts = {
   getNames: () => ['static-parts-0', 'static-parts-1'],
 };
 
-Interact.registerEffects({ BgCloseUp, BgParallax, Tilt3DMouse, StaticParts } as any);
+Interact.registerEffects({
+  BgCloseUp,
+  BgPan,
+  BgParallax,
+  BgReveal,
+  BgRotate,
+  ImageParallax,
+  Tilt3DMouse,
+  StaticParts,
+} as any);
 
 const root = document.getElementById('root')!;
 

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as BgCloseUp from '../BgCloseUp';
-import { baseMockOptions } from './testUtils';
+import { animationsOf, baseMockOptions } from './testUtils';
 import type { BgCloseUp as BgCloseUpType, AnimationData } from '../../../types';
 
 describe('BgCloseUp', () => {
@@ -65,7 +65,7 @@ describe('BgCloseUp', () => {
         },
       ];
 
-      const result = BgCloseUp.style(mockOptions);
+      const result = animationsOf(BgCloseUp.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -89,7 +89,7 @@ describe('BgCloseUp', () => {
         },
       ];
 
-      const result = BgCloseUp.style(mockOptions);
+      const result = animationsOf(BgCloseUp.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });

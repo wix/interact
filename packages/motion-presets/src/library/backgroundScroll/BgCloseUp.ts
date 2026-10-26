@@ -6,7 +6,7 @@ import type {
   AnimationExtraOptions,
   ScrubAnimationOptions,
 } from '../../types';
-import { measureCompHeight } from './utils';
+import { measureCompHeight, withPartStyles } from './utils';
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 
 export function getNames(options: ScrubAnimationOptions) {
@@ -113,5 +113,5 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     },
   ];
 
-  return suffixCustomProperties(animations, options.suffix);
+  return withPartStyles(suffixCustomProperties(animations, options.suffix), options, {}, asWeb);
 }

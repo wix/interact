@@ -80,8 +80,8 @@ for (const mode of ['css', 'runtime'] as Mode[]) {
                     style: { outlineStyle: 'double' },
                   },
                   {
-                    effectId: 'parallax',
-                    namedEffect: { type: 'BgParallax' },
+                    effectId: 'fade',
+                    keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
                     conditions: ['narrow'],
                   },
                 ] as Effect[],

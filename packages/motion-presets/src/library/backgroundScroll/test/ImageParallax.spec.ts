@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as ImageParallax from '../ImageParallax';
-import { baseMockOptions } from './testUtils';
+import { animationsOf, baseMockOptions } from './testUtils';
 import type { ImageParallax as ImageParallaxType, AnimationData } from '../../../types';
 
 describe('ImageParallax', () => {
@@ -76,7 +76,7 @@ describe('ImageParallax', () => {
         },
       ];
 
-      const result = ImageParallax.style(mockOptions);
+      const result = animationsOf(ImageParallax.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -97,7 +97,7 @@ describe('ImageParallax', () => {
         },
       ];
 
-      const result = ImageParallax.style(mockOptions);
+      const result = animationsOf(ImageParallax.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -118,7 +118,7 @@ describe('ImageParallax', () => {
         },
       ];
 
-      const result = ImageParallax.style(mockOptions);
+      const result = animationsOf(ImageParallax.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });

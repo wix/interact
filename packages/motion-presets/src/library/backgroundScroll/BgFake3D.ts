@@ -7,7 +7,12 @@ import type {
   DomApi,
 } from '../../types';
 import { roundNumber, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
-import { measureCompHeight, getScaleFromPerspectiveAndZ } from './utils';
+import {
+  measureCompHeight,
+  getScaleFromPerspectiveAndZ,
+  withPartStyles,
+  FIXED_STYLES,
+} from './utils';
 
 const PERSPECTIVE = 100;
 
@@ -145,5 +150,10 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     },
   ];
 
-  return suffixCustomProperties(animations, options.suffix);
+  return withPartStyles(
+    suffixCustomProperties(animations, options.suffix),
+    options,
+    FIXED_STYLES,
+    asWeb,
+  );
 }

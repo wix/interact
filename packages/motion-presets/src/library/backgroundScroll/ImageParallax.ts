@@ -7,7 +7,7 @@ import type {
   ScrubAnimationOptions,
 } from '../../types';
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
-import { measureCompHeight, measureSiteHeight } from './utils';
+import { measureCompHeight, measureSiteHeight, withPartStyles } from './utils';
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-imageParallax'], options.suffix);
@@ -90,5 +90,13 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     },
   ];
 
-  return suffixCustomProperties(animations, options.suffix);
+  return withPartStyles(
+    suffixCustomProperties(animations, options.suffix),
+    options,
+    {
+      MEDIA_WRAPPER: { height: `${100 * speed}%`, position: 'relative' },
+      MEDIA: { height: '100%', width: '100%', position: 'absolute' },
+    },
+    asWeb,
+  );
 }

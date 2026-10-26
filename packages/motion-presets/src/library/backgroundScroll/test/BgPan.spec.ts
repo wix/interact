@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as BgPan from '../BgPan';
-import { baseMockOptions } from './testUtils';
+import { animationsOf, baseMockOptions } from './testUtils';
 import type { BgPan as BgPanType, AnimationData } from '../../../types';
 
 describe('BgPan', () => {
@@ -84,7 +84,7 @@ describe('BgPan', () => {
         },
       ];
 
-      const result = BgPan.style(mockOptions);
+      const result = animationsOf(BgPan.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -105,7 +105,7 @@ describe('BgPan', () => {
         },
       ];
 
-      const result = BgPan.style(mockOptions);
+      const result = animationsOf(BgPan.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -126,7 +126,7 @@ describe('BgPan', () => {
         },
       ];
 
-      const result = BgPan.style(mockOptions);
+      const result = animationsOf(BgPan.style(mockOptions));
 
       expect(result).toMatchObject(expectedResult);
     });

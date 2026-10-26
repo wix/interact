@@ -7,7 +7,7 @@ import type {
   ScrubAnimationOptions,
 } from '../../types';
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
-import { measureCompHeight } from './utils';
+import { measureCompHeight, withPartStyles } from './utils';
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-bgFadeBackOpacity', 'motion-bgFadeBackScale'], options.suffix);
@@ -104,5 +104,5 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     },
   ];
 
-  return suffixCustomProperties(animations, options.suffix);
+  return withPartStyles(suffixCustomProperties(animations, options.suffix), options, {}, asWeb);
 }

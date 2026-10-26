@@ -107,8 +107,9 @@ describe.each(stylePresets)('%s with a suffix', (type, preset) => {
   const options = { duration: 1000, namedEffect: { type } };
   const suffixed = { ...options, suffix: SUFFIX };
   const names = preset.getNames(options);
-  const animations = preset.style!(options);
-  const suffixedAnimations = preset.style!(suffixed);
+  // animations without a name only declare the static styles of their parts
+  const animations = preset.style!(options).filter(({ name }) => name);
+  const suffixedAnimations = preset.style!(suffixed).filter(({ name }) => name);
 
   test('getNames suffixes every name', () => {
     expect(preset.getNames(suffixed)).toEqual(names.map((name) => `${name}${SUFFIX}`));

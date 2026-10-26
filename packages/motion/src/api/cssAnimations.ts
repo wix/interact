@@ -82,9 +82,9 @@ function getCSSAnimation(
   const isViewProgress = trigger?.trigger === 'view-progress';
 
   return data.map((item, index) => {
-    const { start, end }: { start?: string; end?: string } = isViewProgress
-      ? getRanges(item.effect as AnimationDataForScrub)
-      : {};
+    // an animation without a name only declares the static style of its part
+    const { start, end }: { start?: string; end?: string } =
+      isViewProgress && item.effect.name ? getRanges(item.effect as AnimationDataForScrub) : {};
 
     return {
       part: item.part,

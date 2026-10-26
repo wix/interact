@@ -61,3 +61,54 @@ export function measureSiteHeight(
 export function getScaleFromPerspectiveAndZ(z: number, perspective: number) {
   return z > perspective ? 0 : 1.0 / (1 - z / perspective);
 }
+
+type PartStyles = Partial<Record<'MEDIA_CLIP' | 'MEDIA_WRAPPER' | 'MEDIA', Record<string, string>>>;
+
+/*
+ * Mimics `position: fixed` with sticky positioning and negative margins, since a fixed element breaks inside a
+ * transformed or clipping ancestor. Firefox needs `will-change: transform` on the wrapper
+ * (https://bugzilla.mozilla.org/show_bug.cgi?id=1791232), set through `--motion-bgreveal-will-change`.
+ */
+export const FIXED_STYLES: PartStyles = {
+  MEDIA_WRAPPER: {
+    willChange: 'var(--motion-bgreveal-will-change)',
+    height: 'calc(100% + 200lvh)',
+    marginTop: '-100lvh',
+    overflow: 'clip',
+    // media rendered as a background image needs its own stacking context in some browsers
+    isolation: 'isolate',
+  },
+  MEDIA: {
+    position: 'sticky',
+    height: 'max(100lvh, calc(100% - 200lvh))',
+    width: '100%',
+    top: '0px',
+    marginBottom: 'calc(100lvh - max(100lvh, var(--motion-comp-height, 100%)))',
+    display: 'block',
+    padding: '0px',
+  },
+};
+
+/**
+ * Adds the static styles of the parts as animations without a name. Only `style()` adds them, since `web()` animates
+ * every animation it returns, and the runtime applies the static styles from `style()` too.
+ */
+export function withPartStyles<T>(
+  animations: T[],
+  options: object,
+  { MEDIA_CLIP, ...partStyles }: PartStyles,
+  asWeb: boolean,
+) {
+  if (asWeb) {
+    return animations;
+  }
+
+  const styles = {
+    MEDIA_CLIP: { overflow: 'clip', contain: 'layout', ...MEDIA_CLIP },
+    ...partStyles,
+  };
+  return [
+    ...animations,
+    ...Object.entries(styles).map(([part, style]) => ({ ...options, part, style, keyframes: [] })),
+  ];
+}
