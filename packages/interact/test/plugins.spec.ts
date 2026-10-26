@@ -19,7 +19,7 @@ vi.mock('@wix/motion', () => {
       ready: Promise.resolve(),
     }),
     getElementCSSAnimation: vi.fn().mockReturnValue(null),
-    getCSSAnimation: vi.fn().mockReturnValue(null),
+    getCSSAnimation: vi.fn().mockReturnValue([]),
     prepareAnimation: vi.fn(),
     getScrubScene: vi.fn().mockReturnValue({}),
     getEasing: vi.fn().mockImplementation((v) => v),

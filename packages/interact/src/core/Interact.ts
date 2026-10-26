@@ -13,7 +13,7 @@ import {
   InteractPlugin,
 } from '../types';
 import { getElementHash, getInterpolatedKey } from './utilities';
-import { getKeyframeSlots, getSlotKey } from './css';
+import { getKeyframeSlots, getSlotKey, getStaticStyles } from './css';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
@@ -44,6 +44,7 @@ export class Interact {
     [listContainer: string]: { [interactionId: string]: boolean };
   };
   controllers: Set<IInteractionController>;
+  staticSheet: CSSStyleSheet | null;
   static forceReducedMotion: boolean = false;
   static allowA11yTriggers: boolean = true;
   static instances: Interact[] = [];
@@ -58,6 +59,7 @@ export class Interact {
     this.mediaQueryListeners = new Map();
     this.listInteractionsCache = {};
     this.controllers = new Set();
+    this.staticSheet = null;
   }
 
   init(config: InteractConfig, options?: { useCustomElement?: boolean }): void {
@@ -68,6 +70,13 @@ export class Interact {
     const useCustomElement = options?.useCustomElement ?? !!Interact.defineInteractElement;
 
     this.dataCache = parseConfig(config, useCustomElement);
+
+    const staticStyles = getStaticStyles(config, useCustomElement);
+    if (staticStyles) {
+      this.staticSheet = new CSSStyleSheet();
+      this.staticSheet.replaceSync(staticStyles);
+      document.adoptedStyleSheets = [...document.adoptedStyleSheets, this.staticSheet];
+    }
 
     const defined = Interact.defineInteractElement?.();
 
@@ -100,6 +109,12 @@ export class Interact {
       listener.mql.removeEventListener('change', listener.handler);
     }
     this.mediaQueryListeners.clear();
+    if (this.staticSheet) {
+      document.adoptedStyleSheets = document.adoptedStyleSheets.filter(
+        (sheet) => sheet !== this.staticSheet,
+      );
+      this.staticSheet = null;
+    }
     this.addedInteractions = {};
     this.listInteractionsCache = {};
     this.controllers.clear();

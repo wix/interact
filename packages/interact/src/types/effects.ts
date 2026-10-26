@@ -85,6 +85,8 @@ export type EffectBase = {
   conditions?: string[];
   selector?: string;
   effectId?: string;
+  // static styles of the target, applied while the effect is active
+  style?: Record<string, string | number>;
 } & PluginFields; // `$<name>` fields route to plugins registered via `Interact.use()`
 
 export type EffectRef = EffectBase & { effectId: string };

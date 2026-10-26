@@ -364,10 +364,13 @@ Each effect applies a visual change to a target element. An effect is either inl
   selector?: string;         // optional — CSS selector to refine target element
   listContainer?: string;    // optional — CSS selector for list container
   listItemSelector?: string; // optional — filter which children of listContainer are selected
+  style?: Record<string, string | number>; // optional — static styles of the target while the effect is active
   composite?: 'replace' | 'add' | 'accumulate';
   fill?: 'none' | 'forwards' | 'backwards' | 'both';
 }
 ```
+
+**`style`** — static CSS properties (camelCase or kebab-case) set on the effect's target, e.g. `{ overflow: 'clip' }`. They apply only while the effect is active: while its conditions hold and no later effect of the same interaction on the same target overrides it, so they never leak to an effect that overrides it. Use it for styling an effect needs to look right that isn't animated, instead of styling the target in your own CSS.
 
 **`fill` guidance:**
 

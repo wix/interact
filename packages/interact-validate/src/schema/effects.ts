@@ -131,6 +131,7 @@ const EffectBase = {
   listContainer: z.string().optional(),
   listItemSelector: z.string().optional(),
   conditions: z.array(z.string().min(1)).optional(),
+  style: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
 };
 
 export const StateEffect = withPluginFields(

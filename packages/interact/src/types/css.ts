@@ -33,4 +33,6 @@ export type CSSRuleData = {
   states?: string[];
   selectorCondition?: string;
   selectorSuffix?: string;
+  // static styles of an effect, which the runtime applies as well
+  isStatic?: boolean;
 };

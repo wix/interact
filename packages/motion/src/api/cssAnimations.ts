@@ -91,6 +91,7 @@ function getCSSAnimation(
       animation: getAnimationAsCSS(item, isViewProgress, sequenceOptions),
       composition: item.options.composite,
       custom: item.effect.custom,
+      style: item.effect.style,
       name: item.effect.name,
       keyframes: normalizeKeyframes(item.effect.keyframes),
       id: item.id && `${item.id}-${index + 1}`,
