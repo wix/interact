@@ -1,6 +1,10 @@
 import type {
   InteractConfig,
   Interaction,
+  Effect,
+  EffectRef,
+  SequenceConfig,
+  SequenceConfigRef,
   ResolvedEffect,
   ResolvedSequence,
   Condition,
@@ -39,6 +43,7 @@ import {
   getCSSAnimation,
   getRegisteredEffect,
   MotionKeyframeEffect,
+  toCSSPropertyName,
   TriggerVariant,
 } from '@wix/motion';
 import type { AnimationEffectAPI } from '@wix/motion';
@@ -80,8 +85,6 @@ type GenerateContext = {
   keyframeSlots: Map<string, string>;
   // view timelines whose targets may be outside their source's subtree
   scopedTimelines: string[];
-  // number of targets with effects overriding each other, each naming its active effect property
-  cascades: number;
   // only collecting the effects' list entries for getKeyframeSlots, without generating CSS
   collectSlots: boolean;
   useFirstChild: boolean;
@@ -259,6 +262,12 @@ function collectFieldPluginStyles(
   return rules;
 }
 
+function styleToDeclarations(style: Record<string, string | number | undefined>) {
+  return Object.entries(style)
+    .filter(([_, value]) => value !== undefined)
+    .map(([name, value]) => ({ name: toCSSPropertyName(name), value: value as string | number }));
+}
+
 function effectToCSS(
   ctx: GenerateContext,
   effect: ResolvedEffect,
@@ -282,6 +291,7 @@ function effectToCSS(
     transition,
     transitionProperties,
     initial,
+    style,
   } = effect;
 
   const media = getFullPredicateByType(conditions, ctx.configConditions, 'media');
@@ -300,12 +310,31 @@ function effectToCSS(
 
   const { declarations } = rules[0];
 
+  const pushStaticRule = (
+    childSelector: string | undefined,
+    staticStyle: Record<string, string | number | undefined>,
+  ) =>
+    rules.push({
+      key,
+      media,
+      selectorCondition,
+      childSelector,
+      declarations: styleToDeclarations(staticStyle),
+      isStatic: true,
+    });
+
+  if (style) {
+    pushStaticRule(childSelector, style);
+  }
+
   if (ctx.plugins) {
     rules.push(...collectFieldPluginStyles('effect', effect, key, media, ctx.plugins));
   }
 
   if (namedEffect || keyframeEffect) {
-    const animationOptions = effectToAnimationOptions(effect);
+    // the effect's style is its target's, while presets spread their options to each of their animations
+    const { style: _, ...animated } = effect;
+    const animationOptions = effectToAnimationOptions(animated);
     const cssAnimations = getCSSAnimation(null, animationOptions, trigger, sequence).filter(
       (anim) => anim.name,
     );
@@ -353,6 +382,11 @@ function effectToCSS(
       const childOrPartSelector = part ? `[data-motion-part~="${part}"]` : childSelector;
       if (part && animationDeclarations.length) {
         partSelectors.add(childOrPartSelector!);
+      }
+
+      const partStyle = Object.assign({}, ...animations.map((animation) => animation.style));
+      if (Object.keys(partStyle).length) {
+        pushStaticRule(childOrPartSelector, partStyle);
       }
 
       if (initial) {
@@ -494,6 +528,7 @@ function parseEffect(
  */
 function parseEffects(
   ctx: GenerateContext,
+  interactionIdx: number,
   effects: ResolvedEffect[],
   trigger: TriggerVariant,
   visited: Set<string>,
@@ -514,7 +549,10 @@ function parseEffects(
     }
 
     if (!activeProps.has(targetHash)) {
-      activeProps.set(targetHash, getCustomPropName('active', ctx.cascades++));
+      activeProps.set(
+        targetHash,
+        `${getCustomPropName('active', interactionIdx)}-${activeProps.size}`,
+      );
     }
     const name = activeProps.get(targetHash)!;
     const value = `c${group.indexOf(effect)}`;
@@ -609,7 +647,7 @@ function parseInteraction(
     })
     .filter((effect) => effect !== null);
 
-  cssRules.push(...parseEffects(ctx, resolvedEffects, motionTrigger, visited));
+  cssRules.push(...parseEffects(ctx, interactionIdx, resolvedEffects, motionTrigger, visited));
   visited.forEach((targetHash) => endListEntry(ctx.targetsMap.get(targetHash)!));
 
   const resolvedSequences = sequences
@@ -667,7 +705,6 @@ function parseConfig(
     keyframesMap: new Map<string, Keyframe[]>(),
     keyframeSlots: collectSlots ? new Map() : getKeyframeSlots(config),
     scopedTimelines: [],
-    cascades: 0,
     collectSlots,
     useFirstChild,
     plugins,
@@ -766,6 +803,39 @@ export function _generate(
 
   return { keyframes: ctx.keyframesMap, atProperty, cssRules, listsRule, timelineScopeRule };
 }
+/**
+ * The static styles of the config's effects, with the rules that set which effect is active on each target, so
+ * the runtime applies them the same way the generated CSS does.
+ */
+export function getStaticStyles(config: InteractConfig, useFirstChild: boolean): string {
+  const { effects = {}, sequences = {}, interactions: configInteractions = [] } = config;
+  const mayHaveStyle = (effect: Effect | EffectRef) => {
+    const { style, namedEffect } = { ...effects[effect.effectId!], ...effect } as Effect &
+      Partial<Pick<ResolvedEffect, 'namedEffect'>>;
+    return !!(style || namedEffect);
+  };
+  const sequenceEffects = (sequence: SequenceConfig | SequenceConfigRef) =>
+    ('effects' in sequence ? sequence.effects : sequences[sequence.sequenceId]?.effects) || [];
+
+  // interactions without static styles stay in place, as rules are named by their interaction's index
+  const interactions = configInteractions.map((interaction) =>
+    interaction.effects?.some(mayHaveStyle) ||
+    interaction.sequences?.some((sequence) => sequenceEffects(sequence).some(mayHaveStyle))
+      ? interaction
+      : { ...interaction, effects: [], sequences: [] },
+  );
+  if (interactions.every((interaction, index) => interaction !== configInteractions[index])) {
+    return '';
+  }
+
+  const { cssRules } = parseConfig({ ...config, interactions }, { useFirstChild });
+  const staticRules = cssRules.filter(({ isStatic, selector }) => isStatic || selector === ':root');
+
+  return staticRules.some(({ isStatic }) => isStatic)
+    ? staticRules.map(CSSRuleToString).join('\n')
+    : '';
+}
+
 /**
  * Generates CSS for animations from an InteractConfig.
  *

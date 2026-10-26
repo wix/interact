@@ -441,8 +441,11 @@ Union type of all effect types.
 ```typescript
 type Effect = (TimeEffect | ScrubEffect | StateEffect) & {
   conditions?: string[];
+  style?: Record<string, string | number>;
 };
 ```
+
+- `style` - Static styles of the effect's target, e.g. `{ overflow: 'clip' }`, applied only while the effect is active: while its conditions hold and no later effect of the same interaction on the same target overrides it. Property names may be camelCase or kebab-case. A `namedEffect` preset can declare static styles of its own on each of its parts, and the effect's `style` applies to its target only.
 
 ### `TimeEffect`
 

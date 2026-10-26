@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { registerEffects } from '@wix/motion';
 import { getKeyframeSlots } from '../src/core/css';
 import { Interact } from '../src/core/Interact';
-import { generate, _generate, DEFAULT_INITIAL } from '../src/core/css';
+import { generate, _generate, getStaticStyles, DEFAULT_INITIAL } from '../src/core/css';
 import type { InteractConfig, CSSRuleData } from '../src/types';
 
 describe('css.generate', () => {
@@ -1032,17 +1032,17 @@ describe('css._generate', () => {
         {
           selector: ':root',
           container: undefined,
-          declarations: [{ name: '--actv-0', value: 'c0' }],
+          declarations: [{ name: '--actv-0-0', value: 'c0' }],
         },
         {
           selector: undefined,
-          container: 'style(--actv-0: c0)',
+          container: 'style(--actv-0-0: c0)',
           declarations: [expect.objectContaining({ name: '--anm-0' })],
         },
         {
           selector: ':root',
           container: undefined,
-          declarations: [{ name: '--actv-0', value: 'c1' }],
+          declarations: [{ name: '--actv-0-0', value: 'c1' }],
         },
       ]);
     });
@@ -2023,9 +2023,9 @@ describe('css._generate', () => {
       });
 
       expect(activeRules(cssRules)).toEqual([
-        { media: '', name: '--actv-0', value: 'c0' },
-        { media: '((max-width: 600px))', name: '--actv-0', value: 'c1' },
-        { media: '', name: '--actv-0', value: 'c2' },
+        { media: '', name: '--actv-0-0', value: 'c0' },
+        { media: '((max-width: 600px))', name: '--actv-0-0', value: 'c1' },
+        { media: '', name: '--actv-0-0', value: 'c2' },
       ]);
     });
 
@@ -2044,11 +2044,11 @@ describe('css._generate', () => {
       const ruleOf = (value: string) =>
         cssRules.find(({ declarations }) => declarations[0].value.toString().startsWith(value))!;
       expect(ruleOf('a ')).toMatchObject({
-        container: 'style(--actv-0: c0)',
+        container: 'style(--actv-0-0: c0)',
         selectorCondition: '',
       });
       expect(ruleOf('b ')).toMatchObject({
-        container: 'style(--actv-0: c1)',
+        container: 'style(--actv-0-0: c1)',
         selectorCondition: ':is(.on)',
       });
       expect(ruleOf('b ').media).toBeUndefined();
@@ -2075,13 +2075,13 @@ describe('css._generate', () => {
 
       expect(cssRules.find(({ states }) => states)).toMatchObject({
         states: ['b'],
-        container: 'style(--actv-0: c1)',
+        container: 'style(--actv-0-0: c1)',
         declarations: [{ name: 'opacity', value: '0' }],
       });
       expect(
         cssRules.find(({ declarations }) => isTransitionProp(declarations[0].name)),
       ).toMatchObject({
-        container: 'style(--actv-0: c1)',
+        container: 'style(--actv-0-0: c1)',
       });
     });
 
@@ -2134,9 +2134,9 @@ describe('css._generate', () => {
             .split(' ')[0],
         ]);
       expect(animations).toEqual([
-        ['[data-motion-part~="MEDIA_CLIP"]', 'style(--actv-0: c0)', 'clip'],
-        ['[data-motion-part~="MEDIA_WRAPPER"]', 'style(--actv-0: c0)', 'wrap'],
-        ['[data-motion-part~="MEDIA_WRAPPER"]', 'style(--actv-0: c1)', 'par'],
+        ['[data-motion-part~="MEDIA_CLIP"]', 'style(--actv-0-0: c0)', 'clip'],
+        ['[data-motion-part~="MEDIA_WRAPPER"]', 'style(--actv-0-0: c0)', 'wrap'],
+        ['[data-motion-part~="MEDIA_WRAPPER"]', 'style(--actv-0-0: c1)', 'par'],
       ]);
     });
 
@@ -2156,11 +2156,11 @@ describe('css._generate', () => {
       });
 
       expect(activeRules(cssRules)).toEqual([
-        { media: '', name: '--actv-0', value: 'c0' },
-        { media: '((max-width: 600px))', name: '--actv-0', value: 'c1' },
+        { media: '', name: '--actv-0-0', value: 'c0' },
+        { media: '((max-width: 600px))', name: '--actv-0-0', value: 'c1' },
       ]);
       expect(cssRules.filter(({ selector }) => !selector)).toEqual([
-        expect.objectContaining({ container: 'style(--actv-0: c0)' }),
+        expect.objectContaining({ container: 'style(--actv-0-0: c0)' }),
       ]);
     });
 
@@ -2173,10 +2173,10 @@ describe('css._generate', () => {
       });
 
       expect(activeRules(cssRules).map(({ name, value }) => `${name}: ${value}`)).toEqual([
-        '--actv-0: c0',
-        '--actv-0: c1',
-        '--actv-1: c0',
-        '--actv-1: c1',
+        '--actv-0-0: c0',
+        '--actv-0-0: c1',
+        '--actv-1-0: c0',
+        '--actv-1-0: c1',
       ]);
     });
 
@@ -2202,10 +2202,10 @@ describe('css._generate', () => {
         ],
       });
 
-      expect(css).toContain(':root {\n  --actv-0: c0;\n}');
-      expect(css).toContain('@media ((max-width: 600px)) {\n:root {\n  --actv-0: c1;\n}\n}');
+      expect(css).toContain(':root {\n  --actv-0-0: c0;\n}');
+      expect(css).toContain('@media ((max-width: 600px)) {\n:root {\n  --actv-0-0: c1;\n}\n}');
       expect(css).toContain(
-        '@container style(--actv-0: c1) {\n[data-interact-key="el"] > :first-child {\n  --anm-0: b ',
+        '@container style(--actv-0-0: c1) {\n[data-interact-key="el"] > :first-child {\n  --anm-0: b ',
       );
     });
   });
@@ -2256,6 +2256,200 @@ describe('css._generate', () => {
         '--anm-0: var(--anm-slot-0), var(--anm-slot-1)',
         '--anm-1: var(--anm-slot-2), var(--anm-slot-3)',
       ]);
+    });
+  });
+
+  describe('static styles', () => {
+    const conditions = {
+      narrow: { type: 'media' as const, predicate: '(max-width: 600px)' },
+      on: { type: 'selector' as const, predicate: '.on' },
+    };
+    const partsStyle = (options: object) => [
+      {
+        ...options,
+        name: 'static-clip',
+        part: 'MEDIA_CLIP',
+        style: { overflow: 'clip' },
+        keyframes: [{ opacity: 0 }],
+      },
+      {
+        ...options,
+        name: 'static-wrapper',
+        part: 'MEDIA_WRAPPER',
+        style: { height: '120%', 'min-width': undefined },
+        keyframes: [{ opacity: 0 }],
+      },
+    ];
+    registerEffects({
+      TestStaticParts: {
+        web: partsStyle,
+        style: partsStyle,
+        getNames: () => ['static-clip', 'static-wrapper'],
+      },
+    } as any);
+    const staticRules = (cssRules: CSSRuleData[]) =>
+      cssRules
+        .filter(({ isStatic }) => isStatic)
+        .map(({ childSelector, media, selectorCondition, container, declarations }) => ({
+          childSelector,
+          media,
+          selectorCondition,
+          container,
+          declarations,
+        }));
+
+    it("applies an effect's style to its target under its conditions", () => {
+      const { cssRules } = _generate({
+        conditions,
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              {
+                effectId: 'a',
+                conditions: ['narrow', 'on'],
+                style: { clipPath: 'inset(0)', '--x': 1 },
+                transition: { duration: 200, styleProperties: [{ name: 'opacity', value: '0' }] },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(staticRules(cssRules)).toEqual([
+        {
+          childSelector: '> :first-child',
+          media: '((max-width: 600px))',
+          selectorCondition: ':is(.on)',
+          container: undefined,
+          declarations: [
+            { name: 'clip-path', value: 'inset(0)' },
+            { name: '--x', value: 1 },
+          ],
+        },
+      ]);
+    });
+
+    it("applies an effect's style only while it's active", () => {
+      const { cssRules } = _generate({
+        conditions,
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              { effectId: 'a', style: { overflow: 'hidden' } },
+              { effectId: 'b', style: { overflow: 'clip' }, conditions: ['narrow'] },
+            ],
+          },
+        ],
+      });
+
+      expect(
+        staticRules(cssRules).map(({ container, declarations }) => [container, declarations]),
+      ).toEqual([
+        ['style(--actv-0-0: c0)', [{ name: 'overflow', value: 'hidden' }]],
+        ['style(--actv-0-0: c1)', [{ name: 'overflow', value: 'clip' }]],
+      ]);
+    });
+
+    it("applies the style of each animation of a preset to its part, and the effect's style to its target", () => {
+      const { cssRules } = _generate({
+        interactions: [
+          {
+            key: 'bg',
+            trigger: 'viewProgress',
+            effects: [
+              {
+                effectId: 'a',
+                namedEffect: { type: 'TestStaticParts' } as any,
+                style: { position: 'relative' },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(
+        staticRules(cssRules).map(({ childSelector, declarations }) => [
+          childSelector,
+          declarations,
+        ]),
+      ).toEqual([
+        ['> :first-child', [{ name: 'position', value: 'relative' }]],
+        ['[data-motion-part~="MEDIA_CLIP"]', [{ name: 'overflow', value: 'clip' }]],
+        ['[data-motion-part~="MEDIA_WRAPPER"]', [{ name: 'height', value: '120%' }]],
+      ]);
+    });
+
+    it('returns only the static styles and the active effects for the runtime', () => {
+      const css = getStaticStyles(
+        {
+          conditions,
+          interactions: [
+            {
+              key: 'other',
+              trigger: 'click',
+              effects: [
+                {
+                  effectId: 'x',
+                  duration: 100,
+                  keyframeEffect: { name: 'x', keyframes: [{ opacity: 0 }] },
+                },
+                {
+                  effectId: 'y',
+                  transition: { styleProperties: [{ name: 'opacity', value: '0' }] },
+                },
+              ],
+            },
+            {
+              key: 'el',
+              trigger: 'click',
+              effects: [
+                {
+                  effectId: 'a',
+                  duration: 100,
+                  keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] },
+                },
+                { effectId: 'b', style: { overflow: 'clip' }, conditions: ['narrow'] },
+              ],
+            },
+          ],
+        },
+        true,
+      );
+
+      expect(css).toBe(
+        [
+          ':root {\n  --actv-1-0: c0;\n}',
+          '@media ((max-width: 600px)) {\n:root {\n  --actv-1-0: c1;\n}\n}',
+          '@container style(--actv-1-0: c1) {\n[data-interact-key="el"] > :first-child {\n  overflow: clip;\n}\n}',
+        ].join('\n'),
+      );
+    });
+
+    it('returns no styles for the runtime when no effect may have any', () => {
+      expect(
+        getStaticStyles(
+          {
+            interactions: [
+              {
+                key: 'el',
+                trigger: 'click',
+                effects: [
+                  {
+                    effectId: 'a',
+                    duration: 100,
+                    keyframeEffect: { name: 'a', keyframes: [{ opacity: 0 }] },
+                  },
+                ],
+              },
+            ],
+          },
+          true,
+        ),
+      ).toBe('');
     });
   });
 

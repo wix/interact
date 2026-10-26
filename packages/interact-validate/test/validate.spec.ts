@@ -53,6 +53,42 @@ describe('validateInteractConfig', () => {
     expect(result.errors.some((e) => e.code === 'SEQUENCE_ID_NOT_FOUND')).toBe(true);
   });
 
+  it('accepts static styles on any effect', () => {
+    const result = validateInteractConfig({
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'click',
+          effects: [
+            {
+              namedEffect: { type: 'FadeIn' },
+              duration: 400,
+              style: { overflow: 'clip', zIndex: 1 },
+            },
+            {
+              transition: { styleProperties: [{ name: 'opacity', value: '0' }] },
+              style: { '--x': '1px' },
+            },
+          ],
+        },
+      ],
+    });
+    expect(result.errors.filter((e) => e.severity === 'error')).toHaveLength(0);
+  });
+
+  it('rejects static styles with non-string or non-number values', () => {
+    const result = validateInteractConfig({
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'click',
+          effects: [{ namedEffect: { type: 'FadeIn' }, duration: 400, style: { overflow: true } }],
+        },
+      ],
+    });
+    expect(result.valid).toBe(false);
+  });
+
   it('sorts errors by path lexicographically', () => {
     const config = {
       effects: {

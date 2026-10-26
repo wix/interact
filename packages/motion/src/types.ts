@@ -187,6 +187,8 @@ type AnimationDataExtra = {
   name?: string; // TODO:  need to be added to all animations and then be made required
   keyframes: Record<string, string | number | undefined>[];
   custom?: Record<string, string | number | undefined>;
+  // static styles of the target or part, applied while the effect is active
+  style?: Record<string, string | number | undefined>;
   composite?: CompositeOperation;
   part?: string;
   timing?: Partial<EffectTiming>;

@@ -1,5 +1,11 @@
 import type { TriggerType, TriggerParams } from './triggers';
-import type { Effect, EffectRef, EffectProperty, TimeAnimationTriggerType } from './effects';
+import type {
+  Effect,
+  EffectBase,
+  EffectRef,
+  EffectProperty,
+  TimeAnimationTriggerType,
+} from './effects';
 import type { PluginFields } from './plugins';
 
 export type Condition = {
@@ -64,6 +70,7 @@ export type ResolvedEffect = ElementIdentifier &
     conditions: string[];
     triggerType: TimeAnimationTriggerType;
     initial: boolean;
+    style?: EffectBase['style'];
     suffix?: string;
     // the effect's position in the config (see getSlotKey)
     slotKey?: string;

@@ -2,7 +2,22 @@ import { Interact, generate } from '@wix/interact/web';
 import type { InteractConfig } from '@wix/interact/web';
 import { BgCloseUp, BgParallax, Tilt3DMouse } from '@wix/motion-presets';
 
-Interact.registerEffects({ BgCloseUp, BgParallax, Tilt3DMouse } as any);
+// declares a static style on each of its parts
+const staticParts = (options: object) =>
+  ['MEDIA_CLIP', 'MEDIA_WRAPPER'].map((part, index) => ({
+    ...options,
+    name: `static-parts-${index}`,
+    part,
+    style: part === 'MEDIA_CLIP' ? { overflow: 'clip' } : { outlineStyle: 'dashed' },
+    keyframes: [{ opacity: 0.5 }, { opacity: 0.5 }],
+  }));
+const StaticParts = {
+  web: staticParts,
+  style: staticParts,
+  getNames: () => ['static-parts-0', 'static-parts-1'],
+};
+
+Interact.registerEffects({ BgCloseUp, BgParallax, Tilt3DMouse, StaticParts } as any);
 
 const root = document.getElementById('root')!;
 

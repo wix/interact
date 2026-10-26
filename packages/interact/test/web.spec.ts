@@ -11,6 +11,7 @@ import { InteractionController } from '../src/core/InteractionController';
 vi.mock('@wix/motion', async () => {
   const { toCSSPropertyName } = await vi.importActual<typeof import('@wix/motion')>('@wix/motion');
   const mock: any = {
+    getCSSAnimation: vi.fn().mockReturnValue([]),
     getWebAnimation: vi.fn().mockReturnValue({
       play: vi.fn(),
       cancel: vi.fn(),
