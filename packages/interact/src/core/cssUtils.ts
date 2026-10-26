@@ -102,13 +102,21 @@ export function keyframesToCSS(name: string, keyframes: Keyframe[]): string {
 }
 
 export function CSSRuleToString(rule: CSSRuleData): string {
-  const { key, childSelector, declarations, media, states, selectorCondition, selectorSuffix } =
-    rule;
+  const {
+    key,
+    childSelector,
+    declarations,
+    media,
+    container,
+    states,
+    selectorCondition,
+    selectorSuffix,
+  } = rule;
   if (!declarations.length) {
     return '';
   }
 
-  let selector = `[data-interact-key="${key}"]`;
+  let selector = rule.selector ?? `[data-interact-key="${key}"]`;
 
   // maybe nesting is simpler? - no need for `:is` only adding `&` before every option
   if (states && states.length) {
@@ -136,7 +144,11 @@ export function CSSRuleToString(rule: CSSRuleData): string {
   const declarationsStr = declarations
     .map(({ name, value, important }) => `${name}: ${value}${important ? ' !important' : ''};`)
     .join('\n  ');
-  const cssRule = `${selector} {\n  ${declarationsStr}\n}`;
+  let cssRule = `${selector} {\n  ${declarationsStr}\n}`;
+
+  if (container) {
+    cssRule = `@container ${container} {\n${cssRule}\n}`;
+  }
 
   return media ? `@media ${media} {\n${cssRule}\n}` : cssRule;
 }
