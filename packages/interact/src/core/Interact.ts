@@ -17,6 +17,7 @@ import { getKeyframeSlots, getSlotKey } from './css';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
+  getRegisteredEffect,
   getSequence as getMotionSequence,
   createAnimationGroups,
   Sequence,
@@ -24,7 +25,7 @@ import {
 import type { SequenceOptions, AnimationGroupArgs, IndexedGroup } from '@wix/motion';
 
 function _convertToKeyTemplate(key: string) {
-  return key.replace(/\[([-\w]+)]/g, '[]');
+  return key.replace(/\[[^\]]+]/g, '[]');
 }
 
 export class Interact {
@@ -246,6 +247,7 @@ export class Interact {
   }
 
   static registerEffects = registerEffects;
+  static getRegisteredEffect = getRegisteredEffect;
 
   /**
    * Registers a plugin under a name. When the config carries a plugin field (e.g. `$splitText`) with a matching key

@@ -1,5 +1,5 @@
 import type { TimeAnimationOptions, DomApi, AnimationExtraOptions, Flash } from '../../types';
-import { getEasing, getTimingFactor } from '../../utils';
+import { getEasing, getTimingFactor, suffixNames, suffixCustomProperties } from '../../utils';
 
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
   return style(options, true);
@@ -34,7 +34,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, _as
     },
   ];
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -43,11 +43,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, _as
       keyframes,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const iterationDelay = (options.namedEffect as Flash)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return [`motion-flash-${timingFactor}`];
+  return suffixNames([`motion-flash-${timingFactor}`], options.suffix);
 }

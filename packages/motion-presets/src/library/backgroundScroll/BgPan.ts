@@ -6,11 +6,11 @@ import type {
   AnimationExtraOptions,
   ScrubAnimationOptions,
 } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgPan'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgPan'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -37,7 +37,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
 
   const [bgPan] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgPan,
@@ -67,4 +67,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

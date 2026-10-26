@@ -1,11 +1,17 @@
 import type { EffectFourDirections, SlideIn, TimeAnimationOptions } from '../../types';
-import { getClipPolygonParams, parseDirection, getEntranceFill } from '../../utils';
+import {
+  getClipPolygonParams,
+  parseDirection,
+  getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'left';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-slideIn', 'motion-fadeIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-slideIn', 'motion-fadeIn'], options.suffix);
 }
 
 const PARAM_MAP: Record<
@@ -43,7 +49,7 @@ export function style(options: TimeAnimationOptions) {
     '--motion-translate-y': `${PARAM_MAP[direction].dy * 100}%`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: slideIn,
@@ -70,4 +76,6 @@ export function style(options: TimeAnimationOptions) {
       keyframes: [{ offset: 0, opacity: 0 }],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

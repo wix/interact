@@ -5,7 +5,14 @@ import type {
   AnimationExtraOptions,
   EffectFourDirections,
 } from '../../types';
-import { getTimingFactor, toKeyframeValue, mapRange, parseDirection } from '../../utils';
+import {
+  getTimingFactor,
+  toKeyframeValue,
+  mapRange,
+  parseDirection,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'right';
@@ -70,7 +77,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     };
   });
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -80,11 +87,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       keyframes,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const iterationDelay = (options.namedEffect as Poke)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true) as string;
 
-  return [`motion-poke-${timingFactor}`];
+  return suffixNames([`motion-poke-${timingFactor}`], options.suffix);
 }

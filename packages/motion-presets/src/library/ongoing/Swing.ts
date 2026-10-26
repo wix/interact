@@ -11,6 +11,8 @@ import {
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
+  suffixNames,
+  suffixCustomProperties,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -111,7 +113,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
         },
       ];
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -132,11 +134,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const iterationDelay = (options.namedEffect as Swing)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return [`motion-swing-${timingFactor}`];
+  return suffixNames([`motion-swing-${timingFactor}`], options.suffix);
 }

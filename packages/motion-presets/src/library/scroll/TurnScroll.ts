@@ -5,7 +5,7 @@ import type {
   ScrubAnimationOptions,
   TurnScroll,
 } from '../../types';
-import { toKeyframeValue, parseDirection } from '../../utils';
+import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
 import { SPIN_DIRECTIONS, TWO_SIDES_DIRECTIONS } from '../../consts';
 
 const ELEMENT_ROTATION = 45;
@@ -17,8 +17,8 @@ const ROTATE_DIRECTION_MAP = {
   'counter-clockwise': -1,
 };
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-turnScroll'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-turnScroll'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -85,7 +85,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     '--motion-turn-rotation-to': `${toValues.rotation}deg`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: turnScroll,
@@ -128,4 +128,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

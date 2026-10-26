@@ -1,5 +1,12 @@
 import type { Rubber, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, roundNumber, toKeyframeValue, mapRange } from '../../utils';
+import {
+  getTimingFactor,
+  roundNumber,
+  toKeyframeValue,
+  mapRange,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 
 const RUBBER_OFFSET_SOFT = 0;
 const RUBBER_OFFSET_HARD = 0.1;
@@ -57,7 +64,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     };
   });
 
-  return [
+  const animations = [
     {
       ...options,
       name,
@@ -67,11 +74,13 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       keyframes,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }
 
 export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
   const iterationDelay = (options.namedEffect as Rubber)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return [`motion-rubber-${timingFactor}`];
+  return suffixNames([`motion-rubber-${timingFactor}`], options.suffix);
 }

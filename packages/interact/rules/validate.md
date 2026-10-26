@@ -134,7 +134,6 @@ Severity is one of `'error' | 'warning'`. There are exactly two levers:
 | `VALID_MEDIA_QUERIES`    | `INVALID_MEDIA_QUERY`                                                       | error            |
 | `SAME_ELEMENT_RETRIGGER` | `SAME_ELEMENT_RETRIGGER`                                                    | warning          |
 | `HIT_AREA_SHIFT`         | `HIT_AREA_SHIFT`                                                            | warning          |
-| `SCROLL_RANGE`           | `SCROLL_PRESET_MISSING_RANGE`, `SCROLL_PRESET_BAD_RANGE`                    | warning          |
 | `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE`, `ANIMATION_END_CYCLE`                       | warning          |
 | `ELEMENT_SELECTION`      | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER`, `REDUNDANT_SELECTOR_WITH_LIST_ITEM` | warning          |
 | `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                  | warning          |
@@ -143,6 +142,7 @@ Severity is one of `'error' | 'warning'`. There are exactly two levers:
 | `CSS_PROPERTY_NAME`      | `INVALID_CSS_PROPERTY_NAME`                                                 | warning          |
 | `VIEW_INSET`             | `INVALID_INSET`                                                             | warning          |
 | `OFFSET_EASING`          | `FUNCTION_OFFSET_EASING`                                                    | warning          |
+| `NAMED_EFFECT_PARAMS`    | `NAMED_EFFECT_INVALID_PARAM` (error), `NAMED_EFFECT_UNKNOWN_PARAM`          | warning          |
 
 For each category, set `'off'` to drop those issues entirely, `'warning'` / `'error'` to set their severity:
 
@@ -226,8 +226,6 @@ Statically-detectable authoring pitfalls lifted from the trigger rule files. Eac
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
 | `SAME_ELEMENT_RETRIGGER`               | `viewEnter` with `triggerType` `repeat`/`alternate`/`state` on the same source+target element (re-trigger loop).                                      | `SAME_ELEMENT_RETRIGGER` |
 | `HIT_AREA_SHIFT`                       | `hover`/`click`/`interest`/`activate`/`pointerMove` `keyframeEffect` with a `translate`/`scale`/`matrix` transform on the same source+target element. | `HIT_AREA_SHIFT`         |
-| `SCROLL_PRESET_MISSING_RANGE`          | A `*Scroll` `namedEffect` on `viewProgress` omits `range`.                                                                                            | `SCROLL_RANGE`           |
-| `SCROLL_PRESET_BAD_RANGE`              | A scroll preset `range` is not `'in'`/`'out'`/`'continuous'`.                                                                                         | `SCROLL_RANGE`           |
 | `ANIMATION_END_SELF_REFERENCE`         | An `animationEnd` interaction waits for an effect it also produces → it can never start.                                                              | `ANIMATION_END_GRAPH`    |
 | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER` | `listItemSelector` present without `listContainer` (inert) — on an interaction or an effect.                                                          | `ELEMENT_SELECTION`      |
 | `REDUNDANT_SELECTOR_WITH_LIST_ITEM`    | `selector` is ignored when both `listContainer` and `listItemSelector` are present.                                                                   | `ELEMENT_SELECTION`      |
@@ -239,6 +237,8 @@ Statically-detectable authoring pitfalls lifted from the trigger rule files. Eac
 | `INVALID_CSS_PROPERTY_NAME`            | A keyframe or state-effect property name is neither camelCase nor kebab-case (both casings are accepted; this one cannot be normalized).              | `CSS_PROPERTY_NAME`      |
 | `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 whitespace-separated CSS lengths/percentages.                                                                   | `VIEW_INSET`             |
 | `FUNCTION_OFFSET_EASING`               | A sequence's `offsetEasing` is a function, so `generate()` omits that sequence from the generated CSS.                                                | `OFFSET_EASING`          |
+| `NAMED_EFFECT_INVALID_PARAM`           | A `namedEffect` param does not match its effect's registered `schema` (type, enum values, min/max, length/angle format).                              | `NAMED_EFFECT_PARAMS`    |
+| `NAMED_EFFECT_UNKNOWN_PARAM`           | A `namedEffect` param is not declared in its effect's registered `schema` (e.g. a renamed param).                                                     | `NAMED_EFFECT_PARAMS`    |
 
 ---
 
@@ -310,6 +310,6 @@ The validator is **static**. It cannot see the DOM, the browser, or the preset r
   - Whether a `keyframeEffect`/`namedEffect` actually changes size/position when it cannot be introspected (e.g. `namedEffect` options) — only inline `keyframeEffect` transforms are scanned for `HIT_AREA_SHIFT`.
   - Reduced-motion alternatives, perspective usage, and other authoring guidance with no static signal.
 
-> **Note:** Several pitfalls that previously had "no static signal" are now flagged as **warnings** (see the rule-derived semantic warnings above): same source+target on `viewEnter` with a non-`once` `triggerType` (`SAME_ELEMENT_RETRIGGER`), hit-area shift from inline `keyframeEffect` transforms on `hover`/`pointerMove` (`HIT_AREA_SHIFT`), scroll presets missing/invalid `range` (`SCROLL_PRESET_*`), and missing `fill: 'both'` (`RECOMMENDED_FILL_BOTH`). These are heuristic and conservative (they skip ambiguous cases to avoid false positives), so the trigger rule files remain the authoritative guidance.
+> **Note:** Several pitfalls that previously had "no static signal" are now flagged as **warnings** (see the rule-derived semantic warnings above): same source+target on `viewEnter` with a non-`once` `triggerType` (`SAME_ELEMENT_RETRIGGER`), hit-area shift from inline `keyframeEffect` transforms on `hover`/`pointerMove` (`HIT_AREA_SHIFT`), and missing `fill: 'both'` (`RECOMMENDED_FILL_BOTH`). These are heuristic and conservative (they skip ambiguous cases to avoid false positives), so the trigger rule files remain the authoritative guidance.
 
 For the full API, usage recipes, and the same catalogue in package form, see the [`@wix/interact-validate` README](https://github.com/wix/interact/blob/master/packages/interact-validate/README.md).

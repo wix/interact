@@ -1,8 +1,8 @@
 import type { AnimationFillMode, BlurScroll, ScrubAnimationOptions, DomApi } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-blurScroll'];
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-blurScroll'], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -26,7 +26,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     '--motion-blur-to': `${toValue}px`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: blurScroll,
@@ -44,4 +44,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

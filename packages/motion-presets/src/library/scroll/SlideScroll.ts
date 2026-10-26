@@ -14,6 +14,8 @@ import {
   INITIAL_CLIP,
   FOUR_DIRECTIONS,
   parseDirection,
+  suffixNames,
+  suffixCustomProperties,
 } from '../../utils';
 
 const DEFAULT_DIRECTION: EffectFourDirections = 'bottom';
@@ -27,7 +29,10 @@ const DIRECTION_TRANSLATION_MAP: Record<EffectFourDirections, Translate> = {
 
 export function getNames(options: ScrubAnimationOptions) {
   const { range = 'in' } = options.namedEffect as SlideScroll;
-  return [`motion-slideScroll${range === 'continuous' ? '-continuous' : ''}`];
+  return suffixNames(
+    [`motion-slideScroll${range === 'continuous' ? '-continuous' : ''}`],
+    options.suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
@@ -97,7 +102,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
 
   const [slideScroll] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: slideScroll,
@@ -107,4 +112,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       keyframes,
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

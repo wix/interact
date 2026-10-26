@@ -1,11 +1,17 @@
 import type { SpinIn, TimeAnimationOptions } from '../../types';
-import { toKeyframeValue, parseDirection, getEntranceFill } from '../../utils';
+import {
+  toKeyframeValue,
+  parseDirection,
+  getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { SPIN_DIRECTIONS } from '../../consts';
 
 const DEFAULT_DIRECTION: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-spinIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn', 'motion-spinIn'], options.suffix);
 }
 
 const DIRECTION_MAP = {
@@ -31,7 +37,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     '--motion-rotate': `${transformRotate}deg`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       name: fadeIn,
@@ -59,4 +65,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

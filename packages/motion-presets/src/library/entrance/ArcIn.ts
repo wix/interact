@@ -1,5 +1,12 @@
 import type { ArcIn, TimeAnimationOptions, EffectFourDirections, DomApi } from '../../types';
-import { toKeyframeValue, parseDirection, parseLength, getEntranceFill } from '../../utils';
+import {
+  toKeyframeValue,
+  parseDirection,
+  parseLength,
+  getEntranceFill,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const ROTATION_ANGLE = 80;
@@ -17,8 +24,8 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function getNames(_: TimeAnimationOptions) {
-  return ['motion-fadeIn', 'motion-arcIn'];
+export function getNames(options: TimeAnimationOptions) {
+  return suffixNames(['motion-fadeIn', 'motion-arcIn'], options.suffix);
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
@@ -43,7 +50,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
     '--motion-depth-positive': `calc(${depthValue} / 2)`,
   };
 
-  return [
+  const animations = [
     {
       ...options,
       fill: getEntranceFill(options),
@@ -85,4 +92,6 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

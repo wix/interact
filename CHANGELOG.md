@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/splittext
 
+### [0.2.1] - 2026-10-25
+
+#### Added
+
+- `partIndexing` also sets `--char-count`, `--word-count`, `--line-count` and `--sentence-count` (total parts per split type) on the inner `[data-splittext-wrapper]`, inherited by every span for reverse staggers (#355)
+
 ### [0.2.0] - 2026-08-26
 
 #### Added
@@ -39,6 +45,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact-validate
+
+### [0.2.1] - 2026-10-25
+
+#### Added
+
+- `NAMED_EFFECT_PARAMS` semantic check: `namedEffect` params are validated against the `schema` of the effect registered on `Interact` under their `type` — `NAMED_EFFECT_INVALID_PARAM` (error) for a value that doesn't match its type, enum values, min/max or length/angle format, and `NAMED_EFFECT_UNKNOWN_PARAM` (warning) for a param the schema doesn't declare (#351)
+
+#### Removed
+
+- `SCROLL_PRESET_MISSING_RANGE` / `SCROLL_PRESET_BAD_RANGE` (rule category `SCROLL_RANGE`), now covered by `namedEffect` params validation. `severityOverrides` keyed on `SCROLL_RANGE` are silently ignored (#351)
+- `transitionDelay` on `pointerMove` effects; it is reported as an unrecognized key (#354)
 
 ### [0.2.0] - 2026-08-26
 
@@ -94,6 +111,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact
+
+### [2.5.21] - 2026-10-25
+
+#### Added
+
+- `Interact.getRegisteredEffect()` exposes `@wix/motion`'s registered-effect lookup (#351)
+
+#### Fixed
+
+- List-item keys whose templated path contains characters other than word characters and `-` (e.g. `#`, as repeaters now use) are matched to their key template and interpolated correctly (#352)
+
+#### Removed
+
+- Unused `transitionDelay` from `ScrubEffect` types and docs (#354)
+
+### [2.5.20] - 2026-10-22
+
+#### Fixed
+
+- `generate()` emits a `:root { timeline-scope: ... }` rule for `viewProgress` triggers whose effects target an element other than the source, so a target outside the source's subtree (e.g. a sibling) binds to the source's view timeline instead of staying frozen with a `null` timeline (#345)
+- `viewProgress` and `pointerMove` honor an effect's `selector` condition: no scroll or pointer animation is created for a target that doesn't match it, matching `click`, `hover`, `viewEnter`, `animationEnd` and the `generate()` CSS (#344)
 
 ### [2.5.19] - 2026-10-21
 
@@ -384,6 +422,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion
 
+### [2.1.17] - 2026-10-25
+
+#### Removed
+
+- Unused `transitionDelay` from scrub animation data types and docs (#354)
+
 ### [2.1.16] - 2026-10-21
 
 #### Added
@@ -499,6 +543,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion-presets
+
+### [1.0.8] - 2026-10-25
+
+#### Added
+
+- Every preset honors the `suffix` option: it is appended to the preset's animation names and to the CSS custom properties it declares (and their `var()` references), so the same preset in different keyframe slots of one element doesn't override the other's parameters (#353)
 
 ### [1.0.7] - 2026-09-21
 
