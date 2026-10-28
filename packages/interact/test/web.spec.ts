@@ -2797,6 +2797,53 @@ describe('interact (web)', () => {
       // The InteractElement's toggleEffect should be called (not the controller's fallback logic)
       expect(toggleEffectSpy).toHaveBeenCalledWith('toggle-effect', 'toggle', undefined);
     });
+    it('should handle a tap that Safari sends as a click MouseEvent without pointerType', () => {
+      const config: InteractConfig = {
+        effects: {
+          'toggle-effect': {
+            transition: { duration: 300, styleProperties: [{ name: 'opacity', value: '0.5' }] },
+          },
+        },
+        interactions: [
+          {
+            key: 'tap-source',
+            trigger: 'click',
+            effects: [{ key: 'tap-source', effectId: 'toggle-effect', stateAction: 'toggle' }],
+          },
+        ],
+      };
+
+      Interact.create(config, { useCustomElement: true });
+
+      const interactElement = document.createElement('interact-element') as IInteractElement;
+      const div = document.createElement('div');
+      interactElement.append(div);
+
+      const toggleEffectSpy = vi.fn();
+      interactElement.toggleEffect = toggleEffectSpy;
+
+      add(interactElement, 'tap-source');
+
+      // iOS Safari sends pointerdown/pointerup as PointerEvents, but the click itself is a MouseEvent whose only sign of
+      // a pointer is its click count
+      div.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+
+      expect(toggleEffectSpy).toHaveBeenCalledWith('toggle-effect', 'toggle', undefined);
+    });
+
+    it('should keep states in data-interact-effect when ElementInternals has no CustomStateSet', () => {
+      // jsdom, like Safari before 17.4, has attachInternals() but no `states`
+      expect('states' in ElementInternals.prototype).toBe(false);
+      Interact.create({ effects: {}, interactions: [] }, { useCustomElement: true });
+      const interactElement = document.createElement('interact-element') as IInteractElement;
+
+      expect(() => interactElement.toggleEffect('state-1', 'add')).not.toThrow();
+      expect(interactElement.dataset.interactEffect).toBe('state-1');
+      expect(interactElement.getActiveEffects()).toEqual(['state-1']);
+
+      interactElement.toggleEffect('state-1', 'toggle');
+      expect(interactElement.getActiveEffects()).toEqual([]);
+    });
   });
 
   describe('breakpoint media query listeners', () => {
