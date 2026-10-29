@@ -17,7 +17,7 @@ import {
   getFullPredicateByType,
   getSelectorCondition,
 } from '../utils';
-import { getSelector } from './Interact';
+import { getListItemStateSelector, getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
 import { getElementHash } from './utilities';
 import {
@@ -417,14 +417,24 @@ function effectToCSS(
     }
 
     // adding state rule
-    rules.push({
-      key,
-      media,
-      selectorCondition,
-      childSelector,
-      states: [effectId],
-      declarations: properties,
-    });
+    rules.push(
+      effect.listContainer
+        ? {
+            key,
+            media,
+            selectorCondition,
+            childSelector: getListItemStateSelector(effect, effectId),
+            declarations: properties,
+          }
+        : {
+            key,
+            media,
+            selectorCondition,
+            childSelector,
+            states: [effectId],
+            declarations: properties,
+          },
+    );
   } else {
     // setting off animation custom properties
     declarations.push(

@@ -374,6 +374,17 @@ export function getSelector(
 }
 
 /**
+ * A list effect's state is kept on the list item that holds its trigger (see `createTransitionHandler`), as
+ * `data-interact-effect`: items aren't custom elements, so they have no `:state()`. The state has to sit between the
+ * list container and the effect's selector, where `getSelector` has none.
+ */
+export function getListItemStateSelector(d: Interaction | Effect, effectId: string): string {
+  const item = `${d.listItemSelector || ''}[data-interact-effect~="${effectId}"]`;
+
+  return `${d.listContainer} > ${item}${d.selector ? ` ${d.selector}` : ''}`;
+}
+
+/**
  * Parses the config object and caches interactions, effects, and conditions
  */
 function _isSequenceConfigRef(
