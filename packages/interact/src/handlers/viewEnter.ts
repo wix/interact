@@ -226,21 +226,24 @@ function addViewEnterHandler(
             target.dataset.interactEnter = 'start';
           };
 
+          const setEnterDone = () => {
+            fastdom.mutate(() => {
+              target.dataset.interactEnter = 'done';
+            });
+          };
+
           if (animation.isCSS) {
             fastdom.mutate(() => {
               requestAnimationFrame(setEnterStart);
             });
 
-            const setEnterDone = () => {
-              fastdom.mutate(() => {
-                target.dataset.interactEnter = 'done';
-              });
-            };
-
             animation.onFinish(setEnterDone);
             animation.onAbort(setEnterDone);
           } else {
             fastdom.mutate(setEnterStart);
+            // Generated CSS holds the element at the first keyframe until "done", e.g. a variant
+            // added after a media change, which plays through WAAPI.
+            animation.onFinish(setEnterDone);
           }
         });
       }
