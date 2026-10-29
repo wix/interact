@@ -19,7 +19,7 @@ import {
 } from '../utils';
 import { getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
-import { getElementHash } from './utilities';
+import { getCodeStates, getElementHash } from './utilities';
 import {
   LIST_ANIMATION_PROPERTY_NAMES,
   LIST_PROPERTY_NAMES,
@@ -416,15 +416,25 @@ function effectToCSS(
       wrote.transition = true;
     }
 
-    // adding state rule
-    rules.push({
-      key,
-      media,
-      selectorCondition,
-      childSelector,
-      states: [effectId],
-      declarations: properties,
-    });
+    // adding state rules: the target's, then the other elements' of the key
+    rules.push(
+      {
+        key,
+        media,
+        selectorCondition,
+        childSelector,
+        states: [effectId],
+        declarations: properties,
+      },
+      ...(effect.elementStyles || []).map(({ selector, styleProperties }) => ({
+        key,
+        media,
+        selectorCondition,
+        childSelector: selector,
+        states: [effectId],
+        declarations: getStateStyleProperties({ transition: { styleProperties } }),
+      })),
+    );
   } else {
     // setting off animation custom properties
     declarations.push(
@@ -657,11 +667,31 @@ function parseConfig(
     plugins,
   };
 
-  const cssRules = config.interactions.flatMap((interaction, interactionIdx) =>
-    parseInteraction(ctx, interaction, interactionIdx),
-  );
+  const cssRules = [
+    ...config.interactions.flatMap((interaction, interactionIdx) =>
+      parseInteraction(ctx, interaction, interactionIdx),
+    ),
+    ...parseCodeStates(ctx),
+  ];
 
   return { ctx, cssRules };
+}
+
+// the looks of the states code toggles, each as a state effect of an interaction of its own
+function parseCodeStates(ctx: GenerateContext): CSSRuleData[] {
+  const visited = new Set<string>();
+  const trigger = { id: 'code-states', componentId: '' } as TriggerVariant;
+  const rules = getCodeStates(ctx.config).flatMap((effect) => {
+    const resolved = resolveEffectForCSS(effect, { key: effect.key } as Interaction, {
+      ...ctx.config,
+      effects: {},
+    });
+    return resolved ? parseEffect(ctx, resolved, trigger, visited) : [];
+  });
+
+  visited.forEach((targetHash) => endInteraction(ctx.targetsMap.get(targetHash)!));
+
+  return rules;
 }
 
 export function getSlotKey(interactionIndex: number, effectIndex: number, sequenceIndex?: number) {
