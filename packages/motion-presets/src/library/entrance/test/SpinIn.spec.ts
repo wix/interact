@@ -44,7 +44,7 @@ describe('SpinIn', () => {
       namedEffect: {
         direction: 'counter-clockwise',
         spins: 2,
-        initialScale: 1,
+        scale: 1,
       } as SpinInType,
     };
 
@@ -90,12 +90,12 @@ describe('SpinIn', () => {
         easing: 'cubicInOut',
         custom: {
           '--motion-scale': '0',
-          '--motion-rotate': '-180deg',
+          '--motion-spin-rotate': '-180deg',
         },
         keyframes: [
           {
             scale: 'var(--motion-scale)',
-            rotate: 'var(--motion-rotate)',
+            rotate: 'var(--motion-spin-rotate)',
           },
           {
             scale: '1',
@@ -120,7 +120,7 @@ describe('SpinIn', () => {
       namedEffect: {
         direction: 'counter-clockwise',
         spins: 2,
-        initialScale: 1,
+        scale: 1,
       } as SpinInType,
     };
 
@@ -137,12 +137,12 @@ describe('SpinIn', () => {
         easing,
         custom: {
           '--motion-scale': '1',
-          '--motion-rotate': '720deg',
+          '--motion-spin-rotate': '720deg',
         },
         keyframes: [
           {
             scale: 'var(--motion-scale)',
-            rotate: 'var(--motion-rotate)',
+            rotate: 'var(--motion-spin-rotate)',
           },
           {
             scale: '1',

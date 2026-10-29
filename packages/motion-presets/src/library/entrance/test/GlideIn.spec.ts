@@ -33,19 +33,19 @@ describe('GlideIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('GlideIn animation with custom direction and distance', () => {
-    const direction = 45;
-    const distance = { value: 200, unit: 'px' };
+  test('GlideIn animation with custom from and travel', () => {
+    const from = 45;
+    const travel = { value: 200, unit: 'px' };
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction, distance } as GlideInType,
+      namedEffect: { from, travel } as GlideInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
       {
         keyframes: [
           {
-            transform: 'translate(141px, -141px) rotate(var(--motion-rotate, 0deg))',
+            transform: 'translate(141.42px, 141.42px) rotate(var(--motion-rotate, 0deg))',
           },
           {
             transform: 'translate(0, 0) rotate(var(--motion-rotate, 0deg))',
@@ -98,20 +98,20 @@ describe('GlideIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('GlideIn style animation with custom direction and distance', () => {
-    const direction = 45;
-    const distance = { value: 200, unit: 'px' };
+  test('GlideIn style animation with custom from and travel', () => {
+    const from = 45;
+    const travel = { value: 200, unit: 'px' };
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction, distance } as GlideInType,
+      namedEffect: { from, travel } as GlideInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
       {
         name: 'motion-glideIn',
         custom: {
-          '--motion-translate-x': '141px',
-          '--motion-translate-y': '-141px',
+          '--motion-translate-x': '141.42px',
+          '--motion-translate-y': '141.42px',
         },
         keyframes: [
           {

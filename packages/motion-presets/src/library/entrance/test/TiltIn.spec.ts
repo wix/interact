@@ -41,14 +41,14 @@ describe('TiltIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('TiltIn animation with custom direction', () => {
+  test('TiltIn animation with custom from', () => {
     const duration = 1000;
     const easing = 'cubicIn';
     const mockOptions = {
       ...baseMockOptions,
       easing,
       duration,
-      namedEffect: { direction: 'right' } as TiltInType,
+      namedEffect: { from: 'right' } as TiltInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -97,8 +97,8 @@ describe('TiltIn', () => {
         easing: 'cubicOut',
         custom: {
           '--motion-perspective': '800px',
-          '--motion-depth-negative': 'calc(200px / 2 * -1)',
-          '--motion-depth-positive': 'calc(200px / 2)',
+          '--motion-depth-negative': 'calc(100px * -1)',
+          '--motion-depth-positive': '100px',
         },
         keyframes: [
           {
@@ -138,14 +138,14 @@ describe('TiltIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('TiltIn.style animation with custom direction', () => {
+  test('TiltIn.style animation with custom from', () => {
     const duration = 1000;
     const easing = 'cubicIn';
     const mockOptions = {
       ...baseMockOptions,
       easing,
       duration,
-      namedEffect: { direction: 'right' } as TiltInType,
+      namedEffect: { from: 'right' } as TiltInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -161,8 +161,8 @@ describe('TiltIn', () => {
         easing,
         custom: {
           '--motion-perspective': '800px',
-          '--motion-depth-negative': 'calc(200px / 2 * -1)',
-          '--motion-depth-positive': 'calc(200px / 2)',
+          '--motion-depth-negative': 'calc(100px * -1)',
+          '--motion-depth-positive': '100px',
         },
         keyframes: [
           {

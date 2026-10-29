@@ -48,7 +48,7 @@ describe('SlideIn', () => {
   test('SlideIn animation with custom direction', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'right', initialTranslate: 1 } as SlideInType,
+      namedEffect: { from: 'right', start: 0 } as SlideInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -128,7 +128,7 @@ describe('SlideIn', () => {
   test('SlideIn style with custom direction', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'right', initialTranslate: 1 } as SlideInType,
+      namedEffect: { from: 'right', start: 0 } as SlideInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [

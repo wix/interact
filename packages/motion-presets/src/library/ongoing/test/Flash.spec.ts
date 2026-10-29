@@ -55,8 +55,8 @@ describe('Flash', () => {
               opacity: 1,
               easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)',
             },
-            { offset: 0.335, opacity: 0 },
-            { offset: 0.67, opacity: 1 },
+            { offset: 1 / 3, opacity: 0 },
+            { offset: 2 / 3, opacity: 1 },
             { offset: 1, opacity: 1 },
           ],
         },
@@ -151,8 +151,8 @@ describe('Flash', () => {
               opacity: 1,
               easing: 'cubic-bezier(0.645, 0.045, 0.355, 1)',
             },
-            { offset: 0.335, opacity: 0 },
-            { offset: 0.67, opacity: 1 },
+            { offset: 1 / 3, opacity: 0 },
+            { offset: 2 / 3, opacity: 1 },
             { offset: 1, opacity: 1 },
           ],
         },
@@ -228,6 +228,12 @@ describe('Flash', () => {
 
       expect(result1[0].name).toBe(result2[0].name);
       expect(result1[0].name).toBe('motion-flash-067');
+    });
+  });
+
+  test('schema', () => {
+    expect(FlashAnimation.schema).toEqual({
+      iterationDelay: { type: 'number', min: 0, default: 0 },
     });
   });
 });

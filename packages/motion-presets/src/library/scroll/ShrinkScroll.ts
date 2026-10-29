@@ -1,15 +1,30 @@
-import type {
-  AnimationFillMode,
-  ScrubAnimationOptions,
-  ShrinkScroll,
-  DomApi,
-  EffectNineDirections,
-} from '../../types';
-import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
-import { NINE_DIRECTIONS } from '../../consts';
+import type { ScrubAnimationOptions, ShrinkScroll, DomApi } from '../../types';
+import {
+  toKeyframeValue,
+  parseKeywordLazy,
+  suffixNames,
+  suffixCustomProperties,
+  getScrollFill,
+  getScrollParallax,
+} from '../../utils';
+import { NINE_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 
-const MAX_Y_TRAVEL = 40;
-const DEFAULT_DIRECTION: EffectNineDirections = 'center';
+const EPSILON = 0.01;
+
+const DEFAULTS: Required<ShrinkScroll> = {
+  type: 'ShrinkScroll',
+  pivot: 'center',
+  range: 'in',
+  scale: 1.2,
+  speed: 1,
+};
+
+export const schema = {
+  pivot: { type: 'enum', values: NINE_DIRECTIONS, default: DEFAULTS.pivot },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+  speed: { type: 'number', min: 0, default: DEFAULTS.speed },
+};
 
 const directionMap = {
   top: [0, -50],
@@ -33,101 +48,77 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ShrinkScroll;
-  const { range = 'in', scale = range === 'in' ? 1.2 : 0.8, speed = 0 } = namedEffect;
-  const direction = parseDirection(namedEffect?.direction, NINE_DIRECTIONS, DEFAULT_DIRECTION);
+  const {
+    range = DEFAULTS.range,
+    scale: inputScale = DEFAULTS.scale,
+    speed = DEFAULTS.speed,
+  } = namedEffect;
+  const pivot = parseKeywordLazy(namedEffect?.pivot, NINE_DIRECTIONS, DEFAULTS.pivot);
   const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+  const fill = getScrollFill(options, range);
 
-  const scaleFrom = scale;
-  const scaleTo = scale;
-  const travelY = speed;
-  const travel = travelY * MAX_Y_TRAVEL;
+  const invScale = 1 / Math.max(inputScale, EPSILON);
+  const scale = range === 'in' ? Math.max(inputScale, invScale) : Math.min(inputScale, invScale);
 
-  const fromValues = {
-    scale: range === 'out' ? 1 : scaleFrom,
-    travel: range === 'out' ? 0 : -travel,
-  };
-  const toValues = {
-    scale: range === 'in' ? 1 : scaleTo,
-    travel: range === 'in' ? 0 : travel,
-  };
+  const { from, to, ...rangeOffsets } = getScrollParallax(options, range, speed);
 
-  const offset = Math.abs(travel);
-  const startOffsetAdd = range === 'out' ? '0px' : `${-offset}vh`;
-  const endOffsetAdd = range === 'in' ? '0px' : `${offset}vh`;
-
-  const [trnsX, trnsY] = directionMap[direction] || [0, 0];
+  const [trnsX, trnsY] = directionMap[pivot];
 
   const [shrinkScroll] = getNames(options);
 
   const custom = {
-    '--motion-travel-from': `${fromValues.travel}vh`,
-    '--motion-travel-to': `${toValues.travel}vh`,
-    '--motion-shrink-from': fromValues.scale,
-    '--motion-shrink-to': toValues.scale,
+    '--motion-travel-from': from,
+    '--motion-travel-to': to,
+    '--motion-shrink-from': range === 'out' ? 1 : scale,
+    '--motion-shrink-to': range === 'in' ? 1 : scale,
     '--motion-trans-x': `${trnsX}%`,
     '--motion-trans-y': `${trnsY}%`,
   };
 
+  const getTransform = (travel: string | number, shrink: string | number) =>
+    `translateY(${travel}) rotate(${toKeyframeValue(
+      {},
+      '--motion-rotate',
+      false,
+      '0deg',
+    )}) translate(${toKeyframeValue(custom, '--motion-trans-x', asWeb)}, ${toKeyframeValue(
+      custom,
+      '--motion-trans-y',
+      asWeb,
+    )}) scale(${shrink}) translate(calc(-1 * ${toKeyframeValue(
+      custom,
+      '--motion-trans-x',
+      asWeb,
+    )}), calc(-1 * ${toKeyframeValue(custom, '--motion-trans-y', asWeb)}))`;
+
+  const keyframes = [
+    {
+      transform: getTransform(
+        toKeyframeValue(custom, '--motion-travel-from', asWeb),
+        toKeyframeValue(custom, '--motion-shrink-from', asWeb),
+      ),
+    },
+    {
+      transform: getTransform(
+        toKeyframeValue(custom, '--motion-travel-to', asWeb),
+        toKeyframeValue(custom, '--motion-shrink-to', asWeb),
+      ),
+    },
+  ];
+
+  if (range === 'continuous') {
+    keyframes.splice(1, 0, { transform: getTransform('0px', 1) });
+  }
+
   const animations = [
     {
       ...options,
+      ...rangeOffsets,
       name: shrinkScroll,
       fill,
       easing,
       custom,
-      startOffsetAdd,
-      endOffsetAdd,
-      keyframes: [
-        {
-          transform: `translateY(${toKeyframeValue(
-            custom,
-            '--motion-travel-from',
-            asWeb,
-          )}) translate(${toKeyframeValue(custom, '--motion-trans-x', asWeb)}, ${toKeyframeValue(
-            custom,
-            '--motion-trans-y',
-            asWeb,
-          )}) scale(${toKeyframeValue(
-            custom,
-            '--motion-shrink-from',
-            asWeb,
-          )}) translate(calc(-1 * ${toKeyframeValue(
-            custom,
-            '--motion-trans-x',
-            asWeb,
-          )}), calc(-1 * ${toKeyframeValue(
-            custom,
-            '--motion-trans-y',
-            asWeb,
-          )})) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
-        },
-        {
-          transform: `translateY(${toKeyframeValue(
-            custom,
-            '--motion-travel-to',
-            asWeb,
-          )}) translate(${toKeyframeValue(custom, '--motion-trans-x', asWeb)}, ${toKeyframeValue(
-            custom,
-            '--motion-trans-y',
-            asWeb,
-          )}) scale(${toKeyframeValue(
-            custom,
-            '--motion-shrink-to',
-            asWeb,
-          )}) translate(calc(-1 * ${toKeyframeValue(
-            custom,
-            '--motion-trans-x',
-            asWeb,
-          )}), calc(-1 * ${toKeyframeValue(
-            custom,
-            '--motion-trans-y',
-            asWeb,
-          )})) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
-        },
-      ],
+      keyframes,
     },
   ];
 

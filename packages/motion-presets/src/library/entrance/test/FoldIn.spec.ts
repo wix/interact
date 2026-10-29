@@ -21,11 +21,11 @@ describe('FoldIn', () => {
         keyframes: [
           {
             transform:
-              'rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x, 0%), var(--motion-origin-y, -50%)) perspective(800px) rotateX(var(--motion-rotate-x, -90deg)) rotateY(var(--motion-rotate-y, 0deg)) translate(calc(-1 * var(--motion-origin-x, 0%)), calc(-1 * var(--motion-origin-y, -50%)))',
+              'rotate(var(--motion-rotate, 0deg)) perspective(800px) translate(var(--motion-origin-x, 0%), var(--motion-origin-y, -50%)) rotateX(var(--motion-rotate-x, -90deg)) rotateY(var(--motion-rotate-y, 0deg)) translate(calc(-1 * var(--motion-origin-x, 0%)), calc(-1 * var(--motion-origin-y, -50%)))',
           },
           {
             transform:
-              'rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x, 0%), var(--motion-origin-y, -50%)) perspective(800px) rotateX(0deg) rotateY(0deg) translate(calc(-1 * var(--motion-origin-x, 0%)), calc(-1 * var(--motion-origin-y, -50%)))',
+              'rotate(var(--motion-rotate, 0deg)) perspective(800px) translate(var(--motion-origin-x, 0%), var(--motion-origin-y, -50%)) rotateX(0deg) rotateY(0deg) translate(calc(-1 * var(--motion-origin-x, 0%)), calc(-1 * var(--motion-origin-y, -50%)))',
           },
         ],
       },
@@ -36,13 +36,13 @@ describe('FoldIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('FoldIn animation with custom direction and easing', () => {
+  test('FoldIn animation with custom pivot, angle and easing', () => {
     const mockOptions = {
       ...baseMockOptions,
       easing: 'cubicInOut',
       namedEffect: {
-        direction: 'left',
-        initialRotate: 45,
+        pivot: 'left',
+        angle: -45,
       } as FoldInType,
     };
 
@@ -56,11 +56,11 @@ describe('FoldIn', () => {
         keyframes: [
           {
             transform:
-              'rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x, -50%), var(--motion-origin-y, 0%)) perspective(800px) rotateX(var(--motion-rotate-x, 0deg)) rotateY(var(--motion-rotate-y, 45deg)) translate(calc(-1 * var(--motion-origin-x, -50%)), calc(-1 * var(--motion-origin-y, 0%)))',
+              'rotate(var(--motion-rotate, 0deg)) perspective(800px) translate(var(--motion-origin-x, -50%), var(--motion-origin-y, 0%)) rotateX(var(--motion-rotate-x, 0deg)) rotateY(var(--motion-rotate-y, 45deg)) translate(calc(-1 * var(--motion-origin-x, -50%)), calc(-1 * var(--motion-origin-y, 0%)))',
           },
           {
             transform:
-              'rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x, -50%), var(--motion-origin-y, 0%)) perspective(800px) rotateX(0deg) rotateY(0deg) translate(calc(-1 * var(--motion-origin-x, -50%)), calc(-1 * var(--motion-origin-y, 0%)))',
+              'rotate(var(--motion-rotate, 0deg)) perspective(800px) translate(var(--motion-origin-x, -50%), var(--motion-origin-y, 0%)) rotateX(0deg) rotateY(0deg) translate(calc(-1 * var(--motion-origin-x, -50%)), calc(-1 * var(--motion-origin-y, 0%)))',
           },
         ],
       },
@@ -97,11 +97,11 @@ describe('FoldIn', () => {
         keyframes: [
           {
             transform:
-              'rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x, 0%), var(--motion-origin-y, -50%)) perspective(var(--motion-perspective)) rotateX(var(--motion-rotate-x, -90deg)) rotateY(var(--motion-rotate-y, 0deg)) translate(calc(-1 * var(--motion-origin-x, 0%)), calc(-1 * var(--motion-origin-y, -50%)))',
+              'rotate(var(--motion-rotate, 0deg)) perspective(var(--motion-perspective)) translate(var(--motion-origin-x, 0%), var(--motion-origin-y, -50%)) rotateX(var(--motion-rotate-x, -90deg)) rotateY(var(--motion-rotate-y, 0deg)) translate(calc(-1 * var(--motion-origin-x, 0%)), calc(-1 * var(--motion-origin-y, -50%)))',
           },
           {
             transform:
-              'rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x, 0%), var(--motion-origin-y, -50%)) perspective(var(--motion-perspective)) rotateX(0deg) rotateY(0deg) translate(calc(-1 * var(--motion-origin-x, 0%)), calc(-1 * var(--motion-origin-y, -50%)))',
+              'rotate(var(--motion-rotate, 0deg)) perspective(var(--motion-perspective)) translate(var(--motion-origin-x, 0%), var(--motion-origin-y, -50%)) rotateX(0deg) rotateY(0deg) translate(calc(-1 * var(--motion-origin-x, 0%)), calc(-1 * var(--motion-origin-y, -50%)))',
           },
         ],
       },
@@ -112,13 +112,13 @@ describe('FoldIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('FoldIn style animation with custom direction and easing', () => {
+  test('FoldIn style animation with custom pivot, angle and easing', () => {
     const mockOptions = {
       ...baseMockOptions,
       easing: 'cubicInOut',
       namedEffect: {
-        direction: 'left',
-        initialRotate: 45,
+        pivot: 'left',
+        angle: -45,
       } as FoldInType,
     };
 
@@ -142,11 +142,11 @@ describe('FoldIn', () => {
         keyframes: [
           {
             transform:
-              'rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x, -50%), var(--motion-origin-y, 0%)) perspective(var(--motion-perspective)) rotateX(var(--motion-rotate-x, 0deg)) rotateY(var(--motion-rotate-y, 45deg)) translate(calc(-1 * var(--motion-origin-x, -50%)), calc(-1 * var(--motion-origin-y, 0%)))',
+              'rotate(var(--motion-rotate, 0deg)) perspective(var(--motion-perspective)) translate(var(--motion-origin-x, -50%), var(--motion-origin-y, 0%)) rotateX(var(--motion-rotate-x, 0deg)) rotateY(var(--motion-rotate-y, 45deg)) translate(calc(-1 * var(--motion-origin-x, -50%)), calc(-1 * var(--motion-origin-y, 0%)))',
           },
           {
             transform:
-              'rotate(var(--motion-rotate, 0deg)) translate(var(--motion-origin-x, -50%), var(--motion-origin-y, 0%)) perspective(var(--motion-perspective)) rotateX(0deg) rotateY(0deg) translate(calc(-1 * var(--motion-origin-x, -50%)), calc(-1 * var(--motion-origin-y, 0%)))',
+              'rotate(var(--motion-rotate, 0deg)) perspective(var(--motion-perspective)) translate(var(--motion-origin-x, -50%), var(--motion-origin-y, 0%)) rotateX(0deg) rotateY(0deg) translate(calc(-1 * var(--motion-origin-x, -50%)), calc(-1 * var(--motion-origin-y, 0%)))',
           },
         ],
       },

@@ -17,12 +17,8 @@ describe('SpinScroll', () => {
           fill: 'backwards',
           easing: 'linear',
           keyframes: [
-            {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + -54deg))',
-            },
-            {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
-            },
+            { transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + -54deg))' },
+            { transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))' },
           ],
         },
       ];
@@ -40,13 +36,11 @@ describe('SpinScroll', () => {
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
           keyframes: [
-            {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + -180deg))',
-            },
-            {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
-            },
+            { transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + -180deg))' },
+            { transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))' },
           ],
         },
       ];
@@ -64,13 +58,11 @@ describe('SpinScroll', () => {
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
           keyframes: [
-            {
-              transform: 'scale(0.5) rotate(calc(var(--motion-rotate, 0deg) + -54deg))',
-            },
-            {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
-            },
+            { transform: 'scale(0.5) rotate(calc(var(--motion-rotate, 0deg) + -54deg))' },
+            { transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))' },
           ],
         },
       ];
@@ -88,13 +80,11 @@ describe('SpinScroll', () => {
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
           keyframes: [
-            {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 54deg))',
-            },
-            {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
-            },
+            { transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 54deg))' },
+            { transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))' },
           ],
         },
       ];
@@ -113,13 +103,10 @@ describe('SpinScroll', () => {
       const expectedResult = [
         {
           fill: 'forwards',
+          easing: 'linear',
           keyframes: [
-            {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
-            },
-            {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 54deg))',
-            },
+            { transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))' },
+            { transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 54deg))' },
           ],
         },
       ];
@@ -137,13 +124,12 @@ describe('SpinScroll', () => {
 
       const expectedResult = [
         {
+          fill: 'both',
+          easing: 'linear',
           keyframes: [
-            {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + -27deg))',
-            },
-            {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 27deg))',
-            },
+            { transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + -54deg))' },
+            { transform: 'scale(1) rotate(var(--motion-rotate, 0deg))' },
+            { transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 54deg))' },
           ],
         },
       ];
@@ -165,6 +151,12 @@ describe('SpinScroll', () => {
         {
           fill: 'backwards',
           easing: 'linear',
+          custom: {
+            '--motion-spin-from': '-54deg',
+            '--motion-spin-to': '0deg',
+            '--motion-spin-scale-from': 1,
+            '--motion-spin-scale-to': 1,
+          },
           keyframes: [
             {
               transform:
@@ -191,6 +183,14 @@ describe('SpinScroll', () => {
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
+          custom: {
+            '--motion-spin-from': '-180deg',
+            '--motion-spin-to': '0deg',
+            '--motion-spin-scale-from': 1,
+            '--motion-spin-scale-to': 1,
+          },
           keyframes: [
             {
               transform:
@@ -217,6 +217,14 @@ describe('SpinScroll', () => {
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
+          custom: {
+            '--motion-spin-from': '-54deg',
+            '--motion-spin-to': '0deg',
+            '--motion-spin-scale-from': 0.5,
+            '--motion-spin-scale-to': 1,
+          },
           keyframes: [
             {
               transform:
@@ -243,6 +251,14 @@ describe('SpinScroll', () => {
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
+          custom: {
+            '--motion-spin-from': '54deg',
+            '--motion-spin-to': '0deg',
+            '--motion-spin-scale-from': 1,
+            '--motion-spin-scale-to': 1,
+          },
           keyframes: [
             {
               transform:
@@ -270,6 +286,13 @@ describe('SpinScroll', () => {
       const expectedResult = [
         {
           fill: 'forwards',
+          easing: 'linear',
+          custom: {
+            '--motion-spin-from': '0deg',
+            '--motion-spin-to': '54deg',
+            '--motion-spin-scale-from': 1,
+            '--motion-spin-scale-to': 1,
+          },
           keyframes: [
             {
               transform:
@@ -296,11 +319,20 @@ describe('SpinScroll', () => {
 
       const expectedResult = [
         {
+          fill: 'both',
+          easing: 'linear',
+          custom: {
+            '--motion-spin-from': '-54deg',
+            '--motion-spin-to': '54deg',
+            '--motion-spin-scale-from': 1,
+            '--motion-spin-scale-to': 1,
+          },
           keyframes: [
             {
               transform:
                 'scale(var(--motion-spin-scale-from)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-spin-from)))',
             },
+            { transform: 'scale(1) rotate(var(--motion-rotate, 0deg))' },
             {
               transform:
                 'scale(var(--motion-spin-scale-to)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-spin-to)))',

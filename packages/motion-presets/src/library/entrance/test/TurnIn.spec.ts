@@ -36,10 +36,10 @@ describe('TurnIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('TurnIn animation with bottom-right direction', () => {
+  test('TurnIn animation with bottom-right pivot', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'bottom-right' } as TurnInType,
+      namedEffect: { pivot: 'bottom-right' } as TurnInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -62,10 +62,10 @@ describe('TurnIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('TurnIn animation with top-right direction', () => {
+  test('TurnIn animation with top-right pivot', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'top-right' } as TurnInType,
+      namedEffect: { pivot: 'top-right' } as TurnInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -88,10 +88,10 @@ describe('TurnIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('TurnIn animation with bottom-left direction', () => {
+  test('TurnIn animation with bottom-left pivot', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'bottom-left' } as TurnInType,
+      namedEffect: { pivot: 'bottom-left' } as TurnInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -181,10 +181,10 @@ describe('TurnIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('TurnIn.style animation with bottom-right direction', () => {
+  test('TurnIn.style animation with bottom-right pivot', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'bottom-right' } as TurnInType,
+      namedEffect: { pivot: 'bottom-right' } as TurnInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [

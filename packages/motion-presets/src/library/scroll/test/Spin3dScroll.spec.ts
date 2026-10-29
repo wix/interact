@@ -16,16 +16,30 @@ describe('Spin3dScroll', () => {
         {
           fill: 'backwards',
           easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0px',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           keyframes: [
             {
               transform:
-                'perspective(1000px) translateY(0vh) rotateZ(calc(var(--motion-rotate, 0deg) + 100deg)) rotateY(100deg) rotateX(200deg)',
+                'perspective(1000px) translateY(calc(0 * (50% + 50vh))) rotateX(-100deg) rotateY(-100deg) rotateZ(-100deg) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(1000px) translateY(0vh) rotateZ(calc(var(--motion-rotate, 0deg) + 0deg)) rotateY(0deg) rotateX(0deg)',
+                'perspective(1000px) translateY(calc(0 * (50% + 50vh))) rotateX(0deg) rotateY(0deg) rotateZ(0deg) rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -36,22 +50,84 @@ describe('Spin3dScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom rotate value', () => {
+    test('custom angle', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { rotate: -50 } as Spin3dScrollType,
+        namedEffect: { angle: 50 } as Spin3dScrollType,
       };
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           keyframes: [
             {
               transform:
-                'perspective(1000px) translateY(0vh) rotateZ(calc(var(--motion-rotate, 0deg) + 50deg)) rotateY(50deg) rotateX(100deg)',
+                'perspective(1000px) translateY(calc(0 * (50% + 50vh))) rotateX(-50deg) rotateY(-50deg) rotateZ(-50deg) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(1000px) translateY(0vh) rotateZ(calc(var(--motion-rotate, 0deg) + 0deg)) rotateY(0deg) rotateX(0deg)',
+                'perspective(1000px) translateY(calc(0 * (50% + 50vh))) rotateX(0deg) rotateY(0deg) rotateZ(0deg) rotate(var(--motion-rotate, 0deg))',
+            },
+          ],
+        },
+      ];
+
+      const result = Spin3dScroll.web(mockOptions);
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
+    test('custom perspective', () => {
+      const mockOptions: ScrubAnimationOptions = {
+        ...baseMockOptions,
+        namedEffect: { perspective: 500 } as Spin3dScrollType,
+      };
+
+      const expectedResult = [
+        {
+          fill: 'backwards',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
+          keyframes: [
+            {
+              transform:
+                'perspective(500px) translateY(calc(0 * (50% + 50vh))) rotateX(-100deg) rotateY(-100deg) rotateZ(-100deg) rotate(var(--motion-rotate, 0deg))',
+            },
+            {
+              transform:
+                'perspective(500px) translateY(calc(0 * (50% + 50vh))) rotateX(0deg) rotateY(0deg) rotateZ(0deg) rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -71,16 +147,31 @@ describe('Spin3dScroll', () => {
       const expectedResult = [
         {
           fill: 'forwards',
-          startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
           keyframes: [
             {
               transform:
-                'perspective(1000px) translateY(0vh) rotateZ(calc(var(--motion-rotate, 0deg) + 0deg)) rotateY(0deg) rotateX(0deg)',
+                'perspective(1000px) translateY(calc(0 * (50% + 50vh))) rotateX(0deg) rotateY(0deg) rotateZ(0deg) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(1000px) translateY(0vh) rotateZ(calc(var(--motion-rotate, 0deg) + -100deg)) rotateY(-200deg) rotateX(-300deg)',
+                'perspective(1000px) translateY(calc(0 * (50% + 50vh))) rotateX(100deg) rotateY(100deg) rotateZ(100deg) rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -94,23 +185,37 @@ describe('Spin3dScroll', () => {
     test('custom range - continuous', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        fill: 'both',
         namedEffect: { range: 'continuous' } as Spin3dScrollType,
       };
 
       const expectedResult = [
         {
           fill: 'both',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
           keyframes: [
             {
               transform:
-                'perspective(1000px) translateY(0vh) rotateZ(calc(var(--motion-rotate, 0deg) + 100deg)) rotateY(100deg) rotateX(200deg)',
+                'perspective(1000px) translateY(calc(0 * (100% + 100vh))) rotateX(-100deg) rotateY(-100deg) rotateZ(-100deg) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(1000px) translateY(0vh) rotateZ(calc(var(--motion-rotate, 0deg) + -200deg)) rotateY(-100deg) rotateX(-180deg)',
+                'perspective(1000px) translateY(calc(0 * (100% + 100vh))) rotateX(100deg) rotateY(100deg) rotateZ(100deg) rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -129,16 +234,32 @@ describe('Spin3dScroll', () => {
 
       const expectedResult = [
         {
-          startOffsetAdd: '-20vh',
-          endOffsetAdd: '0px',
+          fill: 'backwards',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: -50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '-50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           keyframes: [
             {
               transform:
-                'perspective(1000px) translateY(-20vh) rotateZ(calc(var(--motion-rotate, 0deg) + 100deg)) rotateY(100deg) rotateX(200deg)',
+                'perspective(1000px) translateY(calc(-1 * (50% + 50vh))) rotateX(-100deg) rotateY(-100deg) rotateZ(-100deg) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(1000px) translateY(0vh) rotateZ(calc(var(--motion-rotate, 0deg) + 0deg)) rotateY(0deg) rotateX(0deg)',
+                'perspective(1000px) translateY(calc(0 * (50% + 50vh))) rotateX(0deg) rotateY(0deg) rotateZ(0deg) rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -161,19 +282,37 @@ describe('Spin3dScroll', () => {
         {
           fill: 'backwards',
           easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0px',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           custom: {
             '--motion-perspective': '1000px',
+            '--motion-travel-from': 'calc(0 * (50% + 50vh))',
+            '--motion-travel-to': 'calc(0 * (50% + 50vh))',
+            '--motion-rot-from': '-100deg',
+            '--motion-rot-to': '0deg',
           },
           keyframes: [
             {
               transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-from)) rotateZ(calc(var(--motion-rotate, 0deg) + var(--motion-rot-z-from))) rotateY(var(--motion-rot-y-from)) rotateX(var(--motion-rot-x-from))',
+                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-from)) rotateX(var(--motion-rot-from)) rotateY(var(--motion-rot-from)) rotateZ(var(--motion-rot-from)) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-to)) rotateZ(calc(var(--motion-rotate, 0deg) + var(--motion-rot-z-to))) rotateY(var(--motion-rot-y-to)) rotateX(var(--motion-rot-x-to))',
+                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-to)) rotateX(var(--motion-rot-to)) rotateY(var(--motion-rot-to)) rotateZ(var(--motion-rot-to)) rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -184,25 +323,47 @@ describe('Spin3dScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom rotate value', () => {
+    test('custom angle', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { rotate: -50 } as Spin3dScrollType,
+        namedEffect: { angle: 50 } as Spin3dScrollType,
       };
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           custom: {
             '--motion-perspective': '1000px',
+            '--motion-travel-from': 'calc(0 * (50% + 50vh))',
+            '--motion-travel-to': 'calc(0 * (50% + 50vh))',
+            '--motion-rot-from': '-50deg',
+            '--motion-rot-to': '0deg',
           },
           keyframes: [
             {
               transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-from)) rotateZ(calc(var(--motion-rotate, 0deg) + var(--motion-rot-z-from))) rotateY(var(--motion-rot-y-from)) rotateX(var(--motion-rot-x-from))',
+                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-from)) rotateX(var(--motion-rot-from)) rotateY(var(--motion-rot-from)) rotateZ(var(--motion-rot-from)) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-to)) rotateZ(calc(var(--motion-rotate, 0deg) + var(--motion-rot-z-to))) rotateY(var(--motion-rot-y-to)) rotateX(var(--motion-rot-x-to))',
+                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-to)) rotateX(var(--motion-rot-to)) rotateY(var(--motion-rot-to)) rotateZ(var(--motion-rot-to)) rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -222,19 +383,38 @@ describe('Spin3dScroll', () => {
       const expectedResult = [
         {
           fill: 'forwards',
-          startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
           custom: {
             '--motion-perspective': '1000px',
+            '--motion-travel-from': 'calc(0 * (50% + 50vh))',
+            '--motion-travel-to': 'calc(0 * (50% + 50vh))',
+            '--motion-rot-from': '0deg',
+            '--motion-rot-to': '100deg',
           },
           keyframes: [
             {
               transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-from)) rotateZ(calc(var(--motion-rotate, 0deg) + var(--motion-rot-z-from))) rotateY(var(--motion-rot-y-from)) rotateX(var(--motion-rot-x-from))',
+                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-from)) rotateX(var(--motion-rot-from)) rotateY(var(--motion-rot-from)) rotateZ(var(--motion-rot-from)) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-to)) rotateZ(calc(var(--motion-rotate, 0deg) + var(--motion-rot-z-to))) rotateY(var(--motion-rot-y-to)) rotateX(var(--motion-rot-x-to))',
+                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-to)) rotateX(var(--motion-rot-to)) rotateY(var(--motion-rot-to)) rotateZ(var(--motion-rot-to)) rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -248,26 +428,44 @@ describe('Spin3dScroll', () => {
     test('custom range - continuous', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        fill: 'both',
         namedEffect: { range: 'continuous' } as Spin3dScrollType,
       };
 
       const expectedResult = [
         {
           fill: 'both',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
           custom: {
             '--motion-perspective': '1000px',
+            '--motion-travel-from': 'calc(0 * (100% + 100vh))',
+            '--motion-travel-to': 'calc(0 * (100% + 100vh))',
+            '--motion-rot-from': '-100deg',
+            '--motion-rot-to': '100deg',
           },
           keyframes: [
             {
               transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-from)) rotateZ(calc(var(--motion-rotate, 0deg) + var(--motion-rot-z-from))) rotateY(var(--motion-rot-y-from)) rotateX(var(--motion-rot-x-from))',
+                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-from)) rotateX(var(--motion-rot-from)) rotateY(var(--motion-rot-from)) rotateZ(var(--motion-rot-from)) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-to)) rotateZ(calc(var(--motion-rotate, 0deg) + var(--motion-rot-z-to))) rotateY(var(--motion-rot-y-to)) rotateX(var(--motion-rot-x-to))',
+                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-to)) rotateX(var(--motion-rot-to)) rotateY(var(--motion-rot-to)) rotateZ(var(--motion-rot-to)) rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -286,19 +484,39 @@ describe('Spin3dScroll', () => {
 
       const expectedResult = [
         {
-          startOffsetAdd: '-20vh',
-          endOffsetAdd: '0px',
+          fill: 'backwards',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: -50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '-50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           custom: {
             '--motion-perspective': '1000px',
+            '--motion-travel-from': 'calc(-1 * (50% + 50vh))',
+            '--motion-travel-to': 'calc(0 * (50% + 50vh))',
+            '--motion-rot-from': '-100deg',
+            '--motion-rot-to': '0deg',
           },
           keyframes: [
             {
               transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-from)) rotateZ(calc(var(--motion-rotate, 0deg) + var(--motion-rot-z-from))) rotateY(var(--motion-rot-y-from)) rotateX(var(--motion-rot-x-from))',
+                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-from)) rotateX(var(--motion-rot-from)) rotateY(var(--motion-rot-from)) rotateZ(var(--motion-rot-from)) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-to)) rotateZ(calc(var(--motion-rotate, 0deg) + var(--motion-rot-z-to))) rotateY(var(--motion-rot-y-to)) rotateX(var(--motion-rot-x-to))',
+                'perspective(var(--motion-perspective)) translateY(var(--motion-travel-to)) rotateX(var(--motion-rot-to)) rotateY(var(--motion-rot-to)) rotateZ(var(--motion-rot-to)) rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },

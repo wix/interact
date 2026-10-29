@@ -15,6 +15,7 @@ describe('SlideScroll', () => {
       const expectedResult = [
         {
           fill: 'backwards',
+          easing: 'linear',
           keyframes: [
             {
               clipPath: 'var(--motion-clip-from, polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%))',
@@ -41,10 +42,12 @@ describe('SlideScroll', () => {
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
           keyframes: [
             {
-              clipPath: 'var(--motion-clip-from, polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%))',
-              transform: 'rotate(var(--motion-rotate, 0)) translate(-100%, 0)',
+              clipPath: 'var(--motion-clip-from, polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%))',
+              transform: 'rotate(var(--motion-rotate, 0)) translate(100%, 0)',
             },
             {
               clipPath: 'var(--motion-clip-to, polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%))',
@@ -68,14 +71,15 @@ describe('SlideScroll', () => {
       const expectedResult = [
         {
           fill: 'forwards',
+          easing: 'linear',
           keyframes: [
             {
               clipPath: 'var(--motion-clip-from, polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%))',
               transform: 'rotate(var(--motion-rotate, 0)) translate(0, 0)',
             },
             {
-              clipPath: 'var(--motion-clip-to, polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%))',
-              transform: 'rotate(var(--motion-rotate, 0)) translate(0, 100%)',
+              clipPath: 'var(--motion-clip-to, polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%))',
+              transform: 'rotate(var(--motion-rotate, 0)) translate(0, -100%)',
             },
           ],
         },
@@ -94,6 +98,8 @@ describe('SlideScroll', () => {
 
       const expectedResult = [
         {
+          fill: 'both',
+          easing: 'linear',
           keyframes: [
             {
               clipPath: 'var(--motion-clip-from, polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%))',
@@ -127,6 +133,15 @@ describe('SlideScroll', () => {
       const expectedResult = [
         {
           fill: 'backwards',
+          easing: 'linear',
+          custom: {
+            '--motion-clip-from': 'polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)',
+            '--motion-clip-to': 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+            '--motion-translate-from-x': '0',
+            '--motion-translate-from-y': '100%',
+            '--motion-translate-to-x': '0',
+            '--motion-translate-to-y': '0',
+          },
           keyframes: [
             {
               clipPath: 'var(--motion-clip-from, polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%))',
@@ -155,9 +170,19 @@ describe('SlideScroll', () => {
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
+          custom: {
+            '--motion-clip-from': 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)',
+            '--motion-clip-to': 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+            '--motion-translate-from-x': '100%',
+            '--motion-translate-from-y': '0',
+            '--motion-translate-to-x': '0',
+            '--motion-translate-to-y': '0',
+          },
           keyframes: [
             {
-              clipPath: 'var(--motion-clip-from, polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%))',
+              clipPath: 'var(--motion-clip-from, polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%))',
               transform:
                 'rotate(var(--motion-rotate, 0)) translate(var(--motion-translate-from-x), var(--motion-translate-from-y))',
             },
@@ -184,6 +209,15 @@ describe('SlideScroll', () => {
       const expectedResult = [
         {
           fill: 'forwards',
+          easing: 'linear',
+          custom: {
+            '--motion-clip-from': 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+            '--motion-clip-to': 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)',
+            '--motion-translate-from-x': '0',
+            '--motion-translate-from-y': '0',
+            '--motion-translate-to-x': '0',
+            '--motion-translate-to-y': '-100%',
+          },
           keyframes: [
             {
               clipPath: 'var(--motion-clip-from, polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%))',
@@ -191,7 +225,7 @@ describe('SlideScroll', () => {
                 'rotate(var(--motion-rotate, 0)) translate(var(--motion-translate-from-x), var(--motion-translate-from-y))',
             },
             {
-              clipPath: 'var(--motion-clip-to, polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%))',
+              clipPath: 'var(--motion-clip-to, polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%))',
               transform:
                 'rotate(var(--motion-rotate, 0)) translate(var(--motion-translate-to-x), var(--motion-translate-to-y))',
             },

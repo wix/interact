@@ -1,6 +1,15 @@
 import type { TimeAnimationOptions, DomApi, AnimationExtraOptions, Flash } from '../../types';
 import { getEasing, getTimingFactor, suffixNames, suffixCustomProperties } from '../../utils';
 
+const DEFAULTS: Required<Flash> = {
+  type: 'Flash',
+  iterationDelay: 0,
+};
+
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+};
+
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
   return style(options, true);
 }
@@ -8,9 +17,9 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, _asWeb = false) {
   const namedEffect = options.namedEffect as Flash;
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
+  const { iterationDelay = DEFAULTS.iterationDelay } = namedEffect;
   const easing = getEasing(options.easing || 'cubicInOut');
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
+  const timingFactor = duration / (duration + iterationDelay);
   const [name] = getNames(options);
 
   const keyframes = [

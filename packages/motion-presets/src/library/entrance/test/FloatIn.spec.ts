@@ -34,10 +34,10 @@ describe('FloatIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('FloatIn animation with custom direction', () => {
+  test('FloatIn animation from top', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'top' } as FloatInType,
+      namedEffect: { from: 'top' } as FloatInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -98,10 +98,10 @@ describe('FloatIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('FloatIn style animation with custom direction', () => {
+  test('FloatIn style animation from top', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'top' } as FloatInType,
+      namedEffect: { from: 'top' } as FloatInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [

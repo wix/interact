@@ -1,8 +1,14 @@
-import type { ArcIn, TimeAnimationOptions, EffectFourDirections, DomApi } from '../../types';
+import type {
+  ArcIn,
+  TimeAnimationOptions,
+  EffectFourDirections,
+  DomApi,
+  LengthValue,
+} from '../../types';
 import {
   toKeyframeValue,
   parseDirection,
-  parseLength,
+  parseLengthLazy,
   getEntranceFill,
   suffixNames,
   suffixCustomProperties,
@@ -10,8 +16,19 @@ import {
 import { FOUR_DIRECTIONS } from '../../consts';
 
 const ROTATION_ANGLE = 80;
-const DEFAULT_DIRECTION: EffectFourDirections = 'right';
-const DEFAULT_DEPTH = { value: 200, unit: 'px' };
+
+const DEFAULTS: Required<ArcIn> = {
+  type: 'ArcIn',
+  depth: { value: 100, unit: 'px' },
+  from: 'right',
+  perspective: 800,
+};
+
+export const schema = {
+  depth: { type: 'length', default: DEFAULTS.depth },
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.from },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+};
 
 const DIRECTION_MAP: Record<EffectFourDirections, { x: number; y: number; sign: number }> = {
   top: { x: 1, y: 0, sign: 1 },
@@ -30,24 +47,23 @@ export function getNames(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ArcIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
+  const from = parseDirection(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from);
 
-  const depth = parseLength(namedEffect.depth, DEFAULT_DEPTH);
-  const { perspective = 800 } = namedEffect;
+  const depth = parseLengthLazy(namedEffect.depth, DEFAULTS.depth as LengthValue);
+  const { perspective = DEFAULTS.perspective } = namedEffect;
   const [fadeIn, arcIn] = getNames(options);
 
   const easing = options.easing || 'quintInOut';
 
-  const { x, y, sign } = DIRECTION_MAP[direction];
-  const depthValue = `${depth.value}${depth.unit === 'percentage' ? '%' : depth.unit}`;
+  const { x, y, sign } = DIRECTION_MAP[from];
 
   const custom = {
     '--motion-perspective': `${perspective}px`,
     '--motion-arc-x': `${x}`,
     '--motion-arc-y': `${y}`,
     '--motion-arc-sign': `${sign}`,
-    '--motion-depth-negative': `calc(-1 * ${depthValue} / 2)`,
-    '--motion-depth-positive': `calc(${depthValue} / 2)`,
+    '--motion-depth-negative': `calc(-1 * ${depth})`,
+    '--motion-depth-positive': depth,
   };
 
   const animations = [

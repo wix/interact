@@ -1,4 +1,4 @@
-import type { TimeAnimationOptions, FloatIn, EffectFourDirections } from '../../types';
+import type { TimeAnimationOptions, FloatIn } from '../../types';
 import {
   toKeyframeValue,
   parseDirection,
@@ -8,7 +8,14 @@ import {
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'left';
+const DEFAULTS: Required<FloatIn> = {
+  type: 'FloatIn',
+  from: 'left',
+};
+
+export const schema = {
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.from },
+};
 
 export function getNames(options: TimeAnimationOptions) {
   return suffixNames(['motion-floatIn', 'motion-fadeIn'], options.suffix);
@@ -27,9 +34,9 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as FloatIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
+  const from = parseDirection(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from);
   const [floatIn, fadeIn] = getNames(options);
-  const fromParams = DIRECTION_MAP[direction];
+  const fromParams = DIRECTION_MAP[from];
 
   const translateX = fromParams.dx * fromParams.distance;
   const translateY = fromParams.dy * fromParams.distance;

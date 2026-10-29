@@ -36,13 +36,13 @@ describe('FlipIn', () => {
 
   test('FlipIn animation with custom values', () => {
     const easing = 'backIn';
-    const direction = 'right';
+    const direction = 'horizontal';
     const mockOptions = {
       ...baseMockOptions,
       easing,
       namedEffect: {
         direction,
-        initialRotate: 50,
+        angle: 50,
       } as FlipInType,
     };
 
@@ -55,7 +55,7 @@ describe('FlipIn', () => {
         easing,
         keyframes: [
           {
-            transform: `perspective(800px) rotate(var(--motion-rotate, 0deg)) rotateX(var(--motion-rotate-x, 0deg)) rotateY(var(--motion-rotate-y, 50deg))`,
+            transform: `perspective(800px) rotate(var(--motion-rotate, 0deg)) rotateX(var(--motion-rotate-x, 0deg)) rotateY(var(--motion-rotate-y, -50deg))`,
           },
           {
             transform: `perspective(800px) rotate(var(--motion-rotate, 0deg)) rotateX(0deg) rotateY(0deg)`,
@@ -108,13 +108,13 @@ describe('FlipIn', () => {
 
   test('FlipIn style with custom values', () => {
     const easing = 'backIn';
-    const direction = 'right';
+    const direction = 'horizontal';
     const mockOptions = {
       ...baseMockOptions,
       easing,
       namedEffect: {
         direction,
-        initialRotate: 50,
+        angle: 50,
       } as FlipInType,
     };
 
@@ -131,11 +131,11 @@ describe('FlipIn', () => {
         custom: {
           '--motion-perspective': '800px',
           '--motion-rotate-x': '0deg',
-          '--motion-rotate-y': '50deg',
+          '--motion-rotate-y': '-50deg',
         },
         keyframes: [
           {
-            transform: `perspective(var(--motion-perspective)) rotate(var(--motion-rotate, 0deg)) rotateX(var(--motion-rotate-x, 0deg)) rotateY(var(--motion-rotate-y, 50deg))`,
+            transform: `perspective(var(--motion-perspective)) rotate(var(--motion-rotate, 0deg)) rotateX(var(--motion-rotate-x, 0deg)) rotateY(var(--motion-rotate-y, -50deg))`,
           },
           {
             transform: `perspective(var(--motion-perspective)) rotate(var(--motion-rotate, 0deg)) rotateX(0deg) rotateY(0deg)`,
