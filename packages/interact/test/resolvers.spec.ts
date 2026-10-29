@@ -201,23 +201,23 @@ describe('css resolvers', () => {
           ),
         ).toBeNull();
       });
-      it('should return null for pointerMove with namedEffect', () => {
-        expect(
-          resolveEffectForCSS(
-            { namedEffect: { type: 'BlurMouse' } },
-            { ...BASE_INTERACTION, trigger: 'pointerMove' },
-            EMPTY_CONFIG,
-          ),
-        ).toBeNull();
+      it('should resolve pointerMove with namedEffect without its animation, as it still overrides', () => {
+        const result = resolveEffectForCSS(
+          { namedEffect: { type: 'BlurMouse' } },
+          { ...BASE_INTERACTION, trigger: 'pointerMove' },
+          EMPTY_CONFIG,
+        );
+        expect(result).toMatchObject({ key: 'interactionKey' });
+        expect(result).not.toHaveProperty('namedEffect');
       });
-      it('should return null for pointerMove with customEffect', () => {
-        expect(
-          resolveEffectForCSS(
-            { customEffect: () => {} },
-            { ...BASE_INTERACTION, trigger: 'pointerMove' },
-            EMPTY_CONFIG,
-          ),
-        ).toBeNull();
+      it('should resolve pointerMove with customEffect without its animation, as it still overrides', () => {
+        const result = resolveEffectForCSS(
+          { customEffect: () => {} },
+          { ...BASE_INTERACTION, trigger: 'pointerMove' },
+          EMPTY_CONFIG,
+        );
+        expect(result).toMatchObject({ key: 'interactionKey' });
+        expect(result).not.toHaveProperty('customEffect');
       });
       it('should use effectId as keyframes name if name does not exist and has reference', () => {
         const result = resolveEffectForCSS({ effectId: 'effectId' }, BASE_INTERACTION, {

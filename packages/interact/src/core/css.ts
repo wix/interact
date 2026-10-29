@@ -55,7 +55,6 @@ export const DEFAULT_INITIAL = [
 type AnimationPropertyName = (typeof LIST_ANIMATION_PROPERTY_NAMES)[number];
 
 type ListCounters = ListSlots & {
-  slotsInInteraction: number;
   touched: boolean;
 };
 type SlotUsage = Record<ListKind, boolean>;
@@ -65,7 +64,6 @@ type TargetContext = {
   key: string;
   childSelector?: string;
   partSelectors: Set<string>;
-  assigned: Set<string>;
   animation: ListCounters;
   transition: ListCounters;
   timeline: ListCounters;
@@ -82,6 +80,8 @@ type GenerateContext = {
   keyframeSlots: Map<string, string>;
   // view timelines whose targets may be outside their source's subtree
   scopedTimelines: string[];
+  // number of targets with effects overriding each other, each naming its active effect property
+  cascades: number;
   // only collecting the effects' list entries for getKeyframeSlots, without generating CSS
   collectSlots: boolean;
   useFirstChild: boolean;
@@ -92,7 +92,6 @@ function createTargetContext(key: string, childSelector?: string): TargetContext
   const createListCounters = (): ListCounters => ({
     listIndex: 0,
     slotCursor: 0,
-    slotsInInteraction: 0,
     slotsInSequence: 0,
     touched: false,
   });
@@ -101,7 +100,6 @@ function createTargetContext(key: string, childSelector?: string): TargetContext
     key,
     childSelector,
     partSelectors: new Set<string>(),
-    assigned: new Set<string>(),
     animation: createListCounters(),
     transition: createListCounters(),
     timeline: createListCounters(),
@@ -179,20 +177,13 @@ function getSlotUsage(sequence: ResolvedSequence): Map<string, SlotUsage> {
   );
 }
 
-function endSequence(target: TargetContext): void {
-  LIST_KINDS.forEach((kind) => {
-    const counters = target[kind];
-    counters.slotsInInteraction = Math.max(counters.slotsInInteraction, counters.slotsInSequence);
-    counters.slotsInSequence = 0;
-  });
-}
-
-function endInteraction(target: TargetContext): void {
+// the effects of an interaction and each of its sequences play together, so each writes its own list entry
+function endListEntry(target: TargetContext): void {
   LIST_KINDS.forEach((kind) => {
     const counters = target[kind];
     counters.listIndex += counters.touched ? 1 : 0;
-    counters.slotCursor += counters.slotsInInteraction;
-    counters.slotsInInteraction = 0;
+    counters.slotCursor += counters.slotsInSequence;
+    counters.slotsInSequence = 0;
     counters.touched = false;
   });
 }
@@ -280,7 +271,7 @@ function effectToCSS(
   keyframes: MotionKeyframeEffect[];
   wrote: Record<ListKind, boolean>;
 } {
-  const { assigned, childSelector, partSelectors } = target;
+  const { childSelector, partSelectors } = target;
   const wrote: Record<ListKind, boolean> = { animation: false, transition: false, timeline: false };
   const {
     key,
@@ -342,9 +333,6 @@ function effectToCSS(
       ),
     );
 
-    // TODO - part animations introduce a problem with cascade where to override it you must override all parts.
-    // Currently this is in play only for background scroll effects, which are not mixed with other effects in cascade,
-    // but this should be fixed. style queries may help in handling this and cascade in general by setting --active-effect-id and querying it by order.
     Object.entries(animationsByPart).forEach(([part, animations]) => {
       const animationDeclarations = LIST_ANIMATION_PROPERTY_NAMES.map((propertyName) => ({
         _listPropertyName: propertyName,
@@ -358,10 +346,8 @@ function effectToCSS(
           })
           .join(', '),
       })).filter(
-        ({ _listPropertyName, name, value }) =>
-          value !== LIST_PROPERTY_FALLBACKS[_listPropertyName] || assigned.has(name),
+        ({ _listPropertyName, value }) => value !== LIST_PROPERTY_FALLBACKS[_listPropertyName],
       );
-      animationDeclarations.forEach(({ name }) => assigned.add(name));
       wrote.animation = wrote.animation || animationDeclarations.length > 0;
 
       const childOrPartSelector = part ? `[data-motion-part~="${part}"]` : childSelector;
@@ -407,12 +393,8 @@ function effectToCSS(
     const transitions = transitionEffectToTransitionsList(effect);
 
     // declaring transition custom property
-    if (transitions.length || assigned.has(customProps.transition)) {
-      declarations.push({
-        name: customProps.transition,
-        value: transitions.join(', ') || LIST_PROPERTY_FALLBACKS.transition,
-      });
-      assigned.add(customProps.transition);
+    if (transitions.length) {
+      declarations.push({ name: customProps.transition, value: transitions.join(', ') });
       wrote.transition = true;
     }
 
@@ -425,16 +407,6 @@ function effectToCSS(
       states: [effectId],
       declarations: properties,
     });
-  } else {
-    // setting off animation custom properties
-    declarations.push(
-      ...LIST_ANIMATION_PROPERTY_NAMES.filter((propertyName) =>
-        assigned.has(customProps[propertyName]),
-      ).map((propertyName) => ({
-        name: customProps[propertyName],
-        value: LIST_PROPERTY_FALLBACKS[propertyName],
-      })),
-    );
   }
 
   return { rules: rules.filter((r) => r.declarations.length), keyframes, wrote };
@@ -515,6 +487,53 @@ function parseEffect(
   return rules;
 }
 
+/**
+ * Effects of an interaction on the same target override each other, and the last one whose media conditions hold
+ * wins. Each effect's rules apply only while it's the active effect, which rules on the root set in that same order,
+ * so nothing of an overridden effect leaks, e.g. its other parts or transition states.
+ */
+function parseEffects(
+  ctx: GenerateContext,
+  effects: ResolvedEffect[],
+  trigger: TriggerVariant,
+  visited: Set<string>,
+): CSSRuleData[] {
+  const groups = new Map<string, ResolvedEffect[]>();
+  effects.forEach((effect) => {
+    const targetHash = getElementHash(effect);
+    groups.set(targetHash, [...(groups.get(targetHash) || []), effect]);
+  });
+  const activeProps = new Map<string, string>();
+
+  return effects.flatMap((effect) => {
+    const rules = parseEffect(ctx, effect, trigger, visited);
+    const targetHash = getElementHash(effect);
+    const group = groups.get(targetHash)!;
+    if (group.length === 1 || ctx.collectSlots) {
+      return rules;
+    }
+
+    if (!activeProps.has(targetHash)) {
+      activeProps.set(targetHash, getCustomPropName('active', ctx.cascades++));
+    }
+    const name = activeProps.get(targetHash)!;
+    const value = `c${group.indexOf(effect)}`;
+
+    return [
+      {
+        key: effect.key,
+        selector: ':root',
+        media: getFullPredicateByType(effect.conditions, ctx.configConditions, 'media'),
+        declarations: [{ name, value }],
+      },
+      ...rules.map(({ media: _, ...rule }) => ({
+        ...rule,
+        container: `style(${name}: ${value})`,
+      })),
+    ];
+  });
+}
+
 function parseSequence(
   ctx: GenerateContext,
   sequence: ResolvedSequence,
@@ -540,11 +559,10 @@ function parseSequence(
 
     const rule = buildSequenceListsRule(current, conditions, ctx.configConditions);
     if (rule) {
-      rule.declarations.forEach(({ name }) => current.assigned.add(name));
       cssRules.push(rule);
     }
 
-    endSequence(current);
+    endListEntry(current);
   });
 
   return cssRules;
@@ -591,9 +609,8 @@ function parseInteraction(
     })
     .filter((effect) => effect !== null);
 
-  cssRules.push(
-    ...resolvedEffects.flatMap((effect) => parseEffect(ctx, effect, motionTrigger, visited)),
-  );
+  cssRules.push(...parseEffects(ctx, resolvedEffects, motionTrigger, visited));
+  visited.forEach((targetHash) => endListEntry(ctx.targetsMap.get(targetHash)!));
 
   const resolvedSequences = sequences
     .map((sequence, seqIndex) =>
@@ -618,8 +635,6 @@ function parseInteraction(
   if (trigger === 'viewProgress' && visited.size > 1) {
     ctx.scopedTimelines.push(`--${motionTrigger.id}`);
   }
-
-  visited.forEach((targetHash) => endInteraction(ctx.targetsMap.get(targetHash)!));
 
   return cssRules;
 }
@@ -652,6 +667,7 @@ function parseConfig(
     keyframesMap: new Map<string, Keyframe[]>(),
     keyframeSlots: collectSlots ? new Map() : getKeyframeSlots(config),
     scopedTimelines: [],
+    cascades: 0,
     collectSlots,
     useFirstChild,
     plugins,

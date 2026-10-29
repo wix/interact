@@ -82,9 +82,12 @@ export function resolveEffectForCSS(
   const initial = shouldUseInitial(interaction, rest);
 
   if (namedEffect) {
+    if (!namedEffect.type) {
+      return null;
+    }
     // With the 2D nature of pointerMove namedEffects, there is no easy way to mimic the
-    // behavior with CSSAnimations.
-    return isPointerMove || !namedEffect.type ? null : { namedEffect, initial, ...rest };
+    // behavior with CSSAnimations, but they still override other effects on their target.
+    return isPointerMove ? { initial, ...rest } : { namedEffect, initial, ...rest };
   } else if (keyframeEffect) {
     // Need to verify validity of name for CSS?
     if (!keyframeEffect.name) {
@@ -93,7 +96,7 @@ export function resolveEffectForCSS(
     }
     return { keyframeEffect, initial, ...rest };
   } else if (customEffect) {
-    return isPointerMove ? null : { initial, ...rest };
+    return { initial, ...rest };
   } else if (transition) {
     return { transition, initial, ...rest };
   } else {

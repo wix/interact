@@ -998,7 +998,7 @@ describe('css._generate', () => {
       expect(generate(config)).toBe('');
     });
 
-    it('should reset only the slots a previous effect on the same target set to a non-default', () => {
+    it('should not reset the slots of an overridden effect, since it applies only while active', () => {
       const config: InteractConfig = {
         effects: {},
         interactions: [
@@ -1022,14 +1022,29 @@ describe('css._generate', () => {
 
       const { cssRules } = _generate(config);
 
-      const offRule = cssRules.find((r) =>
-        r.declarations.some((d) => isAnimationProp(d.name) && d.value === 'none'),
-      );
-      expect(offRule).toBeDefined();
-
-      expect(findDecl(offRule!.declarations, (d) => isCompositionProp(d.name))).toBeUndefined();
-      expect(findDecl(offRule!.declarations, (d) => isTimelineProp(d.name))).toBeUndefined();
-      expect(findDecl(offRule!.declarations, (d) => isRangeProp(d.name))).toBeUndefined();
+      expect(
+        cssRules.map(({ selector, container, declarations }) => ({
+          selector,
+          container,
+          declarations,
+        })),
+      ).toEqual([
+        {
+          selector: ':root',
+          container: undefined,
+          declarations: [{ name: '--actv-0', value: 'c0' }],
+        },
+        {
+          selector: undefined,
+          container: 'style(--actv-0: c0)',
+          declarations: [expect.objectContaining({ name: '--anm-0' })],
+        },
+        {
+          selector: ':root',
+          container: undefined,
+          declarations: [{ name: '--actv-0', value: 'c1' }],
+        },
+      ]);
     });
 
     it('should not reset a slot an earlier interaction set, since the later interaction gets its own slot', () => {
@@ -1818,7 +1833,7 @@ describe('css._generate', () => {
       expect([...keyframes.keys()]).toEqual(['test-move', 'test-move-1', 'test-move-2']);
     });
 
-    it("keeps a sequence's only effect on a target in the interaction's slot, as they share its list entry", () => {
+    it("gives a sequence's only effect on a target its own slot, as it plays with the interaction's effects", () => {
       const { keyframes } = _generate({
         interactions: [
           {
@@ -1830,7 +1845,7 @@ describe('css._generate', () => {
         ],
       });
 
-      expect([...keyframes.keys()]).toEqual(['test-move']);
+      expect([...keyframes.keys()]).toEqual(['test-move', 'test-move-1']);
     });
 
     it('slots effects the same way at runtime', () => {
@@ -1972,6 +1987,275 @@ describe('css._generate', () => {
       expect(listsRule).toContain(
         '[data-interact-key="a"] > :first-child, [data-interact-key="a"] [data-motion-part~="MEDIA_WRAPPER"], [data-interact-key="a"] [data-motion-part~="MEDIA"] {',
       );
+    });
+  });
+
+  describe('effects overriding each other', () => {
+    const conditions = {
+      narrow: { type: 'media' as const, predicate: '(max-width: 600px)' },
+      on: { type: 'selector' as const, predicate: '.on' },
+    };
+    const kf = (effectId: string, extra = {}) => ({
+      effectId,
+      duration: 300,
+      keyframeEffect: { name: effectId, keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+      ...extra,
+    });
+    const activeRules = (cssRules: CSSRuleData[]) =>
+      cssRules
+        .filter(({ selector }) => selector === ':root')
+        .map(({ media, declarations }) => ({ media, ...declarations[0] }));
+
+    it('sets the active effect of a target in the order of its effects, by their media conditions only', () => {
+      const { cssRules } = _generate({
+        conditions,
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              kf('a'),
+              kf('b', { conditions: ['narrow'] }),
+              kf('c', { conditions: ['on'] }),
+            ],
+          },
+        ],
+      });
+
+      expect(activeRules(cssRules)).toEqual([
+        { media: '', name: '--actv-0', value: 'c0' },
+        { media: '((max-width: 600px))', name: '--actv-0', value: 'c1' },
+        { media: '', name: '--actv-0', value: 'c2' },
+      ]);
+    });
+
+    it("applies an effect's rules only while it's active, keeping its selector conditions", () => {
+      const { cssRules } = _generate({
+        conditions,
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [kf('a'), kf('b', { conditions: ['narrow', 'on'] })],
+          },
+        ],
+      });
+
+      const ruleOf = (value: string) =>
+        cssRules.find(({ declarations }) => declarations[0].value.toString().startsWith(value))!;
+      expect(ruleOf('a ')).toMatchObject({
+        container: 'style(--actv-0: c0)',
+        selectorCondition: '',
+      });
+      expect(ruleOf('b ')).toMatchObject({
+        container: 'style(--actv-0: c1)',
+        selectorCondition: ':is(.on)',
+      });
+      expect(ruleOf('b ').media).toBeUndefined();
+    });
+
+    it("applies a transition's state only while it's the active effect", () => {
+      const { cssRules } = _generate({
+        conditions,
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            effects: [
+              kf('a'),
+              {
+                effectId: 'b',
+                conditions: ['narrow'],
+                transition: { duration: 200, styleProperties: [{ name: 'opacity', value: '0' }] },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(cssRules.find(({ states }) => states)).toMatchObject({
+        states: ['b'],
+        container: 'style(--actv-0: c1)',
+        declarations: [{ name: 'opacity', value: '0' }],
+      });
+      expect(
+        cssRules.find(({ declarations }) => isTransitionProp(declarations[0].name)),
+      ).toMatchObject({
+        container: 'style(--actv-0: c1)',
+      });
+    });
+
+    it("applies all parts of an effect only while it's active", () => {
+      registerEffects({
+        TestParts: {
+          web: (options: object) => [
+            { ...options, name: 'clip', part: 'MEDIA_CLIP', keyframes: [{ opacity: 0 }] },
+            { ...options, name: 'wrap', part: 'MEDIA_WRAPPER', keyframes: [{ opacity: 0 }] },
+          ],
+          style: (options: object) => [
+            { ...options, name: 'clip', part: 'MEDIA_CLIP', keyframes: [{ opacity: 0 }] },
+            { ...options, name: 'wrap', part: 'MEDIA_WRAPPER', keyframes: [{ opacity: 0 }] },
+          ],
+          getNames: () => ['clip', 'wrap'],
+        },
+        TestPart: {
+          web: (options: object) => [
+            { ...options, name: 'par', part: 'MEDIA_WRAPPER', keyframes: [{ opacity: 0 }] },
+          ],
+          style: (options: object) => [
+            { ...options, name: 'par', part: 'MEDIA_WRAPPER', keyframes: [{ opacity: 0 }] },
+          ],
+          getNames: () => ['par'],
+        },
+      } as any);
+
+      const { cssRules } = _generate({
+        conditions,
+        interactions: [
+          {
+            key: 'bg',
+            trigger: 'viewProgress',
+            effects: [
+              { effectId: 'a', namedEffect: { type: 'TestParts' } as any },
+              { effectId: 'b', namedEffect: { type: 'TestPart' } as any, conditions: ['narrow'] },
+            ],
+          },
+        ],
+      });
+
+      const animations = cssRules
+        .filter(({ declarations }) => declarations.some(({ name }) => name === '--anm-0'))
+        .map(({ childSelector, container, declarations }) => [
+          childSelector,
+          container,
+          declarations
+            .find(({ name }) => name === '--anm-0')!
+            .value.toString()
+            .split(' ')[0],
+        ]);
+      expect(animations).toEqual([
+        ['[data-motion-part~="MEDIA_CLIP"]', 'style(--actv-0: c0)', 'clip'],
+        ['[data-motion-part~="MEDIA_WRAPPER"]', 'style(--actv-0: c0)', 'wrap'],
+        ['[data-motion-part~="MEDIA_WRAPPER"]', 'style(--actv-0: c1)', 'par'],
+      ]);
+    });
+
+    it('lets an effect CSS cannot animate override the others, by applying none of them', () => {
+      const { cssRules } = _generate({
+        conditions,
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'pointerMove',
+            effects: [
+              kf('a'),
+              { namedEffect: { type: 'TestMouse' } as any, conditions: ['narrow'] },
+            ],
+          },
+        ],
+      });
+
+      expect(activeRules(cssRules)).toEqual([
+        { media: '', name: '--actv-0', value: 'c0' },
+        { media: '((max-width: 600px))', name: '--actv-0', value: 'c1' },
+      ]);
+      expect(cssRules.filter(({ selector }) => !selector)).toEqual([
+        expect.objectContaining({ container: 'style(--actv-0: c0)' }),
+      ]);
+    });
+
+    it('names the active effect property of each target', () => {
+      const { cssRules } = _generate({
+        interactions: [
+          { key: 'a', trigger: 'click', effects: [kf('a1'), kf('a2')] },
+          { key: 'b', trigger: 'click', effects: [kf('b1'), kf('b2', { key: 'c' }), kf('b3')] },
+        ],
+      });
+
+      expect(activeRules(cssRules).map(({ name, value }) => `${name}: ${value}`)).toEqual([
+        '--actv-0: c0',
+        '--actv-0: c1',
+        '--actv-1: c0',
+        '--actv-1: c1',
+      ]);
+    });
+
+    it('does not condition the rules of an effect no other effect overrides', () => {
+      const { cssRules } = _generate({
+        conditions,
+        interactions: [
+          { key: 'el', trigger: 'click', effects: [kf('a', { conditions: ['narrow'] })] },
+        ],
+      });
+
+      expect(activeRules(cssRules)).toEqual([]);
+      expect(cssRules).toHaveLength(1);
+      expect(cssRules[0].media).toBe('((max-width: 600px))');
+      expect(cssRules[0].container).toBeUndefined();
+    });
+
+    it('nests the container query of an active effect inside its media query', () => {
+      const css = generate({
+        conditions,
+        interactions: [
+          { key: 'el', trigger: 'click', effects: [kf('a'), kf('b', { conditions: ['narrow'] })] },
+        ],
+      });
+
+      expect(css).toContain(':root {\n  --actv-0: c0;\n}');
+      expect(css).toContain('@media ((max-width: 600px)) {\n:root {\n  --actv-0: c1;\n}\n}');
+      expect(css).toContain(
+        '@container style(--actv-0: c1) {\n[data-interact-key="el"] > :first-child {\n  --anm-0: b ',
+      );
+    });
+  });
+
+  describe('sequences playing with effects', () => {
+    const kf = (effectId: string) => ({
+      effectId,
+      duration: 300,
+      keyframeEffect: { name: effectId, keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+    });
+    const animationsOf = (cssRules: CSSRuleData[]) =>
+      cssRules.flatMap(({ declarations }) =>
+        declarations
+          .filter(({ name }) => /^--anm-\d/.test(name))
+          .map(({ name, value }) => `${name}: ${value.toString().split(' ')[0]}`),
+      );
+
+    it("writes a sequence's list entry next to the interaction's effects", () => {
+      const { cssRules, listsRule } = _generate({
+        interactions: [
+          { key: 'el', trigger: 'click', effects: [kf('a')], sequences: [{ effects: [kf('s')] }] },
+        ],
+      });
+
+      expect(animationsOf(cssRules)).toEqual(['--anm-0: a', '--anm-1: s']);
+      expect(
+        parseListsRule(listsRule).declarations.find(({ name }) => name === 'animation')!.value,
+      ).toBe('var(--anm-0), var(--anm-1)');
+    });
+
+    it('writes each sequence of an interaction in its own list entry and slots', () => {
+      const { cssRules } = _generate({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [{ effects: [kf('s1'), kf('s2')] }, { effects: [kf('s3'), kf('s4')] }],
+          },
+        ],
+      });
+
+      const lists = cssRules.flatMap(({ declarations }) =>
+        declarations
+          .filter(({ name }) => /^--anm-\d/.test(name))
+          .map(({ name, value }) => `${name}: ${value}`),
+      );
+      expect(lists).toEqual([
+        '--anm-0: var(--anm-slot-0), var(--anm-slot-1)',
+        '--anm-1: var(--anm-slot-2), var(--anm-slot-3)',
+      ]);
     });
   });
 

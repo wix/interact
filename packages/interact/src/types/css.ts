@@ -24,9 +24,12 @@ export type ListPropertyName =
 
 export type CSSRuleData = {
   key: string;
+  // replaces the key's selector
+  selector?: string;
   childSelector?: string;
   declarations: { name: string; value: string | number; important?: boolean }[];
   media?: string;
+  container?: string;
   states?: string[];
   selectorCondition?: string;
   selectorSuffix?: string;
