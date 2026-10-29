@@ -811,4 +811,65 @@ describe('viewEnter handler', () => {
       expect(target.dataset.interactEnter).toBe('done');
     });
   });
+
+  describe('WAAPI animation finish handling', () => {
+    // A variant added after a media change plays through WAAPI, while its generated CSS holds the element
+    // at the first keyframe until data-interact-enter is "done".
+    it('should set interactEnter to done when a WAAPI animation finishes', async () => {
+      let resolveFinished: () => void;
+      const finishedPromise = new Promise<void>((resolve) => {
+        resolveFinished = resolve;
+      });
+
+      const waapiAnimation = {
+        play: vi.fn(),
+        ready: Promise.resolve(),
+        finished: finishedPromise,
+      };
+
+      const mockAnimationGroup = {
+        animations: [waapiAnimation],
+        isCSS: false,
+        ready: Promise.resolve(),
+        async play(callback?: () => void) {
+          for (const a of this.animations) {
+            a.play();
+          }
+          await Promise.all(this.animations.map((a: any) => a.ready));
+          callback?.();
+        },
+        async onFinish(callback: () => void) {
+          await Promise.all(this.animations.map((a: any) => a.finished));
+          callback();
+        },
+        async onAbort() {},
+        cancel: vi.fn(),
+        pause: vi.fn(),
+        reverse: vi.fn(),
+        progress: vi.fn(),
+        persist: vi.fn(),
+        playState: 'idle',
+      };
+
+      viewEnterHandler.add(
+        element,
+        target,
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'once' },
+        {},
+        { animation: mockAnimationGroup as any },
+      );
+
+      getMainObserverCallback()([createEntry({ isIntersecting: true })]);
+
+      // Wait for play's async callback to be invoked
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(target.dataset.interactEnter).toBe('start');
+
+      resolveFinished!();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(target.dataset.interactEnter).toBe('done');
+    });
+  });
 });
