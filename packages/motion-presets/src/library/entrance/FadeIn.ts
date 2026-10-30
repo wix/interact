@@ -2,6 +2,8 @@ import { TimeAnimationOptions } from '../../types';
 
 import { getEntranceFill, suffixNames, suffixCustomProperties } from '../../utils';
 
+export const schema = {};
+
 export function getNames(options: TimeAnimationOptions) {
   return suffixNames(['motion-fadeIn'], options.suffix);
 }

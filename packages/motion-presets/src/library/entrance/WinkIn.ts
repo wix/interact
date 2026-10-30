@@ -9,7 +9,14 @@ import type { TimeAnimationOptions, WinkIn } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
 
 const DIRECTIONS = AXIS_DIRECTIONS;
-const DEFAULT_DIRECTION: (typeof DIRECTIONS)[number] = 'horizontal';
+const DEFAULTS: Required<WinkIn> = {
+  type: 'WinkIn',
+  direction: 'horizontal',
+};
+
+export const schema = {
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: DEFAULTS.direction },
+};
 
 export function getNames(options: TimeAnimationOptions) {
   return suffixNames(['motion-fadeIn', 'motion-winkInClip', 'motion-winkInRotate'], options.suffix);
@@ -26,7 +33,7 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions) {
   const namedEffect = options.namedEffect as WinkIn;
-  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULT_DIRECTION);
+  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULTS.direction);
   const [fadeIn, winkInClip, winkInRotate] = getNames(options);
 
   const { scaleX, scaleY } = PARAM_MAP[direction];

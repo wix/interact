@@ -66,7 +66,7 @@ describe('Spin', () => {
               rotate: 'calc(var(--motion-rotate, 0deg) + -360deg)',
             },
             {
-              offset: 0.67,
+              offset: 2 / 3,
               rotate: 'var(--motion-rotate, 0deg)',
             },
           ],
@@ -213,6 +213,17 @@ describe('Spin', () => {
       const result = SpinAnimation.style(mockOptions);
 
       expect(result).toMatchObject(expectedResult);
+    });
+  });
+
+  test('schema', () => {
+    expect(SpinAnimation.schema).toEqual({
+      direction: {
+        type: 'enum',
+        values: ['clockwise', 'counter-clockwise'],
+        default: 'clockwise',
+      },
+      iterationDelay: { type: 'number', min: 0, default: 0 },
     });
   });
 });

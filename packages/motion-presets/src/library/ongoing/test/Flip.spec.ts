@@ -57,18 +57,18 @@ describe('Flip', () => {
             {
               offset: 0,
               transform:
-                'perspective(800px) rotateZ(var(--motion-rotate, 0deg)) rotate3d(1, 0, 0, 0deg)',
+                'perspective(800px) rotateZ(var(--motion-rotate, 0deg)) rotate3d(-1, 0, 0, 0deg)',
               easing: 'linear',
             },
             {
               offset: 1,
               transform:
-                'perspective(800px) rotateZ(var(--motion-rotate, 0deg)) rotate3d(1, 0, 0, 360deg)',
+                'perspective(800px) rotateZ(var(--motion-rotate, 0deg)) rotate3d(-1, 0, 0, 360deg)',
             },
             {
               offset: 1,
               transform:
-                'perspective(800px) rotateZ(var(--motion-rotate, 0deg)) rotate3d(1, 0, 0, 360deg)',
+                'perspective(800px) rotateZ(var(--motion-rotate, 0deg)) rotate3d(-1, 0, 0, 360deg)',
             },
           ],
         },
@@ -173,7 +173,7 @@ describe('Flip', () => {
           easing: 'linear',
           custom: {
             '--motion-perspective': '800px',
-            '--motion-rotate-x': '1',
+            '--motion-rotate-x': '-1',
             '--motion-rotate-y': '0',
           },
           keyframes: [
@@ -245,6 +245,14 @@ describe('Flip', () => {
       const result = FlipAnimation.style(mockOptions);
 
       expect(result).toMatchObject(expectedResult);
+    });
+  });
+
+  test('schema', () => {
+    expect(FlipAnimation.schema).toEqual({
+      direction: { type: 'enum', values: ['horizontal', 'vertical'], default: 'horizontal' },
+      iterationDelay: { type: 'number', min: 0, default: 0 },
+      perspective: { type: 'number', min: 0, default: 800 },
     });
   });
 });

@@ -15,26 +15,58 @@ describe('TiltScroll', () => {
       const expectedResult = [
         {
           fill: 'backwards',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0px',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           keyframes: [
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(-10deg) rotateY(-25deg)',
+              transform:
+                'perspective(400px) translateY(calc(0 * (50% + 50vh))) rotateX(-10deg) rotateY(-25deg)',
             },
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(0deg) rotateY(0deg)',
+              transform:
+                'perspective(400px) translateY(calc(0 * (50% + 50vh))) rotateX(0deg) rotateY(0deg)',
             },
           ],
         },
         {
           fill: 'backwards',
-          easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-          startOffsetAdd: '0vh',
-          endOffsetAdd: '0px',
+          easing: 'linear',
           composite: 'add',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           keyframes: [
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + 25deg))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
             },
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
@@ -57,27 +89,61 @@ describe('TiltScroll', () => {
       const expectedResult = [
         {
           fill: 'forwards',
-          startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
           keyframes: [
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(0deg) rotateY(0deg)',
+              transform:
+                'perspective(400px) translateY(calc(0 * (50% + 50vh))) rotateX(0deg) rotateY(0deg)',
             },
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(-10deg) rotateY(-25deg)',
+              transform:
+                'perspective(400px) translateY(calc(0 * (50% + 50vh))) rotateX(-10deg) rotateY(-25deg)',
             },
           ],
         },
         {
           fill: 'forwards',
-          startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          easing: 'linear',
+          composite: 'add',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
           keyframes: [
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
             },
             {
-              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 25deg))',
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + -25deg))',
             },
           ],
         },
@@ -91,34 +157,71 @@ describe('TiltScroll', () => {
     test('custom range - continuous', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        fill: 'both',
         namedEffect: { range: 'continuous' } as TiltScrollType,
       };
 
       const expectedResult = [
         {
           fill: 'both',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
           keyframes: [
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(-10deg) rotateY(-25deg)',
+              transform:
+                'perspective(400px) translateY(calc(0 * (100% + 100vh))) rotateX(-10deg) rotateY(-25deg)',
             },
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(10deg) rotateY(12.5deg)',
+              transform:
+                'perspective(400px) translateY(calc(0 * (100% + 100vh))) rotateX(10deg) rotateY(25deg)',
             },
           ],
         },
         {
           fill: 'both',
+          easing: 'linear',
+          composite: 'add',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
           keyframes: [
             {
-              transform: 'rotate(calc(var(--motion-rotate, 0deg) + -25deg))',
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 25deg))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
             },
             {
-              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 31.25deg))',
+              transform: 'rotate(var(--motion-rotate, 0deg))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
+            },
+            {
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + -25deg))',
             },
           ],
         },
@@ -129,27 +232,67 @@ describe('TiltScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - clockwise', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TiltScrollType,
+        namedEffect: { direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           keyframes: [
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(-10deg) rotateY(-25deg)',
+              transform:
+                'perspective(400px) translateY(calc(0 * (50% + 50vh))) rotateX(-10deg) rotateY(-25deg)',
             },
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(0deg) rotateY(0deg)',
+              transform:
+                'perspective(400px) translateY(calc(0 * (50% + 50vh))) rotateX(0deg) rotateY(0deg)',
             },
           ],
         },
         {
+          fill: 'backwards',
+          easing: 'linear',
+          composite: 'add',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           keyframes: [
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + -25deg))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
             },
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
@@ -163,28 +306,72 @@ describe('TiltScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom parallaxFactor', () => {
+    test('custom speed', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { parallaxFactor: 0.5 } as TiltScrollType,
+        namedEffect: { speed: 0.5 } as TiltScrollType,
       };
 
       const expectedResult = [
         {
-          startOffsetAdd: '-20vh',
-          endOffsetAdd: '0px',
+          fill: 'backwards',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: -50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '-50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           keyframes: [
             {
-              transform: 'perspective(400px) translateY(20vh) rotateX(-10deg) rotateY(-25deg)',
+              transform:
+                'perspective(400px) translateY(calc(-1 * (50% + 50vh))) rotateX(-10deg) rotateY(-25deg)',
             },
             {
-              transform: 'perspective(400px) translateY(0vh) rotateX(0deg) rotateY(0deg)',
+              transform:
+                'perspective(400px) translateY(calc(0 * (50% + 50vh))) rotateX(0deg) rotateY(0deg)',
             },
           ],
         },
         {
-          startOffsetAdd: '-20vh',
-          endOffsetAdd: '0px',
+          fill: 'backwards',
+          easing: 'linear',
+          composite: 'add',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: -50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '-50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
+          keyframes: [
+            {
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 25deg))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
+            },
+            {
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
+            },
+          ],
         },
       ];
 
@@ -204,10 +391,33 @@ describe('TiltScroll', () => {
       const expectedResult = [
         {
           fill: 'backwards',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0px',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           custom: {
             '--motion-perspective': '400px',
+            '--motion-tilt-y-from': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-y-to': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-x-from': '-10deg',
+            '--motion-tilt-x-to': '0deg',
+            '--motion-tilt-y-rot-from': '-25deg',
+            '--motion-tilt-y-rot-to': '0deg',
+            '--motion-tilt-z-from': '25deg',
+            '--motion-tilt-z-to': '0deg',
           },
           keyframes: [
             {
@@ -222,13 +432,39 @@ describe('TiltScroll', () => {
         },
         {
           fill: 'backwards',
-          easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-          startOffsetAdd: '0vh',
-          endOffsetAdd: '0px',
+          easing: 'linear',
           composite: 'add',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
+          custom: {
+            '--motion-perspective': '400px',
+            '--motion-tilt-y-from': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-y-to': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-x-from': '-10deg',
+            '--motion-tilt-x-to': '0deg',
+            '--motion-tilt-y-rot-from': '-25deg',
+            '--motion-tilt-y-rot-to': '0deg',
+            '--motion-tilt-z-from': '25deg',
+            '--motion-tilt-z-to': '0deg',
+          },
           keyframes: [
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-from)))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
             },
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-to)))',
@@ -251,10 +487,33 @@ describe('TiltScroll', () => {
       const expectedResult = [
         {
           fill: 'forwards',
-          startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
           custom: {
             '--motion-perspective': '400px',
+            '--motion-tilt-y-from': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-y-to': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-x-from': '0deg',
+            '--motion-tilt-x-to': '-10deg',
+            '--motion-tilt-y-rot-from': '0deg',
+            '--motion-tilt-y-rot-to': '-25deg',
+            '--motion-tilt-z-from': '0deg',
+            '--motion-tilt-z-to': '-25deg',
           },
           keyframes: [
             {
@@ -269,11 +528,39 @@ describe('TiltScroll', () => {
         },
         {
           fill: 'forwards',
-          startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          easing: 'linear',
+          composite: 'add',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
+          custom: {
+            '--motion-perspective': '400px',
+            '--motion-tilt-y-from': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-y-to': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-x-from': '0deg',
+            '--motion-tilt-x-to': '-10deg',
+            '--motion-tilt-y-rot-from': '0deg',
+            '--motion-tilt-y-rot-to': '-25deg',
+            '--motion-tilt-z-from': '0deg',
+            '--motion-tilt-z-to': '-25deg',
+          },
           keyframes: [
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-from)))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
             },
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-to)))',
@@ -290,17 +577,39 @@ describe('TiltScroll', () => {
     test('custom range - continuous', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        fill: 'both',
         namedEffect: { range: 'continuous' } as TiltScrollType,
       };
 
       const expectedResult = [
         {
           fill: 'both',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
           custom: {
             '--motion-perspective': '400px',
+            '--motion-tilt-y-from': 'calc(0 * (100% + 100vh))',
+            '--motion-tilt-y-to': 'calc(0 * (100% + 100vh))',
+            '--motion-tilt-x-from': '-10deg',
+            '--motion-tilt-x-to': '10deg',
+            '--motion-tilt-y-rot-from': '-25deg',
+            '--motion-tilt-y-rot-to': '25deg',
+            '--motion-tilt-z-from': '25deg',
+            '--motion-tilt-z-to': '-25deg',
           },
           keyframes: [
             {
@@ -315,11 +624,43 @@ describe('TiltScroll', () => {
         },
         {
           fill: 'both',
+          easing: 'linear',
+          composite: 'add',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 100,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '100vh',
+          custom: {
+            '--motion-perspective': '400px',
+            '--motion-tilt-y-from': 'calc(0 * (100% + 100vh))',
+            '--motion-tilt-y-to': 'calc(0 * (100% + 100vh))',
+            '--motion-tilt-x-from': '-10deg',
+            '--motion-tilt-x-to': '10deg',
+            '--motion-tilt-y-rot-from': '-25deg',
+            '--motion-tilt-y-rot-to': '25deg',
+            '--motion-tilt-z-from': '25deg',
+            '--motion-tilt-z-to': '-25deg',
+          },
           keyframes: [
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-from)))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
+            },
+            {
+              transform: 'rotate(var(--motion-rotate, 0deg))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
             },
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-to)))',
@@ -333,16 +674,42 @@ describe('TiltScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - clockwise', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TiltScrollType,
+        namedEffect: { direction: 'clockwise' } as TiltScrollType,
       };
 
       const expectedResult = [
         {
+          fill: 'backwards',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           custom: {
             '--motion-perspective': '400px',
+            '--motion-tilt-y-from': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-y-to': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-x-from': '-10deg',
+            '--motion-tilt-x-to': '0deg',
+            '--motion-tilt-y-rot-from': '-25deg',
+            '--motion-tilt-y-rot-to': '0deg',
+            '--motion-tilt-z-from': '-25deg',
+            '--motion-tilt-z-to': '0deg',
           },
           keyframes: [
             {
@@ -356,9 +723,40 @@ describe('TiltScroll', () => {
           ],
         },
         {
+          fill: 'backwards',
+          easing: 'linear',
+          composite: 'add',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 0,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '0vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
+          custom: {
+            '--motion-perspective': '400px',
+            '--motion-tilt-y-from': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-y-to': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-x-from': '-10deg',
+            '--motion-tilt-x-to': '0deg',
+            '--motion-tilt-y-rot-from': '-25deg',
+            '--motion-tilt-y-rot-to': '0deg',
+            '--motion-tilt-z-from': '-25deg',
+            '--motion-tilt-z-to': '0deg',
+          },
           keyframes: [
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-from)))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
             },
             {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-to)))',
@@ -372,18 +770,42 @@ describe('TiltScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom parallaxFactor', () => {
+    test('custom speed', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { parallaxFactor: 0.5 } as TiltScrollType,
+        namedEffect: { speed: 0.5 } as TiltScrollType,
       };
 
       const expectedResult = [
         {
-          startOffsetAdd: '-20vh',
-          endOffsetAdd: '0px',
+          fill: 'backwards',
+          easing: 'linear',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: -50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '-50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
           custom: {
             '--motion-perspective': '400px',
+            '--motion-tilt-y-from': 'calc(-1 * (50% + 50vh))',
+            '--motion-tilt-y-to': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-x-from': '-10deg',
+            '--motion-tilt-x-to': '0deg',
+            '--motion-tilt-y-rot-from': '-25deg',
+            '--motion-tilt-y-rot-to': '0deg',
+            '--motion-tilt-z-from': '25deg',
+            '--motion-tilt-z-to': '0deg',
           },
           keyframes: [
             {
@@ -397,8 +819,45 @@ describe('TiltScroll', () => {
           ],
         },
         {
-          startOffsetAdd: '-20vh',
-          endOffsetAdd: '0px',
+          fill: 'backwards',
+          easing: 'linear',
+          composite: 'add',
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: -50,
+              unit: 'percentage',
+            },
+          },
+          startOffsetAdd: '-50vh',
+          endOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: 50,
+              unit: 'percentage',
+            },
+          },
+          endOffsetAdd: '50vh',
+          custom: {
+            '--motion-perspective': '400px',
+            '--motion-tilt-y-from': 'calc(-1 * (50% + 50vh))',
+            '--motion-tilt-y-to': 'calc(0 * (50% + 50vh))',
+            '--motion-tilt-x-from': '-10deg',
+            '--motion-tilt-x-to': '0deg',
+            '--motion-tilt-y-rot-from': '-25deg',
+            '--motion-tilt-y-rot-to': '0deg',
+            '--motion-tilt-z-from': '25deg',
+            '--motion-tilt-z-to': '0deg',
+          },
+          keyframes: [
+            {
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-from)))',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
+            },
+            {
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + var(--motion-tilt-z-to)))',
+            },
+          ],
         },
       ];
 

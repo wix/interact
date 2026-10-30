@@ -1,4 +1,6 @@
 import { cssEasings, jsEasings } from '@wix/motion';
+import type { LengthPercentage } from '@wix/motion';
+import type { LengthInput, LengthValue, RangeOffset, ScrubAnimationOptions } from './types';
 import type {
   EffectFourDirections,
   EffectScrollRange,
@@ -388,14 +390,6 @@ export function getTimingFactor(
   return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
 }
 
-export type LengthValue = { value: number; unit: string };
-export type LengthInput =
-  | string
-  | number
-  | LengthValue
-  | { value: number; unit?: string }
-  | undefined;
-
 const CSS_UNIT_REGEX = /^(-?\d*\.?\d+)(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/i;
 
 /**
@@ -505,6 +499,59 @@ export function parseDirection<T extends string | number>(
   return defaultValue;
 }
 
+const CSS_UNIT_REGEX_NO_I = /^(-?\d*\.?\d+)(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/;
+export const CSS_CALC_REGEX = /^calc\(.*\)$/;
+export const stripCalc = (str: string) => str.replace(/calc/g, '');
+
+// should not be used to compare direction against preset's default because undefined !== <default>
+export function compareKeywordToNonDefaults(direction: string | undefined, compare: string[]) {
+  const normalized = direction?.trim().toLowerCase();
+  return compare.some((keyword) => normalized === keyword);
+}
+
+export function parseLengthLazy(input: LengthInput, defaultValue: LengthValue) {
+  const parsedLength = { ...defaultValue };
+
+  if (typeof input === 'number') {
+    parsedLength.value = input;
+  }
+
+  if (typeof input === 'string') {
+    const trimmed = input.trim().toLowerCase();
+    if (CSS_CALC_REGEX.test(trimmed) || CSS_UNIT_REGEX_NO_I.test(trimmed)) {
+      return trimmed;
+    }
+    if (trimmed && !isNaN(Number(trimmed))) {
+      parsedLength.value = Number(trimmed);
+    }
+  }
+
+  if (typeof input === 'object' && input !== null && 'value' in input && 'unit' in input) {
+    const value = typeof input.value === 'string' ? parseFloat(input.value) : input.value;
+    if (typeof value === 'number' && !isNaN(value) && typeof input.unit === 'string') {
+      parsedLength.value = value;
+      parsedLength.unit = input.unit.toLowerCase();
+    }
+  }
+
+  return `${parsedLength.value}${getCssUnits(parsedLength.unit)}`;
+}
+
+export function parseKeywordLazy<T extends string>(
+  input: string | number | undefined,
+  allowedKeywords: readonly string[],
+  defaultValue: T,
+) {
+  if (typeof input === 'string') {
+    const trimmed = input.trim().toLowerCase();
+    // Check if it's a valid keyword
+    if (allowedKeywords.includes(trimmed)) {
+      return trimmed as T;
+    }
+  }
+  return defaultValue;
+}
+
 export function suffixNames(names: string[], suffix?: string) {
   return suffix ? names.map((name) => `${name}${suffix}`) : names;
 }
@@ -552,4 +599,121 @@ export function suffixCustomProperties<T extends { custom?: CSSValues; keyframes
   });
 
   return animations;
+}
+
+// scroll presets hold their rest state outside the scroll range, unless the user sets a fill
+export function getScrollFill(options: { fill?: AnimationFillMode }, range: EffectScrollRange) {
+  return (
+    options.fill ?? (range === 'out' ? 'forwards' : range === 'continuous' ? 'both' : 'backwards')
+  );
+}
+
+// fills in a partial range offset - a cover offset defaults to its place in the cover range, any other to 0
+function completeRangeOffset(
+  rangeOffset: Partial<RangeOffset>,
+  defaultName: NonNullable<RangeOffset['name']>,
+  coverValue: number,
+) {
+  const name = rangeOffset.name || defaultName;
+  const unit = rangeOffset.offset?.unit || 'percentage';
+  const value =
+    rangeOffset.offset?.value ?? (name === 'cover' && unit === 'percentage' ? coverValue : 0);
+  return {
+    ...rangeOffset,
+    name,
+    offset: { ...rangeOffset.offset, unit, value } as LengthPercentage,
+  };
+}
+
+// in: cover 0% - 50%, out: cover 50% - 100%, continuous: cover 0% - 100%
+export function completeScrollOffsets(options: ScrubAnimationOptions, range: EffectScrollRange) {
+  const startOffset = completeRangeOffset(
+    options.startOffset ?? {},
+    'cover',
+    range === 'out' ? 50 : 0,
+  );
+  const endOffset = completeRangeOffset(
+    options.endOffset ?? {},
+    startOffset.name,
+    range === 'in' ? 50 : 100,
+  );
+  return { startOffset, endOffset };
+}
+
+type ParallaxOffset = { percentage: number; vh: number; length?: LengthPercentage };
+
+// a range offset as a sum of a percentage of the element, viewport heights and an absolute length
+function toParallaxOffset({
+  name,
+  offset,
+}: ReturnType<typeof completeRangeOffset>): ParallaxOffset {
+  const { value, unit } = offset;
+  const percentage = unit === 'percentage' ? value : 0;
+
+  return {
+    percentage: name === 'contain' ? 100 - percentage : percentage,
+    vh:
+      (unit === 'vh' ? value : 0) +
+      (name.includes('entry') ? 0 : name.includes('exit') ? 100 : percentage),
+    ...(unit !== 'percentage' && unit !== 'vh' && { length: offset }),
+  };
+}
+
+function toLengthTerms(lengths: [number, LengthPercentage | undefined][]) {
+  return lengths
+    .filter(([, length]) => length?.value)
+    .map(([factor, length]) => ` + ${factor * length!.value}${length!.unit}`)
+    .join('');
+}
+
+function toOffsetAdd(vh: number, lengths: [number, LengthPercentage | undefined][]) {
+  const terms = toLengthTerms(lengths);
+  return terms ? `calc(${vh}vh${terms})` : `${vh}vh`;
+}
+
+// widens the scroll range by 1 / speed around center, and translates the element against it to move at speed
+// center defaults to the element's rest state: the end of 'in', the start of 'out' and the middle of 'continuous'
+export function getScrollParallax(
+  options: ScrubAnimationOptions,
+  range: EffectScrollRange,
+  speed: number,
+  center: number = range === 'continuous' ? 0.5 : range === 'out' ? 0 : 1,
+) {
+  const offsets = completeScrollOffsets(options, range);
+  const start = toParallaxOffset(offsets.startOffset);
+  const end = toParallaxOffset(offsets.endOffset);
+  const factor = 1 - 1 / Math.max(speed, 0.01);
+  const startFactor = center * factor;
+  const endFactor = (1 - center) * factor;
+  const travel = `(${end.percentage - start.percentage}% + ${end.vh - start.vh}vh${toLengthTerms([
+    [1, end.length],
+    [-1, start.length],
+  ])})`;
+
+  return {
+    startOffset: {
+      name: 'entry-crossing' as const,
+      offset: {
+        value: start.percentage + startFactor * (end.percentage - start.percentage),
+        unit: 'percentage' as const,
+      },
+    },
+    startOffsetAdd: toOffsetAdd(start.vh + startFactor * (end.vh - start.vh), [
+      [startFactor, end.length],
+      [1 - startFactor, start.length],
+    ]),
+    endOffset: {
+      name: 'entry-crossing' as const,
+      offset: {
+        value: end.percentage + endFactor * (start.percentage - end.percentage),
+        unit: 'percentage' as const,
+      },
+    },
+    endOffsetAdd: toOffsetAdd(end.vh + endFactor * (start.vh - end.vh), [
+      [1 - endFactor, end.length],
+      [endFactor, start.length],
+    ]),
+    from: `calc(${startFactor} * ${travel})`,
+    to: `calc(${startFactor - factor} * ${travel})`,
+  };
 }

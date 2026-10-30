@@ -91,6 +91,7 @@ describe('FadeScroll', () => {
       const expectedResult = [
         {
           fill: 'both',
+          easing: 'linear(0 0%, 1 50%, 1 50%, 0 100%)',
           keyframes: [
             {
               opacity: 0,

@@ -1,6 +1,15 @@
 import type { BlurIn, TimeAnimationOptions } from '../../types';
 import { toKeyframeValue, getEntranceFill, suffixNames, suffixCustomProperties } from '../../utils';
 
+const DEFAULTS: Required<BlurIn> = {
+  type: 'BlurIn',
+  blur: 6,
+};
+
+export const schema = {
+  blur: { type: 'number', min: 0, default: DEFAULTS.blur },
+};
+
 export function getNames(options: TimeAnimationOptions) {
   return suffixNames(['motion-fadeIn', 'motion-blurIn'], options.suffix);
 }
@@ -10,7 +19,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { blur = 6 } = options.namedEffect as BlurIn;
+  const { blur = DEFAULTS.blur } = options.namedEffect as BlurIn;
   const [fadeIn, blurIn] = getNames(options);
 
   const easing = options.easing || 'linear';

@@ -1,4 +1,4 @@
-import type { RevealIn, TimeAnimationOptions, EffectFourDirections } from '../../types';
+import type { RevealIn, TimeAnimationOptions } from '../../types';
 import {
   getClipPolygonParams,
   parseDirection,
@@ -8,7 +8,14 @@ import {
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'left';
+const DEFAULTS: Required<RevealIn> = {
+  type: 'RevealIn',
+  from: 'left',
+};
+
+export const schema = {
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.from },
+};
 
 export function getNames(options: TimeAnimationOptions) {
   return suffixNames(['motion-revealIn', 'motion-fadeIn'], options.suffix);
@@ -20,7 +27,7 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions) {
   const namedEffect = options.namedEffect as RevealIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
+  const direction = parseDirection(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from);
   const [revealIn, fadeIn] = getNames(options);
   const easing = options.easing || 'cubicInOut';
 

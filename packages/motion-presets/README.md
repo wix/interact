@@ -174,28 +174,28 @@ For selection by tone and atmosphere (playful, elegant, bold, soft, dramatic, mo
 
 ## Parameter Conventions
 
-### `direction`
+### `from`, `direction` and `pivot`
 
-The `direction` parameter accepts different value sets depending on the preset:
+Entrance presets use `from` — the side the element comes from. All other presets use `direction` — where the motion goes. `pivot` names the edge or corner the element rotates or scales around. The accepted values depend on the preset:
 
-| Values                                   | Example Presets                                                         |
-| ---------------------------------------- | ----------------------------------------------------------------------- |
-| `'top' \| 'right' \| 'bottom' \| 'left'` | SlideIn, FloatIn, FlipIn, FoldIn                                        |
-| `'horizontal' \| 'vertical'`             | WinkIn, ArcScroll, FlipScroll, Flip                                     |
-| `'clockwise' \| 'counter-clockwise'`     | SpinIn, SpinScroll, Spin                                                |
-| `0–360` (degrees, number)                | GlideIn, ExpandIn, MoveScroll                                           |
-| Corner values                            | TurnIn (`'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`) |
+| Values                                   | Example Presets                                                                  |
+| ---------------------------------------- | -------------------------------------------------------------------------------- |
+| `'top' \| 'right' \| 'bottom' \| 'left'` | `from`: SlideIn, FloatIn, RevealIn; `direction`: SlideScroll; `pivot`: FoldIn    |
+| `'horizontal' \| 'vertical'`             | `direction`: FlipIn, WinkIn, ArcScroll, FlipScroll, Flip                         |
+| `'clockwise' \| 'counter-clockwise'`     | `direction`: SpinIn, SpinScroll, Spin                                            |
+| `0–360` (degrees, number)                | `from`: GlideIn, ExpandIn; `direction`: MoveScroll                               |
+| Corner values                            | `pivot`: TurnIn (`'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`) |
 
-**Angle convention:** `0° = right (east)`, angles increase counter-clockwise.
+**Angle convention:** CSS convention — `0° = right`, `90° = bottom`, `180° = left`, `270° = top`.
 
 ### Distance units
 
-Prefer the `{ value, unit }` object notation:
+Movement lengths are named `travel`. Prefer the `{ value, unit }` object notation:
 
 ```typescript
 namedEffect: {
   type: 'GlideIn',
-  distance: { value: 120, unit: 'px' },
+  travel: { value: 120, unit: 'px' },
 }
 ```
 
@@ -203,7 +203,7 @@ Supported units: `px`, `em`, `rem`, `vh`, `vw`, `vmin`, `vmax`, `percentage`.
 
 ### `iterationDelay` (ongoing only)
 
-Adds an idle pause between loop cycles. Set on the `namedEffect`:
+Adds an idle pause at rest after each loop cycle, without changing the motion itself. Set on the `namedEffect`:
 
 ```typescript
 namedEffect: { type: 'Bounce', iterationDelay: 1000 } // 1 s pause after each cycle

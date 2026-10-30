@@ -2,14 +2,22 @@ import type { TimeAnimationOptions, Bounce, AnimationExtraOptions, DomApi } from
 import {
   getEasing,
   getTimingFactor,
+  parseLengthLazy,
   toKeyframeValue,
-  mapRange,
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
 
-const BOUNCE_FACTOR_SOFT = 1;
-const BOUNCE_FACTOR_HARD = 3;
+const DEFAULTS: Required<Bounce> = {
+  type: 'Bounce',
+  iterationDelay: 0,
+  travel: { value: 49, unit: 'px' },
+};
+
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
 
 const TRANSLATE_Y_KEYFRAMES = [
   { keyframe: 0, translateY: 0 },
@@ -33,28 +41,25 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Bounce;
-  const { intensity = 0 } = namedEffect;
+  const { travel = DEFAULTS.travel, iterationDelay = DEFAULTS.iterationDelay } = namedEffect;
 
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
+  const timingFactor = duration / (duration + iterationDelay);
   const [name] = getNames(options);
-
-  const bounceFactor = mapRange(0, 1, BOUNCE_FACTOR_SOFT, BOUNCE_FACTOR_HARD, intensity);
 
   const easing = getEasing('sineOut');
 
   const custom = {
-    '--motion-bounce-factor': bounceFactor,
+    '--motion-bounce-travel': parseLengthLazy(travel, { value: 0, unit: 'px' }),
   };
 
   const keyframes = TRANSLATE_Y_KEYFRAMES.map(({ keyframe, translateY }) => ({
     offset: (keyframe / 100) * timingFactor,
-    translate: `0px calc(${translateY / 2}px * ${toKeyframeValue(
+    transform: `translateY(calc(${translateY / 98} * ${toKeyframeValue(
       custom,
-      '--motion-bounce-factor',
+      '--motion-bounce-travel',
       asWeb,
-    )})`,
+    )})) rotate(var(--motion-rotate, 0deg))`,
     easing,
   }));
 

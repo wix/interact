@@ -19,7 +19,8 @@ describe('MoveScroll', () => {
           endOffsetAdd: '',
           keyframes: [
             {
-              transform: 'translate(-200px, 346px) rotate(var(--motion-rotate, 0))',
+              transform:
+                'translate(-200.00000000000006px, 346.41016151377545px) rotate(var(--motion-rotate, 0))',
             },
             {
               transform: 'translate(0px, 0px) rotate(var(--motion-rotate, 0))',
@@ -33,11 +34,11 @@ describe('MoveScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom distance', () => {
+    test('custom travel', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
         namedEffect: {
-          distance: { value: 200, unit: 'percentage' },
+          travel: { value: 200, unit: 'percentage' },
         } as MoveScrollType,
       };
 
@@ -47,7 +48,8 @@ describe('MoveScroll', () => {
           endOffsetAdd: '',
           keyframes: [
             {
-              transform: 'translate(-100%, 173%) rotate(var(--motion-rotate, 0))',
+              transform:
+                'translate(-100.00000000000003%, 173.20508075688772%) rotate(var(--motion-rotate, 0))',
             },
             {
               transform: 'translate(0%, 0%) rotate(var(--motion-rotate, 0))',
@@ -61,17 +63,20 @@ describe('MoveScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom angle', () => {
+    test('custom direction - moving down widens the range', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { angle: 45 } as MoveScrollType,
+        namedEffect: { direction: 45 } as MoveScrollType,
       };
 
       const expectedResult = [
         {
+          startOffsetAdd: '-282.84271247461896px',
+          endOffsetAdd: '',
           keyframes: [
             {
-              transform: 'translate(283px, 283px) rotate(var(--motion-rotate, 0))',
+              transform:
+                'translate(-282.842712474619px, -282.84271247461896px) rotate(var(--motion-rotate, 0))',
             },
             {
               transform: 'translate(0px, 0px) rotate(var(--motion-rotate, 0))',
@@ -88,20 +93,21 @@ describe('MoveScroll', () => {
     test('custom range - out', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { range: 'out' } as MoveScrollType,
+        namedEffect: { range: 'out', direction: 45 } as MoveScrollType,
       };
 
       const expectedResult = [
         {
           fill: 'forwards',
           startOffsetAdd: '',
-          endOffsetAdd: '346.4101615137755px',
+          endOffsetAdd: '282.84271247461896px',
           keyframes: [
             {
               transform: 'translate(0px, 0px) rotate(var(--motion-rotate, 0))',
             },
             {
-              transform: 'translate(-200px, 346px) rotate(var(--motion-rotate, 0))',
+              transform:
+                'translate(282.842712474619px, 282.84271247461896px) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -124,10 +130,12 @@ describe('MoveScroll', () => {
           endOffsetAdd: '',
           keyframes: [
             {
-              transform: 'translate(-200px, 346px) rotate(var(--motion-rotate, 0))',
+              transform:
+                'translate(-200.00000000000006px, 346.41016151377545px) rotate(var(--motion-rotate, 0))',
             },
             {
-              transform: 'translate(200px, -346px) rotate(var(--motion-rotate, 0))',
+              transform:
+                'translate(200.00000000000006px, -346.41016151377545px) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -169,11 +177,11 @@ describe('MoveScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom distance', () => {
+    test('custom travel', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
         namedEffect: {
-          distance: { value: 200, unit: 'percentage' },
+          travel: { value: 200, unit: 'percentage' },
         } as MoveScrollType,
       };
 

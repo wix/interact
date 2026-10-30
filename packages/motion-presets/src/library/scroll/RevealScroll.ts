@@ -1,25 +1,30 @@
-import type {
-  AnimationFillMode,
-  ScrubAnimationOptions,
-  RevealScroll,
-  DomApi,
-  EffectFourDirections,
-} from '../../types';
+import type { ScrubAnimationOptions, RevealScroll, DomApi } from '../../types';
 import {
+  getClipPolygonParams,
   getRevealClipFrom,
-  getRevealClipTo,
   toKeyframeValue,
   INITIAL_CLIP,
   parseDirection,
   suffixNames,
   suffixCustomProperties,
+  getScrollFill,
+  completeScrollOffsets,
 } from '../../utils';
-import { FOUR_DIRECTIONS } from '../../consts';
+import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'bottom';
+const DEFAULTS: Required<RevealScroll> = {
+  type: 'RevealScroll',
+  direction: 'bottom',
+  range: 'in',
+};
+
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+};
 
 export function getNames(options: ScrubAnimationOptions) {
-  const { range = 'in' } = options.namedEffect as RevealScroll;
+  const { range = DEFAULTS.range } = options.namedEffect as RevealScroll;
   return suffixNames(
     [`motion-revealScroll${range === 'continuous' ? '-continuous' : ''}`],
     options.suffix,
@@ -32,18 +37,17 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions) {
   const namedEffect = options.namedEffect as RevealScroll;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { range = 'in' } = namedEffect;
+  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction);
+  const { range = DEFAULTS.range } = namedEffect;
   const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+  const fill = getScrollFill(options, range);
+  const offsets = completeScrollOffsets(options as ScrubAnimationOptions, range);
 
   const [revealScroll] = getNames(options);
 
   const custom = {
     '--motion-clip-from': getRevealClipFrom(direction, range),
-    '--motion-clip-to': getRevealClipTo(direction, range),
+    '--motion-clip-to': range === 'in' ? INITIAL_CLIP : getClipPolygonParams({ direction }),
   };
 
   const keyframes = [
@@ -64,6 +68,7 @@ export function style(options: ScrubAnimationOptions) {
       ...options,
       name: revealScroll,
       fill,
+      ...offsets,
       easing,
       custom,
       keyframes,

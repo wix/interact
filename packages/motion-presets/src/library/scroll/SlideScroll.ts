@@ -1,5 +1,4 @@
 import type {
-  AnimationFillMode,
   DomApi,
   EffectFourDirections,
   ScrubAnimationOptions,
@@ -12,13 +11,24 @@ import {
   getRevealClipTo,
   toKeyframeValue,
   INITIAL_CLIP,
-  FOUR_DIRECTIONS,
-  parseDirection,
+  parseKeywordLazy,
   suffixNames,
   suffixCustomProperties,
+  getScrollFill,
+  completeScrollOffsets,
 } from '../../utils';
+import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'bottom';
+const DEFAULTS: Required<SlideScroll> = {
+  type: 'SlideScroll',
+  direction: 'top',
+  range: 'in',
+};
+
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+};
 
 const DIRECTION_TRANSLATION_MAP: Record<EffectFourDirections, Translate> = {
   bottom: { x: '0', y: '100%' },
@@ -28,7 +38,7 @@ const DIRECTION_TRANSLATION_MAP: Record<EffectFourDirections, Translate> = {
 };
 
 export function getNames(options: ScrubAnimationOptions) {
-  const { range = 'in' } = options.namedEffect as SlideScroll;
+  const { range = DEFAULTS.range } = options.namedEffect as SlideScroll;
   return suffixNames(
     [`motion-slideScroll${range === 'continuous' ? '-continuous' : ''}`],
     options.suffix,
@@ -41,13 +51,18 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as SlideScroll;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { range = 'in' } = namedEffect;
+  const { range = DEFAULTS.range } = namedEffect;
+  const motionDirection = parseKeywordLazy(
+    namedEffect?.direction,
+    FOUR_DIRECTIONS,
+    DEFAULTS.direction,
+  );
+  const direction =
+    range === 'out' ? motionDirection : getOppositeDirection([...FOUR_DIRECTIONS], motionDirection);
   const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
-  const oppositeDirection = getOppositeDirection(FOUR_DIRECTIONS, direction);
+  const fill = getScrollFill(options, range);
+  const offsets = completeScrollOffsets(options as ScrubAnimationOptions, range);
+  const oppositeDirection = getOppositeDirection([...FOUR_DIRECTIONS], direction);
 
   const translateFrom = range === 'out' ? { x: '0', y: '0' } : DIRECTION_TRANSLATION_MAP[direction];
   const translateTo =
@@ -107,6 +122,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ...options,
       name: slideScroll,
       fill,
+      ...offsets,
       easing,
       custom,
       keyframes,

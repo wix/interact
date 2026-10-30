@@ -59,10 +59,10 @@ describe('PanScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - right', () => {
+    test('custom direction - left', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as PanScrollType,
+        namedEffect: { direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [
@@ -99,7 +99,7 @@ describe('PanScroll', () => {
             },
             {
               transform:
-                'translateX(calc(var(--motion-left, calc(100vw - 100%)) * -1 - 100%)) rotate(var(--motion-rotate, 0))',
+                'translateX(calc(100vw - var(--motion-left, 0px))) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -191,10 +191,10 @@ describe('PanScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - right', () => {
+    test('custom direction - left', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as PanScrollType,
+        namedEffect: { direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [

@@ -9,7 +9,16 @@ import {
 } from '../../utils';
 import { SPIN_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
+const DEFAULTS: Required<Spin> = {
+  type: 'Spin',
+  direction: 'clockwise',
+  iterationDelay: 0,
+};
+
+export const schema = {
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: DEFAULTS.direction },
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+};
 
 const DIRECTION_MAP = {
   clockwise: -1,
@@ -22,11 +31,11 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Spin;
-  const direction = parseDirection(namedEffect?.direction, SPIN_DIRECTIONS, DEFAULT_DIRECTION);
+  const direction = parseDirection(namedEffect?.direction, SPIN_DIRECTIONS, DEFAULTS.direction);
+  const { iterationDelay = DEFAULTS.iterationDelay } = namedEffect;
 
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
+  const timingFactor = duration / (duration + iterationDelay);
   const [name] = getNames(options);
 
   const easing = options.easing || 'linear';

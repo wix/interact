@@ -1,16 +1,30 @@
-import type {
-  AnimationFillMode,
-  DomApi,
-  EffectTwoSides,
-  ScrubAnimationOptions,
-  TurnScroll,
-} from '../../types';
-import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
-import { SPIN_DIRECTIONS, TWO_SIDES_DIRECTIONS } from '../../consts';
+import type { DomApi, ScrubAnimationOptions, TurnScroll } from '../../types';
+import {
+  toKeyframeValue,
+  parseKeywordLazy,
+  suffixNames,
+  suffixCustomProperties,
+  getScrollFill,
+  completeScrollOffsets,
+} from '../../utils';
+import { SCROLL_RANGES, SPIN_DIRECTIONS, TWO_SIDES_DIRECTIONS } from '../../consts';
 
-const ELEMENT_ROTATION = 45;
-const DEFAULT_DIRECTION: EffectTwoSides = 'right';
-const DEFAULT_SPIN: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
+const DEFAULTS: Required<TurnScroll> = {
+  type: 'TurnScroll',
+  angle: 45,
+  direction: 'left',
+  range: 'in',
+  scale: 1,
+  spin: 'clockwise',
+};
+
+export const schema = {
+  angle: { type: 'number', default: DEFAULTS.angle },
+  direction: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+  spin: { type: 'enum', values: SPIN_DIRECTIONS, default: DEFAULTS.spin },
+};
 
 const ROTATE_DIRECTION_MAP = {
   clockwise: 1,
@@ -44,24 +58,27 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as TurnScroll;
-  const direction = parseDirection(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULT_DIRECTION);
-  const spin = parseDirection(namedEffect?.spin, SPIN_DIRECTIONS, DEFAULT_SPIN);
-  const { scale = 1, range = 'in' } = namedEffect;
+  const direction = parseKeywordLazy(
+    namedEffect?.direction,
+    TWO_SIDES_DIRECTIONS,
+    DEFAULTS.direction,
+  );
+  const spin = parseKeywordLazy(namedEffect?.spin, SPIN_DIRECTIONS, DEFAULTS.spin);
+  const { angle = DEFAULTS.angle, scale = DEFAULTS.scale, range = DEFAULTS.range } = namedEffect;
   const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+  const fill = getScrollFill(options, range);
+  const offsets = completeScrollOffsets(options as ScrubAnimationOptions, range);
 
-  const startXLeft = `calc(-1 * ${toKeyframeValue(
+  const leftX = `calc(-1 * ${toKeyframeValue(
     {},
     '--motion-left',
     false,
     'calc(100vw - 100%)',
   )} - 100%)`;
-  const endXLeft = `calc(100vw - ${toKeyframeValue({}, '--motion-left', false, '0px')})`;
-  const [startX, endX] = direction === 'left' ? [startXLeft, endXLeft] : [endXLeft, startXLeft];
+  const rightX = `calc(100vw - ${toKeyframeValue({}, '--motion-left', false, '0px')})`;
+  const [startX, endX] = direction === 'left' ? [rightX, leftX] : [leftX, rightX];
 
-  const rotate = ELEMENT_ROTATION * ROTATE_DIRECTION_MAP[spin];
+  const rotate = angle * ROTATE_DIRECTION_MAP[spin];
 
   const fromValues = {
     rotation: range === 'out' ? 0 : -rotate,
@@ -85,47 +102,58 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     '--motion-turn-rotation-to': `${toValues.rotation}deg`,
   };
 
+  const getTransform = (
+    translate: string | number,
+    scaleValue: string | number,
+    rotation: string | number,
+  ) =>
+    `translateX(${translate}) scale(${scaleValue}) rotate(calc(${toKeyframeValue(
+      {},
+      '--motion-rotate',
+      false,
+      '0deg',
+    )} + ${rotation}))`;
+
+  const keyframes = [
+    {
+      transform: getTransform(
+        toKeyframeValue(custom, '--motion-turn-translate-from', asWeb),
+        toKeyframeValue(custom, '--motion-turn-scale-from', asWeb),
+        toKeyframeValue(custom, '--motion-turn-rotation-from', asWeb),
+      ),
+    },
+    {
+      transform: getTransform(
+        toKeyframeValue(custom, '--motion-turn-translate-to', asWeb),
+        toKeyframeValue(custom, '--motion-turn-scale-to', asWeb),
+        toKeyframeValue(custom, '--motion-turn-rotation-to', asWeb),
+      ),
+    },
+  ];
+
+  if (range === 'continuous') {
+    keyframes.splice(1, 0, {
+      transform: getTransform(
+        `calc((${toKeyframeValue(custom, '--motion-turn-translate-from', asWeb)} + ${toKeyframeValue(
+          custom,
+          '--motion-turn-translate-to',
+          asWeb,
+        )}) / 2)`,
+        1,
+        '0deg',
+      ),
+    });
+  }
+
   const animations = [
     {
       ...options,
       name: turnScroll,
       fill,
+      ...offsets,
       easing,
       custom,
-      keyframes: [
-        {
-          transform: `translateX(${toKeyframeValue(
-            custom,
-            '--motion-turn-translate-from',
-            asWeb,
-          )}) scale(${toKeyframeValue(
-            custom,
-            '--motion-turn-scale-from',
-            asWeb,
-          )}) rotate(calc(${toKeyframeValue(
-            {},
-            '--motion-rotate',
-            false,
-            '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-turn-rotation-from', asWeb)}))`,
-        },
-        {
-          transform: `translateX(${toKeyframeValue(
-            custom,
-            '--motion-turn-translate-to',
-            asWeb,
-          )}) scale(${toKeyframeValue(
-            custom,
-            '--motion-turn-scale-to',
-            asWeb,
-          )}) rotate(calc(${toKeyframeValue(
-            {},
-            '--motion-rotate',
-            false,
-            '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-turn-rotation-to', asWeb)}))`,
-        },
-      ],
+      keyframes,
     },
   ];
 

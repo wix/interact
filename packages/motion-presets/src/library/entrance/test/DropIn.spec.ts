@@ -29,6 +29,28 @@ describe('DropIn', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
+    test('DropIn animation with custom scale', () => {
+      const mockOptions = {
+        ...baseMockOptions,
+        duration: 1000,
+        namedEffect: { scale: 2.4 } as DropInType,
+      };
+
+      const expectedResult: Partial<AnimationData>[] = [
+        {},
+        {
+          keyframes: [
+            { scale: '2.4', transform: 'rotate(var(--motion-rotate, 0deg))' },
+            { scale: '1', transform: 'rotate(var(--motion-rotate, 0deg))' },
+          ],
+        },
+      ];
+
+      const result = DropIn.web(mockOptions);
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
     test('DropIn animation with custom easing', () => {
       const duration = 1000;
       const customEasing = 'circInOut';

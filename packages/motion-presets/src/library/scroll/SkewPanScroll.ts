@@ -1,18 +1,30 @@
-import type {
-  AnimationFillMode,
-  DomApi,
-  ScrubAnimationOptions,
-  SkewPanScroll,
-  EffectTwoSides,
-} from '../../types';
-import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
-import { TWO_SIDES_DIRECTIONS } from '../../consts';
+import type { DomApi, ScrubAnimationOptions, SkewPanScroll } from '../../types';
+import {
+  toKeyframeValue,
+  parseKeywordLazy,
+  suffixNames,
+  suffixCustomProperties,
+  getScrollFill,
+  completeScrollOffsets,
+} from '../../utils';
+import { SCROLL_RANGES, TWO_SIDES_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectTwoSides = 'right';
+const DEFAULTS: Required<SkewPanScroll> = {
+  type: 'SkewPanScroll',
+  direction: 'left',
+  range: 'in',
+  skew: 10,
+};
+
+export const schema = {
+  direction: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  skew: { type: 'number', default: DEFAULTS.skew },
+};
 
 const DIRECTION_MAP = {
-  right: -1,
-  left: 1,
+  right: 1,
+  left: -1,
 };
 
 export function getNames(options: ScrubAnimationOptions) {
@@ -42,30 +54,33 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as SkewPanScroll;
-  const direction = parseDirection(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULT_DIRECTION);
-  const { skew = 10, range = 'in' } = namedEffect;
+  const direction = parseKeywordLazy(
+    namedEffect?.direction,
+    TWO_SIDES_DIRECTIONS,
+    DEFAULTS.direction,
+  );
+  const { skew = DEFAULTS.skew, range = DEFAULTS.range } = namedEffect;
   const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+  const fill = getScrollFill(options, range);
+  const offsets = completeScrollOffsets(options as ScrubAnimationOptions, range);
 
   const skewX = skew * DIRECTION_MAP[direction];
-  const startXLeft = `calc(${toKeyframeValue(
+  const leftX = `calc(${toKeyframeValue(
     {},
     '--motion-left',
     false,
     'calc(100vw - 100%)',
   )} * -1 - 100%)`;
-  const endXLeft = `calc(100vw - ${toKeyframeValue({}, '--motion-left', false, '0px')})`;
-  const [startX, endX] = direction === 'left' ? [startXLeft, endXLeft] : [endXLeft, startXLeft];
+  const rightX = `calc(100vw - ${toKeyframeValue({}, '--motion-left', false, '0px')})`;
+  const [startX, endX] = direction === 'left' ? [rightX, leftX] : [leftX, rightX];
 
   const fromValues = {
     skew: range === 'out' ? 0 : skewX,
-    translate: range === 'out' ? 0 : startX,
+    translate: range === 'out' ? '0px' : startX,
   };
   const toValues = {
     skew: range === 'in' ? 0 : -skewX,
-    translate: range === 'in' ? 0 : range === 'out' ? startX : endX,
+    translate: range === 'in' ? '0px' : endX,
   };
 
   const [skewPanScroll] = getNames(options);
@@ -82,6 +97,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ...options,
       name: skewPanScroll,
       fill,
+      ...offsets,
       easing,
       custom,
       keyframes: [
@@ -94,7 +110,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
             custom,
             '--motion-skewpan-from-skew',
             asWeb,
-          )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
+          )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0deg')})`,
         },
         {
           transform: `translateX(${toKeyframeValue(
@@ -105,7 +121,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
             custom,
             '--motion-skewpan-to-skew',
             asWeb,
-          )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
+          )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0deg')})`,
         },
       ],
     },

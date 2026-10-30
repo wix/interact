@@ -1,8 +1,28 @@
-import type { AnimationFillMode, DomApi, FlipScroll, ScrubAnimationOptions } from '../../types';
-import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
-import { AXIS_DIRECTIONS } from '../../consts';
+import type { DomApi, FlipScroll, ScrubAnimationOptions } from '../../types';
+import {
+  toKeyframeValue,
+  parseDirection,
+  suffixNames,
+  suffixCustomProperties,
+  getScrollFill,
+  completeScrollOffsets,
+} from '../../utils';
+import { AXIS_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 
-const DEFAULT_DIRECTION: (typeof AXIS_DIRECTIONS)[number] = 'horizontal';
+const DEFAULTS: Required<FlipScroll> = {
+  type: 'FlipScroll',
+  angle: 240,
+  direction: 'horizontal',
+  perspective: 800,
+  range: 'continuous',
+};
+
+export const schema = {
+  angle: { type: 'number', default: DEFAULTS.angle },
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: DEFAULTS.direction },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+};
 
 const ROTATE_DIRECTION_MAP = {
   vertical: 'rotateX',
@@ -19,17 +39,20 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as FlipScroll;
-  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULT_DIRECTION);
-  const { rotate = 240, range = 'continuous', perspective = 800 } = namedEffect;
+  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULTS.direction);
+  const {
+    angle = DEFAULTS.angle,
+    range = DEFAULTS.range,
+    perspective = DEFAULTS.perspective,
+  } = namedEffect;
 
   const rotationAxis = ROTATE_DIRECTION_MAP[direction];
 
-  const fromValue = range === 'out' ? 0 : -rotate;
-  const toValue = range === 'in' ? 0 : rotate;
+  const fromValue = range === 'out' ? 0 : -angle;
+  const toValue = range === 'in' ? 0 : angle;
   const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+  const fill = getScrollFill(options, range);
+  const offsets = completeScrollOffsets(options as ScrubAnimationOptions, range);
 
   const [flipScroll] = getNames(options);
 
@@ -44,6 +67,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ...options,
       name: flipScroll,
       fill,
+      ...offsets,
       easing,
       custom,
       keyframes: [

@@ -4,6 +4,9 @@ import * as GrowScroll from '../GrowScroll';
 import type { GrowScroll as GrowScrollType, ScrubAnimationOptions } from '../../../types';
 import { baseMockOptions } from './testUtils';
 
+const transform = (travel: string, pivot: [string, string], scale: number) =>
+  `translateY(${travel}) rotate(var(--motion-rotate, 0)) translate(${pivot[0]}, ${pivot[1]}) scale(${scale}) translate(calc(-1 * ${pivot[0]}), calc(-1 * ${pivot[1]}))`;
+
 describe('GrowScroll', () => {
   describe('web', () => {
     test('default values', () => {
@@ -15,17 +18,14 @@ describe('GrowScroll', () => {
       const expectedResult = [
         {
           fill: 'backwards',
+          easing: 'linear',
+          startOffset: { name: 'entry-crossing', offset: { value: 0, unit: 'percentage' } },
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0px',
+          endOffset: { name: 'entry-crossing', offset: { value: 50, unit: 'percentage' } },
+          endOffsetAdd: '50vh',
           keyframes: [
-            {
-              transform:
-                'translateY(0vh) translate(0%, 0%) scale(0) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(0vh) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
-            },
+            { transform: transform('calc(0 * (50% + 50vh))', ['0%', '0%'], 0.25) },
+            { transform: transform('calc(0 * (50% + 50vh))', ['0%', '0%'], 1) },
           ],
         },
       ];
@@ -44,17 +44,13 @@ describe('GrowScroll', () => {
       const expectedResult = [
         {
           fill: 'forwards',
-          startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          startOffset: { name: 'entry-crossing', offset: { value: 50, unit: 'percentage' } },
+          startOffsetAdd: '50vh',
+          endOffset: { name: 'entry-crossing', offset: { value: 100, unit: 'percentage' } },
+          endOffsetAdd: '100vh',
           keyframes: [
-            {
-              transform:
-                'translateY(0vh) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(0vh) translate(0%, 0%) scale(4) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
-            },
+            { transform: transform('calc(0 * (50% + 50vh))', ['0%', '0%'], 1) },
+            { transform: transform('calc(0 * (50% + 50vh))', ['0%', '0%'], 4) },
           ],
         },
       ];
@@ -64,23 +60,26 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - top-right', () => {
+    test('custom range - continuous', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'top-right' } as GrowScrollType,
+        namedEffect: { range: 'continuous' } as GrowScrollType,
       };
 
       const expectedResult = [
         {
+          easing: 'linear',
           keyframes: [
+            { transform: transform('calc(0 * (100% + 100vh))', ['0%', '0%'], 4) },
             {
-              transform:
-                'translateY(0vh) translate(50%, -50%) scale(0) translate(calc(-1 * 50%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
+              offset: 0.5,
+              transform: transform(
+                'calc((calc(0 * (100% + 100vh)) + calc(0 * (100% + 100vh))) / 2)',
+                ['0%', '0%'],
+                1,
+              ),
             },
-            {
-              transform:
-                'translateY(0vh) translate(50%, -50%) scale(1) translate(calc(-1 * 50%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
-            },
+            { transform: transform('calc(0 * (100% + 100vh))', ['0%', '0%'], 4) },
           ],
         },
       ];
@@ -90,23 +89,26 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - bottom-left', () => {
+    test.each([
+      ['top', '0%', '-50%'],
+      ['top-right', '50%', '-50%'],
+      ['right', '50%', '0%'],
+      ['bottom-right', '50%', '50%'],
+      ['bottom', '0%', '50%'],
+      ['bottom-left', '-50%', '50%'],
+      ['left', '-50%', '0%'],
+      ['top-left', '-50%', '-50%'],
+    ] as const)('custom pivot - %s', (pivot, x, y) => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'bottom-left' } as GrowScrollType,
+        namedEffect: { pivot } as GrowScrollType,
       };
 
       const expectedResult = [
         {
           keyframes: [
-            {
-              transform:
-                'translateY(0vh) translate(-50%, 50%) scale(0) translate(calc(-1 * -50%), calc(-1 * 50%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(0vh) translate(-50%, 50%) scale(1) translate(calc(-1 * -50%), calc(-1 * 50%)) rotate(var(--motion-rotate, 0))',
-            },
+            { transform: transform('calc(0 * (50% + 50vh))', [x, y], 0.25) },
+            { transform: transform('calc(0 * (50% + 50vh))', [x, y], 1) },
           ],
         },
       ];
@@ -116,153 +118,17 @@ describe('GrowScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - bottom-right', () => {
+    test('custom scale - inverted to grow', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'bottom-right' } as GrowScrollType,
+        namedEffect: { scale: 4 } as GrowScrollType,
       };
 
       const expectedResult = [
         {
           keyframes: [
-            {
-              transform:
-                'translateY(0vh) translate(50%, 50%) scale(0) translate(calc(-1 * 50%), calc(-1 * 50%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(0vh) translate(50%, 50%) scale(1) translate(calc(-1 * 50%), calc(-1 * 50%)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = GrowScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - top-left', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'top-left' } as GrowScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateY(0vh) translate(-50%, -50%) scale(0) translate(calc(-1 * -50%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(0vh) translate(-50%, -50%) scale(1) translate(calc(-1 * -50%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = GrowScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - bottom', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'bottom' } as GrowScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateY(0vh) translate(0%, 50%) scale(0) translate(calc(-1 * 0%), calc(-1 * 50%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(0vh) translate(0%, 50%) scale(1) translate(calc(-1 * 0%), calc(-1 * 50%)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = GrowScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - top', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'top' } as GrowScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateY(0vh) translate(0%, -50%) scale(0) translate(calc(-1 * 0%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(0vh) translate(0%, -50%) scale(1) translate(calc(-1 * 0%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = GrowScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - left', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'left' } as GrowScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateY(0vh) translate(-50%, 0%) scale(0) translate(calc(-1 * -50%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(0vh) translate(-50%, 0%) scale(1) translate(calc(-1 * -50%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = GrowScroll.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - right', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'right' } as GrowScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateY(0vh) translate(50%, 0%) scale(0) translate(calc(-1 * 50%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(0vh) translate(50%, 0%) scale(1) translate(calc(-1 * 50%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
-            },
+            { transform: transform('calc(0 * (50% + 50vh))', ['0%', '0%'], 0.25) },
+            { transform: transform('calc(0 * (50% + 50vh))', ['0%', '0%'], 1) },
           ],
         },
       ];
@@ -280,17 +146,13 @@ describe('GrowScroll', () => {
 
       const expectedResult = [
         {
-          startOffsetAdd: '-20vh',
-          endOffsetAdd: '0px',
+          startOffset: { name: 'entry-crossing', offset: { value: -50, unit: 'percentage' } },
+          startOffsetAdd: '-50vh',
+          endOffset: { name: 'entry-crossing', offset: { value: 50, unit: 'percentage' } },
+          endOffsetAdd: '50vh',
           keyframes: [
-            {
-              transform:
-                'translateY(-20vh) translate(0%, 0%) scale(0) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(0vh) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
-            },
+            { transform: transform('calc(-1 * (50% + 50vh))', ['0%', '0%'], 0.25) },
+            { transform: transform('calc(0 * (50% + 50vh))', ['0%', '0%'], 1) },
           ],
         },
       ];
@@ -311,71 +173,22 @@ describe('GrowScroll', () => {
       const expectedResult = [
         {
           fill: 'backwards',
-          startOffsetAdd: '0vh',
-          endOffsetAdd: '0px',
+          custom: {
+            '--motion-travel-from': 'calc(0 * (50% + 50vh))',
+            '--motion-travel-to': 'calc(0 * (50% + 50vh))',
+            '--motion-grow-from': 0.25,
+            '--motion-grow-to': 1,
+            '--motion-trans-x': '0%',
+            '--motion-trans-y': '0%',
+          },
           keyframes: [
             {
               transform:
-                'translateY(var(--motion-travel-from)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-grow-from)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
+                'translateY(var(--motion-travel-from)) rotate(var(--motion-rotate, 0)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-grow-from)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y)))',
             },
             {
               transform:
-                'translateY(var(--motion-travel-to)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-grow-to)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = GrowScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom range - out', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { range: 'out' } as GrowScrollType,
-      };
-
-      const expectedResult = [
-        {
-          fill: 'forwards',
-          startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
-          keyframes: [
-            {
-              transform:
-                'translateY(var(--motion-travel-from)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-grow-from)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(var(--motion-travel-to)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-grow-to)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
-            },
-          ],
-        },
-      ];
-
-      const result = GrowScroll.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom direction - top-right', () => {
-      const mockOptions: ScrubAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { direction: 'top-right' } as GrowScrollType,
-      };
-
-      const expectedResult = [
-        {
-          keyframes: [
-            {
-              transform:
-                'translateY(var(--motion-travel-from)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-grow-from)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
-            },
-            {
-              transform:
-                'translateY(var(--motion-travel-to)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-grow-to)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
+                'translateY(var(--motion-travel-to)) rotate(var(--motion-rotate, 0)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-grow-to)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y)))',
             },
           ],
         },

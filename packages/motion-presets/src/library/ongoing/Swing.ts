@@ -16,7 +16,18 @@ import {
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'top';
+const DEFAULTS: Required<Swing> = {
+  type: 'Swing',
+  angle: 20,
+  iterationDelay: 0,
+  pivot: 'top',
+};
+
+export const schema = {
+  angle: { type: 'number', min: 0, default: DEFAULTS.angle },
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  pivot: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.pivot },
+};
 
 const DIRECTION_MAP = {
   top: { x: 0, y: -1 },
@@ -43,27 +54,26 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Swing;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { swing = 20 } = namedEffect;
+  const pivot = parseDirection(
+    namedEffect?.pivot,
+    FOUR_DIRECTIONS,
+    DEFAULTS.pivot,
+  ) as EffectFourDirections;
+  const { angle = DEFAULTS.angle, iterationDelay = DEFAULTS.iterationDelay } = namedEffect;
 
   const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
   const easing = options.easing || 'sineInOut';
   const ease = getEasingFamily(easing);
   const [name] = getNames(options);
 
-  const { x, y } = DIRECTION_MAP[direction];
+  const { x, y } = DIRECTION_MAP[pivot];
   const totalDuration = duration + iterationDelay;
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
+  const timingFactor = duration / (duration + iterationDelay);
 
-  // Create CSS custom properties for the swing configuration
   const custom: Record<string, string | number> = {
-    '--motion-swing-deg': `${swing}deg`,
+    '--motion-swing-deg': `${angle}deg`,
     '--motion-trans-x': `${x * TRANSLATE_DISTANCE}%`,
     '--motion-trans-y': `${y * TRANSLATE_DISTANCE}%`,
-    '--motion-ease-in': getEasing(ease.in),
-    '--motion-ease-inout': getEasing(ease.inOut),
-    '--motion-ease-out': getEasing(ease.out),
   };
 
   const translateBefore = `translate(${toKeyframeValue(
@@ -78,40 +88,15 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     asWeb,
   )} * -1), calc(${toKeyframeValue(custom, '--motion-trans-y', asWeb)} * -1))`;
 
-  const keyframes = iterationDelay
-    ? FACTORS_SEQUENCE.map(({ factor, timeFactor }) => {
-        const keyframeOffset = timeFactor * timingFactor;
-
-        return {
-          offset: keyframeOffset,
-          easing: toKeyframeValue(custom, '--motion-ease-inout', asWeb),
-          transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${toKeyframeValue(
-            custom,
-            '--motion-swing-deg',
-            asWeb,
-          )} * ${factor})) ${translateAfter}`,
-        };
-      })
-    : [
-        {
-          offset: 0.25,
-          easing: toKeyframeValue(custom, '--motion-ease-inout', asWeb),
-          transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(${toKeyframeValue(
-            custom,
-            '--motion-swing-deg',
-            asWeb,
-          )}) ${translateAfter}`,
-        },
-        {
-          offset: 0.75,
-          easing: toKeyframeValue(custom, '--motion-ease-in', asWeb),
-          transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${toKeyframeValue(
-            custom,
-            '--motion-swing-deg',
-            asWeb,
-          )} * -1)) ${translateAfter}`,
-        },
-      ];
+  const keyframes = FACTORS_SEQUENCE.map(({ factor, timeFactor }) => ({
+    offset: (timeFactor / 1.175) * timingFactor,
+    easing: getEasing(ease.inOut),
+    transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${toKeyframeValue(
+      custom,
+      '--motion-swing-deg',
+      asWeb,
+    )} * ${factor})) ${translateAfter}`,
+  }));
 
   const animations = [
     {
@@ -123,7 +108,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       keyframes: [
         {
           offset: 0,
-          easing: toKeyframeValue(custom, '--motion-ease-out', asWeb),
+          easing: getEasing(ease.out),
           transform: `rotateZ(var(--motion-rotate, 0deg)) ${translateBefore} rotate(0deg) ${translateAfter}`,
         },
         ...keyframes,

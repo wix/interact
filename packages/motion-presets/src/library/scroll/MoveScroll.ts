@@ -1,62 +1,69 @@
-import type { AnimationFillMode, DomApi, MoveScroll, ScrubAnimationOptions } from '../../types';
+import type { DomApi, MoveScroll, ScrubAnimationOptions } from '../../types';
 import {
   getCssUnits,
   transformPolarToXY,
   toKeyframeValue,
   parseLength,
-  parseDirection,
   suffixNames,
   suffixCustomProperties,
+  getScrollFill,
+  completeScrollOffsets,
 } from '../../utils';
+import { SCROLL_RANGES } from '../../consts';
 
-const DEFAULT_ANGLE = 120;
-const DEFAULT_DISTANCE = { value: 400, unit: 'px' };
+const DEFAULTS: Required<MoveScroll> = {
+  type: 'MoveScroll',
+  direction: -60,
+  range: 'in',
+  travel: { value: 400, unit: 'px' },
+};
+
+export const schema = {
+  direction: { type: 'number', default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-moveScroll'], options.suffix);
 }
 
-export function web(options: ScrubAnimationOptions, _?: DomApi, config?: Record<string, any>) {
-  return style(options, config, true);
+export function web(options: ScrubAnimationOptions, _?: DomApi) {
+  return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, config?: Record<string, any>, asWeb = false) {
+export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as MoveScroll;
-  const angle = parseDirection(namedEffect?.angle, [], DEFAULT_ANGLE, true);
-  const { range = 'in' } = namedEffect;
+  const { direction = DEFAULTS.direction, range = DEFAULTS.range } = namedEffect;
 
   const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+  const fill = getScrollFill(options, range);
+  const offsets = completeScrollOffsets(options as ScrubAnimationOptions, range);
 
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
+  const travel = parseLength(namedEffect.travel, DEFAULTS.travel);
+  const unit = getCssUnits(travel.unit);
+  const [travelX, polarY] = transformPolarToXY(direction, travel.value);
+  const travelY = direction % 180 ? polarY : 0;
 
-  let [travelX, travelY] = transformPolarToXY(angle, distance.value);
-  const unit = getCssUnits(distance.unit);
-
+  // moving down - against the scroll - widens the range by the travel
   let startOffsetAdd = '',
     endOffsetAdd = '';
-  if (!config?.ignoreScrollMoveOffsets) {
-    if (travelY < 0 && range !== 'out') {
-      startOffsetAdd = `${travelY}${unit}`;
-      if (range !== 'in') {
-        endOffsetAdd = `${Math.abs(travelY)}${unit}`;
-      }
+  if (travelY > 0) {
+    if (range !== 'out') {
+      startOffsetAdd = `${-travelY}${unit}`;
     }
-    if (travelY > 0 && range === 'out') {
-      endOffsetAdd = `${Math.abs(travelY)}${unit}`;
+    if (range !== 'in') {
+      endOffsetAdd = `${travelY}${unit}`;
     }
   }
 
-  [travelX, travelY] = [travelX, travelY].map(Math.round);
   const fromValue = {
-    x: range === 'out' ? 0 : travelX,
-    y: range === 'out' ? 0 : travelY,
+    x: range === 'out' ? 0 : -travelX,
+    y: range === 'out' ? 0 : -travelY,
   };
   const toValue = {
-    x: range === 'in' ? 0 : range === 'out' ? travelX : -travelX,
-    y: range === 'in' ? 0 : range === 'out' ? travelY : -travelY,
+    x: range === 'in' ? 0 : travelX,
+    y: range === 'in' ? 0 : travelY,
   };
 
   const [moveScroll] = getNames(options);
@@ -74,6 +81,7 @@ export function style(options: ScrubAnimationOptions, config?: Record<string, an
       ...options,
       name: moveScroll,
       fill,
+      ...offsets,
       easing,
       startOffsetAdd,
       endOffsetAdd,

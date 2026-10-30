@@ -1,5 +1,15 @@
 import type { Shape, ShapeIn, TimeAnimationOptions } from '../../types';
 import { toKeyframeValue, getEntranceFill, suffixNames, suffixCustomProperties } from '../../utils';
+import { SHAPES } from '../../consts';
+
+const DEFAULTS: Required<ShapeIn> = {
+  type: 'ShapeIn',
+  shape: 'rectangle',
+};
+
+export const schema = {
+  shape: { type: 'enum', values: SHAPES, default: DEFAULTS.shape },
+};
 
 export function getNames(options: TimeAnimationOptions) {
   return suffixNames(['motion-fadeIn', 'motion-shapeIn'], options.suffix);
@@ -24,7 +34,7 @@ export function web(options: TimeAnimationOptions) {
 }
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { shape = 'rectangle' } = options.namedEffect as ShapeIn;
+  const { shape = DEFAULTS.shape } = options.namedEffect as ShapeIn;
   const [fadeIn, shapeIn] = getNames(options);
   const easing = options.easing || 'cubicInOut';
 

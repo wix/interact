@@ -7,11 +7,21 @@ import {
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
-import type { TiltIn, TimeAnimationOptions, EffectTwoSides } from '../../types';
+import type { TiltIn, TimeAnimationOptions, LengthValue } from '../../types';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectTwoSides = 'left';
-const DEFAULT_DEPTH = { value: 200, unit: 'px' };
+const DEFAULTS: Required<TiltIn> = {
+  type: 'TiltIn',
+  depth: { value: 100, unit: 'px' },
+  from: 'left',
+  perspective: 800,
+};
+
+export const schema = {
+  depth: { type: 'length', default: DEFAULTS.depth },
+  from: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: DEFAULTS.from },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+};
 
 export function getNames(options: TimeAnimationOptions) {
   return suffixNames(['motion-fadeIn', 'motion-tiltInRotate', 'motion-tiltInClip'], options.suffix);
@@ -28,9 +38,9 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as TiltIn;
-  const direction = parseDirection(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULT_DIRECTION);
-  const depth = parseLength(namedEffect.depth, DEFAULT_DEPTH);
-  const { perspective = 800 } = namedEffect;
+  const direction = parseDirection(namedEffect?.from, TWO_SIDES_DIRECTIONS, DEFAULTS.from);
+  const depth = parseLength(namedEffect.depth, DEFAULTS.depth as LengthValue);
+  const { perspective = DEFAULTS.perspective } = namedEffect;
   const [fadeIn, tiltInRotate, tiltInClip] = getNames(options);
 
   const easing = options.easing || 'cubicOut';
@@ -41,8 +51,8 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   const rotateCustom = {
     '--motion-perspective': `${perspective}px`,
-    '--motion-depth-negative': `calc(${depthValue} / 2 * -1)`,
-    '--motion-depth-positive': `calc(${depthValue} / 2)`,
+    '--motion-depth-negative': `calc(${depthValue} * -1)`,
+    '--motion-depth-positive': depthValue,
   };
 
   const clipCustom = {
