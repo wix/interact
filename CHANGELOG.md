@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Fixed
 
-- `splitTextPlugin` splits a container again when a re-render replaces it after the split, e.g. a hydration that doesn't match the split DOM. It calls Interact's plugin `refresh()`, so the effects target the new spans instead of the detached ones. Needs an `@wix/interact` version that passes `refresh` (#386)
+- `splitTextPlugin` splits a container again when a re-render replaces it, or its children, after the split, e.g. a hydration that doesn't match the split DOM. A hidden `<splittext-sentinel>` in each split container detects it, with no `MutationObserver`. It calls Interact's plugin `refresh()`, so the effects target the new spans instead of the detached ones. Needs an `@wix/interact` version that passes `refresh` (#386)
 
 ### [0.2.1] - 2026-10-25
 
