@@ -85,7 +85,12 @@ export const splitTextPlugin = (
  * A re-render can replace a split container while its root stays, e.g. a hydration that doesn't match
  * the split DOM and renders the container again. The new container isn't split, and Interact's effects
  * still target the old one's spans. `refresh` re-applies the plugin, which splits the new container,
- * and re-resolves the targets. The split itself keeps the containers, so it doesn't trigger this.
+ * and re-resolves the targets.
+ *
+ * A container leaves the document only when it or one of its ancestors is removed from its parent, so
+ * it's enough to watch the children of each node from the container's parent up to the root. The split
+ * itself only changes nodes inside the containers, and other changes in the root reach the observer
+ * only when they add or remove a child of one of those ancestors.
  */
 function refreshOnReplace(
   root: HTMLElement,
@@ -98,7 +103,17 @@ function refreshOnReplace(
       refresh();
     }
   });
-  observer.observe(root, { childList: true, subtree: true });
+
+  const ancestors = new Set<Node>();
+  for (const element of elements) {
+    for (let node = element.parentNode; node && !ancestors.has(node); node = node.parentNode) {
+      ancestors.add(node);
+      if (node === root) {
+        break;
+      }
+    }
+  }
+  ancestors.forEach((ancestor) => observer.observe(ancestor, { childList: true }));
 
   return observer;
 }

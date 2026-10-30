@@ -56,6 +56,39 @@ describe('splitTextPlugin refresh', () => {
     expect(refresh).not.toHaveBeenCalled();
   });
 
+  it('asks for a refresh when an ancestor between the root and the container is replaced', async () => {
+    const root = document.createElement('section');
+    root.innerHTML = '<div class="host"><div class="inner"><h2 class="title">Hi there</h2></div></div>';
+    document.body.appendChild(root);
+    const refresh = vi.fn();
+    splitTextPlugin({ container: '.title', type: 'chars' }, { root, refresh });
+
+    const rendered = document.createElement('div');
+    rendered.className = 'inner';
+    rendered.innerHTML = '<h2 class="title">Hi there</h2>';
+    root.querySelector('.inner')!.replaceWith(rendered);
+    await flushMutations();
+
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("watches only the children of the containers' ancestors up to the root", () => {
+    document.body.innerHTML = '<main><section class="root"></section></main>';
+    const root = document.querySelector<HTMLElement>('.root')!;
+    root.innerHTML =
+      '<div class="a"><h2 class="title">One</h2></div>' +
+      '<div class="b"><div class="c"><h2 class="title">Two</h2></div></div>' +
+      '<div class="busy"><ul><li>other content</li></ul></div>';
+    const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+
+    splitTextPlugin({ container: '.title', type: 'chars' }, { root, refresh: vi.fn() });
+
+    const observed = observe.mock.calls.map(([target]) => (target as Element).className);
+    expect(observed.sort()).toEqual(['a', 'b', 'c', 'root']);
+    expect(observe.mock.calls.every(([, options]) => !options?.subtree)).toBe(true);
+    observe.mockRestore();
+  });
+
   it('splits without a refresh from an Interact version that passes none', () => {
     const root = aRoot();
 
