@@ -30,6 +30,7 @@ import {
   buildAtPropertyRules,
   getCustomPropName,
   buildSequenceListsRule,
+  buildTimelineScopeRule,
   LIST_KINDS,
   listKind,
 } from './cssUtils';
@@ -86,6 +87,7 @@ type GenerateContext = {
   collectSlots: boolean;
   useFirstChild: boolean;
   plugins?: InteractPluginStyles;
+  configIndex?: number;
 };
 
 function createTargetContext(key: string, childSelector?: string): TargetContext {
@@ -112,6 +114,7 @@ function createTargetContext(key: string, childSelector?: string): TargetContext
 function getCustomProps(
   target: TargetContext,
   useSlots: SlotUsage,
+  configIndex?: number,
 ): Record<ListPropertyName, string> {
   return Object.fromEntries(
     LIST_PROPERTY_NAMES.map((name) => {
@@ -120,8 +123,8 @@ function getCustomProps(
       return [
         name,
         useSlots[kind]
-          ? getCustomPropName(name, slotCursor + slotsInSequence, true)
-          : getCustomPropName(name, listIndex),
+          ? getCustomPropName(name, slotCursor + slotsInSequence, true, configIndex)
+          : getCustomPropName(name, listIndex, false, configIndex),
       ];
     }),
   ) as Record<ListPropertyName, string>;
@@ -224,7 +227,7 @@ function triggerToCSS(
 
   const sourceHash = getElementHash(interaction);
   const source = ctx.targetsMap.get(sourceHash) || createTargetContext(key, childSelector);
-  const name = getCustomProps(source, NO_SLOTS)['view-timeline'];
+  const name = getCustomProps(source, NO_SLOTS, ctx.configIndex)['view-timeline'];
   endEffect(source, { animation: false, transition: false, timeline: true }, NO_SLOTS);
   ctx.targetsMap.set(sourceHash, source);
   visited.add(sourceHash);
@@ -480,7 +483,7 @@ function parseEffect(
   visited.add(targetHash);
 
   const useSlots = slotUsage?.get(targetHash) || NO_SLOTS;
-  const customProps = getCustomProps(current, useSlots);
+  const customProps = getCustomProps(current, useSlots, ctx.configIndex);
 
   if (ctx.collectSlots) {
     collectKeyframeEntry(current, effect, customProps.animation);
@@ -538,7 +541,7 @@ function parseSequence(
     visited.add(targetHash);
     const current = ctx.targetsMap.get(targetHash)!;
 
-    const rule = buildSequenceListsRule(current, conditions, ctx.configConditions);
+    const rule = buildSequenceListsRule(current, conditions, ctx.configConditions, ctx.configIndex);
     if (rule) {
       rule.declarations.forEach(({ name }) => current.assigned.add(name));
       cssRules.push(rule);
@@ -570,7 +573,7 @@ function parseInteraction(
   const { trigger } = interaction;
   const motionTrigger = {
     trigger: camelToKebabCase(trigger),
-    id: ['trigger', interactionIdx].join('-'),
+    id: getFallbackId('trigger', [interactionIdx], ctx.configIndex),
     componentId: '',
   } as TriggerVariant;
   const visited = new Set<string>();
@@ -585,7 +588,7 @@ function parseInteraction(
         effect,
         interaction,
         ctx.config,
-        `eff-${interactionIdx}-${effIndex}`,
+        getFallbackId('eff', [interactionIdx, effIndex], ctx.configIndex),
       );
       return resolved && Object.assign(resolved, { slotKey: getSlotKey(interactionIdx, effIndex) });
     })
@@ -601,7 +604,7 @@ function parseInteraction(
         sequence,
         interaction,
         ctx.config,
-        `seq-${interactionIdx}-${seqIndex}`,
+        getFallbackId('seq', [interactionIdx, seqIndex], ctx.configIndex),
         (effIndex) => getSlotKey(interactionIdx, effIndex, seqIndex),
       ),
     )
@@ -630,31 +633,26 @@ function parseInteraction(
  * Normalizes `generate()`'s single optional argument, which is either the legacy `useFirstChild`
  * boolean or an options bag.
  */
-function normalizeGenerateOptions(options: boolean | GenerateOptions = {}): {
-  useFirstChild: boolean;
-  plugins?: InteractPluginStyles;
-} {
-  const { useFirstChild = true, plugins } =
-    typeof options === 'boolean' ? { useFirstChild: options, plugins: undefined } : options;
-
-  return { useFirstChild, plugins };
+function normalizeGenerateOptions(options: boolean | GenerateOptions = {}): GenerateOptions {
+  return typeof options === 'boolean' ? { useFirstChild: options } : options;
 }
 
 function parseConfig(
   config: InteractConfig,
-  options: { useFirstChild?: boolean; plugins?: InteractPluginStyles; collectSlots?: boolean },
+  options: GenerateOptions & { collectSlots?: boolean },
 ) {
-  const { useFirstChild = true, plugins, collectSlots = false } = options;
+  const { useFirstChild = true, plugins, configIndex, collectSlots = false } = options;
   const ctx: GenerateContext = {
     config,
     configConditions: config.conditions || {},
     targetsMap: new Map<string, TargetContext>(),
     keyframesMap: new Map<string, Keyframe[]>(),
-    keyframeSlots: collectSlots ? new Map() : getKeyframeSlots(config),
+    keyframeSlots: collectSlots ? new Map() : getKeyframeSlots(config, configIndex),
     scopedTimelines: [],
     collectSlots,
     useFirstChild,
     plugins,
+    configIndex,
   };
 
   const cssRules = config.interactions.flatMap((interaction, interactionIdx) =>
@@ -662,6 +660,15 @@ function parseConfig(
   );
 
   return { ctx, cssRules };
+}
+
+// ids of what the config leaves unnamed, shared with the runtime, which finds generated animations by them
+export function getFallbackId(
+  type: 'trigger' | 'eff' | 'seq',
+  indices: number[],
+  configIndex?: number,
+): string {
+  return [type, ...(configIndex === undefined ? [] : [`c${configIndex}`]), ...indices].join('-');
 }
 
 export function getSlotKey(interactionIndex: number, effectIndex: number, sequenceIndex?: number) {
@@ -679,8 +686,11 @@ export function getSlotKey(interactionIndex: number, effectIndex: number, sequen
  *
  * @returns the suffix of every effect not in the first slot, by its slot key (see getSlotKey)
  */
-export function getKeyframeSlots(config: InteractConfig): Map<string, string> {
-  const { ctx } = parseConfig(config, { collectSlots: true });
+export function getKeyframeSlots(
+  config: InteractConfig,
+  configIndex?: number,
+): Map<string, string> {
+  const { ctx } = parseConfig(config, { configIndex, collectSlots: true });
   const slots = new Map<string, string>();
   const suffixOf = (slot: number) => (slot ? `-${slot}` : undefined);
 
@@ -728,6 +738,7 @@ export function _generate(
     animationLength,
     transitionLength,
     timelineLength,
+    ctx.configIndex,
   );
 
   const animationSlotLength = Math.max(0, ...targets.map(({ animation }) => animation.slotCursor));
@@ -741,12 +752,12 @@ export function _generate(
     animationSlotLength,
     transitionSlotLength,
     timelineLength,
+    ctx.configIndex,
   );
 
-  // trigger names are unique in a config, and a target inside its source still resolves the source's timeline first
-  const timelineScopeRule = ctx.scopedTimelines.length
-    ? `:root {\n  timeline-scope: ${ctx.scopedTimelines.join(', ')};\n}`
-    : '';
+  // trigger names are unique in a config (and across configs given their configIndex),
+  // and a target inside its source still resolves the source's timeline first
+  const timelineScopeRule = buildTimelineScopeRule(ctx.scopedTimelines, ctx.configIndex);
 
   return { keyframes: ctx.keyframesMap, atProperty, cssRules, listsRule, timelineScopeRule };
 }
@@ -762,6 +773,8 @@ export function _generate(
  *       the config, the matching generator is called with the field's (opaque) value and a context;
  *       its returned CSS is appended. Used e.g. to hide pre-split text for FOUC prevention.
  *       Interact never inspects the field value — mirroring `create()`/`use()`.
+ *   - `configIndex` - The config's index among the configs on the page, when there are several (see
+ *       {@link GenerateOptions})
  *
  * @returns string containing all of the CSS rules needed for time-based animations
  */

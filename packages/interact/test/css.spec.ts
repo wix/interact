@@ -1941,6 +1941,110 @@ describe('css._generate', () => {
     });
   });
 
+  describe('multiple configs (configIndex option)', () => {
+    const scrubOf = (source: string, effectId: string): InteractConfig => ({
+      interactions: [
+        {
+          key: source,
+          trigger: 'viewProgress',
+          effects: [
+            {
+              key: 'shared',
+              effectId,
+              keyframeEffect: { name: effectId, keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+            },
+          ],
+        },
+      ],
+    });
+
+    it('suffixes the list custom properties and trigger names with the config index', () => {
+      const { cssRules, atProperty } = _generate(scrubOf('a', 'fade'), { configIndex: 1 });
+      const names = cssRules.flatMap(({ declarations }) => declarations.map(({ name }) => name));
+
+      expect(names).toEqual(
+        expect.arrayContaining(['--vw-tmln-c1-0', '--anm-c1-0', '--anm-tmln-c1-0']),
+      );
+      expect(names.filter((name) => /^--[a-z-]+-\d+$/.test(name))).toEqual([]);
+      expect(cssRules.find(({ key }) => key === 'a')!.declarations[0].value).toBe('--trigger-c1-0');
+      expect(atProperty).toContain(
+        '@property --anm-c1-0 { syntax: "*"; inherits: false; initial-value: none; }',
+      );
+    });
+
+    it('concatenates the lists of the configs before it on the elements it targets', () => {
+      const { listsRule, atProperty } = _generate(scrubOf('a', 'fade'), { configIndex: 1 });
+
+      expect(listsRule).toContain('--anm-c1: var(--anm-c1-0);');
+      expect(listsRule).toContain('animation: var(--anm-c0), var(--anm-c1);');
+      expect(listsRule).toContain('view-timeline: var(--vw-tmln-c0), var(--vw-tmln-c1);');
+      expect(atProperty).toContain(
+        '@property --anm-c0 { syntax: "*"; inherits: false; initial-value: none; }',
+      );
+      expect(atProperty).toContain(
+        '@property --anm-c1 { syntax: "*"; inherits: false; initial-value: none; }',
+      );
+    });
+
+    it('scopes the timelines of the configs before it to the page', () => {
+      const { timelineScopeRule } = _generate(scrubOf('a', 'fade'), { configIndex: 2 });
+
+      expect(timelineScopeRule).toBe(
+        ':root {\n  --tmln-scp-c2: --trigger-c2-0;\n  timeline-scope: var(--tmln-scp-c0, --_), var(--tmln-scp-c1, --_), var(--tmln-scp-c2, --_);\n}',
+      );
+    });
+
+    it('keeps the legacy names without a config index', () => {
+      const { listsRule, timelineScopeRule } = _generate(scrubOf('a', 'fade'));
+
+      expect(listsRule).toContain('animation: var(--anm-0);');
+      expect(listsRule).not.toContain('-c0');
+      expect(timelineScopeRule).toBe(':root {\n  timeline-scope: --trigger-0;\n}');
+    });
+
+    const unnamed = (): InteractConfig => ({
+      interactions: [
+        {
+          key: 'a',
+          trigger: 'click',
+          effects: [
+            { duration: 100, keyframeEffect: { keyframes: [{ opacity: 0 }] } },
+            { transition: { duration: 100, styleProperties: [{ name: 'color', value: 'red' }] } },
+          ],
+          sequences: [
+            { effects: [{ duration: 100, keyframeEffect: { keyframes: [{ opacity: 0 }] } }] },
+          ],
+        },
+      ],
+    });
+
+    it('suffixes the ids of unnamed effects and sequences with the config index', () => {
+      const { keyframes, cssRules } = _generate(unnamed(), { configIndex: 1 });
+
+      expect([...keyframes.keys()]).toEqual(['eff-c1-0-0', 'seq-c1-0-0-eff-0']);
+      expect(cssRules.find(({ states }) => states)!.states).toEqual(['eff-c1-0-1']);
+    });
+
+    it('gives unnamed effects and sequences the same ids at runtime', () => {
+      const idsOf = ({ interactions: [{ effects, sequences }] }: InteractConfig) => [
+        ...effects!.map((effect) => (effect as { effectId: string }).effectId),
+        ...sequences!.flatMap((sequence) =>
+          (sequence as { effects: { keyframeEffect: { name: string } }[] }).effects.map(
+            ({ keyframeEffect }) => keyframeEffect.name,
+          ),
+        ),
+      ];
+      const generated = unnamed();
+      _generate(generated, { configIndex: 1 });
+      const config = unnamed();
+      const instance = Interact.create(config, { configIndex: 1 });
+
+      expect(idsOf(config)).toEqual(['eff-c1-0-0', 'eff-c1-0-1', 'seq-c1-0-0-eff-0']);
+      expect(idsOf(config)).toEqual(idsOf(generated));
+      instance.destroy();
+    });
+  });
+
   describe('effect parts', () => {
     const style = (options: { suffix?: string }) => [
       { ...options, name: 'bg-media', part: 'MEDIA_WRAPPER', keyframes: [{ opacity: 0 }] },

@@ -13,7 +13,7 @@ import {
   InteractPlugin,
 } from '../types';
 import { getElementHash, getInterpolatedKey } from './utilities';
-import { getKeyframeSlots, getSlotKey } from './css';
+import { getFallbackId, getKeyframeSlots, getSlotKey } from './css';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
@@ -60,14 +60,17 @@ export class Interact {
     this.controllers = new Set();
   }
 
-  init(config: InteractConfig, options?: { useCustomElement?: boolean }): void {
+  init(
+    config: InteractConfig,
+    options?: { useCustomElement?: boolean; configIndex?: number },
+  ): void {
     if (typeof window === 'undefined' || !window.customElements) {
       return;
     }
 
     const useCustomElement = options?.useCustomElement ?? !!Interact.defineInteractElement;
 
-    this.dataCache = parseConfig(config, useCustomElement);
+    this.dataCache = parseConfig(config, useCustomElement, options?.configIndex);
 
     const defined = Interact.defineInteractElement?.();
 
@@ -174,7 +177,10 @@ export class Interact {
     });
   }
 
-  static create(config: InteractConfig, options?: { useCustomElement?: boolean }): Interact {
+  static create(
+    config: InteractConfig,
+    options?: { useCustomElement?: boolean; configIndex?: number },
+  ): Interact {
     const instance = new Interact();
     Interact.instances.push(instance);
 
@@ -418,12 +424,18 @@ function withSlots<T extends SequenceConfig | SequenceConfigRef>(
   };
 }
 
-function parseConfig(config: InteractConfig, useCustomElement: boolean = false): InteractCache {
+function parseConfig(
+  config: InteractConfig,
+  useCustomElement: boolean = false,
+  configIndex?: number,
+): InteractCache {
   const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {} } = config;
   const interactions: InteractCache['interactions'] = {};
-  const slots = config.interactions ? getKeyframeSlots(config) : new Map<string, string>();
+  const slots = config.interactions
+    ? getKeyframeSlots(config, configIndex)
+    : new Map<string, string>();
 
-  config.interactions?.forEach((interaction_, configIndex) => {
+  config.interactions?.forEach((interaction_, interactionIndex) => {
     const source = interaction_.key;
     const interactionIdx = ++interactionIdCounter;
     const { effects: effects_, sequences: sequences_, ...rest } = interaction_;
@@ -454,7 +466,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
 
       const seq = seqOrRef as SequenceConfig;
       if (!seq.sequenceId) {
-        seq.sequenceId = `seq-${configIndex}-${sequenceIndex}`;
+        seq.sequenceId = getFallbackId('seq', [interactionIndex, sequenceIndex], configIndex);
       }
       return seq;
     });
@@ -463,7 +475,11 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
       ...rest,
       effects: effects.length > 0 ? effects : undefined,
       sequences: processedSequences?.map((seq, sequenceIndex) =>
-        withSlots(seq, (effectIndex) => getSlotKey(configIndex, effectIndex, sequenceIndex), slots),
+        withSlots(
+          seq,
+          (effectIndex) => getSlotKey(interactionIndex, effectIndex, sequenceIndex),
+          slots,
+        ),
       ),
     } as Interaction;
 
@@ -488,9 +504,13 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
 
       const configEffectIndex = effects.length - 1 - effectIndex;
       if (!(effect as EffectRef).effectId) {
-        (effect as EffectRef).effectId = `eff-${configIndex}-${configEffectIndex}`;
+        (effect as EffectRef).effectId = getFallbackId(
+          'eff',
+          [interactionIndex, configEffectIndex],
+          configIndex,
+        );
       }
-      const suffix = slots.get(getSlotKey(configIndex, configEffectIndex));
+      const suffix = slots.get(getSlotKey(interactionIndex, configEffectIndex));
       if (suffix) {
         (effect as { suffix?: string }).suffix = suffix;
       }

@@ -20,7 +20,10 @@ import { Interact } from '@wix/interact';
 ```typescript
 class Interact {
   // Static methods
-  static create(config: InteractConfig, options?: { useCustomElement?: boolean }): Interact;
+  static create(
+    config: InteractConfig,
+    options?: { useCustomElement?: boolean; configIndex?: number },
+  ): Interact;
   static getInstance(key: string): Interact | undefined;
   static destroy(): void;
   static setup(options: {
@@ -36,7 +39,10 @@ class Interact {
   static getPluginNames(): Set<string>;
 
   // Instance methods
-  init(config: InteractConfig, options?: { useCustomElement?: boolean }): void;
+  init(
+    config: InteractConfig,
+    options?: { useCustomElement?: boolean; configIndex?: number },
+  ): void;
   destroy(): void;
   has(key: string): boolean;
   get(key: string): InteractCache['interactions'][string] | undefined;
@@ -52,6 +58,8 @@ Creates a new `Interact` instance with the provided configuration and initialize
 **Parameters:**
 
 - `config: InteractConfig` - The interaction configuration object
+- `options?.useCustomElement?: boolean` - Whether elements are wrapped in `<interact-element>` (defaults to whether the custom element is available)
+- `options?.configIndex?: number` - The config's index when several configs are on the same page. It must match the `configIndex` passed to [`generate()`](./functions.md#generateconfig-options) for the same config. Unnamed effects and sequences get ids suffixed by it (`eff-c1-0-0`), which become their generated keyframe and state names, so the configs' names don't collide.
 
 **Returns:** `Interact` - The initialized interact instance
 
