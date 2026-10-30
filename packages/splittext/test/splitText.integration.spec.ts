@@ -54,6 +54,53 @@ describe('splitText through the Interact plugin bridge (real @wix/splittext)', (
     document.body.removeChild(element);
   });
 
+  it('splits again a container that a re-render replaced', async () => {
+    const element = document.createElement('div');
+    element.innerHTML = '<div class="host"><h1 class="title">Hi</h1></div>';
+    document.body.appendChild(element);
+
+    const config: InteractConfig = {
+      interactions: [
+        {
+          key: 'hero',
+          trigger: 'hover',
+          $splitText: { container: '.title', type: 'chars', hideUntilReady: true },
+          effects: [
+            {
+              key: 'hero',
+              selector: '.split-c',
+              namedEffect: { type: 'FadeIn' } as never,
+              duration: 300,
+            },
+          ],
+        },
+      ],
+    };
+
+    Interact.create(config);
+    add(element, 'hero');
+    const firstChars = [...element.querySelectorAll('.split-c')];
+    expect(firstChars.length).toBeGreaterThanOrEqual(2);
+
+    // As a hydration that doesn't match the split DOM: the component is rendered again, un-split
+    const rendered = document.createElement('div');
+    rendered.className = 'host';
+    rendered.innerHTML = '<h1 class="title">Hi</h1>';
+    element.querySelector('.host')!.replaceWith(rendered);
+    // The plugin's MutationObserver, then Interact's refresh microtask
+    await new Promise((resolve) => setTimeout(resolve));
+
+    const title = element.querySelector<HTMLElement>('.title')!;
+    const chars = [...element.querySelectorAll<HTMLElement>('.split-c')];
+    expect(chars.length).toBeGreaterThanOrEqual(2);
+    expect(chars.some((char) => firstChars.includes(char))).toBe(false);
+    expect(title.hasAttribute('data-splittext-ready')).toBe(true);
+
+    remove('hero');
+    expect(element.querySelectorAll('.split-c').length).toBe(0);
+    document.body.removeChild(element);
+  });
+
   it('generate() emits SSR FOUC-prevention CSS via splitTextStyle, matched by the runtime marker', () => {
     // A `hover` trigger keeps the runtime path off the (jsdom-unsupported) sequence engine;
     // the `hideUntilReady` marker is trigger-independent. The SSR rule is emitted for any trigger.

@@ -18,7 +18,7 @@ Register before `Interact.create()`:
 ```js
 Interact.use('<plugin-name>', (value, context) => {
   // value:   the value of the `$<plugin-name>` field
-  // context: { root, key, scope: 'interaction' | 'effect', config }
+  // context: { root, key, scope: 'interaction' | 'effect', config, refresh }
   // return:  optional cleanup () => void, run on disconnect/teardown
 });
 ```
@@ -45,6 +45,7 @@ Add a `$<plugin-name>` field on an **interaction** or an **effect**:
 - Use a bare, unquoted `$<name>` key — no quotes needed since `$` is a valid identifier start (e.g. `$splitText:`, not `'plugin:splitText':`).
 - Plugins run at **connect time, before target resolution** — DOM a plugin creates is visible to the `selector` / `listContainer` queries that follow.
 - A returned cleanup runs on disconnect, on `Interact.destroy()`, and on media-query reconnect. Use it to fully undo the plugin's work.
+- If something replaces the plugin's output after it ran (e.g. a re-render during hydration), the plugin **SHOULD** call `context.refresh()`: it runs the cleanups, re-applies the plugins and re-resolves the targets, which otherwise stay on the replaced elements. It runs in a microtask, once for all the calls before it, and is a no-op after the cleanup. The plugin detects the replacement; Interact doesn't watch for it.
 - Each distinct plugin value is applied **once per connect**, even across multiple triggers on the same element.
 - Interaction-level fields use the interaction's element as `root`; effect-level fields use the effect's target element as `root`.
 

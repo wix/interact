@@ -221,6 +221,8 @@ Interact.create({
 });
 ```
 
+If a re-render replaces a split container — e.g. a hydration that doesn't match the split DOM renders it again — the plugin asks Interact to `refresh()`, which splits the new container and points the effects at its spans. This needs an `@wix/interact` version that passes `refresh` to plugins; with an older one, the replaced container stays un-split.
+
 For SSR / build-time CSS, pass the companion `splitTextStyle` generator to `generate()` so the `hideUntilReady` container is hidden until the runtime split marks it ready:
 
 ```ts

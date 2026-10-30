@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/splittext
 
+### [0.2.2] - 2026-10-30
+
+#### Fixed
+
+- `splitTextPlugin` splits a container again when a re-render replaces it after the split, e.g. a hydration that doesn't match the split DOM. It calls Interact's plugin `refresh()`, so the effects target the new spans instead of the detached ones. Needs an `@wix/interact` version that passes `refresh`
+
 ### [0.2.1] - 2026-10-25
 
 #### Added
@@ -111,6 +117,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact
+
+### [2.5.26] - 2026-10-30
+
+#### Added
+
+- `refresh()` in the plugin context: runs the cleanups, re-applies the plugins and re-resolves the targets of the element the plugin was applied to, as on a reconnect. For a plugin whose output was replaced after it ran. Runs in a microtask, once for all the calls before it, and does nothing once the plugin's cleanup has run
 
 ### [2.5.25] - 2026-10-30
 

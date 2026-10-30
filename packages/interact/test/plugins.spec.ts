@@ -201,6 +201,94 @@ describe('interact plugin bridge', () => {
     });
   });
 
+  describe('refresh', () => {
+    const aConfig = (): InteractConfig => ({
+      interactions: [
+        {
+          key: 'el',
+          trigger: 'hover',
+          $demo: {},
+          effects: [
+            { key: 'el', selector: '.pt', namedEffect: { type: 'FadeIn' } as any, duration: 100 },
+          ],
+        },
+      ],
+    });
+
+    it('re-applies the plugin and re-resolves the targets', async () => {
+      const contexts: InteractPluginContext[] = [];
+      Interact.use('demo', (_value, ctx) => {
+        contexts.push(ctx);
+        const span = document.createElement('span');
+        span.className = 'pt';
+        ctx.root.appendChild(span);
+        return () => span.remove();
+      });
+      const addSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+      const element = document.createElement('div');
+      Interact.create(aConfig());
+      add(element, 'el');
+      const [firstSpan] = element.querySelectorAll('.pt');
+
+      // Something else replaces the plugin's output, as a re-render would
+      firstSpan.replaceWith(document.createElement('span'));
+      contexts[0].refresh();
+      await Promise.resolve();
+
+      const [secondSpan] = element.querySelectorAll('.pt');
+      expect(contexts).toHaveLength(2);
+      expect(secondSpan).not.toBe(firstSpan);
+      expect(addSpy.mock.calls.at(-1)?.[1]).toBe(secondSpan);
+    });
+
+    it('can be called while the plugin runs, and runs once for the calls before it', async () => {
+      const apply = vi.fn((_value: unknown, ctx: InteractPluginContext) => {
+        if (apply.mock.calls.length === 1) {
+          ctx.refresh();
+          ctx.refresh();
+        }
+      });
+      Interact.use('demo', apply);
+      Interact.create(aConfig());
+      add(document.createElement('div'), 'el');
+      expect(apply).toHaveBeenCalledTimes(1);
+
+      await Promise.resolve();
+
+      expect(apply).toHaveBeenCalledTimes(2);
+    });
+
+    it('does nothing once the plugin was cleaned up', async () => {
+      const contexts: InteractPluginContext[] = [];
+      Interact.use('demo', (_value, ctx) => {
+        contexts.push(ctx);
+      });
+      Interact.create(aConfig());
+      add(document.createElement('div'), 'el');
+
+      contexts[0].refresh();
+      remove('el');
+      await Promise.resolve();
+
+      expect(contexts).toHaveLength(1);
+    });
+
+    it("doesn't re-apply after a reconnect it was called before", async () => {
+      const contexts: InteractPluginContext[] = [];
+      Interact.use('demo', (_value, ctx) => {
+        contexts.push(ctx);
+      });
+      Interact.create(aConfig());
+      add(document.createElement('div'), 'el');
+
+      contexts[0].refresh();
+      Interact.getController('el')?.update();
+      await Promise.resolve();
+
+      expect(contexts).toHaveLength(2);
+    });
+  });
+
   describe('effect-level plugins (cross-element)', () => {
     it('applies a plugin to the effect target element before resolving it', () => {
       const roots: HTMLElement[] = [];

@@ -26,6 +26,13 @@ export type InteractPluginContext = {
   scope: 'interaction' | 'effect';
   /** The full interaction or effect config object the plugin field was found on. */
   config: Record<string, unknown>;
+  /**
+   * Re-applies the plugins and re-resolves the targets of the element the plugin was applied to, as on a
+   * reconnect. For a plugin whose output was replaced after it ran, e.g. by a re-render: the effects still
+   * target the replaced elements until then. Runs in a microtask, once for all the calls before it, and does
+   * nothing once the plugin's cleanup has run.
+   */
+  refresh: () => void;
 };
 
 /** Called on disconnect/teardown to undo whatever the plugin did (e.g. revert a DOM mutation). */

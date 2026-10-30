@@ -60,6 +60,7 @@ function _applyPlugins(
   scope: 'interaction' | 'effect',
 ): void {
   const pluginNames = Interact.getPluginsNames();
+  const refresh = _createPluginRefresh(owner);
 
   for (const name of pluginNames) {
     const field = `${PLUGIN_FIELD_PREFIX}${name}`;
@@ -78,12 +79,35 @@ function _applyPlugins(
 
     const plugin = Interact.getPlugin(name)!;
 
-    const cleanup = plugin(value, { root, key, scope, config });
+    const cleanup = plugin(value, { root, key, scope, config, refresh });
 
     if (typeof cleanup === 'function') {
       owner._pluginCleanups.push(cleanup);
     }
   }
+}
+
+/**
+ * A plugin's `refresh`: reconnects the owner, which runs the plugins' cleanups, re-applies them and
+ * re-resolves the targets. In a microtask, so a plugin can call it while it runs. A disconnect replaces
+ * `_appliedPlugins`, so a refresh from before it does nothing.
+ */
+function _createPluginRefresh(owner: IInteractionController): () => void {
+  const appliedPlugins = owner._appliedPlugins;
+  let scheduled = false;
+
+  return () => {
+    if (scheduled) {
+      return;
+    }
+    scheduled = true;
+
+    queueMicrotask(() => {
+      if (owner.connected && owner._appliedPlugins === appliedPlugins) {
+        owner.update();
+      }
+    });
+  };
 }
 
 function _getElementsFromData(

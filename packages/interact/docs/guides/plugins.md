@@ -49,6 +49,7 @@ type InteractPlugin = (
     key: string; // the interaction/effect key
     scope: 'interaction' | 'effect';
     config: Record<string, unknown>; // the interaction/effect object the field was on
+    refresh: () => void; // re-apply the plugins and re-resolve the targets, as on a reconnect
   },
 ) => void | (() => void); // optionally return a cleanup function
 ```
@@ -56,6 +57,7 @@ type InteractPlugin = (
 - Plugins run at **connect** time (when the element enters the DOM / is added).
 - A returned **cleanup** runs on disconnect, on teardown (`Interact.destroy()`), and when an interaction re-connects after a media-query change — so plugins can fully undo their work.
 - Each distinct plugin value is applied **once per connect**, even if referenced by multiple triggers on the same element.
+- If something replaces a plugin's output after it ran — e.g. a framework re-rendering the element during hydration — the effects still target the replaced elements. Call **`refresh()`** to run the cleanups, re-apply the plugins and re-resolve the targets. It runs in a microtask, once for all the calls before it, and does nothing once the plugin's cleanup has run. The plugin decides when to call it, since only it knows which elements its output depends on; `@wix/splittext/plugin` calls it when a container it split is replaced.
 
 ### Type-safe config (optional)
 
