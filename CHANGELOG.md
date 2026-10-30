@@ -112,6 +112,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [Unreleased]
+
+#### Added
+
+- `configIndex` option for `generate()` and `Interact.create()`, for several configs on the same page. Give each config its own index (`0`, `1`, …), pass the same one to its `generate()` and `Interact.create()`, and insert the configs' CSS in index order (#384)
+  - List custom properties, slots and trigger timeline names are suffixed with the index (`--anm-c1-0`, `--anm-c1-slot-0`, `--vw-tmln-c1-0`, `--trigger-c1-0`), so a config's CSS no longer overrides another's
+  - Each config's lists and `:root { timeline-scope }` include those of the configs before it, so configs that target the same element play their animations together and their scoped timelines all stay visible
+  - Derived ids of effects and sequences without an `effectId` / `sequenceId` are suffixed too (`eff-c1-0-0`, `seq-c1-0-0`), so their generated `@keyframes` and state names don't collide between configs
+
 ### [2.5.22] - 2026-10-26
 
 #### Added
