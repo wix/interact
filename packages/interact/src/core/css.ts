@@ -573,10 +573,7 @@ function parseInteraction(
   const { trigger } = interaction;
   const motionTrigger = {
     trigger: camelToKebabCase(trigger),
-    id:
-      ctx.configIndex === undefined
-        ? `trigger-${interactionIdx}`
-        : `trigger-c${ctx.configIndex}-${interactionIdx}`,
+    id: getFallbackId('trigger', [interactionIdx], ctx.configIndex),
     componentId: '',
   } as TriggerVariant;
   const visited = new Set<string>();
@@ -591,7 +588,7 @@ function parseInteraction(
         effect,
         interaction,
         ctx.config,
-        `eff-${interactionIdx}-${effIndex}`,
+        getFallbackId('eff', [interactionIdx, effIndex], ctx.configIndex),
       );
       return resolved && Object.assign(resolved, { slotKey: getSlotKey(interactionIdx, effIndex) });
     })
@@ -607,7 +604,7 @@ function parseInteraction(
         sequence,
         interaction,
         ctx.config,
-        `seq-${interactionIdx}-${seqIndex}`,
+        getFallbackId('seq', [interactionIdx, seqIndex], ctx.configIndex),
         (effIndex) => getSlotKey(interactionIdx, effIndex, seqIndex),
       ),
     )
@@ -650,7 +647,7 @@ function parseConfig(
     configConditions: config.conditions || {},
     targetsMap: new Map<string, TargetContext>(),
     keyframesMap: new Map<string, Keyframe[]>(),
-    keyframeSlots: collectSlots ? new Map() : getKeyframeSlots(config),
+    keyframeSlots: collectSlots ? new Map() : getKeyframeSlots(config, configIndex),
     scopedTimelines: [],
     collectSlots,
     useFirstChild,
@@ -663,6 +660,15 @@ function parseConfig(
   );
 
   return { ctx, cssRules };
+}
+
+// ids of what the config leaves unnamed, shared with the runtime, which finds generated animations by them
+export function getFallbackId(
+  type: 'trigger' | 'eff' | 'seq',
+  indices: number[],
+  configIndex?: number,
+): string {
+  return [type, ...(configIndex === undefined ? [] : [`c${configIndex}`]), ...indices].join('-');
 }
 
 export function getSlotKey(interactionIndex: number, effectIndex: number, sequenceIndex?: number) {
@@ -680,8 +686,11 @@ export function getSlotKey(interactionIndex: number, effectIndex: number, sequen
  *
  * @returns the suffix of every effect not in the first slot, by its slot key (see getSlotKey)
  */
-export function getKeyframeSlots(config: InteractConfig): Map<string, string> {
-  const { ctx } = parseConfig(config, { collectSlots: true });
+export function getKeyframeSlots(
+  config: InteractConfig,
+  configIndex?: number,
+): Map<string, string> {
+  const { ctx } = parseConfig(config, { configIndex, collectSlots: true });
   const slots = new Map<string, string>();
   const suffixOf = (slot: number) => (slot ? `-${slot}` : undefined);
 

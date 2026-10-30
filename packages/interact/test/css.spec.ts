@@ -2001,6 +2001,48 @@ describe('css._generate', () => {
       expect(listsRule).not.toContain('-c0');
       expect(timelineScopeRule).toBe(':root {\n  timeline-scope: --trigger-0;\n}');
     });
+
+    const unnamed = (): InteractConfig => ({
+      interactions: [
+        {
+          key: 'a',
+          trigger: 'click',
+          effects: [
+            { duration: 100, keyframeEffect: { keyframes: [{ opacity: 0 }] } },
+            { transition: { duration: 100, styleProperties: [{ name: 'color', value: 'red' }] } },
+          ],
+          sequences: [
+            { effects: [{ duration: 100, keyframeEffect: { keyframes: [{ opacity: 0 }] } }] },
+          ],
+        },
+      ],
+    });
+
+    it('suffixes the ids of unnamed effects and sequences with the config index', () => {
+      const { keyframes, cssRules } = _generate(unnamed(), { configIndex: 1 });
+
+      expect([...keyframes.keys()]).toEqual(['eff-c1-0-0', 'seq-c1-0-0-eff-0']);
+      expect(cssRules.find(({ states }) => states)!.states).toEqual(['eff-c1-0-1']);
+    });
+
+    it('gives unnamed effects and sequences the same ids at runtime', () => {
+      const idsOf = ({ interactions: [{ effects, sequences }] }: InteractConfig) => [
+        ...effects!.map((effect) => (effect as { effectId: string }).effectId),
+        ...sequences!.flatMap((sequence) =>
+          (sequence as { effects: { keyframeEffect: { name: string } }[] }).effects.map(
+            ({ keyframeEffect }) => keyframeEffect.name,
+          ),
+        ),
+      ];
+      const generated = unnamed();
+      _generate(generated, { configIndex: 1 });
+      const config = unnamed();
+      const instance = Interact.create(config, { configIndex: 1 });
+
+      expect(idsOf(config)).toEqual(['eff-c1-0-0', 'eff-c1-0-1', 'seq-c1-0-0-eff-0']);
+      expect(idsOf(config)).toEqual(idsOf(generated));
+      instance.destroy();
+    });
   });
 
   describe('effect parts', () => {
