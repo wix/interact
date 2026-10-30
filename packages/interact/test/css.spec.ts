@@ -612,6 +612,40 @@ describe('css._generate', () => {
       expect(colorDecl).toBeDefined();
       expect(colorDecl!.value).toBe('red');
     });
+
+    it('should match a list effect state on its item, between the list container and the selector', () => {
+      const config: InteractConfig = {
+        effects: {},
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            listContainer: '.list',
+            listItemSelector: 'li',
+            selector: '.image',
+            effects: [
+              {
+                listContainer: '.list',
+                listItemSelector: 'li',
+                selector: '.image',
+                effectId: 'trans3',
+                transition: {
+                  styleProperties: [{ name: 'opacity', value: '1' }],
+                  duration: 500,
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      const css = generate(config);
+
+      expect(css).toContain(
+        '[data-interact-key="el"] .list > li[data-interact-effect~="trans3"] .image {',
+      );
+      expect(css).not.toContain(':state(trans3)');
+    });
   });
 
   describe('effectToCSS - viewProgress (scroll-driven) branch', () => {

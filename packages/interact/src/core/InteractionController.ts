@@ -137,8 +137,9 @@ export class InteractionController {
       return;
     }
 
+    const stateElement = item || this.element;
     const currentEffects = new Set(
-      this.element.dataset[INTERACT_EFFECT_DATA_ATTR]?.split(' ') || [],
+      stateElement.dataset[INTERACT_EFFECT_DATA_ATTR]?.split(' ') || [],
     );
 
     if (stateAction === 'toggle') {
@@ -155,8 +156,7 @@ export class InteractionController {
       currentEffects.clear();
     }
 
-    (item || this.element).dataset[INTERACT_EFFECT_DATA_ATTR] =
-      Array.from(currentEffects).join(' ');
+    stateElement.dataset[INTERACT_EFFECT_DATA_ATTR] = Array.from(currentEffects).join(' ');
   }
 
   getActiveEffects(): string[] {

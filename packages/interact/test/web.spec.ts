@@ -1338,6 +1338,75 @@ describe('interact (web)', () => {
           }),
         );
       });
+
+      it('should keep a list effect state on the clicked item, toggle it off, and style it from the item', () => {
+        Interact.create(
+          {
+            effects: {
+              'item-state': {
+                transition: { duration: 300, styleProperties: [{ name: 'opacity', value: '0.5' }] },
+              },
+            },
+            interactions: [
+              {
+                key: 'state-list',
+                trigger: 'click',
+                listContainer: '.list',
+                selector: '.image',
+                effects: [
+                  {
+                    key: 'state-list',
+                    listContainer: '.list',
+                    selector: '.image',
+                    effectId: 'item-state',
+                    stateAction: 'toggle',
+                  },
+                ],
+              },
+            ],
+          },
+          { useCustomElement: true },
+        );
+
+        element = document.createElement('interact-element') as IInteractElement;
+        element.dataset.interactKey = 'state-list';
+        const ul = document.createElement('ul');
+        ul.className = 'list';
+        const items = [0, 1].map(() => {
+          const li = document.createElement('li');
+          const image = document.createElement('div');
+          image.className = 'image';
+          li.append(image);
+          ul.append(li);
+          return li;
+        });
+        element.append(ul);
+        const renderStyle = vi
+          .spyOn(InteractionController.prototype, 'renderStyle')
+          .mockImplementation(() => {});
+
+        add(element, 'state-list');
+
+        const clickImage = (li: HTMLElement) =>
+          li
+            .querySelector('.image')!
+            .dispatchEvent(new PointerEvent('click', { bubbles: true, pointerType: 'mouse' }));
+
+        clickImage(items[1]);
+        expect(items[0].dataset.interactEffect).toBeUndefined();
+        expect(items[1].dataset.interactEffect).toBe('item-state');
+        expect(element.dataset.interactEffect).toBeUndefined();
+
+        clickImage(items[1]);
+        expect(items[1].dataset.interactEffect).toBe('');
+
+        const css = renderStyle.mock.calls.flat(2).join('\n');
+        renderStyle.mockRestore();
+        expect(css).toContain(
+          '[data-interact-key="state-list"] .list > [data-interact-effect~="item-state"] .image {',
+        );
+        expect(css).not.toContain('[data-interact-effect~="item-state"] .list');
+      });
     });
   });
 
