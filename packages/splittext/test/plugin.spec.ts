@@ -58,7 +58,8 @@ describe('splitTextPlugin refresh', () => {
 
   it('asks for a refresh when an ancestor between the root and the container is replaced', async () => {
     const root = document.createElement('section');
-    root.innerHTML = '<div class="host"><div class="inner"><h2 class="title">Hi there</h2></div></div>';
+    root.innerHTML =
+      '<div class="host"><div class="inner"><h2 class="title">Hi there</h2></div></div>';
     document.body.appendChild(root);
     const refresh = vi.fn();
     splitTextPlugin({ container: '.title', type: 'chars' }, { root, refresh });
