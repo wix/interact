@@ -62,8 +62,30 @@ export const splitTextPlugin = (
   }
 
   const results: SplitTextResult[] = [];
+  const watchers: SplitWatcher[] = [];
+  const canWatch = refresh && defineSentinel();
+  // The first lost split refreshes, which re-applies the plugin to all the containers
+  const onLost = () => {
+    watchers.forEach((watcher) => watcher.stop());
+    refresh?.();
+  };
   elements.forEach((element) => {
-    results.push(splitText(element, options));
+    if (!canWatch) {
+      results.push(splitText(element, options));
+      return;
+    }
+    const watcher = watchSplit(root, element, onLost);
+    watchers.push(watcher);
+    // Every split, including an `autoSplit` re-split, rebuilds the container, so the sentinel goes back in each time
+    results.push(
+      splitText(element, {
+        ...options,
+        onSplit: (result) => {
+          watcher.mark();
+          options.onSplit?.(result);
+        },
+      }),
+    );
   });
 
   // Reveal the container (see splitTextStyle) now that it holds the individually-animated spans.
@@ -71,51 +93,96 @@ export const splitTextPlugin = (
     elements.forEach((element) => element.setAttribute(READY_ATTR, ''));
   }
 
-  const observer = refresh && refreshOnReplace(root, elements, refresh);
-
   // Interact runs this on disconnect/teardown, restoring the original text.
   return () => {
-    observer?.disconnect();
+    watchers.forEach((watcher) => watcher.stop());
     results.forEach((result) => result.revert());
     elements.forEach((element) => element.removeAttribute(READY_ATTR));
   };
 };
 
+const SENTINEL_TAG = 'splittext-sentinel';
+
+type Sentinel = HTMLElement & { onDisconnect?: () => void };
+
+type SplitWatcher = { mark: () => void; stop: () => void };
+
 /**
- * A re-render can replace a split container while its root stays, e.g. a hydration that doesn't match
- * the split DOM and renders the container again. The new container isn't split, and Interact's effects
- * still target the old one's spans. `refresh` re-applies the plugin, which splits the new container,
+ * A hidden custom element the plugin appends to each split container. The browser calls its
+ * `disconnectedCallback` whenever it leaves the document — the container or any ancestor removed, or the
+ * container's children replaced — so watching costs nothing until that happens. The class is defined once
+ * per document and shared by every copy of the plugin, which only sets `onDisconnect`.
+ */
+function defineSentinel(): boolean {
+  if (typeof customElements === 'undefined') {
+    return false;
+  }
+  if (!customElements.get(SENTINEL_TAG)) {
+    customElements.define(
+      SENTINEL_TAG,
+      class extends HTMLElement {
+        onDisconnect?: () => void;
+
+        disconnectedCallback() {
+          this.onDisconnect?.();
+        }
+      },
+    );
+  }
+  return true;
+}
+
+/**
+ * A re-render can replace a split container, or its children, while its root stays, e.g. a hydration
+ * that doesn't match the split DOM and renders the container again. The split is lost, and Interact's
+ * effects still target the old spans. `refresh` re-applies the plugin, which splits the container again,
  * and re-resolves the targets.
  *
- * A container leaves the document only when it or one of its ancestors is removed from its parent, so
- * it's enough to watch the children of each node from the container's parent up to the root. The split
- * itself only changes nodes inside the containers, and other changes in the root reach the observer
- * only when they add or remove a child of one of those ancestors.
+ * The sentinel also leaves on the plugin's own changes (`autoSplit` re-splits, which `mark` follows with a
+ * new sentinel) and on moves (connected again right away), so the check waits for a microtask and
+ * refreshes only if the container or its current sentinel is still out of the document.
  */
-function refreshOnReplace(
-  root: HTMLElement,
-  elements: HTMLElement[],
-  refresh: () => void,
-): MutationObserver {
-  const observer = new MutationObserver(() => {
-    if (root.isConnected && elements.some((element) => !element.isConnected)) {
-      observer.disconnect();
-      refresh();
-    }
-  });
+function watchSplit(root: HTMLElement, element: HTMLElement, onLost: () => void): SplitWatcher {
+  let sentinel: Sentinel | null = null;
+  let stopped = false;
+  let checkScheduled = false;
 
-  const ancestors = new Set<Node>();
-  for (const element of elements) {
-    for (let node = element.parentNode; node && !ancestors.has(node); node = node.parentNode) {
-      ancestors.add(node);
-      if (node === root) {
-        break;
-      }
+  const stop = () => {
+    stopped = true;
+    if (sentinel) {
+      sentinel.onDisconnect = undefined;
     }
-  }
-  ancestors.forEach((ancestor) => observer.observe(ancestor, { childList: true }));
+  };
 
-  return observer;
+  const check = () => {
+    checkScheduled = false;
+    if (stopped || !root.isConnected || (element.isConnected && sentinel?.isConnected)) {
+      return;
+    }
+    stop();
+    onLost();
+  };
+
+  const onDisconnect = () => {
+    if (!checkScheduled) {
+      checkScheduled = true;
+      queueMicrotask(check);
+    }
+  };
+
+  const mark = () => {
+    if (stopped) {
+      return;
+    }
+    const next = element.ownerDocument.createElement(SENTINEL_TAG) as Sentinel;
+    next.hidden = true;
+    next.setAttribute('aria-hidden', 'true');
+    next.onDisconnect = onDisconnect;
+    element.appendChild(next);
+    sentinel = next;
+  };
+
+  return { mark, stop };
 }
 
 /**
