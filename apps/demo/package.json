@@ -10,7 +10,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@wix/interact": "^2.5.24",
+    "@wix/interact": "^2.5.25",
     "@wix/splittext": "^0.2.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
