@@ -16,7 +16,7 @@ import { add, remove, generate } from '@wix/interact';
 | ------------ | -------------------------------------------------------------------------------- | -------------------------------------- | -------- |
 | `add()`      | Add interactions to an element                                                   | `element`, `key?`                      | `void`   |
 | `remove()`   | Remove interactions from an element                                              | `key`                                  | `void`   |
-| `generate()` | Generate complete CSS for all animations, transitions, and scroll-driven effects | `config`, `useFirstChild?`, `plugins?` | `string` |
+| `generate()` | Generate complete CSS for all animations, transitions, and scroll-driven effects | `config`, `useFirstChild?`, `plugins?`, `configIndex?` | `string` |
 
 ---
 
@@ -208,6 +208,7 @@ function generate(config: InteractConfig, options?: boolean | GenerateOptions): 
 type GenerateOptions = {
   useFirstChild?: boolean;
   plugins?: InteractPluginStyles;
+  configIndex?: number;
 };
 ```
 
@@ -219,6 +220,7 @@ type GenerateOptions = {
 
 - **`useFirstChild?: boolean`** - When `true` (the default), generated selectors target the first child of each keyed element (e.g. `[data-interact-key="hero"] > :first-child`). This is the correct mode for `<interact-element>` custom elements. Pass `false` when the keyed element itself is the animation target (vanilla JS or React `<Interaction>`).
 - **`plugins?: InteractPluginStyles`** - Optional map of plugin name → SSR style generator. For every `$<name>` field in the config, the matching generator is called with the field's (opaque) value and a context, and its returned CSS data is appended to the output. Used to emit build-time styling on a plugin's behalf — e.g. hiding pre-split text for FOUC prevention. Like `create()`/`use()`, `generate()` never inspects the field value. See [Plugins → SSR styling](../guides/plugins.md#ssr-styling-foouc-prevention).
+- **`configIndex?: number`** - The config's index, starting at `0`, when the CSS of several configs is on the same page. Without it, every config's CSS uses the same custom-property and timeline names (`--anm-0`, `--trigger-0`, …), so a later config's CSS overrides an earlier one's animations, transitions and `timeline-scope`. With it, the names are suffixed by the index (`--anm-c1-0`, `--trigger-c1-0`, …) and each config's lists and `timeline-scope` include those of the configs before it, so the configs' animations play together, even on the same element. Give every config its own index and insert their CSS in index order.
 
 ### Returns
 

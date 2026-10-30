@@ -12,6 +12,12 @@ export type GenerateOptions = {
    * generator is called with the field's (opaque) value and a context; its returned CSS is appended.
    */
   plugins?: InteractPluginStyles;
+  /**
+   * The config's index among several configs whose CSS is on the same page, starting at 0. Suffixes the
+   * generated custom properties and timeline names with it so they don't collide with the other configs', and
+   * combines the configs' lists and `timeline-scope` where they meet. Configs' CSS must be in index order.
+   */
+  configIndex?: number;
 };
 
 export type ListPropertyName =

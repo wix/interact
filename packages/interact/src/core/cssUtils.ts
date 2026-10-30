@@ -176,9 +176,31 @@ export const LIST_PROPERTY_FALLBACKS: Record<ListPropertyName, string> = {
   'view-timeline': 'none',
 };
 
+function abbreviate(name: string): string {
+  return name.replace(/(?<!(^|-))([aeiou]|tion)/g, '');
+}
+
 // TODO: maybe add `-intrct` to names? --anm-0 or --trns-0 could collide with user-defined names
-export function getCustomPropName(name: string, index: number, isSlot: boolean = false): string {
-  return `--${name.replace(/(?<!(^|-))([aeiou]|tion)/g, '')}${isSlot ? '-slot' : ''}-${index}`;
+export function getCustomPropName(
+  name: string,
+  index: number,
+  isSlot: boolean = false,
+  configIndex?: number,
+): string {
+  const config = configIndex === undefined ? '' : `-c${configIndex}`;
+  return `--${abbreviate(name)}${config}${isSlot ? '-slot' : ''}-${index}`;
+}
+
+// a config's whole list of a property, so configs targeting the same element can concatenate their lists
+export function getConfigListPropName(name: string, configIndex: number): string {
+  return `--${abbreviate(name)}-c${configIndex}`;
+}
+
+function configListsOf(name: ListPropertyName, configIndex: number): string {
+  return Array.from(
+    { length: configIndex + 1 },
+    (_, i) => `var(${getConfigListPropName(name, i)})`,
+  ).join(', ');
 }
 
 export function buildAtPropertyRules(
@@ -187,6 +209,7 @@ export function buildAtPropertyRules(
   animationSlotLength: number,
   transitionSlotLength: number,
   timelineLength: number = 0,
+  configIndex?: number,
 ): string[] {
   const lengths = {
     animation: animationLength,
@@ -198,16 +221,19 @@ export function buildAtPropertyRules(
     transition: transitionSlotLength,
     timeline: 0,
   };
+  const atProperty = (name: ListPropertyName, propName: string) =>
+    `@property ${propName} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`;
   return LIST_PROPERTY_NAMES.flatMap((name) => [
-    ...Array.from(
-      { length: lengths[listKind(name)] },
-      (_, i) =>
-        `@property ${getCustomPropName(name, i)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
+    ...Array.from({ length: lengths[listKind(name)] }, (_, i) =>
+      atProperty(name, getCustomPropName(name, i, false, configIndex)),
     ),
+    ...Array.from({ length: slotLengths[listKind(name)] }, (_, i) =>
+      atProperty(name, getCustomPropName(name, i, true, configIndex)),
+    ),
+    // registers the lists of the configs before it too, for elements they don't target
     ...Array.from(
-      { length: slotLengths[listKind(name)] },
-      (_, i) =>
-        `@property ${getCustomPropName(name, i, true)} { syntax: "*"; inherits: false; initial-value: ${LIST_PROPERTY_FALLBACKS[name]}; }`,
+      { length: configIndex !== undefined && lengths[listKind(name)] ? configIndex + 1 : 0 },
+      (_, i) => atProperty(name, getConfigListPropName(name, i)),
     ),
   ]);
 }
@@ -222,6 +248,7 @@ export function buildSequenceListsRule(
   },
   conditions?: string[],
   configConditions?: Record<string, Condition>,
+  configIndex?: number,
 ): CSSRuleData | null {
   const propertyNames = LIST_PROPERTY_NAMES.filter(
     (name) => target[listKind(name)].slotsInSequence > 0,
@@ -234,10 +261,10 @@ export function buildSequenceListsRule(
     const { listIndex, slotCursor, slotsInSequence } = target[listKind(name)];
 
     return {
-      name: getCustomPropName(name, listIndex),
+      name: getCustomPropName(name, listIndex, false, configIndex),
       value: Array.from(
         { length: slotsInSequence },
-        (_, i) => `var(${getCustomPropName(name, slotCursor + i, true)})`,
+        (_, i) => `var(${getCustomPropName(name, slotCursor + i, true, configIndex)})`,
       ).join(', '),
     };
   });
@@ -257,6 +284,7 @@ export function buildListsRule(
   animationLength: number,
   transitionLength: number,
   timelineLength: number = 0,
+  configIndex?: number,
 ): string {
   if (targets.length === 0) {
     return '';
@@ -272,14 +300,23 @@ export function buildListsRule(
     return '';
   }
 
-  const declarations = propertyNames.map((name) => ({
-    name,
-    value: Array.from(
+  const declarations = propertyNames.flatMap((name) => {
+    const value = Array.from(
       { length: lengths[listKind(name)] },
       // TODO: maybe add `-intrct` to names? --anm-0 or --trns-0 could collide with user-defined names
-      (_, i) => `var(${getCustomPropName(name, i)})`,
-    ).join(', '),
-  }));
+      (_, i) => `var(${getCustomPropName(name, i, false, configIndex)})`,
+    ).join(', ');
+
+    if (configIndex === undefined) {
+      return [{ name, value }];
+    }
+
+    // configs' stylesheets are ordered by index, so the last config that targets an element has all of its lists
+    return [
+      { name: getConfigListPropName(name, configIndex), value },
+      { name, value: configListsOf(name, configIndex) },
+    ];
+  });
 
   const joinedSelector = targets
     .map(
@@ -289,4 +326,22 @@ export function buildListsRule(
     .join(', ');
 
   return `${joinedSelector} {\n${declarations.map(({ name, value }) => `  ${name}: ${value};`).join('\n')}\n}`;
+}
+
+export function buildTimelineScopeRule(names: string[], configIndex?: number): string {
+  if (names.length === 0) {
+    return '';
+  }
+
+  if (configIndex === undefined) {
+    return `:root {\n  timeline-scope: ${names.join(', ')};\n}`;
+  }
+
+  // like the lists, the last config's rule scopes the timelines of the configs before it,
+  // and `--_` stands for a config without scoped timelines since `none` can't be in a list
+  const scopes = Array.from(
+    { length: configIndex + 1 },
+    (_, i) => `var(${getConfigListPropName('timeline-scope', i)}, --_)`,
+  ).join(', ');
+  return `:root {\n  ${getConfigListPropName('timeline-scope', configIndex)}: ${names.join(', ')};\n  timeline-scope: ${scopes};\n}`;
 }

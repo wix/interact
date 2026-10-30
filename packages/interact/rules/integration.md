@@ -292,6 +292,9 @@ pre-generate the static config and generate/inject the runtime config in the
 browser before its `Interact.create()` call. If splitting is impractical,
 generating the complete CSS at runtime is an acceptable fallback. Call
 `registerEffects()` before each `generate()` when using `namedEffect`.
+When the CSS of several configs is on the same page, pass each its own
+`configIndex` (`0`, `1`, …) and insert their CSS in that order, so one config's
+CSS doesn't override another's animations.
 
 The `useFirstChild` option tells Interact whether to render `:first-child` selectors for custom-element (`web`) integration: `true` for **web**, `false` for **react** and **vanilla**. Pass it either as a bare boolean (`generate(config, true)`) or in the options bag (`generate(config, { useFirstChild: true })`) — the bag is also where `plugins` goes.
 

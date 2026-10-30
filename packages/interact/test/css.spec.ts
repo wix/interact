@@ -1941,6 +1941,68 @@ describe('css._generate', () => {
     });
   });
 
+  describe('multiple configs (configIndex option)', () => {
+    const scrubOf = (source: string, effectId: string): InteractConfig => ({
+      interactions: [
+        {
+          key: source,
+          trigger: 'viewProgress',
+          effects: [
+            {
+              key: 'shared',
+              effectId,
+              keyframeEffect: { name: effectId, keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+            },
+          ],
+        },
+      ],
+    });
+
+    it('suffixes the list custom properties and trigger names with the config index', () => {
+      const { cssRules, atProperty } = _generate(scrubOf('a', 'fade'), { configIndex: 1 });
+      const names = cssRules.flatMap(({ declarations }) => declarations.map(({ name }) => name));
+
+      expect(names).toEqual(
+        expect.arrayContaining(['--vw-tmln-c1-0', '--anm-c1-0', '--anm-tmln-c1-0']),
+      );
+      expect(names.filter((name) => /^--[a-z-]+-\d+$/.test(name))).toEqual([]);
+      expect(cssRules.find(({ key }) => key === 'a')!.declarations[0].value).toBe('--trigger-c1-0');
+      expect(atProperty).toContain(
+        '@property --anm-c1-0 { syntax: "*"; inherits: false; initial-value: none; }',
+      );
+    });
+
+    it('concatenates the lists of the configs before it on the elements it targets', () => {
+      const { listsRule, atProperty } = _generate(scrubOf('a', 'fade'), { configIndex: 1 });
+
+      expect(listsRule).toContain('--anm-c1: var(--anm-c1-0);');
+      expect(listsRule).toContain('animation: var(--anm-c0), var(--anm-c1);');
+      expect(listsRule).toContain('view-timeline: var(--vw-tmln-c0), var(--vw-tmln-c1);');
+      expect(atProperty).toContain(
+        '@property --anm-c0 { syntax: "*"; inherits: false; initial-value: none; }',
+      );
+      expect(atProperty).toContain(
+        '@property --anm-c1 { syntax: "*"; inherits: false; initial-value: none; }',
+      );
+    });
+
+    it('scopes the timelines of the configs before it to the page', () => {
+      const { timelineScopeRule } = _generate(scrubOf('a', 'fade'), { configIndex: 2 });
+
+      expect(timelineScopeRule).toBe(
+        ':root {\n  --tmln-scp-c2: --trigger-c2-0;\n  timeline-scope: var(--tmln-scp-c0, --_), var(--tmln-scp-c1, --_), var(--tmln-scp-c2, --_);\n}',
+      );
+    });
+
+    it('keeps the legacy names without a config index', () => {
+      const { listsRule, timelineScopeRule } = _generate(scrubOf('a', 'fade'));
+
+      expect(listsRule).toContain('animation: var(--anm-0);');
+      expect(listsRule).not.toContain('-c0');
+      expect(timelineScopeRule).toBe(':root {\n  timeline-scope: --trigger-0;\n}');
+    });
+  });
+
   describe('effect parts', () => {
     const style = (options: { suffix?: string }) => [
       { ...options, name: 'bg-media', part: 'MEDIA_WRAPPER', keyframes: [{ opacity: 0 }] },
