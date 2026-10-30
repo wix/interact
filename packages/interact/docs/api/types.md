@@ -960,6 +960,7 @@ type InteractPluginContext = {
   key: string; // the interaction/effect key
   scope: 'interaction' | 'effect';
   config: Record<string, unknown>; // the interaction/effect object the plugin field was on
+  refresh: () => void; // re-apply the plugins and re-resolve the targets, in a microtask; a no-op after the cleanup
 };
 ```
 

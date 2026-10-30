@@ -20,10 +20,11 @@ export type { SplitTextPluginConfig };
 
 /**
  * Minimal structural mirror of the runtime context Interact passes to a plugin (a subset of
- * Interact's `InteractPluginContext`). Only `root` is read here; typing it as a subset keeps
- * {@link splitTextPlugin} assignable to `InteractPlugin` without importing `@wix/interact`.
+ * Interact's `InteractPluginContext`). Only `root` and `refresh` are read here; typing it as a subset
+ * keeps {@link splitTextPlugin} assignable to `InteractPlugin` without importing `@wix/interact`.
+ * `refresh` is optional because Interact versions before it don't pass one.
  */
-type PluginContext = { root: HTMLElement };
+type PluginContext = { root: HTMLElement; refresh?: () => void };
 
 /**
  * Minimal structural mirror of the CSS rule Interact's `generate()` expects back from a style
@@ -48,10 +49,13 @@ const READY_ATTR = 'data-splittext-ready';
  * Interact.use('splitText', splitTextPlugin);
  * ```
  */
-export const splitTextPlugin = (value: unknown, { root }: PluginContext): void | (() => void) => {
+export const splitTextPlugin = (
+  value: unknown,
+  { root, refresh }: PluginContext,
+): void | (() => void) => {
   const { container, hideUntilReady, ...options } = value as SplitTextPluginConfig;
 
-  const elements = root.querySelectorAll<HTMLElement>(container);
+  const elements = Array.from(root.querySelectorAll<HTMLElement>(container));
 
   if (!elements.length) {
     return;
@@ -67,12 +71,52 @@ export const splitTextPlugin = (value: unknown, { root }: PluginContext): void |
     elements.forEach((element) => element.setAttribute(READY_ATTR, ''));
   }
 
+  const observer = refresh && refreshOnReplace(root, elements, refresh);
+
   // Interact runs this on disconnect/teardown, restoring the original text.
   return () => {
+    observer?.disconnect();
     results.forEach((result) => result.revert());
     elements.forEach((element) => element.removeAttribute(READY_ATTR));
   };
 };
+
+/**
+ * A re-render can replace a split container while its root stays, e.g. a hydration that doesn't match
+ * the split DOM and renders the container again. The new container isn't split, and Interact's effects
+ * still target the old one's spans. `refresh` re-applies the plugin, which splits the new container,
+ * and re-resolves the targets.
+ *
+ * A container leaves the document only when it or one of its ancestors is removed from its parent, so
+ * it's enough to watch the children of each node from the container's parent up to the root. The split
+ * itself only changes nodes inside the containers, and other changes in the root reach the observer
+ * only when they add or remove a child of one of those ancestors.
+ */
+function refreshOnReplace(
+  root: HTMLElement,
+  elements: HTMLElement[],
+  refresh: () => void,
+): MutationObserver {
+  const observer = new MutationObserver(() => {
+    if (root.isConnected && elements.some((element) => !element.isConnected)) {
+      observer.disconnect();
+      refresh();
+    }
+  });
+
+  const ancestors = new Set<Node>();
+  for (const element of elements) {
+    for (let node = element.parentNode; node && !ancestors.has(node); node = node.parentNode) {
+      ancestors.add(node);
+      if (node === root) {
+        break;
+      }
+    }
+  }
+  ancestors.forEach((ancestor) => observer.observe(ancestor, { childList: true }));
+
+  return observer;
+}
 
 /**
  * Build-time (SSR) styling for `$splitText`, passed to `generate()` — NOT the same callback as the

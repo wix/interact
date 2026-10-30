@@ -28,7 +28,7 @@ connect elements already in the document:
 ```ts
 Interact.use('<plugin-name>', (value, context) => {
   // value:   the value of the `$<plugin-name>` field
-  // context: { root, key, scope: 'interaction' | 'effect', config }
+  // context: { root, key, scope: 'interaction' | 'effect', config, refresh }
   // return:  optional cleanup () => void, run on disconnect/teardown
 });
 ```
@@ -62,6 +62,11 @@ Add a `$<plugin-name>` field on an **interaction** or an **effect**:
   creates is visible to the `selector` / `listContainer` queries that follow.
 - A returned cleanup runs on disconnect, on `Interact.destroy()`, and on
   media-query reconnect. Use it to fully undo the plugin's work.
+- If something replaces the plugin's output after it ran (e.g. a re-render
+  during hydration), the plugin should call `context.refresh()`. It runs the
+  cleanups, re-applies the plugins and re-resolves the targets, which otherwise
+  stay on the replaced elements. It runs in a microtask, once for all the calls
+  before it, and is a no-op after the cleanup.
 - Runtime dedupe applies only when the **same object reference** is reused on the
   same controller. Separate inline objects and primitive values run separately.
 - `root` is the keyed controller element, before `selector` / `listContainer`
