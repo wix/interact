@@ -135,11 +135,11 @@ describe('Rubber', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  test('custom intensity - style method', () => {
+  test('custom stretch - style method', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       duration: 1000,
-      namedEffect: { intensity: 0.8, iterationDelay: 1000 } as RubberType,
+      namedEffect: { stretch: 0.11, iterationDelay: 1000 } as RubberType,
     };
 
     const expectedResult = [
@@ -149,15 +149,15 @@ describe('Rubber', () => {
         easing: 'linear',
         custom: {
           '--motion-scale-x-45': 1.11,
-          '--motion-scale-y-45': 0.85,
-          '--motion-scale-x-56': 0.86,
-          '--motion-scale-y-56': 1.07,
-          '--motion-scale-x-66': 1.1,
-          '--motion-scale-y-66': 0.88,
-          '--motion-scale-x-78': 0.94,
-          '--motion-scale-y-78': 1.06,
-          '--motion-scale-x-89': 1.085,
-          '--motion-scale-y-89': 0.9195,
+          '--motion-scale-y-45': 0.835,
+          '--motion-scale-x-56': 0.8281,
+          '--motion-scale-y-56': 1.0756,
+          '--motion-scale-x-66': 1.0962,
+          '--motion-scale-y-66': 0.8762,
+          '--motion-scale-x-78': 0.9381,
+          '--motion-scale-y-78': 1.0619,
+          '--motion-scale-x-89': 1.0756,
+          '--motion-scale-y-89': 0.9306,
           '--motion-scale-x-100': 1,
           '--motion-scale-y-100': 1,
         },
@@ -201,11 +201,11 @@ describe('Rubber', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('custom intensity - web method', () => {
+  test('custom stretch - web method', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       duration: 1000,
-      namedEffect: { intensity: 0.8, iterationDelay: 1000 } as RubberType,
+      namedEffect: { stretch: 0.11, iterationDelay: 1000 } as RubberType,
     };
 
     const expectedResult = [
@@ -215,38 +215,38 @@ describe('Rubber', () => {
         easing: 'linear',
         custom: {
           '--motion-scale-x-45': 1.11,
-          '--motion-scale-y-45': 0.85,
-          '--motion-scale-x-56': 0.86,
-          '--motion-scale-y-56': 1.07,
-          '--motion-scale-x-66': 1.1,
-          '--motion-scale-y-66': 0.88,
-          '--motion-scale-x-78': 0.94,
-          '--motion-scale-y-78': 1.06,
-          '--motion-scale-x-89': 1.085,
-          '--motion-scale-y-89': 0.9195,
+          '--motion-scale-y-45': 0.835,
+          '--motion-scale-x-56': 0.8281,
+          '--motion-scale-y-56': 1.0756,
+          '--motion-scale-x-66': 1.0962,
+          '--motion-scale-y-66': 0.8762,
+          '--motion-scale-x-78': 0.9381,
+          '--motion-scale-y-78': 1.0619,
+          '--motion-scale-x-89': 1.0756,
+          '--motion-scale-y-89': 0.9306,
           '--motion-scale-x-100': 1,
           '--motion-scale-y-100': 1,
         },
         keyframes: [
           {
             offset: 0.225,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.11, 0.85)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.11, 0.835)',
           },
           {
             offset: 0.28,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.86, 1.07)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.8281, 1.0756)',
           },
           {
             offset: 0.33,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.1, 0.88)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.0962, 0.8762)',
           },
           {
             offset: 0.39,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.94, 1.06)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.9381, 1.0619)',
           },
           {
             offset: 0.445,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.085, 0.9195)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.0756, 0.9306)',
           },
           {
             offset: 0.5,

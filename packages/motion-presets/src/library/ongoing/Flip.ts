@@ -1,6 +1,7 @@
 import type { AnimationExtraOptions, DomApi, Flip, TimeAnimationOptions } from '../../types';
 import {
   getEasing,
+  getEasingName,
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
@@ -9,10 +10,23 @@ import {
 } from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: (typeof AXIS_DIRECTIONS)[number] = 'horizontal';
+const DEFAULT_EASING = 'linear';
+
+const DEFAULTS: Required<Flip> = {
+  type: 'Flip',
+  direction: 'horizontal',
+  iterationDelay: 0,
+  perspective: 800,
+};
+
+export const schema = {
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: DEFAULTS.direction },
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+};
 
 const DIRECTION_MAP = {
-  vertical: { x: '1', y: '0' },
+  vertical: { x: '-1', y: '0' },
   horizontal: { x: '0', y: '1' },
 };
 
@@ -22,8 +36,8 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Flip;
-  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULT_DIRECTION);
-  const { perspective = 800 } = namedEffect;
+  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULTS.direction);
+  const { perspective = DEFAULTS.perspective } = namedEffect;
 
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || 0;
@@ -31,7 +45,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const [name] = getNames(options);
 
   const rotationAxes = DIRECTION_MAP[direction];
-  const easing = options.easing || 'linear';
+  const easing = options.easing || DEFAULT_EASING;
 
   const custom = {
     '--motion-perspective': `${perspective}px`,
@@ -83,5 +97,8 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
   const iterationDelay = (options.namedEffect as Flip)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return suffixNames([`motion-flip-${timingFactor}`], options.suffix);
+  return suffixNames(
+    [`motion-flip-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
+    options.suffix,
+  );
 }

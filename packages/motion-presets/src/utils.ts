@@ -388,6 +388,22 @@ export function getTimingFactor(
   return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
 }
 
+const EASING_NAME_LENGTH = 40;
+
+// keyframes that bake in the easing need a non-default one in their name, so CSS @keyframes don't collide.
+// e.g. cubic-bezier(0.68, -0.55, 0.27, 1.55) -> cubic-bezier-068_-055_027_155
+export function getEasingName(easing: string | undefined, defaultEasing: string) {
+  if (!easing || easing === defaultEasing) {
+    return '';
+  }
+  const name = easing
+    .trim()
+    .replace(/\s*,\s*/g, '_')
+    .replace(/[\s(]+/g, '-')
+    .replace(/[^\w-]/g, '');
+  return `-${name.slice(0, EASING_NAME_LENGTH)}`;
+}
+
 export type LengthValue = { value: number; unit: string };
 export type LengthInput =
   | string

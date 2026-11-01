@@ -80,11 +80,11 @@ These are set on the effect configuration level, not on the preset itself:
 
 ### Overloaded Parameter Names
 
-Entrance presets use `from` — the side the element comes from — and `pivot` for the edge or corner the element rotates around. Elsewhere `direction` accepts different values depending on the preset:
+Entrance presets use `from` — the side the element comes from — and `pivot` for the edge or corner the element rotates around (as do Swing and Fold). Elsewhere `direction` accepts different values depending on the preset:
 
 | Meaning          | Accepted Values                                           | Presets                                                                                                                                       |
 | ---------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cardinal         | 'top', 'right', 'bottom', 'left'                          | `from`: ArcIn, CurveIn, FloatIn, RevealIn, ShuttersIn, SlideIn; `pivot`: FoldIn; Poke, Swing, Fold, RevealScroll, ShuttersScroll, SlideScroll |
+| Cardinal         | 'top', 'right', 'bottom', 'left'                          | `from`: ArcIn, CurveIn, FloatIn, RevealIn, ShuttersIn, SlideIn; `pivot`: FoldIn, Swing, Fold; Poke, RevealScroll, ShuttersScroll, SlideScroll |
 | Cardinal + back  | 'top', 'right', 'bottom', 'left', 'back'                  | `from`: BounceIn                                                                                                                              |
 | Two sides        | 'left', 'right'                                           | `from`: TiltIn; PanScroll, SkewPanScroll, TiltScroll, TurnScroll                                                                              |
 | Corner           | 'top-left', 'top-right', 'bottom-left', 'bottom-right'    | `pivot`: TurnIn                                                                                                                               |
