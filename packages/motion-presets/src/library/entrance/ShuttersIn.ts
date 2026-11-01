@@ -1,6 +1,7 @@
 import { ShuttersIn, TimeAnimationOptions, EffectFourDirections } from '../../types';
 import {
   getShuttersClipPaths,
+  getOppositeDirection,
   getEasing,
   toKeyframeValue,
   parseDirection,
@@ -10,7 +11,18 @@ import {
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'right';
+const DEFAULTS: Required<ShuttersIn> = {
+  type: 'ShuttersIn',
+  from: 'left',
+  shutters: 12,
+  staggered: true,
+};
+
+export const schema = {
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.from },
+  shutters: { type: 'number', min: 1, int: true, default: DEFAULTS.shutters },
+  staggered: { type: 'bool', default: DEFAULTS.staggered },
+};
 
 export function getNames(options: TimeAnimationOptions) {
   return suffixNames(['motion-shuttersIn', 'motion-fadeIn'], options.suffix);
@@ -22,8 +34,9 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ShuttersIn;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { shutters = 12, staggered = true } = namedEffect;
+  const from = parseDirection(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from);
+  const direction = getOppositeDirection<EffectFourDirections>([...FOUR_DIRECTIONS], from);
+  const { shutters = DEFAULTS.shutters, staggered = DEFAULTS.staggered } = namedEffect;
   const [shuttersIn, fadeIn] = getNames(options);
 
   const { clipStart, clipEnd } = getShuttersClipPaths(direction, shutters, staggered);
@@ -55,8 +68,9 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ...options,
       name: fadeIn,
       fill: getEntranceFill(options),
+      easing: 'step-start',
       custom: {},
-      keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+      keyframes: [{ offset: 0, opacity: 0 }],
     },
   ];
 
