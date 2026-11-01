@@ -1,20 +1,23 @@
 import type { Pulse, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import {
-  getTimingFactor,
-  toKeyframeValue,
-  mapRange,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+import { getTimingFactor, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 
-const PULSE_OFFSET_SOFT = 0;
-const PULSE_OFFSET_HARD = 0.12;
+const DEFAULTS: Required<Pulse> = {
+  type: 'Pulse',
+  iterationDelay: 0,
+  scale: 0.93,
+};
 
+export const schema = {
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+};
+
+// two beats - a light one at 4/7 of the depth and then the full one
 const SCALE_KEYFRAMES = [
-  { keyframe: 27, scale: 0.96 },
-  { keyframe: 45, scale: 1 },
-  { keyframe: 72, scale: 0.93 },
-  { keyframe: 100, scale: 1 },
+  { keyframe: 27, depth: 4 / 7 },
+  { keyframe: 45, depth: 0 },
+  { keyframe: 72, depth: 1 },
+  { keyframe: 100, depth: 0 },
 ];
 
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
@@ -23,28 +26,25 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Pulse;
-  const { intensity = 0 } = namedEffect;
+  const { scale = DEFAULTS.scale } = namedEffect;
 
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || 0;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const pulseOffset = mapRange(0, 1, PULSE_OFFSET_SOFT, PULSE_OFFSET_HARD, intensity);
-
-  // Create CSS custom properties for the pulse configuration
   const custom: Record<string, string | number> = {
-    '--motion-pulse-offset': pulseOffset,
+    '--motion-scale': scale,
   };
 
-  const keyframes = SCALE_KEYFRAMES.map(({ keyframe, scale }) => {
+  const keyframes = SCALE_KEYFRAMES.map(({ keyframe, depth }) => {
     const offset = (keyframe / 100) * timingFactor;
 
     return {
       offset,
-      transform: `scale(${
-        scale < 1
-          ? `calc(${scale} - ${toKeyframeValue(custom, '--motion-pulse-offset', asWeb)})`
+      transform: `rotateZ(var(--motion-rotate, 0deg)) scale(${
+        depth
+          ? `calc(1 - (1 - ${toKeyframeValue(custom, '--motion-scale', asWeb)}) * ${depth})`
           : '1'
       })`,
     };
@@ -53,7 +53,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   if (timingFactor < 1) {
     keyframes.push({
       offset: 1,
-      transform: 'scale(1)',
+      transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
     });
   }
 

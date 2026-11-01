@@ -3,7 +3,6 @@ import type {
   AnimationExtraOptions,
   Cross,
   DomApi,
-  EffectEightDirections,
   HorizontalOffsetByDirectionParams,
   OffsetByDirectionParams,
   TimeAnimationOptions,
@@ -11,7 +10,16 @@ import type {
 } from '../../types';
 import { getElementOffset, getTimingFactor, parseDirection } from '../../utils';
 
-const DEFAULT_DIRECTION: EffectEightDirections = 'right';
+const DEFAULTS: Required<Cross> = {
+  type: 'Cross',
+  direction: 'right',
+  iterationDelay: 0,
+};
+
+export const schema = {
+  direction: { type: 'enum', values: EIGHT_DIRECTIONS, default: DEFAULTS.direction },
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+};
 
 const FOUR_DIRECTIONS_TRANSLATIONS = {
   // 100cqw - left
@@ -166,7 +174,7 @@ function generateTranslate(direction: keyof typeof FOUR_CORNERS_TRANSLATIONS) {
 
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?: DomApi) {
   const namedEffect = options.namedEffect as Cross;
-  const direction = parseDirection(namedEffect?.direction, EIGHT_DIRECTIONS, DEFAULT_DIRECTION);
+  const direction = parseDirection(namedEffect?.direction, EIGHT_DIRECTIONS, DEFAULTS.direction);
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || 0;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;

@@ -16,7 +16,20 @@ import {
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'top';
+const DEFAULTS: Required<Fold> = {
+  type: 'Fold',
+  angle: 15,
+  iterationDelay: 0,
+  perspective: 800,
+  pivot: 'top',
+};
+
+export const schema = {
+  angle: { type: 'number', min: 0, default: DEFAULTS.angle },
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+  pivot: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.pivot },
+};
 
 const DIRECTION_MAP = {
   top: {
@@ -37,8 +50,6 @@ const DIRECTION_MAP = {
   },
 };
 
-const MIN_ROTATE_ANGLE = 15;
-
 const KEYFRAME_FACTORS = [
   { fold: 1, frameFactor: 0.1 },
   { fold: -0.7, frameFactor: 0.302 },
@@ -55,19 +66,19 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Fold;
-  const direction = parseDirection(
-    namedEffect.direction,
+  const pivot = parseDirection(
+    namedEffect.pivot,
     FOUR_DIRECTIONS,
-    DEFAULT_DIRECTION,
+    DEFAULTS.pivot,
   ) as EffectFourDirections;
-  const { angle = MIN_ROTATE_ANGLE } = namedEffect;
+  const { angle = DEFAULTS.angle, perspective = DEFAULTS.perspective } = namedEffect;
 
   const easing = options.easing || 'cubicInOut';
   const duration = options.duration || 1;
   const iterationDelay = +(namedEffect?.iterationDelay || 0);
   const [name] = getNames(options);
 
-  const { rotation, origin } = DIRECTION_MAP[direction];
+  const { rotation, origin } = DIRECTION_MAP[pivot];
   const { x, y } = origin;
   const ease = getEasingFamily(easing);
 
@@ -78,6 +89,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const custom: Record<string, string | number> = {
     '--motion-origin-x': `${x}%`,
     '--motion-origin-y': `${y}%`,
+    '--motion-perspective': `${perspective}px`,
     '--motion-rotate-angle': `${angle}deg`,
     '--motion-rotate-x': `${rotation.x}`,
     '--motion-rotate-y': `${rotation.y}`,
@@ -87,7 +99,11 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     custom,
     '--motion-origin-x',
     asWeb,
-  )}) translateY(${toKeyframeValue(custom, '--motion-origin-y', asWeb)}) perspective(800px)`;
+  )}) translateY(${toKeyframeValue(custom, '--motion-origin-y', asWeb)}) perspective(${toKeyframeValue(
+    custom,
+    '--motion-perspective',
+    asWeb,
+  )})`;
   const transformRight = `translateX(calc(-1 * ${toKeyframeValue(
     custom,
     '--motion-origin-x',

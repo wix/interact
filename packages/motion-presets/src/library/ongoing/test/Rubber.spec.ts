@@ -20,16 +20,16 @@ describe('Rubber', () => {
         namedEffect: {},
         name: 'motion-rubber-1',
         custom: {
-          '--motion-scale-x-45': 1.08,
-          '--motion-scale-y-45': 0.88,
-          '--motion-scale-x-56': 0.875,
-          '--motion-scale-y-56': 1.055,
-          '--motion-scale-x-66': 1.07,
-          '--motion-scale-y-66': 0.91,
+          '--motion-scale-x-45': 1.1,
+          '--motion-scale-y-45': 0.9,
+          '--motion-scale-x-56': 0.91,
+          '--motion-scale-y-56': 1.09,
+          '--motion-scale-x-66': 1.08,
+          '--motion-scale-y-66': 0.92,
           '--motion-scale-x-78': 0.955,
           '--motion-scale-y-78': 1.045,
-          '--motion-scale-x-89': 1.055,
-          '--motion-scale-y-89': 0.9495,
+          '--motion-scale-x-89': 1.0528,
+          '--motion-scale-y-89': 0.9473,
           '--motion-scale-x-100': 1,
           '--motion-scale-y-100': 1,
         },
@@ -88,31 +88,31 @@ describe('Rubber', () => {
         namedEffect: {},
         name: 'motion-rubber-1',
         custom: {
-          '--motion-scale-x-45': 1.08,
-          '--motion-scale-y-45': 0.88,
-          '--motion-scale-x-56': 0.875,
-          '--motion-scale-y-56': 1.055,
-          '--motion-scale-x-66': 1.07,
-          '--motion-scale-y-66': 0.91,
+          '--motion-scale-x-45': 1.1,
+          '--motion-scale-y-45': 0.9,
+          '--motion-scale-x-56': 0.91,
+          '--motion-scale-y-56': 1.09,
+          '--motion-scale-x-66': 1.08,
+          '--motion-scale-y-66': 0.92,
           '--motion-scale-x-78': 0.955,
           '--motion-scale-y-78': 1.045,
-          '--motion-scale-x-89': 1.055,
-          '--motion-scale-y-89': 0.9495,
+          '--motion-scale-x-89': 1.0528,
+          '--motion-scale-y-89': 0.9473,
           '--motion-scale-x-100': 1,
           '--motion-scale-y-100': 1,
         },
         keyframes: [
           {
             offset: 0.45,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.08, 0.88)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.1, 0.9)',
           },
           {
             offset: 0.56,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.875, 1.055)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.91, 1.09)',
           },
           {
             offset: 0.66,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.07, 0.91)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.08, 0.92)',
           },
           {
             offset: 0.78,
@@ -120,7 +120,7 @@ describe('Rubber', () => {
           },
           {
             offset: 0.89,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.055, 0.9495)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.0528, 0.9473)',
           },
           {
             offset: 1,
@@ -135,11 +135,11 @@ describe('Rubber', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  test('custom intensity - style method', () => {
+  test('custom stretch - style method', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       duration: 1000,
-      namedEffect: { intensity: 0.8, iterationDelay: 1000 } as RubberType,
+      namedEffect: { stretch: 0.13, iterationDelay: 1000 } as RubberType,
     };
 
     const expectedResult = [
@@ -148,16 +148,16 @@ describe('Rubber', () => {
         duration: 2000,
         easing: 'linear',
         custom: {
-          '--motion-scale-x-45': 1.11,
-          '--motion-scale-y-45': 0.85,
-          '--motion-scale-x-56': 0.86,
-          '--motion-scale-y-56': 1.07,
-          '--motion-scale-x-66': 1.1,
-          '--motion-scale-y-66': 0.88,
-          '--motion-scale-x-78': 0.94,
-          '--motion-scale-y-78': 1.06,
-          '--motion-scale-x-89': 1.085,
-          '--motion-scale-y-89': 0.9195,
+          '--motion-scale-x-45': 1.13,
+          '--motion-scale-y-45': 0.87,
+          '--motion-scale-x-56': 0.883,
+          '--motion-scale-y-56': 1.117,
+          '--motion-scale-x-66': 1.104,
+          '--motion-scale-y-66': 0.896,
+          '--motion-scale-x-78': 0.9415,
+          '--motion-scale-y-78': 1.0585,
+          '--motion-scale-x-89': 1.0686,
+          '--motion-scale-y-89': 0.9314,
           '--motion-scale-x-100': 1,
           '--motion-scale-y-100': 1,
         },
@@ -201,11 +201,11 @@ describe('Rubber', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('custom intensity - web method', () => {
+  test('custom stretch - web method', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       duration: 1000,
-      namedEffect: { intensity: 0.8, iterationDelay: 1000 } as RubberType,
+      namedEffect: { stretch: 0.13, iterationDelay: 1000 } as RubberType,
     };
 
     const expectedResult = [
@@ -214,39 +214,39 @@ describe('Rubber', () => {
         duration: 2000,
         easing: 'linear',
         custom: {
-          '--motion-scale-x-45': 1.11,
-          '--motion-scale-y-45': 0.85,
-          '--motion-scale-x-56': 0.86,
-          '--motion-scale-y-56': 1.07,
-          '--motion-scale-x-66': 1.1,
-          '--motion-scale-y-66': 0.88,
-          '--motion-scale-x-78': 0.94,
-          '--motion-scale-y-78': 1.06,
-          '--motion-scale-x-89': 1.085,
-          '--motion-scale-y-89': 0.9195,
+          '--motion-scale-x-45': 1.13,
+          '--motion-scale-y-45': 0.87,
+          '--motion-scale-x-56': 0.883,
+          '--motion-scale-y-56': 1.117,
+          '--motion-scale-x-66': 1.104,
+          '--motion-scale-y-66': 0.896,
+          '--motion-scale-x-78': 0.9415,
+          '--motion-scale-y-78': 1.0585,
+          '--motion-scale-x-89': 1.0686,
+          '--motion-scale-y-89': 0.9314,
           '--motion-scale-x-100': 1,
           '--motion-scale-y-100': 1,
         },
         keyframes: [
           {
             offset: 0.225,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.11, 0.85)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.13, 0.87)',
           },
           {
             offset: 0.28,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.86, 1.07)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.883, 1.117)',
           },
           {
             offset: 0.33,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.1, 0.88)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.104, 0.896)',
           },
           {
             offset: 0.39,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.94, 1.06)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(0.9415, 1.0585)',
           },
           {
             offset: 0.445,
-            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.085, 0.9195)',
+            transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1.0686, 0.9314)',
           },
           {
             offset: 0.5,

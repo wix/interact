@@ -38,6 +38,7 @@ import type {
   UnitLengthPercentage,
   WebAnimationEffectFactory,
 } from '@wix/motion';
+import type { LengthInput } from './utils';
 
 export type Translate = { x: string; y: string };
 export type ShapeType = 'circle' | 'ellipse' | 'rectangle' | 'diamond' | 'window';
@@ -177,13 +178,13 @@ export type EntranceAnimations = Record<EntranceAnimation['type'], AnimationEffe
 export type Breathe = {
   type: 'Breathe';
   direction?: 'vertical' | 'horizontal' | 'center';
-  distance?: UnitLengthPercentage;
+  travel?: LengthInput;
   perspective?: number;
   iterationDelay?: number;
 };
 export type Pulse = {
   type: 'Pulse';
-  intensity?: number;
+  scale?: number;
   iterationDelay?: number;
 };
 export type Spin = {
@@ -194,14 +195,14 @@ export type Spin = {
 export type Poke = {
   type: 'Poke';
   direction?: EffectFourDirections;
-  intensity?: number;
+  travel?: LengthInput;
   iterationDelay?: number;
 };
 export type Flash = { type: 'Flash'; iterationDelay?: number };
 export type Swing = {
   type: 'Swing';
-  swing?: number;
-  direction?: EffectFourDirections;
+  angle?: number;
+  pivot?: EffectFourDirections;
   iterationDelay?: number;
 };
 export type Flip = {
@@ -212,28 +213,30 @@ export type Flip = {
 };
 export type Rubber = {
   type: 'Rubber';
-  intensity?: number;
+  stretch?: number;
   iterationDelay?: number;
 };
 export type Fold = {
   type: 'Fold';
-  direction?: EffectFourDirections;
+  pivot?: EffectFourDirections;
   angle?: number;
+  perspective?: number;
   iterationDelay?: number;
 };
 export type Jello = {
   type: 'Jello';
-  intensity?: number;
+  skew?: number;
   iterationDelay?: number;
 };
 export type Wiggle = {
   type: 'Wiggle';
-  intensity?: number;
+  angle?: number;
+  travel?: LengthInput;
   iterationDelay?: number;
 };
 export type Bounce = {
   type: 'Bounce';
-  intensity?: number;
+  travel?: LengthInput;
   iterationDelay?: number;
 };
 export type Cross = {

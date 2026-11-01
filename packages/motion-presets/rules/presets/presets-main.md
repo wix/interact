@@ -82,19 +82,19 @@ These are set on the effect configuration level, not on the preset itself:
 
 The `direction` parameter accepts different values depending on the preset:
 
-| Meaning            | Accepted Values                                           | Presets                                                                                                              |
-| ------------------ | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Cardinal           | 'top', 'right', 'bottom', 'left'                          | FlipIn, FoldIn, SlideIn, FloatIn, RevealIn, ShuttersIn, Poke, Swing, Fold, RevealScroll, ShuttersScroll, SlideScroll |
-| Cardinal + center  | 'top', 'right', 'bottom', 'left', 'center'                | BounceIn                                                                                                             |
-| Two sides          | 'left', 'right'                                           | TiltIn, PanScroll, SkewPanScroll, TiltScroll, TurnScroll                                                             |
-| Two sides + pseudo | 'left', 'right', 'pseudoLeft', 'pseudoRight'              | CurveIn                                                                                                              |
-| Corner             | 'top-left', 'top-right', 'bottom-left', 'bottom-right'    | TurnIn                                                                                                               |
-| Eight directions   | 4 cardinal + 4 diagonal                                   | Cross                                                                                                                |
-| Nine directions    | 4 cardinal + 4 diagonal + 'center'                        | GrowScroll, ShrinkScroll                                                                                             |
-| Axis               | 'horizontal', 'vertical'                                  | WinkIn, ArcScroll, FlipScroll, Flip                                                                                  |
-| Axis + center      | 'horizontal', 'vertical', 'center'                        | Breathe                                                                                                              |
-| Rotation           | 'clockwise', 'counter-clockwise'                          | SpinIn, SpinScroll, Spin                                                                                             |
-| Angle (number)     | 0–360 (0° = right, 90° = top, 180° = left, 270° = bottom) | GlideIn, ExpandIn                                                                                                    |
+| Meaning            | Accepted Values                                           | Presets                                                                                                                       |
+| ------------------ | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Cardinal           | 'top', 'right', 'bottom', 'left'                          | FlipIn, FoldIn, SlideIn, FloatIn, RevealIn, ShuttersIn, Poke, RevealScroll, ShuttersScroll, SlideScroll; `pivot`: Swing, Fold |
+| Cardinal + center  | 'top', 'right', 'bottom', 'left', 'center'                | BounceIn                                                                                                                      |
+| Two sides          | 'left', 'right'                                           | TiltIn, PanScroll, SkewPanScroll, TiltScroll, TurnScroll                                                                      |
+| Two sides + pseudo | 'left', 'right', 'pseudoLeft', 'pseudoRight'              | CurveIn                                                                                                                       |
+| Corner             | 'top-left', 'top-right', 'bottom-left', 'bottom-right'    | TurnIn                                                                                                                        |
+| Eight directions   | 4 cardinal + 4 diagonal                                   | Cross                                                                                                                         |
+| Nine directions    | 4 cardinal + 4 diagonal + 'center'                        | GrowScroll, ShrinkScroll                                                                                                      |
+| Axis               | 'horizontal', 'vertical'                                  | WinkIn, ArcScroll, FlipScroll, Flip                                                                                           |
+| Axis + center      | 'horizontal', 'vertical', 'center'                        | Breathe                                                                                                                       |
+| Rotation           | 'clockwise', 'counter-clockwise'                          | SpinIn, SpinScroll, Spin                                                                                                      |
+| Angle (number)     | 0–360 (0° = right, 90° = top, 180° = left, 270° = bottom) | GlideIn, ExpandIn                                                                                                             |
 
 ### Using Units
 

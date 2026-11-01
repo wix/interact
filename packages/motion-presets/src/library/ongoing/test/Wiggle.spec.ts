@@ -19,7 +19,8 @@ describe('Wiggle', () => {
           keyframes: [
             {
               offset: 0.18,
-              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 25deg)) translateY(-25px)',
+              transform:
+                'rotate(calc(var(--motion-rotate, 0deg) + 25deg)) translateY(calc(-1 * 25px))',
             },
             {
               offset: 0.35,
@@ -46,11 +47,11 @@ describe('Wiggle', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom duration and intensity', () => {
+    test('custom duration, angle and travel', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Wiggle,
+        namedEffect: { angle: 34, travel: '34px', iterationDelay: 500 } as Wiggle,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -60,7 +61,8 @@ describe('Wiggle', () => {
           keyframes: [
             {
               offset: 0.1206,
-              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 34deg)) translateY(-34px)',
+              transform:
+                'rotate(calc(var(--motion-rotate, 0deg) + 34deg)) translateY(calc(-1 * 34px))',
             },
             {
               offset: 0.2345,
@@ -101,7 +103,7 @@ describe('Wiggle', () => {
           duration: 1,
           custom: {
             '--motion-rotate-18': 'calc(var(--motion-rotate, 0deg) + 25deg)',
-            '--motion-translate-y-18': '-25px',
+            '--motion-translate-y-18': 'calc(-1 * 25px)',
             '--motion-rotate-35': 'calc(var(--motion-rotate, 0deg) + -20deg)',
             '--motion-translate-y-35': '0px',
             '--motion-rotate-53': 'calc(var(--motion-rotate, 0deg) + 15deg)',
@@ -142,11 +144,11 @@ describe('Wiggle', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom intensity and duration', () => {
+    test('custom angle, travel and duration', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { intensity: 0.8, iterationDelay: 500 } as Wiggle,
+        namedEffect: { angle: 34, travel: '34px', iterationDelay: 500 } as Wiggle,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -155,7 +157,7 @@ describe('Wiggle', () => {
           duration: 1500,
           custom: {
             '--motion-rotate-18': 'calc(var(--motion-rotate, 0deg) + 34deg)',
-            '--motion-translate-y-18': '-34px',
+            '--motion-translate-y-18': 'calc(-1 * 34px)',
             '--motion-rotate-35': 'calc(var(--motion-rotate, 0deg) + -27.2deg)',
             '--motion-translate-y-35': '0px',
             '--motion-rotate-53': 'calc(var(--motion-rotate, 0deg) + 20.4deg)',
@@ -199,7 +201,7 @@ describe('Wiggle', () => {
     test('style method should populate custom properties correctly', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { intensity: 0.5 } as Wiggle,
+        namedEffect: { angle: 10, travel: { value: 1, unit: 'em' } } as Wiggle,
       };
 
       const result = WiggleAnimation.style?.(mockOptions);
@@ -216,9 +218,10 @@ describe('Wiggle', () => {
       expect(result[0].custom).toHaveProperty('--motion-rotate-100');
       expect(result[0].custom).toHaveProperty('--motion-translate-y-100');
 
-      // Verify the custom properties contain the expected calculated values
-      expect(typeof result[0].custom!['--motion-rotate-18']).toBe('string');
-      expect(typeof result[0].custom!['--motion-translate-y-18']).toBe('string');
+      expect(result[0].custom!['--motion-rotate-18']).toBe(
+        'calc(var(--motion-rotate, 0deg) + 10deg)',
+      );
+      expect(result[0].custom!['--motion-translate-y-18']).toBe('calc(-1 * 1em)');
     });
   });
 });

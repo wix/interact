@@ -9,7 +9,18 @@ import {
 } from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: (typeof AXIS_DIRECTIONS)[number] = 'horizontal';
+const DEFAULTS: Required<Flip> = {
+  type: 'Flip',
+  direction: 'horizontal',
+  iterationDelay: 0,
+  perspective: 800,
+};
+
+export const schema = {
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: DEFAULTS.direction },
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+};
 
 const DIRECTION_MAP = {
   vertical: { x: '1', y: '0' },
@@ -22,8 +33,8 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Flip;
-  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULT_DIRECTION);
-  const { perspective = 800 } = namedEffect;
+  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULTS.direction);
+  const { perspective = DEFAULTS.perspective } = namedEffect;
 
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || 0;

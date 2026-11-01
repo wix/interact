@@ -121,10 +121,10 @@ describe('Breathe', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom distance', () => {
+    test('custom travel', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { distance: { value: 50, unit: 'percentage' } } as Breathe,
+        namedEffect: { travel: { value: 50, unit: 'percentage' } } as Breathe,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -436,10 +436,10 @@ describe('Breathe', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom distance', () => {
+    test('custom travel', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { distance: { value: 50, unit: 'percentage' } } as Breathe,
+        namedEffect: { travel: { value: 50, unit: 'percentage' } } as Breathe,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
