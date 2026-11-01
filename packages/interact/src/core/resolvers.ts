@@ -32,7 +32,7 @@ export function resolveEffectForCSS(
   fallbackId?: string,
 ): ResolvedEffect | null {
   const { effects = {}, conditions: configConditions = {} } = config;
-  const { key: interactionKey, trigger } = interaction;
+  const { key: interactionKey, trigger, conditions: interactionConditions = [] } = interaction;
   const isPointerMove = trigger === 'pointerMove';
 
   // ensuring the original reference of the effect has an id (required for states)
@@ -61,10 +61,17 @@ export function resolveEffectForCSS(
     // should probably find a way to support those
     return null;
   }
-  // TODO: handle here any key escaping if needed
+
+  const interactionMediaConditions = interactionConditions.filter(
+    (condition: string) => configConditions[condition].type === 'media',
+  );
 
   conditions = [
-    ...new Set((conditions || []).filter((condition: string) => configConditions[condition])),
+    ...new Set(
+      [...(conditions || []), ...interactionMediaConditions].filter(
+        (condition: string) => configConditions[condition],
+      ),
+    ),
   ];
 
   if (!triggerType) {
@@ -109,6 +116,7 @@ export function resolveSequenceForCSS(
   getSlotKey?: (effectIndex: number) => string,
 ): ResolvedSequence | null {
   const { sequences = {}, conditions: configConditions = {} } = config;
+  const { trigger, conditions: interactionConditions = [] } = interaction;
 
   if (!sequence.sequenceId) {
     sequence.sequenceId = fallbackId || generateId();
@@ -134,11 +142,19 @@ export function resolveSequenceForCSS(
   }
 
   if (!triggerType) {
-    triggerType = TIME_TRIGGER_TO_DEFAULT_TYPE.get(interaction.trigger)!;
+    triggerType = TIME_TRIGGER_TO_DEFAULT_TYPE.get(trigger)!;
   }
 
+  const interactionMediaConditions = interactionConditions.filter(
+    (condition: string) => configConditions[condition].type === 'media',
+  );
+
   conditions = [
-    ...new Set((conditions || []).filter((condition: string) => configConditions[condition])),
+    ...new Set(
+      [...(conditions || []), ...interactionMediaConditions].filter(
+        (condition: string) => configConditions[condition],
+      ),
+    ),
   ];
   // resolving effects and cascading the conditions from sequence
   const resolvedEffects = effects.map((effect, index) => {
