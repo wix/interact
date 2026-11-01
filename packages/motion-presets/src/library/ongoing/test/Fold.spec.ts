@@ -64,7 +64,7 @@ describe('Fold', () => {
         namedEffect: { iterationDelay: 500 } as Fold,
       };
 
-      const dynamicName = `motion-fold-067-cubic-bezier-151pv8d`;
+      const dynamicName = `motion-fold-067-cubic-bezier-0215_061_0355_1`;
 
       const expectedResult: Partial<AnimationData>[] = [
         {
@@ -457,7 +457,7 @@ describe('Fold', () => {
         namedEffect: { iterationDelay: 500 } as Fold,
       };
 
-      const dynamicName = `motion-fold-067-cubic-bezier-151pv8d`;
+      const dynamicName = `motion-fold-067-cubic-bezier-0215_061_0355_1`;
 
       const expectedResult: Partial<AnimationData>[] = [
         {

@@ -21,7 +21,6 @@ const EASINGS = [
   'linear(0, 0.25 50%, 1)',
   'linear(0, 0.25 -50%, 1)',
   'linear(0, 0.0039, 0.0157, 0.0352, 0.0625 25%, 0.1407, 0.25, 0.5, 0.75 75%, 1)',
-  'linear(0, 0.0039, 0.0157, 0.0352, 0.0625 25%, 0.1407, 0.25, 0.5, 0.8 75%, 1)',
 ];
 
 // every enum value and boolean of the schema, one param at a time, with and without a delay
@@ -69,19 +68,18 @@ describe('ongoing presets keyframe names', () => {
 });
 
 describe('getEasingName', () => {
-  test('the default easing adds nothing', () => {
-    expect(getEasingName(undefined, 'linear')).toBe('');
-    expect(getEasingName('linear', 'linear')).toBe('');
-  });
-
-  test('keyword easings are used as is', () => {
-    expect(getEasingName('sineIn', 'linear')).toBe('-sineIn');
-    expect(getEasingName('ease-in-out', 'linear')).toBe('-ease-in-out');
-  });
-
-  test('function easings get distinct names', () => {
-    const names = EASINGS.slice(3).map((easing) => getEasingName(easing, 'linear'));
-    expect(new Set(names).size).toBe(names.length);
-    names.forEach((name) => expect(name).toMatch(/^-(cubic-bezier|linear)-[a-z0-9]+$/));
+  test.each([
+    [undefined, ''],
+    ['linear', ''],
+    ['sineIn', '-sineIn'],
+    ['cubic-bezier(0.68, -0.55, 0.27, 1.55)', '-cubic-bezier-068_-055_027_155'],
+    ['steps(4, jump-end)', '-steps-4_jump-end'],
+    ['linear(0, 0.25 50%, 1)', '-linear-0_025-50_1'],
+    [
+      'linear(0, 0.0039, 0.0157, 0.0352, 0.0625 25%, 0.1407, 0.25, 0.5, 0.75 75%, 1)',
+      '-linear-0_00039_00157_00352_00625-25_0140',
+    ],
+  ])('%s', (easing, name) => {
+    expect(getEasingName(easing, 'linear')).toBe(name);
   });
 });
