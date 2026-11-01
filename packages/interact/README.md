@@ -248,7 +248,7 @@ Each example is a complete `InteractConfig` — pass it to `Interact.create(conf
     'float-in': {
       duration: 800,
       easing: 'ease-out',
-      namedEffect: { type: 'FloatIn', direction: 'bottom' },
+      namedEffect: { type: 'FloatIn', from: 'bottom' },
     },
   },
 }
