@@ -22,7 +22,7 @@ const DEFAULTS: Required<BgPullBack> = {
 };
 
 export const schema = {
-  depth: { type: 'length', default: DEFAULTS.depth },
+  depth: { type: 'lengthObject', default: DEFAULTS.depth },
 };
 
 export function getNames(options: ScrubAnimationOptions) {

@@ -40,7 +40,7 @@ describe('BgFake3D', () => {
 
     test('Custom values', () => {
       const scaleY = 1.5;
-      const depth = 30;
+      const depth = { value: 30, unit: 'px' };
       const mockOptions = {
         ...baseMockOptions,
         namedEffect: { scaleY, depth } as BgFake3DType,
@@ -110,7 +110,7 @@ describe('BgFake3D', () => {
 
     test('Custom values', () => {
       const scaleY = 1.5;
-      const depth = 30;
+      const depth = { value: 30, unit: 'px' };
       const mockOptions = {
         ...baseMockOptions,
         namedEffect: { scaleY, depth } as BgFake3DType,

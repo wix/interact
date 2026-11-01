@@ -26,7 +26,7 @@ const DEFAULTS: Required<BgFake3D> = {
 };
 
 export const schema = {
-  depth: { type: 'length', default: DEFAULTS.depth },
+  depth: { type: 'lengthObject', default: DEFAULTS.depth },
   scaleY: { type: 'number', min: 0, default: DEFAULTS.scaleY },
 };
 

@@ -148,7 +148,7 @@ describe('BgZoom', () => {
     });
 
     test('Custom depth', () => {
-      const depth = 60;
+      const depth = { value: 60, unit: 'px' };
       const mockOptions = {
         ...baseMockOptions,
         namedEffect: { depth } as BgZoomType,

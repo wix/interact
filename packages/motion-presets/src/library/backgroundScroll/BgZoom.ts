@@ -37,7 +37,7 @@ const DEFAULTS: Required<BgZoom> = {
 };
 
 export const schema = {
-  depth: { type: 'length', default: DEFAULTS.depth },
+  depth: { type: 'lengthObject', default: DEFAULTS.depth },
   direction: { type: 'enum', values: ['in', 'out'], default: DEFAULTS.direction },
 };
 
