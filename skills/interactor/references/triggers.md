@@ -220,7 +220,7 @@ spans (`.split-c`, `.split-w`, etc.) — use `$splitText` on the interaction, th
 { interactions: [{ key: 'features', trigger: 'viewEnter',
     sequences: [{ offset: 120, offsetEasing: 'quadOut',
       effects: [{ effectId: 'card-in', selector: '.feature-card' }] }] }],
-  effects: { 'card-in': { duration: 600, easing: 'ease-out', fill: 'backwards', namedEffect: { type: 'SlideIn', direction: 'bottom' }, triggerType: 'once' } } }
+  effects: { 'card-in': { duration: 600, easing: 'ease-out', fill: 'backwards', namedEffect: { type: 'SlideIn', from: 'bottom' }, triggerType: 'once' } } }
 ```
 
 - `offset` = ms between consecutive items' starts.

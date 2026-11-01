@@ -1,23 +1,26 @@
 import type { TimeAnimationOptions } from '../../types';
+import type { LengthValue } from '../../utils';
 import {
-  getCssUnits,
   toKeyframeValue,
-  parseLength,
-  parseDirection,
+  parseLengthLazy,
+  parseAngleLazy,
   getEntranceFill,
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
 import type { ExpandIn } from '../../types';
-import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION = 90;
-const DEFAULT_DISTANCE = { value: 120, unit: 'percentage' };
-const DIRECTION_KEYWORD_TO_ANGLE: Record<string, number> = {
-  top: 90,
-  right: 0,
-  bottom: 270,
-  left: 180,
+const DEFAULTS: Required<ExpandIn> = {
+  type: 'ExpandIn',
+  from: 270,
+  scale: 0,
+  travel: { value: 120, unit: 'percentage' },
+};
+
+export const schema = {
+  from: { type: 'angle', default: DEFAULTS.from },
+  scale: { type: 'number', min: 0, max: 1, default: DEFAULTS.scale },
+  travel: { type: 'length', default: DEFAULTS.travel },
 };
 
 export function getNames(options: TimeAnimationOptions) {
@@ -30,34 +33,23 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ExpandIn;
-  const { initialScale = 0 } = namedEffect;
+  const { scale = DEFAULTS.scale } = namedEffect;
 
-  const parsedDirection = parseDirection(
-    namedEffect?.direction,
-    FOUR_DIRECTIONS,
-    DEFAULT_DIRECTION,
-    true,
-  );
-  const direction =
-    typeof parsedDirection === 'string'
-      ? DIRECTION_KEYWORD_TO_ANGLE[parsedDirection]
-      : parsedDirection;
+  const from = parseAngleLazy(namedEffect?.from, DEFAULTS.from as number);
 
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
+  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
 
   const [fadeIn, expandIn] = getNames(options);
 
   const easing = options.easing || 'cubicInOut';
-  const angleInRad = (direction * Math.PI) / 180;
-  const unit = getCssUnits(distance.unit);
 
-  const x = `${(Math.cos(angleInRad) * distance.value) | 0}${unit}`;
-  const y = `${(Math.sin(angleInRad) * distance.value * -1) | 0}${unit}`;
+  const x = `calc(cos(${from}) * ${travel})`;
+  const y = `calc(sin(${from}) * ${travel})`;
 
   const custom = {
     '--motion-translate-x': `${x}`,
     '--motion-translate-y': `${y}`,
-    '--motion-scale': `${initialScale}`,
+    '--motion-scale': `${scale}`,
   };
 
   const animations = [

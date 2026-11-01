@@ -228,8 +228,8 @@ const config = {
     'fade-up': {
       namedEffect: {
         type: 'SlideIn',
-        direction: 'bottom',
-        initialTranslate: 0.3,
+        from: 'bottom',
+        start: 0.7,
       },
       duration: 1000,
       easing: 'ease-out',

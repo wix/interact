@@ -10,10 +10,10 @@ const baseMockOptions: TimeAnimationOptions = {
 };
 
 describe('ShuttersIn.web()', () => {
-  test('default options (right direction)', () => {
+  test('default options (from left)', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'right' } as ShuttersInType,
+      namedEffect: { from: 'left' } as ShuttersInType,
     };
 
     const expectedResult = [
@@ -32,7 +32,8 @@ describe('ShuttersIn.web()', () => {
         ],
       },
       {
-        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+        easing: 'step-start',
+        keyframes: [{ offset: 0, opacity: 0 }],
       },
     ];
 
@@ -40,10 +41,10 @@ describe('ShuttersIn.web()', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('left direction', () => {
+  test('from right', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
-      namedEffect: { type: 'ShuttersIn', direction: 'left' } as ShuttersInType,
+      namedEffect: { type: 'ShuttersIn', from: 'right' } as ShuttersInType,
     };
 
     const expectedResult = [
@@ -61,7 +62,8 @@ describe('ShuttersIn.web()', () => {
         ],
       },
       {
-        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+        easing: 'step-start',
+        keyframes: [{ offset: 0, opacity: 0 }],
       },
     ];
 
@@ -74,7 +76,7 @@ describe('ShuttersIn.web()', () => {
       ...baseMockOptions,
       namedEffect: {
         type: 'ShuttersIn',
-        direction: 'right',
+        from: 'left',
         shutters: 6,
       } as ShuttersInType,
     };
@@ -94,7 +96,8 @@ describe('ShuttersIn.web()', () => {
         ],
       },
       {
-        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+        easing: 'step-start',
+        keyframes: [{ offset: 0, opacity: 0 }],
       },
     ];
 
@@ -107,7 +110,7 @@ describe('ShuttersIn.web()', () => {
       ...baseMockOptions,
       namedEffect: {
         type: 'ShuttersIn',
-        direction: 'right',
+        from: 'left',
         staggered: false,
       } as ShuttersInType,
     };
@@ -127,7 +130,8 @@ describe('ShuttersIn.web()', () => {
         ],
       },
       {
-        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+        easing: 'step-start',
+        keyframes: [{ offset: 0, opacity: 0 }],
       },
     ];
 
@@ -139,7 +143,7 @@ describe('ShuttersIn.web()', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       easing: 'easeInOutQuad',
-      namedEffect: { type: 'ShuttersIn', direction: 'right' } as ShuttersInType,
+      namedEffect: { type: 'ShuttersIn', from: 'left' } as ShuttersInType,
     };
 
     const expectedResult = [
@@ -158,8 +162,8 @@ describe('ShuttersIn.web()', () => {
         ],
       },
       {
-        easing: 'easeInOutQuad',
-        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+        easing: 'step-start',
+        keyframes: [{ offset: 0, opacity: 0 }],
       },
     ];
 
@@ -169,10 +173,10 @@ describe('ShuttersIn.web()', () => {
 });
 
 describe('ShuttersIn.style()', () => {
-  test('default options (right direction)', () => {
+  test('default options (from left)', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'right' } as ShuttersInType,
+      namedEffect: { from: 'left' } as ShuttersInType,
     };
 
     const expectedResult = [
@@ -198,7 +202,8 @@ describe('ShuttersIn.style()', () => {
       {
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+        easing: 'step-start',
+        keyframes: [{ offset: 0, opacity: 0 }],
       },
     ];
 
@@ -206,10 +211,10 @@ describe('ShuttersIn.style()', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('left direction', () => {
+  test('from right', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
-      namedEffect: { type: 'ShuttersIn', direction: 'left' } as ShuttersInType,
+      namedEffect: { type: 'ShuttersIn', from: 'right' } as ShuttersInType,
     };
 
     const expectedResult = [
@@ -234,7 +239,8 @@ describe('ShuttersIn.style()', () => {
       {
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+        easing: 'step-start',
+        keyframes: [{ offset: 0, opacity: 0 }],
       },
     ];
 
@@ -247,7 +253,7 @@ describe('ShuttersIn.style()', () => {
       ...baseMockOptions,
       namedEffect: {
         type: 'ShuttersIn',
-        direction: 'right',
+        from: 'left',
         shutters: 6,
       } as ShuttersInType,
     };
@@ -274,7 +280,8 @@ describe('ShuttersIn.style()', () => {
       {
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+        easing: 'step-start',
+        keyframes: [{ offset: 0, opacity: 0 }],
       },
     ];
 
@@ -287,7 +294,7 @@ describe('ShuttersIn.style()', () => {
       ...baseMockOptions,
       namedEffect: {
         type: 'ShuttersIn',
-        direction: 'right',
+        from: 'left',
         staggered: false,
       } as ShuttersInType,
     };
@@ -314,7 +321,8 @@ describe('ShuttersIn.style()', () => {
       {
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+        easing: 'step-start',
+        keyframes: [{ offset: 0, opacity: 0 }],
       },
     ];
 
@@ -326,7 +334,7 @@ describe('ShuttersIn.style()', () => {
     const mockOptions: TimeAnimationOptions = {
       ...baseMockOptions,
       easing: 'easeInOutQuad',
-      namedEffect: { type: 'ShuttersIn', direction: 'right' } as ShuttersInType,
+      namedEffect: { type: 'ShuttersIn', from: 'left' } as ShuttersInType,
     };
 
     const expectedResult = [
@@ -350,10 +358,10 @@ describe('ShuttersIn.style()', () => {
         ],
       },
       {
-        easing: 'easeInOutQuad',
         name: 'motion-fadeIn',
         custom: {},
-        keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+        easing: 'step-start',
+        keyframes: [{ offset: 0, opacity: 0 }],
       },
     ];
 

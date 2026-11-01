@@ -1,24 +1,24 @@
 import type { TimeAnimationOptions, GlideIn } from '../../types';
+import type { LengthValue } from '../../utils';
 import {
-  getCssUnits,
   toKeyframeValue,
-  parseLength,
-  parseDirection,
+  parseLengthLazy,
+  parseAngleLazy,
   getEntranceFill,
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
-import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION = 180;
-const DEFAULT_DISTANCE = { value: 100, unit: 'percentage' };
-const DIRECTION_KEYWORD_TO_ANGLE: Record<string, number> = {
-  top: 90,
-  right: 0,
-  bottom: 270,
-  left: 180,
+const DEFAULTS: Required<GlideIn> = {
+  type: 'GlideIn',
+  from: 180,
+  travel: { value: 100, unit: 'percentage' },
 };
-const ALLOW_ANGLES = true;
+
+export const schema = {
+  from: { type: 'angle', default: DEFAULTS.from },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
 
 export function getNames(options: TimeAnimationOptions) {
   return suffixNames(['motion-glideIn', 'motion-fadeIn'], options.suffix);
@@ -31,26 +31,13 @@ export function web(options: TimeAnimationOptions) {
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as GlideIn;
 
-  const parsedDirection = parseDirection(
-    namedEffect?.direction,
-    FOUR_DIRECTIONS,
-    DEFAULT_DIRECTION,
-    ALLOW_ANGLES,
-  );
-  const direction =
-    typeof parsedDirection === 'string'
-      ? DIRECTION_KEYWORD_TO_ANGLE[parsedDirection]
-      : parsedDirection;
-
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-
-  const angleInRad = (direction * Math.PI) / 180;
-  const unit = getCssUnits(distance.unit);
+  const from = parseAngleLazy(namedEffect?.from, DEFAULTS.from as number);
+  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
 
   const easing = options.easing || 'quintInOut';
 
-  const translateX = `${(Math.cos(angleInRad) * distance.value) | 0}${unit}`;
-  const translateY = `${(Math.sin(angleInRad) * distance.value * -1) | 0}${unit}`;
+  const translateX = `calc(cos(${from}) * ${travel})`;
+  const translateY = `calc(sin(${from}) * ${travel})`;
 
   const custom = {
     '--motion-translate-x': `${translateX}`,
@@ -87,8 +74,9 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
       ...options,
       name: fadeIn,
       fill: getEntranceFill(options),
+      easing: 'step-start',
       custom: {},
-      keyframes: [{ opacity: 0, offset: 0, easing: 'step-start' }],
+      keyframes: [{ offset: 0, opacity: 0 }],
     },
   ];
 
