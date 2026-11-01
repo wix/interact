@@ -15,7 +15,6 @@ describe('ParallaxScroll', () => {
   test('passes center and speed to the parallax', () => {
     const [parallax] = ParallaxScroll.style(
       scrollOptions({ type: 'ParallaxScroll', center: 0.2, speed: 0.5 }),
-      true,
     ) as any[];
     expect(parallax.custom['--motion-trans-rot-parallax-center']).toBe(0.2);
     expect(parallax.custom['--motion-trans-rot-parallax-inv-speed']).toBe(2);

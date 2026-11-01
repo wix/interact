@@ -186,7 +186,6 @@ export function parseCssLength(input: LengthInput, defaultValue: LengthValue) {
   return `${parsedLength.value}${getCssUnits(parsedLength.unit)}`;
 }
 
-
 /**
  * Normalize unit string to internal format
  */
@@ -326,6 +325,19 @@ export function getTimingFactor(
   const delay_ = delay || 0;
   const timingFactor = roundNumber(duration_ / (duration_ + delay_));
   return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
+}
+
+// a base preset's layer with the suffix appended to its name, custom properties and their references
+export function suffixLayer<T extends { name: string; custom?: CSSValues; keyframes: CSSValues[] }>(
+  layer: T,
+  suffix?: string,
+): T {
+  if (!suffix) {
+    return layer;
+  }
+  const [suffixed] = suffixCustomProperties([layer], suffix);
+  suffixed.name = `${layer.name}${suffix}`;
+  return suffixed;
 }
 
 export function suffixNames(names: string[], suffix?: string) {

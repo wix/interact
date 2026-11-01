@@ -36,7 +36,7 @@ export function getNames({ namedEffect, suffix = '' }: ScrubAnimationOptions) {
   const staggerContinuous = staggered && compareKeywordToNonDefaults(range, ['continuous']);
 
   return [
-    `${MOTION_SHUTTERS_NAME}${suffix}-${shutters}${staggerContinuous ? '-cont-stagger' : ''}`,
+    `${MOTION_SHUTTERS_NAME}-${shutters}${staggerContinuous ? '-cont-stagger' : ''}${suffix}`,
   ];
 }
 

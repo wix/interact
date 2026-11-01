@@ -22,7 +22,7 @@ export const schema = {
 
 export function getNames({ namedEffect, suffix = '' }: TimeAnimationOptions) {
   const { shutters = DEFAULTS.shutters } = namedEffect as ShuttersIn;
-  return [MOTION_FADE_NAME + suffix, `${MOTION_SHUTTERS_NAME}${suffix}-${shutters}`];
+  return [MOTION_FADE_NAME + suffix, `${MOTION_SHUTTERS_NAME}-${shutters}${suffix}`];
 }
 
 export function web(options: TimeAnimationOptions) {

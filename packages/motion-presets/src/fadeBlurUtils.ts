@@ -1,4 +1,4 @@
-import { toKeyframeValue } from './utils';
+import { suffixLayer, toKeyframeValue } from './utils';
 
 export const MOTION_BLUR_NAME = 'motion-blur';
 export const MOTION_FADE_NAME = 'motion-fade';
@@ -13,15 +13,18 @@ export function getMotionFade(
 ) {
   const { opacity = 0 } = params;
   const custom = {
-    [`--motion-opacity${suffix}`]: opacity,
+    [`--motion-opacity`]: opacity,
   };
-  const opacity_ = toKeyframeValue(custom, `--motion-opacity${suffix}`, asWeb, '0');
+  const opacity_ = toKeyframeValue(custom, `--motion-opacity`, asWeb, '0');
 
-  return {
-    name: `${MOTION_FADE_NAME}${suffix}`,
-    custom,
-    keyframes: [{ offset: 0, opacity: opacity_ }],
-  };
+  return suffixLayer(
+    {
+      name: `${MOTION_FADE_NAME}`,
+      custom,
+      keyframes: [{ offset: 0, opacity: opacity_ }],
+    },
+    suffix,
+  );
 }
 
 export function getMotionBlur(
@@ -33,14 +36,17 @@ export function getMotionBlur(
 ) {
   const { blur = 0 } = params;
   const custom = {
-    [`--motion-blur${suffix}`]: `${blur}px`,
+    [`--motion-blur`]: `${blur}px`,
   };
-  const blur_ = toKeyframeValue(custom, `--motion-blur${suffix}`, asWeb, '0px');
+  const blur_ = toKeyframeValue(custom, `--motion-blur`, asWeb, '0px');
 
-  return {
-    name: `${MOTION_BLUR_NAME}${suffix}`,
-    composite: 'add' as const,
-    custom,
-    keyframes: [{ filter: `blur(${blur_})` }, { filter: `blur(0px)` }],
-  };
+  return suffixLayer(
+    {
+      name: `${MOTION_BLUR_NAME}`,
+      composite: 'add' as const,
+      custom,
+      keyframes: [{ filter: `blur(${blur_})` }, { filter: `blur(0px)` }],
+    },
+    suffix,
+  );
 }

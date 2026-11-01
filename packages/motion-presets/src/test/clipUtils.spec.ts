@@ -33,8 +33,8 @@ describe('getMotionReveal', () => {
     const data = getMotionReveal({ ...RANGES.continuous }, { minimum: 0.2 }, true, '-s');
     expect(data.name).toBe(`${MOTION_REVEAL_NAME}-s`);
     expect(data.custom).toMatchObject({
-      '--motion-reveal-s-from': -0.8,
-      '--motion-reveal-s-to': 0.8,
+      '--motion-reveal-from-s': -0.8,
+      '--motion-reveal-to-s': 0.8,
     });
   });
 });
@@ -70,10 +70,10 @@ describe('getMotionShape', () => {
     const data = getMotionShape({ shape: 'circle' }, false, '-s');
     expect(data.name).toBe(`${MOTION_SHAPE_NAME}-s`);
     SHAPES.filter((s) => s !== 'circle').forEach((s) => {
-      expect(data.custom[`--motion-shape-s-${s}-start`]).toBe('initial');
-      expect(data.custom[`--motion-shape-s-${s}-end`]).toBe('initial');
+      expect(data.custom[`--motion-shape-${s}-start-s`]).toBe('initial');
+      expect(data.custom[`--motion-shape-${s}-end-s`]).toBe('initial');
     });
-    expect(data.custom['--motion-shape-s-circle-end']).toBe('border-box circle(75%)');
+    expect(data.custom['--motion-shape-circle-end-s']).toBe('border-box circle(75%)');
   });
 
   test('web keyframes resolve to the selected shape', () => {
@@ -105,7 +105,7 @@ describe('getMotionShutters', () => {
     expect(
       getMotionShutters({ ...RANGES.inHorizontal }, { shutters: 4, staggered: false }, true, '-s')
         .name,
-    ).toBe(`${MOTION_SHUTTERS_NAME}-s-4`);
+    ).toBe(`${MOTION_SHUTTERS_NAME}-4-s`);
   });
 
   test('continuous uses evenodd fill, in uses nonzero', () => {

@@ -1,6 +1,6 @@
 import type { MotionRange } from './directions';
 import type { Parallax } from './parallaxUtils';
-import { CSS_CALC_REGEX, declareCustom, stripCalc, toKeyframeValue } from './utils';
+import { CSS_CALC_REGEX, declareCustom, stripCalc, suffixLayer, toKeyframeValue } from './utils';
 
 export const MOTION_TRANS_ROT_NAME = 'motion-trans-rot';
 export const MOTION_SCALE_NAME = 'motion-scale';
@@ -75,7 +75,7 @@ export function getMotionTransRot(
     travel = '0px',
     toTravel = travel,
   } = params;
-  const prefix = `--motion-trans-rot${suffix}`;
+  const prefix = `--motion-trans-rot`;
   const { custom, vars } = declareCustom(
     prefix,
     {
@@ -107,12 +107,15 @@ export function getMotionTransRot(
 
   applyTransformOrigin(transformFrames, transformOrigin, custom, prefix, asWeb);
 
-  return {
-    name: `${MOTION_TRANS_ROT_NAME}${suffix}`,
-    custom,
-    keyframes: transformFrames.map((transform) => ({ transform: transform.join(' ') })),
-    ...rangeOffsets,
-  };
+  return suffixLayer(
+    {
+      name: `${MOTION_TRANS_ROT_NAME}`,
+      custom,
+      keyframes: transformFrames.map((transform) => ({ transform: transform.join(' ') })),
+      ...rangeOffsets,
+    },
+    suffix,
+  );
 }
 
 // non-directional 2d transformation - scale from the given values to identity
@@ -128,7 +131,7 @@ export function getMotionScale(
 ) {
   const { scale = {}, transformOrigin = {} } = params;
   const scaleXY = typeof scale === 'number' ? { x: scale, y: scale } : scale;
-  const prefix = `--motion-scale${suffix}`;
+  const prefix = `--motion-scale`;
   const { custom, vars } = declareCustom(
     prefix,
     {
@@ -142,12 +145,15 @@ export function getMotionScale(
 
   applyTransformOrigin(transformFrames, transformOrigin, custom, prefix, asWeb);
 
-  return {
-    name: `${MOTION_SCALE_NAME}${suffix}`,
-    composite: 'add' as const,
-    custom,
-    keyframes: transformFrames.map((transform) => ({ transform: transform.join(' ') })),
-  };
+  return suffixLayer(
+    {
+      name: `${MOTION_SCALE_NAME}`,
+      composite: 'add' as const,
+      custom,
+      keyframes: transformFrames.map((transform) => ({ transform: transform.join(' ') })),
+    },
+    suffix,
+  );
 }
 
 export function getMotion3dTransform(
@@ -177,7 +183,7 @@ export function getMotion3dTransform(
       : angle;
   const travelXYZ = typeof travel === 'string' ? { z: travel } : travel;
 
-  const prefix = `--motion-transform-3d${suffix}`;
+  const prefix = `--motion-transform-3d`;
   const { custom, vars } = declareCustom(
     prefix,
     {
@@ -219,12 +225,15 @@ export function getMotion3dTransform(
 
   transformFrames.forEach((transform) => transform.unshift(`perspective(${vars.perspective})`));
 
-  return {
-    name: `${MOTION_3D_TRANSFORM_NAME}${suffix}`,
-    custom,
-    keyframes: transformFrames.map((transform) => ({ transform: transform.join(' ') })),
-    ...rangeOffsets,
-  };
+  return suffixLayer(
+    {
+      name: `${MOTION_3D_TRANSFORM_NAME}`,
+      custom,
+      keyframes: transformFrames.map((transform) => ({ transform: transform.join(' ') })),
+      ...rangeOffsets,
+    },
+    suffix,
+  );
 }
 
 // the layout's own rotation (--motion-rotate) as a constant transform layer, since an animated transform replaces it
@@ -237,9 +246,12 @@ export function getMotionLayoutRotation(
 ) {
   const rotate = `rotate(${toKeyframeValue({}, '--motion-rotate', false, '0deg')})`;
 
-  return {
-    name: `${MOTION_LAYOUT_ROTATION_NAME}${suffix}`,
-    custom: {},
-    keyframes: [{ transform: rotate }, { transform: rotate }],
-  };
+  return suffixLayer(
+    {
+      name: `${MOTION_LAYOUT_ROTATION_NAME}`,
+      custom: {},
+      keyframes: [{ transform: rotate }, { transform: rotate }],
+    },
+    suffix,
+  );
 }

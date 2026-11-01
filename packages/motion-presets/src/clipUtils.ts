@@ -1,7 +1,14 @@
 import type { Shape } from './types';
 import type { MotionRange } from './directions';
 import { SHAPES } from './consts';
-import { declareCustom, getEasing, mapRange, stripCalc, toKeyframeValue } from './utils';
+import {
+  declareCustom,
+  getEasing,
+  mapRange,
+  stripCalc,
+  suffixLayer,
+  toKeyframeValue,
+} from './utils';
 
 export const MOTION_REVEAL_NAME = 'motion-reveal';
 export const MOTION_SHAPE_NAME = 'motion-shape';
@@ -140,25 +147,28 @@ export function getMotionReveal(
   const { custom, isVertical, from, to } = prepareBasicRevealVars(
     motionRange,
     1 - minimum,
-    `--motion-reveal${suffix}`,
+    `--motion-reveal`,
     asWeb,
   );
 
   const { x: fromLeft, y: fromTop } = getDirectionalOffset(isVertical, from);
   const { x: toLeft, y: toTop } = getDirectionalOffset(isVertical, to);
 
-  return {
-    name: `${MOTION_REVEAL_NAME}${suffix}`,
-    custom,
-    keyframes: [
-      {
-        clipPath: polygon(getClipRect(fromLeft, fromTop, 100, 100)),
-      },
-      {
-        clipPath: polygon(getClipRect(toLeft, toTop, 100, 100)),
-      },
-    ],
-  };
+  return suffixLayer(
+    {
+      name: `${MOTION_REVEAL_NAME}`,
+      custom,
+      keyframes: [
+        {
+          clipPath: polygon(getClipRect(fromLeft, fromTop, 100, 100)),
+        },
+        {
+          clipPath: polygon(getClipRect(toLeft, toTop, 100, 100)),
+        },
+      ],
+    },
+    suffix,
+  );
 }
 
 // clips an element horizontally or vertically from the middle
@@ -169,7 +179,7 @@ export function getMotionWink(
   suffix: string = '',
 ) {
   const { custom, vars } = declareCustom(
-    `--motion-wink${suffix}`,
+    `--motion-wink`,
     {
       'is-vertical': [motionRange.vertical ? 1 : 0, '0'],
     },
@@ -180,18 +190,21 @@ export function getMotionWink(
   const { x, y } = getDirectionalOffset(isVertical, 0.5);
   const { width, height } = getDirectionalStripSizes(isVertical);
 
-  return {
-    name: `${MOTION_WINK_NAME}${suffix}`,
-    custom,
-    keyframes: [
-      {
-        clipPath: polygon(getClipRect(x, y, width, height)),
-      },
-      {
-        clipPath: polygon(getClipRect(0, 0, 100, 100)),
-      },
-    ],
-  };
+  return suffixLayer(
+    {
+      name: `${MOTION_WINK_NAME}`,
+      custom,
+      keyframes: [
+        {
+          clipPath: polygon(getClipRect(x, y, width, height)),
+        },
+        {
+          clipPath: polygon(getClipRect(0, 0, 100, 100)),
+        },
+      ],
+    },
+    suffix,
+  );
 }
 
 // scales a clip pattern of one of few selected shapes
@@ -207,7 +220,7 @@ export function getMotionShape(
   const { minimum = 0, shape } = params;
 
   const { custom, vars } = declareCustom(
-    `--motion-shape${suffix}`,
+    `--motion-shape`,
     {
       from: [minimum, '0'],
     },
@@ -216,21 +229,18 @@ export function getMotionShape(
 
   // setting all but the correct shape to initial
   SHAPES.forEach((s) => {
-    custom[`--motion-shape${suffix}-${s}-start`] =
-      s === shape ? SHAPES_MAP[shape](vars.from) : 'initial';
-    custom[`--motion-shape${suffix}-${s}-end`] = s === shape ? SHAPES_MAP[shape](1) : 'initial';
+    custom[`--motion-shape-${s}-start`] = s === shape ? SHAPES_MAP[shape](vars.from) : 'initial';
+    custom[`--motion-shape-${s}-end`] = s === shape ? SHAPES_MAP[shape](1) : 'initial';
   });
 
   const keyframes = ['start', 'end'].map((frame) => ({
     // clip-path value is the concatenated vars with space fallbacks
     clipPath: asWeb
-      ? custom[`--motion-shape${suffix}-${shape}-${frame}`]
-      : SHAPES.map((s) =>
-          toKeyframeValue({}, `--motion-shape${suffix}-${s}-${frame}`, false, ''),
-        ).join(' '),
+      ? custom[`--motion-shape-${shape}-${frame}`]
+      : SHAPES.map((s) => toKeyframeValue({}, `--motion-shape-${s}-${frame}`, false, '')).join(' '),
   }));
 
-  return { name: `${MOTION_SHAPE_NAME}${suffix}`, custom, keyframes };
+  return suffixLayer({ name: MOTION_SHAPE_NAME, custom, keyframes }, suffix);
 }
 
 // creates <shutters> amount of vertical or horizontal strips with each having an effect similar to reveal
@@ -254,7 +264,7 @@ export function getMotionShutters(
   // staggered + continuous cannot be done without altering the keyframes
   // we keep memory of this for later push the extra keyframes, but temporarily revert to "in" animation
   const staggerContinuous = motionRange.toSign && staggered;
-  const name = `${MOTION_SHUTTERS_NAME}${suffix}-${shutters}${staggerContinuous ? '-cont-stagger' : ''}`;
+  const name = `${MOTION_SHUTTERS_NAME}-${shutters}${staggerContinuous ? '-cont-stagger' : ''}`;
   if (staggerContinuous) {
     motionRange.toSign = 0;
   }
@@ -263,20 +273,15 @@ export function getMotionShutters(
   const { custom, isVertical, from, to } = prepareBasicRevealVars(
     motionRange,
     1,
-    `--motion-shutters${suffix}`,
+    `--motion-shutters`,
     asWeb,
   );
 
   // continuous motion requires evenodd fill in order to be implemented as a single motion between 2 frames
-  custom[`--motion-shutters${suffix}-fill`] = motionRange.toSign ? 'evenodd' : 'nonzero';
-  custom[`--motion-shutters${suffix}-stagger`] = staggered ? 1 : 0;
-  const pathFill_ = toKeyframeValue(
-    custom,
-    `--motion-shutters${suffix}-fill`,
-    asWeb,
-    'nonzero',
-  ) as string;
-  const stagger_ = toKeyframeValue(custom, `--motion-shutters${suffix}-stagger`, asWeb, '0');
+  custom[`--motion-shutters-fill`] = motionRange.toSign ? 'evenodd' : 'nonzero';
+  custom[`--motion-shutters-stagger`] = staggered ? 1 : 0;
+  const pathFill_ = toKeyframeValue(custom, `--motion-shutters-fill`, asWeb, 'nonzero') as string;
+  const stagger_ = toKeyframeValue(custom, `--motion-shutters-stagger`, asWeb, '0');
 
   // from short size 0
   const { width: fromWidth, height: fromHeight } = getDirectionalStripSizes(isVertical);
@@ -338,5 +343,5 @@ export function getMotionShutters(
     );
   }
 
-  return { name, custom, keyframes };
+  return suffixLayer({ name, custom, keyframes }, suffix);
 }

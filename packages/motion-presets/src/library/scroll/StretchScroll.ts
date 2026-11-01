@@ -90,7 +90,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
   // the element moves up by the extra height it is stretched by
   // using the scale custom-property in the computation if not a web animation
   // TODO - not so safe that it relies on matching the name here - need to standardize var-naming
-  const stretchY = asWeb ? scaleY : `var(--motion-scale${suffix}-scale-y, 1)`;
+  const stretchY = asWeb ? scaleY : `var(--motion-scale-scale-y${suffix}, 1)`;
   const travel = `calc(100% * (${stretchY} - 1))`;
 
   // the movement is directional (always moving up), while the stretch itself is not
