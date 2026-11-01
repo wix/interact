@@ -6,23 +6,16 @@ import type {
   AnimationExtraOptions,
   ScrubAnimationOptions,
 } from '../../types';
-import type { LengthValue } from '../../utils';
 import { measureCompHeight } from './utils';
-import {
-  getCssUnitValue,
-  parseLength,
-  toKeyframeValue,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 
 const DEFAULTS: Required<BgCloseUp> = {
   type: 'BgCloseUp',
-  depth: { value: 80, unit: 'px' },
+  depth: 80,
 };
 
 export const schema = {
-  depth: { type: 'lengthObject', default: DEFAULTS.depth },
+  depth: { type: 'number', default: DEFAULTS.depth },
 };
 
 export function getNames(options: ScrubAnimationOptions) {
@@ -50,12 +43,9 @@ export const parts = ['MEDIA_CLIP', 'MEDIA_WRAPPER'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const easing = 'linear';
-  const depth = parseLength(
-    (options.namedEffect as BgCloseUp).depth,
-    DEFAULTS.depth as LengthValue,
-  );
+  const { depth = DEFAULTS.depth } = options.namedEffect as BgCloseUp;
 
-  const custom = { '--motion-trans-z': getCssUnitValue(depth) };
+  const custom = { '--motion-trans-z': `${depth}px` };
 
   const [bgCloseUpOpacity, bgCloseUpZoom] = getNames(options);
 

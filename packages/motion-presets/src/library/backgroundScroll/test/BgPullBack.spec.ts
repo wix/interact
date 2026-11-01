@@ -29,7 +29,7 @@ describe('BgPullBack', () => {
     });
 
     test('Custom depth', () => {
-      const depth = { value: 60, unit: 'px' };
+      const depth = 60;
       const mockOptions = {
         ...baseMockOptions,
         namedEffect: { depth } as BgPullBackType,
@@ -76,7 +76,7 @@ describe('BgPullBack', () => {
     });
 
     test('Custom depth', () => {
-      const depth = { value: 60, unit: 'px' };
+      const depth = 60;
       const mockOptions = {
         ...baseMockOptions,
         namedEffect: { depth } as BgPullBackType,

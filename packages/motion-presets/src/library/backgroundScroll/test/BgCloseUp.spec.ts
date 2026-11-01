@@ -26,7 +26,7 @@ describe('BgCloseUp', () => {
     });
 
     test('Custom values', () => {
-      const depth = { value: 50, unit: 'px' };
+      const depth = 50;
       const mockOptions = {
         ...baseMockOptions,
         namedEffect: { depth } as BgCloseUpType,
@@ -71,7 +71,7 @@ describe('BgCloseUp', () => {
     });
 
     test('Custom values', () => {
-      const depth = { value: 50, unit: 'px' };
+      const depth = 50;
       const mockOptions = {
         ...baseMockOptions,
         namedEffect: { depth } as BgCloseUpType,

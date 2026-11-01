@@ -4,7 +4,6 @@ import * as backgroundScroll from '..';
 import type { ScrubAnimationOptions } from '../../../types';
 import { baseMockOptions } from './testUtils';
 
-type LengthDefault = { value: number; unit: string };
 type Field = { type: string; values?: readonly string[]; default: unknown };
 type Preset = {
   schema: Record<string, Field>;
@@ -21,9 +20,6 @@ function getVariants(schema: Record<string, Field>) {
       variants.push({ [key]: true }, { [key]: false });
     } else if (field.type === 'number') {
       variants.push({ [key]: (field.default as number) + 1 });
-    } else if (field.type === 'lengthObject') {
-      const def = field.default as LengthDefault;
-      variants.push({ [key]: { value: def.value + 10, unit: def.unit } });
     }
   }
   return variants;
