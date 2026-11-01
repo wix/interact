@@ -19,7 +19,7 @@ const DEFAULTS: Required<MoveScroll> = {
 export const schema = {
   direction: { type: 'number', default: DEFAULTS.direction },
   range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
-  travel: { type: 'length', default: DEFAULTS.travel },
+  travel: { type: 'lengthObject', default: DEFAULTS.travel },
 };
 
 export function getNames(options: ScrubAnimationOptions) {

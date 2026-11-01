@@ -25,7 +25,7 @@ const DEFAULTS: Required<PanScroll> = {
 
 export const schema = {
   direction: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: DEFAULTS.direction },
-  distance: { type: 'length', default: DEFAULTS.distance },
+  distance: { type: 'lengthObject', default: DEFAULTS.distance },
   range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
   startFromOffScreen: { type: 'bool', default: DEFAULTS.startFromOffScreen },
 };
