@@ -6,7 +6,7 @@ import {
   MouseEffectAxis,
 } from '../../types';
 import type { LengthValue } from '../../utils';
-import { getMouseTransitionEasing, mapRange, parseLengthLazy, parseDirection } from '../../utils';
+import { getMouseTransitionEasing, mapRange, parseCssLength, parseDirection } from '../../utils';
 import { circInOut } from '@wix/motion';
 import { CustomMouse } from './CustomMouse';
 
@@ -70,7 +70,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as SkewMouse;
   const { inverted = DEFAULTS.inverted, angle = DEFAULTS.angle } = namedEffect;
-  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
   const direction = parseDirection(
     namedEffect.direction,
     AXES,

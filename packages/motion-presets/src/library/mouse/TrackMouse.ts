@@ -6,7 +6,7 @@ import {
   MouseEffectAxis,
 } from '../../types';
 import type { LengthValue } from '../../utils';
-import { getMouseTransitionEasing, mapRange, parseLengthLazy, parseDirection } from '../../utils';
+import { getMouseTransitionEasing, mapRange, parseCssLength, parseDirection } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 
 const AXES = ['both', 'horizontal', 'vertical'] as const;
@@ -54,7 +54,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as TrackMouse;
   const inverted = namedEffect.inverted ?? DEFAULTS.inverted;
-  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
   const direction = parseDirection(
     namedEffect.direction,
     AXES,

@@ -1,5 +1,5 @@
 import type { LengthValue } from '../../utils';
-import { getMouseTransitionEasing, mapRange, parseLengthLazy } from '../../utils';
+import { getMouseTransitionEasing, mapRange, parseCssLength } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 import { ScrubAnimationOptions, AnimationExtraOptions, BlobMouse, Progress } from '../../types';
 
@@ -47,7 +47,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as BlobMouse;
   const { inverted = DEFAULTS.inverted, scale = DEFAULTS.scale } = namedEffect;
-  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
 
   const invert = inverted ? -1 : 1;
   const animationOptions = {

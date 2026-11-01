@@ -1,5 +1,5 @@
 import type { LengthValue } from '../../utils';
-import { getMouseTransitionEasing, mapRange, parseLengthLazy, parseDirection } from '../../utils';
+import { getMouseTransitionEasing, mapRange, parseCssLength, parseDirection } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 import {
   ScrubAnimationOptions,
@@ -68,7 +68,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as ScaleMouse;
   const { inverted = DEFAULTS.inverted, scale = DEFAULTS.scale } = namedEffect;
-  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
   const direction = parseDirection(
     namedEffect.direction,
     AXES,

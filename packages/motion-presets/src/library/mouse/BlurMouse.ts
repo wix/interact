@@ -1,5 +1,5 @@
 import type { LengthValue } from '../../utils';
-import { getMouseTransitionEasing, distance2d, mapRange, parseLengthLazy } from '../../utils';
+import { getMouseTransitionEasing, distance2d, mapRange, parseCssLength } from '../../utils';
 import { quadInOut } from '@wix/motion';
 import { CustomMouse } from './CustomMouse';
 import { ScrubAnimationOptions, AnimationExtraOptions, BlurMouse, Progress } from '../../types';
@@ -79,7 +79,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
     blur = DEFAULTS.blur,
     perspective = DEFAULTS.perspective,
   } = namedEffect;
-  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration

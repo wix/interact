@@ -1,5 +1,5 @@
 import type { LengthValue } from '../../utils';
-import { getMouseTransitionEasing, mapRange, parseLengthLazy, parseDirection } from '../../utils';
+import { getMouseTransitionEasing, mapRange, parseCssLength, parseDirection } from '../../utils';
 import type {
   ScrubAnimationOptions,
   AiryMouse,
@@ -55,7 +55,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as AiryMouse;
   const { inverted = DEFAULTS.inverted, angle = DEFAULTS.angle } = namedEffect;
-  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
   const direction = parseDirection(
     namedEffect.direction,
     AXES,
