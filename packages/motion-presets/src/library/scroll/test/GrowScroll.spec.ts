@@ -306,6 +306,43 @@ describe('GrowScroll', () => {
 
       expect(result).toMatchObject(expectedResult);
     });
+
+    test('custom range - continuous', () => {
+      const mockOptions: ScrubAnimationOptions = {
+        ...baseMockOptions,
+        namedEffect: { range: 'continuous' } as GrowScrollType,
+      };
+
+      const expectedResult = [
+        {
+          fill: 'both',
+          startOffsetAdd: '0vh',
+          endOffsetAdd: '100vh',
+          custom: {
+            '--motion-grow-from': 4,
+            '--motion-grow-to': 4,
+          },
+          keyframes: [
+            {
+              transform:
+                'translateY(calc(0.5 * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(4) translate(calc(-1 * 0%), calc(-1 * 0%))',
+            },
+            {
+              transform:
+                'translateY(calc((calc(0.5 * (1 - 1) * (100% + 100vh)) + calc((0.5 - 1) * (1 - 1) * (100% + 100vh))) / 2)) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%))',
+            },
+            {
+              transform:
+                'translateY(calc((0.5 - 1) * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(4) translate(calc(-1 * 0%), calc(-1 * 0%))',
+            },
+          ],
+        },
+      ];
+
+      const result = GrowScroll.web(mockOptions);
+
+      expect(result).toMatchObject(expectedResult);
+    });
   });
 
   describe('style', () => {
@@ -389,6 +426,41 @@ describe('GrowScroll', () => {
             '--motion-trans-x': '50%',
             '--motion-trans-y': '-50%',
           },
+        },
+      ];
+
+      const result = GrowScroll.style(mockOptions);
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
+    test('custom range - continuous', () => {
+      const mockOptions: ScrubAnimationOptions = {
+        ...baseMockOptions,
+        namedEffect: { range: 'continuous' } as GrowScrollType,
+      };
+
+      const expectedResult = [
+        {
+          fill: 'both',
+          custom: {
+            '--motion-grow-from': 4,
+            '--motion-grow-to': 4,
+          },
+          keyframes: [
+            {
+              transform:
+                'translateY(var(--motion-grow-parallax-from)) rotate(var(--motion-rotate, 0)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-grow-from)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y)))',
+            },
+            {
+              transform:
+                'translateY(calc((var(--motion-grow-parallax-from) + var(--motion-grow-parallax-to)) / 2)) rotate(var(--motion-rotate, 0)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(1) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y)))',
+            },
+            {
+              transform:
+                'translateY(var(--motion-grow-parallax-to)) rotate(var(--motion-rotate, 0)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-grow-to)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y)))',
+            },
+          ],
         },
       ];
 
