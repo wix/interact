@@ -7,16 +7,21 @@ import {
   suffixCustomProperties,
 } from '../../utils';
 import { FOUR_CORNERS_DIRECTIONS } from '../../consts';
-const DEFAULT_DIRECTION: EffectFourCorners = 'top-left';
+
+const DEFAULTS: Required<TurnIn> = {
+  type: 'TurnIn',
+  pivot: 'top-left',
+};
+
+export const schema = {
+  pivot: { type: 'enum', values: FOUR_CORNERS_DIRECTIONS, default: DEFAULTS.pivot },
+};
 
 export function getNames(options: TimeAnimationOptions) {
   return suffixNames(['motion-fadeIn', 'motion-turnIn'], options.suffix);
 }
 
-const DIRECTION_TO_TRANSFORM_MAP: Record<
-  EffectFourCorners,
-  { x: number; y: number; angle: number }
-> = {
+const PIVOT_TO_TRANSFORM_MAP: Record<EffectFourCorners, { x: number; y: number; angle: number }> = {
   'top-left': { angle: -50, x: -50, y: -50 },
   'top-right': { angle: 50, x: 50, y: -50 },
   'bottom-right': { angle: 50, x: 50, y: 50 },
@@ -29,15 +34,11 @@ export function web(options: TimeAnimationOptions) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as TurnIn;
-  const direction = parseDirection(
-    namedEffect?.direction,
-    FOUR_CORNERS_DIRECTIONS,
-    DEFAULT_DIRECTION,
-  );
+  const pivot = parseDirection(namedEffect?.pivot, FOUR_CORNERS_DIRECTIONS, DEFAULTS.pivot);
   const [fadeIn, turnIn] = getNames(options);
 
   const easing = options.easing || 'backOut';
-  const { x, y, angle } = DIRECTION_TO_TRANSFORM_MAP[direction];
+  const { x, y, angle } = PIVOT_TO_TRANSFORM_MAP[pivot];
 
   const custom = {
     '--motion-origin': `${x}%, ${y}%`,

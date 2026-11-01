@@ -36,13 +36,13 @@ describe('FlipIn', () => {
 
   test('FlipIn animation with custom values', () => {
     const easing = 'backIn';
-    const direction = 'right';
+    const direction = 'horizontal';
     const mockOptions = {
       ...baseMockOptions,
       easing,
       namedEffect: {
         direction,
-        initialRotate: 50,
+        angle: -50,
       } as FlipInType,
     };
 
@@ -108,13 +108,13 @@ describe('FlipIn', () => {
 
   test('FlipIn style with custom values', () => {
     const easing = 'backIn';
-    const direction = 'right';
+    const direction = 'horizontal';
     const mockOptions = {
       ...baseMockOptions,
       easing,
       namedEffect: {
         direction,
-        initialRotate: 50,
+        angle: -50,
       } as FlipInType,
     };
 

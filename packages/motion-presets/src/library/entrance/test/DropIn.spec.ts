@@ -20,7 +20,10 @@ describe('DropIn', () => {
         },
         {
           easing: 'quintInOut',
-          keyframes: [{ scale: '1.6' }, { scale: '1' }],
+          keyframes: [
+            { scale: '1.6', transform: 'rotate(var(--motion-rotate, 0deg))' },
+            { scale: '1', transform: 'rotate(var(--motion-rotate, 0deg))' },
+          ],
         },
       ];
 

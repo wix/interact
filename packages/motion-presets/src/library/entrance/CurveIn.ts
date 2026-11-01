@@ -1,26 +1,36 @@
-import type { CurveIn, TimeAnimationOptions, DomApi } from '../../types';
+import type { CurveIn, TimeAnimationOptions, DomApi, EffectFourDirections } from '../../types';
+import type { LengthValue } from '../../utils';
 import {
   toKeyframeValue,
   parseDirection,
-  parseLength,
+  parseCssLength,
   getEntranceFill,
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
-import { TWO_SIDES_DIRECTIONS } from '../../consts';
+import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DEPTH = { value: 300, unit: 'px' };
-const DIRECTIONS = [...TWO_SIDES_DIRECTIONS, 'pseudoLeft', 'pseudoRight'] as const;
-const DEFAULT_DIRECTION: (typeof DIRECTIONS)[number] = 'right';
+const DEFAULTS: Required<CurveIn> = {
+  type: 'CurveIn',
+  depth: { value: 900, unit: 'px' },
+  from: 'right',
+  perspective: 200,
+};
+
+export const schema = {
+  depth: { type: 'length', default: DEFAULTS.depth },
+  from: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.from },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+};
 
 export function getNames(options: TimeAnimationOptions) {
   return suffixNames(['motion-curveIn', 'motion-fadeIn'], options.suffix);
 }
 
-const PARAMS_MAP = {
-  pseudoRight: { rotationX: '180', rotationY: '0' },
+const PARAMS_MAP: Record<EffectFourDirections, { rotationX: string; rotationY: string }> = {
+  top: { rotationX: '180', rotationY: '0' },
   right: { rotationX: '0', rotationY: '180' },
-  pseudoLeft: { rotationX: '-180', rotationY: '0' },
+  bottom: { rotationX: '-180', rotationY: '0' },
   left: { rotationX: '0', rotationY: '-180' },
 };
 
@@ -30,20 +40,19 @@ export function web(options: TimeAnimationOptions, _dom?: DomApi) {
 
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as CurveIn;
-  const direction = parseDirection(namedEffect?.direction, DIRECTIONS, DEFAULT_DIRECTION);
-  const depth = parseLength(namedEffect.depth, DEFAULT_DEPTH);
-  const { perspective = 200 } = namedEffect;
+  const from = parseDirection(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from);
+  const depth = parseCssLength(namedEffect.depth, DEFAULTS.depth as LengthValue);
+  const { perspective = DEFAULTS.perspective } = namedEffect;
   const [curveIn, fadeIn] = getNames(options);
 
-  const { rotationX, rotationY } = PARAMS_MAP[direction];
-  const depthValue = `${depth.value}${depth.unit === 'percentage' ? '%' : depth.unit}`;
+  const { rotationX, rotationY } = PARAMS_MAP[from];
 
   const custom = {
     '--motion-perspective': `${perspective}px`,
     '--motion-rotate-x': `${rotationX}deg`,
     '--motion-rotate-y': `${rotationY}deg`,
-    '--motion-depth-negative': `calc(${depthValue} * -3)`,
-    '--motion-depth-positive': `calc(${depthValue} * 3)`,
+    '--motion-depth-negative': `calc(-1 * ${depth})`,
+    '--motion-depth-positive': depth,
   };
 
   const easing = 'quadOut';

@@ -24,6 +24,7 @@ const NINE_DIRECTIONS = [
   'center',
 ] as const;
 const FOUR_CORNERS_DIRECTIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;
+const SHAPES = ['rectangle', 'ellipse', 'circle', 'diamond', 'window'] as const;
 
 export {
   FOUR_DIRECTIONS,
@@ -33,4 +34,5 @@ export {
   EIGHT_DIRECTIONS,
   NINE_DIRECTIONS,
   FOUR_CORNERS_DIRECTIONS,
+  SHAPES,
 };

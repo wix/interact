@@ -378,7 +378,7 @@ Effect applies to different elements:
             key: 'mobile-menu',     // Different element
             namedEffect: {
                 type: 'SlideIn',
-                direction: 'down'
+                from: 'top'
             },
             duration: 300
         },
