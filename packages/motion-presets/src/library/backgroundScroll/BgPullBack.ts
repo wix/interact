@@ -8,7 +8,7 @@ import type {
 } from '../../types';
 import type { LengthValue } from '../../utils';
 import {
-  getCssUnits,
+  getCssUnitValue,
   parseLength,
   toKeyframeValue,
   suffixNames,
@@ -53,7 +53,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
   );
 
   const custom = {
-    '--motion-trans-z': `${depth.value}${getCssUnits(depth.unit)}`,
+    '--motion-trans-z': getCssUnitValue(depth),
     // TODO: (ameerf) - remove and use only depth once CSS round is widely available
     '--motion-trans-y': `-${(depth.value / 3) | 0}%`,
   };

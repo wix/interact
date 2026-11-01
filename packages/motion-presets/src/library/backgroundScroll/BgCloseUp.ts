@@ -9,7 +9,7 @@ import type {
 import type { LengthValue } from '../../utils';
 import { measureCompHeight } from './utils';
 import {
-  getCssUnits,
+  getCssUnitValue,
   parseLength,
   toKeyframeValue,
   suffixNames,
@@ -55,7 +55,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     DEFAULTS.depth as LengthValue,
   );
 
-  const custom = { '--motion-trans-z': `${depth.value}${getCssUnits(depth.unit)}` };
+  const custom = { '--motion-trans-z': getCssUnitValue(depth) };
 
   const [bgCloseUpOpacity, bgCloseUpZoom] = getNames(options);
 
