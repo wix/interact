@@ -82,7 +82,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
 
   const keyframes = BOUNCE_KEYFRAMES.map(({ offset, translate }, index) => ({
     offset: offset / 100,
-    animationTimingFunction: getEasing(index % 2 ? easeOut : easeIn),
+    easing: getEasing(index % 2 ? easeOut : easeIn),
     transform: `${(perspective_ as string).trim()} translate3d(calc(${directionX} * ${travel_} * ${
       translate / 100
     }), calc(${directionY} * ${travel_} * ${translate / 100}), calc(${directionZ} * ${travel_} * ${
