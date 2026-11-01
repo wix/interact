@@ -39,11 +39,11 @@ describe('BgFake3D', () => {
     });
 
     test('Custom values', () => {
-      const stretch = 1.5;
-      const zoom = 30;
+      const scaleY = 1.5;
+      const depth = 30;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { stretch, zoom } as BgFake3DType,
+        namedEffect: { scaleY, depth } as BgFake3DType,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -109,11 +109,11 @@ describe('BgFake3D', () => {
     });
 
     test('Custom values', () => {
-      const stretch = 1.5;
-      const zoom = 30;
+      const scaleY = 1.5;
+      const depth = 30;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { stretch, zoom } as BgFake3DType,
+        namedEffect: { scaleY, depth } as BgFake3DType,
       };
 
       const expectedResult = [

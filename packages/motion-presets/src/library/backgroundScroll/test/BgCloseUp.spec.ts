@@ -26,10 +26,10 @@ describe('BgCloseUp', () => {
     });
 
     test('Custom values', () => {
-      const scale = 50;
+      const depth = 50;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { scale } as BgCloseUpType,
+        namedEffect: { depth } as BgCloseUpType,
       };
       const expectedResult: Partial<AnimationData>[] = [
         { ...baseMockOptions },
@@ -71,10 +71,10 @@ describe('BgCloseUp', () => {
     });
 
     test('Custom values', () => {
-      const scale = 50;
+      const depth = 50;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { scale } as BgCloseUpType,
+        namedEffect: { depth } as BgCloseUpType,
       };
       const expectedResult = [
         { ...baseMockOptions },

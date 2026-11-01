@@ -8,6 +8,18 @@ import type {
 } from '../../types';
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
+import { SPIN_DIRECTIONS } from '../../consts';
+
+const DEFAULTS: Required<BgSkew> = {
+  type: 'BgSkew',
+  angle: 20,
+  direction: 'counter-clockwise',
+};
+
+export const schema = {
+  angle: { type: 'number', min: 0, default: DEFAULTS.angle },
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: DEFAULTS.direction },
+};
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-bgSkew'], options.suffix);
@@ -30,7 +42,7 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
 export const parts = ['MEDIA_WRAPPER'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { angle = 20, direction = 'counter-clockwise' } = options.namedEffect as BgSkew;
+  const { angle = DEFAULTS.angle, direction = DEFAULTS.direction } = options.namedEffect as BgSkew;
 
   const custom = {
     '--motion-skew': `${direction === 'counter-clockwise' ? angle : -angle}deg`,
