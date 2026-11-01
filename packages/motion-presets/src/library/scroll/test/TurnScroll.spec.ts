@@ -58,10 +58,10 @@ describe('TurnScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TurnScrollType,
+        namedEffect: { direction: 'right' } as TurnScrollType,
       };
 
       const expectedResult = [
@@ -95,6 +95,31 @@ describe('TurnScroll', () => {
             {
               transform:
                 'translateX(calc(100vw - var(--motion-left, 0px))) scale(0.5) rotate(calc(var(--motion-rotate, 0deg) + -45deg))',
+            },
+            {
+              transform: 'translateX(0px) scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
+            },
+          ],
+        },
+      ];
+
+      const result = TurnScroll.web(mockOptions);
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
+    test('custom angle', () => {
+      const mockOptions: ScrubAnimationOptions = {
+        ...baseMockOptions,
+        namedEffect: { angle: 90 } as TurnScrollType,
+      };
+
+      const expectedResult = [
+        {
+          keyframes: [
+            {
+              transform:
+                'translateX(calc(100vw - var(--motion-left, 0px))) scale(1) rotate(calc(var(--motion-rotate, 0deg) + -90deg))',
             },
             {
               transform: 'translateX(0px) scale(1) rotate(calc(var(--motion-rotate, 0deg) + 0deg))',
@@ -146,6 +171,10 @@ describe('TurnScroll', () => {
             {
               transform:
                 'translateX(calc(100vw - var(--motion-left, 0px))) scale(1) rotate(calc(var(--motion-rotate, 0deg) + -45deg))',
+            },
+            {
+              transform:
+                'translateX(calc((calc(100vw - var(--motion-left, 0px)) + calc(-1 * var(--motion-left, calc(100vw - 100%)) - 100%)) / 2)) scale(1) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:
@@ -216,10 +245,10 @@ describe('TurnScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - left', () => {
+    test('custom direction - right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as TurnScrollType,
+        namedEffect: { direction: 'right' } as TurnScrollType,
       };
 
       const expectedResult = [
@@ -307,6 +336,10 @@ describe('TurnScroll', () => {
             {
               transform:
                 'translateX(var(--motion-turn-translate-from)) scale(var(--motion-turn-scale-from)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-turn-rotation-from)))',
+            },
+            {
+              transform:
+                'translateX(calc((var(--motion-turn-translate-from) + var(--motion-turn-translate-to)) / 2)) scale(1) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:

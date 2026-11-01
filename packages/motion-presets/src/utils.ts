@@ -377,6 +377,26 @@ export function toKeyframeValue(
   return useValue ? custom[key] : `var(${key}${fallback !== undefined ? `, ${fallback}` : ''})`;
 }
 
+export function declareCustom<K extends string>(
+  prefix: string,
+  entries: Record<K, [string | number, string]>,
+  asWeb: boolean = false,
+) {
+  const custom: Record<string, string | number> = {};
+  const vars = {} as Record<K, string | number>;
+
+  for (const [key, [value, fallback]] of Object.entries(entries) as [
+    K,
+    [string | number, string],
+  ][]) {
+    const name = `${prefix}-${key}`;
+    custom[name] = value;
+    vars[key] = toKeyframeValue(custom, name, asWeb, fallback);
+  }
+
+  return { custom, vars };
+}
+
 export function getTimingFactor(
   duration: number,
   delay: number,

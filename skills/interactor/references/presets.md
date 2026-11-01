@@ -97,29 +97,29 @@ range: 'continuous' }`). It is unrelated to the effect-level **`rangeStart`/
 > `rangeEnd`** (the ViewTimeline scroll _window_, a `RangeOffset` — see
 > `config-schema.md`). Every `viewProgress` effect — including `ParallaxScroll` —
 > still takes `rangeStart`/`rangeEnd` to define its scroll window; `ParallaxScroll`
-> just doesn't accept the `range` _option_ (it uses `parallaxFactor`).
+> just doesn't accept the `range` _option_ (it uses `speed` and `center`).
 
-| Preset           | Params (default)                                                                                                              |
-| :--------------- | :---------------------------------------------------------------------------------------------------------------------------- |
-| `FadeScroll`     | `opacity` (`0`), `range` (`'in'`)                                                                                             |
-| `RevealScroll`   | `direction` cardinal (`'bottom'`), `range` (`'in'`)                                                                           |
-| `ParallaxScroll` | `parallaxFactor` (`0.5`) — **no `range`**                                                                                     |
-| `MoveScroll`     | `angle` deg (`120`), `distance` (`{400,'px'}`), `range` (`'in'`)                                                              |
-| `SlideScroll`    | `direction` cardinal (`'bottom'`), `range` (`'in'`)                                                                           |
-| `GrowScroll`     | `direction` 9-way (`'center'`), `scale` (`0` in / `4` out), `speed` (`0`), `range` (`'in'`)                                   |
-| `ShrinkScroll`   | `direction` 9-way (`'center'`), `scale` (`1.2` in / `0.8` out), `speed` (`0`), `range` (`'in'`)                               |
-| `TiltScroll`     | `direction` `left\|right` (`'right'`), `parallaxFactor` (`0`), `perspective` (`400`), `range` (`'in'`)                        |
-| `PanScroll`      | `direction` `left\|right` (`'left'`), `distance` (`{400,'px'}`), `startFromOffScreen` (`true`), `range` (`'in'`)              |
-| `BlurScroll`     | `blur` (`6`), `range` (`'in'`)                                                                                                |
-| `FlipScroll`     | `direction` `vertical\|horizontal` (`'horizontal'`), `rotate` deg (`240`), `perspective` (`800`), `range` (`'continuous'`)    |
-| `SpinScroll`     | `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `spins` (`0.15`), `scale` (`1`), `range` (`'in'`)                 |
-| `ArcScroll`      | `direction` `vertical\|horizontal` (`'horizontal'`), `perspective` (`500`), `range` (`'in'`)                                  |
-| `ShapeScroll`    | `shape` (`'circle'`), `intensity` (`0.5`), `range` (`'in'`)                                                                   |
-| `ShuttersScroll` | `direction` cardinal (`'right'`), `shutters` (`12`), `staggered` (`true`), `range` (`'in'`)                                   |
-| `SkewPanScroll`  | `direction` `left\|right` (`'right'`), `skew` deg (`10`), `range` (`'in'`)                                                    |
-| `Spin3dScroll`   | `rotate` deg (`-100`), `speed` (`0`), `perspective` (`1000`), `range` (`'in'`)                                                |
-| `StretchScroll`  | `stretch` (`0.6`), `range` (`'out'`)                                                                                          |
-| `TurnScroll`     | `direction` `left\|right` (`'right'`), `spin` `clockwise\|counter-clockwise` (`'clockwise'`), `scale` (`1`), `range` (`'in'`) |
+| Preset           | Params (default)                                                                                                                                                  |
+| :--------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FadeScroll`     | `opacity` (`0`), `range` (`'in'`)                                                                                                                                 |
+| `RevealScroll`   | `direction` cardinal (`'bottom'`), `range` (`'in'`)                                                                                                               |
+| `ParallaxScroll` | `speed` (`0.7159`, 1 = moves with the page), `center` 0–1 (`0.5`) — **no `range`**                                                                                |
+| `MoveScroll`     | `direction` deg it moves towards (`-60`), `travel` (`{400,'px'}`), `range` (`'in'`)                                                                               |
+| `SlideScroll`    | `direction` cardinal it moves towards (`'top'`), `range` (`'in'`)                                                                                                 |
+| `GrowScroll`     | `pivot` 9-way (`'center'`), `scale` (`0.25`; out goes to `1/scale`), `speed` (`1`), `range` (`'in'`)                                                              |
+| `ShrinkScroll`   | `pivot` 9-way (`'center'`), `scale` (`1.2`; out goes to `1/scale`), `speed` (`1`), `range` (`'in'`)                                                               |
+| `TiltScroll`     | `direction` `clockwise\|counter-clockwise` (`'counter-clockwise'`), `speed` (`1`), `perspective` (`400`), `range` (`'in'`)                                        |
+| `PanScroll`      | `direction` `left\|right` it moves towards (`'right'`), `distance` (`{400,'px'}`), `startFromOffScreen` (`true`), `range` (`'in'`)                                |
+| `BlurScroll`     | `blur` (`6`), `range` (`'in'`)                                                                                                                                    |
+| `FlipScroll`     | `direction` `vertical\|horizontal` (`'horizontal'`), `angle` deg (`240`), `perspective` (`800`), `range` (`'continuous'`)                                         |
+| `SpinScroll`     | `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `spins` (`0.15`), `scale` (`1`), `range` (`'in'`)                                                     |
+| `ArcScroll`      | `direction` `vertical\|horizontal` (`'horizontal'`), `perspective` (`500`), `range` (`'in'`)                                                                      |
+| `ShapeScroll`    | `shape` (`'circle'`), `start` 0–1 (`0.667`), `range` (`'in'`)                                                                                                     |
+| `ShuttersScroll` | `direction` cardinal (`'right'`), `shutters` (`12`), `staggered` (`true`), `range` (`'in'`)                                                                       |
+| `SkewPanScroll`  | `direction` `left\|right` it moves towards (`'left'`), `skew` deg (`10`), `range` (`'in'`)                                                                        |
+| `Spin3dScroll`   | `angle` deg (`100`), `speed` (`1`), `perspective` (`1000`), `range` (`'in'`)                                                                                      |
+| `StretchScroll`  | `stretch` -1–1 (`0.6`), `range` (`'out'`)                                                                                                                         |
+| `TurnScroll`     | `direction` `left\|right` it moves towards (`'left'`), `spin` `clockwise\|counter-clockwise` (`'clockwise'`), `angle` deg (`45`), `scale` (`1`), `range` (`'in'`) |
 
 ---
 

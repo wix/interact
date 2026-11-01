@@ -29,15 +29,14 @@ describe('StretchScroll', () => {
         },
         {
           fill: 'forwards',
-          easing: 'backInOut',
+          easing:
+            'linear(0 0%, 0 45.1%, 0.1458 46.9%, 0.2918 48.7%, 0.4315 50.5%, 0.5575 52.3%, 0.6668 54.1%, 0.7595 55.9%, 0.8372 57.7%, 0.902 59.5%, 0.9558 61.3%, 1 63%, 1 100%)',
           keyframes: [
             {
               opacity: 1,
-              offset: 0.35,
             },
             {
               opacity: 0,
-              offset: 1,
             },
           ],
         },
@@ -71,11 +70,9 @@ describe('StretchScroll', () => {
           keyframes: [
             {
               opacity: 1,
-              offset: 0.35,
             },
             {
               opacity: 0,
-              offset: 1,
             },
           ],
         },
@@ -108,14 +105,14 @@ describe('StretchScroll', () => {
         },
         {
           fill: 'backwards',
+          easing:
+            'linear(0 0%, 0 33.9%, 0.0472 35.6%, 0.1041 37.3%, 0.173 39%, 0.2557 40.7%, 0.3539 42.4%, 0.4681 44.1%, 0.5964 45.8%, 0.7335 47.5%, 0.871 49.2%, 1 50.9%, 1 100%)',
           keyframes: [
             {
               opacity: 0,
-              offset: 0,
             },
             {
               opacity: 1,
-              offset: 0.65,
             },
           ],
         },
@@ -208,15 +205,14 @@ describe('StretchScroll', () => {
         },
         {
           fill: 'forwards',
-          easing: 'backInOut',
+          easing:
+            'linear(0 0%, 0 45.1%, 0.1458 46.9%, 0.2918 48.7%, 0.4315 50.5%, 0.5575 52.3%, 0.6668 54.1%, 0.7595 55.9%, 0.8372 57.7%, 0.902 59.5%, 0.9558 61.3%, 1 63%, 1 100%)',
           keyframes: [
             {
               opacity: 1,
-              offset: 0.35,
             },
             {
               opacity: 0,
-              offset: 1,
             },
           ],
         },
@@ -252,11 +248,9 @@ describe('StretchScroll', () => {
           keyframes: [
             {
               opacity: 0,
-              offset: 0,
             },
             {
               opacity: 1,
-              offset: 0.65,
             },
           ],
         },

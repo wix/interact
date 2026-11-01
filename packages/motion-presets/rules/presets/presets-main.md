@@ -86,13 +86,13 @@ Entrance presets use `from` — the side the element comes from — and `pivot` 
 | ---------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | Cardinal         | 'top', 'right', 'bottom', 'left'                          | `from`: ArcIn, CurveIn, FloatIn, RevealIn, ShuttersIn, SlideIn; `pivot`: FoldIn, Swing, Fold; Poke, RevealScroll, ShuttersScroll, SlideScroll |
 | Cardinal + back  | 'top', 'right', 'bottom', 'left', 'back'                  | `from`: BounceIn                                                                                                                              |
-| Two sides        | 'left', 'right'                                           | `from`: TiltIn; PanScroll, SkewPanScroll, TiltScroll, TurnScroll                                                                              |
+| Two sides        | 'left', 'right'                                           | `from`: TiltIn; PanScroll, SkewPanScroll, TurnScroll                                                                                          |
 | Corner           | 'top-left', 'top-right', 'bottom-left', 'bottom-right'    | `pivot`: TurnIn                                                                                                                               |
 | Eight directions | 4 cardinal + 4 diagonal                                   | Cross                                                                                                                                         |
-| Nine directions  | 4 cardinal + 4 diagonal + 'center'                        | GrowScroll, ShrinkScroll                                                                                                                      |
+| Nine directions  | 4 cardinal + 4 diagonal + 'center'                        | `pivot`: GrowScroll, ShrinkScroll                                                                                                             |
 | Axis             | 'horizontal', 'vertical'                                  | FlipIn, WinkIn, ArcScroll, FlipScroll, Flip                                                                                                   |
 | Axis + center    | 'horizontal', 'vertical', 'center'                        | Breathe                                                                                                                                       |
-| Rotation         | 'clockwise', 'counter-clockwise'                          | SpinIn, SpinScroll, Spin                                                                                                                      |
+| Rotation         | 'clockwise', 'counter-clockwise'                          | SpinIn, SpinScroll, Spin, TiltScroll                                                                                                          |
 | Angle (number)   | 0–360 (0° = right, 90° = bottom, 180° = left, 270° = top) | `from`: GlideIn, ExpandIn (also accept cardinal keywords)                                                                                     |
 
 ### Using Units

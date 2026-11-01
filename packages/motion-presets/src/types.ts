@@ -285,21 +285,21 @@ export type FlipScroll = {
   type: 'FlipScroll';
   direction?: 'vertical' | 'horizontal';
   range?: EffectScrollRange;
-  rotate?: number;
+  angle?: number;
   perspective?: number;
 };
 export type GrowScroll = {
   type: 'GrowScroll';
-  direction?: EffectNineDirections;
+  pivot?: EffectNineDirections;
   range?: EffectScrollRange;
   scale?: number;
   speed?: number;
 };
 export type MoveScroll = {
   type: 'MoveScroll';
-  angle?: number;
+  direction?: number;
   range?: EffectScrollRange;
-  distance?: UnitLengthPercentage;
+  travel?: UnitLengthPercentage;
 };
 export type PanScroll = {
   type: 'PanScroll';
@@ -310,8 +310,8 @@ export type PanScroll = {
 };
 export type ParallaxScroll = {
   type: 'ParallaxScroll';
-  parallaxFactor?: number;
-  range?: EffectScrollRange;
+  center?: number;
+  speed?: number;
 };
 export type RevealScroll = {
   type: 'RevealScroll';
@@ -322,11 +322,11 @@ export type ShapeScroll = {
   type: 'ShapeScroll';
   shape?: 'circle' | 'ellipse' | 'rectangle' | 'diamond' | 'window';
   range?: EffectScrollRange;
-  intensity?: number;
+  start?: number;
 };
 export type ShrinkScroll = {
   type: 'ShrinkScroll';
-  direction?: EffectNineDirections;
+  pivot?: EffectNineDirections;
   range?: EffectScrollRange;
   scale?: number;
   speed?: number;
@@ -352,7 +352,7 @@ export type SlideScroll = {
 export type Spin3dScroll = {
   type: 'Spin3dScroll';
   range?: EffectScrollRange;
-  rotate?: number;
+  angle?: number;
   speed?: number;
   perspective?: number;
 };
@@ -370,9 +370,9 @@ export type StretchScroll = {
 };
 export type TiltScroll = {
   type: 'TiltScroll';
-  direction?: EffectTwoSides;
+  direction?: 'clockwise' | 'counter-clockwise';
   range?: EffectScrollRange;
-  parallaxFactor?: number;
+  speed?: number;
   perspective?: number;
 };
 export type TurnScroll = {
@@ -381,7 +381,7 @@ export type TurnScroll = {
   spin?: 'clockwise' | 'counter-clockwise';
   range?: EffectScrollRange;
   scale?: number;
-  rotation?: number;
+  angle?: number;
 };
 
 export type ScrollAnimation =
