@@ -2,6 +2,8 @@
 import type { ScrubAnimationOptions, DomApi } from '../../types';
 import { measureCompHeight } from './utils';
 
+export const schema = {};
+
 export function getNames(_: ScrubAnimationOptions) {
   return [];
 }
