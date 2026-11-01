@@ -6,8 +6,24 @@ import type {
   AnimationExtraOptions,
   ScrubAnimationOptions,
 } from '../../types';
-import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
+import type { LengthValue } from '../../utils';
+import {
+  getCssUnits,
+  parseLength,
+  toKeyframeValue,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { measureCompHeight } from './utils';
+
+const DEFAULTS: Required<BgPullBack> = {
+  type: 'BgPullBack',
+  depth: { value: 50, unit: 'px' },
+};
+
+export const schema = {
+  depth: { type: 'length', default: DEFAULTS.depth },
+};
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-bgPullBack'], options.suffix);
@@ -31,12 +47,15 @@ export const parts = ['MEDIA_WRAPPER'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const easing = 'linear';
-  const { scale = 50 } = options.namedEffect as BgPullBack;
+  const depth = parseLength(
+    (options.namedEffect as BgPullBack).depth,
+    DEFAULTS.depth as LengthValue,
+  );
 
   const custom = {
-    '--motion-trans-z': `${scale}px`,
-    // TODO: (ameerf) - remove and use only scale once CSS round is widely available
-    '--motion-trans-y': `-${(scale / 3) | 0}%`,
+    '--motion-trans-z': `${depth.value}${getCssUnits(depth.unit)}`,
+    // TODO: (ameerf) - remove and use only depth once CSS round is widely available
+    '--motion-trans-y': `-${(depth.value / 3) | 0}%`,
   };
 
   const [bgPullBack] = getNames(options);

@@ -6,10 +6,29 @@ import type {
   ScrubAnimationOptions,
   DomApi,
 } from '../../types';
-import { roundNumber, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
+import type { LengthValue } from '../../utils';
+import {
+  getCssUnits,
+  parseLength,
+  roundNumber,
+  toKeyframeValue,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { measureCompHeight, getScaleFromPerspectiveAndZ } from './utils';
 
 const PERSPECTIVE = 100;
+
+const DEFAULTS: Required<BgFake3D> = {
+  type: 'BgFake3D',
+  depth: { value: 16.67, unit: 'px' },
+  scaleY: 1.3,
+};
+
+export const schema = {
+  depth: { type: 'length', default: DEFAULTS.depth },
+  scaleY: { type: 'number', min: 0, default: DEFAULTS.scaleY },
+};
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(
@@ -35,12 +54,13 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
 export const parts = ['MEDIA'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { stretch = 1.3, zoom = 100 / 6 } = options.namedEffect as BgFake3D;
-  const scale = getScaleFromPerspectiveAndZ(zoom, PERSPECTIVE);
+  const { scaleY = DEFAULTS.scaleY } = options.namedEffect as BgFake3D;
+  const depth = parseLength((options.namedEffect as BgFake3D).depth, DEFAULTS.depth as LengthValue);
+  const scale = getScaleFromPerspectiveAndZ(depth.value, PERSPECTIVE);
 
   const custom = {
-    '--motion-scale-y': stretch,
-    '--motion-trans-z': `${roundNumber(zoom)}px`,
+    '--motion-scale-y': scaleY,
+    '--motion-trans-z': `${roundNumber(depth.value)}${getCssUnits(depth.unit)}`,
     '--motion-trans-y-factor': roundNumber(-0.1 * (2 - scale)),
   };
 

@@ -38,6 +38,7 @@ import type {
   UnitLengthPercentage,
   WebAnimationEffectFactory,
 } from '@wix/motion';
+import type { LengthInput } from './utils';
 
 export type Translate = { x: string; y: string };
 export type ShapeType = 'circle' | 'ellipse' | 'rectangle' | 'diamond' | 'window';
@@ -412,11 +413,11 @@ export type ScrollAnimations = Record<ScrollAnimation['type'], AnimationEffectAP
 
 export type BgCloseUp = {
   type: 'BgCloseUp';
-  scale?: number;
+  depth?: LengthInput;
 };
 export type BgFade = {
   type: 'BgFade';
-  range: 'in' | 'out';
+  range?: 'in' | 'out';
 };
 export type BgFadeBack = {
   type: 'BgFadeBack';
@@ -424,12 +425,12 @@ export type BgFadeBack = {
 };
 export type BgFake3D = {
   type: 'BgFake3D';
-  stretch?: number;
-  zoom?: number;
+  scaleY?: number;
+  depth?: LengthInput;
 };
 export type BgPan = {
   type: 'BgPan';
-  direction: 'left' | 'right';
+  direction?: 'left' | 'right';
   speed?: number;
 };
 export type BgParallax = {
@@ -438,7 +439,7 @@ export type BgParallax = {
 };
 export type BgPullBack = {
   type: 'BgPullBack';
-  scale?: number;
+  depth?: LengthInput;
 };
 export type BgReveal = { type: 'BgReveal' };
 export type BgRotate = {
@@ -453,8 +454,8 @@ export type BgSkew = {
 };
 export type BgZoom = {
   type: 'BgZoom';
-  direction: 'in' | 'out';
-  zoom?: number;
+  direction?: 'in' | 'out';
+  depth?: LengthInput;
 };
 export type ImageParallax = {
   type: 'ImageParallax';

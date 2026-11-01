@@ -8,6 +8,18 @@ import type {
 } from '../../types';
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
+import { TWO_SIDES_DIRECTIONS } from '../../consts';
+
+const DEFAULTS: Required<BgPan> = {
+  type: 'BgPan',
+  direction: 'left',
+  speed: 0.2,
+};
+
+export const schema = {
+  direction: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: DEFAULTS.direction },
+  speed: { type: 'number', min: 0, default: DEFAULTS.speed },
+};
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-bgPan'], options.suffix);
@@ -30,7 +42,7 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
 export const parts = ['MEDIA_WRAPPER'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { direction = 'left', speed = 0.2 } = options.namedEffect as BgPan;
+  const { direction = DEFAULTS.direction, speed = DEFAULTS.speed } = options.namedEffect as BgPan;
   const offsetPercentage = ((50 * speed) / (1 + speed)) | 0;
 
   const custom = {

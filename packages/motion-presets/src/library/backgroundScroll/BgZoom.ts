@@ -7,11 +7,17 @@ import type {
   ScrubAnimationOptions,
   DomApi,
 } from '../../types';
-import { roundNumber, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
+import type { LengthValue } from '../../utils';
+import {
+  parseLength,
+  roundNumber,
+  toKeyframeValue,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { measureCompHeight, getScaleFromPerspectiveAndZ } from './utils';
 
 const PERSPECTIVE = 100;
-const DEFAULT_ZOOM = 40;
 const ZOOM_OUT_FACTOR = 0.375; // 15/40 - this for using the same scale of values in the data
 const DIRECTION_TO_PARAMS = {
   in: {
@@ -24,8 +30,19 @@ const DIRECTION_TO_PARAMS = {
   },
 };
 
+const DEFAULTS: Required<BgZoom> = {
+  type: 'BgZoom',
+  depth: { value: 40, unit: 'px' },
+  direction: 'in',
+};
+
+export const schema = {
+  depth: { type: 'length', default: DEFAULTS.depth },
+  direction: { type: 'enum', values: ['in', 'out'], default: DEFAULTS.direction },
+};
+
 export function getNames(options: ScrubAnimationOptions) {
-  const { direction = 'in' } = options.namedEffect as BgZoom;
+  const { direction = DEFAULTS.direction } = options.namedEffect as BgZoom;
   const names = ['motion-bgZoomMedia', 'motion-bgZoomImg'];
 
   if (direction === 'in') {
@@ -52,7 +69,12 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
 export const parts = ['MEDIA_WRAPPER', 'MEDIA'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  let { direction = 'in', zoom = DEFAULT_ZOOM } = options.namedEffect as BgZoom;
+  let { direction = DEFAULTS.direction } = options.namedEffect as BgZoom;
+  // the depth is in px - 'out' derives its own depths from it
+  let zoom = parseLength(
+    (options.namedEffect as BgZoom).depth,
+    DEFAULTS.depth as LengthValue,
+  ).value;
   const isIn = direction === 'in';
   if (!isIn) {
     direction = 'out';

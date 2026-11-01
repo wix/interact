@@ -9,6 +9,15 @@ import type {
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
 
+const DEFAULTS: Required<BgFade> = {
+  type: 'BgFade',
+  range: 'in',
+};
+
+export const schema = {
+  range: { type: 'enum', values: ['in', 'out'], default: DEFAULTS.range },
+};
+
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-bgFade'], options.suffix);
 }
@@ -33,7 +42,7 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
 export const parts = ['MEDIA_CLIP'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { range = 'in' } = options.namedEffect as BgFade;
+  const { range = DEFAULTS.range } = options.namedEffect as BgFade;
   const isOut = range === 'out';
   const easing = isOut ? 'sineOut' : 'sineIn';
 

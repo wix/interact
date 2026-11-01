@@ -147,11 +147,11 @@ describe('BgZoom', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('Custom zoom', () => {
-      const zoom = 40;
+    test('Custom depth', () => {
+      const depth = 60;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { zoom } as BgZoomType,
+        namedEffect: { depth } as BgZoomType,
       };
 
       const expectedResult = [
@@ -169,6 +169,11 @@ describe('BgZoom', () => {
         {
           part: 'MEDIA',
           composite: 'add',
+          custom: {
+            '--motion-scale-to': 2.5,
+            '--motion-trans-z-to': '60px',
+            '--motion-zoom-over-pers': 0.3,
+          },
           keyframes: [
             {
               transform: `perspective(100px) translateZ(var(--motion-trans-z-from))`,
