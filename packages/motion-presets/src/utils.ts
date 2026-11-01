@@ -399,7 +399,7 @@ function hashString(value: string) {
 }
 
 // keyframes that bake in the easing need a non-default one in their name, so CSS @keyframes don't collide.
-// e.g. cubic-bezier(0.68, -0.55, 0.27, 1.55) -> cubic-bezier-068_-055_027_155
+// e.g. cubic-bezier(0.68, -0.55, 0.27, 1.55) -> cubic-bezier-0p68_m0p55_0p27_1p55
 export function getEasingName(easing: string | undefined, defaultEasing: string) {
   if (!easing || easing === defaultEasing) {
     return '';
@@ -408,9 +408,12 @@ export function getEasingName(easing: string | undefined, defaultEasing: string)
   const trimmed = easing.trim();
   const name = trimmed
     .replace(/\s*([(),])\s*/g, '$1')
-    .replace(/[.%)]/g, '')
+    .replace(/-(?=[\d.])/g, 'm')
+    .replace(/\./g, 'p')
+    .replace(/%/g, 'pc')
     .replace(/,/g, '_')
-    .replace(/[\s(]+/g, '-');
+    .replace(/[\s(]+/g, '-')
+    .replace(/\)/g, '');
 
   if (/^[\w-]+$/.test(name) && name.length <= EASING_NAME_LENGTH) {
     return `-${name}`;

@@ -71,10 +71,10 @@ describe('ongoing presets keyframe names', () => {
 describe('getEasingName', () => {
   test.each([
     ['sineIn', '-sineIn'],
-    ['cubic-bezier(0.215, 0.61, 0.355, 1)', '-cubic-bezier-0215_061_0355_1'],
-    ['cubic-bezier(0.68, -0.55, 0.27, 1.55)', '-cubic-bezier-068_-055_027_155'],
+    ['cubic-bezier(0.215, 0.61, 0.355, 1)', '-cubic-bezier-0p215_0p61_0p355_1'],
+    ['cubic-bezier(0.68, -0.55, 0.27, 1.55)', '-cubic-bezier-0p68_m0p55_0p27_1p55'],
     ['steps(4, jump-end)', '-steps-4_jump-end'],
-    ['linear(0, 0.25 50%, 1)', '-linear-0_025-50_1'],
+    ['linear(0, 0.25 50%, 1)', '-linear-0_0p25-50pc_1'],
   ])('%s', (easing, name) => {
     expect(getEasingName(easing, 'linear')).toBe(name);
   });
