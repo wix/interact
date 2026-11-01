@@ -244,6 +244,14 @@ describe('parseAngle and parseCssLength', () => {
     expect(parseCssLength('calc(10px + 5%)', defaultLength)).toBe('calc(10px + 5%)');
   });
 
+  test('custom property names inside calc() keep their case', () => {
+    expect(parseAngle('calc(var(--myAngle) * 2)', 0)).toBe('calc(var(--myAngle) * 2)');
+    expect(parseCssLength('calc(var(--myTravel) * 1px)', defaultLength)).toBe(
+      'calc(var(--myTravel) * 1px)',
+    );
+    expect(parseAngle('TOP', 0)).toBe('270deg');
+  });
+
   test('length objects keep their unit', () => {
     expect(parseCssLength({ value: 3, unit: 'percentage' }, defaultLength)).toBe('3%');
   });
