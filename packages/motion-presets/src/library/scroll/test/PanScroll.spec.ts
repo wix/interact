@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import * as PanScroll from '../PanScroll';
 import type { PanScroll as PanScrollType, ScrubAnimationOptions } from '../../../types';
@@ -59,10 +59,10 @@ describe('PanScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - right', () => {
+    test('custom direction - left', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as PanScrollType,
+        namedEffect: { direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [
@@ -99,7 +99,7 @@ describe('PanScroll', () => {
             },
             {
               transform:
-                'translateX(calc(var(--motion-left, calc(100vw - 100%)) * -1 - 100%)) rotate(var(--motion-rotate, 0))',
+                'translateX(calc(100vw - var(--motion-left, 0px))) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -191,10 +191,10 @@ describe('PanScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - right', () => {
+    test('custom direction - left', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as PanScrollType,
+        namedEffect: { direction: 'left' } as PanScrollType,
       };
 
       const expectedResult = [
@@ -264,6 +264,20 @@ describe('PanScroll', () => {
       const result = PanScroll.style(mockOptions);
 
       expect(result).toMatchObject(expectedResult);
+    });
+  });
+
+  describe('prepare', () => {
+    test.each([
+      [{}, 1],
+      [{ startFromOffScreen: true }, 1],
+      [{ startFromOffScreen: false }, 0],
+    ])('measures with %j', (namedEffect, calls) => {
+      const dom = { measure: vi.fn(), mutate: vi.fn() };
+
+      PanScroll.prepare({ ...baseMockOptions, namedEffect: namedEffect as PanScrollType }, dom);
+
+      expect(dom.measure).toHaveBeenCalledTimes(calls);
     });
   });
 });

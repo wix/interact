@@ -83,7 +83,6 @@ describe('BlurScroll', () => {
     test('custom range - continuous', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        fill: 'both',
         namedEffect: { range: 'continuous' } as BlurScrollType,
       };
 
@@ -96,6 +95,9 @@ describe('BlurScroll', () => {
             },
             {
               filter: 'blur(0px)',
+            },
+            {
+              filter: 'blur(6px)',
             },
           ],
         },
@@ -185,7 +187,6 @@ describe('BlurScroll', () => {
     test('custom range - continuous', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        fill: 'both',
         namedEffect: { range: 'continuous' } as BlurScrollType,
       };
 
@@ -198,6 +199,9 @@ describe('BlurScroll', () => {
             },
             {
               filter: 'blur(var(--motion-blur-to))',
+            },
+            {
+              filter: 'blur(var(--motion-blur-from))',
             },
           ],
         },

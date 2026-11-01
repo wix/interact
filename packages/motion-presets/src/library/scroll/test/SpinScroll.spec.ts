@@ -139,10 +139,13 @@ describe('SpinScroll', () => {
         {
           keyframes: [
             {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + -27deg))',
+              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + -54deg))',
             },
             {
-              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 27deg))',
+              transform: 'scale(1) rotate(var(--motion-rotate, 0deg))',
+            },
+            {
+              transform: 'scale(1) rotate(calc(var(--motion-rotate, 0deg) + 54deg))',
             },
           ],
         },
@@ -300,6 +303,9 @@ describe('SpinScroll', () => {
             {
               transform:
                 'scale(var(--motion-spin-scale-from)) rotate(calc(var(--motion-rotate, 0deg) + var(--motion-spin-from)))',
+            },
+            {
+              transform: 'scale(1) rotate(var(--motion-rotate, 0deg))',
             },
             {
               transform:

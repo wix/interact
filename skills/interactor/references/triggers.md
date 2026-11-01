@@ -71,7 +71,7 @@ trigger params** — the range lives on the _effect_ via `rangeStart` / `rangeEn
     rangeStart: { name: 'cover', offset: { value: 0,   unit: 'percentage' } },
     rangeEnd:   { name: 'cover', offset: { value: 100, unit: 'percentage' } },
     fill: 'both',
-    namedEffect: { type: 'ParallaxScroll', parallaxFactor: 0.4 },
+    namedEffect: { type: 'ParallaxScroll', speed: 0.75 },
   } } }
 ```
 
@@ -83,7 +83,7 @@ Replace every such `overflow: hidden` with `overflow: clip` (Tailwind:
 **Scroll presets need `range`.** Every `*Scroll` preset takes
 `range: 'in' | 'out' | 'continuous'` (prefer `'continuous'` unless you specifically
 want enter-only / exit-only) — **except** `ParallaxScroll`, which uses
-`parallaxFactor`. Use `fill: 'both'` for scrub effects.
+`speed`. Use `fill: 'both'` for scrub effects.
 
 ---
 

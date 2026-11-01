@@ -1,10 +1,4 @@
-import type {
-  AnimationFillMode,
-  ScrubAnimationOptions,
-  ShuttersScroll,
-  DomApi,
-  EffectFourDirections,
-} from '../../types';
+import type { AnimationFillMode, ScrubAnimationOptions, ShuttersScroll, DomApi } from '../../types';
 import {
   getOppositeDirection,
   getShuttersClipPaths,
@@ -15,8 +9,22 @@ import {
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
+import { SCROLL_RANGES } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'right';
+const DEFAULTS: Required<ShuttersScroll> = {
+  type: 'ShuttersScroll',
+  direction: 'right',
+  range: 'in',
+  shutters: 12,
+  staggered: true,
+};
+
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  shutters: { type: 'number', min: 1, int: true, default: DEFAULTS.shutters },
+  staggered: { type: 'bool', default: DEFAULTS.staggered },
+};
 
 export function getNames(options: ScrubAnimationOptions) {
   const { range = 'in' } = options.namedEffect as ShuttersScroll;
@@ -32,10 +40,14 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ShuttersScroll;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { shutters = 12, staggered = true, range = 'in' } = namedEffect;
+  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction);
+  const {
+    shutters = DEFAULTS.shutters,
+    staggered = DEFAULTS.staggered,
+    range = DEFAULTS.range,
+  } = namedEffect;
   const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
+    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill || 'both'
   ) as AnimationFillMode;
 
   const easing = range === 'in' ? getEasing('sineIn') : getEasing('sineOut');

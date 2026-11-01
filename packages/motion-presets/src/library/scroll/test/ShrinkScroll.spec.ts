@@ -17,15 +17,15 @@ describe('ShrinkScroll', () => {
           fill: 'backwards',
           easing: 'linear',
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0px',
+          endOffsetAdd: '100vh',
           keyframes: [
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1.2) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(calc(1 * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(1.2) translate(calc(-1 * 0%), calc(-1 * 0%))',
             },
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(calc((1 - 1) * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%))',
             },
           ],
         },
@@ -45,16 +45,16 @@ describe('ShrinkScroll', () => {
       const expectedResult = [
         {
           fill: 'forwards',
-          startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          startOffsetAdd: '0vh',
+          endOffsetAdd: '100vh',
           keyframes: [
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(calc(0 * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%))',
             },
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(0.8) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(calc((0 - 1) * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(0.8333333333333334) translate(calc(-1 * 0%), calc(-1 * 0%))',
             },
           ],
         },
@@ -65,10 +65,10 @@ describe('ShrinkScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - top-right', () => {
+    test('custom pivot - top-right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'top-right' } as ShrinkScrollType,
+        namedEffect: { pivot: 'top-right' } as ShrinkScrollType,
       };
 
       const expectedResult = [
@@ -76,11 +76,11 @@ describe('ShrinkScroll', () => {
           keyframes: [
             {
               transform:
-                'translateY(0vh) translate(50%, -50%) scale(1.2) translate(calc(-1 * 50%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
+                'translateY(calc(1 * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(50%, -50%) scale(1.2) translate(calc(-1 * 50%), calc(-1 * -50%))',
             },
             {
               transform:
-                'translateY(0vh) translate(50%, -50%) scale(1) translate(calc(-1 * 50%), calc(-1 * -50%)) rotate(var(--motion-rotate, 0))',
+                'translateY(calc((1 - 1) * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(50%, -50%) scale(1) translate(calc(-1 * 50%), calc(-1 * -50%))',
             },
           ],
         },
@@ -102,11 +102,11 @@ describe('ShrinkScroll', () => {
           keyframes: [
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1.5) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(calc(1 * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(1.5) translate(calc(-1 * 0%), calc(-1 * 0%))',
             },
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(calc((1 - 1) * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%))',
             },
           ],
         },
@@ -125,18 +125,25 @@ describe('ShrinkScroll', () => {
 
       const expectedResult = [
         {
-          startOffsetAdd: '-20vh',
-          endOffsetAdd: '0px',
+          startOffsetAdd: '-100vh',
+          endOffsetAdd: '100vh',
           keyframes: [
             {
               transform:
-                'translateY(-20vh) translate(0%, 0%) scale(1.2) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(calc(1 * (1 - 2) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(1.2) translate(calc(-1 * 0%), calc(-1 * 0%))',
             },
             {
               transform:
-                'translateY(0vh) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%)) rotate(var(--motion-rotate, 0))',
+                'translateY(calc((1 - 1) * (1 - 2) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(1) translate(calc(-1 * 0%), calc(-1 * 0%))',
             },
           ],
+          startOffset: {
+            name: 'entry-crossing',
+            offset: {
+              value: -100,
+              unit: 'percentage',
+            },
+          },
         },
       ];
 
@@ -158,15 +165,15 @@ describe('ShrinkScroll', () => {
           fill: 'backwards',
           easing: 'linear',
           startOffsetAdd: '0vh',
-          endOffsetAdd: '0px',
+          endOffsetAdd: '100vh',
           keyframes: [
             {
               transform:
-                'translateY(var(--motion-travel-from)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-from)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
+                'translateY(var(--motion-shrink-parallax-from)) rotate(var(--motion-rotate, 0)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-from)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y)))',
             },
             {
               transform:
-                'translateY(var(--motion-travel-to)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-to)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
+                'translateY(var(--motion-shrink-parallax-to)) rotate(var(--motion-rotate, 0)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-to)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y)))',
             },
           ],
         },
@@ -186,16 +193,16 @@ describe('ShrinkScroll', () => {
       const expectedResult = [
         {
           fill: 'forwards',
-          startOffsetAdd: '0px',
-          endOffsetAdd: '0vh',
+          startOffsetAdd: '0vh',
+          endOffsetAdd: '100vh',
           keyframes: [
             {
               transform:
-                'translateY(var(--motion-travel-from)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-from)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
+                'translateY(var(--motion-shrink-parallax-from)) rotate(var(--motion-rotate, 0)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-from)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y)))',
             },
             {
               transform:
-                'translateY(var(--motion-travel-to)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-to)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
+                'translateY(var(--motion-shrink-parallax-to)) rotate(var(--motion-rotate, 0)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-to)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y)))',
             },
           ],
         },
@@ -206,10 +213,10 @@ describe('ShrinkScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom direction - top-right', () => {
+    test('custom pivot - top-right', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'top-right' } as ShrinkScrollType,
+        namedEffect: { pivot: 'top-right' } as ShrinkScrollType,
       };
 
       const expectedResult = [
@@ -217,13 +224,17 @@ describe('ShrinkScroll', () => {
           keyframes: [
             {
               transform:
-                'translateY(var(--motion-travel-from)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-from)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
+                'translateY(var(--motion-shrink-parallax-from)) rotate(var(--motion-rotate, 0)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-from)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y)))',
             },
             {
               transform:
-                'translateY(var(--motion-travel-to)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-to)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y))) rotate(var(--motion-rotate, 0))',
+                'translateY(var(--motion-shrink-parallax-to)) rotate(var(--motion-rotate, 0)) translate(var(--motion-trans-x), var(--motion-trans-y)) scale(var(--motion-shrink-to)) translate(calc(-1 * var(--motion-trans-x)), calc(-1 * var(--motion-trans-y)))',
             },
           ],
+          custom: {
+            '--motion-trans-x': '50%',
+            '--motion-trans-y': '-50%',
+          },
         },
       ];
 

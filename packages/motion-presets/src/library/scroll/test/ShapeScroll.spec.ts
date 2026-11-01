@@ -18,7 +18,7 @@ describe('ShapeScroll', () => {
           easing: 'linear',
           keyframes: [
             {
-              clipPath: 'circle(50%)',
+              clipPath: 'circle(50.025000000000006%)',
               easing: 'cubic-bezier(0.785, 0.135, 0.15, 0.86)',
             },
             {
@@ -43,7 +43,8 @@ describe('ShapeScroll', () => {
         {
           keyframes: [
             {
-              clipPath: 'polygon(50% 25%, 75% 50%, 50% 75%, 25% 50%)',
+              clipPath:
+                'polygon(50% -16.700000000000003%, 116.7% 50%, 50% 116.7%, -16.700000000000003% 50%)',
             },
             {
               clipPath: 'polygon(50% -50%, 150% 50%, 50% 150%, -50% 50%)',
@@ -67,7 +68,7 @@ describe('ShapeScroll', () => {
         {
           keyframes: [
             {
-              clipPath: 'ellipse(25% 25%)',
+              clipPath: 'ellipse(50.025000000000006% 50.025000000000006%)',
             },
             {
               clipPath: 'ellipse(75% 75%)',
@@ -91,7 +92,7 @@ describe('ShapeScroll', () => {
         {
           keyframes: [
             {
-              clipPath: 'inset(25% round 50% 50% 0% 0%)',
+              clipPath: 'inset(3.309999999999995% round 50% 50% 0% 0%)',
             },
             {
               clipPath: 'inset(-20% round 50% 50% 0% 0%)',
@@ -115,7 +116,7 @@ describe('ShapeScroll', () => {
         {
           keyframes: [
             {
-              clipPath: 'inset(50%)',
+              clipPath: 'inset(16.65%)',
             },
             {
               clipPath: 'inset(0%)',
@@ -129,17 +130,17 @@ describe('ShapeScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom intensity', () => {
+    test('custom start', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { intensity: 0.75 } as ShapeScrollType,
+        namedEffect: { start: 0.4 } as ShapeScrollType,
       };
 
       const expectedResult = [
         {
           keyframes: [
             {
-              clipPath: 'circle(25%)',
+              clipPath: 'circle(30%)',
             },
             {
               clipPath: 'circle(75%)',
@@ -167,7 +168,7 @@ describe('ShapeScroll', () => {
               clipPath: 'circle(75%)',
             },
             {
-              clipPath: 'circle(50%)',
+              clipPath: 'circle(50.025000000000006%)',
             },
           ],
         },
@@ -190,13 +191,15 @@ describe('ShapeScroll', () => {
           fill: 'both',
           keyframes: [
             {
-              clipPath: 'circle(50%)',
+              clipPath: 'circle(50.025000000000006%)',
+              easing: 'cubic-bezier(0.785, 0.135, 0.15, 0.86)',
             },
             {
               clipPath: 'circle(75%)',
+              easing: 'cubic-bezier(0.785, 0.135, 0.15, 0.86)',
             },
             {
-              clipPath: 'circle(50%)',
+              clipPath: 'circle(50.025000000000006%)',
             },
           ],
         },
