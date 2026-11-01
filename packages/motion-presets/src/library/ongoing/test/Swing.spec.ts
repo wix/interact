@@ -20,25 +20,22 @@ describe('Swing', () => {
             '--motion-swing-deg': '20deg',
             '--motion-trans-x': '0%',
             '--motion-trans-y': '-50%',
-            '--motion-ease-in': 'cubic-bezier(0.47, 0, 0.745, 0.715)',
-            '--motion-ease-inout': 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-            '--motion-ease-out': 'cubic-bezier(0.39, 0.575, 0.565, 1)',
           },
           keyframes: [
             {
-              easing: 'var(--motion-ease-out)',
+              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
               offset: 0,
               transform:
                 'rotateZ(var(--motion-rotate, 0deg)) translate(var(--motion-trans-x), var(--motion-trans-y)) rotate(0deg) translate(calc(var(--motion-trans-x) * -1), calc(var(--motion-trans-y) * -1))',
             },
             {
-              easing: 'var(--motion-ease-inout)',
+              easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
               offset: 0.25,
               transform:
                 'rotate(var(--motion-rotate, 0deg)) translate(var(--motion-trans-x), var(--motion-trans-y)) rotate(var(--motion-swing-deg)) translate(calc(var(--motion-trans-x) * -1), calc(var(--motion-trans-y) * -1))',
             },
             {
-              easing: 'var(--motion-ease-in)',
+              easing: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
               offset: 0.75,
               transform:
                 'rotate(var(--motion-rotate, 0deg)) translate(var(--motion-trans-x), var(--motion-trans-y)) rotate(calc(var(--motion-swing-deg) * -1)) translate(calc(var(--motion-trans-x) * -1), calc(var(--motion-trans-y) * -1))',
@@ -57,32 +54,29 @@ describe('Swing', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom swing, duration and easing', () => {
+    test('custom angle, duration and easing', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
         easing: 'linear',
-        namedEffect: { swing: 30, iterationDelay: 500 } as SwingType,
+        namedEffect: { angle: 30, iterationDelay: 500 } as SwingType,
       };
 
       const result = Swing.style(mockOptions);
 
       expect(result[0]).toMatchObject({
-        name: 'motion-swing-067',
+        name: 'motion-swing-067-linear',
         duration: 1500,
         custom: {
           '--motion-swing-deg': '30deg',
           '--motion-trans-x': '0%',
           '--motion-trans-y': '-50%',
-          '--motion-ease-in': 'linear',
-          '--motion-ease-inout': 'linear',
-          '--motion-ease-out': 'linear',
         },
       });
 
       // Check that delay sequence is used (more keyframes)
       expect(result[0].keyframes.length).toBe(9); // 7 delay sequence + start + end
-      expect(result[0].keyframes[0].easing).toBe('var(--motion-ease-out)');
+      expect(result[0].keyframes[0].easing).toBe('linear');
     });
 
     test('custom duration and delay - offsets and name', () => {
@@ -111,10 +105,10 @@ describe('Swing', () => {
       expect(keyframes[8].offset).toBe(1);
     });
 
-    test('custom direction - right', () => {
+    test('custom pivot - right', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as SwingType,
+        namedEffect: { pivot: 'right' } as SwingType,
       };
 
       const result = Swing.style(mockOptions);
@@ -129,10 +123,10 @@ describe('Swing', () => {
       );
     });
 
-    test('custom direction - left', () => {
+    test('custom pivot - left', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as SwingType,
+        namedEffect: { pivot: 'left' } as SwingType,
       };
 
       const result = Swing.style?.(mockOptions);
@@ -143,10 +137,10 @@ describe('Swing', () => {
       });
     });
 
-    test('custom direction - bottom', () => {
+    test('custom pivot - bottom', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'bottom' } as SwingType,
+        namedEffect: { pivot: 'bottom' } as SwingType,
       };
 
       const result = Swing.style?.(mockOptions);
@@ -173,9 +167,6 @@ describe('Swing', () => {
             '--motion-swing-deg': '20deg',
             '--motion-trans-x': '0%',
             '--motion-trans-y': '-50%',
-            '--motion-ease-in': 'cubic-bezier(0.47, 0, 0.745, 0.715)',
-            '--motion-ease-inout': 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-            '--motion-ease-out': 'cubic-bezier(0.39, 0.575, 0.565, 1)',
           },
           keyframes: [
             {
@@ -210,26 +201,23 @@ describe('Swing', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom swing, duration and easing with web output', () => {
+    test('custom angle, duration and easing with web output', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
         easing: 'linear',
-        namedEffect: { swing: 30, iterationDelay: 500 } as SwingType,
+        namedEffect: { angle: 30, iterationDelay: 500 } as SwingType,
       };
 
       const result = Swing.web(mockOptions);
 
       expect(result[0]).toMatchObject({
-        name: 'motion-swing-067',
+        name: 'motion-swing-067-linear',
         duration: 1500,
         custom: {
           '--motion-swing-deg': '30deg',
           '--motion-trans-x': '0%',
           '--motion-trans-y': '-50%',
-          '--motion-ease-in': 'linear',
-          '--motion-ease-inout': 'linear',
-          '--motion-ease-out': 'linear',
         },
       });
 
@@ -240,7 +228,7 @@ describe('Swing', () => {
       expect(firstKeyframe.transform).not.toContain('var(--motion-trans-x)');
       expect(firstKeyframe.transform).not.toContain('var(--motion-trans-y)');
 
-      // Check a delay sequence keyframe contains computed swing degree values
+      // Check a delay sequence keyframe contains computed angle values
       const delayKeyframe = result[0].keyframes[1]; // First delay sequence keyframe
       expect(delayKeyframe.transform).toContain('rotate(calc(30deg * 1))'); // factor 1 for first delay keyframe
       expect(delayKeyframe.transform).not.toContain('var(--motion-swing-deg)');
@@ -279,10 +267,10 @@ describe('Swing', () => {
       expect(keyframes[8].offset).toBe(1);
     });
 
-    test('custom direction - right with web output', () => {
+    test('custom pivot - right with web output', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'right' } as SwingType,
+        namedEffect: { pivot: 'right' } as SwingType,
       };
 
       const result = Swing.web(mockOptions);

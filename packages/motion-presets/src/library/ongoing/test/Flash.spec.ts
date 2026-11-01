@@ -76,7 +76,7 @@ describe('Flash', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-flash-1',
+          name: 'motion-flash-1-sineIn',
           duration: 1,
           keyframes: [
             {
@@ -172,7 +172,7 @@ describe('Flash', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-flash-1',
+          name: 'motion-flash-1-sineIn',
           duration: 1,
           keyframes: [
             {
