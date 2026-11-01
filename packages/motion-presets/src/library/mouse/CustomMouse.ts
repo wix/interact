@@ -1,5 +1,7 @@
 import type { AnimationExtraOptions, Progress, ScrubAnimationOptions } from '../../types';
 
+export const schema = {};
+
 export class CustomMouse {
   target: HTMLElement;
   options: Record<string, any>;
