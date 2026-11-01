@@ -37,10 +37,10 @@ export function getNames(options: ScrubAnimationOptions) {
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
-  return style(options);
+  return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions) {
+export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as RevealScroll;
   const parsedDirection = parseDirection(
     namedEffect?.direction,
@@ -67,10 +67,10 @@ export function style(options: ScrubAnimationOptions) {
 
   const keyframes = [
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-from', false, custom['--motion-clip-from']),
+      clipPath: toKeyframeValue(custom, '--motion-clip-from', asWeb),
     },
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-to', false, custom['--motion-clip-to']),
+      clipPath: toKeyframeValue(custom, '--motion-clip-to', asWeb),
     },
   ];
 

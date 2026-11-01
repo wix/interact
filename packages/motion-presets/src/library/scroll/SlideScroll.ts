@@ -78,7 +78,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
 
   const keyframes = [
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-from', false, custom['--motion-clip-from']),
+      clipPath: toKeyframeValue(custom, '--motion-clip-from', asWeb),
       transform: `rotate(${toKeyframeValue(
         {},
         '--motion-rotate',
@@ -91,7 +91,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       )}, ${toKeyframeValue(custom, `--motion-translate-from-y`, asWeb)})`,
     },
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-to', false, custom['--motion-clip-to']),
+      clipPath: toKeyframeValue(custom, '--motion-clip-to', asWeb),
       transform: `rotate(${toKeyframeValue(
         {},
         '--motion-rotate',

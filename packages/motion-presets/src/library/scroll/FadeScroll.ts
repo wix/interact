@@ -13,8 +13,13 @@ export const schema = {
   range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
 };
 
+// continuous has its own keyframes, so it needs its own name
 export function getNames(options: ScrubAnimationOptions) {
-  return suffixNames(['motion-fadeScroll'], options.suffix);
+  const { range = DEFAULTS.range } = options.namedEffect as FadeScroll;
+  return suffixNames(
+    [`motion-fadeScroll${range === 'continuous' ? '-continuous' : ''}`],
+    options.suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {

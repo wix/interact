@@ -24,8 +24,13 @@ const ROTATE_DIRECTION_MAP = {
   'counter-clockwise': -1,
 };
 
+// continuous has its own keyframes, so it needs its own name
 export function getNames(options: ScrubAnimationOptions) {
-  return suffixNames(['motion-turnScroll'], options.suffix);
+  const { range = DEFAULTS.range } = options.namedEffect as TurnScroll;
+  return suffixNames(
+    [`motion-turnScroll${range === 'continuous' ? '-continuous' : ''}`],
+    options.suffix,
+  );
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {

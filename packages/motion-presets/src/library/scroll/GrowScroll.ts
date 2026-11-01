@@ -32,8 +32,13 @@ const directionMap = {
   center: [0, 0],
 };
 
+// continuous has its own keyframes, so it needs its own name
 export function getNames(options: ScrubAnimationOptions) {
-  return suffixNames(['motion-growScroll'], options.suffix);
+  const { range = DEFAULTS.range } = options.namedEffect as GrowScroll;
+  return suffixNames(
+    [`motion-growScroll${range === 'continuous' ? '-continuous' : ''}`],
+    options.suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {

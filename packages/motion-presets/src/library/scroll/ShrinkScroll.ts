@@ -32,8 +32,13 @@ const directionMap = {
   center: [0, 0],
 };
 
+// continuous has its own keyframes, so it needs its own name
 export function getNames(options: ScrubAnimationOptions) {
-  return suffixNames(['motion-shrinkScroll'], options.suffix);
+  const { range = DEFAULTS.range } = options.namedEffect as ShrinkScroll;
+  return suffixNames(
+    [`motion-shrinkScroll${range === 'continuous' ? '-continuous' : ''}`],
+    options.suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {

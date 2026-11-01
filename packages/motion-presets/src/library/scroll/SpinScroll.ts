@@ -22,8 +22,13 @@ const DIRECTION_MAP = {
   'counter-clockwise': -1,
 };
 
+// continuous has its own keyframes, so it needs its own name
 export function getNames(options: ScrubAnimationOptions) {
-  return suffixNames(['motion-spinScroll'], options.suffix);
+  const { range = DEFAULTS.range } = options.namedEffect as SpinScroll;
+  return suffixNames(
+    [`motion-spinScroll${range === 'continuous' ? '-continuous' : ''}`],
+    options.suffix,
+  );
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {

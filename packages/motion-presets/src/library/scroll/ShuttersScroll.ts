@@ -26,12 +26,12 @@ export const schema = {
   staggered: { type: 'bool', default: DEFAULTS.staggered },
 };
 
+// the easing is set on the keyframes and differs per range, and staggered continuous has its own offsets
 export function getNames(options: ScrubAnimationOptions) {
-  const { range = 'in' } = options.namedEffect as ShuttersScroll;
-  return suffixNames(
-    [`motion-shuttersScroll-${range === 'continuous' ? '-continuous' : ''}`],
-    options.suffix,
-  );
+  const { range = DEFAULTS.range, staggered = DEFAULTS.staggered } =
+    options.namedEffect as ShuttersScroll;
+  const variant = range === 'continuous' && staggered ? 'continuous-staggered' : range;
+  return suffixNames([`motion-shuttersScroll-${variant}`], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
