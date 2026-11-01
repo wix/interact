@@ -413,8 +413,8 @@ export type LengthInput =
   | undefined;
 
 const CSS_UNIT_REGEX = /^(-?\d*\.?\d+)(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/i;
-const CSS_CALC_REGEX = /^calc\(.*\)$/;
-const CSS_ANGLE_REGEX = /^(-?\d*\.?\d+)(deg|rad|grad|turn)$/;
+const CSS_CALC_REGEX = /^calc\(.*\)$/i;
+const CSS_ANGLE_REGEX = /^(-?\d*\.?\d+)(deg|rad|grad|turn)$/i;
 const SIDE_ANGLES: Record<string, number> = { top: 270, right: 0, bottom: 90, left: 180 };
 
 function isCssNumeric(value: string) {
@@ -431,9 +431,10 @@ export function parseAngle(input: number | string | undefined, defaultValue: num
   }
 
   if (typeof input === 'string') {
-    const trimmed = input.trim().toLowerCase();
-    if (Object.hasOwn(SIDE_ANGLES, trimmed)) {
-      return `${SIDE_ANGLES[trimmed]}deg`;
+    const trimmed = input.trim();
+    const side = trimmed.toLowerCase();
+    if (Object.hasOwn(SIDE_ANGLES, side)) {
+      return `${SIDE_ANGLES[side]}deg`;
     }
     if (trimmed && !isNaN(Number(trimmed))) {
       return `${Number(trimmed)}deg`;
@@ -454,7 +455,7 @@ export function parseCssLength(input: LengthInput, defaultValue: LengthValue) {
   }
 
   if (typeof input === 'string') {
-    const trimmed = input.trim().toLowerCase();
+    const trimmed = input.trim();
     if (trimmed && !isNaN(Number(trimmed))) {
       parsedLength.value = Number(trimmed);
     } else if (
