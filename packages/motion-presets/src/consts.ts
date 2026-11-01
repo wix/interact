@@ -1,6 +1,7 @@
 const FOUR_DIRECTIONS = ['top', 'right', 'bottom', 'left'] as const;
 const AXIS_DIRECTIONS = ['horizontal', 'vertical'] as const;
 const SCROLL_RANGES = ['in', 'out', 'continuous'] as const;
+const EPSILON = 0.01;
 const SPIN_DIRECTIONS = ['clockwise', 'counter-clockwise'] as const;
 const TWO_SIDES_DIRECTIONS = ['left', 'right'] as const;
 const EIGHT_DIRECTIONS = [
@@ -27,14 +28,11 @@ const NINE_DIRECTIONS = [
 const FOUR_CORNERS_DIRECTIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;
 const SHAPES = ['rectangle', 'ellipse', 'circle', 'diamond', 'window'] as const;
 
-// keeps inverse-scale/speed math finite
-const EPSILON = 0.01;
-
 export {
-  EPSILON,
   FOUR_DIRECTIONS,
   AXIS_DIRECTIONS,
   SCROLL_RANGES,
+  EPSILON,
   SPIN_DIRECTIONS,
   TWO_SIDES_DIRECTIONS,
   EIGHT_DIRECTIONS,
