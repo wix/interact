@@ -388,6 +388,11 @@ export function getTimingFactor(
   return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
 }
 
+// keyframes that bake in the easing need a non-default one in their name, so CSS @keyframes don't collide
+export function getEasingName(easing: string | undefined, defaultEasing: string) {
+  return easing && easing !== defaultEasing ? `-${easing.replace(/[^\w-]/g, '_')}` : '';
+}
+
 export type LengthValue = { value: number; unit: string };
 export type LengthInput =
   | string

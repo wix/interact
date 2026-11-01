@@ -3,6 +3,7 @@ import type { LengthValue } from '../../utils';
 import {
   getEasing,
   getEasingFamily,
+  getEasingName,
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
@@ -13,6 +14,8 @@ import {
 import { AXIS_DIRECTIONS } from '../../consts';
 
 const DIRECTIONS = [...AXIS_DIRECTIONS, 'center'] as const;
+
+const DEFAULT_EASING = 'sineInOut';
 
 const DEFAULTS: Required<Breathe> = {
   type: 'Breathe',
@@ -53,7 +56,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
   const { perspective = DEFAULTS.perspective } = namedEffect;
 
-  const easing = options.easing || 'sineInOut';
+  const easing = options.easing || DEFAULT_EASING;
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || 0;
   const totalDuration = duration + iterationDelay;
@@ -137,5 +140,8 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
   const iterationDelay = (options.namedEffect as Breathe)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return suffixNames([`motion-breathe-${timingFactor}`], options.suffix);
+  return suffixNames(
+    [`motion-breathe-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
+    options.suffix,
+  );
 }

@@ -2,6 +2,7 @@ import type { Swing, TimeAnimationOptions, DomApi, AnimationExtraOptions } from 
 import {
   getEasing,
   getEasingFamily,
+  getEasingName,
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
@@ -9,6 +10,8 @@ import {
   suffixCustomProperties,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
+
+const DEFAULT_EASING = 'sineInOut';
 
 const DEFAULTS: Required<Swing> = {
   type: 'Swing',
@@ -53,7 +56,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || 0;
-  const easing = options.easing || 'sineInOut';
+  const easing = options.easing || DEFAULT_EASING;
   const ease = getEasingFamily(easing);
   const [name] = getNames(options);
 
@@ -144,5 +147,8 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
   const iterationDelay = (options.namedEffect as Swing)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return suffixNames([`motion-swing-${timingFactor}`], options.suffix);
+  return suffixNames(
+    [`motion-swing-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
+    options.suffix,
+  );
 }

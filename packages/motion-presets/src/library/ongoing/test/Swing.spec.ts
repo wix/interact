@@ -65,7 +65,7 @@ describe('Swing', () => {
       const result = Swing.style(mockOptions);
 
       expect(result[0]).toMatchObject({
-        name: 'motion-swing-067',
+        name: 'motion-swing-067-linear',
         duration: 1500,
         custom: {
           '--motion-swing-deg': '30deg',
@@ -212,7 +212,7 @@ describe('Swing', () => {
       const result = Swing.web(mockOptions);
 
       expect(result[0]).toMatchObject({
-        name: 'motion-swing-067',
+        name: 'motion-swing-067-linear',
         duration: 1500,
         custom: {
           '--motion-swing-deg': '30deg',

@@ -8,6 +8,7 @@ import type {
 import {
   getEasing,
   getEasingFamily,
+  getEasingName,
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
@@ -15,6 +16,8 @@ import {
   suffixCustomProperties,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
+
+const DEFAULT_EASING = 'cubicInOut';
 
 const DEFAULTS: Required<Fold> = {
   type: 'Fold',
@@ -73,7 +76,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   ) as EffectFourDirections;
   const { angle = DEFAULTS.angle, perspective = DEFAULTS.perspective } = namedEffect;
 
-  const easing = options.easing || 'cubicInOut';
+  const easing = options.easing || DEFAULT_EASING;
   const duration = options.duration || 1;
   const iterationDelay = +(namedEffect?.iterationDelay || 0);
   const [name] = getNames(options);
@@ -175,10 +178,16 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
   const iterationDelay = +((options.namedEffect as Fold)?.iterationDelay || 0);
 
   if (!iterationDelay) {
-    return suffixNames(['motion-fold'], options.suffix);
+    return suffixNames(
+      [`motion-fold${getEasingName(options.easing, DEFAULT_EASING)}`],
+      options.suffix,
+    );
   }
 
   const timingFactor = getTimingFactor(duration, iterationDelay, true) as string;
 
-  return suffixNames([`motion-fold-${timingFactor}`], options.suffix);
+  return suffixNames(
+    [`motion-fold-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
+    options.suffix,
+  );
 }

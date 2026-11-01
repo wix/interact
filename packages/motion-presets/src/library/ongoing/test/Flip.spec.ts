@@ -89,7 +89,7 @@ describe('Flip', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-flip-05',
+          name: 'motion-flip-05-ease-in-out',
           easing: 'linear',
           namedEffect: { iterationDelay: 1000 } as Flip,
           duration: 2000,
@@ -212,7 +212,7 @@ describe('Flip', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-flip-05',
+          name: 'motion-flip-05-ease-in-out',
           easing: 'linear',
           namedEffect: { iterationDelay: 1000 } as Flip,
           duration: 2000,

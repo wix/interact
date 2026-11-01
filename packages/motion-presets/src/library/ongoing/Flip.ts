@@ -1,6 +1,7 @@
 import type { AnimationExtraOptions, DomApi, Flip, TimeAnimationOptions } from '../../types';
 import {
   getEasing,
+  getEasingName,
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
@@ -8,6 +9,8 @@ import {
   suffixCustomProperties,
 } from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
+
+const DEFAULT_EASING = 'linear';
 
 const DEFAULTS: Required<Flip> = {
   type: 'Flip',
@@ -42,7 +45,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const [name] = getNames(options);
 
   const rotationAxes = DIRECTION_MAP[direction];
-  const easing = options.easing || 'linear';
+  const easing = options.easing || DEFAULT_EASING;
 
   const custom = {
     '--motion-perspective': `${perspective}px`,
@@ -94,5 +97,8 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
   const iterationDelay = (options.namedEffect as Flip)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return suffixNames([`motion-flip-${timingFactor}`], options.suffix);
+  return suffixNames(
+    [`motion-flip-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
+    options.suffix,
+  );
 }

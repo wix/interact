@@ -1,6 +1,7 @@
 import type { AnimationExtraOptions, DomApi, Spin, TimeAnimationOptions } from '../../types';
 import {
   getEasing,
+  getEasingName,
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
@@ -8,6 +9,8 @@ import {
   suffixCustomProperties,
 } from '../../utils';
 import { SPIN_DIRECTIONS } from '../../consts';
+
+const DEFAULT_EASING = 'linear';
 
 const DEFAULTS: Required<Spin> = {
   type: 'Spin',
@@ -38,7 +41,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const easing = options.easing || 'linear';
+  const easing = options.easing || DEFAULT_EASING;
 
   const transformRotate = (DIRECTION_MAP[direction] > 0 ? 1 : -1) * 360;
 
@@ -74,5 +77,8 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
   const iterationDelay = (options.namedEffect as Spin)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return suffixNames([`motion-spin-${timingFactor}`], options.suffix);
+  return suffixNames(
+    [`motion-spin-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
+    options.suffix,
+  );
 }

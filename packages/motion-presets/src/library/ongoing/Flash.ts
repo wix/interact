@@ -1,5 +1,13 @@
 import type { TimeAnimationOptions, DomApi, AnimationExtraOptions, Flash } from '../../types';
-import { getEasing, getTimingFactor, suffixNames, suffixCustomProperties } from '../../utils';
+import {
+  getEasing,
+  getEasingName,
+  getTimingFactor,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
+
+const DEFAULT_EASING = 'cubicInOut';
 
 const DEFAULTS: Required<Flash> = {
   type: 'Flash',
@@ -18,7 +26,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, _as
   const namedEffect = options.namedEffect as Flash;
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || 0;
-  const easing = getEasing(options.easing || 'cubicInOut');
+  const easing = getEasing(options.easing || DEFAULT_EASING);
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
@@ -60,5 +68,8 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
   const iterationDelay = (options.namedEffect as Flash)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return suffixNames([`motion-flash-${timingFactor}`], options.suffix);
+  return suffixNames(
+    [`motion-flash-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
+    options.suffix,
+  );
 }

@@ -52,7 +52,7 @@ describe('Spin', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-spin-067',
+          name: 'motion-spin-067-quintInOut',
           easing: 'linear',
           namedEffect: { iterationDelay: 500 } as Spin,
           duration: 1500,

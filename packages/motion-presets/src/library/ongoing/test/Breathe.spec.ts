@@ -177,7 +177,7 @@ describe('Breathe', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-breathe-1',
+          name: 'motion-breathe-1-easeIn',
           duration: 1,
           custom: {
             '--motion-breathe-perspective': '',
