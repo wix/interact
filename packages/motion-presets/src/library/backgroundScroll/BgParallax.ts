@@ -9,6 +9,15 @@ import type {
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
 
+const DEFAULTS: Required<BgParallax> = {
+  type: 'BgParallax',
+  speed: 0.2,
+};
+
+export const schema = {
+  speed: { type: 'number', min: 0, default: DEFAULTS.speed },
+};
+
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-bgParallax'], options.suffix);
 }
@@ -30,7 +39,7 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
 export const parts = ['MEDIA_WRAPPER'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { speed = 0.2 } = options.namedEffect as BgParallax;
+  const { speed = DEFAULTS.speed } = options.namedEffect as BgParallax;
   const custom = {
     '--motion-parallax-speed': speed,
   };

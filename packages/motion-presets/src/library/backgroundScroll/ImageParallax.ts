@@ -9,6 +9,19 @@ import type {
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight, measureSiteHeight } from './utils';
 
+const DEFAULTS: Required<ImageParallax> = {
+  type: 'ImageParallax',
+  isPage: false,
+  reverse: false,
+  speed: 1.5,
+};
+
+export const schema = {
+  isPage: { type: 'bool', default: DEFAULTS.isPage },
+  reverse: { type: 'bool', default: DEFAULTS.reverse },
+  speed: { type: 'number', default: DEFAULTS.speed },
+};
+
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-imageParallax'], options.suffix);
 }
@@ -18,7 +31,7 @@ export function prepare(options: ScrubAnimationOptions, dom?: DomApi) {
     '--motion-comp-height': '0px',
     '--motion-site-height': '0',
   };
-  const { isPage = false } = options.namedEffect as ImageParallax;
+  const { isPage = DEFAULTS.isPage } = options.namedEffect as ImageParallax;
   if (dom) {
     if (isPage) {
       measureSiteHeight(measures, dom, true);
@@ -38,7 +51,11 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
 export const parts = ['MEDIA_WRAPPER'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { speed = 1.5, reverse = false, isPage = false } = options.namedEffect as ImageParallax;
+  const {
+    speed = DEFAULTS.speed,
+    reverse = DEFAULTS.reverse,
+    isPage = DEFAULTS.isPage,
+  } = options.namedEffect as ImageParallax;
 
   let start = -100 * (speed - 1);
   if (!isPage) {
