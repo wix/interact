@@ -1,8 +1,19 @@
-import { getMouseTransitionEasing, mapRange, parseDirection } from '../../utils';
+import { getMouseTransitionEasing, mapRange } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 import { ScrubAnimationOptions, AnimationExtraOptions, Tilt3DMouse, Progress } from '../../types';
 
-const DEFAULT_ANGLE = 5;
+const DEFAULTS: Required<Tilt3DMouse> = {
+  type: 'Tilt3DMouse',
+  angle: 5,
+  inverted: false,
+  perspective: 800,
+};
+
+export const schema = {
+  angle: { type: 'number', min: 0, default: DEFAULTS.angle },
+  inverted: { type: 'bool', default: DEFAULTS.inverted },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+};
 
 class Tilt3DMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
@@ -24,9 +35,11 @@ class Tilt3DMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as Tilt3DMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const angle = parseDirection(namedEffect.angle, [], DEFAULT_ANGLE, true) as number;
-  const { perspective = 800 } = namedEffect;
+  const {
+    inverted = DEFAULTS.inverted,
+    angle = DEFAULTS.angle,
+    perspective = DEFAULTS.perspective,
+  } = namedEffect;
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration

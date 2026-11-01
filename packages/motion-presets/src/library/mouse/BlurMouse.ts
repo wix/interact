@@ -1,24 +1,37 @@
-import {
-  getCssUnits,
-  getMouseTransitionEasing,
-  distance2d,
-  mapRange,
-  parseLength,
-  parseDirection,
-} from '../../utils';
+import type { LengthValue } from '../../utils';
+import { getMouseTransitionEasing, distance2d, mapRange, parseLengthLazy } from '../../utils';
 import { quadInOut } from '@wix/motion';
 import { CustomMouse } from './CustomMouse';
 import { ScrubAnimationOptions, AnimationExtraOptions, BlurMouse, Progress } from '../../types';
 
-const DEFAULT_DISTANCE = { value: 80, unit: 'px' };
-const DEFAULT_ANGLE = 5;
+const DEFAULTS: Required<BlurMouse> = {
+  type: 'BlurMouse',
+  angle: 5,
+  blur: 16.57,
+  inverted: false,
+  perspective: 600,
+  scale: 0.3,
+  travel: { value: 80, unit: 'px' },
+};
+
+// the cursor's distance from the center is at most √0.5, at the corners, where the blur peaks
+const PEAK_EASED_DISTANCE = quadInOut(Math.SQRT1_2);
+
+export const schema = {
+  angle: { type: 'number', min: 0, default: DEFAULTS.angle },
+  blur: { type: 'number', min: 0, default: DEFAULTS.blur },
+  inverted: { type: 'bool', default: DEFAULTS.inverted },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
 
 class BlurMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
-    const { distance, angle, scale, invert, blur, perspective } = this.options;
+    const { travel, angle, scale, invert, blur, perspective } = this.options;
 
-    const translateX = mapRange(0, 1, -distance.value, distance.value, progressX) * invert;
-    const translateY = mapRange(0, 1, -distance.value, distance.value, progressY) * invert;
+    const translateX = mapRange(0, 1, -1, 1, progressX) * invert;
+    const translateY = mapRange(0, 1, -1, 1, progressY) * invert;
 
     // if progressX === 0 || progressX === 1, scaleX === scale, if progressX === 0.5, scaleX === 1
     const scaleX =
@@ -38,12 +51,10 @@ class BlurMouseAnimation extends CustomMouse {
     const rotateX = mapRange(0, 1, -angle, angle, progressY) * invert;
     const rotateY = mapRange(0, 1, angle, -angle, progressX) * invert;
 
-    const units = getCssUnits(distance.unit);
-
-    const transform = `perspective(${perspective}px) translateX(${translateX}${units}) translateY(${translateY}${units}) scale(${maxScale}, ${maxScale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotate(var(--motion-rotate, 0deg))`;
+    const transform = `perspective(${perspective}px) translateX(calc(${travel} * ${translateX})) translateY(calc(${travel} * ${translateY})) scale(${maxScale}, ${maxScale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotate(var(--motion-rotate, 0deg))`;
 
     const progressDistance = distance2d([0.5, 0.5], [progressX, progressY]);
-    const blurFilter = Math.round(mapRange(0, 1, 0, blur, quadInOut(progressDistance)));
+    const blurFilter = (blur * quadInOut(progressDistance)) / PEAK_EASED_DISTANCE;
 
     const filter = `blur(${blurFilter}px)`;
 
@@ -61,10 +72,14 @@ class BlurMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as BlurMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-  const angle = parseDirection(namedEffect.angle, [], DEFAULT_ANGLE, true) as number;
-  const { scale = 0.3, blur = 20, perspective = 600 } = namedEffect;
+  const {
+    inverted = DEFAULTS.inverted,
+    angle = DEFAULTS.angle,
+    scale = DEFAULTS.scale,
+    blur = DEFAULTS.blur,
+    perspective = DEFAULTS.perspective,
+  } = namedEffect;
+  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration
@@ -72,7 +87,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
           transitionEasing,
         )}, filter ${transitionDuration}ms ${getMouseTransitionEasing(transitionEasing)}`
       : '',
-    distance,
+    travel,
     angle,
     scale,
     blur,

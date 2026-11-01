@@ -150,23 +150,23 @@ idle pause appended after each cycle.
 ## Mouse — for `pointerMove`
 
 Cursor-position-driven transforms (`x:0.5, y:0.5` = center). **All share `inverted`
-boolean (`false`)**; where present, `axis` ∈ `both | horizontal | vertical`
+boolean (`false`)**; where present, `direction` ∈ `both | horizontal | vertical`
 (default `'both'`). Use a scrub effect with `rangeStart`/`rangeEnd` and `fill:'both'`;
 gate with a `(hover: hover)` condition.
 
-| Preset         | Params (default)                                                                                      |
-| :------------- | :---------------------------------------------------------------------------------------------------- |
-| `TrackMouse`   | `distance` (`{200,'px'}`), `axis` (`'both'`) — element follows the cursor                             |
-| `Tilt3DMouse`  | `angle` deg (`5`), `perspective` (`800`) — 3D tilt toward cursor                                      |
-| `Track3DMouse` | `distance` (`{200,'px'}`), `angle` deg (`5`), `perspective` (`800`), `axis` (`'both'`)                |
-| `SwivelMouse`  | `angle` deg (`5`), `perspective` (`800`), `pivotAxis` (`'center-horizontal'`)                         |
-| `AiryMouse`    | `distance` (`{200,'px'}`), `angle` deg (`30`), `axis` (`'both'`)                                      |
-| `ScaleMouse`   | `distance` (`{80,'px'}`), `scale` (`1.4`), `axis` (`'both'`)                                          |
-| `BlurMouse`    | `distance` (`{80,'px'}`), `angle` deg (`5`), `scale` (`0.3`), `blur` px (`20`), `perspective` (`600`) |
-| `SkewMouse`    | `distance` (`{200,'px'}`), `angle` deg (`25`), `axis` (`'both'`)                                      |
-| `BlobMouse`    | `distance` (`{200,'px'}`), `scale` (`1.4`)                                                            |
-| `BounceMouse`  | `distance` (`{80,'px'}`), `axis` (`'both'`) — elastic follow                                          |
-| `SpinMouse`    | `axis` (`'both'`)                                                                                     |
+| Preset         | Params (default)                                                                                                  |
+| :------------- | :---------------------------------------------------------------------------------------------------------------- |
+| `TrackMouse`   | `travel` (`{200,'px'}`), `direction` (`'both'`) — element follows the cursor                                      |
+| `Tilt3DMouse`  | `angle` deg (`5`), `perspective` (`800`) — 3D tilt toward cursor                                                  |
+| `Track3DMouse` | `travel` (`{200,'px'}`), `angle` deg (`5`), `perspective` (`800`), `direction` (`'both'`)                         |
+| `SwivelMouse`  | `angle` deg (`5`), `perspective` (`800`), `pivot` (`'center-horizontal'`)                                         |
+| `AiryMouse`    | `travel` (`{200,'px'}`), `angle` deg (`30`), `direction` (`'both'`)                                               |
+| `ScaleMouse`   | `travel` (`{80,'px'}`), `scale` (`1.4`), `direction` (`'both'`)                                                   |
+| `BlurMouse`    | `travel` (`{80,'px'}`), `angle` deg (`5`), `scale` (`0.3`), `blur` px at corners (`16.57`), `perspective` (`600`) |
+| `SkewMouse`    | `travel` (`{200,'px'}`), `angle` deg (`25`), `direction` (`'both'`)                                               |
+| `BlobMouse`    | `travel` (`{200,'px'}`), `scale` (`1.4`)                                                                          |
+| `BounceMouse`  | `travel` (`{80,'px'}`), `direction` (`'both'`) — elastic follow                                                   |
+| `SpinMouse`    | `direction` (`'both'`)                                                                                            |
 
 > Advanced: `CustomMouse` is a 12th mouse export — a programmatic escape hatch that
 > needs a `customEffect(target, progress)` callback you supply. Not config-only; use
