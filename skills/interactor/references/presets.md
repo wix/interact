@@ -22,7 +22,7 @@ CDN/quick-start or when you genuinely use most of the catalog.
 ## Two parameter layers (don't confuse them)
 
 - **Animation options** go on the **effect** (outside `namedEffect`): `duration`, `delay`, `easing`, `iterations`, `alternate`, `fill`, `reversed`; for scroll add `rangeStart`/`rangeEnd`, `transition*`.
-- **Preset parameters** go **inside `namedEffect`**: the per-preset knobs below (`direction`, `distance`, `blur`, `intensity`, …).
+- **Preset parameters** go **inside `namedEffect`**: the per-preset knobs below (`from`, `direction`, `travel`, `blur`, …).
 
 **If you don't know a param's name/type, omit it — defaults apply.** Guessing
 produces silently-wrong output. Never invent a `type`.
@@ -35,13 +35,13 @@ produces silently-wrong output. Never invent a `type`.
 ## Conventions
 
 - **Suffix encodes category:** `…In` = entrance, `…Scroll` = scroll, `…Mouse` = mouse, **no suffix** = ongoing.
-- **`direction` is overloaded** — the accepted set depends on the preset (cardinal `top/right/bottom/left`, `+center`, two-sided `left/right`, corners, 8-way, 9-way, axis `horizontal/vertical`, rotation `clockwise/counter-clockwise`, or a `0–360` number). Use the value set listed per preset.
-- **On entrances, `direction` names the edge the element comes _from_**, not where
-  it heads. `direction: 'bottom'` starts the element **below** its resting place and
+- **`from` / `direction` / `pivot` are overloaded** — the accepted set depends on the preset (cardinal `top/right/bottom/left`, `+back`, two-sided `left/right`, corners, 8-way, 9-way, axis `horizontal/vertical`, rotation `clockwise/counter-clockwise`, or a `0–360` number). Use the value set listed per preset.
+- **Entrances use `from` — the edge the element comes _from_**, not where
+  it heads. `from: 'bottom'` starts the element **below** its resting place and
   drifts it **upward** into position; `'left'` starts it to the left and moves it
-  right. So the everyday "fade **up** into place" is `direction: 'bottom'` — picking
-  `'top'` gives you the opposite, a downward drift. Verified across all four cardinals
-  on the translate-based presets (`FloatIn`, `GlideIn`, and `SlideIn`'s movement).
+  right. So the everyday "fade **up** into place" is `from: 'bottom'` — picking
+  `'top'` gives you the opposite, a downward drift. `pivot` names the fixed edge or
+  corner an entrance rotates around (`FoldIn`, `TurnIn`).
 - **The clip-based entrances anchor their mask differently from each other** — don't
   assume the movement rule carries over. `RevealIn` uncovers **from** the named edge
   (`'left'` → the mask opens at the left edge and sweeps right). `SlideIn` is the
@@ -49,8 +49,8 @@ produces silently-wrong output. Never invent a `type`.
   from the **right** edge, which is what makes it read as sliding out from behind a
   fixed edge rather than being wiped on. If the exact reveal geometry matters, check
   the emitted `--motion-clip-start` polygon rather than reasoning from the name.
-- **Angle convention** (numeric directions/angles): `0° = right`, increasing **counter-clockwise** → `90° = top`, `180° = left`, `270° = bottom`. Same polarity — the angle points at the edge it enters from.
-- **Distances** use `{ value, unit }` with unit ∈ `px | em | rem | vh | vw | vmin | vmax | percentage`. Strings like `'120px'` also parse.
+- **Angle convention** (numeric angles): entrances (`GlideIn`, `ExpandIn` `from`) use the CSS convention — `0° = right`, increasing **clockwise** → `90° = bottom`, `180° = left`, `270° = top`; the angle points at the edge it enters from. Other presets: `0° = right`, increasing **counter-clockwise** → `90° = top`.
+- **Distances** use `{ value, unit }` with unit ∈ `px | em | rem | vh | vw | vmin | vmax | percentage`. Strings like `'120px'` also parse. Entrance movement lengths are `travel`.
 
 ---
 
@@ -61,27 +61,27 @@ produces silently-wrong output. Never invent a `type`.
 For per-char or per-word text entrances, use the `$splitText` plugin to split
 text into spans, then stagger them with a sequence — see `plugins.md`.
 
-| Preset       | Params (default)                                                                                              | Look                                    |
-| :----------- | :------------------------------------------------------------------------------------------------------------ | :-------------------------------------- |
-| `FadeIn`     | —                                                                                                             | transparent → opaque                    |
-| `GlideIn`    | `direction` 0–360 \| cardinal (`180`/left), `distance` (`{100,'percentage'}`)                                 | glides in from off-screen — **no fade** |
-| `SlideIn`    | `direction` cardinal (`'left'`), `initialTranslate` 0–1 (`1`)                                                 | slides in behind a clip mask            |
-| `FloatIn`    | `direction` cardinal (`'left'`)                                                                               | gentle drift + fade                     |
-| `RevealIn`   | `direction` cardinal (`'left'`)                                                                               | clip-path reveal from an edge           |
-| `ExpandIn`   | `initialScale` (`0`), `direction` number\|cardinal (`90`), `distance` (`{120,'percentage'}`)                  | expands from a point + fade             |
-| `BlurIn`     | `blur` px (`6`)                                                                                               | blurred → sharp + fade                  |
-| `FlipIn`     | `direction` cardinal (`'top'`), `initialRotate` deg (`90`), `perspective` (`800`)                             | 3D flip into place                      |
-| `ArcIn`      | `direction` cardinal (`'right'`), `depth` (`{200,'px'}`), `perspective` (`800`)                               | swings in along a 3D arc                |
-| `ShuttersIn` | `direction` cardinal (`'right'`), `shutters` (`12`), `staggered` (`true`)                                     | shutter strips open — **no fade**       |
-| `CurveIn`    | `direction` `left\|right\|pseudoLeft\|pseudoRight` (`'right'`), `depth` (`{300,'px'}`), `perspective` (`200`) | 180° swing arc                          |
-| `DropIn`     | `initialScale` (`1.6`)                                                                                        | shrinks from larger to natural size     |
-| `FoldIn`     | `direction` cardinal (`'top'`), `initialRotate` deg (`90`), `perspective` (`800`)                             | unfolds at a hinged edge                |
-| `ShapeIn`    | `shape` `circle\|ellipse\|rectangle\|diamond\|window` (`'rectangle'`)                                         | expanding clip-path shape               |
-| `TiltIn`     | `direction` `left\|right` (`'left'`), `depth` (`{200,'px'}`), `perspective` (`800`)                           | 3D tilt + clip reveal                   |
-| `WinkIn`     | `direction` `horizontal\|vertical` (`'horizontal'`)                                                           | expands from the center axis            |
-| `SpinIn`     | `spins` (`0.5`), `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `initialScale` (`0`)             | spins + scales in                       |
-| `TurnIn`     | `direction` corner (`'top-left'`)                                                                             | rotates around a corner pivot           |
-| `BounceIn`   | `direction` cardinal\|`center` (`'bottom'`), `distanceFactor` (`1`), `perspective` (`800`)                    | elastic bounce in                       |
+| Preset       | Params (default)                                                                             | Look                                    |
+| :----------- | :------------------------------------------------------------------------------------------- | :-------------------------------------- |
+| `FadeIn`     | —                                                                                            | transparent → opaque                    |
+| `GlideIn`    | `from` 0–360 \| cardinal (`180`/left), `travel` (`{100,'percentage'}`)                       | glides in from off-screen — **no fade** |
+| `SlideIn`    | `from` cardinal (`'left'`), `start` 0–1 (`0`)                                                | slides in behind a clip mask            |
+| `FloatIn`    | `from` cardinal (`'left'`)                                                                   | gentle drift + fade                     |
+| `RevealIn`   | `from` cardinal (`'left'`)                                                                   | clip-path reveal from an edge           |
+| `ExpandIn`   | `scale` 0–1 (`0`), `from` number\|cardinal (`270`/top), `travel` (`{120,'percentage'}`)      | expands from a point + fade             |
+| `BlurIn`     | `blur` px (`6`)                                                                              | blurred → sharp + fade                  |
+| `FlipIn`     | `direction` `horizontal\|vertical` (`'vertical'`), `angle` deg (`90`), `perspective` (`800`) | 3D flip into place                      |
+| `ArcIn`      | `from` cardinal (`'right'`), `depth` (`{100,'px'}`), `perspective` (`800`)                   | swings in along a 3D arc                |
+| `ShuttersIn` | `from` cardinal (`'left'`), `shutters` (`12`), `staggered` (`true`)                          | shutter strips open — **no fade**       |
+| `CurveIn`    | `from` cardinal (`'right'`), `depth` (`{900,'px'}`), `perspective` (`200`)                   | 180° swing arc                          |
+| `DropIn`     | `scale` ≥1 (`1.6`)                                                                           | shrinks from larger to natural size     |
+| `FoldIn`     | `pivot` cardinal (`'top'`), `angle` deg (`-90`), `perspective` (`800`)                       | unfolds at a hinged edge                |
+| `ShapeIn`    | `shape` `circle\|ellipse\|rectangle\|diamond\|window` (`'rectangle'`)                        | expanding clip-path shape               |
+| `TiltIn`     | `from` `left\|right` (`'left'`), `depth` (`{100,'px'}`), `perspective` (`800`)               | 3D tilt + clip reveal                   |
+| `WinkIn`     | `direction` `horizontal\|vertical` (`'horizontal'`)                                          | expands from the center axis            |
+| `SpinIn`     | `spins` (`0.5`), `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `scale` (`0`)   | spins + scales in                       |
+| `TurnIn`     | `pivot` corner (`'top-left'`)                                                                | rotates around a corner pivot           |
+| `BounceIn`   | `from` cardinal\|`back` (`'bottom'`), `travel` (`{50,'px'}`), `perspective` (`800`)          | elastic bounce in                       |
 
 ---
 

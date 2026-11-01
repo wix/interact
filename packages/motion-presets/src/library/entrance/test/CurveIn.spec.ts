@@ -20,11 +20,11 @@ describe('CurveIn', () => {
           keyframes: [
             {
               transform:
-                'perspective(200px) translateZ(calc(300px * -3)) rotateX(0deg) rotateY(180deg) translateZ(calc(300px * 3)) rotateZ(var(--motion-rotate, 0deg))',
+                'perspective(200px) translateZ(calc(-1 * 900px)) rotateX(0deg) rotateY(180deg) translateZ(900px) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(200px) translateZ(calc(300px * -3)) rotateX(0deg) rotateY(0deg) translateZ(calc(300px * 3)) rotateZ(var(--motion-rotate, 0deg))',
+                'perspective(200px) translateZ(calc(-1 * 900px)) rotateX(0deg) rotateY(0deg) translateZ(900px) rotateZ(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -39,11 +39,11 @@ describe('CurveIn', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('CurveIn animation with left direction', () => {
+    test('CurveIn animation from left', () => {
       const duration = 1500;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as CurveInType,
+        namedEffect: { from: 'left' } as CurveInType,
         duration,
       };
 
@@ -53,11 +53,11 @@ describe('CurveIn', () => {
           keyframes: [
             {
               transform:
-                'perspective(200px) translateZ(calc(300px * -3)) rotateX(0deg) rotateY(-180deg) translateZ(calc(300px * 3)) rotateZ(var(--motion-rotate, 0deg))',
+                'perspective(200px) translateZ(calc(-1 * 900px)) rotateX(0deg) rotateY(-180deg) translateZ(900px) rotateZ(var(--motion-rotate, 0deg))',
             },
             {
               transform:
-                'perspective(200px) translateZ(calc(300px * -3)) rotateX(0deg) rotateY(0deg) translateZ(calc(300px * 3)) rotateZ(var(--motion-rotate, 0deg))',
+                'perspective(200px) translateZ(calc(-1 * 900px)) rotateX(0deg) rotateY(0deg) translateZ(900px) rotateZ(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -115,11 +115,11 @@ describe('CurveIn', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('CurveIn style with left direction', () => {
+    test('CurveIn style from left', () => {
       const duration = 1500;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { direction: 'left' } as CurveInType,
+        namedEffect: { from: 'left' } as CurveInType,
         duration,
       };
 

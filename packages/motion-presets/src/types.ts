@@ -38,6 +38,7 @@ import type {
   UnitLengthPercentage,
   WebAnimationEffectFactory,
 } from '@wix/motion';
+import type { LengthInput } from './utils';
 
 export type Translate = { x: string; y: string };
 export type ShapeType = 'circle' | 'ellipse' | 'rectangle' | 'diamond' | 'window';
@@ -58,61 +59,61 @@ export type OffsetByDirectionParams = HorizontalOffsetByDirectionParams &
 export type FadeIn = { type: 'FadeIn' };
 export type ArcIn = {
   type: 'ArcIn';
-  direction?: EffectFourDirections;
-  depth?: UnitLengthPercentage;
+  from?: EffectFourDirections;
+  depth?: LengthInput;
   perspective?: number;
 };
 export type CurveIn = {
   type: 'CurveIn';
-  direction?: 'left' | 'right' | 'pseudoLeft' | 'pseudoRight';
-  depth?: UnitLengthPercentage;
+  from?: EffectFourDirections;
+  depth?: LengthInput;
   perspective?: number;
 };
 export type DropIn = {
   type: 'DropIn';
-  initialScale?: number;
+  scale?: number;
 };
 export type FlipIn = {
   type: 'FlipIn';
-  direction?: EffectFourDirections;
-  initialRotate?: number;
+  direction?: 'vertical' | 'horizontal';
+  angle?: number;
   perspective?: number;
 };
 export type FloatIn = {
   type: 'FloatIn';
-  direction?: EffectFourDirections;
+  from?: EffectFourDirections;
 };
 export type FoldIn = {
   type: 'FoldIn';
-  direction?: EffectFourDirections;
-  initialRotate?: number;
+  pivot?: EffectFourDirections;
+  angle?: number;
   perspective?: number;
 };
 export type SlideIn = {
   type: 'SlideIn';
-  direction?: EffectFourDirections;
-  initialTranslate?: number;
+  from?: EffectFourDirections;
+  start?: number;
 };
 export type SpinIn = {
   type: 'SpinIn';
   spins?: number;
   direction?: 'clockwise' | 'counter-clockwise';
-  initialScale?: number;
+  scale?: number;
 };
 export type BounceIn = {
   type: 'BounceIn';
-  direction?: EffectFourDirections | 'center';
-  distanceFactor?: number;
+  from?: EffectFourDirections | 'back';
+  travel?: LengthInput;
   perspective?: number;
 };
 export type GlideIn = {
   type: 'GlideIn';
-  direction?: number;
-  distance?: UnitLengthPercentage | EffectFourDirections;
+  from?: number | string;
+  travel?: LengthInput;
 };
 export type TurnIn = {
   type: 'TurnIn';
-  direction?: EffectFourCorners;
+  pivot?: EffectFourCorners;
 };
 export type WinkIn = {
   type: 'WinkIn';
@@ -120,8 +121,8 @@ export type WinkIn = {
 };
 export type TiltIn = {
   type: 'TiltIn';
-  direction?: EffectTwoSides;
-  depth?: UnitLengthPercentage;
+  from?: EffectTwoSides;
+  depth?: LengthInput;
   perspective?: number;
 };
 export type ShapeIn = {
@@ -131,13 +132,13 @@ export type ShapeIn = {
 
 export type ShuttersIn = {
   type: 'ShuttersIn';
-  direction?: EffectFourDirections;
+  from?: EffectFourDirections;
   shutters?: number;
   staggered?: boolean;
 };
 export type RevealIn = {
   type: 'RevealIn';
-  direction?: EffectFourDirections;
+  from?: EffectFourDirections;
 };
 export type BlurIn = {
   type: 'BlurIn';
@@ -146,9 +147,9 @@ export type BlurIn = {
 
 export type ExpandIn = {
   type: 'ExpandIn';
-  direction?: number | string;
-  distance?: UnitLengthPercentage;
-  initialScale?: number;
+  from?: number | string;
+  travel?: LengthInput;
+  scale?: number;
 };
 
 export type EntranceAnimation =

@@ -417,6 +417,70 @@ export type LengthInput =
   | undefined;
 
 const CSS_UNIT_REGEX = /^(-?\d*\.?\d+)(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/i;
+const CSS_CALC_REGEX = /^calc\(.*\)$/i;
+const CSS_ANGLE_REGEX = /^(-?\d*\.?\d+)(deg|rad|grad|turn)$/i;
+const SIDE_ANGLES: Record<string, number> = { top: 270, right: 0, bottom: 90, left: 180 };
+
+function isCssNumeric(value: string) {
+  try {
+    return !!globalThis.CSSNumericValue?.parse(value);
+  } catch {
+    return false;
+  }
+}
+
+export function parseAngle(input: number | string | undefined, defaultValue: number) {
+  if (typeof input === 'number') {
+    return `${input}deg`;
+  }
+
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    const side = trimmed.toLowerCase();
+    if (Object.hasOwn(SIDE_ANGLES, side)) {
+      return `${SIDE_ANGLES[side]}deg`;
+    }
+    if (trimmed && !isNaN(Number(trimmed))) {
+      return `${Number(trimmed)}deg`;
+    }
+    if (CSS_ANGLE_REGEX.test(trimmed) || CSS_CALC_REGEX.test(trimmed) || isCssNumeric(trimmed)) {
+      return trimmed;
+    }
+  }
+
+  return `${defaultValue}deg`;
+}
+
+export function parseCssLength(input: LengthInput, defaultValue: LengthValue) {
+  const parsedLength = { ...defaultValue };
+
+  if (typeof input === 'number') {
+    parsedLength.value = input;
+  }
+
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    if (trimmed && !isNaN(Number(trimmed))) {
+      parsedLength.value = Number(trimmed);
+    } else if (
+      CSS_CALC_REGEX.test(trimmed) ||
+      CSS_UNIT_REGEX.test(trimmed) ||
+      isCssNumeric(trimmed)
+    ) {
+      return trimmed;
+    }
+  }
+
+  if (typeof input === 'object' && input !== null && 'value' in input && 'unit' in input) {
+    const value = typeof input.value === 'string' ? parseFloat(input.value) : input.value;
+    if (typeof value === 'number' && !isNaN(value) && typeof input.unit === 'string') {
+      parsedLength.value = value;
+      parsedLength.unit = input.unit.toLowerCase();
+    }
+  }
+
+  return `${parsedLength.value}${getCssUnits(parsedLength.unit)}`;
+}
 
 /**
  * Normalize unit string to internal format

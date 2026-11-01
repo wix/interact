@@ -45,10 +45,10 @@ describe('SlideIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('SlideIn animation with custom direction', () => {
+  test('SlideIn animation with custom from', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'right', initialTranslate: 1 } as SlideInType,
+      namedEffect: { from: 'right', start: 0 } as SlideInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -125,10 +125,10 @@ describe('SlideIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('SlideIn style with custom direction', () => {
+  test('SlideIn style with custom from', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'right', initialTranslate: 1 } as SlideInType,
+      namedEffect: { from: 'right', start: 0 } as SlideInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
