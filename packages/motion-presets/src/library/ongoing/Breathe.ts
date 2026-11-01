@@ -7,7 +7,7 @@ import {
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
-  parseLengthLazy,
+  parseCssLength,
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
@@ -53,7 +53,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Breathe;
   const direction = parseDirection(namedEffect?.direction, DIRECTIONS, DEFAULTS.direction);
-  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
   const { perspective = DEFAULTS.perspective } = namedEffect;
 
   const easing = options.easing || DEFAULT_EASING;

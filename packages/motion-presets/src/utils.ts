@@ -406,7 +406,25 @@ const CSS_CALC_REGEX = /^calc\(.*\)$/;
 const CSS_ANGLE_REGEX = /^(-?\d*\.?\d+)(deg|rad|grad|turn)$/;
 const SIDE_ANGLES: Record<string, number> = { top: 270, right: 0, bottom: 90, left: 180 };
 
-export function parseAngleLazy(input: number | string | undefined, defaultValue: number) {
+function isNumericOfType(value: string, types: (keyof CSSNumericType)[]) {
+  if (typeof CSSNumericValue === 'undefined') {
+    return false;
+  }
+  try {
+    const nonZero = Object.entries(CSSNumericValue.parse(value).type()).filter(
+      ([key, power]) => key !== 'percentHint' && power,
+    );
+    return (
+      nonZero.length === 1 &&
+      nonZero[0][1] === 1 &&
+      types.includes(nonZero[0][0] as keyof CSSNumericType)
+    );
+  } catch {
+    return false;
+  }
+}
+
+export function parseAngle(input: number | string | undefined, defaultValue: number) {
   if (typeof input === 'number') {
     return `${input}deg`;
   }
@@ -416,7 +434,11 @@ export function parseAngleLazy(input: number | string | undefined, defaultValue:
     if (Object.hasOwn(SIDE_ANGLES, trimmed)) {
       return `${SIDE_ANGLES[trimmed]}deg`;
     }
-    if (CSS_ANGLE_REGEX.test(trimmed) || CSS_CALC_REGEX.test(trimmed)) {
+    if (
+      CSS_ANGLE_REGEX.test(trimmed) ||
+      CSS_CALC_REGEX.test(trimmed) ||
+      isNumericOfType(trimmed, ['angle'])
+    ) {
       return trimmed;
     }
     if (trimmed && !isNaN(Number(trimmed))) {
@@ -427,7 +449,7 @@ export function parseAngleLazy(input: number | string | undefined, defaultValue:
   return `${defaultValue}deg`;
 }
 
-export function parseLengthLazy(input: LengthInput, defaultValue: LengthValue) {
+export function parseCssLength(input: LengthInput, defaultValue: LengthValue) {
   const parsedLength = { ...defaultValue };
 
   if (typeof input === 'number') {
@@ -436,7 +458,11 @@ export function parseLengthLazy(input: LengthInput, defaultValue: LengthValue) {
 
   if (typeof input === 'string') {
     const trimmed = input.trim().toLowerCase();
-    if (CSS_CALC_REGEX.test(trimmed) || CSS_UNIT_REGEX.test(trimmed)) {
+    if (
+      CSS_CALC_REGEX.test(trimmed) ||
+      CSS_UNIT_REGEX.test(trimmed) ||
+      isNumericOfType(trimmed, ['length', 'percent'])
+    ) {
       return trimmed;
     }
     if (trimmed && !isNaN(Number(trimmed))) {

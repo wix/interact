@@ -4,7 +4,7 @@ import {
   getTimingFactor,
   roundNumber,
   toKeyframeValue,
-  parseLengthLazy,
+  parseCssLength,
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
@@ -37,7 +37,7 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Wiggle;
   const { angle = DEFAULTS.angle } = namedEffect;
-  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || 0;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
