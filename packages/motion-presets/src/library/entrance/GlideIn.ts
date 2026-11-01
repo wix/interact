@@ -2,8 +2,8 @@ import type { TimeAnimationOptions, GlideIn } from '../../types';
 import type { LengthValue } from '../../utils';
 import {
   toKeyframeValue,
-  parseLengthLazy,
-  parseAngleLazy,
+  parseCssLength,
+  parseAngle,
   getEntranceFill,
   suffixNames,
   suffixCustomProperties,
@@ -31,8 +31,8 @@ export function web(options: TimeAnimationOptions) {
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as GlideIn;
 
-  const from = parseAngleLazy(namedEffect?.from, DEFAULTS.from as number);
-  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const from = parseAngle(namedEffect?.from, DEFAULTS.from as number);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
 
   const easing = options.easing || 'quintInOut';
 

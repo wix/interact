@@ -2,7 +2,7 @@ import {
   getClipPolygonParams,
   toKeyframeValue,
   parseDirection,
-  parseLengthLazy,
+  parseCssLength,
   getEntranceFill,
   suffixNames,
   suffixCustomProperties,
@@ -40,7 +40,7 @@ export function web(options: TimeAnimationOptions) {
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as TiltIn;
   const from = parseDirection(namedEffect?.from, TWO_SIDES_DIRECTIONS, DEFAULTS.from);
-  const depth = parseLengthLazy(namedEffect.depth, DEFAULTS.depth as LengthValue);
+  const depth = parseCssLength(namedEffect.depth, DEFAULTS.depth as LengthValue);
   const { perspective = DEFAULTS.perspective } = namedEffect;
   const [fadeIn, tiltInRotate, tiltInClip] = getNames(options);
 

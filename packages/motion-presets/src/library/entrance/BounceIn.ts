@@ -3,7 +3,7 @@ import {
   getEasing,
   toKeyframeValue,
   parseDirection,
-  parseLengthLazy,
+  parseCssLength,
   getEntranceFill,
   suffixNames,
   suffixCustomProperties,
@@ -60,7 +60,7 @@ export function web(options: TimeAnimationOptions) {
 export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as BounceIn;
   const from = parseDirection(namedEffect?.from, DIRECTIONS, DEFAULTS.from);
-  const travel = parseLengthLazy(namedEffect?.travel, DEFAULTS.travel as LengthValue);
+  const travel = parseCssLength(namedEffect?.travel, DEFAULTS.travel as LengthValue);
   const { perspective = DEFAULTS.perspective } = namedEffect || {};
   const [fadeIn, bounceIn] = getNames(options);
   const perspectiveValue = from === 'back' ? `perspective(${perspective}px)` : ' ';

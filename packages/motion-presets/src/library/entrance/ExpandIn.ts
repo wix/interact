@@ -2,8 +2,8 @@ import type { TimeAnimationOptions } from '../../types';
 import type { LengthValue } from '../../utils';
 import {
   toKeyframeValue,
-  parseLengthLazy,
-  parseAngleLazy,
+  parseCssLength,
+  parseAngle,
   getEntranceFill,
   suffixNames,
   suffixCustomProperties,
@@ -35,9 +35,9 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ExpandIn;
   const { scale = DEFAULTS.scale } = namedEffect;
 
-  const from = parseAngleLazy(namedEffect?.from, DEFAULTS.from as number);
+  const from = parseAngle(namedEffect?.from, DEFAULTS.from as number);
 
-  const travel = parseLengthLazy(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
 
   const [fadeIn, expandIn] = getNames(options);
 

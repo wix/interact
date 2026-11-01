@@ -3,7 +3,7 @@ import type { LengthValue } from '../../utils';
 import {
   toKeyframeValue,
   parseDirection,
-  parseLengthLazy,
+  parseCssLength,
   getEntranceFill,
   suffixNames,
   suffixCustomProperties,
@@ -44,7 +44,7 @@ export function style(options: TimeAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ArcIn;
   const from = parseDirection(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from);
 
-  const depth = parseLengthLazy(namedEffect.depth, DEFAULTS.depth as LengthValue);
+  const depth = parseCssLength(namedEffect.depth, DEFAULTS.depth as LengthValue);
   const { perspective = DEFAULTS.perspective } = namedEffect;
   const [fadeIn, arcIn] = getNames(options);
 
