@@ -26,11 +26,11 @@ describe('Spin', () => {
             {
               offset: 0,
               easing: 'linear',
-              rotate: 'calc(var(--motion-rotate, 0deg) + -360deg)',
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + -360deg))',
             },
             {
               offset: 1,
-              rotate: 'var(--motion-rotate, 0deg)',
+              transform: 'rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -52,7 +52,7 @@ describe('Spin', () => {
 
       const expectedResult: Partial<AnimationData>[] = [
         {
-          name: 'motion-spin-067',
+          name: 'motion-spin-067-quintInOut',
           easing: 'linear',
           namedEffect: { iterationDelay: 500 } as Spin,
           duration: 1500,
@@ -63,11 +63,11 @@ describe('Spin', () => {
             {
               offset: 0,
               easing: 'cubic-bezier(0.86, 0, 0.07, 1)',
-              rotate: 'calc(var(--motion-rotate, 0deg) + -360deg)',
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + -360deg))',
             },
             {
               offset: 0.67,
-              rotate: 'var(--motion-rotate, 0deg)',
+              transform: 'rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -95,11 +95,11 @@ describe('Spin', () => {
             {
               offset: 0,
               easing: 'linear',
-              rotate: 'calc(var(--motion-rotate, 0deg) + 360deg)',
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 360deg))',
             },
             {
               offset: 1,
-              rotate: 'var(--motion-rotate, 0deg)',
+              transform: 'rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -132,11 +132,11 @@ describe('Spin', () => {
             {
               offset: 0,
               easing: 'linear',
-              rotate: 'var(--motion-rotate-start)',
+              transform: 'rotate(var(--motion-rotate-start))',
             },
             {
               offset: 1,
-              rotate: 'var(--motion-rotate, 0deg)',
+              transform: 'rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -168,11 +168,11 @@ describe('Spin', () => {
             {
               offset: 0,
               easing: 'linear',
-              rotate: 'var(--motion-rotate-start)',
+              transform: 'rotate(var(--motion-rotate-start))',
             },
             {
               offset: 0.8, // duration / (duration + delay)
-              rotate: 'var(--motion-rotate, 0deg)',
+              transform: 'rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },
@@ -200,11 +200,11 @@ describe('Spin', () => {
             {
               offset: 0,
               easing: 'linear',
-              rotate: 'var(--motion-rotate-start)',
+              transform: 'rotate(var(--motion-rotate-start))',
             },
             {
               offset: 1,
-              rotate: 'var(--motion-rotate, 0deg)',
+              transform: 'rotate(var(--motion-rotate, 0deg))',
             },
           ],
         },

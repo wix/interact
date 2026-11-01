@@ -129,21 +129,21 @@ Run with `iterations: Infinity` (or large) for a perpetual loop, or attach to a
 trigger. **All accept `iterationDelay`** (ms, default `0`) inside `namedEffect` — an
 idle pause appended after each cycle.
 
-| Preset    | Params (default)                                                                                           |
-| :-------- | :--------------------------------------------------------------------------------------------------------- |
-| `Pulse`   | `intensity` 0–1 (`0`)                                                                                      |
-| `Spin`    | `direction` `clockwise\|counter-clockwise` (`'clockwise'`)                                                 |
-| `Breathe` | `direction` `vertical\|horizontal\|center` (`'vertical'`), `distance` (`{25,'px'}`), `perspective` (`800`) |
-| `Bounce`  | `intensity` 0–1 (`0`)                                                                                      |
-| `Wiggle`  | `intensity` 0–1 (`0.5`)                                                                                    |
-| `Flash`   | — (only `iterationDelay`)                                                                                  |
-| `Flip`    | `direction` `vertical\|horizontal` (`'horizontal'`), `perspective` (`800`)                                 |
-| `Fold`    | `direction` cardinal (`'top'`), `angle` deg (`15`)                                                         |
-| `Jello`   | `intensity` 0–1 (`0.25`)                                                                                   |
-| `Poke`    | `direction` cardinal (`'right'`), `intensity` 0–1 (`0.5`)                                                  |
-| `Rubber`  | `intensity` 0–1 (`0.5`)                                                                                    |
-| `Swing`   | `direction` cardinal pivot (`'top'`), `swing` deg (`20`)                                                   |
-| `Cross`   | `direction` 8-way (`'right'`)                                                                              |
+| Preset    | Params (default)                                                                                         |
+| :-------- | :------------------------------------------------------------------------------------------------------- |
+| `Pulse`   | `scale` (`0.93`)                                                                                         |
+| `Spin`    | `direction` `clockwise\|counter-clockwise` (`'clockwise'`)                                               |
+| `Breathe` | `direction` `vertical\|horizontal\|center` (`'vertical'`), `travel` (`{25,'px'}`), `perspective` (`800`) |
+| `Bounce`  | `travel` (`{49,'px'}`)                                                                                   |
+| `Wiggle`  | `angle` deg (`25`), `travel` (`{25,'px'}`)                                                               |
+| `Flash`   | — (only `iterationDelay`)                                                                                |
+| `Flip`    | `direction` `vertical\|horizontal` (`'horizontal'`), `perspective` (`800`)                               |
+| `Fold`    | `pivot` cardinal (`'top'`), `angle` deg (`15`), `perspective` (`800`)                                    |
+| `Jello`   | `skew` deg (`12.25`)                                                                                     |
+| `Poke`    | `direction` cardinal (`'right'`), `travel` (`{62.5,'px'}`)                                               |
+| `Rubber`  | `stretch` -1–1 (`0.1`)                                                                                   |
+| `Swing`   | `pivot` cardinal (`'top'`), `angle` deg (`20`)                                                           |
+| `Cross`   | `direction` 8-way (`'right'`)                                                                            |
 
 ---
 

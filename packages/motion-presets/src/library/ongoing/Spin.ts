@@ -1,6 +1,7 @@
 import type { AnimationExtraOptions, DomApi, Spin, TimeAnimationOptions } from '../../types';
 import {
   getEasing,
+  getEasingName,
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
@@ -9,7 +10,18 @@ import {
 } from '../../utils';
 import { SPIN_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
+const DEFAULT_EASING = 'linear';
+
+const DEFAULTS: Required<Spin> = {
+  type: 'Spin',
+  direction: 'clockwise',
+  iterationDelay: 0,
+};
+
+export const schema = {
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: DEFAULTS.direction },
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+};
 
 const DIRECTION_MAP = {
   clockwise: -1,
@@ -22,14 +34,14 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Spin;
-  const direction = parseDirection(namedEffect?.direction, SPIN_DIRECTIONS, DEFAULT_DIRECTION);
+  const direction = parseDirection(namedEffect?.direction, SPIN_DIRECTIONS, DEFAULTS.direction);
 
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || 0;
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const easing = options.easing || 'linear';
+  const easing = options.easing || DEFAULT_EASING;
 
   const transformRotate = (DIRECTION_MAP[direction] > 0 ? 1 : -1) * 360;
 
@@ -48,11 +60,11 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
         {
           offset: 0,
           easing: getEasing(easing),
-          rotate: toKeyframeValue(custom, '--motion-rotate-start', asWeb),
+          transform: `rotate(${toKeyframeValue(custom, '--motion-rotate-start', asWeb)})`,
         },
         {
           offset: timingFactor,
-          rotate: `var(--motion-rotate, 0deg)`,
+          transform: 'rotate(var(--motion-rotate, 0deg))',
         },
       ],
     },
@@ -65,5 +77,8 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
   const iterationDelay = (options.namedEffect as Spin)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return suffixNames([`motion-spin-${timingFactor}`], options.suffix);
+  return suffixNames(
+    [`motion-spin-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
+    options.suffix,
+  );
 }

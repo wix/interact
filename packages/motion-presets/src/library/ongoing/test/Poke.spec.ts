@@ -19,37 +19,38 @@ describe('Poke', () => {
           name: 'motion-poke-1',
           duration: 1000,
           custom: {
-            '--motion-translate-x': 2.5,
+            '--motion-translate-x': 1,
             '--motion-translate-y': 0,
+            '--motion-travel': '62.5px',
           },
           keyframes: [
             {
               offset: 0.17,
-              translate: 'calc(2.5 * 7px) calc(0 * 7px)',
+              translate: 'calc(1 * 62.5px * 7 / 25) calc(0 * 62.5px * 7 / 25)',
             },
             {
               offset: 0.32,
-              translate: 'calc(2.5 * 25px) calc(0 * 25px)',
+              translate: 'calc(1 * 62.5px * 25 / 25) calc(0 * 62.5px * 25 / 25)',
             },
             {
               offset: 0.48,
-              translate: 'calc(2.5 * 8px) calc(0 * 8px)',
+              translate: 'calc(1 * 62.5px * 8 / 25) calc(0 * 62.5px * 8 / 25)',
             },
             {
               offset: 0.56,
-              translate: 'calc(2.5 * 11px) calc(0 * 11px)',
+              translate: 'calc(1 * 62.5px * 11 / 25) calc(0 * 62.5px * 11 / 25)',
             },
             {
               offset: 0.66,
-              translate: 'calc(2.5 * 25px) calc(0 * 25px)',
+              translate: 'calc(1 * 62.5px * 25 / 25) calc(0 * 62.5px * 25 / 25)',
             },
             {
               offset: 0.83,
-              translate: 'calc(2.5 * 4px) calc(0 * 4px)',
+              translate: 'calc(1 * 62.5px * 4 / 25) calc(0 * 62.5px * 4 / 25)',
             },
             {
               offset: 1,
-              translate: 'calc(2.5 * 0px) calc(0 * 0px)',
+              translate: 'calc(1 * 62.5px * 0 / 25) calc(0 * 62.5px * 0 / 25)',
             },
           ],
         },
@@ -73,8 +74,9 @@ describe('Poke', () => {
       expect(result[0].name).toBe('motion-poke-067');
       expect(result[0].duration).toBe(1500);
       expect(result[0].custom).toEqual({
-        '--motion-translate-x': 2.5,
+        '--motion-translate-x': 1,
         '--motion-translate-y': 0,
+        '--motion-travel': '62.5px',
       });
       expect(result[0].keyframes).toHaveLength(7);
       // Check approximate offset values due to floating point precision
@@ -82,20 +84,24 @@ describe('Poke', () => {
       expect(result[0].keyframes[6].offset).toBeCloseTo(0.67, 2);
     });
 
-    test('Poke animation with custom intensity', () => {
+    test('Poke animation with custom travel', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
-        namedEffect: { intensity: 0.8 } as Poke,
+        namedEffect: { travel: { value: 85, unit: 'px' } } as Poke,
       };
 
       const result = PokeAnimation.web(mockOptions);
 
       expect(result[0].name).toBe('motion-poke-1');
-      // Check the intensity calculation with tolerance for floating point precision
-      expect(result[0].custom!['--motion-translate-x']).toBeCloseTo(3.4, 1);
-      expect(result[0].custom!['--motion-translate-y']).toBe(0);
-      expect(result[0].keyframes[0].translate).toContain('3.4');
+      expect(result[0].custom).toEqual({
+        '--motion-translate-x': 1,
+        '--motion-translate-y': 0,
+        '--motion-travel': '85px',
+      });
+      expect(result[0].keyframes[0].translate).toBe(
+        'calc(1 * 85px * 7 / 25) calc(0 * 85px * 7 / 25)',
+      );
     });
 
     test('Poke animation with custom direction - top', () => {
@@ -110,36 +116,37 @@ describe('Poke', () => {
           name: 'motion-poke-1',
           custom: {
             '--motion-translate-x': 0,
-            '--motion-translate-y': -2.5,
+            '--motion-translate-y': -1,
+            '--motion-travel': '62.5px',
           },
           keyframes: [
             {
               offset: 0.17,
-              translate: 'calc(0 * 7px) calc(-2.5 * 7px)',
+              translate: 'calc(0 * 62.5px * 7 / 25) calc(-1 * 62.5px * 7 / 25)',
             },
             {
               offset: 0.32,
-              translate: 'calc(0 * 25px) calc(-2.5 * 25px)',
+              translate: 'calc(0 * 62.5px * 25 / 25) calc(-1 * 62.5px * 25 / 25)',
             },
             {
               offset: 0.48,
-              translate: 'calc(0 * 8px) calc(-2.5 * 8px)',
+              translate: 'calc(0 * 62.5px * 8 / 25) calc(-1 * 62.5px * 8 / 25)',
             },
             {
               offset: 0.56,
-              translate: 'calc(0 * 11px) calc(-2.5 * 11px)',
+              translate: 'calc(0 * 62.5px * 11 / 25) calc(-1 * 62.5px * 11 / 25)',
             },
             {
               offset: 0.66,
-              translate: 'calc(0 * 25px) calc(-2.5 * 25px)',
+              translate: 'calc(0 * 62.5px * 25 / 25) calc(-1 * 62.5px * 25 / 25)',
             },
             {
               offset: 0.83,
-              translate: 'calc(0 * 4px) calc(-2.5 * 4px)',
+              translate: 'calc(0 * 62.5px * 4 / 25) calc(-1 * 62.5px * 4 / 25)',
             },
             {
               offset: 1,
-              translate: 'calc(0 * 0px) calc(-2.5 * 0px)',
+              translate: 'calc(0 * 62.5px * 0 / 25) calc(-1 * 62.5px * 0 / 25)',
             },
           ],
         },
@@ -162,36 +169,37 @@ describe('Poke', () => {
           name: 'motion-poke-1',
           custom: {
             '--motion-translate-x': 0,
-            '--motion-translate-y': 2.5,
+            '--motion-translate-y': 1,
+            '--motion-travel': '62.5px',
           },
           keyframes: [
             {
               offset: 0.17,
-              translate: 'calc(0 * 7px) calc(2.5 * 7px)',
+              translate: 'calc(0 * 62.5px * 7 / 25) calc(1 * 62.5px * 7 / 25)',
             },
             {
               offset: 0.32,
-              translate: 'calc(0 * 25px) calc(2.5 * 25px)',
+              translate: 'calc(0 * 62.5px * 25 / 25) calc(1 * 62.5px * 25 / 25)',
             },
             {
               offset: 0.48,
-              translate: 'calc(0 * 8px) calc(2.5 * 8px)',
+              translate: 'calc(0 * 62.5px * 8 / 25) calc(1 * 62.5px * 8 / 25)',
             },
             {
               offset: 0.56,
-              translate: 'calc(0 * 11px) calc(2.5 * 11px)',
+              translate: 'calc(0 * 62.5px * 11 / 25) calc(1 * 62.5px * 11 / 25)',
             },
             {
               offset: 0.66,
-              translate: 'calc(0 * 25px) calc(2.5 * 25px)',
+              translate: 'calc(0 * 62.5px * 25 / 25) calc(1 * 62.5px * 25 / 25)',
             },
             {
               offset: 0.83,
-              translate: 'calc(0 * 4px) calc(2.5 * 4px)',
+              translate: 'calc(0 * 62.5px * 4 / 25) calc(1 * 62.5px * 4 / 25)',
             },
             {
               offset: 1,
-              translate: 'calc(0 * 0px) calc(2.5 * 0px)',
+              translate: 'calc(0 * 62.5px * 0 / 25) calc(1 * 62.5px * 0 / 25)',
             },
           ],
         },
@@ -213,37 +221,38 @@ describe('Poke', () => {
         {
           name: 'motion-poke-1',
           custom: {
-            '--motion-translate-x': -2.5,
+            '--motion-translate-x': -1,
             '--motion-translate-y': 0,
+            '--motion-travel': '62.5px',
           },
           keyframes: [
             {
               offset: 0.17,
-              translate: 'calc(-2.5 * 7px) calc(0 * 7px)',
+              translate: 'calc(-1 * 62.5px * 7 / 25) calc(0 * 62.5px * 7 / 25)',
             },
             {
               offset: 0.32,
-              translate: 'calc(-2.5 * 25px) calc(0 * 25px)',
+              translate: 'calc(-1 * 62.5px * 25 / 25) calc(0 * 62.5px * 25 / 25)',
             },
             {
               offset: 0.48,
-              translate: 'calc(-2.5 * 8px) calc(0 * 8px)',
+              translate: 'calc(-1 * 62.5px * 8 / 25) calc(0 * 62.5px * 8 / 25)',
             },
             {
               offset: 0.56,
-              translate: 'calc(-2.5 * 11px) calc(0 * 11px)',
+              translate: 'calc(-1 * 62.5px * 11 / 25) calc(0 * 62.5px * 11 / 25)',
             },
             {
               offset: 0.66,
-              translate: 'calc(-2.5 * 25px) calc(0 * 25px)',
+              translate: 'calc(-1 * 62.5px * 25 / 25) calc(0 * 62.5px * 25 / 25)',
             },
             {
               offset: 0.83,
-              translate: 'calc(-2.5 * 4px) calc(0 * 4px)',
+              translate: 'calc(-1 * 62.5px * 4 / 25) calc(0 * 62.5px * 4 / 25)',
             },
             {
               offset: 1,
-              translate: 'calc(-2.5 * 0px) calc(0 * 0px)',
+              translate: 'calc(-1 * 62.5px * 0 / 25) calc(0 * 62.5px * 0 / 25)',
             },
           ],
         },
@@ -269,44 +278,45 @@ describe('Poke', () => {
           name: 'motion-poke-1',
           duration: 1000,
           custom: {
-            '--motion-translate-x': 2.5,
+            '--motion-translate-x': 1,
             '--motion-translate-y': 0,
+            '--motion-travel': '62.5px',
           },
           keyframes: [
             {
               offset: 0.17,
               translate:
-                'calc(var(--motion-translate-x) * 7px) calc(var(--motion-translate-y) * 7px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 7 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 7 / 25)',
             },
             {
               offset: 0.32,
               translate:
-                'calc(var(--motion-translate-x) * 25px) calc(var(--motion-translate-y) * 25px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 25 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 25 / 25)',
             },
             {
               offset: 0.48,
               translate:
-                'calc(var(--motion-translate-x) * 8px) calc(var(--motion-translate-y) * 8px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 8 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 8 / 25)',
             },
             {
               offset: 0.56,
               translate:
-                'calc(var(--motion-translate-x) * 11px) calc(var(--motion-translate-y) * 11px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 11 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 11 / 25)',
             },
             {
               offset: 0.66,
               translate:
-                'calc(var(--motion-translate-x) * 25px) calc(var(--motion-translate-y) * 25px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 25 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 25 / 25)',
             },
             {
               offset: 0.83,
               translate:
-                'calc(var(--motion-translate-x) * 4px) calc(var(--motion-translate-y) * 4px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 4 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 4 / 25)',
             },
             {
               offset: 1,
               translate:
-                'calc(var(--motion-translate-x) * 0px) calc(var(--motion-translate-y) * 0px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 0 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 0 / 25)',
             },
           ],
         },
@@ -330,8 +340,9 @@ describe('Poke', () => {
       expect(result[0].name).toBe('motion-poke-08');
       expect(result[0].duration).toBe(1000);
       expect(result[0].custom).toEqual({
-        '--motion-translate-x': 2.5,
+        '--motion-translate-x': 1,
         '--motion-translate-y': 0,
+        '--motion-travel': '62.5px',
       });
       expect(result[0].keyframes).toHaveLength(7);
       // Check approximate offset values due to floating point precision
@@ -340,7 +351,7 @@ describe('Poke', () => {
       expect(result[0].keyframes[6].offset).toBe(0.8);
     });
 
-    test('Poke.style animation with counter-clockwise direction', () => {
+    test('Poke.style animation with custom direction - top', () => {
       const mockOptions: TimeAnimationOptions = {
         ...baseMockOptions,
         duration: 1000,
@@ -352,43 +363,44 @@ describe('Poke', () => {
           name: 'motion-poke-1',
           custom: {
             '--motion-translate-x': 0,
-            '--motion-translate-y': -2.5,
+            '--motion-translate-y': -1,
+            '--motion-travel': '62.5px',
           },
           keyframes: [
             {
               offset: 0.17,
               translate:
-                'calc(var(--motion-translate-x) * 7px) calc(var(--motion-translate-y) * 7px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 7 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 7 / 25)',
             },
             {
               offset: 0.32,
               translate:
-                'calc(var(--motion-translate-x) * 25px) calc(var(--motion-translate-y) * 25px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 25 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 25 / 25)',
             },
             {
               offset: 0.48,
               translate:
-                'calc(var(--motion-translate-x) * 8px) calc(var(--motion-translate-y) * 8px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 8 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 8 / 25)',
             },
             {
               offset: 0.56,
               translate:
-                'calc(var(--motion-translate-x) * 11px) calc(var(--motion-translate-y) * 11px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 11 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 11 / 25)',
             },
             {
               offset: 0.66,
               translate:
-                'calc(var(--motion-translate-x) * 25px) calc(var(--motion-translate-y) * 25px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 25 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 25 / 25)',
             },
             {
               offset: 0.83,
               translate:
-                'calc(var(--motion-translate-x) * 4px) calc(var(--motion-translate-y) * 4px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 4 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 4 / 25)',
             },
             {
               offset: 1,
               translate:
-                'calc(var(--motion-translate-x) * 0px) calc(var(--motion-translate-y) * 0px)',
+                'calc(var(--motion-translate-x) * var(--motion-travel) * 0 / 25) calc(var(--motion-translate-y) * var(--motion-travel) * 0 / 25)',
             },
           ],
         },
