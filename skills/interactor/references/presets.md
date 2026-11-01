@@ -141,7 +141,7 @@ idle pause appended after each cycle.
 | `Fold`    | `pivot` cardinal (`'top'`), `angle` deg (`15`), `perspective` (`800`)                                    |
 | `Jello`   | `skew` deg (`12.25`)                                                                                     |
 | `Poke`    | `direction` cardinal (`'right'`), `travel` (`{62.5,'px'}`)                                               |
-| `Rubber`  | `stretch` -1–1 (`0.1`)                                                                                   |
+| `Rubber`  | `stretch` ±0.64 (`0.08`)                                                                                 |
 | `Swing`   | `pivot` cardinal (`'top'`), `angle` deg (`20`)                                                           |
 | `Cross`   | `direction` 8-way (`'right'`)                                                                            |
 
