@@ -23,7 +23,7 @@ export const schema = {
 };
 
 const DIRECTION_MAP = {
-  vertical: { x: '1', y: '0' },
+  vertical: { x: '-1', y: '0' },
   horizontal: { x: '0', y: '1' },
 };
 

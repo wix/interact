@@ -41,11 +41,11 @@ const DIRECTION_MAP = {
     origin: { x: 50, y: 0 },
   },
   bottom: {
-    rotation: { x: 1, y: 0 },
+    rotation: { x: -1, y: 0 },
     origin: { x: 0, y: 50 },
   },
   left: {
-    rotation: { x: 0, y: 1 },
+    rotation: { x: 0, y: -1 },
     origin: { x: -50, y: 0 },
   },
 };

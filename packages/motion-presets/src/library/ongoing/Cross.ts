@@ -206,17 +206,15 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, dom?:
         return;
       }
 
-      const { width: targetWidth, height: targetHeight } = target.getBoundingClientRect();
       const parent = target.offsetParent as HTMLElement;
-      const parentRect = parent?.getBoundingClientRect() || ({} as DOMRect);
       const offset = getElementOffset(target, parent);
 
       left = offset.left;
       top = offset.top;
-      width = targetWidth;
-      height = targetHeight;
-      parentWidth = parentRect.width;
-      parentHeight = parentRect.height;
+      width = target.offsetWidth;
+      height = target.offsetHeight;
+      parentWidth = parent?.offsetWidth || 0;
+      parentHeight = parent?.offsetHeight || 0;
     });
 
     dom.mutate((target) => {

@@ -110,7 +110,7 @@ Visual: Element folds at an edge using 3D rotation, like a page turning back and
 Parameters:
 
 - `pivot`: 'top' | 'right' | 'bottom' | 'left' — the folding edge (default: `'top'`)
-- `angle`: number — fold angle in degrees (default: `15`)
+- `angle`: number — fold angle in degrees; always folds towards the viewer first (default: `15`)
 - `perspective`: number — 3D perspective in px (default: `800`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
