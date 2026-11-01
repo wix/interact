@@ -172,11 +172,11 @@ Visual: Element stretches non-uniformly on X and Y axes, creating a rubber-band 
 
 Parameters:
 
-- `stretch`: number — -1 to 1, the stretch amount at the first squash: scaleX = 1 + stretch, scaleY = 1 - stretch (default: `0.1`)
+- `stretch`: number — -0.64 to 0.64, the stretch at the first squash: scaleX = 1 + stretch, with scaleY and the later wobbles following master's asymmetric shape (default: `0.08`)
 - `iterationDelay`: number — idle time in ms after each iteration cycle (default: `0`)
 
 ```typescript
-{ type: 'Rubber', stretch: 0.13 }
+{ type: 'Rubber', stretch: 0.11 }
 ```
 
 ---
@@ -239,6 +239,6 @@ Tested values for different intensity levels. When a user asks for "soft", "subt
 | Jello  | skew          | 7°          | 14°       | 28°           |
 | Poke   | travel        | 25px        | 50px      | 100px         |
 | Pulse  | scale         | 0.93        | 0.87      | 0.81          |
-| Rubber | stretch       | 0.05        | 0.1       | 0.15          |
+| Rubber | stretch       | 0.03        | 0.08      | 0.13          |
 | Swing  | angle         | 20°         | 40°       | 60°           |
 | Wiggle | angle, travel | 10°, 10px   | 20°, 20px | 40°, 40px     |

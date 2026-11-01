@@ -10,22 +10,22 @@ import {
 const DEFAULTS: Required<Rubber> = {
   type: 'Rubber',
   iterationDelay: 0,
-  stretch: 0.1,
+  stretch: 0.08,
 };
 
 export const schema = {
   iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
-  stretch: { type: 'number', min: -1, max: 1, default: DEFAULTS.stretch },
+  stretch: { type: 'number', min: -0.64, max: 0.64, default: DEFAULTS.stretch },
 };
 
-// scaleX = 1 + squash * stretch, scaleY = 1 - squash * stretch
+// scale = 1 + factor * stretch, where stretch is the first squash's scaleX - 1
 const SCALE_KEYFRAMES = [
-  { keyframe: 45, squash: 1 },
-  { keyframe: 56, squash: -0.9 },
-  { keyframe: 66, squash: 0.8 },
-  { keyframe: 78, squash: -0.45 },
-  { keyframe: 89, squash: 0.5275 },
-  { keyframe: 100, squash: 0 },
+  { keyframe: 45, x: 1, y: -1.5 },
+  { keyframe: 56, x: -1.5625, y: 0.6875 },
+  { keyframe: 66, x: 0.875, y: -1.125 },
+  { keyframe: 78, x: -0.5625, y: 0.5625 },
+  { keyframe: 89, x: 0.6875, y: -0.63125 },
+  { keyframe: 100, x: 0, y: 0 },
 ];
 
 export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
@@ -43,9 +43,9 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   const custom: Record<string, string | number> = {};
 
-  const keyframes = SCALE_KEYFRAMES.map(({ keyframe, squash }) => {
-    const adjustedScaleX = roundNumber(1 + squash * stretch, 4);
-    const adjustedScaleY = roundNumber(1 - squash * stretch, 4);
+  const keyframes = SCALE_KEYFRAMES.map(({ keyframe, x, y }) => {
+    const adjustedScaleX = roundNumber(1 + x * stretch, 4);
+    const adjustedScaleY = roundNumber(1 + y * stretch, 4);
 
     // Create custom property keys for this keyframe
     const scaleXKey = `--motion-scale-x-${keyframe}`;
