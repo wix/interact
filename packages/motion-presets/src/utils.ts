@@ -388,9 +388,35 @@ export function getTimingFactor(
   return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
 }
 
-// keyframes that bake in the easing need a non-default one in their name, so CSS @keyframes don't collide
+const EASING_NAME_LENGTH = 40;
+
+function hashString(value: string) {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i++) {
+    hash = Math.imul(hash ^ value.charCodeAt(i), 0x01000193);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+// keyframes that bake in the easing need a non-default one in their name, so CSS @keyframes don't collide.
+// e.g. cubic-bezier(0.68, -0.55, 0.27, 1.55) -> cubic-bezier-068_-055_027_155
 export function getEasingName(easing: string | undefined, defaultEasing: string) {
-  return easing && easing !== defaultEasing ? `-${easing.replace(/[^\w-]/g, '_')}` : '';
+  if (!easing || easing === defaultEasing) {
+    return '';
+  }
+
+  const trimmed = easing.trim();
+  const name = trimmed
+    .replace(/\s*([(),])\s*/g, '$1')
+    .replace(/[.%)]/g, '')
+    .replace(/,/g, '_')
+    .replace(/[\s(]+/g, '-');
+
+  if (/^[\w-]+$/.test(name) && name.length <= EASING_NAME_LENGTH) {
+    return `-${name}`;
+  }
+  const hash = hashString(trimmed);
+  return `-${name.replace(/[^\w-]/g, '').slice(0, EASING_NAME_LENGTH - hash.length - 1)}-${hash}`;
 }
 
 export type LengthValue = { value: number; unit: string };
