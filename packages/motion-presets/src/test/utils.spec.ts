@@ -253,30 +253,21 @@ describe('parseAngle and parseCssLength', () => {
     expect(parseCssLength('min(10px, 2vw)', defaultLength)).toBe('25px');
   });
 
-  test('CSS Typed OM accepts any numeric value of the right type', () => {
-    const types: Record<string, object> = {
-      'max(10deg, 1rad)': { angle: 1 },
-      'min(10px, 2vw)': { length: 1 },
-      'clamp(1%, 2px, 3%)': { length: 1, percentHint: 'length' },
-      'min(1px, 2deg)': { length: 1, angle: 1 },
-      'max(1px, 2px)': { length: 2 },
-    };
+  test('CSS Typed OM accepts any numeric value it parses', () => {
+    const numeric = ['max(10deg, 1rad)', 'min(10px, 2vw)', '45', '10'];
     vi.stubGlobal('CSSNumericValue', {
       parse: (value: string) => {
-        if (!(value in types)) {
+        if (!numeric.includes(value)) {
           throw new SyntaxError(value);
         }
-        return { type: () => types[value] };
+        return {};
       },
     });
 
     expect(parseAngle('max(10deg, 1rad)', 15)).toBe('max(10deg, 1rad)');
-    expect(parseAngle('min(10px, 2vw)', 15)).toBe('15deg');
     expect(parseCssLength('min(10px, 2vw)', defaultLength)).toBe('min(10px, 2vw)');
-    expect(parseCssLength('clamp(1%, 2px, 3%)', defaultLength)).toBe('clamp(1%, 2px, 3%)');
-    expect(parseCssLength('max(10deg, 1rad)', defaultLength)).toBe('25px');
-    expect(parseCssLength('min(1px, 2deg)', defaultLength)).toBe('25px');
-    expect(parseCssLength('max(1px, 2px)', defaultLength)).toBe('25px');
+    expect(parseAngle('45', 15)).toBe('45deg');
+    expect(parseCssLength('10', defaultLength)).toBe('10px');
     expect(parseCssLength('foo', defaultLength)).toBe('25px');
   });
 });

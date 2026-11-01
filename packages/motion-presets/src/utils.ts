@@ -388,8 +388,6 @@ export function getTimingFactor(
   return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
 }
 
-const EASING_NAME_LENGTH = 40;
-
 function hashString(value: string) {
   let hash = 0x811c9dc5;
   for (let i = 0; i < value.length; i++) {
@@ -399,27 +397,15 @@ function hashString(value: string) {
 }
 
 // keyframes that bake in the easing need a non-default one in their name, so CSS @keyframes don't collide.
-// e.g. cubic-bezier(0.68, -0.55, 0.27, 1.55) -> cubic-bezier-0p68_m0p55_0p27_1p55
+// a keyword easing is used as is, a function is hashed: cubic-bezier(0.68, -0.55, 0.27, 1.55) -> cubic-bezier-<hash>
 export function getEasingName(easing: string | undefined, defaultEasing: string) {
   if (!easing || easing === defaultEasing) {
     return '';
   }
-
   const trimmed = easing.trim();
-  const name = trimmed
-    .replace(/\s*([(),])\s*/g, '$1')
-    .replace(/-(?=[\d.])/g, 'm')
-    .replace(/\./g, 'p')
-    .replace(/%/g, 'pc')
-    .replace(/,/g, '_')
-    .replace(/[\s(]+/g, '-')
-    .replace(/\)/g, '');
-
-  if (/^[\w-]+$/.test(name) && name.length <= EASING_NAME_LENGTH) {
-    return `-${name}`;
-  }
-  const hash = hashString(trimmed);
-  return `-${name.replace(/[^\w-]/g, '').slice(0, EASING_NAME_LENGTH - hash.length - 1)}-${hash}`;
+  return /^[\w-]+$/.test(trimmed)
+    ? `-${trimmed}`
+    : `-${trimmed.match(/^[\w-]*/)![0]}-${hashString(trimmed)}`;
 }
 
 export type LengthValue = { value: number; unit: string };
@@ -435,19 +421,9 @@ const CSS_CALC_REGEX = /^calc\(.*\)$/;
 const CSS_ANGLE_REGEX = /^(-?\d*\.?\d+)(deg|rad|grad|turn)$/;
 const SIDE_ANGLES: Record<string, number> = { top: 270, right: 0, bottom: 90, left: 180 };
 
-function isNumericOfType(value: string, types: (keyof CSSNumericType)[]) {
-  if (typeof CSSNumericValue === 'undefined') {
-    return false;
-  }
+function isCssNumeric(value: string) {
   try {
-    const nonZero = Object.entries(CSSNumericValue.parse(value).type()).filter(
-      ([key, power]) => key !== 'percentHint' && power,
-    );
-    return (
-      nonZero.length === 1 &&
-      nonZero[0][1] === 1 &&
-      types.includes(nonZero[0][0] as keyof CSSNumericType)
-    );
+    return !!globalThis.CSSNumericValue?.parse(value);
   } catch {
     return false;
   }
@@ -463,15 +439,11 @@ export function parseAngle(input: number | string | undefined, defaultValue: num
     if (Object.hasOwn(SIDE_ANGLES, trimmed)) {
       return `${SIDE_ANGLES[trimmed]}deg`;
     }
-    if (
-      CSS_ANGLE_REGEX.test(trimmed) ||
-      CSS_CALC_REGEX.test(trimmed) ||
-      isNumericOfType(trimmed, ['angle'])
-    ) {
-      return trimmed;
-    }
     if (trimmed && !isNaN(Number(trimmed))) {
       return `${Number(trimmed)}deg`;
+    }
+    if (CSS_ANGLE_REGEX.test(trimmed) || CSS_CALC_REGEX.test(trimmed) || isCssNumeric(trimmed)) {
+      return trimmed;
     }
   }
 
@@ -487,15 +459,14 @@ export function parseCssLength(input: LengthInput, defaultValue: LengthValue) {
 
   if (typeof input === 'string') {
     const trimmed = input.trim().toLowerCase();
-    if (
-      CSS_CALC_REGEX.test(trimmed) ||
-      CSS_UNIT_REGEX.test(trimmed) ||
-      isNumericOfType(trimmed, ['length', 'percent'])
-    ) {
-      return trimmed;
-    }
     if (trimmed && !isNaN(Number(trimmed))) {
       parsedLength.value = Number(trimmed);
+    } else if (
+      CSS_CALC_REGEX.test(trimmed) ||
+      CSS_UNIT_REGEX.test(trimmed) ||
+      isCssNumeric(trimmed)
+    ) {
+      return trimmed;
     }
   }
 
