@@ -6,12 +6,8 @@ import type {
   SequenceOptions,
   TriggerVariant,
 } from '../types';
-import { getJsEasingInCSS } from '../utils';
+import { getJsEasingInCSS, normalizeKeyframes } from '../utils';
 import { getEffectsData, getRanges, getNamedEffect, isNotAScrubTrigger } from './common';
-
-function getAnimationTarget(target: string | null, part: string | undefined) {
-  return target ? `#${target}${part ? `[data-motion-part~="${part}"]` : ''}` : '';
-}
 
 function getAnimationAsCSS(
   data: {
@@ -73,7 +69,7 @@ function getCSSAnimationEffect(
 }
 
 function getCSSAnimation(
-  target: string | null,
+  _: string | null,
   animationOptions: AnimationOptions,
   trigger?: TriggerVariant,
   sequenceOptions?: SequenceOptions,
@@ -91,12 +87,12 @@ function getCSSAnimation(
       : {};
 
     return {
-      target: getAnimationTarget(target, item.part),
+      part: item.part,
       animation: getAnimationAsCSS(item, isViewProgress, sequenceOptions),
       composition: item.options.composite,
       custom: item.effect.custom,
       name: item.effect.name,
-      keyframes: item.effect.keyframes,
+      keyframes: normalizeKeyframes(item.effect.keyframes),
       id: item.id && `${item.id}-${index + 1}`,
       animationTimeline: isViewProgress ? `--${trigger?.id}` : '',
       animationRange: start || end ? `${start} ${end}` : '',

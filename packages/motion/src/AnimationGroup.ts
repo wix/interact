@@ -84,11 +84,6 @@ export class AnimationGroup {
     }
   }
 
-  // keeps finished, filling animations from being auto-removed when later animations cover their properties
-  persist() {
-    this.animations.forEach((animation) => animation.persist?.());
-  }
-
   cancel() {
     for (const animation of this.animations) {
       animation.cancel();

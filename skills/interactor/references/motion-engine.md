@@ -39,7 +39,7 @@ trigger + which effect field is present — **not** by a `type` field.
 { keyframeEffect? | namedEffect? | customEffect?;
   startOffset?: RangeOffset; endOffset?: RangeOffset; playbackRate?;
   easing?; iterations?; alternate?; fill?; reversed?;
-  transitionDuration?; transitionDelay?; transitionEasing?; centeredToTarget?;
+  transitionDuration?; transitionEasing?; centeredToTarget?;
   duration?: LengthPercentage /* scrub duration is length/%, NOT ms */ }
 ```
 

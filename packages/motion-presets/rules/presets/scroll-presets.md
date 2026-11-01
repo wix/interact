@@ -42,7 +42,7 @@ Most scroll presets accept a `range` parameter:
 - `'out'`: Animation starts from the element's idle state (element animates out as it exits)
 - `'continuous'`: Animation passes through the idle state (animates across the full scroll range)
 
-`'out'` is `'in'` reversed with the direction flipped (for directional presets); `'continuous'` is `'in'` followed by `'out'`. `direction` always names where the motion goes. Scroll presets use their own easing — the effect's `easing` is ignored.
+`'out'` is `'in'` reversed with the direction flipped (for directional presets); `'continuous'` is `'in'` followed by `'out'`, and holds its first and last states outside the scroll range (unless the effect sets `fill`). `direction` always names where the motion goes. Scroll presets use their own easing — the effect's `easing` is ignored.
 
 ---
 
@@ -197,7 +197,7 @@ Parameters:
 
 - `shape`: 'circle' | 'ellipse' | 'rectangle' | 'diamond' | 'window' (default: `'circle'`)
 - `range`: 'in' | 'out' | 'continuous' (default: `'in'`)
-- `start`: number — 0 to 1, how open the shape starts (default: `0.5`)
+- `start`: number — 0 to 1, the starting size as a fraction of the full shape (default: `0.667`)
 
 ```typescript
 { type: 'ShapeScroll', shape: 'diamond', range: 'out' }

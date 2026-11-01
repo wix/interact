@@ -84,6 +84,9 @@ jobs:
       - name: Build interact package
         run: yarn workspace @wix/interact build
 
+      - name: Build splittext package
+        run: yarn workspace @wix/splittext build
+
       - name: Build interact-validate package
         run: yarn workspace @wix/interact-validate build
 

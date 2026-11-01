@@ -11,7 +11,7 @@ const DEFAULTS: Required<ShapeScroll> = {
   type: 'ShapeScroll',
   range: 'in',
   shape: 'circle',
-  start: 0.5,
+  start: 0.667,
 };
 
 export const schema = {

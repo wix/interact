@@ -18,7 +18,7 @@ import {
   walkTextNodes,
   flattenBeyondDepth,
 } from './utils';
-import { createWrapper, injectBaseStyles } from './wrappers';
+import { applyPartCounts, createWrapper, injectBaseStyles } from './wrappers';
 
 type SplitCache = {
   chars?: HTMLSpanElement[];
@@ -297,6 +297,7 @@ class SplitTextResultImpl implements SplitTextResult {
     this.element.innerHTML = '';
     const innerWrapper = applyAccessibility(this.element, this._originalText, this._options);
     innerWrapper.append(...finalNodes);
+    applyPartCounts(innerWrapper, this._cache, this._options);
 
     this._isSplit = true;
     this._options.onSplit?.(this);
@@ -400,6 +401,8 @@ class SplitTextResultImpl implements SplitTextResult {
         innerWrapper.appendChild(node);
       }
     }
+
+    applyPartCounts(innerWrapper, this._cache, this._options);
 
     this._isSplit = true;
     this._options.onSplit?.(this);

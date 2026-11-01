@@ -9,7 +9,7 @@ import {
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { getLoopOverrides } from '../../easingUtils';
-import { parseLengthLazy } from '../../utils';
+import { parseCssLength } from '../../utils';
 import { UNDIRECTED_MOTION_RANGE } from '../../directions';
 
 // no z-motion, so the perspective has no effect
@@ -107,7 +107,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...getLoopOverrides(liftOptions, { shape: LIFT_SHAPE }),
       ...getMotionTransRot(
         UNDIRECTED_MOTION_RANGE,
-        { travel: parseLengthLazy(travel, { value: 0, unit: 'px' }) },
+        { travel: parseCssLength(travel, { value: 0, unit: 'px' }) },
         asWeb,
         suffix,
       ),

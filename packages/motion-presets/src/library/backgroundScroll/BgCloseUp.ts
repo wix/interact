@@ -7,10 +7,19 @@ import type {
   ScrubAnimationOptions,
 } from '../../types';
 import { measureCompHeight } from './utils';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgCloseUpOpacity', 'motion-bgCloseUpZoom'];
+const DEFAULTS: Required<BgCloseUp> = {
+  type: 'BgCloseUp',
+  depth: 80,
+};
+
+export const schema = {
+  depth: { type: 'number', default: DEFAULTS.depth },
+};
+
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgCloseUpOpacity', 'motion-bgCloseUpZoom'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -30,20 +39,22 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_CLIP', 'MEDIA_WRAPPER'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const easing = 'linear';
-  const { scale = 80 } = options.namedEffect as BgCloseUp;
+  const { depth = DEFAULTS.depth } = options.namedEffect as BgCloseUp;
 
-  const custom = { '--motion-trans-z': `${scale}px` };
+  const custom = { '--motion-trans-z': `${depth}px` };
 
   const [bgCloseUpOpacity, bgCloseUpZoom] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgCloseUpOpacity,
       easing,
-      part: 'BG_LAYER',
+      part: 'MEDIA_CLIP',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -78,8 +89,9 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgCloseUpZoom,
+      custom,
       easing,
-      part: 'BG_MEDIA',
+      part: 'MEDIA_WRAPPER',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -109,4 +121,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

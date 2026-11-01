@@ -76,7 +76,7 @@ These are set on the effect configuration level, not on the preset itself:
 **Scroll-specific animation options:**
 
 - `rangeStart` / `rangeEnd`: `RangeOffset` controlling when the scroll animation starts/ends
-- `transitionDuration` / `transitionDelay` / `transitionEasing`: Transition smoothing
+- `transitionDuration` / `transitionEasing`: Transition smoothing
 
 ### Overloaded Parameter Names
 

@@ -6,11 +6,24 @@ import type {
   AnimationExtraOptions,
   ScrubAnimationOptions,
 } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight, measureSiteHeight } from './utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-imageParallax'];
+const DEFAULTS: Required<ImageParallax> = {
+  type: 'ImageParallax',
+  isPage: false,
+  reverse: false,
+  speed: 1.5,
+};
+
+export const schema = {
+  isPage: { type: 'bool', default: DEFAULTS.isPage },
+  reverse: { type: 'bool', default: DEFAULTS.reverse },
+  speed: { type: 'number', default: DEFAULTS.speed },
+};
+
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-imageParallax'], options.suffix);
 }
 
 export function prepare(options: ScrubAnimationOptions, dom?: DomApi) {
@@ -18,7 +31,7 @@ export function prepare(options: ScrubAnimationOptions, dom?: DomApi) {
     '--motion-comp-height': '0px',
     '--motion-site-height': '0',
   };
-  const { isPage = false } = options.namedEffect as ImageParallax;
+  const { isPage = DEFAULTS.isPage } = options.namedEffect as ImageParallax;
   if (dom) {
     if (isPage) {
       measureSiteHeight(measures, dom, true);
@@ -35,8 +48,14 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_WRAPPER'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { speed = 1.5, reverse = false, isPage = false } = options.namedEffect as ImageParallax;
+  const {
+    speed = DEFAULTS.speed,
+    reverse = DEFAULTS.reverse,
+    isPage = DEFAULTS.isPage,
+  } = options.namedEffect as ImageParallax;
 
   let start = -100 * (speed - 1);
   if (!isPage) {
@@ -54,11 +73,12 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
 
   const [imageParallax] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: imageParallax,
-      part: 'BG_MEDIA',
+      custom,
+      part: 'MEDIA_WRAPPER',
       startOffset: {
         name: isPage ? 'contain' : 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -86,4 +106,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

@@ -1,18 +1,33 @@
 // NOT PRODUCTION READY — background-scroll presets are experimental and excluded from public documentation.
 import type { BgRotate, RangeOffset, ScrubAnimationOptions } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
+import { SPIN_DIRECTIONS } from '../../consts';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgRotate'];
+const DEFAULTS: Required<BgRotate> = {
+  type: 'BgRotate',
+  angle: 22,
+  direction: 'counter-clockwise',
+};
+
+export const schema = {
+  angle: { type: 'number', min: 0, default: DEFAULTS.angle },
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: DEFAULTS.direction },
+};
+
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgRotate'], options.suffix);
 }
 
 export function web(options: ScrubAnimationOptions) {
   return style(options, true);
 }
 
+export const parts = ['MEDIA_WRAPPER'];
+
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const easing = 'sineOut';
-  const { angle = 22, direction = 'counter-clockwise' } = options.namedEffect as BgRotate;
+  const { angle = DEFAULTS.angle, direction = DEFAULTS.direction } =
+    options.namedEffect as BgRotate;
 
   const custom = {
     '--motion-rot-from': `${direction === 'counter-clockwise' ? angle : -angle}deg`,
@@ -20,12 +35,13 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
 
   const [bgRotate] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgRotate,
+      custom,
       easing,
-      part: 'BG_MEDIA',
+      part: 'MEDIA_WRAPPER',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -45,4 +61,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

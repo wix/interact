@@ -418,7 +418,6 @@ Used with `viewProgress` and `pointerMove` triggers.
   composite?: 'replace' | 'add' | 'accumulate';
   centeredToTarget?: boolean;  // pointerMove; namedEffect / customEffect only — ignored for keyframeEffect
   transitionDuration?: number; // ms, smoothing on progress jumps; pointerMove + customEffect only
-  transitionDelay?: number;    // ms (primarily for pointerMove)
   transitionEasing?: 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce'; // pointerMove + customEffect only
   // + exactly one animation payload (see below)
 }

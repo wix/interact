@@ -1,5 +1,5 @@
 import type { AnimationData, ScrubAnimationOptions, ShrinkScroll, DomApi } from '../../types';
-import { NINE_DIRECTIONS, SCROLL_RANGES } from '../../consts';
+import { EPSILON, NINE_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 import { axisDirection, toMotionRange } from '../../directions';
 import { getScrollParallax } from '../../parallaxUtils';
 import {
@@ -19,7 +19,6 @@ import {
 } from '../../transformUtils';
 import { compareKeywordToNonDefaults, parseKeywordLazy } from '../../utils';
 
-const EPSILON = 0.01;
 const DIRECTION = 'vertical';
 
 const DEFAULTS: Required<ShrinkScroll> = {

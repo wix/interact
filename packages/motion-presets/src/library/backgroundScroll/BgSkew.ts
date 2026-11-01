@@ -6,11 +6,23 @@ import type {
   AnimationExtraOptions,
   ScrubAnimationOptions,
 } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
+import { SPIN_DIRECTIONS } from '../../consts';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgSkew'];
+const DEFAULTS: Required<BgSkew> = {
+  type: 'BgSkew',
+  angle: 20,
+  direction: 'counter-clockwise',
+};
+
+export const schema = {
+  angle: { type: 'number', min: 0, default: DEFAULTS.angle },
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: DEFAULTS.direction },
+};
+
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgSkew'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -27,8 +39,10 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_WRAPPER'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { angle = 20, direction = 'counter-clockwise' } = options.namedEffect as BgSkew;
+  const { angle = DEFAULTS.angle, direction = DEFAULTS.direction } = options.namedEffect as BgSkew;
 
   const custom = {
     '--motion-skew': `${direction === 'counter-clockwise' ? angle : -angle}deg`,
@@ -36,11 +50,12 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
 
   const [bgSkew] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgSkew,
-      part: 'BG_MEDIA',
+      custom,
+      part: 'MEDIA_WRAPPER',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -66,4 +81,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

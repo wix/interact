@@ -6,11 +6,20 @@ import type {
   ScrubAnimationOptions,
   DomApi,
 } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgParallax'];
+const DEFAULTS: Required<BgParallax> = {
+  type: 'BgParallax',
+  speed: 0.2,
+};
+
+export const schema = {
+  speed: { type: 'number', min: 0, default: DEFAULTS.speed },
+};
+
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgParallax'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -27,19 +36,22 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_WRAPPER'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { speed = 0.2 } = options.namedEffect as BgParallax;
+  const { speed = DEFAULTS.speed } = options.namedEffect as BgParallax;
   const custom = {
     '--motion-parallax-speed': speed,
   };
 
   const [bgParallax] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgParallax,
-      part: 'BG_MEDIA',
+      custom,
+      part: 'MEDIA_WRAPPER',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -73,4 +85,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

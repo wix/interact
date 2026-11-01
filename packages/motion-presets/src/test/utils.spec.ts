@@ -1,11 +1,12 @@
-import { describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import {
   declareCustom,
   parseDirection,
+  parseAngle,
+  parseCssLength,
   parseKeywordLazy,
   parseLength,
-  parseLengthLazy,
   toKeyframeValue,
 } from '../utils';
 
@@ -232,32 +233,6 @@ describe('parseDirection', () => {
   });
 });
 
-describe('parseLengthLazy', () => {
-  const defaultValue = { value: 10, unit: 'px' };
-
-  test('returns css lengths and calc as is', () => {
-    expect(parseLengthLazy('50%', defaultValue)).toBe('50%');
-    expect(parseLengthLazy(' 2REM ', defaultValue)).toBe('2rem');
-    expect(parseLengthLazy('calc(100% - 10px)', defaultValue)).toBe('calc(100% - 10px)');
-  });
-
-  test('numbers use the default unit', () => {
-    expect(parseLengthLazy(20, defaultValue)).toBe('20px');
-    expect(parseLengthLazy('20', { value: 0, unit: 'percentage' })).toBe('20%');
-  });
-
-  test('objects', () => {
-    expect(parseLengthLazy({ value: 5, unit: 'vh' }, defaultValue)).toBe('5vh');
-    expect(parseLengthLazy({ value: 5, unit: 'percentage' }, defaultValue)).toBe('5%');
-  });
-
-  test('invalid input falls back to the default', () => {
-    expect(parseLengthLazy(undefined, defaultValue)).toBe('10px');
-    expect(parseLengthLazy('abc', defaultValue)).toBe('10px');
-    expect(parseLengthLazy({ value: NaN, unit: 'px' }, defaultValue)).toBe('10px');
-  });
-});
-
 describe('parseKeywordLazy', () => {
   test('accepts allowed keywords case-insensitively', () => {
     expect(parseKeywordLazy(' Left ', ['left', 'right'], 'right')).toBe('left');
@@ -294,5 +269,60 @@ describe('declareCustom', () => {
 
   test('uses the values directly for web animations', () => {
     expect(declareCustom('--p', { x: [1, '0'] }, true).vars).toEqual({ x: 1 });
+  });
+});
+
+describe('parseAngle and parseCssLength', () => {
+  const defaultLength = { value: 25, unit: 'px' };
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  test('numbers take the default unit', () => {
+    expect(parseAngle(30, 0)).toBe('30deg');
+    expect(parseCssLength(10, defaultLength)).toBe('10px');
+  });
+
+  test('unit strings, calc() and side keywords pass through', () => {
+    expect(parseAngle('0.5turn', 0)).toBe('0.5turn');
+    expect(parseAngle('top', 0)).toBe('270deg');
+    expect(parseCssLength('2em', defaultLength)).toBe('2em');
+    expect(parseCssLength('calc(10px + 5%)', defaultLength)).toBe('calc(10px + 5%)');
+  });
+
+  test('custom property names inside calc() keep their case', () => {
+    expect(parseAngle('calc(var(--myAngle) * 2)', 0)).toBe('calc(var(--myAngle) * 2)');
+    expect(parseCssLength('calc(var(--myTravel) * 1px)', defaultLength)).toBe(
+      'calc(var(--myTravel) * 1px)',
+    );
+    expect(parseAngle('TOP', 0)).toBe('270deg');
+  });
+
+  test('length objects keep their unit', () => {
+    expect(parseCssLength({ value: 3, unit: 'percentage' }, defaultLength)).toBe('3%');
+  });
+
+  test('other strings fall back to the default without CSS Typed OM', () => {
+    expect(parseAngle('max(10deg, 1rad)', 15)).toBe('15deg');
+    expect(parseCssLength('min(10px, 2vw)', defaultLength)).toBe('25px');
+  });
+
+  test('CSS Typed OM accepts any numeric value it parses', () => {
+    const numeric = ['max(10deg, 1rad)', 'min(10px, 2vw)', '45', '10'];
+    vi.stubGlobal('CSSNumericValue', {
+      parse: (value: string) => {
+        if (!numeric.includes(value)) {
+          throw new SyntaxError(value);
+        }
+        return {};
+      },
+    });
+
+    expect(parseAngle('max(10deg, 1rad)', 15)).toBe('max(10deg, 1rad)');
+    expect(parseCssLength('min(10px, 2vw)', defaultLength)).toBe('min(10px, 2vw)');
+    expect(parseAngle('45', 15)).toBe('45deg');
+    expect(parseCssLength('10', defaultLength)).toBe('10px');
+    expect(parseCssLength('foo', defaultLength)).toBe('25px');
   });
 });

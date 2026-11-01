@@ -12,7 +12,7 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   getMotionLayoutRotation,
 } from '../../transformUtils';
-import { parseLengthLazy } from '../../utils';
+import { parseCssLength } from '../../utils';
 
 // samples of the previous implementation: fading over 0 -> 65% (in) or 35% -> 100% (out) keyframes with 'backInOut'
 const FADE_EASING = linearEasing([
@@ -126,7 +126,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
       ...getScrollOverrides(options, range, getScrollEasing(range, true, easingOptions)),
       ...getMotionTransRot(
         motionRange,
-        { travel: parseLengthLazy(travel, NO_TRAVEL) },
+        { travel: parseCssLength(travel, NO_TRAVEL) },
         asWeb,
         suffix,
       ),

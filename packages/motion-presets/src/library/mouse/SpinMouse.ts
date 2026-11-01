@@ -5,20 +5,30 @@ import {
   Progress,
   MouseEffectAxis,
 } from '../../types';
-import { getAngleInDeg, getMouseTransitionEasing, parseDirection } from '../../utils';
+import { getMouseTransitionEasing, getAngleInDeg, parseDirection } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 
-const DEFAULT_AXIS: MouseEffectAxis = 'both';
 const AXES = ['both', 'horizontal', 'vertical'] as const;
+
+const DEFAULTS: Required<SpinMouse> = {
+  type: 'SpinMouse',
+  direction: 'both',
+  inverted: false,
+};
+
+export const schema = {
+  direction: { type: 'enum', values: AXES, default: DEFAULTS.direction },
+  inverted: { type: 'bool', default: DEFAULTS.inverted },
+};
 
 class SpinMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
-    const { invert, axis } = this.options;
+    const { invert, direction } = this.options;
 
     const rotation =
       getAngleInDeg(
         [0.5, 0.5],
-        [axis === 'vertical' ? 0 : progressX, axis === 'horizontal' ? 0 : progressY],
+        [direction === 'vertical' ? 0 : progressX, direction === 'horizontal' ? 0 : progressY],
         90,
       ) * invert;
 
@@ -34,15 +44,19 @@ class SpinMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing = 'linear' } = options;
   const namedEffect = options.namedEffect as SpinMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const axis = parseDirection(namedEffect.axis, AXES, DEFAULT_AXIS) as MouseEffectAxis;
+  const inverted = namedEffect.inverted ?? DEFAULTS.inverted;
+  const direction = parseDirection(
+    namedEffect.direction,
+    AXES,
+    DEFAULTS.direction,
+  ) as MouseEffectAxis;
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration
       ? `transform ${transitionDuration}ms ${getMouseTransitionEasing(transitionEasing)}`
       : '',
     invert,
-    axis,
+    direction,
   };
 
   return (target: HTMLElement) => new SpinMouseAnimation(target, animationOptions);

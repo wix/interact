@@ -65,7 +65,6 @@ type ScrubAnimationOptions = {
   alternate?: boolean;
   reversed?: boolean;
   transitionDuration?: number; // pointer smoothing (ms)
-  transitionDelay?: number;
   transitionEasing?: ScrubTransitionEasing; // 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce'
   centeredToTarget?: boolean;
   duration?: LengthPercentage; // NOTE: length/percentage, not ms
@@ -74,7 +73,7 @@ type ScrubAnimationOptions = {
 
 - **`duration` here is a [`LengthPercentage`](#length--percentage--lengthpercentage), not a millisecond number** — unlike `TimeAnimationOptions.duration`. It expresses a portion of the scroll/scrub range.
 - `startOffset` / `endOffset` live on these options, not on the trigger.
-- `transitionDuration` / `transitionDelay` / `transitionEasing` / `centeredToTarget` only apply to pointer-driven (`pointer-move`) scrubbing.
+- `transitionDuration` / `transitionEasing` / `centeredToTarget` only apply to pointer-driven (`pointer-move`) scrubbing.
 
 ### `AnimationExtraOptions`
 

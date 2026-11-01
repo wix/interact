@@ -25,7 +25,7 @@ describe('BgZoom', () => {
           ],
         },
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'add',
           keyframes: [
             {
@@ -63,7 +63,7 @@ describe('BgZoom', () => {
           ],
         },
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'add',
           keyframes: [
             {
@@ -90,7 +90,7 @@ describe('BgZoom', () => {
       const expectedResult: Partial<AnimationData>[] = [
         {},
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'replace',
           keyframes: [
             {
@@ -129,7 +129,7 @@ describe('BgZoom', () => {
           ],
         },
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'add',
           keyframes: [
             {
@@ -147,11 +147,11 @@ describe('BgZoom', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('Custom zoom', () => {
-      const zoom = 40;
+    test('Custom depth', () => {
+      const depth = 60;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { zoom } as BgZoomType,
+        namedEffect: { depth } as BgZoomType,
       };
 
       const expectedResult = [
@@ -167,8 +167,13 @@ describe('BgZoom', () => {
           ],
         },
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'add',
+          custom: {
+            '--motion-scale-to': 2.5,
+            '--motion-trans-z-to': '60px',
+            '--motion-zoom-over-pers': 0.3,
+          },
           keyframes: [
             {
               transform: `perspective(100px) translateZ(var(--motion-trans-z-from))`,
@@ -194,7 +199,7 @@ describe('BgZoom', () => {
       const expectedResult = [
         {},
         {
-          part: 'BG_IMG',
+          part: 'MEDIA',
           composite: 'replace',
           keyframes: [
             {

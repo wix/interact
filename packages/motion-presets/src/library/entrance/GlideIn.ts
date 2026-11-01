@@ -5,7 +5,7 @@ import {
   getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
 } from '../../transformUtils';
-import { parseLengthLazy } from '../../utils';
+import { parseCssLength } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { angleDirection, toMotionRange } from '../../directions';
 
@@ -51,7 +51,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       fill,
       ...getMotionTransRot(
         toMotionRange(angleDirection, angleDirection.opposite(from), 'in'),
-        { travel: parseLengthLazy(namedEffect?.travel, DEFAULTS.travel as LengthValue) },
+        { travel: parseCssLength(namedEffect?.travel, DEFAULTS.travel as LengthValue) },
         asWeb,
         suffix,
       ),

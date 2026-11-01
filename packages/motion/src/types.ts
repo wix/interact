@@ -63,6 +63,7 @@ export type AnimationEffectAPI<Enum extends keyof AnimationOptionsTypes> = {
   getNames: (animationOptions: AnimationOptionsTypes[Enum]) => string[];
   style?: (options: AnimationOptionsTypes[Enum]) => AnimationData[];
   prepare?: (options: AnimationOptionsTypes[Enum], dom?: DomApi) => void;
+  parts?: string[];
 };
 
 export type WebAnimationEffectFactory<Enum extends keyof AnimationOptionsTypes> = (
@@ -173,7 +174,6 @@ type ScrubAnimationDataBase<TNamedEffect extends NamedEffect = NamedEffect> = {
   alternate?: boolean;
   reversed?: boolean;
   transitionDuration?: number;
-  transitionDelay?: number;
   transitionEasing?: ScrubTransitionEasing;
   centeredToTarget?: boolean;
 };

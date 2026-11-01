@@ -188,7 +188,6 @@ directly. The pointer-relevant fields are `transitionDuration`/`transitionEasing
   composite?: 'replace' | 'add' | 'accumulate';
   centeredToTarget?: boolean;     // remap 0.5 progress to the target's center
   transitionDuration?: number;    // ms — smoothing on progress jumps (mainly pointerMove)
-  transitionDelay?: number;       // ms
   transitionEasing?: 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce';
   // + exactly one payload
 }

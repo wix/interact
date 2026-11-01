@@ -1,8 +1,7 @@
 import type { Length } from '@wix/motion';
 import type { EffectScrollRange, RangeOffset } from './types';
 import { declareCustom, mapRange } from './utils';
-
-const EPSILON = 0.01;
+import { EPSILON } from './consts';
 
 type ParallaxRange = { startOffset: Required<RangeOffset>; endOffset: Required<RangeOffset> };
 
@@ -75,7 +74,7 @@ function scaleVhPercentageRangeAroundCenter(
     end.absoluteOffset,
     start.absoluteOffset,
   );
-  const endOAbsoluteAdd = lengthsLinearCombination(
+  const endAbsoluteAdd = lengthsLinearCombination(
     1 - endOffsetFactor,
     endOffsetFactor,
     end.absoluteOffset,
@@ -85,8 +84,8 @@ function scaleVhPercentageRangeAroundCenter(
   if (startAbsoluteAdd) {
     rangeOffsets.startOffsetAdd = `calc(${rangeOffsets.startOffsetAdd} + ${startAbsoluteAdd})`;
   }
-  if (endOAbsoluteAdd) {
-    rangeOffsets.endOffsetAdd = `calc(${rangeOffsets.endOffsetAdd} + ${endOAbsoluteAdd})`;
+  if (endAbsoluteAdd) {
+    rangeOffsets.endOffsetAdd = `calc(${rangeOffsets.endOffsetAdd} + ${endAbsoluteAdd})`;
   }
 
   return rangeOffsets;
@@ -130,7 +129,9 @@ function computeParallax(
     },
     asWeb,
   );
-  Object.assign(custom, parallaxCustom);
+  if (!asWeb) {
+    Object.assign(custom, parallaxCustom);
+  }
 
   const from = `calc(${vars.center} * (1 - ${vars['inv-speed']}) * ${vars.travel})`;
   const to = `calc((${vars.center} - 1) * (1 - ${vars['inv-speed']}) * ${vars.travel})`;

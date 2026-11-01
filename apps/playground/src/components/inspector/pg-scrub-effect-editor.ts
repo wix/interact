@@ -231,7 +231,6 @@ export class PgScrubEffectEditor extends BaseComponent {
     const rangeEnd = (e.rangeEnd as RangeOffset) ?? {};
 
     const transitionDuration = (e.transitionDuration as number) ?? 0;
-    const transitionDelay = (e.transitionDelay as number) ?? 0;
     const transitionEasing = (e.transitionEasing as string) ?? '';
     const centeredToTarget = (e.centeredToTarget as boolean) ?? false;
 
@@ -344,15 +343,9 @@ export class PgScrubEffectEditor extends BaseComponent {
       <div class="section-title">Transition</div>
 
       <div class="transition-section">
-        <div class="field-row">
-          <div class="field">
-            <label>Duration (ms)</label>
-            <input type="number" class="pg-input" id="trans-duration" min="0" max="10000" step="50" value="${transitionDuration}">
-          </div>
-          <div class="field">
-            <label>Delay (ms)</label>
-            <input type="number" class="pg-input" id="trans-delay" min="0" max="10000" step="50" value="${transitionDelay}">
-          </div>
+        <div class="field">
+          <label>Duration (ms)</label>
+          <input type="number" class="pg-input" id="trans-duration" min="0" max="10000" step="50" value="${transitionDuration}">
         </div>
         <div class="field">
           <label>Easing</label>
@@ -501,9 +494,6 @@ export class PgScrubEffectEditor extends BaseComponent {
 
     shadow.getElementById('trans-duration')?.addEventListener('change', (e) => {
       update({ transitionDuration: parseInt((e.target as HTMLInputElement).value, 10) || 0 });
-    });
-    shadow.getElementById('trans-delay')?.addEventListener('change', (e) => {
-      update({ transitionDelay: parseInt((e.target as HTMLInputElement).value, 10) || 0 });
     });
     shadow.getElementById('trans-easing')?.addEventListener('change', (e) => {
       const val = (e.target as HTMLSelectElement).value;

@@ -114,7 +114,6 @@ type ScrubAnimationOptions = {
   alternate?: boolean;
   reversed?: boolean;
   transitionDuration?: number; // pointer smoothing (ms)
-  transitionDelay?: number;
   transitionEasing?: ScrubTransitionEasing; // 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce'
   centeredToTarget?: boolean;
   duration?: LengthPercentage; // NOTE: length/percentage, NOT ms — unlike TimeAnimationOptions.duration

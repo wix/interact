@@ -14,7 +14,7 @@ import {
   getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
 } from '../../transformUtils';
-import { compareKeywordToNonDefaults, parseLengthLazy } from '../../utils';
+import { compareKeywordToNonDefaults, parseCssLength } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { sideDirection, toMotionRange } from '../../directions';
 
@@ -108,7 +108,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
   );
   const transformParams = {
     perspective,
-    travel: parseLengthLazy(travel, DEFAULTS.travel as LengthValue),
+    travel: parseCssLength(travel, DEFAULTS.travel as LengthValue),
   };
 
   const transformOptions = {

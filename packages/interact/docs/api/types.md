@@ -544,7 +544,6 @@ type ScrubEffect = {
   rangeEnd?: RangeOffset;
   centeredToTarget?: boolean;
   transitionDuration?: number;
-  transitionDelay?: number;
   transitionEasing?: ScrubTransitionEasing;
 } & EffectProperty;
 ```
@@ -555,7 +554,6 @@ type ScrubEffect = {
 - `rangeEnd` - Scroll position where animation ends
 - `centeredToTarget` - Whether to center scroll range on target element
 - `transitionDuration` - Smooth transition duration when entering/exiting scrub
-- `transitionDelay` - Delay for scrub transition
 - `transitionEasing` - Easing for scrub transition
 
 **Examples:**

@@ -8,7 +8,7 @@ import {
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { getLoopOverrides } from '../../easingUtils';
-import { parseLengthLazy } from '../../utils';
+import { parseCssLength } from '../../utils';
 
 const EASING = 'sineOut';
 // starts at the peak above its place and falls down to it
@@ -70,7 +70,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...getLoopOverrides(bounceOptions, { shape: SHAPE, easings: [EASING] }),
       ...getMotionTransRot(
         MOTION_RANGE,
-        { travel: parseLengthLazy(travel, { value: 0, unit: 'px' }) },
+        { travel: parseCssLength(travel, { value: 0, unit: 'px' }) },
         asWeb,
         suffix,
       ),

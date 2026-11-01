@@ -1,4 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
+import { registerEffects } from '@wix/motion';
+import { getKeyframeSlots } from '../src/core/css';
+import { Interact } from '../src/core/Interact';
 import { generate, _generate, DEFAULT_INITIAL } from '../src/core/css';
 import type { InteractConfig, CSSRuleData } from '../src/types';
 
@@ -401,6 +404,7 @@ const isAnimationProp = (name: string) => /^--anm-(slot-)?\d/.test(name);
 const isCompositionProp = (name: string) => /^--anm-cmps-(slot-)?\d/.test(name);
 const isTransitionProp = (name: string) => /^--trns-(slot-)?\d/.test(name);
 const isTimelineProp = (name: string) => /^--anm-tmln-(slot-)?\d/.test(name);
+const isViewTimelineProp = (name: string) => /^--vw-tmln-\d/.test(name);
 const isRangeProp = (name: string) => /^--anm-rng-(slot-)?\d/.test(name);
 
 function parseListsRule(listsRule: string) {
@@ -858,15 +862,16 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { cssRules, listsRule } = _generate(config);
 
       const viewTimelineRule = cssRules.find((r) =>
-        r.declarations.some((d) => d.name === 'view-timeline'),
+        r.declarations.some((d) => isViewTimelineProp(d.name)),
       );
       expect(viewTimelineRule).toBeDefined();
-      expect(viewTimelineRule!.declarations.find((d) => d.name === 'view-timeline')!.value).toBe(
+      expect(viewTimelineRule!.declarations.find((d) => isViewTimelineProp(d.name))!.value).toBe(
         '--trigger-0',
       );
+      expect(listsRule).toContain('view-timeline: var(--vw-tmln-0);');
     });
 
     it('should use matching ids between view-timeline and animation-timeline for viewProgress', () => {
@@ -897,10 +902,10 @@ describe('css._generate', () => {
       const { cssRules } = _generate(config);
 
       const viewTimelineRule = cssRules.find((r) =>
-        r.declarations.some((d) => d.name === 'view-timeline'),
+        r.declarations.some((d) => isViewTimelineProp(d.name)),
       )!;
-      const triggerId = viewTimelineRule.declarations.find(
-        (d) => d.name === 'view-timeline',
+      const triggerId = viewTimelineRule.declarations.find((d) =>
+        isViewTimelineProp(d.name),
       )!.value;
 
       const effectRule = cssRules.find((r) => r.declarations.some((d) => isTimelineProp(d.name)))!;
@@ -934,7 +939,7 @@ describe('css._generate', () => {
       const { cssRules } = _generate(config);
 
       const viewTimelineRule = cssRules.find((r) =>
-        r.declarations.some((d) => d.name === 'view-timeline'),
+        r.declarations.some((d) => isViewTimelineProp(d.name)),
       );
       expect(viewTimelineRule).toBeUndefined();
     });
@@ -969,7 +974,7 @@ describe('css._generate', () => {
       const { cssRules } = _generate(config);
 
       const viewTimelineRule = cssRules.find((r) =>
-        r.declarations.some((d) => d.name === 'view-timeline'),
+        r.declarations.some((d) => isViewTimelineProp(d.name)),
       )!;
       expect(viewTimelineRule).toBeDefined();
       expect(viewTimelineRule.media).toContain('min-width: 1024px');
@@ -1734,6 +1739,343 @@ describe('css._generate', () => {
       const animationDecl = declarations.find((d) => d.name === 'animation');
       expect(animationDecl).toBeDefined();
       expect(animationDecl!.value).toBe('var(--anm-0)');
+    });
+  });
+
+  describe('namedEffect keyframe slots', () => {
+    const style = ({ suffix = '', ...options }: { suffix?: string }) => [
+      {
+        ...options,
+        name: `test-move${suffix}`,
+        custom: { [`--test-move${suffix}-x`]: '10px' },
+        keyframes: [{ translate: `var(--test-move${suffix}-x)` }, { translate: '0px' }],
+      },
+    ];
+    registerEffects({
+      TestMove: {
+        web: style,
+        style,
+        getNames: ({ suffix = '' }: { suffix?: string }) => [`test-move${suffix}`],
+      },
+    } as any);
+
+    const effect = (effectId: string) => ({
+      effectId,
+      duration: 100,
+      namedEffect: { type: 'TestMove' },
+    });
+
+    it('gives an effect whose keyframes are already used on its target the next free slot', () => {
+      const { keyframes, cssRules } = _generate({
+        interactions: [
+          { key: 'a', trigger: 'viewEnter', effects: [effect('first')] },
+          { key: 'a', trigger: 'click', effects: [effect('second')] },
+        ],
+      });
+
+      expect([...keyframes.keys()]).toEqual(['test-move', 'test-move-1']);
+      const declared = cssRules.flatMap(({ declarations }) => declarations.map(({ name }) => name));
+      expect(declared).toEqual(expect.arrayContaining(['--test-move-x', '--test-move-1-x']));
+    });
+
+    it('shares each slot between targets', () => {
+      const { keyframes } = _generate({
+        interactions: ['a', 'b'].flatMap((key) => [
+          { key, trigger: 'viewEnter' as const, effects: [effect(`${key}-first`)] },
+          { key, trigger: 'click' as const, effects: [effect(`${key}-second`)] },
+        ]),
+      });
+
+      expect([...keyframes.keys()]).toEqual(['test-move', 'test-move-1']);
+    });
+
+    it('keeps effects of the same interaction on a target in one slot, as they override each other', () => {
+      const { keyframes } = _generate({
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'viewEnter',
+            effects: [effect('first'), effect('second'), effect('third')],
+          },
+        ],
+      });
+
+      expect([...keyframes.keys()]).toEqual(['test-move']);
+    });
+
+    it('assigns slots to sequence effects by their position', () => {
+      const { keyframes } = _generate({
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'viewEnter',
+            effects: [effect('first')],
+            sequences: [{ offset: 100, effects: [effect('second'), effect('third')] }],
+          },
+        ],
+      });
+
+      expect([...keyframes.keys()]).toEqual(['test-move', 'test-move-1', 'test-move-2']);
+    });
+
+    it("keeps a sequence's only effect on a target in the interaction's slot, as they share its list entry", () => {
+      const { keyframes } = _generate({
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'viewEnter',
+            effects: [effect('first')],
+            sequences: [{ offset: 100, effects: [effect('second')] }],
+          },
+        ],
+      });
+
+      expect([...keyframes.keys()]).toEqual(['test-move']);
+    });
+
+    it('slots effects the same way at runtime', () => {
+      const config = {
+        interactions: [
+          { key: 'a', trigger: 'viewEnter' as const, effects: [effect('first')] },
+          { key: 'a', trigger: 'click' as const, effects: [effect('second')] },
+        ],
+      };
+      const suffixes = [...getKeyframeSlots(config).entries()];
+
+      expect(suffixes).toEqual([['1:0', '-1']]);
+      const instance = Interact.create(config);
+      expect(
+        config.interactions.map(({ effects }) => (effects[0] as { suffix?: string }).suffix),
+      ).toEqual([undefined, '-1']);
+      instance.destroy();
+    });
+
+    it('shares the keyframes between different targets', () => {
+      const { keyframes } = _generate({
+        interactions: [
+          { key: 'a', trigger: 'viewEnter', effects: [effect('first')] },
+          { key: 'b', trigger: 'viewEnter', effects: [effect('second')] },
+        ],
+      });
+
+      expect([...keyframes.keys()]).toEqual(['test-move']);
+    });
+  });
+
+  describe('viewProgress timelines', () => {
+    const scrub = (effectId: string) => ({
+      effectId,
+      keyframeEffect: { name: effectId, keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+    });
+    const timelinesOf = (cssRules: CSSRuleData[]) =>
+      cssRules.flatMap(({ key, media, declarations }) =>
+        declarations
+          .filter(({ name }) => isViewTimelineProp(name))
+          .map(({ name, value }) => ({ key, media, name, value })),
+      );
+
+    it('lists the timelines of all viewProgress interactions of a source', () => {
+      const { cssRules, listsRule } = _generate({
+        interactions: [
+          { key: 'a', trigger: 'viewProgress', effects: [scrub('in')] },
+          { key: 'a', trigger: 'viewProgress', effects: [scrub('out')] },
+          { key: 'b', trigger: 'viewProgress', effects: [scrub('other')] },
+        ],
+      });
+
+      expect(timelinesOf(cssRules)).toEqual([
+        { key: 'a', media: '', name: '--vw-tmln-0', value: '--trigger-0' },
+        { key: 'a', media: '', name: '--vw-tmln-1', value: '--trigger-1' },
+        { key: 'b', media: '', name: '--vw-tmln-0', value: '--trigger-2' },
+      ]);
+      expect(listsRule).toContain('view-timeline: var(--vw-tmln-0), var(--vw-tmln-1);');
+    });
+
+    it("keeps each timeline under its interaction's conditions", () => {
+      const { cssRules } = _generate({
+        conditions: { desktop: { type: 'media', predicate: 'min-width: 1024px' } },
+        interactions: [
+          { key: 'a', trigger: 'viewProgress', effects: [scrub('in')] },
+          { key: 'a', trigger: 'viewProgress', conditions: ['desktop'], effects: [scrub('out')] },
+        ],
+      });
+
+      const [always, desktop] = timelinesOf(cssRules);
+      expect(always).toMatchObject({ name: '--vw-tmln-0', value: '--trigger-0' });
+      expect(always.media).toBeFalsy();
+      expect(desktop).toMatchObject({ name: '--vw-tmln-1', value: '--trigger-1' });
+      expect(desktop.media).toContain('min-width: 1024px');
+    });
+
+    // a named view timeline is only visible to its source's subtree, so a sibling target can't find it
+    it('scopes the timelines that animate other elements to the page', () => {
+      const css = generate({
+        interactions: [
+          { key: 'a', trigger: 'viewProgress', effects: [{ ...scrub('sibling'), key: 'b' }] },
+          { key: 'a', trigger: 'viewProgress', effects: [scrub('self')] },
+          {
+            key: 'c',
+            selector: '.source',
+            trigger: 'viewProgress',
+            effects: [{ ...scrub('other'), selector: '.target' }],
+          },
+        ],
+      });
+
+      expect(css).toContain(':root {\n  timeline-scope: --trigger-0, --trigger-2;\n}');
+    });
+
+    it('does not scope the timelines that only animate their source', () => {
+      const css = generate({
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'viewProgress',
+            effects: [scrub('in'), { ...scrub('out'), key: 'a' }],
+          },
+          { key: 'a', trigger: 'viewEnter', effects: [{ ...scrub('enter'), key: 'b' }] },
+        ],
+      });
+
+      expect(css).not.toContain('timeline-scope');
+    });
+  });
+
+  describe('multiple configs (configIndex option)', () => {
+    const scrubOf = (source: string, effectId: string): InteractConfig => ({
+      interactions: [
+        {
+          key: source,
+          trigger: 'viewProgress',
+          effects: [
+            {
+              key: 'shared',
+              effectId,
+              keyframeEffect: { name: effectId, keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+            },
+          ],
+        },
+      ],
+    });
+
+    it('suffixes the list custom properties and trigger names with the config index', () => {
+      const { cssRules, atProperty } = _generate(scrubOf('a', 'fade'), { configIndex: 1 });
+      const names = cssRules.flatMap(({ declarations }) => declarations.map(({ name }) => name));
+
+      expect(names).toEqual(
+        expect.arrayContaining(['--vw-tmln-c1-0', '--anm-c1-0', '--anm-tmln-c1-0']),
+      );
+      expect(names.filter((name) => /^--[a-z-]+-\d+$/.test(name))).toEqual([]);
+      expect(cssRules.find(({ key }) => key === 'a')!.declarations[0].value).toBe('--trigger-c1-0');
+      expect(atProperty).toContain(
+        '@property --anm-c1-0 { syntax: "*"; inherits: false; initial-value: none; }',
+      );
+    });
+
+    it('concatenates the lists of the configs before it on the elements it targets', () => {
+      const { listsRule, atProperty } = _generate(scrubOf('a', 'fade'), { configIndex: 1 });
+
+      expect(listsRule).toContain('--anm-c1: var(--anm-c1-0);');
+      expect(listsRule).toContain('animation: var(--anm-c0), var(--anm-c1);');
+      expect(listsRule).toContain('view-timeline: var(--vw-tmln-c0), var(--vw-tmln-c1);');
+      expect(atProperty).toContain(
+        '@property --anm-c0 { syntax: "*"; inherits: false; initial-value: none; }',
+      );
+      expect(atProperty).toContain(
+        '@property --anm-c1 { syntax: "*"; inherits: false; initial-value: none; }',
+      );
+    });
+
+    it('scopes the timelines of the configs before it to the page', () => {
+      const { timelineScopeRule } = _generate(scrubOf('a', 'fade'), { configIndex: 2 });
+
+      expect(timelineScopeRule).toBe(
+        ':root {\n  --tmln-scp-c2: --trigger-c2-0;\n  timeline-scope: var(--tmln-scp-c0, --_), var(--tmln-scp-c1, --_), var(--tmln-scp-c2, --_);\n}',
+      );
+    });
+
+    it('keeps the legacy names without a config index', () => {
+      const { listsRule, timelineScopeRule } = _generate(scrubOf('a', 'fade'));
+
+      expect(listsRule).toContain('animation: var(--anm-0);');
+      expect(listsRule).not.toContain('-c0');
+      expect(timelineScopeRule).toBe(':root {\n  timeline-scope: --trigger-0;\n}');
+    });
+
+    const unnamed = (): InteractConfig => ({
+      interactions: [
+        {
+          key: 'a',
+          trigger: 'click',
+          effects: [
+            { duration: 100, keyframeEffect: { keyframes: [{ opacity: 0 }] } },
+            { transition: { duration: 100, styleProperties: [{ name: 'color', value: 'red' }] } },
+          ],
+          sequences: [
+            { effects: [{ duration: 100, keyframeEffect: { keyframes: [{ opacity: 0 }] } }] },
+          ],
+        },
+      ],
+    });
+
+    it('suffixes the ids of unnamed effects and sequences with the config index', () => {
+      const { keyframes, cssRules } = _generate(unnamed(), { configIndex: 1 });
+
+      expect([...keyframes.keys()]).toEqual(['eff-c1-0-0', 'seq-c1-0-0-eff-0']);
+      expect(cssRules.find(({ states }) => states)!.states).toEqual(['eff-c1-0-1']);
+    });
+
+    it('gives unnamed effects and sequences the same ids at runtime', () => {
+      const idsOf = ({ interactions: [{ effects, sequences }] }: InteractConfig) => [
+        ...effects!.map((effect) => (effect as { effectId: string }).effectId),
+        ...sequences!.flatMap((sequence) =>
+          (sequence as { effects: { keyframeEffect: { name: string } }[] }).effects.map(
+            ({ keyframeEffect }) => keyframeEffect.name,
+          ),
+        ),
+      ];
+      const generated = unnamed();
+      _generate(generated, { configIndex: 1 });
+      const config = unnamed();
+      const instance = Interact.create(config, { configIndex: 1 });
+
+      expect(idsOf(config)).toEqual(['eff-c1-0-0', 'eff-c1-0-1', 'seq-c1-0-0-eff-0']);
+      expect(idsOf(config)).toEqual(idsOf(generated));
+      instance.destroy();
+    });
+  });
+
+  describe('effect parts', () => {
+    const style = (options: { suffix?: string }) => [
+      { ...options, name: 'bg-media', part: 'MEDIA_WRAPPER', keyframes: [{ opacity: 0 }] },
+      { ...options, name: 'bg-img', part: 'MEDIA', keyframes: [{ opacity: 0 }] },
+    ];
+    registerEffects({
+      TestBgParts: { web: style, style, getNames: () => ['bg-media', 'bg-img'] },
+    } as any);
+
+    it('declares the animations of each part on that part', () => {
+      const { cssRules, listsRule } = _generate({
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'viewProgress',
+            effects: [{ effectId: 'bg', namedEffect: { type: 'TestBgParts' } as any }],
+          },
+        ],
+      });
+
+      const animationOf = (childSelector: string) =>
+        cssRules
+          .find((rule) => rule.childSelector === childSelector)
+          ?.declarations.find(({ name }) => name === '--anm-0')?.value;
+
+      expect(animationOf('[data-motion-part~="MEDIA_WRAPPER"]')).toMatch(/^bg-media /);
+      expect(animationOf('[data-motion-part~="MEDIA"]')).toMatch(/^bg-img /);
+      expect(animationOf('> :first-child')).toBeUndefined();
+      expect(listsRule).toContain(
+        '[data-interact-key="a"] > :first-child, [data-interact-key="a"] [data-motion-part~="MEDIA_WRAPPER"], [data-interact-key="a"] [data-motion-part~="MEDIA"] {',
+      );
     });
   });
 

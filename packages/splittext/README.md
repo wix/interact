@@ -13,7 +13,7 @@ Lightweight, accessible text splitting utility for creating staggered animations
 - **Lazy evaluation** — DOM is only mutated when a result getter is first accessed
 - **Accessible by default** — original text preserved for screen readers and SEO
 - **Customizable wrappers** — add classes, inline styles, and data attributes per split type
-- **CSS stagger hooks** — `--char-index`, `--word-index`, etc. set automatically on every span
+- **CSS stagger hooks** — `--char-index`, `--word-index`, etc. on every span; `--char-count`, `--word-count`, etc. on the inner wrapper for reverse staggers
 - **React hook** — `useSplitText` with automatic cleanup on unmount
 - **Responsive** — optional `autoSplit` re-splits on resize and font load
 - **Revertible** — restore the original DOM at any time with `result.revert()`
@@ -72,6 +72,11 @@ splitText('.headline', {
   animation: fadeUp 0.4s ease forwards;
   animation-delay: calc(var(--char-index) * 0.04s);
 }
+
+/* Reverse stagger: `--char-count` is set on the inner wrapper and inherited */
+.char.reverse {
+  animation-delay: calc((var(--char-count) - 1 - var(--char-index)) * 0.04s);
+}
 @keyframes fadeUp {
   to {
     opacity: 1;
@@ -123,7 +128,7 @@ Returns a `SplitTextResult` with lazy getters: `.chars`, `.words`, `.lines`, `.s
 | `contentAttribute` | `'none' \| 'both' \| 'attribute-only'`                                               | `'both'`     | `both`: text content and `data-content`; `attribute-only`: attribute only |
 | `aria`             | `'auto' \| 'none'`                                                                   | `'auto'`     | ARIA handling mode                                                        |
 | `preserveText`     | `boolean`                                                                            | `true`       | Insert visually-hidden original text for a11y/SEO                         |
-| `partIndexing`     | `boolean`                                                                            | `true`       | Set `--char-index` / `--word-index` etc. on spans                         |
+| `partIndexing`     | `boolean`                                                                            | `true`       | Set `--*-index` on spans and `--*-count` on the inner wrapper             |
 | `wordGlue`         | `'adjacent' \| 'none'`                                                               | `'adjacent'` | Glue punctuation to words, or wrap it separately                          |
 | `nested`           | `'flatten' \| 'preserve' \| number`                                                  | `'preserve'` | How inner DOM structure is handled                                        |
 | `autoSplit`        | `boolean`                                                                            | `false`      | Re-split on resize / font load                                            |

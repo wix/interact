@@ -30,6 +30,7 @@ vi.mock('@wix/motion', async () => {
       });
     }),
     registerEffects: vi.fn(),
+    getRegisteredEffect: vi.fn(),
     toCSSPropertyName,
   };
 

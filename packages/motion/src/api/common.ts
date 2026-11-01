@@ -8,7 +8,7 @@ import type {
   TriggerVariant,
   UnitLengthPercentage,
 } from '../types';
-import { getCssUnits, getEasing, normalizeKeyframes } from '../utils';
+import { getCssUnits, getEasing } from '../utils';
 import fastdom from 'fastdom';
 import { getRegisteredEffect } from './registry';
 
@@ -21,6 +21,16 @@ function getElementMotionPart(element: Element | null, part: string) {
     return element;
   }
   return element?.querySelector(`[data-motion-part~="${part}"]`);
+}
+
+function getTargetParts(target: HTMLElement | string | null, parts?: string[]) {
+  const element = typeof target === 'string' ? getElement(target) : target;
+  if (parts?.length) {
+    return parts
+      .map((part) => getElementMotionPart(element, part))
+      .filter(Boolean) as HTMLElement[];
+  }
+  return element ? [element] : [];
 }
 
 function getDirection(effect: AnimationData): KeyframeEffectOptions['direction'] {
@@ -119,12 +129,10 @@ function getEffectsData(
       }
     }
 
-    // keyframe property names may be authored in camelCase or kebab-case,
-    // WAAPI only understands camelCase
-    const keyframes = normalizeKeyframes(effect.keyframes);
-
     return {
-      effect: keyframes === effect.keyframes ? effect : { ...effect, keyframes },
+      // pass the preset's object as is - its keyframes and ranges may be getters
+      // that must only be read after its measure() callbacks ran
+      effect,
       options: effectOptions,
       id: effectId && `${effectId}-${index + 1}`,
       part: effect.part,
@@ -140,6 +148,7 @@ export {
   isNotAScrubTrigger,
   getElement,
   getElementMotionPart,
+  getTargetParts,
   getNamedEffect,
   getEffectsData,
   measure,

@@ -141,11 +141,8 @@ function toKebabCase(property: string): string {
   return property.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
 }
 
-function getCssTargetElement(target: string): HTMLElement | null {
-  const selector =
-    target.startsWith('#') || target.startsWith('.') || target.startsWith('[')
-      ? target
-      : `#${target}`;
+function getCssTargetElement(targetId: string, part?: string): HTMLElement | null {
+  const selector = `#${targetId}${part ? `[data-motion-part~="${part}"]` : ''}`;
   return document.querySelector(selector) as HTMLElement | null;
 }
 
@@ -169,13 +166,13 @@ function formatKeyframeBlock(keyframe: Keyframe): string {
  * so E2E can verify descriptor usability in a real browser. It does not validate
  * internal descriptor-generation logic itself (covered by unit tests).
  */
-function applyCssAnimationData(data: CssAnimationData[]): void {
+function applyCssAnimationData(targetId: string, data: CssAnimationData[]): void {
   const firstAnimation = data[0];
   if (!firstAnimation?.name) {
     return;
   }
 
-  const target = getCssTargetElement(firstAnimation.target);
+  const target = getCssTargetElement(targetId, firstAnimation.part);
   if (!target) {
     return;
   }
@@ -197,7 +194,7 @@ function applyCssAnimationData(data: CssAnimationData[]): void {
 
 function runNamedCssApplied() {
   runNamedCss();
-  applyCssAnimationData(namedCssData);
+  applyCssAnimationData(EFFECTS_TARGET_IDS.namedCss, namedCssData);
 }
 
 // ---------------------------------------------------------------------------
@@ -245,7 +242,7 @@ function runKeyframeCss() {
 
 function runKeyframeCssApplied() {
   runKeyframeCss();
-  applyCssAnimationData(keyframeCssData);
+  applyCssAnimationData(EFFECTS_TARGET_IDS.keyframeCss, keyframeCssData);
 }
 
 // ---------------------------------------------------------------------------

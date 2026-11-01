@@ -6,11 +6,20 @@ import type {
   AnimationExtraOptions,
   ScrubAnimationOptions,
 } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgPullBack'];
+const DEFAULTS: Required<BgPullBack> = {
+  type: 'BgPullBack',
+  depth: 50,
+};
+
+export const schema = {
+  depth: { type: 'number', default: DEFAULTS.depth },
+};
+
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgPullBack'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -27,24 +36,27 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_WRAPPER'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const easing = 'linear';
-  const { scale = 50 } = options.namedEffect as BgPullBack;
+  const { depth = DEFAULTS.depth } = options.namedEffect as BgPullBack;
 
   const custom = {
-    '--motion-trans-z': `${scale}px`,
-    // TODO: (ameerf) - remove and use only scale once CSS round is widely available
-    '--motion-trans-y': `-${(scale / 3) | 0}%`,
+    '--motion-trans-z': `${depth}px`,
+    // TODO: (ameerf) - remove and use only depth once CSS round is widely available
+    '--motion-trans-y': `-${(depth / 3) | 0}%`,
   };
 
   const [bgPullBack] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgPullBack,
+      custom,
       easing,
-      part: 'BG_MEDIA',
+      part: 'MEDIA_WRAPPER',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -70,4 +82,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

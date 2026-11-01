@@ -6,11 +6,20 @@ import type {
   AnimationExtraOptions,
   ScrubAnimationOptions,
 } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgFade'];
+const DEFAULTS: Required<BgFade> = {
+  type: 'BgFade',
+  range: 'in',
+};
+
+export const schema = {
+  range: { type: 'enum', values: ['in', 'out'], default: DEFAULTS.range },
+};
+
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgFade'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -30,8 +39,10 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_CLIP'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { range = 'in' } = options.namedEffect as BgFade;
+  const { range = DEFAULTS.range } = options.namedEffect as BgFade;
   const isOut = range === 'out';
   const easing = isOut ? 'sineOut' : 'sineIn';
 
@@ -42,11 +53,12 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
 
   const [bgFade] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgFade,
-      part: 'BG_LAYER',
+      custom,
+      part: 'MEDIA_CLIP',
       easing,
       startOffset: {
         name: 'cover',
@@ -80,4 +92,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

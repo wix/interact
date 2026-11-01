@@ -210,7 +210,7 @@ function _addInteraction(
 
   const interactionsToApply: InteractionsToApply = [];
 
-  (interaction.effects || []).forEach((effect) => {
+  (interaction.effects || []).forEach((effect, effectIndex) => {
     const effectId = (effect as EffectRef).effectId;
 
     const effectOptions = {
@@ -235,7 +235,7 @@ function _addInteraction(
     const mql = getMediaQuery(effectOptions.conditions || [], instance.dataCache.conditions);
 
     if (mql) {
-      instance.setupMediaQueryListener(interactionId, mql, sourceKey, () => {
+      instance.setupMediaQueryListener(`${interactionId}::${effectIndex}`, mql, sourceKey, () => {
         sourceController.update();
       });
     }
@@ -708,7 +708,7 @@ function addEffectsForTarget(
     const effectVariations = effects[interactionId_];
 
     // use `some` to short-circuit after the first effect that matches the conditions
-    effectVariations.some(({ effect, ...interaction }) => {
+    effectVariations.some(({ effect, ...interaction }, variationIndex) => {
       const interactionMql = getMediaQuery(
         interaction.conditions || [],
         instance!.dataCache.conditions,
@@ -735,10 +735,15 @@ function addEffectsForTarget(
       const mql = getMediaQuery(effectOptions.conditions || [], instance!.dataCache.conditions);
 
       if (mql) {
-        instance.setupMediaQueryListener(interactionId, mql, targetKey, () => {
-          // For effects on target, we reconcile the target element
-          targetController.update();
-        });
+        instance.setupMediaQueryListener(
+          `${interactionId}::${variationIndex}`,
+          mql,
+          targetKey,
+          () => {
+            // For effects on target, we reconcile the target element
+            targetController.update();
+          },
+        );
       }
 
       if (!mql || mql.matches) {

@@ -13,7 +13,7 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   getMotionLayoutRotation,
 } from '../../transformUtils';
-import { compareKeywordToNonDefaults, parseLength, parseLengthLazy } from '../../utils';
+import { compareKeywordToNonDefaults, parseLength, parseCssLength } from '../../utils';
 
 const DEFAULTS: Required<MoveScroll> = {
   type: 'MoveScroll',
@@ -25,7 +25,7 @@ const DEFAULTS: Required<MoveScroll> = {
 export const schema = {
   direction: { type: 'number', default: DEFAULTS.direction },
   range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
-  travel: { type: 'length', default: DEFAULTS.travel },
+  travel: { type: 'lengthObject', default: DEFAULTS.travel },
 };
 
 export function getNames({ suffix = '' }: ScrubAnimationOptions) {
@@ -73,7 +73,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
       ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
       ...getMotionTransRot(
         toMotionRange(angleDirection, motionDirection, range),
-        { travel: parseLengthLazy(inputTravel, DEFAULTS.travel) },
+        { travel: parseCssLength(inputTravel, DEFAULTS.travel) },
         asWeb,
         suffix,
       ),

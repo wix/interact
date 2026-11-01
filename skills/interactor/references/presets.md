@@ -102,29 +102,29 @@ range: 'continuous' }`). It is unrelated to the effect-level **`rangeStart`/
 > `rangeEnd`** (the ViewTimeline scroll _window_, a `RangeOffset` — see
 > `config-schema.md`). Every `viewProgress` effect — including `ParallaxScroll` —
 > still takes `rangeStart`/`rangeEnd` to define its scroll window; `ParallaxScroll`
-> just doesn't accept the `range` _option_ (it uses `speed`).
+> just doesn't accept the `range` _option_ (it uses `speed` and `center`).
 
-| Preset           | Params (default)                                                                                                                                 |
-| :--------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `FadeScroll`     | `opacity` (`0`), `range` (`'in'`)                                                                                                                |
-| `RevealScroll`   | `direction` cardinal (`'bottom'`), `range` (`'in'`)                                                                                              |
-| `ParallaxScroll` | `speed` (`0.7159`), `center` 0–1 (`0.5`) — **no `range`**                                                                                        |
-| `MoveScroll`     | `direction` deg (`-60`), `travel` (`{400,'px'}`), `range` (`'in'`)                                                                               |
-| `SlideScroll`    | `direction` cardinal (`'top'`), `range` (`'in'`)                                                                                                 |
+| Preset           | Params (default)                                                                                                                                                  |
+| :--------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FadeScroll`     | `opacity` (`0`), `range` (`'in'`)                                                                                                                                 |
+| `RevealScroll`   | `direction` cardinal (`'bottom'`), `range` (`'in'`)                                                                                                               |
+| `ParallaxScroll` | `speed` (`0.7159`, 1 = moves with the page), `center` 0–1 (`0.5`) — **no `range`**                                                                                |
+| `MoveScroll`     | `direction` deg it moves towards (`-60`), `travel` (`{400,'px'}`), `range` (`'in'`)                                                                               |
+| `SlideScroll`    | `direction` cardinal it moves towards (`'top'`), `range` (`'in'`)                                                                                                 |
 | `GrowScroll`     | `pivot` 9-way (`'center'`), `scale` (`0.25`; inverted to >1 for out/continuous), `speed` (`1`), `range` (`'in'`)                                 |
 | `ShrinkScroll`   | `pivot` 9-way (`'center'`), `scale` (`1.2`; inverted to <1 for out/continuous), `speed` (`1`), `range` (`'in'`)                                  |
-| `TiltScroll`     | `direction` `clockwise\|counter-clockwise` (`'counter-clockwise'`), `speed` (`1`), `perspective` (`400`), `range` (`'in'`)                       |
-| `PanScroll`      | `direction` `left\|right` (`'right'`), `distance` (`{400,'px'}`), `startFromOffScreen` (`true`), `range` (`'in'`)                                |
-| `BlurScroll`     | `blur` (`6`), `range` (`'in'`)                                                                                                                   |
-| `FlipScroll`     | `direction` `vertical\|horizontal` (`'horizontal'`), `angle` deg (`240`), `perspective` (`800`), `range` (`'continuous'`)                        |
-| `SpinScroll`     | `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `spins` (`0.15`), `scale` (`1`), `range` (`'in'`)                                    |
-| `ArcScroll`      | `direction` `vertical\|horizontal` (`'horizontal'`), `perspective` (`500`), `range` (`'in'`)                                                     |
-| `ShapeScroll`    | `shape` (`'circle'`), `start` 0–1 (`0.5`), `range` (`'in'`)                                                                                      |
-| `ShuttersScroll` | `direction` cardinal (`'right'`), `shutters` (`12`), `staggered` (`true`), `range` (`'in'`)                                                      |
-| `SkewPanScroll`  | `direction` `left\|right` (`'left'`), `skew` deg (`10`), `range` (`'in'`)                                                                        |
-| `Spin3dScroll`   | `angle` deg (`100`), `speed` (`1`), `perspective` (`1000`), `range` (`'in'`)                                                                     |
-| `StretchScroll`  | `stretch` -1–1 (`0.6`), `range` (`'out'`)                                                                                                        |
-| `TurnScroll`     | `direction` `left\|right` (`'left'`), `spin` `clockwise\|counter-clockwise` (`'clockwise'`), `angle` deg (`45`), `scale` (`1`), `range` (`'in'`) |
+| `TiltScroll`     | `direction` `clockwise\|counter-clockwise` (`'counter-clockwise'`), `speed` (`1`), `perspective` (`400`), `range` (`'in'`)                                        |
+| `PanScroll`      | `direction` `left\|right` it moves towards (`'right'`), `distance` (`{400,'px'}`), `startFromOffScreen` (`true`), `range` (`'in'`)                                |
+| `BlurScroll`     | `blur` (`6`), `range` (`'in'`)                                                                                                                                    |
+| `FlipScroll`     | `direction` `vertical\|horizontal` (`'horizontal'`), `angle` deg (`240`), `perspective` (`800`), `range` (`'continuous'`)                                         |
+| `SpinScroll`     | `direction` `clockwise\|counter-clockwise` (`'clockwise'`), `spins` (`0.15`), `scale` (`1`), `range` (`'in'`)                                                     |
+| `ArcScroll`      | `direction` `vertical\|horizontal` (`'horizontal'`), `perspective` (`500`), `range` (`'in'`)                                                                      |
+| `ShapeScroll`    | `shape` (`'circle'`), `start` 0–1 (`0.667`), `range` (`'in'`)                                                                                                     |
+| `ShuttersScroll` | `direction` cardinal (`'right'`), `shutters` (`12`), `staggered` (`true`), `range` (`'in'`)                                                                       |
+| `SkewPanScroll`  | `direction` `left\|right` it moves towards (`'left'`), `skew` deg (`10`), `range` (`'in'`)                                                                        |
+| `Spin3dScroll`   | `angle` deg (`100`), `speed` (`1`), `perspective` (`1000`), `range` (`'in'`)                                                                                      |
+| `StretchScroll`  | `stretch` -1–1 (`0.6`), `range` (`'out'`)                                                                                                                         |
+| `TurnScroll`     | `direction` `left\|right` it moves towards (`'left'`), `spin` `clockwise\|counter-clockwise` (`'clockwise'`), `angle` deg (`45`), `scale` (`1`), `range` (`'in'`) |
 
 ---
 
@@ -146,7 +146,7 @@ idle hold at rest appended after each cycle (the motion itself is unchanged).
 | `Fold`    | `pivot` cardinal (`'top'`), `angle` deg (`15`), `perspective` (`800`)                                    |
 | `Jello`   | `skew` deg (`12.25`)                                                                                     |
 | `Poke`    | `direction` cardinal (`'right'`), `travel` (`{62.5,'px'}`)                                               |
-| `Rubber`  | `stretch` -1–1 (`0.1`)                                                                                   |
+| `Rubber`  | `stretch` ±0.64 (`0.08`)                                                                                 |
 | `Swing`   | `pivot` cardinal (`'top'`), `angle` deg (`20`)                                                           |
 | `Cross`   | `direction` 8-way (`'right'`)                                                                            |
 
@@ -155,23 +155,23 @@ idle hold at rest appended after each cycle (the motion itself is unchanged).
 ## Mouse — for `pointerMove`
 
 Cursor-position-driven transforms (`x:0.5, y:0.5` = center). **All share `inverted`
-boolean (`false`)**; where present, `axis` ∈ `both | horizontal | vertical`
+boolean (`false`)**; where present, `direction` ∈ `both | horizontal | vertical`
 (default `'both'`). Use a scrub effect with `rangeStart`/`rangeEnd` and `fill:'both'`;
 gate with a `(hover: hover)` condition.
 
-| Preset         | Params (default)                                                                                      |
-| :------------- | :---------------------------------------------------------------------------------------------------- |
-| `TrackMouse`   | `distance` (`{200,'px'}`), `axis` (`'both'`) — element follows the cursor                             |
-| `Tilt3DMouse`  | `angle` deg (`5`), `perspective` (`800`) — 3D tilt toward cursor                                      |
-| `Track3DMouse` | `distance` (`{200,'px'}`), `angle` deg (`5`), `perspective` (`800`), `axis` (`'both'`)                |
-| `SwivelMouse`  | `angle` deg (`5`), `perspective` (`800`), `pivotAxis` (`'center-horizontal'`)                         |
-| `AiryMouse`    | `distance` (`{200,'px'}`), `angle` deg (`30`), `axis` (`'both'`)                                      |
-| `ScaleMouse`   | `distance` (`{80,'px'}`), `scale` (`1.4`), `axis` (`'both'`)                                          |
-| `BlurMouse`    | `distance` (`{80,'px'}`), `angle` deg (`5`), `scale` (`0.3`), `blur` px (`20`), `perspective` (`600`) |
-| `SkewMouse`    | `distance` (`{200,'px'}`), `angle` deg (`25`), `axis` (`'both'`)                                      |
-| `BlobMouse`    | `distance` (`{200,'px'}`), `scale` (`1.4`)                                                            |
-| `BounceMouse`  | `distance` (`{80,'px'}`), `axis` (`'both'`) — elastic follow                                          |
-| `SpinMouse`    | `axis` (`'both'`)                                                                                     |
+| Preset         | Params (default)                                                                                                  |
+| :------------- | :---------------------------------------------------------------------------------------------------------------- |
+| `TrackMouse`   | `travel` (`{200,'px'}`), `direction` (`'both'`) — element follows the cursor                                      |
+| `Tilt3DMouse`  | `angle` deg (`5`), `perspective` (`800`) — 3D tilt toward cursor                                                  |
+| `Track3DMouse` | `travel` (`{200,'px'}`), `angle` deg (`5`), `perspective` (`800`), `direction` (`'both'`)                         |
+| `SwivelMouse`  | `angle` deg (`5`), `perspective` (`800`), `pivot` (`'center-horizontal'`)                                         |
+| `AiryMouse`    | `travel` (`{200,'px'}`), `angle` deg (`30`), `direction` (`'both'`)                                               |
+| `ScaleMouse`   | `travel` (`{80,'px'}`), `scale` (`1.4`), `direction` (`'both'`)                                                   |
+| `BlurMouse`    | `travel` (`{80,'px'}`), `angle` deg (`5`), `scale` (`0.3`), `blur` px at corners (`16.57`), `perspective` (`600`) |
+| `SkewMouse`    | `travel` (`{200,'px'}`), `angle` deg (`25`), `direction` (`'both'`)                                               |
+| `BlobMouse`    | `travel` (`{200,'px'}`), `scale` (`1.4`)                                                                          |
+| `BounceMouse`  | `travel` (`{80,'px'}`), `direction` (`'both'`) — elastic follow                                                   |
+| `SpinMouse`    | `direction` (`'both'`)                                                                                            |
 
 > Advanced: `CustomMouse` is a 12th mouse export — a programmatic escape hatch that
 > needs a `customEffect(target, progress)` callback you supply. Not config-only; use

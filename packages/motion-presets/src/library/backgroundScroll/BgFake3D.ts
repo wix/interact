@@ -6,13 +6,27 @@ import type {
   ScrubAnimationOptions,
   DomApi,
 } from '../../types';
-import { roundNumber, toKeyframeValue } from '../../utils';
+import { roundNumber, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight, getScaleFromPerspectiveAndZ } from './utils';
 
 const PERSPECTIVE = 100;
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgFake3DParallax', 'motion-bgFake3DStretch', 'motion-bgFake3DZoom'];
+const DEFAULTS: Required<BgFake3D> = {
+  type: 'BgFake3D',
+  depth: 16.67,
+  scaleY: 1.3,
+};
+
+export const schema = {
+  depth: { type: 'number', default: DEFAULTS.depth },
+  scaleY: { type: 'number', min: 0, default: DEFAULTS.scaleY },
+};
+
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(
+    ['motion-bgFake3DParallax', 'motion-bgFake3DStretch', 'motion-bgFake3DZoom'],
+    options.suffix,
+  );
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -29,24 +43,27 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const { stretch = 1.3, zoom = 100 / 6 } = options.namedEffect as BgFake3D;
-  const scale = getScaleFromPerspectiveAndZ(zoom, PERSPECTIVE);
+  const { scaleY = DEFAULTS.scaleY, depth = DEFAULTS.depth } = options.namedEffect as BgFake3D;
+  const scale = getScaleFromPerspectiveAndZ(depth, PERSPECTIVE);
 
   const custom = {
-    '--motion-scale-y': stretch,
-    '--motion-trans-z': `${roundNumber(zoom)}px`,
+    '--motion-scale-y': scaleY,
+    '--motion-trans-z': `${roundNumber(depth)}px`,
     '--motion-trans-y-factor': roundNumber(-0.1 * (2 - scale)),
   };
 
   const [bgFake3DParallax, bgFake3DStretch, bgFake3DZoom] = getNames(options);
   const { measures = { '--motion-comp-height': '0px' } } = options;
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgFake3DParallax,
-      part: 'BG_IMG',
+      custom,
+      part: 'MEDIA',
       easing: 'sineOut',
       startOffset: {
         name: 'cover',
@@ -82,9 +99,10 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgFake3DStretch,
-      part: 'BG_IMG',
+      custom,
+      part: 'MEDIA',
       easing: 'linear',
-      composite: 'add',
+      composite: 'add' as const,
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -108,9 +126,10 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgFake3DZoom,
-      part: 'BG_IMG',
+      custom,
+      part: 'MEDIA',
       easing: 'sineIn',
-      composite: 'add',
+      composite: 'add' as const,
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -136,4 +155,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

@@ -226,7 +226,7 @@ Interact.create(config);
 | `ignore`           | CSS selector string or `(node) => boolean`                       | Skip subtrees in preserve modes; flatten mode excludes their text.                                                                   |
 | `preserveText`     | `boolean`                                                        | Default `true` — insert visually-hidden original text for a11y/SEO.                                                                  |
 | `aria`             | `'auto' \| 'none'`                                               | Default `'auto'`; `'none'` disables the default screen-reader handling.                                                              |
-| `partIndexing`     | `boolean`                                                        | Default `true` — set the corresponding `--char/word/line/sentence-index`.                                                            |
+| `partIndexing`     | `boolean`                                                        | Default `true` — set `--char/word/line/sentence-index` on spans and matching `--*-count` on the inner wrapper.                       |
 | `wordGlue`         | `'adjacent' \| 'none'`                                           | Default `'adjacent'`; glue punctuation to words or wrap it separately.                                                               |
 | `contentAttribute` | `'none' \| 'both' \| 'attribute-only'`                           | Default `'both'`; applies to character and word spans only.                                                                          |
 | `segmenter`        | `Intl.Segmenter` instance or constructor                         | Supply a polyfill when native `Intl.Segmenter` is unavailable.                                                                       |
@@ -247,7 +247,9 @@ Every wrapper `<span>` automatically receives a built-in class:
 Base styles are injected once per document. Character, word, and sentence spans are
 `inline-block`; line spans are `block`. With `partIndexing: true` (default), each
 span gets `--char-index`, `--word-index`, `--line-index`, or
-`--sentence-index`.
+`--sentence-index`, and the inner `[data-splittext-wrapper]` sets inherited
+`--char-count`, `--word-count`, `--line-count`, or `--sentence-count` for the
+built type(s).
 
 ### Staggering split spans
 

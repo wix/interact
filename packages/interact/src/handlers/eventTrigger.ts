@@ -27,7 +27,9 @@ function createFocusListener(source: HTMLElement, handler: EventHandler): EventL
 function createClickListener(handler: EventHandler): EventListener {
   return (e: Event) => {
     const ev = e as MouseEvent;
-    if ((ev as PointerEvent).pointerType) {
+    // Safari sends a pointer's click as a MouseEvent without pointerType; its click count (detail) still marks it.
+    // A keyboard-synthesized click has neither, and the keydown listener handles it
+    if ((ev as PointerEvent).pointerType || ev.detail > 0) {
       handler(ev);
     }
   };

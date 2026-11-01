@@ -8,7 +8,7 @@ import {
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { getLoopOverrides } from '../../easingUtils';
-import { parseLengthLazy } from '../../utils';
+import { parseCssLength } from '../../utils';
 import { sideDirection, toMotionRange } from '../../directions';
 
 const DEFAULTS: Required<Poke> = {
@@ -67,7 +67,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...getLoopOverrides(pokeOptions, { shape: SHAPE }),
       ...getMotionTransRot(
         toMotionRange(sideDirection, side, 'in'),
-        { travel: parseLengthLazy(travel, { value: 0, unit: 'px' }) },
+        { travel: parseCssLength(travel, { value: 0, unit: 'px' }) },
         asWeb,
         suffix,
       ),

@@ -12,10 +12,12 @@ import {
   IInteractElement,
   InteractPlugin,
 } from '../types';
-import { getInterpolatedKey } from './utilities';
+import { getElementHash, getInterpolatedKey } from './utilities';
+import { getFallbackId, getKeyframeSlots, getSlotKey } from './css';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
+  getRegisteredEffect,
   getSequence as getMotionSequence,
   createAnimationGroups,
   Sequence,
@@ -23,7 +25,7 @@ import {
 import type { SequenceOptions, AnimationGroupArgs, IndexedGroup } from '@wix/motion';
 
 function _convertToKeyTemplate(key: string) {
-  return key.replace(/\[([-\w]+)]/g, '[]');
+  return key.replace(/\[[^\]]+]/g, '[]');
 }
 
 export class Interact {
@@ -58,14 +60,17 @@ export class Interact {
     this.controllers = new Set();
   }
 
-  init(config: InteractConfig, options?: { useCustomElement?: boolean }): void {
+  init(
+    config: InteractConfig,
+    options?: { useCustomElement?: boolean; configIndex?: number },
+  ): void {
     if (typeof window === 'undefined' || !window.customElements) {
       return;
     }
 
     const useCustomElement = options?.useCustomElement ?? !!Interact.defineInteractElement;
 
-    this.dataCache = parseConfig(config, useCustomElement);
+    this.dataCache = parseConfig(config, useCustomElement, options?.configIndex);
 
     const defined = Interact.defineInteractElement?.();
 
@@ -172,7 +177,10 @@ export class Interact {
     });
   }
 
-  static create(config: InteractConfig, options?: { useCustomElement?: boolean }): Interact {
+  static create(
+    config: InteractConfig,
+    options?: { useCustomElement?: boolean; configIndex?: number },
+  ): Interact {
     const instance = new Interact();
     Interact.instances.push(instance);
 
@@ -245,6 +253,7 @@ export class Interact {
   }
 
   static registerEffects = registerEffects;
+  static getRegisteredEffect = getRegisteredEffect;
 
   /**
    * Registers a plugin under a name. When the config carries a plugin field (e.g. `$splitText`) with a matching key
@@ -396,11 +405,37 @@ function _ensureInteractionEntry(
   return interactions[key];
 }
 
-function parseConfig(config: InteractConfig, useCustomElement: boolean = false): InteractCache {
+// the sequence's effects in their slots - copied, since a referenced sequence can be in different slots
+function withSlots<T extends SequenceConfig | SequenceConfigRef>(
+  sequence: T,
+  getKey: (effectIndex: number) => string,
+  slots: Map<string, string>,
+): T {
+  const { effects = [] } = sequence as Partial<SequenceConfig>;
+  if (!effects.some((_, index) => slots.has(getKey(index)))) {
+    return sequence;
+  }
+  return {
+    ...sequence,
+    effects: effects.map((effect, index) => {
+      const suffix = slots.get(getKey(index));
+      return suffix ? { ...effect, suffix } : effect;
+    }),
+  };
+}
+
+function parseConfig(
+  config: InteractConfig,
+  useCustomElement: boolean = false,
+  configIndex?: number,
+): InteractCache {
   const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {} } = config;
   const interactions: InteractCache['interactions'] = {};
+  const slots = config.interactions
+    ? getKeyframeSlots(config, configIndex)
+    : new Map<string, string>();
 
-  config.interactions?.forEach((interaction_, configIndex) => {
+  config.interactions?.forEach((interaction_, interactionIndex) => {
     const source = interaction_.key;
     const interactionIdx = ++interactionIdCounter;
     const { effects: effects_, sequences: sequences_, ...rest } = interaction_;
@@ -431,7 +466,7 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
 
       const seq = seqOrRef as SequenceConfig;
       if (!seq.sequenceId) {
-        seq.sequenceId = `seq-${configIndex}-${sequenceIndex}`;
+        seq.sequenceId = getFallbackId('seq', [interactionIndex, sequenceIndex], configIndex);
       }
       return seq;
     });
@@ -439,7 +474,13 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
     const interaction = {
       ...rest,
       effects: effects.length > 0 ? effects : undefined,
-      sequences: processedSequences,
+      sequences: processedSequences?.map((seq, sequenceIndex) =>
+        withSlots(
+          seq,
+          (effectIndex) => getSlotKey(interactionIndex, effectIndex, sequenceIndex),
+          slots,
+        ),
+      ),
     } as Interaction;
 
     interactions[source].triggers.push(interaction);
@@ -456,24 +497,27 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
        *  -> Config.effects.effect.key
        *  -> Config.interactions.interaction.key
        */
-      let target = effect.key;
+      const referencedEffect = (effect as EffectRef).effectId
+        ? effectMap[(effect as EffectRef).effectId]
+        : undefined;
+      let target = effect.key || referencedEffect?.key;
 
-      if (!target && (effect as EffectRef).effectId) {
-        const referencedEffect = effectMap[(effect as EffectRef).effectId];
-
-        if (referencedEffect) {
-          target = referencedEffect.key;
-        }
-      }
-
+      const configEffectIndex = effects.length - 1 - effectIndex;
       if (!(effect as EffectRef).effectId) {
-        (effect as EffectRef).effectId = `eff-${configIndex}-${effects.length - 1 - effectIndex}`;
+        (effect as EffectRef).effectId = getFallbackId(
+          'eff',
+          [interactionIndex, configEffectIndex],
+          configIndex,
+        );
+      }
+      const suffix = slots.get(getSlotKey(interactionIndex, configEffectIndex));
+      if (suffix) {
+        (effect as { suffix?: string }).suffix = suffix;
       }
 
       // if no target is specified, use the source element as the target
       target = target || source;
       effect.key = target;
-      const effectId = (effect as EffectRef).effectId;
 
       if (listContainer && effect.listContainer) {
         // we do not support having 2 separate lists for same interaction
@@ -482,7 +526,8 @@ function parseConfig(config: InteractConfig, useCustomElement: boolean = false):
         }
       }
 
-      const interactionId = `${source}::${target}::${effectId}::${interactionIdx}`;
+      const targetHash = getElementHash({ ...referencedEffect, ...effect, key: target });
+      const interactionId = `${source}::${targetHash}::${interactionIdx}`;
       effect.interactionId = interactionId;
       interactions[source].interactionIds.add(interactionId);
 

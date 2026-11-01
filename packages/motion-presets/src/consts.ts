@@ -1,6 +1,7 @@
 const FOUR_DIRECTIONS = ['top', 'right', 'bottom', 'left'] as const;
 const AXIS_DIRECTIONS = ['horizontal', 'vertical'] as const;
 const SCROLL_RANGES = ['in', 'out', 'continuous'] as const;
+const EPSILON = 0.01;
 const SPIN_DIRECTIONS = ['clockwise', 'counter-clockwise'] as const;
 const TWO_SIDES_DIRECTIONS = ['left', 'right'] as const;
 const EIGHT_DIRECTIONS = [
@@ -33,6 +34,7 @@ export {
   FOUR_DIRECTIONS,
   AXIS_DIRECTIONS,
   SCROLL_RANGES,
+  EPSILON,
   SPIN_DIRECTIONS,
   TWO_SIDES_DIRECTIONS,
   EIGHT_DIRECTIONS,

@@ -1,7 +1,7 @@
 import type { Interaction, ElementIdentifier, TimeAnimationTriggerType } from '../types';
 
 export function _processKeysForInterpolation(key: string) {
-  return [...key.matchAll(/\[([-\w]+)]/g)].map(([_, _instanceKey]) => _instanceKey);
+  return [...key.matchAll(/\[([^\]]+)]/g)].map(([_, _instanceKey]) => _instanceKey);
 }
 
 // TODO: currently only supports simple one-to-one mapping, e.g. item[0] -> item[0], item[1] -> item[1]

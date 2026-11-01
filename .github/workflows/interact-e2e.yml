@@ -30,7 +30,7 @@ env:
 jobs:
   interact-e2e:
     name: Interact E2E (${{ github.event.inputs.browser || 'all' }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     steps:

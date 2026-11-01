@@ -14,7 +14,7 @@ import {
   getMotionLayoutRotation,
   getMotionTransRot,
 } from '../../transformUtils';
-import { parseKeywordLazy, parseLengthLazy } from '../../utils';
+import { parseKeywordLazy, parseCssLength } from '../../utils';
 
 const DEFAULTS: Required<PanScroll> = {
   type: 'PanScroll',
@@ -26,7 +26,7 @@ const DEFAULTS: Required<PanScroll> = {
 
 export const schema = {
   direction: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: DEFAULTS.direction },
-  distance: { type: 'length', default: DEFAULTS.distance },
+  distance: { type: 'lengthObject', default: DEFAULTS.distance },
   range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
   startFromOffScreen: { type: 'bool', default: DEFAULTS.startFromOffScreen },
 };
@@ -72,7 +72,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
     ? range === 'out'
       ? { travel: offscreenTravels.toTravel, toTravel: offscreenTravels.travel }
       : offscreenTravels
-    : { travel: parseLengthLazy(distance, DEFAULTS.distance) };
+    : { travel: parseCssLength(distance, DEFAULTS.distance) };
   const motionSide = range === 'out' ? sideDirection.opposite(side) : side;
 
   return withSharedScrollRange([

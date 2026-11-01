@@ -6,7 +6,7 @@ import {
   getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
 } from '../../transformUtils';
-import { parseLengthLazy } from '../../utils';
+import { parseCssLength } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { sideDirection, toMotionRange } from '../../directions';
 
@@ -66,7 +66,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
         toMotionRange(sideDirection, sideDirection.opposite(from), 'in'),
         {
           angle: ROTATION_ANGLE,
-          depth: parseLengthLazy(depth, DEFAULTS.depth as LengthValue),
+          depth: parseCssLength(depth, DEFAULTS.depth as LengthValue),
           perspective,
         },
         asWeb,

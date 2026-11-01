@@ -1,6 +1,8 @@
 import { cssEasings } from '@wix/motion';
 import type { LengthInput, LengthValue, Point, ScrubTransitionEasing } from './types';
 
+export type { LengthInput, LengthValue } from './types';
+
 export function mapRange(
   sourceMin: number,
   sourceMax: number,
@@ -119,6 +121,71 @@ export function declareCustom<K extends string>(
 }
 
 const CSS_UNIT_REGEX = /^(-?\d*\.?\d+)(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/i;
+export const CSS_CALC_REGEX = /^calc\(.*\)$/i;
+const CSS_ANGLE_REGEX = /^(-?\d*\.?\d+)(deg|rad|grad|turn)$/i;
+const SIDE_ANGLES: Record<string, number> = { top: 270, right: 0, bottom: 90, left: 180 };
+
+function isCssNumeric(value: string) {
+  try {
+    return !!globalThis.CSSNumericValue?.parse(value);
+  } catch {
+    return false;
+  }
+}
+
+export function parseAngle(input: number | string | undefined, defaultValue: number) {
+  if (typeof input === 'number') {
+    return `${input}deg`;
+  }
+
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    const side = trimmed.toLowerCase();
+    if (Object.hasOwn(SIDE_ANGLES, side)) {
+      return `${SIDE_ANGLES[side]}deg`;
+    }
+    if (trimmed && !isNaN(Number(trimmed))) {
+      return `${Number(trimmed)}deg`;
+    }
+    if (CSS_ANGLE_REGEX.test(trimmed) || CSS_CALC_REGEX.test(trimmed) || isCssNumeric(trimmed)) {
+      return trimmed;
+    }
+  }
+
+  return `${defaultValue}deg`;
+}
+
+export function parseCssLength(input: LengthInput, defaultValue: LengthValue) {
+  const parsedLength = { ...defaultValue };
+
+  if (typeof input === 'number') {
+    parsedLength.value = input;
+  }
+
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    if (trimmed && !isNaN(Number(trimmed))) {
+      parsedLength.value = Number(trimmed);
+    } else if (
+      CSS_CALC_REGEX.test(trimmed) ||
+      CSS_UNIT_REGEX.test(trimmed) ||
+      isCssNumeric(trimmed)
+    ) {
+      return trimmed;
+    }
+  }
+
+  if (typeof input === 'object' && input !== null && 'value' in input && 'unit' in input) {
+    const value = typeof input.value === 'string' ? parseFloat(input.value) : input.value;
+    if (typeof value === 'number' && !isNaN(value) && typeof input.unit === 'string') {
+      parsedLength.value = value;
+      parsedLength.unit = input.unit.toLowerCase();
+    }
+  }
+
+  return `${parsedLength.value}${getCssUnits(parsedLength.unit)}`;
+}
+
 
 /**
  * Normalize unit string to internal format
@@ -227,42 +294,12 @@ export function parseDirection<T extends string | number>(
   return defaultValue;
 }
 
-const CSS_UNIT_REGEX_NO_I = /^(-?\d*\.?\d+)(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/;
-export const CSS_CALC_REGEX = /^calc\(.*\)$/;
 export const stripCalc = (str: string) => str.replace(/calc/g, '');
 
 // should not be used to compare direction against preset's default because undefined !== <default>
 export function compareKeywordToNonDefaults(direction: string | undefined, compare: string[]) {
   const normalized = direction?.trim().toLowerCase();
   return compare.some((keyword) => normalized === keyword);
-}
-
-export function parseLengthLazy(input: LengthInput, defaultValue: LengthValue) {
-  const parsedLength = { ...defaultValue };
-
-  if (typeof input === 'number') {
-    parsedLength.value = input;
-  }
-
-  if (typeof input === 'string') {
-    const trimmed = input.trim().toLowerCase();
-    if (CSS_CALC_REGEX.test(trimmed) || CSS_UNIT_REGEX_NO_I.test(trimmed)) {
-      return trimmed;
-    }
-    if (trimmed && !isNaN(Number(trimmed))) {
-      parsedLength.value = Number(trimmed);
-    }
-  }
-
-  if (typeof input === 'object' && input !== null && 'value' in input && 'unit' in input) {
-    const value = typeof input.value === 'string' ? parseFloat(input.value) : input.value;
-    if (typeof value === 'number' && !isNaN(value) && typeof input.unit === 'string') {
-      parsedLength.value = value;
-      parsedLength.unit = input.unit.toLowerCase();
-    }
-  }
-
-  return `${parsedLength.value}${getCssUnits(parsedLength.unit)}`;
 }
 
 export function parseKeywordLazy<T extends string>(
@@ -278,4 +315,64 @@ export function parseKeywordLazy<T extends string>(
     }
   }
   return defaultValue;
+}
+
+export function getTimingFactor(
+  duration: number,
+  delay: number,
+  asString = false,
+): number | string {
+  const duration_ = duration || 1;
+  const delay_ = delay || 0;
+  const timingFactor = roundNumber(duration_ / (duration_ + delay_));
+  return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
+}
+
+export function suffixNames(names: string[], suffix?: string) {
+  return suffix ? names.map((name) => `${name}${suffix}`) : names;
+}
+
+type CSSValues = Record<string, string | number | undefined>;
+
+/**
+ * Suffixes the custom properties the animations declare, and their references, so animations of the same
+ * preset in different keyframe slots of an element don't override each other's parameters.
+ * Mutates the animations in place, keeping lazy `keyframes` getters lazy.
+ */
+export function suffixCustomProperties<T extends { custom?: CSSValues; keyframes: CSSValues[] }>(
+  animations: T[],
+  suffix?: string,
+): T[] {
+  const props = new Set(animations.flatMap(({ custom }) => Object.keys(custom || {})));
+  if (!suffix || !props.size) {
+    return animations;
+  }
+
+  const suffixValues = (values: CSSValues) =>
+    Object.fromEntries(
+      Object.entries(values).map(([key, value]) => [
+        props.has(key) ? `${key}${suffix}` : key,
+        typeof value === 'string'
+          ? value.replace(/var\((--[\w-]+)(?=\s*[,)])/g, (match, prop) =>
+              props.has(prop) ? `var(${prop}${suffix}` : match,
+            )
+          : value,
+      ]),
+    );
+
+  animations.forEach((animation) => {
+    if (animation.custom) {
+      animation.custom = suffixValues(animation.custom);
+    }
+    const { get, value } = Object.getOwnPropertyDescriptor(animation, 'keyframes')!;
+    Object.defineProperty(animation, 'keyframes', {
+      ...(get
+        ? { get: () => get.call(animation).map(suffixValues) }
+        : { value: value.map(suffixValues), writable: true }),
+      enumerable: true,
+      configurable: true,
+    });
+  });
+
+  return animations;
 }

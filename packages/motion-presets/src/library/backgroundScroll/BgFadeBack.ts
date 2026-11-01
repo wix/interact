@@ -6,11 +6,20 @@ import type {
   AnimationExtraOptions,
   ScrubAnimationOptions,
 } from '../../types';
-import { toKeyframeValue } from '../../utils';
+import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
 
-export function getNames(_: ScrubAnimationOptions) {
-  return ['motion-bgFadeBackOpacity', 'motion-bgFadeBackScale'];
+const DEFAULTS: Required<BgFadeBack> = {
+  type: 'BgFadeBack',
+  scale: 0.7,
+};
+
+export const schema = {
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+};
+
+export function getNames(options: ScrubAnimationOptions) {
+  return suffixNames(['motion-bgFadeBackOpacity', 'motion-bgFadeBackScale'], options.suffix);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -30,20 +39,22 @@ export function web(options: ScrubAnimationOptions & AnimationExtraOptions, dom?
   return style(options, true);
 }
 
+export const parts = ['MEDIA_CLIP'];
+
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const easing = 'sineOut';
-  const { scale = 0.7 } = options.namedEffect as BgFadeBack;
+  const { scale = DEFAULTS.scale } = options.namedEffect as BgFadeBack;
 
   const custom = { '--motion-scale': scale };
 
   const [bgFadeBackOpacity, bgFadeBackScale] = getNames(options);
 
-  return [
+  const animations = [
     {
       ...options,
       name: bgFadeBackOpacity,
       easing: 'linear',
-      part: 'BG_LAYER',
+      part: 'MEDIA_CLIP',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -72,8 +83,9 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
     {
       ...options,
       name: bgFadeBackScale,
+      custom,
       easing,
-      part: 'BG_LAYER',
+      part: 'MEDIA_CLIP',
       startOffset: {
         name: 'cover',
         offset: { unit: 'percentage', value: 0 },
@@ -100,4 +112,6 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
       ],
     },
   ];
+
+  return suffixCustomProperties(animations, options.suffix);
 }

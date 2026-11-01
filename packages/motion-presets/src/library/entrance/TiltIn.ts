@@ -9,7 +9,7 @@ import {
   getMotionLayoutRotation,
   MOTION_LAYOUT_ROTATION_NAME,
 } from '../../transformUtils';
-import { compareKeywordToNonDefaults, parseLengthLazy } from '../../utils';
+import { compareKeywordToNonDefaults, parseCssLength } from '../../utils';
 import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
 import { axisDirection, sideDirection, spinDirection, toMotionRange } from '../../directions';
 
@@ -104,7 +104,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
         toMotionRange(axisDirection, TILT_DIRECTION, 'in'),
         {
           angle: ROTATION_3D_ANGLE,
-          depth: parseLengthLazy(depth, DEFAULTS.depth as LengthValue),
+          depth: parseCssLength(depth, DEFAULTS.depth as LengthValue),
           perspective,
         },
         asWeb,

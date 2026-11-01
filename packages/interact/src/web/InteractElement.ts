@@ -17,10 +17,14 @@ export function getInteractElement() {
       this.controller = new InteractionController(this, undefined, { useFirstChild: true });
       this._internals = null;
 
-      if (this.attachInternals) {
-        this._internals = this.attachInternals() as ElementInternals & {
-          states: Set<string>;
-        };
+      const internals = this.attachInternals?.() as
+        | (ElementInternals & { states?: Set<string> })
+        | undefined;
+
+      // Safari before 17.4 has ElementInternals without CustomStateSet: keep _internals null, so states fall back to
+      // the data-interact-effect attribute
+      if (internals?.states) {
+        this._internals = internals as ElementInternals & { states: Set<string> };
 
         if (!checkedForLegacyStateSyntax) {
           checkedForLegacyStateSyntax = true;

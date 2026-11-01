@@ -10,7 +10,7 @@ import {
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { getLoopOverrides } from '../../easingUtils';
-import { getEasingFamily, parseKeywordLazy, parseLengthLazy } from '../../utils';
+import { getEasingFamily, parseKeywordLazy, parseCssLength } from '../../utils';
 import { axisDirection, toMotionRange } from '../../directions';
 
 const DEFAULT_EASING = 'sineInOut';
@@ -76,7 +76,7 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
   } as TimeAnimationOptions;
 
   const motionRange = toMotionRange(axisDirection, axis, 'in');
-  const params = { perspective, travel: parseLengthLazy(travel, { value: 0, unit: 'px' }) };
+  const params = { perspective, travel: parseCssLength(travel, { value: 0, unit: 'px' }) };
 
   return [
     {
