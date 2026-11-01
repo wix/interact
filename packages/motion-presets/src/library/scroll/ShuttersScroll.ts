@@ -82,7 +82,9 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   ];
 
   if (range === 'continuous') {
-    keyframes[1].easing = easing;
+    // holds the revealed state until the opposite side takes over, without 2 keyframes on the same offset
+    // since CSS merges keyframes that share an offset
+    keyframes[1].easing = 'step-end';
     keyframes[1].offset = staggered ? 0.45 : 0.4;
 
     const { clipStart: oppClipStart, clipEnd: oppClipEnd } = getShuttersClipPaths(
@@ -98,11 +100,6 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
 
     const secondOffset = staggered ? 0.55 : 0.6;
     keyframes.push(
-      {
-        clipPath: toKeyframeValue(custom, '--motion-shutters-clip-end', asWeb),
-        offset: secondOffset,
-        easing,
-      },
       {
         clipPath: toKeyframeValue(custom, '--motion-shutters-clip-opp-end', asWeb),
         offset: secondOffset,
