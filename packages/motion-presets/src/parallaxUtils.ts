@@ -1,8 +1,7 @@
 import type { Length } from '@wix/motion';
 import type { EffectScrollRange, RangeOffset, ScrubAnimationOptions } from './types';
 import { declareCustom, mapRange } from './utils';
-
-const EPSILON = 0.01;
+import { EPSILON } from './consts';
 
 type ParallaxRange = { startOffset: Required<RangeOffset>; endOffset: Required<RangeOffset> };
 
@@ -75,7 +74,7 @@ function scaleVhPercentageRangeAroundCenter(
     end.absoluteOffset,
     start.absoluteOffset,
   );
-  const endOAbsoluteAdd = lengthsLinearCombination(
+  const endAbsoluteAdd = lengthsLinearCombination(
     1 - endOffsetFactor,
     endOffsetFactor,
     end.absoluteOffset,
@@ -85,8 +84,8 @@ function scaleVhPercentageRangeAroundCenter(
   if (startAbsoluteAdd) {
     rangeOffsets.startOffsetAdd = `calc(${rangeOffsets.startOffsetAdd} + ${startAbsoluteAdd})`;
   }
-  if (endOAbsoluteAdd) {
-    rangeOffsets.endOffsetAdd = `calc(${rangeOffsets.endOffsetAdd} + ${endOAbsoluteAdd})`;
+  if (endAbsoluteAdd) {
+    rangeOffsets.endOffsetAdd = `calc(${rangeOffsets.endOffsetAdd} + ${endAbsoluteAdd})`;
   }
 
   return rangeOffsets;
@@ -130,7 +129,9 @@ function computeParallax(
     },
     asWeb,
   );
-  Object.assign(custom, parallaxCustom);
+  if (!asWeb) {
+    Object.assign(custom, parallaxCustom);
+  }
 
   const from = `calc(${vars.center} * (1 - ${vars['inv-speed']}) * ${vars.travel})`;
   const to = `calc((${vars.center} - 1) * (1 - ${vars['inv-speed']}) * ${vars.travel})`;
@@ -140,7 +141,7 @@ function computeParallax(
   return rangeOffsets;
 }
 
-export function createParallax(
+function createParallax(
   range: ParallaxRange,
   reversed: boolean,
   speed?: number,
@@ -148,21 +149,6 @@ export function createParallax(
 ): Parallax {
   return (custom, prefix, asWeb) =>
     computeParallax(range, reversed, speed, center, custom, prefix, asWeb);
-}
-
-// the parallax of a scroll layer over its scroll range, centered by default on the element's rest state
-export function getScrollParallax(
-  range: EffectScrollRange,
-  { startOffset, endOffset }: { startOffset: RangeOffset; endOffset: RangeOffset },
-  speed: number,
-  center: number = range === 'continuous' ? 0.5 : range === 'out' ? 0 : 1,
-) {
-  return createParallax(
-    { startOffset, endOffset } as ParallaxRange,
-    range === 'out',
-    speed,
-    center,
-  );
 }
 
 // the parallax of a preset whose keyframes play forward on every range (no reversed 'out'),

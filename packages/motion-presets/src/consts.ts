@@ -27,7 +27,11 @@ const NINE_DIRECTIONS = [
 const FOUR_CORNERS_DIRECTIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;
 const SHAPES = ['rectangle', 'ellipse', 'circle', 'diamond', 'window'] as const;
 
+// keeps inverse-scale/speed math finite
+const EPSILON = 0.01;
+
 export {
+  EPSILON,
   FOUR_DIRECTIONS,
   AXIS_DIRECTIONS,
   SCROLL_RANGES,

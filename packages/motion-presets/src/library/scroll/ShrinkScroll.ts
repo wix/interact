@@ -1,9 +1,7 @@
 import type { AnimationFillMode, ScrubAnimationOptions, ShrinkScroll, DomApi } from '../../types';
 import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
-import { NINE_DIRECTIONS, SCROLL_RANGES } from '../../consts';
+import { EPSILON, NINE_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 import { getPresetScrollParallax } from '../../parallaxUtils';
-
-const EPSILON = 0.01;
 
 const DEFAULTS: Required<ShrinkScroll> = {
   type: 'ShrinkScroll',
