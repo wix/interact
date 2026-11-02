@@ -17,7 +17,7 @@ import {
   getMotionLayoutRotation,
   pivotToTransformOrigin,
 } from '../../transformUtils';
-import { compareKeywordToNonDefaults, parseKeywordLazy } from '../../utils';
+import { compareKeywordToNonDefaults, parseKeywordLazy, roundNumber } from '../../utils';
 
 const DIRECTION = 'vertical';
 
@@ -58,7 +58,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
 
   // ShrinkScroll always goes down in scale, so scale should be bigger than 1 for 'in' and smaller than 1 otherwise
   // in case the scale is not in the correct range, we take its inverse
-  const invScale = 1 / Math.max(inputScale, EPSILON);
+  const invScale = roundNumber(1 / Math.max(inputScale, EPSILON), 4);
   const scale = isIn ? Math.max(inputScale, invScale) : Math.min(inputScale, invScale);
 
   // parallax is a directional motion, so it continues through 'continuous' while the scale goes back and forth

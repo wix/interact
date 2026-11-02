@@ -16,7 +16,7 @@ describe('MoveScroll', () => {
   });
 
   test('widens the range by the vertical travel when moving against the scroll', () => {
-    const travelY = 100 * Math.sin(Math.PI / 6);
+    const travelY = 50;
     expect(offsetsOf({ direction: 30, travel: '100px', range: 'in' })).toEqual([
       [`${-travelY}px`, ''],
       [`${-travelY}px`, ''],

@@ -1,6 +1,6 @@
 import type { Length } from '@wix/motion';
 import type { EffectScrollRange, RangeOffset } from './types';
-import { declareCustom, mapRange } from './utils';
+import { declareCustom, mapRange, roundNumber } from './utils';
 import { EPSILON } from './consts';
 
 type ParallaxRange = { startOffset: Required<RangeOffset>; endOffset: Required<RangeOffset> };
@@ -53,19 +53,19 @@ function scaleVhPercentageRangeAroundCenter(
     startOffset: {
       name: 'entry-crossing' as const,
       offset: {
-        value: mapRange(0, 1, start.percentage, end.percentage, startOffsetFactor),
+        value: roundNumber(mapRange(0, 1, start.percentage, end.percentage, startOffsetFactor), 4),
         unit: 'percentage' as const,
       },
     },
-    startOffsetAdd: `${mapRange(0, 1, start.vh, end.vh, startOffsetFactor)}vh`,
+    startOffsetAdd: `${roundNumber(mapRange(0, 1, start.vh, end.vh, startOffsetFactor), 4)}vh`,
     endOffset: {
       name: 'entry-crossing' as const,
       offset: {
-        value: mapRange(0, 1, end.percentage, start.percentage, endOffsetFactor),
+        value: roundNumber(mapRange(0, 1, end.percentage, start.percentage, endOffsetFactor), 4),
         unit: 'percentage' as const,
       },
     },
-    endOffsetAdd: `${mapRange(0, 1, end.vh, start.vh, endOffsetFactor)}vh`,
+    endOffsetAdd: `${roundNumber(mapRange(0, 1, end.vh, start.vh, endOffsetFactor), 4)}vh`,
   };
 
   const startAbsoluteAdd = lengthsLinearCombination(
@@ -110,7 +110,7 @@ function computeParallax(
   const end = rangeOffsetToVhPercentageSum(endOffset);
   const start = rangeOffsetToVhPercentageSum(startOffset);
 
-  const invSpeed = 1 / Math.max(speed, EPSILON);
+  const invSpeed = roundNumber(1 / Math.max(speed, EPSILON), 4);
   const c = Math.min(1, Math.max(0, center));
 
   const rangeOffsets = scaleVhPercentageRangeAroundCenter(start, end, invSpeed, c);

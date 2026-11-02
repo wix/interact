@@ -8,6 +8,7 @@ import {
   stripCalc,
   suffixLayer,
   toKeyframeValue,
+  roundNumber,
 } from './utils';
 
 export const MOTION_REVEAL_NAME = 'motion-reveal';
@@ -29,7 +30,7 @@ function inset(inset: string, round?: string[], geometryBox: string = 'border-bo
 // string inputs allow using calc for parameterized shapes
 function lerpPercentage(from: number, to: number, factor: number | string) {
   if (typeof factor === 'number') {
-    return `${mapRange(0, 1, from, to, factor)}%`;
+    return `${roundNumber(mapRange(0, 1, from, to, factor), 4)}%`;
   }
   const delta = to - from;
   return `calc((${from} ${delta < 0 ? '-' : '+'} ${Math.abs(delta)} * ${stripCalc(factor)}) * 1%)`;

@@ -1,7 +1,7 @@
 import { toCSSPropertyName } from '@wix/motion';
 import type { DomApi, EffectEightDirections, EffectFourDirections } from './types';
 import { sideDirection } from './directions';
-import { getElementOffset } from './utils';
+import { getElementOffset, roundNumber } from './utils';
 
 export type LayoutContainer = 'viewport' | 'parent';
 
@@ -98,15 +98,17 @@ const sidesOf = (direction: EffectEightDirections) =>
   direction.split('-') as EffectFourDirections[];
 
 // a diagonal leaves the container through the nearer of its two sides, moving along the 45deg line
+const SQRT2 = roundNumber(Math.SQRT2, 4);
+
 export function getOffscreenTravel(direction: EffectEightDirections) {
   const travels = sidesOf(direction).map((side) => OFFSCREEN_TRAVEL[side]);
-  return travels.length > 1 ? `calc(min(${travels.join(', ')}) * ${Math.SQRT2})` : travels[0];
+  return travels.length > 1 ? `calc(min(${travels.join(', ')}) * ${SQRT2})` : travels[0];
 }
 
 // the measured distance (in px, along the motion) matching getOffscreenTravel
 export function getOffscreenDistance(layout: Layout, direction: EffectEightDirections) {
   const distances = sidesOf(direction).map((side) => OFFSCREEN_DISTANCE[side](layout));
-  return distances.length > 1 ? Math.min(...distances) * Math.SQRT2 : distances[0];
+  return distances.length > 1 ? Math.min(...distances) * SQRT2 : distances[0];
 }
 
 export function getOppositeDirection(direction: EffectEightDirections) {

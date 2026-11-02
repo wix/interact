@@ -118,7 +118,7 @@ describe('getOffscreenTravel', () => {
 
   test('corners use the nearer of their sides along the diagonal', () => {
     expect(getOffscreenTravel('top-right')).toBe(
-      `calc(min(${getOffscreenTravel('top')}, ${getOffscreenTravel('right')}) * ${Math.SQRT2})`,
+      `calc(min(${getOffscreenTravel('top')}, ${getOffscreenTravel('right')}) * 1.4142)`,
     );
   });
 });
@@ -155,8 +155,8 @@ describe('getOffscreenDistance', () => {
   });
 
   test('corners use the nearer side along the diagonal', () => {
-    expect(getOffscreenDistance(layout, 'top-left')).toBeCloseTo(70 * Math.SQRT2);
-    expect(getOffscreenDistance(layout, 'bottom-right')).toBeCloseTo(550 * Math.SQRT2);
+    expect(getOffscreenDistance(layout, 'top-left')).toBeCloseTo(70 * 1.4142);
+    expect(getOffscreenDistance(layout, 'bottom-right')).toBeCloseTo(550 * 1.4142);
   });
 });
 

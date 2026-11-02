@@ -13,7 +13,7 @@ import {
   MOTION_LAYOUT_ROTATION_NAME,
   getMotionLayoutRotation,
 } from '../../transformUtils';
-import { compareKeywordToNonDefaults, parseLength, parseCssLength } from '../../utils';
+import { compareKeywordToNonDefaults, parseLength, parseCssLength, roundNumber } from '../../utils';
 
 const DEFAULTS: Required<MoveScroll> = {
   type: 'MoveScroll',
@@ -55,10 +55,10 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
     const travelY = travel.value * Math.sin((direction * Math.PI) / 180);
     const unit = travel.unit;
     if (!compareKeywordToNonDefaults(inputRange, ['out'])) {
-      startOffsetAdd = `${-travelY}${unit}`;
+      startOffsetAdd = `${roundNumber(-travelY, 4)}${unit}`;
     }
     if (compareKeywordToNonDefaults(inputRange, ['out', 'continuous'])) {
-      endOffsetAdd = `${travelY}${unit}`;
+      endOffsetAdd = `${roundNumber(travelY, 4)}${unit}`;
     }
   }
 
