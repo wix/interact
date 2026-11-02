@@ -1,5 +1,11 @@
 import type { AnimationFillMode, GrowScroll, ScrubAnimationOptions, DomApi } from '../../types';
-import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
+import {
+  toKeyframeValue,
+  parseDirection,
+  roundNumber,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { EPSILON, NINE_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 import { getPresetScrollParallax } from '../../parallaxUtils';
 
@@ -57,7 +63,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
   ) as AnimationFillMode;
 
   // GrowScroll always grows, so its scale is below 1 on 'in' and above 1 otherwise - using the inverse if needed
-  const invScale = 1 / Math.max(inputScale, EPSILON);
+  const invScale = roundNumber(1 / Math.max(inputScale, EPSILON), 4);
   const scale = range === 'in' ? Math.min(inputScale, invScale) : Math.max(inputScale, invScale);
 
   const fromValues = { scale: range === 'out' ? 1 : scale };

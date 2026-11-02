@@ -5,7 +5,13 @@ import type {
   ShapeScroll,
   ShapeType,
 } from '../../types';
-import { toKeyframeValue, getEasing, suffixNames, suffixCustomProperties } from '../../utils';
+import {
+  toKeyframeValue,
+  getEasing,
+  roundNumber,
+  suffixNames,
+  suffixCustomProperties,
+} from '../../utils';
 import { SCROLL_RANGES, SHAPES } from '../../consts';
 
 const DEFAULTS: Required<ShapeScroll> = {
@@ -22,7 +28,7 @@ export const schema = {
 };
 
 const lerpPercentage = (from: number, to: number, factor: number) =>
-  `${from + (to - from) * factor}%`;
+  `${roundNumber(from + (to - from) * factor, 4)}%`;
 
 // each shape from fully clipped (0) to fully revealed (1)
 const SHAPES_MAP: Record<ShapeType, (factor: number) => string> = {

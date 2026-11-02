@@ -54,7 +54,7 @@ describe('ShrinkScroll', () => {
             },
             {
               transform:
-                'translateY(calc((0 - 1) * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(0.8333333333333334) translate(calc(-1 * 0%), calc(-1 * 0%))',
+                'translateY(calc((0 - 1) * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(0.8333) translate(calc(-1 * 0%), calc(-1 * 0%))',
             },
           ],
         },
@@ -164,13 +164,13 @@ describe('ShrinkScroll', () => {
           startOffsetAdd: '0vh',
           endOffsetAdd: '100vh',
           custom: {
-            '--motion-shrink-from': 0.8333333333333334,
-            '--motion-shrink-to': 0.8333333333333334,
+            '--motion-shrink-from': 0.8333,
+            '--motion-shrink-to': 0.8333,
           },
           keyframes: [
             {
               transform:
-                'translateY(calc(0.5 * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(0.8333333333333334) translate(calc(-1 * 0%), calc(-1 * 0%))',
+                'translateY(calc(0.5 * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(0.8333) translate(calc(-1 * 0%), calc(-1 * 0%))',
             },
             {
               transform:
@@ -178,7 +178,7 @@ describe('ShrinkScroll', () => {
             },
             {
               transform:
-                'translateY(calc((0.5 - 1) * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(0.8333333333333334) translate(calc(-1 * 0%), calc(-1 * 0%))',
+                'translateY(calc((0.5 - 1) * (1 - 1) * (100% + 100vh))) rotate(var(--motion-rotate, 0)) translate(0%, 0%) scale(0.8333) translate(calc(-1 * 0%), calc(-1 * 0%))',
             },
           ],
         },
@@ -290,8 +290,8 @@ describe('ShrinkScroll', () => {
         {
           fill: 'both',
           custom: {
-            '--motion-shrink-from': 0.8333333333333334,
-            '--motion-shrink-to': 0.8333333333333334,
+            '--motion-shrink-from': 0.8333,
+            '--motion-shrink-to': 0.8333,
           },
           keyframes: [
             {

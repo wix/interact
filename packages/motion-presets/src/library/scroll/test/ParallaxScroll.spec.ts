@@ -16,16 +16,16 @@ describe('ParallaxScroll', () => {
         {
           fill: 'both',
           easing: 'linear',
-          startOffsetAdd: '-19.842156725799697vh',
-          endOffsetAdd: '119.8421567257997vh',
+          startOffsetAdd: '-19.84vh',
+          endOffsetAdd: '119.84vh',
           keyframes: [
             {
               transform:
-                'translateY(calc(0.5 * (1 - 1.396843134515994) * (100% + 100vh))) rotate(var(--motion-rotate, 0))',
+                'translateY(calc(0.5 * (1 - 1.3968) * (100% + 100vh))) rotate(var(--motion-rotate, 0))',
             },
             {
               transform:
-                'translateY(calc((0.5 - 1) * (1 - 1.396843134515994) * (100% + 100vh))) rotate(var(--motion-rotate, 0))',
+                'translateY(calc((0.5 - 1) * (1 - 1.3968) * (100% + 100vh))) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -73,15 +73,15 @@ describe('ParallaxScroll', () => {
       const expectedResult = [
         {
           startOffsetAdd: '0vh',
-          endOffsetAdd: '139.6843134515994vh',
+          endOffsetAdd: '139.68vh',
           keyframes: [
             {
               transform:
-                'translateY(calc(0 * (1 - 1.396843134515994) * (100% + 100vh))) rotate(var(--motion-rotate, 0))',
+                'translateY(calc(0 * (1 - 1.3968) * (100% + 100vh))) rotate(var(--motion-rotate, 0))',
             },
             {
               transform:
-                'translateY(calc((0 - 1) * (1 - 1.396843134515994) * (100% + 100vh))) rotate(var(--motion-rotate, 0))',
+                'translateY(calc((0 - 1) * (1 - 1.3968) * (100% + 100vh))) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -104,8 +104,8 @@ describe('ParallaxScroll', () => {
         {
           fill: 'both',
           easing: 'linear',
-          startOffsetAdd: '-19.842156725799697vh',
-          endOffsetAdd: '119.8421567257997vh',
+          startOffsetAdd: '-19.84vh',
+          endOffsetAdd: '119.84vh',
           keyframes: [
             {
               transform: 'translateY(var(--motion-parallax-from)) rotate(var(--motion-rotate, 0))',

@@ -4,6 +4,7 @@ import {
   transformPolarToXY,
   toKeyframeValue,
   parseLength,
+  roundNumber,
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
@@ -50,13 +51,13 @@ export function style(options: ScrubAnimationOptions, config?: Record<string, an
     endOffsetAdd = '';
   if (!config?.ignoreScrollMoveOffsets) {
     if (travelY < 0 && range !== 'out') {
-      startOffsetAdd = `${travelY}${unit}`;
+      startOffsetAdd = `${roundNumber(travelY, 4)}${unit}`;
       if (range !== 'in') {
-        endOffsetAdd = `${Math.abs(travelY)}${unit}`;
+        endOffsetAdd = `${roundNumber(Math.abs(travelY), 4)}${unit}`;
       }
     }
     if (travelY > 0 && range === 'out') {
-      endOffsetAdd = `${Math.abs(travelY)}${unit}`;
+      endOffsetAdd = `${roundNumber(Math.abs(travelY), 4)}${unit}`;
     }
   }
 

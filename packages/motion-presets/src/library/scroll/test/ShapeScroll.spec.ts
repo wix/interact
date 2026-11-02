@@ -18,7 +18,7 @@ describe('ShapeScroll', () => {
           easing: 'linear',
           keyframes: [
             {
-              clipPath: 'circle(50.025000000000006%)',
+              clipPath: 'circle(50.025%)',
               easing: 'cubic-bezier(0.785, 0.135, 0.15, 0.86)',
             },
             {
@@ -43,8 +43,7 @@ describe('ShapeScroll', () => {
         {
           keyframes: [
             {
-              clipPath:
-                'polygon(50% -16.700000000000003%, 116.7% 50%, 50% 116.7%, -16.700000000000003% 50%)',
+              clipPath: 'polygon(50% -16.7%, 116.7% 50%, 50% 116.7%, -16.7% 50%)',
             },
             {
               clipPath: 'polygon(50% -50%, 150% 50%, 50% 150%, -50% 50%)',
@@ -68,7 +67,7 @@ describe('ShapeScroll', () => {
         {
           keyframes: [
             {
-              clipPath: 'ellipse(50.025000000000006% 50.025000000000006%)',
+              clipPath: 'ellipse(50.025% 50.025%)',
             },
             {
               clipPath: 'ellipse(75% 75%)',
@@ -92,7 +91,7 @@ describe('ShapeScroll', () => {
         {
           keyframes: [
             {
-              clipPath: 'inset(3.309999999999995% round 50% 50% 0% 0%)',
+              clipPath: 'inset(3.31% round 50% 50% 0% 0%)',
             },
             {
               clipPath: 'inset(-20% round 50% 50% 0% 0%)',
@@ -168,7 +167,7 @@ describe('ShapeScroll', () => {
               clipPath: 'circle(75%)',
             },
             {
-              clipPath: 'circle(50.025000000000006%)',
+              clipPath: 'circle(50.025%)',
             },
           ],
         },
@@ -191,7 +190,7 @@ describe('ShapeScroll', () => {
           fill: 'both',
           keyframes: [
             {
-              clipPath: 'circle(50.025000000000006%)',
+              clipPath: 'circle(50.025%)',
               easing: 'cubic-bezier(0.785, 0.135, 0.15, 0.86)',
             },
             {
@@ -199,7 +198,7 @@ describe('ShapeScroll', () => {
               easing: 'cubic-bezier(0.785, 0.135, 0.15, 0.86)',
             },
             {
-              clipPath: 'circle(50.025000000000006%)',
+              clipPath: 'circle(50.025%)',
             },
           ],
         },
