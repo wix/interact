@@ -325,7 +325,7 @@ params: {
 - For 2D effects, use `namedEffect` mouse presets or `customEffect`. `keyframeEffect` only supports a single axis.
 - For independent 2-axis control with keyframes, use two separate interactions (one `axis: 'x'`, one `axis: 'y'`) with `composite: 'add'` or `'accumulate'` on the second effect.
 
-**`centeredToTarget`** — set `true` to remap the `0–1` progress range so that `0.5` progress corresponds to the center of the target element. Use when source and target are different elements, or when `hitArea: 'root'` is used, so that the pointer resting over the target center produces 50% progress regardless of position in viewport. Applies to `namedEffect` and `customEffect` only: a `keyframeEffect` scrub scene resolves no target, so centering is silently ignored there.
+**`centeredToTarget`** — set `true` to remap the `0–1` progress range so that `0.5` progress corresponds to the center of the target element. Use when source and target are different elements, or when `hitArea: 'root'` is used, so that the pointer resting over the target center produces 50% progress regardless of position in viewport. Applies to `namedEffect`, `customEffect`, and `keyframeEffect`.
 
 **`transitionDuration` / `transitionEasing`** — progress smoothing. For a `keyframeEffect` or `customEffect` payload on `pointerMove`, the pointer progress is interpolated toward each new position over `transitionDuration` ms using `transitionEasing`.
 
@@ -416,7 +416,7 @@ Used with `viewProgress` and `pointerMove` triggers.
   reversed?: boolean;
   fill?: 'none' | 'forwards' | 'backwards' | 'both';
   composite?: 'replace' | 'add' | 'accumulate';
-  centeredToTarget?: boolean;  // pointerMove; namedEffect / customEffect only — ignored for keyframeEffect
+  centeredToTarget?: boolean;  // pointerMove
   transitionDuration?: number; // ms, smoothing on progress jumps; pointerMove + keyframeEffect / customEffect
   transitionEasing?: 'linear' | 'hardBackOut' | 'easeOut' | 'elastic' | 'bounce'; // pointerMove + keyframeEffect / customEffect
   // + exactly one animation payload (see below)

@@ -71,7 +71,7 @@ Controls which element's bounds define the 0–1 progress range.
 - **`false` (default)**: Progress is calculated against the **source element's** (or viewport's) bounds. The `50%` progress of the timeline is at the center of the source element.
 - **`true`**: `50%` progress of the timeline is calculated against the **target element's center**. The edges of the timeline are still calculated against the edges of the source element/viewport depending on `hitArea`.
 
-**Applies to `namedEffect` and `customEffect` only.** Centering needs a resolved target, and a `keyframeEffect` scrub scene resolves none — set it there and it is silently ignored.
+**Applies to `namedEffect`, `customEffect`, and `keyframeEffect`.**
 
 ---
 
@@ -176,7 +176,7 @@ Use `keyframeEffect` when the pointer position along a single axis should drive 
 - `[KEYFRAMES]` — array of CSS keyframe objects (e.g. `[{ transform: 'rotate(-10deg)' }, { transform: 'rotate(0)' }, { transform: 'rotate(10deg)' }]`). Distributed evenly across 0–1 progress: first keyframe = progress 0 (left/top edge), last = progress 1 (right/bottom edge). Any number of keyframes is allowed.
 - `[UNIQUE_EFFECT_ID]` — optional string identifier.
 
-> A `keyframeEffect` scrub scene resolves no target, so `centeredToTarget` is silently ignored here. For centered pointer motion use a mouse `namedEffect` or a `customEffect`. `transitionDuration` / `transitionEasing` are supported: they smooth the pointer progress toward each new position.
+> `centeredToTarget`, `transitionDuration`, and `transitionEasing` are supported here: centering remaps progress so `0.5` sits at the target's center, and the transition options smooth the pointer progress toward each new position.
 
 ---
 
@@ -231,7 +231,7 @@ Use two separate interactions on the same source/target pair — one for `axis: 
 - `[COMPOSITE_OPERATION]` — `'add'` or `'accumulate'`. Required when both effects animate `transform` and/or both animate `filter`, so their values combine rather than override. `'add'`: composited transform functions are appended. `'accumulate'`: matching function arguments are summed.
 - `[FILL_MODE]` — typically `'both'` to ensure the effect keeps applying after exiting the effect's active range.
 
-> As in Rule 2, `centeredToTarget` does not apply to a `keyframeEffect` payload; `transitionDuration` / `transitionEasing` do.
+> As in Rule 2, `centeredToTarget`, `transitionDuration`, and `transitionEasing` apply to a `keyframeEffect` payload.
 
 ---
 

@@ -1906,6 +1906,32 @@ describe('motion.ts', () => {
         getWebAnimationSpy.mockRestore();
       });
 
+      test.each([
+        ['an element', () => mockElement],
+        ['an element id', () => 'test-element'],
+      ])(
+        'should set target on keyframeEffect pointer scene when target is %s',
+        async (_, getTarget) => {
+          const animationOptions: AnimationOptions = {
+            keyframeEffect: { name: 'kf', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+            centeredToTarget: true,
+          };
+
+          const webAnimations = await import('../src/api/webAnimations');
+          const getWebAnimationSpy = vi.spyOn(webAnimations, 'getWebAnimation');
+          getWebAnimationSpy.mockReturnValue(mockAnimationGroup);
+
+          const result = getScrubScene(getTarget(), animationOptions, {
+            trigger: 'pointer-move' as const,
+          }) as any;
+
+          expect(result.target).toBe(mockElement);
+          expect(result.centeredToTarget).toBe(true);
+
+          getWebAnimationSpy.mockRestore();
+        },
+      );
+
       test('should include disabled and allowActiveEvent options', async () => {
         const animationOptions: AnimationOptions = {
           namedEffect: { type: 'BlobMouse', id: 'mouse' },
