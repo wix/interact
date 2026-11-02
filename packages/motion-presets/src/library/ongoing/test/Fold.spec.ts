@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as Fold from '../Fold';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { toCssEasing, toEasingFunction } from '../../../easingUtils';
 import type { TimeAnimationOptions } from '../../../types';
 import { progressAt } from './testUtils';
@@ -14,7 +15,7 @@ const options = (namedEffect = {}, rest: Partial<TimeAnimationOptions> = {}) =>
 
 // the first peak's rotation around each axis
 function peak(pivot: string) {
-  const [, fold] = Fold.layers(options({ pivot }));
+  const [, fold] = resolveDefaults(Fold.layers(options({ pivot })));
   const custom = fold.custom as Record<string, string | number>;
   const from = custom['--motion-transform-3d-from'] as number;
   return ['x', 'y'].map(
@@ -24,7 +25,7 @@ function peak(pivot: string) {
 
 describe('Fold', () => {
   test('layout rotation first, then the fold added around the rotated pivot', () => {
-    const [rotation, fold] = Fold.layers(options());
+    const [rotation, fold] = resolveDefaults(Fold.layers(options()));
     expect(rotation.composite).toBe('replace');
     expect(fold.composite).toBe('add');
     expect(fold.custom).toMatchObject({
@@ -43,7 +44,10 @@ describe('Fold', () => {
   test('eases out of rest with the user easing family, then sineInOut', () => {
     const first = (0.1 / 1.189) * 100;
     const at = (easing?: string) =>
-      progressAt(Fold.layers(options({}, easing ? { easing } : {}))[1].easing!, first / 2);
+      progressAt(
+        resolveDefaults(Fold.layers(options({}, easing ? { easing } : {})))[1].easing!,
+        first / 2,
+      );
     const ease = (easing: string) => toEasingFunction(toCssEasing(easing))(0.5);
     expect(at()).toBeCloseTo(1 - ease('cubicOut'), 2);
     expect(at('sineIn')).toBeCloseTo(1 - ease('sineOut'), 2);

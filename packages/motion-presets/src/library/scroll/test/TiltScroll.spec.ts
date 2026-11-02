@@ -1,11 +1,15 @@
 import { describe, expect, test } from 'vitest';
 import * as TiltScroll from '../TiltScroll';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { MOTION_3D_TRANSFORM_NAME, MOTION_TRANS_ROT_NAME } from '../../../transformUtils';
 import { getEasing } from '../../../utils';
 import { byName, scrollOptions } from './testUtils';
 
 const tiltOf = (namedEffect: Record<string, unknown>) =>
-  TiltScroll.layers(scrollOptions({ type: 'TiltScroll', ...namedEffect }), true) as any[];
+  resolveDefaults(
+    TiltScroll.layers(scrollOptions({ type: 'TiltScroll', ...namedEffect }), true),
+    TiltScroll.layers(scrollOptions({ type: 'TiltScroll', ...namedEffect })),
+  ) as any[];
 
 describe('TiltScroll', () => {
   test("'out' is 'in' reversed with the same 3d tilt", () => {

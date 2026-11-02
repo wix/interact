@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as Poke from '../Poke';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import type { TimeAnimationOptions } from '../../../types';
 import { progressAt } from './testUtils';
 
@@ -9,7 +10,7 @@ const options = (namedEffect = {}) =>
 
 describe('Poke', () => {
   test('pokes 62.5px to the right by default, then the layout rotation', () => {
-    const [poke, rotation] = Poke.layers(options());
+    const [poke, rotation] = resolveDefaults(Poke.layers(options()));
     expect(poke.custom).toMatchObject({
       '--motion-trans-rot-travel': '62.5px',
       '--motion-trans-rot-direction': '0deg',
@@ -19,7 +20,7 @@ describe('Poke', () => {
   });
 
   test('peaks towards the direction', () => {
-    const [poke] = Poke.layers(options({ direction: 'top', travel: '10px' }));
+    const [poke] = resolveDefaults(Poke.layers(options({ direction: 'top', travel: '10px' })));
     expect(poke.custom).toMatchObject({
       '--motion-trans-rot-travel': '10px',
       '--motion-trans-rot-direction': '90deg',
@@ -28,7 +29,7 @@ describe('Poke', () => {
   });
 
   test('two linear pokes', () => {
-    const [{ easing }] = Poke.layers(options());
+    const [{ easing }] = resolveDefaults(Poke.layers(options()));
     expect(progressAt(easing!, 17)).toBeCloseTo(0.72, 4);
     expect(progressAt(easing!, 32)).toBe(0);
     expect(progressAt(easing!, 48)).toBeCloseTo(0.68, 4);

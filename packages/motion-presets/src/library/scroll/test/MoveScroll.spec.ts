@@ -1,11 +1,13 @@
 import { describe, expect, test } from 'vitest';
 import * as MoveScroll from '../MoveScroll';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { scrollOptions } from './testUtils';
 
 const offsetsOf = (namedEffect: Record<string, unknown>) =>
-  MoveScroll.layers(scrollOptions({ type: 'MoveScroll', ...namedEffect }), true).map(
-    (animation: any) => [animation.startOffsetAdd, animation.endOffsetAdd],
-  );
+  resolveDefaults(
+    MoveScroll.layers(scrollOptions({ type: 'MoveScroll', ...namedEffect }), true),
+    MoveScroll.layers(scrollOptions({ type: 'MoveScroll', ...namedEffect })),
+  ).map((animation: any) => [animation.startOffsetAdd, animation.endOffsetAdd]);
 
 describe('MoveScroll', () => {
   test('does not widen the range when moving with the scroll', () => {

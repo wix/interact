@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as Jello from '../Jello';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import type { TimeAnimationOptions } from '../../../types';
 import { progressAt } from './testUtils';
 
@@ -9,14 +10,14 @@ const options = (namedEffect = {}) =>
 
 describe('Jello', () => {
   test('layout rotation first, then the skew added along the rotated axes', () => {
-    const [rotation, jello] = Jello.layers(options());
+    const [rotation, jello] = resolveDefaults(Jello.layers(options()));
     expect(rotation.composite).toBe('replace');
     expect(jello.composite).toBe('add');
   });
 
   test('first peak is the positive skew (12.25deg by default)', () => {
     const skewY = (namedEffect = {}) => {
-      const custom = Jello.layers(options(namedEffect))[1].custom as Record<
+      const custom = resolveDefaults(Jello.layers(options(namedEffect)))[1].custom as Record<
         string,
         string | number
       >;
@@ -30,7 +31,7 @@ describe('Jello', () => {
   });
 
   test('a linear damped wobble', () => {
-    const [, { easing }] = Jello.layers(options());
+    const [, { easing }] = resolveDefaults(Jello.layers(options()));
     expect(progressAt(easing!, 24)).toBe(0);
     expect(progressAt(easing!, 38)).toBeCloseTo(1 + 2 / 7, 4);
     expect(progressAt(easing!, 58)).toBeCloseTo(1 - 4 / 7, 4);

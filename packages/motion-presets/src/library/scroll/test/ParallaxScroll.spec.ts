@@ -1,12 +1,14 @@
 import { describe, expect, test } from 'vitest';
 import * as ParallaxScroll from '../ParallaxScroll';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { scrollOptions } from './testUtils';
 
 describe('ParallaxScroll', () => {
   test('is always continuous', () => {
-    const [parallax] = ParallaxScroll.style(
-      scrollOptions({ type: 'ParallaxScroll', range: 'in' }),
-      true,
+    const options = scrollOptions({ type: 'ParallaxScroll', range: 'in' });
+    const [parallax] = resolveDefaults(
+      ParallaxScroll.style(options, true),
+      ParallaxScroll.style(options),
     ) as any[];
     expect(parallax.fill).toBe('both');
     expect(parallax.custom['--motion-trans-rot-to']).toBe(1);

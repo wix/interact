@@ -1,4 +1,5 @@
 import type { AnimationData, TimeAnimationOptions } from '../../../types';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 
 type Preset = {
   web: (options: TimeAnimationOptions) => AnimationData[];
@@ -8,7 +9,9 @@ type Preset = {
 // the preset's layers before they're merged into one transform list
 export function run(preset: Preset, namedEffect: Record<string, unknown> = {}, duration = 1000) {
   const options = { duration, namedEffect } as TimeAnimationOptions;
-  return preset.layers ? preset.layers(options, true) : preset.web(options);
+  return preset.layers
+    ? resolveDefaults(preset.layers(options, true), preset.layers(options))
+    : preset.web(options);
 }
 
 export function layer(animations: AnimationData[], name: string) {

@@ -92,12 +92,14 @@ export function roundNumber(num: number, precision = 2) {
 }
 
 export function toKeyframeValue(
-  custom: Record<string, string | number>,
+  custom: Record<string, string | number | undefined>,
   key: string,
   useValue: boolean | undefined = false,
   fallback: string | undefined = undefined,
 ) {
-  return useValue ? custom[key] : `var(${key}${fallback !== undefined ? `, ${fallback}` : ''})`;
+  return useValue
+    ? ((custom[key] ?? fallback) as string | number)
+    : `var(${key}${fallback !== undefined ? `, ${fallback}` : ''})`;
 }
 
 export function declareCustom<K extends string>(
@@ -105,7 +107,8 @@ export function declareCustom<K extends string>(
   entries: Record<K, [string | number, string]>,
   asWeb: boolean = false,
 ) {
-  const custom: Record<string, string | number> = {};
+  // a value equal to its fallback is left undeclared - interact registers it as not inherited
+  const custom: Record<string, string | number | undefined> = {};
   const vars = {} as Record<K, string | number>;
 
   for (const [key, [value, fallback]] of Object.entries(entries) as [
@@ -113,7 +116,7 @@ export function declareCustom<K extends string>(
     [string | number, string],
   ][]) {
     const name = `${prefix}-${key}`;
-    custom[name] = value;
+    custom[name] = String(value) === fallback ? undefined : value;
     vars[key] = toKeyframeValue(custom, name, asWeb, fallback);
   }
 

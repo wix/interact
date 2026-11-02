@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import * as StretchScroll from '../StretchScroll';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { MOTION_FADE_NAME } from '../../../fadeBlurUtils';
 import {
   MOTION_LAYOUT_ROTATION_NAME,
@@ -10,7 +11,9 @@ import { getEasing } from '../../../utils';
 import { byName, scrollOptions } from './testUtils';
 
 const stretchOf = (namedEffect: Record<string, unknown>, asWeb = true) =>
-  StretchScroll.layers(scrollOptions({ type: 'StretchScroll', ...namedEffect }), asWeb) as any[];
+  resolveDefaults(
+    StretchScroll.layers(scrollOptions({ type: 'StretchScroll', ...namedEffect }), asWeb),
+  ) as any[];
 
 describe('StretchScroll', () => {
   test('keeps the layout rotation last, so the stretch is along the screen axes', () => {

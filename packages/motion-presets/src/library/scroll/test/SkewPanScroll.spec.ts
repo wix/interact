@@ -1,11 +1,15 @@
 import { describe, expect, test } from 'vitest';
 import * as SkewPanScroll from '../SkewPanScroll';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { getOffscreenTravels } from '../../../layoutUtils';
 import { byName, scrollOptions } from './testUtils';
 
 const skewPanOf = (namedEffect: Record<string, unknown>) =>
   byName(
-    SkewPanScroll.layers(scrollOptions({ type: 'SkewPanScroll', ...namedEffect }), true),
+    resolveDefaults(
+      SkewPanScroll.layers(scrollOptions({ type: 'SkewPanScroll', ...namedEffect }), true),
+      SkewPanScroll.layers(scrollOptions({ type: 'SkewPanScroll', ...namedEffect })),
+    ),
     'motion-trans-rot',
   ).custom!;
 

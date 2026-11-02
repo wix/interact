@@ -2045,6 +2045,65 @@ describe('css._generate', () => {
     });
   });
 
+  describe('effect custom properties', () => {
+    const style = (options: { suffix?: string }) => [
+      {
+        ...options,
+        name: 'test-layer',
+        custom: { '--test-layer-x': '10px', '--test-layer-y': undefined },
+        keyframes: [
+          { translate: 'var(--test-layer-x, 0px) var(--test-layer-y, 0px)' },
+          { translate: '0px' },
+        ],
+      },
+      {
+        ...options,
+        name: 'test-part',
+        part: 'MEDIA',
+        custom: { '--test-part-x': '1' },
+        keyframes: [{ opacity: 0 }],
+      },
+    ];
+    registerEffects({
+      TestCustom: { web: style, style, getNames: () => ['test-layer', 'test-part'] },
+    } as any);
+
+    const generateFor = () =>
+      _generate({
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'viewEnter',
+            effects: [
+              { effectId: 'custom', duration: 100, namedEffect: { type: 'TestCustom' } as any },
+            ],
+          },
+        ],
+      });
+
+    it('registers them as not inherited, including the ones left to their fallback', () => {
+      const { atProperty } = generateFor();
+      expect(atProperty).toEqual(
+        expect.arrayContaining([
+          '@property --test-layer-x { syntax: "*"; inherits: false; }',
+          '@property --test-layer-y { syntax: "*"; inherits: false; }',
+        ]),
+      );
+    });
+
+    it('declares only the defined ones', () => {
+      const declared = generateFor().cssRules.flatMap(({ declarations }) =>
+        declarations.map(({ name }) => name),
+      );
+      expect(declared).toContain('--test-layer-x');
+      expect(declared).not.toContain('--test-layer-y');
+    });
+
+    it("doesn't register the properties of parts, which read them from the element", () => {
+      expect(generateFor().atProperty.join('\n')).not.toContain('--test-part-x');
+    });
+  });
+
   describe('effect parts', () => {
     const style = (options: { suffix?: string }) => [
       { ...options, name: 'bg-media', part: 'MEDIA_WRAPPER', keyframes: [{ opacity: 0 }] },

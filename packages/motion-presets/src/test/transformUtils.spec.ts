@@ -92,12 +92,12 @@ describe('getMotionTransRot', () => {
     expect(data.custom).toHaveProperty('--motion-trans-rot-parallax-to');
   });
 
-  test('no parallax - no range offsets', () => {
+  test('no parallax - no range offsets, the offsets listed but left to their fallback', () => {
     const data = getMotionTransRot(RANGES.inVertical, {}, false) as any;
     expect(data.startOffset).toBeUndefined();
     expect(data.custom).toMatchObject({
-      '--motion-trans-rot-parallax-from': '0px',
-      '--motion-trans-rot-parallax-to': '0px',
+      '--motion-trans-rot-parallax-from': undefined,
+      '--motion-trans-rot-parallax-to': undefined,
     });
   });
 });
@@ -143,17 +143,17 @@ describe('getMotion3dTransform', () => {
     transforms(data).forEach((t: string) => expect(t.startsWith('perspective(800px)')).toBe(true));
   });
 
-  test('number angle rotates around x (negated) when vertical, around y otherwise', () => {
+  test('number angle rotates around x (negated) when vertical, around y otherwise - zeros are left to their fallback', () => {
     expect(
       getMotion3dTransform(RANGES.inVertical, { angle: 30, perspective: 800 }, true).custom,
     ).toMatchObject({
       '--motion-transform-3d-angle-x': '-30deg',
-      '--motion-transform-3d-angle-y': '0deg',
+      '--motion-transform-3d-angle-y': undefined,
     });
     expect(
       getMotion3dTransform(RANGES.inHorizontal, { angle: 30, perspective: 800 }, true).custom,
     ).toMatchObject({
-      '--motion-transform-3d-angle-x': '0deg',
+      '--motion-transform-3d-angle-x': undefined,
       '--motion-transform-3d-angle-y': '30deg',
     });
   });
@@ -162,7 +162,7 @@ describe('getMotion3dTransform', () => {
     expect(
       getMotion3dTransform(RANGES.inVertical, { travel: '40px', perspective: 800 }, true).custom,
     ).toMatchObject({
-      '--motion-transform-3d-travel-x': '0px',
+      '--motion-transform-3d-travel-x': undefined,
       '--motion-transform-3d-travel-z': '40px',
     });
     expect(
@@ -170,7 +170,7 @@ describe('getMotion3dTransform', () => {
         .custom,
     ).toMatchObject({
       '--motion-transform-3d-travel-x': '10px',
-      '--motion-transform-3d-travel-z': '0px',
+      '--motion-transform-3d-travel-z': undefined,
     });
   });
 

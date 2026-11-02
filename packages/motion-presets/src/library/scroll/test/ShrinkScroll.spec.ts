@@ -1,10 +1,14 @@
 import { describe, expect, test } from 'vitest';
 import * as ShrinkScroll from '../ShrinkScroll';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { byName, scrollOptions } from './testUtils';
 
 const scaleOf = (range?: string, scale?: number) =>
   byName(
-    ShrinkScroll.layers(scrollOptions({ type: 'ShrinkScroll', range, scale }), true),
+    resolveDefaults(
+      ShrinkScroll.layers(scrollOptions({ type: 'ShrinkScroll', range, scale }), true),
+      ShrinkScroll.layers(scrollOptions({ type: 'ShrinkScroll', range, scale })),
+    ),
     'motion-scale',
   ).custom!;
 

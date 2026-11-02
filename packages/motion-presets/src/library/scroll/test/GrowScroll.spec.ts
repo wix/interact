@@ -1,10 +1,14 @@
 import { describe, expect, test } from 'vitest';
 import * as GrowScroll from '../GrowScroll';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { byName, scrollOptions } from './testUtils';
 
 const scaleOf = (range?: string, scale?: number) =>
   byName(
-    GrowScroll.layers(scrollOptions({ type: 'GrowScroll', range, scale }), true),
+    resolveDefaults(
+      GrowScroll.layers(scrollOptions({ type: 'GrowScroll', range, scale }), true),
+      GrowScroll.layers(scrollOptions({ type: 'GrowScroll', range, scale })),
+    ),
     'motion-scale',
   ).custom!;
 
@@ -18,7 +22,10 @@ describe('GrowScroll', () => {
 
   test('scales from the pivot', () => {
     const custom = byName(
-      GrowScroll.layers(scrollOptions({ type: 'GrowScroll', pivot: 'top-left' }), true),
+      resolveDefaults(
+        GrowScroll.layers(scrollOptions({ type: 'GrowScroll', pivot: 'top-left' }), true),
+        GrowScroll.layers(scrollOptions({ type: 'GrowScroll', pivot: 'top-left' })),
+      ),
       'motion-scale',
     ).custom!;
     expect(custom['--motion-scale-origin-x']).toBe('-50%');
@@ -26,9 +33,9 @@ describe('GrowScroll', () => {
   });
 
   test('all layers span the parallax range', () => {
-    const [parallax, ...rest] = GrowScroll.layers(
-      scrollOptions({ type: 'GrowScroll', speed: 1.5 }),
-      true,
+    const [parallax, ...rest] = resolveDefaults(
+      GrowScroll.layers(scrollOptions({ type: 'GrowScroll', speed: 1.5 }), true),
+      GrowScroll.layers(scrollOptions({ type: 'GrowScroll', speed: 1.5 })),
     ) as any[];
     expect(parallax.startOffsetAdd).toBeDefined();
     rest.forEach((animation) => {

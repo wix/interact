@@ -1,11 +1,15 @@
 import { describe, expect, test } from 'vitest';
 import * as PanScroll from '../PanScroll';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { getOffscreenTravels } from '../../../layoutUtils';
 import { byName, fakeDom, scrollOptions } from './testUtils';
 
 const panOf = (namedEffect: Record<string, unknown>) =>
   byName(
-    PanScroll.layers(scrollOptions({ type: 'PanScroll', ...namedEffect }), true),
+    resolveDefaults(
+      PanScroll.layers(scrollOptions({ type: 'PanScroll', ...namedEffect }), true),
+      PanScroll.layers(scrollOptions({ type: 'PanScroll', ...namedEffect })),
+    ),
     'motion-trans-rot',
   ).custom!;
 

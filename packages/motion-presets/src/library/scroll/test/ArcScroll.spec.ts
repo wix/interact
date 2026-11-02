@@ -1,11 +1,15 @@
 import { describe, expect, test } from 'vitest';
 import * as ArcScroll from '../ArcScroll';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { MOTION_3D_TRANSFORM_NAME } from '../../../transformUtils';
 import { byName, scrollOptions } from './testUtils';
 
 const arcOf = (namedEffect: Record<string, unknown>) =>
   byName(
-    ArcScroll.layers(scrollOptions({ type: 'ArcScroll', ...namedEffect }), true),
+    resolveDefaults(
+      ArcScroll.layers(scrollOptions({ type: 'ArcScroll', ...namedEffect }), true),
+      ArcScroll.layers(scrollOptions({ type: 'ArcScroll', ...namedEffect })),
+    ),
     MOTION_3D_TRANSFORM_NAME,
   ) as any;
 

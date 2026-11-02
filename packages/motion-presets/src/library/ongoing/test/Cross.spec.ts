@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import * as Cross from '../Cross';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { getWrapEasing } from '../../../easingUtils';
 import { getOffscreenTravel } from '../../../layoutUtils';
 import type { DomApi, TimeAnimationOptions } from '../../../types';
@@ -44,7 +45,7 @@ describe('Cross', () => {
   });
 
   test('continuous keyframes from the direction side to the opposite side', () => {
-    const [cross, rotation] = Cross.layers(options());
+    const [cross, rotation] = resolveDefaults(Cross.layers(options()));
     expect(cross.custom).toMatchObject({
       '--motion-trans-rot-direction': 'calc(180deg + 0deg)',
       '--motion-trans-rot-from': -1,
@@ -57,7 +58,7 @@ describe('Cross', () => {
 
   test('maps the eight directions to css angles', () => {
     const angle = (direction: string) =>
-      (Cross.layers(options({ direction }))[0].custom as Record<string, string>)[
+      (resolveDefaults(Cross.layers(options({ direction })))[0].custom as Record<string, string>)[
         '--motion-trans-rot-direction'
       ];
     expect(angle('bottom-right')).toBe('calc(180deg + 45deg)');
@@ -68,7 +69,7 @@ describe('Cross', () => {
   });
 
   test('without measurements it wraps in the middle', () => {
-    const [cross] = Cross.layers(options({ iterationDelay: 1000 }));
+    const [cross] = resolveDefaults(Cross.layers(options({ iterationDelay: 1000 })));
     expect(cross.easing).toBe(getWrapEasing(0.5, 0.5));
     expect(cross.duration).toBe(2000);
     expect('timing' in cross).toBe(false);

@@ -1,12 +1,16 @@
 import { describe, expect, test } from 'vitest';
 import * as TurnScroll from '../TurnScroll';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { getOffscreenTravels } from '../../../layoutUtils';
 import { MOTION_TRANS_ROT_NAME } from '../../../transformUtils';
 import { byName, fakeDom, scrollOptions } from './testUtils';
 
 const turnOf = (namedEffect: Record<string, unknown>) =>
   byName(
-    TurnScroll.layers(scrollOptions({ type: 'TurnScroll', ...namedEffect }), true),
+    resolveDefaults(
+      TurnScroll.layers(scrollOptions({ type: 'TurnScroll', ...namedEffect }), true),
+      TurnScroll.layers(scrollOptions({ type: 'TurnScroll', ...namedEffect })),
+    ),
     MOTION_TRANS_ROT_NAME,
   ).custom!;
 

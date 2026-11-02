@@ -18,14 +18,14 @@ function invertLength(l: string) {
 function applyTransformOrigin(
   transformFrames: string[][],
   transformOrigin: { x?: string; y?: string; z?: string },
-  custom: Record<string, number | string>,
+  custom: Record<string, number | string | undefined>,
   prefix: string,
   asWeb: boolean = false,
 ) {
   const origin = (['x', 'y', 'z'] as const).map((axis) => {
     const value = transformOrigin[axis] ?? '0px';
     const key = `${prefix}-origin-${axis}`;
-    custom[key] = value;
+    custom[key] = value === '0px' ? undefined : value;
     return toKeyframeValue(custom, key, asWeb, '0px');
   });
 
@@ -35,10 +35,11 @@ function applyTransformOrigin(
   });
 }
 
-// declared anyway, so an element never reads the parallax of an ancestor running the same keyframes
-function withoutParallax(custom: Record<string, number | string>, prefix: string) {
-  custom[`${prefix}-parallax-from`] = '0px';
-  custom[`${prefix}-parallax-to`] = '0px';
+// listed but left undeclared - interact registers them as not inherited, so an element never reads
+// the parallax of an ancestor running the same keyframes
+function withoutParallax(custom: Record<string, number | string | undefined>, prefix: string) {
+  custom[`${prefix}-parallax-from`] = undefined;
+  custom[`${prefix}-parallax-to`] = undefined;
   return {};
 }
 

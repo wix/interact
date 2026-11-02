@@ -4,7 +4,7 @@ exports[`getMotionReveal > continuous asWeb=false 1`] = `
 {
   "custom": {
     "--motion-reveal-from-s": -0.8,
-    "--motion-reveal-is-vertical-s": 0,
+    "--motion-reveal-is-vertical-s": undefined,
     "--motion-reveal-to-s": 0.8,
   },
   "keyframes": [
@@ -23,7 +23,7 @@ exports[`getMotionReveal > continuous asWeb=true 1`] = `
 {
   "custom": {
     "--motion-reveal-from-s": -0.8,
-    "--motion-reveal-is-vertical-s": 0,
+    "--motion-reveal-is-vertical-s": undefined,
     "--motion-reveal-to-s": 0.8,
   },
   "keyframes": [
@@ -42,8 +42,8 @@ exports[`getMotionReveal > inHorizontal asWeb=false 1`] = `
 {
   "custom": {
     "--motion-reveal-from-s": -0.8,
-    "--motion-reveal-is-vertical-s": 0,
-    "--motion-reveal-to-s": 0,
+    "--motion-reveal-is-vertical-s": undefined,
+    "--motion-reveal-to-s": undefined,
   },
   "keyframes": [
     {
@@ -61,8 +61,8 @@ exports[`getMotionReveal > inHorizontal asWeb=true 1`] = `
 {
   "custom": {
     "--motion-reveal-from-s": -0.8,
-    "--motion-reveal-is-vertical-s": 0,
-    "--motion-reveal-to-s": 0,
+    "--motion-reveal-is-vertical-s": undefined,
+    "--motion-reveal-to-s": undefined,
   },
   "keyframes": [
     {
@@ -81,7 +81,7 @@ exports[`getMotionReveal > inVertical asWeb=false 1`] = `
   "custom": {
     "--motion-reveal-from-s": 0.8,
     "--motion-reveal-is-vertical-s": 1,
-    "--motion-reveal-to-s": 0,
+    "--motion-reveal-to-s": undefined,
   },
   "keyframes": [
     {
@@ -100,7 +100,7 @@ exports[`getMotionReveal > inVertical asWeb=true 1`] = `
   "custom": {
     "--motion-reveal-from-s": 0.8,
     "--motion-reveal-is-vertical-s": 1,
-    "--motion-reveal-to-s": 0,
+    "--motion-reveal-to-s": undefined,
   },
   "keyframes": [
     {
@@ -388,8 +388,8 @@ exports[`getMotionShutters > continuous asWeb=false 1`] = `
 {
   "custom": {
     "--motion-shutters-fill-s": "evenodd",
-    "--motion-shutters-from-s": -1,
-    "--motion-shutters-is-vertical-s": 0,
+    "--motion-shutters-from-s": undefined,
+    "--motion-shutters-is-vertical-s": undefined,
     "--motion-shutters-stagger-s": 0,
     "--motion-shutters-to-s": 1,
   },
@@ -409,8 +409,8 @@ exports[`getMotionShutters > continuous asWeb=true 1`] = `
 {
   "custom": {
     "--motion-shutters-fill-s": "evenodd",
-    "--motion-shutters-from-s": -1,
-    "--motion-shutters-is-vertical-s": 0,
+    "--motion-shutters-from-s": undefined,
+    "--motion-shutters-is-vertical-s": undefined,
     "--motion-shutters-stagger-s": 0,
     "--motion-shutters-to-s": 1,
   },
@@ -430,10 +430,10 @@ exports[`getMotionShutters > in asWeb=false 1`] = `
 {
   "custom": {
     "--motion-shutters-fill-s": "nonzero",
-    "--motion-shutters-from-s": -1,
-    "--motion-shutters-is-vertical-s": 0,
+    "--motion-shutters-from-s": undefined,
+    "--motion-shutters-is-vertical-s": undefined,
     "--motion-shutters-stagger-s": 0,
-    "--motion-shutters-to-s": 0,
+    "--motion-shutters-to-s": undefined,
   },
   "keyframes": [
     {
@@ -451,10 +451,10 @@ exports[`getMotionShutters > in asWeb=true 1`] = `
 {
   "custom": {
     "--motion-shutters-fill-s": "nonzero",
-    "--motion-shutters-from-s": -1,
-    "--motion-shutters-is-vertical-s": 0,
+    "--motion-shutters-from-s": undefined,
+    "--motion-shutters-is-vertical-s": undefined,
     "--motion-shutters-stagger-s": 0,
-    "--motion-shutters-to-s": 0,
+    "--motion-shutters-to-s": undefined,
   },
   "keyframes": [
     {
@@ -475,7 +475,7 @@ exports[`getMotionShutters > inVertical asWeb=false 1`] = `
     "--motion-shutters-from-s": 1,
     "--motion-shutters-is-vertical-s": 1,
     "--motion-shutters-stagger-s": 0,
-    "--motion-shutters-to-s": 0,
+    "--motion-shutters-to-s": undefined,
   },
   "keyframes": [
     {
@@ -496,7 +496,7 @@ exports[`getMotionShutters > inVertical asWeb=true 1`] = `
     "--motion-shutters-from-s": 1,
     "--motion-shutters-is-vertical-s": 1,
     "--motion-shutters-stagger-s": 0,
-    "--motion-shutters-to-s": 0,
+    "--motion-shutters-to-s": undefined,
   },
   "keyframes": [
     {
@@ -514,10 +514,10 @@ exports[`getMotionShutters > staggered asWeb=false 1`] = `
 {
   "custom": {
     "--motion-shutters-fill-s": "nonzero",
-    "--motion-shutters-from-s": -1,
-    "--motion-shutters-is-vertical-s": 0,
+    "--motion-shutters-from-s": undefined,
+    "--motion-shutters-is-vertical-s": undefined,
     "--motion-shutters-stagger-s": 1,
-    "--motion-shutters-to-s": 0,
+    "--motion-shutters-to-s": undefined,
   },
   "keyframes": [
     {
@@ -535,10 +535,10 @@ exports[`getMotionShutters > staggered asWeb=true 1`] = `
 {
   "custom": {
     "--motion-shutters-fill-s": "nonzero",
-    "--motion-shutters-from-s": -1,
-    "--motion-shutters-is-vertical-s": 0,
+    "--motion-shutters-from-s": undefined,
+    "--motion-shutters-is-vertical-s": undefined,
     "--motion-shutters-stagger-s": 1,
-    "--motion-shutters-to-s": 0,
+    "--motion-shutters-to-s": undefined,
   },
   "keyframes": [
     {
@@ -556,10 +556,10 @@ exports[`getMotionShutters > staggeredContinuous asWeb=false 1`] = `
 {
   "custom": {
     "--motion-shutters-fill-s": "nonzero",
-    "--motion-shutters-from-s": -1,
-    "--motion-shutters-is-vertical-s": 0,
+    "--motion-shutters-from-s": undefined,
+    "--motion-shutters-is-vertical-s": undefined,
     "--motion-shutters-stagger-s": 1,
-    "--motion-shutters-to-s": 0,
+    "--motion-shutters-to-s": undefined,
   },
   "keyframes": [
     {
@@ -590,10 +590,10 @@ exports[`getMotionShutters > staggeredContinuous asWeb=true 1`] = `
 {
   "custom": {
     "--motion-shutters-fill-s": "nonzero",
-    "--motion-shutters-from-s": -1,
-    "--motion-shutters-is-vertical-s": 0,
+    "--motion-shutters-from-s": undefined,
+    "--motion-shutters-is-vertical-s": undefined,
     "--motion-shutters-stagger-s": 1,
-    "--motion-shutters-to-s": 0,
+    "--motion-shutters-to-s": undefined,
   },
   "keyframes": [
     {
@@ -623,7 +623,7 @@ exports[`getMotionShutters > staggeredContinuous asWeb=true 1`] = `
 exports[`getMotionWink > continuous asWeb=false 1`] = `
 {
   "custom": {
-    "--motion-wink-is-vertical-s": 0,
+    "--motion-wink-is-vertical-s": undefined,
   },
   "keyframes": [
     {
@@ -640,7 +640,7 @@ exports[`getMotionWink > continuous asWeb=false 1`] = `
 exports[`getMotionWink > continuous asWeb=true 1`] = `
 {
   "custom": {
-    "--motion-wink-is-vertical-s": 0,
+    "--motion-wink-is-vertical-s": undefined,
   },
   "keyframes": [
     {
@@ -657,7 +657,7 @@ exports[`getMotionWink > continuous asWeb=true 1`] = `
 exports[`getMotionWink > inHorizontal asWeb=false 1`] = `
 {
   "custom": {
-    "--motion-wink-is-vertical-s": 0,
+    "--motion-wink-is-vertical-s": undefined,
   },
   "keyframes": [
     {
@@ -674,7 +674,7 @@ exports[`getMotionWink > inHorizontal asWeb=false 1`] = `
 exports[`getMotionWink > inHorizontal asWeb=true 1`] = `
 {
   "custom": {
-    "--motion-wink-is-vertical-s": 0,
+    "--motion-wink-is-vertical-s": undefined,
   },
   "keyframes": [
     {

@@ -7,7 +7,7 @@ type ParallaxRange = { startOffset: Required<RangeOffset>; endOffset: Required<R
 
 // the parallax of a transform layer - declares the layer's parallax custom properties and returns its widened scroll range
 export type Parallax = (
-  custom: Record<string, number | string>,
+  custom: Record<string, number | string | undefined>,
   prefix: string,
   asWeb?: boolean,
 ) => ReturnType<typeof scaleVhPercentageRangeAroundCenter>;
@@ -102,7 +102,7 @@ function computeParallax(
   reversed: boolean,
   speed: number = 1,
   center: number = 0.5,
-  custom: Record<string, number | string>,
+  custom: Record<string, number | string | undefined>,
   prefix: string,
   asWeb: boolean = false,
 ) {

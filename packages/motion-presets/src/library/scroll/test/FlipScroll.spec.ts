@@ -1,11 +1,15 @@
 import { describe, expect, test } from 'vitest';
 import * as FlipScroll from '../FlipScroll';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 import { MOTION_3D_TRANSFORM_NAME } from '../../../transformUtils';
 import { byName, scrollOptions } from './testUtils';
 
 const flipOf = (namedEffect: Record<string, unknown>) =>
   byName(
-    FlipScroll.layers(scrollOptions({ type: 'FlipScroll', ...namedEffect }), true),
+    resolveDefaults(
+      FlipScroll.layers(scrollOptions({ type: 'FlipScroll', ...namedEffect }), true),
+      FlipScroll.layers(scrollOptions({ type: 'FlipScroll', ...namedEffect })),
+    ),
     MOTION_3D_TRANSFORM_NAME,
   ) as any;
 
