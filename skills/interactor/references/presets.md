@@ -111,8 +111,8 @@ range: 'continuous' }`). It is unrelated to the effect-level **`rangeStart`/
 | `ParallaxScroll` | `speed` (`0.7159`, 1 = moves with the page), `center` 0–1 (`0.5`) — **no `range`**                                                                                |
 | `MoveScroll`     | `direction` deg it moves towards (`-60`), `travel` (`{400,'px'}`), `range` (`'in'`)                                                                               |
 | `SlideScroll`    | `direction` cardinal it moves towards (`'top'`), `range` (`'in'`)                                                                                                 |
-| `GrowScroll`     | `pivot` 9-way (`'center'`), `scale` (`0.25`; inverted to >1 for out/continuous), `speed` (`1`), `range` (`'in'`)                                 |
-| `ShrinkScroll`   | `pivot` 9-way (`'center'`), `scale` (`1.2`; inverted to <1 for out/continuous), `speed` (`1`), `range` (`'in'`)                                  |
+| `GrowScroll`     | `pivot` 9-way (`'center'`), `scale` (`0.25`; inverted to >1 for out/continuous), `speed` (`1`), `range` (`'in'`)                                                  |
+| `ShrinkScroll`   | `pivot` 9-way (`'center'`), `scale` (`1.2`; inverted to <1 for out/continuous), `speed` (`1`), `range` (`'in'`)                                                   |
 | `TiltScroll`     | `direction` `clockwise\|counter-clockwise` (`'counter-clockwise'`), `speed` (`1`), `perspective` (`400`), `range` (`'in'`)                                        |
 | `PanScroll`      | `direction` `left\|right` it moves towards (`'right'`), `distance` (`{400,'px'}`), `startFromOffScreen` (`true`), `range` (`'in'`)                                |
 | `BlurScroll`     | `blur` (`6`), `range` (`'in'`)                                                                                                                                    |
