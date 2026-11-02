@@ -112,6 +112,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.6.0] - 2026-11-02
+
+#### Changed
+
+- `generate()` and runtime resolution merge an interaction's media `conditions` onto each effect and sequence, so effects inherit viewport breakpoints declared on the interaction (#388)
+
+#### Fixed
+
+- `pointerMove` with `keyframeEffect` or `customEffect` now passes `transitionDuration` and `transitionEasing` into `getScrubScene()` for progress smoothing (`namedEffect` presets still apply their own CSS transition) (#395)
+
 ### [2.5.25] - 2026-10-30
 
 #### Added
@@ -120,6 +130,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - List custom properties, slots and trigger timeline names are suffixed with the index (`--anm-c1-0`, `--anm-c1-slot-0`, `--vw-tmln-c1-0`, `--trigger-c1-0`), so a config's CSS no longer overrides another's
   - Each config's lists and `:root { timeline-scope }` include those of the configs before it, so configs that target the same element play their animations together and their scoped timelines all stay visible
   - Derived ids of effects and sequences without an `effectId` / `sequenceId` are suffixed too (`eff-c1-0-0`, `seq-c1-0-0`), so their generated `@keyframes` and state names don't collide between configs
+
+#### Fixed
+
+- `click` triggers on iOS Safari: accept taps whose `click` is a `MouseEvent` without `pointerType` (keyboard-synthesized clicks with `detail === 0` still use the keydown path) (#378)
+- `viewEnter` with `once`: after a WAAPI entrance finishes, set `data-interact-enter="done"` so coexisting `generate()` CSS does not keep a paused `backwards` animation at progress 0 and hide the element (#382)
+- Safari before 17.4: skip `ElementInternals` when `CustomStateSet` is missing so toggle state falls back to `data-interact-effect` instead of throwing on `states.add` (#378)
 
 ### [2.5.22] - 2026-10-26
 
@@ -441,6 +457,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/motion
 
+### [2.2.0] - 2026-11-02
+
+#### Fixed
+
+- Multi-animation named effects call `persist()` on every layer so a finished filling animation is not dropped when later layers cover its properties — fixing reversed TiltIn losing its 3D tilt (#389)
+- `getScrubScene()` sets `target` on `keyframeEffect` pointer scenes to the resolved element (or id), matching `namedEffect` / `customEffect` and enabling `centeredToTarget` (#395)
+
+#### Changed
+
+- Scrub scene docs: `keyframeEffect` pointer scenes expose `target`, not `undefined` (#395)
+
+### [2.1.21] - 2026-10-28
+
+#### Fixed
+
+- CSS e2e fixture resolves the target from element id and optional `part` after `getCSSAnimation()` stopped returning `target` (#370)
+
+### [2.1.20] - 2026-10-27
+
+#### Changed
+
+- Republish aligning monorepo dependents on `@wix/motion@2.1.20`; no API changes since 2.1.18 (#376)
+
+### [2.1.19] - 2026-10-26
+
+#### Changed
+
+- Republish aligning monorepo dependents on `@wix/motion@2.1.19`; no API changes since 2.1.18 (#372)
+
 ### [2.1.18] - 2026-10-26
 
 #### Added
@@ -576,6 +621,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion-presets
+
+### [1.1.0] - 2026-11-02
+
+#### Changed
+
+- Preset parameter schemas aligned with #330 conventions across entrance, scroll, ongoing, mouse, and background-scroll categories (#389, #390, #391, #392, #393)
+- `parseAngle` and `parseCssLength` replace the lazy parsers; accept `min()` / `max()` / `clamp()` via CSS Typed OM when available; preserve input case so `calc(var(--CustomProp))` resolves correctly (#389)
+- Entrance `BounceIn` per-keyframe bounce uses WAAPI `easing`, not `animationTimingFunction` (#389)
+- Scroll presets: unique `@keyframes` names per range; `ShuttersScroll` continuous hold uses `step-end` instead of duplicate offsets; `MoveScroll` `travel` and `PanScroll` `distance` accept length objects; shared parallax helpers (#392)
+- Ongoing presets: easing baked into keyframe names where presets embed it; Flip/Fold direction conventions match #330; Rubber keeps master's asymmetric squash via a `stretch`-scaled deviation (#390)
+- Ongoing keyframe offsets rounded to six decimals to avoid floating-point noise in default keyframes (#394)
+- Mouse preset schemas and factory conventions (#391)
+- Background-scroll preset schemas and #330 naming (#393)
+
+#### Fixed
+
+- Ongoing `Fold` and `Swing` with a short `iterationDelay` no longer throw in WAAPI when damped keyframe offsets would exceed `1` — the damped shape is fitted into the active cycle when the delay is too short (#394)
 
 ### [1.0.9] - 2026-10-26
 
