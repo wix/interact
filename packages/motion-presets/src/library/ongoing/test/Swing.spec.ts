@@ -14,13 +14,13 @@ const options = (namedEffect = {}, rest: Partial<TimeAnimationOptions> = {}) =>
 
 describe('Swing', () => {
   test('layout rotation first, then the swing added around the rotated pivot', () => {
-    const [rotation, swing] = Swing.style(options());
+    const [rotation, swing] = Swing.layers(options());
     expect(rotation.composite).toBe('replace');
     expect(swing.composite).toBe('add');
   });
 
   test('swings 20deg around the top by default, first to the positive angle', () => {
-    const [, swing] = Swing.style(options());
+    const [, swing] = Swing.layers(options());
     expect(swing.custom).toMatchObject({
       '--motion-trans-rot-angle': '20deg',
       '--motion-trans-rot-from': 1,
@@ -34,7 +34,7 @@ describe('Swing', () => {
   });
 
   test('pivot sets the transform origin', () => {
-    const [, swing] = Swing.style(options({ pivot: 'right', angle: 30 }));
+    const [, swing] = Swing.layers(options({ pivot: 'right', angle: 30 }));
     expect(swing.custom).toMatchObject({
       '--motion-trans-rot-angle': '30deg',
       '--motion-trans-rot-origin-x': '50%',
@@ -45,7 +45,7 @@ describe('Swing', () => {
   test('eases out of rest and in-out between peaks, from the user easing family', () => {
     const quarter = (easing?: string) =>
       progressAt(
-        Swing.style(options({}, easing ? { easing } : {}))[1].easing!,
+        Swing.layers(options({}, easing ? { easing } : {}))[1].easing!,
         (0.0934 / 1.175) * 25,
       );
     const ease = (easing: string) => toEasingFunction(toCssEasing(easing))(0.25);

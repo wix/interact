@@ -1,14 +1,13 @@
 import type { AnimationData, TimeAnimationOptions, TurnIn } from '../../types';
 import { FOUR_CORNERS_DIRECTIONS } from '../../consts';
 import {
-  MOTION_TRANS_ROT_NAME,
   getMotionTransRot,
   getMotionLayoutRotation,
-  MOTION_LAYOUT_ROTATION_NAME,
   pivotToTransformOrigin,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { compareKeywordToNonDefaults, parseKeywordLazy } from '../../utils';
-import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { getMotionFade } from '../../fadeBlurUtils';
 import { spinDirection, toMotionRange } from '../../directions';
 
 const FADE_IN_EASING = 'sineIn';
@@ -26,17 +25,15 @@ export const schema = {
   pivot: { type: 'enum', values: FOUR_CORNERS_DIRECTIONS, default: DEFAULTS.pivot },
 };
 
-export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_FADE_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map(
-    (name) => name + suffix,
-  );
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<TurnIn>;
   const { pivot } = namedEffect!;
   const { fill = 'backwards' } = options;
@@ -79,4 +76,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

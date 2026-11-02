@@ -10,7 +10,7 @@ import { getEasing } from '../../../utils';
 import { byName, scrollOptions } from './testUtils';
 
 const stretchOf = (namedEffect: Record<string, unknown>, asWeb = true) =>
-  StretchScroll.style(scrollOptions({ type: 'StretchScroll', ...namedEffect }), asWeb) as any[];
+  StretchScroll.layers(scrollOptions({ type: 'StretchScroll', ...namedEffect }), asWeb) as any[];
 
 describe('StretchScroll', () => {
   test('keeps the layout rotation last, so the stretch is along the screen axes', () => {

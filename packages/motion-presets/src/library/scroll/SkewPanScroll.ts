@@ -9,10 +9,9 @@ import {
   withSharedScrollRange,
 } from '../../rangeUtils';
 import {
-  MOTION_LAYOUT_ROTATION_NAME,
-  MOTION_TRANS_ROT_NAME,
   getMotionLayoutRotation,
   getMotionTransRot,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
 
@@ -29,8 +28,8 @@ export const schema = {
   skew: { type: 'number', default: DEFAULTS.skew },
 };
 
-export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+export function getNames(options: ScrubAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -43,7 +42,7 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<SkewPanScroll>;
   const { direction, skew = DEFAULTS.skew } = namedEffect!;
   const range = parseRange(namedEffect, DEFAULTS.range);
@@ -88,4 +87,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ]);
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

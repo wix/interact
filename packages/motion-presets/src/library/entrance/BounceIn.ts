@@ -7,15 +7,13 @@ import type {
 } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
 import {
-  MOTION_TRANS_ROT_NAME,
-  MOTION_3D_TRANSFORM_NAME,
   getMotionTransRot,
   getMotion3dTransform,
   getMotionLayoutRotation,
-  MOTION_LAYOUT_ROTATION_NAME,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { compareKeywordToNonDefaults, parseCssLength } from '../../utils';
-import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { getMotionFade } from '../../fadeBlurUtils';
 import { sideDirection, toMotionRange } from '../../directions';
 
 // BounceIn uses easing to create the bouncing movement and uses only 2 keyframes
@@ -79,20 +77,15 @@ export const schema = {
   travel: { type: 'length', default: DEFAULTS.travel },
 };
 
-export function getNames({ namedEffect, suffix = '' }: TimeAnimationOptions) {
-  const { from } = namedEffect as BounceIn;
-  return [
-    MOTION_FADE_NAME,
-    compareKeywordToNonDefaults(from, ['back']) ? MOTION_3D_TRANSFORM_NAME : MOTION_TRANS_ROT_NAME,
-    MOTION_LAYOUT_ROTATION_NAME,
-  ].map((name) => name + suffix);
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<BounceIn>;
   const { from, perspective = DEFAULTS.perspective, travel } = namedEffect!;
   const { fill = 'backwards' } = options;
@@ -138,4 +131,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

@@ -1,9 +1,8 @@
 import type { AnimationData, DomApi, Pulse, TimeAnimationOptions } from '../../types';
 import {
-  MOTION_LAYOUT_ROTATION_NAME,
-  MOTION_SCALE_NAME,
   getMotionScale,
   getMotionLayoutRotation,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { getLoopOverrides } from '../../easingUtils';
 import { UNDIRECTED_MOTION_RANGE } from '../../directions';
@@ -28,15 +27,15 @@ const SHAPE: [number, number][] = [
   [0, 1],
 ];
 
-export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map((name) => name + suffix);
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<Pulse>;
   const { scale = DEFAULTS.scale } = namedEffect!;
 
@@ -61,4 +60,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...getMotionScale(UNDIRECTED_MOTION_RANGE, { scale }, asWeb, suffix),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

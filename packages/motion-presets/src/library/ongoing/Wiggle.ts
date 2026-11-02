@@ -1,11 +1,9 @@
 import type { AnimationData, DomApi, TimeAnimationOptions, Wiggle } from '../../types';
 import {
-  MOTION_3D_TRANSFORM_NAME,
-  MOTION_LAYOUT_ROTATION_NAME,
-  MOTION_TRANS_ROT_NAME,
   getMotion3dTransform,
   getMotionLayoutRotation,
   getMotionTransRot,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { getLoopOverrides } from '../../easingUtils';
@@ -46,17 +44,15 @@ const LIFT_SHAPE: LoopPoint[] = [
   [0, 1],
 ];
 
-export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_LAYOUT_ROTATION_NAME, MOTION_3D_TRANSFORM_NAME, MOTION_TRANS_ROT_NAME].map(
-    (name) => name + suffix,
-  );
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<Wiggle>;
   const { angle = DEFAULTS.angle, travel = DEFAULTS.travel } = namedEffect!;
   // the keyframes start at the negative sign, so the first peak is +angle
@@ -113,4 +109,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

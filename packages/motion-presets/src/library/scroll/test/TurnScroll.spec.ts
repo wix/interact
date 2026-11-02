@@ -6,7 +6,7 @@ import { byName, fakeDom, scrollOptions } from './testUtils';
 
 const turnOf = (namedEffect: Record<string, unknown>) =>
   byName(
-    TurnScroll.style(scrollOptions({ type: 'TurnScroll', ...namedEffect }), true),
+    TurnScroll.layers(scrollOptions({ type: 'TurnScroll', ...namedEffect }), true),
     MOTION_TRANS_ROT_NAME,
   ).custom!;
 

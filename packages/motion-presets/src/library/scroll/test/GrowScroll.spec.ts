@@ -4,7 +4,7 @@ import { byName, scrollOptions } from './testUtils';
 
 const scaleOf = (range?: string, scale?: number) =>
   byName(
-    GrowScroll.style(scrollOptions({ type: 'GrowScroll', range, scale }), true),
+    GrowScroll.layers(scrollOptions({ type: 'GrowScroll', range, scale }), true),
     'motion-scale',
   ).custom!;
 
@@ -18,7 +18,7 @@ describe('GrowScroll', () => {
 
   test('scales from the pivot', () => {
     const custom = byName(
-      GrowScroll.style(scrollOptions({ type: 'GrowScroll', pivot: 'top-left' }), true),
+      GrowScroll.layers(scrollOptions({ type: 'GrowScroll', pivot: 'top-left' }), true),
       'motion-scale',
     ).custom!;
     expect(custom['--motion-scale-origin-x']).toBe('-50%');
@@ -26,7 +26,7 @@ describe('GrowScroll', () => {
   });
 
   test('all layers span the parallax range', () => {
-    const [parallax, ...rest] = GrowScroll.style(
+    const [parallax, ...rest] = GrowScroll.layers(
       scrollOptions({ type: 'GrowScroll', speed: 1.5 }),
       true,
     ) as any[];

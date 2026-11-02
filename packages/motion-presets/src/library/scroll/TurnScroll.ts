@@ -9,12 +9,10 @@ import {
   withSharedScrollRange,
 } from '../../rangeUtils';
 import {
-  MOTION_LAYOUT_ROTATION_NAME,
-  MOTION_SCALE_NAME,
-  MOTION_TRANS_ROT_NAME,
   getMotionScale,
   getMotionTransRot,
   getMotionLayoutRotation,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
 
@@ -35,10 +33,8 @@ export const schema = {
   spin: { type: 'enum', values: SPIN_DIRECTIONS, default: DEFAULTS.spin },
 };
 
-export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map(
-    (name) => name + suffix,
-  );
+export function getNames(options: ScrubAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
@@ -52,7 +48,7 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
 }
 
 // moves from fully outside the viewport on one side to fully outside on the other side while turning
-export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<TurnScroll>;
   const { angle = DEFAULTS.angle, scale = DEFAULTS.scale } = namedEffect!;
   const range = parseRange(namedEffect, DEFAULTS.range);
@@ -104,4 +100,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
       ...getMotionScale(motionRange, { scale }, asWeb, suffix),
     },
   ]);
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

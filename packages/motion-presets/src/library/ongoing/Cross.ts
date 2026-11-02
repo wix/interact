@@ -14,10 +14,9 @@ import {
   measureLayout,
 } from '../../layoutUtils';
 import {
-  MOTION_LAYOUT_ROTATION_NAME,
-  MOTION_TRANS_ROT_NAME,
   getMotionLayoutRotation,
   getMotionTransRot,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
 import { getActiveFraction, getLoopOverrides, getWrapEasing } from '../../easingUtils';
@@ -45,8 +44,8 @@ const DIRECTION_ANGLES: Record<EffectEightDirections, number> = {
   'top-right': 315,
 };
 
-export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function prepare(_options: TimeAnimationOptions, dom?: DomApi) {
@@ -59,7 +58,7 @@ export function web(options: TimeAnimationOptions, dom?: DomApi) {
 
 // crosses its container towards the direction - from its place to fully outside the container,
 // then from fully outside the opposite side back to its place, at a constant speed
-export function style(
+export function layers(
   options: TimeAnimationOptions,
   asWeb = false,
   layout?: Layout,
@@ -125,4 +124,8 @@ export function style(
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

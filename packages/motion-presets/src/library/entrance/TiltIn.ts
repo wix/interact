@@ -1,16 +1,14 @@
 import type { AnimationData, LengthValue, TiltIn, TimeAnimationOptions } from '../../types';
 import { TWO_SIDES_DIRECTIONS } from '../../consts';
-import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
+import { getMotionReveal } from '../../clipUtils';
 import {
-  MOTION_TRANS_ROT_NAME,
-  MOTION_3D_TRANSFORM_NAME,
   getMotionTransRot,
   getMotion3dTransform,
   getMotionLayoutRotation,
-  MOTION_LAYOUT_ROTATION_NAME,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { compareKeywordToNonDefaults, parseCssLength } from '../../utils';
-import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { getMotionFade } from '../../fadeBlurUtils';
 import { axisDirection, sideDirection, spinDirection, toMotionRange } from '../../directions';
 
 const FADE_IN_EASING = 'cubicOut';
@@ -37,21 +35,15 @@ export const schema = {
   perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
 };
 
-export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [
-    MOTION_FADE_NAME,
-    MOTION_3D_TRANSFORM_NAME,
-    MOTION_TRANS_ROT_NAME,
-    MOTION_LAYOUT_ROTATION_NAME,
-    MOTION_REVEAL_NAME,
-  ].map((name) => name + suffix);
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<TiltIn>;
   const { depth, from, perspective = DEFAULTS.perspective } = namedEffect!;
   const { fill = 'backwards' } = options;
@@ -135,4 +127,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

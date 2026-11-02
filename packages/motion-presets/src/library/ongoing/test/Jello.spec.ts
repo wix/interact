@@ -9,14 +9,17 @@ const options = (namedEffect = {}) =>
 
 describe('Jello', () => {
   test('layout rotation first, then the skew added along the rotated axes', () => {
-    const [rotation, jello] = Jello.style(options());
+    const [rotation, jello] = Jello.layers(options());
     expect(rotation.composite).toBe('replace');
     expect(jello.composite).toBe('add');
   });
 
   test('first peak is the positive skew (12.25deg by default)', () => {
     const skewY = (namedEffect = {}) => {
-      const custom = Jello.style(options(namedEffect))[1].custom as Record<string, string | number>;
+      const custom = Jello.layers(options(namedEffect))[1].custom as Record<
+        string,
+        string | number
+      >;
       return (
         (custom['--motion-trans-rot-from'] as number) *
         parseFloat(custom['--motion-trans-rot-skew-y'] as string)
@@ -27,7 +30,7 @@ describe('Jello', () => {
   });
 
   test('a linear damped wobble', () => {
-    const [, { easing }] = Jello.style(options());
+    const [, { easing }] = Jello.layers(options());
     expect(progressAt(easing!, 24)).toBe(0);
     expect(progressAt(easing!, 38)).toBeCloseTo(1 + 2 / 7, 4);
     expect(progressAt(easing!, 58)).toBeCloseTo(1 - 4 / 7, 4);

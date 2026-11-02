@@ -14,7 +14,7 @@ const options = (namedEffect = {}, rest: Partial<TimeAnimationOptions> = {}) =>
 
 describe('Bounce', () => {
   test('jumps 49px up by default, then the layout rotation', () => {
-    const [bounce, rotation] = Bounce.style(options());
+    const [bounce, rotation] = Bounce.layers(options());
     expect(bounce.custom).toMatchObject({
       '--motion-trans-rot-travel': '49px',
       '--motion-trans-rot-direction': '90deg',
@@ -24,7 +24,7 @@ describe('Bounce', () => {
   });
 
   test('always bounces up', () => {
-    const [bounce] = Bounce.style(options({ direction: 'left', travel: 98 }));
+    const [bounce] = Bounce.layers(options({ direction: 'left', travel: 98 }));
     expect(bounce.custom).toMatchObject({
       '--motion-trans-rot-travel': '98px',
       '--motion-trans-rot-direction': '90deg',
@@ -32,7 +32,7 @@ describe('Bounce', () => {
   });
 
   test('peaks at the jump, sineOut per segment regardless of the user easing', () => {
-    const [{ easing }] = Bounce.style(options({}, { easing: 'linear' }));
+    const [{ easing }] = Bounce.layers(options({}, { easing: 'linear' }));
     expect(progressAt(easing!, 26.5)).toBeCloseTo(0, 3);
     expect(progressAt(easing!, 53.1)).toBeCloseTo(1, 3);
     expect(easing).toContain(

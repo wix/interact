@@ -1,10 +1,9 @@
 import type { Bounce, DomApi, TimeAnimationOptions, AnimationData } from '../../types';
 import type { MotionRange } from '../../directions';
 import {
-  MOTION_LAYOUT_ROTATION_NAME,
-  MOTION_TRANS_ROT_NAME,
   getMotionLayoutRotation,
   getMotionTransRot,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { getLoopOverrides } from '../../easingUtils';
@@ -47,15 +46,15 @@ const SHAPE: LoopPoint[] = [
   [0, 100],
 ].map(([value, time]) => [value / 98, time / 100]);
 
-export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as TimeAnimationOptions<Bounce>;
   const { travel = DEFAULTS.travel } = namedEffect!;
 
@@ -82,4 +81,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

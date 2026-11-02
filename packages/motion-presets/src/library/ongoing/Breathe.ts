@@ -1,12 +1,10 @@
 import type { AnimationData, Breathe, DomApi, TimeAnimationOptions } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
 import {
-  MOTION_3D_TRANSFORM_NAME,
-  MOTION_LAYOUT_ROTATION_NAME,
-  MOTION_TRANS_ROT_NAME,
   getMotion3dTransform,
   getMotionLayoutRotation,
   getMotionTransRot,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { getLoopOverrides } from '../../easingUtils';
@@ -42,21 +40,15 @@ const SHAPE: LoopPoint[] = [
   [0, 1],
 ];
 
-export function getNames({ namedEffect, suffix = '' }: TimeAnimationOptions) {
-  const isCenter =
-    parseKeywordLazy((namedEffect as Breathe)?.direction, DIRECTIONS, DEFAULTS.direction) ===
-    'center';
-  return [
-    isCenter ? MOTION_3D_TRANSFORM_NAME : MOTION_TRANS_ROT_NAME,
-    MOTION_LAYOUT_ROTATION_NAME,
-  ].map((name) => name + suffix);
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<Breathe>;
   const { perspective = DEFAULTS.perspective, travel = DEFAULTS.travel } = namedEffect!;
   const direction = parseKeywordLazy(namedEffect?.direction, DIRECTIONS, DEFAULTS.direction);
@@ -93,4 +85,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

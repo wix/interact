@@ -10,12 +10,10 @@ import {
   withSharedScrollRange,
 } from '../../rangeUtils';
 import {
-  MOTION_TRANS_ROT_NAME,
-  MOTION_3D_TRANSFORM_NAME,
   getMotionTransRot,
   getMotion3dTransform,
-  MOTION_LAYOUT_ROTATION_NAME,
   getMotionLayoutRotation,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { compareKeywordToNonDefaults } from '../../utils';
 
@@ -37,17 +35,15 @@ export const schema = {
   speed: { type: 'number', min: 0, default: DEFAULTS.speed },
 };
 
-export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_3D_TRANSFORM_NAME, MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map(
-    (name) => name + suffix,
-  );
+export function getNames(options: ScrubAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<TiltScroll>;
   const { perspective = DEFAULTS.perspective, speed = DEFAULTS.speed } = namedEffect!;
   const range = parseRange(namedEffect, DEFAULTS.range);
@@ -116,4 +112,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ]);
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

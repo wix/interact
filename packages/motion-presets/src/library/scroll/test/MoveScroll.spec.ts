@@ -3,7 +3,7 @@ import * as MoveScroll from '../MoveScroll';
 import { scrollOptions } from './testUtils';
 
 const offsetsOf = (namedEffect: Record<string, unknown>) =>
-  MoveScroll.style(scrollOptions({ type: 'MoveScroll', ...namedEffect }), true).map(
+  MoveScroll.layers(scrollOptions({ type: 'MoveScroll', ...namedEffect }), true).map(
     (animation: any) => [animation.startOffsetAdd, animation.endOffsetAdd],
   );
 

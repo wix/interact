@@ -5,7 +5,7 @@ import { byName, scrollOptions } from './testUtils';
 
 const skewPanOf = (namedEffect: Record<string, unknown>) =>
   byName(
-    SkewPanScroll.style(scrollOptions({ type: 'SkewPanScroll', ...namedEffect }), true),
+    SkewPanScroll.layers(scrollOptions({ type: 'SkewPanScroll', ...namedEffect }), true),
     'motion-trans-rot',
   ).custom!;
 

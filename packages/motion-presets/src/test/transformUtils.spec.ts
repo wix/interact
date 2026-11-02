@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import type { MotionRange } from '../directions';
+import type { AnimationData } from '../types';
 import { createParallax } from '../parallaxUtils';
 import {
   MOTION_3D_TRANSFORM_NAME,
@@ -10,6 +11,7 @@ import {
   getMotion3dTransform,
   getMotionLayoutRotation,
   getMotionScale,
+  mergeTransformLayers,
   getMotionTransRot,
   pivotToTransformOrigin,
 } from '../transformUtils';
@@ -198,5 +200,65 @@ describe('pivotToTransformOrigin', () => {
     expect(pivotToTransformOrigin('top-left')).toEqual({ x: '-50%', y: '-50%' });
     expect(pivotToTransformOrigin('bottom-right')).toEqual({ x: '50%', y: '50%' });
     expect(pivotToTransformOrigin('right')).toEqual({ x: '50%', y: '0px' });
+  });
+});
+
+describe('mergeTransformLayers', () => {
+  const layer = (name: string, transforms: string[], extra: Record<string, unknown> = {}) =>
+    ({
+      name,
+      duration: 1000,
+      easing: 'linear',
+      custom: { [`--${name}`]: 1 },
+      keyframes: transforms.map((transform) => ({ transform })),
+      ...extra,
+    }) as AnimationData;
+  const rotation = layer(
+    'rotation',
+    ['rotate(var(--motion-rotate))', 'rotate(var(--motion-rotate))'],
+    {
+      composite: 'replace',
+    },
+  );
+
+  test('a constant layer merges into a moving one, in their stacking order, composited like the first', () => {
+    const moving = layer('move', ['translateX(0px)', 'translateX(10px)'], {
+      composite: 'add',
+      easing: 'ease-in',
+    });
+    const [merged, ...rest] = mergeTransformLayers([{ ...rotation }, moving]);
+    expect(rest).toEqual([]);
+    expect(merged.name).toBe('rotation--move');
+    expect(merged.composite).toBe('replace');
+    expect(merged.easing).toBe('ease-in');
+    expect(merged.keyframes.map(({ transform }) => transform)).toEqual([
+      'rotate(var(--motion-rotate)) translateX(0px)',
+      'rotate(var(--motion-rotate)) translateX(10px)',
+    ]);
+    expect(merged.custom).toEqual({ '--rotation': 1, '--move': 1 });
+  });
+
+  test('moving layers merge only when their timing is the same', () => {
+    const a = layer('a', ['translateX(0px)', 'translateX(10px)']);
+    const b = layer('b', ['rotate(0deg)', 'rotate(10deg)'], { composite: 'add' });
+    const c = layer('c', ['scale(1)', 'scale(2)'], { composite: 'add', easing: 'ease-out' });
+    expect(mergeTransformLayers([a, b, c]).map(({ name }) => name)).toEqual(['a--b', 'c']);
+  });
+
+  test('the moving layer keeps its getters', () => {
+    const moving = layer('move', ['translateX(0px)', 'translateX(10px)'], { composite: 'add' });
+    Object.defineProperty(moving, 'timing', { get: () => ({ easing: 'ease' }), enumerable: true });
+    const [merged] = mergeTransformLayers([{ ...rotation }, moving]);
+    expect(Object.getOwnPropertyDescriptor(merged, 'timing')?.get).toBeTypeOf('function');
+  });
+
+  test('other properties stay in their own layers, and the suffix stays at the end', () => {
+    const fade = { name: 'fade-1', keyframes: [{ opacity: 0 }] } as AnimationData;
+    const moving = layer('move-1', ['translateX(0px)', 'translateX(10px)'], { composite: 'add' });
+    const names = mergeTransformLayers(
+      [{ ...rotation, name: 'rotation-1' }, fade, moving],
+      '-1',
+    ).map(({ name }) => name);
+    expect(names).toEqual(['rotation--move-1', 'fade-1']);
   });
 });

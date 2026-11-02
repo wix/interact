@@ -5,7 +5,7 @@ import { getEasing } from '../../../utils';
 import { byName, scrollOptions } from './testUtils';
 
 const tiltOf = (namedEffect: Record<string, unknown>) =>
-  TiltScroll.style(scrollOptions({ type: 'TiltScroll', ...namedEffect }), true) as any[];
+  TiltScroll.layers(scrollOptions({ type: 'TiltScroll', ...namedEffect }), true) as any[];
 
 describe('TiltScroll', () => {
   test("'out' is 'in' reversed with the same 3d tilt", () => {

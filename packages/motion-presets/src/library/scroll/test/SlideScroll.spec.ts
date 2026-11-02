@@ -6,7 +6,7 @@ import { scrollOptions } from './testUtils';
 
 describe('SlideScroll', () => {
   test('moves along the rotated axes - the layout rotation replaces and the motion adds', () => {
-    const [rotation, motion, reveal] = SlideScroll.style(
+    const [rotation, motion, reveal] = SlideScroll.layers(
       scrollOptions({ type: 'SlideScroll' }),
       true,
     ) as any[];
@@ -20,7 +20,7 @@ describe('SlideScroll', () => {
   });
 
   test('reveals from the side opposite to the movement', () => {
-    const [, motion, reveal] = SlideScroll.style(
+    const [, motion, reveal] = SlideScroll.layers(
       scrollOptions({ type: 'SlideScroll', direction: 'left' }),
       true,
     ) as any[];

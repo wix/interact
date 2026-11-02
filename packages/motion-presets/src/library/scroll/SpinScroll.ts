@@ -8,12 +8,10 @@ import {
   withSharedScrollRange,
 } from '../../rangeUtils';
 import {
-  MOTION_SCALE_NAME,
-  MOTION_TRANS_ROT_NAME,
   getMotionScale,
   getMotionTransRot,
-  MOTION_LAYOUT_ROTATION_NAME,
   getMotionLayoutRotation,
+  mergeTransformLayers,
 } from '../../transformUtils';
 
 const DEFAULTS: Required<SpinScroll> = {
@@ -31,17 +29,15 @@ export const schema = {
   spins: { type: 'number', min: 0, default: DEFAULTS.spins },
 };
 
-export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME].map(
-    (name) => name + suffix,
-  );
+export function getNames(options: ScrubAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<SpinScroll>;
   const { scale = DEFAULTS.scale, spins = DEFAULTS.spins } = namedEffect!;
   const range = parseRange(namedEffect, DEFAULTS.range);
@@ -79,4 +75,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
       ...getMotionScale(motionRange, { scale }, asWeb, suffix),
     },
   ]);
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

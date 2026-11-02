@@ -1,11 +1,10 @@
 import type { AnimationData, DomApi, Fold, TimeAnimationOptions } from '../../types';
 import { CENTER_AND_FOUR_DIRECTIONS, FOUR_DIRECTIONS } from '../../consts';
 import {
-  MOTION_3D_TRANSFORM_NAME,
-  MOTION_LAYOUT_ROTATION_NAME,
   getMotion3dTransform,
   getMotionLayoutRotation,
   pivotToTransformOrigin,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import type { LoopPoint } from '../../easingUtils';
 import { getLoopOverrides } from '../../easingUtils';
@@ -41,15 +40,15 @@ const SHAPE: LoopPoint[] = [
   [0, 1.189],
 ].map(([value, time]) => [value, time / 1.189]);
 
-export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_LAYOUT_ROTATION_NAME, MOTION_3D_TRANSFORM_NAME].map((name) => name + suffix);
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<Fold>;
   const {
     angle = DEFAULTS.angle,
@@ -95,4 +94,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

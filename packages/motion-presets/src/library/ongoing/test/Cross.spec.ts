@@ -44,7 +44,7 @@ describe('Cross', () => {
   });
 
   test('continuous keyframes from the direction side to the opposite side', () => {
-    const [cross, rotation] = Cross.style(options());
+    const [cross, rotation] = Cross.layers(options());
     expect(cross.custom).toMatchObject({
       '--motion-trans-rot-direction': 'calc(180deg + 0deg)',
       '--motion-trans-rot-from': -1,
@@ -57,7 +57,7 @@ describe('Cross', () => {
 
   test('maps the eight directions to css angles', () => {
     const angle = (direction: string) =>
-      (Cross.style(options({ direction }))[0].custom as Record<string, string>)[
+      (Cross.layers(options({ direction }))[0].custom as Record<string, string>)[
         '--motion-trans-rot-direction'
       ];
     expect(angle('bottom-right')).toBe('calc(180deg + 45deg)');
@@ -68,7 +68,7 @@ describe('Cross', () => {
   });
 
   test('without measurements it wraps in the middle', () => {
-    const [cross] = Cross.style(options({ iterationDelay: 1000 }));
+    const [cross] = Cross.layers(options({ iterationDelay: 1000 }));
     expect(cross.easing).toBe(getWrapEasing(0.5, 0.5));
     expect(cross.duration).toBe(2000);
     expect('timing' in cross).toBe(false);

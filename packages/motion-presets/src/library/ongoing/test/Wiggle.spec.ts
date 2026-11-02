@@ -13,7 +13,7 @@ const options = (namedEffect = {}, rest: Partial<TimeAnimationOptions> = {}) =>
 
 describe('Wiggle', () => {
   test('layout rotation, then the wiggle rotation, then the lift along the tilted axes', () => {
-    const [rotation, wiggle, lift] = Wiggle.style(options());
+    const [rotation, wiggle, lift] = Wiggle.layers(options());
     expect(rotation.composite).toBe('replace');
     expect(wiggle.name).toBe('motion-3d-transform');
     expect(wiggle.composite).toBe('add');
@@ -23,7 +23,7 @@ describe('Wiggle', () => {
 
   test('rotates only around z, first to the positive angle (25deg by default)', () => {
     const angleOf = (namedEffect = {}) => {
-      const custom = Wiggle.style(options(namedEffect))[1].custom!;
+      const custom = Wiggle.layers(options(namedEffect))[1].custom!;
       expect(custom).toMatchObject({
         '--motion-transform-3d-angle-x': '0deg',
         '--motion-transform-3d-angle-y': '0deg',
@@ -39,18 +39,18 @@ describe('Wiggle', () => {
   });
 
   test('lifts up without rotating (25px by default)', () => {
-    const custom = Wiggle.style(options({ travel: '40px' }))[2].custom!;
+    const custom = Wiggle.layers(options({ travel: '40px' }))[2].custom!;
     expect(custom).toMatchObject({
       '--motion-trans-rot-angle': '0deg',
       '--motion-trans-rot-direction': '90deg',
       '--motion-trans-rot-from': -1,
       '--motion-trans-rot-travel': '40px',
     });
-    expect(Wiggle.style(options())[2].custom!['--motion-trans-rot-travel']).toBe('25px');
+    expect(Wiggle.layers(options())[2].custom!['--motion-trans-rot-travel']).toBe('25px');
   });
 
   test('the rotation wobbles while the lift is a single bump, both linear', () => {
-    const [, wiggle, lift] = Wiggle.style(options({}, { easing: 'sineIn' }));
+    const [, wiggle, lift] = Wiggle.layers(options({}, { easing: 'sineIn' }));
     expect(progressAt(wiggle.easing!, 18)).toBeCloseTo(0, 4);
     expect(progressAt(wiggle.easing!, 35)).toBeCloseTo(1.8, 4);
     expect(progressAt(wiggle.easing!, 73)).toBeCloseTo(1.4, 4);

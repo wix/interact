@@ -4,7 +4,7 @@ import { byName, scrollOptions } from './testUtils';
 
 const scaleOf = (range?: string, scale?: number) =>
   byName(
-    ShrinkScroll.style(scrollOptions({ type: 'ShrinkScroll', range, scale }), true),
+    ShrinkScroll.layers(scrollOptions({ type: 'ShrinkScroll', range, scale }), true),
     'motion-scale',
   ).custom!;
 

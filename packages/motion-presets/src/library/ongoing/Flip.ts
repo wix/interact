@@ -1,10 +1,9 @@
 import type { AnimationData, DomApi, Flip, TimeAnimationOptions } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
 import {
-  MOTION_3D_TRANSFORM_NAME,
-  MOTION_LAYOUT_ROTATION_NAME,
   getMotion3dTransform,
   getMotionLayoutRotation,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { getLoopOverrides } from '../../easingUtils';
 import { axisDirection, toMotionRange } from '../../directions';
@@ -31,15 +30,15 @@ const SHAPE: [number, number][] = [
   [0, 1],
 ];
 
-export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_LAYOUT_ROTATION_NAME, MOTION_3D_TRANSFORM_NAME].map((name) => name + suffix);
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<Flip>;
   const { perspective = DEFAULTS.perspective } = namedEffect!;
 
@@ -74,4 +73,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

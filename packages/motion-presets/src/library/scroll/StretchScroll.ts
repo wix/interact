@@ -2,15 +2,13 @@ import type { AnimationData, ScrubAnimationOptions, StretchScroll, DomApi } from
 import { SCROLL_RANGES } from '../../consts';
 import { sideDirection, toMotionRange } from '../../directions';
 import { getScrollEasing, linearEasing } from '../../easingUtils';
-import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { getMotionFade } from '../../fadeBlurUtils';
 import { getLinearScrollEasing, getScrollOverrides, parseRange } from '../../rangeUtils';
 import {
-  MOTION_SCALE_NAME,
-  MOTION_TRANS_ROT_NAME,
   getMotionScale,
   getMotionTransRot,
-  MOTION_LAYOUT_ROTATION_NAME,
   getMotionLayoutRotation,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { parseCssLength } from '../../utils';
 
@@ -66,20 +64,15 @@ export const schema = {
   stretch: { type: 'number', min: -1, max: 1, default: DEFAULTS.stretch },
 };
 
-export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [
-    MOTION_FADE_NAME,
-    MOTION_TRANS_ROT_NAME,
-    MOTION_SCALE_NAME,
-    MOTION_LAYOUT_ROTATION_NAME,
-  ].map((name) => name + suffix);
+export function getNames(options: ScrubAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix = '' } = options as ScrubAnimationOptions<StretchScroll>;
   const { stretch = DEFAULTS.stretch } = namedEffect!;
   const range = parseRange(namedEffect, DEFAULTS.range);
@@ -144,4 +137,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

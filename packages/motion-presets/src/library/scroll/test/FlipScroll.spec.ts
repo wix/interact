@@ -5,7 +5,7 @@ import { byName, scrollOptions } from './testUtils';
 
 const flipOf = (namedEffect: Record<string, unknown>) =>
   byName(
-    FlipScroll.style(scrollOptions({ type: 'FlipScroll', ...namedEffect }), true),
+    FlipScroll.layers(scrollOptions({ type: 'FlipScroll', ...namedEffect }), true),
     MOTION_3D_TRANSFORM_NAME,
   ) as any;
 

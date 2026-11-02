@@ -1,14 +1,13 @@
 import type { AnimationData, TimeAnimationOptions, WinkIn } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
-import { MOTION_WINK_NAME, getMotionWink } from '../../clipUtils';
+import { getMotionWink } from '../../clipUtils';
 import {
-  MOTION_SCALE_NAME,
   getMotionScale,
   getMotionLayoutRotation,
-  MOTION_LAYOUT_ROTATION_NAME,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { compareKeywordToNonDefaults } from '../../utils';
-import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { getMotionFade } from '../../fadeBlurUtils';
 import { axisDirection, toMotionRange } from '../../directions';
 
 const FADE_IN_EASING = 'quadOut';
@@ -24,17 +23,15 @@ export const schema = {
   direction: { type: 'enum', values: AXIS_DIRECTIONS, default: DEFAULTS.direction },
 };
 
-export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [MOTION_FADE_NAME, MOTION_LAYOUT_ROTATION_NAME, MOTION_SCALE_NAME, MOTION_WINK_NAME].map(
-    (name) => name + suffix,
-  );
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<WinkIn>;
   const { direction } = namedEffect!;
   const { fill = 'backwards' } = options;
@@ -79,4 +76,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...getMotionWink(motionRange, {}, asWeb, suffix),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

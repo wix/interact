@@ -5,15 +5,14 @@ import type {
   AnimationData,
 } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
-import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
+import { getMotionReveal } from '../../clipUtils';
 import {
-  MOTION_TRANS_ROT_NAME,
   getMotionLayoutRotation,
   getMotionTransRot,
-  MOTION_LAYOUT_ROTATION_NAME,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
-import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { getMotionFade } from '../../fadeBlurUtils';
 import { sideDirection, toMotionRange } from '../../directions';
 
 const TRAVEL = '100%';
@@ -30,20 +29,15 @@ export const schema = {
   start: { type: 'number', min: 0, max: 1, default: DEFAULTS.start },
 };
 
-export function getNames({ suffix = '' }: TimeAnimationOptions) {
-  return [
-    MOTION_FADE_NAME,
-    MOTION_LAYOUT_ROTATION_NAME,
-    MOTION_TRANS_ROT_NAME,
-    MOTION_REVEAL_NAME,
-  ].map((name) => name + suffix);
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
   const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<SlideIn>;
   const { start: minimum = DEFAULTS.start } = namedEffect!;
   const { fill = 'backwards' } = options;
@@ -92,4 +86,8 @@ export function style(options: TimeAnimationOptions, asWeb = false): AnimationDa
       ...getMotionReveal(toMotionRange(sideDirection, from, 'in'), { minimum }, asWeb, suffix),
     },
   ];
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

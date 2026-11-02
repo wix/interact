@@ -9,10 +9,9 @@ import {
   withSharedScrollRange,
 } from '../../rangeUtils';
 import {
-  MOTION_LAYOUT_ROTATION_NAME,
-  MOTION_TRANS_ROT_NAME,
   getMotionLayoutRotation,
   getMotionTransRot,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { parseKeywordLazy, parseCssLength } from '../../utils';
 
@@ -31,8 +30,8 @@ export const schema = {
   startFromOffScreen: { type: 'bool', default: DEFAULTS.startFromOffScreen },
 };
 
-export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+export function getNames(options: ScrubAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function prepare(options: ScrubAnimationOptions, dom?: DomApi) {
@@ -48,7 +47,7 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<PanScroll>;
   const { direction, distance, startFromOffScreen = DEFAULTS.startFromOffScreen } = namedEffect!;
   const range = parseRange(namedEffect, DEFAULTS.range);
@@ -93,4 +92,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ]);
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

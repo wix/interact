@@ -5,7 +5,7 @@ import { byName, fakeDom, scrollOptions } from './testUtils';
 
 const panOf = (namedEffect: Record<string, unknown>) =>
   byName(
-    PanScroll.style(scrollOptions({ type: 'PanScroll', ...namedEffect }), true),
+    PanScroll.layers(scrollOptions({ type: 'PanScroll', ...namedEffect }), true),
     'motion-trans-rot',
   ).custom!;
 

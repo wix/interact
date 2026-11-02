@@ -8,10 +8,9 @@ import {
   withSharedScrollRange,
 } from '../../rangeUtils';
 import {
-  MOTION_TRANS_ROT_NAME,
   getMotionTransRot,
-  MOTION_LAYOUT_ROTATION_NAME,
   getMotionLayoutRotation,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { compareKeywordToNonDefaults, parseLength, parseCssLength, roundNumber } from '../../utils';
 
@@ -28,15 +27,15 @@ export const schema = {
   travel: { type: 'lengthObject', default: DEFAULTS.travel },
 };
 
-export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_TRANS_ROT_NAME, MOTION_LAYOUT_ROTATION_NAME].map((name) => name + suffix);
+export function getNames(options: ScrubAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: ScrubAnimationOptions, _?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<MoveScroll>;
   const { direction = DEFAULTS.direction, range: inputRange, travel: inputTravel } = namedEffect!;
   const range = parseRange(namedEffect, DEFAULTS.range);
@@ -87,4 +86,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
       ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ]);
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

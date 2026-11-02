@@ -13,13 +13,13 @@ const options = (namedEffect = {}, rest: Partial<TimeAnimationOptions> = {}) =>
 
 describe('Flip', () => {
   test('layout rotation first, then the 3d flip added on the rotated axes', () => {
-    const [rotation, flip] = Flip.style(options());
+    const [rotation, flip] = Flip.layers(options());
     expect(rotation.composite).toBe('replace');
     expect(flip.composite).toBe('add');
   });
 
   test('a full horizontal turn by default', () => {
-    const [, flip] = Flip.style(options());
+    const [, flip] = Flip.layers(options());
     expect(flip.custom).toMatchObject({
       '--motion-transform-3d-angle-y': '360deg',
       '--motion-transform-3d-angle-x': '0deg',
@@ -36,7 +36,7 @@ describe('Flip', () => {
   });
 
   test('vertical turns around the x-axis', () => {
-    const [, flip] = Flip.style(options({ direction: 'vertical' }));
+    const [, flip] = Flip.layers(options({ direction: 'vertical' }));
     expect(flip.custom).toMatchObject({
       '--motion-transform-3d-angle-x': '-360deg',
       '--motion-transform-3d-angle-y': '0deg',
@@ -44,7 +44,7 @@ describe('Flip', () => {
   });
 
   test('uses the user easing', () => {
-    const [, flip] = Flip.style(options({}, { easing: 'cubicIn' }));
+    const [, flip] = Flip.layers(options({}, { easing: 'cubicIn' }));
     expect(flip.easing).toBe(
       getLoopEasing({
         shape: [

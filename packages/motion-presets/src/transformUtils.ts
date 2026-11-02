@@ -1,5 +1,6 @@
 import type { MotionRange } from './directions';
 import type { Parallax } from './parallaxUtils';
+import type { AnimationData } from './types';
 import { CSS_CALC_REGEX, declareCustom, stripCalc, suffixLayer, toKeyframeValue } from './utils';
 
 export const MOTION_TRANS_ROT_NAME = 'motion-trans-rot';
@@ -234,6 +235,85 @@ export function getMotion3dTransform(
     },
     suffix,
   );
+}
+
+type Layer = AnimationData & { name?: string };
+
+const NON_TIMING_KEYS = new Set(['name', 'keyframes', 'custom', 'composite', 'namedEffect']);
+
+const isTransformLayer = ({ keyframes }: Layer) =>
+  keyframes.length > 0 &&
+  keyframes.every((keyframe) =>
+    Object.keys(keyframe).every((key) => key === 'transform' || key === 'offset'),
+  );
+
+const isConstant = ({ keyframes }: Layer) =>
+  keyframes.every(({ transform }) => transform === keyframes[0].transform);
+
+function timingOf(layer: Layer) {
+  const descriptors = Object.getOwnPropertyDescriptors(layer);
+  if (Object.values(descriptors).some((descriptor) => descriptor.get)) {
+    return null;
+  }
+  const entries = Object.entries(layer).filter(([key]) => !NON_TIMING_KEYS.has(key));
+  return JSON.stringify([
+    entries.sort(([a], [b]) => (a < b ? -1 : 1)),
+    layer.keyframes.map(({ offset }) => offset),
+  ]);
+}
+
+function canMerge(a: Layer, b: Layer) {
+  if (isConstant(a) || isConstant(b)) {
+    return true;
+  }
+  const timing = timingOf(a);
+  return timing !== null && timing === timingOf(b);
+}
+
+// folds the next layer into the carrier, keeping the carrier's object (and any getters on it)
+function mergeInto(carrier: Layer, other: Layer, otherFirst: boolean, baseName: string) {
+  const constantTransform = other.keyframes[0].transform;
+  carrier.keyframes = carrier.keyframes.map((keyframe, index) => {
+    const otherTransform = isConstant(other) ? constantTransform : other.keyframes[index].transform;
+    const [first, second] = otherFirst
+      ? [otherTransform, keyframe.transform]
+      : [keyframe.transform, otherTransform];
+    return { ...keyframe, transform: `${first} ${second}` };
+  });
+  carrier.custom = { ...other.custom, ...carrier.custom };
+  carrier.name = baseName;
+  return carrier;
+}
+
+// stacked 'add' transform layers keep an element off the compositor, so a preset's transform layers that share
+// their timing are merged into one transform list - constant layers (like the layout rotation) merge into any.
+// the merged layer is composited like the first of them, and named after its layers
+export function mergeTransformLayers(
+  layers: AnimationData[],
+  suffix: string = '',
+): AnimationData[] {
+  const baseName = (name?: string) =>
+    suffix && name?.endsWith(suffix) ? name.slice(0, -suffix.length) : name || '';
+  const result: Layer[] = [];
+
+  for (const layer of layers as Layer[]) {
+    const previous = [...result].reverse().find(isTransformLayer);
+    if (!isTransformLayer(layer) || !previous || !canMerge(previous, layer)) {
+      result.push(layer);
+      continue;
+    }
+    const name = `${baseName(previous.name)}--${baseName(layer.name)}${suffix}`;
+    const composite = previous.composite;
+    // the carrier is the moving layer, so its timing (and getters) stay
+    const merged =
+      isConstant(previous) && !isConstant(layer)
+        ? mergeInto(layer, previous, true, name)
+        : mergeInto(previous, layer, false, name);
+    merged.composite = composite;
+    result[result.indexOf(previous)] = merged;
+  }
+
+  return result;
 }
 
 // the layout's own rotation (--motion-rotate) as a constant transform layer, since an animated transform replaces it

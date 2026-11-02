@@ -1,6 +1,6 @@
 import type { AnimationData, DomApi, ScrubAnimationOptions, SlideScroll } from '../../types';
 import { FOUR_DIRECTIONS, SCROLL_RANGES } from '../../consts';
-import { MOTION_REVEAL_NAME, getMotionReveal } from '../../clipUtils';
+import { getMotionReveal } from '../../clipUtils';
 import { sideDirection, toMotionRange } from '../../directions';
 import {
   getLinearScrollEasing,
@@ -9,10 +9,9 @@ import {
   withSharedScrollRange,
 } from '../../rangeUtils';
 import {
-  MOTION_TRANS_ROT_NAME,
   getMotionTransRot,
-  MOTION_LAYOUT_ROTATION_NAME,
   getMotionLayoutRotation,
+  mergeTransformLayers,
 } from '../../transformUtils';
 import { parseKeywordLazy } from '../../utils';
 
@@ -29,17 +28,15 @@ export const schema = {
   range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
 };
 
-export function getNames({ suffix = '' }: ScrubAnimationOptions) {
-  return [MOTION_LAYOUT_ROTATION_NAME, MOTION_TRANS_ROT_NAME, MOTION_REVEAL_NAME].map(
-    (name) => name + suffix,
-  );
+export function getNames(options: ScrubAnimationOptions) {
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
   const { namedEffect, suffix } = options as ScrubAnimationOptions<SlideScroll>;
   const range = parseRange(namedEffect, DEFAULTS.range);
   const direction = parseKeywordLazy(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction);
@@ -95,4 +92,8 @@ export function style(options: ScrubAnimationOptions, asWeb = false): AnimationD
       ),
     },
   ]);
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }
