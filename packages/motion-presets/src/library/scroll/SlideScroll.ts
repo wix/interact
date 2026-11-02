@@ -17,8 +17,18 @@ import {
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
+import { SCROLL_RANGES } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'bottom';
+const DEFAULTS: Required<SlideScroll> = {
+  type: 'SlideScroll',
+  direction: 'top',
+  range: 'in',
+};
+
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+};
 
 const DIRECTION_TRANSLATION_MAP: Record<EffectFourDirections, Translate> = {
   bottom: { x: '0', y: '100%' },
@@ -41,23 +51,25 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as SlideScroll;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { range = 'in' } = namedEffect;
+  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction);
+  const { range = DEFAULTS.range } = namedEffect;
+  // direction is where the element moves to - it comes from the opposite side, and continues to direction on out
+  const from = range === 'out' ? direction : getOppositeDirection(FOUR_DIRECTIONS, direction);
   const easing = 'linear';
   const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
+    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill || 'both'
   ) as AnimationFillMode;
-  const oppositeDirection = getOppositeDirection(FOUR_DIRECTIONS, direction);
+  const oppositeDirection = getOppositeDirection(FOUR_DIRECTIONS, from);
 
-  const translateFrom = range === 'out' ? { x: '0', y: '0' } : DIRECTION_TRANSLATION_MAP[direction];
+  const translateFrom = range === 'out' ? { x: '0', y: '0' } : DIRECTION_TRANSLATION_MAP[from];
   const translateTo =
     range === 'in'
       ? { x: '0', y: '0' }
-      : DIRECTION_TRANSLATION_MAP[range === 'out' ? direction : oppositeDirection];
+      : DIRECTION_TRANSLATION_MAP[range === 'out' ? from : oppositeDirection];
 
   const custom = {
-    '--motion-clip-from': getRevealClipFrom(direction, range),
-    '--motion-clip-to': getRevealClipTo(direction, range),
+    '--motion-clip-from': getRevealClipFrom(from, range),
+    '--motion-clip-to': getRevealClipTo(from, range),
     '--motion-translate-from-x': translateFrom.x,
     '--motion-translate-from-y': translateFrom.y,
     '--motion-translate-to-x': translateTo.x,
@@ -66,7 +78,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
 
   const keyframes = [
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-from', false, custom['--motion-clip-from']),
+      clipPath: toKeyframeValue(custom, '--motion-clip-from', asWeb),
       transform: `rotate(${toKeyframeValue(
         {},
         '--motion-rotate',
@@ -79,7 +91,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       )}, ${toKeyframeValue(custom, `--motion-translate-from-y`, asWeb)})`,
     },
     {
-      clipPath: toKeyframeValue({}, '--motion-clip-to', false, custom['--motion-clip-to']),
+      clipPath: toKeyframeValue(custom, '--motion-clip-to', asWeb),
       transform: `rotate(${toKeyframeValue(
         {},
         '--motion-rotate',

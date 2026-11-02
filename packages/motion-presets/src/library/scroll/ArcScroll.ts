@@ -1,9 +1,21 @@
 import type { ArcScroll, AnimationFillMode, DomApi, ScrubAnimationOptions } from '../../types';
 import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
-import { AXIS_DIRECTIONS } from '../../consts';
+import { AXIS_DIRECTIONS, SCROLL_RANGES } from '../../consts';
 
 const ROTATION = 68;
-const DEFAULT_DIRECTION: (typeof AXIS_DIRECTIONS)[number] = 'horizontal';
+
+const DEFAULTS: Required<ArcScroll> = {
+  type: 'ArcScroll',
+  direction: 'horizontal',
+  perspective: 500,
+  range: 'in',
+};
+
+export const schema = {
+  direction: { type: 'enum', values: AXIS_DIRECTIONS, default: DEFAULTS.direction },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+};
 
 const ROTATE_DIRECTION_MAP = {
   vertical: 'rotateX',
@@ -20,10 +32,10 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as ArcScroll;
-  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULT_DIRECTION);
-  const { range = 'in', perspective = 500 } = namedEffect;
+  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULTS.direction);
+  const { range = DEFAULTS.range, perspective = DEFAULTS.perspective } = namedEffect;
   const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
+    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill || 'both'
   ) as AnimationFillMode;
 
   const rotateAxis = ROTATE_DIRECTION_MAP[direction];

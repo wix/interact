@@ -76,7 +76,7 @@ export function style(options: ScrubAnimationOptions & AnimationExtraOptions, as
   const toScale = roundNumber(getScaleFromPerspectiveAndZ(toZ, PERSPECTIVE));
 
   const custom = {
-    '--motion-zoom-over-pers': (0.5 * zoom) / PERSPECTIVE,
+    '--motion-zoom-over-pers': roundNumber((0.5 * zoom) / PERSPECTIVE, 6),
     '--motion-scale-to': toScale,
     '--motion-trans-y-from': fromY,
     '--motion-trans-z-from': `${roundNumber(fromZ)}px`,
