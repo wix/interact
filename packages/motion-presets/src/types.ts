@@ -504,18 +504,18 @@ export type MousePivotAxis =
 
 export type AiryMouse = MouseEffectBase & {
   type: 'AiryMouse';
-  distance?: UnitLengthPercentage;
-  axis?: MouseEffectAxis;
+  travel?: LengthInput;
+  direction?: MouseEffectAxis;
   angle?: number;
 };
 export type BlobMouse = MouseEffectBase & {
   type: 'BlobMouse';
-  distance?: UnitLengthPercentage;
+  travel?: LengthInput;
   scale?: number;
 };
 export type BlurMouse = MouseEffectBase & {
   type: 'BlurMouse';
-  distance?: UnitLengthPercentage;
+  travel?: LengthInput;
   angle?: number;
   scale?: number;
   blur?: number;
@@ -523,30 +523,30 @@ export type BlurMouse = MouseEffectBase & {
 };
 export type BounceMouse = MouseEffectBase & {
   type: 'BounceMouse';
-  distance?: UnitLengthPercentage;
-  axis?: MouseEffectAxis;
+  travel?: LengthInput;
+  direction?: MouseEffectAxis;
 };
 export type ScaleMouse = MouseEffectBase & {
   type: 'ScaleMouse';
-  distance?: UnitLengthPercentage;
-  axis?: MouseEffectAxis;
+  travel?: LengthInput;
+  direction?: MouseEffectAxis;
   scale?: number;
 };
 export type SkewMouse = MouseEffectBase & {
   type: 'SkewMouse';
-  distance?: UnitLengthPercentage;
+  travel?: LengthInput;
   angle?: number;
-  axis?: MouseEffectAxis;
+  direction?: MouseEffectAxis;
 };
 export type SpinMouse = MouseEffectBase & {
   type: 'SpinMouse';
-  axis?: MouseEffectAxis;
+  direction?: MouseEffectAxis;
 };
 export type SwivelMouse = MouseEffectBase & {
   type: 'SwivelMouse';
   angle?: number;
   perspective?: number;
-  pivotAxis?: MousePivotAxis;
+  pivot?: MousePivotAxis;
 };
 export type Tilt3DMouse = MouseEffectBase & {
   type: 'Tilt3DMouse';
@@ -555,15 +555,15 @@ export type Tilt3DMouse = MouseEffectBase & {
 };
 export type Track3DMouse = MouseEffectBase & {
   type: 'Track3DMouse';
-  distance?: UnitLengthPercentage;
+  travel?: LengthInput;
   angle?: number;
-  axis?: MouseEffectAxis;
+  direction?: MouseEffectAxis;
   perspective?: number;
 };
 export type TrackMouse = MouseEffectBase & {
   type: 'TrackMouse';
-  distance?: UnitLengthPercentage;
-  axis?: MouseEffectAxis;
+  travel?: LengthInput;
+  direction?: MouseEffectAxis;
 };
 
 export type CustomMouse = { type: 'CustomMouse' };

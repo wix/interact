@@ -1,14 +1,26 @@
-import { getCssUnits, getMouseTransitionEasing, mapRange, parseLength } from '../../utils';
+import type { LengthValue } from '../../utils';
+import { getMouseTransitionEasing, mapRange, parseCssLength } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 import { ScrubAnimationOptions, AnimationExtraOptions, BlobMouse, Progress } from '../../types';
 
-const DEFAULT_DISTANCE = { value: 200, unit: 'px' };
+const DEFAULTS: Required<BlobMouse> = {
+  type: 'BlobMouse',
+  inverted: false,
+  scale: 1.4,
+  travel: { value: 200, unit: 'px' },
+};
+
+export const schema = {
+  inverted: { type: 'bool', default: DEFAULTS.inverted },
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
 
 class BlobMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
-    const { distance, scale, invert } = this.options;
-    const translateX = mapRange(0, 1, -distance.value, distance.value, progressX) * invert;
-    const translateY = mapRange(0, 1, -distance.value, distance.value, progressY) * invert;
+    const { travel, scale, invert } = this.options;
+    const translateX = mapRange(0, 1, -1, 1, progressX) * invert;
+    const translateY = mapRange(0, 1, -1, 1, progressY) * invert;
 
     // if progressX === 0 || progressX === 1, scaleX === scale, if progressX === 0.5, scaleX === 1
     const scaleX =
@@ -22,9 +34,7 @@ class BlobMouseAnimation extends CustomMouse {
         ? mapRange(0, 0.5, scale, 1, progressY)
         : mapRange(0.5, 1, 1, scale, progressY);
 
-    const units = getCssUnits(distance.unit);
-
-    this.target.style.transform = `translateX(${translateX}${units}) translateY(${translateY}${units}) scale(${scaleX}, ${scaleY}) rotate(var(--motion-rotate, 0deg))`;
+    this.target.style.transform = `translateX(calc(${travel} * ${translateX})) translateY(calc(${travel} * ${translateY})) scale(${scaleX}, ${scaleY}) rotate(var(--motion-rotate, 0deg))`;
   }
 
   cancel() {
@@ -36,8 +46,8 @@ class BlobMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as BlobMouse;
-  const { inverted = false, scale = 1.4 } = namedEffect;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
+  const { inverted = DEFAULTS.inverted, scale = DEFAULTS.scale } = namedEffect;
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
 
   const invert = inverted ? -1 : 1;
   const animationOptions = {
@@ -45,7 +55,7 @@ export default function create(options: ScrubAnimationOptions & AnimationExtraOp
       ? `transform ${transitionDuration}ms ${getMouseTransitionEasing(transitionEasing)}`
       : '',
     invert,
-    distance,
+    travel,
     scale,
   };
 

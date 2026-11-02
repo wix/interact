@@ -33,11 +33,13 @@ These parameters are available on all mouse presets:
 
 - `inverted`: boolean — reverses the movement/effect direction (default: `false`)
 
-The `axis` parameter, where available, accepts:
+The `direction` parameter, where available, accepts:
 
 - `'both'`: respond on both axes
 - `'horizontal'`: respond only on X
 - `'vertical'`: respond only on Y
+
+Movement lengths are named `travel` (`LengthInput`: a number in px, a CSS length string such as `'2em'`, or `{ value, unit }`).
 
 ---
 
@@ -48,12 +50,12 @@ Visual: Element floats and rotates gently following the cursor, creating an airy
 Parameters:
 
 - `inverted`: boolean (default: `false`)
-- `distance`: UnitLengthPercentage — max translate distance (default: `{ value: 200, unit: 'px' }`)
+- `travel`: LengthInput — max translate distance (default: `{ value: 200, unit: 'px' }`)
 - `angle`: number — max rotation in degrees (default: `30`)
-- `axis`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
+- `direction`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
 
 ```typescript
-{ type: 'AiryMouse', angle: 50, distance: { value: 150, unit: 'px' } }
+{ type: 'AiryMouse', angle: 50, travel: { value: 150, unit: 'px' } }
 ```
 
 ---
@@ -65,11 +67,11 @@ Visual: Element translates and scales non-uniformly following the cursor, creati
 Parameters:
 
 - `inverted`: boolean (default: `false`)
-- `distance`: UnitLengthPercentage — max translate distance (default: `{ value: 200, unit: 'px' }`)
+- `travel`: LengthInput — max translate distance (default: `{ value: 200, unit: 'px' }`)
 - `scale`: number — max scale at edges (default: `1.4`)
 
 ```typescript
-{ type: 'BlobMouse', scale: 2, distance: { value: 100, unit: 'px' } }
+{ type: 'BlobMouse', scale: 2, travel: { value: 100, unit: 'px' } }
 ```
 
 ---
@@ -81,14 +83,14 @@ Visual: Element translates, tilts in 3D, scales, and blurs based on distance fro
 Parameters:
 
 - `inverted`: boolean (default: `false`)
-- `distance`: UnitLengthPercentage — max translate distance (default: `{ value: 80, unit: 'px' }`)
+- `travel`: LengthInput — max translate distance (default: `{ value: 80, unit: 'px' }`)
 - `angle`: number — max 3D rotation in degrees (default: `5`)
 - `scale`: number — min scale at edges (default: `0.3`)
-- `blur`: number — max blur in px (default: `20`)
+- `blur`: number — blur in px with the cursor at a corner, less towards the center (default: `16.57`)
 - `perspective`: number — 3D perspective in px (default: `600`)
 
 ```typescript
-{ type: 'BlurMouse', blur: 30, angle: 10 }
+{ type: 'BlurMouse', blur: 25, angle: 10 }
 ```
 
 ---
@@ -100,11 +102,11 @@ Visual: Element follows the cursor like TrackMouse but with elastic easing — t
 Parameters:
 
 - `inverted`: boolean (default: `false`)
-- `distance`: UnitLengthPercentage — max translate distance (default: `{ value: 80, unit: 'px' }`)
-- `axis`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
+- `travel`: LengthInput — max translate distance (default: `{ value: 80, unit: 'px' }`)
+- `direction`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
 
 ```typescript
-{ type: 'BounceMouse', distance: { value: 120, unit: 'px' } }
+{ type: 'BounceMouse', travel: { value: 120, unit: 'px' } }
 ```
 
 ---
@@ -116,9 +118,9 @@ Visual: Element translates and scales uniformly following the cursor.
 Parameters:
 
 - `inverted`: boolean (default: `false`)
-- `distance`: UnitLengthPercentage — max translate distance (default: `{ value: 80, unit: 'px' }`)
+- `travel`: LengthInput — max translate distance (default: `{ value: 80, unit: 'px' }`)
 - `scale`: number — scale at edges, >1 for grow, <1 for shrink (default: `1.4`)
-- `axis`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
+- `direction`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
 
 ```typescript
 { type: 'ScaleMouse', scale: 0.5 }
@@ -133,12 +135,12 @@ Visual: Element translates and skews following the cursor, creating a directiona
 Parameters:
 
 - `inverted`: boolean (default: `false`)
-- `distance`: UnitLengthPercentage — max translate distance (default: `{ value: 200, unit: 'px' }`)
+- `travel`: LengthInput — max translate distance (default: `{ value: 200, unit: 'px' }`)
 - `angle`: number — max skew angle in degrees (default: `25`)
-- `axis`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
+- `direction`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
 
 ```typescript
-{ type: 'SkewMouse', angle: 15, axis: 'horizontal' }
+{ type: 'SkewMouse', angle: 15, direction: 'horizontal' }
 ```
 
 ---
@@ -150,10 +152,10 @@ Visual: Element rotates in response to cursor direction — the rotation angle i
 Parameters:
 
 - `inverted`: boolean (default: `false`)
-- `axis`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
+- `direction`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
 
 ```typescript
-{ type: 'SpinMouse', axis: 'horizontal' }
+{ type: 'SpinMouse', direction: 'horizontal' }
 ```
 
 ---
@@ -167,10 +169,10 @@ Parameters:
 - `inverted`: boolean (default: `false`)
 - `angle`: number — max tilt angle in degrees (default: `5`)
 - `perspective`: number — 3D perspective in px (default: `800`)
-- `pivotAxis`: 'top' | 'bottom' | 'right' | 'left' | 'center-horizontal' | 'center-vertical' (default: `'center-horizontal'`)
+- `pivot`: 'top' | 'bottom' | 'right' | 'left' | 'center-horizontal' | 'center-vertical' — the edge it tilts around, or the center with the tilt's direction (default: `'center-horizontal'`)
 
 ```typescript
-{ type: 'SwivelMouse', angle: 25, pivotAxis: 'top' }
+{ type: 'SwivelMouse', angle: 25, pivot: 'top' }
 ```
 
 ---
@@ -198,13 +200,13 @@ Visual: Element translates and tilts in 3D following the cursor, combining movem
 Parameters:
 
 - `inverted`: boolean (default: `false`)
-- `distance`: UnitLengthPercentage — max translate distance (default: `{ value: 200, unit: 'px' }`)
+- `travel`: LengthInput — max translate distance (default: `{ value: 200, unit: 'px' }`)
 - `angle`: number — max 3D rotation in degrees (default: `5`)
-- `axis`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
+- `direction`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
 - `perspective`: number — 3D perspective in px (default: `800`)
 
 ```typescript
-{ type: 'Track3DMouse', angle: 15, distance: { value: 100, unit: 'px' } }
+{ type: 'Track3DMouse', angle: 15, travel: { value: 100, unit: 'px' } }
 ```
 
 ---
@@ -216,11 +218,11 @@ Visual: Element follows the cursor with direct translation, no rotation.
 Parameters:
 
 - `inverted`: boolean (default: `false`)
-- `distance`: UnitLengthPercentage — max translate distance (default: `{ value: 200, unit: 'px' }`)
-- `axis`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
+- `travel`: LengthInput — max translate distance (default: `{ value: 200, unit: 'px' }`)
+- `direction`: 'both' | 'horizontal' | 'vertical' (default: `'both'`)
 
 ```typescript
-{ type: 'TrackMouse', distance: { value: 100, unit: 'px' }, axis: 'vertical' }
+{ type: 'TrackMouse', travel: { value: 100, unit: 'px' }, direction: 'vertical' }
 ```
 
 ---
@@ -234,7 +236,7 @@ Tested values for different intensity levels. When a user asks for "soft", "subt
 | AiryMouse         | angle              | 10°         | 50°      | 85°           |
 | BlobMouse         | scale              | 1.2         | 1.6      | 2.4           |
 | BlurMouse         | angle, scale       | 0°, 1       | 25°, 0.7 | 65°, 0.25     |
-| BounceMouse       | distance           | 40px        | 80px     | 200px         |
+| BounceMouse       | travel             | 40px        | 80px     | 200px         |
 | ScaleMouse (down) | scale              | 0.85        | 0.5      | 0             |
 | ScaleMouse (up)   | scale              | 1.2         | 1.6      | 2.4           |
 | SkewMouse         | angle              | 10°         | 20°      | 45°           |
