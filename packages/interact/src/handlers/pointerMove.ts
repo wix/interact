@@ -1,4 +1,4 @@
-import { getScrubScene } from '@wix/motion';
+import { getScrubScene, getJsEasing } from '@wix/motion';
 import { Pointer } from 'kuliso';
 import type { PointerMoveParams, ScrubEffect, HandlerObjectMap, InteractOptions } from '../types';
 import {
@@ -12,6 +12,21 @@ let pointerOptionsGetter: () => Partial<PointerConfig> = () => ({});
 
 function registerOptionsGetter(getter: () => Partial<PointerConfig>) {
   pointerOptionsGetter = getter;
+}
+
+// namedEffect presets apply their own CSS transition, so only smooth progress for the rest
+function getTransitionOptions(effect: ScrubEffect): {
+  transitionDuration?: number;
+  transitionEasing?: (t: number) => number;
+} {
+  if (!('keyframeEffect' in effect || 'customEffect' in effect) || !effect.transitionDuration) {
+    return {};
+  }
+
+  return {
+    transitionDuration: effect.transitionDuration,
+    transitionEasing: getJsEasing(effect.transitionEasing),
+  };
 }
 
 function addPointerMoveHandler(
@@ -41,6 +56,7 @@ function addPointerMoveHandler(
       root: options.hitArea === 'self' ? source : undefined,
       scenes,
       ...pointerOptionsGetter(),
+      ...getTransitionOptions(effect),
     });
     const cleanup = () => {
       pointer.destroy();

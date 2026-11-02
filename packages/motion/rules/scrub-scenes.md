@@ -148,7 +148,7 @@ type Progress = { x: number; y: number; v?: { x: number; y: number }; active?: b
 
 | Field                | `keyframeEffect` pointer path                   | `namedEffect`/`customEffect` pointer path                                |
 | -------------------- | ----------------------------------------------- | ------------------------------------------------------------------------ |
-| `target`             | `undefined`                                     | the wrapped `MouseAnimationInstance.target`                              |
+| `target`             | the resolved target element                     | the wrapped `MouseAnimationInstance.target`                              |
 | `centeredToTarget`   | from `animationOptions.centeredToTarget`        | from `animationOptions.centeredToTarget`                                 |
 | `transitionDuration` | not set                                         | set only if `customEffect` **and** `transitionDuration` are both present |
 | `transitionEasing`   | not set                                         | set only in that same case — see gotcha below                            |

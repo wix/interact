@@ -135,7 +135,7 @@ function getScrubScene(
       }
 
       const scene: ScrubPointerScene & { _currentProgress: number } = {
-        target: undefined,
+        target: (typeof target === 'string' ? getElement(target) : target) ?? undefined,
         centeredToTarget,
         ready: animationGroup.ready,
         _currentProgress: 0,
