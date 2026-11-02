@@ -33,11 +33,11 @@ describe('MoveScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom distance', () => {
+    test('custom travel', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
         namedEffect: {
-          distance: { value: 200, unit: 'percentage' },
+          travel: { value: 200, unit: 'percentage' },
         } as MoveScrollType,
       };
 
@@ -61,10 +61,10 @@ describe('MoveScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom angle', () => {
+    test('custom direction', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        namedEffect: { angle: 45 } as MoveScrollType,
+        namedEffect: { direction: -135 } as MoveScrollType,
       };
 
       const expectedResult = [
@@ -95,13 +95,13 @@ describe('MoveScroll', () => {
         {
           fill: 'forwards',
           startOffsetAdd: '',
-          endOffsetAdd: '346.4101615137755px',
+          endOffsetAdd: '',
           keyframes: [
             {
               transform: 'translate(0px, 0px) rotate(var(--motion-rotate, 0))',
             },
             {
-              transform: 'translate(-200px, 346px) rotate(var(--motion-rotate, 0))',
+              transform: 'translate(200px, -346px) rotate(var(--motion-rotate, 0))',
             },
           ],
         },
@@ -169,11 +169,11 @@ describe('MoveScroll', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('custom distance', () => {
+    test('custom travel', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
         namedEffect: {
-          distance: { value: 200, unit: 'percentage' },
+          travel: { value: 200, unit: 'percentage' },
         } as MoveScrollType,
       };
 

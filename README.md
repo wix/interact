@@ -221,7 +221,7 @@ const config: InteractConfig = {
     'card-float': {
       duration: 900,
       easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-      namedEffect: { type: 'FloatIn', direction: 'bottom' },
+      namedEffect: { type: 'FloatIn', from: 'bottom' },
     },
   },
 };
@@ -269,7 +269,7 @@ const config: InteractConfig = {
       trigger: 'viewProgress',
       effects: [
         {
-          namedEffect: { type: 'ParallaxScroll', parallaxFactor: 0.5 },
+          namedEffect: { type: 'ParallaxScroll', speed: 0.7 },
           rangeStart: { name: 'cover', offset: { unit: 'percentage', value: 0 } },
           rangeEnd: { name: 'cover', offset: { unit: 'percentage', value: 100 } },
           easing: 'linear',

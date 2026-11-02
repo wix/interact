@@ -377,6 +377,26 @@ export function toKeyframeValue(
   return useValue ? custom[key] : `var(${key}${fallback !== undefined ? `, ${fallback}` : ''})`;
 }
 
+export function declareCustom<K extends string>(
+  prefix: string,
+  entries: Record<K, [string | number, string]>,
+  asWeb: boolean = false,
+) {
+  const custom: Record<string, string | number> = {};
+  const vars = {} as Record<K, string | number>;
+
+  for (const [key, [value, fallback]] of Object.entries(entries) as [
+    K,
+    [string | number, string],
+  ][]) {
+    const name = `${prefix}-${key}`;
+    custom[name] = value;
+    vars[key] = toKeyframeValue(custom, name, asWeb, fallback);
+  }
+
+  return { custom, vars };
+}
+
 export function getTimingFactor(
   duration: number,
   delay: number,
@@ -388,6 +408,22 @@ export function getTimingFactor(
   return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
 }
 
+const EASING_NAME_LENGTH = 40;
+
+// keyframes that bake in the easing need a non-default one in their name, so CSS @keyframes don't collide.
+// e.g. cubic-bezier(0.68, -0.55, 0.27, 1.55) -> cubic-bezier-068_-055_027_155
+export function getEasingName(easing: string | undefined, defaultEasing: string) {
+  if (!easing || easing === defaultEasing) {
+    return '';
+  }
+  const name = easing
+    .trim()
+    .replace(/\s*,\s*/g, '_')
+    .replace(/[\s(]+/g, '-')
+    .replace(/[^\w-]/g, '');
+  return `-${name.slice(0, EASING_NAME_LENGTH)}`;
+}
+
 export type LengthValue = { value: number; unit: string };
 export type LengthInput =
   | string
@@ -397,6 +433,70 @@ export type LengthInput =
   | undefined;
 
 const CSS_UNIT_REGEX = /^(-?\d*\.?\d+)(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/i;
+const CSS_CALC_REGEX = /^calc\(.*\)$/i;
+const CSS_ANGLE_REGEX = /^(-?\d*\.?\d+)(deg|rad|grad|turn)$/i;
+const SIDE_ANGLES: Record<string, number> = { top: 270, right: 0, bottom: 90, left: 180 };
+
+function isCssNumeric(value: string) {
+  try {
+    return !!globalThis.CSSNumericValue?.parse(value);
+  } catch {
+    return false;
+  }
+}
+
+export function parseAngle(input: number | string | undefined, defaultValue: number) {
+  if (typeof input === 'number') {
+    return `${input}deg`;
+  }
+
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    const side = trimmed.toLowerCase();
+    if (Object.hasOwn(SIDE_ANGLES, side)) {
+      return `${SIDE_ANGLES[side]}deg`;
+    }
+    if (trimmed && !isNaN(Number(trimmed))) {
+      return `${Number(trimmed)}deg`;
+    }
+    if (CSS_ANGLE_REGEX.test(trimmed) || CSS_CALC_REGEX.test(trimmed) || isCssNumeric(trimmed)) {
+      return trimmed;
+    }
+  }
+
+  return `${defaultValue}deg`;
+}
+
+export function parseCssLength(input: LengthInput, defaultValue: LengthValue) {
+  const parsedLength = { ...defaultValue };
+
+  if (typeof input === 'number') {
+    parsedLength.value = input;
+  }
+
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    if (trimmed && !isNaN(Number(trimmed))) {
+      parsedLength.value = Number(trimmed);
+    } else if (
+      CSS_CALC_REGEX.test(trimmed) ||
+      CSS_UNIT_REGEX.test(trimmed) ||
+      isCssNumeric(trimmed)
+    ) {
+      return trimmed;
+    }
+  }
+
+  if (typeof input === 'object' && input !== null && 'value' in input && 'unit' in input) {
+    const value = typeof input.value === 'string' ? parseFloat(input.value) : input.value;
+    if (typeof value === 'number' && !isNaN(value) && typeof input.unit === 'string') {
+      parsedLength.value = value;
+      parsedLength.unit = input.unit.toLowerCase();
+    }
+  }
+
+  return `${parsedLength.value}${getCssUnits(parsedLength.unit)}`;
+}
 
 /**
  * Normalize unit string to internal format

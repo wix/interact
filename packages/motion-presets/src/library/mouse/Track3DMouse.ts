@@ -5,43 +5,51 @@ import {
   Progress,
   MouseEffectAxis,
 } from '../../types';
-import {
-  getCssUnits,
-  getMouseTransitionEasing,
-  mapRange,
-  parseLength,
-  parseDirection,
-} from '../../utils';
+import type { LengthValue } from '../../utils';
+import { getMouseTransitionEasing, mapRange, parseCssLength, parseDirection } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 
-const DEFAULT_DISTANCE = { value: 200, unit: 'px' };
-const DEFAULT_ANGLE = 5;
-const DEFAULT_AXIS: MouseEffectAxis = 'both';
 const AXES = ['both', 'horizontal', 'vertical'] as const;
+
+const DEFAULTS: Required<Track3DMouse> = {
+  type: 'Track3DMouse',
+  angle: 5,
+  direction: 'both',
+  inverted: false,
+  perspective: 800,
+  travel: { value: 200, unit: 'px' },
+};
+
+export const schema = {
+  angle: { type: 'number', min: 0, default: DEFAULTS.angle },
+  direction: { type: 'enum', values: AXES, default: DEFAULTS.direction },
+  inverted: { type: 'bool', default: DEFAULTS.inverted },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
 
 class Track3DMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
-    const { invert, distance, angle, axis, perspective } = this.options;
+    const { invert, travel, angle, direction, perspective } = this.options;
 
     let translateX = 0;
     let translateY = 0;
     let rotateX = 0;
     let rotateY = 0;
-    // if progressX === 0, translateX === -distance
+    // if progressX === 0, translateX === -travel
     // if progressX === 0.5, translateX === 0
-    // if progressX === 1, translateX === distance
+    // if progressX === 1, translateX === travel
     // if progressX === 0, rotateX === -angle, if progressX === 0.5, rotateX === 0, if progressX === 1, rotateX === angle
-    if (axis === 'both' || axis === 'horizontal') {
-      translateX = mapRange(0, 1, -distance.value, distance.value, progressX);
+    if (direction === 'both' || direction === 'horizontal') {
+      translateX = mapRange(0, 1, -1, 1, progressX);
       rotateY = mapRange(0, 1, -angle, angle, progressX) * invert;
     }
-    if (axis === 'both' || axis === 'vertical') {
-      translateY = mapRange(0, 1, -distance.value, distance.value, progressY);
+    if (direction === 'both' || direction === 'vertical') {
+      translateY = mapRange(0, 1, -1, 1, progressY);
       rotateX = mapRange(0, 1, angle, -angle, progressY) * invert;
     }
-    const units = getCssUnits(distance.unit);
 
-    this.target.style.transform = `perspective(${perspective}px) translateX(${translateX}${units}) translateY(${translateY}${units}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotate(var(--motion-rotate, 0deg))`;
+    this.target.style.transform = `perspective(${perspective}px) translateX(calc(${travel} * ${translateX})) translateY(calc(${travel} * ${translateY})) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotate(var(--motion-rotate, 0deg))`;
   }
 
   cancel() {
@@ -53,19 +61,25 @@ class Track3DMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as Track3DMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-  const angle = parseDirection(namedEffect.angle, [], DEFAULT_ANGLE, true) as number;
-  const axis = parseDirection(namedEffect.axis, AXES, DEFAULT_AXIS) as MouseEffectAxis;
-  const { perspective = 800 } = namedEffect;
+  const {
+    inverted = DEFAULTS.inverted,
+    angle = DEFAULTS.angle,
+    perspective = DEFAULTS.perspective,
+  } = namedEffect;
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const direction = parseDirection(
+    namedEffect.direction,
+    AXES,
+    DEFAULTS.direction,
+  ) as MouseEffectAxis;
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration
       ? `transform ${transitionDuration}ms ${getMouseTransitionEasing(transitionEasing)}`
       : '',
     invert,
-    distance,
-    axis,
+    travel,
+    direction,
     angle,
     perspective,
   };

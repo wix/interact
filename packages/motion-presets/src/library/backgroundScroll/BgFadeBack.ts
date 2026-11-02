@@ -9,6 +9,15 @@ import type {
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
 import { measureCompHeight } from './utils';
 
+const DEFAULTS: Required<BgFadeBack> = {
+  type: 'BgFadeBack',
+  scale: 0.7,
+};
+
+export const schema = {
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+};
+
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-bgFadeBackOpacity', 'motion-bgFadeBackScale'], options.suffix);
 }
@@ -34,7 +43,7 @@ export const parts = ['MEDIA_CLIP'];
 
 export function style(options: ScrubAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const easing = 'sineOut';
-  const { scale = 0.7 } = options.namedEffect as BgFadeBack;
+  const { scale = DEFAULTS.scale } = options.namedEffect as BgFadeBack;
 
   const custom = { '--motion-scale': scale };
 

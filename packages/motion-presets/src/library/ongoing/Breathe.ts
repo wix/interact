@@ -1,20 +1,36 @@
 import type { AnimationExtraOptions, Breathe, DomApi, TimeAnimationOptions } from '../../types';
+import type { LengthValue } from '../../utils';
 import {
-  getCssUnits,
   getEasing,
   getEasingFamily,
+  getEasingName,
   getTimingFactor,
   toKeyframeValue,
   parseDirection,
-  parseLength,
+  parseCssLength,
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DISTANCE = { value: 25, unit: 'px' };
 const DIRECTIONS = [...AXIS_DIRECTIONS, 'center'] as const;
-const DEFAULT_DIRECTION: (typeof DIRECTIONS)[number] = 'vertical';
+
+const DEFAULT_EASING = 'sineInOut';
+
+const DEFAULTS: Required<Breathe> = {
+  type: 'Breathe',
+  direction: 'vertical',
+  iterationDelay: 0,
+  perspective: 800,
+  travel: { value: 25, unit: 'px' },
+};
+
+export const schema = {
+  direction: { type: 'enum', values: DIRECTIONS, default: DEFAULTS.direction },
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
 
 const DIRECTION_MAP = {
   vertical: { x: 0, y: 1, z: 0 },
@@ -36,11 +52,11 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Breathe;
-  const direction = parseDirection(namedEffect?.direction, DIRECTIONS, DEFAULT_DIRECTION);
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-  const { perspective = 800 } = namedEffect;
+  const direction = parseDirection(namedEffect?.direction, DIRECTIONS, DEFAULTS.direction);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const { perspective = DEFAULTS.perspective } = namedEffect;
 
-  const easing = options.easing || 'sineInOut';
+  const easing = options.easing || DEFAULT_EASING;
   const duration = options.duration || 1;
   const iterationDelay = namedEffect?.iterationDelay || 0;
   const totalDuration = duration + iterationDelay;
@@ -54,7 +70,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   // Create CSS custom properties for the Breathe configuration
   const custom: Record<string, string | number> = {
     '--motion-breathe-perspective': perspectiveTransform,
-    '--motion-breathe-distance': `${distance.value}${getCssUnits(distance.unit || 'px')}`,
+    '--motion-breathe-distance': travel,
     '--motion-breathe-x': x,
     '--motion-breathe-y': y,
     '--motion-breathe-z': z,
@@ -124,5 +140,8 @@ export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) 
   const iterationDelay = (options.namedEffect as Breathe)?.iterationDelay || 0;
   const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
 
-  return suffixNames([`motion-breathe-${timingFactor}`], options.suffix);
+  return suffixNames(
+    [`motion-breathe-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
+    options.suffix,
+  );
 }

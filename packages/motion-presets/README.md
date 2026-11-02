@@ -174,28 +174,28 @@ For selection by tone and atmosphere (playful, elegant, bold, soft, dramatic, mo
 
 ## Parameter Conventions
 
-### `direction`
+### `from`, `direction` and `pivot`
 
-The `direction` parameter accepts different value sets depending on the preset:
+Entrance presets use `from` — the side the element comes from. `pivot` names the edge or corner the element rotates around. The accepted values depend on the preset:
 
-| Values                                   | Example Presets                                                         |
-| ---------------------------------------- | ----------------------------------------------------------------------- |
-| `'top' \| 'right' \| 'bottom' \| 'left'` | SlideIn, FloatIn, FlipIn, FoldIn                                        |
-| `'horizontal' \| 'vertical'`             | WinkIn, ArcScroll, FlipScroll, Flip                                     |
-| `'clockwise' \| 'counter-clockwise'`     | SpinIn, SpinScroll, Spin                                                |
-| `0–360` (degrees, number)                | GlideIn, ExpandIn, MoveScroll                                           |
-| Corner values                            | TurnIn (`'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`) |
+| Values                                   | Example Presets                                                                  |
+| ---------------------------------------- | -------------------------------------------------------------------------------- |
+| `'top' \| 'right' \| 'bottom' \| 'left'` | `from`: SlideIn, FloatIn, RevealIn; `direction`: SlideScroll; `pivot`: FoldIn    |
+| `'horizontal' \| 'vertical'`             | `direction`: FlipIn, WinkIn, ArcScroll, FlipScroll, Flip                         |
+| `'clockwise' \| 'counter-clockwise'`     | `direction`: SpinIn, SpinScroll, Spin                                            |
+| `0–360` (degrees, number)                | `from`: GlideIn, ExpandIn; MoveScroll                                            |
+| Corner values                            | `pivot`: TurnIn (`'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`) |
 
-**Angle convention:** `0° = right (east)`, angles increase counter-clockwise.
+**Angle convention:** entrance presets follow the CSS convention — `0° = right`, `90° = bottom`, `180° = left`, `270° = top`. Other presets use `0° = right (east)`, with angles increasing counter-clockwise.
 
 ### Distance units
 
-Prefer the `{ value, unit }` object notation:
+Entrance movement lengths are named `travel`. Prefer the `{ value, unit }` object notation:
 
 ```typescript
 namedEffect: {
   type: 'GlideIn',
-  distance: { value: 120, unit: 'px' },
+  travel: { value: 120, unit: 'px' },
 }
 ```
 

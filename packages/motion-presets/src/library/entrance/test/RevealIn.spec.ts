@@ -36,10 +36,10 @@ describe('RevealIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('RevealIn animation with custom direction', () => {
+  test('RevealIn animation with custom from', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'right' } as RevealInType,
+      namedEffect: { from: 'right' } as RevealInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [
@@ -100,10 +100,10 @@ describe('RevealIn', () => {
     expect(result).toMatchObject(expectedResult);
   });
 
-  test('RevealIn style with custom direction', () => {
+  test('RevealIn style with custom from', () => {
     const mockOptions = {
       ...baseMockOptions,
-      namedEffect: { direction: 'right' } as RevealInType,
+      namedEffect: { from: 'right' } as RevealInType,
     };
 
     const expectedResult: Partial<AnimationData>[] = [

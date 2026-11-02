@@ -28,11 +28,11 @@ describe('BgPullBack', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('Custom scale', () => {
-      const scale = 60;
+    test('Custom depth', () => {
+      const depth = 60;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { scale } as BgPullBackType,
+        namedEffect: { depth } as BgPullBackType,
       };
 
       const expectedResult: Partial<AnimationData>[] = [
@@ -75,11 +75,11 @@ describe('BgPullBack', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    test('Custom scale', () => {
-      const scale = 60;
+    test('Custom depth', () => {
+      const depth = 60;
       const mockOptions = {
         ...baseMockOptions,
-        namedEffect: { scale } as BgPullBackType,
+        namedEffect: { depth } as BgPullBackType,
       };
 
       const expectedResult = [

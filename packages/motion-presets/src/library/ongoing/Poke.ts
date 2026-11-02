@@ -1,21 +1,29 @@
-import type {
-  Poke,
-  TimeAnimationOptions,
-  DomApi,
-  AnimationExtraOptions,
-  EffectFourDirections,
-} from '../../types';
+import type { Poke, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
+import type { LengthValue } from '../../utils';
 import {
   getTimingFactor,
   toKeyframeValue,
-  mapRange,
   parseDirection,
+  parseCssLength,
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectFourDirections = 'right';
+const DEFAULTS: Required<Poke> = {
+  type: 'Poke',
+  direction: 'right',
+  iterationDelay: 0,
+  travel: { value: 62.5, unit: 'px' },
+};
+
+export const schema = {
+  direction: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.direction },
+  iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
+
+const PEAK_TRANSLATE = 25;
 
 const TRANSLATE_KEYFRAMES = [
   { keyframe: 17, translate: 7 },
@@ -26,9 +34,6 @@ const TRANSLATE_KEYFRAMES = [
   { keyframe: 83, translate: 4 },
   { keyframe: 100, translate: 0 },
 ];
-
-const POKE_FACTOR_SOFT = 1;
-const POKE_FACTOR_HARD = 4;
 
 const DIRECTION_MAP = {
   top: { x: 0, y: -1 },
@@ -43,8 +48,8 @@ export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?
 
 export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
   const namedEffect = options.namedEffect as Poke;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULT_DIRECTION);
-  const { intensity = 0.5 } = namedEffect;
+  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction);
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
 
   const duration = options.duration || 1;
   const iterationDelay = +(namedEffect?.iterationDelay || 0);
@@ -52,24 +57,23 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const timingFactor = getTimingFactor(duration, iterationDelay) as number;
   const [name] = getNames(options);
 
-  const pokeFactor = mapRange(0, 1, POKE_FACTOR_SOFT, POKE_FACTOR_HARD, intensity);
-
-  // Create CSS custom properties for the poke configuration
   const custom: Record<string, string | number> = {
-    '--motion-translate-x': x * pokeFactor,
-    '--motion-translate-y': y * pokeFactor,
+    '--motion-translate-x': x,
+    '--motion-translate-y': y,
+    '--motion-travel': travel,
   };
+  const travel_ = toKeyframeValue(custom, '--motion-travel', asWeb);
 
   const keyframes = TRANSLATE_KEYFRAMES.map(({ keyframe, translate }) => {
     const translateValue = `calc(${toKeyframeValue(
       custom,
       '--motion-translate-x',
       asWeb,
-    )} * ${translate}px) calc(${toKeyframeValue(
+    )} * ${travel_} * ${translate} / ${PEAK_TRANSLATE}) calc(${toKeyframeValue(
       custom,
       '--motion-translate-y',
       asWeb,
-    )} * ${translate}px)`;
+    )} * ${travel_} * ${translate} / ${PEAK_TRANSLATE})`;
 
     return {
       offset: (keyframe / 100) * timingFactor,

@@ -13,17 +13,30 @@ import {
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
-import { TWO_SIDES_DIRECTIONS } from '../../consts';
+import { SCROLL_RANGES, TWO_SIDES_DIRECTIONS } from '../../consts';
 
-const DEFAULT_DIRECTION: EffectTwoSides = 'left';
-const DEFAULT_DISTANCE = { value: 400, unit: 'px' };
+const DEFAULTS: Required<PanScroll> = {
+  type: 'PanScroll',
+  direction: 'right',
+  distance: { value: 400, unit: 'px' },
+  range: 'in',
+  startFromOffScreen: true,
+};
+
+export const schema = {
+  direction: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: DEFAULTS.direction },
+  distance: { type: 'lengthObject', default: DEFAULTS.distance },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  startFromOffScreen: { type: 'bool', default: DEFAULTS.startFromOffScreen },
+};
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-panScroll'], options.suffix);
 }
 
 export function prepare(options: ScrubAnimationOptions, dom?: DomApi) {
-  if (options.namedEffect && (options.namedEffect as PanScroll).startFromOffScreen && dom) {
+  const { startFromOffScreen = DEFAULTS.startFromOffScreen } = options.namedEffect as PanScroll;
+  if (startFromOffScreen && dom) {
     let left = 0;
     dom.measure((target) => {
       if (!target) {
@@ -45,10 +58,17 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const namedEffect = options.namedEffect as PanScroll;
-  const direction = parseDirection(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULT_DIRECTION);
-  const { startFromOffScreen = true, range = 'in' } = namedEffect;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-  const travel = distance.value * (direction === 'left' ? 1 : -1);
+  const direction = parseDirection(
+    namedEffect?.direction,
+    TWO_SIDES_DIRECTIONS,
+    DEFAULTS.direction,
+  );
+  const { startFromOffScreen = DEFAULTS.startFromOffScreen, range = DEFAULTS.range } = namedEffect;
+  // direction is where the element moves to - it comes from the opposite side, and continues to direction on out
+  const from: EffectTwoSides =
+    range === 'out' ? direction : direction === 'left' ? 'right' : 'left';
+  const distance = parseLength(namedEffect.distance, DEFAULTS.distance);
+  const travel = distance.value * (from === 'left' ? 1 : -1);
   let startX = `${-travel}${getCssUnits(distance.unit)}`;
   let endX = `${travel}${getCssUnits(distance.unit)}`;
   if (startFromOffScreen) {
@@ -59,14 +79,14 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       'calc(100vw - 100%)',
     )} * -1 - 100%)`;
     const endXLeft = `calc(100vw - ${toKeyframeValue({}, '--motion-left', false, '0px')})`;
-    [startX, endX] = direction === 'left' ? [startXLeft, endXLeft] : [endXLeft, startXLeft];
+    [startX, endX] = from === 'left' ? [startXLeft, endXLeft] : [endXLeft, startXLeft];
   }
 
   const fromValue = range === 'out' ? 0 : startX;
   const toValue = range === 'in' ? 0 : range === 'out' ? startX : endX;
   const easing = 'linear';
   const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
+    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill || 'both'
   ) as AnimationFillMode;
 
   const [panScroll] = getNames(options);

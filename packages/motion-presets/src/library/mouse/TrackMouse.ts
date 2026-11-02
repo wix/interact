@@ -5,40 +5,44 @@ import {
   Progress,
   MouseEffectAxis,
 } from '../../types';
-import {
-  getCssUnits,
-  getMouseTransitionEasing,
-  mapRange,
-  parseLength,
-  parseDirection,
-} from '../../utils';
+import type { LengthValue } from '../../utils';
+import { getMouseTransitionEasing, mapRange, parseCssLength, parseDirection } from '../../utils';
 import { CustomMouse } from './CustomMouse';
 
-const DEFAULT_DISTANCE = { value: 200, unit: 'px' };
-const DEFAULT_AXIS: MouseEffectAxis = 'both';
 const AXES = ['both', 'horizontal', 'vertical'] as const;
+
+const DEFAULTS: Required<TrackMouse> = {
+  type: 'TrackMouse',
+  direction: 'both',
+  inverted: false,
+  travel: { value: 200, unit: 'px' },
+};
+
+export const schema = {
+  direction: { type: 'enum', values: AXES, default: DEFAULTS.direction },
+  inverted: { type: 'bool', default: DEFAULTS.inverted },
+  travel: { type: 'length', default: DEFAULTS.travel },
+};
 
 class TrackMouseAnimation extends CustomMouse {
   progress({ x: progressX, y: progressY }: Progress) {
-    const { invert, distance, axis } = this.options;
+    const { invert, travel, direction } = this.options;
 
     let translateX = 0;
     let translateY = 0;
 
-    // if progressX === 0, translateX === -distance
+    // if progressX === 0, translateX === -travel
     // if progressX === 0.5, translateX === 0
-    // if progressX === 1, translateX === distance
-    if (axis === 'both' || axis === 'horizontal') {
-      translateX = mapRange(0, 1, -distance.value, distance.value, progressX) * invert;
+    // if progressX === 1, translateX === travel
+    if (direction === 'both' || direction === 'horizontal') {
+      translateX = mapRange(0, 1, -1, 1, progressX) * invert;
     }
 
-    if (axis === 'both' || axis === 'vertical') {
-      translateY = mapRange(0, 1, -distance.value, distance.value, progressY) * invert;
+    if (direction === 'both' || direction === 'vertical') {
+      translateY = mapRange(0, 1, -1, 1, progressY) * invert;
     }
 
-    const units = getCssUnits(distance.unit);
-
-    this.target.style.transform = `translateX(${translateX}${units}) translateY(${translateY}${units}) rotate(var(--motion-rotate, 0deg))`;
+    this.target.style.transform = `translateX(calc(${travel} * ${translateX})) translateY(calc(${travel} * ${translateY})) rotate(var(--motion-rotate, 0deg))`;
   }
   cancel() {
     this.target.style.transform = '';
@@ -49,17 +53,21 @@ class TrackMouseAnimation extends CustomMouse {
 export default function create(options: ScrubAnimationOptions & AnimationExtraOptions) {
   const { transitionDuration, transitionEasing } = options;
   const namedEffect = options.namedEffect as TrackMouse;
-  const inverted = namedEffect.inverted ?? false;
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-  const axis = parseDirection(namedEffect.axis, AXES, DEFAULT_AXIS) as MouseEffectAxis;
+  const inverted = namedEffect.inverted ?? DEFAULTS.inverted;
+  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
+  const direction = parseDirection(
+    namedEffect.direction,
+    AXES,
+    DEFAULTS.direction,
+  ) as MouseEffectAxis;
   const invert = inverted ? -1 : 1;
   const animationOptions = {
     transition: transitionDuration
       ? `transform ${transitionDuration}ms ${getMouseTransitionEasing(transitionEasing)}`
       : '',
     invert,
-    distance,
-    axis,
+    travel,
+    direction,
   };
 
   return (target: HTMLElement) => new TrackMouseAnimation(target, animationOptions);
