@@ -9,7 +9,8 @@ import TRIGGER_TO_HANDLER_MODULE_MAP from '../src/handlers';
 
 // Mock @wix/motion module
 vi.mock('@wix/motion', async () => {
-  const { toCSSPropertyName } = await vi.importActual<typeof import('@wix/motion')>('@wix/motion');
+  const { toCSSPropertyName, getJsEasing } =
+    await vi.importActual<typeof import('@wix/motion')>('@wix/motion');
   const mock: any = {
     getWebAnimation: vi.fn().mockReturnValue({
       play: vi.fn(),
@@ -35,6 +36,7 @@ vi.mock('@wix/motion', async () => {
     registerEffects: vi.fn(),
     getRegisteredEffect: vi.fn(),
     toCSSPropertyName,
+    getJsEasing,
   };
 
   return mock;
@@ -1062,6 +1064,48 @@ describe('interact (mini)', () => {
             done(void 0);
           }, 0);
         }));
+
+      it('should pass transitionDuration and transitionEasing to Pointer for keyframeEffect', async () => {
+        const { Pointer } = await import('kuliso');
+
+        Interact.destroy();
+        Interact.create({
+          interactions: [
+            {
+              trigger: 'pointerMove',
+              key: 'keyframe-mouse',
+              params: { hitArea: 'root', axis: 'x' },
+              effects: [{ key: 'keyframe-mouse', effectId: 'keyframe-track-mouse' }],
+            },
+          ],
+          effects: {
+            'keyframe-track-mouse': {
+              keyframeEffect: {
+                name: 'custom-pointer-move',
+                keyframes: [{ opacity: 0 }, { opacity: 1 }],
+              },
+              transitionDuration: 400,
+              transitionEasing: 'easeOut',
+            },
+          },
+        });
+
+        add(document.createElement('div'), 'keyframe-mouse');
+
+        const pointerConfig = (Pointer as any).mock.calls.at(-1)[0];
+        expect(pointerConfig.transitionDuration).toBe(400);
+        expect(pointerConfig.transitionEasing).toBeTypeOf('function');
+      });
+
+      it('should not pass transitionDuration to Pointer for namedEffect', async () => {
+        const { Pointer } = await import('kuliso');
+
+        add(document.createElement('div'), 'logo-mouse');
+
+        const pointerConfig = (Pointer as any).mock.calls.at(-1)[0];
+        expect(pointerConfig.transitionDuration).toBeUndefined();
+        expect(pointerConfig.transitionEasing).toBeUndefined();
+      });
     });
 
     describe('viewProgress', () => {

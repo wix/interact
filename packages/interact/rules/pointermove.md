@@ -176,7 +176,7 @@ Use `keyframeEffect` when the pointer position along a single axis should drive 
 - `[KEYFRAMES]` — array of CSS keyframe objects (e.g. `[{ transform: 'rotate(-10deg)' }, { transform: 'rotate(0)' }, { transform: 'rotate(10deg)' }]`). Distributed evenly across 0–1 progress: first keyframe = progress 0 (left/top edge), last = progress 1 (right/bottom edge). Any number of keyframes is allowed.
 - `[UNIQUE_EFFECT_ID]` — optional string identifier.
 
-> A `keyframeEffect` scrub scene resolves no target, so `centeredToTarget` is silently ignored here, and `transitionDuration` / `transitionEasing` are not forwarded either. All three apply only to the payloads noted in Rules 1 and 4. For smoothed, centered pointer motion use a mouse `namedEffect` or a `customEffect`.
+> A `keyframeEffect` scrub scene resolves no target, so `centeredToTarget` is silently ignored here. For centered pointer motion use a mouse `namedEffect` or a `customEffect`. `transitionDuration` / `transitionEasing` are supported: they smooth the pointer progress toward each new position.
 
 ---
 
@@ -231,7 +231,7 @@ Use two separate interactions on the same source/target pair — one for `axis: 
 - `[COMPOSITE_OPERATION]` — `'add'` or `'accumulate'`. Required when both effects animate `transform` and/or both animate `filter`, so their values combine rather than override. `'add'`: composited transform functions are appended. `'accumulate'`: matching function arguments are summed.
 - `[FILL_MODE]` — typically `'both'` to ensure the effect keeps applying after exiting the effect's active range.
 
-> As in Rule 2, `transitionDuration` / `transitionEasing` / `centeredToTarget` do not apply to a `keyframeEffect` payload.
+> As in Rule 2, `centeredToTarget` does not apply to a `keyframeEffect` payload; `transitionDuration` / `transitionEasing` do.
 
 ---
 
