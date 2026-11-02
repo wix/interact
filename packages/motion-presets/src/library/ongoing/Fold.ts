@@ -14,6 +14,7 @@ import {
   parseDirection,
   suffixNames,
   suffixCustomProperties,
+  roundNumber,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -126,7 +127,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   const keyframes = iterationDelay
     ? KEYFRAME_FACTORS.map(({ fold, frameFactor }) => {
-        const keyframeOffset = frameFactor * timingFactor;
+        const keyframeOffset = roundNumber(frameFactor * timingFactor, 6);
         return {
           offset: keyframeOffset,
           easing: getEasing('sineInOut'),

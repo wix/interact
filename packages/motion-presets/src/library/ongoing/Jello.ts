@@ -1,5 +1,11 @@
 import type { Jello, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
+import {
+  getTimingFactor,
+  toKeyframeValue,
+  suffixNames,
+  suffixCustomProperties,
+  roundNumber,
+} from '../../utils';
 
 const DEFAULTS: Required<Jello> = {
   type: 'Jello',
@@ -39,7 +45,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   };
 
   const keyframes = SKEW_Y_KEYFRAMES.map(({ keyframe, skewY }) => {
-    const offset = (keyframe / 100) * timingFactor;
+    const offset = roundNumber((keyframe / 100) * timingFactor, 6);
 
     return {
       offset,

@@ -98,13 +98,13 @@ describe('Fold', () => {
             },
             {
               easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.33768000000000004,
+              offset: 0.33768,
               transform:
                 'rotateZ(var(--motion-rotate, 0deg)) translateX(0%) translateY(-50%) perspective(800px) rotateX(calc(1 * 0.6 * 15deg)) rotateY(calc(0 * 0.6 * 15deg)) translateX(calc(-1 * 0%)) translateY(calc(-1 * -50%))',
             },
             {
               easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.4596200000000001,
+              offset: 0.45962,
               transform:
                 'rotateZ(var(--motion-rotate, 0deg)) translateX(0%) translateY(-50%) perspective(800px) rotateX(calc(1 * -0.3 * 15deg)) rotateY(calc(0 * -0.3 * 15deg)) translateX(calc(-1 * 0%)) translateY(calc(-1 * -50%))',
             },
@@ -122,7 +122,7 @@ describe('Fold', () => {
             },
             {
               easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.7966300000000001,
+              offset: 0.79663,
               transform:
                 'rotateZ(var(--motion-rotate, 0deg)) translateX(0%) translateY(-50%) perspective(800px) rotateX(calc(1 * 0 * 15deg)) rotateY(calc(0 * 0 * 15deg)) translateX(calc(-1 * 0%)) translateY(calc(-1 * -50%))',
             },
@@ -491,13 +491,13 @@ describe('Fold', () => {
             },
             {
               easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.33768000000000004,
+              offset: 0.33768,
               transform:
                 'rotateZ(var(--motion-rotate, 0deg)) translateX(var(--motion-origin-x)) translateY(var(--motion-origin-y)) perspective(var(--motion-perspective)) rotateX(calc(var(--motion-rotate-x) * 0.6 * 15deg)) rotateY(calc(var(--motion-rotate-y) * 0.6 * 15deg)) translateX(calc(-1 * var(--motion-origin-x))) translateY(calc(-1 * var(--motion-origin-y)))',
             },
             {
               easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.4596200000000001,
+              offset: 0.45962,
               transform:
                 'rotateZ(var(--motion-rotate, 0deg)) translateX(var(--motion-origin-x)) translateY(var(--motion-origin-y)) perspective(var(--motion-perspective)) rotateX(calc(var(--motion-rotate-x) * -0.3 * 15deg)) rotateY(calc(var(--motion-rotate-y) * -0.3 * 15deg)) translateX(calc(-1 * var(--motion-origin-x))) translateY(calc(-1 * var(--motion-origin-y)))',
             },
@@ -515,7 +515,7 @@ describe('Fold', () => {
             },
             {
               easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.7966300000000001,
+              offset: 0.79663,
               transform:
                 'rotateZ(var(--motion-rotate, 0deg)) translateX(var(--motion-origin-x)) translateY(var(--motion-origin-y)) perspective(var(--motion-perspective)) rotateX(calc(var(--motion-rotate-x) * 0 * 15deg)) rotateY(calc(var(--motion-rotate-y) * 0 * 15deg)) translateX(calc(-1 * var(--motion-origin-x))) translateY(calc(-1 * var(--motion-origin-y)))',
             },

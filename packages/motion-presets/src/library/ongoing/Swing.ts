@@ -8,6 +8,7 @@ import {
   parseDirection,
   suffixNames,
   suffixCustomProperties,
+  roundNumber,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -85,7 +86,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   const keyframes = iterationDelay
     ? FACTORS_SEQUENCE.map(({ factor, timeFactor }) => {
-        const keyframeOffset = timeFactor * timingFactor;
+        const keyframeOffset = roundNumber(timeFactor * timingFactor, 6);
 
         return {
           offset: keyframeOffset,

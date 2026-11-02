@@ -62,12 +62,12 @@ describe('Pulse', () => {
           },
           keyframes: [
             {
-              offset: 0.18090000000000003,
+              offset: 0.1809,
               transform:
                 'rotateZ(var(--motion-rotate, 0deg)) scale(calc(1 - (1 - 0.834) * 0.5714285714285714))',
             },
             {
-              offset: 0.30150000000000005,
+              offset: 0.3015,
               transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
             {
@@ -150,12 +150,12 @@ describe('Pulse', () => {
           },
           keyframes: [
             {
-              offset: 0.18090000000000003,
+              offset: 0.1809,
               transform:
                 'rotateZ(var(--motion-rotate, 0deg)) scale(calc(1 - (1 - var(--motion-scale)) * 0.5714285714285714))',
             },
             {
-              offset: 0.30150000000000005,
+              offset: 0.3015,
               transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
             },
             {

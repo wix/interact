@@ -7,6 +7,7 @@ import {
   parseCssLength,
   suffixNames,
   suffixCustomProperties,
+  roundNumber,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -76,7 +77,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     )} * ${travel_} * ${translate} / ${PEAK_TRANSLATE})`;
 
     return {
-      offset: (keyframe / 100) * timingFactor,
+      offset: roundNumber((keyframe / 100) * timingFactor, 6),
       translate: translateValue,
     };
   });

@@ -92,7 +92,7 @@ describe('Breathe', () => {
             },
             {
               easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.33768000000000004,
+              offset: 0.33768,
               transform:
                 ' translate3d(calc(0 * 25px * 1), calc(1 * 25px * 1), calc(0 * 25px * 1)) rotateZ(var(--motion-rotate, 0deg))',
             },
@@ -406,7 +406,7 @@ describe('Breathe', () => {
             },
             {
               easing: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
-              offset: 0.33768000000000004,
+              offset: 0.33768,
               transform:
                 'var(--motion-breathe-perspective, ) translate3d(calc(var(--motion-breathe-x) * var(--motion-breathe-distance) * 1), calc(var(--motion-breathe-y) * var(--motion-breathe-distance) * 1), calc(var(--motion-breathe-z) * var(--motion-breathe-distance) * 1)) rotateZ(var(--motion-rotate, 0deg))',
             },

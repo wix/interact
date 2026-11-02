@@ -7,6 +7,7 @@ import {
   parseCssLength,
   suffixNames,
   suffixCustomProperties,
+  roundNumber,
 } from '../../utils';
 
 const DEFAULTS: Required<Bounce> = {
@@ -58,7 +59,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   };
 
   const keyframes = TRANSLATE_Y_KEYFRAMES.map(({ keyframe, translateY }) => ({
-    offset: (keyframe / 100) * timingFactor,
+    offset: roundNumber((keyframe / 100) * timingFactor, 6),
     translate: `0px calc(${toKeyframeValue(
       custom,
       '--motion-bounce-travel',
