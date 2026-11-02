@@ -39,6 +39,10 @@
     "build:types": "tsc -p tsconfig.build.json",
     "lint": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --headed",
+    "test:e2e:fixtures": "vite --config e2e/fixtures/vite.config.ts",
     "coverage": "vitest run --coverage"
   },
   "keywords": [
@@ -86,6 +90,7 @@
     }
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.1.0",
     "@types/react": "^18.3.2",
