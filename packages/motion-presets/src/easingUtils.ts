@@ -28,15 +28,35 @@ export function toEasingFunction(css: string): EasingFunction {
   return css === 'linear' ? (t) => t : parseJsEasing(css)!;
 }
 
+// the fewest samples (up to `max`) whose straight lines stay within `tolerance` of the easing
+function samplesFor(easing: EasingFunction, max: number) {
+  const tolerance = 0.005;
+  for (let samples = 1; samples < max; samples++) {
+    let error = 0;
+    for (let i = 0; i < samples * 8; i++) {
+      const t = (i + 0.5) / (samples * 8);
+      const step = Math.floor(t * samples);
+      const [t0, t1] = [step / samples, (step + 1) / samples];
+      const line = easing(t0) + ((easing(t1) - easing(t0)) * (t - t0)) / (t1 - t0);
+      error = Math.max(error, Math.abs(easing(t) - line));
+    }
+    if (error <= tolerance) {
+      return samples;
+    }
+  }
+  return max;
+}
+
 // linear() approximation of consecutive [start, end, easing] segments (gaps between segments hold their value)
 function toLinearEasing(segments: [number, number, EasingFunction][], samples: number) {
-  const points = segments.flatMap(([start, end, easing]) =>
-    Array.from({ length: samples + 1 }, (_, i) => {
-      const t = i / samples;
+  const points = segments.flatMap(([start, end, easing]) => {
+    const count = samplesFor(easing, samples);
+    return Array.from({ length: count + 1 }, (_, i) => {
+      const t = i / count;
       return `${roundNumber(easing(t), 4)} ${roundNumber((start + t * (end - start)) * 100, 2)}%`;
-    }),
-  );
-  return `linear(${points.join(', ')})`;
+    });
+  });
+  return `linear(${points.filter((point, i) => point !== points[i - 1]).join(', ')})`;
 }
 
 // css linear() easing from [output, input percentage] points

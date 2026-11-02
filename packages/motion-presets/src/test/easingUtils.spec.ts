@@ -10,6 +10,7 @@ import {
   linearEasing,
   mirrorEasing,
   toCssEasing,
+  toEasingFunction,
 } from '../easingUtils';
 
 function parseLinear(easing: string) {
@@ -116,7 +117,6 @@ describe('getContinuousEasing', () => {
     expect(points).toEqual([
       [0, 0],
       [1, 50],
-      [1, 50],
       [0, 100],
     ]);
   });
@@ -193,7 +193,6 @@ describe('getLoopEasing', () => {
     expect(parseLinear(getLoopEasing({ shape }))).toEqual([
       [1, 0],
       [0, 50],
-      [0, 50],
       [1, 100],
     ]);
   });
@@ -211,8 +210,8 @@ describe('getLoopEasing', () => {
     expect(valueAt(points, 50)).toBe(2);
   });
 
-  test('linear shapes use a single sample per segment', () => {
-    expect(parseLinear(getLoopEasing({ shape, easings: ['linear'] }))).toHaveLength(4);
+  test('linear shapes use a single sample per segment, without repeating the shared points', () => {
+    expect(parseLinear(getLoopEasing({ shape, easings: ['linear'] }))).toHaveLength(3);
   });
 
   test('times are scaled by the active fraction with a trailing hold at rest', () => {
@@ -221,10 +220,20 @@ describe('getLoopEasing', () => {
     expect(parseLinear(easing)).toEqual([
       [1, 0],
       [0, 25],
-      [0, 25],
       [1, 50],
       [1, 100],
     ]);
+  });
+
+  test('eased segments use the fewest samples that stay within 0.005 of the easing', () => {
+    const points = parseLinear(getLoopEasing({ shape, easings: ['sineInOut'] }));
+    const ease = toEasingFunction(toCssEasing('sineInOut'));
+    expect(points.length).toBeLessThan(2 * 16 + 1);
+    for (let i = 0; i <= 200; i++) {
+      const t = i / 200;
+      // the first segment goes from progress 1 (rest at the start) to 0 (the peak)
+      expect(Math.abs(valueAt(points, t * 50) - (1 - ease(t)))).toBeLessThanOrEqual(0.005);
+    }
   });
 
   test('easings apply per segment and the last one repeats', () => {
@@ -268,7 +277,7 @@ describe('getScrollEasing', () => {
   });
 
   test('continuous: back and forth, or linear for directional linear motion', () => {
-    expect(getScrollEasing('continuous', false)).toBe('linear(0 0%, 1 50%, 1 50%, 0 100%)');
+    expect(getScrollEasing('continuous', false)).toBe('linear(0 0%, 1 50%, 0 100%)');
     expect(getScrollEasing('continuous', true)).toBe('linear');
   });
 
@@ -303,6 +312,6 @@ describe('getLoopOverrides', () => {
           ],
         },
       ),
-    ).toEqual({ duration: 2000, easing: 'linear(1 0%, 0 25%, 0 25%, 1 50%, 1 100%)' });
+    ).toEqual({ duration: 2000, easing: 'linear(1 0%, 0 25%, 1 50%, 1 100%)' });
   });
 });
