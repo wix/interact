@@ -84,9 +84,12 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     asWeb,
   )} * -1), calc(${toKeyframeValue(custom, '--motion-trans-y', asWeb)} * -1))`;
 
+  // the damped shape runs past the motion into the delay - a delay too short to hold it fits it into the cycle
+  const dampedFactor = Math.min(timingFactor, 1 / FACTORS_SEQUENCE.at(-1)!.timeFactor);
+
   const keyframes = iterationDelay
     ? FACTORS_SEQUENCE.map(({ factor, timeFactor }) => {
-        const keyframeOffset = roundNumber(timeFactor * timingFactor, 6);
+        const keyframeOffset = roundNumber(timeFactor * dampedFactor, 6);
 
         return {
           offset: keyframeOffset,

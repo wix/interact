@@ -533,4 +533,19 @@ describe('Fold', () => {
       expect(result).toMatchObject(expectedResult);
     });
   });
+
+  test.each([1, 50, 100, 150, 180, 190, 500])(
+    'iterationDelay %i keeps the offsets within the cycle and in order',
+    (iterationDelay) => {
+      const [animation] = FoldAnimation.style({
+        ...baseMockOptions,
+        duration: 1000,
+        namedEffect: { iterationDelay } as Fold,
+      });
+      const offsets = animation.keyframes.map(({ offset }) => offset as number);
+      expect(Math.min(...offsets)).toBeGreaterThanOrEqual(0);
+      expect(Math.max(...offsets)).toBeLessThanOrEqual(1);
+      expect(offsets).toEqual([...offsets].sort((a, b) => a - b));
+    },
+  );
 });
