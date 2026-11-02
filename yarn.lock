@@ -1455,6 +1455,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@wix/motion-presets@workspace:packages/motion-presets"
   dependencies:
+    "@playwright/test": "npm:^1.58.2"
     "@vitest/coverage-v8": "npm:^4.0.14"
     "@wix/motion": "npm:^2.1.21"
     rimraf: "npm:^6.0.1"
