@@ -14,6 +14,7 @@ import {
   parseDirection,
   suffixNames,
   suffixCustomProperties,
+  roundNumber,
 } from '../../utils';
 import { FOUR_DIRECTIONS } from '../../consts';
 
@@ -124,9 +125,12 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
       asWeb,
     )} * ${value} * ${angle}deg)) ${transformRight}`;
 
+  // the damped shape runs past the motion into the delay - a delay too short to hold it fits it into the cycle
+  const dampedFactor = Math.min(timingFactor, 1 / KEYFRAME_FACTORS.at(-1)!.frameFactor);
+
   const keyframes = iterationDelay
     ? KEYFRAME_FACTORS.map(({ fold, frameFactor }) => {
-        const keyframeOffset = frameFactor * timingFactor;
+        const keyframeOffset = roundNumber(frameFactor * dampedFactor, 6);
         return {
           offset: keyframeOffset,
           easing: getEasing('sineInOut'),

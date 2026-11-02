@@ -56,7 +56,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
     custom[scaleYKey] = adjustedScaleY;
 
     return {
-      offset: (keyframe / 100) * timingFactor,
+      offset: roundNumber((keyframe / 100) * timingFactor, 6),
       transform: `rotateZ(var(--motion-rotate, 0deg)) scale(${toKeyframeValue(
         custom,
         scaleXKey,

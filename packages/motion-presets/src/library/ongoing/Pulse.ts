@@ -1,5 +1,11 @@
 import type { Pulse, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
+import {
+  getTimingFactor,
+  toKeyframeValue,
+  suffixNames,
+  suffixCustomProperties,
+  roundNumber,
+} from '../../utils';
 
 const DEFAULTS: Required<Pulse> = {
   type: 'Pulse',
@@ -38,7 +44,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   };
 
   const keyframes = SCALE_KEYFRAMES.map(({ keyframe, depth }) => {
-    const offset = (keyframe / 100) * timingFactor;
+    const offset = roundNumber((keyframe / 100) * timingFactor, 6);
 
     return {
       offset,

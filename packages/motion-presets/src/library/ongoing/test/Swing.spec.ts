@@ -96,12 +96,12 @@ describe('Swing', () => {
       const keyframes = result[0].keyframes;
       expect(keyframes[0].offset).toBe(0);
       expect(keyframes[1].offset).toBe(0.062578);
-      expect(keyframes[2].offset).toBe(0.18760000000000002);
-      expect(keyframes[3].offset).toBe(0.31222000000000005);
-      expect(keyframes[4].offset).toBe(0.43751000000000007);
+      expect(keyframes[2].offset).toBe(0.1876);
+      expect(keyframes[3].offset).toBe(0.31222);
+      expect(keyframes[4].offset).toBe(0.43751);
       expect(keyframes[5].offset).toBe(0.56213);
       expect(keyframes[6].offset).toBe(0.68742);
-      expect(keyframes[7].offset).toBe(0.7872500000000001);
+      expect(keyframes[7].offset).toBe(0.78725);
       expect(keyframes[8].offset).toBe(1);
     });
 
@@ -258,12 +258,12 @@ describe('Swing', () => {
       const keyframes = result[0].keyframes;
       expect(keyframes[0].offset).toBe(0);
       expect(keyframes[1].offset).toBe(0.062578);
-      expect(keyframes[2].offset).toBe(0.18760000000000002);
-      expect(keyframes[3].offset).toBe(0.31222000000000005);
-      expect(keyframes[4].offset).toBe(0.43751000000000007);
+      expect(keyframes[2].offset).toBe(0.1876);
+      expect(keyframes[3].offset).toBe(0.31222);
+      expect(keyframes[4].offset).toBe(0.43751);
       expect(keyframes[5].offset).toBe(0.56213);
       expect(keyframes[6].offset).toBe(0.68742);
-      expect(keyframes[7].offset).toBe(0.7872500000000001);
+      expect(keyframes[7].offset).toBe(0.78725);
       expect(keyframes[8].offset).toBe(1);
     });
 
@@ -281,4 +281,19 @@ describe('Swing', () => {
       );
     });
   });
+
+  test.each([1, 50, 100, 150, 180, 190, 500])(
+    'iterationDelay %i keeps the offsets within the cycle and in order',
+    (iterationDelay) => {
+      const [animation] = Swing.style({
+        ...baseMockOptions,
+        duration: 1000,
+        namedEffect: { iterationDelay } as SwingType,
+      });
+      const offsets = animation.keyframes.map(({ offset }) => offset as number);
+      expect(Math.min(...offsets)).toBeGreaterThanOrEqual(0);
+      expect(Math.max(...offsets)).toBeLessThanOrEqual(1);
+      expect(offsets).toEqual([...offsets].sort((a, b) => a - b));
+    },
+  );
 });

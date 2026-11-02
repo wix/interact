@@ -29,12 +29,12 @@ describe('Bounce', () => {
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.08800000000000001,
+              offset: 0.088,
               translate: '0px calc(var(--motion-bounce-travel) * -55 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.17600000000000002,
+              offset: 0.176,
               translate: '0px calc(var(--motion-bounce-travel) * -87 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
@@ -121,12 +121,12 @@ describe('Bounce', () => {
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.05896000000000001,
+              offset: 0.05896,
               translate: '0px calc(var(--motion-bounce-travel) * -55 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.11792000000000002,
+              offset: 0.11792,
               translate: '0px calc(var(--motion-bounce-travel) * -87 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
@@ -146,22 +146,22 @@ describe('Bounce', () => {
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.35577000000000003,
+              offset: 0.35577,
               translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.44354000000000005,
+              offset: 0.44354,
               translate: '0px calc(var(--motion-bounce-travel) * -23 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.5427000000000001,
+              offset: 0.5427,
               translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.5815600000000001,
+              offset: 0.58156,
               translate: '0px calc(var(--motion-bounce-travel) * -5 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
@@ -214,12 +214,12 @@ describe('Bounce', () => {
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.08800000000000001,
+              offset: 0.088,
               translate: '0px calc(49px * -55 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.17600000000000002,
+              offset: 0.176,
               translate: '0px calc(49px * -87 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
@@ -306,12 +306,12 @@ describe('Bounce', () => {
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.05896000000000001,
+              offset: 0.05896,
               translate: '0px calc(127.4px * -55 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.11792000000000002,
+              offset: 0.11792,
               translate: '0px calc(127.4px * -87 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
@@ -331,22 +331,22 @@ describe('Bounce', () => {
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.35577000000000003,
+              offset: 0.35577,
               translate: '0px calc(127.4px * 0 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.44354000000000005,
+              offset: 0.44354,
               translate: '0px calc(127.4px * -23 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.5427000000000001,
+              offset: 0.5427,
               translate: '0px calc(127.4px * 0 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },
             {
-              offset: 0.5815600000000001,
+              offset: 0.58156,
               translate: '0px calc(127.4px * -5 / 98)',
               easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
             },

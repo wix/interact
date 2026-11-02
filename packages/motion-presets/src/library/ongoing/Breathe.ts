@@ -10,6 +10,7 @@ import {
   parseCssLength,
   suffixNames,
   suffixCustomProperties,
+  roundNumber,
 } from '../../utils';
 import { AXIS_DIRECTIONS } from '../../consts';
 
@@ -89,7 +90,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
 
   const keyframes = iterationDelay
     ? FACTORS_SEQUENCE.map(({ translateFactor, timeFactor }) => {
-        const keyframeOffset = timeFactor * timingFactor;
+        const keyframeOffset = roundNumber(timeFactor * timingFactor, 6);
         const distancePart = `${breatheDistance} * ${translateFactor}`;
 
         return {
