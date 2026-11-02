@@ -4,13 +4,24 @@ import {
   transformPolarToXY,
   toKeyframeValue,
   parseLength,
-  parseDirection,
+  roundNumber,
   suffixNames,
   suffixCustomProperties,
 } from '../../utils';
+import { SCROLL_RANGES } from '../../consts';
 
-const DEFAULT_ANGLE = 120;
-const DEFAULT_DISTANCE = { value: 400, unit: 'px' };
+const DEFAULTS: Required<MoveScroll> = {
+  type: 'MoveScroll',
+  direction: -60,
+  range: 'in',
+  travel: { value: 400, unit: 'px' },
+};
+
+export const schema = {
+  direction: { type: 'number', default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  travel: { type: 'lengthObject', default: DEFAULTS.travel },
+};
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-moveScroll'], options.suffix);
@@ -22,15 +33,16 @@ export function web(options: ScrubAnimationOptions, _?: DomApi, config?: Record<
 
 export function style(options: ScrubAnimationOptions, config?: Record<string, any>, asWeb = false) {
   const namedEffect = options.namedEffect as MoveScroll;
-  const angle = parseDirection(namedEffect?.angle, [], DEFAULT_ANGLE, true);
-  const { range = 'in' } = namedEffect;
+  const { direction = DEFAULTS.direction, range = DEFAULTS.range } = namedEffect;
+  // direction is where the element moves to, the angle is where it moves from
+  const angle = range === 'out' ? direction : direction + 180;
 
   const easing = 'linear';
   const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
+    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill || 'both'
   ) as AnimationFillMode;
 
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
+  const distance = parseLength(namedEffect.travel, DEFAULTS.travel);
 
   let [travelX, travelY] = transformPolarToXY(angle, distance.value);
   const unit = getCssUnits(distance.unit);
@@ -39,13 +51,13 @@ export function style(options: ScrubAnimationOptions, config?: Record<string, an
     endOffsetAdd = '';
   if (!config?.ignoreScrollMoveOffsets) {
     if (travelY < 0 && range !== 'out') {
-      startOffsetAdd = `${travelY}${unit}`;
+      startOffsetAdd = `${roundNumber(travelY, 4)}${unit}`;
       if (range !== 'in') {
-        endOffsetAdd = `${Math.abs(travelY)}${unit}`;
+        endOffsetAdd = `${roundNumber(Math.abs(travelY), 4)}${unit}`;
       }
     }
     if (travelY > 0 && range === 'out') {
-      endOffsetAdd = `${Math.abs(travelY)}${unit}`;
+      endOffsetAdd = `${roundNumber(Math.abs(travelY), 4)}${unit}`;
     }
   }
 

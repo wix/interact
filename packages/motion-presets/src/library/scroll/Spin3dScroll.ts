@@ -1,7 +1,25 @@
 import type { AnimationFillMode, ScrubAnimationOptions, Spin3dScroll, DomApi } from '../../types';
 import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
+import { SCROLL_RANGES } from '../../consts';
+import { getPresetScrollParallax } from '../../parallaxUtils';
 
-const MAX_Y_TRAVEL = 40;
+const DEFAULTS: Required<Spin3dScroll> = {
+  type: 'Spin3dScroll',
+  angle: 100,
+  perspective: 1000,
+  range: 'in',
+  speed: 1,
+};
+
+export const schema = {
+  angle: { type: 'number', default: DEFAULTS.angle },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  speed: { type: 'number', min: 0, default: DEFAULTS.speed },
+};
+
+// the rotation on each axis relative to angle - spinning on x twice as fast
+const [FACTOR_X, FACTOR_Y, FACTOR_Z] = [2, 1, 1];
 
 export function getNames(options: ScrubAnimationOptions) {
   return suffixNames(['motion-spin3dScroll'], options.suffix);
@@ -13,41 +31,34 @@ export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
 
 export function style(options: ScrubAnimationOptions, asWeb = false) {
   const {
-    rotate = -100,
-    speed = 0,
-    range = 'in',
-    perspective = 1000,
+    angle = DEFAULTS.angle,
+    speed = DEFAULTS.speed,
+    range = DEFAULTS.range,
+    perspective = DEFAULTS.perspective,
   } = options.namedEffect as Spin3dScroll;
   const easing = 'linear';
   const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
+    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill || 'both'
   ) as AnimationFillMode;
 
-  const travel = speed * MAX_Y_TRAVEL;
-
+  // spinning into place on 'in' and continuing the same spin on 'out'
+  const fromSign = range === 'out' ? 0 : 1;
+  const toSign = range === 'in' ? 0 : -1;
   const fromValues = {
-    rotationX: range === 'out' ? 0 : -2 * rotate,
-    rotationY: range === 'out' ? 0 : -rotate,
-    rotationZ: range === 'out' ? 0 : -rotate,
-    travel: range === 'out' ? 0 : -travel,
+    rotationX: fromSign * FACTOR_X * angle,
+    rotationY: fromSign * FACTOR_Y * angle,
+    rotationZ: fromSign * FACTOR_Z * angle,
   };
   const toValues = {
-    rotationX: rotate * (range === 'in' ? 0 : range === 'out' ? 3 : 1.8),
-    rotationY: rotate * (range === 'in' ? 0 : range === 'out' ? 2 : 1),
-    rotationZ: rotate * (range === 'in' ? 0 : range === 'out' ? 1 : 2),
-    travel: range === 'in' ? 0 : travel,
+    rotationX: toSign * FACTOR_X * angle,
+    rotationY: toSign * FACTOR_Y * angle,
+    rotationZ: toSign * FACTOR_Z * angle,
   };
-
-  const offset = Math.abs(travel);
-  const startOffsetAdd = range === 'out' ? '0px' : `${-offset}vh`;
-  const endOffsetAdd = range === 'in' ? '0px' : `${offset}vh`;
 
   const [spin3dScroll] = getNames(options);
 
-  const custom = {
+  const custom: Record<string, string | number> = {
     '--motion-perspective': `${perspective}px`,
-    '--motion-travel-from': `${fromValues.travel}vh`,
-    '--motion-travel-to': `${toValues.travel}vh`,
     '--motion-rot-x-from': `${fromValues.rotationX}deg`,
     '--motion-rot-x-to': `${toValues.rotationX}deg`,
     '--motion-rot-y-from': `${fromValues.rotationY}deg`,
@@ -55,6 +66,11 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
     '--motion-rot-z-from': `${fromValues.rotationZ}deg`,
     '--motion-rot-z-to': `${toValues.rotationZ}deg`,
   };
+  const rangeOffsets = getPresetScrollParallax(options, range, speed)(
+    custom,
+    '--motion-spin3d',
+    asWeb,
+  );
 
   const animations = [
     {
@@ -63,13 +79,12 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
       fill,
       easing,
       custom,
-      startOffsetAdd,
-      endOffsetAdd,
+      ...rangeOffsets,
       keyframes: [
         {
           transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateY(${toKeyframeValue(
             custom,
-            '--motion-travel-from',
+            '--motion-spin3d-parallax-from',
             asWeb,
           )}) rotateZ(calc(${toKeyframeValue(
             {},
@@ -85,7 +100,7 @@ export function style(options: ScrubAnimationOptions, asWeb = false) {
         {
           transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateY(${toKeyframeValue(
             custom,
-            '--motion-travel-to',
+            '--motion-spin3d-parallax-to',
             asWeb,
           )}) rotateZ(calc(${toKeyframeValue(
             {},

@@ -84,7 +84,6 @@ describe('FadeScroll', () => {
     test('custom range - continuous', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        fill: 'both',
         namedEffect: { range: 'continuous' } as FadeScrollType,
       };
 
@@ -97,6 +96,9 @@ describe('FadeScroll', () => {
             },
             {
               opacity: `var(--comp-opacity, 1)`,
+            },
+            {
+              opacity: 0,
             },
           ],
         },
@@ -187,7 +189,6 @@ describe('FadeScroll', () => {
     test('custom range - continuous', () => {
       const mockOptions: ScrubAnimationOptions = {
         ...baseMockOptions,
-        fill: 'both',
         namedEffect: { range: 'continuous' } as FadeScrollType,
       };
 
@@ -200,6 +201,9 @@ describe('FadeScroll', () => {
             },
             {
               opacity: 'var(--motion-fade-to)',
+            },
+            {
+              opacity: 'var(--motion-fade-from)',
             },
           ],
         },
