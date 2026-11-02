@@ -1,5 +1,23 @@
-import type { TimeAnimationOptions } from '../../../types';
+import type { AnimationData, TimeAnimationOptions } from '../../../types';
+import { resolveDefaults } from '../../../test/resolveDefaults';
 
-export const baseMockOptions: TimeAnimationOptions = {
-  id: '1',
+type Preset = {
+  web: (options: TimeAnimationOptions) => AnimationData[];
+  layers?: (options: TimeAnimationOptions, asWeb?: boolean) => AnimationData[];
 };
+
+// the preset's layers before they're merged into one transform list
+export function run(preset: Preset, namedEffect: Record<string, unknown> = {}, duration = 1000) {
+  const options = { duration, namedEffect } as TimeAnimationOptions;
+  return preset.layers
+    ? resolveDefaults(preset.layers(options, true), preset.layers(options))
+    : preset.web(options);
+}
+
+export function layer(animations: AnimationData[], name: string) {
+  const animation = animations.find((a) => a.name === name);
+  if (!animation) {
+    throw new Error(`missing layer ${name}`);
+  }
+  return animation as AnimationData & { custom: Record<string, string | number> };
+}

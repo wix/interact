@@ -71,7 +71,7 @@ These are set on the effect configuration level, not on the preset itself:
 
 **Ongoing-specific preset parameter:**
 
-- `iterationDelay`: Idle time in ms appended after each active iteration cycle. Available on all ongoing presets. This compresses the active animation keyframes into a fraction of the total iteration duration, creating a pause between repetitions. Set on the `namedEffect`, not on the animation options.
+- `iterationDelay`: Idle time in ms appended after each active iteration cycle. Available on all ongoing presets. The element holds at rest for this time after each iteration; the motion's shape is unchanged. Set on the `namedEffect`, not on the animation options.
 
 **Scroll-specific animation options:**
 
@@ -80,37 +80,35 @@ These are set on the effect configuration level, not on the preset itself:
 
 ### Overloaded Parameter Names
 
-Entrance presets use `from` — the side the element comes from — and `pivot` for the edge or corner the element rotates around (as do Swing and Fold). Elsewhere `direction` accepts different values depending on the preset:
+Entrance presets use `from` — the side the element comes from. All other presets use `direction` — where the motion goes. `pivot` names the edge, corner or point the element rotates or scales around. Each accepts different values depending on the preset:
 
-| Meaning          | Accepted Values                                           | Presets                                                                                                                                       |
-| ---------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cardinal         | 'top', 'right', 'bottom', 'left'                          | `from`: ArcIn, CurveIn, FloatIn, RevealIn, ShuttersIn, SlideIn; `pivot`: FoldIn, Swing, Fold; Poke, RevealScroll, ShuttersScroll, SlideScroll |
-| Cardinal + back  | 'top', 'right', 'bottom', 'left', 'back'                  | `from`: BounceIn                                                                                                                              |
-| Two sides        | 'left', 'right'                                           | `from`: TiltIn; PanScroll, SkewPanScroll, TiltScroll, TurnScroll                                                                              |
-| Corner           | 'top-left', 'top-right', 'bottom-left', 'bottom-right'    | `pivot`: TurnIn                                                                                                                               |
-| Eight directions | 4 cardinal + 4 diagonal                                   | Cross                                                                                                                                         |
-| Nine directions  | 4 cardinal + 4 diagonal + 'center'                        | GrowScroll, ShrinkScroll                                                                                                                      |
-| Axis             | 'horizontal', 'vertical'                                  | FlipIn, WinkIn, ArcScroll, FlipScroll, Flip                                                                                                   |
-| Axis + center    | 'horizontal', 'vertical', 'center'                        | Breathe                                                                                                                                       |
-| Rotation         | 'clockwise', 'counter-clockwise'                          | SpinIn, SpinScroll, Spin                                                                                                                      |
-| Angle (number)   | 0–360 (0° = right, 90° = bottom, 180° = left, 270° = top) | `from`: GlideIn, ExpandIn (also accept cardinal keywords)                                                                                     |
+| Meaning          | Accepted Values                                           | Presets                                                                                                                                                    |
+| ---------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cardinal         | 'top', 'right', 'bottom', 'left'                          | `from`: ArcIn, CurveIn, FloatIn, RevealIn, ShuttersIn, SlideIn; `direction`: Poke, RevealScroll, ShuttersScroll, SlideScroll; `pivot`: FoldIn, Fold, Swing |
+| Cardinal + back  | 'top', 'right', 'bottom', 'left', 'back'                  | `from`: BounceIn                                                                                                                                           |
+| Two sides        | 'left', 'right'                                           | `from`: TiltIn; `direction`: PanScroll, SkewPanScroll, TurnScroll                                                                                          |
+| Corner           | 'top-left', 'top-right', 'bottom-left', 'bottom-right'    | `pivot`: TurnIn                                                                                                                                            |
+| Eight directions | 4 cardinal + 4 diagonal                                   | `direction`: Cross                                                                                                                                         |
+| Nine directions  | 4 cardinal + 4 diagonal + 'center'                        | `pivot`: GrowScroll, ShrinkScroll                                                                                                                          |
+| Axis             | 'horizontal', 'vertical'                                  | `direction`: FlipIn, WinkIn, ArcScroll, FlipScroll, Flip                                                                                                   |
+| Axis + center    | 'horizontal', 'vertical', 'center'                        | `direction`: Breathe                                                                                                                                       |
+| Rotation         | 'clockwise', 'counter-clockwise'                          | `direction`: SpinIn, SpinScroll, TiltScroll, Spin; `spin`: TurnScroll                                                                                      |
+| Angle (number)   | 0–360 (0° = right, 90° = bottom, 180° = left, 270° = top) | `from`: GlideIn, ExpandIn (also accept cardinal keywords); `direction`: MoveScroll                                                                         |
 
 ### Using Units
 
-Entrance movement lengths are named `travel` (`depth` is Z translation). Interact supports both a CSSUnitValue-style object (e.g., `travel: { value: 120, unit: 'px' }`, mapped to the internal type `UnitLengthPercentage`) and flat string values (e.g., `travel: '120px'`).
+Entrance, scroll and ongoing movement lengths are named `travel` (PanScroll keeps `distance`; `depth` is Z translation). Interact supports both a CSSUnitValue-style object (e.g., `travel: { value: 120, unit: 'px' }`, mapped to the internal type `UnitLengthPercentage`) and flat string values (e.g., `travel: '120px'`).
 
 Prefer the object notation. Be consistent within a configuration — use one format, not both.
 
 ### Coordinate System
 
-**Entrance presets:** CSS convention — 0° = right (east), angles increase clockwise
+**Standard:** CSS convention — 0° = right (east), angles increase clockwise
 
 - 0° = right (east)
 - 90° = bottom (south)
 - 180° = left (west)
 - 270° = top (north)
-
-**Other presets:** 0° = right (east), angles increase counter-clockwise
 
 ### Distance Units
 

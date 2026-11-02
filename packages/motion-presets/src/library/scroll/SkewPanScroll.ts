@@ -1,37 +1,39 @@
-import type {
-  AnimationFillMode,
-  DomApi,
-  ScrubAnimationOptions,
-  SkewPanScroll,
-  EffectTwoSides,
-} from '../../types';
-import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
-import { TWO_SIDES_DIRECTIONS } from '../../consts';
+import type { AnimationData, DomApi, ScrubAnimationOptions, SkewPanScroll } from '../../types';
+import { SCROLL_RANGES, TWO_SIDES_DIRECTIONS } from '../../consts';
+import { sideDirection, toMotionRange } from '../../directions';
+import { getOffscreenTravels, measureLayout } from '../../layoutUtils';
+import {
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
+import {
+  getMotionLayoutRotation,
+  getMotionTransRot,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { parseKeywordLazy } from '../../utils';
 
-const DEFAULT_DIRECTION: EffectTwoSides = 'right';
+const DEFAULTS: Required<SkewPanScroll> = {
+  type: 'SkewPanScroll',
+  direction: 'left',
+  range: 'in',
+  skew: 10,
+};
 
-const DIRECTION_MAP = {
-  right: -1,
-  left: 1,
+export const schema = {
+  direction: { type: 'enum', values: TWO_SIDES_DIRECTIONS, default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  skew: { type: 'number', default: DEFAULTS.skew },
 };
 
 export function getNames(options: ScrubAnimationOptions) {
-  return suffixNames(['motion-skewPanScroll'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
 
 export function prepare(_: ScrubAnimationOptions, dom?: DomApi) {
-  if (dom) {
-    let left = 0;
-    dom.measure((target) => {
-      if (!target) {
-        return;
-      }
-      left = target.getBoundingClientRect().left;
-    });
-    dom.mutate((target) => {
-      target?.style.setProperty('--motion-left', `${left}px`);
-    });
-  }
+  measureLayout(dom);
 }
 
 export function web(options: ScrubAnimationOptions, dom?: DomApi) {
@@ -40,76 +42,53 @@ export function web(options: ScrubAnimationOptions, dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as SkewPanScroll;
-  const direction = parseDirection(namedEffect?.direction, TWO_SIDES_DIRECTIONS, DEFAULT_DIRECTION);
-  const { skew = 10, range = 'in' } = namedEffect;
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<SkewPanScroll>;
+  const { direction, skew = DEFAULTS.skew } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
 
-  const skewX = skew * DIRECTION_MAP[direction];
-  const startXLeft = `calc(${toKeyframeValue(
-    {},
-    '--motion-left',
-    false,
-    'calc(100vw - 100%)',
-  )} * -1 - 100%)`;
-  const endXLeft = `calc(100vw - ${toKeyframeValue({}, '--motion-left', false, '0px')})`;
-  const [startX, endX] = direction === 'left' ? [startXLeft, endXLeft] : [endXLeft, startXLeft];
+  // from fully outside the viewport on one side to fully outside on the other side
+  const side = parseKeywordLazy(direction, TWO_SIDES_DIRECTIONS, DEFAULTS.direction);
+  const { travel, toTravel } = getOffscreenTravels(side);
+  // leaning into the movement, flipping as it passes its layout position
+  const skewXY = { x: -skew };
 
-  const fromValues = {
-    skew: range === 'out' ? 0 : skewX,
-    translate: range === 'out' ? 0 : startX,
-  };
-  const toValues = {
-    skew: range === 'in' ? 0 : -skewX,
-    translate: range === 'in' ? 0 : range === 'out' ? startX : endX,
-  };
-
-  const [skewPanScroll] = getNames(options);
-
-  const custom = {
-    '--motion-skewpan-start-x': fromValues.translate,
-    '--motion-skewpan-end-x': toValues.translate,
-    '--motion-skewpan-from-skew': `${fromValues.skew}deg`,
-    '--motion-skewpan-to-skew': `${toValues.skew}deg`,
-  };
-
-  const animations = [
-    {
-      ...options,
-      name: skewPanScroll,
-      fill,
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `translateX(${toKeyframeValue(
-            custom,
-            '--motion-skewpan-start-x',
-            asWeb,
-          )}) skewX(${toKeyframeValue(
-            custom,
-            '--motion-skewpan-from-skew',
-            asWeb,
-          )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
-        },
-        {
-          transform: `translateX(${toKeyframeValue(
-            custom,
-            '--motion-skewpan-end-x',
-            asWeb,
-          )}) skewX(${toKeyframeValue(
-            custom,
-            '--motion-skewpan-to-skew',
-            asWeb,
-          )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
-        },
-      ],
+  const panOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      direction: side,
+      travel,
+      toTravel,
+      skew: skewXY,
     },
-  ];
+  } as ScrubAnimationOptions;
 
-  return suffixCustomProperties(animations, options.suffix);
+  // 'out' is the reversed 'in' of the opposite direction, so its travel is the one towards the original direction
+  const motionTravels =
+    range === 'out' ? { travel: toTravel, toTravel: travel } : { travel, toTravel };
+  const motionSide = range === 'out' ? sideDirection.opposite(side) : side;
+
+  return withSharedScrollRange([
+    {
+      ...panOptions,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
+      ...getMotionTransRot(
+        toMotionRange(sideDirection, motionSide, range),
+        { skew: skewXY, ...motionTravels },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...panOptions,
+      composite: 'add',
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, false)),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+  ]);
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

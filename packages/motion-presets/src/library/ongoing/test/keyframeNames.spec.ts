@@ -2,7 +2,6 @@ import { describe, expect, test } from 'vitest';
 
 import * as ongoing from '..';
 import type { TimeAnimationOptions } from '../../../types';
-import { getEasingName } from '../../../utils';
 import { baseMockOptions } from './testUtils';
 
 type Field = { type: string; values?: readonly string[] };
@@ -64,22 +63,5 @@ describe('ongoing presets keyframe names', () => {
         }
       }
     }
-  });
-});
-
-describe('getEasingName', () => {
-  test.each([
-    [undefined, ''],
-    ['linear', ''],
-    ['sineIn', '-sineIn'],
-    ['cubic-bezier(0.68, -0.55, 0.27, 1.55)', '-cubic-bezier-068_-055_027_155'],
-    ['steps(4, jump-end)', '-steps-4_jump-end'],
-    ['linear(0, 0.25 50%, 1)', '-linear-0_025-50_1'],
-    [
-      'linear(0, 0.0039, 0.0157, 0.0352, 0.0625 25%, 0.1407, 0.25, 0.5, 0.75 75%, 1)',
-      '-linear-0_00039_00157_00352_00625-25_0140',
-    ],
-  ])('%s', (easing, name) => {
-    expect(getEasingName(easing, 'linear')).toBe(name);
   });
 });

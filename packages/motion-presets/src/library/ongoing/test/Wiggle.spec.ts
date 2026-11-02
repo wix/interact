@@ -73,7 +73,7 @@ describe('Wiggle', () => {
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + 20.4deg)) translateY(0px)',
             },
             {
-              offset: 0.48910000000000003,
+              offset: 0.4891,
               transform: 'rotate(calc(var(--motion-rotate, 0deg) + -13.6deg)) translateY(0px)',
             },
             {
@@ -181,7 +181,7 @@ describe('Wiggle', () => {
               transform: 'rotate(var(--motion-rotate-53)) translateY(var(--motion-translate-y-53))',
             },
             {
-              offset: 0.48910000000000003,
+              offset: 0.4891,
               transform: 'rotate(var(--motion-rotate-73)) translateY(var(--motion-translate-y-73))',
             },
             {

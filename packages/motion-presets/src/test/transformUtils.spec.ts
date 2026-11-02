@@ -1,0 +1,264 @@
+import { describe, expect, test } from 'vitest';
+
+import type { MotionRange } from '../directions';
+import type { AnimationData } from '../types';
+import { createParallax } from '../parallaxUtils';
+import {
+  MOTION_3D_TRANSFORM_NAME,
+  MOTION_LAYOUT_ROTATION_NAME,
+  MOTION_SCALE_NAME,
+  MOTION_TRANS_ROT_NAME,
+  getMotion3dTransform,
+  getMotionLayoutRotation,
+  getMotionScale,
+  mergeTransformLayers,
+  getMotionTransRot,
+  pivotToTransformOrigin,
+} from '../transformUtils';
+
+const RANGES: Record<string, MotionRange> = {
+  inHorizontal: { fromSign: -1, toSign: 0, movementAngle: '0deg', vertical: false },
+  inVertical: { fromSign: 1, toSign: 0, movementAngle: '90deg', vertical: true },
+  continuous: { fromSign: -1, toSign: 1, movementAngle: '0deg', vertical: false },
+  angle: { fromSign: -1, toSign: 0, movementAngle: '45deg', vertical: false },
+};
+
+const COVER = {
+  startOffset: { name: 'cover' as const, offset: { value: 0, unit: 'percentage' as const } },
+  endOffset: { name: 'cover' as const, offset: { value: 100, unit: 'percentage' as const } },
+};
+
+const transforms = (data: { keyframes: any[] }) => data.keyframes.map((k) => k.transform);
+
+describe('getMotionTransRot', () => {
+  const params = { angle: 90, travel: '100px', skew: { x: 10 } };
+
+  for (const [key, range] of Object.entries(RANGES)) {
+    for (const asWeb of [false, true]) {
+      test(`${key} asWeb=${asWeb}`, () => {
+        expect(getMotionTransRot({ ...range }, params, asWeb, '-s')).toMatchSnapshot();
+      });
+    }
+  }
+
+  test('name with suffix', () => {
+    expect(getMotionTransRot(RANGES.inHorizontal, {}, false, '-s').name).toBe(
+      `${MOTION_TRANS_ROT_NAME}-s`,
+    );
+  });
+
+  test('resolved values move from the signed travel and angle to rest', () => {
+    const [from, to] = transforms(getMotionTransRot(RANGES.inHorizontal, params, true));
+    expect(from).toContain('translate(calc(-1 * cos(0deg) * 100px)');
+    expect(from).toContain('rotate(calc(-1 * 90deg))');
+    expect(to).toContain('translate(calc(0 * cos(0deg) * 100px)');
+  });
+
+  test('toTravel is used for the end keyframe and defaults to travel', () => {
+    const range = RANGES.continuous;
+    expect(
+      getMotionTransRot(range, { travel: '10px', toTravel: '20px' }, true).custom,
+    ).toMatchObject({
+      '--motion-trans-rot-travel': '10px',
+      '--motion-trans-rot-to-travel': '20px',
+    });
+    expect(
+      getMotionTransRot(range, { travel: '10px' }, true).custom['--motion-trans-rot-to-travel'],
+    ).toBe('10px');
+  });
+
+  test('transform origin conjugation wraps every keyframe', () => {
+    for (const transform of transforms(
+      getMotionTransRot(RANGES.inHorizontal, { angle: 10, transformOrigin: { y: '-50%' } }, true),
+    )) {
+      expect(transform.startsWith('translate3d(0px, -50%, 0px)')).toBe(true);
+      expect(
+        transform.endsWith('translate3d(calc(-1 * 0px), calc(-1 * -50%), calc(-1 * 0px))'),
+      ).toBe(true);
+    }
+  });
+
+  test('parallax adds range offsets and parallax custom properties', () => {
+    const data = getMotionTransRot(
+      { ...RANGES.inVertical },
+      { parallax: createParallax(COVER, false, 0.5, 0.5) },
+      false,
+    ) as any;
+    expect(data).toMatchSnapshot();
+    expect(data.startOffset).toBeDefined();
+    expect(data.endOffset).toBeDefined();
+    expect(data.custom).toHaveProperty('--motion-trans-rot-parallax-inv-speed', 2);
+    expect(data.custom).toHaveProperty('--motion-trans-rot-parallax-from');
+    expect(data.custom).toHaveProperty('--motion-trans-rot-parallax-to');
+  });
+
+  test('no parallax - no range offsets, the offsets listed but left to their fallback', () => {
+    const data = getMotionTransRot(RANGES.inVertical, {}, false) as any;
+    expect(data.startOffset).toBeUndefined();
+    expect(data.custom).toMatchObject({
+      '--motion-trans-rot-parallax-from': undefined,
+      '--motion-trans-rot-parallax-to': undefined,
+    });
+  });
+});
+
+describe('getMotionScale', () => {
+  for (const asWeb of [false, true]) {
+    test(`asWeb=${asWeb}`, () => {
+      expect(
+        getMotionScale(
+          RANGES.inHorizontal,
+          { scale: { x: 0.5, y: 2 }, transformOrigin: { x: '50%' } },
+          asWeb,
+          '-s',
+        ),
+      ).toMatchSnapshot();
+    });
+  }
+
+  test('added on top of other layers, uniform number scale, ends at identity', () => {
+    const data = getMotionScale(RANGES.inHorizontal, { scale: 0.3 }, true, '-s');
+    expect(data.name).toBe(`${MOTION_SCALE_NAME}-s`);
+    expect(data.composite).toBe('add');
+    const [from, to] = transforms(data);
+    expect(from).toContain('scale(0.3, 0.3)');
+    expect(to).toContain('scale(1, 1)');
+  });
+});
+
+describe('getMotion3dTransform', () => {
+  const params = { angle: 30, perspective: 800, depth: '100px', travel: '50px' };
+
+  for (const [key, range] of Object.entries(RANGES)) {
+    for (const asWeb of [false, true]) {
+      test(`${key} asWeb=${asWeb}`, () => {
+        expect(getMotion3dTransform({ ...range }, params, asWeb, '-s')).toMatchSnapshot();
+      });
+    }
+  }
+
+  test('name with suffix and perspective first', () => {
+    const data = getMotion3dTransform(RANGES.inHorizontal, params, true, '-s');
+    expect(data.name).toBe(`${MOTION_3D_TRANSFORM_NAME}-s`);
+    transforms(data).forEach((t: string) => expect(t.startsWith('perspective(800px)')).toBe(true));
+  });
+
+  test('number angle rotates around x (negated) when vertical, around y otherwise - zeros are left to their fallback', () => {
+    expect(
+      getMotion3dTransform(RANGES.inVertical, { angle: 30, perspective: 800 }, true).custom,
+    ).toMatchObject({
+      '--motion-transform-3d-angle-x': '-30deg',
+      '--motion-transform-3d-angle-y': undefined,
+    });
+    expect(
+      getMotion3dTransform(RANGES.inHorizontal, { angle: 30, perspective: 800 }, true).custom,
+    ).toMatchObject({
+      '--motion-transform-3d-angle-x': undefined,
+      '--motion-transform-3d-angle-y': '30deg',
+    });
+  });
+
+  test('string travel moves along z, object travel per axis', () => {
+    expect(
+      getMotion3dTransform(RANGES.inVertical, { travel: '40px', perspective: 800 }, true).custom,
+    ).toMatchObject({
+      '--motion-transform-3d-travel-x': undefined,
+      '--motion-transform-3d-travel-z': '40px',
+    });
+    expect(
+      getMotion3dTransform(RANGES.inVertical, { travel: { x: '10px' }, perspective: 800 }, true)
+        .custom,
+    ).toMatchObject({
+      '--motion-transform-3d-travel-x': '10px',
+      '--motion-transform-3d-travel-z': undefined,
+    });
+  });
+
+  test('depth moves the origin backwards on z', () => {
+    const [from] = transforms(
+      getMotion3dTransform(RANGES.inVertical, { depth: '100px', perspective: 800 }, true),
+    );
+    expect(from).toContain('translate3d(0px, 0px, -100px)');
+  });
+});
+
+describe('layout rotation', () => {
+  test('constant --motion-rotate on both keyframes', () => {
+    const data = getMotionLayoutRotation({}, true, '-s');
+    expect(data).toMatchSnapshot();
+    expect(data.name).toBe(`${MOTION_LAYOUT_ROTATION_NAME}-s`);
+    expect(data.keyframes).toEqual([
+      { transform: 'rotate(var(--motion-rotate, 0deg))' },
+      { transform: 'rotate(var(--motion-rotate, 0deg))' },
+    ]);
+  });
+});
+
+describe('pivotToTransformOrigin', () => {
+  test('maps a pivot keyword to an origin relative to the center', () => {
+    expect(pivotToTransformOrigin('center')).toEqual({ x: '0px', y: '0px' });
+    expect(pivotToTransformOrigin('top-left')).toEqual({ x: '-50%', y: '-50%' });
+    expect(pivotToTransformOrigin('bottom-right')).toEqual({ x: '50%', y: '50%' });
+    expect(pivotToTransformOrigin('right')).toEqual({ x: '50%', y: '0px' });
+  });
+});
+
+describe('mergeTransformLayers', () => {
+  const layer = (name: string, transforms: string[], extra: Record<string, unknown> = {}) =>
+    ({
+      name,
+      duration: 1000,
+      easing: 'linear',
+      custom: { [`--${name}`]: 1 },
+      keyframes: transforms.map((transform) => ({ transform })),
+      ...extra,
+    }) as AnimationData;
+  const rotation = layer(
+    'rotation',
+    ['rotate(var(--motion-rotate))', 'rotate(var(--motion-rotate))'],
+    {
+      composite: 'replace',
+    },
+  );
+
+  test('a constant layer merges into a moving one, in their stacking order, composited like the first', () => {
+    const moving = layer('move', ['translateX(0px)', 'translateX(10px)'], {
+      composite: 'add',
+      easing: 'ease-in',
+    });
+    const [merged, ...rest] = mergeTransformLayers([{ ...rotation }, moving]);
+    expect(rest).toEqual([]);
+    expect(merged.name).toBe('rotation--move');
+    expect(merged.composite).toBe('replace');
+    expect(merged.easing).toBe('ease-in');
+    expect(merged.keyframes.map(({ transform }) => transform)).toEqual([
+      'rotate(var(--motion-rotate)) translateX(0px)',
+      'rotate(var(--motion-rotate)) translateX(10px)',
+    ]);
+    expect(merged.custom).toEqual({ '--rotation': 1, '--move': 1 });
+  });
+
+  test('moving layers merge only when their timing is the same', () => {
+    const a = layer('a', ['translateX(0px)', 'translateX(10px)']);
+    const b = layer('b', ['rotate(0deg)', 'rotate(10deg)'], { composite: 'add' });
+    const c = layer('c', ['scale(1)', 'scale(2)'], { composite: 'add', easing: 'ease-out' });
+    expect(mergeTransformLayers([a, b, c]).map(({ name }) => name)).toEqual(['a--b', 'c']);
+  });
+
+  test('the moving layer keeps its getters', () => {
+    const moving = layer('move', ['translateX(0px)', 'translateX(10px)'], { composite: 'add' });
+    Object.defineProperty(moving, 'timing', { get: () => ({ easing: 'ease' }), enumerable: true });
+    const [merged] = mergeTransformLayers([{ ...rotation }, moving]);
+    expect(Object.getOwnPropertyDescriptor(merged, 'timing')?.get).toBeTypeOf('function');
+  });
+
+  test('other properties stay in their own layers, and the suffix stays at the end', () => {
+    const fade = { name: 'fade-1', keyframes: [{ opacity: 0 }] } as AnimationData;
+    const moving = layer('move-1', ['translateX(0px)', 'translateX(10px)'], { composite: 'add' });
+    const names = mergeTransformLayers(
+      [{ ...rotation, name: 'rotation-1' }, fade, moving],
+      '-1',
+    ).map(({ name }) => name);
+    expect(names).toEqual(['rotation--move-1', 'fade-1']);
+  });
+});

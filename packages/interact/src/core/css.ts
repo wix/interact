@@ -80,6 +80,8 @@ type GenerateContext = {
   configConditions: Record<string, Condition>;
   targetsMap: TargetsMap;
   keyframesMap: Map<string, Keyframe[]>;
+  // the effects' own custom properties, registered as not inherited
+  customProperties: Set<string>;
   keyframeSlots: Map<string, string>;
   // view timelines whose targets may be outside their source's subtree
   scopedTimelines: string[];
@@ -335,8 +337,15 @@ function effectToCSS(
       keyframes: anim.keyframes,
     }));
 
-    // declare custom parameters
-    // TODO - register those to define with @property to prevent unintended override
+    // registered as not inherited, so an element never reads the parameters of an ancestor running the same
+    // keyframes - except for parts, which read them from the element
+    cssAnimations
+      .filter(({ part }) => !part)
+      .forEach(({ custom }) =>
+        Object.keys(custom || {}).forEach((name) => ctx.customProperties.add(name)),
+      );
+
+    // declare custom parameters - the undefined ones are left to their fallbacks
     declarations.push(
       ...cssAnimations.flatMap(({ custom }) =>
         Object.entries(custom || {})
@@ -647,6 +656,7 @@ function parseConfig(
     configConditions: config.conditions || {},
     targetsMap: new Map<string, TargetContext>(),
     keyframesMap: new Map<string, Keyframe[]>(),
+    customProperties: new Set<string>(),
     keyframeSlots: collectSlots ? new Map() : getKeyframeSlots(config, configIndex),
     scopedTimelines: [],
     collectSlots,
@@ -746,14 +756,19 @@ export function _generate(
     0,
     ...targets.map(({ transition }) => transition.slotCursor),
   );
-  const atProperty = buildAtPropertyRules(
-    animationLength,
-    transitionLength,
-    animationSlotLength,
-    transitionSlotLength,
-    timelineLength,
-    ctx.configIndex,
-  );
+  const atProperty = [
+    ...buildAtPropertyRules(
+      animationLength,
+      transitionLength,
+      animationSlotLength,
+      transitionSlotLength,
+      timelineLength,
+      ctx.configIndex,
+    ),
+    ...[...ctx.customProperties].map(
+      (name) => `@property ${name} { syntax: "*"; inherits: false; }`,
+    ),
+  ];
 
   // trigger names are unique in a config (and across configs given their configIndex),
   // and a target inside its source still resolves the source's timeline first

@@ -1,17 +1,19 @@
-import type { Swing, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
+import type { AnimationData, DomApi, Swing, TimeAnimationOptions } from '../../types';
+import { CENTER_AND_FOUR_DIRECTIONS, FOUR_DIRECTIONS } from '../../consts';
 import {
-  getEasing,
-  getEasingFamily,
-  getEasingName,
-  getTimingFactor,
-  toKeyframeValue,
-  parseDirection,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
-import { FOUR_DIRECTIONS } from '../../consts';
+  getMotionLayoutRotation,
+  getMotionTransRot,
+  pivotToTransformOrigin,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import type { LoopPoint } from '../../easingUtils';
+import { getLoopOverrides } from '../../easingUtils';
+import { getEasingFamily, parseKeywordLazy } from '../../utils';
+import { spinDirection, toMotionRange } from '../../directions';
 
 const DEFAULT_EASING = 'sineInOut';
+// the positive angle is a counter-clockwise spin's peak
+const DIRECTION = 'counter-clockwise';
 
 const DEFAULTS: Required<Swing> = {
   type: 'Swing',
@@ -26,129 +28,67 @@ export const schema = {
   pivot: { type: 'enum', values: FOUR_DIRECTIONS, default: DEFAULTS.pivot },
 };
 
-const DIRECTION_MAP = {
-  top: { x: 0, y: -1 },
-  right: { x: 1, y: 0 },
-  bottom: { x: 0, y: 1 },
-  left: { x: -1, y: 0 },
-};
+// a damped swing, first to the positive angle
+const SHAPE: LoopPoint[] = [
+  [0, 0],
+  [1, 0.0934],
+  [-1, 0.28],
+  [0.6, 0.466],
+  [-0.3, 0.653],
+  [0.2, 0.839],
+  [-0.05, 1.026],
+  [0, 1.175],
+].map(([value, time]) => [value, time / 1.175]);
 
-const TRANSLATE_DISTANCE = 50;
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
+}
 
-const FACTORS_SEQUENCE = [
-  { factor: 1, timeFactor: 0.0934 },
-  { factor: -1, timeFactor: 0.28 },
-  { factor: 0.6, timeFactor: 0.466 },
-  { factor: -0.3, timeFactor: 0.653 },
-  { factor: 0.2, timeFactor: 0.839 },
-  { factor: -0.05, timeFactor: 1.026 },
-  { factor: 0, timeFactor: 1.175 },
-];
-
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
+export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as Swing;
-  const pivot = parseDirection(namedEffect?.pivot, FOUR_DIRECTIONS, DEFAULTS.pivot);
-  const { angle = DEFAULTS.angle } = namedEffect;
-
-  const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const easing = options.easing || DEFAULT_EASING;
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<Swing>;
+  const { angle = DEFAULTS.angle, pivot = DEFAULTS.pivot } = namedEffect!;
   const ease = getEasingFamily(easing);
-  const [name] = getNames(options);
 
-  const { x, y } = DIRECTION_MAP[pivot];
-  const totalDuration = duration + iterationDelay;
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
+  const swingOptions = {
+    ...options,
+    composite: 'add',
+    namedEffect: {
+      ...namedEffect,
+      angle,
+      direction: DIRECTION,
+      pivot,
+    },
+  } as TimeAnimationOptions;
 
-  // Create CSS custom properties for the swing configuration
-  const custom: Record<string, string | number> = {
-    '--motion-swing-deg': `${angle}deg`,
-    '--motion-trans-x': `${x * TRANSLATE_DISTANCE}%`,
-    '--motion-trans-y': `${y * TRANSLATE_DISTANCE}%`,
-  };
+  const transformOrigin = pivotToTransformOrigin(
+    parseKeywordLazy(pivot, CENTER_AND_FOUR_DIRECTIONS, DEFAULTS.pivot),
+  );
 
-  const translateBefore = `translate(${toKeyframeValue(
-    custom,
-    '--motion-trans-x',
-    asWeb,
-  )}, ${toKeyframeValue(custom, '--motion-trans-y', asWeb)})`;
-
-  const translateAfter = `translate(calc(${toKeyframeValue(
-    custom,
-    '--motion-trans-x',
-    asWeb,
-  )} * -1), calc(${toKeyframeValue(custom, '--motion-trans-y', asWeb)} * -1))`;
-
-  const keyframes = iterationDelay
-    ? FACTORS_SEQUENCE.map(({ factor, timeFactor }) => {
-        const keyframeOffset = timeFactor * timingFactor;
-
-        return {
-          offset: keyframeOffset,
-          easing: getEasing(ease.inOut),
-          transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${toKeyframeValue(
-            custom,
-            '--motion-swing-deg',
-            asWeb,
-          )} * ${factor})) ${translateAfter}`,
-        };
-      })
-    : [
-        {
-          offset: 0.25,
-          easing: getEasing(ease.inOut),
-          transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(${toKeyframeValue(
-            custom,
-            '--motion-swing-deg',
-            asWeb,
-          )}) ${translateAfter}`,
-        },
-        {
-          offset: 0.75,
-          easing: getEasing(ease.in),
-          transform: `rotate(var(--motion-rotate, 0deg)) ${translateBefore} rotate(calc(${toKeyframeValue(
-            custom,
-            '--motion-swing-deg',
-            asWeb,
-          )} * -1)) ${translateAfter}`,
-        },
-      ];
-
-  const animations = [
+  return [
+    // the layout rotation comes first, so the pivot is on the element's rotated side
     {
-      ...options,
-      name,
-      easing: 'linear',
-      duration: totalDuration,
-      custom,
-      keyframes: [
-        {
-          offset: 0,
-          easing: getEasing(ease.out),
-          transform: `rotateZ(var(--motion-rotate, 0deg)) ${translateBefore} rotate(0deg) ${translateAfter}`,
-        },
-        ...keyframes,
-        {
-          offset: 1,
-          transform: `rotateZ(var(--motion-rotate, 0deg)) ${translateBefore} rotate(0deg) ${translateAfter}`,
-        },
-      ],
+      ...swingOptions,
+      composite: 'replace',
+      ...getLoopOverrides(swingOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...swingOptions,
+      ...getLoopOverrides(swingOptions, { shape: SHAPE, easings: [ease.out, ease.inOut] }),
+      ...getMotionTransRot(
+        toMotionRange(spinDirection, DIRECTION, 'in'),
+        { angle, transformOrigin },
+        asWeb,
+        suffix,
+      ),
     },
   ];
-
-  return suffixCustomProperties(animations, options.suffix);
 }
 
-export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Swing)?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
-
-  return suffixNames(
-    [`motion-swing-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
-    options.suffix,
-  );
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

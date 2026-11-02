@@ -1,448 +1,49 @@
 import { describe, expect, test } from 'vitest';
 
 import * as Bounce from '../Bounce';
-import { TimeAnimationOptions } from '../../../types';
-import { baseMockOptions } from './testUtils';
+import { resolveDefaults } from '../../../test/resolveDefaults';
+import { getLoopEasing } from '../../../easingUtils';
+import type { TimeAnimationOptions } from '../../../types';
+import { progressAt } from './testUtils';
+
+const options = (namedEffect = {}, rest: Partial<TimeAnimationOptions> = {}) =>
+  ({
+    duration: 1000,
+    namedEffect: { type: 'Bounce', ...namedEffect },
+    ...rest,
+  }) as TimeAnimationOptions;
 
 describe('Bounce', () => {
-  describe('style function', () => {
-    test('default values', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { type: 'Bounce' },
-      };
-
-      const expectedResult = [
-        {
-          id: 'test-id',
-          namedEffect: { type: 'Bounce' },
-          name: 'motion-bounce-1',
-          easing: 'linear',
-          duration: 1,
-          custom: {
-            '--motion-bounce-travel': '49px',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.08800000000000001,
-              translate: '0px calc(var(--motion-bounce-travel) * -55 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.17600000000000002,
-              translate: '0px calc(var(--motion-bounce-travel) * -87 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.265,
-              translate: '0px calc(var(--motion-bounce-travel) * -98 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.353,
-              translate: '0px calc(var(--motion-bounce-travel) * -87 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.441,
-              translate: '0px calc(var(--motion-bounce-travel) * -55 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.531,
-              translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.662,
-              translate: '0px calc(var(--motion-bounce-travel) * -23 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.81,
-              translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.868,
-              translate: '0px calc(var(--motion-bounce-travel) * -5 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.941,
-              translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.971,
-              translate: '0px calc(var(--motion-bounce-travel) * -2 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 1,
-              translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-          ],
-        },
-      ];
-
-      const result = Bounce.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
+  test('jumps 49px up by default, then the layout rotation', () => {
+    const [bounce, rotation] = resolveDefaults(Bounce.layers(options()));
+    expect(bounce.custom).toMatchObject({
+      '--motion-trans-rot-travel': '49px',
+      '--motion-trans-rot-direction': '90deg',
+      '--motion-trans-rot-from': -1,
     });
+    expect(rotation.composite).toBe('add');
+  });
 
-    test('custom duration and travel', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 1000,
-        namedEffect: { type: 'Bounce', travel: '127.4px', iterationDelay: 500 },
-      };
-
-      const expectedResult = [
-        {
-          id: 'test-id',
-          duration: 1500,
-          namedEffect: { type: 'Bounce', travel: '127.4px', iterationDelay: 500 },
-          name: 'motion-bounce-067',
-          easing: 'linear',
-          custom: {
-            '--motion-bounce-travel': '127.4px',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.05896000000000001,
-              translate: '0px calc(var(--motion-bounce-travel) * -55 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.11792000000000002,
-              translate: '0px calc(var(--motion-bounce-travel) * -87 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.17755,
-              translate: '0px calc(var(--motion-bounce-travel) * -98 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.23651,
-              translate: '0px calc(var(--motion-bounce-travel) * -87 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.29547,
-              translate: '0px calc(var(--motion-bounce-travel) * -55 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.35577000000000003,
-              translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.44354000000000005,
-              translate: '0px calc(var(--motion-bounce-travel) * -23 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.5427000000000001,
-              translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.5815600000000001,
-              translate: '0px calc(var(--motion-bounce-travel) * -5 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.63047,
-              translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.65057,
-              translate: '0px calc(var(--motion-bounce-travel) * -2 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.67,
-              translate: '0px calc(var(--motion-bounce-travel) * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-          ],
-        },
-      ];
-
-      const result = Bounce.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
+  test('always bounces up', () => {
+    const [bounce] = resolveDefaults(Bounce.layers(options({ direction: 'left', travel: 98 })));
+    expect(bounce.custom).toMatchObject({
+      '--motion-trans-rot-travel': '98px',
+      '--motion-trans-rot-direction': '90deg',
     });
   });
 
-  describe('web function', () => {
-    test('default values', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { type: 'Bounce' },
-      };
-
-      const expectedResult = [
-        {
-          id: 'test-id',
-          namedEffect: { type: 'Bounce' },
-          name: 'motion-bounce-1',
-          easing: 'linear',
-          duration: 1,
-          custom: {
-            '--motion-bounce-travel': '49px',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0px calc(49px * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.08800000000000001,
-              translate: '0px calc(49px * -55 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.17600000000000002,
-              translate: '0px calc(49px * -87 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.265,
-              translate: '0px calc(49px * -98 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.353,
-              translate: '0px calc(49px * -87 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.441,
-              translate: '0px calc(49px * -55 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.531,
-              translate: '0px calc(49px * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.662,
-              translate: '0px calc(49px * -23 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.81,
-              translate: '0px calc(49px * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.868,
-              translate: '0px calc(49px * -5 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.941,
-              translate: '0px calc(49px * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.971,
-              translate: '0px calc(49px * -2 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 1,
-              translate: '0px calc(49px * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-          ],
-        },
-      ];
-
-      const result = Bounce.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom duration and travel', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 1000,
-        namedEffect: { type: 'Bounce', travel: '127.4px', iterationDelay: 500 },
-      };
-
-      const expectedResult = [
-        {
-          id: 'test-id',
-          duration: 1500,
-          namedEffect: { type: 'Bounce', travel: '127.4px', iterationDelay: 500 },
-          name: 'motion-bounce-067',
-          easing: 'linear',
-          custom: {
-            '--motion-bounce-travel': '127.4px',
-          },
-          keyframes: [
-            {
-              offset: 0,
-              translate: '0px calc(127.4px * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.05896000000000001,
-              translate: '0px calc(127.4px * -55 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.11792000000000002,
-              translate: '0px calc(127.4px * -87 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.17755,
-              translate: '0px calc(127.4px * -98 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.23651,
-              translate: '0px calc(127.4px * -87 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.29547,
-              translate: '0px calc(127.4px * -55 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.35577000000000003,
-              translate: '0px calc(127.4px * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.44354000000000005,
-              translate: '0px calc(127.4px * -23 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.5427000000000001,
-              translate: '0px calc(127.4px * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.5815600000000001,
-              translate: '0px calc(127.4px * -5 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.63047,
-              translate: '0px calc(127.4px * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.65057,
-              translate: '0px calc(127.4px * -2 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-            {
-              offset: 0.67,
-              translate: '0px calc(127.4px * 0 / 98)',
-              easing: 'cubic-bezier(0.39, 0.575, 0.565, 1)',
-            },
-          ],
-        },
-      ];
-
-      const result = Bounce.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-  });
-
-  describe('getNames function', () => {
-    test('default duration and no delay', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { type: 'Bounce' },
-      };
-
-      const expectedResult = ['motion-bounce-1'];
-
-      const result = Bounce.getNames(mockOptions);
-
-      expect(result).toEqual(expectedResult);
-    });
-
-    test('custom duration with no delay', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 2000,
-        namedEffect: { type: 'Bounce' },
-      };
-
-      const expectedResult = ['motion-bounce-1'];
-
-      const result = Bounce.getNames(mockOptions);
-
-      expect(result).toEqual(expectedResult);
-    });
-
-    test('custom duration with delay', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 1000,
-        namedEffect: { type: 'Bounce', iterationDelay: 500 },
-      };
-
-      const expectedResult = ['motion-bounce-067'];
-
-      const result = Bounce.getNames(mockOptions);
-
-      expect(result).toEqual(expectedResult);
-    });
-
-    test('equal duration and delay', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 1000,
-        namedEffect: { type: 'Bounce', iterationDelay: 1000 },
-      };
-
-      const expectedResult = ['motion-bounce-05'];
-
-      const result = Bounce.getNames(mockOptions);
-
-      expect(result).toEqual(expectedResult);
-    });
-
-    test('delay longer than duration', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 500,
-        namedEffect: { type: 'Bounce', iterationDelay: 1500 },
-      };
-
-      const expectedResult = ['motion-bounce-025'];
-
-      const result = Bounce.getNames(mockOptions);
-
-      expect(result).toEqual(expectedResult);
-    });
+  test('peaks at the jump, sineOut per segment regardless of the user easing', () => {
+    const [{ easing }] = resolveDefaults(Bounce.layers(options({}, { easing: 'linear' })));
+    expect(progressAt(easing!, 26.5)).toBeCloseTo(0, 3);
+    expect(progressAt(easing!, 53.1)).toBeCloseTo(1, 3);
+    expect(easing).toContain(
+      getLoopEasing({
+        shape: [
+          [0, 0],
+          [55 / 98, 0.088],
+        ],
+        easings: ['sineOut'],
+      }).slice(7, -1),
+    );
   });
 });

@@ -1,12 +1,15 @@
-import type { TimeAnimationOptions, FloatIn } from '../../types';
-import {
-  toKeyframeValue,
-  parseDirection,
-  getEntranceFill,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+import type { AnimationData, FloatIn, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
+import {
+  getMotionTransRot,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { getMotionFade } from '../../fadeBlurUtils';
+import { sideDirection, toMotionRange } from '../../directions';
+
+const TRAVEL = '120px';
+const EASING = 'sineInOut';
 
 const DEFAULTS: Required<FloatIn> = {
   type: 'FloatIn',
@@ -18,69 +21,49 @@ export const schema = {
 };
 
 export function getNames(options: TimeAnimationOptions) {
-  return suffixNames(['motion-floatIn', 'motion-fadeIn'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
-
-const DIRECTION_MAP = {
-  top: { dx: 0, dy: -1, distance: 120 },
-  right: { dx: 1, dy: 0, distance: 120 },
-  bottom: { dx: 0, dy: 1, distance: 120 },
-  left: { dx: -1, dy: 0, distance: 120 },
-};
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as FloatIn;
-  const from = parseDirection(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from);
-  const [floatIn, fadeIn] = getNames(options);
-  const fromParams = DIRECTION_MAP[from];
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as TimeAnimationOptions<FloatIn>;
+  const { fill = 'backwards' } = options;
+  const from = sideDirection.parse(namedEffect?.from, DEFAULTS.from);
 
-  const translateX = fromParams.dx * fromParams.distance;
-  const translateY = fromParams.dy * fromParams.distance;
+  const transformOptions = {
+    ...options,
+    easing: EASING,
+    fill,
+    namedEffect: { ...namedEffect, travel: TRAVEL },
+  } as TimeAnimationOptions;
 
-  const custom = {
-    '--motion-translate-x': `${translateX}px`,
-    '--motion-translate-y': `${translateY}px`,
-  };
-
-  const easing = 'sineInOut';
-
-  const animations = [
+  return [
     {
       ...options,
-      name: floatIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `translate(${toKeyframeValue(
-            custom,
-            '--motion-translate-x',
-            asWeb,
-          )}, ${toKeyframeValue(
-            custom,
-            '--motion-translate-y',
-            asWeb,
-          )}) rotate(var(--motion-rotate, 0deg))`,
-        },
-        {
-          transform: 'translate(0, 0) rotate(var(--motion-rotate, 0deg))',
-        },
-      ],
+      easing: EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
     },
     {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      ...transformOptions,
+      ...getMotionTransRot(
+        toMotionRange(sideDirection, sideDirection.opposite(from), 'in'),
+        { travel: TRAVEL },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
+}
 
-  return suffixCustomProperties(animations, options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

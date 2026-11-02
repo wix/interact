@@ -1,14 +1,16 @@
-import type { TimeAnimationOptions, GlideIn } from '../../types';
-import type { LengthValue } from '../../utils';
+import type { AnimationData, GlideIn, LengthValue, TimeAnimationOptions } from '../../types';
 import {
-  toKeyframeValue,
-  parseCssLength,
-  parseAngle,
-  getEntranceFill,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+  getMotionTransRot,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { parseCssLength } from '../../utils';
+import { getMotionFade } from '../../fadeBlurUtils';
+import { angleDirection, toMotionRange } from '../../directions';
 
+const FADE_IN_EASING = 'step-start';
+
+const DEFAULT_EASING = 'quintInOut';
 const DEFAULTS: Required<GlideIn> = {
   type: 'GlideIn',
   from: 180,
@@ -21,64 +23,46 @@ export const schema = {
 };
 
 export function getNames(options: TimeAnimationOptions) {
-  return suffixNames(['motion-glideIn', 'motion-fadeIn'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as GlideIn;
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<GlideIn>;
+  const { fill = 'backwards' } = options;
+  const from = angleDirection.parse(namedEffect?.from, DEFAULTS.from as number);
 
-  const from = parseAngle(namedEffect?.from, DEFAULTS.from as number);
-  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
-
-  const easing = options.easing || 'quintInOut';
-
-  const translateX = `calc(cos(${from}) * ${travel})`;
-  const translateY = `calc(sin(${from}) * ${travel})`;
-
-  const custom = {
-    '--motion-translate-x': `${translateX}`,
-    '--motion-translate-y': `${translateY}`,
-  };
-
-  const [glideIn, fadeIn] = getNames(options);
-
-  const animations = [
+  return [
     {
       ...options,
-      name: glideIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `translate(${toKeyframeValue(
-            custom,
-            '--motion-translate-x',
-            asWeb,
-          )}, ${toKeyframeValue(
-            custom,
-            '--motion-translate-y',
-            asWeb,
-          )}) rotate(var(--motion-rotate, 0deg))`,
-        },
-        {
-          transform: 'translate(0, 0) rotate(var(--motion-rotate, 0deg))',
-        },
-      ],
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
     },
     {
       ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing: 'step-start',
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      easing,
+      fill,
+      ...getMotionTransRot(
+        toMotionRange(angleDirection, angleDirection.opposite(from), 'in'),
+        { travel: parseCssLength(namedEffect?.travel, DEFAULTS.travel as LengthValue) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...options,
+      composite: 'add',
+      easing,
+      fill,
+      ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
+}
 
-  return suffixCustomProperties(animations, options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

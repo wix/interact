@@ -1,13 +1,21 @@
-import type { TurnIn, TimeAnimationOptions, EffectFourCorners } from '../../types';
-import {
-  toKeyframeValue,
-  parseDirection,
-  getEntranceFill,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+import type { AnimationData, TimeAnimationOptions, TurnIn } from '../../types';
 import { FOUR_CORNERS_DIRECTIONS } from '../../consts';
+import {
+  getMotionTransRot,
+  getMotionLayoutRotation,
+  pivotToTransformOrigin,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { compareKeywordToNonDefaults, parseKeywordLazy } from '../../utils';
+import { getMotionFade } from '../../fadeBlurUtils';
+import { spinDirection, toMotionRange } from '../../directions';
 
+const FADE_IN_EASING = 'sineIn';
+const FADE_IN_DURATION_FACTOR = 0.6;
+
+const ROTATION_ANGLE = 50;
+
+const DEFAULT_EASING = 'backOut';
 const DEFAULTS: Required<TurnIn> = {
   type: 'TurnIn',
   pivot: 'top-left',
@@ -18,67 +26,58 @@ export const schema = {
 };
 
 export function getNames(options: TimeAnimationOptions) {
-  return suffixNames(['motion-fadeIn', 'motion-turnIn'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
-
-const PIVOT_TO_TRANSFORM_MAP: Record<EffectFourCorners, { x: number; y: number; angle: number }> = {
-  'top-left': { angle: -50, x: -50, y: -50 },
-  'top-right': { angle: 50, x: 50, y: -50 },
-  'bottom-right': { angle: 50, x: 50, y: 50 },
-  'bottom-left': { angle: -50, x: -50, y: 50 },
-};
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as TurnIn;
-  const pivot = parseDirection(namedEffect?.pivot, FOUR_CORNERS_DIRECTIONS, DEFAULTS.pivot);
-  const [fadeIn, turnIn] = getNames(options);
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<TurnIn>;
+  const { pivot } = namedEffect!;
+  const { fill = 'backwards' } = options;
 
-  const easing = options.easing || 'backOut';
-  const { x, y, angle } = PIVOT_TO_TRANSFORM_MAP[pivot];
+  // TurnIn always comes from the top - so it is clockwise when rotating around the left side
+  const direction = compareKeywordToNonDefaults(pivot, ['top-right', 'bottom-right'])
+    ? 'counter-clockwise'
+    : 'clockwise';
+  const transformOrigin = pivotToTransformOrigin(
+    parseKeywordLazy(pivot, FOUR_CORNERS_DIRECTIONS, DEFAULTS.pivot),
+  );
 
-  const custom = {
-    '--motion-origin': `${x}%, ${y}%`,
-    '--motion-origin-invert': `${-x}%, ${-y}%`,
-    '--motion-rotate-z': `${angle}deg`,
-  };
+  const transformOptions = {
+    ...options,
+    easing,
+    fill,
+    namedEffect: { ...namedEffect, angle: ROTATION_ANGLE, direction },
+  } as TimeAnimationOptions;
 
-  const origin = toKeyframeValue(custom, '--motion-origin', asWeb);
-  const invertedOrigin = toKeyframeValue(custom, '--motion-origin-invert', asWeb);
-
-  const animations = [
+  return [
     {
       ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      duration: options.duration! * 0.6,
-      easing: 'sineIn',
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
     },
     {
-      ...options,
-      name: turnIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `translate(${origin}) rotate(${toKeyframeValue(
-            custom,
-            '--motion-rotate-z',
-            asWeb,
-          )}) translate(${invertedOrigin}) rotate(var(--motion-rotate, 0deg))`,
-        },
-        {
-          transform: `translate(${origin}) rotate(0deg) translate(${invertedOrigin}) rotate(var(--motion-rotate, 0deg))`,
-        },
-      ],
+      ...transformOptions,
+      ...getMotionTransRot(
+        toMotionRange(spinDirection, direction, 'in'),
+        { angle: ROTATION_ANGLE, transformOrigin },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
+}
 
-  return suffixCustomProperties(animations, options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

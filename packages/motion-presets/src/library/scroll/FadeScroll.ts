@@ -1,48 +1,36 @@
-import type { FadeScroll, ScrubAnimationOptions, AnimationFillMode, DomApi } from '../../types';
-import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
+import type { DomApi, FadeScroll, ScrubAnimationOptions, AnimationData } from '../../types';
+import { SCROLL_RANGES } from '../../consts';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { getLinearScrollEasing, getScrollOverrides, parseRange } from '../../rangeUtils';
 
-export function getNames(options: ScrubAnimationOptions) {
-  return suffixNames(['motion-fadeScroll'], options.suffix);
+const DEFAULTS: Required<FadeScroll> = {
+  type: 'FadeScroll',
+  opacity: 0,
+  range: 'in',
+};
+
+export const schema = {
+  opacity: { type: 'number', min: 0, max: 1, default: DEFAULTS.opacity },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+};
+
+export function getNames({ suffix = '' }: ScrubAnimationOptions) {
+  return [MOTION_FADE_NAME + suffix];
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const { opacity = 0, range = 'in' } = options.namedEffect as FadeScroll;
-  const isOut = range === 'out';
-  const fromValue = isOut ? toKeyframeValue({}, '--comp-opacity', false, '1') : opacity;
-  const toValue = isOut ? opacity : toKeyframeValue({}, '--comp-opacity', false, '1');
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+export function style(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<FadeScroll>;
+  const range = parseRange(namedEffect, DEFAULTS.range);
 
-  const [fadeScroll] = getNames(options);
-
-  const custom = {
-    '--motion-fade-from': fromValue,
-    '--motion-fade-to': toValue,
-  };
-
-  const animations = [
+  return [
     {
       ...options,
-      name: fadeScroll,
-      fill,
-      easing,
-      custom,
-      keyframes: [
-        {
-          opacity: toKeyframeValue(custom, '--motion-fade-from', asWeb),
-        },
-        {
-          opacity: toKeyframeValue(custom, '--motion-fade-to', asWeb),
-        },
-      ],
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, false)),
+      ...getMotionFade(namedEffect!, asWeb, suffix),
     },
   ];
-
-  return suffixCustomProperties(animations, options.suffix);
 }

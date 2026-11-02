@@ -35,10 +35,10 @@ import type {
   EffectTwoSides,
   MouseAnimationFactoryCreate,
   ScrubAnimationOptions,
+  Shape,
   UnitLengthPercentage,
   WebAnimationEffectFactory,
 } from '@wix/motion';
-import type { LengthInput } from './utils';
 
 export type Translate = { x: string; y: string };
 export type ShapeType = 'circle' | 'ellipse' | 'rectangle' | 'diamond' | 'window';
@@ -56,27 +56,54 @@ export type VerticalOffsetByDirectionParams = {
 export type OffsetByDirectionParams = HorizontalOffsetByDirectionParams &
   VerticalOffsetByDirectionParams;
 
-export type FadeIn = { type: 'FadeIn' };
+export type LengthValue = { value: number; unit: string };
+export type LengthInput =
+  | string
+  | number
+  | LengthValue
+  | { value: number; unit?: string }
+  | undefined;
+
+export type EffectTwoAxes = 'horizontal' | 'vertical';
+export type EffectSpinDirection = 'clockwise' | 'counter-clockwise';
+
 export type ArcIn = {
   type: 'ArcIn';
-  from?: EffectFourDirections;
   depth?: LengthInput;
+  from?: EffectFourDirections;
   perspective?: number;
+};
+export type BlurIn = {
+  type: 'BlurIn';
+  blur?: number;
+};
+export type BounceIn = {
+  type: 'BounceIn';
+  from?: EffectFourDirections | 'back';
+  perspective?: number;
+  travel?: LengthInput;
 };
 export type CurveIn = {
   type: 'CurveIn';
-  from?: EffectFourDirections;
   depth?: LengthInput;
+  from?: EffectFourDirections;
   perspective?: number;
 };
 export type DropIn = {
   type: 'DropIn';
   scale?: number;
 };
+export type ExpandIn = {
+  type: 'ExpandIn';
+  from?: number | string;
+  scale?: number;
+  travel?: LengthInput;
+};
+export type FadeIn = { type: 'FadeIn' };
 export type FlipIn = {
   type: 'FlipIn';
-  direction?: 'vertical' | 'horizontal';
   angle?: number;
+  direction?: EffectTwoAxes;
   perspective?: number;
 };
 export type FloatIn = {
@@ -85,9 +112,28 @@ export type FloatIn = {
 };
 export type FoldIn = {
   type: 'FoldIn';
-  pivot?: EffectFourDirections;
   angle?: number;
   perspective?: number;
+  pivot?: EffectFourDirections;
+};
+export type GlideIn = {
+  type: 'GlideIn';
+  from?: number | string;
+  travel?: LengthInput;
+};
+export type RevealIn = {
+  type: 'RevealIn';
+  from?: EffectFourDirections;
+};
+export type ShapeIn = {
+  type: 'ShapeIn';
+  shape?: 'circle' | 'ellipse' | 'rectangle' | 'diamond' | 'window';
+};
+export type ShuttersIn = {
+  type: 'ShuttersIn';
+  from?: EffectFourDirections;
+  shutters?: number;
+  staggered?: boolean;
 };
 export type SlideIn = {
   type: 'SlideIn';
@@ -96,20 +142,15 @@ export type SlideIn = {
 };
 export type SpinIn = {
   type: 'SpinIn';
-  spins?: number;
-  direction?: 'clockwise' | 'counter-clockwise';
+  direction?: EffectSpinDirection;
   scale?: number;
+  spins?: number;
 };
-export type BounceIn = {
-  type: 'BounceIn';
-  from?: EffectFourDirections | 'back';
-  travel?: LengthInput;
+export type TiltIn = {
+  type: 'TiltIn';
+  depth?: LengthInput;
+  from?: EffectTwoSides;
   perspective?: number;
-};
-export type GlideIn = {
-  type: 'GlideIn';
-  from?: number | string;
-  travel?: LengthInput;
 };
 export type TurnIn = {
   type: 'TurnIn';
@@ -117,39 +158,7 @@ export type TurnIn = {
 };
 export type WinkIn = {
   type: 'WinkIn';
-  direction?: 'vertical' | 'horizontal';
-};
-export type TiltIn = {
-  type: 'TiltIn';
-  from?: EffectTwoSides;
-  depth?: LengthInput;
-  perspective?: number;
-};
-export type ShapeIn = {
-  type: 'ShapeIn';
-  shape?: 'circle' | 'ellipse' | 'rectangle' | 'diamond' | 'window';
-};
-
-export type ShuttersIn = {
-  type: 'ShuttersIn';
-  from?: EffectFourDirections;
-  shutters?: number;
-  staggered?: boolean;
-};
-export type RevealIn = {
-  type: 'RevealIn';
-  from?: EffectFourDirections;
-};
-export type BlurIn = {
-  type: 'BlurIn';
-  blur?: number;
-};
-
-export type ExpandIn = {
-  type: 'ExpandIn';
-  from?: number | string;
-  travel?: LengthInput;
-  scale?: number;
+  direction?: EffectTwoAxes;
 };
 
 export type EntranceAnimation =
@@ -177,67 +186,67 @@ export type EntranceAnimations = Record<EntranceAnimation['type'], AnimationEffe
 
 export type Breathe = {
   type: 'Breathe';
-  direction?: 'vertical' | 'horizontal' | 'center';
-  travel?: LengthInput;
-  perspective?: number;
+  direction?: EffectTwoAxes | 'center';
   iterationDelay?: number;
+  perspective?: number;
+  travel?: LengthInput;
 };
 export type Pulse = {
   type: 'Pulse';
-  scale?: number;
   iterationDelay?: number;
+  scale?: number;
 };
 export type Spin = {
   type: 'Spin';
-  direction?: 'clockwise' | 'counter-clockwise';
+  direction?: EffectSpinDirection;
   iterationDelay?: number;
 };
 export type Poke = {
   type: 'Poke';
   direction?: EffectFourDirections;
-  travel?: LengthInput;
   iterationDelay?: number;
+  travel?: LengthInput;
 };
 export type Flash = { type: 'Flash'; iterationDelay?: number };
 export type Swing = {
   type: 'Swing';
   angle?: number;
-  pivot?: EffectFourDirections;
   iterationDelay?: number;
+  pivot?: EffectFourDirections;
 };
 export type Flip = {
   type: 'Flip';
-  direction?: 'vertical' | 'horizontal';
-  perspective?: number;
+  direction?: EffectTwoAxes;
   iterationDelay?: number;
+  perspective?: number;
 };
 export type Rubber = {
   type: 'Rubber';
-  stretch?: number;
   iterationDelay?: number;
+  stretch?: number;
 };
 export type Fold = {
   type: 'Fold';
-  pivot?: EffectFourDirections;
   angle?: number;
-  perspective?: number;
   iterationDelay?: number;
+  perspective?: number;
+  pivot?: EffectFourDirections;
 };
 export type Jello = {
   type: 'Jello';
-  skew?: number;
   iterationDelay?: number;
+  skew?: number;
 };
 export type Wiggle = {
   type: 'Wiggle';
   angle?: number;
-  travel?: LengthInput;
   iterationDelay?: number;
+  travel?: LengthInput;
 };
 export type Bounce = {
   type: 'Bounce';
-  travel?: LengthInput;
   iterationDelay?: number;
+  travel?: LengthInput;
 };
 export type Cross = {
   type: 'Cross';
@@ -268,38 +277,38 @@ export type OngoingAnimations = Record<OngoingAnimation['type'], AnimationEffect
 export type ArcScroll = {
   type: 'ArcScroll';
   direction?: 'vertical' | 'horizontal';
-  range?: EffectScrollRange;
   perspective?: number;
+  range?: EffectScrollRange;
 };
 export type BlurScroll = {
   type: 'BlurScroll';
-  range?: EffectScrollRange;
   blur?: number;
+  range?: EffectScrollRange;
 };
 export type FadeScroll = {
   type: 'FadeScroll';
-  range?: EffectScrollRange;
   opacity?: number;
+  range?: EffectScrollRange;
 };
 export type FlipScroll = {
   type: 'FlipScroll';
+  angle?: number;
   direction?: 'vertical' | 'horizontal';
-  range?: EffectScrollRange;
-  rotate?: number;
   perspective?: number;
+  range?: EffectScrollRange;
 };
 export type GrowScroll = {
   type: 'GrowScroll';
-  direction?: EffectNineDirections;
+  pivot?: EffectNineDirections;
   range?: EffectScrollRange;
   scale?: number;
   speed?: number;
 };
 export type MoveScroll = {
   type: 'MoveScroll';
-  angle?: number;
+  direction?: number;
   range?: EffectScrollRange;
-  distance?: UnitLengthPercentage;
+  travel?: UnitLengthPercentage;
 };
 export type PanScroll = {
   type: 'PanScroll';
@@ -310,8 +319,8 @@ export type PanScroll = {
 };
 export type ParallaxScroll = {
   type: 'ParallaxScroll';
-  parallaxFactor?: number;
-  range?: EffectScrollRange;
+  center?: number;
+  speed?: number;
 };
 export type RevealScroll = {
   type: 'RevealScroll';
@@ -320,13 +329,13 @@ export type RevealScroll = {
 };
 export type ShapeScroll = {
   type: 'ShapeScroll';
-  shape?: 'circle' | 'ellipse' | 'rectangle' | 'diamond' | 'window';
   range?: EffectScrollRange;
-  intensity?: number;
+  shape?: Shape;
+  start?: number;
 };
 export type ShrinkScroll = {
   type: 'ShrinkScroll';
-  direction?: EffectNineDirections;
+  pivot?: EffectNineDirections;
   range?: EffectScrollRange;
   scale?: number;
   speed?: number;
@@ -334,9 +343,9 @@ export type ShrinkScroll = {
 export type ShuttersScroll = {
   type: 'ShuttersScroll';
   direction?: EffectFourDirections;
+  range?: EffectScrollRange;
   shutters?: number;
   staggered?: boolean;
-  range?: EffectScrollRange;
 };
 export type SkewPanScroll = {
   type: 'SkewPanScroll';
@@ -351,17 +360,17 @@ export type SlideScroll = {
 };
 export type Spin3dScroll = {
   type: 'Spin3dScroll';
-  range?: EffectScrollRange;
-  rotate?: number;
-  speed?: number;
+  angle?: number;
   perspective?: number;
+  range?: EffectScrollRange;
+  speed?: number;
 };
 export type SpinScroll = {
   type: 'SpinScroll';
-  direction?: 'clockwise' | 'counter-clockwise';
-  spins?: number;
+  direction?: EffectSpinDirection;
   range?: EffectScrollRange;
   scale?: number;
+  spins?: number;
 };
 export type StretchScroll = {
   type: 'StretchScroll';
@@ -370,18 +379,18 @@ export type StretchScroll = {
 };
 export type TiltScroll = {
   type: 'TiltScroll';
-  direction?: EffectTwoSides;
-  range?: EffectScrollRange;
-  parallaxFactor?: number;
+  direction?: EffectSpinDirection;
   perspective?: number;
+  range?: EffectScrollRange;
+  speed?: number;
 };
 export type TurnScroll = {
   type: 'TurnScroll';
+  angle?: number;
   direction?: EffectTwoSides;
-  spin?: 'clockwise' | 'counter-clockwise';
   range?: EffectScrollRange;
   scale?: number;
-  rotation?: number;
+  spin?: EffectSpinDirection;
 };
 
 export type ScrollAnimation =

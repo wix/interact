@@ -27,7 +27,9 @@
     "build:types": "tsc -p tsconfig.build.json",
     "lint": "tsc -p tsconfig.build.json --noEmit",
     "test": "vitest run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:fixtures": "vite --config e2e/fixtures/vite.config.ts"
   },
   "keywords": [
     "animation",
@@ -63,6 +65,7 @@
     "@wix/motion": "^2.1.21"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@vitest/coverage-v8": "^4.0.14",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.3",

@@ -1,18 +1,20 @@
-import type { TimeAnimationOptions } from '../../types';
-import type { LengthValue } from '../../utils';
+import type { AnimationData, ExpandIn, LengthValue, TimeAnimationOptions } from '../../types';
 import {
-  toKeyframeValue,
-  parseCssLength,
-  parseAngle,
-  getEntranceFill,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
-import type { ExpandIn } from '../../types';
+  getMotionScale,
+  getMotionTransRot,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { parseCssLength } from '../../utils';
+import { getMotionFade } from '../../fadeBlurUtils';
+import { angleDirection, toMotionRange } from '../../directions';
 
+const FADE_IN_DURATION_FACTOR = 0.7;
+
+const DEFAULT_EASING = 'cubicInOut';
 const DEFAULTS: Required<ExpandIn> = {
   type: 'ExpandIn',
-  from: 270,
+  from: 270, // from top
   scale: 0,
   travel: { value: 120, unit: 'percentage' },
 };
@@ -24,72 +26,60 @@ export const schema = {
 };
 
 export function getNames(options: TimeAnimationOptions) {
-  return suffixNames(['motion-fadeIn', 'motion-expandIn'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as ExpandIn;
-  const { scale = DEFAULTS.scale } = namedEffect;
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const {
+    easing = DEFAULT_EASING,
+    namedEffect,
+    suffix,
+  } = options as TimeAnimationOptions<ExpandIn>;
+  const { scale = DEFAULTS.scale, travel } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  const from = angleDirection.parse(namedEffect?.from, DEFAULTS.from as number);
+  const motionRange = toMotionRange(angleDirection, angleDirection.opposite(from), 'in');
 
-  const from = parseAngle(namedEffect?.from, DEFAULTS.from as number);
+  const transformOptions = {
+    ...options,
+    easing,
+    fill,
+    namedEffect: { ...namedEffect, scale },
+  } as TimeAnimationOptions;
 
-  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
-
-  const [fadeIn, expandIn] = getNames(options);
-
-  const easing = options.easing || 'cubicInOut';
-
-  const x = `calc(cos(${from}) * ${travel})`;
-  const y = `calc(sin(${from}) * ${travel})`;
-
-  const custom = {
-    '--motion-translate-x': `${x}`,
-    '--motion-translate-y': `${y}`,
-    '--motion-scale': `${scale}`,
-  };
-
-  const animations = [
+  return [
     {
       ...options,
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
       easing,
-      duration: options.duration! * 0.7,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
     },
     {
-      ...options,
-      easing,
-      name: expandIn,
-      fill: getEntranceFill(options),
-      custom,
-      keyframes: [
-        {
-          transform: `translate(${toKeyframeValue(
-            custom,
-            '--motion-translate-x',
-            asWeb,
-          )}, ${toKeyframeValue(
-            custom,
-            '--motion-translate-y',
-            asWeb,
-          )}) rotate(var(--motion-rotate, 0deg)) scale(${toKeyframeValue(
-            custom,
-            '--motion-scale',
-            asWeb,
-          )})`,
-        },
-        {
-          transform: 'translate(0px, 0px) rotate(var(--motion-rotate, 0deg)) scale(1)',
-        },
-      ],
+      ...transformOptions,
+      ...getMotionTransRot(
+        motionRange,
+        { travel: parseCssLength(travel, DEFAULTS.travel as LengthValue) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotionScale(motionRange, { scale }, asWeb, suffix),
     },
   ];
+}
 
-  return suffixCustomProperties(animations, options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

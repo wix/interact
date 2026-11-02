@@ -46,7 +46,7 @@ export function style(options: TimeAnimationOptions & AnimationExtraOptions, asW
   const custom: Record<string, string | number> = {};
 
   const keyframes = TRANSFORM_KEYFRAMES.map(({ keyframe, lift, rotate }) => {
-    const offset = (keyframe / 100) * timingFactor;
+    const offset = roundNumber((keyframe / 100) * timingFactor, 6);
     const rotateValue = `calc(var(--motion-rotate, 0deg) + ${roundNumber(rotate * angle)}deg)`;
     const translateYValue = lift ? `calc(-1 * ${travel})` : '0px';
 

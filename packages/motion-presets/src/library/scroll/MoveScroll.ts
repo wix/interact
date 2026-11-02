@@ -1,109 +1,93 @@
-import type { AnimationFillMode, DomApi, MoveScroll, ScrubAnimationOptions } from '../../types';
+import type { AnimationData, DomApi, MoveScroll, ScrubAnimationOptions } from '../../types';
+import { SCROLL_RANGES } from '../../consts';
+import { angleDirection, toMotionRange } from '../../directions';
 import {
-  getCssUnits,
-  transformPolarToXY,
-  toKeyframeValue,
-  parseLength,
-  parseDirection,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
+import {
+  getMotionTransRot,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { compareKeywordToNonDefaults, parseLength, parseCssLength, roundNumber } from '../../utils';
 
-const DEFAULT_ANGLE = 120;
-const DEFAULT_DISTANCE = { value: 400, unit: 'px' };
+const DEFAULTS: Required<MoveScroll> = {
+  type: 'MoveScroll',
+  direction: -60,
+  range: 'in',
+  travel: { value: 400, unit: 'px' },
+};
+
+export const schema = {
+  direction: { type: 'number', default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  travel: { type: 'lengthObject', default: DEFAULTS.travel },
+};
 
 export function getNames(options: ScrubAnimationOptions) {
-  return suffixNames(['motion-moveScroll'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
 
-export function web(options: ScrubAnimationOptions, _?: DomApi, config?: Record<string, any>) {
-  return style(options, config, true);
+export function web(options: ScrubAnimationOptions, _?: DomApi) {
+  return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, config?: Record<string, any>, asWeb = false) {
-  const namedEffect = options.namedEffect as MoveScroll;
-  const angle = parseDirection(namedEffect?.angle, [], DEFAULT_ANGLE, true);
-  const { range = 'in' } = namedEffect;
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<MoveScroll>;
+  const { direction = DEFAULTS.direction, range: inputRange, travel: inputTravel } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
 
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
-
-  const distance = parseLength(namedEffect.distance, DEFAULT_DISTANCE);
-
-  let [travelX, travelY] = transformPolarToXY(angle, distance.value);
-  const unit = getCssUnits(distance.unit);
+  // when y direction is positive - moving against the scroll - we need to widen the range like with parallax
+  // TODO - teach fizban some more math operations to allow using calc here and accept any string as direction or travel
+  const travel = parseLength(inputTravel, DEFAULTS.travel);
+  const normalized = ((direction % 360) + 360) % 360;
+  const yDirection =
+    Math.sign(travel.value) *
+    (normalized === 180 || normalized === 0 ? 0 : normalized < 180 ? 1 : -1);
 
   let startOffsetAdd = '',
     endOffsetAdd = '';
-  if (!config?.ignoreScrollMoveOffsets) {
-    if (travelY < 0 && range !== 'out') {
-      startOffsetAdd = `${travelY}${unit}`;
-      if (range !== 'in') {
-        endOffsetAdd = `${Math.abs(travelY)}${unit}`;
-      }
+  if (yDirection === 1) {
+    const travelY = travel.value * Math.sin((direction * Math.PI) / 180);
+    const unit = travel.unit;
+    if (!compareKeywordToNonDefaults(inputRange, ['out'])) {
+      startOffsetAdd = `${roundNumber(-travelY, 4)}${unit}`;
     }
-    if (travelY > 0 && range === 'out') {
-      endOffsetAdd = `${Math.abs(travelY)}${unit}`;
+    if (compareKeywordToNonDefaults(inputRange, ['out', 'continuous'])) {
+      endOffsetAdd = `${roundNumber(travelY, 4)}${unit}`;
     }
   }
 
-  [travelX, travelY] = [travelX, travelY].map(Math.round);
-  const fromValue = {
-    x: range === 'out' ? 0 : travelX,
-    y: range === 'out' ? 0 : travelY,
-  };
-  const toValue = {
-    x: range === 'in' ? 0 : range === 'out' ? travelX : -travelX,
-    y: range === 'in' ? 0 : range === 'out' ? travelY : -travelY,
-  };
+  // range out is opposite direction reversed
+  const parsedDirection = angleDirection.parse(namedEffect!.direction, DEFAULTS.direction);
+  const motionDirection =
+    range === 'out' ? angleDirection.opposite(parsedDirection) : parsedDirection;
 
-  const [moveScroll] = getNames(options);
-
-  const custom = {
-    '--motion-move-from-x': `${fromValue.x}${unit}`,
-    '--motion-move-from-y': `${fromValue.y}${unit}`,
-    '--motion-move-to-x': `${toValue.x}${unit}`,
-    '--motion-move-to-y': `${toValue.y}${unit}`,
-  };
-
-  // use transform: translate(<value>) and not translate: <value> because of WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=276281
-  const animations = [
+  return withSharedScrollRange([
     {
       ...options,
-      name: moveScroll,
-      fill,
-      easing,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
+      ...getMotionTransRot(
+        toMotionRange(angleDirection, motionDirection, range),
+        { travel: parseCssLength(inputTravel, DEFAULTS.travel) },
+        asWeb,
+        suffix,
+      ),
       startOffsetAdd,
       endOffsetAdd,
-      custom,
-      keyframes: [
-        {
-          transform: `translate(${toKeyframeValue(
-            custom,
-            '--motion-move-from-x',
-            asWeb,
-          )}, ${toKeyframeValue(
-            custom,
-            '--motion-move-from-y',
-            asWeb,
-          )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
-        },
-        {
-          transform: `translate(${toKeyframeValue(
-            custom,
-            '--motion-move-to-x',
-            asWeb,
-          )}, ${toKeyframeValue(
-            custom,
-            '--motion-move-to-y',
-            asWeb,
-          )}) rotate(${toKeyframeValue({}, '--motion-rotate', false, '0')})`,
-        },
-      ],
     },
-  ];
+    {
+      ...options,
+      composite: 'add',
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, false)),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+  ]);
+}
 
-  return suffixCustomProperties(animations, options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

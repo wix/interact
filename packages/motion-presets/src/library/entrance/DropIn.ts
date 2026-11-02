@@ -1,6 +1,16 @@
-import type { TimeAnimationOptions, DropIn } from '../../types';
-import { toKeyframeValue, getEntranceFill, suffixNames, suffixCustomProperties } from '../../utils';
+import type { AnimationData, DropIn, TimeAnimationOptions } from '../../types';
+import {
+  getMotionScale,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { getMotionFade } from '../../fadeBlurUtils';
+import { UNDIRECTED_MOTION_RANGE } from '../../directions';
 
+const FADE_IN_DURATION_FACTOR = 0.8;
+const FADE_IN_EASING = 'quadOut';
+
+const DEFAULT_EASING = 'quintInOut';
 const DEFAULTS: Required<DropIn> = {
   type: 'DropIn',
   scale: 1.6,
@@ -11,51 +21,45 @@ export const schema = {
 };
 
 export function getNames(options: TimeAnimationOptions) {
-  return suffixNames(['motion-fadeIn', 'motion-dropIn'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const { scale = DEFAULTS.scale } = options.namedEffect as DropIn;
-  const [fadeIn, dropIn] = getNames(options);
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<DropIn>;
+  const { scale = DEFAULTS.scale } = namedEffect!;
+  const { fill = 'backwards' } = options;
 
-  const easing = options.easing || 'quintInOut';
+  const transformOptions = {
+    ...options,
+    easing,
+    fill,
+    namedEffect: { ...namedEffect, scale },
+  } as TimeAnimationOptions;
 
-  const custom = {
-    '--motion-scale': `${scale}`,
-  };
-
-  const animations = [
+  return [
     {
       ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing: 'quadOut',
-      duration: options.duration! * 0.8,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
     },
     {
-      ...options,
-      name: dropIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          scale: toKeyframeValue(custom, '--motion-scale', asWeb),
-          transform: 'rotate(var(--motion-rotate, 0deg))',
-        },
-        {
-          scale: '1',
-          transform: 'rotate(var(--motion-rotate, 0deg))',
-        },
-      ],
+      ...transformOptions,
+      composite: 'replace',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...transformOptions,
+      ...getMotionScale(UNDIRECTED_MOTION_RANGE, { scale }, asWeb, suffix),
     },
   ];
+}
 
-  return suffixCustomProperties(animations, options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

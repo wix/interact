@@ -1,194 +1,37 @@
 import { describe, expect, test } from 'vitest';
 
-import * as PulseAnimation from '../Pulse';
-import { Pulse, TimeAnimationOptions, AnimationData } from '../../../types';
-import { baseMockOptions } from './testUtils';
+import * as Pulse from '../Pulse';
+import { resolveDefaults } from '../../../test/resolveDefaults';
+import type { TimeAnimationOptions } from '../../../types';
+import { progressAt } from './testUtils';
+
+const options = (namedEffect = {}) =>
+  ({ duration: 1000, namedEffect: { type: 'Pulse', ...namedEffect } }) as TimeAnimationOptions;
 
 describe('Pulse', () => {
-  describe('web() method', () => {
-    test('default values', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as Pulse,
-      };
+  test('layout rotation replaces, the scale is added on top', () => {
+    const [rotation, scale] = resolveDefaults(Pulse.layers(options()));
+    expect(rotation.composite).toBe('replace');
+    expect(scale.composite).toBe('add');
+  });
 
-      const expectedResult: Partial<AnimationData>[] = [
-        {
-          name: 'motion-pulse-1',
-          duration: 1,
-          custom: {
-            '--motion-scale': 0.93,
-          },
-          keyframes: [
-            {
-              offset: 0.27,
-              transform:
-                'rotateZ(var(--motion-rotate, 0deg)) scale(calc(1 - (1 - 0.93) * 0.5714285714285714))',
-            },
-            {
-              offset: 0.45,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
-            },
-            {
-              offset: 0.72,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(calc(1 - (1 - 0.93) * 1))',
-            },
-            {
-              offset: 1,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
-            },
-          ],
-        },
-      ];
-
-      const result = PulseAnimation.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
+  test('scales to 0.93 by default', () => {
+    const [, scale] = resolveDefaults(Pulse.layers(options()));
+    expect(scale.custom).toMatchObject({
+      '--motion-scale-scale-x': 0.93,
+      '--motion-scale-scale-y': 0.93,
     });
-
-    test('custom scale and duration', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 1000,
-        namedEffect: { scale: 0.834, iterationDelay: 500 } as Pulse,
-      };
-
-      const expectedResult: Partial<AnimationData>[] = [
-        {
-          name: 'motion-pulse-067',
-          duration: 1500,
-          custom: {
-            '--motion-scale': 0.834,
-          },
-          keyframes: [
-            {
-              offset: 0.18090000000000003,
-              transform:
-                'rotateZ(var(--motion-rotate, 0deg)) scale(calc(1 - (1 - 0.834) * 0.5714285714285714))',
-            },
-            {
-              offset: 0.30150000000000005,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
-            },
-            {
-              offset: 0.4824,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(calc(1 - (1 - 0.834) * 1))',
-            },
-            {
-              offset: 0.67,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
-            },
-            {
-              offset: 1,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
-            },
-          ],
-        },
-      ];
-
-      const result = PulseAnimation.web(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
+    expect(resolveDefaults(Pulse.layers(options({ scale: 0.8 })))[1].custom).toMatchObject({
+      '--motion-scale-scale-x': 0.8,
     });
   });
 
-  describe('style() method', () => {
-    test('default values', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: {} as Pulse,
-      };
-
-      const expectedResult: Partial<AnimationData>[] = [
-        {
-          name: 'motion-pulse-1',
-          duration: 1,
-          custom: {
-            '--motion-scale': 0.93,
-          },
-          keyframes: [
-            {
-              offset: 0.27,
-              transform:
-                'rotateZ(var(--motion-rotate, 0deg)) scale(calc(1 - (1 - var(--motion-scale)) * 0.5714285714285714))',
-            },
-            {
-              offset: 0.45,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
-            },
-            {
-              offset: 0.72,
-              transform:
-                'rotateZ(var(--motion-rotate, 0deg)) scale(calc(1 - (1 - var(--motion-scale)) * 1))',
-            },
-            {
-              offset: 1,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
-            },
-          ],
-        },
-      ];
-
-      const result = PulseAnimation.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('custom scale and duration', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        duration: 1000,
-        namedEffect: { scale: 0.834, iterationDelay: 500 } as Pulse,
-      };
-
-      const expectedResult: Partial<AnimationData>[] = [
-        {
-          name: 'motion-pulse-067',
-          duration: 1500,
-          custom: {
-            '--motion-scale': 0.834,
-          },
-          keyframes: [
-            {
-              offset: 0.18090000000000003,
-              transform:
-                'rotateZ(var(--motion-rotate, 0deg)) scale(calc(1 - (1 - var(--motion-scale)) * 0.5714285714285714))',
-            },
-            {
-              offset: 0.30150000000000005,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
-            },
-            {
-              offset: 0.4824,
-              transform:
-                'rotateZ(var(--motion-rotate, 0deg)) scale(calc(1 - (1 - var(--motion-scale)) * 1))',
-            },
-            {
-              offset: 0.67,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
-            },
-            {
-              offset: 1,
-              transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
-            },
-          ],
-        },
-      ];
-
-      const result = PulseAnimation.style(mockOptions);
-
-      expect(result).toMatchObject(expectedResult);
-    });
-
-    test('style method should populate custom properties correctly', () => {
-      const mockOptions: TimeAnimationOptions = {
-        ...baseMockOptions,
-        namedEffect: { scale: 0.87 } as Pulse,
-      };
-
-      const result = PulseAnimation.style(mockOptions);
-
-      expect(result[0].custom).toEqual({ '--motion-scale': 0.87 });
-    });
+  test('beats lightly (4/7 of the scale) and then fully, starting and ending at rest', () => {
+    const [, { easing }] = resolveDefaults(Pulse.layers(options()));
+    expect(progressAt(easing!, 0)).toBe(1);
+    expect(progressAt(easing!, 27)).toBeCloseTo(3 / 7, 3);
+    expect(progressAt(easing!, 45)).toBe(1);
+    expect(progressAt(easing!, 72)).toBe(0);
+    expect(progressAt(easing!, 100)).toBe(1);
   });
 });

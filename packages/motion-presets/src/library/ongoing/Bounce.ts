@@ -1,13 +1,22 @@
-import type { TimeAnimationOptions, Bounce, AnimationExtraOptions, DomApi } from '../../types';
-import type { LengthValue } from '../../utils';
+import type { Bounce, DomApi, TimeAnimationOptions, AnimationData } from '../../types';
+import type { MotionRange } from '../../directions';
 import {
-  getEasing,
-  getTimingFactor,
-  toKeyframeValue,
-  parseCssLength,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+  getMotionLayoutRotation,
+  getMotionTransRot,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import type { LoopPoint } from '../../easingUtils';
+import { getLoopOverrides } from '../../easingUtils';
+import { parseCssLength } from '../../utils';
+
+const EASING = 'sineOut';
+// starts at the peak above its place and falls down to it
+const MOTION_RANGE: MotionRange = {
+  fromSign: -1,
+  toSign: 0,
+  vertical: true,
+  movementAngle: '90deg',
+};
 
 const DEFAULTS: Required<Bounce> = {
   type: 'Bounce',
@@ -20,70 +29,60 @@ export const schema = {
   travel: { type: 'length', default: DEFAULTS.travel },
 };
 
-const PEAK_TRANSLATE_Y = 98;
+// a jump up and smaller bounces after it
+const SHAPE: LoopPoint[] = [
+  [0, 0],
+  [55, 8.8],
+  [87, 17.6],
+  [98, 26.5],
+  [87, 35.3],
+  [55, 44.1],
+  [0, 53.1],
+  [23, 66.2],
+  [0, 81],
+  [5, 86.8],
+  [0, 94.1],
+  [2, 97.1],
+  [0, 100],
+].map(([value, time]) => [value / 98, time / 100]);
 
-const TRANSLATE_Y_KEYFRAMES = [
-  { keyframe: 0, translateY: 0 },
-  { keyframe: 8.8, translateY: -55 },
-  { keyframe: 17.6, translateY: -87 },
-  { keyframe: 26.5, translateY: -98 },
-  { keyframe: 35.3, translateY: -87 },
-  { keyframe: 44.1, translateY: -55 },
-  { keyframe: 53.1, translateY: 0 },
-  { keyframe: 66.2, translateY: -23 },
-  { keyframe: 81, translateY: 0 },
-  { keyframe: 86.8, translateY: -5 },
-  { keyframe: 94.1, translateY: 0 },
-  { keyframe: 97.1, translateY: -2 },
-  { keyframe: 100, translateY: 0 },
-];
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
+}
 
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
+export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as Bounce;
-  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as TimeAnimationOptions<Bounce>;
+  const { travel = DEFAULTS.travel } = namedEffect!;
 
-  const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
-  const [name] = getNames(options);
+  const bounceOptions = {
+    ...options,
+    namedEffect: { ...namedEffect, direction: 'top', travel },
+  } as TimeAnimationOptions;
 
-  const easing = getEasing('sineOut');
-
-  const custom = {
-    '--motion-bounce-travel': travel,
-  };
-
-  const keyframes = TRANSLATE_Y_KEYFRAMES.map(({ keyframe, translateY }) => ({
-    offset: (keyframe / 100) * timingFactor,
-    translate: `0px calc(${toKeyframeValue(
-      custom,
-      '--motion-bounce-travel',
-      asWeb,
-    )} * ${translateY} / ${PEAK_TRANSLATE_Y})`,
-    easing,
-  }));
-
-  const animations = [
+  return [
     {
-      ...options,
-      name,
-      easing: 'linear',
-      duration: duration + iterationDelay,
-      custom,
-      keyframes,
+      ...bounceOptions,
+      ...getLoopOverrides(bounceOptions, { shape: SHAPE, easings: [EASING] }),
+      ...getMotionTransRot(
+        MOTION_RANGE,
+        { travel: parseCssLength(travel, { value: 0, unit: 'px' }) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...bounceOptions,
+      composite: 'add',
+      ...getLoopOverrides(bounceOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
-
-  return suffixCustomProperties(animations, options.suffix);
 }
 
-export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Bounce)?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
-
-  return suffixNames([`motion-bounce-${timingFactor}`], options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

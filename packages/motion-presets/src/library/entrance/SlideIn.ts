@@ -1,13 +1,23 @@
-import type { EffectFourDirections, SlideIn, TimeAnimationOptions } from '../../types';
-import {
-  getClipPolygonParams,
-  parseDirection,
-  getEntranceFill,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+import type {
+  EffectFourDirections,
+  SlideIn,
+  TimeAnimationOptions,
+  AnimationData,
+} from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
+import { getMotionReveal } from '../../clipUtils';
+import {
+  getMotionLayoutRotation,
+  getMotionTransRot,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { parseKeywordLazy } from '../../utils';
+import { getMotionFade } from '../../fadeBlurUtils';
+import { sideDirection, toMotionRange } from '../../directions';
 
+const TRAVEL = '100%';
+
+const DEFAULT_EASING = 'cubicInOut';
 const DEFAULTS: Required<SlideIn> = {
   type: 'SlideIn',
   from: 'left',
@@ -20,69 +30,64 @@ export const schema = {
 };
 
 export function getNames(options: TimeAnimationOptions) {
-  return suffixNames(['motion-slideIn', 'motion-fadeIn'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
-
-const PARAM_MAP: Record<
-  EffectFourDirections,
-  { dx: number; dy: number; clip: EffectFourDirections }
-> = {
-  top: { dx: 0, dy: -1, clip: 'bottom' },
-  right: { dx: 1, dy: 0, clip: 'left' },
-  bottom: { dx: 0, dy: 1, clip: 'top' },
-  left: { dx: -1, dy: 0, clip: 'right' },
-};
 
 export function web(options: TimeAnimationOptions) {
-  return style(options);
+  return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions) {
-  const namedEffect = options.namedEffect as SlideIn;
-  const from = parseDirection(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from);
-  const { start = DEFAULTS.start } = namedEffect;
-  const [slideIn, fadeIn] = getNames(options);
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<SlideIn>;
+  const { start: minimum = DEFAULTS.start } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  const from = parseKeywordLazy(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from);
+  // SlideIn reveals in the opposite direction to the movement to create its entrance feel
+  const clipFrom = sideDirection.opposite(from) as EffectFourDirections;
 
-  const easing = options.easing || 'cubicInOut';
-  const clipStart = getClipPolygonParams({
-    direction: PARAM_MAP[from].clip,
-    minimum: start * 100,
-  });
-  const clipEnd = getClipPolygonParams({ direction: 'initial' });
+  const transformOptions = {
+    ...options,
+    composite: 'add',
+    easing,
+    fill,
+    namedEffect: { ...namedEffect, travel: TRAVEL },
+  } as TimeAnimationOptions;
+  const revealOptions = {
+    ...options,
+    easing,
+    fill,
+    namedEffect: { ...namedEffect, minimum, from: clipFrom },
+  } as TimeAnimationOptions;
 
-  const custom = {
-    '--motion-clip-start': clipStart,
-    '--motion-translate-x': `${PARAM_MAP[from].dx * 100}%`,
-    '--motion-translate-y': `${PARAM_MAP[from].dy * 100}%`,
-  };
-
-  const animations = [
+  return [
     {
       ...options,
-      name: slideIn,
-      fill: getEntranceFill(options),
       easing,
-      custom,
-      keyframes: [
-        {
-          transform: `rotate(var(--motion-rotate, 0deg)) translate(var(--motion-translate-x, ${custom['--motion-translate-x']}), var(--motion-translate-y, ${custom['--motion-translate-y']}))`,
-          clipPath: `var(--motion-clip-start, ${custom['--motion-clip-start']})`,
-        },
-        {
-          transform: 'rotate(var(--motion-rotate, 0deg)) translate(0px, 0px)',
-          clipPath: clipEnd,
-        },
-      ],
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    // the layout rotation comes first, so the motion moves along the element's rotated axes
+    {
+      ...transformOptions,
+      composite: 'replace',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
     },
     {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      ...transformOptions,
+      ...getMotionTransRot(
+        toMotionRange(sideDirection, clipFrom, 'in'),
+        { travel: TRAVEL },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...revealOptions,
+      ...getMotionReveal(toMotionRange(sideDirection, from, 'in'), { minimum }, asWeb, suffix),
     },
   ];
+}
 
-  return suffixCustomProperties(animations, options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

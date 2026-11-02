@@ -1,26 +1,8 @@
-import { cssEasings, jsEasings } from '@wix/motion';
-import type {
-  EffectFourDirections,
-  EffectScrollRange,
-  Point,
-  ScrubTransitionEasing,
-  AnimationFillMode,
-  TimeAnimationOptions,
-} from '@wix/motion';
+import { cssEasings } from '@wix/motion';
+import type { LengthInput, LengthValue, Point, ScrubTransitionEasing } from './types';
 
-export type Direction =
-  | 'initial'
-  | 'top'
-  | 'right'
-  | 'center'
-  | 'bottom'
-  | 'left'
-  | 'vertical'
-  | 'horizontal';
+export type { LengthInput, LengthValue } from './types';
 
-/**
- * Map a value from one range 'a' to different range 'b'
- */
 export function mapRange(
   sourceMin: number,
   sourceMax: number,
@@ -40,126 +22,12 @@ export function getAngleInDeg(p1: Point = [0, 0], p2: Point = [0, 0], offset: nu
   return (360 + offset + angle) % 360;
 }
 
-type ClipPolygonTemplateParams = {
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-  centerX: number;
-  centerY: number;
-  minimum: number;
-};
-
-const CLIP_POLYGON_TEMPLATES: Record<Direction, (params: ClipPolygonTemplateParams) => string> = {
-  initial: ({ top, bottom, left, right }) =>
-    `${left}% ${top}%, ${right}% ${top}%, ${right}% ${bottom}%, ${left}% ${bottom}%`,
-  top: ({ top, left, right, minimum }) =>
-    `${left}% ${top}%, ${right}% ${top}%, ${right}% ${top + minimum}%, ${left}% ${top + minimum}%`,
-  right: ({ top, bottom, right, minimum }) =>
-    `${right - minimum}% ${top}%, ${right}% ${top}%, ${right}% ${bottom}%, ${
-      right - minimum
-    }% ${bottom}%`,
-  center: ({ centerX, centerY, minimum }) =>
-    `${centerX - minimum / 2}% ${centerY - minimum / 2}%, ${
-      centerX + minimum / 2
-    }% ${centerY - minimum / 2}%, ${centerX + minimum / 2}% ${
-      centerY + minimum / 2
-    }%, ${centerX - minimum / 2}% ${centerY + minimum / 2}%`,
-  bottom: ({ bottom, left, right, minimum }) =>
-    `${left}% ${bottom - minimum}%, ${right}% ${
-      bottom - minimum
-    }%, ${right}% ${bottom}%, ${left}% ${bottom}%`,
-  left: ({ top, bottom, left, minimum }) =>
-    `${left}% ${top}%, ${left + minimum}% ${top}%, ${
-      left + minimum
-    }% ${bottom}%, ${left}% ${bottom}%`,
-  vertical: ({ top, bottom, left, right, minimum }) =>
-    `${left}% ${top + minimum / 2}%, ${right}% ${
-      top + minimum / 2
-    }%, ${right}% ${bottom - minimum / 2}%, ${left}% ${bottom - minimum / 2}%`,
-  horizontal: ({ top, bottom, left, right, minimum }) =>
-    `${left + minimum / 2}% ${top}%, ${right - minimum / 2}% ${top}%, ${
-      right - minimum / 2
-    }% ${bottom}%, ${left + minimum / 2}% ${bottom}%`,
-};
-
-export function getClipPolygonParams({
-  direction,
-  scaleX = 1,
-  scaleY = 1,
-  minimum = 0,
-}: {
-  direction: Direction;
-  scaleX?: number;
-  scaleY?: number;
-  minimum?: number;
-}) {
-  const top = ((1 - scaleY) / 2) * 100;
-  const left = ((1 - scaleX) / 2) * 100;
-  const right = 100 + left - (1 - scaleX) * 100;
-  const bottom = 100 + top - (1 - scaleY) * 100;
-  const centerX = (right + left) / 2;
-  const centerY = (bottom + top) / 2;
-
-  return `polygon(${CLIP_POLYGON_TEMPLATES[direction]({
-    top,
-    bottom,
-    left,
-    right,
-    centerX,
-    centerY,
-    minimum,
-  })})`;
-}
-
-export const INITIAL_CLIP = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)';
-export const FOUR_DIRECTIONS: EffectFourDirections[] = ['bottom', 'left', 'top', 'right'];
-
-export function getOppositeDirection<T>(availableDirections: T[], direction: T) {
-  const index = Math.max(0, availableDirections.indexOf(direction));
-  const length = availableDirections.length;
-  return availableDirections[(index + (length >> 1)) % length];
-}
-
-export function getRevealClipFrom(direction: EffectFourDirections, range: EffectScrollRange) {
-  return range === 'out'
-    ? INITIAL_CLIP
-    : getClipPolygonParams({
-        direction: getOppositeDirection(FOUR_DIRECTIONS, direction),
-      });
-}
-
-export function getRevealClipTo(direction: EffectFourDirections, range: EffectScrollRange) {
-  return range === 'in'
-    ? INITIAL_CLIP
-    : getClipPolygonParams({
-        direction: range === 'out' ? getOppositeDirection(FOUR_DIRECTIONS, direction) : direction,
-      });
-}
-
-export function transformPolarToXY(angle: number, distance: number) {
-  const radians = (angle * Math.PI) / 180;
-  const x = Math.cos(radians) * distance;
-  const y = Math.sin(radians) * distance;
-  return [x, y];
-}
-
 export function getCssUnits(unit: 'percentage' | string) {
   return unit === 'percentage' ? '%' : unit || 'px';
 }
 
 export function getEasing(easing?: keyof typeof cssEasings | string): string {
   return easing ? cssEasings[easing as keyof typeof cssEasings] || easing : cssEasings.linear;
-}
-
-export function getJsEasing(
-  easing?: keyof typeof jsEasings | string,
-): ((t: number) => number) | undefined {
-  return easing ? jsEasings[easing as keyof typeof jsEasings] : undefined;
-}
-
-export function getCssUnitValue(length: { value: number; unit: string }) {
-  return `${length.value}${getCssUnits(length.unit)}`;
 }
 
 export function getEasingFamily(easing: string) {
@@ -201,82 +69,6 @@ export function getMouseTransitionEasing(value?: ScrubTransitionEasing) {
   return (value && MOUSE_TRANSITION_EASING_MAP[value]) || 'linear';
 }
 
-export function deg2rad(angleInDeg: number): number {
-  return (angleInDeg * Math.PI) / 180;
-}
-
-export function getEntranceFill(options: TimeAnimationOptions): AnimationFillMode {
-  return options.fill ?? 'backwards';
-}
-
-export function getTransformParams(
-  originDirection: { dx: number; dy: number },
-  angleInRad: number,
-  scale: number = 1,
-) {
-  const x = `calc(var(--motion-height, 100%) * ${
-    scale * originDirection.dy * Math.sin(-angleInRad)
-  } + var(--motion-width, 100%) * ${scale * originDirection.dx * Math.cos(angleInRad)})`;
-
-  const y = `calc(var(--motion-height, 100%) * ${
-    scale * originDirection.dy * Math.cos(-angleInRad)
-  } + var(--motion-width, 100%) * ${scale * originDirection.dx * Math.sin(angleInRad)})`;
-
-  return { x, y };
-}
-
-export function getOutOfScreenDistance(angle: number) {
-  const angleInRad = (angle * Math.PI) / 180;
-  const angleCos = Math.round(Math.cos(angleInRad) * 10) / 10;
-  const angleSin = Math.round(Math.sin(angleInRad) * 10) / 10;
-
-  // Calculate x and y direction based on angle
-  const xDirection = Math.sign(angleCos);
-  const yDirection = Math.sign(angleSin);
-  const left = `var(--motion-left, 0px)`;
-  const top = `var(--motion-top, 0px)`;
-
-  // Calculate x and y distances between component and stage
-  const xDistance = xDirection
-    ? xDirection === -1
-      ? `(-1 * ${left} - 100%)`
-      : `(100vw - ${left})`
-    : 0;
-  const yDistance = yDirection
-    ? yDirection === -1
-      ? `(-1 * ${top} - 100%)`
-      : `(100vh - ${top})`
-    : 0;
-
-  // Calculate hypotenuse
-  let hypotenuse;
-  const hypotX = `calc(${xDistance} / ${angleCos})`;
-  const hypotY = `calc(${yDistance} / ${angleSin})`;
-
-  if (!angleCos) {
-    hypotenuse = hypotY;
-  } else if (!angleSin) {
-    hypotenuse = hypotX;
-  } else {
-    hypotenuse = `min(${hypotY}, ${hypotX})`;
-  }
-
-  return {
-    x: `calc(${hypotenuse} * ${angleCos})`,
-    y: `calc(${hypotenuse} * ${angleSin})`,
-  };
-}
-
-export function keyframesToDuration(
-  keyframes_translation: { keyframe: number }[],
-  duration: number,
-) {
-  return keyframes_translation.map(({ keyframe }, idx) => {
-    const stepDuration = keyframe - (idx > 0 ? keyframes_translation[idx - 1].keyframe : 0);
-    return duration * (stepDuration / 100);
-  });
-}
-
 export function getElementOffset(element: HTMLElement, parent?: HTMLElement) {
   let left = element.offsetLeft;
   let top = element.offsetTop;
@@ -295,125 +87,44 @@ export function getElementOffset(element: HTMLElement, parent?: HTMLElement) {
   return { left, top };
 }
 
-const generateShuttersClipPath = (
-  direction: EffectFourDirections,
-  shutterCount: number,
-  staggered: boolean,
-) => {
-  const isTopOrLeft = direction === 'top' || direction === 'left';
-  const iterStart = isTopOrLeft ? shutterCount : 0;
-  const iterEnd = isTopOrLeft ? 0 : shutterCount;
-  const inc = isTopOrLeft ? -1 : 1;
-
-  const isVerticalPath = direction === 'top' || direction === 'bottom';
-
-  const clipPathStart = [];
-  const clipPathEnd = [];
-
-  for (let i = iterStart; i !== iterEnd; i += inc) {
-    const shutterEndPosInPercentage = 100 * ((i + inc) / shutterCount);
-    const clipStart = (100 * (i / shutterCount)) | 0;
-    let clipEnd;
-
-    if (staggered) {
-      const staggerFactor = isTopOrLeft
-        ? 1 + (shutterCount - i) / shutterCount
-        : 1 + i / shutterCount;
-
-      clipEnd = isTopOrLeft
-        ? 100 - (100 - shutterEndPosInPercentage) * staggerFactor
-        : shutterEndPosInPercentage * staggerFactor;
-    } else {
-      clipEnd = shutterEndPosInPercentage;
-    }
-
-    clipEnd |= 0;
-
-    if (isVerticalPath) {
-      clipPathStart.push(
-        `0% ${clipStart}%, 100% ${clipStart}%, 100% ${clipStart}%, 0% ${clipStart}%`,
-      );
-      clipPathEnd.push(`0% ${clipStart}%, 100% ${clipStart}%, 100% ${clipEnd}%, 0% ${clipEnd}%`);
-    } else {
-      clipPathStart.push(
-        `${clipStart}% 0%, ${clipStart}% 100%, ${clipStart}% 100%, ${clipStart}% 0%`,
-      );
-      clipPathEnd.push(`${clipStart}% 0%, ${clipStart}% 100%, ${clipEnd}% 100%, ${clipEnd}% 0%`);
-    }
-  }
-
-  return { start: clipPathStart, end: clipPathEnd };
-};
-
-export function getShuttersClipPaths(
-  direction: EffectFourDirections,
-  shutterCount: number,
-  staggered: boolean,
-  reverse?: boolean,
-) {
-  const { start, end } = generateShuttersClipPath(direction, shutterCount, staggered);
-
-  if (reverse) {
-    start.reverse();
-    end.reverse();
-  }
-
-  return {
-    clipStart: `polygon(${start.join(', ')})`,
-    clipEnd: `polygon(${end.join(', ')})`,
-  };
-}
-
 export function roundNumber(num: number, precision = 2) {
   return parseFloat(num.toFixed(precision));
 }
 
 export function toKeyframeValue(
-  custom: Record<string, string | number>,
+  custom: Record<string, string | number | undefined>,
   key: string,
   useValue: boolean | undefined = false,
   fallback: string | undefined = undefined,
 ) {
-  return useValue ? custom[key] : `var(${key}${fallback !== undefined ? `, ${fallback}` : ''})`;
+  return useValue
+    ? ((custom[key] ?? fallback) as string | number)
+    : `var(${key}${fallback !== undefined ? `, ${fallback}` : ''})`;
 }
 
-export function getTimingFactor(
-  duration: number,
-  delay: number,
-  asString = false,
-): number | string {
-  const duration_ = duration || 1;
-  const delay_ = delay || 0;
-  const timingFactor = roundNumber(duration_ / (duration_ + delay_));
-  return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
-}
+export function declareCustom<K extends string>(
+  prefix: string,
+  entries: Record<K, [string | number, string]>,
+  asWeb: boolean = false,
+) {
+  // a value equal to its fallback is left undeclared - interact registers it as not inherited
+  const custom: Record<string, string | number | undefined> = {};
+  const vars = {} as Record<K, string | number>;
 
-const EASING_NAME_LENGTH = 40;
-
-// keyframes that bake in the easing need a non-default one in their name, so CSS @keyframes don't collide.
-// e.g. cubic-bezier(0.68, -0.55, 0.27, 1.55) -> cubic-bezier-068_-055_027_155
-export function getEasingName(easing: string | undefined, defaultEasing: string) {
-  if (!easing || easing === defaultEasing) {
-    return '';
+  for (const [key, [value, fallback]] of Object.entries(entries) as [
+    K,
+    [string | number, string],
+  ][]) {
+    const name = `${prefix}-${key}`;
+    custom[name] = String(value) === fallback ? undefined : value;
+    vars[key] = toKeyframeValue(custom, name, asWeb, fallback);
   }
-  const name = easing
-    .trim()
-    .replace(/\s*,\s*/g, '_')
-    .replace(/[\s(]+/g, '-')
-    .replace(/[^\w-]/g, '');
-  return `-${name.slice(0, EASING_NAME_LENGTH)}`;
-}
 
-export type LengthValue = { value: number; unit: string };
-export type LengthInput =
-  | string
-  | number
-  | LengthValue
-  | { value: number; unit?: string }
-  | undefined;
+  return { custom, vars };
+}
 
 const CSS_UNIT_REGEX = /^(-?\d*\.?\d+)(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$/i;
-const CSS_CALC_REGEX = /^calc\(.*\)$/i;
+export const CSS_CALC_REGEX = /^calc\(.*\)$/i;
 const CSS_ANGLE_REGEX = /^(-?\d*\.?\d+)(deg|rad|grad|turn)$/i;
 const SIDE_ANGLES: Record<string, number> = { top: 270, right: 0, bottom: 90, left: 180 };
 
@@ -583,6 +294,53 @@ export function parseDirection<T extends string | number>(
   }
 
   return defaultValue;
+}
+
+export const stripCalc = (str: string) => str.replace(/calc/g, '');
+
+// should not be used to compare direction against preset's default because undefined !== <default>
+export function compareKeywordToNonDefaults(direction: string | undefined, compare: string[]) {
+  const normalized = direction?.trim().toLowerCase();
+  return compare.some((keyword) => normalized === keyword);
+}
+
+export function parseKeywordLazy<T extends string>(
+  input: string | number | undefined,
+  allowedKeywords: readonly string[],
+  defaultValue: T,
+) {
+  if (typeof input === 'string') {
+    const trimmed = input.trim().toLowerCase();
+    // Check if it's a valid keyword
+    if (allowedKeywords.includes(trimmed)) {
+      return trimmed as T;
+    }
+  }
+  return defaultValue;
+}
+
+export function getTimingFactor(
+  duration: number,
+  delay: number,
+  asString = false,
+): number | string {
+  const duration_ = duration || 1;
+  const delay_ = delay || 0;
+  const timingFactor = roundNumber(duration_ / (duration_ + delay_));
+  return asString ? timingFactor.toString().replace(/\./g, '') : timingFactor;
+}
+
+// a base preset's layer with the suffix appended to its name, custom properties and their references
+export function suffixLayer<T extends { name: string; custom?: CSSValues; keyframes: CSSValues[] }>(
+  layer: T,
+  suffix?: string,
+): T {
+  if (!suffix) {
+    return layer;
+  }
+  const [suffixed] = suffixCustomProperties([layer], suffix);
+  suffixed.name = `${layer.name}${suffix}`;
+  return suffixed;
 }
 
 export function suffixNames(names: string[], suffix?: string) {

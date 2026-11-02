@@ -1,16 +1,66 @@
-import {
-  getEasingFamily,
-  getEasing,
-  toKeyframeValue,
-  parseDirection,
-  parseCssLength,
-  getEntranceFill,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
-import type { BounceIn, TimeAnimationOptions } from '../../types';
-import type { LengthValue } from '../../utils';
+import type {
+  AnimationData,
+  BounceIn,
+  EffectFourDirections,
+  LengthValue,
+  TimeAnimationOptions,
+} from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
+import {
+  getMotionTransRot,
+  getMotion3dTransform,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { compareKeywordToNonDefaults, parseCssLength } from '../../utils';
+import { getMotionFade } from '../../fadeBlurUtils';
+import { sideDirection, toMotionRange } from '../../directions';
+
+// BounceIn uses easing to create the bouncing movement and uses only 2 keyframes
+const BOUNCE_IN_EASING = `linear(${[
+  [0],
+  [0.0129, 3.25],
+  [0.1159, 9.55],
+  [0.2076, 12.7],
+  [0.3011, 15.25],
+  [0.4149, 17.9],
+  [0.5426, 20.55],
+  [0.8588, 26.75],
+  [1, 30],
+  [0.7999, 34.5],
+  [0.7187, 36.75],
+  [0.6874, 38],
+  [0.6664, 39.25],
+  [0.65, 42],
+  [0.6685, 44.6],
+  [0.7233, 47.1],
+  [0.7948, 49.15],
+  [0.9506, 52.7],
+  [1, 54],
+  [0.8799, 57],
+  [0.8312, 58.5],
+  [0.8, 60.15],
+  [0.79, 62],
+  [0.8011, 64.6],
+  [0.834, 67.1],
+  [0.8769, 69.15],
+  [1, 74],
+  [0.9277, 78.5],
+  [0.9143, 80.15],
+  [0.91, 82],
+  [0.9288, 85.4],
+  [1, 90],
+  [0.98, 95],
+  [1],
+]
+  .map(
+    (params: number[]) =>
+      `${params[0].toFixed(4)}${params[1] === undefined ? '' : ` ${params[1].toFixed(2)}%`}`,
+  )
+  .join(', ')})`;
+
+const FADE_IN_DURATION_FACTOR = 0.54;
+const FADE_IN_EASING = 'quadOut';
 
 const DIRECTIONS = [...FOUR_DIRECTIONS, 'back'] as const;
 
@@ -28,87 +78,61 @@ export const schema = {
 };
 
 export function getNames(options: TimeAnimationOptions) {
-  return suffixNames(['motion-fadeIn', 'motion-bounceIn'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
-
-const { in: easeIn, out: easeOut } = getEasingFamily('sineIn');
-const BOUNCE_KEYFRAMES = [
-  { offset: 0, translate: 100 },
-  { offset: 30, translate: 0 },
-  { offset: 42, translate: 35 },
-  { offset: 54, translate: 0 },
-  { offset: 62, translate: 21 },
-  { offset: 74, translate: 0 },
-  { offset: 82, translate: 9 },
-  { offset: 90, translate: 0 },
-  { offset: 95, translate: 2 },
-  { offset: 100, translate: 0, isIn: true },
-];
-
-const TRANSLATE_DIRECTION_MAP = {
-  top: { y: -1, x: 0, z: 0 },
-  right: { y: 0, x: 1, z: 0 },
-  bottom: { y: 1, x: 0, z: 0 },
-  left: { y: 0, x: -1, z: 0 },
-  back: { x: 0, y: 0, z: -1 },
-};
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as BounceIn;
-  const from = parseDirection(namedEffect?.from, DIRECTIONS, DEFAULTS.from);
-  const travel = parseCssLength(namedEffect?.travel, DEFAULTS.travel as LengthValue);
-  const { perspective = DEFAULTS.perspective } = namedEffect || {};
-  const [fadeIn, bounceIn] = getNames(options);
-  const perspectiveValue = from === 'back' ? `perspective(${perspective}px)` : ' ';
-  const { x, y, z } = TRANSLATE_DIRECTION_MAP[from];
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as TimeAnimationOptions<BounceIn>;
+  const { from, perspective = DEFAULTS.perspective, travel } = namedEffect!;
+  const { fill = 'backwards' } = options;
 
-  const custom = {
-    '--motion-direction-x': x,
-    '--motion-direction-y': y,
-    '--motion-direction-z': z,
-    '--motion-travel': travel,
-    '--motion-perspective': perspectiveValue,
+  // 'back' bounces along the z-axis, the sides along their own axis
+  const isBack = compareKeywordToNonDefaults(from, ['back']);
+  // from 'top' starts at the negative sign - the z travel then starts behind the element
+  const side = isBack ? 'top' : from;
+  const motionRange = toMotionRange(
+    sideDirection,
+    sideDirection.opposite(sideDirection.parse(side, DEFAULTS.from as EffectFourDirections)),
+    'in',
+  );
+  const transformParams = {
+    perspective,
+    travel: parseCssLength(travel, DEFAULTS.travel as LengthValue),
   };
 
-  const travel_ = toKeyframeValue(custom, '--motion-travel', asWeb);
-  const perspective_ = toKeyframeValue(custom, '--motion-perspective', asWeb, '');
-  const directionX = toKeyframeValue(custom, '--motion-direction-x', asWeb);
-  const directionY = toKeyframeValue(custom, '--motion-direction-y', asWeb);
-  const directionZ = toKeyframeValue(custom, '--motion-direction-z', asWeb);
+  const transformOptions = {
+    ...options,
+    easing: BOUNCE_IN_EASING,
+    fill,
+    namedEffect: { ...namedEffect, from: side, perspective },
+  } as TimeAnimationOptions;
 
-  const keyframes = BOUNCE_KEYFRAMES.map(({ offset, translate }, index) => ({
-    offset: offset / 100,
-    easing: getEasing(index % 2 ? easeOut : easeIn),
-    transform: `${(perspective_ as string).trim()} translate3d(calc(${directionX} * ${travel_} * ${
-      translate / 100
-    }), calc(${directionY} * ${travel_} * ${translate / 100}), calc(${directionZ} * ${travel_} * ${
-      translate / 100
-    })) rotateZ(var(--motion-rotate, 0deg))`,
-  }));
-
-  const animations = [
+  return [
     {
       ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing: 'quadOut',
-      duration: (options.duration! * BOUNCE_KEYFRAMES[3].offset) / 100,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      duration: options.duration! * FADE_IN_DURATION_FACTOR,
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
     },
     {
-      ...options,
-      name: bounceIn,
-      fill: getEntranceFill(options),
-      easing: 'linear',
-      custom,
-      keyframes,
+      ...transformOptions,
+      ...(isBack
+        ? getMotion3dTransform(motionRange, transformParams, asWeb, suffix)
+        : getMotionTransRot(motionRange, transformParams, asWeb, suffix)),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
+}
 
-  return suffixCustomProperties(animations, options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

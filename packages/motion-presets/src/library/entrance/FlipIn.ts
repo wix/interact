@@ -1,13 +1,16 @@
-import {
-  parseDirection,
-  toKeyframeValue,
-  getEntranceFill,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
-import type { FlipIn, TimeAnimationOptions } from '../../types';
+import type { AnimationData, FlipIn, TimeAnimationOptions } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
+import {
+  getMotion3dTransform,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { getMotionFade } from '../../fadeBlurUtils';
+import { axisDirection, toMotionRange } from '../../directions';
 
+const FADE_IN_EASING = 'quadOut';
+
+const DEFAULT_EASING = 'backOut';
 const DEFAULTS: Required<FlipIn> = {
   type: 'FlipIn',
   angle: 90,
@@ -22,58 +25,52 @@ export const schema = {
 };
 
 export function getNames(options: TimeAnimationOptions) {
-  return suffixNames(['motion-fadeIn', 'motion-flipIn'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
-
-const ROTATE_MAP = {
-  vertical: { x: 1, y: 0 },
-  horizontal: { x: 0, y: -1 },
-};
 
 export function web(options: TimeAnimationOptions) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as FlipIn;
-  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULTS.direction);
-  const { angle = DEFAULTS.angle, perspective = DEFAULTS.perspective } = namedEffect;
-  const [fadeIn, flipIn] = getNames(options);
-  const easing = options.easing || 'backOut';
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<FlipIn>;
+  const { angle = DEFAULTS.angle, perspective = DEFAULTS.perspective } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  const direction = axisDirection.parse(namedEffect?.direction, DEFAULTS.direction);
 
-  const { x, y } = ROTATE_MAP[direction];
+  const transformOptions = {
+    ...options,
+    composite: 'add',
+    easing,
+    fill,
+    namedEffect: { ...namedEffect, angle, perspective },
+  } as TimeAnimationOptions;
 
-  const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-rotate-x': `${x * angle}deg`,
-    '--motion-rotate-y': `${y * angle}deg`,
-  };
-
-  const animations = [
+  return [
     {
       ...options,
-      easing: 'quadOut',
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      easing: FADE_IN_EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
+    },
+    // the layout rotation comes first, so the motion moves along the element's rotated axes
+    {
+      ...transformOptions,
+      composite: 'replace',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
     },
     {
-      ...options,
-      easing,
-      name: flipIn,
-      fill: getEntranceFill(options),
-      custom,
-      keyframes: [
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(var(--motion-rotate-x, ${custom['--motion-rotate-x']})) rotateY(var(--motion-rotate-y, ${custom['--motion-rotate-y']}))`,
-        },
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotate(var(--motion-rotate, 0deg)) rotateX(0deg) rotateY(0deg)`,
-        },
-      ],
+      ...transformOptions,
+      ...getMotion3dTransform(
+        toMotionRange(axisDirection, direction, 'in'),
+        { angle, perspective },
+        asWeb,
+        suffix,
+      ),
     },
   ];
+}
 
-  return suffixCustomProperties(animations, options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

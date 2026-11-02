@@ -1,5 +1,11 @@
-import type { Pulse, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import { getTimingFactor, toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
+import type { AnimationData, DomApi, Pulse, TimeAnimationOptions } from '../../types';
+import {
+  getMotionScale,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { getLoopOverrides } from '../../easingUtils';
+import { UNDIRECTED_MOTION_RANGE } from '../../directions';
 
 const DEFAULTS: Required<Pulse> = {
   type: 'Pulse',
@@ -12,68 +18,50 @@ export const schema = {
   scale: { type: 'number', min: 0, default: DEFAULTS.scale },
 };
 
-// two beats - a light one at 4/7 of the depth and then the full one
-const SCALE_KEYFRAMES = [
-  { keyframe: 27, depth: 4 / 7 },
-  { keyframe: 45, depth: 0 },
-  { keyframe: 72, depth: 1 },
-  { keyframe: 100, depth: 0 },
+// two beats - a light one and then the full one
+const SHAPE: [number, number][] = [
+  [0, 0],
+  [4 / 7, 0.27],
+  [0, 0.45],
+  [1, 0.72],
+  [0, 1],
 ];
 
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
+}
+
+export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as Pulse;
-  const { scale = DEFAULTS.scale } = namedEffect;
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as TimeAnimationOptions<Pulse>;
+  const { scale = DEFAULTS.scale } = namedEffect!;
 
-  const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
-  const [name] = getNames(options);
+  const scaleOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      scale,
+    },
+  } as TimeAnimationOptions;
 
-  const custom: Record<string, string | number> = {
-    '--motion-scale': scale,
-  };
-
-  const keyframes = SCALE_KEYFRAMES.map(({ keyframe, depth }) => {
-    const offset = (keyframe / 100) * timingFactor;
-
-    return {
-      offset,
-      transform: `rotateZ(var(--motion-rotate, 0deg)) scale(${
-        depth
-          ? `calc(1 - (1 - ${toKeyframeValue(custom, '--motion-scale', asWeb)}) * ${depth})`
-          : '1'
-      })`,
-    };
-  });
-
-  if (timingFactor < 1) {
-    keyframes.push({
-      offset: 1,
-      transform: 'rotateZ(var(--motion-rotate, 0deg)) scale(1)',
-    });
-  }
-
-  const animations = [
+  return [
     {
       ...options,
-      name,
-      easing: 'linear',
-      duration: duration + iterationDelay,
-      custom,
-      keyframes,
+      composite: 'replace',
+      ...getLoopOverrides(options),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...scaleOptions,
+      ...getLoopOverrides(scaleOptions, { shape: SHAPE }),
+      ...getMotionScale(UNDIRECTED_MOTION_RANGE, { scale }, asWeb, suffix),
     },
   ];
-
-  return suffixCustomProperties(animations, options.suffix);
 }
 
-export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Pulse)?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
-
-  return suffixNames([`motion-pulse-${timingFactor}`], options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

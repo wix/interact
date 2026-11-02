@@ -1,82 +1,82 @@
-import type { AnimationFillMode, DomApi, ScrubAnimationOptions, SpinScroll } from '../../types';
-import { toKeyframeValue, parseDirection, suffixNames, suffixCustomProperties } from '../../utils';
-import { SPIN_DIRECTIONS } from '../../consts';
+import type { AnimationData, DomApi, ScrubAnimationOptions, SpinScroll } from '../../types';
+import { SCROLL_RANGES, SPIN_DIRECTIONS } from '../../consts';
+import { spinDirection, toMotionRange } from '../../directions';
+import {
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
+import {
+  getMotionScale,
+  getMotionTransRot,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
 
-const DEFAULT_DIRECTION: (typeof SPIN_DIRECTIONS)[number] = 'clockwise';
+const DEFAULTS: Required<SpinScroll> = {
+  type: 'SpinScroll',
+  direction: 'clockwise',
+  range: 'in',
+  scale: 1,
+  spins: 0.15,
+};
 
-const DIRECTION_MAP = {
-  clockwise: 1,
-  'counter-clockwise': -1,
+export const schema = {
+  direction: { type: 'enum', values: SPIN_DIRECTIONS, default: DEFAULTS.direction },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  scale: { type: 'number', min: 0, default: DEFAULTS.scale },
+  spins: { type: 'number', min: 0, default: DEFAULTS.spins },
 };
 
 export function getNames(options: ScrubAnimationOptions) {
-  return suffixNames(['motion-spinScroll'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as SpinScroll;
-  const direction = parseDirection(namedEffect?.direction, SPIN_DIRECTIONS, DEFAULT_DIRECTION);
-  const { spins = 0.15, scale = 1, range = 'in' } = namedEffect;
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<SpinScroll>;
+  const { scale = DEFAULTS.scale, spins = DEFAULTS.spins } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
+  const spin = spinDirection.parse(namedEffect!.direction, DEFAULTS.direction);
+  const direction = range === 'out' ? spinDirection.opposite(spin) : spin;
+  const angle = 360 * spins;
 
-  const spinDirection = DIRECTION_MAP[direction];
-  const rotationZ = spins * 360;
-  const isIn = range === 'in';
+  const spinOptions = {
+    ...options,
+    namedEffect: { ...namedEffect, angle },
+  } as ScrubAnimationOptions;
+  const scaleOptions = {
+    ...options,
+    namedEffect: { ...namedEffect, scale },
+  } as ScrubAnimationOptions;
 
-  const fromValue = isIn ? -rotationZ : range === 'out' ? 0 : -rotationZ / 2;
-  const toValue = isIn ? 0 : range === 'out' ? rotationZ : rotationZ / 2;
+  const motionRange = toMotionRange(spinDirection, direction, range);
+  const scaleOverrides = getScrollOverrides(options, range, getLinearScrollEasing(range, false));
 
-  const [spinScroll] = getNames(options);
-
-  const custom = {
-    '--motion-spin-from': `${spinDirection * fromValue}deg`,
-    '--motion-spin-to': `${spinDirection * toValue}deg`,
-    '--motion-spin-scale-from': isIn ? scale : 1,
-    '--motion-spin-scale-to': isIn ? 1 : scale,
-  };
-
-  const animations = [
+  return withSharedScrollRange([
     {
-      ...options,
-      name: spinScroll,
-      fill,
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `scale(${toKeyframeValue(
-            custom,
-            '--motion-spin-scale-from',
-            asWeb,
-          )}) rotate(calc(${toKeyframeValue(
-            {},
-            '--motion-rotate',
-            false,
-            '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-spin-from', asWeb)}))`,
-        },
-        {
-          transform: `scale(${toKeyframeValue(
-            custom,
-            '--motion-spin-scale-to',
-            asWeb,
-          )}) rotate(calc(${toKeyframeValue(
-            {},
-            '--motion-rotate',
-            false,
-            '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-spin-to', asWeb)}))`,
-        },
-      ],
+      ...spinOptions,
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, true)),
+      ...getMotionTransRot(motionRange, { angle }, asWeb, suffix),
     },
-  ];
+    {
+      ...spinOptions,
+      composite: 'add',
+      ...scaleOverrides,
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...scaleOptions,
+      ...scaleOverrides,
+      ...getMotionScale(motionRange, { scale }, asWeb, suffix),
+    },
+  ]);
+}
 
-  return suffixCustomProperties(animations, options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

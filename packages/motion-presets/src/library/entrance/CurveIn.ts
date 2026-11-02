@@ -1,14 +1,22 @@
-import type { CurveIn, TimeAnimationOptions, DomApi, EffectFourDirections } from '../../types';
-import type { LengthValue } from '../../utils';
-import {
-  toKeyframeValue,
-  parseDirection,
-  parseCssLength,
-  getEntranceFill,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+import type {
+  AnimationData,
+  CurveIn,
+  DomApi,
+  LengthValue,
+  TimeAnimationOptions,
+} from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
+import {
+  getMotion3dTransform,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { parseCssLength } from '../../utils';
+import { getMotionFade } from '../../fadeBlurUtils';
+import { sideDirection, toMotionRange } from '../../directions';
+
+const EASING = 'quadOut';
+const ROTATION_ANGLE = 180;
 
 const DEFAULTS: Required<CurveIn> = {
   type: 'CurveIn',
@@ -24,72 +32,54 @@ export const schema = {
 };
 
 export function getNames(options: TimeAnimationOptions) {
-  return suffixNames(['motion-curveIn', 'motion-fadeIn'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
-
-const PARAMS_MAP: Record<EffectFourDirections, { rotationX: string; rotationY: string }> = {
-  top: { rotationX: '180', rotationY: '0' },
-  right: { rotationX: '0', rotationY: '180' },
-  bottom: { rotationX: '-180', rotationY: '0' },
-  left: { rotationX: '0', rotationY: '-180' },
-};
 
 export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as CurveIn;
-  const from = parseDirection(namedEffect?.from, FOUR_DIRECTIONS, DEFAULTS.from);
-  const depth = parseCssLength(namedEffect.depth, DEFAULTS.depth as LengthValue);
-  const { perspective = DEFAULTS.perspective } = namedEffect;
-  const [curveIn, fadeIn] = getNames(options);
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as TimeAnimationOptions<CurveIn>;
+  const { depth, perspective = DEFAULTS.perspective } = namedEffect!;
+  const { fill = 'backwards' } = options;
+  const from = sideDirection.parse(namedEffect?.from, DEFAULTS.from);
 
-  const { rotationX, rotationY } = PARAMS_MAP[from];
+  const transformOptions = {
+    ...options,
+    easing: EASING,
+    fill,
+    namedEffect: { ...namedEffect, angle: ROTATION_ANGLE, perspective },
+  } as TimeAnimationOptions;
 
-  const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-rotate-x': `${rotationX}deg`,
-    '--motion-rotate-y': `${rotationY}deg`,
-    '--motion-depth-negative': `calc(-1 * ${depth})`,
-    '--motion-depth-positive': depth,
-  };
-
-  const easing = 'quadOut';
-
-  const animations = [
+  return [
     {
       ...options,
-      name: curveIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom,
-      keyframes: [
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(custom, '--motion-depth-negative', asWeb)}) rotateX(${toKeyframeValue(
-            custom,
-            '--motion-rotate-x',
-            asWeb,
-          )}) rotateY(${toKeyframeValue(
-            custom,
-            '--motion-rotate-y',
-            asWeb,
-          )}) translateZ(${toKeyframeValue(custom, '--motion-depth-positive', asWeb)}) rotateZ(var(--motion-rotate, 0deg))`,
-        },
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateZ(${toKeyframeValue(custom, '--motion-depth-negative', asWeb)}) rotateX(0deg) rotateY(0deg) translateZ(${toKeyframeValue(custom, '--motion-depth-positive', asWeb)}) rotateZ(var(--motion-rotate, 0deg))`,
-        },
-      ],
+      easing: EASING,
+      fill,
+      ...getMotionFade(namedEffect as { opacity?: number }, asWeb, suffix),
     },
     {
-      ...options,
-      name: fadeIn,
-      fill: getEntranceFill(options),
-      easing,
-      custom: {},
-      keyframes: [{ offset: 0, opacity: 0 }],
+      ...transformOptions,
+      ...getMotion3dTransform(
+        toMotionRange(sideDirection, sideDirection.opposite(from), 'in'),
+        {
+          angle: ROTATION_ANGLE,
+          depth: parseCssLength(depth, DEFAULTS.depth as LengthValue),
+          perspective,
+        },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
+}
 
-  return suffixCustomProperties(animations, options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

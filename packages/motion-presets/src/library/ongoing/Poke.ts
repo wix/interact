@@ -1,14 +1,14 @@
-import type { Poke, TimeAnimationOptions, DomApi, AnimationExtraOptions } from '../../types';
-import type { LengthValue } from '../../utils';
-import {
-  getTimingFactor,
-  toKeyframeValue,
-  parseDirection,
-  parseCssLength,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+import type { AnimationData, DomApi, Poke, TimeAnimationOptions } from '../../types';
 import { FOUR_DIRECTIONS } from '../../consts';
+import {
+  getMotionLayoutRotation,
+  getMotionTransRot,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import type { LoopPoint } from '../../easingUtils';
+import { getLoopOverrides } from '../../easingUtils';
+import { parseCssLength } from '../../utils';
+import { sideDirection, toMotionRange } from '../../directions';
 
 const DEFAULTS: Required<Poke> = {
   type: 'Poke',
@@ -23,81 +23,63 @@ export const schema = {
   travel: { type: 'length', default: DEFAULTS.travel },
 };
 
-const PEAK_TRANSLATE = 25;
-
-const TRANSLATE_KEYFRAMES = [
-  { keyframe: 17, translate: 7 },
-  { keyframe: 32, translate: 25 },
-  { keyframe: 48, translate: 8 },
-  { keyframe: 56, translate: 11 },
-  { keyframe: 66, translate: 25 },
-  { keyframe: 83, translate: 4 },
-  { keyframe: 100, translate: 0 },
+// two pokes towards the direction
+const SHAPE: LoopPoint[] = [
+  [0, 0],
+  [0.28, 0.17],
+  [1, 0.32],
+  [0.32, 0.48],
+  [0.44, 0.56],
+  [1, 0.66],
+  [0.16, 0.83],
+  [0, 1],
 ];
 
-const DIRECTION_MAP = {
-  top: { x: 0, y: -1 },
-  bottom: { x: 0, y: 1 },
-  right: { x: 1, y: 0 },
-  left: { x: -1, y: 0 },
-};
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
+}
 
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
+export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as Poke;
-  const direction = parseDirection(namedEffect?.direction, FOUR_DIRECTIONS, DEFAULTS.direction);
-  const travel = parseCssLength(namedEffect.travel, DEFAULTS.travel as LengthValue);
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as TimeAnimationOptions<Poke>;
+  const { travel = DEFAULTS.travel } = namedEffect!;
 
-  const duration = options.duration || 1;
-  const iterationDelay = +(namedEffect?.iterationDelay || 0);
-  const { x, y } = DIRECTION_MAP[direction];
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
-  const [name] = getNames(options);
+  const pokeOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      travel,
+    },
+  } as TimeAnimationOptions;
 
-  const custom: Record<string, string | number> = {
-    '--motion-translate-x': x,
-    '--motion-translate-y': y,
-    '--motion-travel': travel,
-  };
-  const travel_ = toKeyframeValue(custom, '--motion-travel', asWeb);
+  // the keyframes start at their peak, towards the direction
+  const side = sideDirection.opposite(
+    sideDirection.parse(namedEffect?.direction, DEFAULTS.direction),
+  );
 
-  const keyframes = TRANSLATE_KEYFRAMES.map(({ keyframe, translate }) => {
-    const translateValue = `calc(${toKeyframeValue(
-      custom,
-      '--motion-translate-x',
-      asWeb,
-    )} * ${travel_} * ${translate} / ${PEAK_TRANSLATE}) calc(${toKeyframeValue(
-      custom,
-      '--motion-translate-y',
-      asWeb,
-    )} * ${travel_} * ${translate} / ${PEAK_TRANSLATE})`;
-
-    return {
-      offset: (keyframe / 100) * timingFactor,
-      translate: translateValue,
-    };
-  });
-
-  const animations = [
+  return [
     {
-      ...options,
-      name,
-      easing: 'linear',
-      duration: duration + iterationDelay,
-      custom,
-      keyframes,
+      ...pokeOptions,
+      ...getLoopOverrides(pokeOptions, { shape: SHAPE }),
+      ...getMotionTransRot(
+        toMotionRange(sideDirection, side, 'in'),
+        { travel: parseCssLength(travel, { value: 0, unit: 'px' }) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...pokeOptions,
+      composite: 'add',
+      ...getLoopOverrides(pokeOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
     },
   ];
-
-  return suffixCustomProperties(animations, options.suffix);
 }
 
-export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Poke)?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true) as string;
-
-  return suffixNames([`motion-poke-${timingFactor}`], options.suffix);
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

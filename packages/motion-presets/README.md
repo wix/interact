@@ -176,21 +176,21 @@ For selection by tone and atmosphere (playful, elegant, bold, soft, dramatic, mo
 
 ### `from`, `direction` and `pivot`
 
-Entrance presets use `from` — the side the element comes from. `pivot` names the edge or corner the element rotates around. The accepted values depend on the preset:
+Entrance presets use `from` — the side the element comes from. All other presets use `direction` — where the motion goes. `pivot` names the edge or corner the element rotates or scales around. The accepted values depend on the preset:
 
 | Values                                   | Example Presets                                                                  |
 | ---------------------------------------- | -------------------------------------------------------------------------------- |
 | `'top' \| 'right' \| 'bottom' \| 'left'` | `from`: SlideIn, FloatIn, RevealIn; `direction`: SlideScroll; `pivot`: FoldIn    |
 | `'horizontal' \| 'vertical'`             | `direction`: FlipIn, WinkIn, ArcScroll, FlipScroll, Flip                         |
 | `'clockwise' \| 'counter-clockwise'`     | `direction`: SpinIn, SpinScroll, Spin                                            |
-| `0–360` (degrees, number)                | `from`: GlideIn, ExpandIn; MoveScroll                                            |
+| `0–360` (degrees, number)                | `from`: GlideIn, ExpandIn; `direction`: MoveScroll                               |
 | Corner values                            | `pivot`: TurnIn (`'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'`) |
 
-**Angle convention:** entrance presets follow the CSS convention — `0° = right`, `90° = bottom`, `180° = left`, `270° = top`. Other presets use `0° = right (east)`, with angles increasing counter-clockwise.
+**Angle convention:** CSS convention — `0° = right`, `90° = bottom`, `180° = left`, `270° = top`.
 
 ### Distance units
 
-Entrance movement lengths are named `travel`. Prefer the `{ value, unit }` object notation:
+Movement lengths are named `travel`. Prefer the `{ value, unit }` object notation:
 
 ```typescript
 namedEffect: {
@@ -203,7 +203,7 @@ Supported units: `px`, `em`, `rem`, `vh`, `vw`, `vmin`, `vmax`, `percentage`.
 
 ### `iterationDelay` (ongoing only)
 
-Adds an idle pause between loop cycles. Set on the `namedEffect`:
+Adds an idle pause at rest after each loop cycle, without changing the motion itself. Set on the `namedEffect`:
 
 ```typescript
 namedEffect: { type: 'Bounce', iterationDelay: 1000 } // 1 s pause after each cycle

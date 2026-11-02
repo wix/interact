@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import { parseAngle, parseCssLength, parseLength, parseDirection } from '../utils';
+import {
+  declareCustom,
+  parseDirection,
+  parseAngle,
+  parseCssLength,
+  parseKeywordLazy,
+  parseLength,
+  toKeyframeValue,
+} from '../utils';
 
 describe('parseLength', () => {
   const defaultValue = { value: 100, unit: 'percentage' };
@@ -222,6 +230,45 @@ describe('parseDirection', () => {
         expect(parseDirection('45', allowedKeywords, defaultValue, false)).toBe(defaultValue);
       });
     });
+  });
+});
+
+describe('parseKeywordLazy', () => {
+  test('accepts allowed keywords case-insensitively', () => {
+    expect(parseKeywordLazy(' Left ', ['left', 'right'], 'right')).toBe('left');
+  });
+
+  test('falls back to the default', () => {
+    expect(parseKeywordLazy('up', ['left', 'right'], 'right')).toBe('right');
+    expect(parseKeywordLazy(3, ['left', 'right'], 'right')).toBe('right');
+    expect(parseKeywordLazy(undefined, ['left', 'right'], 'right')).toBe('right');
+  });
+});
+
+describe('toKeyframeValue', () => {
+  const custom = { '--a': '5px' };
+
+  test('returns the value for web animations', () => {
+    expect(toKeyframeValue(custom, '--a', true)).toBe('5px');
+  });
+
+  test('returns a var() with an optional fallback for css', () => {
+    expect(toKeyframeValue(custom, '--a')).toBe('var(--a)');
+    expect(toKeyframeValue(custom, '--a', false, '0px')).toBe('var(--a, 0px)');
+    expect(toKeyframeValue(custom, '--a', false, '')).toBe('var(--a, )');
+  });
+});
+
+describe('declareCustom', () => {
+  test('declares prefixed custom properties and returns their keyframe values', () => {
+    expect(declareCustom('--p', { x: [1, '0'], y: ['2px', '0px'] })).toEqual({
+      custom: { '--p-x': 1, '--p-y': '2px' },
+      vars: { x: 'var(--p-x, 0)', y: 'var(--p-y, 0px)' },
+    });
+  });
+
+  test('uses the values directly for web animations', () => {
+    expect(declareCustom('--p', { x: [1, '0'] }, true).vars).toEqual({ x: 1 });
   });
 });
 

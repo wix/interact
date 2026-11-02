@@ -19,3 +19,6 @@ tsconfig.tsbuildinfo
 llms.txt
 llms-full.txt
 packages/interact/llms.txt
+
+# playwright
+test-results/

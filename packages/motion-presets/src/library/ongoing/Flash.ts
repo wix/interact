@@ -1,11 +1,6 @@
-import type { TimeAnimationOptions, DomApi, AnimationExtraOptions, Flash } from '../../types';
-import {
-  getEasing,
-  getEasingName,
-  getTimingFactor,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+import type { DomApi, Flash, TimeAnimationOptions, AnimationData } from '../../types';
+import { getMotionFade, MOTION_FADE_NAME } from '../../fadeBlurUtils';
+import { getLoopOverrides } from '../../easingUtils';
 
 const DEFAULT_EASING = 'cubicInOut';
 
@@ -18,58 +13,29 @@ export const schema = {
   iterationDelay: { type: 'number', min: 0, default: DEFAULTS.iterationDelay },
 };
 
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
+// fades out and back in
+const SHAPE: [number, number][] = [
+  [0, 0],
+  [1, 0.5],
+  [0, 1],
+];
+
+export function getNames({ suffix = '' }: TimeAnimationOptions) {
+  return [MOTION_FADE_NAME + suffix];
+}
+
+export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions & AnimationExtraOptions, _asWeb = false) {
-  const namedEffect = options.namedEffect as Flash;
-  const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const easing = getEasing(options.easing || DEFAULT_EASING);
-  const timingFactor = getTimingFactor(duration, iterationDelay) as number;
-  const [name] = getNames(options);
+export function style(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, suffix } = options;
 
-  const keyframes = [
-    {
-      offset: 0,
-      opacity: 1,
-      easing,
-    },
-    {
-      offset: 0.5 * timingFactor,
-      opacity: 0,
-      easing,
-    },
-    {
-      offset: timingFactor,
-      opacity: 1,
-    },
-    {
-      offset: 1,
-      opacity: 1,
-    },
-  ];
-
-  const animations = [
+  return [
     {
       ...options,
-      name,
-      easing: 'linear',
-      duration: duration + iterationDelay,
-      keyframes,
+      ...getLoopOverrides(options, { shape: SHAPE, easings: [easing] }),
+      ...getMotionFade({}, asWeb, suffix),
     },
   ];
-
-  return suffixCustomProperties(animations, options.suffix);
-}
-
-export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Flash)?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
-
-  return suffixNames(
-    [`motion-flash-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
-    options.suffix,
-  );
 }

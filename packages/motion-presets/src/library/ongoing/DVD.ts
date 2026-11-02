@@ -76,7 +76,7 @@ export function web(options: TimeAnimationOptions, dom?: DomApi) {
       delay,
       duration: duration * ratio,
       alternate: true,
-      composite: 'add' as const,
+      composite: 'add',
       keyframes: [
         {
           translate: '0 calc(-1 * var(--motion-top, 0px))',

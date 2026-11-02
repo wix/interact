@@ -1,16 +1,15 @@
-import type { AnimationExtraOptions, DomApi, Flip, TimeAnimationOptions } from '../../types';
-import {
-  getEasing,
-  getEasingName,
-  getTimingFactor,
-  toKeyframeValue,
-  parseDirection,
-  suffixNames,
-  suffixCustomProperties,
-} from '../../utils';
+import type { AnimationData, DomApi, Flip, TimeAnimationOptions } from '../../types';
 import { AXIS_DIRECTIONS } from '../../consts';
+import {
+  getMotion3dTransform,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
+import { getLoopOverrides } from '../../easingUtils';
+import { axisDirection, toMotionRange } from '../../directions';
 
 const DEFAULT_EASING = 'linear';
+const ANGLE = 360;
 
 const DEFAULTS: Required<Flip> = {
   type: 'Flip',
@@ -25,80 +24,57 @@ export const schema = {
   perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
 };
 
-const DIRECTION_MAP = {
-  vertical: { x: '-1', y: '0' },
-  horizontal: { x: '0', y: '1' },
-};
+// a full flip - starting a turn away from rest, which looks the same
+const SHAPE: [number, number][] = [
+  [1, 0],
+  [0, 1],
+];
 
-export function web(options: TimeAnimationOptions & AnimationExtraOptions, _dom?: DomApi) {
+export function getNames(options: TimeAnimationOptions) {
+  return style(options).map(({ name }) => name!);
+}
+
+export function web(options: TimeAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: TimeAnimationOptions & AnimationExtraOptions, asWeb = false) {
-  const namedEffect = options.namedEffect as Flip;
-  const direction = parseDirection(namedEffect?.direction, AXIS_DIRECTIONS, DEFAULTS.direction);
-  const { perspective = DEFAULTS.perspective } = namedEffect;
+export function layers(options: TimeAnimationOptions, asWeb = false): AnimationData[] {
+  const { easing = DEFAULT_EASING, namedEffect, suffix } = options as TimeAnimationOptions<Flip>;
+  const { perspective = DEFAULTS.perspective } = namedEffect!;
 
-  const duration = options.duration || 1;
-  const iterationDelay = namedEffect?.iterationDelay || 0;
-  const offset = getTimingFactor(duration, iterationDelay) as number;
-  const [name] = getNames(options);
+  const flipOptions = {
+    ...options,
+    composite: 'add',
+    namedEffect: {
+      ...namedEffect,
+      angle: ANGLE,
+      perspective,
+    },
+  } as TimeAnimationOptions;
 
-  const rotationAxes = DIRECTION_MAP[direction];
-  const easing = options.easing || DEFAULT_EASING;
+  const axis = axisDirection.parse(namedEffect?.direction, DEFAULTS.direction);
 
-  const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-rotate-x': rotationAxes.x,
-    '--motion-rotate-y': rotationAxes.y,
-  };
-
-  const rotateStart = `rotate3d(${toKeyframeValue(
-    custom,
-    '--motion-rotate-x',
-    asWeb,
-  )}, ${toKeyframeValue(custom, '--motion-rotate-y', asWeb)}, 0, 0deg)`;
-
-  const rotateEnd = `rotate3d(${toKeyframeValue(
-    custom,
-    '--motion-rotate-x',
-    asWeb,
-  )}, ${toKeyframeValue(custom, '--motion-rotate-y', asWeb)}, 0, 360deg)`;
-
-  const animations = [
+  return [
+    // the layout rotation comes first, so the flip is along the element's rotated axes
     {
-      ...options,
-      name,
-      easing: 'linear',
-      duration: duration + iterationDelay,
-      custom,
-      keyframes: [
-        {
-          offset: 0,
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateStart}`,
-          easing: getEasing(easing),
-        },
-        {
-          offset,
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateEnd}`,
-        },
-        {
-          offset: 1,
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) rotateZ(var(--motion-rotate, 0deg)) ${rotateEnd}`,
-        },
-      ],
+      ...flipOptions,
+      composite: 'replace',
+      ...getLoopOverrides(flipOptions),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+    {
+      ...flipOptions,
+      ...getLoopOverrides(flipOptions, { shape: SHAPE, easings: [easing] }),
+      ...getMotion3dTransform(
+        toMotionRange(axisDirection, axis, 'in'),
+        { angle: ANGLE, perspective },
+        asWeb,
+        suffix,
+      ),
     },
   ];
-
-  return suffixCustomProperties(animations, options.suffix);
 }
 
-export function getNames(options: TimeAnimationOptions & AnimationExtraOptions) {
-  const iterationDelay = (options.namedEffect as Flip)?.iterationDelay || 0;
-  const timingFactor = getTimingFactor(options.duration!, iterationDelay, true);
-
-  return suffixNames(
-    [`motion-flip-${timingFactor}${getEasingName(options.easing, DEFAULT_EASING)}`],
-    options.suffix,
-  );
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }

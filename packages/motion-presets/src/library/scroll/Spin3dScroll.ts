@@ -1,106 +1,88 @@
-import type { AnimationFillMode, ScrubAnimationOptions, Spin3dScroll, DomApi } from '../../types';
-import { toKeyframeValue, suffixNames, suffixCustomProperties } from '../../utils';
+import type { AnimationData, ScrubAnimationOptions, Spin3dScroll, DomApi } from '../../types';
+import { SCROLL_RANGES } from '../../consts';
+import { spinDirection, toMotionRange } from '../../directions';
+import { getScrollParallax } from '../../parallaxUtils';
+import {
+  getLinearScrollEasing,
+  getScrollOverrides,
+  parseRange,
+  withSharedScrollRange,
+} from '../../rangeUtils';
+import {
+  getMotion3dTransform,
+  getMotionLayoutRotation,
+  mergeTransformLayers,
+} from '../../transformUtils';
 
-const MAX_Y_TRAVEL = 40;
+const DIRECTION = 'clockwise';
+
+const DEFAULTS: Required<Spin3dScroll> = {
+  type: 'Spin3dScroll',
+  angle: 100,
+  perspective: 1000,
+  range: 'in',
+  speed: 1,
+};
+
+export const schema = {
+  angle: { type: 'number', default: DEFAULTS.angle },
+  perspective: { type: 'number', min: 0, default: DEFAULTS.perspective },
+  range: { type: 'enum', values: SCROLL_RANGES, default: DEFAULTS.range },
+  speed: { type: 'number', min: 0, default: DEFAULTS.speed },
+};
 
 export function getNames(options: ScrubAnimationOptions) {
-  return suffixNames(['motion-spin3dScroll'], options.suffix);
+  return style(options).map(({ name }) => name!);
 }
 
 export function web(options: ScrubAnimationOptions, _dom?: DomApi) {
   return style(options, true);
 }
 
-export function style(options: ScrubAnimationOptions, asWeb = false) {
+export function layers(options: ScrubAnimationOptions, asWeb = false): AnimationData[] {
+  const { namedEffect, suffix } = options as ScrubAnimationOptions<Spin3dScroll>;
   const {
-    rotate = -100,
-    speed = 0,
-    range = 'in',
-    perspective = 1000,
-  } = options.namedEffect as Spin3dScroll;
-  const easing = 'linear';
-  const fill = (
-    range === 'out' ? 'forwards' : range === 'in' ? 'backwards' : options.fill
-  ) as AnimationFillMode;
+    angle = DEFAULTS.angle,
+    perspective = DEFAULTS.perspective,
+    speed = DEFAULTS.speed,
+  } = namedEffect!;
+  const range = parseRange(namedEffect, DEFAULTS.range);
+  const direction = range === 'out' ? spinDirection.opposite(DIRECTION) : DIRECTION;
+  const angleXYZ = { x: angle, y: angle, z: angle };
 
-  const travel = speed * MAX_Y_TRAVEL;
-
-  const fromValues = {
-    rotationX: range === 'out' ? 0 : -2 * rotate,
-    rotationY: range === 'out' ? 0 : -rotate,
-    rotationZ: range === 'out' ? 0 : -rotate,
-    travel: range === 'out' ? 0 : -travel,
-  };
-  const toValues = {
-    rotationX: rotate * (range === 'in' ? 0 : range === 'out' ? 3 : 1.8),
-    rotationY: rotate * (range === 'in' ? 0 : range === 'out' ? 2 : 1),
-    rotationZ: rotate * (range === 'in' ? 0 : range === 'out' ? 1 : 2),
-    travel: range === 'in' ? 0 : travel,
-  };
-
-  const offset = Math.abs(travel);
-  const startOffsetAdd = range === 'out' ? '0px' : `${-offset}vh`;
-  const endOffsetAdd = range === 'in' ? '0px' : `${offset}vh`;
-
-  const [spin3dScroll] = getNames(options);
-
-  const custom = {
-    '--motion-perspective': `${perspective}px`,
-    '--motion-travel-from': `${fromValues.travel}vh`,
-    '--motion-travel-to': `${toValues.travel}vh`,
-    '--motion-rot-x-from': `${fromValues.rotationX}deg`,
-    '--motion-rot-x-to': `${toValues.rotationX}deg`,
-    '--motion-rot-y-from': `${fromValues.rotationY}deg`,
-    '--motion-rot-y-to': `${toValues.rotationY}deg`,
-    '--motion-rot-z-from': `${fromValues.rotationZ}deg`,
-    '--motion-rot-z-to': `${toValues.rotationZ}deg`,
-  };
-
-  const animations = [
-    {
-      ...options,
-      name: spin3dScroll,
-      fill,
-      easing,
-      custom,
-      startOffsetAdd,
-      endOffsetAdd,
-      keyframes: [
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateY(${toKeyframeValue(
-            custom,
-            '--motion-travel-from',
-            asWeb,
-          )}) rotateZ(calc(${toKeyframeValue(
-            {},
-            '--motion-rotate',
-            false,
-            '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-rot-z-from', asWeb)})) rotateY(${toKeyframeValue(
-            custom,
-            '--motion-rot-y-from',
-            asWeb,
-          )}) rotateX(${toKeyframeValue(custom, '--motion-rot-x-from', asWeb)})`,
-        },
-        {
-          transform: `perspective(${toKeyframeValue(custom, '--motion-perspective', asWeb)}) translateY(${toKeyframeValue(
-            custom,
-            '--motion-travel-to',
-            asWeb,
-          )}) rotateZ(calc(${toKeyframeValue(
-            {},
-            '--motion-rotate',
-            false,
-            '0deg',
-          )} + ${toKeyframeValue(custom, '--motion-rot-z-to', asWeb)})) rotateY(${toKeyframeValue(
-            custom,
-            '--motion-rot-y-to',
-            asWeb,
-          )}) rotateX(${toKeyframeValue(custom, '--motion-rot-x-to', asWeb)})`,
-        },
-      ],
+  const transformOptions = {
+    ...options,
+    namedEffect: {
+      ...namedEffect,
+      angle: angleXYZ,
+      direction: DIRECTION,
+      perspective,
+      parallax: { speed },
     },
-  ];
+  } as ScrubAnimationOptions;
 
-  return suffixCustomProperties(animations, options.suffix);
+  const overrides = getScrollOverrides(options, range, getLinearScrollEasing(range, true));
+
+  return withSharedScrollRange([
+    {
+      ...transformOptions,
+      ...overrides,
+      ...getMotion3dTransform(
+        toMotionRange(spinDirection, direction, range),
+        { angle: angleXYZ, perspective, parallax: getScrollParallax(range, overrides, speed) },
+        asWeb,
+        suffix,
+      ),
+    },
+    {
+      ...transformOptions,
+      composite: 'add',
+      ...getScrollOverrides(options, range, getLinearScrollEasing(range, false)),
+      ...getMotionLayoutRotation({}, asWeb, suffix),
+    },
+  ]);
+}
+
+export function style(...args: Parameters<typeof layers>): AnimationData[] {
+  return mergeTransformLayers(layers(...args), args[0].suffix);
 }
