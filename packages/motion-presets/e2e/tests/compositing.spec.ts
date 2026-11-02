@@ -6,7 +6,6 @@ const NOT_COMPOSITED: Record<string, string> = {
   BlurScroll: 'filter',
   TiltIn: 'layers with different timings, as on master',
   TiltScroll: 'layers with different timings, as on master',
-  Wiggle: 'its rotation and lift follow different loop shapes',
 };
 
 // Chromium traces an 'Animation' event with a failure bitmask for every animation it can't composite

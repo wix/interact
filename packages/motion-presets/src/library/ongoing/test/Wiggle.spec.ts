@@ -1,64 +1,227 @@
 import { describe, expect, test } from 'vitest';
 
-import * as Wiggle from '../Wiggle';
-import { resolveDefaults } from '../../../test/resolveDefaults';
-import type { TimeAnimationOptions } from '../../../types';
-import { progressAt } from './testUtils';
-
-const options = (namedEffect = {}, rest: Partial<TimeAnimationOptions> = {}) =>
-  ({
-    duration: 1000,
-    namedEffect: { type: 'Wiggle', ...namedEffect },
-    ...rest,
-  }) as TimeAnimationOptions;
+import * as WiggleAnimation from '../Wiggle';
+import { Wiggle, TimeAnimationOptions, AnimationData } from '../../../types';
+import { baseMockOptions } from './testUtils';
 
 describe('Wiggle', () => {
-  test('layout rotation, then the wiggle rotation, then the lift along the tilted axes', () => {
-    const [rotation, wiggle, lift] = resolveDefaults(Wiggle.layers(options()));
-    expect(rotation.composite).toBe('replace');
-    expect(wiggle.name).toBe('motion-3d-transform');
-    expect(wiggle.composite).toBe('add');
-    expect(lift.name).toBe('motion-trans-rot');
-    expect(lift.composite).toBe('add');
-  });
+  describe('web() method', () => {
+    test('default values', () => {
+      const mockOptions: TimeAnimationOptions = {
+        ...baseMockOptions,
+        namedEffect: {} as Wiggle,
+      };
 
-  test('rotates only around z, first to the positive angle (25deg by default)', () => {
-    const angleOf = (namedEffect = {}) => {
-      const custom = resolveDefaults(Wiggle.layers(options(namedEffect)))[1].custom!;
-      expect(custom).toMatchObject({
-        '--motion-transform-3d-angle-x': '0deg',
-        '--motion-transform-3d-angle-y': '0deg',
-        '--motion-transform-3d-travel-z': '0px',
-      });
-      return (
-        (custom['--motion-transform-3d-from'] as number) *
-        parseFloat(custom['--motion-transform-3d-angle-z'] as string)
-      );
-    };
-    expect(angleOf()).toBe(25);
-    expect(angleOf({ angle: 10 })).toBe(10);
-  });
+      const expectedResult: Partial<AnimationData>[] = [
+        {
+          name: 'motion-wiggle-1',
+          duration: 1,
+          keyframes: [
+            {
+              offset: 0.18,
+              transform:
+                'rotate(calc(var(--motion-rotate, 0deg) + 25deg)) translateY(calc(-1 * 25px))',
+            },
+            {
+              offset: 0.35,
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + -20deg)) translateY(0px)',
+            },
+            {
+              offset: 0.53,
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 15deg)) translateY(0px)',
+            },
+            {
+              offset: 0.73,
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + -10deg)) translateY(0px)',
+            },
+            {
+              offset: 1,
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 0deg)) translateY(0px)',
+            },
+          ],
+        },
+      ];
 
-  test('lifts up without rotating (25px by default)', () => {
-    const custom = resolveDefaults(Wiggle.layers(options({ travel: '40px' })))[2].custom!;
-    expect(custom).toMatchObject({
-      '--motion-trans-rot-angle': '0deg',
-      '--motion-trans-rot-direction': '90deg',
-      '--motion-trans-rot-from': -1,
-      '--motion-trans-rot-travel': '40px',
+      const result = WiggleAnimation.web(mockOptions);
+
+      expect(result).toMatchObject(expectedResult);
     });
-    expect(resolveDefaults(Wiggle.layers(options()))[2].custom!['--motion-trans-rot-travel']).toBe(
-      '25px',
-    );
+
+    test('custom duration, angle and travel', () => {
+      const mockOptions: TimeAnimationOptions = {
+        ...baseMockOptions,
+        duration: 1000,
+        namedEffect: { angle: 34, travel: '34px', iterationDelay: 500 } as Wiggle,
+      };
+
+      const expectedResult: Partial<AnimationData>[] = [
+        {
+          name: 'motion-wiggle-067',
+          duration: 1500,
+          keyframes: [
+            {
+              offset: 0.1206,
+              transform:
+                'rotate(calc(var(--motion-rotate, 0deg) + 34deg)) translateY(calc(-1 * 34px))',
+            },
+            {
+              offset: 0.2345,
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + -27.2deg)) translateY(0px)',
+            },
+            {
+              offset: 0.3551,
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 20.4deg)) translateY(0px)',
+            },
+            {
+              offset: 0.4891,
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + -13.6deg)) translateY(0px)',
+            },
+            {
+              offset: 0.67,
+              transform: 'rotate(calc(var(--motion-rotate, 0deg) + 0deg)) translateY(0px)',
+            },
+          ],
+        },
+      ];
+
+      const result = WiggleAnimation.web(mockOptions);
+
+      expect(result).toMatchObject(expectedResult);
+    });
   });
 
-  test('the rotation wobbles while the lift is a single bump, both linear', () => {
-    const [, wiggle, lift] = resolveDefaults(Wiggle.layers(options({}, { easing: 'sineIn' })));
-    expect(progressAt(wiggle.easing!, 18)).toBeCloseTo(0, 4);
-    expect(progressAt(wiggle.easing!, 35)).toBeCloseTo(1.8, 4);
-    expect(progressAt(wiggle.easing!, 73)).toBeCloseTo(1.4, 4);
-    expect(progressAt(lift.easing!, 18)).toBeCloseTo(0, 4);
-    expect(progressAt(lift.easing!, 35)).toBe(1);
-    expect(progressAt(lift.easing!, 60)).toBe(1);
+  describe('style() method', () => {
+    test('default values', () => {
+      const mockOptions: TimeAnimationOptions = {
+        ...baseMockOptions,
+        namedEffect: {} as Wiggle,
+      };
+
+      const expectedResult: Partial<AnimationData>[] = [
+        {
+          name: 'motion-wiggle-1',
+          duration: 1,
+          custom: {
+            '--motion-rotate-18': 'calc(var(--motion-rotate, 0deg) + 25deg)',
+            '--motion-translate-y-18': 'calc(-1 * 25px)',
+            '--motion-rotate-35': 'calc(var(--motion-rotate, 0deg) + -20deg)',
+            '--motion-translate-y-35': '0px',
+            '--motion-rotate-53': 'calc(var(--motion-rotate, 0deg) + 15deg)',
+            '--motion-translate-y-53': '0px',
+            '--motion-rotate-73': 'calc(var(--motion-rotate, 0deg) + -10deg)',
+            '--motion-translate-y-73': '0px',
+            '--motion-rotate-100': 'calc(var(--motion-rotate, 0deg) + 0deg)',
+            '--motion-translate-y-100': '0px',
+          },
+          keyframes: [
+            {
+              offset: 0.18,
+              transform: 'rotate(var(--motion-rotate-18)) translateY(var(--motion-translate-y-18))',
+            },
+            {
+              offset: 0.35,
+              transform: 'rotate(var(--motion-rotate-35)) translateY(var(--motion-translate-y-35))',
+            },
+            {
+              offset: 0.53,
+              transform: 'rotate(var(--motion-rotate-53)) translateY(var(--motion-translate-y-53))',
+            },
+            {
+              offset: 0.73,
+              transform: 'rotate(var(--motion-rotate-73)) translateY(var(--motion-translate-y-73))',
+            },
+            {
+              offset: 1,
+              transform:
+                'rotate(var(--motion-rotate-100)) translateY(var(--motion-translate-y-100))',
+            },
+          ],
+        },
+      ];
+
+      const result = WiggleAnimation.style?.(mockOptions);
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
+    test('custom angle, travel and duration', () => {
+      const mockOptions: TimeAnimationOptions = {
+        ...baseMockOptions,
+        duration: 1000,
+        namedEffect: { angle: 34, travel: '34px', iterationDelay: 500 } as Wiggle,
+      };
+
+      const expectedResult: Partial<AnimationData>[] = [
+        {
+          name: 'motion-wiggle-067',
+          duration: 1500,
+          custom: {
+            '--motion-rotate-18': 'calc(var(--motion-rotate, 0deg) + 34deg)',
+            '--motion-translate-y-18': 'calc(-1 * 34px)',
+            '--motion-rotate-35': 'calc(var(--motion-rotate, 0deg) + -27.2deg)',
+            '--motion-translate-y-35': '0px',
+            '--motion-rotate-53': 'calc(var(--motion-rotate, 0deg) + 20.4deg)',
+            '--motion-translate-y-53': '0px',
+            '--motion-rotate-73': 'calc(var(--motion-rotate, 0deg) + -13.6deg)',
+            '--motion-translate-y-73': '0px',
+            '--motion-rotate-100': 'calc(var(--motion-rotate, 0deg) + 0deg)',
+            '--motion-translate-y-100': '0px',
+          },
+          keyframes: [
+            {
+              offset: 0.1206,
+              transform: 'rotate(var(--motion-rotate-18)) translateY(var(--motion-translate-y-18))',
+            },
+            {
+              offset: 0.2345,
+              transform: 'rotate(var(--motion-rotate-35)) translateY(var(--motion-translate-y-35))',
+            },
+            {
+              offset: 0.3551,
+              transform: 'rotate(var(--motion-rotate-53)) translateY(var(--motion-translate-y-53))',
+            },
+            {
+              offset: 0.4891,
+              transform: 'rotate(var(--motion-rotate-73)) translateY(var(--motion-translate-y-73))',
+            },
+            {
+              offset: 0.67,
+              transform:
+                'rotate(var(--motion-rotate-100)) translateY(var(--motion-translate-y-100))',
+            },
+          ],
+        },
+      ];
+
+      const result = WiggleAnimation.style?.(mockOptions);
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
+    test('style method should populate custom properties correctly', () => {
+      const mockOptions: TimeAnimationOptions = {
+        ...baseMockOptions,
+        namedEffect: { angle: 10, travel: { value: 1, unit: 'em' } } as Wiggle,
+      };
+
+      const result = WiggleAnimation.style?.(mockOptions);
+
+      expect(result[0]).toHaveProperty('custom');
+      expect(result[0].custom).toHaveProperty('--motion-rotate-18');
+      expect(result[0].custom).toHaveProperty('--motion-translate-y-18');
+      expect(result[0].custom).toHaveProperty('--motion-rotate-35');
+      expect(result[0].custom).toHaveProperty('--motion-translate-y-35');
+      expect(result[0].custom).toHaveProperty('--motion-rotate-53');
+      expect(result[0].custom).toHaveProperty('--motion-translate-y-53');
+      expect(result[0].custom).toHaveProperty('--motion-rotate-73');
+      expect(result[0].custom).toHaveProperty('--motion-translate-y-73');
+      expect(result[0].custom).toHaveProperty('--motion-rotate-100');
+      expect(result[0].custom).toHaveProperty('--motion-translate-y-100');
+
+      expect(result[0].custom!['--motion-rotate-18']).toBe(
+        'calc(var(--motion-rotate, 0deg) + 10deg)',
+      );
+      expect(result[0].custom!['--motion-translate-y-18']).toBe('calc(-1 * 1em)');
+    });
   });
 });
