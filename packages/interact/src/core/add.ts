@@ -18,7 +18,7 @@ import { PLUGIN_FIELD_PREFIX } from '../types';
 import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
 import { getInterpolatedKey } from './utilities';
 import { effectToAnimationOptions } from '../handlers/utilities';
-import { Interact, getSelector } from './Interact';
+import { Interact, getListItemStateSelector, getSelector } from './Interact';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import type { AnimationGroupArgs } from '@wix/motion';
 
@@ -848,6 +848,9 @@ function addInteraction<T extends TriggerType>(
         addItemFilter: true,
         useFirstChild,
       }),
+      listItemStateSelector: effect.listContainer
+        ? getListItemStateSelector(effect, (effect as Effect).effectId!)
+        : undefined,
       selectorCondition,
     };
 

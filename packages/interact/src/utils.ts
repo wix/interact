@@ -102,6 +102,7 @@ export function createTransitionCSS({
   transition,
   transitionProperties,
   childSelector = '> :first-child',
+  listItemStateSelector,
   selectorCondition,
 }: CreateTransitionCSSParams): string[] {
   const transitions: string[] = transitionEffectToTransitionsList({
@@ -113,21 +114,19 @@ export function createTransitionCSS({
     (property) => `${property.name}: ${property.value};`,
   );
   const escapedKey = key.replace(/"/g, "'");
+  const withCondition = (selector: string) =>
+    selectorCondition ? applySelectorCondition(selector, selectorCondition) : selector;
 
-  // Build selectors, applying condition if present
-  const stateSelector = `:is(:state(${effectId}), :--${effectId}) ${childSelector}`;
-  const dataAttrSelector = `[data-interact-effect~="${effectId}"] ${childSelector}`;
-
-  const finalStateSelector = selectorCondition
-    ? applySelectorCondition(stateSelector, selectorCondition)
-    : stateSelector;
-  const finalDataAttrSelector = selectorCondition
-    ? applySelectorCondition(dataAttrSelector, selectorCondition)
-    : dataAttrSelector;
+  const stateSelectors = listItemStateSelector
+    ? [`[data-interact-key="${escapedKey}"] ${listItemStateSelector}`]
+    : [
+        `:is(:state(${effectId}), :--${effectId}) ${childSelector}`,
+        `[data-interact-effect~="${effectId}"] ${childSelector}`,
+      ];
 
   const result = [
-    `${finalStateSelector},
-    ${finalDataAttrSelector} {
+    `${stateSelectors.map(withCondition).join(`,
+    `)} {
       ${styleProperties.join(`
       `)}
     }`,
