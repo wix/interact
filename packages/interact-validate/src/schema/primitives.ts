@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+// a string other than the enum values is an effectId in config.effects
+export const ReducedMotionHandling = z.union([
+  z.enum(['ignore', 'cancel', 'collapse']),
+  z.string().min(1),
+]);
+
 export const Keyframe = z.record(z.string(), z.union([z.string(), z.number()]));
 
 export const LengthPercentage = z

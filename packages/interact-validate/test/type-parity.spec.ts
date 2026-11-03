@@ -52,6 +52,17 @@ describe('schema type parity (drift guard)', () => {
     >();
   });
 
+  it('reducedMotionHandling is accepted at every level (mirrors ReducedMotionHandling)', () => {
+    type Canonical = InteractConfig['reducedMotionHandling'];
+    type InferredInteraction = InferredConfig['interactions'][number];
+    type InferredEffect = NonNullable<InferredConfig['effects']>[string];
+    type InferredSequence = NonNullable<InferredConfig['sequences']>[string];
+    expectTypeOf<InferredConfig['reducedMotionHandling']>().toMatchTypeOf<Canonical>();
+    expectTypeOf<InferredInteraction['reducedMotionHandling']>().toMatchTypeOf<Canonical>();
+    expectTypeOf<InferredEffect['reducedMotionHandling']>().toMatchTypeOf<Canonical>();
+    expectTypeOf<InferredSequence['reducedMotionHandling']>().toMatchTypeOf<Canonical>();
+  });
+
   it('interaction/effect schemas accept $-prefixed plugin fields (mirrors PluginFields)', () => {
     // Both the zod-inferred type and the canonical type accept an arbitrary `$`-prefixed field.
     type InferredInteraction = InferredConfig['interactions'][number];

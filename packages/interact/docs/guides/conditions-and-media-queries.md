@@ -269,6 +269,60 @@ const accessibleConfig: InteractConfig = {
 };
 ```
 
+### Reduced Motion Handling
+
+Instead of writing a separate interaction per motion preference, set `reducedMotionHandling` and let Interact derive the reduced-motion version of each effect. It is accepted on the config, interactions, sequences and effects — the most specific level wins.
+
+```typescript
+const config: InteractConfig = {
+  // every effect jumps to its end state for users who prefer reduced motion
+  reducedMotionHandling: 'collapse',
+
+  effects: {
+    fade: {
+      keyframeEffect: { name: 'fade', keyframes: [{ opacity: '0' }, { opacity: '1' }] },
+      duration: 300,
+      easing: 'ease-out',
+    },
+  },
+
+  interactions: [
+    {
+      key: 'hero-title',
+      trigger: 'viewEnter',
+      effects: [
+        {
+          keyframeEffect: {
+            name: 'fade-move',
+            keyframes: [
+              { opacity: '0', transform: 'translateY(50px) rotate(-2deg)' },
+              { opacity: '1', transform: 'translateY(0) rotate(0deg)' },
+            ],
+          },
+          duration: 800,
+          // swap in the subtle `fade` effect instead of collapsing
+          reducedMotionHandling: 'fade',
+        },
+      ],
+    },
+    {
+      key: 'background',
+      trigger: 'viewProgress',
+      // drop the parallax entirely
+      reducedMotionHandling: 'cancel',
+      effects: [{ namedEffect: { type: 'ParallaxScroll' } }],
+    },
+  ],
+};
+```
+
+- `'ignore'` (default) plays the effect as usual.
+- `'cancel'` drops it, exactly as if it had a `(prefers-reduced-motion: no-preference)` condition.
+- `'collapse'` plays it with duration 0, so it jumps to its end state after its delay. Looping and scroll/pointer-driven effects have no end state, so they're cancelled instead.
+- An effectId replaces the effect's animation with that registry effect's, keeping the original target and conditions. It must be the same kind of effect (time-based, scroll/pointer-driven or a state transition), otherwise the effect collapses.
+
+`Interact.forceReducedMotion = true` applies the reduced-motion outcome regardless of the user's setting — pass `forceReducedMotion: true` to `generate()` too.
+
 ## Device-Specific Patterns
 
 ### Touch vs Mouse Devices

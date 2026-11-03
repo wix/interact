@@ -14,6 +14,7 @@ import {
 } from '../types';
 import { getElementHash, getInterpolatedKey } from './utilities';
 import { getFallbackId, getKeyframeSlots, getSlotKey } from './css';
+import { withReducedMotionConditions } from './reducedMotion';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import {
   registerEffects,
@@ -276,12 +277,11 @@ export class Interact {
     cacheKey: string,
     sequenceOptions: SequenceOptions,
     animationGroupArgs: AnimationGroupArgs[],
-    context?: { reducedMotion?: boolean },
   ): Sequence {
     const cached = Interact.sequenceCache.get(cacheKey);
     if (cached) return cached;
 
-    const sequence = getMotionSequence(sequenceOptions, animationGroupArgs, context);
+    const sequence = getMotionSequence(sequenceOptions, animationGroupArgs);
     Interact.sequenceCache.set(cacheKey, sequence);
     Interact._registerSequenceElements(animationGroupArgs, sequence);
 
@@ -292,13 +292,12 @@ export class Interact {
     cacheKey: string,
     animationGroupArgs: AnimationGroupArgs[],
     indices: number[],
-    context?: { reducedMotion?: boolean },
   ): boolean {
     const cached = Interact.sequenceCache.get(cacheKey);
 
     if (!cached) return false;
 
-    const newGroups = createAnimationGroups(animationGroupArgs, context);
+    const newGroups = createAnimationGroups(animationGroupArgs);
     const entries: IndexedGroup[] = newGroups.map((group, i) => ({
       index: indices[i] ?? cached.animationGroups.length,
       group,
@@ -432,7 +431,7 @@ function parseConfig(
   const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {} } = config;
   const interactions: InteractCache['interactions'] = {};
   const slots = config.interactions
-    ? getKeyframeSlots(config, configIndex)
+    ? getKeyframeSlots(config, configIndex, Interact.forceReducedMotion)
     : new Map<string, string>();
 
   config.interactions?.forEach((interaction_, interactionIndex) => {
@@ -598,7 +597,8 @@ function parseConfig(
   return {
     effects: effectMap,
     sequences: sequenceMap,
-    conditions,
+    conditions: withReducedMotionConditions(conditions),
+    reducedMotionHandling: config.reducedMotionHandling,
     interactions,
   };
 }

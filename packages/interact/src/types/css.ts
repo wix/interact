@@ -19,6 +19,11 @@ export type GenerateOptions = {
    * and each config's `Interact.create()` must get the same index, since unnamed effects' ids are suffixed too.
    */
   configIndex?: number;
+  /**
+   * Generates only the reduced-motion outcome of every effect, unconditionally. Must equal
+   * `Interact.forceReducedMotion` at runtime.
+   */
+  forceReducedMotion?: boolean;
 };
 
 export type ListPropertyName =

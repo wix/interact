@@ -49,6 +49,7 @@ The main configuration object for defining interactions, effects, and conditions
 type InteractConfig = {
   effects: Record<string, Effect>;
   conditions?: Record<string, Condition>;
+  reducedMotionHandling?: ReducedMotionHandling;
   interactions: Interaction[];
 };
 ```
@@ -58,6 +59,7 @@ type InteractConfig = {
 - `interactions` - Array of interaction definitions (required)
 - `effects` - Map of reusable effect definitions by ID (required)
 - `conditions` - Map of conditional logic definitions by ID (optional)
+- `reducedMotionHandling` - Default [`ReducedMotionHandling`](#reducedmotionhandling) for every effect (optional, defaults to `'ignore'`). Interactions, sequences and effects override it
 
 **Example:**
 
@@ -274,7 +276,6 @@ Options passed to interaction handlers.
 
 ```typescript
 type InteractOptions = {
-  reducedMotion?: boolean;
   targetController?: IInteractionController;
   selectorCondition?: string;
   allowA11yTriggers?: boolean;
@@ -283,7 +284,6 @@ type InteractOptions = {
 
 **Properties:**
 
-- `reducedMotion` - Whether reduced motion is enabled (respects `prefers-reduced-motion` or `Interact.forceReducedMotion`)
 - `targetController` - The controller managing the target element
 - `selectorCondition` - Optional CSS selector condition for element matching
 - `allowA11yTriggers` - Whether to enable accessibility triggers (keyboard events) for `click` and `hover` triggers. When `true`, `click` responds to Enter/Space keys and `hover` responds to focus events. Defaults to `true`.
@@ -293,7 +293,6 @@ type InteractOptions = {
 ```typescript
 // Used internally by handlers
 const options: InteractOptions = {
-  reducedMotion: Interact.forceReducedMotion,
   targetController: Interact.getController('my-element'),
 };
 ```
@@ -863,6 +862,25 @@ type Interaction = InteractionTrigger & {
 ```
 
 An interaction can have `effects` only, `sequences` only, or both.
+
+## Reduced Motion Types
+
+### `ReducedMotionHandling`
+
+What an effect does when the user prefers reduced motion: `(prefers-reduced-motion: reduce)` matches, or `Interact.forceReducedMotion` is set.
+
+```typescript
+type ReducedMotionHandling = 'ignore' | 'cancel' | 'collapse' | (string & {}); // string = effectId
+```
+
+Accepted on `InteractConfig`, `Interaction`, `SequenceConfig` / `SequenceConfigRef` and effects. The most specific level wins: inline effect → its `effects` registry entry → sequence → interaction → config → `'ignore'`.
+
+- `'ignore'` - Plays as usual.
+- `'cancel'` - Dropped, exactly like a `(prefers-reduced-motion: no-preference)` media condition.
+- `'collapse'` - Plays with duration 0, keeping everything else (delay, iterations, fill, keyframes), so it jumps to its end state. Transitions become 0ms and keep their delay. Effects with no end state (infinite iterations, `viewProgress` / `pointerMove`) are cancelled instead.
+- effectId - Replaced by the animation of `effects[effectId]` (effect type, keyframes and timing), keeping the original's target, conditions, `effectId` and `triggerType`. It must be of the same kind (time, scrub or state) and exist, otherwise the effect collapses.
+
+`generate()` emits both outcomes under exclusive `prefers-reduced-motion` media queries, so the CSS and the runtime agree. Pass `generate(config, { forceReducedMotion: true })` when `Interact.forceReducedMotion` is set.
 
 ## Condition Types
 

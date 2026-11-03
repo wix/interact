@@ -456,7 +456,7 @@ describe('interact (react)', () => {
         expect.any(HTMLElement),
         expect.any(Object),
         undefined,
-        { reducedMotion: false },
+        { reducedMotion: undefined },
       );
     });
 
@@ -481,7 +481,7 @@ describe('interact (react)', () => {
         expect.any(HTMLElement),
         expect.any(Object),
         undefined,
-        { reducedMotion: false },
+        { reducedMotion: undefined },
       );
     });
 
@@ -500,7 +500,7 @@ describe('interact (react)', () => {
         expect.any(HTMLElement),
         expect.any(Object),
         undefined,
-        { reducedMotion: false },
+        { reducedMotion: undefined },
       );
     });
 
@@ -806,7 +806,7 @@ describe('interact (react)', () => {
         expect.any(HTMLElement),
         expect.any(Object),
         undefined,
-        { reducedMotion: false },
+        { reducedMotion: undefined },
       );
     });
   });
@@ -837,11 +837,11 @@ describe('interact (react)', () => {
   });
 
   describe('reduced motion', () => {
-    it('should pass reducedMotion=true to getWebAnimation when forceReducedMotion is true', async () => {
+    it('should collapse effects when forceReducedMotion is true and reducedMotionHandling is collapse', async () => {
       const { getWebAnimation } = await import('@wix/motion');
 
       Interact.forceReducedMotion = true;
-      Interact.create(getMockConfig());
+      Interact.create({ ...getMockConfig(), reducedMotionHandling: 'collapse' });
 
       render(
         <Interaction tagName="div" interactKey="logo-hover">
@@ -851,9 +851,9 @@ describe('interact (react)', () => {
 
       expect(getWebAnimation).toHaveBeenCalledWith(
         expect.any(HTMLElement),
-        expect.any(Object),
+        expect.objectContaining({ duration: 0 }),
         undefined,
-        { reducedMotion: true },
+        { reducedMotion: undefined },
       );
     });
   });

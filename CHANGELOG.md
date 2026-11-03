@@ -46,6 +46,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact-validate
 
+### [Unreleased]
+
+#### Added
+
+- `reducedMotionHandling` accepted on the config, interactions, sequences and effects, with checks that a named effect exists and is of the same kind (`REDUCED_MOTION_EFFECT_NOT_FOUND`, `REDUCED_MOTION_INCOMPATIBLE_EFFECT`) and the `REDUCED_MOTION` rule category (`REDUCED_MOTION_SELF_REFERENCE`, `REDUCED_MOTION_SHADOWED_EFFECT_ID`, `REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH`, `REDUCED_MOTION_COLLAPSE_CANCELS`)
+- An effect named only by a `reducedMotionHandling` is no longer reported as `UNUSED_EFFECT`
+
 ### [0.2.1] - 2026-10-25
 
 #### Added
@@ -111,6 +118,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/interact
+
+### [Unreleased]
+
+#### Added
+
+- `reducedMotionHandling` on the config, interactions, sequences and effects — `'ignore'` (default), `'cancel'`, `'collapse'` or an effectId — sets what an effect does under `prefers-reduced-motion: reduce`; the most specific level wins. `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media, and the runtime picks the matching one, without adding effects to the config
+- `forceReducedMotion` option for `generate()`, matching `Interact.forceReducedMotion`
+
+#### Changed
+
+- **Breaking:** `Interact.forceReducedMotion` applies the reduced-motion outcome of `reducedMotionHandling` instead of passing `reducedMotion` to `@wix/motion`, so on its own it no longer changes anything. To keep the old behavior, set `reducedMotionHandling: 'collapse'` on the config (finite multi-iteration animations now collapse instead of being dropped)
+- **Breaking:** runtime transitions no longer drop their `transition` under `prefers-reduced-motion: reduce`, matching `generate()`. Use `reducedMotionHandling: 'collapse'` to keep it
+- `reducedMotion` removed from `InteractOptions`, and the `context` argument from `Interact.getSequence()` / `Interact.addToSequence()`
+- 0ms transitions that have a delay are kept, so the delay is honored
 
 ### [2.6.0] - 2026-11-02
 

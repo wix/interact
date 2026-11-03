@@ -13,19 +13,13 @@ import fastdom from 'fastdom';
 export function createTimeEffectHandler(
   element: HTMLElement,
   effect: TimeEffect & EffectBase,
-  reducedMotion: boolean = false,
   selectorCondition?: string,
   enterLeave?: EventTriggerConfigEnterLeave,
   preCreatedAnimation?: AnimationGroup,
 ): ((event: Event) => void) | null {
   const animation =
     preCreatedAnimation ||
-    (getAnimation(
-      element,
-      effectToAnimationOptions(effect),
-      undefined,
-      reducedMotion,
-    ) as AnimationGroup | null);
+    (getAnimation(element, effectToAnimationOptions(effect)) as AnimationGroup | null);
 
   if (!animation) {
     return null;

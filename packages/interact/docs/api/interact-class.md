@@ -144,7 +144,7 @@ Configures global settings for the Interact system.
 - `options.viewEnter` - Optional default partial `ViewEnterParams` (e.g. `threshold`, `inset`, `useSafeViewEnter`)
 - `options.allowA11yTriggers` - When `true`, `click` and `hover` triggers also respond to keyboard (Enter/Space) and focus
 
-To force reduced motion globally, set `Interact.forceReducedMotion = true` (static property, not via `setup`).
+To force reduced motion globally, set `Interact.forceReducedMotion = true` (static property, not via `setup`). It applies the reduced-motion outcome of each effect's `reducedMotionHandling` regardless of the OS setting, so it does nothing for effects without one (the default is `'ignore'`). When using `generate()`, pass it the same value as `forceReducedMotion`.
 
 **Example:**
 

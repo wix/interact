@@ -1,4 +1,10 @@
-import type { Effect, EffectRef, StateEffect, TransitionProperty } from './effects';
+import type {
+  Effect,
+  EffectRef,
+  ReducedMotionHandling,
+  StateEffect,
+  TransitionProperty,
+} from './effects';
 import type { Condition, SequenceConfig, Interaction, InteractionTrigger } from './config';
 
 export type InteractCache = {
@@ -11,6 +17,7 @@ export type InteractCache = {
   conditions: {
     [conditionId: string]: Condition;
   };
+  reducedMotionHandling?: ReducedMotionHandling;
   interactions: {
     [path: string]: {
       triggers: Interaction[];

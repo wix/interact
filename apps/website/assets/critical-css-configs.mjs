@@ -18,6 +18,7 @@ const TILT_UP_OPTS = {
 
 /** Landing page (`index.html`) — viewEnter entrances for FOUC CSS generation. */
 export const landingPageConfig = {
+  reducedMotionHandling: 'collapse',
   interactions: [
     {
       key: 'perf-text',

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Condition } from './primitives';
+import { Condition, ReducedMotionHandling } from './primitives';
 import {
   Effect,
   ViewProgressEffect,
@@ -17,6 +17,7 @@ import { withPluginFields } from './plugins';
 import type { Path, SemanticIssue } from '../types';
 import { walkConfig } from '../walkConfig';
 import { collectSemanticWarnings } from '../semantic';
+import { collectReducedMotionIssues, getReducedMotionReferences } from '../semantic/reducedMotion';
 
 export const TriggerType = z.enum([
   'hover',
@@ -58,6 +59,7 @@ const InteractionBase = {
   listContainer: z.string().optional(),
   listItemSelector: z.string().optional(),
   conditions: z.array(z.string().min(1)).optional(),
+  reducedMotionHandling: ReducedMotionHandling.optional(),
 };
 
 const hasEffectsOrSequences = (interaction: { effects?: unknown[]; sequences?: unknown[] }) =>
@@ -220,6 +222,7 @@ export const InteractConfigSchema = z
     effects: z.record(z.string().min(1), Effect).optional(),
     sequences: z.record(z.string().min(1), SequenceConfig).optional(),
     conditions: z.record(z.string().min(1), Condition).optional(),
+    reducedMotionHandling: ReducedMotionHandling.optional(),
     interactions: z.array(Interaction),
   })
   .strict()
@@ -265,6 +268,10 @@ export const InteractConfigSchema = z
         }
       },
     });
+
+    collectReducedMotionIssues(config)
+      .filter(({ severity }) => severity === 'error')
+      .forEach(({ severity: _, ...issue }) => ctx.addIssue(issue as any));
   })
   .transform((config) => {
     const configEffects = config.effects ?? {};
@@ -304,6 +311,8 @@ export const InteractConfigSchema = z
       },
     });
 
+    getReducedMotionReferences(config).forEach(Set.prototype.delete, effectIdReferences);
+
     effectIdReferences.forEach((effectId) => {
       warnings.push({
         code: 'custom',
@@ -331,6 +340,9 @@ export const InteractConfigSchema = z
 
     // Append the rule-derived semantic warnings/info nudges (A/C/D + animationEnd self-reference).
     warnings.push(...collectSemanticWarnings(config));
+    warnings.push(
+      ...collectReducedMotionIssues(config).filter(({ severity }) => severity !== 'error'),
+    );
 
     return { ...config, warnings };
   });

@@ -609,46 +609,56 @@ describe('interact (mini)', () => {
   });
 
   describe('reduced motion', () => {
-    it('should pass reducedMotion=true to getWebAnimation when forceReducedMotion is true', async () => {
-      const { getWebAnimation } = await import('@wix/motion');
-      Interact.forceReducedMotion = true;
-      Interact.create({
-        interactions: [
-          {
-            trigger: 'hover',
-            key: 'logo-hover',
-            effects: [
-              {
-                key: 'logo-hover',
-                effectId: 'logo-arc-in',
-              },
-            ],
+    it.each([
+      [undefined, 1200],
+      ['collapse', 0],
+    ] as const)(
+      'should apply reducedMotionHandling %s when forceReducedMotion is true',
+      async (reducedMotionHandling, duration) => {
+        const { getWebAnimation } = await import('@wix/motion');
+        Interact.forceReducedMotion = true;
+        Interact.create({
+          reducedMotionHandling,
+          interactions: [
+            {
+              trigger: 'hover',
+              key: 'logo-hover',
+              effects: [
+                {
+                  key: 'logo-hover',
+                  effectId: 'logo-arc-in',
+                },
+              ],
+            },
+          ],
+          effects: {
+            'logo-arc-in': {
+              namedEffect: {
+                type: 'ArcIn',
+                direction: 'right',
+                power: 'medium',
+              } as NamedEffect,
+              duration: 1200,
+            },
           },
-        ],
-        effects: {
-          'logo-arc-in': {
-            namedEffect: {
-              type: 'ArcIn',
-              direction: 'right',
-              power: 'medium',
-            } as NamedEffect,
-            duration: 1200,
-          },
-        },
-      });
+        });
 
-      element = document.createElement('div');
+        element = document.createElement('div');
 
-      add(element, 'logo-hover');
+        add(element, 'logo-hover');
 
-      expect(getWebAnimation).toHaveBeenCalledWith(element, expect.any(Object), undefined, {
-        reducedMotion: true,
-      });
+        expect(getWebAnimation).toHaveBeenCalledWith(
+          element,
+          expect.objectContaining({ duration }),
+          undefined,
+          { reducedMotion: undefined },
+        );
 
-      Interact.forceReducedMotion = false;
+        Interact.forceReducedMotion = false;
 
-      Interact.destroy();
-    });
+        Interact.destroy();
+      },
+    );
   });
 
   describe('add interaction', () => {
@@ -700,7 +710,7 @@ describe('interact (mini)', () => {
             }),
           }),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
     });
@@ -736,7 +746,7 @@ describe('interact (mini)', () => {
           expect.any(HTMLElement),
           expect.any(Object),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
 
@@ -759,13 +769,13 @@ describe('interact (mini)', () => {
         expect(getWebAnimation.mock.calls[1][0]).toBe(element);
         expect(getWebAnimation.mock.calls[2][0]).toBe(elementClick);
         expect(getWebAnimation.mock.calls[0][3]).toMatchObject({
-          reducedMotion: false,
+          reducedMotion: undefined,
         });
         expect(getWebAnimation.mock.calls[1][3]).toMatchObject({
-          reducedMotion: false,
+          reducedMotion: undefined,
         });
         expect(getWebAnimation.mock.calls[2][3]).toMatchObject({
-          reducedMotion: false,
+          reducedMotion: undefined,
         });
       });
 
@@ -959,7 +969,7 @@ describe('interact (mini)', () => {
           expect.any(HTMLElement),
           expect.any(Object),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
     });
@@ -1423,7 +1433,7 @@ describe('interact (mini)', () => {
             }),
           }),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
 
@@ -1450,7 +1460,7 @@ describe('interact (mini)', () => {
             }),
           }),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
 
@@ -1477,7 +1487,7 @@ describe('interact (mini)', () => {
             }),
           }),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
     });
@@ -1506,7 +1516,7 @@ describe('interact (mini)', () => {
             }),
           }),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
 
@@ -1533,7 +1543,7 @@ describe('interact (mini)', () => {
             }),
           }),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
     });
@@ -1612,7 +1622,7 @@ describe('interact (mini)', () => {
             }),
           }),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
 
         // Should not be called for mobile effect since condition doesn't match
@@ -1624,7 +1634,7 @@ describe('interact (mini)', () => {
             }),
           }),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
 
@@ -1691,7 +1701,7 @@ describe('interact (mini)', () => {
             }),
           }),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
     });
@@ -1754,7 +1764,7 @@ describe('interact (mini)', () => {
             }),
           }),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
 
@@ -1807,7 +1817,7 @@ describe('interact (mini)', () => {
             }),
           }),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
     });
@@ -1925,7 +1935,7 @@ describe('interact (mini)', () => {
           animationTarget,
           expect.any(Object),
           undefined,
-          { reducedMotion: false },
+          { reducedMotion: undefined },
         );
       });
 
@@ -2248,7 +2258,7 @@ describe('interact (mini)', () => {
         );
 
         expect(getWebAnimation).toHaveBeenCalledWith(deepTarget, expect.any(Object), undefined, {
-          reducedMotion: false,
+          reducedMotion: undefined,
         });
       });
 
@@ -2333,7 +2343,7 @@ describe('interact (mini)', () => {
 
         // Effect should target firstElementChild, not the interaction's selector
         expect(getWebAnimation).toHaveBeenCalledWith(targetElement, expect.any(Object), undefined, {
-          reducedMotion: false,
+          reducedMotion: undefined,
         });
       });
     });

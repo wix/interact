@@ -427,7 +427,6 @@ describe('interact sequences', () => {
       expect(getSequenceMock).toHaveBeenCalledWith(
         expect.objectContaining({ sequenceId: 'view-seq' }),
         expect.any(Array),
-        { reducedMotion: false },
       );
     });
 
@@ -450,7 +449,6 @@ describe('interact sequences', () => {
       expect(getSequenceMock).toHaveBeenCalledWith(
         expect.objectContaining({ sequenceId: 'click-seq' }),
         expect.any(Array),
-        { reducedMotion: false },
       );
     });
 
@@ -715,7 +713,6 @@ describe('interact sequences', () => {
       expect(interactionCall?.[4]).toEqual(
         expect.objectContaining({
           animation: mockSequence,
-          reducedMotion: false,
           allowA11yTriggers: expect.any(Boolean),
         }),
       );
@@ -897,7 +894,6 @@ describe('interact sequences', () => {
       expect(getSequenceMock).toHaveBeenCalledWith(
         expect.objectContaining({ sequenceId: 'cross-seq' }),
         expect.any(Array),
-        { reducedMotion: false },
       );
     });
 
@@ -929,7 +925,6 @@ describe('interact sequences', () => {
       expect(getSequenceMock).toHaveBeenCalledWith(
         expect.objectContaining({ sequenceId: 'source-after-seq' }),
         expect.any(Array),
-        { reducedMotion: false },
       );
     });
 
@@ -1735,12 +1730,11 @@ describe('interact sequences', () => {
       const animationGroupArgs: any[] = [
         { target, options: { duration: 300, keyframeEffect: { name: 'fade' } } },
       ];
-      const context = { reducedMotion: true };
 
-      Interact.getSequence('key-D', sequenceOptions, animationGroupArgs, context);
+      Interact.getSequence('key-D', sequenceOptions, animationGroupArgs);
 
       expect(getSequenceMock).toHaveBeenCalledTimes(1);
-      expect(getSequenceMock).toHaveBeenCalledWith(sequenceOptions, animationGroupArgs, context);
+      expect(getSequenceMock).toHaveBeenCalledWith(sequenceOptions, animationGroupArgs);
     });
   });
 
@@ -1857,6 +1851,46 @@ describe('interact sequences', () => {
           keyframeEffect: expect.objectContaining({ name: 'always' }),
         }),
       );
+    });
+
+    test('resolves reducedMotionHandling per effect, the sequence over the interaction', () => {
+      mockMatchMedia(['(prefers-reduced-motion: reduce)']);
+      const getSequenceMock = vi.mocked(getSequence);
+      const keyframeEffect = { name: 'pop', keyframes: [{ opacity: 0 }, { opacity: 1 }] };
+      const config: InteractConfig = {
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'source-key',
+            reducedMotionHandling: 'cancel',
+            sequences: [
+              {
+                sequenceId: 'rm-seq',
+                offset: 100,
+                reducedMotionHandling: 'collapse',
+                effects: [
+                  { key: 'source-key', keyframeEffect, duration: 300 },
+                  {
+                    key: 'source-key',
+                    keyframeEffect,
+                    duration: 400,
+                    reducedMotionHandling: 'ignore',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      Interact.create(config, { useCustomElement: false });
+      const source = createInteractElement();
+      addElement(source.element, 'source-key');
+
+      expect(getSequenceMock).toHaveBeenCalledTimes(1);
+      const [sequenceOptions, animationGroupArgs] = getSequenceMock.mock.calls[0];
+      expect(sequenceOptions).toMatchObject({ offset: 100 });
+      expect(animationGroupArgs.map(({ options }) => options.duration)).toEqual([0, 400]);
     });
 
     test('sets up media query listener for sequence conditions', () => {

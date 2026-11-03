@@ -8,6 +8,8 @@ import type {
   Interaction,
   ResolvedEffect,
   ResolvedSequence,
+  ReducedMotionHandling,
+  EffectProperty,
   SequenceConfig,
   SequenceConfigRef,
   TimeAnimationTriggerType,
@@ -15,6 +17,7 @@ import type {
 } from '../types';
 import { isTemplatedKey, generateId } from '../utils';
 import { shouldUseInitial } from './utilities';
+import { getEffectKind, getReducedMotionHandling, getReducedMotionVariants } from './reducedMotion';
 
 const TIME_TRIGGER_TO_DEFAULT_TYPE: Map<TriggerType, TimeAnimationTriggerType> = new Map([
   ['viewEnter', 'once'],
@@ -25,11 +28,59 @@ const TIME_TRIGGER_TO_DEFAULT_TYPE: Map<TriggerType, TimeAnimationTriggerType> =
   ['interest', 'alternate'],
 ]);
 
+type ResolveOptions = {
+  sequence?: { reducedMotionHandling?: ReducedMotionHandling };
+  force?: boolean;
+};
+
+type FullEffect = EffectBase &
+  StateEffect & {
+    triggerType?: TimeAnimationTriggerType;
+    namedEffect?: NamedEffect;
+    customEffect?: (element: Element, progress: any) => void;
+    keyframeEffect?: MotionKeyframeEffect;
+  };
+
+// whether CSS keeps a position for the effect - a customEffect has one, but plays at runtime only
+function hasCSSPosition(
+  { namedEffect, keyframeEffect, customEffect }: FullEffect,
+  isPointerMove: boolean,
+): boolean {
+  if (namedEffect) {
+    // With the 2D nature of pointerMove namedEffects, there is no easy way to mimic the
+    // behavior with CSSAnimations.
+    return !isPointerMove && !!namedEffect.type;
+  }
+  return !!keyframeEffect || !(customEffect && isPointerMove);
+}
+
+// the effect with only the animation source CSS can express, if any
+function resolveBody(
+  effect: FullEffect & Omit<ResolvedEffect, keyof EffectProperty>,
+  isPointerMove: boolean,
+): ResolvedEffect {
+  const { namedEffect, customEffect, keyframeEffect, transition, transitionProperties, ...rest } =
+    effect;
+
+  if (namedEffect) {
+    return isPointerMove || !namedEffect.type ? rest : { namedEffect, ...rest };
+  } else if (keyframeEffect) {
+    return { keyframeEffect, ...rest };
+  } else if (customEffect) {
+    return rest;
+  } else if (transition) {
+    return { transition, ...rest };
+  } else {
+    return transitionProperties ? { transitionProperties, ...rest } : rest;
+  }
+}
+
 export function resolveEffectForCSS(
   effect: Effect | EffectRef,
   interaction: Interaction,
   config: InteractConfig,
   fallbackId?: string,
+  options: ResolveOptions = {},
 ): ResolvedEffect | null {
   const { effects = {}, conditions: configConditions = {} } = config;
   const { key: interactionKey, trigger, conditions: interactionConditions = [] } = interaction;
@@ -41,13 +92,7 @@ export function resolveEffectForCSS(
   }
   const { effectId } = effect;
 
-  const fullEffect: EffectBase &
-    StateEffect & {
-      triggerType?: TimeAnimationTriggerType;
-      namedEffect?: NamedEffect;
-      customEffect?: (element: Element, progress: any) => void;
-      keyframeEffect?: MotionKeyframeEffect;
-    } = { ...(effects[effectId] || {}), ...effect };
+  const fullEffect: FullEffect = { ...(effects[effectId] || {}), ...effect };
 
   let { key, conditions, triggerType } = fullEffect;
 
@@ -78,34 +123,27 @@ export function resolveEffectForCSS(
     triggerType = TIME_TRIGGER_TO_DEFAULT_TYPE.get(trigger)!;
   }
 
-  const { namedEffect, customEffect, keyframeEffect, transition, transitionProperties, ...rest } = {
-    ...fullEffect,
-    key,
-    conditions,
-    effectId,
-    triggerType,
-  };
-
-  const initial = shouldUseInitial(interaction, rest);
-
-  if (namedEffect) {
-    // With the 2D nature of pointerMove namedEffects, there is no easy way to mimic the
-    // behavior with CSSAnimations.
-    return isPointerMove || !namedEffect.type ? null : { namedEffect, initial, ...rest };
-  } else if (keyframeEffect) {
-    // Need to verify validity of name for CSS?
-    if (!keyframeEffect.name) {
-      const canUseEffectId = effectId && !(effects[effectId] && 'keyframeEffect' in effect);
-      keyframeEffect.name = canUseEffectId ? effectId : generateId();
-    }
-    return { keyframeEffect, initial, ...rest };
-  } else if (customEffect) {
-    return isPointerMove ? null : { initial, ...rest };
-  } else if (transition) {
-    return { transition, initial, ...rest };
-  } else {
-    return transitionProperties ? { transitionProperties, initial, ...rest } : { initial, ...rest };
+  const { namedEffect, keyframeEffect } = fullEffect;
+  // Need to verify validity of name for CSS?
+  if (!namedEffect && keyframeEffect && !keyframeEffect.name) {
+    const canUseEffectId = effectId && !(effects[effectId] && 'keyframeEffect' in effect);
+    keyframeEffect.name = canUseEffectId ? effectId : generateId();
   }
+
+  if (!hasCSSPosition(fullEffect, isPointerMove)) {
+    return null;
+  }
+
+  const full = { ...fullEffect, key, conditions, effectId, triggerType };
+  const position = { ...full, initial: shouldUseInitial(interaction, full) };
+
+  const variants = getReducedMotionVariants(
+    position,
+    getReducedMotionHandling(fullEffect, options.sequence, interaction, config),
+    { kind: getEffectKind(fullEffect, trigger), effects, force: options.force },
+  ).map((variant) => resolveBody(variant, isPointerMove));
+
+  return variants.length ? { ...resolveBody(position, isPointerMove), variants } : null;
 }
 
 export function resolveSequenceForCSS(
@@ -114,6 +152,7 @@ export function resolveSequenceForCSS(
   config: InteractConfig,
   fallbackId?: string,
   getSlotKey?: (effectIndex: number) => string,
+  force?: boolean,
 ): ResolvedSequence | null {
   const { sequences = {}, conditions: configConditions = {} } = config;
   const { trigger, conditions: interactionConditions = [] } = interaction;
@@ -163,6 +202,7 @@ export function resolveSequenceForCSS(
       interaction,
       config,
       `${sequenceId}-eff-${index}`,
+      { sequence: fullSequence, force },
     );
     return resolved && Object.assign(resolved, { slotKey: getSlotKey?.(index) });
   });

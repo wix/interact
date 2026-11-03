@@ -20,6 +20,7 @@ import {
 import { getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
 import { getElementHash } from './utilities';
+import { withReducedMotionConditions } from './reducedMotion';
 import {
   LIST_ANIMATION_PROPERTY_NAMES,
   LIST_PROPERTY_NAMES,
@@ -86,6 +87,7 @@ type GenerateContext = {
   // only collecting the effects' list entries for getKeyframeSlots, without generating CSS
   collectSlots: boolean;
   useFirstChild: boolean;
+  forceReducedMotion: boolean;
   plugins?: InteractPluginStyles;
   configIndex?: number;
 };
@@ -159,11 +161,16 @@ function getEffectListKind(effect: ResolvedEffect): ListKind | null {
   return null;
 }
 
+// a position's variants are of the same kind, but only some of them may be expressible in CSS
+function getPositionListKind(effect: ResolvedEffect): ListKind | null {
+  return (effect.variants || [effect]).map(getEffectListKind).find(Boolean) || null;
+}
+
 function getSlotUsage(sequence: ResolvedSequence): Map<string, SlotUsage> {
   const counts = new Map<string, Record<ListKind, number>>();
 
   sequence.effects.forEach((effect) => {
-    const kind = getEffectListKind(effect);
+    const kind = getPositionListKind(effect);
     if (!kind) {
       return;
     }
@@ -318,6 +325,8 @@ function effectToCSS(
 
   if (namedEffect || keyframeEffect) {
     const animationOptions = effectToAnimationOptions(effect);
+    // read before getCSSAnimation() normalizes a 0 duration
+    const isInstant = 'duration' in animationOptions && animationOptions.duration === 0;
     const cssAnimations = getCSSAnimation(null, animationOptions, trigger, sequence).filter(
       (anim) => anim.name,
     );
@@ -382,14 +391,29 @@ function effectToCSS(
           declarations: DEFAULT_INITIAL,
           selectorSuffix: ':not([data-interact-enter])',
         });
-        rules.push({
-          key,
-          media,
-          selectorCondition,
-          childSelector: childOrPartSelector,
-          declarations: animationDeclarations,
-          selectorSuffix: ':not([data-interact-enter="done"])',
-        });
+        // an instant (e.g. collapsed) entrance can finish before it's marked as started, which would restart a
+        // CSS animation that's held until done, so it only hides the element and the runtime plays it
+        rules.push(
+          isInstant
+            ? {
+                key,
+                media,
+                selectorCondition,
+                childSelector: childOrPartSelector,
+                declarations: animationDeclarations.map(({ _listPropertyName, name }) => ({
+                  name,
+                  value: LIST_PROPERTY_FALLBACKS[_listPropertyName],
+                })),
+              }
+            : {
+                key,
+                media,
+                selectorCondition,
+                childSelector: childOrPartSelector,
+                declarations: animationDeclarations,
+                selectorSuffix: ':not([data-interact-enter="done"])',
+              },
+        );
       } else {
         // declare animation custom properties
         if (part) {
@@ -444,7 +468,12 @@ function effectToCSS(
 }
 
 // records a namedEffect under the animation list entry it writes on its target
-function collectKeyframeEntry(target: TargetContext, effect: ResolvedEffect, entry: string) {
+function collectKeyframeEntry(
+  target: TargetContext,
+  effect: ResolvedEffect,
+  entry: string,
+  slotKey: string,
+) {
   const module =
     effect.namedEffect &&
     (getRegisteredEffect(effect.namedEffect.type, false) as AnimationEffectAPI<'time'> | null);
@@ -458,7 +487,7 @@ function collectKeyframeEntry(target: TargetContext, effect: ResolvedEffect, ent
     return;
   }
   const members = target.keyframeEntries.get(entry) || [];
-  target.keyframeEntries.set(entry, [...members, { slotKey: effect.slotKey!, getNames }]);
+  target.keyframeEntries.set(entry, [...members, { slotKey, getNames }]);
 }
 
 function parseEffect(
@@ -484,10 +513,13 @@ function parseEffect(
 
   const useSlots = slotUsage?.get(targetHash) || NO_SLOTS;
   const customProps = getCustomProps(current, useSlots, ctx.configIndex);
+  const variants = effect.variants || [effect];
+  const kind = getPositionListKind(effect);
 
   if (ctx.collectSlots) {
-    collectKeyframeEntry(current, effect, customProps.animation);
-    const kind = getEffectListKind(effect);
+    variants.forEach((variant) =>
+      collectKeyframeEntry(current, variant, customProps.animation, effect.slotKey!),
+    );
     endEffect(
       current,
       { animation: kind === 'animation', transition: kind === 'transition', timeline: false },
@@ -497,25 +529,35 @@ function parseEffect(
     return [];
   }
 
-  if (effect.namedEffect) {
-    effect.suffix = ctx.keyframeSlots.get(effect.slotKey!);
+  if (variants.length > 1) {
+    // every variant writes all of the position's entries, falling back on the ones it doesn't use
+    const names =
+      kind === 'animation'
+        ? LIST_ANIMATION_PROPERTY_NAMES
+        : kind === 'transition'
+          ? (['transition'] as const)
+          : [];
+    names.forEach((name) => current.assigned.add(customProps[name]));
   }
 
-  const { rules, keyframes, wrote } = effectToCSS(
-    ctx,
-    effect,
-    current,
-    trigger,
-    customProps,
-    sequence,
+  const results = variants.map((variant) => {
+    if (variant.namedEffect) {
+      variant.suffix = ctx.keyframeSlots.get(effect.slotKey!);
+    }
+    return effectToCSS(ctx, variant, current, trigger, customProps, sequence);
+  });
+
+  results.forEach(({ keyframes }) =>
+    keyframes.forEach(({ name, keyframes }) => ctx.keyframesMap.set(name, keyframes)),
   );
 
-  keyframes.forEach(({ name, keyframes }) => ctx.keyframesMap.set(name, keyframes));
-
+  const wrote = Object.fromEntries(
+    LIST_KINDS.map((kind) => [kind, results.some((result) => result.wrote[kind])]),
+  ) as Record<ListKind, boolean>;
   endEffect(current, wrote, useSlots);
   ctx.targetsMap.set(targetHash, current);
 
-  return rules;
+  return results.flatMap(({ rules }) => rules);
 }
 
 function parseSequence(
@@ -589,6 +631,7 @@ function parseInteraction(
         interaction,
         ctx.config,
         getFallbackId('eff', [interactionIdx, effIndex], ctx.configIndex),
+        { force: ctx.forceReducedMotion },
       );
       return resolved && Object.assign(resolved, { slotKey: getSlotKey(interactionIdx, effIndex) });
     })
@@ -606,6 +649,7 @@ function parseInteraction(
         ctx.config,
         getFallbackId('seq', [interactionIdx, seqIndex], ctx.configIndex),
         (effIndex) => getSlotKey(interactionIdx, effIndex, seqIndex),
+        ctx.forceReducedMotion,
       ),
     )
     .filter((sequence) => sequence !== null);
@@ -641,16 +685,25 @@ function parseConfig(
   config: InteractConfig,
   options: GenerateOptions & { collectSlots?: boolean },
 ) {
-  const { useFirstChild = true, plugins, configIndex, collectSlots = false } = options;
+  const {
+    useFirstChild = true,
+    plugins,
+    configIndex,
+    collectSlots = false,
+    forceReducedMotion = false,
+  } = options;
   const ctx: GenerateContext = {
     config,
-    configConditions: config.conditions || {},
+    configConditions: withReducedMotionConditions(config.conditions),
     targetsMap: new Map<string, TargetContext>(),
     keyframesMap: new Map<string, Keyframe[]>(),
-    keyframeSlots: collectSlots ? new Map() : getKeyframeSlots(config, configIndex),
+    keyframeSlots: collectSlots
+      ? new Map()
+      : getKeyframeSlots(config, configIndex, forceReducedMotion),
     scopedTimelines: [],
     collectSlots,
     useFirstChild,
+    forceReducedMotion,
     plugins,
     configIndex,
   };
@@ -689,8 +742,9 @@ export function getSlotKey(interactionIndex: number, effectIndex: number, sequen
 export function getKeyframeSlots(
   config: InteractConfig,
   configIndex?: number,
+  forceReducedMotion?: boolean,
 ): Map<string, string> {
-  const { ctx } = parseConfig(config, { configIndex, collectSlots: true });
+  const { ctx } = parseConfig(config, { configIndex, collectSlots: true, forceReducedMotion });
   const slots = new Map<string, string>();
   const suffixOf = (slot: number) => (slot ? `-${slot}` : undefined);
 
