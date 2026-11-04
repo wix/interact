@@ -46,7 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact-validate
 
-### [Unreleased]
+### [0.3.0] - 2026-11-04
 
 #### Added
 
@@ -119,7 +119,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
-### [Unreleased]
+### [2.8.0] - 2026-11-04
 
 #### Added
 
