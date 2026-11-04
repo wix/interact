@@ -416,7 +416,7 @@ describe('Interaction-level conditions in addEffectsForTarget', () => {
   });
 });
 
-describe('reducedMotionHandling at runtime', () => {
+describe('reducedMotionPolicy at runtime', () => {
   const REDUCE = '(prefers-reduced-motion: reduce)';
   const NO_PREFERENCE = '(prefers-reduced-motion: no-preference)';
   let instance: Interact;
@@ -427,7 +427,7 @@ describe('reducedMotionHandling at runtime', () => {
     delay: 100,
   };
 
-  const createConfig = (reducedMotionHandling?: string): InteractConfig => ({
+  const createConfig = (reducedMotionPolicy?: string): InteractConfig => ({
     effects: {
       fade: { namedEffect: { type: 'FadeIn' } as NamedEffect, duration: 300 },
     },
@@ -435,7 +435,7 @@ describe('reducedMotionHandling at runtime', () => {
       {
         trigger: 'click',
         key: 'button',
-        effects: [{ ...slide, reducedMotionHandling }],
+        effects: [{ ...slide, reducedMotionPolicy }],
       },
     ],
   });
@@ -500,15 +500,15 @@ describe('reducedMotionHandling at runtime', () => {
     );
   });
 
-  describe('instance handling', () => {
+  describe('instance policy', () => {
     afterEach(() => {
-      Interact.setup({ reducedMotionHandling: 'collapse' });
+      Interact.setup({ reducedMotionPolicy: 'collapse' });
     });
 
-    it('takes the handling from Interact.setup()', async () => {
+    it('takes the policy from Interact.setup()', async () => {
       const { getWebAnimation } = await import('@wix/motion');
       mockMatchMedia([REDUCE]);
-      Interact.setup({ reducedMotionHandling: 'cancel' });
+      Interact.setup({ reducedMotionPolicy: 'cancel' });
       instance = Interact.create(createConfig());
 
       addButton();
@@ -516,11 +516,11 @@ describe('reducedMotionHandling at runtime', () => {
       expect(getWebAnimation).not.toHaveBeenCalled();
     });
 
-    it("takes the instance's handling over Interact.setup()", async () => {
+    it("takes the instance's policy over Interact.setup()", async () => {
       const { getWebAnimation } = await import('@wix/motion');
       mockMatchMedia([REDUCE]);
-      Interact.setup({ reducedMotionHandling: 'cancel' });
-      instance = Interact.create(createConfig(), { reducedMotionHandling: 'ignore' });
+      Interact.setup({ reducedMotionPolicy: 'cancel' });
+      instance = Interact.create(createConfig(), { reducedMotionPolicy: 'ignore' });
 
       addButton();
 
@@ -579,8 +579,8 @@ describe('reducedMotionHandling at runtime', () => {
           trigger: 'click',
           key: 'button',
           effects: [
-            { key: 'target', ...slide, duration: 200, reducedMotionHandling: 'ignore' },
-            { key: 'target', ...slide, reducedMotionHandling: 'cancel' },
+            { key: 'target', ...slide, duration: 200, reducedMotionPolicy: 'ignore' },
+            { key: 'target', ...slide, reducedMotionPolicy: 'cancel' },
           ],
         },
       ],

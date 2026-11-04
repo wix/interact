@@ -56,43 +56,43 @@ function getUseSite(
   const resolved = { ...definition, ...effect };
   return {
     effect: resolved,
-    explicit: effect.reducedMotionHandling ?? definition?.reducedMotionHandling,
-    inherited: owner && (sequence?.reducedMotionHandling ?? owner.reducedMotionHandling),
+    explicit: effect.reducedMotionPolicy ?? definition?.reducedMotionPolicy,
+    inherited: owner && (sequence?.reducedMotionPolicy ?? owner.reducedMotionPolicy),
     kind: getKind(resolved, owner?.trigger),
   };
 }
 
-function getReplacement(config: AnyConfig, handling?: string): AnyEffect | undefined {
-  return handling && !MODES.has(handling) ? config.effects?.[handling] : undefined;
+function getReplacement(config: AnyConfig, policy?: string): AnyEffect | undefined {
+  return policy && !MODES.has(policy) ? config.effects?.[policy] : undefined;
 }
 
-function isIncompatible(config: AnyConfig, { effect, kind }: UseSite, handling?: string): boolean {
-  const replacement = getReplacement(config, handling);
-  return !!replacement && handling !== effect.effectId && getReplacementKind(replacement) !== kind;
+function isIncompatible(config: AnyConfig, { effect, kind }: UseSite, policy?: string): boolean {
+  const replacement = getReplacement(config, policy);
+  return !!replacement && policy !== effect.effectId && getReplacementKind(replacement) !== kind;
 }
 
 function checkReference(
   config: AnyConfig,
   path: Path,
-  handling: string | undefined,
+  policy: string | undefined,
   isEffect: boolean,
 ): SemanticIssue[] {
-  if (!handling || MODES.has(handling) || config.effects?.[handling]) return [];
+  if (!policy || MODES.has(policy) || config.effects?.[policy]) return [];
   return [
     issue(
-      [...path, 'reducedMotionHandling'],
+      [...path, 'reducedMotionPolicy'],
       'REDUCED_MOTION_EFFECT_NOT_FOUND',
-      `reducedMotionHandling effect "${handling}" not found${isEffect ? '' : ', so the effects inheriting it fall back to "collapse"'}`,
+      `reducedMotionPolicy effect "${policy}" not found${isEffect ? '' : ', so the effects inheriting it fall back to "collapse"'}`,
       isEffect ? 'error' : 'warning',
     ),
   ];
 }
 
-function incompatible(path: Path, handling: string, site: UseSite, severity: 'error' | 'warning') {
+function incompatible(path: Path, policy: string, site: UseSite, severity: 'error' | 'warning') {
   return issue(
     path,
     'REDUCED_MOTION_INCOMPATIBLE_EFFECT',
-    `reducedMotionHandling effect "${handling}" can't replace a ${site.kind} effect, so it falls back to "collapse"`,
+    `reducedMotionPolicy effect "${policy}" can't replace a ${site.kind} effect, so it falls back to "collapse"`,
     severity,
   );
 }
@@ -105,7 +105,7 @@ export function checkReducedMotionErrors(
   owner?: AnyInteraction,
   sequence?: AnySequence,
 ): SemanticIssue[] {
-  const issues = checkReference(config, path, effect.reducedMotionHandling, true);
+  const issues = checkReference(config, path, effect.reducedMotionPolicy, true);
   if (isTopLevel) return issues;
 
   const site = getUseSite(config, effect, owner, sequence);
@@ -115,7 +115,7 @@ export function checkReducedMotionErrors(
   return issues;
 }
 
-// the warning and info issues - an explicit incompatible replacement is an error instead. The instance's handling
+// the warning and info issues - an explicit incompatible replacement is an error instead. The instance's policy
 // isn't part of the config, so it's taken to be the default 'collapse'
 export function createReducedMotionWarnings(config: AnyConfig) {
   const animationEndSources = new Set(
@@ -126,18 +126,18 @@ export function createReducedMotionWarnings(config: AnyConfig) {
 
   const checkUseSite = (path: Path, site: UseSite): SemanticIssue[] => {
     const { effect, explicit, inherited, kind } = site;
-    const handling = explicit ?? inherited ?? 'collapse';
+    const policy = explicit ?? inherited ?? 'collapse';
     const issues: SemanticIssue[] = [];
 
-    // the runtime resolves an animationEnd source's handling from its definition and the instance only
+    // the runtime resolves an animationEnd source's policy from its definition and the instance only
     if (effect.effectId && animationEndSources.has(effect.effectId)) {
-      const sourceHandling = config.effects?.[effect.effectId]?.reducedMotionHandling ?? 'collapse';
-      if (handling !== sourceHandling) {
+      const sourcePolicy = config.effects?.[effect.effectId]?.reducedMotionPolicy ?? 'collapse';
+      if (policy !== sourcePolicy) {
         issues.push(
           issue(
             path,
             'REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH',
-            `Effect "${effect.effectId}" triggers animationEnd interactions, which resolve its reducedMotionHandling from its definition only - set it there instead`,
+            `Effect "${effect.effectId}" triggers animationEnd interactions, which resolve its reducedMotionPolicy from its definition only - set it there instead`,
             'warning',
           ),
         );
@@ -147,23 +147,23 @@ export function createReducedMotionWarnings(config: AnyConfig) {
     // the default needs no notice
     if (!explicit && !inherited) return issues;
 
-    let collapses = handling === 'collapse';
-    if (!MODES.has(handling)) {
-      if (handling === effect.effectId) {
+    let collapses = policy === 'collapse';
+    if (!MODES.has(policy)) {
+      if (policy === effect.effectId) {
         issues.push(
           issue(
             path,
             'REDUCED_MOTION_SELF_REFERENCE',
-            `reducedMotionHandling replaces effect "${handling}" with itself, which is the same as "ignore"`,
+            `reducedMotionPolicy replaces effect "${policy}" with itself, which is the same as "ignore"`,
             'warning',
           ),
         );
-      } else if (!getReplacement(config, handling)) {
+      } else if (!getReplacement(config, policy)) {
         collapses = true;
-      } else if (isIncompatible(config, site, handling)) {
+      } else if (isIncompatible(config, site, policy)) {
         collapses = true;
         if (!explicit) {
-          issues.push(incompatible(path, handling, site, 'warning'));
+          issues.push(incompatible(path, policy, site, 'warning'));
         }
       }
     }
@@ -187,7 +187,7 @@ export function createReducedMotionWarnings(config: AnyConfig) {
 
   return {
     onInteraction: (path: Path, interaction: AnyInteraction) =>
-      checkReference(config, path, interaction.reducedMotionHandling, false),
+      checkReference(config, path, interaction.reducedMotionPolicy, false),
     onEffect: (
       path: Path,
       effect: AnyEffect,
@@ -202,14 +202,14 @@ export function createReducedMotionWarnings(config: AnyConfig) {
               issue(
                 path,
                 'REDUCED_MOTION_SHADOWED_EFFECT_ID',
-                `Effect "${id}" can't be used as a reducedMotionHandling replacement since "${id}" is a handling mode`,
+                `Effect "${id}" can't be used as a reducedMotionPolicy replacement since "${id}" is a policy mode`,
                 'warning',
               ),
             ]
           : [];
       }
       const site = getUseSite(config, effect, owner, sequence);
-      // a sequence definition's effect inherits its handling where the sequence is referenced
+      // a sequence definition's effect inherits its policy where the sequence is referenced
       return owner || site.explicit ? checkUseSite(path, site) : [];
     },
     onSequence: (
@@ -218,7 +218,7 @@ export function createReducedMotionWarnings(config: AnyConfig) {
       isTopLevel: boolean,
       owner?: AnyInteraction,
     ): SemanticIssue[] => {
-      const issues = checkReference(config, path, sequence.reducedMotionHandling, false);
+      const issues = checkReference(config, path, sequence.reducedMotionPolicy, false);
       const definition =
         !isTopLevel && !sequence.effects && sequence.sequenceId
           ? config.sequences?.[sequence.sequenceId]

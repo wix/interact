@@ -3,7 +3,7 @@ import type {
   Effect,
   EffectRef,
   EffectProperty,
-  ReducedMotionHandling,
+  ReducedMotionPolicy,
   TimeAnimationTriggerType,
 } from './effects';
 import type { PluginFields } from './plugins';
@@ -20,7 +20,7 @@ export type SequenceOptionsConfig = {
   sequenceId?: string;
   conditions?: string[];
   triggerType?: TimeAnimationTriggerType;
-  reducedMotionHandling?: ReducedMotionHandling;
+  reducedMotionPolicy?: ReducedMotionPolicy;
 };
 
 export type SequenceConfig = SequenceOptionsConfig & {
@@ -34,7 +34,7 @@ export type SequenceConfigRef = {
   offset?: number;
   offsetEasing?: string | ((p: number) => number);
   conditions?: string[];
-  reducedMotionHandling?: ReducedMotionHandling;
+  reducedMotionPolicy?: ReducedMotionPolicy;
 };
 
 export type InteractionTrigger = {
@@ -45,7 +45,7 @@ export type InteractionTrigger = {
   params?: TriggerParams;
   conditions?: string[];
   selector?: string;
-  reducedMotionHandling?: ReducedMotionHandling;
+  reducedMotionPolicy?: ReducedMotionPolicy;
 } & PluginFields; // `$<name>` fields route to plugins registered via `Interact.use()`
 
 export type Interaction = InteractionTrigger & {
@@ -87,6 +87,6 @@ export type ResolvedSequence = {
   offset: number;
   offsetEasing: string;
   conditions: string[];
-  reducedMotionHandling: ReducedMotionHandling;
+  reducedMotionPolicy: ReducedMotionPolicy;
   effects: ResolvedEffect[];
 };

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Keyframe, RangeOffset, ReducedMotionHandling } from './primitives';
+import { Keyframe, RangeOffset, ReducedMotionPolicy } from './primitives';
 import { withPluginFields } from './plugins';
 
 export const StateActionType = z.enum(['add', 'remove', 'toggle', 'clear']);
@@ -131,7 +131,7 @@ const EffectBase = {
   listContainer: z.string().optional(),
   listItemSelector: z.string().optional(),
   conditions: z.array(z.string().min(1)).optional(),
-  reducedMotionHandling: ReducedMotionHandling.optional(),
+  reducedMotionPolicy: ReducedMotionPolicy.optional(),
 };
 
 export const StateEffect = withPluginFields(

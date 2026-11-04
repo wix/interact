@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   REDUCED_MOTION_NO_PREFERENCE as NO_PREFERENCE,
   REDUCED_MOTION_REDUCE as REDUCE,
-  getReducedMotionHandling,
+  getReducedMotionPolicy,
   getReducedMotionVariants,
 } from '../src/core/reducedMotion';
 import { createTransitionCSS, transitionEffectToTransitionsList } from '../src/utils';
@@ -24,7 +24,7 @@ const effects: Record<string, Effect> = {
   fade: {
     key: 'elsewhere',
     conditions: ['mobile'],
-    reducedMotionHandling: 'cancel',
+    reducedMotionPolicy: 'cancel',
     keyframeEffect: { name: '', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
     duration: 300,
   },
@@ -37,15 +37,15 @@ const { keyframeEffect, duration, delay, easing, ...scrubSlide } = slide;
 const options = { effects };
 
 describe('reducedMotion', () => {
-  describe('getReducedMotionHandling', () => {
+  describe('getReducedMotionPolicy', () => {
     it('takes the most specific level', () => {
-      expect(getReducedMotionHandling('cancel', 'ignore', 'fade', 'ignore')).toBe('cancel');
-      expect(getReducedMotionHandling(undefined, 'ignore', 'fade', undefined)).toBe('ignore');
-      expect(getReducedMotionHandling(undefined, undefined, undefined, 'fade')).toBe('fade');
+      expect(getReducedMotionPolicy('cancel', 'ignore', 'fade', 'ignore')).toBe('cancel');
+      expect(getReducedMotionPolicy(undefined, 'ignore', 'fade', undefined)).toBe('ignore');
+      expect(getReducedMotionPolicy(undefined, undefined, undefined, 'fade')).toBe('fade');
     });
 
     it('defaults to collapse', () => {
-      expect(getReducedMotionHandling(undefined, undefined, undefined, undefined)).toBe('collapse');
+      expect(getReducedMotionPolicy(undefined, undefined, undefined, undefined)).toBe('collapse');
     });
   });
 
@@ -124,8 +124,8 @@ describe('reducedMotion', () => {
     it.each([
       ['an incompatible', 'dim'],
       ['a missing', 'nope'],
-    ])('falls back to collapse for %s replacement', (_, handling) => {
-      expect(getReducedMotionVariants(slide, handling, options)).toEqual([
+    ])('falls back to collapse for %s replacement', (_, policy) => {
+      expect(getReducedMotionVariants(slide, policy, options)).toEqual([
         { ...slide, conditions: ['desktop', NO_PREFERENCE] },
         { ...slide, duration: 0, conditions: ['desktop', REDUCE] },
       ]);

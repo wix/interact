@@ -13,7 +13,7 @@ import type {
   IInteractionController,
   AnimationEndParams,
   AnimationOptions,
-  ReducedMotionHandling,
+  ReducedMotionPolicy,
 } from '../types';
 import { PLUGIN_FIELD_PREFIX } from '../types';
 import {
@@ -26,7 +26,7 @@ import {
 import { getInterpolatedKey } from './utilities';
 import {
   REDUCED_MOTION_REDUCE,
-  getReducedMotionHandling,
+  getReducedMotionPolicy,
   getReducedMotionVariants,
 } from './reducedMotion';
 import { effectToAnimationOptions } from '../handlers/utilities';
@@ -164,16 +164,12 @@ function _resolveVariant<T extends Effect>(
   effect: T,
   instance: Interact,
   listener: { id: string; key: string; onUpdate: () => void },
-  inherited: { handling?: ReducedMotionHandling; collapsesStagger?: boolean } = {},
+  inherited: { policy?: ReducedMotionPolicy; collapsesStagger?: boolean } = {},
 ): T | undefined {
-  const { effects, conditions, reducedMotionHandling, forceReducedMotion } = instance.dataCache;
+  const { effects, conditions, reducedMotionPolicy, forceReducedMotion } = instance.dataCache;
   const variants = getReducedMotionVariants(
     effect,
-    getReducedMotionHandling(
-      effect.reducedMotionHandling,
-      inherited.handling,
-      reducedMotionHandling,
-    ),
+    getReducedMotionPolicy(effect.reducedMotionPolicy, inherited.policy, reducedMotionPolicy),
     { effects, force: forceReducedMotion, collapsesStagger: inherited.collapsesStagger },
   );
 
@@ -311,7 +307,7 @@ function _addInteraction(
           sourceController.update();
         },
       },
-      { handling: interaction.reducedMotionHandling },
+      { policy: interaction.reducedMotionPolicy },
     );
 
     if (effectOptions) {
@@ -392,15 +388,15 @@ function _addInteraction(
   _processSequences(sourceKey, sourceController, instance, interaction, elements);
 }
 
-function _getSequenceHandling(
+function _getSequencePolicy(
   sequenceConfig: SequenceConfig,
   interaction: InteractionTrigger,
   instance: Interact,
-): ReducedMotionHandling {
-  return getReducedMotionHandling(
-    sequenceConfig.reducedMotionHandling,
-    interaction.reducedMotionHandling,
-    instance.dataCache.reducedMotionHandling,
+): ReducedMotionPolicy {
+  return getReducedMotionPolicy(
+    sequenceConfig.reducedMotionPolicy,
+    interaction.reducedMotionPolicy,
+    instance.dataCache.reducedMotionPolicy,
   );
 }
 
@@ -414,7 +410,7 @@ function _getSequenceOptions(
   const mql = getMediaQuery([REDUCED_MOTION_REDUCE], conditions);
   const isReduced = forceReducedMotion || !!(mql && mql.matches);
 
-  return isReduced && _getSequenceHandling(sequenceConfig, interaction, instance) !== 'ignore'
+  return isReduced && _getSequencePolicy(sequenceConfig, interaction, instance) !== 'ignore'
     ? { ...sequenceConfig, offset: 0 }
     : sequenceConfig;
 }
@@ -476,7 +472,7 @@ function _buildAnimationGroupArgsFromSequence(
   }
 
   const animationGroupArgs: AnimationGroupArgs[] = [];
-  const handling = _getSequenceHandling(sequenceConfig, interaction, instance);
+  const policy = _getSequencePolicy(sequenceConfig, interaction, instance);
   let usedListElements = false;
 
   for (const effect of seqEffects) {
@@ -489,7 +485,7 @@ function _buildAnimationGroupArgsFromSequence(
         key: options.updateKey,
         onUpdate: options.onUpdate,
       },
-      { handling, collapsesStagger: handling !== 'ignore' },
+      { policy, collapsesStagger: policy !== 'ignore' },
     );
 
     if (!effectOptions) continue;
@@ -878,7 +874,7 @@ function addEffectsForTarget(
             targetController.update();
           },
         },
-        { handling: interaction.reducedMotionHandling },
+        { policy: interaction.reducedMotionPolicy },
       );
 
       if (effectOptions) {
@@ -1003,7 +999,7 @@ function addInteraction<T extends TriggerType>(
     const triggerEffectId = (options as AnimationEndParams).effectId;
     const instance = sourceKey ? Interact.getInstance(sourceKey) : undefined;
     const definition = instance?.dataCache.effects[triggerEffectId];
-    // the source's use site is unknown, so its handling resolves from its definition and the config only
+    // the source's use site is unknown, so its policy resolves from its definition and the config only
     const srcEffect =
       definition &&
       _resolveVariant(definition, instance!, {

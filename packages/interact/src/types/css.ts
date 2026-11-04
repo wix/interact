@@ -1,5 +1,11 @@
+import type { MotionKeyframeEffect, NamedEffect } from '@wix/motion';
 import type { InteractPluginStyles } from './plugins';
-import type { ReducedMotionHandling } from './effects';
+import type {
+  EffectBase,
+  ReducedMotionPolicy,
+  StateEffect,
+  TimeAnimationTriggerType,
+} from './effects';
 
 /**
  * Options bag for `generate()`. Passed as its single optional 2nd argument, which also accepts a
@@ -26,10 +32,10 @@ export type GenerateOptions = {
    */
   forceReducedMotion?: boolean;
   /**
-   * The handling of effects that don't set one along their interaction, sequence or effect. Must equal the
-   * instance's `reducedMotionHandling` at runtime. Defaults to `Interact.reducedMotionHandling`.
+   * The policy of effects that don't set one along their interaction, sequence or effect. Must equal the
+   * instance's `reducedMotionPolicy` at runtime. Defaults to `Interact.reducedMotionPolicy`.
    */
-  reducedMotionHandling?: ReducedMotionHandling;
+  reducedMotionPolicy?: ReducedMotionPolicy;
 };
 
 export type ListPropertyName =
@@ -48,4 +54,25 @@ export type CSSRuleData = {
   states?: string[];
   selectorCondition?: string;
   selectorSuffix?: string;
+};
+
+// an effect merged with its definition, as resolved for CSS
+export type FullEffect = EffectBase &
+  StateEffect & {
+    triggerType?: TimeAnimationTriggerType;
+    namedEffect?: NamedEffect;
+    customEffect?: (element: Element, progress: any) => void;
+    keyframeEffect?: MotionKeyframeEffect;
+  };
+
+export type ResolveOptions = {
+  // the instance's
+  defaultPolicy?: ReducedMotionPolicy;
+  force?: boolean;
+};
+
+export type ResolveEffectOptions = ResolveOptions & {
+  // inherited from the sequence
+  policy?: ReducedMotionPolicy;
+  collapsesStagger?: boolean;
 };

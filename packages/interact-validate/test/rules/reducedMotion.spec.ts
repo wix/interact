@@ -8,18 +8,18 @@ const dim = { transition: { duration: 200, styleProperties: [{ name: 'opacity', 
 const issuesOf = (config: unknown, code: string) =>
   validateInteractConfig(config).errors.filter((e) => e.code === code);
 
-describe('reducedMotionHandling', () => {
+describe('reducedMotionPolicy', () => {
   it('accepts the field at every level', () => {
     const result = validateInteractConfig({
-      effects: { fade: { ...fade, reducedMotionHandling: 'ignore' } },
-      sequences: { seq: { reducedMotionHandling: 'cancel', effects: [{ effectId: 'fade' }] } },
+      effects: { fade: { ...fade, reducedMotionPolicy: 'ignore' } },
+      sequences: { seq: { reducedMotionPolicy: 'cancel', effects: [{ effectId: 'fade' }] } },
       interactions: [
         {
           key: 'el',
           trigger: 'click',
-          reducedMotionHandling: 'fade',
-          effects: [{ ...slide, reducedMotionHandling: 'fade' }],
-          sequences: [{ sequenceId: 'seq', reducedMotionHandling: 'collapse' }],
+          reducedMotionPolicy: 'fade',
+          effects: [{ ...slide, reducedMotionPolicy: 'fade' }],
+          sequences: [{ sequenceId: 'seq', reducedMotionPolicy: 'collapse' }],
         },
       ],
     });
@@ -32,7 +32,7 @@ describe('reducedMotionHandling', () => {
     expect(
       issuesOf(
         {
-          reducedMotionHandling: 'ignore',
+          reducedMotionPolicy: 'ignore',
           interactions: [{ key: 'el', trigger: 'click', effects: [slide] }],
         },
         'SCHEMA_UNRECOGNIZED_KEYS',
@@ -46,7 +46,7 @@ describe('reducedMotionHandling', () => {
         {
           effects: { fade },
           interactions: [
-            { key: 'el', trigger: 'click', effects: [{ ...slide, reducedMotionHandling: 'fade' }] },
+            { key: 'el', trigger: 'click', effects: [{ ...slide, reducedMotionPolicy: 'fade' }] },
           ],
         },
         'UNUSED_EFFECT',
@@ -59,7 +59,7 @@ describe('reducedMotionHandling', () => {
       const [issue, ...rest] = issuesOf(
         {
           interactions: [
-            { key: 'el', trigger: 'click', effects: [{ ...slide, reducedMotionHandling: 'nope' }] },
+            { key: 'el', trigger: 'click', effects: [{ ...slide, reducedMotionPolicy: 'nope' }] },
           ],
         },
         'REDUCED_MOTION_EFFECT_NOT_FOUND',
@@ -68,7 +68,7 @@ describe('reducedMotionHandling', () => {
       expect(rest).toEqual([]);
       expect(issue).toMatchObject({
         severity: 'error',
-        path: ['interactions', 0, 'effects', 0, 'reducedMotionHandling'],
+        path: ['interactions', 0, 'effects', 0, 'reducedMotionPolicy'],
       });
     });
 
@@ -76,7 +76,7 @@ describe('reducedMotionHandling', () => {
       const issues = issuesOf(
         {
           interactions: [
-            { key: 'el', trigger: 'click', reducedMotionHandling: 'nope', effects: [slide] },
+            { key: 'el', trigger: 'click', reducedMotionPolicy: 'nope', effects: [slide] },
           ],
         },
         'REDUCED_MOTION_EFFECT_NOT_FOUND',
@@ -85,7 +85,7 @@ describe('reducedMotionHandling', () => {
       expect(issues).toEqual([
         expect.objectContaining({
           severity: 'warning',
-          path: ['interactions', 0, 'reducedMotionHandling'],
+          path: ['interactions', 0, 'reducedMotionPolicy'],
         }),
       ]);
     });
@@ -101,7 +101,7 @@ describe('reducedMotionHandling', () => {
               {
                 key: 'el',
                 trigger: 'click',
-                effects: [{ ...slide, reducedMotionHandling: 'dim' }],
+                effects: [{ ...slide, reducedMotionPolicy: 'dim' }],
               },
             ],
           },
@@ -121,13 +121,13 @@ describe('reducedMotionHandling', () => {
               {
                 key: 'el',
                 trigger: 'click',
-                reducedMotionHandling: 'fade',
+                reducedMotionPolicy: 'fade',
                 effects: [{ effectId: 'fade' }, dim],
               },
               {
                 key: 'el',
                 trigger: 'viewProgress',
-                reducedMotionHandling: 'fade',
+                reducedMotionPolicy: 'fade',
                 effects: [{ namedEffect: { type: 'FadeScroll' } }],
               },
             ],
@@ -149,13 +149,13 @@ describe('reducedMotionHandling', () => {
             {
               key: 'el',
               trigger: 'click',
-              reducedMotionHandling: 'collapse',
+              reducedMotionPolicy: 'collapse',
               effects: [slide, { ...slide, iterations: 0 }],
             },
             {
               key: 'el',
               trigger: 'viewProgress',
-              reducedMotionHandling: 'collapse',
+              reducedMotionPolicy: 'collapse',
               effects: [{ namedEffect: { type: 'FadeScroll' } }],
             },
           ],
@@ -174,7 +174,7 @@ describe('reducedMotionHandling', () => {
         issuesOf(
           {
             effects: { dim },
-            sequences: { seq: { reducedMotionHandling: 'dim', effects: [slide] } },
+            sequences: { seq: { reducedMotionPolicy: 'dim', effects: [slide] } },
             interactions: [
               { key: 'a', trigger: 'click', sequences: [{ sequenceId: 'seq' }] },
               { key: 'b', trigger: 'hover', sequences: [{ sequenceId: 'seq' }] },
@@ -188,12 +188,12 @@ describe('reducedMotionHandling', () => {
       ]);
     });
 
-    it("reports an effect's own handling once, on the definition", () => {
+    it("reports an effect's own policy once, on the definition", () => {
       expect(
         issuesOf(
           {
             sequences: {
-              seq: { effects: [{ ...slide, iterations: 0, reducedMotionHandling: 'collapse' }] },
+              seq: { effects: [{ ...slide, iterations: 0, reducedMotionPolicy: 'collapse' }] },
             },
             interactions: [
               { key: 'a', trigger: 'click', sequences: [{ sequenceId: 'seq' }] },
@@ -216,8 +216,8 @@ describe('reducedMotionHandling', () => {
               key: 'el',
               trigger: 'click',
               effects: [
-                { ...slide, reducedMotionHandling: 'fade' },
-                { ...slide, reducedMotionHandling: 'scrub' },
+                { ...slide, reducedMotionPolicy: 'fade' },
+                { ...slide, reducedMotionPolicy: 'scrub' },
               ],
             },
           ],
@@ -236,7 +236,7 @@ describe('reducedMotionHandling', () => {
             {
               key: 'el',
               trigger: 'click',
-              effects: [{ effectId: 'fade', reducedMotionHandling: 'fade' }],
+              effects: [{ effectId: 'fade', reducedMotionPolicy: 'fade' }],
             },
           ],
         },
@@ -245,7 +245,7 @@ describe('reducedMotionHandling', () => {
     ).toHaveLength(1);
   });
 
-  it('warns about an effect id shadowed by a handling mode', () => {
+  it('warns about an effect id shadowed by a policy mode', () => {
     expect(
       issuesOf(
         {
@@ -258,25 +258,25 @@ describe('reducedMotionHandling', () => {
   });
 
   describe('REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH', () => {
-    const configWith = (sourceHandling?: string, definitionHandling?: string) => ({
-      effects: { fade: { ...fade, reducedMotionHandling: definitionHandling } },
+    const configWith = (sourcePolicy?: string, definitionHandling?: string) => ({
+      effects: { fade: { ...fade, reducedMotionPolicy: definitionHandling } },
       interactions: [
         {
           key: 'a',
           trigger: 'viewEnter',
-          effects: [{ effectId: 'fade', reducedMotionHandling: sourceHandling }],
+          effects: [{ effectId: 'fade', reducedMotionPolicy: sourcePolicy }],
         },
         { key: 'b', trigger: 'animationEnd', params: { effectId: 'fade' }, effects: [slide] },
       ],
     });
 
-    it('warns when the source resolves a different handling at its use site', () => {
+    it('warns when the source resolves a different policy at its use site', () => {
       expect(
         issuesOf(configWith('cancel'), 'REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH'),
       ).toEqual([expect.objectContaining({ path: ['interactions', 0, 'effects', 0] })]);
     });
 
-    it('accepts a handling set on the definition', () => {
+    it('accepts a policy set on the definition', () => {
       expect(
         issuesOf(configWith(undefined, 'cancel'), 'REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH'),
       ).toHaveLength(0);

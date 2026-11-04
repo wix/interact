@@ -1864,19 +1864,19 @@ describe('interact sequences', () => {
           {
             trigger: 'click',
             key: 'source-key',
-            reducedMotionHandling: 'cancel',
+            reducedMotionPolicy: 'cancel',
             sequences: [
               {
                 sequenceId: 'rm-seq',
                 offset,
-                reducedMotionHandling: sequenceHandling,
+                reducedMotionPolicy: sequenceHandling,
                 effects: [
                   { key: 'source-key', keyframeEffect, duration: 300 },
                   {
                     key: 'source-key',
                     keyframeEffect,
                     duration: 400,
-                    reducedMotionHandling: 'ignore',
+                    reducedMotionPolicy: 'ignore',
                   },
                 ],
               },
@@ -1898,7 +1898,7 @@ describe('interact sequences', () => {
       ['collapse', [0, 400]],
       [undefined, [400]],
     ])(
-      'resolves reducedMotionHandling per effect, the sequence (%s) over the interaction (cancel)',
+      'resolves reducedMotionPolicy per effect, the sequence (%s) over the interaction (cancel)',
       (sequenceHandling, durations) => {
         mockMatchMedia(['(prefers-reduced-motion: reduce)']);
 

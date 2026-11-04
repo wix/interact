@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Condition, ReducedMotionHandling } from './primitives';
+import { Condition, ReducedMotionPolicy } from './primitives';
 import {
   Effect,
   ViewProgressEffect,
@@ -59,7 +59,7 @@ const InteractionBase = {
   listContainer: z.string().optional(),
   listItemSelector: z.string().optional(),
   conditions: z.array(z.string().min(1)).optional(),
-  reducedMotionHandling: ReducedMotionHandling.optional(),
+  reducedMotionPolicy: ReducedMotionPolicy.optional(),
 };
 
 const hasEffectsOrSequences = (interaction: { effects?: unknown[]; sequences?: unknown[] }) =>
@@ -285,11 +285,11 @@ export const InteractConfigSchema = z
     walkConfig(config, {
       onInteraction: (_path, interaction) => {
         interaction.conditions?.forEach(Set.prototype.delete, conditionReferences);
-        effectIdReferences.delete(interaction.reducedMotionHandling!);
+        effectIdReferences.delete(interaction.reducedMotionPolicy!);
       },
       onEffect: (path, effect, isTopLevel) => {
         effect.conditions?.forEach(Set.prototype.delete, conditionReferences);
-        effectIdReferences.delete(effect.reducedMotionHandling!);
+        effectIdReferences.delete(effect.reducedMotionPolicy!);
         collectEffectKeyframeNames(warnings, path, keyframeNames, (effect as any).keyframeEffect);
         if (!isTopLevel && effect.effectId) {
           if (!configEffects[effect.effectId]) {
@@ -305,7 +305,7 @@ export const InteractConfigSchema = z
       },
       onSequence: (_path, sequence, isTopLevel) => {
         sequence.conditions?.forEach(Set.prototype.delete, conditionReferences);
-        effectIdReferences.delete(sequence.reducedMotionHandling!);
+        effectIdReferences.delete(sequence.reducedMotionPolicy!);
         if (!isTopLevel && sequence.sequenceId) {
           sequenceIdReferences.delete(sequence.sequenceId);
         }

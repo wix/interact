@@ -52,14 +52,14 @@ describe('schema type parity (drift guard)', () => {
     >();
   });
 
-  it('reducedMotionHandling is accepted on interactions, effects and sequences (mirrors ReducedMotionHandling)', () => {
-    type Canonical = InteractConfig['interactions'][number]['reducedMotionHandling'];
+  it('reducedMotionPolicy is accepted on interactions, effects and sequences (mirrors ReducedMotionPolicy)', () => {
+    type Canonical = InteractConfig['interactions'][number]['reducedMotionPolicy'];
     type InferredInteraction = InferredConfig['interactions'][number];
     type InferredEffect = NonNullable<InferredConfig['effects']>[string];
     type InferredSequence = NonNullable<InferredConfig['sequences']>[string];
-    expectTypeOf<InferredInteraction['reducedMotionHandling']>().toMatchTypeOf<Canonical>();
-    expectTypeOf<InferredEffect['reducedMotionHandling']>().toMatchTypeOf<Canonical>();
-    expectTypeOf<InferredSequence['reducedMotionHandling']>().toMatchTypeOf<Canonical>();
+    expectTypeOf<InferredInteraction['reducedMotionPolicy']>().toMatchTypeOf<Canonical>();
+    expectTypeOf<InferredEffect['reducedMotionPolicy']>().toMatchTypeOf<Canonical>();
+    expectTypeOf<InferredSequence['reducedMotionPolicy']>().toMatchTypeOf<Canonical>();
   });
 
   it('interaction/effect schemas accept $-prefixed plugin fields (mirrors PluginFields)', () => {

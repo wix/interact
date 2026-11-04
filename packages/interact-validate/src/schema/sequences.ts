@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { TimeEffect, TimeEffectRef, TimeTriggerType } from './effects';
-import { ReducedMotionHandling } from './primitives';
+import { ReducedMotionPolicy } from './primitives';
 
 const SequenceOptionsConfig = {
   delay: z.number().int().nonnegative().optional(),
@@ -11,7 +11,7 @@ const SequenceOptionsConfig = {
   triggerType: TimeTriggerType.optional(),
   sequenceId: z.string().optional(),
   conditions: z.array(z.string().min(1)).optional(),
-  reducedMotionHandling: ReducedMotionHandling.optional(),
+  reducedMotionPolicy: ReducedMotionPolicy.optional(),
 };
 
 export const SequenceConfig = z

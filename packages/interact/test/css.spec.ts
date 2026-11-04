@@ -1283,7 +1283,7 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config, { reducedMotionHandling: 'ignore' });
+      const { cssRules } = _generate(config, { reducedMotionPolicy: 'ignore' });
 
       const animRules = cssRules.filter(
         (r) =>
@@ -1474,7 +1474,7 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config, { reducedMotionHandling: 'ignore' });
+      const { cssRules } = _generate(config, { reducedMotionPolicy: 'ignore' });
 
       const animPropsByKey = (key: string) =>
         cssRules
@@ -2425,7 +2425,7 @@ describe('css._generate', () => {
   });
 });
 
-describe('css reducedMotionHandling', () => {
+describe('css reducedMotionPolicy', () => {
   const NO_PREFERENCE = '(prefers-reduced-motion: no-preference)';
   const REDUCE = '(prefers-reduced-motion: reduce)';
 
@@ -2450,7 +2450,7 @@ describe('css reducedMotionHandling', () => {
 
   it('emits the no-preference variant for both preferences, and what the reduce one changes under reduce', () => {
     const { cssRules, listsRule, atProperty } = _generate(
-      configWith({ ...slide, reducedMotionHandling: 'collapse' }),
+      configWith({ ...slide, reducedMotionPolicy: 'collapse' }),
     );
     const plain = _generate(configWith(slide));
 
@@ -2471,7 +2471,7 @@ describe('css reducedMotionHandling', () => {
         {
           key: 'a',
           trigger: 'viewEnter',
-          effects: [{ ...slide, reducedMotionHandling: 'cancel' }],
+          effects: [{ ...slide, reducedMotionPolicy: 'cancel' }],
         },
       ],
     });
@@ -2482,7 +2482,7 @@ describe('css reducedMotionHandling', () => {
 
   it('emits the replacement under reduce, its keyframes named by its id', () => {
     const { cssRules, keyframes } = _generate(
-      configWith({ ...slide, reducedMotionHandling: 'fade' }),
+      configWith({ ...slide, reducedMotionPolicy: 'fade' }),
     );
 
     expect([...keyframes.keys()]).toEqual(['slide', 'fade']);
@@ -2500,7 +2500,7 @@ describe('css reducedMotionHandling', () => {
         {
           key: 'a',
           trigger: 'viewEnter',
-          effects: [{ ...slide, reducedMotionHandling: 'collapse' }],
+          effects: [{ ...slide, reducedMotionPolicy: 'collapse' }],
         },
       ],
     });
@@ -2518,7 +2518,7 @@ describe('css reducedMotionHandling', () => {
         delay: 100,
         styleProperties: [{ name: 'opacity', value: '0.5' }],
       },
-      reducedMotionHandling: 'collapse',
+      reducedMotionPolicy: 'collapse',
     };
     const { cssRules } = _generate(configWith(transition));
 
@@ -2551,7 +2551,7 @@ describe('css reducedMotionHandling', () => {
           effects: [
             {
               transition: { duration: 300, styleProperties: [{ name: 'opacity', value: '0.5' }] },
-              reducedMotionHandling: 'tint',
+              reducedMotionPolicy: 'tint',
             },
           ],
         },
@@ -2570,7 +2570,7 @@ describe('css reducedMotionHandling', () => {
 
   it('resets the list entries the reduce variant drops', () => {
     const { cssRules } = _generate(
-      configWith({ ...slide, composite: 'add', reducedMotionHandling: 'fade' }),
+      configWith({ ...slide, composite: 'add', reducedMotionPolicy: 'fade' }),
     );
 
     expect(cssRules.find(({ media }) => media === REDUCE)!.declarations).toEqual([
@@ -2587,8 +2587,8 @@ describe('css reducedMotionHandling', () => {
           key: 'a',
           trigger: 'hover',
           effects: [
-            { ...slide, reducedMotionHandling: 'ignore' },
-            { ...slide, reducedMotionHandling: 'custom' },
+            { ...slide, reducedMotionPolicy: 'ignore' },
+            { ...slide, reducedMotionPolicy: 'custom' },
           ],
         },
       ],
@@ -2601,7 +2601,7 @@ describe('css reducedMotionHandling', () => {
     ]);
   });
 
-  it('inherits the handling from the interaction and the instance, the effect taking precedence', () => {
+  it('inherits the policy from the interaction and the instance, the effect taking precedence', () => {
     const fromInteraction = _generate(
       {
         effects: { fade },
@@ -2609,13 +2609,13 @@ describe('css reducedMotionHandling', () => {
           {
             key: 'a',
             trigger: 'hover',
-            reducedMotionHandling: 'cancel',
-            effects: [slide, { key: 'b', ...slide, reducedMotionHandling: 'ignore' }],
+            reducedMotionPolicy: 'cancel',
+            effects: [slide, { key: 'b', ...slide, reducedMotionPolicy: 'ignore' }],
           },
           { key: 'c', trigger: 'hover', effects: [slide] },
         ],
       },
-      { reducedMotionHandling: 'ignore' },
+      { reducedMotionPolicy: 'ignore' },
     );
 
     expect(fromInteraction.cssRules.map(({ key, media }) => ({ key, media }))).toEqual([
@@ -2625,27 +2625,27 @@ describe('css reducedMotionHandling', () => {
     ]);
   });
 
-  it('takes the instance handling and forcing from Interact.setup()', () => {
-    Interact.setup({ reducedMotionHandling: 'cancel', forceReducedMotion: true });
+  it('takes the instance policy and forcing from Interact.setup()', () => {
+    Interact.setup({ reducedMotionPolicy: 'cancel', forceReducedMotion: true });
 
     try {
       expect(_generate(configWith(slide)).cssRules).toEqual([]);
     } finally {
-      Interact.setup({ reducedMotionHandling: 'collapse', forceReducedMotion: false });
+      Interact.setup({ reducedMotionPolicy: 'collapse', forceReducedMotion: false });
     }
   });
 
-  it('inherits the handling from the sequence, the effect taking precedence', () => {
+  it('inherits the policy from the sequence, the effect taking precedence', () => {
     const { cssRules } = _generate({
       sequences: {
-        seq: { effects: [slide, { key: 'b', ...slide, reducedMotionHandling: 'ignore' }] },
+        seq: { effects: [slide, { key: 'b', ...slide, reducedMotionPolicy: 'ignore' }] },
       },
       interactions: [
         {
           key: 'a',
           trigger: 'click',
-          reducedMotionHandling: 'collapse',
-          sequences: [{ sequenceId: 'seq', reducedMotionHandling: 'cancel' }],
+          reducedMotionPolicy: 'collapse',
+          sequences: [{ sequenceId: 'seq', reducedMotionPolicy: 'cancel' }],
         },
       ],
     });
@@ -2660,7 +2660,7 @@ describe('css reducedMotionHandling', () => {
   });
 
   it('collapses the stagger under reduce, unless the sequence ignores it', () => {
-    const staggerOf = (reducedMotionHandling: string) =>
+    const staggerOf = (reducedMotionPolicy: string) =>
       _generate({
         interactions: [
           {
@@ -2669,8 +2669,8 @@ describe('css reducedMotionHandling', () => {
             sequences: [
               {
                 offset: 100,
-                reducedMotionHandling,
-                effects: [{ ...slide, reducedMotionHandling: 'ignore' }],
+                reducedMotionPolicy,
+                effects: [{ ...slide, reducedMotionPolicy: 'ignore' }],
               },
             ],
           },
@@ -2688,7 +2688,7 @@ describe('css reducedMotionHandling', () => {
   });
 
   it('emits only the reduced outcome, unconditionally, when forced', () => {
-    const config = configWith({ ...slide, reducedMotionHandling: 'fade' });
+    const config = configWith({ ...slide, reducedMotionPolicy: 'fade' });
 
     expect(declarationsByMedia(_generate(config, { forceReducedMotion: true }).cssRules)).toEqual([
       {
@@ -2697,7 +2697,7 @@ describe('css reducedMotionHandling', () => {
       },
     ]);
     expect(
-      _generate(configWith({ ...slide, reducedMotionHandling: 'cancel' }), {
+      _generate(configWith({ ...slide, reducedMotionPolicy: 'cancel' }), {
         forceReducedMotion: true,
       }).cssRules,
     ).toEqual([]);
@@ -2724,7 +2724,7 @@ describe('css reducedMotionHandling', () => {
             trigger: 'hover',
             effects: [
               slide,
-              { ...slide, duration: 500, conditions: ['desktop'], reducedMotionHandling: 'ignore' },
+              { ...slide, duration: 500, conditions: ['desktop'], reducedMotionPolicy: 'ignore' },
             ],
           },
         ],
@@ -2765,7 +2765,7 @@ describe('css reducedMotionHandling', () => {
               {
                 namedEffect: { type: 'RMFade' } as any,
                 duration: 100,
-                reducedMotionHandling: 'move',
+                reducedMotionPolicy: 'move',
               },
             ],
           },

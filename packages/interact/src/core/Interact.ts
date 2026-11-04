@@ -11,7 +11,7 @@ import {
   IInteractionController,
   IInteractElement,
   InteractPlugin,
-  ReducedMotionHandling,
+  ReducedMotionPolicy,
   InteractPluginOptions,
 } from '../types';
 import { getElementHash, getInterpolatedKey } from './utilities';
@@ -32,7 +32,7 @@ type InteractInitOptions = {
   configIndex?: number;
   // override Interact's for this instance
   forceReducedMotion?: boolean;
-  reducedMotionHandling?: ReducedMotionHandling;
+  reducedMotionPolicy?: ReducedMotionPolicy;
 };
 
 function _convertToKeyTemplate(key: string) {
@@ -56,7 +56,7 @@ export class Interact {
   };
   controllers: Set<IInteractionController>;
   static forceReducedMotion: boolean = false;
-  static reducedMotionHandling: ReducedMotionHandling = 'collapse';
+  static reducedMotionPolicy: ReducedMotionPolicy = 'collapse';
   static allowA11yTriggers: boolean = true;
   static instances: Interact[] = [];
   static controllerCache = new Map<string, IInteractionController>();
@@ -85,7 +85,7 @@ export class Interact {
     this.dataCache = parseConfig(config, useCustomElement, {
       configIndex: options?.configIndex,
       forceReducedMotion: options?.forceReducedMotion ?? Interact.forceReducedMotion,
-      reducedMotionHandling: options?.reducedMotionHandling ?? Interact.reducedMotionHandling,
+      reducedMotionPolicy: options?.reducedMotionPolicy ?? Interact.reducedMotionPolicy,
     });
 
     const defined = Interact.defineInteractElement?.();
@@ -219,7 +219,7 @@ export class Interact {
     viewEnter?: Partial<ViewEnterParams>;
     allowA11yTriggers?: boolean;
     forceReducedMotion?: boolean;
-    reducedMotionHandling?: ReducedMotionHandling;
+    reducedMotionPolicy?: ReducedMotionPolicy;
   }): void {
     if (options.scrollOptionsGetter) {
       TRIGGER_TO_HANDLER_MODULE_MAP.viewProgress.registerOptionsGetter?.(
@@ -247,8 +247,8 @@ export class Interact {
       Interact.forceReducedMotion = options.forceReducedMotion;
     }
 
-    if (options.reducedMotionHandling !== undefined) {
-      Interact.reducedMotionHandling = options.reducedMotionHandling;
+    if (options.reducedMotionPolicy !== undefined) {
+      Interact.reducedMotionPolicy = options.reducedMotionPolicy;
     }
   }
 
@@ -484,7 +484,7 @@ function withSlots<T extends SequenceConfig | SequenceConfigRef>(
 function parseConfig(
   config: InteractConfig,
   useCustomElement: boolean,
-  options: Required<Pick<InteractInitOptions, 'forceReducedMotion' | 'reducedMotionHandling'>> &
+  options: Required<Pick<InteractInitOptions, 'forceReducedMotion' | 'reducedMotionPolicy'>> &
     Pick<InteractInitOptions, 'configIndex'>,
 ): InteractCache {
   const { configIndex } = options;
@@ -656,7 +656,7 @@ function parseConfig(
     effects: effectMap,
     sequences: sequenceMap,
     conditions: withReducedMotionConditions(conditions),
-    reducedMotionHandling: options.reducedMotionHandling,
+    reducedMotionPolicy: options.reducedMotionPolicy,
     forceReducedMotion: options.forceReducedMotion,
     interactions,
   };

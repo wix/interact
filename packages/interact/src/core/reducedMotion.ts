@@ -1,11 +1,4 @@
-import type {
-  Condition,
-  Effect,
-  ReducedMotionHandling,
-  ScrubEffect,
-  StateEffect,
-  TimeEffect,
-} from '../types';
+import type { Condition, Effect, ReducedMotionPolicy, StateEffect, TimeEffect } from '../types';
 import { isTransitionEffect } from '../utils';
 
 export const REDUCED_MOTION_REDUCE = '__rm-reduce';
@@ -28,37 +21,27 @@ type VariantOptions = {
   collapsesStagger?: boolean;
 };
 
-type KeysOfUnion<T> = T extends unknown ? keyof T : never;
-
-// typed against the effect types, so a new field must be classified here
-const BODY_FIELDS = new Set(
-  Object.keys({
-    namedEffect: true,
-    keyframeEffect: true,
-    customEffect: true,
-    transition: true,
-    transitionProperties: true,
-    duration: true,
-    delay: true,
-    easing: true,
-    iterations: true,
-    alternate: true,
-    fill: true,
-    reversed: true,
-    composite: true,
-    rangeStart: true,
-    rangeEnd: true,
-    centeredToTarget: true,
-    transitionDuration: true,
-    transitionEasing: true,
-  } satisfies Record<
-    Exclude<
-      KeysOfUnion<TimeEffect | ScrubEffect | StateEffect>,
-      'key' | 'effectId' | 'stateAction' | 'triggerType'
-    >,
-    true
-  >),
-);
+// the effect's animation itself, taken from a replacement - the rest is the original's identity and targeting
+const BODY_FIELDS = new Set([
+  'namedEffect',
+  'keyframeEffect',
+  'customEffect',
+  'transition',
+  'transitionProperties',
+  'duration',
+  'delay',
+  'easing',
+  'iterations',
+  'alternate',
+  'fill',
+  'reversed',
+  'composite',
+  'rangeStart',
+  'rangeEnd',
+  'centeredToTarget',
+  'transitionDuration',
+  'transitionEasing',
+]);
 
 export function withReducedMotionConditions(
   conditions: Record<string, Condition> = {},
@@ -66,11 +49,11 @@ export function withReducedMotionConditions(
   return { ...conditions, ...REDUCED_MOTION_CONDITIONS };
 }
 
-// handlings from the most specific level: effect, sequence, interaction, instance
-export function getReducedMotionHandling(
-  ...handlings: (ReducedMotionHandling | undefined)[]
-): ReducedMotionHandling {
-  return handlings.find(Boolean) ?? 'collapse';
+// policies from the most specific level: effect, sequence, interaction, instance
+export function getReducedMotionPolicy(
+  ...policies: (ReducedMotionPolicy | undefined)[]
+): ReducedMotionPolicy {
+  return policies.find(Boolean) ?? 'collapse';
 }
 
 // the same time/scrub discriminator as effectToAnimationOptions()
@@ -122,10 +105,10 @@ function replace<T extends object>(effect: T, replacementId: string, replacement
 
 function getReducedEffect<T extends object>(
   effect: T,
-  handling: ReducedMotionHandling,
+  policy: ReducedMotionPolicy,
   effects: Record<string, Effect>,
 ): T | null {
-  switch (handling) {
+  switch (policy) {
     case 'ignore':
       return effect;
     case 'cancel':
@@ -133,9 +116,9 @@ function getReducedEffect<T extends object>(
     case 'collapse':
       return collapse(effect);
     default: {
-      const replacement = effects[handling];
+      const replacement = effects[policy];
       return replacement && getEffectKind(replacement) === getEffectKind(effect)
-        ? replace(effect, handling, replacement)
+        ? replace(effect, policy, replacement)
         : collapse(effect);
     }
   }
@@ -165,10 +148,10 @@ export function isReducedMotionVariant(effect: { conditions?: string[] }): boole
  */
 export function getReducedMotionVariants<T extends object>(
   effect: T,
-  handling: ReducedMotionHandling,
+  policy: ReducedMotionPolicy,
   { effects, force, collapsesStagger }: VariantOptions,
 ): T[] {
-  const reduced = getReducedEffect(effect, handling, effects);
+  const reduced = getReducedEffect(effect, policy, effects);
 
   if (force) {
     return reduced ? [reduced] : [];
