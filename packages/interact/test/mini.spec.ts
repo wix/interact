@@ -618,32 +618,34 @@ describe('interact (mini)', () => {
       'should apply reducedMotionHandling %s when forceReducedMotion is true',
       async (reducedMotionHandling, duration) => {
         const { getWebAnimation } = await import('@wix/motion');
-        Interact.forceReducedMotion = true;
-        Interact.create({
-          reducedMotionHandling,
-          interactions: [
-            {
-              trigger: 'hover',
-              key: 'logo-hover',
-              effects: [
-                {
-                  key: 'logo-hover',
-                  effectId: 'logo-arc-in',
-                },
-              ],
-            },
-          ],
-          effects: {
-            'logo-arc-in': {
-              namedEffect: {
-                type: 'ArcIn',
-                direction: 'right',
-                power: 'medium',
-              } as NamedEffect,
-              duration: 1200,
+        Interact.setup({ forceReducedMotion: true });
+        Interact.create(
+          {
+            interactions: [
+              {
+                trigger: 'hover',
+                key: 'logo-hover',
+                effects: [
+                  {
+                    key: 'logo-hover',
+                    effectId: 'logo-arc-in',
+                  },
+                ],
+              },
+            ],
+            effects: {
+              'logo-arc-in': {
+                namedEffect: {
+                  type: 'ArcIn',
+                  direction: 'right',
+                  power: 'medium',
+                } as NamedEffect,
+                duration: 1200,
+              },
             },
           },
-        });
+          { reducedMotionHandling },
+        );
 
         element = document.createElement('div');
 
@@ -2744,7 +2746,6 @@ describe('interact (mini)', () => {
     it('should not apply selector condition type to media query listeners', () => {
       // Selector conditions should NOT create matchMedia listeners (only media conditions do)
       const config: InteractConfig = {
-        reducedMotionHandling: 'ignore',
         conditions: {
           active: {
             type: 'selector',
@@ -2775,7 +2776,7 @@ describe('interact (mini)', () => {
         },
       };
 
-      const instance = Interact.create(config);
+      const instance = Interact.create(config, { reducedMotionHandling: 'ignore' });
 
       const testElement = document.createElement('div');
 

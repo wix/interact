@@ -11,6 +11,7 @@ import {
   IInteractionController,
   IInteractElement,
   InteractPlugin,
+  ReducedMotionHandling,
 } from '../types';
 import { getElementHash, getInterpolatedKey } from './utilities';
 import { getFallbackId, getKeyframeSlots, getSlotKey } from './css';
@@ -28,8 +29,9 @@ import type { SequenceOptions, AnimationGroupArgs, IndexedGroup } from '@wix/mot
 type InteractInitOptions = {
   useCustomElement?: boolean;
   configIndex?: number;
-  // overrides Interact.forceReducedMotion for this instance
+  // override Interact's for this instance
   forceReducedMotion?: boolean;
+  reducedMotionHandling?: ReducedMotionHandling;
 };
 
 function _convertToKeyTemplate(key: string) {
@@ -53,6 +55,7 @@ export class Interact {
   };
   controllers: Set<IInteractionController>;
   static forceReducedMotion: boolean = false;
+  static reducedMotionHandling: ReducedMotionHandling = 'collapse';
   static allowA11yTriggers: boolean = true;
   static instances: Interact[] = [];
   static controllerCache = new Map<string, IInteractionController>();
@@ -75,12 +78,11 @@ export class Interact {
 
     const useCustomElement = options?.useCustomElement ?? !!Interact.defineInteractElement;
 
-    this.dataCache = parseConfig(
-      config,
-      useCustomElement,
-      options?.configIndex,
-      options?.forceReducedMotion ?? Interact.forceReducedMotion,
-    );
+    this.dataCache = parseConfig(config, useCustomElement, {
+      configIndex: options?.configIndex,
+      forceReducedMotion: options?.forceReducedMotion ?? Interact.forceReducedMotion,
+      reducedMotionHandling: options?.reducedMotionHandling ?? Interact.reducedMotionHandling,
+    });
 
     const defined = Interact.defineInteractElement?.();
 
@@ -211,6 +213,8 @@ export class Interact {
     pointerOptionsGetter?: () => Partial<PointerConfig>;
     viewEnter?: Partial<ViewEnterParams>;
     allowA11yTriggers?: boolean;
+    forceReducedMotion?: boolean;
+    reducedMotionHandling?: ReducedMotionHandling;
   }): void {
     if (options.scrollOptionsGetter) {
       TRIGGER_TO_HANDLER_MODULE_MAP.viewProgress.registerOptionsGetter?.(
@@ -232,6 +236,14 @@ export class Interact {
 
     if (options.allowA11yTriggers !== undefined) {
       Interact.allowA11yTriggers = options.allowA11yTriggers;
+    }
+
+    if (options.forceReducedMotion !== undefined) {
+      Interact.forceReducedMotion = options.forceReducedMotion;
+    }
+
+    if (options.reducedMotionHandling !== undefined) {
+      Interact.reducedMotionHandling = options.reducedMotionHandling;
     }
   }
 
@@ -431,15 +443,14 @@ function withSlots<T extends SequenceConfig | SequenceConfigRef>(
 
 function parseConfig(
   config: InteractConfig,
-  useCustomElement: boolean = false,
-  configIndex?: number,
-  forceReducedMotion: boolean = false,
+  useCustomElement: boolean,
+  options: Required<Pick<InteractInitOptions, 'forceReducedMotion' | 'reducedMotionHandling'>> &
+    Pick<InteractInitOptions, 'configIndex'>,
 ): InteractCache {
+  const { configIndex } = options;
   const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {} } = config;
   const interactions: InteractCache['interactions'] = {};
-  const slots = config.interactions
-    ? getKeyframeSlots(config, configIndex, forceReducedMotion)
-    : new Map<string, string>();
+  const slots = config.interactions ? getKeyframeSlots(config, options) : new Map<string, string>();
 
   config.interactions?.forEach((interaction_, interactionIndex) => {
     const source = interaction_.key;
@@ -605,8 +616,8 @@ function parseConfig(
     effects: effectMap,
     sequences: sequenceMap,
     conditions: withReducedMotionConditions(conditions),
-    reducedMotionHandling: config.reducedMotionHandling,
-    forceReducedMotion,
+    reducedMotionHandling: options.reducedMotionHandling,
+    forceReducedMotion: options.forceReducedMotion,
     interactions,
   };
 }

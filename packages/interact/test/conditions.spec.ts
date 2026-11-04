@@ -500,6 +500,39 @@ describe('reducedMotionHandling at runtime', () => {
     );
   });
 
+  describe('instance handling', () => {
+    afterEach(() => {
+      Interact.setup({ reducedMotionHandling: 'collapse' });
+    });
+
+    it('takes the handling from Interact.setup()', async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      mockMatchMedia([REDUCE]);
+      Interact.setup({ reducedMotionHandling: 'cancel' });
+      instance = Interact.create(createConfig());
+
+      addButton();
+
+      expect(getWebAnimation).not.toHaveBeenCalled();
+    });
+
+    it("takes the instance's handling over Interact.setup()", async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      mockMatchMedia([REDUCE]);
+      Interact.setup({ reducedMotionHandling: 'cancel' });
+      instance = Interact.create(createConfig(), { reducedMotionHandling: 'ignore' });
+
+      addButton();
+
+      expect(getWebAnimation).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ duration: 500 }),
+        undefined,
+        expect.anything(),
+      );
+    });
+  });
+
   it('plays the replacement when motion is reduced', async () => {
     const { getWebAnimation } = await import('@wix/motion');
     mockMatchMedia([REDUCE]);

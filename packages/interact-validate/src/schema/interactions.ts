@@ -222,7 +222,6 @@ export const InteractConfigSchema = z
     effects: z.record(z.string().min(1), Effect).optional(),
     sequences: z.record(z.string().min(1), SequenceConfig).optional(),
     conditions: z.record(z.string().min(1), Condition).optional(),
-    reducedMotionHandling: ReducedMotionHandling.optional(),
     interactions: z.array(Interaction),
   })
   .strict()
@@ -278,7 +277,6 @@ export const InteractConfigSchema = z
     const configConditions = config.conditions ?? {};
     const keyframeNames = new Set<string>();
     const effectIdReferences = new Set(Object.keys(configEffects));
-    effectIdReferences.delete(config.reducedMotionHandling!);
     const sequenceIdReferences = new Set(Object.keys(configSequences));
     const conditionReferences = new Set(Object.keys(configConditions));
 

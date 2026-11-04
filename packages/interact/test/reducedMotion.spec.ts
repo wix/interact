@@ -85,6 +85,25 @@ describe('reducedMotion', () => {
       });
     });
 
+    it.each([
+      [2.25, false, { iterations: 0.25 }],
+      [2, true, { iterations: 1, reversed: true }],
+      [1.25, true, { iterations: 0.25, reversed: true }],
+      [2.5, true, { iterations: 0.5 }],
+    ])(
+      'collapses %s iterations (alternate: %s) to one ending where the last one does',
+      (iterations, alternate, expected) => {
+        const [, collapsed] = getReducedMotionVariants(
+          { ...slide, iterations, alternate },
+          'collapse',
+          options,
+        );
+
+        expect(collapsed).toMatchObject({ duration: 0, ...expected });
+        expect((collapsed as { reversed?: boolean }).reversed).toBe(expected.reversed);
+      },
+    );
+
     it.each([0, Infinity])('falls back to cancel when collapsing %s iterations', (iterations) => {
       const looping = { ...slide, iterations };
 

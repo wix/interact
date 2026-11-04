@@ -18,7 +18,8 @@ Today, reduced motion is handled inconsistently:
 **Decisions:**
 
 - The default is `collapse`, so reduced motion is respected out of the box.
-- `Interact.forceReducedMotion` is folded into the new mechanism, and can also be set per instance.
+- `Interact.forceReducedMotion` is folded into the new mechanism.
+- The config gets no new top-level field. The instance-wide handling and forcing are `Interact.setup()` options (every instance) and `Interact.create()` options (one instance), like the other global settings.
 - Fallback chain: `effectId` → `collapse` → `cancel`.
 
 ---
@@ -32,12 +33,21 @@ export type ReducedMotionHandling = 'ignore' | 'cancel' | 'collapse' | (string &
 
 `reducedMotionHandling?: ReducedMotionHandling` is added to:
 
-- `InteractConfig`. An `Interact` instance is created from a single config, so this sets the handling per config and per instance.
 - `InteractionTrigger` (so it flows through `...rest` into the cached interactions)
 - `SequenceOptionsConfig` and `SequenceConfigRef`
 - `EffectBase` (covers inline effects, `EffectRef`, and `config.effects` definitions)
 
-Forcing reduced motion is per instance too: `Interact.create(config, { forceReducedMotion })` overrides the static `Interact.forceReducedMotion` (§3.5).
+The instance-wide values stay outside the config, so it stays clean:
+
+```ts
+Interact.setup({ reducedMotionHandling: 'ignore', forceReducedMotion: false }); // every instance
+Interact.create(config, { reducedMotionHandling: 'cancel', forceReducedMotion: true }); // one instance
+generate(config, { reducedMotionHandling: 'cancel', forceReducedMotion: true }); // defaults to setup()'s
+```
+
+- `Interact.setup()` sets the statics `Interact.reducedMotionHandling` (default `collapse`) and `Interact.forceReducedMotion` (default `false`).
+- `Interact.create()` options override them for the instance. They're read once at `init` into `InteractCache`, since `parseConfig` derives keyframe slots from them.
+- `generate()` takes the same two options, defaulting to the statics, and must get the instance's values, the same contract `configIndex` already has.
 
 ### Cascade (most specific first)
 
@@ -45,7 +55,7 @@ Forcing reduced motion is per instance too: `Interact.create(config, { forceRedu
 2. `config.effects[effectId]`. Items 1 and 2 come from the existing `{ ...effects[id], ...effect }` merge.
 3. Sequence: the `SequenceConfigRef` field overrides the `config.sequences[id]` field. This level applies only to effects inside sequences.
 4. Interaction
-5. Config
+5. Instance (`Interact.create()` option, then `Interact.setup()`)
 6. Default: `collapse`
 
 ### Reduced-motion state
@@ -80,7 +90,7 @@ The state is reduced when `(prefers-reduced-motion: reduce)` matches or when it 
 
 | Value        | Under reduced motion                                                                                                                                                                                                                                              |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `collapse`   | Default. The effect is replaced in place by its collapsed form: a single iteration of duration 0, everything else kept (§3.3). It keeps its place and media, so winners never change.                                                                             |
+| `collapse`   | Default. The effect is replaced in place by its collapsed form: one iteration of duration 0 ending where the effect would, everything else kept (§3.3). It keeps its place and media, so winners never change.                                                    |
 | `ignore`     | Nothing changes, except a sequence's stagger (§3.3).                                                                                                                                                                                                              |
 | `cancel`     | The effect gets the media condition `(prefers-reduced-motion: no-preference)` and behaves exactly like a user media condition. It drops out, and in variation competition ("media picks winner") an earlier variation for the same (interaction, target) can win. |
 | `<effectId>` | The effect is replaced in place by the body of `config.effects[effectId]`, keeping the original's identity and targeting (§3.2). Winners never change.                                                                                                            |
@@ -137,15 +147,17 @@ Keyframe naming: the builder names an unnamed replacement `keyframeEffect` after
 
 ### 3.3 Collapse transform
 
-- **time:** `duration: 0`, `iterations: 1`.
+- **time:** `duration: 0` and a single iteration that ends where the last one does.
   - Motion's existing `duration || 1` normalization turns the duration into 1ms in both the `web` and `style` paths, so the paths match.
-  - Delay, alternate, reversed, fill, easing, composite and keyframes are kept. A single iteration lands on the end state of the first one, which is the effect's "entered" state. The result is applied after the delay.
+  - `iterations` becomes its fractional part, or 1 when it's whole: 2.25 iterations end a quarter into an iteration, and so does the collapsed one.
+  - With `alternate`, the last iteration runs backwards when its index (`ceil(iterations) - 1`) is odd, so the collapsed effect flips `reversed` then. 2 alternate iterations end at the start, and so does the collapsed one.
+  - Delay, fill, easing, composite and keyframes are kept. The result is applied after the delay.
   - With `fill: none`, the result is the base style. This matches what the uncollapsed animation leaves after it ends.
   - The `alternate` and `state` trigger types still play, reverse and pause, just instantly.
 - **state:** every transition entry gets duration 0 and keeps its delay. The state rule still applies.
   - Today `transitionEffectToTransitionsList` (`utils.ts`) drops 0-duration entries. It must keep those that have a delay. Both paths use this helper.
 - **No end state** (infinite iterations, i.e. `iterations` 0 or `Infinity`, or kind `scrub`): falls back to `cancel`.
-- **Sequence stagger:** under reduced motion a sequence's `offset` becomes 0, so its items land together, unless the sequence's own handling (ref → definition → interaction → config) is `ignore`.
+- **Sequence stagger:** under reduced motion a sequence's `offset` becomes 0, so its items land together, unless the sequence's own handling (ref → definition → interaction → instance) is `ignore`.
   - The sequence `delay` and effect delays are kept.
   - Stagger is a sequence-level value, so it can't follow each effect's handling. Effects whose own handling is `ignore` inside such a sequence still get a reduce variant (`collapsesStagger`) that differs only in the stagger. This keeps the runtime's single `Sequence` offset and the CSS per-effect stagger `calc()` in agreement.
 
@@ -163,8 +175,8 @@ Both paths fall back silently, so they behave the same. The validator reports th
   - `ignore` → `[effect]`
   - `cancel` → `[]`. The effect loses, as if a media condition didn't match.
   - `collapse` / `<id>` → `[reducedVariant]`
-- **Runtime:** `force` is `Interact.create(config, { forceReducedMotion })`, falling back to the static `Interact.forceReducedMotion`. It's read once at `init` into `InteractCache.forceReducedMotion`, since `parseConfig` derives keyframe slots from it.
-- **CSS:** a new `GenerateOptions.forceReducedMotion` (`types/css.ts`). In CSS mode it must equal the instance's value, the same contract `configIndex` already has.
+- **Runtime:** `force` is the instance's `forceReducedMotion` (§1).
+- **CSS:** a new `GenerateOptions.forceReducedMotion` (`types/css.ts`), defaulting to `Interact.forceReducedMotion`. In CSS mode it must equal the instance's value.
 - Interact stops passing `reducedMotion` to motion and to the handlers:
   - It is removed from `InteractOptions` (`types/handlers.ts`).
   - Its uses are removed from `core/add.ts`, all handlers and `effectHandlers.ts`.
@@ -183,7 +195,7 @@ The merged effect goes through the builder at all three effect-resolution sites:
 - `_buildAnimationGroupArgsFromSequence`
 
 ```ts
-const variants = getReducedMotionVariants(effect, getReducedMotionHandling(effect.reducedMotionHandling, inherited, config), {...});
+const variants = getReducedMotionVariants(effect, getReducedMotionHandling(effect.reducedMotionHandling, inherited, instanceHandling), {...});
 variants.forEach((v, i) => mql(v) && instance.setupMediaQueryListener(`${baseId}::rm${i}`, mql(v), updateKey, onUpdate));
 const chosen = variants.find((v) => !mql(v) || mql(v).matches);
 // no chosen variant → identical to today's "media didn't match" branch (return / return false / continue)
@@ -191,12 +203,12 @@ const chosen = variants.find((v) => !mql(v) || mql(v).matches);
 
 - `inherited` is the interaction's handling for interaction effects, and the sequence's resolved handling for sequence effects.
 - `update()` is disconnect + connect. It rebuilds the handlers, the adopted sheet and the sequence cache, so a reduce toggle rides on the existing media machinery.
-- `InteractCache` gains the config-level `reducedMotionHandling` and the instance's `forceReducedMotion`.
+- `InteractCache` gains the instance's `reducedMotionHandling` and `forceReducedMotion`.
 - Sequences: `Interact.getSequence` gets the sequence options with `offset: 0` when the state is reduced and the sequence's handling isn't `ignore`. Every effect of such a sequence has a reduce variant, so its listeners cover a toggle.
 - `addInteraction`:
   - `createTransitionCSS` renders the chosen variant.
   - Its hardcoded `no-preference` wrapper is removed. The default `collapse` collapses the transition instead, and the runtime matches `generate()`.
-- The `animationEnd` source matching builds `sourceAnimationOptions` from the source's chosen variant. The source's handling resolves from `effects[id]` and config only, because the use site is unknown (§5).
+- The `animationEnd` source matching builds `sourceAnimationOptions` from the source's chosen variant. The source's handling resolves from `effects[id]` and the instance only, because the use site is unknown (§5).
 
 ### 4.2 CSS (`core/resolvers.ts`, `core/css.ts`)
 
@@ -233,24 +245,25 @@ const chosen = variants.find((v) => !mql(v) || mql(v).matches);
 ### Granularity limits
 
 1. **Sequence level is a default for its effects, and decides its stagger.** The sequence's `delay` never changes, and its stagger follows the sequence's handling, not its effects'.
-2. **An animationEnd source** resolves its handling from its definition (`effects[id]`) and config only. Overrides at its use site (inline, sequence or interaction) must agree, or the chain filter mismatches. The validator warns about this.
+2. **An animationEnd source** resolves its handling from its definition (`effects[id]`) and the instance only. Overrides at its use site (inline, sequence or interaction) must agree, or the chain filter mismatches. The validator warns about this.
 3. **Triggers are never varied.** Listeners, observers and view-timelines stay. Only effects change.
-4. **`forceReducedMotion` is per instance** (`Interact.create()` option, falling back to the static flag), not per interaction or effect.
+4. **`forceReducedMotion` is per instance** (`Interact.create()` option, falling back to `Interact.setup()`'s), not per interaction or effect.
 
 ## 6. Validation (`packages/interact-validate`)
 
 - **Schema** (`src/schema/effects.ts`, `interactions.ts`, `sequences.ts`):
   - `z.union([ReducedMotionMode, z.string().min(1)])`, with `ReducedMotionMode = z.enum(['ignore', 'cancel', 'collapse'])`, which also gives the checks their mode set.
-  - Applied to the config root, interactions, inline/ref/definition effects, and inline/ref/definition sequences.
+  - Applied to interactions, inline/ref/definition effects, and inline/ref/definition sequences. The config root rejects it.
   - Update the drift guard, `test/type-parity.spec.ts`.
 - **No extra traversal.** The checks run inside the two existing `walkConfig` passes, and `walkConfig` hands each effect its parent sequence:
   - Errors run in the `superRefine` walk: a missing effect named on an effect, and an incompatible replacement set on the effect or its definition.
   - Warnings and info run in `collectSemanticWarnings`' walk.
   - A replacement's kind comes from the effect schema it validates against (`StateEffect`, then `TimeEffect`, else scrub), memoized per definition object across both passes. An effect's own kind follows its trigger, as the interaction schemas pick the effect type by trigger.
   - Unused-effect detection drops a referenced id in the `transform` walk that already collects references.
+  - The instance's handling isn't in the config, so the checks take it to be the default `collapse`.
 - **Use sites.** An effect's handling depends on where it plays. A `config.sequences` entry plays wherever it's referenced:
   - Issues from the effect's own handling (on it or its definition) are reported once, on the definition.
-  - Inherited issues (from the reference, the definition's sequence-level value, the interaction or the config) are reported on each sequence reference. Each reference is a distinct path, so nothing is reported twice and nothing needs deduplicating.
+  - Inherited issues (from the reference, the definition's sequence-level value or the interaction) are reported on each sequence reference. Each reference is a distinct path, so nothing is reported twice and nothing needs deduplicating.
 - **Referential:**
   - A string value must exist in `config.effects`. Explicit at effect level → error. Inherited → warning naming the fallback.
   - An effect id equal to `ignore`, `cancel` or `collapse` is shadowed by the enum → warning.
@@ -258,12 +271,12 @@ const chosen = variants.find((v) => !mql(v) || mql(v).matches);
   - Incompatible kind → error if explicit at effect level, warning if inherited.
   - `collapse` → `cancel` fallback → info, only when a handling is set (the default isn't reported).
   - Self-reference → warning.
-  - An animationEnd source whose use-site handling differs from its definition and config → warning.
+  - An animationEnd source whose use-site handling differs from its definition → warning.
 - Update `packages/interact/rules/validate.md`.
 
 ## 7. Behavior changes (release notes)
 
-1. Under OS reduce, effects collapse by default. Looping, `viewProgress` and `pointerMove` effects are dropped, and sequence staggers collapse. Opt out with `ignore`.
+1. Under OS reduce, effects collapse by default. Looping, `viewProgress` and `pointerMove` effects are dropped, and sequence staggers collapse. Opt out with `Interact.setup({ reducedMotionHandling: 'ignore' })`.
 2. `forceReducedMotion` applies the `reducedMotionHandling` outcome. With the default `collapse` it keeps its old behavior, except that finite multi-iteration animations collapse to their end state instead of being dropped.
 3. Runtime transitions collapse through `reducedMotionHandling` instead of a fixed `no-preference` wrapper.
 4. 0-duration transition entries that have a delay are now kept, so the delay is honored.
@@ -289,7 +302,7 @@ const chosen = variants.find((v) => !mql(v) || mql(v).matches);
 **Unit tests:**
 
 - `packages/interact/test/css.spec.ts`: variants share list entries, list lengths are unchanged, media is exclusive, each variant falls back only earlier entries, keyframe slots work across variants, stagger collapses.
-- `resolvers.spec.ts`, `sequences.spec.ts`, `conditions.spec.ts`, `web.spec.ts`: cascade, default, fallback chain, force (static and per instance), stagger.
+- `resolvers.spec.ts`, `sequences.spec.ts`, `conditions.spec.ts`, `web.spec.ts`: cascade, default, fallback chain, instance handling and force (`setup()` and per instance), stagger.
 - New `reducedMotion.spec.ts` for the builder.
 - interact-validate specs, including shared sequence definitions.
 - Run `yarn build && yarn lint && yarn format:check && yarn test` (after `nvm use`).

@@ -22,7 +22,7 @@ import { createReducedMotionWarnings } from './reducedMotion';
 // Collect every warning/info-level semantic issue (consumed by `transform`).
 export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
   const reducedMotion = createReducedMotionWarnings(config);
-  const warnings: SemanticIssue[] = [...reducedMotion.onConfig()];
+  const warnings: SemanticIssue[] = [];
 
   walkConfig(config, {
     onInteraction: (path, interaction) => {

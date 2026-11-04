@@ -40,7 +40,7 @@ Each item here is CRITICAL — ignoring any of them will break animations.
   events and flickering. Use `selector` to target a child element, or set the effect's `key` to a different element.
 - **CRITICAL**: For `pointerMove` trigger MUST AVOID using the same element as both source and target with `hitArea: 'self'` and effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
 - **CRITICAL — Do NOT guess preset options**: If you don't know the expected type/structure for a `namedEffect` param, omit it — rely on defaults rather than guessing.
-- **Reduced motion**: Effects collapse by default (see [Reduced Motion](#reduced-motion)) — users who prefer reduced motion get the end state without the tween. Use `'cancel'` to drop an effect, an effectId to swap in a gentler effect, or `'ignore'` to keep it as is. `Interact.forceReducedMotion` forces the reduced outcome.
+- **Reduced motion**: Effects collapse by default (see [Reduced Motion](#reduced-motion)) — users who prefer reduced motion get the end state without the tween. Use `'cancel'` to drop an effect, an effectId to swap in a gentler effect, or `'ignore'` to keep it as is. `Interact.setup({ reducedMotionHandling, forceReducedMotion })` changes the default and forces the reduced outcome for every instance; `Interact.create(config, options)` takes both per instance. Never put `reducedMotionHandling` on the config root.
 - **Perspective**: Prefer `transform: perspective(...)` inside keyframes. Use the CSS `perspective` property only when multiple children share the same `perspective-origin`.
 
 ---
@@ -177,7 +177,6 @@ type InteractConfig = {
   effects?: Record<string, Effect>; // reusable effects referenced by effectId
   sequences?: Record<string, SequenceConfig>; // reusable sequences by sequenceId
   conditions?: Record<string, Condition>; // named conditions; keys are condition ids
-  reducedMotionHandling?: ReducedMotionHandling; // default for every effect; see Reduced Motion
 };
 ```
 
@@ -629,18 +628,18 @@ conditions: {
 type ReducedMotionHandling = 'ignore' | 'cancel' | 'collapse' | string; // string = effectId in the effects registry
 ```
 
-What an effect does when the user prefers reduced motion (`(prefers-reduced-motion: reduce)`, or forced by `Interact.forceReducedMotion` / `Interact.create()`'s `forceReducedMotion`). Set on the config, an interaction, a sequence or an effect; the most specific wins: effect (inline, then its registry entry) → sequence → interaction → config → `'collapse'`.
+What an effect does when the user prefers reduced motion (`(prefers-reduced-motion: reduce)`, or forced by `forceReducedMotion` of `Interact.setup()` / `Interact.create()`). Set on an interaction, a sequence or an effect, or per instance (`Interact.setup()` / `Interact.create()` option, not a config field); the most specific wins: effect (inline, then its registry entry) → sequence → interaction → instance → `'collapse'`.
 
-| Value        | Under reduced motion                                                                                                                                                                                                     |
-| :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `'collapse'` | Default. Plays a single iteration with duration 0, keeping its delay, fill and keyframes, so it jumps to its end state. Transitions become 0ms (with delay). Looping and scroll/pointer-driven effects are cancelled.    |
-| `'ignore'`   | Plays as usual.                                                                                                                                                                                                          |
-| `'cancel'`   | Dropped, like a `(prefers-reduced-motion: no-preference)` media condition — an earlier effect of the same interaction on the same target may then apply instead.                                                         |
-| effectId     | Replaced by that registry effect's animation (effect type, keyframes and timing); the original's target, conditions and `triggerType` stay. It must be of the same kind (time, scrub or state) — otherwise it collapses. |
+| Value        | Under reduced motion                                                                                                                                                                                                                                                                                                                                  |
+| :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'collapse'` | Default. Plays one iteration with duration 0 that ends where its last iteration would (the fraction of a fractional `iterations`, reversed when it's a backwards `alternate` one), keeping its delay, fill and keyframes, so it jumps to its end state. Transitions become 0ms (with delay). Looping and scroll/pointer-driven effects are cancelled. |
+| `'ignore'`   | Plays as usual.                                                                                                                                                                                                                                                                                                                                       |
+| `'cancel'`   | Dropped, like a `(prefers-reduced-motion: no-preference)` media condition — an earlier effect of the same interaction on the same target may then apply instead.                                                                                                                                                                                      |
+| effectId     | Replaced by that registry effect's animation (effect type, keyframes and timing); the original's target, conditions and `triggerType` stay. It must be of the same kind (time, scrub or state) — otherwise it collapses.                                                                                                                              |
 
 - A sequence's stagger (`offset`) collapses to 0, unless the sequence's handling is `'ignore'`; delays are kept.
-- An `animationEnd` source resolves its handling from its registry entry and the config only — set it there.
-- `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media; pass `forceReducedMotion: true` to `generate()` when reduced motion is forced.
+- An `animationEnd` source resolves its handling from its registry entry and the instance only — set it there.
+- `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media. It takes the instance's `reducedMotionHandling` / `forceReducedMotion` as options, defaulting to `Interact.setup()`'s.
 
 ---
 
@@ -792,22 +791,24 @@ Default split wrapper classes: `.split-c` (chars), `.split-w` (words), `.split-l
 | Method / Property                   | Description                                                                                                                                                                                                                                               |
 | :---------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `generate(config, options?)`        | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML. `options` = `{ useFirstChild?, plugins? }`, or a bare boolean for legacy `useFirstChild`. `plugins` = per-plugin SSR style generators (see [Plugins](#plugins)). |
-| `Interact.create(config, options?)` | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle. `options.forceReducedMotion` overrides `Interact.forceReducedMotion` for the instance.                                                                        |
+| `Interact.create(config, options?)` | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle. `options.forceReducedMotion` / `options.reducedMotionHandling` override `Interact.setup()`'s for the instance.                                                |
 | `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `generate()` and `create`.                                                                                                                                                                           |
 | `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                                                                                                                                                                         |
-| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — apply the reduced-motion outcome of `reducedMotionHandling` regardless of OS setting. Pass the same value as `generate()`'s `forceReducedMotion`.                                                                          |
+| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — apply the reduced-motion outcome of `reducedMotionHandling` regardless of OS setting. Set by `Interact.setup()`.                                                                                                           |
 | `Interact.allowA11yTriggers`        | `boolean` (default: `true`) — enable accessibility trigger variants (`interest`, `activate`).                                                                                                                                                             |
 | `Interact.setup(options)`           | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below.                                                                                                                                             |
 | `Interact.use(name, plugin)`        | Register an external plugin by name (see [Plugins](#plugins)). Call before `create`.                                                                                                                                                                      |
 
 **`Interact.setup(options)`** — optional configuration object:
 
-| Option                 | Type                           | Description                                                           |
-| :--------------------- | :----------------------------- | :-------------------------------------------------------------------- |
-| `scrollOptionsGetter`  | `() => Partial<scrollConfig>`  | Function returning defaults for scroll-driven animation configuration |
-| `pointerOptionsGetter` | `() => Partial<PointerConfig>` | Function returning defaults for pointer-move animation configuration  |
-| `viewEnter`            | `Partial<ViewEnterParams>`     | Defaults for all viewEnter triggers (`threshold`,`inset`)             |
-| `allowA11yTriggers`    | `boolean`                      | Enable accessibility trigger variants (use `interest` and `activate`) |
+| Option                  | Type                           | Description                                                           |
+| :---------------------- | :----------------------------- | :-------------------------------------------------------------------- |
+| `scrollOptionsGetter`   | `() => Partial<scrollConfig>`  | Function returning defaults for scroll-driven animation configuration |
+| `pointerOptionsGetter`  | `() => Partial<PointerConfig>` | Function returning defaults for pointer-move animation configuration  |
+| `viewEnter`             | `Partial<ViewEnterParams>`     | Defaults for all viewEnter triggers (`threshold`,`inset`)             |
+| `allowA11yTriggers`     | `boolean`                      | Enable accessibility trigger variants (use `interest` and `activate`) |
+| `forceReducedMotion`    | `boolean`                      | Apply the reduced-motion outcome regardless of OS setting             |
+| `reducedMotionHandling` | `ReducedMotionHandling`        | Default handling of effects (default `'collapse'`)                    |
 
 Use `setup()` when you need to override default observer thresholds or provide global configuration that applies to all interactions of a given trigger type.
 

@@ -1,4 +1,5 @@
 import type { InteractPluginStyles } from './plugins';
+import type { ReducedMotionHandling } from './effects';
 
 /**
  * Options bag for `generate()`. Passed as its single optional 2nd argument, which also accepts a
@@ -20,10 +21,15 @@ export type GenerateOptions = {
    */
   configIndex?: number;
   /**
-   * Generates only the reduced-motion outcome of every effect, unconditionally. Must equal
-   * `Interact.forceReducedMotion` at runtime.
+   * Generates only the reduced-motion outcome of every effect, unconditionally. Must equal the instance's
+   * `forceReducedMotion` at runtime. Defaults to `Interact.forceReducedMotion` (see `Interact.setup()`).
    */
   forceReducedMotion?: boolean;
+  /**
+   * The handling of effects that don't set one along their interaction, sequence or effect. Must equal the
+   * instance's `reducedMotionHandling` at runtime. Defaults to `Interact.reducedMotionHandling`.
+   */
+  reducedMotionHandling?: ReducedMotionHandling;
 };
 
 export type ListPropertyName =

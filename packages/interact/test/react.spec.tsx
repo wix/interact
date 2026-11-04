@@ -712,7 +712,6 @@ describe('interact (react)', () => {
 
     it('should work with conditions/media queries', () => {
       const config: InteractConfig = {
-        reducedMotionHandling: 'ignore',
         conditions: {
           desktop: {
             type: 'media',
@@ -744,7 +743,7 @@ describe('interact (react)', () => {
       };
 
       mockMatchMedia(['min-width: 1024px']);
-      const instance = Interact.create(config);
+      const instance = Interact.create(config, { reducedMotionHandling: 'ignore' });
 
       render(
         <Interaction tagName="button" interactKey="responsive-button">
@@ -839,11 +838,11 @@ describe('interact (react)', () => {
   });
 
   describe('reduced motion', () => {
-    it('should collapse effects when forceReducedMotion is true and reducedMotionHandling is collapse', async () => {
+    it('should collapse effects when forceReducedMotion is true', async () => {
       const { getWebAnimation } = await import('@wix/motion');
 
       Interact.forceReducedMotion = true;
-      Interact.create({ ...getMockConfig(), reducedMotionHandling: 'collapse' });
+      Interact.create(getMockConfig());
 
       render(
         <Interaction tagName="div" interactKey="logo-hover">

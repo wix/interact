@@ -8,6 +8,7 @@ import type {
   CSSRuleData,
   InteractPluginStyles,
   GenerateOptions,
+  ReducedMotionHandling,
 } from '../types';
 import { PLUGIN_FIELD_PREFIX } from '../types';
 import {
@@ -17,7 +18,7 @@ import {
   getFullPredicateByType,
   getSelectorCondition,
 } from '../utils';
-import { getSelector } from './Interact';
+import { Interact, getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
 import { getElementHash } from './utilities';
 import { isReducedMotionVariant, withReducedMotionConditions } from './reducedMotion';
@@ -88,6 +89,7 @@ type GenerateContext = {
   collectSlots: boolean;
   useFirstChild: boolean;
   forceReducedMotion: boolean;
+  reducedMotionHandling: ReducedMotionHandling;
   plugins?: InteractPluginStyles;
   configIndex?: number;
 };
@@ -643,7 +645,7 @@ function parseInteraction(
         interaction,
         ctx.config,
         getFallbackId('eff', [interactionIdx, effIndex], ctx.configIndex),
-        { force: ctx.forceReducedMotion },
+        { force: ctx.forceReducedMotion, defaultHandling: ctx.reducedMotionHandling },
       );
       return resolved && Object.assign(resolved, { slotKey: getSlotKey(interactionIdx, effIndex) });
     })
@@ -661,7 +663,7 @@ function parseInteraction(
         ctx.config,
         getFallbackId('seq', [interactionIdx, seqIndex], ctx.configIndex),
         (effIndex) => getSlotKey(interactionIdx, effIndex, seqIndex),
-        ctx.forceReducedMotion,
+        { force: ctx.forceReducedMotion, defaultHandling: ctx.reducedMotionHandling },
       ),
     )
     .filter((sequence) => sequence !== null);
@@ -702,7 +704,8 @@ function parseConfig(
     plugins,
     configIndex,
     collectSlots = false,
-    forceReducedMotion = false,
+    forceReducedMotion = Interact.forceReducedMotion,
+    reducedMotionHandling = Interact.reducedMotionHandling,
   } = options;
   const ctx: GenerateContext = {
     config,
@@ -711,11 +714,12 @@ function parseConfig(
     keyframesMap: new Map<string, Keyframe[]>(),
     keyframeSlots: collectSlots
       ? new Map()
-      : getKeyframeSlots(config, configIndex, forceReducedMotion),
+      : getKeyframeSlots(config, { configIndex, forceReducedMotion, reducedMotionHandling }),
     scopedTimelines: [],
     collectSlots,
     useFirstChild,
     forceReducedMotion,
+    reducedMotionHandling,
     plugins,
     configIndex,
   };
@@ -753,10 +757,12 @@ export function getSlotKey(interactionIndex: number, effectIndex: number, sequen
  */
 export function getKeyframeSlots(
   config: InteractConfig,
-  configIndex?: number,
-  forceReducedMotion?: boolean,
+  options: Pick<
+    GenerateOptions,
+    'configIndex' | 'forceReducedMotion' | 'reducedMotionHandling'
+  > = {},
 ): Map<string, string> {
-  const { ctx } = parseConfig(config, { configIndex, collectSlots: true, forceReducedMotion });
+  const { ctx } = parseConfig(config, { ...options, collectSlots: true });
   const slots = new Map<string, string>();
   const suffixOf = (slot: number) => (slot ? `-${slot}` : undefined);
 

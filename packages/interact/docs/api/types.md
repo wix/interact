@@ -49,7 +49,6 @@ The main configuration object for defining interactions, effects, and conditions
 type InteractConfig = {
   effects: Record<string, Effect>;
   conditions?: Record<string, Condition>;
-  reducedMotionHandling?: ReducedMotionHandling;
   interactions: Interaction[];
 };
 ```
@@ -59,7 +58,6 @@ type InteractConfig = {
 - `interactions` - Array of interaction definitions (required)
 - `effects` - Map of reusable effect definitions by ID (required)
 - `conditions` - Map of conditional logic definitions by ID (optional)
-- `reducedMotionHandling` - Default [`ReducedMotionHandling`](#reducedmotionhandling) for every effect (optional, defaults to `'collapse'`). Interactions, sequences and effects override it
 
 **Example:**
 
@@ -867,22 +865,22 @@ An interaction can have `effects` only, `sequences` only, or both.
 
 ### `ReducedMotionHandling`
 
-What an effect does when the user prefers reduced motion: `(prefers-reduced-motion: reduce)` matches, or reduced motion is forced (`Interact.forceReducedMotion`, or `Interact.create()`'s `forceReducedMotion`).
+What an effect does when the user prefers reduced motion: `(prefers-reduced-motion: reduce)` matches, or reduced motion is forced (`forceReducedMotion` of `Interact.setup()` or `Interact.create()`).
 
 ```typescript
 type ReducedMotionHandling = 'ignore' | 'cancel' | 'collapse' | (string & {}); // string = effectId
 ```
 
-Accepted on `InteractConfig`, `Interaction`, `SequenceConfig` / `SequenceConfigRef` and effects. The most specific level wins: inline effect → its `effects` registry entry → sequence → interaction → config → `'collapse'`.
+Accepted on `Interaction`, `SequenceConfig` / `SequenceConfigRef` and effects, and per instance as an option of `Interact.create()` / `Interact.setup()` (it isn't a config field). The most specific level wins: inline effect → its `effects` registry entry → sequence → interaction → instance → `'collapse'`.
 
-- `'collapse'` (default) - Plays a single iteration with duration 0, keeping everything else (delay, fill, keyframes), so it jumps to its end state. Transitions become 0ms and keep their delay. Effects with no end state (infinite iterations, `viewProgress` / `pointerMove`) are cancelled instead.
+- `'collapse'` (default) - Plays one iteration with duration 0 that ends where its last iteration would (the fraction of a fractional `iterations`, reversed when it's a backwards `alternate` one), keeping its delay, fill and keyframes, so it jumps to its end state. Transitions become 0ms and keep their delay. Effects with no end state (infinite iterations, `viewProgress` / `pointerMove`) are cancelled instead.
 - `'ignore'` - Plays as usual.
 - `'cancel'` - Dropped, exactly like a `(prefers-reduced-motion: no-preference)` media condition.
 - effectId - Replaced by the animation of `effects[effectId]` (effect type, keyframes and timing), keeping the original's target, conditions, `effectId` and `triggerType`. It must be of the same kind (time, scrub or state) and exist, otherwise the effect collapses.
 
 A sequence's stagger (`offset`) collapses to 0 under reduced motion, unless the sequence's own handling resolves to `'ignore'`. Its `delay` and its effects' delays are kept.
 
-`generate()` emits both outcomes under exclusive `prefers-reduced-motion` media queries, so the CSS and the runtime agree. Pass `generate(config, { forceReducedMotion: true })` when reduced motion is forced.
+`generate()` emits both outcomes under exclusive `prefers-reduced-motion` media queries, so the CSS and the runtime agree. `generate()` takes the instance's `reducedMotionHandling` and `forceReducedMotion` as options, defaulting to the ones set by `Interact.setup()`.
 
 ## Condition Types
 

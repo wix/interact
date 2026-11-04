@@ -66,7 +66,7 @@ export function withReducedMotionConditions(
   return { ...conditions, ...REDUCED_MOTION_CONDITIONS };
 }
 
-// handlings from the most specific level: effect, sequence, interaction, config
+// handlings from the most specific level: effect, sequence, interaction, instance
 export function getReducedMotionHandling(
   ...handlings: (ReducedMotionHandling | undefined)[]
 ): ReducedMotionHandling {
@@ -98,12 +98,18 @@ function collapse<T extends object>(effect: T): T | null {
     };
   }
 
-  const { iterations = 1 } = effect as TimeEffect;
+  const { iterations = 1, alternate, reversed } = effect as TimeEffect;
   if (kind === 'scrub' || !iterations || iterations === Infinity) {
     return null;
   }
 
-  return { ...effect, duration: 0, iterations: 1 };
+  // a single iteration ending where the last one does, which runs backwards when it's an odd alternate one
+  return {
+    ...effect,
+    duration: 0,
+    iterations: iterations % 1 || 1,
+    ...(alternate && (Math.ceil(iterations) - 1) % 2 && { reversed: !reversed }),
+  };
 }
 
 function replace<T extends object>(effect: T, replacementId: string, replacement: Effect): T {

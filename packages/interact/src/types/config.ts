@@ -57,7 +57,6 @@ export type InteractConfig = {
   effects?: Record<string, Effect>;
   sequences?: Record<string, SequenceConfig>;
   conditions?: Record<string, Condition>;
-  reducedMotionHandling?: ReducedMotionHandling;
   interactions: Interaction[];
 };
 

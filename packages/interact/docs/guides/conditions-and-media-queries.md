@@ -271,7 +271,7 @@ const accessibleConfig: InteractConfig = {
 
 ### Reduced Motion Handling
 
-Instead of writing a separate interaction per motion preference, set `reducedMotionHandling` and let Interact derive the reduced-motion version of each effect. It is accepted on the config, interactions, sequences and effects — the most specific level wins. By default every effect collapses: it jumps to its end state for users who prefer reduced motion.
+Instead of writing a separate interaction per motion preference, set `reducedMotionHandling` and let Interact derive the reduced-motion version of each effect. It is accepted on interactions, sequences and effects — the most specific level wins. By default every effect collapses: it jumps to its end state for users who prefer reduced motion. To change that default, pass `reducedMotionHandling` to `Interact.setup()` for every instance, or to `Interact.create(config, options)` for one.
 
 ```typescript
 const config: InteractConfig = {
@@ -313,14 +313,14 @@ const config: InteractConfig = {
 };
 ```
 
-- `'collapse'` (default) plays a single iteration with duration 0, so it jumps to its end state after its delay. Looping and scroll/pointer-driven effects have no end state, so they're cancelled instead.
+- `'collapse'` (default) plays one iteration with duration 0 that ends where the effect would, so it jumps to its end state after its delay. Looping and scroll/pointer-driven effects have no end state, so they're cancelled instead.
 - `'ignore'` plays the effect as usual.
 - `'cancel'` drops it, exactly as if it had a `(prefers-reduced-motion: no-preference)` condition.
 - An effectId replaces the effect's animation with that registry effect's, keeping the original target and conditions. It must be the same kind of effect (time-based, scroll/pointer-driven or a state transition), otherwise the effect collapses.
 
 A sequence's stagger collapses too, so its items land together, unless the sequence's handling is `'ignore'`.
 
-`Interact.forceReducedMotion = true` (or `Interact.create(config, { forceReducedMotion: true })` for a single instance) applies the reduced-motion outcome regardless of the user's setting — pass `forceReducedMotion: true` to `generate()` too.
+`Interact.setup({ forceReducedMotion: true })` (or `Interact.create(config, { forceReducedMotion: true })` for a single instance) applies the reduced-motion outcome regardless of the user's setting. `generate()` defaults to the values set by `Interact.setup()`; pass it the instance's values otherwise.
 
 ## Device-Specific Patterns
 

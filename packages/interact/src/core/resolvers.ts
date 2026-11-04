@@ -29,10 +29,15 @@ const TIME_TRIGGER_TO_DEFAULT_TYPE: Map<TriggerType, TimeAnimationTriggerType> =
 ]);
 
 type ResolveOptions = {
+  // the instance's
+  defaultHandling?: ReducedMotionHandling;
+  force?: boolean;
+};
+
+type ResolveEffectOptions = ResolveOptions & {
   // inherited from the sequence
   handling?: ReducedMotionHandling;
   collapsesStagger?: boolean;
-  force?: boolean;
 };
 
 type FullEffect = EffectBase &
@@ -61,7 +66,7 @@ export function resolveEffectForCSS(
   interaction: Interaction,
   config: InteractConfig,
   fallbackId?: string,
-  options: ResolveOptions = {},
+  options: ResolveEffectOptions = {},
 ): ResolvedEffect | null {
   const { effects = {}, conditions: configConditions = {} } = config;
   const { key: interactionKey, trigger, conditions: interactionConditions = [] } = interaction;
@@ -144,7 +149,7 @@ export function resolveEffectForCSS(
       fullEffect.reducedMotionHandling,
       options.handling,
       interaction.reducedMotionHandling,
-      config.reducedMotionHandling,
+      options.defaultHandling,
     ),
     { effects, force: options.force, collapsesStagger: options.collapsesStagger },
   ).map(resolveBody);
@@ -158,7 +163,7 @@ export function resolveSequenceForCSS(
   config: InteractConfig,
   fallbackId?: string,
   getSlotKey?: (effectIndex: number) => string,
-  force?: boolean,
+  options: ResolveOptions = {},
 ): ResolvedSequence | null {
   const { sequences = {}, conditions: configConditions = {} } = config;
   const { trigger, conditions: interactionConditions = [] } = interaction;
@@ -172,7 +177,7 @@ export function resolveSequenceForCSS(
   const handling = getReducedMotionHandling(
     fullSequence.reducedMotionHandling,
     interaction.reducedMotionHandling,
-    config.reducedMotionHandling,
+    options.defaultHandling,
   );
 
   let {
@@ -213,7 +218,7 @@ export function resolveSequenceForCSS(
       interaction,
       config,
       `${sequenceId}-eff-${index}`,
-      { handling, collapsesStagger: handling !== 'ignore', force },
+      { ...options, handling, collapsesStagger: handling !== 'ignore' },
     );
     return resolved && Object.assign(resolved, { slotKey: getSlotKey?.(index) });
   });

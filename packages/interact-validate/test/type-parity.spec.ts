@@ -52,12 +52,11 @@ describe('schema type parity (drift guard)', () => {
     >();
   });
 
-  it('reducedMotionHandling is accepted at every level (mirrors ReducedMotionHandling)', () => {
-    type Canonical = InteractConfig['reducedMotionHandling'];
+  it('reducedMotionHandling is accepted on interactions, effects and sequences (mirrors ReducedMotionHandling)', () => {
+    type Canonical = InteractConfig['interactions'][number]['reducedMotionHandling'];
     type InferredInteraction = InferredConfig['interactions'][number];
     type InferredEffect = NonNullable<InferredConfig['effects']>[string];
     type InferredSequence = NonNullable<InferredConfig['sequences']>[string];
-    expectTypeOf<InferredConfig['reducedMotionHandling']>().toMatchTypeOf<Canonical>();
     expectTypeOf<InferredInteraction['reducedMotionHandling']>().toMatchTypeOf<Canonical>();
     expectTypeOf<InferredEffect['reducedMotionHandling']>().toMatchTypeOf<Canonical>();
     expectTypeOf<InferredSequence['reducedMotionHandling']>().toMatchTypeOf<Canonical>();

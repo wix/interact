@@ -599,10 +599,9 @@ describe('interact (web)', () => {
       'should apply reducedMotionHandling %s when forceReducedMotion is true',
       async (reducedMotionHandling, duration) => {
         const { getWebAnimation } = await import('@wix/motion');
-        Interact.forceReducedMotion = true;
+        Interact.setup({ forceReducedMotion: true });
         Interact.create(
           {
-            reducedMotionHandling,
             interactions: [
               {
                 trigger: 'hover',
@@ -626,7 +625,7 @@ describe('interact (web)', () => {
               },
             },
           },
-          { useCustomElement: true },
+          { useCustomElement: true, reducedMotionHandling },
         );
 
         element = document.createElement('interact-element') as IInteractElement;

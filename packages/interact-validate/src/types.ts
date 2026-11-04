@@ -90,7 +90,6 @@ export type AnyInteraction = {
 export type AnyConfig = {
   effects?: Record<string, AnyEffect>;
   sequences?: Record<string, AnySequence>;
-  reducedMotionHandling?: string;
   interactions: AnyInteraction[];
 };
 

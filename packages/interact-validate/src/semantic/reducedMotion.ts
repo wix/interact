@@ -17,7 +17,7 @@ type UseSite = {
   effect: AnyEffect;
   // set on the effect or its definition
   explicit?: string;
-  // from its sequence, interaction or config - unknown for a sequence definition's effect
+  // from its sequence or interaction - unknown for a sequence definition's effect
   inherited?: string;
   kind: Kind;
 };
@@ -57,11 +57,7 @@ function getUseSite(
   return {
     effect: resolved,
     explicit: effect.reducedMotionHandling ?? definition?.reducedMotionHandling,
-    inherited:
-      owner &&
-      (sequence?.reducedMotionHandling ??
-        owner.reducedMotionHandling ??
-        config.reducedMotionHandling),
+    inherited: owner && (sequence?.reducedMotionHandling ?? owner.reducedMotionHandling),
     kind: getKind(resolved, owner?.trigger),
   };
 }
@@ -119,7 +115,8 @@ export function checkReducedMotionErrors(
   return issues;
 }
 
-// the warning and info issues - an explicit incompatible replacement is an error instead
+// the warning and info issues - an explicit incompatible replacement is an error instead. The instance's handling
+// isn't part of the config, so it's taken to be the default 'collapse'
 export function createReducedMotionWarnings(config: AnyConfig) {
   const animationEndSources = new Set(
     config.interactions.flatMap(({ trigger, params }) =>
@@ -132,18 +129,15 @@ export function createReducedMotionWarnings(config: AnyConfig) {
     const handling = explicit ?? inherited ?? 'collapse';
     const issues: SemanticIssue[] = [];
 
-    // the runtime resolves an animationEnd source's handling from its definition and the config only
+    // the runtime resolves an animationEnd source's handling from its definition and the instance only
     if (effect.effectId && animationEndSources.has(effect.effectId)) {
-      const sourceHandling =
-        config.effects?.[effect.effectId]?.reducedMotionHandling ??
-        config.reducedMotionHandling ??
-        'collapse';
+      const sourceHandling = config.effects?.[effect.effectId]?.reducedMotionHandling ?? 'collapse';
       if (handling !== sourceHandling) {
         issues.push(
           issue(
             path,
             'REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH',
-            `Effect "${effect.effectId}" triggers animationEnd interactions, which resolve its reducedMotionHandling from its definition and the config only - set it there instead`,
+            `Effect "${effect.effectId}" triggers animationEnd interactions, which resolve its reducedMotionHandling from its definition only - set it there instead`,
             'warning',
           ),
         );
@@ -192,7 +186,6 @@ export function createReducedMotionWarnings(config: AnyConfig) {
   };
 
   return {
-    onConfig: () => checkReference(config, [], config.reducedMotionHandling, false),
     onInteraction: (path: Path, interaction: AnyInteraction) =>
       checkReference(config, path, interaction.reducedMotionHandling, false),
     onEffect: (

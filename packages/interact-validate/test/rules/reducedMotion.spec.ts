@@ -11,7 +11,6 @@ const issuesOf = (config: unknown, code: string) =>
 describe('reducedMotionHandling', () => {
   it('accepts the field at every level', () => {
     const result = validateInteractConfig({
-      reducedMotionHandling: 'collapse',
       effects: { fade: { ...fade, reducedMotionHandling: 'ignore' } },
       sequences: { seq: { reducedMotionHandling: 'cancel', effects: [{ effectId: 'fade' }] } },
       interactions: [
@@ -27,6 +26,18 @@ describe('reducedMotionHandling', () => {
 
     expect(result.valid).toBe(true);
     expect(result.errors).toEqual([]);
+  });
+
+  it('rejects it on the config, where the instance sets it', () => {
+    expect(
+      issuesOf(
+        {
+          reducedMotionHandling: 'ignore',
+          interactions: [{ key: 'el', trigger: 'click', effects: [slide] }],
+        },
+        'SCHEMA_UNRECOGNIZED_KEYS',
+      ),
+    ).toHaveLength(1);
   });
 
   it('counts a replacement as a reference of its effect', () => {
@@ -64,14 +75,18 @@ describe('reducedMotionHandling', () => {
     it('is a warning where effects inherit it', () => {
       const issues = issuesOf(
         {
-          reducedMotionHandling: 'nope',
-          interactions: [{ key: 'el', trigger: 'click', effects: [slide] }],
+          interactions: [
+            { key: 'el', trigger: 'click', reducedMotionHandling: 'nope', effects: [slide] },
+          ],
         },
         'REDUCED_MOTION_EFFECT_NOT_FOUND',
       );
 
       expect(issues).toEqual([
-        expect.objectContaining({ severity: 'warning', path: ['reducedMotionHandling'] }),
+        expect.objectContaining({
+          severity: 'warning',
+          path: ['interactions', 0, 'reducedMotionHandling'],
+        }),
       ]);
     });
   });
@@ -101,13 +116,18 @@ describe('reducedMotionHandling', () => {
       expect(
         issuesOf(
           {
-            reducedMotionHandling: 'fade',
             effects: { fade },
             interactions: [
-              { key: 'el', trigger: 'click', effects: [{ effectId: 'fade' }, dim] },
+              {
+                key: 'el',
+                trigger: 'click',
+                reducedMotionHandling: 'fade',
+                effects: [{ effectId: 'fade' }, dim],
+              },
               {
                 key: 'el',
                 trigger: 'viewProgress',
+                reducedMotionHandling: 'fade',
                 effects: [{ namedEffect: { type: 'FadeScroll' } }],
               },
             ],

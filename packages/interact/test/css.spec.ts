@@ -1253,7 +1253,6 @@ describe('css._generate', () => {
     it('should produce unique custom prop names per effect in a sequence', () => {
       const config: InteractConfig = {
         effects: {},
-        reducedMotionHandling: 'ignore',
         interactions: [
           {
             key: 'el',
@@ -1284,7 +1283,7 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { cssRules } = _generate(config, { reducedMotionHandling: 'ignore' });
 
       const animRules = cssRules.filter(
         (r) =>
@@ -1434,7 +1433,6 @@ describe('css._generate', () => {
     it('should only use slots for the targets that repeat within the sequence', () => {
       const config: InteractConfig = {
         effects: {},
-        reducedMotionHandling: 'ignore',
         interactions: [
           {
             key: 'el',
@@ -1476,7 +1474,7 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { cssRules } = _generate(config, { reducedMotionHandling: 'ignore' });
 
       const animPropsByKey = (key: string) =>
         cssRules
@@ -2574,24 +2572,38 @@ describe('css reducedMotionHandling', () => {
     ]);
   });
 
-  it('inherits the handling from the interaction and the config, the effect taking precedence', () => {
-    const fromInteraction = _generate({
-      effects: { fade },
-      interactions: [
-        {
-          key: 'a',
-          trigger: 'hover',
-          reducedMotionHandling: 'cancel',
-          effects: [slide, { key: 'b', ...slide, reducedMotionHandling: 'ignore' }],
-        },
-      ],
-      reducedMotionHandling: 'collapse',
-    });
+  it('inherits the handling from the interaction and the instance, the effect taking precedence', () => {
+    const fromInteraction = _generate(
+      {
+        effects: { fade },
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'hover',
+            reducedMotionHandling: 'cancel',
+            effects: [slide, { key: 'b', ...slide, reducedMotionHandling: 'ignore' }],
+          },
+          { key: 'c', trigger: 'hover', effects: [slide] },
+        ],
+      },
+      { reducedMotionHandling: 'ignore' },
+    );
 
     expect(fromInteraction.cssRules.map(({ key, media }) => ({ key, media }))).toEqual([
       { key: 'a', media: NO_PREFERENCE },
       { key: 'b', media: '' },
+      { key: 'c', media: '' },
     ]);
+  });
+
+  it('takes the instance handling and forcing from Interact.setup()', () => {
+    Interact.setup({ reducedMotionHandling: 'cancel', forceReducedMotion: true });
+
+    try {
+      expect(_generate(configWith(slide)).cssRules).toEqual([]);
+    } finally {
+      Interact.setup({ reducedMotionHandling: 'collapse', forceReducedMotion: false });
+    }
   });
 
   it('inherits the handling from the sequence, the effect taking precedence', () => {
