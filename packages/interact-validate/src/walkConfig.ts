@@ -13,7 +13,7 @@ export function walkConfig(config: AnyConfig, visitors: Visitors): void {
   Object.entries(config.sequences ?? {}).forEach(([id, sequence]) => {
     onSequence(['sequences', id], sequence, true, undefined);
     sequence.effects?.forEach((effect, ei) => {
-      onEffect(['sequences', id, 'effects', ei], effect, false, undefined);
+      onEffect(['sequences', id, 'effects', ei], effect, false, undefined, sequence);
     });
   });
 
@@ -26,7 +26,7 @@ export function walkConfig(config: AnyConfig, visitors: Visitors): void {
       const seqPath: Path = ['interactions', i, 'sequences', si];
       onSequence(seqPath, sequence, false, interaction);
       sequence.effects?.forEach((effect, ei) => {
-        onEffect([...seqPath, 'effects', ei], effect, false, interaction);
+        onEffect([...seqPath, 'effects', ei], effect, false, interaction, sequence);
       });
     });
   });

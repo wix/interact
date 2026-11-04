@@ -22,6 +22,7 @@ Declarative configuration-driven interaction library. Binds animations to trigge
   - [Animation Payloads](#animation-payloads)
 - [Sequences](#sequences)
 - [Conditions](#conditions)
+- [Reduced Motion](#reduced-motion)
 - [CSS Generation & FOUC Prevention](#css-generation--fouc-prevention)
 - [Element Resolution](#element-resolution)
 - [Plugins](#plugins)
@@ -39,7 +40,7 @@ Each item here is CRITICAL — ignoring any of them will break animations.
   events and flickering. Use `selector` to target a child element, or set the effect's `key` to a different element.
 - **CRITICAL**: For `pointerMove` trigger MUST AVOID using the same element as both source and target with `hitArea: 'self'` and effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
 - **CRITICAL — Do NOT guess preset options**: If you don't know the expected type/structure for a `namedEffect` param, omit it — rely on defaults rather than guessing.
-- **Reduced motion**: Use conditions to provide gentler alternatives (shorter durations, fewer transforms, no perpetual motion) for users who prefer reduced motion. You can also set `Interact.forceReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches` to force a global reduced-motion behavior programmatically.
+- **Reduced motion**: Effects collapse by default (see [Reduced Motion](#reduced-motion)) — users who prefer reduced motion get the end state without the tween. Use `'cancel'` to drop an effect, an effectId to swap in a gentler effect, or `'ignore'` to keep it as is. `Interact.setup({ reducedMotionPolicy, forceReducedMotion })` changes the default and forces the reduced outcome for every instance; `Interact.create(config, options)` takes both per instance. Never put `reducedMotionPolicy` on the config root.
 - **Perspective**: Prefer `transform: perspective(...)` inside keyframes. Use the CSS `perspective` property only when multiple children share the same `perspective-origin`.
 
 ---
@@ -197,6 +198,7 @@ Each interaction maps a source element + trigger to one or more effects.
   effects?: (Effect | EffectRef)[]; // possible to add multiple effects for same trigger
   sequences?: (SequenceConfig | SequenceConfigRef)[]; // possible to add multiple sequences for same trigger
   conditions?: string[];         // ids referencing the top-level conditions map; all must pass
+  reducedMotionPolicy?: ReducedMotionPolicy; // default for the interaction's effects
   selector?: string;             // optional - CSS selector to refine source element selection within the root element
   listContainer?: string;        // optional — CSS selector for list container
   listItemSelector?: string;     // optional — CSS selector to filter which children of listContainer are observed as sources
@@ -361,6 +363,7 @@ Each effect applies a visual change to a target element. An effect is either inl
   key?: string;              // target element key; omit to target the source
   effectId?: string;         // reference to effects registry (EffectRef)
   conditions?: string[];     // ids referencing the top-level conditions map; all must pass
+  reducedMotionPolicy?: ReducedMotionPolicy; // see Reduced Motion
   selector?: string;         // optional — CSS selector to refine target element
   listContainer?: string;    // optional — CSS selector for list container
   listItemSelector?: string; // optional — filter which children of listContainer are selected
@@ -542,6 +545,7 @@ Coordinate multiple effects with staggered timing. Prefer sequences over manual 
   sequenceId?: string;                  // for caching/referencing; also names the CSS stagger custom
                                         // properties. Defaults to `seq-<interactionIdx>-<sequenceIdx>`
   conditions?: string[];                // ids referencing the top-level conditions map
+  reducedMotionPolicy?: ReducedMotionPolicy; // default for the sequence's effects
 }
 ```
 
@@ -615,6 +619,27 @@ conditions: {
   'odd-items': { type: 'selector', predicate: ':nth-of-type(odd)' },
 }
 ```
+
+---
+
+## Reduced Motion
+
+```ts
+type ReducedMotionPolicy = 'ignore' | 'cancel' | 'collapse' | string; // string = effectId in the effects registry
+```
+
+What an effect does when the user prefers reduced motion (`(prefers-reduced-motion: reduce)`, or forced by `forceReducedMotion` of `Interact.setup()` / `Interact.create()`). Set on an interaction, a sequence or an effect, or per instance (`Interact.setup()` / `Interact.create()` option, not a config field); the most specific wins: effect (inline, then its registry entry) → sequence → interaction → instance → `'collapse'`.
+
+| Value        | Under reduced motion                                                                                                                                                                                                      |
+| :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `'collapse'` | Default. Plays with duration 0, keeping everything else (delay, iterations, fill, keyframes), so it jumps to its end state. Transitions become 0ms (with delay). Looping and scroll/pointer-driven effects are cancelled. |
+| `'ignore'`   | Plays as usual.                                                                                                                                                                                                           |
+| `'cancel'`   | Dropped, like a `(prefers-reduced-motion: no-preference)` media condition — an earlier effect of the same interaction on the same target may then apply instead.                                                          |
+| effectId     | Replaced by that registry effect's animation (effect type, keyframes and timing); the original's target, conditions and `triggerType` stay. It must be of the same kind (time, scrub or state) — otherwise it collapses.  |
+
+- A sequence's stagger (`offset`) collapses to 0, unless the sequence's policy is `'ignore'`; delays are kept.
+- An `animationEnd` source resolves its policy from its registry entry and the instance only — set it there.
+- `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media. It takes the instance's `reducedMotionPolicy` / `forceReducedMotion` as options, defaulting to `Interact.setup()`'s.
 
 ---
 
@@ -767,10 +792,10 @@ Default split wrapper classes: `.split-c` (chars), `.split-w` (words), `.split-l
 | Method / Property                   | Description                                                                                                                                                                                                                                               |
 | :---------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `generate(config, options?)`        | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML. `options` = `{ useFirstChild?, plugins? }`, or a bare boolean for legacy `useFirstChild`. `plugins` = per-plugin SSR style generators (see [Plugins](#plugins)). |
-| `Interact.create(config)`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                                                                                                                                                               |
+| `Interact.create(config, options?)` | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle. `options.forceReducedMotion` / `options.reducedMotionPolicy` override `Interact.setup()`'s for the instance.                                                  |
 | `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `generate()` and `create`.                                                                                                                                                                           |
 | `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                                                                                                                                                                         |
-| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — force reduced-motion behavior regardless of OS setting.                                                                                                                                                                    |
+| `Interact.forceReducedMotion`       | `boolean` (default: `false`) — apply the reduced-motion outcome of `reducedMotionPolicy` regardless of OS setting. Set by `Interact.setup()`.                                                                                                             |
 | `Interact.allowA11yTriggers`        | `boolean` (default: `true`) — enable accessibility trigger variants (`interest`, `activate`).                                                                                                                                                             |
 | `Interact.setup(options)`           | Configure global options for scroll, pointer, and viewEnter systems. Call before `create`. See options below.                                                                                                                                             |
 | `Interact.use(name, plugin, opts?)` | Register an external plugin by name (see [Plugins](#plugins)). Call before `create`. `opts.defer` defers it until `Interact.ready()`.                                                                                                                     |
@@ -784,6 +809,8 @@ Default split wrapper classes: `.split-c` (chars), `.split-w` (words), `.split-l
 | `pointerOptionsGetter` | `() => Partial<PointerConfig>` | Function returning defaults for pointer-move animation configuration  |
 | `viewEnter`            | `Partial<ViewEnterParams>`     | Defaults for all viewEnter triggers (`threshold`,`inset`)             |
 | `allowA11yTriggers`    | `boolean`                      | Enable accessibility trigger variants (use `interest` and `activate`) |
+| `forceReducedMotion`   | `boolean`                      | Apply the reduced-motion outcome regardless of OS setting             |
+| `reducedMotionPolicy`  | `ReducedMotionPolicy`          | Default policy of effects (default `'collapse'`)                      |
 
 Use `setup()` when you need to override default observer thresholds or provide global configuration that applies to all interactions of a given trigger type.
 

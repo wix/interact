@@ -13,10 +13,22 @@ import type {
   IInteractionController,
   AnimationEndParams,
   AnimationOptions,
+  ReducedMotionPolicy,
 } from '../types';
 import { PLUGIN_FIELD_PREFIX } from '../types';
-import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
+import {
+  createTransitionCSS,
+  getMediaQuery,
+  getSelectorCondition,
+  generateId,
+  isTransitionEffect,
+} from '../utils';
 import { getInterpolatedKey } from './utilities';
+import {
+  REDUCED_MOTION_REDUCE,
+  getReducedMotionPolicy,
+  getReducedMotionVariants,
+} from './reducedMotion';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { Interact, getSelector } from './Interact';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
@@ -144,6 +156,45 @@ function _queryItemElement(data: Interaction | Effect, elements: HTMLElement[]):
     .filter(Boolean) as HTMLElement[];
 }
 
+/**
+ * The effect's reduced-motion variant whose media matches, listening on every variant's media so a change
+ * re-resolves it.
+ */
+function _resolveVariant<T extends Effect>(
+  effect: T,
+  instance: Interact,
+  listener: { id: string; key: string; onUpdate: () => void },
+  inherited: { policy?: ReducedMotionPolicy; collapsesStagger?: boolean } = {},
+): T | undefined {
+  const { effects, conditions, reducedMotionPolicy, forceReducedMotion } = instance.dataCache;
+  const variants = getReducedMotionVariants(
+    effect,
+    getReducedMotionPolicy(effect.reducedMotionPolicy, inherited.policy, reducedMotionPolicy),
+    { effects, force: forceReducedMotion, collapsesStagger: inherited.collapsesStagger },
+  );
+
+  let chosen: T | undefined;
+
+  variants.forEach((variant, index) => {
+    const mql = getMediaQuery(variant.conditions || [], conditions);
+
+    if (mql) {
+      instance.setupMediaQueryListener(
+        index ? `${listener.id}::rm${index}` : listener.id,
+        mql,
+        listener.key,
+        listener.onUpdate,
+      );
+    }
+
+    if (!chosen && (!mql || mql.matches)) {
+      chosen = variant;
+    }
+  });
+
+  return chosen;
+}
+
 function _getInteractionElements(
   interaction: InteractionTrigger,
   effect: Effect,
@@ -227,12 +278,12 @@ function _addInteraction(
   (interaction.effects || []).forEach((effect, effectIndex) => {
     const effectId = (effect as EffectRef).effectId;
 
-    const effectOptions = {
+    const mergedEffect = {
       ...(instance.dataCache.effects[effectId] || {}),
       ...effect,
       effectId,
-    };
-    const targetKey_ = effectOptions.key;
+    } as Effect;
+    const targetKey_ = mergedEffect.key;
 
     const interactionId = getInterpolatedKey(effect.interactionId!, sourceKey);
 
@@ -246,15 +297,20 @@ function _addInteraction(
       return;
     }
 
-    const mql = getMediaQuery(effectOptions.conditions || [], instance.dataCache.conditions);
+    const effectOptions = _resolveVariant(
+      mergedEffect,
+      instance,
+      {
+        id: `${interactionId}::${effectIndex}`,
+        key: sourceKey,
+        onUpdate: () => {
+          sourceController.update();
+        },
+      },
+      { policy: interaction.reducedMotionPolicy },
+    );
 
-    if (mql) {
-      instance.setupMediaQueryListener(`${interactionId}::${effectIndex}`, mql, sourceKey, () => {
-        sourceController.update();
-      });
-    }
-
-    if (!mql || mql.matches) {
+    if (effectOptions) {
       interactionVariations[interactionId!] = true;
 
       const target = targetKey_ && getInterpolatedKey(targetKey_, sourceKey);
@@ -332,6 +388,33 @@ function _addInteraction(
   _processSequences(sourceKey, sourceController, instance, interaction, elements);
 }
 
+function _getSequencePolicy(
+  sequenceConfig: SequenceConfig,
+  interaction: InteractionTrigger,
+  instance: Interact,
+): ReducedMotionPolicy {
+  return getReducedMotionPolicy(
+    sequenceConfig.reducedMotionPolicy,
+    interaction.reducedMotionPolicy,
+    instance.dataCache.reducedMotionPolicy,
+  );
+}
+
+// the stagger collapses under reduced motion, unless the sequence ignores it
+function _getSequenceOptions(
+  sequenceConfig: SequenceConfig,
+  interaction: InteractionTrigger,
+  instance: Interact,
+): SequenceConfig {
+  const { forceReducedMotion, conditions } = instance.dataCache;
+  const mql = getMediaQuery([REDUCED_MOTION_REDUCE], conditions);
+  const isReduced = forceReducedMotion || !!(mql && mql.matches);
+
+  return isReduced && _getSequencePolicy(sequenceConfig, interaction, instance) !== 'ignore'
+    ? { ...sequenceConfig, offset: 0 }
+    : sequenceConfig;
+}
+
 function _isSequenceConfigRef(
   config: SequenceConfig | SequenceConfigRef,
 ): config is SequenceConfigRef {
@@ -349,6 +432,7 @@ function _isSequenceConfigRef(
  */
 function _buildAnimationGroupArgsFromSequence(
   sequenceConfig: SequenceConfig,
+  interaction: InteractionTrigger,
   cacheKey: string,
   sourceKey: string,
   sourceController: IInteractionController,
@@ -388,25 +472,23 @@ function _buildAnimationGroupArgsFromSequence(
   }
 
   const animationGroupArgs: AnimationGroupArgs[] = [];
+  const policy = _getSequencePolicy(sequenceConfig, interaction, instance);
   let usedListElements = false;
 
   for (const effect of seqEffects) {
     const effectId = (effect as EffectRef).effectId;
-    const effectOptions = resolveEffect(effect);
+    const effectOptions = _resolveVariant(
+      resolveEffect(effect),
+      instance,
+      {
+        id: `${cacheKey}::${effectId || 'eff'}`,
+        key: options.updateKey,
+        onUpdate: options.onUpdate,
+      },
+      { policy, collapsesStagger: policy !== 'ignore' },
+    );
 
-    const effectMql = getMediaQuery(effectOptions.conditions || [], instance.dataCache.conditions);
-
-    if (effectMql) {
-      const effectCacheKey = `${cacheKey}::${effectId || 'eff'}`;
-      instance.setupMediaQueryListener(
-        effectCacheKey,
-        effectMql,
-        options.updateKey,
-        options.onUpdate,
-      );
-    }
-
-    if (effectMql && !effectMql.matches) continue;
+    if (!effectOptions) continue;
 
     const targetKey_ = effectOptions.key;
     const target = targetKey_ && getInterpolatedKey(targetKey_, sourceKey);
@@ -490,7 +572,6 @@ function _attachSequenceTriggers(
       { triggerType: sequenceConfig.triggerType } as Effect,
       interaction.params || {},
       {
-        reducedMotion: Interact.forceReducedMotion,
         selectorCondition,
         animation: sequence,
         allowA11yTriggers: Interact.allowA11yTriggers,
@@ -555,6 +636,7 @@ function _processSequences(
 
     const animationGroupArgs = _buildAnimationGroupArgsFromSequence(
       sequenceConfig,
+      interaction,
       cacheKey,
       sourceKey,
       sourceController,
@@ -575,13 +657,13 @@ function _processSequences(
         elements,
       );
 
-      Interact.addToSequence(cacheKey, animationGroupArgs, indices, {
-        reducedMotion: Interact.forceReducedMotion,
-      });
+      Interact.addToSequence(cacheKey, animationGroupArgs, indices);
 
-      const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
-        reducedMotion: Interact.forceReducedMotion,
-      });
+      const sequence = Interact.getSequence(
+        cacheKey,
+        _getSequenceOptions(sequenceConfig, interaction, instance),
+        animationGroupArgs,
+      );
 
       const selectorCondition = getSelectorCondition(
         interaction.conditions || [],
@@ -603,9 +685,11 @@ function _processSequences(
       return;
     }
 
-    const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
-      reducedMotion: Interact.forceReducedMotion,
-    });
+    const sequence = Interact.getSequence(
+      cacheKey,
+      _getSequenceOptions(sequenceConfig, interaction, instance),
+      animationGroupArgs,
+    );
 
     const selectorCondition = getSelectorCondition(
       interaction.conditions || [],
@@ -678,6 +762,7 @@ function _processSequencesForTarget(
 
       const animationGroupArgs = _buildAnimationGroupArgsFromSequence(
         sequenceConfig,
+        interaction,
         cacheKey,
         sourceKey!,
         sourceController,
@@ -694,16 +779,16 @@ function _processSequencesForTarget(
       if (elements && instance.addedInteractions[cacheKey]) {
         const indices = _resolveListItemIndices(targetController, listContainer!, elements);
 
-        Interact.addToSequence(cacheKey, animationGroupArgs, indices, {
-          reducedMotion: Interact.forceReducedMotion,
-        });
+        Interact.addToSequence(cacheKey, animationGroupArgs, indices);
 
         return true;
       }
 
-      const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs, {
-        reducedMotion: Interact.forceReducedMotion,
-      });
+      const sequence = Interact.getSequence(
+        cacheKey,
+        _getSequenceOptions(sequenceConfig, interaction, instance),
+        animationGroupArgs,
+      );
 
       const selectorCondition = getSelectorCondition(
         interaction.conditions || [],
@@ -767,32 +852,32 @@ function addEffectsForTarget(
 
       const effectId = (effect as EffectRef).effectId;
 
-      const effectOptions = {
+      const mergedEffect = {
         ...(instance!.dataCache.effects[effectId] || {}),
         ...effect,
         effectId,
-      };
+      } as Effect;
 
-      if (listContainer && effectOptions.listContainer !== listContainer) {
+      if (listContainer && mergedEffect.listContainer !== listContainer) {
         // skip this effect if a listContainer was provided and it's not matching this effect.listContainer
         return false;
       }
 
-      const mql = getMediaQuery(effectOptions.conditions || [], instance!.dataCache.conditions);
-
-      if (mql) {
-        instance.setupMediaQueryListener(
-          `${interactionId}::${variationIndex}`,
-          mql,
-          targetKey,
-          () => {
+      const effectOptions = _resolveVariant(
+        mergedEffect,
+        instance,
+        {
+          id: `${interactionId}::${variationIndex}`,
+          key: targetKey,
+          onUpdate: () => {
             // For effects on target, we reconcile the target element
             targetController.update();
           },
-        );
-      }
+        },
+        { policy: interaction.reducedMotionPolicy },
+      );
 
-      if (!mql || mql.matches) {
+      if (effectOptions) {
         const sourceKey = interaction.key && getInterpolatedKey(interaction.key, targetKey);
         const sourceController = Interact.getController(sourceKey);
 
@@ -887,7 +972,7 @@ function addInteraction<T extends TriggerType>(
 ): void {
   let targetController;
 
-  if ((effect as StateEffect).transition || (effect as StateEffect).transitionProperties) {
+  if (isTransitionEffect(effect)) {
     const args: CreateTransitionCSSParams = {
       key: targetKey,
       effectId: (effect as Effect).effectId!,
@@ -913,16 +998,25 @@ function addInteraction<T extends TriggerType>(
   if (trigger === 'animationEnd') {
     const triggerEffectId = (options as AnimationEndParams).effectId;
     const instance = sourceKey ? Interact.getInstance(sourceKey) : undefined;
-    const srcEffect = instance?.dataCache.effects[triggerEffectId] as TimeEffect | undefined;
+    const definition = instance?.dataCache.effects[triggerEffectId];
+    // the source's use site is unknown, so its policy resolves from its definition and the config only
+    const srcEffect =
+      definition &&
+      _resolveVariant(definition, instance!, {
+        id: `${sourceKey}::animationEnd::${triggerEffectId}`,
+        key: sourceKey!,
+        onUpdate: () => {
+          Interact.getController(sourceKey)?.update();
+        },
+      });
     if (srcEffect) {
-      sourceAnimationOptions = effectToAnimationOptions(srcEffect) as
+      sourceAnimationOptions = effectToAnimationOptions(srcEffect as TimeEffect) as
         | AnimationOptions<'time'>
         | undefined;
     }
   }
 
   TRIGGER_TO_HANDLER_MODULE_MAP[trigger]?.add(source, target, effect, options, {
-    reducedMotion: Interact.forceReducedMotion,
     targetController,
     selectorCondition,
     allowA11yTriggers: Interact.allowA11yTriggers,

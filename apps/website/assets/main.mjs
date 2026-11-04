@@ -1739,9 +1739,6 @@ updateTunnelBounds();
 window.addEventListener('resize', buildGrid);
 window.addEventListener('resize', updateTunnelBounds);
 
-// Respect reduced motion settings
-Interact.forceReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 // Register presets
 Interact.registerEffects(presets);
 

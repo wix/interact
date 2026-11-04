@@ -5,6 +5,7 @@ import { Interaction, createInteractRef, Interact } from '../src/react';
 import * as domApi from '../src/dom/api';
 import type { InteractConfig } from '../src/types';
 import type { NamedEffect } from '@wix/motion';
+import { withNoReducedMotionPreference } from './matchMedia';
 
 // Mock @wix/motion module
 vi.mock('@wix/motion', async () => {
@@ -196,7 +197,7 @@ describe('interact (react)', () => {
       }
 
       const mql = {
-        matches: queryRule === query,
+        matches: withNoReducedMotionPreference((q) => q === queryRule)(query),
         media: query,
         onchange: null,
         addEventListener: vi.fn(),
@@ -456,7 +457,7 @@ describe('interact (react)', () => {
         expect.any(HTMLElement),
         expect.any(Object),
         undefined,
-        { reducedMotion: false },
+        { reducedMotion: undefined },
       );
     });
 
@@ -481,7 +482,7 @@ describe('interact (react)', () => {
         expect.any(HTMLElement),
         expect.any(Object),
         undefined,
-        { reducedMotion: false },
+        { reducedMotion: undefined },
       );
     });
 
@@ -500,7 +501,7 @@ describe('interact (react)', () => {
         expect.any(HTMLElement),
         expect.any(Object),
         undefined,
-        { reducedMotion: false },
+        { reducedMotion: undefined },
       );
     });
 
@@ -742,7 +743,7 @@ describe('interact (react)', () => {
       };
 
       mockMatchMedia(['min-width: 1024px']);
-      const instance = Interact.create(config);
+      const instance = Interact.create(config, { reducedMotionPolicy: 'ignore' });
 
       render(
         <Interaction tagName="button" interactKey="responsive-button">
@@ -806,7 +807,7 @@ describe('interact (react)', () => {
         expect.any(HTMLElement),
         expect.any(Object),
         undefined,
-        { reducedMotion: false },
+        { reducedMotion: undefined },
       );
     });
   });
@@ -837,7 +838,7 @@ describe('interact (react)', () => {
   });
 
   describe('reduced motion', () => {
-    it('should pass reducedMotion=true to getWebAnimation when forceReducedMotion is true', async () => {
+    it('should collapse effects when forceReducedMotion is true', async () => {
       const { getWebAnimation } = await import('@wix/motion');
 
       Interact.forceReducedMotion = true;
@@ -851,9 +852,9 @@ describe('interact (react)', () => {
 
       expect(getWebAnimation).toHaveBeenCalledWith(
         expect.any(HTMLElement),
-        expect.any(Object),
+        expect.objectContaining({ duration: 0 }),
         undefined,
-        { reducedMotion: true },
+        { reducedMotion: undefined },
       );
     });
   });

@@ -6,6 +6,7 @@ import type { InteractConfig, SequenceConfig } from '../src/types';
 import { getSequence, createAnimationGroups } from '@wix/motion';
 import { addListItems } from '../src/core/add';
 import { removeListItems } from '../src/core/remove';
+import { withNoReducedMotionPreference } from './matchMedia';
 
 vi.mock('@wix/motion', async () => {
   const { toCSSPropertyName } = await vi.importActual<typeof import('@wix/motion')>('@wix/motion');
@@ -427,7 +428,6 @@ describe('interact sequences', () => {
       expect(getSequenceMock).toHaveBeenCalledWith(
         expect.objectContaining({ sequenceId: 'view-seq' }),
         expect.any(Array),
-        { reducedMotion: false },
       );
     });
 
@@ -450,7 +450,6 @@ describe('interact sequences', () => {
       expect(getSequenceMock).toHaveBeenCalledWith(
         expect.objectContaining({ sequenceId: 'click-seq' }),
         expect.any(Array),
-        { reducedMotion: false },
       );
     });
 
@@ -715,7 +714,6 @@ describe('interact sequences', () => {
       expect(interactionCall?.[4]).toEqual(
         expect.objectContaining({
           animation: mockSequence,
-          reducedMotion: false,
           allowA11yTriggers: expect.any(Boolean),
         }),
       );
@@ -897,7 +895,6 @@ describe('interact sequences', () => {
       expect(getSequenceMock).toHaveBeenCalledWith(
         expect.objectContaining({ sequenceId: 'cross-seq' }),
         expect.any(Array),
-        { reducedMotion: false },
       );
     });
 
@@ -929,7 +926,6 @@ describe('interact sequences', () => {
       expect(getSequenceMock).toHaveBeenCalledWith(
         expect.objectContaining({ sequenceId: 'source-after-seq' }),
         expect.any(Array),
-        { reducedMotion: false },
       );
     });
 
@@ -1735,12 +1731,11 @@ describe('interact sequences', () => {
       const animationGroupArgs: any[] = [
         { target, options: { duration: 300, keyframeEffect: { name: 'fade' } } },
       ];
-      const context = { reducedMotion: true };
 
-      Interact.getSequence('key-D', sequenceOptions, animationGroupArgs, context);
+      Interact.getSequence('key-D', sequenceOptions, animationGroupArgs);
 
       expect(getSequenceMock).toHaveBeenCalledTimes(1);
-      expect(getSequenceMock).toHaveBeenCalledWith(sequenceOptions, animationGroupArgs, context);
+      expect(getSequenceMock).toHaveBeenCalledWith(sequenceOptions, animationGroupArgs);
     });
   });
 
@@ -1754,7 +1749,7 @@ describe('interact sequences', () => {
         writable: true,
         configurable: true,
         value: vi.fn((query: string) => {
-          const matches = matchingQueries.includes(query);
+          const matches = withNoReducedMotionPreference((q) => matchingQueries.includes(q))(query);
           const mql = {
             matches,
             media: query,
@@ -1857,6 +1852,72 @@ describe('interact sequences', () => {
           keyframeEffect: expect.objectContaining({ name: 'always' }),
         }),
       );
+    });
+
+    const createReducedMotionConfig = (
+      sequenceHandling: string | undefined,
+      offset = 100,
+    ): InteractConfig => {
+      const keyframeEffect = { name: 'pop', keyframes: [{ opacity: 0 }, { opacity: 1 }] };
+      return {
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'source-key',
+            reducedMotionPolicy: 'cancel',
+            sequences: [
+              {
+                sequenceId: 'rm-seq',
+                offset,
+                reducedMotionPolicy: sequenceHandling,
+                effects: [
+                  { key: 'source-key', keyframeEffect, duration: 300 },
+                  {
+                    key: 'source-key',
+                    keyframeEffect,
+                    duration: 400,
+                    reducedMotionPolicy: 'ignore',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    };
+
+    const getSequenceArgs = (config: InteractConfig) => {
+      Interact.create(config, { useCustomElement: false });
+      addElement(createInteractElement().element, 'source-key');
+
+      expect(getSequence).toHaveBeenCalledTimes(1);
+      return vi.mocked(getSequence).mock.calls[0];
+    };
+
+    test.each([
+      ['collapse', [0, 400]],
+      [undefined, [400]],
+    ])(
+      'resolves reducedMotionPolicy per effect, the sequence (%s) over the interaction (cancel)',
+      (sequenceHandling, durations) => {
+        mockMatchMedia(['(prefers-reduced-motion: reduce)']);
+
+        const [, animationGroupArgs] = getSequenceArgs(createReducedMotionConfig(sequenceHandling));
+
+        expect(animationGroupArgs.map(({ options }) => options.duration)).toEqual(durations);
+      },
+    );
+
+    test.each([
+      ['(prefers-reduced-motion: reduce)', 'collapse', 0],
+      ['(prefers-reduced-motion: reduce)', 'ignore', 100],
+      ['(prefers-reduced-motion: no-preference)', 'collapse', 100],
+    ])('under %s, a %s sequence staggers by %s', (query, sequenceHandling, offset) => {
+      mockMatchMedia([query]);
+
+      const [sequenceOptions] = getSequenceArgs(createReducedMotionConfig(sequenceHandling));
+
+      expect(sequenceOptions).toMatchObject({ offset });
     });
 
     test('sets up media query listener for sequence conditions', () => {

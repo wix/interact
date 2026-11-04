@@ -1283,7 +1283,7 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { cssRules } = _generate(config, { reducedMotionPolicy: 'ignore' });
 
       const animRules = cssRules.filter(
         (r) =>
@@ -1474,7 +1474,7 @@ describe('css._generate', () => {
         ],
       };
 
-      const { cssRules } = _generate(config);
+      const { cssRules } = _generate(config, { reducedMotionPolicy: 'ignore' });
 
       const animPropsByKey = (key: string) =>
         cssRules
@@ -2421,6 +2421,304 @@ describe('css._generate', () => {
         key: 'target',
         scope: 'effect',
       });
+    });
+  });
+});
+
+describe('css reducedMotionPolicy', () => {
+  const NO_PREFERENCE = '(prefers-reduced-motion: no-preference)';
+  const REDUCE = '(prefers-reduced-motion: reduce)';
+
+  const slide = {
+    keyframeEffect: { name: 'slide', keyframes: [{ translate: '-10px' }, { translate: '0' }] },
+    duration: 800,
+    delay: 100,
+  };
+  const fade = {
+    keyframeEffect: { name: '', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+    duration: 300,
+  };
+
+  const configWith = (effect: object, rest: Partial<InteractConfig> = {}): InteractConfig => ({
+    effects: { fade },
+    interactions: [{ key: 'a', trigger: 'hover', effects: [effect] }],
+    ...rest,
+  });
+
+  const declarationsByMedia = (cssRules: CSSRuleData[]) =>
+    cssRules.map(({ media, declarations }) => ({ media, declarations }));
+
+  it('emits each variant under exclusive media into the same list entry', () => {
+    const { cssRules, listsRule, atProperty } = _generate(
+      configWith({ ...slide, reducedMotionPolicy: 'collapse' }),
+    );
+    const plain = _generate(configWith(slide));
+
+    const animationLists = (value: string) => [
+      { _listPropertyName: 'animation', name: '--anm-0', value: expect.stringContaining(value) },
+    ];
+    expect(declarationsByMedia(cssRules)).toEqual([
+      { media: NO_PREFERENCE, declarations: animationLists('slide 800ms 100ms') },
+      { media: REDUCE, declarations: animationLists('slide 1ms 100ms') },
+    ]);
+    expect(listsRule).toBe(plain.listsRule);
+    expect(atProperty).toEqual(plain.atProperty);
+  });
+
+  it('emits the effect under no-preference only for cancel, its initial rules included', () => {
+    const { cssRules } = _generate({
+      interactions: [
+        {
+          key: 'a',
+          trigger: 'viewEnter',
+          effects: [{ ...slide, reducedMotionPolicy: 'cancel' }],
+        },
+      ],
+    });
+
+    expect(cssRules.length).toBeGreaterThan(1);
+    cssRules.forEach(({ media }) => expect(media).toBe(NO_PREFERENCE));
+  });
+
+  it('emits the replacement under reduce, its keyframes named by its id', () => {
+    const { cssRules, keyframes } = _generate(
+      configWith({ ...slide, reducedMotionPolicy: 'fade' }),
+    );
+
+    expect([...keyframes.keys()]).toEqual(['slide', 'fade']);
+    expect(cssRules.find(({ media }) => media === REDUCE)!.declarations).toContainEqual(
+      expect.objectContaining({
+        name: '--anm-0',
+        value: expect.stringContaining('fade 300ms 0ms'),
+      }),
+    );
+  });
+
+  it('only hides a collapsed entrance until it enters, leaving its animation to the runtime', () => {
+    const { cssRules } = _generate({
+      interactions: [
+        {
+          key: 'a',
+          trigger: 'viewEnter',
+          effects: [{ ...slide, reducedMotionPolicy: 'collapse' }],
+        },
+      ],
+    });
+    const reduced = cssRules.filter(({ media }) => media === REDUCE);
+
+    expect(reduced.map(({ selectorSuffix }) => selectorSuffix)).toEqual([
+      ':not([data-interact-enter])',
+    ]);
+    expect(reduced[0].declarations).toBe(DEFAULT_INITIAL);
+    expect(
+      cssRules
+        .filter(({ media }) => media === NO_PREFERENCE)
+        .map(({ selectorSuffix }) => selectorSuffix),
+    ).toEqual([':not([data-interact-enter])', ':not([data-interact-enter="done"])']);
+  });
+
+  it('collapses a transition to a 0ms one keeping its delay, and its state applies under both', () => {
+    const transition = {
+      transition: {
+        duration: 300,
+        delay: 100,
+        styleProperties: [{ name: 'opacity', value: '0.5' }],
+      },
+      reducedMotionPolicy: 'collapse',
+    };
+    const { cssRules } = _generate(configWith(transition));
+
+    expect(
+      cssRules.map(({ media, states, declarations }) => ({ media, states, declarations })),
+    ).toEqual([
+      {
+        media: NO_PREFERENCE,
+        states: undefined,
+        declarations: [{ name: '--trns-0', value: 'opacity 300ms ease 100ms' }],
+      },
+      {
+        media: NO_PREFERENCE,
+        states: ['eff-0-0'],
+        declarations: [{ name: 'opacity', value: '0.5' }],
+      },
+      {
+        media: REDUCE,
+        states: undefined,
+        declarations: [{ name: '--trns-0', value: 'opacity 0ms ease 100ms' }],
+      },
+      { media: REDUCE, states: ['eff-0-0'], declarations: [{ name: 'opacity', value: '0.5' }] },
+    ]);
+  });
+
+  it('falls back, under each variant, only the entries assigned before its effect', () => {
+    const { cssRules } = _generate({
+      effects: { custom: { customEffect: () => {}, duration: 300 } },
+      interactions: [
+        {
+          key: 'a',
+          trigger: 'hover',
+          effects: [
+            { ...slide, reducedMotionPolicy: 'ignore' },
+            { ...slide, reducedMotionPolicy: 'custom' },
+          ],
+        },
+      ],
+    });
+
+    expect(declarationsByMedia(cssRules)).toEqual([
+      { media: '', declarations: [expect.objectContaining({ name: '--anm-0' })] },
+      { media: NO_PREFERENCE, declarations: [expect.objectContaining({ name: '--anm-0' })] },
+      { media: REDUCE, declarations: [{ name: '--anm-0', value: 'none' }] },
+    ]);
+  });
+
+  it('inherits the policy from the interaction and the instance, the effect taking precedence', () => {
+    const fromInteraction = _generate(
+      {
+        effects: { fade },
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'hover',
+            reducedMotionPolicy: 'cancel',
+            effects: [slide, { key: 'b', ...slide, reducedMotionPolicy: 'ignore' }],
+          },
+          { key: 'c', trigger: 'hover', effects: [slide] },
+        ],
+      },
+      { reducedMotionPolicy: 'ignore' },
+    );
+
+    expect(fromInteraction.cssRules.map(({ key, media }) => ({ key, media }))).toEqual([
+      { key: 'a', media: NO_PREFERENCE },
+      { key: 'b', media: '' },
+      { key: 'c', media: '' },
+    ]);
+  });
+
+  it('takes the instance policy and forcing from Interact.setup()', () => {
+    Interact.setup({ reducedMotionPolicy: 'cancel', forceReducedMotion: true });
+
+    try {
+      expect(_generate(configWith(slide)).cssRules).toEqual([]);
+    } finally {
+      Interact.setup({ reducedMotionPolicy: 'collapse', forceReducedMotion: false });
+    }
+  });
+
+  it('inherits the policy from the sequence, the effect taking precedence', () => {
+    const { cssRules } = _generate({
+      sequences: {
+        seq: { effects: [slide, { key: 'b', ...slide, reducedMotionPolicy: 'ignore' }] },
+      },
+      interactions: [
+        {
+          key: 'a',
+          trigger: 'click',
+          reducedMotionPolicy: 'collapse',
+          sequences: [{ sequenceId: 'seq', reducedMotionPolicy: 'cancel' }],
+        },
+      ],
+    });
+
+    const effectRules = cssRules.filter(({ declarations }) =>
+      declarations.some(({ name }) => name.includes('slot') || name === '--anm-0'),
+    );
+    expect(effectRules.map(({ key, media }) => ({ key, media }))).toEqual([
+      { key: 'a', media: NO_PREFERENCE },
+      { key: 'b', media: NO_PREFERENCE },
+      { key: 'b', media: REDUCE },
+    ]);
+  });
+
+  it('collapses the stagger under reduce, unless the sequence ignores it', () => {
+    const staggerOf = (reducedMotionPolicy: string) =>
+      _generate({
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'click',
+            sequences: [
+              {
+                offset: 100,
+                reducedMotionPolicy,
+                effects: [{ ...slide, reducedMotionPolicy: 'ignore' }],
+              },
+            ],
+          },
+        ],
+      }).cssRules.map(({ media, declarations }) => ({
+        media,
+        staggered: declarations.some(({ value }) => String(value).includes('-index')),
+      }));
+
+    expect(staggerOf('collapse')).toEqual([
+      { media: NO_PREFERENCE, staggered: true },
+      { media: REDUCE, staggered: false },
+    ]);
+    expect(staggerOf('ignore')).toEqual([{ media: '', staggered: true }]);
+  });
+
+  it('emits only the reduced outcome, unconditionally, when forced', () => {
+    const config = configWith({ ...slide, reducedMotionPolicy: 'fade' });
+
+    expect(declarationsByMedia(_generate(config, { forceReducedMotion: true }).cssRules)).toEqual([
+      {
+        media: '',
+        declarations: [expect.objectContaining({ value: expect.stringContaining('fade 300ms') })],
+      },
+    ]);
+    expect(
+      _generate(configWith({ ...slide, reducedMotionPolicy: 'cancel' }), {
+        forceReducedMotion: true,
+      }).cssRules,
+    ).toEqual([]);
+  });
+
+  describe('keyframe slots', () => {
+    const style =
+      (name: string) =>
+      ({ suffix = '', ...options }: { suffix?: string }) => [
+        { ...options, name: `${name}${suffix}`, keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+      ];
+    registerEffects({
+      RMMove: {
+        web: style('rm-move'),
+        style: style('rm-move'),
+        getNames: ({ suffix = '' }: { suffix?: string }) => [`rm-move${suffix}`],
+      },
+      RMFade: {
+        web: style('rm-fade'),
+        style: style('rm-fade'),
+        getNames: ({ suffix = '' }: { suffix?: string }) => [`rm-fade${suffix}`],
+      },
+    } as any);
+
+    it("picks a slot free of the names of both of a position's variants", () => {
+      const config: InteractConfig = {
+        effects: { move: { namedEffect: { type: 'RMMove' } as any, duration: 100 } },
+        interactions: [
+          { key: 'a', trigger: 'viewEnter', effects: [{ effectId: 'move' }] },
+          {
+            key: 'a',
+            trigger: 'click',
+            effects: [
+              {
+                namedEffect: { type: 'RMFade' } as any,
+                duration: 100,
+                reducedMotionPolicy: 'move',
+              },
+            ],
+          },
+        ],
+      };
+
+      expect([...getKeyframeSlots(config).values()]).toEqual(['-1']);
+      expect([..._generate(config).keyframes.keys()]).toEqual([
+        'rm-move',
+        'rm-fade-1',
+        'rm-move-1',
+      ]);
     });
   });
 });

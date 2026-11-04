@@ -10,6 +10,14 @@ import { splitTextPlugin, splitTextStyle } from '../src/plugin';
 describe('splitText through the Interact plugin bridge (real @wix/splittext)', () => {
   beforeEach(() => {
     Interact.use('splitText', splitTextPlugin);
+    // jsdom has no matchMedia - a browser without a reduced-motion preference
+    window.matchMedia = (query: string) =>
+      ({
+        matches: query.includes('no-preference'),
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }) as unknown as MediaQueryList;
   });
 
   afterEach(() => {

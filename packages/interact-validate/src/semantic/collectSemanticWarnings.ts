@@ -3,7 +3,8 @@
 // inspect the parsed config shape only. Warning/info checks are collected by
 // `collectSemanticWarnings` (consumed by the schema `transform`).
 
-import type { Path, SemanticIssue, AnyConfig, Visitors } from '../types';
+import type { SemanticIssue, AnyConfig } from '../types';
+import { walkConfig } from '../walkConfig';
 import { checkFunctionOffsetEasing } from './cssGeneration';
 import { checkCSSPropertyNames, checkInvalidInset } from './cssSyntax';
 import { checkSameElementRetrigger, checkHitAreaShift } from './fouc';
@@ -16,41 +17,11 @@ import { checkEmptyStyleProperties, checkStateRemoveWithoutEffectId } from './pa
 import { checkRecommendedFill } from './recommendedPatterns';
 import { findAnimationEndWarnings } from './animationEndGraph';
 import { checkNamedEffectParams } from './namedEffectParams';
-
-// Single traversal of top-level registry effects/sequences and per-interaction
-// effects/sequences, supplying each node's `path`, whether it is a top-level
-// registry definition, and its owning interaction (when known).
-export function walkConfig(config: AnyConfig, visitors: Visitors): void {
-  const { onInteraction, onEffect, onSequence } = visitors;
-
-  Object.entries(config.effects ?? {}).forEach(([id, effect]) => {
-    onEffect(['effects', id], effect, true, undefined);
-  });
-
-  Object.entries(config.sequences ?? {}).forEach(([id, sequence]) => {
-    onSequence(['sequences', id], sequence, true, undefined);
-    sequence.effects?.forEach((effect, ei) => {
-      onEffect(['sequences', id, 'effects', ei], effect, false, undefined);
-    });
-  });
-
-  config.interactions.forEach((interaction, i) => {
-    onInteraction?.(['interactions', i], interaction);
-    interaction.effects?.forEach((effect, ei) => {
-      onEffect(['interactions', i, 'effects', ei], effect, false, interaction);
-    });
-    interaction.sequences?.forEach((sequence, si) => {
-      const seqPath: Path = ['interactions', i, 'sequences', si];
-      onSequence(seqPath, sequence, false, interaction);
-      sequence.effects?.forEach((effect, ei) => {
-        onEffect([...seqPath, 'effects', ei], effect, false, interaction);
-      });
-    });
-  });
-}
+import { createReducedMotionWarnings } from './reducedMotion';
 
 // Collect every warning/info-level semantic issue (consumed by `transform`).
 export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
+  const reducedMotion = createReducedMotionWarnings(config);
   const warnings: SemanticIssue[] = [];
 
   walkConfig(config, {
@@ -58,9 +29,10 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
       warnings.push(...checkListItemSelectorWithoutContainer(path, interaction));
       warnings.push(...checkRedundantSelector(path, interaction));
       warnings.push(...checkInvalidInset(path, interaction));
+      warnings.push(...reducedMotion.onInteraction(path, interaction));
     },
     // checks that only look at depth>1 properties in effects/sequences do not need resolving
-    onEffect: (path, effect, isTopLevel, owner) => {
+    onEffect: (path, effect, isTopLevel, owner, sequence) => {
       const { effectId } = effect;
       const resolvedEffect =
         !isTopLevel && effectId
@@ -76,6 +48,7 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
       warnings.push(...checkPointerAxisIgnored(path, resolvedEffect, owner));
       warnings.push(...checkCSSPropertyNames(path, effect));
       warnings.push(...checkNamedEffectParams(path, effect));
+      warnings.push(...reducedMotion.onEffect(path, effect, isTopLevel, owner, sequence));
     },
     onSequence: (path, sequence, isTopLevel, owner) => {
       const { sequenceId } = sequence;
@@ -85,6 +58,7 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
           : sequence;
       warnings.push(...checkSameElementRetrigger(path, resolvedSequence, owner));
       warnings.push(...checkFunctionOffsetEasing(path, sequence));
+      warnings.push(...reducedMotion.onSequence(path, sequence, isTopLevel, owner));
     },
   });
 

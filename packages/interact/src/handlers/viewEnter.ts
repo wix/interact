@@ -157,17 +157,12 @@ function addViewEnterHandler(
   target: HTMLElement,
   effect: TimeEffect,
   options: ViewEnterParams = {},
-  { reducedMotion, selectorCondition, animation: preCreatedAnimation }: InteractOptions = {},
+  { selectorCondition, animation: preCreatedAnimation }: InteractOptions = {},
 ) {
   const mergedOptions = { ...viewEnterOptions, ...options };
   const type = effect.triggerType || 'once';
   const animation = (preCreatedAnimation ||
-    getAnimation(
-      target,
-      effectToAnimationOptions(effect),
-      undefined,
-      reducedMotion,
-    )) as AnimationGroup | null;
+    getAnimation(target, effectToAnimationOptions(effect))) as AnimationGroup | null;
 
   // Early return if animation is null, no observer created
   if (!animation) {

@@ -1,4 +1,5 @@
 export const RETRIGGER_TYPES = ['repeat', 'alternate', 'state'];
+export const SCRUB_TRIGGERS = ['viewProgress', 'pointerMove'];
 
 export type Severity = 'error' | 'warning' | 'info';
 
@@ -52,6 +53,9 @@ export type AnyEffect = {
   stateAction?: string;
   fill?: string;
   delay?: number;
+  duration?: number;
+  iterations?: number;
+  reducedMotionPolicy?: string;
   namedEffect?: { type?: string; range?: unknown; [k: string]: unknown };
   keyframeEffect?: { name?: string; keyframes?: Array<Record<string, unknown>> };
   transition?: { styleProperties?: unknown[] };
@@ -67,6 +71,7 @@ export type AnySequence = {
   offsetEasing?: string | ((...args: unknown[]) => unknown);
   effects?: AnyEffect[];
   conditions?: string[];
+  reducedMotionPolicy?: string;
 };
 
 export type AnyInteraction = {
@@ -79,6 +84,7 @@ export type AnyInteraction = {
   effects?: AnyEffect[];
   sequences?: AnySequence[];
   conditions?: string[];
+  reducedMotionPolicy?: string;
 };
 
 export type AnyConfig = {
@@ -92,7 +98,14 @@ export type Visitors = {
   // `owner` is the parent interaction (carrying trigger/key/selector/params), or
   // `undefined` for top-level registry effects/sequences whose trigger context is
   // unknown until their reference site. Trigger-aware checks skip `owner === undefined`.
-  onEffect: (path: Path, effect: AnyEffect, isTopLevel: boolean, owner?: AnyInteraction) => void;
+  // `sequence` is the effect's parent sequence, when it's in one.
+  onEffect: (
+    path: Path,
+    effect: AnyEffect,
+    isTopLevel: boolean,
+    owner?: AnyInteraction,
+    sequence?: AnySequence,
+  ) => void;
   onSequence: (
     path: Path,
     sequence: AnySequence,

@@ -1,5 +1,6 @@
 import { Interact } from '@wix/interact';
 import type { AnyEffect, EffectParamSchema, EffectSchema, Path, SemanticIssue } from '../types';
+import { issue } from './issue';
 
 const LENGTH_REGEX = /^-?\d*\.?\d+(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)?$/i;
 const ANGLE_REGEX = /^-?\d*\.?\d+(deg|rad|grad|turn)?$/i;
@@ -57,13 +58,6 @@ const PARAM_TYPES: Record<
       `an angle (number, '<number>deg', calc() or ${SIDES.map((s) => `'${s}'`).join(' | ')})`,
   },
 };
-
-const issue = (
-  path: Path,
-  domainCode: string,
-  message: string,
-  severity: SemanticIssue['severity'],
-) => ({ code: 'custom', path, message, params: { domainCode }, severity }) as SemanticIssue;
 
 // the namedEffect's params against the schema of the effect registered on Interact under its type
 export function checkNamedEffectParams(path: Path, effect: AnyEffect): SemanticIssue[] {

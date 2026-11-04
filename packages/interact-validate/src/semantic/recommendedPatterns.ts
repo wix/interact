@@ -1,5 +1,5 @@
 import type { Path, SemanticIssue, AnyEffect, AnyInteraction } from '../types';
-import { RETRIGGER_TYPES } from '../types';
+import { RETRIGGER_TYPES, SCRUB_TRIGGERS } from '../types';
 
 function isKeyframeEffect(effect: AnyEffect): boolean {
   return !!(effect.namedEffect || effect.keyframeEffect);
@@ -12,7 +12,7 @@ export function checkRecommendedFill(
   owner?: AnyInteraction,
 ): SemanticIssue[] {
   if (effect.fill === 'both') return [];
-  const isScrubbed = owner?.trigger === 'viewProgress' || owner?.trigger === 'pointerMove';
+  const isScrubbed = !!owner?.trigger && SCRUB_TRIGGERS.includes(owner.trigger);
   const isToggling =
     effect.triggerType !== undefined && RETRIGGER_TYPES.includes(effect.triggerType);
 

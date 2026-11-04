@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Interact, add } from '../src/index';
 import type { InteractConfig } from '../src/types';
 import type { NamedEffect } from '@wix/motion';
+import { withNoReducedMotionPreference } from './matchMedia';
 
 // Mock @wix/motion module
 vi.mock('@wix/motion', async () => {
@@ -59,7 +60,7 @@ function mockMatchMedia(matchingQueries: string[] = []) {
   mockMQLs = new Map();
 
   window.matchMedia = vi.fn((query: string) => {
-    const matches = matchingQueries.includes(query);
+    const matches = withNoReducedMotionPreference((q) => matchingQueries.includes(q))(query);
     const mql = {
       matches,
       media: query,
@@ -207,7 +208,7 @@ describe('Interaction-level conditions in addEffectsForTarget', () => {
           }),
         }),
         undefined,
-        { reducedMotion: false },
+        { reducedMotion: undefined },
       );
     });
 
@@ -295,7 +296,7 @@ describe('Interaction-level conditions in addEffectsForTarget', () => {
           }),
         }),
         undefined,
-        { reducedMotion: false },
+        { reducedMotion: undefined },
       );
     });
 
@@ -350,7 +351,7 @@ describe('Interaction-level conditions in addEffectsForTarget', () => {
           }),
         }),
         undefined,
-        { reducedMotion: false },
+        { reducedMotion: undefined },
       );
     });
 
@@ -410,6 +411,238 @@ describe('Interaction-level conditions in addEffectsForTarget', () => {
 
       // Should NOT create animation because interaction-level condition doesn't match
       // (even though effect-level condition would match)
+      expect(getWebAnimation).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('reducedMotionPolicy at runtime', () => {
+  const REDUCE = '(prefers-reduced-motion: reduce)';
+  const NO_PREFERENCE = '(prefers-reduced-motion: no-preference)';
+  let instance: Interact;
+
+  const slide = {
+    namedEffect: { type: 'SlideIn', direction: 'right', power: 'medium' } as NamedEffect,
+    duration: 500,
+    delay: 100,
+  };
+
+  const createConfig = (reducedMotionPolicy?: string): InteractConfig => ({
+    effects: {
+      fade: { namedEffect: { type: 'FadeIn' } as NamedEffect, duration: 300 },
+    },
+    interactions: [
+      {
+        trigger: 'click',
+        key: 'button',
+        effects: [{ ...slide, reducedMotionPolicy }],
+      },
+    ],
+  });
+
+  const addButton = () => {
+    const element = document.createElement('div');
+    add(element, 'button');
+    return element;
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    instance?.destroy();
+  });
+
+  it('plays the effect as is when motion is not reduced', async () => {
+    const { getWebAnimation } = await import('@wix/motion');
+    mockMatchMedia([NO_PREFERENCE]);
+    instance = Interact.create(createConfig('collapse'));
+
+    addButton();
+
+    expect(getWebAnimation).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ duration: 500, delay: 100 }),
+      undefined,
+      expect.anything(),
+    );
+  });
+
+  it('plays the collapsed effect when motion is reduced', async () => {
+    const { getWebAnimation } = await import('@wix/motion');
+    mockMatchMedia([REDUCE]);
+    instance = Interact.create(createConfig('collapse'));
+
+    addButton();
+
+    expect(getWebAnimation).toHaveBeenCalledTimes(1);
+    expect(getWebAnimation).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ duration: 0, delay: 100, namedEffect: slide.namedEffect }),
+      undefined,
+      expect.anything(),
+    );
+  });
+
+  it('collapses by default when motion is reduced', async () => {
+    const { getWebAnimation } = await import('@wix/motion');
+    mockMatchMedia([REDUCE]);
+    instance = Interact.create(createConfig());
+
+    addButton();
+
+    expect(getWebAnimation).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ duration: 0, delay: 100 }),
+      undefined,
+      expect.anything(),
+    );
+  });
+
+  describe('instance policy', () => {
+    afterEach(() => {
+      Interact.setup({ reducedMotionPolicy: 'collapse' });
+    });
+
+    it('takes the policy from Interact.setup()', async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      mockMatchMedia([REDUCE]);
+      Interact.setup({ reducedMotionPolicy: 'cancel' });
+      instance = Interact.create(createConfig());
+
+      addButton();
+
+      expect(getWebAnimation).not.toHaveBeenCalled();
+    });
+
+    it("takes the instance's policy over Interact.setup()", async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      mockMatchMedia([REDUCE]);
+      Interact.setup({ reducedMotionPolicy: 'cancel' });
+      instance = Interact.create(createConfig(), { reducedMotionPolicy: 'ignore' });
+
+      addButton();
+
+      expect(getWebAnimation).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ duration: 500 }),
+        undefined,
+        expect.anything(),
+      );
+    });
+  });
+
+  it('plays the replacement when motion is reduced', async () => {
+    const { getWebAnimation } = await import('@wix/motion');
+    mockMatchMedia([REDUCE]);
+    instance = Interact.create(createConfig('fade'));
+
+    addButton();
+
+    const [, options] = vi.mocked(getWebAnimation).mock.calls[0];
+    expect(options).toMatchObject({ duration: 300, namedEffect: { type: 'FadeIn' } });
+    expect(options).not.toHaveProperty('delay');
+  });
+
+  it('skips a cancelled effect when motion is reduced', async () => {
+    const { getWebAnimation } = await import('@wix/motion');
+    mockMatchMedia([REDUCE]);
+    instance = Interact.create(createConfig('cancel'));
+
+    addButton();
+
+    expect(getWebAnimation).not.toHaveBeenCalled();
+  });
+
+  it('listens on the media of every variant', () => {
+    mockMatchMedia([NO_PREFERENCE]);
+    instance = Interact.create(createConfig('collapse'));
+
+    addButton();
+
+    [REDUCE, NO_PREFERENCE].forEach((query) =>
+      expect(mockMQLs.get(query)!.addEventListener).toHaveBeenCalledWith(
+        'change',
+        expect.any(Function),
+      ),
+    );
+  });
+
+  it('lets an earlier variation win when the effect is cancelled', async () => {
+    const { getWebAnimation } = await import('@wix/motion');
+    mockMatchMedia([REDUCE]);
+    instance = Interact.create({
+      effects: {},
+      interactions: [
+        {
+          trigger: 'click',
+          key: 'button',
+          effects: [
+            { key: 'target', ...slide, duration: 200, reducedMotionPolicy: 'ignore' },
+            { key: 'target', ...slide, reducedMotionPolicy: 'cancel' },
+          ],
+        },
+      ],
+    });
+
+    add(document.createElement('div'), 'target');
+    addButton();
+
+    expect(getWebAnimation).toHaveBeenCalledTimes(1);
+    expect(getWebAnimation).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ duration: 200 }),
+      undefined,
+      expect.anything(),
+    );
+  });
+
+  describe('forced', () => {
+    afterEach(() => {
+      Interact.forceReducedMotion = false;
+    });
+
+    it('is forced per instance, over the static flag', async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      mockMatchMedia([NO_PREFERENCE]);
+      Interact.forceReducedMotion = true;
+      instance = Interact.create(createConfig('collapse'), { forceReducedMotion: false });
+
+      addButton();
+
+      expect(getWebAnimation).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ duration: 500 }),
+        undefined,
+        expect.anything(),
+      );
+    });
+
+    it('plays the reduced outcome regardless of the media', async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      mockMatchMedia([NO_PREFERENCE]);
+      Interact.forceReducedMotion = true;
+      instance = Interact.create(createConfig('collapse'));
+
+      addButton();
+
+      expect(getWebAnimation).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ duration: 0 }),
+        undefined,
+        expect.anything(),
+      );
+    });
+
+    it('skips a cancelled effect regardless of the media', async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      mockMatchMedia([NO_PREFERENCE]);
+      Interact.forceReducedMotion = true;
+      instance = Interact.create(createConfig('cancel'));
+
+      addButton();
+
       expect(getWebAnimation).not.toHaveBeenCalled();
     });
   });

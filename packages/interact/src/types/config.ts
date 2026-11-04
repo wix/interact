@@ -1,5 +1,11 @@
 import type { TriggerType, TriggerParams } from './triggers';
-import type { Effect, EffectRef, EffectProperty, TimeAnimationTriggerType } from './effects';
+import type {
+  Effect,
+  EffectRef,
+  EffectProperty,
+  ReducedMotionPolicy,
+  TimeAnimationTriggerType,
+} from './effects';
 import type { PluginFields } from './plugins';
 
 export type Condition = {
@@ -14,6 +20,7 @@ export type SequenceOptionsConfig = {
   sequenceId?: string;
   conditions?: string[];
   triggerType?: TimeAnimationTriggerType;
+  reducedMotionPolicy?: ReducedMotionPolicy;
 };
 
 export type SequenceConfig = SequenceOptionsConfig & {
@@ -27,6 +34,7 @@ export type SequenceConfigRef = {
   offset?: number;
   offsetEasing?: string | ((p: number) => number);
   conditions?: string[];
+  reducedMotionPolicy?: ReducedMotionPolicy;
 };
 
 export type InteractionTrigger = {
@@ -37,6 +45,7 @@ export type InteractionTrigger = {
   params?: TriggerParams;
   conditions?: string[];
   selector?: string;
+  reducedMotionPolicy?: ReducedMotionPolicy;
 } & PluginFields; // `$<name>` fields route to plugins registered via `Interact.use()`
 
 export type Interaction = InteractionTrigger & {
@@ -67,6 +76,8 @@ export type ResolvedEffect = ElementIdentifier &
     suffix?: string;
     // the effect's position in the config (see getSlotKey)
     slotKey?: string;
+    // the effect's reduced-motion variants, each under its reserved media (see getReducedMotionVariants)
+    variants?: ResolvedEffect[];
   };
 
 export type ResolvedSequence = {
@@ -76,5 +87,6 @@ export type ResolvedSequence = {
   offset: number;
   offsetEasing: string;
   conditions: string[];
+  reducedMotionPolicy: ReducedMotionPolicy;
   effects: ResolvedEffect[];
 };

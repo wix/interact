@@ -20,7 +20,6 @@ export type InteractionParamsTypes = {
 };
 
 export type InteractOptions = {
-  reducedMotion?: boolean;
   targetController?: IInteractionController;
   selectorCondition?: string;
   allowA11yTriggers?: boolean;

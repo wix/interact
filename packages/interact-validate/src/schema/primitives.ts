@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+export const ReducedMotionMode = z.enum(['ignore', 'cancel', 'collapse']);
+
+// a string other than the modes is an effectId in config.effects
+export const ReducedMotionPolicy = z.union([ReducedMotionMode, z.string().min(1)]);
+
 export const Keyframe = z.record(z.string(), z.union([z.string(), z.number()]));
 
 export const LengthPercentage = z

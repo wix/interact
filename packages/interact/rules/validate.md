@@ -127,22 +127,23 @@ Severity is one of `'error' | 'warning'`. There are exactly two levers:
 1. **`strict: true`** — promotes all remaining issues to `'error'`, so any warning fails the config.
 2. **`severityOverrides`** — keyed by **rule category**, not by individual code. Only the following categories are registered and overridable:
 
-| Rule category            | Covers codes                                                                | Default severity |
-| ------------------------ | --------------------------------------------------------------------------- | ---------------- |
-| `UNUSED_DEFINITION`      | `UNUSED_EFFECT`, `UNUSED_SEQUENCE`, `UNUSED_CONDITION`                      | warning          |
-| `UNIQUE_DEFINITION_IDS`  | `DUPLICATE_KEYFRAME_NAME`                                                   | warning          |
-| `VALID_MEDIA_QUERIES`    | `INVALID_MEDIA_QUERY`                                                       | error            |
-| `SAME_ELEMENT_RETRIGGER` | `SAME_ELEMENT_RETRIGGER`                                                    | warning          |
-| `HIT_AREA_SHIFT`         | `HIT_AREA_SHIFT`                                                            | warning          |
-| `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE`, `ANIMATION_END_CYCLE`                       | warning          |
-| `ELEMENT_SELECTION`      | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER`, `REDUNDANT_SELECTOR_WITH_LIST_ITEM` | warning          |
-| `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                  | warning          |
-| `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                     | info             |
-| `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                      | warning          |
-| `CSS_PROPERTY_NAME`      | `INVALID_CSS_PROPERTY_NAME`                                                 | warning          |
-| `VIEW_INSET`             | `INVALID_INSET`                                                             | warning          |
-| `OFFSET_EASING`          | `FUNCTION_OFFSET_EASING`                                                    | warning          |
-| `NAMED_EFFECT_PARAMS`    | `NAMED_EFFECT_INVALID_PARAM` (error), `NAMED_EFFECT_UNKNOWN_PARAM`          | warning          |
+| Rule category            | Covers codes                                                                                                                                                   | Default severity |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `UNUSED_DEFINITION`      | `UNUSED_EFFECT`, `UNUSED_SEQUENCE`, `UNUSED_CONDITION`                                                                                                         | warning          |
+| `UNIQUE_DEFINITION_IDS`  | `DUPLICATE_KEYFRAME_NAME`                                                                                                                                      | warning          |
+| `VALID_MEDIA_QUERIES`    | `INVALID_MEDIA_QUERY`                                                                                                                                          | error            |
+| `SAME_ELEMENT_RETRIGGER` | `SAME_ELEMENT_RETRIGGER`                                                                                                                                       | warning          |
+| `HIT_AREA_SHIFT`         | `HIT_AREA_SHIFT`                                                                                                                                               | warning          |
+| `ANIMATION_END_GRAPH`    | `ANIMATION_END_SELF_REFERENCE`, `ANIMATION_END_CYCLE`                                                                                                          | warning          |
+| `ELEMENT_SELECTION`      | `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER`, `REDUNDANT_SELECTOR_WITH_LIST_ITEM`                                                                                    | warning          |
+| `STATE_EFFECT`           | `EMPTY_STYLE_PROPERTIES`, `STATE_REMOVE_WITHOUT_EFFECT_ID`                                                                                                     | warning          |
+| `RECOMMENDED_FILL`       | `RECOMMENDED_FILL_BOTH`                                                                                                                                        | info             |
+| `POINTER_AXIS`           | `POINTER_AXIS_IGNORED`                                                                                                                                         | warning          |
+| `CSS_PROPERTY_NAME`      | `INVALID_CSS_PROPERTY_NAME`                                                                                                                                    | warning          |
+| `VIEW_INSET`             | `INVALID_INSET`                                                                                                                                                | warning          |
+| `OFFSET_EASING`          | `FUNCTION_OFFSET_EASING`                                                                                                                                       | warning          |
+| `NAMED_EFFECT_PARAMS`    | `NAMED_EFFECT_INVALID_PARAM` (error), `NAMED_EFFECT_UNKNOWN_PARAM`                                                                                             | warning          |
+| `REDUCED_MOTION`         | `REDUCED_MOTION_SELF_REFERENCE`, `REDUCED_MOTION_SHADOWED_EFFECT_ID`, `REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH`, `REDUCED_MOTION_COLLAPSE_CANCELS` (info) | warning          |
 
 For each category, set `'off'` to drop those issues entirely, `'warning'` / `'error'` to set their severity:
 
@@ -194,11 +195,13 @@ This is the authoritative list of every code the validator emits today. Codes no
 
 ### Referential errors (severity: error)
 
-| Code                             | What it flags                                                                  |
-| -------------------------------- | ------------------------------------------------------------------------------ |
-| `ANIMATION_END_EFFECT_NOT_FOUND` | An `animationEnd` interaction's `params.effectId` references a missing effect. |
-| `SEQUENCE_ID_NOT_FOUND`          | A `sequenceId` references a key absent from `config.sequences`.                |
-| `CONDITION_NOT_FOUND`            | A `conditions[]` entry references a key absent from `config.conditions`.       |
+| Code                                 | What it flags                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANIMATION_END_EFFECT_NOT_FOUND`     | An `animationEnd` interaction's `params.effectId` references a missing effect.                                                                                                                                                                                                                                   |
+| `SEQUENCE_ID_NOT_FOUND`              | A `sequenceId` references a key absent from `config.sequences`.                                                                                                                                                                                                                                                  |
+| `CONDITION_NOT_FOUND`                | A `conditions[]` entry references a key absent from `config.conditions`.                                                                                                                                                                                                                                         |
+| `REDUCED_MOTION_EFFECT_NOT_FOUND`    | An effect's `reducedMotionPolicy` names an effectId absent from `config.effects`. On an interaction or sequence it is a **warning** instead — the effects inheriting it collapse.                                                                                                                                |
+| `REDUCED_MOTION_INCOMPATIBLE_EFFECT` | An effect's `reducedMotionPolicy` names an effect of another kind (time / scroll-or-pointer-driven / state). When inherited from an interaction or sequence it is a **warning** instead — the effect collapses. An effect of a `config.sequences` entry is reported on each sequence reference it inherits from. |
 
 ### Other structural errors (severity: error)
 
@@ -222,23 +225,29 @@ This is the authoritative list of every code the validator emits today. Codes no
 
 Statically-detectable authoring pitfalls lifted from the trigger rule files. Each belongs to its own rule category, so `severityOverrides` can silence (`'off'`) or escalate (`'error'`) it. `strict: true` promotes all of these to `error`.
 
-| Code                                   | What it flags                                                                                                                                         | Rule category            |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `SAME_ELEMENT_RETRIGGER`               | `viewEnter` with `triggerType` `repeat`/`alternate`/`state` on the same source+target element (re-trigger loop).                                      | `SAME_ELEMENT_RETRIGGER` |
-| `HIT_AREA_SHIFT`                       | `hover`/`click`/`interest`/`activate`/`pointerMove` `keyframeEffect` with a `translate`/`scale`/`matrix` transform on the same source+target element. | `HIT_AREA_SHIFT`         |
-| `ANIMATION_END_SELF_REFERENCE`         | An `animationEnd` interaction waits for an effect it also produces → it can never start.                                                              | `ANIMATION_END_GRAPH`    |
-| `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER` | `listItemSelector` present without `listContainer` (inert) — on an interaction or an effect.                                                          | `ELEMENT_SELECTION`      |
-| `REDUNDANT_SELECTOR_WITH_LIST_ITEM`    | `selector` is ignored when both `listContainer` and `listItemSelector` are present.                                                                   | `ELEMENT_SELECTION`      |
-| `EMPTY_STYLE_PROPERTIES`               | A state effect's `transition.styleProperties` / `transitionProperties` is `[]` (toggles nothing).                                                     | `STATE_EFFECT`           |
-| `STATE_REMOVE_WITHOUT_EFFECT_ID`       | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                                                                           | `STATE_EFFECT`           |
-| `RECOMMENDED_FILL_BOTH`                | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.                                     | `RECOMMENDED_FILL`       |
-| `RECOMMENDED_FILL_BACKWARDS`           | A `viewEnter` + `once` named/keyframe effect targeting another element or using a same-element delay omits `fill: 'backwards'` or `'both'`.           | `RECOMMENDED_FILL`       |
-| `POINTER_AXIS_IGNORED`                 | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).                                            | `POINTER_AXIS`           |
-| `INVALID_CSS_PROPERTY_NAME`            | A keyframe or state-effect property name is neither camelCase nor kebab-case (both casings are accepted; this one cannot be normalized).              | `CSS_PROPERTY_NAME`      |
-| `INVALID_INSET`                        | `viewEnter` `params.inset` is not 1–4 whitespace-separated CSS lengths/percentages.                                                                   | `VIEW_INSET`             |
-| `FUNCTION_OFFSET_EASING`               | A sequence's `offsetEasing` is a function, so `generate()` omits that sequence from the generated CSS.                                                | `OFFSET_EASING`          |
-| `NAMED_EFFECT_INVALID_PARAM`           | A `namedEffect` param does not match its effect's registered `schema` (type, enum values, min/max, length/angle format).                              | `NAMED_EFFECT_PARAMS`    |
-| `NAMED_EFFECT_UNKNOWN_PARAM`           | A `namedEffect` param is not declared in its effect's registered `schema` (e.g. a renamed param).                                                     | `NAMED_EFFECT_PARAMS`    |
+| Code                                           | What it flags                                                                                                                                                                  | Rule category            |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
+| `SAME_ELEMENT_RETRIGGER`                       | `viewEnter` with `triggerType` `repeat`/`alternate`/`state` on the same source+target element (re-trigger loop).                                                               | `SAME_ELEMENT_RETRIGGER` |
+| `HIT_AREA_SHIFT`                               | `hover`/`click`/`interest`/`activate`/`pointerMove` `keyframeEffect` with a `translate`/`scale`/`matrix` transform on the same source+target element.                          | `HIT_AREA_SHIFT`         |
+| `ANIMATION_END_SELF_REFERENCE`                 | An `animationEnd` interaction waits for an effect it also produces → it can never start.                                                                                       | `ANIMATION_END_GRAPH`    |
+| `LIST_ITEM_SELECTOR_WITHOUT_CONTAINER`         | `listItemSelector` present without `listContainer` (inert) — on an interaction or an effect.                                                                                   | `ELEMENT_SELECTION`      |
+| `REDUNDANT_SELECTOR_WITH_LIST_ITEM`            | `selector` is ignored when both `listContainer` and `listItemSelector` are present.                                                                                            | `ELEMENT_SELECTION`      |
+| `EMPTY_STYLE_PROPERTIES`                       | A state effect's `transition.styleProperties` / `transitionProperties` is `[]` (toggles nothing).                                                                              | `STATE_EFFECT`           |
+| `STATE_REMOVE_WITHOUT_EFFECT_ID`               | `stateAction: 'remove'` with no `effectId` to pair with a matching `'add'`.                                                                                                    | `STATE_EFFECT`           |
+| `RECOMMENDED_FILL_BOTH`                        | A scrubbed (`viewProgress`/`pointerMove`) or toggling (`alternate`/`repeat`/`state`) effect omits `fill: 'both'`.                                                              | `RECOMMENDED_FILL`       |
+| `RECOMMENDED_FILL_BACKWARDS`                   | A `viewEnter` + `once` named/keyframe effect targeting another element or using a same-element delay omits `fill: 'backwards'` or `'both'`.                                    | `RECOMMENDED_FILL`       |
+| `POINTER_AXIS_IGNORED`                         | `pointerMove` `params.axis` set on a `namedEffect`/`customEffect` (axis only applies to `keyframeEffect`).                                                                     | `POINTER_AXIS`           |
+| `INVALID_CSS_PROPERTY_NAME`                    | A keyframe or state-effect property name is neither camelCase nor kebab-case (both casings are accepted; this one cannot be normalized).                                       | `CSS_PROPERTY_NAME`      |
+| `INVALID_INSET`                                | `viewEnter` `params.inset` is not 1–4 whitespace-separated CSS lengths/percentages.                                                                                            | `VIEW_INSET`             |
+| `FUNCTION_OFFSET_EASING`                       | A sequence's `offsetEasing` is a function, so `generate()` omits that sequence from the generated CSS.                                                                         | `OFFSET_EASING`          |
+| `NAMED_EFFECT_INVALID_PARAM`                   | A `namedEffect` param does not match its effect's registered `schema` (type, enum values, min/max, length/angle format).                                                       | `NAMED_EFFECT_PARAMS`    |
+| `NAMED_EFFECT_UNKNOWN_PARAM`                   | A `namedEffect` param is not declared in its effect's registered `schema` (e.g. a renamed param).                                                                              | `NAMED_EFFECT_PARAMS`    |
+| `REDUCED_MOTION_SELF_REFERENCE`                | An effect's `reducedMotionPolicy` names the effect itself, which is the same as `'ignore'`.                                                                                    | `REDUCED_MOTION`         |
+| `REDUCED_MOTION_SHADOWED_EFFECT_ID`            | A `config.effects` key is `ignore` / `cancel` / `collapse`, so `reducedMotionPolicy` can't name it.                                                                            | `REDUCED_MOTION`         |
+| `REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH` | An `animationEnd` source effect gets a different `reducedMotionPolicy` where it plays than from its registry entry, which is all the `animationEnd` trigger sees.              | `REDUCED_MOTION`         |
+| `REDUCED_MOTION_COLLAPSE_CANCELS` (info)       | A collapsed effect has no end state (infinite iterations, or `viewProgress` / `pointerMove`), so reduced motion cancels it. Not reported when no `reducedMotionPolicy` is set. | `REDUCED_MOTION`         |
+
+The instance's `reducedMotionPolicy` (an `Interact.setup()` / `Interact.create()` option) isn't part of the config, so the `REDUCED_MOTION_*` checks take it to be the default `'collapse'`.
 
 ---
 

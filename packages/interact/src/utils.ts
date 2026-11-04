@@ -35,6 +35,12 @@ export function generateId() {
   );
 }
 
+export function isTransitionEffect(
+  effect: object,
+): effect is Pick<StateEffect, 'transition' | 'transitionProperties'> {
+  return !!((effect as StateEffect).transition || (effect as StateEffect).transitionProperties);
+}
+
 /**
  * Resolves the style properties of a state effect - `transition.styleProperties` wins
  * when both are set - with property names normalized to the kebab-case form CSS expects.
@@ -59,7 +65,7 @@ export function transitionEffectToTransitionsList(transitionEffect: StateEffect)
   if (transition?.styleProperties) {
     const { duration, easing, delay } = transition;
 
-    if (duration) {
+    if (duration || delay) {
       const hasCustomPropertiesTransition = transition.styleProperties.some((styleProperty) =>
         styleProperty.name.startsWith('--'),
       );
@@ -67,13 +73,13 @@ export function transitionEffectToTransitionsList(transitionEffect: StateEffect)
       if (hasCustomPropertiesTransition) {
         // If there are custom properties in the transition, we need to fall back to Viewer's legacy implementation
         transitions = [
-          `all ${duration}ms ${getEasing(easing || 'ease')}${delay ? ` ${delay}ms` : ''}`,
+          `all ${duration || 0}ms ${getEasing(easing || 'ease')}${delay ? ` ${delay}ms` : ''}`,
           'visibility 0s',
         ];
       } else {
         transitions = transition.styleProperties.map(
           (styleProperty) =>
-            `${toCSSPropertyName(styleProperty.name)} ${duration}ms ${getEasing(
+            `${toCSSPropertyName(styleProperty.name)} ${duration || 0}ms ${getEasing(
               easing || 'ease',
             )}${delay ? ` ${delay}ms` : ''}`,
         );
@@ -82,10 +88,10 @@ export function transitionEffectToTransitionsList(transitionEffect: StateEffect)
   } else {
     transitions =
       transitionProperties
-        ?.filter((property) => property.duration)
+        ?.filter((property) => property.duration || property.delay)
         .map(
           (property) =>
-            `${toCSSPropertyName(property.name)} ${property.duration}ms ${
+            `${toCSSPropertyName(property.name)} ${property.duration || 0}ms ${
               getEasing(property.easing) || 'ease'
             }${property.delay ? ` ${property.delay}ms` : ''}`,
         ) || [];
@@ -139,9 +145,9 @@ export function createTransitionCSS({
       ? applySelectorCondition(transitionSelector, selectorCondition)
       : transitionSelector;
 
-    result.push(`@media (prefers-reduced-motion: no-preference) { ${finalTransitionSelector} {
+    result.push(`${finalTransitionSelector} {
       transition: ${transitions.join(', ')};
-    } }`);
+    }`);
   }
   return result;
 }
