@@ -639,7 +639,7 @@ What an effect does when the user prefers reduced motion (`(prefers-reduced-moti
 
 - A sequence's stagger (`offset`) collapses to 0, unless the sequence's handling is `'ignore'`; delays are kept.
 - An `animationEnd` source resolves its handling from its registry entry and the instance only — set it there.
-- `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media. It takes the instance's `reducedMotionHandling` / `forceReducedMotion` as options, defaulting to `Interact.setup()`'s.
+- `generate()` emits both outcomes, the reduce one as overrides under `prefers-reduced-motion: reduce`. It takes the instance's `reducedMotionHandling` / `forceReducedMotion` as options, defaulting to `Interact.setup()`'s.
 
 ---
 

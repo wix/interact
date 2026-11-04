@@ -101,7 +101,7 @@ The state is reduced when `(prefers-reduced-motion: reduce)` matches or when it 
 
 Each effect in the config yields one or two variants. A variant is the effect with a reserved media condition appended. Both paths consume the same variant list:
 
-- **CSS** emits every variant under its media.
+- **CSS** emits every variant. A rule both variants share applies under either preference, and the reduce variant only overrides what differs (§4.2).
 - **Runtime** picks the variant whose media matches and listens on it. This is the existing media-condition rule.
 
 A new file, `packages/interact/src/core/reducedMotion.ts`, holds the pure, shared logic:
@@ -217,7 +217,12 @@ const chosen = variants.find((v) => !mql(v) || mql(v).matches);
   - It runs `effectToCSS` per variant against the same `TargetContext`, unions `wrote`, then calls `endEffect` once. List lengths, slots and `@property` counts are unchanged.
   - Each variant starts from the list entries assigned before the effect, and the effect leaves the union of what its variants assigned. The variants' media are exclusive, so each variant writes the same declarations it would write as the only effect in its place: it falls back only entries that an earlier variation assigned. Unused entries are left to their `@property` initial value.
   - A reduce variant, or any variant when forced, is rendered with the sequence's `offset` set to 0 unless the sequence's handling is `ignore`.
-- `collectKeyframeEntry` records each variant as a member with the same `slotKey`.
+- An effect with two variants renders both without their reserved media, then merges them by rule (`mergeVariantRules`). Rules are matched by key, media, selector condition, child selector, states and suffix:
+  - A rule both variants have is emitted with no reduced-motion gate. Its reduce rule follows under `reduce` and holds only the declarations whose value differs. A list entry the reduce rule doesn't write is set to `initial`, which is the entry's `@property` fallback and what it would be without the rule, since the variant writes every entry assigned before the effect.
+  - A rule only one variant has keeps its own gate, e.g. an entrance's animation rule under `no-preference`.
+  - A pair whose reduce rule drops any other declaration (a replacement transition on other properties) keeps both gates, since that declaration can't be reset to "no rule".
+  - A browser without `prefers-reduced-motion` support matches neither gate, so it now gets the full effect from the shared rules.
+- `generate()` prints the gated rules in one trailing block per media query (`printRules`). A rule stays in place when a later rule writes one of its properties on the same key, since a later variation has to keep winning. Rules of different keys target different elements, which the list rules already assume. `_generate()`'s `cssRules` are unaffected.- `collectKeyframeEntry` records each variant as a member with the same `slotKey`.
   - `getKeyframeSlots` then picks a suffix that is collision-free for both name sets.
   - The runtime stamps the same suffix in `parseConfig`.
 - `initial` rules carry the variant's media.
@@ -299,7 +304,7 @@ const chosen = variants.find((v) => !mql(v) || mql(v).matches);
 
 **Unit tests:**
 
-- `packages/interact/test/css.spec.ts`: variants share list entries, list lengths are unchanged, media is exclusive, each variant falls back only earlier entries, keyframe slots work across variants, stagger collapses.
+- `packages/interact/test/css.spec.ts`: variants share list entries and rules, list lengths are unchanged, the reduce variant overrides only what differs, gated rules group without reordering a later variation, keyframe slots work across variants, stagger collapses.
 - `resolvers.spec.ts`, `sequences.spec.ts`, `conditions.spec.ts`, `web.spec.ts`: cascade, default, fallback chain, instance handling and force (`setup()` and per instance), stagger.
 - New `reducedMotion.spec.ts` for the builder.
 - interact-validate specs, including shared sequence definitions.

@@ -880,7 +880,7 @@ Accepted on `Interaction`, `SequenceConfig` / `SequenceConfigRef` and effects, a
 
 A sequence's stagger (`offset`) collapses to 0 under reduced motion, unless the sequence's own handling resolves to `'ignore'`. Its `delay` and its effects' delays are kept.
 
-`generate()` emits both outcomes under exclusive `prefers-reduced-motion` media queries, so the CSS and the runtime agree. `generate()` takes the instance's `reducedMotionHandling` and `forceReducedMotion` as options, defaulting to the ones set by `Interact.setup()`.
+`generate()` emits both outcomes, the reduce one as overrides under `prefers-reduced-motion: reduce`, so the CSS and the runtime agree. `generate()` takes the instance's `reducedMotionHandling` and `forceReducedMotion` as options, defaulting to the ones set by `Interact.setup()`.
 
 ## Condition Types
 

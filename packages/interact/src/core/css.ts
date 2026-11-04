@@ -21,7 +21,14 @@ import {
 import { Interact, getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
 import { getElementHash } from './utilities';
-import { isReducedMotionVariant, withReducedMotionConditions } from './reducedMotion';
+import {
+  REDUCED_MOTION_CONDITIONS,
+  REDUCED_MOTION_NO_PREFERENCE,
+  REDUCED_MOTION_REDUCE,
+  isReducedMotionVariant,
+  withReducedMotionConditions,
+  withoutReducedMotionConditions,
+} from './reducedMotion';
 import {
   LIST_ANIMATION_PROPERTY_NAMES,
   LIST_PROPERTY_NAMES,
@@ -489,6 +496,76 @@ function collectKeyframeEntry(
   target.keyframeEntries.set(entry, [...members, { slotKey, getNames }]);
 }
 
+function withMediaCondition(rule: CSSRuleData, condition: string): CSSRuleData {
+  const predicate = `(${REDUCED_MOTION_CONDITIONS[condition].predicate})`;
+  return { ...rule, media: rule.media ? `${rule.media} and ${predicate}` : predicate };
+}
+
+const getRuleSignature = ({ declarations: _, states, ...rule }: CSSRuleData) =>
+  JSON.stringify([
+    rule.key,
+    rule.media,
+    rule.selectorCondition,
+    rule.childSelector,
+    states?.join(' '),
+    rule.selectorSuffix,
+  ]);
+
+const getDeclarationValue = ({ value, important }: CSSRuleData['declarations'][number]) =>
+  `${value}${important ? '!' : ''}`;
+
+/**
+ * The rules of an effect's no-preference and reduce variants, rendered without their reserved media. A rule both
+ * variants have applies under either preference, and its reduce rule only overrides what differs - list entries the
+ * reduce variant doesn't write are reset. A rule only one variant has keeps its preference, as does a pair where the
+ * reduce variant drops a declaration that can't be reset.
+ */
+function mergeVariantRules(
+  normalRules: CSSRuleData[],
+  reducedRules: CSSRuleData[],
+  resettable: Set<string>,
+): CSSRuleData[] {
+  const normalBySignature = new Map(normalRules.map((rule) => [getRuleSignature(rule), rule]));
+  const shared = new Set<CSSRuleData>();
+
+  const overrides = reducedRules.flatMap((rule) => {
+    const normal = normalBySignature.get(getRuleSignature(rule));
+    const reducedValues = new Map(
+      rule.declarations.map((declaration) => [declaration.name, getDeclarationValue(declaration)]),
+    );
+    const dropped = normal?.declarations.filter(({ name }) => !reducedValues.has(name)) || [];
+
+    if (!normal || dropped.some(({ name }) => !resettable.has(name))) {
+      return [withMediaCondition(rule, REDUCED_MOTION_REDUCE)];
+    }
+
+    shared.add(normal);
+    const normalValues = new Map(
+      normal.declarations.map((declaration) => [
+        declaration.name,
+        getDeclarationValue(declaration),
+      ]),
+    );
+    const declarations = [
+      ...rule.declarations.filter(
+        (declaration) => normalValues.get(declaration.name) !== getDeclarationValue(declaration),
+      ),
+      ...dropped.map(({ name }) => ({ name, value: 'initial' })),
+    ];
+
+    return declarations.length
+      ? [{ ...withMediaCondition(rule, REDUCED_MOTION_REDUCE), declarations }]
+      : [];
+  });
+
+  return [
+    ...normalRules.map((rule) =>
+      shared.has(rule) ? rule : withMediaCondition(rule, REDUCED_MOTION_NO_PREFERENCE),
+    ),
+    ...overrides,
+  ];
+}
+
 // the stagger collapses under reduced motion, unless the sequence ignores it
 function getVariantSequence(
   ctx: GenerateContext,
@@ -550,7 +627,7 @@ function parseEffect(
     return {
       ...effectToCSS(
         ctx,
-        variant,
+        variants.length > 1 ? withoutReducedMotionConditions(variant) : variant,
         current,
         trigger,
         customProps,
@@ -571,7 +648,9 @@ function parseEffect(
   endEffect(current, wrote, useSlots);
   ctx.targetsMap.set(targetHash, current);
 
-  return results.flatMap(({ rules }) => rules);
+  return variants.length > 1
+    ? mergeVariantRules(results[0].rules, results[1].rules, new Set(Object.values(customProps)))
+    : results[0]?.rules || [];
 }
 
 function parseSequence(
@@ -850,6 +929,45 @@ export function _generate(
  *
  * @returns string containing all of the CSS rules needed for time-based animations
  */
+const REDUCED_MOTION_PREDICATES = Object.values(REDUCED_MOTION_CONDITIONS).map(
+  ({ predicate }) => `(${predicate})`,
+);
+
+/**
+ * Prints the rules, moving the ones gated by a reduced-motion preference into one block per media query after the
+ * others. A rule stays in place when a later rule writes one of its properties on the same key, since the later one
+ * has to keep winning there. Rules of different keys target different elements.
+ */
+function printRules(rules: CSSRuleData[]): string[] {
+  const laterWrites = new Set<string>();
+  const inPlace: CSSRuleData[] = [];
+  const blocks = new Map<string, CSSRuleData[]>();
+
+  for (let i = rules.length - 1; i >= 0; i--) {
+    const rule = rules[i];
+    const writes = rule.declarations.map(({ name }) => `${rule.key}|${name}`);
+    const { media = '' } = rule;
+
+    if (
+      REDUCED_MOTION_PREDICATES.some((predicate) => media.includes(predicate)) &&
+      !writes.some((write) => laterWrites.has(write))
+    ) {
+      blocks.set(media, [...(blocks.get(media) || []), { ...rule, media: '' }]);
+    } else {
+      inPlace.push(rule);
+    }
+    writes.forEach((write) => laterWrites.add(write));
+  }
+
+  return [
+    ...inPlace.reverse().map(CSSRuleToString),
+    ...[...blocks].map(
+      ([media, block]) =>
+        `@media ${media} {\n${block.reverse().map(CSSRuleToString).filter(Boolean).join('\n')}\n}`,
+    ),
+  ];
+}
+
 export function generate(config: InteractConfig, options?: boolean | GenerateOptions): string {
   const { cssRules, keyframes, atProperty, listsRule, timelineScopeRule } = _generate(
     config,
@@ -859,7 +977,7 @@ export function generate(config: InteractConfig, options?: boolean | GenerateOpt
   const css = [
     ...atProperty,
     ...[...keyframes.entries()].map(([name, keyframes]) => keyframesToCSS(name, keyframes)),
-    ...cssRules.map(CSSRuleToString),
+    ...printRules(cssRules),
     listsRule,
     timelineScopeRule,
   ].filter((rule) => rule);
