@@ -35,6 +35,34 @@ Interact.use('<plugin-name>', (value, context) => {
 
 - `Interact.getPlugin(name)` / `Interact.getPluginsNames()` inspect the registry.
 
+### Deferring until hydration (or any event)
+
+DOM-changing plugins conflict with frameworks that hydrate server-rendered
+markup (e.g. React): hydration can wipe the plugin's changes. Pass `defer` to
+hold the plugin back, then release it with `Interact.ready()`:
+
+```ts
+Interact.use('splitText', splitTextPlugin, { defer: 'hydrated' });
+Interact.create(config);
+
+// React client root — effects run after the hydration commit
+useEffect(() => Interact.ready('hydrated'), []);
+```
+
+- While deferred, the plugin does not run, and neither does what carries its
+  `$<name>` field: the whole interaction (interaction-level field), only that
+  effect (effect-level field), or the whole sequence (field on any sequence
+  effect). Everything else applies immediately.
+- `Interact.ready(name, key)` releases one element; `Interact.ready(name)`
+  releases all.
+- `defer` may list several names; all must be released, e.g.
+  `{ defer: ['hydrated', 'fonts'] }` with
+  `document.fonts.ready.then(() => Interact.ready('fonts'))`.
+- Elements connecting after a release are not deferred. `Interact.destroy()`
+  resets released names.
+- Content hidden by `hideUntilReady` or entrance FOUC CSS stays hidden until the
+  name is released — always call `ready()` for every name you defer on.
+
 ---
 
 ## Config placement
@@ -285,8 +313,13 @@ Most plugin mistakes are silent at runtime; the exceptions are noted below.
 6. **Wrong `.split-*` selector** — the effect resolves zero targets.
 7. **`type: 'lines'` without `autoSplit`** — line wrappers do not update after
    width or initial font-layout changes.
-8. **Long per-character copy** — N characters create N animation targets; prefer
-   word splitting for longer passages and keep the accessibility defaults.
+8. **`defer` without `ready()`** — the plugin and everything carrying its field
+   never apply; with `hideUntilReady`, the content stays hidden.
+9. **Splitting before hydration** — without `{ defer: 'hydrated' }`, a React app
+   that hydrates the markup may wipe the split spans, leaving animations bound to
+   detached elements.
+10. **Long per-character copy** — N characters create N animation targets; prefer
+    word splitting for longer passages and keep the accessibility defaults.
 
 `@wix/interact-validate` treats `$` fields as opaque, so it does not validate
 `container`, `type`, or other plugin-specific values. TypeScript augmentation
