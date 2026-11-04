@@ -612,6 +612,86 @@ describe('css._generate', () => {
       expect(colorDecl).toBeDefined();
       expect(colorDecl!.value).toBe('red');
     });
+
+    describe('duration: 0', () => {
+      const transitionValues = (effects: InteractConfig['effects']) => {
+        const { cssRules } = _generate({
+          effects,
+          interactions: [
+            {
+              key: 'el',
+              trigger: 'click',
+              effects: Object.keys(effects).map((effectId) => ({ effectId })),
+            },
+          ],
+        });
+
+        return cssRules
+          .filter((r) => !r.states)
+          .flatMap((r) => r.declarations.filter((d) => isTransitionProp(d.name)))
+          .map((d) => String(d.value));
+      };
+
+      it('should keep the delay of a transition with duration: 0', () => {
+        expect(
+          transitionValues({
+            s1: {
+              transition: {
+                duration: 0,
+                delay: 500,
+                styleProperties: [{ name: 'opacity', value: '0.5' }],
+              },
+            },
+          }),
+        ).toEqual(['opacity 0ms ease 500ms']);
+      });
+
+      it('should keep the delay of transitionProperties with duration: 0', () => {
+        expect(
+          transitionValues({
+            s1: {
+              transitionProperties: [
+                { name: 'opacity', value: '0.5', duration: 0, delay: 500, easing: 'ease' },
+                { name: 'color', value: 'red', duration: 0 },
+              ],
+            },
+          }),
+        ).toEqual(['opacity 0ms ease 500ms']);
+      });
+
+      it('should write no transition for duration: 0 without a delay', () => {
+        expect(
+          transitionValues({
+            s1: {
+              transition: { duration: 0, styleProperties: [{ name: 'opacity', value: '0.5' }] },
+            },
+            s2: {
+              transitionProperties: [{ name: 'color', value: 'red', duration: 0 }],
+            },
+          }),
+        ).toEqual([]);
+      });
+
+      it("should write a delayed duration: 0 effect's timing in place of an earlier effect's", () => {
+        expect(
+          transitionValues({
+            s1: {
+              transition: {
+                duration: 6300,
+                styleProperties: [{ name: 'transform', value: 'scale(1.2)' }],
+              },
+            },
+            s2: {
+              transition: {
+                duration: 0,
+                delay: 500,
+                styleProperties: [{ name: 'opacity', value: '0.5' }],
+              },
+            },
+          }),
+        ).toEqual(['transform 6300ms ease', 'opacity 0ms ease 500ms']);
+      });
+    });
   });
 
   describe('effectToCSS - viewProgress (scroll-driven) branch', () => {

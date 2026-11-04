@@ -103,6 +103,20 @@ describe('CSS property name casing', () => {
       expect(rules.join('\n')).not.toContain('backgroundColor');
     });
 
+    it('keeps the delay of a duration: 0 transition on the runtime path', () => {
+      const rules = createTransitionCSS({
+        key: 'el',
+        effectId: 'state1',
+        transition: {
+          duration: 0,
+          delay: 500,
+          styleProperties: [{ name: 'opacity', value: '0.5' }],
+        },
+      });
+
+      expect(rules.join('\n')).toContain('transition: opacity 0ms ease 500ms;');
+    });
+
     it('resolves `transition` over `transitionProperties` when both are set', () => {
       expect(
         getStateStyleProperties({
