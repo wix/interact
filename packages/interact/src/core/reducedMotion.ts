@@ -131,6 +131,13 @@ function withCondition<T extends object>(effect: T, condition: string): T {
   };
 }
 
+export function withoutReducedMotionConditions<T extends { conditions?: string[] }>(effect: T): T {
+  return {
+    ...effect,
+    conditions: effect.conditions?.filter((condition) => !(condition in REDUCED_MOTION_CONDITIONS)),
+  };
+}
+
 export function isReducedMotionVariant(effect: { conditions?: string[] }): boolean {
   return !!effect.conditions?.includes(REDUCED_MOTION_REDUCE);
 }

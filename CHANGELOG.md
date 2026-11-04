@@ -123,7 +123,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Added
 
-- `reducedMotionPolicy` on interactions, sequences and effects — `'collapse'` (default), `'ignore'`, `'cancel'` or an effectId — sets what an effect does under `prefers-reduced-motion: reduce`; the most specific level wins. `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media, and the runtime picks the matching one, without adding effects to the config
+- `reducedMotionPolicy` on interactions, sequences and effects — `'collapse'` (default), `'ignore'`, `'cancel'` or an effectId — sets what an effect does under `prefers-reduced-motion: reduce`; the most specific level wins. `generate()` emits both outcomes, the reduce one only as overrides under `prefers-reduced-motion: reduce`, grouped into one block per media query, and the runtime picks the matching one, without adding effects to the config
 - `reducedMotionPolicy` and `forceReducedMotion` options for `Interact.setup()` (every instance), `Interact.create()` (one instance) and `generate()` (defaulting to `Interact.setup()`'s)
 
 #### Changed

@@ -2448,7 +2448,7 @@ describe('css reducedMotionPolicy', () => {
   const declarationsByMedia = (cssRules: CSSRuleData[]) =>
     cssRules.map(({ media, declarations }) => ({ media, declarations }));
 
-  it('emits each variant under exclusive media into the same list entry', () => {
+  it('emits the no-preference variant for both preferences, and what the reduce one changes under reduce', () => {
     const { cssRules, listsRule, atProperty } = _generate(
       configWith({ ...slide, reducedMotionPolicy: 'collapse' }),
     );
@@ -2458,7 +2458,7 @@ describe('css reducedMotionPolicy', () => {
       { _listPropertyName: 'animation', name: '--anm-0', value: expect.stringContaining(value) },
     ];
     expect(declarationsByMedia(cssRules)).toEqual([
-      { media: NO_PREFERENCE, declarations: animationLists('slide 800ms 100ms') },
+      { media: '', declarations: animationLists('slide 800ms 100ms') },
       { media: REDUCE, declarations: animationLists('slide 1ms 100ms') },
     ]);
     expect(listsRule).toBe(plain.listsRule);
@@ -2504,17 +2504,11 @@ describe('css reducedMotionPolicy', () => {
         },
       ],
     });
-    const reduced = cssRules.filter(({ media }) => media === REDUCE);
-
-    expect(reduced.map(({ selectorSuffix }) => selectorSuffix)).toEqual([
-      ':not([data-interact-enter])',
+    expect(cssRules.map(({ media, selectorSuffix }) => ({ media, selectorSuffix }))).toEqual([
+      { media: '', selectorSuffix: ':not([data-interact-enter])' },
+      { media: NO_PREFERENCE, selectorSuffix: ':not([data-interact-enter="done"])' },
     ]);
-    expect(reduced[0].declarations).toBe(DEFAULT_INITIAL);
-    expect(
-      cssRules
-        .filter(({ media }) => media === NO_PREFERENCE)
-        .map(({ selectorSuffix }) => selectorSuffix),
-    ).toEqual([':not([data-interact-enter])', ':not([data-interact-enter="done"])']);
+    expect(cssRules[0].declarations).toEqual(DEFAULT_INITIAL);
   });
 
   it('collapses a transition to a 0ms one keeping its delay, and its state applies under both', () => {
@@ -2532,21 +2526,56 @@ describe('css reducedMotionPolicy', () => {
       cssRules.map(({ media, states, declarations }) => ({ media, states, declarations })),
     ).toEqual([
       {
-        media: NO_PREFERENCE,
+        media: '',
         states: undefined,
         declarations: [{ name: '--trns-0', value: 'opacity 300ms ease 100ms' }],
       },
-      {
-        media: NO_PREFERENCE,
-        states: ['eff-0-0'],
-        declarations: [{ name: 'opacity', value: '0.5' }],
-      },
+      { media: '', states: ['eff-0-0'], declarations: [{ name: 'opacity', value: '0.5' }] },
       {
         media: REDUCE,
         states: undefined,
         declarations: [{ name: '--trns-0', value: 'opacity 0ms ease 100ms' }],
       },
-      { media: REDUCE, states: ['eff-0-0'], declarations: [{ name: 'opacity', value: '0.5' }] },
+    ]);
+  });
+
+  it("keeps a rule's variants under their own preference when the reduce one drops a declaration it can't reset", () => {
+    const { cssRules } = _generate({
+      effects: {
+        tint: { transition: { duration: 200, styleProperties: [{ name: 'color', value: 'red' }] } },
+      },
+      interactions: [
+        {
+          key: 'a',
+          trigger: 'hover',
+          effects: [
+            {
+              transition: { duration: 300, styleProperties: [{ name: 'opacity', value: '0.5' }] },
+              reducedMotionPolicy: 'tint',
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(
+      cssRules
+        .filter(({ states }) => states)
+        .map(({ media, declarations }) => ({ media, declarations })),
+    ).toEqual([
+      { media: NO_PREFERENCE, declarations: [{ name: 'opacity', value: '0.5' }] },
+      { media: REDUCE, declarations: [{ name: 'color', value: 'red' }] },
+    ]);
+  });
+
+  it('resets the list entries the reduce variant drops', () => {
+    const { cssRules } = _generate(
+      configWith({ ...slide, composite: 'add', reducedMotionPolicy: 'fade' }),
+    );
+
+    expect(cssRules.find(({ media }) => media === REDUCE)!.declarations).toEqual([
+      expect.objectContaining({ name: '--anm-0', value: expect.stringContaining('fade 300ms') }),
+      { name: '--anm-cmps-0', value: 'initial' },
     ]);
   });
 
@@ -2567,7 +2596,7 @@ describe('css reducedMotionPolicy', () => {
 
     expect(declarationsByMedia(cssRules)).toEqual([
       { media: '', declarations: [expect.objectContaining({ name: '--anm-0' })] },
-      { media: NO_PREFERENCE, declarations: [expect.objectContaining({ name: '--anm-0' })] },
+      { media: '', declarations: [expect.objectContaining({ name: '--anm-0' })] },
       { media: REDUCE, declarations: [{ name: '--anm-0', value: 'none' }] },
     ]);
   });
@@ -2626,8 +2655,7 @@ describe('css reducedMotionPolicy', () => {
     );
     expect(effectRules.map(({ key, media }) => ({ key, media }))).toEqual([
       { key: 'a', media: NO_PREFERENCE },
-      { key: 'b', media: NO_PREFERENCE },
-      { key: 'b', media: REDUCE },
+      { key: 'b', media: '' },
     ]);
   });
 
@@ -2653,7 +2681,7 @@ describe('css reducedMotionPolicy', () => {
       }));
 
     expect(staggerOf('collapse')).toEqual([
-      { media: NO_PREFERENCE, staggered: true },
+      { media: '', staggered: true },
       { media: REDUCE, staggered: false },
     ]);
     expect(staggerOf('ignore')).toEqual([{ media: '', staggered: true }]);
@@ -2673,6 +2701,37 @@ describe('css reducedMotionPolicy', () => {
         forceReducedMotion: true,
       }).cssRules,
     ).toEqual([]);
+  });
+
+  describe('generate()', () => {
+    const mediaBlocks = (css: string) => css.match(/@media [^{]+/g) || [];
+
+    it('groups the reduced-motion rules into one block per media query, after the others', () => {
+      const css = generate({
+        interactions: ['a', 'b', 'c'].map((key) => ({ key, trigger: 'hover', effects: [slide] })),
+      });
+
+      expect(mediaBlocks(css)).toEqual([`@media ${REDUCE} `]);
+      expect(css.indexOf(REDUCE)).toBeGreaterThan(css.lastIndexOf('slide 800ms'));
+    });
+
+    it('keeps a rule in place when a later rule writes one of its properties on the same key', () => {
+      const css = generate({
+        conditions: { desktop: { type: 'media', predicate: 'min-width: 1000px' } },
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'hover',
+            effects: [
+              slide,
+              { ...slide, duration: 500, conditions: ['desktop'], reducedMotionPolicy: 'ignore' },
+            ],
+          },
+        ],
+      });
+
+      expect(css.indexOf('slide 1ms 100ms')).toBeLessThan(css.indexOf('slide 500ms'));
+    });
   });
 
   describe('keyframe slots', () => {
