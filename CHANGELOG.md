@@ -125,7 +125,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `reducedMotionPolicy` on interactions, sequences and effects — `'collapse'` (default), `'ignore'`, `'cancel'` or an effectId — sets what an effect does under `prefers-reduced-motion: reduce`; the most specific level wins. `generate()` emits both outcomes, the reduce one only as overrides under `prefers-reduced-motion: reduce`, grouped into one block per media query, and the runtime picks the matching one, without adding effects to the config
 - `reducedMotionPolicy` and `forceReducedMotion` options for `Interact.setup()` (every instance), `Interact.create()` (one instance) and `generate()` (defaulting to `Interact.setup()`'s)
-- `defer` option for `Interact.use(name, plugin, { defer })`, and `Interact.ready(name, key?)` to release it. A deferred plugin, and the interaction, effect, or sequence carrying its `$`-field, is applied only once every defer name is released — e.g. after React hydration, so it no longer wipes the plugin's DOM changes
 
 #### Changed
 
@@ -134,6 +133,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Runtime transitions collapse under `prefers-reduced-motion: reduce` through `reducedMotionPolicy`, matching `generate()`, instead of always being wrapped in `prefers-reduced-motion: no-preference`
 - `reducedMotion` removed from `InteractOptions`, and the `context` argument from `Interact.getSequence()` / `Interact.addToSequence()`
 - 0ms transitions that have a delay are kept, so the delay is honored
+
+### [2.7.0] - 2026-11-04
+
+#### Added
+
+- Plugin deferring: `defer` on `Interact.use(name, plugin, { defer })` and `Interact.ready(name, key?)` to release deferred work (#403)
+  - While a plugin name is unreleased, the plugin does not run, and neither does the interaction, effect, or sequence that carries its `$`-prefixed field — so triggers and selectors do not run against pre-plugin DOM (e.g. split text wiped by React hydration)
+  - `defer` accepts one name or several; a plugin stays deferred until every name is released. `ready(name, key)` releases a name for one element only; `ready(name)` releases it for every key
+  - Non-deferred interactions apply immediately; SSR styles from plugin style generators (e.g. `hideUntilReady`) still apply while deferred. Released names reset on `Interact.destroy()`
 
 ### [2.6.0] - 2026-11-02
 
