@@ -89,7 +89,7 @@ function _applyPlugins(
 /**
  * Whether `config` carries a field of a plugin that is still deferred for `key` (see the `defer`
  * option of `Interact.use()`). A deferred unit is skipped without being marked as added, so the
- * add pass re-run by `Interact.ready()` applies it.
+ * add pass that `Interact.ready()` re-runs for the released key (or every key) applies it.
  */
 function _isDeferred(key: string, config: Record<string, unknown>): boolean {
   for (const name of Interact.getPluginsNames()) {
@@ -277,7 +277,6 @@ function _addInteraction(
       }
 
       if (_isDeferred(target || interaction.key, effectOptions)) {
-        Interact._deferredControllers.add(sourceController);
         return;
       }
 
@@ -354,7 +353,7 @@ function _buildAnimationGroupArgsFromSequence(
   sourceKey: string,
   sourceController: IInteractionController,
   instance: Interact,
-  options: { updateKey: string; onUpdate: () => void; owner: IInteractionController },
+  options: { updateKey: string; onUpdate: () => void },
   listElements?: ListElements,
 ): AnimationGroupArgs[] | null {
   const seqMql = getMediaQuery(sequenceConfig.conditions || [], instance.dataCache.conditions);
@@ -385,7 +384,6 @@ function _buildAnimationGroupArgsFromSequence(
   });
 
   if (isDeferred) {
-    Interact._deferredControllers.add(options.owner);
     return null;
   }
 
@@ -564,7 +562,6 @@ function _processSequences(
       {
         updateKey: sourceKey,
         onUpdate: () => sourceController.update(),
-        owner: sourceController,
       },
       listElements,
     );
@@ -671,7 +668,6 @@ function _processSequencesForTarget(
       }
 
       if (_isDeferred(sourceKey!, interaction)) {
-        Interact._deferredControllers.add(targetController);
         return true;
       }
 
@@ -689,7 +685,6 @@ function _processSequencesForTarget(
         {
           updateKey: targetKey,
           onUpdate: () => targetController.update(),
-          owner: targetController,
         },
         listElements,
       );
@@ -807,7 +802,6 @@ function addEffectsForTarget(
         }
 
         if (_isDeferred(sourceKey!, interaction) || _isDeferred(targetKey, effectOptions)) {
-          Interact._deferredControllers.add(targetController);
           return true;
         }
 
@@ -968,7 +962,6 @@ export function add(controller: IInteractionController): boolean {
 
     if (!mql || mql.matches) {
       if (_isDeferred(key, interaction)) {
-        Interact._deferredControllers.add(controller);
         return;
       }
 
@@ -1020,7 +1013,6 @@ export function addListItems(
 
       if (!mql || mql.matches) {
         if (_isDeferred(key, interaction)) {
-          Interact._deferredControllers.add(controller);
           return;
         }
 

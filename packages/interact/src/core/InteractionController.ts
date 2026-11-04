@@ -1,6 +1,5 @@
 import type { IInteractElement, InteractPluginCleanup, StateAction } from '../types';
 import { add, addListItems } from './add';
-import { Interact } from './Interact';
 import { remove, removeListItems } from './remove';
 
 export const INTERACT_EFFECT_DATA_ATTR = 'interactEffect';
@@ -58,8 +57,6 @@ export class InteractionController {
   disconnect({ removeFromCache = false }: { removeFromCache?: boolean } = {}) {
     const key = this.key || this.element.dataset.interactKey;
 
-    Interact._deferredControllers.delete(this);
-
     if (key) {
       remove(this, removeFromCache);
     }
@@ -102,13 +99,9 @@ export class InteractionController {
   }
 
   resume() {
-    Interact._deferredControllers.delete(this);
-
-    if (!this.key) {
-      return;
+    if (this.connected) {
+      add(this);
     }
-
-    this.connected = add(this) || this.connected;
   }
 
   renderStyle(cssRules: string[]) {

@@ -415,6 +415,85 @@ describe('interact plugin bridge', () => {
       expect(apply).toHaveBeenLastCalledWith(b);
     });
 
+    it('ready(name, key) does not resume other controllers', () => {
+      useSpanPlugin('deferred', 'hydrated');
+
+      Interact.create({
+        interactions: ['a', 'b'].map((key) => ({
+          key,
+          trigger: 'hover' as const,
+          $deferred: {},
+          effects: [{ key, ...fadeIn }],
+        })),
+      });
+      add(document.createElement('div'), 'a');
+      add(document.createElement('div'), 'b');
+      const resumeB = vi.spyOn(Interact.getController('b')!, 'resume');
+
+      Interact.ready('hydrated', 'a');
+
+      expect(resumeB).not.toHaveBeenCalled();
+    });
+
+    it('ready(name, targetKey) releases a cross-element effect deferred on its target', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+      const addSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'source',
+            trigger: 'hover',
+            effects: [{ key: 'split', $deferred: {}, selector: '.pt', ...fadeIn }],
+          },
+        ],
+      });
+      const split = document.createElement('div');
+      add(split, 'split');
+      add(document.createElement('div'), 'source');
+
+      Interact.ready('hydrated', 'source');
+      expect(apply).not.toHaveBeenCalled();
+
+      Interact.ready('hydrated', 'split');
+      expect(apply).toHaveBeenCalledTimes(1);
+      expect(apply).toHaveBeenCalledWith(split);
+      expect(hoverTargets(addSpy).filter((el) => el.classList.contains('pt'))).toHaveLength(1);
+    });
+
+    it('ready(name, targetKey) releases a sequence deferred on an effect target', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+      const getSequenceSpy = vi.spyOn(Interact, 'getSequence');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'source',
+            trigger: 'click',
+            sequences: [
+              {
+                effects: [
+                  { key: 'source', ...fadeIn },
+                  { key: 'split', $deferred: {}, selector: '.pt', ...fadeIn },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      const split = document.createElement('div');
+      add(split, 'split');
+      add(document.createElement('div'), 'source');
+
+      Interact.ready('hydrated', 'source');
+      expect(getSequenceSpy).not.toHaveBeenCalled();
+
+      Interact.ready('hydrated', 'split');
+      expect(apply).toHaveBeenCalledTimes(1);
+      expect(apply).toHaveBeenCalledWith(split);
+      expect(getSequenceSpy).toHaveBeenCalledTimes(1);
+    });
+
     it('stays deferred until every defer name is released', () => {
       const apply = useSpanPlugin('deferred', ['hydrated', 'fonts']);
 

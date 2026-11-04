@@ -55,8 +55,6 @@ export class Interact {
   private static pluginDefers = new Map<string, string[]>();
   /** Released defer names: `name` (every key) or `name::key` (a single key). */
   static _released = new Set<string>();
-  /** Controllers whose add pass skipped at least one deferred interaction, effect, or sequence. */
-  static _deferredControllers = new Set<IInteractionController>();
 
   constructor() {
     this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
@@ -204,7 +202,6 @@ export class Interact {
     Interact.sequenceCache.clear();
     Interact.elementSequenceMap = new WeakMap();
     Interact._released.clear();
-    Interact._deferredControllers.clear();
   }
 
   static setup(options: {
@@ -289,8 +286,10 @@ export class Interact {
   static ready(name: string, key?: string): void {
     Interact._released.add(key ? `${name}::${key}` : name);
 
-    for (const controller of Array.from(Interact._deferredControllers)) {
-      controller.resume();
+    if (key) {
+      Interact.controllerCache.get(key)?.resume();
+    } else {
+      Interact.controllerCache.forEach((controller) => controller.resume());
     }
   }
 
