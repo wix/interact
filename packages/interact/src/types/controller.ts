@@ -15,6 +15,8 @@ export interface IInteractionController {
   connect(key?: string): void;
   disconnect(options?: { removeFromCache?: boolean }): void;
   update(): void;
+  /** Re-runs the add pass to apply interactions that were deferred by a plugin's `defer` option. */
+  resume(): void;
   toggleEffect(
     effectId: string,
     stateAction: StateAction,

@@ -969,6 +969,18 @@ type InteractPluginContext = {
 type InteractPluginCleanup = () => void; // runs on disconnect/teardown
 ```
 
+### `InteractPluginOptions`
+
+Registration options, passed as the third argument of `Interact.use()`.
+
+```typescript
+type InteractPluginOptions = {
+  defer?: string | string[]; // name(s) to defer until, released with `Interact.ready(name, key?)`
+};
+```
+
+See [Deferring plugins](../guides/plugins.md#deferring-plugins).
+
 ### `InteractPluginConfigMap`
 
 Augmentable interface for typing plugin fields, keyed by the **unprefixed** plugin name. Empty by default; consumers merge into it:

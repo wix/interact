@@ -49,6 +49,7 @@ export type {
   InteractPlugin,
   InteractPluginContext,
   InteractPluginCleanup,
+  InteractPluginOptions,
   InteractPluginConfigMap,
   InteractPluginStyleContext,
   InteractPluginStyleGenerator,

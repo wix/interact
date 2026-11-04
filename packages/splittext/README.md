@@ -230,6 +230,17 @@ import { splitTextStyle } from '@wix/splittext/plugin';
 const css = generate(config, { plugins: { splitText: splitTextStyle } });
 ```
 
+In apps that hydrate server-rendered markup (e.g. React), splitting before hydration can be wiped by it. Defer the plugin, and release it once hydration is done:
+
+```ts
+Interact.use('splitText', splitTextPlugin, { defer: 'hydrated' });
+
+// React client root
+useEffect(() => Interact.ready('hydrated'), []);
+```
+
+See [Deferring plugins](../interact/docs/guides/plugins.md#deferring-plugins) in the Interact docs.
+
 To type the `$splitText` config field, augment `InteractPluginConfigMap` from your app (the only place that imports both packages):
 
 ```ts

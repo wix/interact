@@ -28,7 +28,9 @@ vi.mock('@wix/motion', () => {
       return mock.getWebAnimation(target, options, trigger, { reducedMotion });
     }),
     createAnimationGroups: vi.fn().mockReturnValue([]),
-    getSequence: vi.fn().mockReturnValue({ animationGroups: [], addGroups: vi.fn() }),
+    getSequence: vi
+      .fn()
+      .mockReturnValue({ animationGroups: [], addGroups: vi.fn(), removeGroups: vi.fn() }),
     registerEffects: vi.fn(),
     getRegisteredEffect: vi.fn(),
     MotionKeyframeEffect: class {},
@@ -235,6 +237,264 @@ describe('interact plugin bridge', () => {
       // The plugin ran against the effect's target element, not the source.
       expect(roots).toContain(target);
       expect(roots).not.toContain(source);
+    });
+  });
+
+  describe('deferred plugins (use options.defer + ready)', () => {
+    const fadeIn = { namedEffect: { type: 'FadeIn' } as any, duration: 100 };
+
+    function hoverTargets(spy: ReturnType<typeof vi.spyOn>): HTMLElement[] {
+      return spy.mock.calls.map((call) => call[1] as HTMLElement);
+    }
+
+    function useSpanPlugin(name: string, defer: string | string[]) {
+      const apply = vi.fn();
+      Interact.use(
+        name,
+        (_value, ctx) => {
+          apply(ctx.root);
+          const span = document.createElement('span');
+          span.className = 'pt';
+          ctx.root.appendChild(span);
+        },
+        { defer },
+      );
+      return apply;
+    }
+
+    it('defers an interaction-level plugin and its interaction until ready()', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+      const addSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'hover',
+            $deferred: {},
+            effects: [{ key: 'el', selector: '.pt', ...fadeIn }],
+          },
+        ],
+      });
+      const element = document.createElement('div');
+      add(element, 'el');
+
+      expect(apply).not.toHaveBeenCalled();
+      expect(addSpy).not.toHaveBeenCalled();
+
+      Interact.ready('hydrated');
+
+      expect(apply).toHaveBeenCalledTimes(1);
+      expect(hoverTargets(addSpy).some((el) => el.classList.contains('pt'))).toBe(true);
+    });
+
+    it('applies non-deferred interactions immediately and does not duplicate them on ready()', () => {
+      useSpanPlugin('deferred', 'hydrated');
+      const eager = vi.fn();
+      Interact.use('eager', eager);
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+      const clickSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.click, 'add');
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'click', $eager: {}, effects: [{ key: 'el', ...fadeIn }] },
+          {
+            key: 'el',
+            trigger: 'hover',
+            $deferred: {},
+            effects: [{ key: 'el', selector: '.pt', ...fadeIn }],
+          },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+
+      expect(eager).toHaveBeenCalledTimes(1);
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      expect(hoverSpy).not.toHaveBeenCalled();
+
+      Interact.ready('hydrated');
+
+      expect(eager).toHaveBeenCalledTimes(1);
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      expect(hoverSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('defers only the effect that carries an effect-level deferred plugin', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+      const addSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'source',
+            trigger: 'hover',
+            effects: [
+              { key: 'plain', ...fadeIn },
+              { key: 'split', $deferred: {}, selector: '.pt', ...fadeIn },
+            ],
+          },
+        ],
+      });
+      const plain = document.createElement('div');
+      const split = document.createElement('div');
+      add(plain, 'plain');
+      add(split, 'split');
+      add(document.createElement('div'), 'source');
+
+      expect(apply).not.toHaveBeenCalled();
+      expect(hoverTargets(addSpy)).toContain(plain);
+      expect(hoverTargets(addSpy).some((el) => el.classList.contains('pt'))).toBe(false);
+
+      Interact.ready('hydrated');
+
+      expect(apply).toHaveBeenCalledTimes(1);
+      expect(apply).toHaveBeenCalledWith(split);
+      expect(hoverTargets(addSpy).filter((el) => el === plain)).toHaveLength(1);
+      expect(hoverTargets(addSpy).some((el) => el.classList.contains('pt'))).toBe(true);
+    });
+
+    it('defers a whole sequence when one of its effects is deferred', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+      const eager = vi.fn();
+      Interact.use('eager', eager);
+      const getSequenceSpy = vi.spyOn(Interact, 'getSequence');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                effects: [
+                  { key: 'el', $eager: {}, ...fadeIn },
+                  { key: 'el', $deferred: {}, selector: '.pt', ...fadeIn },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+
+      expect(eager).not.toHaveBeenCalled();
+      expect(apply).not.toHaveBeenCalled();
+      expect(getSequenceSpy).not.toHaveBeenCalled();
+
+      Interact.ready('hydrated');
+
+      expect(eager).toHaveBeenCalledTimes(1);
+      expect(apply).toHaveBeenCalledTimes(1);
+      expect(getSequenceSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('ready(name, key) releases only that key', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+
+      Interact.create({
+        interactions: ['a', 'b'].map((key) => ({
+          key,
+          trigger: 'hover' as const,
+          $deferred: {},
+          effects: [{ key, ...fadeIn }],
+        })),
+      });
+      const a = document.createElement('div');
+      const b = document.createElement('div');
+      add(a, 'a');
+      add(b, 'b');
+
+      Interact.ready('hydrated', 'a');
+
+      expect(apply).toHaveBeenCalledTimes(1);
+      expect(apply).toHaveBeenCalledWith(a);
+
+      Interact.ready('hydrated');
+
+      expect(apply).toHaveBeenCalledTimes(2);
+      expect(apply).toHaveBeenLastCalledWith(b);
+    });
+
+    it('stays deferred until every defer name is released', () => {
+      const apply = useSpanPlugin('deferred', ['hydrated', 'fonts']);
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'hover', $deferred: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+
+      Interact.ready('hydrated');
+      expect(apply).not.toHaveBeenCalled();
+
+      Interact.ready('fonts');
+      expect(apply).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not defer when the name was released before the element connects', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+      Interact.ready('hydrated');
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'hover', $deferred: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+
+      expect(apply).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not resume an element that disconnected while deferred', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'hover', $deferred: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+      remove('el');
+
+      Interact.ready('hydrated');
+
+      expect(apply).not.toHaveBeenCalled();
+    });
+
+    it('stays deferred across update() and applies once after release', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'hover', $deferred: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+
+      Interact.getController('el')?.update();
+      expect(apply).not.toHaveBeenCalled();
+
+      Interact.ready('hydrated');
+      expect(apply).toHaveBeenCalledTimes(1);
+
+      Interact.getController('el')?.update();
+      expect(apply).toHaveBeenCalledTimes(2);
+    });
+
+    it('Interact.destroy() resets released names', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+      Interact.ready('hydrated');
+      Interact.destroy();
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'hover', $deferred: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+
+      expect(apply).not.toHaveBeenCalled();
     });
   });
 });
