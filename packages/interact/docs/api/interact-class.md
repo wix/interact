@@ -41,7 +41,8 @@ class Interact {
   }): void;
   static registerEffects(effects: Record<string, NamedEffect>): void;
   static getController(key: string | undefined): IInteractionController | undefined;
-  static use(name: string, plugin: InteractPlugin): void;
+  static use(name: string, plugin: InteractPlugin, options?: InteractPluginOptions): void;
+  static ready(name: string, key?: string): void;
   static getPlugin(name: string): InteractPlugin | undefined;
   static getPluginNames(): Set<string>;
 
@@ -255,7 +256,7 @@ Interact.registerEffects({
 - Effects must be registered before calling `Interact.create()` with configurations that reference them
 - Registration is global — once registered, effects are available to all Interact instances
 
-### `Interact.use(name, plugin)`
+### `Interact.use(name, plugin, options?)`
 
 Registers a plugin under a name. When an interaction or effect carries a `$<name>` field, Interact invokes the plugin with that field's value and a context. Interact is agnostic to what the plugin does — see the [Plugins guide](../guides/plugins.md).
 
@@ -263,6 +264,7 @@ Registers a plugin under a name. When an interaction or effect carries a `$<name
 
 - `name: string` - The plugin name, matched against `$<name>` config fields
 - `plugin: InteractPlugin` - `(value, context) => void | (() => void)`; the returned cleanup runs on disconnect/teardown
+- `options.defer?: string | string[]` - Name(s) to defer the plugin until. While deferred, neither the plugin nor the interaction, effect, or sequence carrying its `$<name>` field runs; each name is released with [`Interact.ready()`](#interactreadyname-key). See [Deferring plugins](../guides/plugins.md#deferring-plugins)
 
 **Example:**
 
@@ -278,6 +280,30 @@ Interact.create(config); // configs may now use a `$splitText: { ... }` field
 
 - Register plugins **before** `Interact.create()`.
 - Registration is global. A `$<name>` field naming an unregistered plugin is ignored.
+
+### `Interact.ready(name, key?)`
+
+Releases a defer name used by a plugin's `defer` option, and applies everything that was deferred on it.
+
+**Parameters:**
+
+- `name: string` - The defer name to release
+- `key?: string` - Release it only for the element with this key. Without a key, it is released for every element
+
+**Example:**
+
+```typescript
+Interact.use('splitText', splitTextPlugin, { defer: 'hydrated' });
+Interact.create(config);
+
+// React: effects run after the hydration commit
+useEffect(() => Interact.ready('hydrated'), []);
+```
+
+**Notes:**
+
+- A plugin with several defer names stays deferred until all of them are released.
+- Releasing is permanent until `Interact.destroy()`. Elements that connect after a name is released are not deferred on it.
 
 ### `Interact.getPlugin(name)`
 

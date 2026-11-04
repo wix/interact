@@ -25,6 +25,23 @@ Interact.use('<plugin-name>', (value, context) => {
 
 - `Interact.getPlugin(name) / Interact.getPluginsNames()` inspect the registry.
 
+### Deferring (hydration)
+
+When a framework hydrates or owns the DOM (e.g. React), defer DOM-changing plugins until the framework is done, then release:
+
+```js
+Interact.use('splitText', splitTextPlugin, { defer: 'hydrated' });
+Interact.create(config);
+
+// React client root — effects run after the hydration commit
+useEffect(() => Interact.ready('hydrated'), []);
+```
+
+- While deferred, the plugin does not run, and neither does what carries its `$<name>` field: the whole interaction (interaction-level field), only that effect (effect-level field), or the whole sequence (field on any sequence effect). Everything else applies immediately.
+- `Interact.ready(name, key)` releases a name for one element only; `Interact.ready(name)` releases it for all.
+- `defer` may list several names (e.g. `['hydrated', 'fonts']`); all must be released. Release `'fonts'` with `document.fonts.ready.then(() => Interact.ready('fonts'))`.
+- Released names persist until `Interact.destroy()`.
+
 ## Config placement
 
 Add a `$<plugin-name>` field on an **interaction** or an **effect**:
@@ -45,7 +62,8 @@ Add a `$<plugin-name>` field on an **interaction** or an **effect**:
 - Use a bare, unquoted `$<name>` key — no quotes needed since `$` is a valid identifier start (e.g. `$splitText:`, not `'plugin:splitText':`).
 - Plugins run at **connect time, before target resolution** — DOM a plugin creates is visible to the `selector` / `listContainer` queries that follow.
 - A returned cleanup runs on disconnect, on `Interact.destroy()`, and on media-query reconnect. Use it to fully undo the plugin's work.
-- Each distinct plugin value is applied **once per connect**, even across multiple triggers on the same element.
+- Each distinct plugin value is applied **once per connect**, even across multiple triggers on the same element. Use object values — the dedup is by identity.
+- **SHOULD** pass `{ defer: 'hydrated' }` to `Interact.use()` for DOM-changing plugins (e.g. `splitTextPlugin`) in apps that hydrate server-rendered markup, and call `Interact.ready('hydrated')` after hydration.
 - Interaction-level fields use the interaction's element as `root`; effect-level fields use the effect's target element as `root`.
 
 ## SSR styling (FOUC prevention)

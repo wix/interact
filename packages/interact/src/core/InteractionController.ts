@@ -98,6 +98,12 @@ export class InteractionController {
     this.connect();
   }
 
+  resume() {
+    if (this.connected) {
+      add(this);
+    }
+  }
+
   renderStyle(cssRules: string[]) {
     const rootNode = this.element?.getRootNode() as ShadowRoot | Document;
     const adoptTarget: { adoptedStyleSheets: CSSStyleSheet[] } = ((rootNode as ShadowRoot).host

@@ -15,6 +15,11 @@ export interface IInteractionController {
   connect(key?: string): void;
   disconnect(options?: { removeFromCache?: boolean }): void;
   update(): void;
+  /**
+   * Re-runs the add pass while connected, applying what a plugin's `defer` option no longer holds
+   * back. Called by `Interact.ready()`.
+   */
+  resume(): void;
   toggleEffect(
     effectId: string,
     stateAction: StateAction,

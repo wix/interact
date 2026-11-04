@@ -55,7 +55,7 @@ type InteractPlugin = (
 
 - Plugins run at **connect** time (when the element enters the DOM / is added).
 - A returned **cleanup** runs on disconnect, on teardown (`Interact.destroy()`), and when an interaction re-connects after a media-query change — so plugins can fully undo their work.
-- Each distinct plugin value is applied **once per connect**, even if referenced by multiple triggers on the same element.
+- Each distinct plugin value is applied **once per connect**, even if referenced by multiple triggers on the same element. That dedup relies on the value's identity, so plugin values should be objects.
 
 ### Type-safe config (optional)
 
@@ -138,6 +138,41 @@ A `$`-prefixed field can also sit on an individual effect, using that effect's *
   ],
 }
 ```
+
+## Deferring plugins
+
+Plugins that change the DOM can conflict with frameworks that own it. React, for example, hydrates server-rendered markup and expects it unchanged. If a plugin like `@wix/splittext` runs first (e.g. from `<interact-element>`'s `connectedCallback`, which fires while the HTML is parsed), hydration can wipe its changes, leaving animations bound to detached elements.
+
+Pass `defer` to `Interact.use()` to hold a plugin back until you release it with `Interact.ready()`:
+
+```ts
+Interact.use('splitText', splitTextPlugin, { defer: 'hydrated' });
+Interact.create(config);
+
+// React client root: effects run after the hydration commit
+useEffect(() => Interact.ready('hydrated'), []);
+```
+
+While a plugin is deferred, Interact also defers everything that may resolve against the DOM the plugin creates:
+
+| Where the `$<name>` field sits                                                    | What is deferred                                 |
+| --------------------------------------------------------------------------------- | ------------------------------------------------ |
+| On an interaction                                                                 | The whole interaction: its effects and sequences |
+| On an effect in `effects` (or in its definition under the config's `effects` map) | Only that effect                                 |
+| On any effect of a sequence                                                       | The whole sequence                               |
+
+Everything else in the config is applied immediately, as usual. Once released, deferred parts are applied exactly as they would have been on connect.
+
+- `Interact.ready(name, key)` releases a name for a single element only — useful when parts of the page hydrate separately (e.g. Suspense boundaries).
+- `defer` accepts several names; the plugin stays deferred until all are released. A name can stand for any event, not just hydration — for example, `@wix/splittext`'s `lines` mode measures text, so it should wait for fonts:
+
+  ```ts
+  Interact.use('splitText', splitTextPlugin, { defer: ['hydrated', 'fonts'] });
+  document.fonts.ready.then(() => Interact.ready('fonts'));
+  ```
+
+- Elements that connect after a name was released are not deferred on it. Released names are reset by `Interact.destroy()`.
+- SSR styles keep applying while deferred: content hidden by a plugin's style generator (e.g. `hideUntilReady`) or by entrance FOUC-prevention CSS stays hidden until the name is released.
 
 ## SSR styling (FOUC prevention)
 
