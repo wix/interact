@@ -18,7 +18,7 @@ export type TimeAnimationTriggerType = 'once' | 'repeat' | 'alternate' | 'state'
 export type StateAction = 'add' | 'remove' | 'toggle' | 'clear';
 
 // a string other than the enum values is an effectId in config.effects
-export type ReducedMotionHandling = 'ignore' | 'cancel' | 'collapse' | (string & {});
+export type ReducedMotionPolicy = 'ignore' | 'cancel' | 'collapse' | (string & {});
 
 type EffectEffectProperty =
   | {
@@ -88,7 +88,7 @@ export type EffectBase = {
   conditions?: string[];
   selector?: string;
   effectId?: string;
-  reducedMotionHandling?: ReducedMotionHandling;
+  reducedMotionPolicy?: ReducedMotionPolicy;
 } & PluginFields; // `$<name>` fields route to plugins registered via `Interact.use()`
 
 export type EffectRef = EffectBase & { effectId: string };

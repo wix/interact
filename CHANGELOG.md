@@ -50,8 +50,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Added
 
-- `reducedMotionHandling` accepted on interactions, sequences and effects, with checks that a named effect exists and is of the same kind (`REDUCED_MOTION_EFFECT_NOT_FOUND`, `REDUCED_MOTION_INCOMPATIBLE_EFFECT`) and the `REDUCED_MOTION` rule category (`REDUCED_MOTION_SELF_REFERENCE`, `REDUCED_MOTION_SHADOWED_EFFECT_ID`, `REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH`, `REDUCED_MOTION_COLLAPSE_CANCELS`)
-- An effect named only by a `reducedMotionHandling` is no longer reported as `UNUSED_EFFECT`
+- `reducedMotionPolicy` accepted on interactions, sequences and effects, with checks that a named effect exists and is of the same kind (`REDUCED_MOTION_EFFECT_NOT_FOUND`, `REDUCED_MOTION_INCOMPATIBLE_EFFECT`) and the `REDUCED_MOTION` rule category (`REDUCED_MOTION_SELF_REFERENCE`, `REDUCED_MOTION_SHADOWED_EFFECT_ID`, `REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH`, `REDUCED_MOTION_COLLAPSE_CANCELS`)
+- An effect named only by a `reducedMotionPolicy` is no longer reported as `UNUSED_EFFECT`
 
 ### [0.2.1] - 2026-10-25
 
@@ -123,15 +123,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Added
 
-- `reducedMotionHandling` on interactions, sequences and effects — `'collapse'` (default), `'ignore'`, `'cancel'` or an effectId — sets what an effect does under `prefers-reduced-motion: reduce`; the most specific level wins. `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media, and the runtime picks the matching one, without adding effects to the config
-- `reducedMotionHandling` and `forceReducedMotion` options for `Interact.setup()` (every instance), `Interact.create()` (one instance) and `generate()` (defaulting to `Interact.setup()`'s)
+- `reducedMotionPolicy` on interactions, sequences and effects — `'collapse'` (default), `'ignore'`, `'cancel'` or an effectId — sets what an effect does under `prefers-reduced-motion: reduce`; the most specific level wins. `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media, and the runtime picks the matching one, without adding effects to the config
+- `reducedMotionPolicy` and `forceReducedMotion` options for `Interact.setup()` (every instance), `Interact.create()` (one instance) and `generate()` (defaulting to `Interact.setup()`'s)
 - `defer` option for `Interact.use(name, plugin, { defer })`, and `Interact.ready(name, key?)` to release it. A deferred plugin, and the interaction, effect, or sequence carrying its `$`-field, is applied only once every defer name is released — e.g. after React hydration, so it no longer wipes the plugin's DOM changes
 
 #### Changed
 
-- **Breaking:** under `prefers-reduced-motion: reduce`, effects collapse by default: they play with duration 0, keeping their delay and iterations, so they jump to their end state. Looping, `viewProgress` and `pointerMove` effects are dropped, and sequence staggers collapse. Pass `reducedMotionHandling: 'ignore'` to `Interact.setup()` to keep the old behavior
-- **Breaking:** `Interact.forceReducedMotion` applies the reduced-motion outcome of `reducedMotionHandling` instead of passing `reducedMotion` to `@wix/motion`. With the default `'collapse'` that matches the old behavior, except that finite multi-iteration animations collapse to their end state instead of being dropped
-- Runtime transitions collapse under `prefers-reduced-motion: reduce` through `reducedMotionHandling`, matching `generate()`, instead of always being wrapped in `prefers-reduced-motion: no-preference`
+- **Breaking:** under `prefers-reduced-motion: reduce`, effects collapse by default: they play with duration 0, keeping their delay and iterations, so they jump to their end state. Looping, `viewProgress` and `pointerMove` effects are dropped, and sequence staggers collapse. Pass `reducedMotionPolicy: 'ignore'` to `Interact.setup()` to keep the old behavior
+- **Breaking:** `Interact.forceReducedMotion` applies the reduced-motion outcome of `reducedMotionPolicy` instead of passing `reducedMotion` to `@wix/motion`. With the default `'collapse'` that matches the old behavior, except that finite multi-iteration animations collapse to their end state instead of being dropped
+- Runtime transitions collapse under `prefers-reduced-motion: reduce` through `reducedMotionPolicy`, matching `generate()`, instead of always being wrapped in `prefers-reduced-motion: no-preference`
 - `reducedMotion` removed from `InteractOptions`, and the `context` argument from `Interact.getSequence()` / `Interact.addToSequence()`
 - 0ms transitions that have a delay are kept, so the delay is honored
 

@@ -1,7 +1,7 @@
 import type {
   Effect,
   EffectRef,
-  ReducedMotionHandling,
+  ReducedMotionPolicy,
   StateEffect,
   TransitionProperty,
 } from './effects';
@@ -18,7 +18,7 @@ export type InteractCache = {
     [conditionId: string]: Condition;
   };
   // the instance's
-  reducedMotionHandling?: ReducedMotionHandling;
+  reducedMotionPolicy?: ReducedMotionPolicy;
   forceReducedMotion?: boolean;
   interactions: {
     [path: string]: {

@@ -26,7 +26,7 @@ class Interact {
       useCustomElement?: boolean;
       configIndex?: number;
       forceReducedMotion?: boolean;
-      reducedMotionHandling?: ReducedMotionHandling;
+      reducedMotionPolicy?: ReducedMotionPolicy;
     },
   ): Interact;
   static getInstance(key: string): Interact | undefined;
@@ -37,7 +37,7 @@ class Interact {
     viewEnter?: Partial<ViewEnterParams>;
     allowA11yTriggers?: boolean;
     forceReducedMotion?: boolean;
-    reducedMotionHandling?: ReducedMotionHandling;
+    reducedMotionPolicy?: ReducedMotionPolicy;
   }): void;
   static registerEffects(effects: Record<string, NamedEffect>): void;
   static getController(key: string | undefined): IInteractionController | undefined;
@@ -69,7 +69,7 @@ Creates a new `Interact` instance with the provided configuration and initialize
 - `options?.useCustomElement?: boolean` - Whether elements are wrapped in `<interact-element>` (defaults to whether the custom element is available)
 - `options?.configIndex?: number` - The config's index when several configs are on the same page. It must match the `configIndex` passed to [`generate()`](./functions.md#generateconfig-options) for the same config. Unnamed effects and sequences get ids suffixed by it (`eff-c1-0-0`), which become their generated keyframe and state names, so the configs' names don't collide.
 - `options?.forceReducedMotion?: boolean` - Forces reduced motion for this instance, overriding the one set by [`Interact.setup()`](#interactsetupoptions). It must match the `forceReducedMotion` passed to `generate()` for the same config.
-- `options?.reducedMotionHandling?: ReducedMotionHandling` - The [`ReducedMotionHandling`](./types.md#reducedmotionhandling) of the instance's effects that don't set one on their interaction, sequence or effect, overriding the one set by `Interact.setup()`. It must match the `reducedMotionHandling` passed to `generate()` for the same config.
+- `options?.reducedMotionPolicy?: ReducedMotionPolicy` - The [`ReducedMotionPolicy`](./types.md#reducedmotionpolicy) of the instance's effects that don't set one on their interaction, sequence or effect, overriding the one set by `Interact.setup()`. It must match the `reducedMotionPolicy` passed to `generate()` for the same config.
 
 **Returns:** `Interact` - The initialized interact instance
 
@@ -153,8 +153,8 @@ Configures global settings for the Interact system.
 - `options.pointerOptionsGetter` - Optional callback returning default partial pointer config for `pointerMove` trigger
 - `options.viewEnter` - Optional default partial `ViewEnterParams` (e.g. `threshold`, `inset`, `useSafeViewEnter`)
 - `options.allowA11yTriggers` - When `true`, `click` and `hover` triggers also respond to keyboard (Enter/Space) and focus
-- `options.forceReducedMotion` - When `true`, applies the reduced-motion outcome of each effect's `reducedMotionHandling` regardless of the OS setting (sets `Interact.forceReducedMotion`)
-- `options.reducedMotionHandling` - The default [`ReducedMotionHandling`](./types.md#reducedmotionhandling) of every instance's effects (`'collapse'` unless set; sets `Interact.reducedMotionHandling`)
+- `options.forceReducedMotion` - When `true`, applies the reduced-motion outcome of each effect's `reducedMotionPolicy` regardless of the OS setting (sets `Interact.forceReducedMotion`)
+- `options.reducedMotionPolicy` - The default [`ReducedMotionPolicy`](./types.md#reducedmotionpolicy) of every instance's effects (`'collapse'` unless set; sets `Interact.reducedMotionPolicy`)
 
 Both reduced-motion options can be overridden per instance with `Interact.create(config, options)`. `generate()` defaults to the values set here, so set them before generating, or pass the instance's values to `generate()`.
 
@@ -176,8 +176,8 @@ Interact.setup({
   }),
 });
 
-// Keep effects as they are for users who prefer reduced motion, unless an effect sets its own handling
-Interact.setup({ reducedMotionHandling: 'ignore' });
+// Keep effects as they are for users who prefer reduced motion, unless an effect sets its own policy
+Interact.setup({ reducedMotionPolicy: 'ignore' });
 
 // Enable accessibility for all click and hover triggers
 Interact.setup({

@@ -26,14 +26,13 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
 
   walkConfig(config, {
     onInteraction: (path, interaction) => {
-      warnings.push(...reducedMotion.onInteraction(path, interaction));
       warnings.push(...checkListItemSelectorWithoutContainer(path, interaction));
       warnings.push(...checkRedundantSelector(path, interaction));
       warnings.push(...checkInvalidInset(path, interaction));
+      warnings.push(...reducedMotion.onInteraction(path, interaction));
     },
     // checks that only look at depth>1 properties in effects/sequences do not need resolving
     onEffect: (path, effect, isTopLevel, owner, sequence) => {
-      warnings.push(...reducedMotion.onEffect(path, effect, isTopLevel, owner, sequence));
       const { effectId } = effect;
       const resolvedEffect =
         !isTopLevel && effectId
@@ -49,9 +48,9 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
       warnings.push(...checkPointerAxisIgnored(path, resolvedEffect, owner));
       warnings.push(...checkCSSPropertyNames(path, effect));
       warnings.push(...checkNamedEffectParams(path, effect));
+      warnings.push(...reducedMotion.onEffect(path, effect, isTopLevel, owner, sequence));
     },
     onSequence: (path, sequence, isTopLevel, owner) => {
-      warnings.push(...reducedMotion.onSequence(path, sequence, isTopLevel, owner));
       const { sequenceId } = sequence;
       const resolvedSequence =
         !isTopLevel && sequenceId
@@ -59,6 +58,7 @@ export function collectSemanticWarnings(config: AnyConfig): SemanticIssue[] {
           : sequence;
       warnings.push(...checkSameElementRetrigger(path, resolvedSequence, owner));
       warnings.push(...checkFunctionOffsetEasing(path, sequence));
+      warnings.push(...reducedMotion.onSequence(path, sequence, isTopLevel, owner));
     },
   });
 

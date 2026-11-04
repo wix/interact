@@ -863,12 +863,12 @@ An interaction can have `effects` only, `sequences` only, or both.
 
 ## Reduced Motion Types
 
-### `ReducedMotionHandling`
+### `ReducedMotionPolicy`
 
 What an effect does when the user prefers reduced motion: `(prefers-reduced-motion: reduce)` matches, or reduced motion is forced (`forceReducedMotion` of `Interact.setup()` or `Interact.create()`).
 
 ```typescript
-type ReducedMotionHandling = 'ignore' | 'cancel' | 'collapse' | (string & {}); // string = effectId
+type ReducedMotionPolicy = 'ignore' | 'cancel' | 'collapse' | (string & {}); // string = effectId
 ```
 
 Accepted on `Interaction`, `SequenceConfig` / `SequenceConfigRef` and effects, and per instance as an option of `Interact.create()` / `Interact.setup()` (it isn't a config field). The most specific level wins: inline effect → its `effects` registry entry → sequence → interaction → instance → `'collapse'`.
@@ -878,9 +878,9 @@ Accepted on `Interaction`, `SequenceConfig` / `SequenceConfigRef` and effects, a
 - `'cancel'` - Dropped, exactly like a `(prefers-reduced-motion: no-preference)` media condition.
 - effectId - Replaced by the animation of `effects[effectId]` (effect type, keyframes and timing), keeping the original's target, conditions, `effectId` and `triggerType`. It must be of the same kind (time, scrub or state) and exist, otherwise the effect collapses.
 
-A sequence's stagger (`offset`) collapses to 0 under reduced motion, unless the sequence's own handling resolves to `'ignore'`. Its `delay` and its effects' delays are kept.
+A sequence's stagger (`offset`) collapses to 0 under reduced motion, unless the sequence's own policy resolves to `'ignore'`. Its `delay` and its effects' delays are kept.
 
-`generate()` emits both outcomes under exclusive `prefers-reduced-motion` media queries, so the CSS and the runtime agree. `generate()` takes the instance's `reducedMotionHandling` and `forceReducedMotion` as options, defaulting to the ones set by `Interact.setup()`.
+`generate()` emits both outcomes under exclusive `prefers-reduced-motion` media queries, so the CSS and the runtime agree. `generate()` takes the instance's `reducedMotionPolicy` and `forceReducedMotion` as options, defaulting to the ones set by `Interact.setup()`.
 
 ## Condition Types
 

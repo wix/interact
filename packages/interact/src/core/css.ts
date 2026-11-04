@@ -8,7 +8,7 @@ import type {
   CSSRuleData,
   InteractPluginStyles,
   GenerateOptions,
-  ReducedMotionHandling,
+  ReducedMotionPolicy,
 } from '../types';
 import { PLUGIN_FIELD_PREFIX } from '../types';
 import {
@@ -89,7 +89,7 @@ type GenerateContext = {
   collectSlots: boolean;
   useFirstChild: boolean;
   forceReducedMotion: boolean;
-  reducedMotionHandling: ReducedMotionHandling;
+  reducedMotionPolicy: ReducedMotionPolicy;
   plugins?: InteractPluginStyles;
   configIndex?: number;
 };
@@ -496,7 +496,7 @@ function getVariantSequence(
   sequence?: ResolvedSequence,
 ): ResolvedSequence | undefined {
   const isReduced = ctx.forceReducedMotion || isReducedMotionVariant(variant);
-  return sequence && isReduced && sequence.reducedMotionHandling !== 'ignore'
+  return sequence && isReduced && sequence.reducedMotionPolicy !== 'ignore'
     ? { ...sequence, offset: 0 }
     : sequence;
 }
@@ -645,7 +645,7 @@ function parseInteraction(
         interaction,
         ctx.config,
         getFallbackId('eff', [interactionIdx, effIndex], ctx.configIndex),
-        { force: ctx.forceReducedMotion, defaultHandling: ctx.reducedMotionHandling },
+        { force: ctx.forceReducedMotion, defaultPolicy: ctx.reducedMotionPolicy },
       );
       return resolved && Object.assign(resolved, { slotKey: getSlotKey(interactionIdx, effIndex) });
     })
@@ -663,7 +663,7 @@ function parseInteraction(
         ctx.config,
         getFallbackId('seq', [interactionIdx, seqIndex], ctx.configIndex),
         (effIndex) => getSlotKey(interactionIdx, effIndex, seqIndex),
-        { force: ctx.forceReducedMotion, defaultHandling: ctx.reducedMotionHandling },
+        { force: ctx.forceReducedMotion, defaultPolicy: ctx.reducedMotionPolicy },
       ),
     )
     .filter((sequence) => sequence !== null);
@@ -705,7 +705,7 @@ function parseConfig(
     configIndex,
     collectSlots = false,
     forceReducedMotion = Interact.forceReducedMotion,
-    reducedMotionHandling = Interact.reducedMotionHandling,
+    reducedMotionPolicy = Interact.reducedMotionPolicy,
   } = options;
   const ctx: GenerateContext = {
     config,
@@ -714,12 +714,12 @@ function parseConfig(
     keyframesMap: new Map<string, Keyframe[]>(),
     keyframeSlots: collectSlots
       ? new Map()
-      : getKeyframeSlots(config, { configIndex, forceReducedMotion, reducedMotionHandling }),
+      : getKeyframeSlots(config, { configIndex, forceReducedMotion, reducedMotionPolicy }),
     scopedTimelines: [],
     collectSlots,
     useFirstChild,
     forceReducedMotion,
-    reducedMotionHandling,
+    reducedMotionPolicy,
     plugins,
     configIndex,
   };
@@ -757,10 +757,7 @@ export function getSlotKey(interactionIndex: number, effectIndex: number, sequen
  */
 export function getKeyframeSlots(
   config: InteractConfig,
-  options: Pick<
-    GenerateOptions,
-    'configIndex' | 'forceReducedMotion' | 'reducedMotionHandling'
-  > = {},
+  options: Pick<GenerateOptions, 'configIndex' | 'forceReducedMotion' | 'reducedMotionPolicy'> = {},
 ): Map<string, string> {
   const { ctx } = parseConfig(config, { ...options, collectSlots: true });
   const slots = new Map<string, string>();

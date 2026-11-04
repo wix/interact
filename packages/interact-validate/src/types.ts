@@ -55,7 +55,7 @@ export type AnyEffect = {
   delay?: number;
   duration?: number;
   iterations?: number;
-  reducedMotionHandling?: string;
+  reducedMotionPolicy?: string;
   namedEffect?: { type?: string; range?: unknown; [k: string]: unknown };
   keyframeEffect?: { name?: string; keyframes?: Array<Record<string, unknown>> };
   transition?: { styleProperties?: unknown[] };
@@ -71,7 +71,7 @@ export type AnySequence = {
   offsetEasing?: string | ((...args: unknown[]) => unknown);
   effects?: AnyEffect[];
   conditions?: string[];
-  reducedMotionHandling?: string;
+  reducedMotionPolicy?: string;
 };
 
 export type AnyInteraction = {
@@ -84,7 +84,7 @@ export type AnyInteraction = {
   effects?: AnyEffect[];
   sequences?: AnySequence[];
   conditions?: string[];
-  reducedMotionHandling?: string;
+  reducedMotionPolicy?: string;
 };
 
 export type AnyConfig = {

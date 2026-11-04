@@ -596,8 +596,8 @@ describe('interact (web)', () => {
       [undefined, 0],
       ['collapse', 0],
     ] as const)(
-      'should apply reducedMotionHandling %s when forceReducedMotion is true',
-      async (reducedMotionHandling, duration) => {
+      'should apply reducedMotionPolicy %s when forceReducedMotion is true',
+      async (reducedMotionPolicy, duration) => {
         const { getWebAnimation } = await import('@wix/motion');
         Interact.setup({ forceReducedMotion: true });
         Interact.create(
@@ -625,7 +625,7 @@ describe('interact (web)', () => {
               },
             },
           },
-          { useCustomElement: true, reducedMotionHandling },
+          { useCustomElement: true, reducedMotionPolicy },
         );
 
         element = document.createElement('interact-element') as IInteractElement;

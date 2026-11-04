@@ -743,7 +743,7 @@ describe('interact (react)', () => {
       };
 
       mockMatchMedia(['min-width: 1024px']);
-      const instance = Interact.create(config, { reducedMotionHandling: 'ignore' });
+      const instance = Interact.create(config, { reducedMotionPolicy: 'ignore' });
 
       render(
         <Interaction tagName="button" interactKey="responsive-button">
