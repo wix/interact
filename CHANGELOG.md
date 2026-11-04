@@ -123,13 +123,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Added
 
-- `reducedMotionHandling` on the config, interactions, sequences and effects — `'ignore'` (default), `'cancel'`, `'collapse'` or an effectId — sets what an effect does under `prefers-reduced-motion: reduce`; the most specific level wins. `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media, and the runtime picks the matching one, without adding effects to the config
-- `forceReducedMotion` option for `generate()`, matching `Interact.forceReducedMotion`
+- `reducedMotionHandling` on the config, interactions, sequences and effects — `'collapse'` (default), `'ignore'`, `'cancel'` or an effectId — sets what an effect does under `prefers-reduced-motion: reduce`; the most specific level wins. `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media, and the runtime picks the matching one, without adding effects to the config
+- `forceReducedMotion` option for `generate()` and `Interact.create()`, the latter overriding `Interact.forceReducedMotion` for the instance
 
 #### Changed
 
-- **Breaking:** `Interact.forceReducedMotion` applies the reduced-motion outcome of `reducedMotionHandling` instead of passing `reducedMotion` to `@wix/motion`, so on its own it no longer changes anything. To keep the old behavior, set `reducedMotionHandling: 'collapse'` on the config (finite multi-iteration animations now collapse instead of being dropped)
-- **Breaking:** runtime transitions no longer drop their `transition` under `prefers-reduced-motion: reduce`, matching `generate()`. Use `reducedMotionHandling: 'collapse'` to keep it
+- **Breaking:** under `prefers-reduced-motion: reduce`, effects collapse by default: a single 0ms iteration that keeps its delay, so it jumps to its end state. Looping, `viewProgress` and `pointerMove` effects are dropped, and sequence staggers collapse. Set `reducedMotionHandling: 'ignore'` to keep the old behavior
+- **Breaking:** `Interact.forceReducedMotion` applies the reduced-motion outcome of `reducedMotionHandling` instead of passing `reducedMotion` to `@wix/motion`. With the default `'collapse'` that matches the old behavior, except that finite multi-iteration animations collapse to their end state instead of being dropped
+- Runtime transitions collapse under `prefers-reduced-motion: reduce` through `reducedMotionHandling`, matching `generate()`, instead of always being wrapped in `prefers-reduced-motion: no-preference`
 - `reducedMotion` removed from `InteractOptions`, and the `context` argument from `Interact.getSequence()` / `Interact.addToSequence()`
 - 0ms transitions that have a delay are kept, so the delay is honored
 

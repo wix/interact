@@ -40,7 +40,7 @@ Each item here is CRITICAL — ignoring any of them will break animations.
   events and flickering. Use `selector` to target a child element, or set the effect's `key` to a different element.
 - **CRITICAL**: For `pointerMove` trigger MUST AVOID using the same element as both source and target with `hitArea: 'self'` and effects that change size or position (e.g. `transform: translate(…)`, `scale(…)`). The transform shifts the hit area, causing jittery re-entry cycles. Instead, use `selector` to target a child element for the animation.
 - **CRITICAL — Do NOT guess preset options**: If you don't know the expected type/structure for a `namedEffect` param, omit it — rely on defaults rather than guessing.
-- **Reduced motion**: Set `reducedMotionHandling` (see [Reduced Motion](#reduced-motion)) — usually `'collapse'` on the config — so users who prefer reduced motion get the end state without the tween. Use `'cancel'` to drop an effect, or an effectId to swap in a gentler effect. `Interact.forceReducedMotion` forces the reduced outcome, but does nothing without a `reducedMotionHandling`.
+- **Reduced motion**: Effects collapse by default (see [Reduced Motion](#reduced-motion)) — users who prefer reduced motion get the end state without the tween. Use `'cancel'` to drop an effect, an effectId to swap in a gentler effect, or `'ignore'` to keep it as is. `Interact.forceReducedMotion` forces the reduced outcome.
 - **Perspective**: Prefer `transform: perspective(...)` inside keyframes. Use the CSS `perspective` property only when multiple children share the same `perspective-origin`.
 
 ---
@@ -629,18 +629,18 @@ conditions: {
 type ReducedMotionHandling = 'ignore' | 'cancel' | 'collapse' | string; // string = effectId in the effects registry
 ```
 
-What an effect does when the user prefers reduced motion (`(prefers-reduced-motion: reduce)`, or `Interact.forceReducedMotion`). Set on the config, an interaction, a sequence or an effect; the most specific wins: effect (inline, then its registry entry) → sequence → interaction → config → `'ignore'`.
+What an effect does when the user prefers reduced motion (`(prefers-reduced-motion: reduce)`, or forced by `Interact.forceReducedMotion` / `Interact.create()`'s `forceReducedMotion`). Set on the config, an interaction, a sequence or an effect; the most specific wins: effect (inline, then its registry entry) → sequence → interaction → config → `'collapse'`.
 
-| Value        | Under reduced motion                                                                                                                                                                                                            |
-| :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `'ignore'`   | Plays as usual (default).                                                                                                                                                                                                       |
-| `'cancel'`   | Dropped, like a `(prefers-reduced-motion: no-preference)` media condition — an earlier effect of the same interaction on the same target may then apply instead.                                                                |
-| `'collapse'` | Plays with duration 0, keeping its delay, iterations, fill and keyframes, so it jumps to its end state. Transitions become 0ms (with delay). Looping and scroll/pointer-driven effects have no end state, so they're cancelled. |
-| effectId     | Replaced by that registry effect's animation (effect type, keyframes and timing); the original's target, conditions and `triggerType` stay. It must be of the same kind (time, scrub or state) — otherwise it collapses.        |
+| Value        | Under reduced motion                                                                                                                                                                                                     |
+| :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'collapse'` | Default. Plays a single iteration with duration 0, keeping its delay, fill and keyframes, so it jumps to its end state. Transitions become 0ms (with delay). Looping and scroll/pointer-driven effects are cancelled.    |
+| `'ignore'`   | Plays as usual.                                                                                                                                                                                                          |
+| `'cancel'`   | Dropped, like a `(prefers-reduced-motion: no-preference)` media condition — an earlier effect of the same interaction on the same target may then apply instead.                                                         |
+| effectId     | Replaced by that registry effect's animation (effect type, keyframes and timing); the original's target, conditions and `triggerType` stay. It must be of the same kind (time, scrub or state) — otherwise it collapses. |
 
-- Sequence delays, offsets and staggers are never changed.
+- A sequence's stagger (`offset`) collapses to 0, unless the sequence's handling is `'ignore'`; delays are kept.
 - An `animationEnd` source resolves its handling from its registry entry and the config only — set it there.
-- `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media; pass `forceReducedMotion: true` to `generate()` when `Interact.forceReducedMotion` is set.
+- `generate()` emits both outcomes under exclusive `prefers-reduced-motion` media; pass `forceReducedMotion: true` to `generate()` when reduced motion is forced.
 
 ---
 
@@ -792,7 +792,7 @@ Default split wrapper classes: `.split-c` (chars), `.split-w` (words), `.split-l
 | Method / Property                   | Description                                                                                                                                                                                                                                               |
 | :---------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `generate(config, options?)`        | Produce complete CSS for all interactions. Call at build/generation time; embed in HTML. `options` = `{ useFirstChild?, plugins? }`, or a bare boolean for legacy `useFirstChild`. `plugins` = per-plugin SSR style generators (see [Plugins](#plugins)). |
-| `Interact.create(config)`           | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle.                                                                                                                                                               |
+| `Interact.create(config, options?)` | Initialize with a config. Returns the instance. Store the instance to manage its lifecycle. `options.forceReducedMotion` overrides `Interact.forceReducedMotion` for the instance.                                                                        |
 | `Interact.registerEffects(presets)` | Register named effect presets. MUST be called before `generate()` and `create`.                                                                                                                                                                           |
 | `Interact.destroy()`                | Tear down all instances. Call on unmount or route change to prevent memory leaks.                                                                                                                                                                         |
 | `Interact.forceReducedMotion`       | `boolean` (default: `false`) — apply the reduced-motion outcome of `reducedMotionHandling` regardless of OS setting. Pass the same value as `generate()`'s `forceReducedMotion`.                                                                          |

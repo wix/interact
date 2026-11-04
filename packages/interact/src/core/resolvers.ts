@@ -17,7 +17,7 @@ import type {
 } from '../types';
 import { isTemplatedKey, generateId } from '../utils';
 import { shouldUseInitial } from './utilities';
-import { getEffectKind, getReducedMotionHandling, getReducedMotionVariants } from './reducedMotion';
+import { getReducedMotionHandling, getReducedMotionVariants } from './reducedMotion';
 
 const TIME_TRIGGER_TO_DEFAULT_TYPE: Map<TriggerType, TimeAnimationTriggerType> = new Map([
   ['viewEnter', 'once'],
@@ -29,7 +29,9 @@ const TIME_TRIGGER_TO_DEFAULT_TYPE: Map<TriggerType, TimeAnimationTriggerType> =
 ]);
 
 type ResolveOptions = {
-  sequence?: { reducedMotionHandling?: ReducedMotionHandling };
+  // inherited from the sequence
+  handling?: ReducedMotionHandling;
+  collapsesStagger?: boolean;
   force?: boolean;
 };
 
@@ -41,8 +43,8 @@ type FullEffect = EffectBase &
     keyframeEffect?: MotionKeyframeEffect;
   };
 
-// whether CSS keeps a position for the effect - a customEffect has one, but plays at runtime only
-function hasCSSPosition(
+// whether CSS has rules for the effect - a customEffect plays at runtime only, but falls back its list entries
+function hasCSSRules(
   { namedEffect, keyframeEffect, customEffect }: FullEffect,
   isPointerMove: boolean,
 ): boolean {
@@ -52,27 +54,6 @@ function hasCSSPosition(
     return !isPointerMove && !!namedEffect.type;
   }
   return !!keyframeEffect || !(customEffect && isPointerMove);
-}
-
-// the effect with only the animation source CSS can express, if any
-function resolveBody(
-  effect: FullEffect & Omit<ResolvedEffect, keyof EffectProperty>,
-  isPointerMove: boolean,
-): ResolvedEffect {
-  const { namedEffect, customEffect, keyframeEffect, transition, transitionProperties, ...rest } =
-    effect;
-
-  if (namedEffect) {
-    return isPointerMove || !namedEffect.type ? rest : { namedEffect, ...rest };
-  } else if (keyframeEffect) {
-    return { keyframeEffect, ...rest };
-  } else if (customEffect) {
-    return rest;
-  } else if (transition) {
-    return { transition, ...rest };
-  } else {
-    return transitionProperties ? { transitionProperties, ...rest } : rest;
-  }
 }
 
 export function resolveEffectForCSS(
@@ -123,27 +104,52 @@ export function resolveEffectForCSS(
     triggerType = TIME_TRIGGER_TO_DEFAULT_TYPE.get(trigger)!;
   }
 
-  const { namedEffect, keyframeEffect } = fullEffect;
-  // Need to verify validity of name for CSS?
-  if (!namedEffect && keyframeEffect && !keyframeEffect.name) {
-    const canUseEffectId = effectId && !(effects[effectId] && 'keyframeEffect' in effect);
-    keyframeEffect.name = canUseEffectId ? effectId : generateId();
-  }
-
-  if (!hasCSSPosition(fullEffect, isPointerMove)) {
+  if (!hasCSSRules(fullEffect, isPointerMove)) {
     return null;
   }
 
+  // the effect with only the animation source CSS can express, if any
+  const resolveBody = ({
+    namedEffect,
+    customEffect,
+    keyframeEffect,
+    transition,
+    transitionProperties,
+    ...rest
+  }: FullEffect & Omit<ResolvedEffect, keyof EffectProperty>): ResolvedEffect => {
+    if (namedEffect) {
+      return isPointerMove || !namedEffect.type ? rest : { namedEffect, ...rest };
+    } else if (keyframeEffect) {
+      // Need to verify validity of name for CSS?
+      if (!keyframeEffect.name) {
+        const canUseEffectId = effectId && !(effects[effectId] && 'keyframeEffect' in effect);
+        keyframeEffect.name = canUseEffectId ? effectId : generateId();
+      }
+      return { keyframeEffect, ...rest };
+    } else if (customEffect) {
+      return rest;
+    } else if (transition) {
+      return { transition, ...rest };
+    } else {
+      return transitionProperties ? { transitionProperties, ...rest } : rest;
+    }
+  };
+
   const full = { ...fullEffect, key, conditions, effectId, triggerType };
-  const position = { ...full, initial: shouldUseInitial(interaction, full) };
+  const resolved = { ...full, initial: shouldUseInitial(interaction, full) };
 
   const variants = getReducedMotionVariants(
-    position,
-    getReducedMotionHandling(fullEffect, options.sequence, interaction, config),
-    { kind: getEffectKind(fullEffect, trigger), effects, force: options.force },
-  ).map((variant) => resolveBody(variant, isPointerMove));
+    resolved,
+    getReducedMotionHandling(
+      fullEffect.reducedMotionHandling,
+      options.handling,
+      interaction.reducedMotionHandling,
+      config.reducedMotionHandling,
+    ),
+    { effects, force: options.force, collapsesStagger: options.collapsesStagger },
+  ).map(resolveBody);
 
-  return variants.length ? { ...resolveBody(position, isPointerMove), variants } : null;
+  return variants.length ? { ...resolveBody(resolved), variants } : null;
 }
 
 export function resolveSequenceForCSS(
@@ -163,6 +169,11 @@ export function resolveSequenceForCSS(
 
   const { sequenceId } = sequence;
   const fullSequence = { ...(sequences[sequenceId] || {}), ...sequence };
+  const handling = getReducedMotionHandling(
+    fullSequence.reducedMotionHandling,
+    interaction.reducedMotionHandling,
+    config.reducedMotionHandling,
+  );
 
   let {
     effects,
@@ -202,7 +213,7 @@ export function resolveSequenceForCSS(
       interaction,
       config,
       `${sequenceId}-eff-${index}`,
-      { sequence: fullSequence, force },
+      { handling, collapsesStagger: handling !== 'ignore', force },
     );
     return resolved && Object.assign(resolved, { slotKey: getSlotKey?.(index) });
   });
@@ -220,6 +231,7 @@ export function resolveSequenceForCSS(
     delay,
     offset,
     offsetEasing,
+    reducedMotionHandling: handling,
     effects: filteredEffects,
   };
 }

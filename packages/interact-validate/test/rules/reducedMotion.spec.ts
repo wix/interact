@@ -148,19 +148,63 @@ describe('reducedMotionHandling', () => {
     ]);
   });
 
-  it('resolves sequence effects through the sequence definition', () => {
+  describe('sequence definitions', () => {
+    it('reports what an effect inherits where its sequence is referenced, once per reference', () => {
+      expect(
+        issuesOf(
+          {
+            effects: { dim },
+            sequences: { seq: { reducedMotionHandling: 'dim', effects: [slide] } },
+            interactions: [
+              { key: 'a', trigger: 'click', sequences: [{ sequenceId: 'seq' }] },
+              { key: 'b', trigger: 'hover', sequences: [{ sequenceId: 'seq' }] },
+            ],
+          },
+          'REDUCED_MOTION_INCOMPATIBLE_EFFECT',
+        ).map(({ severity, path }) => ({ severity, path })),
+      ).toEqual([
+        { severity: 'warning', path: ['interactions', 0, 'sequences', 0] },
+        { severity: 'warning', path: ['interactions', 1, 'sequences', 0] },
+      ]);
+    });
+
+    it("reports an effect's own handling once, on the definition", () => {
+      expect(
+        issuesOf(
+          {
+            sequences: {
+              seq: { effects: [{ ...slide, iterations: 0, reducedMotionHandling: 'collapse' }] },
+            },
+            interactions: [
+              { key: 'a', trigger: 'click', sequences: [{ sequenceId: 'seq' }] },
+              { key: 'b', trigger: 'hover', sequences: [{ sequenceId: 'seq' }] },
+            ],
+          },
+          'REDUCED_MOTION_COLLAPSE_CANCELS',
+        ).map(({ path }) => path),
+      ).toEqual([['sequences', 'seq', 'effects', 0]]);
+    });
+  });
+
+  it('tells a time replacement from a scrub one by the effect schema it validates against', () => {
     expect(
       issuesOf(
         {
-          effects: { dim },
-          sequences: { seq: { reducedMotionHandling: 'dim', effects: [slide] } },
-          interactions: [{ key: 'el', trigger: 'click', sequences: [{ sequenceId: 'seq' }] }],
+          effects: { fade, scrub: { namedEffect: { type: 'FadeScroll' } } },
+          interactions: [
+            {
+              key: 'el',
+              trigger: 'click',
+              effects: [
+                { ...slide, reducedMotionHandling: 'fade' },
+                { ...slide, reducedMotionHandling: 'scrub' },
+              ],
+            },
+          ],
         },
         'REDUCED_MOTION_INCOMPATIBLE_EFFECT',
-      ),
-    ).toEqual([
-      expect.objectContaining({ severity: 'warning', path: ['sequences', 'seq', 'effects', 0] }),
-    ]);
+      ).map(({ path }) => path),
+    ).toEqual([['interactions', 0, 'effects', 1]]);
   });
 
   it('warns about a replacement by the effect itself', () => {
@@ -208,13 +252,13 @@ describe('reducedMotionHandling', () => {
 
     it('warns when the source resolves a different handling at its use site', () => {
       expect(
-        issuesOf(configWith('collapse'), 'REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH'),
+        issuesOf(configWith('cancel'), 'REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH'),
       ).toEqual([expect.objectContaining({ path: ['interactions', 0, 'effects', 0] })]);
     });
 
     it('accepts a handling set on the definition', () => {
       expect(
-        issuesOf(configWith(undefined, 'collapse'), 'REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH'),
+        issuesOf(configWith(undefined, 'cancel'), 'REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH'),
       ).toHaveLength(0);
     });
   });

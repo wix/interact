@@ -195,13 +195,13 @@ This is the authoritative list of every code the validator emits today. Codes no
 
 ### Referential errors (severity: error)
 
-| Code                                 | What it flags                                                                                                                                                                                                            |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ANIMATION_END_EFFECT_NOT_FOUND`     | An `animationEnd` interaction's `params.effectId` references a missing effect.                                                                                                                                           |
-| `SEQUENCE_ID_NOT_FOUND`              | A `sequenceId` references a key absent from `config.sequences`.                                                                                                                                                          |
-| `CONDITION_NOT_FOUND`                | A `conditions[]` entry references a key absent from `config.conditions`.                                                                                                                                                 |
-| `REDUCED_MOTION_EFFECT_NOT_FOUND`    | An effect's `reducedMotionHandling` names an effectId absent from `config.effects`. On a config, interaction or sequence it is a **warning** instead — the effects inheriting it collapse.                               |
-| `REDUCED_MOTION_INCOMPATIBLE_EFFECT` | An effect's `reducedMotionHandling` names an effect of another kind (time / scroll-or-pointer-driven / state). When inherited from a config, interaction or sequence it is a **warning** instead — the effect collapses. |
+| Code                                 | What it flags                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANIMATION_END_EFFECT_NOT_FOUND`     | An `animationEnd` interaction's `params.effectId` references a missing effect.                                                                                                                                                                                                                                            |
+| `SEQUENCE_ID_NOT_FOUND`              | A `sequenceId` references a key absent from `config.sequences`.                                                                                                                                                                                                                                                           |
+| `CONDITION_NOT_FOUND`                | A `conditions[]` entry references a key absent from `config.conditions`.                                                                                                                                                                                                                                                  |
+| `REDUCED_MOTION_EFFECT_NOT_FOUND`    | An effect's `reducedMotionHandling` names an effectId absent from `config.effects`. On a config, interaction or sequence it is a **warning** instead — the effects inheriting it collapse.                                                                                                                                |
+| `REDUCED_MOTION_INCOMPATIBLE_EFFECT` | An effect's `reducedMotionHandling` names an effect of another kind (time / scroll-or-pointer-driven / state). When inherited from a config, interaction or sequence it is a **warning** instead — the effect collapses. An effect of a `config.sequences` entry is reported on each sequence reference it inherits from. |
 
 ### Other structural errors (severity: error)
 
@@ -245,7 +245,7 @@ Statically-detectable authoring pitfalls lifted from the trigger rule files. Eac
 | `REDUCED_MOTION_SELF_REFERENCE`                | An effect's `reducedMotionHandling` names the effect itself, which is the same as `'ignore'`.                                                                                      | `REDUCED_MOTION`         |
 | `REDUCED_MOTION_SHADOWED_EFFECT_ID`            | A `config.effects` key is `ignore` / `cancel` / `collapse`, so `reducedMotionHandling` can't name it.                                                                              | `REDUCED_MOTION`         |
 | `REDUCED_MOTION_ANIMATION_END_SOURCE_MISMATCH` | An `animationEnd` source effect gets a different `reducedMotionHandling` where it plays than from its registry entry and the config, which is all the `animationEnd` trigger sees. | `REDUCED_MOTION`         |
-| `REDUCED_MOTION_COLLAPSE_CANCELS` (info)       | A collapsed effect has no end state (infinite iterations, or `viewProgress` / `pointerMove`), so reduced motion cancels it.                                                        | `REDUCED_MOTION`         |
+| `REDUCED_MOTION_COLLAPSE_CANCELS` (info)       | A collapsed effect has no end state (infinite iterations, or `viewProgress` / `pointerMove`), so reduced motion cancels it. Not reported when no `reducedMotionHandling` is set.   | `REDUCED_MOTION`         |
 
 ---
 

@@ -13,11 +13,22 @@ import type {
   IInteractionController,
   AnimationEndParams,
   AnimationOptions,
+  ReducedMotionHandling,
 } from '../types';
 import { PLUGIN_FIELD_PREFIX } from '../types';
-import { createTransitionCSS, getMediaQuery, getSelectorCondition, generateId } from '../utils';
+import {
+  createTransitionCSS,
+  getMediaQuery,
+  getSelectorCondition,
+  generateId,
+  isTransitionEffect,
+} from '../utils';
 import { getInterpolatedKey } from './utilities';
-import { getEffectKind, getReducedMotionHandling, getReducedMotionVariants } from './reducedMotion';
+import {
+  REDUCED_MOTION_REDUCE,
+  getReducedMotionHandling,
+  getReducedMotionVariants,
+} from './reducedMotion';
 import { effectToAnimationOptions } from '../handlers/utilities';
 import { Interact, getSelector } from './Interact';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
@@ -138,25 +149,24 @@ function _queryItemElement(data: Interaction | Effect, elements: HTMLElement[]):
 function _resolveVariant<T extends Effect>(
   effect: T,
   instance: Interact,
-  context: { trigger: TriggerType; interaction?: InteractionTrigger; sequence?: SequenceConfig },
   listener: { id: string; key: string; onUpdate: () => void },
+  inherited: { handling?: ReducedMotionHandling; collapsesStagger?: boolean } = {},
 ): T | undefined {
-  const { trigger, interaction, sequence } = context;
+  const { effects, conditions, reducedMotionHandling, forceReducedMotion } = instance.dataCache;
   const variants = getReducedMotionVariants(
     effect,
-    getReducedMotionHandling(effect, sequence, interaction, instance.dataCache),
-    {
-      kind: getEffectKind(effect, trigger),
-      effects: instance.dataCache.effects,
-      force: Interact.forceReducedMotion,
-      warn: true,
-    },
+    getReducedMotionHandling(
+      effect.reducedMotionHandling,
+      inherited.handling,
+      reducedMotionHandling,
+    ),
+    { effects, force: forceReducedMotion, collapsesStagger: inherited.collapsesStagger },
   );
 
   let chosen: T | undefined;
 
   variants.forEach((variant, index) => {
-    const mql = getMediaQuery(variant.conditions || [], instance.dataCache.conditions);
+    const mql = getMediaQuery(variant.conditions || [], conditions);
 
     if (mql) {
       instance.setupMediaQueryListener(
@@ -280,7 +290,6 @@ function _addInteraction(
     const effectOptions = _resolveVariant(
       mergedEffect,
       instance,
-      { trigger: interaction.trigger, interaction },
       {
         id: `${interactionId}::${effectIndex}`,
         key: sourceKey,
@@ -288,6 +297,7 @@ function _addInteraction(
           sourceController.update();
         },
       },
+      { handling: interaction.reducedMotionHandling },
     );
 
     if (effectOptions) {
@@ -364,6 +374,33 @@ function _addInteraction(
   _processSequences(sourceKey, sourceController, instance, interaction, elements);
 }
 
+function _getSequenceHandling(
+  sequenceConfig: SequenceConfig,
+  interaction: InteractionTrigger,
+  instance: Interact,
+): ReducedMotionHandling {
+  return getReducedMotionHandling(
+    sequenceConfig.reducedMotionHandling,
+    interaction.reducedMotionHandling,
+    instance.dataCache.reducedMotionHandling,
+  );
+}
+
+// the stagger collapses under reduced motion, unless the sequence ignores it
+function _getSequenceOptions(
+  sequenceConfig: SequenceConfig,
+  interaction: InteractionTrigger,
+  instance: Interact,
+): SequenceConfig {
+  const { forceReducedMotion, conditions } = instance.dataCache;
+  const mql = getMediaQuery([REDUCED_MOTION_REDUCE], conditions);
+  const isReduced = forceReducedMotion || !!(mql && mql.matches);
+
+  return isReduced && _getSequenceHandling(sequenceConfig, interaction, instance) !== 'ignore'
+    ? { ...sequenceConfig, offset: 0 }
+    : sequenceConfig;
+}
+
 function _isSequenceConfigRef(
   config: SequenceConfig | SequenceConfigRef,
 ): config is SequenceConfigRef {
@@ -399,6 +436,7 @@ function _buildAnimationGroupArgsFromSequence(
 
   const seqEffects: (Effect | EffectRef)[] = sequenceConfig.effects || [];
   const animationGroupArgs: AnimationGroupArgs[] = [];
+  const handling = _getSequenceHandling(sequenceConfig, interaction, instance);
   let usedListElements = false;
 
   for (const effect of seqEffects) {
@@ -407,12 +445,12 @@ function _buildAnimationGroupArgsFromSequence(
     const effectOptions = _resolveVariant(
       { ...resolvedEffect, ...effect } as Effect,
       instance,
-      { trigger: interaction.trigger, interaction, sequence: sequenceConfig },
       {
         id: `${cacheKey}::${effectId || 'eff'}`,
         key: options.updateKey,
         onUpdate: options.onUpdate,
       },
+      { handling, collapsesStagger: handling !== 'ignore' },
     );
 
     if (!effectOptions) continue;
@@ -583,7 +621,11 @@ function _processSequences(
 
       Interact.addToSequence(cacheKey, animationGroupArgs, indices);
 
-      const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs);
+      const sequence = Interact.getSequence(
+        cacheKey,
+        _getSequenceOptions(sequenceConfig, interaction, instance),
+        animationGroupArgs,
+      );
 
       const selectorCondition = getSelectorCondition(
         interaction.conditions || [],
@@ -605,7 +647,11 @@ function _processSequences(
       return;
     }
 
-    const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs);
+    const sequence = Interact.getSequence(
+      cacheKey,
+      _getSequenceOptions(sequenceConfig, interaction, instance),
+      animationGroupArgs,
+    );
 
     const selectorCondition = getSelectorCondition(
       interaction.conditions || [],
@@ -693,7 +739,11 @@ function _processSequencesForTarget(
         return true;
       }
 
-      const sequence = Interact.getSequence(cacheKey, sequenceConfig, animationGroupArgs);
+      const sequence = Interact.getSequence(
+        cacheKey,
+        _getSequenceOptions(sequenceConfig, interaction, instance),
+        animationGroupArgs,
+      );
 
       const selectorCondition = getSelectorCondition(
         interaction.conditions || [],
@@ -771,7 +821,6 @@ function addEffectsForTarget(
       const effectOptions = _resolveVariant(
         mergedEffect,
         instance,
-        { trigger: interaction.trigger, interaction },
         {
           id: `${interactionId}::${variationIndex}`,
           key: targetKey,
@@ -780,6 +829,7 @@ function addEffectsForTarget(
             targetController.update();
           },
         },
+        { handling: interaction.reducedMotionHandling },
       );
 
       if (effectOptions) {
@@ -873,7 +923,7 @@ function addInteraction<T extends TriggerType>(
 ): void {
   let targetController;
 
-  if ((effect as StateEffect).transition || (effect as StateEffect).transitionProperties) {
+  if (isTransitionEffect(effect)) {
     const args: CreateTransitionCSSParams = {
       key: targetKey,
       effectId: (effect as Effect).effectId!,
@@ -903,18 +953,13 @@ function addInteraction<T extends TriggerType>(
     // the source's use site is unknown, so its handling resolves from its definition and the config only
     const srcEffect =
       definition &&
-      _resolveVariant(
-        definition,
-        instance!,
-        { trigger },
-        {
-          id: `${sourceKey}::animationEnd::${triggerEffectId}`,
-          key: sourceKey!,
-          onUpdate: () => {
-            Interact.getController(sourceKey)?.update();
-          },
+      _resolveVariant(definition, instance!, {
+        id: `${sourceKey}::animationEnd::${triggerEffectId}`,
+        key: sourceKey!,
+        onUpdate: () => {
+          Interact.getController(sourceKey)?.update();
         },
-      );
+      });
     if (srcEffect) {
       sourceAnimationOptions = effectToAnimationOptions(srcEffect as TimeEffect) as
         | AnimationOptions<'time'>

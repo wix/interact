@@ -2,10 +2,11 @@ import type {
   Condition,
   Effect,
   ReducedMotionHandling,
+  ScrubEffect,
   StateEffect,
   TimeEffect,
-  TriggerType,
 } from '../types';
+import { isTransitionEffect } from '../utils';
 
 export const REDUCED_MOTION_REDUCE = '__rm-reduce';
 export const REDUCED_MOTION_NO_PREFERENCE = '__rm-no-preference';
@@ -18,42 +19,46 @@ export const REDUCED_MOTION_CONDITIONS: Record<string, Condition> = {
   },
 };
 
-export type EffectKind = 'time' | 'scrub' | 'state';
-
-type HandlingSource = { reducedMotionHandling?: ReducedMotionHandling } | undefined;
+type EffectKind = 'time' | 'scrub' | 'state';
 
 type VariantOptions = {
-  kind: EffectKind;
   effects: Record<string, Effect>;
   force?: boolean;
-  warn?: boolean;
+  // the effect plays in a sequence whose stagger collapses, so it has a reduced-motion variant even when ignored
+  collapsesStagger?: boolean;
 };
 
-// the effect's animation itself, taken from a replacement - the rest is the original's identity and targeting
-const BODY_FIELDS = [
-  'namedEffect',
-  'keyframeEffect',
-  'customEffect',
-  'transition',
-  'transitionProperties',
-  'duration',
-  'delay',
-  'easing',
-  'iterations',
-  'alternate',
-  'fill',
-  'reversed',
-  'composite',
-  'rangeStart',
-  'rangeEnd',
-  'centeredToTarget',
-  'transitionDuration',
-  'transitionEasing',
-] as const;
+type KeysOfUnion<T> = T extends unknown ? keyof T : never;
 
-const SCRUB_TRIGGERS = new Set<TriggerType>(['viewProgress', 'pointerMove']);
-
-const warned = new Set<string>();
+// typed against the effect types, so a new field must be classified here
+const BODY_FIELDS = new Set(
+  Object.keys({
+    namedEffect: true,
+    keyframeEffect: true,
+    customEffect: true,
+    transition: true,
+    transitionProperties: true,
+    duration: true,
+    delay: true,
+    easing: true,
+    iterations: true,
+    alternate: true,
+    fill: true,
+    reversed: true,
+    composite: true,
+    rangeStart: true,
+    rangeEnd: true,
+    centeredToTarget: true,
+    transitionDuration: true,
+    transitionEasing: true,
+  } satisfies Record<
+    Exclude<
+      KeysOfUnion<TimeEffect | ScrubEffect | StateEffect>,
+      'key' | 'effectId' | 'stateAction' | 'triggerType'
+    >,
+    true
+  >),
+);
 
 export function withReducedMotionConditions(
   conditions: Record<string, Condition> = {},
@@ -61,40 +66,24 @@ export function withReducedMotionConditions(
   return { ...conditions, ...REDUCED_MOTION_CONDITIONS };
 }
 
+// handlings from the most specific level: effect, sequence, interaction, config
 export function getReducedMotionHandling(
-  effect: HandlingSource,
-  sequence: HandlingSource,
-  interaction: HandlingSource,
-  config: HandlingSource,
+  ...handlings: (ReducedMotionHandling | undefined)[]
 ): ReducedMotionHandling {
-  return (
-    effect?.reducedMotionHandling ??
-    sequence?.reducedMotionHandling ??
-    interaction?.reducedMotionHandling ??
-    config?.reducedMotionHandling ??
-    'ignore'
-  );
+  return handlings.find(Boolean) ?? 'collapse';
 }
 
-function isStateEffect(effect: object): boolean {
-  return !!((effect as StateEffect).transition || (effect as StateEffect).transitionProperties);
-}
-
-export function getEffectKind(effect: object, trigger: TriggerType): EffectKind {
-  if (isStateEffect(effect)) {
-    return 'state';
-  }
-  return SCRUB_TRIGGERS.has(trigger) ? 'scrub' : 'time';
-}
-
-function getReplacementKind(effect: Effect): EffectKind {
-  if (isStateEffect(effect)) {
+// the same time/scrub discriminator as effectToAnimationOptions()
+function getEffectKind(effect: object): EffectKind {
+  if (isTransitionEffect(effect)) {
     return 'state';
   }
   return 'duration' in effect ? 'time' : 'scrub';
 }
 
-function collapse<T extends object>(effect: T, kind: EffectKind): T | null {
+function collapse<T extends object>(effect: T): T | null {
+  const kind = getEffectKind(effect);
+
   if (kind === 'state') {
     const { transition, transitionProperties } = effect as StateEffect;
     return {
@@ -114,60 +103,42 @@ function collapse<T extends object>(effect: T, kind: EffectKind): T | null {
     return null;
   }
 
-  return { ...effect, duration: 0 };
+  return { ...effect, duration: 0, iterations: 1 };
 }
 
 function replace<T extends object>(effect: T, replacementId: string, replacement: Effect): T {
-  const body: Record<string, unknown> = {};
-  const base = { ...effect } as Record<string, unknown>;
+  const isBody = ([field]: [string, unknown]) => BODY_FIELDS.has(field);
+  const { keyframeEffect } = replacement as { keyframeEffect?: { name?: string } };
 
-  BODY_FIELDS.forEach((field) => {
-    delete base[field];
-    if (field in replacement) {
-      body[field] = replacement[field as keyof Effect];
-    }
-  });
-
-  const keyframeEffect = body.keyframeEffect as { name?: string } | undefined;
-  if (keyframeEffect && !keyframeEffect.name) {
-    body.keyframeEffect = { ...keyframeEffect, name: replacementId };
-  }
-
-  return { ...base, ...body } as T;
-}
-
-function warnFallback(effect: object, handling: string, fallback: string) {
-  const id = `${(effect as Effect).effectId}::${handling}`;
-  if (warned.has(id)) {
-    return;
-  }
-  warned.add(id);
-  console.warn(
-    `Interact: reducedMotionHandling "${handling}" can't apply to effect "${(effect as Effect).effectId}", falling back to "${fallback}"`,
-  );
+  return {
+    ...Object.fromEntries(Object.entries(effect).filter((entry) => !isBody(entry))),
+    ...Object.fromEntries(Object.entries(replacement).filter(isBody)),
+    // named after the replacement, or its keyframes would take the original's name
+    ...(keyframeEffect && {
+      keyframeEffect: { ...keyframeEffect, name: keyframeEffect.name || replacementId },
+    }),
+  } as T;
 }
 
 function getReducedEffect<T extends object>(
   effect: T,
   handling: ReducedMotionHandling,
-  { kind, effects, warn }: VariantOptions,
+  effects: Record<string, Effect>,
 ): T | null {
-  if (handling !== 'collapse') {
-    const replacement = effects[handling];
-    if (replacement && getReplacementKind(replacement) === kind) {
-      return replace(effect, handling, replacement);
-    }
-    if (warn) {
-      warnFallback(effect, handling, 'collapse');
+  switch (handling) {
+    case 'ignore':
+      return effect;
+    case 'cancel':
+      return null;
+    case 'collapse':
+      return collapse(effect);
+    default: {
+      const replacement = effects[handling];
+      return replacement && getEffectKind(replacement) === getEffectKind(effect)
+        ? replace(effect, handling, replacement)
+        : collapse(effect);
     }
   }
-
-  const collapsed = collapse(effect, kind);
-  if (!collapsed && warn) {
-    warnFallback(effect, handling, 'cancel');
-  }
-
-  return collapsed;
 }
 
 function withCondition<T extends object>(effect: T, condition: string): T {
@@ -177,23 +148,27 @@ function withCondition<T extends object>(effect: T, condition: string): T {
   };
 }
 
+export function isReducedMotionVariant(effect: { conditions?: string[] }): boolean {
+  return !!effect.conditions?.includes(REDUCED_MOTION_REDUCE);
+}
+
 /**
- * The variants of the effect in its position, each under its reserved media: CSS emits all of them, the runtime
- * picks the one whose media matches. When forced, only the reduced-motion outcome, unconditionally.
+ * The effect's variants, each under its reserved media: CSS emits all of them, the runtime picks the one whose
+ * media matches. When forced, only the reduced-motion outcome, unconditionally.
  */
 export function getReducedMotionVariants<T extends object>(
   effect: T,
   handling: ReducedMotionHandling,
-  options: VariantOptions,
+  { effects, force, collapsesStagger }: VariantOptions,
 ): T[] {
-  if (handling === 'ignore') {
-    return [effect];
+  const reduced = getReducedEffect(effect, handling, effects);
+
+  if (force) {
+    return reduced ? [reduced] : [];
   }
 
-  const reduced = handling === 'cancel' ? null : getReducedEffect(effect, handling, options);
-
-  if (options.force) {
-    return reduced ? [reduced] : [];
+  if (reduced === effect && !collapsesStagger) {
+    return [effect];
   }
 
   const normal = withCondition(effect, REDUCED_MOTION_NO_PREFERENCE);

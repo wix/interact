@@ -6,6 +6,7 @@ import type { InteractConfig, SequenceConfig } from '../src/types';
 import { getSequence, createAnimationGroups } from '@wix/motion';
 import { addListItems } from '../src/core/add';
 import { removeListItems } from '../src/core/remove';
+import { withNoReducedMotionPreference } from './matchMedia';
 
 vi.mock('@wix/motion', async () => {
   const { toCSSPropertyName } = await vi.importActual<typeof import('@wix/motion')>('@wix/motion');
@@ -1748,7 +1749,7 @@ describe('interact sequences', () => {
         writable: true,
         configurable: true,
         value: vi.fn((query: string) => {
-          const matches = matchingQueries.includes(query);
+          const matches = withNoReducedMotionPreference((q) => matchingQueries.includes(q))(query);
           const mql = {
             matches,
             media: query,
@@ -1853,11 +1854,12 @@ describe('interact sequences', () => {
       );
     });
 
-    test('resolves reducedMotionHandling per effect, the sequence over the interaction', () => {
-      mockMatchMedia(['(prefers-reduced-motion: reduce)']);
-      const getSequenceMock = vi.mocked(getSequence);
+    const createReducedMotionConfig = (
+      sequenceHandling: string | undefined,
+      offset = 100,
+    ): InteractConfig => {
       const keyframeEffect = { name: 'pop', keyframes: [{ opacity: 0 }, { opacity: 1 }] };
-      const config: InteractConfig = {
+      return {
         interactions: [
           {
             trigger: 'click',
@@ -1866,8 +1868,8 @@ describe('interact sequences', () => {
             sequences: [
               {
                 sequenceId: 'rm-seq',
-                offset: 100,
-                reducedMotionHandling: 'collapse',
+                offset,
+                reducedMotionHandling: sequenceHandling,
                 effects: [
                   { key: 'source-key', keyframeEffect, duration: 300 },
                   {
@@ -1882,15 +1884,40 @@ describe('interact sequences', () => {
           },
         ],
       };
+    };
 
+    const getSequenceArgs = (config: InteractConfig) => {
       Interact.create(config, { useCustomElement: false });
-      const source = createInteractElement();
-      addElement(source.element, 'source-key');
+      addElement(createInteractElement().element, 'source-key');
 
-      expect(getSequenceMock).toHaveBeenCalledTimes(1);
-      const [sequenceOptions, animationGroupArgs] = getSequenceMock.mock.calls[0];
-      expect(sequenceOptions).toMatchObject({ offset: 100 });
-      expect(animationGroupArgs.map(({ options }) => options.duration)).toEqual([0, 400]);
+      expect(getSequence).toHaveBeenCalledTimes(1);
+      return vi.mocked(getSequence).mock.calls[0];
+    };
+
+    test.each([
+      ['collapse', [0, 400]],
+      [undefined, [400]],
+    ])(
+      'resolves reducedMotionHandling per effect, the sequence (%s) over the interaction (cancel)',
+      (sequenceHandling, durations) => {
+        mockMatchMedia(['(prefers-reduced-motion: reduce)']);
+
+        const [, animationGroupArgs] = getSequenceArgs(createReducedMotionConfig(sequenceHandling));
+
+        expect(animationGroupArgs.map(({ options }) => options.duration)).toEqual(durations);
+      },
+    );
+
+    test.each([
+      ['(prefers-reduced-motion: reduce)', 'collapse', 0],
+      ['(prefers-reduced-motion: reduce)', 'ignore', 100],
+      ['(prefers-reduced-motion: no-preference)', 'collapse', 100],
+    ])('under %s, a %s sequence staggers by %s', (query, sequenceHandling, offset) => {
+      mockMatchMedia([query]);
+
+      const [sequenceOptions] = getSequenceArgs(createReducedMotionConfig(sequenceHandling));
+
+      expect(sequenceOptions).toMatchObject({ offset });
     });
 
     test('sets up media query listener for sequence conditions', () => {

@@ -22,7 +22,7 @@ class Interact {
   // Static methods
   static create(
     config: InteractConfig,
-    options?: { useCustomElement?: boolean; configIndex?: number },
+    options?: { useCustomElement?: boolean; configIndex?: number; forceReducedMotion?: boolean },
   ): Interact;
   static getInstance(key: string): Interact | undefined;
   static destroy(): void;
@@ -60,6 +60,7 @@ Creates a new `Interact` instance with the provided configuration and initialize
 - `config: InteractConfig` - The interaction configuration object
 - `options?.useCustomElement?: boolean` - Whether elements are wrapped in `<interact-element>` (defaults to whether the custom element is available)
 - `options?.configIndex?: number` - The config's index when several configs are on the same page. It must match the `configIndex` passed to [`generate()`](./functions.md#generateconfig-options) for the same config. Unnamed effects and sequences get ids suffixed by it (`eff-c1-0-0`), which become their generated keyframe and state names, so the configs' names don't collide.
+- `options?.forceReducedMotion?: boolean` - Forces reduced motion for this instance, overriding `Interact.forceReducedMotion`. It must match the `forceReducedMotion` passed to `generate()` for the same config.
 
 **Returns:** `Interact` - The initialized interact instance
 
@@ -144,7 +145,7 @@ Configures global settings for the Interact system.
 - `options.viewEnter` - Optional default partial `ViewEnterParams` (e.g. `threshold`, `inset`, `useSafeViewEnter`)
 - `options.allowA11yTriggers` - When `true`, `click` and `hover` triggers also respond to keyboard (Enter/Space) and focus
 
-To force reduced motion globally, set `Interact.forceReducedMotion = true` (static property, not via `setup`). It applies the reduced-motion outcome of each effect's `reducedMotionHandling` regardless of the OS setting, so it does nothing for effects without one (the default is `'ignore'`). When using `generate()`, pass it the same value as `forceReducedMotion`.
+To force reduced motion globally, set `Interact.forceReducedMotion = true` (static property, not via `setup`), or per instance with `Interact.create(config, { forceReducedMotion })`. It applies the reduced-motion outcome of each effect's `reducedMotionHandling` (`'collapse'` by default) regardless of the OS setting. When using `generate()`, pass it the same value as `forceReducedMotion`.
 
 **Example:**
 

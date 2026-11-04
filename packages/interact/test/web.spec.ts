@@ -6,6 +6,7 @@ import type { InteractConfig, ScrubEffect, IInteractElement, TriggerType } from 
 import type { NamedEffect } from '@wix/motion';
 import { effectToAnimationOptions } from '../src/handlers/utilities';
 import { InteractionController } from '../src/core/InteractionController';
+import { withNoReducedMotionPreference } from './matchMedia';
 
 // Mock @wix/motion module
 vi.mock('@wix/motion', async () => {
@@ -375,7 +376,7 @@ describe('interact (web)', () => {
       }
 
       const mql = {
-        matches: queryRule === query,
+        matches: withNoReducedMotionPreference((q) => q === queryRule)(query),
         media: query,
         onchange: null,
         addEventListener: vi.fn(),
@@ -591,7 +592,8 @@ describe('interact (web)', () => {
 
   describe('reduced motion', () => {
     it.each([
-      [undefined, 1200],
+      ['ignore', 1200],
+      [undefined, 0],
       ['collapse', 0],
     ] as const)(
       'should apply reducedMotionHandling %s when forceReducedMotion is true',

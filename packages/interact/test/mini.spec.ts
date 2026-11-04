@@ -6,6 +6,7 @@ import type { InteractConfig, ScrubEffect, TriggerType, IInteractElement } from 
 import type { NamedEffect } from '@wix/motion';
 import { effectToAnimationOptions } from '../src/handlers/utilities';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../src/handlers';
+import { withNoReducedMotionPreference } from './matchMedia';
 
 // Mock @wix/motion module
 vi.mock('@wix/motion', async () => {
@@ -412,7 +413,7 @@ describe('interact (mini)', () => {
       }
 
       const mql = {
-        matches: queryRule === query,
+        matches: withNoReducedMotionPreference((q) => q === queryRule)(query),
         media: query,
         onchange: null,
         addEventListener: vi.fn(),
@@ -610,7 +611,8 @@ describe('interact (mini)', () => {
 
   describe('reduced motion', () => {
     it.each([
-      [undefined, 1200],
+      ['ignore', 1200],
+      [undefined, 0],
       ['collapse', 0],
     ] as const)(
       'should apply reducedMotionHandling %s when forceReducedMotion is true',
@@ -2742,6 +2744,7 @@ describe('interact (mini)', () => {
     it('should not apply selector condition type to media query listeners', () => {
       // Selector conditions should NOT create matchMedia listeners (only media conditions do)
       const config: InteractConfig = {
+        reducedMotionHandling: 'ignore',
         conditions: {
           active: {
             type: 'selector',

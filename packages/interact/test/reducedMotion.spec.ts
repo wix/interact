@@ -1,8 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   REDUCED_MOTION_NO_PREFERENCE as NO_PREFERENCE,
   REDUCED_MOTION_REDUCE as REDUCE,
-  getEffectKind,
   getReducedMotionHandling,
   getReducedMotionVariants,
 } from '../src/core/reducedMotion';
@@ -33,43 +32,20 @@ const effects: Record<string, Effect> = {
   scrub: { keyframeEffect: { name: 'scrub', keyframes: [{ opacity: 0 }] } },
 };
 
-const options = { kind: 'time' as const, effects };
+const { keyframeEffect, duration, delay, easing, ...scrubSlide } = slide;
+
+const options = { effects };
 
 describe('reducedMotion', () => {
   describe('getReducedMotionHandling', () => {
     it('takes the most specific level', () => {
-      expect(
-        getReducedMotionHandling(
-          { reducedMotionHandling: 'cancel' },
-          { reducedMotionHandling: 'collapse' },
-          { reducedMotionHandling: 'fade' },
-          { reducedMotionHandling: 'collapse' },
-        ),
-      ).toBe('cancel');
-      expect(
-        getReducedMotionHandling(
-          {},
-          { reducedMotionHandling: 'collapse' },
-          { reducedMotionHandling: 'fade' },
-          undefined,
-        ),
-      ).toBe('collapse');
-      expect(getReducedMotionHandling({}, undefined, {}, { reducedMotionHandling: 'fade' })).toBe(
-        'fade',
-      );
+      expect(getReducedMotionHandling('cancel', 'ignore', 'fade', 'ignore')).toBe('cancel');
+      expect(getReducedMotionHandling(undefined, 'ignore', 'fade', undefined)).toBe('ignore');
+      expect(getReducedMotionHandling(undefined, undefined, undefined, 'fade')).toBe('fade');
     });
 
-    it('defaults to ignore', () => {
-      expect(getReducedMotionHandling({}, undefined, {}, {})).toBe('ignore');
-    });
-  });
-
-  describe('getEffectKind', () => {
-    it('is state for transitions, scrub for scrub triggers and time otherwise', () => {
-      expect(getEffectKind(effects.dim, 'viewProgress')).toBe('state');
-      expect(getEffectKind(slide, 'viewProgress')).toBe('scrub');
-      expect(getEffectKind(slide, 'pointerMove')).toBe('scrub');
-      expect(getEffectKind(slide, 'hover')).toBe('time');
+    it('defaults to collapse', () => {
+      expect(getReducedMotionHandling(undefined, undefined, undefined, undefined)).toBe('collapse');
     });
   });
 
@@ -84,10 +60,12 @@ describe('reducedMotion', () => {
       ]);
     });
 
-    it('collapses the duration only, under reduce', () => {
-      expect(getReducedMotionVariants(slide, 'collapse', options)).toEqual([
-        { ...slide, conditions: ['desktop', NO_PREFERENCE] },
-        { ...slide, duration: 0, conditions: ['desktop', REDUCE] },
+    it('collapses the duration and iterations only, under reduce', () => {
+      const repeating = { ...slide, iterations: 3 };
+
+      expect(getReducedMotionVariants(repeating, 'collapse', options)).toEqual([
+        { ...repeating, conditions: ['desktop', NO_PREFERENCE] },
+        { ...repeating, duration: 0, iterations: 1, conditions: ['desktop', REDUCE] },
       ]);
     });
 
@@ -96,10 +74,7 @@ describe('reducedMotion', () => {
         { name: 'opacity', value: '0', duration: 200, delay: 50 },
         { name: 'color', value: 'red', duration: 300 },
       ];
-      const [, collapsed] = getReducedMotionVariants({ transitionProperties }, 'collapse', {
-        ...options,
-        kind: 'state',
-      });
+      const [, collapsed] = getReducedMotionVariants({ transitionProperties }, 'collapse', options);
 
       expect(collapsed).toEqual({
         transitionProperties: [
@@ -111,19 +86,18 @@ describe('reducedMotion', () => {
     });
 
     it.each([0, Infinity])('falls back to cancel when collapsing %s iterations', (iterations) => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const looping = { ...slide, effectId: `loop-${iterations}`, iterations };
+      const looping = { ...slide, iterations };
 
-      expect(getReducedMotionVariants(looping, 'collapse', { ...options, warn: true })).toEqual([
+      expect(getReducedMotionVariants(looping, 'collapse', options)).toEqual([
         { ...looping, conditions: ['desktop', NO_PREFERENCE] },
       ]);
-      expect(warn).toHaveBeenCalledTimes(1);
-      warn.mockRestore();
     });
 
     it('falls back to cancel when collapsing a scrub effect', () => {
-      expect(getReducedMotionVariants(slide, 'collapse', { ...options, kind: 'scrub' })).toEqual([
-        { ...slide, conditions: ['desktop', NO_PREFERENCE] },
+      const scrub = { ...scrubSlide, keyframeEffect };
+
+      expect(getReducedMotionVariants(scrub, 'collapse', options)).toEqual([
+        { ...scrub, conditions: ['desktop', NO_PREFERENCE] },
       ]);
     });
 
@@ -153,15 +127,25 @@ describe('reducedMotion', () => {
     ])('falls back to collapse for %s replacement', (_, handling) => {
       expect(getReducedMotionVariants(slide, handling, options)).toEqual([
         { ...slide, conditions: ['desktop', NO_PREFERENCE] },
-        { ...slide, duration: 0, conditions: ['desktop', REDUCE] },
+        { ...slide, duration: 0, iterations: 1, conditions: ['desktop', REDUCE] },
       ]);
     });
 
     it('accepts a scrub replacement for a scrub effect', () => {
-      const [, replaced] = getReducedMotionVariants(slide, 'scrub', { ...options, kind: 'scrub' });
+      const scrub = { ...scrubSlide, keyframeEffect };
+      const [, replaced] = getReducedMotionVariants(scrub, 'scrub', options);
 
       expect(replaced).toMatchObject({ keyframeEffect: { name: 'scrub' } });
       expect(replaced).not.toHaveProperty('duration');
+    });
+
+    it('splits an ignored effect whose sequence stagger collapses', () => {
+      expect(
+        getReducedMotionVariants(slide, 'ignore', { ...options, collapsesStagger: true }),
+      ).toEqual([
+        { ...slide, conditions: ['desktop', NO_PREFERENCE] },
+        { ...slide, conditions: ['desktop', REDUCE] },
+      ]);
     });
 
     describe('forced', () => {
@@ -177,7 +161,7 @@ describe('reducedMotion', () => {
 
       it('returns the reduced variant only, unconditionally', () => {
         expect(getReducedMotionVariants(slide, 'collapse', forced)).toEqual([
-          { ...slide, duration: 0 },
+          { ...slide, duration: 0, iterations: 1 },
         ]);
       });
     });

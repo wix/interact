@@ -614,7 +614,6 @@ const primitiveInteractions = primitivePrefixes.flatMap((prefix) =>
 
 // --- Interact Configuration ---
 const config = {
-  reducedMotionHandling: 'collapse',
   conditions: {
     Mobile: {
       type: 'media',

@@ -17,7 +17,7 @@ import { withPluginFields } from './plugins';
 import type { Path, SemanticIssue } from '../types';
 import { walkConfig } from '../walkConfig';
 import { collectSemanticWarnings } from '../semantic';
-import { collectReducedMotionIssues, getReducedMotionReferences } from '../semantic/reducedMotion';
+import { checkReducedMotionErrors } from '../semantic/reducedMotion';
 
 export const TriggerType = z.enum([
   'hover',
@@ -250,11 +250,14 @@ export const InteractConfigSchema = z
       onInteraction: (path, interaction) => {
         validateConditionReferences(ctx, path, configConditions, interaction.conditions);
       },
-      onEffect: (path, effect, isTopLevel) => {
+      onEffect: (path, effect, isTopLevel, owner, sequence) => {
         validateConditionReferences(ctx, path, configConditions, effect.conditions);
         if (!isTopLevel) {
           validateEffectReference(ctx, path, effect, configEffects);
         }
+        checkReducedMotionErrors(config, path, effect, isTopLevel, owner, sequence).forEach(
+          ({ severity: _, ...issue }) => ctx.addIssue(issue as any),
+        );
       },
       onSequence: (path, sequence, isTopLevel) => {
         validateConditionReferences(ctx, path, configConditions, sequence.conditions);
@@ -268,10 +271,6 @@ export const InteractConfigSchema = z
         }
       },
     });
-
-    collectReducedMotionIssues(config)
-      .filter(({ severity }) => severity === 'error')
-      .forEach(({ severity: _, ...issue }) => ctx.addIssue(issue as any));
   })
   .transform((config) => {
     const configEffects = config.effects ?? {};
@@ -279,6 +278,7 @@ export const InteractConfigSchema = z
     const configConditions = config.conditions ?? {};
     const keyframeNames = new Set<string>();
     const effectIdReferences = new Set(Object.keys(configEffects));
+    effectIdReferences.delete(config.reducedMotionHandling!);
     const sequenceIdReferences = new Set(Object.keys(configSequences));
     const conditionReferences = new Set(Object.keys(configConditions));
 
@@ -287,9 +287,11 @@ export const InteractConfigSchema = z
     walkConfig(config, {
       onInteraction: (_path, interaction) => {
         interaction.conditions?.forEach(Set.prototype.delete, conditionReferences);
+        effectIdReferences.delete(interaction.reducedMotionHandling!);
       },
       onEffect: (path, effect, isTopLevel) => {
         effect.conditions?.forEach(Set.prototype.delete, conditionReferences);
+        effectIdReferences.delete(effect.reducedMotionHandling!);
         collectEffectKeyframeNames(warnings, path, keyframeNames, (effect as any).keyframeEffect);
         if (!isTopLevel && effect.effectId) {
           if (!configEffects[effect.effectId]) {
@@ -305,13 +307,12 @@ export const InteractConfigSchema = z
       },
       onSequence: (_path, sequence, isTopLevel) => {
         sequence.conditions?.forEach(Set.prototype.delete, conditionReferences);
+        effectIdReferences.delete(sequence.reducedMotionHandling!);
         if (!isTopLevel && sequence.sequenceId) {
           sequenceIdReferences.delete(sequence.sequenceId);
         }
       },
     });
-
-    getReducedMotionReferences(config).forEach(Set.prototype.delete, effectIdReferences);
 
     effectIdReferences.forEach((effectId) => {
       warnings.push({
@@ -340,9 +341,6 @@ export const InteractConfigSchema = z
 
     // Append the rule-derived semantic warnings/info nudges (A/C/D + animationEnd self-reference).
     warnings.push(...collectSemanticWarnings(config));
-    warnings.push(
-      ...collectReducedMotionIssues(config).filter(({ severity }) => severity !== 'error'),
-    );
 
     return { ...config, warnings };
   });

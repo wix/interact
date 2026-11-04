@@ -18,6 +18,7 @@ export type InteractCache = {
     [conditionId: string]: Condition;
   };
   reducedMotionHandling?: ReducedMotionHandling;
+  forceReducedMotion?: boolean;
   interactions: {
     [path: string]: {
       triggers: Interaction[];

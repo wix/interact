@@ -1,4 +1,5 @@
 export const RETRIGGER_TYPES = ['repeat', 'alternate', 'state'];
+export const SCRUB_TRIGGERS = ['viewProgress', 'pointerMove'];
 
 export type Severity = 'error' | 'warning' | 'info';
 
@@ -98,7 +99,14 @@ export type Visitors = {
   // `owner` is the parent interaction (carrying trigger/key/selector/params), or
   // `undefined` for top-level registry effects/sequences whose trigger context is
   // unknown until their reference site. Trigger-aware checks skip `owner === undefined`.
-  onEffect: (path: Path, effect: AnyEffect, isTopLevel: boolean, owner?: AnyInteraction) => void;
+  // `sequence` is the effect's parent sequence, when it's in one.
+  onEffect: (
+    path: Path,
+    effect: AnyEffect,
+    isTopLevel: boolean,
+    owner?: AnyInteraction,
+    sequence?: AnySequence,
+  ) => void;
   onSequence: (
     path: Path,
     sequence: AnySequence,

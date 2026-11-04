@@ -1253,6 +1253,7 @@ describe('css._generate', () => {
     it('should produce unique custom prop names per effect in a sequence', () => {
       const config: InteractConfig = {
         effects: {},
+        reducedMotionHandling: 'ignore',
         interactions: [
           {
             key: 'el',
@@ -1433,6 +1434,7 @@ describe('css._generate', () => {
     it('should only use slots for the targets that repeat within the sequence', () => {
       const config: InteractConfig = {
         effects: {},
+        reducedMotionHandling: 'ignore',
         interactions: [
           {
             key: 'el',
@@ -2456,9 +2458,6 @@ describe('css reducedMotionHandling', () => {
 
     const animationLists = (value: string) => [
       { _listPropertyName: 'animation', name: '--anm-0', value: expect.stringContaining(value) },
-      { _listPropertyName: 'animation-composition', name: '--anm-cmps-0', value: 'replace' },
-      { _listPropertyName: 'animation-timeline', name: '--anm-tmln-0', value: 'auto' },
-      { _listPropertyName: 'animation-range', name: '--anm-rng-0', value: 'normal' },
     ];
     expect(declarationsByMedia(cssRules)).toEqual([
       { media: NO_PREFERENCE, declarations: animationLists('slide 800ms 100ms') },
@@ -2511,15 +2510,8 @@ describe('css reducedMotionHandling', () => {
 
     expect(reduced.map(({ selectorSuffix }) => selectorSuffix)).toEqual([
       ':not([data-interact-enter])',
-      undefined,
     ]);
     expect(reduced[0].declarations).toBe(DEFAULT_INITIAL);
-    expect(reduced[1].declarations).toEqual([
-      { name: '--anm-0', value: 'none' },
-      { name: '--anm-cmps-0', value: 'replace' },
-      { name: '--anm-tmln-0', value: 'auto' },
-      { name: '--anm-rng-0', value: 'normal' },
-    ]);
     expect(
       cssRules
         .filter(({ media }) => media === NO_PREFERENCE)
@@ -2560,16 +2552,26 @@ describe('css reducedMotionHandling', () => {
     ]);
   });
 
-  it('writes the fallback of an entry a variant does not use', () => {
-    const transition = {
-      transition: { duration: 300, styleProperties: [{ name: 'opacity', value: '0.5' }] },
-      reducedMotionHandling: 'collapse',
-    };
-    const { cssRules } = _generate(configWith(transition));
+  it('falls back, under each variant, only the entries assigned before its effect', () => {
+    const { cssRules } = _generate({
+      effects: { custom: { customEffect: () => {}, duration: 300 } },
+      interactions: [
+        {
+          key: 'a',
+          trigger: 'hover',
+          effects: [
+            { ...slide, reducedMotionHandling: 'ignore' },
+            { ...slide, reducedMotionHandling: 'custom' },
+          ],
+        },
+      ],
+    });
 
-    expect(cssRules.find(({ media, states }) => media === REDUCE && !states)!.declarations).toEqual(
-      [{ name: '--trns-0', value: '_' }],
-    );
+    expect(declarationsByMedia(cssRules)).toEqual([
+      { media: '', declarations: [expect.objectContaining({ name: '--anm-0' })] },
+      { media: NO_PREFERENCE, declarations: [expect.objectContaining({ name: '--anm-0' })] },
+      { media: REDUCE, declarations: [{ name: '--anm-0', value: 'none' }] },
+    ]);
   });
 
   it('inherits the handling from the interaction and the config, the effect taking precedence', () => {
@@ -2612,8 +2614,37 @@ describe('css reducedMotionHandling', () => {
     );
     expect(effectRules.map(({ key, media }) => ({ key, media }))).toEqual([
       { key: 'a', media: NO_PREFERENCE },
-      { key: 'b', media: '' },
+      { key: 'b', media: NO_PREFERENCE },
+      { key: 'b', media: REDUCE },
     ]);
+  });
+
+  it('collapses the stagger under reduce, unless the sequence ignores it', () => {
+    const staggerOf = (reducedMotionHandling: string) =>
+      _generate({
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'click',
+            sequences: [
+              {
+                offset: 100,
+                reducedMotionHandling,
+                effects: [{ ...slide, reducedMotionHandling: 'ignore' }],
+              },
+            ],
+          },
+        ],
+      }).cssRules.map(({ media, declarations }) => ({
+        media,
+        staggered: declarations.some(({ value }) => String(value).includes('-index')),
+      }));
+
+    expect(staggerOf('collapse')).toEqual([
+      { media: NO_PREFERENCE, staggered: true },
+      { media: REDUCE, staggered: false },
+    ]);
+    expect(staggerOf('ignore')).toEqual([{ media: '', staggered: true }]);
   });
 
   it('emits only the reduced outcome, unconditionally, when forced', () => {

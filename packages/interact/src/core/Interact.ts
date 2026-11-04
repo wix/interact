@@ -25,6 +25,13 @@ import {
 } from '@wix/motion';
 import type { SequenceOptions, AnimationGroupArgs, IndexedGroup } from '@wix/motion';
 
+type InteractInitOptions = {
+  useCustomElement?: boolean;
+  configIndex?: number;
+  // overrides Interact.forceReducedMotion for this instance
+  forceReducedMotion?: boolean;
+};
+
 function _convertToKeyTemplate(key: string) {
   return key.replace(/\[[^\]]+]/g, '[]');
 }
@@ -61,17 +68,19 @@ export class Interact {
     this.controllers = new Set();
   }
 
-  init(
-    config: InteractConfig,
-    options?: { useCustomElement?: boolean; configIndex?: number },
-  ): void {
+  init(config: InteractConfig, options?: InteractInitOptions): void {
     if (typeof window === 'undefined' || !window.customElements) {
       return;
     }
 
     const useCustomElement = options?.useCustomElement ?? !!Interact.defineInteractElement;
 
-    this.dataCache = parseConfig(config, useCustomElement, options?.configIndex);
+    this.dataCache = parseConfig(
+      config,
+      useCustomElement,
+      options?.configIndex,
+      options?.forceReducedMotion ?? Interact.forceReducedMotion,
+    );
 
     const defined = Interact.defineInteractElement?.();
 
@@ -178,10 +187,7 @@ export class Interact {
     });
   }
 
-  static create(
-    config: InteractConfig,
-    options?: { useCustomElement?: boolean; configIndex?: number },
-  ): Interact {
+  static create(config: InteractConfig, options?: InteractInitOptions): Interact {
     const instance = new Interact();
     Interact.instances.push(instance);
 
@@ -427,11 +433,12 @@ function parseConfig(
   config: InteractConfig,
   useCustomElement: boolean = false,
   configIndex?: number,
+  forceReducedMotion: boolean = false,
 ): InteractCache {
   const { effects: effectMap = {}, sequences: sequenceMap = {}, conditions = {} } = config;
   const interactions: InteractCache['interactions'] = {};
   const slots = config.interactions
-    ? getKeyframeSlots(config, configIndex, Interact.forceReducedMotion)
+    ? getKeyframeSlots(config, configIndex, forceReducedMotion)
     : new Map<string, string>();
 
   config.interactions?.forEach((interaction_, interactionIndex) => {
@@ -599,6 +606,7 @@ function parseConfig(
     sequences: sequenceMap,
     conditions: withReducedMotionConditions(conditions),
     reducedMotionHandling: config.reducedMotionHandling,
+    forceReducedMotion,
     interactions,
   };
 }

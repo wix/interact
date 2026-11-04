@@ -35,6 +35,12 @@ export function generateId() {
   );
 }
 
+export function isTransitionEffect(
+  effect: object,
+): effect is Pick<StateEffect, 'transition' | 'transitionProperties'> {
+  return !!((effect as StateEffect).transition || (effect as StateEffect).transitionProperties);
+}
+
 /**
  * Resolves the style properties of a state effect - `transition.styleProperties` wins
  * when both are set - with property names normalized to the kebab-case form CSS expects.

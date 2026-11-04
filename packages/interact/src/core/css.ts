@@ -20,7 +20,7 @@ import {
 import { getSelector } from './Interact';
 import { resolveEffectForCSS, resolveSequenceForCSS } from './resolvers';
 import { getElementHash } from './utilities';
-import { withReducedMotionConditions } from './reducedMotion';
+import { isReducedMotionVariant, withReducedMotionConditions } from './reducedMotion';
 import {
   LIST_ANIMATION_PROPERTY_NAMES,
   LIST_PROPERTY_NAMES,
@@ -161,8 +161,8 @@ function getEffectListKind(effect: ResolvedEffect): ListKind | null {
   return null;
 }
 
-// a position's variants are of the same kind, but only some of them may be expressible in CSS
-function getPositionListKind(effect: ResolvedEffect): ListKind | null {
+// an effect's variants are of the same kind, but only some of them may be expressible in CSS
+function getVariantsListKind(effect: ResolvedEffect): ListKind | null {
   return (effect.variants || [effect]).map(getEffectListKind).find(Boolean) || null;
 }
 
@@ -170,7 +170,7 @@ function getSlotUsage(sequence: ResolvedSequence): Map<string, SlotUsage> {
   const counts = new Map<string, Record<ListKind, number>>();
 
   sequence.effects.forEach((effect) => {
-    const kind = getPositionListKind(effect);
+    const kind = getVariantsListKind(effect);
     if (!kind) {
       return;
     }
@@ -323,10 +323,12 @@ function effectToCSS(
     rules.push(...collectFieldPluginStyles('effect', effect, key, media, ctx.plugins));
   }
 
-  if (namedEffect || keyframeEffect) {
+  // a 0-duration entrance can finish before it's marked as started, restarting a CSS animation that's held until
+  // done, so CSS only hides its element and the runtime plays it
+  const isInstantEntrance = initial && (effect as { duration?: number }).duration === 0;
+
+  if ((namedEffect || keyframeEffect) && !isInstantEntrance) {
     const animationOptions = effectToAnimationOptions(effect);
-    // read before getCSSAnimation() normalizes a 0 duration
-    const isInstant = 'duration' in animationOptions && animationOptions.duration === 0;
     const cssAnimations = getCSSAnimation(null, animationOptions, trigger, sequence).filter(
       (anim) => anim.name,
     );
@@ -391,29 +393,14 @@ function effectToCSS(
           declarations: DEFAULT_INITIAL,
           selectorSuffix: ':not([data-interact-enter])',
         });
-        // an instant (e.g. collapsed) entrance can finish before it's marked as started, which would restart a
-        // CSS animation that's held until done, so it only hides the element and the runtime plays it
-        rules.push(
-          isInstant
-            ? {
-                key,
-                media,
-                selectorCondition,
-                childSelector: childOrPartSelector,
-                declarations: animationDeclarations.map(({ _listPropertyName, name }) => ({
-                  name,
-                  value: LIST_PROPERTY_FALLBACKS[_listPropertyName],
-                })),
-              }
-            : {
-                key,
-                media,
-                selectorCondition,
-                childSelector: childOrPartSelector,
-                declarations: animationDeclarations,
-                selectorSuffix: ':not([data-interact-enter="done"])',
-              },
-        );
+        rules.push({
+          key,
+          media,
+          selectorCondition,
+          childSelector: childOrPartSelector,
+          declarations: animationDeclarations,
+          selectorSuffix: ':not([data-interact-enter="done"])',
+        });
       } else {
         // declare animation custom properties
         if (part) {
@@ -453,6 +440,16 @@ function effectToCSS(
       declarations: properties,
     });
   } else {
+    if (isInstantEntrance) {
+      rules.push({
+        key,
+        media,
+        selectorCondition,
+        childSelector,
+        declarations: DEFAULT_INITIAL,
+        selectorSuffix: ':not([data-interact-enter])',
+      });
+    }
     // setting off animation custom properties
     declarations.push(
       ...LIST_ANIMATION_PROPERTY_NAMES.filter((propertyName) =>
@@ -490,6 +487,18 @@ function collectKeyframeEntry(
   target.keyframeEntries.set(entry, [...members, { slotKey, getNames }]);
 }
 
+// the stagger collapses under reduced motion, unless the sequence ignores it
+function getVariantSequence(
+  ctx: GenerateContext,
+  variant: ResolvedEffect,
+  sequence?: ResolvedSequence,
+): ResolvedSequence | undefined {
+  const isReduced = ctx.forceReducedMotion || isReducedMotionVariant(variant);
+  return sequence && isReduced && sequence.reducedMotionHandling !== 'ignore'
+    ? { ...sequence, offset: 0 }
+    : sequence;
+}
+
 function parseEffect(
   ctx: GenerateContext,
   effect: ResolvedEffect,
@@ -514,7 +523,7 @@ function parseEffect(
   const useSlots = slotUsage?.get(targetHash) || NO_SLOTS;
   const customProps = getCustomProps(current, useSlots, ctx.configIndex);
   const variants = effect.variants || [effect];
-  const kind = getPositionListKind(effect);
+  const kind = getVariantsListKind(effect);
 
   if (ctx.collectSlots) {
     variants.forEach((variant) =>
@@ -529,23 +538,26 @@ function parseEffect(
     return [];
   }
 
-  if (variants.length > 1) {
-    // every variant writes all of the position's entries, falling back on the ones it doesn't use
-    const names =
-      kind === 'animation'
-        ? LIST_ANIMATION_PROPERTY_NAMES
-        : kind === 'transition'
-          ? (['transition'] as const)
-          : [];
-    names.forEach((name) => current.assigned.add(customProps[name]));
-  }
-
+  const assigned = current.assigned;
   const results = variants.map((variant) => {
     if (variant.namedEffect) {
       variant.suffix = ctx.keyframeSlots.get(effect.slotKey!);
     }
-    return effectToCSS(ctx, variant, current, trigger, customProps, sequence);
+    // the variants' media are exclusive, so each overrides only what was assigned before the effect
+    current.assigned = new Set(assigned);
+    return {
+      ...effectToCSS(
+        ctx,
+        variant,
+        current,
+        trigger,
+        customProps,
+        getVariantSequence(ctx, variant, sequence),
+      ),
+      assigned: current.assigned,
+    };
   });
+  current.assigned = new Set(results.flatMap((result) => [...result.assigned]));
 
   results.forEach(({ keyframes }) =>
     keyframes.forEach(({ name, keyframes }) => ctx.keyframesMap.set(name, keyframes)),

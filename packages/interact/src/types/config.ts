@@ -77,7 +77,7 @@ export type ResolvedEffect = ElementIdentifier &
     suffix?: string;
     // the effect's position in the config (see getSlotKey)
     slotKey?: string;
-    // the position's reduced-motion variants, each under its reserved media (see getReducedMotionVariants)
+    // the effect's reduced-motion variants, each under its reserved media (see getReducedMotionVariants)
     variants?: ResolvedEffect[];
   };
 
@@ -88,5 +88,6 @@ export type ResolvedSequence = {
   offset: number;
   offsetEasing: string;
   conditions: string[];
+  reducedMotionHandling: ReducedMotionHandling;
   effects: ResolvedEffect[];
 };

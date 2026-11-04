@@ -5,6 +5,7 @@ import { Interaction, createInteractRef, Interact } from '../src/react';
 import * as domApi from '../src/dom/api';
 import type { InteractConfig } from '../src/types';
 import type { NamedEffect } from '@wix/motion';
+import { withNoReducedMotionPreference } from './matchMedia';
 
 // Mock @wix/motion module
 vi.mock('@wix/motion', async () => {
@@ -196,7 +197,7 @@ describe('interact (react)', () => {
       }
 
       const mql = {
-        matches: queryRule === query,
+        matches: withNoReducedMotionPreference((q) => q === queryRule)(query),
         media: query,
         onchange: null,
         addEventListener: vi.fn(),
@@ -711,6 +712,7 @@ describe('interact (react)', () => {
 
     it('should work with conditions/media queries', () => {
       const config: InteractConfig = {
+        reducedMotionHandling: 'ignore',
         conditions: {
           desktop: {
             type: 'media',
