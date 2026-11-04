@@ -86,6 +86,20 @@ function _applyPlugins(
   }
 }
 
+/**
+ * Whether `config` carries a field of a plugin that is still deferred for `key` (see the `defer`
+ * option of `Interact.use()`). A deferred unit is skipped without being marked as added, so the
+ * add pass that `Interact.ready()` re-runs for the released key (or every key) applies it.
+ */
+function _isDeferred(key: string, config: Record<string, unknown>): boolean {
+  for (const name of Interact.getPluginsNames()) {
+    if (`${PLUGIN_FIELD_PREFIX}${name}` in config && !Interact._isPluginReleased(name, key)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function _getElementsFromData(
   data: Interaction | Effect,
   root: HTMLElement,
@@ -262,6 +276,10 @@ function _addInteraction(
         targetController = sourceController;
       }
 
+      if (_isDeferred(target || interaction.key, effectOptions)) {
+        return;
+      }
+
       // Effect-level plugins act on the effect's target element before it is resolved.
       _applyPlugins(
         targetController,
@@ -347,16 +365,34 @@ function _buildAnimationGroupArgsFromSequence(
   if (seqMql && !seqMql.matches) return null;
 
   const seqEffects: (Effect | EffectRef)[] = sequenceConfig.effects || [];
+  const resolveEffect = (effect: Effect | EffectRef) => {
+    const effectId = (effect as EffectRef).effectId;
+    const resolvedEffect = effectId ? instance.dataCache.effects[effectId] || {} : {};
+    return { ...resolvedEffect, ...effect } as Effect;
+  };
+
+  // A sequence is built as a whole, so one deferred effect defers all of it — checked up front so
+  // no plugin of the sequence runs while it is deferred.
+  const isDeferred = seqEffects.some((effect) => {
+    const effectOptions = resolveEffect(effect);
+    const effectMql = getMediaQuery(effectOptions.conditions || [], instance.dataCache.conditions);
+
+    if (effectMql && !effectMql.matches) return false;
+
+    const target = effectOptions.key && getInterpolatedKey(effectOptions.key, sourceKey);
+    return _isDeferred(target || sourceKey, effectOptions);
+  });
+
+  if (isDeferred) {
+    return null;
+  }
+
   const animationGroupArgs: AnimationGroupArgs[] = [];
   let usedListElements = false;
 
   for (const effect of seqEffects) {
     const effectId = (effect as EffectRef).effectId;
-    const resolvedEffect = effectId ? instance.dataCache.effects[effectId] || {} : {};
-    const effectOptions = {
-      ...resolvedEffect,
-      ...effect,
-    };
+    const effectOptions = resolveEffect(effect);
 
     const effectMql = getMediaQuery(effectOptions.conditions || [], instance.dataCache.conditions);
 
@@ -523,7 +559,10 @@ function _processSequences(
       sourceKey,
       sourceController,
       instance,
-      { updateKey: sourceKey, onUpdate: () => sourceController.update() },
+      {
+        updateKey: sourceKey,
+        onUpdate: () => sourceController.update(),
+      },
       listElements,
     );
 
@@ -628,6 +667,10 @@ function _processSequencesForTarget(
         return true;
       }
 
+      if (_isDeferred(sourceKey!, interaction)) {
+        return true;
+      }
+
       const listElements: ListElements | undefined =
         elements && listContainer
           ? { controllerKey: targetKey, listContainer, elements }
@@ -639,7 +682,10 @@ function _processSequencesForTarget(
         sourceKey!,
         sourceController,
         instance,
-        { updateKey: targetKey, onUpdate: () => targetController.update() },
+        {
+          updateKey: targetKey,
+          onUpdate: () => targetController.update(),
+        },
         listElements,
       );
 
@@ -752,6 +798,10 @@ function addEffectsForTarget(
 
         if (!sourceController) {
           // Bail out :: no source or target elements in cache
+          return true;
+        }
+
+        if (_isDeferred(sourceKey!, interaction) || _isDeferred(targetKey, effectOptions)) {
           return true;
         }
 
@@ -911,6 +961,10 @@ export function add(controller: IInteractionController): boolean {
     }
 
     if (!mql || mql.matches) {
+      if (_isDeferred(key, interaction)) {
+        return;
+      }
+
       // Run interaction-level plugins before target resolution / list observation so any DOM they
       // create is visible to the selectors and MutationObservers that follow.
       _applyPlugins(controller, controller.element, interaction, key, 'interaction');
@@ -958,6 +1012,10 @@ export function addListItems(
       }
 
       if (!mql || mql.matches) {
+        if (_isDeferred(key, interaction)) {
+          return;
+        }
+
         _addInteraction(key, controller, instance!, interaction, elements);
       }
     });

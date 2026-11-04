@@ -11,6 +11,7 @@ import {
   IInteractionController,
   IInteractElement,
   InteractPlugin,
+  InteractPluginOptions,
 } from '../types';
 import { getElementHash, getInterpolatedKey } from './utilities';
 import { getFallbackId, getKeyframeSlots, getSlotKey } from './css';
@@ -51,6 +52,9 @@ export class Interact {
   static sequenceCache = new Map<string, Sequence>();
   static elementSequenceMap = new WeakMap<HTMLElement, Set<Sequence>>();
   private static plugins = new Map<string, InteractPlugin>();
+  private static pluginDefers = new Map<string, string[]>();
+  /** Released defer names: `name` (every key) or `name::key` (a single key). */
+  static _released = new Set<string>();
 
   constructor() {
     this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
@@ -197,6 +201,7 @@ export class Interact {
     Interact.controllerCache.clear();
     Interact.sequenceCache.clear();
     Interact.elementSequenceMap = new WeakMap();
+    Interact._released.clear();
   }
 
   static setup(options: {
@@ -259,9 +264,44 @@ export class Interact {
    * Registers a plugin under a name. When the config carries a plugin field (e.g. `$splitText`) with a matching key
    * (on an interaction or effect), Interact invokes the plugin with the field's value and a
    * context. Interact is agnostic to what the plugin does — see the `InteractPlugin` type.
+   *
+   * With `options.defer`, the plugin — and every interaction, effect, or sequence carrying its
+   * field — is deferred until each named event is released via `Interact.ready()`.
    */
-  static use(name: string, plugin: InteractPlugin): void {
+  static use(name: string, plugin: InteractPlugin, options?: InteractPluginOptions): void {
     Interact.plugins.set(name, plugin);
+
+    const defer = options?.defer;
+    if (defer && defer.length) {
+      Interact.pluginDefers.set(name, Array.isArray(defer) ? defer : [defer]);
+    } else {
+      Interact.pluginDefers.delete(name);
+    }
+  }
+
+  /**
+   * Releases a defer name — for every key, or only for `key` — and applies everything that was
+   * deferred on it (see the `defer` option of `Interact.use()`).
+   */
+  static ready(name: string, key?: string): void {
+    Interact._released.add(key ? `${name}::${key}` : name);
+
+    if (key) {
+      Interact.controllerCache.get(key)?.resume();
+    } else {
+      Interact.controllerCache.forEach((controller) => controller.resume());
+    }
+  }
+
+  static _isPluginReleased(pluginName: string, key: string): boolean {
+    const defer = Interact.pluginDefers.get(pluginName);
+    if (!defer) {
+      return true;
+    }
+
+    return defer.every(
+      (name) => Interact._released.has(name) || Interact._released.has(`${name}::${key}`),
+    );
   }
 
   static getPlugin(name: string): InteractPlugin | undefined {

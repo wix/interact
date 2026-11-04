@@ -40,6 +40,17 @@ export type InteractPlugin = (
   context: InteractPluginContext,
 ) => void | InteractPluginCleanup;
 
+/** Registration options passed as the third argument of `Interact.use()`. */
+export type InteractPluginOptions = {
+  /**
+   * Name(s) this plugin is deferred until, released with `Interact.ready(name, key?)`. While
+   * deferred, the plugin does not run, and neither does the interaction, effect, or sequence that
+   * carries its `$`-prefixed field (they may resolve against the DOM the plugin creates). A plugin
+   * with several names stays deferred until all of them are released.
+   */
+  defer?: string | string[];
+};
+
 /**
  * Context passed to a plugin's SSR style generator (see {@link InteractPluginStyleGenerator}).
  * Unlike {@link InteractPluginContext}, there is no live DOM — only the selector that scopes to
