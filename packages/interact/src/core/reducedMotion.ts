@@ -98,18 +98,12 @@ function collapse<T extends object>(effect: T): T | null {
     };
   }
 
-  const { iterations = 1, alternate, reversed } = effect as TimeEffect;
+  const { iterations = 1 } = effect as TimeEffect;
   if (kind === 'scrub' || !iterations || iterations === Infinity) {
     return null;
   }
 
-  // a single iteration ending where the last one does, which runs backwards when it's an odd alternate one
-  return {
-    ...effect,
-    duration: 0,
-    iterations: iterations % 1 || 1,
-    ...(alternate && (Math.ceil(iterations) - 1) % 2 && { reversed: !reversed }),
-  };
+  return { ...effect, duration: 0 };
 }
 
 function replace<T extends object>(effect: T, replacementId: string, replacement: Effect): T {

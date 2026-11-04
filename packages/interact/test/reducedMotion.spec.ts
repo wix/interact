@@ -60,12 +60,12 @@ describe('reducedMotion', () => {
       ]);
     });
 
-    it('collapses the duration and iterations only, under reduce', () => {
-      const repeating = { ...slide, iterations: 3 };
+    it('collapses the duration only, under reduce', () => {
+      const repeating = { ...slide, iterations: 2.5, alternate: true };
 
       expect(getReducedMotionVariants(repeating, 'collapse', options)).toEqual([
         { ...repeating, conditions: ['desktop', NO_PREFERENCE] },
-        { ...repeating, duration: 0, iterations: 1, conditions: ['desktop', REDUCE] },
+        { ...repeating, duration: 0, conditions: ['desktop', REDUCE] },
       ]);
     });
 
@@ -84,25 +84,6 @@ describe('reducedMotion', () => {
         conditions: [REDUCE],
       });
     });
-
-    it.each([
-      [2.25, false, { iterations: 0.25 }],
-      [2, true, { iterations: 1, reversed: true }],
-      [1.25, true, { iterations: 0.25, reversed: true }],
-      [2.5, true, { iterations: 0.5 }],
-    ])(
-      'collapses %s iterations (alternate: %s) to one ending where the last one does',
-      (iterations, alternate, expected) => {
-        const [, collapsed] = getReducedMotionVariants(
-          { ...slide, iterations, alternate },
-          'collapse',
-          options,
-        );
-
-        expect(collapsed).toMatchObject({ duration: 0, ...expected });
-        expect((collapsed as { reversed?: boolean }).reversed).toBe(expected.reversed);
-      },
-    );
 
     it.each([0, Infinity])('falls back to cancel when collapsing %s iterations', (iterations) => {
       const looping = { ...slide, iterations };
@@ -146,7 +127,7 @@ describe('reducedMotion', () => {
     ])('falls back to collapse for %s replacement', (_, handling) => {
       expect(getReducedMotionVariants(slide, handling, options)).toEqual([
         { ...slide, conditions: ['desktop', NO_PREFERENCE] },
-        { ...slide, duration: 0, iterations: 1, conditions: ['desktop', REDUCE] },
+        { ...slide, duration: 0, conditions: ['desktop', REDUCE] },
       ]);
     });
 
@@ -180,7 +161,7 @@ describe('reducedMotion', () => {
 
       it('returns the reduced variant only, unconditionally', () => {
         expect(getReducedMotionVariants(slide, 'collapse', forced)).toEqual([
-          { ...slide, duration: 0, iterations: 1 },
+          { ...slide, duration: 0 },
         ]);
       });
     });

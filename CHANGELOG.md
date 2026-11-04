@@ -128,7 +128,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Changed
 
-- **Breaking:** under `prefers-reduced-motion: reduce`, effects collapse by default: a single 0ms iteration that keeps its delay and ends where the effect would, so it jumps to its end state. Looping, `viewProgress` and `pointerMove` effects are dropped, and sequence staggers collapse. Pass `reducedMotionHandling: 'ignore'` to `Interact.setup()` to keep the old behavior
+- **Breaking:** under `prefers-reduced-motion: reduce`, effects collapse by default: they play with duration 0, keeping their delay and iterations, so they jump to their end state. Looping, `viewProgress` and `pointerMove` effects are dropped, and sequence staggers collapse. Pass `reducedMotionHandling: 'ignore'` to `Interact.setup()` to keep the old behavior
 - **Breaking:** `Interact.forceReducedMotion` applies the reduced-motion outcome of `reducedMotionHandling` instead of passing `reducedMotion` to `@wix/motion`. With the default `'collapse'` that matches the old behavior, except that finite multi-iteration animations collapse to their end state instead of being dropped
 - Runtime transitions collapse under `prefers-reduced-motion: reduce` through `reducedMotionHandling`, matching `generate()`, instead of always being wrapped in `prefers-reduced-motion: no-preference`
 - `reducedMotion` removed from `InteractOptions`, and the `context` argument from `Interact.getSequence()` / `Interact.addToSequence()`

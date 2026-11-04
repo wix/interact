@@ -873,7 +873,7 @@ type ReducedMotionHandling = 'ignore' | 'cancel' | 'collapse' | (string & {}); /
 
 Accepted on `Interaction`, `SequenceConfig` / `SequenceConfigRef` and effects, and per instance as an option of `Interact.create()` / `Interact.setup()` (it isn't a config field). The most specific level wins: inline effect → its `effects` registry entry → sequence → interaction → instance → `'collapse'`.
 
-- `'collapse'` (default) - Plays one iteration with duration 0 that ends where its last iteration would (the fraction of a fractional `iterations`, reversed when it's a backwards `alternate` one), keeping its delay, fill and keyframes, so it jumps to its end state. Transitions become 0ms and keep their delay. Effects with no end state (infinite iterations, `viewProgress` / `pointerMove`) are cancelled instead.
+- `'collapse'` (default) - Plays with duration 0, keeping everything else (delay, iterations, fill, keyframes), so it jumps to its end state. Transitions become 0ms and keep their delay. Effects with no end state (infinite iterations, `viewProgress` / `pointerMove`) are cancelled instead.
 - `'ignore'` - Plays as usual.
 - `'cancel'` - Dropped, exactly like a `(prefers-reduced-motion: no-preference)` media condition.
 - effectId - Replaced by the animation of `effects[effectId]` (effect type, keyframes and timing), keeping the original's target, conditions, `effectId` and `triggerType`. It must be of the same kind (time, scrub or state) and exist, otherwise the effect collapses.

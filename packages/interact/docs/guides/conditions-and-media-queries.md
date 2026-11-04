@@ -313,7 +313,7 @@ const config: InteractConfig = {
 };
 ```
 
-- `'collapse'` (default) plays one iteration with duration 0 that ends where the effect would, so it jumps to its end state after its delay. Looping and scroll/pointer-driven effects have no end state, so they're cancelled instead.
+- `'collapse'` (default) plays it with duration 0, keeping its iterations, so it jumps to its end state after its delay. Looping and scroll/pointer-driven effects have no end state, so they're cancelled instead.
 - `'ignore'` plays the effect as usual.
 - `'cancel'` drops it, exactly as if it had a `(prefers-reduced-motion: no-preference)` condition.
 - An effectId replaces the effect's animation with that registry effect's, keeping the original target and conditions. It must be the same kind of effect (time-based, scroll/pointer-driven or a state transition), otherwise the effect collapses.

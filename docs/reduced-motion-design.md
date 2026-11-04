@@ -90,7 +90,7 @@ The state is reduced when `(prefers-reduced-motion: reduce)` matches or when it 
 
 | Value        | Under reduced motion                                                                                                                                                                                                                                              |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `collapse`   | Default. The effect is replaced in place by its collapsed form: one iteration of duration 0 ending where the effect would, everything else kept (§3.3). It keeps its place and media, so winners never change.                                                    |
+| `collapse`   | Default. The effect is replaced in place by its collapsed form: duration 0, everything else kept (§3.3). It keeps its place and media, so winners never change.                                                                                                   |
 | `ignore`     | Nothing changes, except a sequence's stagger (§3.3).                                                                                                                                                                                                              |
 | `cancel`     | The effect gets the media condition `(prefers-reduced-motion: no-preference)` and behaves exactly like a user media condition. It drops out, and in variation competition ("media picks winner") an earlier variation for the same (interaction, target) can win. |
 | `<effectId>` | The effect is replaced in place by the body of `config.effects[effectId]`, keeping the original's identity and targeting (§3.2). Winners never change.                                                                                                            |
@@ -147,11 +147,9 @@ Keyframe naming: the builder names an unnamed replacement `keyframeEffect` after
 
 ### 3.3 Collapse transform
 
-- **time:** `duration: 0` and a single iteration that ends where the last one does.
-  - Motion's existing `duration || 1` normalization turns the duration into 1ms in both the `web` and `style` paths, so the paths match.
-  - `iterations` becomes its fractional part, or 1 when it's whole: 2.25 iterations end a quarter into an iteration, and so does the collapsed one.
-  - With `alternate`, the last iteration runs backwards when its index (`ceil(iterations) - 1`) is odd, so the collapsed effect flips `reversed` then. 2 alternate iterations end at the start, and so does the collapsed one.
-  - Delay, fill, easing, composite and keyframes are kept. The result is applied after the delay.
+- **time:** `duration: 0`.
+  - Motion's existing `duration || 1` normalization turns this into 1ms in both the `web` and `style` paths, so the paths match.
+  - Delay, finite iterations, alternate, reversed, fill, easing, composite and keyframes are kept, so the effect ends exactly where it would, including fractional and `alternate` iterations. The result is applied after the delay.
   - With `fill: none`, the result is the base style. This matches what the uncollapsed animation leaves after it ends.
   - The `alternate` and `state` trigger types still play, reverse and pause, just instantly.
 - **state:** every transition entry gets duration 0 and keeps its delay. The state rule still applies.
