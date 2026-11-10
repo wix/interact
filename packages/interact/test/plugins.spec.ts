@@ -28,9 +28,12 @@ vi.mock('@wix/motion', () => {
       return mock.getWebAnimation(target, options, trigger, { reducedMotion });
     }),
     createAnimationGroups: vi.fn().mockReturnValue([]),
-    getSequence: vi
-      .fn()
-      .mockReturnValue({ animationGroups: [], addGroups: vi.fn(), removeGroups: vi.fn() }),
+    getSequence: vi.fn().mockReturnValue({
+      animationGroups: [],
+      addGroups: vi.fn(),
+      removeGroups: vi.fn(),
+      cancel: vi.fn(),
+    }),
     registerEffects: vi.fn(),
     getRegisteredEffect: vi.fn(),
     MotionKeyframeEffect: class {},
