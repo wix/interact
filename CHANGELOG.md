@@ -119,7 +119,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
-### [Unreleased]
+### [2.8.1] - 2026-11-10
 
 #### Fixed
 
