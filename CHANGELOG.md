@@ -119,6 +119,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.8.1] - 2026-11-10
+
+#### Fixed
+
+- Event-trigger animations are now cancelled when an interaction's source or target is removed, preventing paused composited styles from continuing to affect layout (#410)
+
 ### [2.8.0] - 2026-11-04
 
 #### Added
