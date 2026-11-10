@@ -55,3 +55,8 @@ export type HandlerObject = {
 };
 
 export type HandlerObjectMap = WeakMap<HTMLElement, Set<HandlerObject>>;
+
+export type TimeEffectHandler = {
+  handler: (event: Event) => void;
+  cleanup: () => void;
+};

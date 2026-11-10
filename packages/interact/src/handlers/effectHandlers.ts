@@ -6,14 +6,10 @@ import type {
   EffectBase,
   IInteractionController,
   EventTriggerConfigEnterLeave,
+  TimeEffectHandler,
 } from '../types';
 import { effectToAnimationOptions } from './utilities';
 import fastdom from 'fastdom';
-
-type TimeEffectHandler = {
-  handler: (event: Event) => void;
-  cleanup: () => void;
-};
 
 export function createTimeEffectHandler(
   element: HTMLElement,
