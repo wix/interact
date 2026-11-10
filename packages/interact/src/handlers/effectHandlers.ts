@@ -6,6 +6,7 @@ import type {
   EffectBase,
   IInteractionController,
   EventTriggerConfigEnterLeave,
+  TimeEffectHandler,
 } from '../types';
 import { effectToAnimationOptions } from './utilities';
 import fastdom from 'fastdom';
@@ -16,7 +17,7 @@ export function createTimeEffectHandler(
   selectorCondition?: string,
   enterLeave?: EventTriggerConfigEnterLeave,
   preCreatedAnimation?: AnimationGroup,
-): ((event: Event) => void) | null {
+): TimeEffectHandler | null {
   const animation =
     preCreatedAnimation ||
     (getAnimation(element, effectToAnimationOptions(effect)) as AnimationGroup | null);
@@ -28,7 +29,7 @@ export function createTimeEffectHandler(
   let initialPlay = true;
   const type = effect.triggerType || 'alternate';
 
-  return (event: Event) => {
+  const handler = (event: Event) => {
     if (selectorCondition && !element.matches(selectorCondition)) return;
 
     const isToggle = !enterLeave;
@@ -79,6 +80,11 @@ export function createTimeEffectHandler(
         animation.pause();
       }
     }
+  };
+
+  return {
+    handler,
+    cleanup: () => animation.cancel(),
   };
 }
 
