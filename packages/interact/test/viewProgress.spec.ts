@@ -24,8 +24,6 @@ class CSSMathSum {
 const px = (value: number) => new CSSUnitValue(value, 'px');
 const percent = (value: number) => new CSSUnitValue(value, 'percent');
 
-// an element whose cover range runs from scroll position -662px (0%) to 279px (100%),
-// i.e. at the top of the page it is already at 70.35% of its cover range
 const createAboveFoldAnimation = (overrides: Record<string, unknown> = {}) => ({
   timeline: { startOffset: px(-662), endOffset: px(279) },
   rangeStart: { rangeName: 'cover', offset: percent(50) } as unknown,
@@ -127,7 +125,6 @@ describe('viewProgress handler', () => {
 
   describe('leaves the range unchanged', () => {
     it('when the element reaches rangeStart by scrolling', () => {
-      // cover range from -200px to 900px: 18% at the top of the page
       const animation = createAboveFoldAnimation({
         timeline: { startOffset: px(-200), endOffset: px(900) },
       });
