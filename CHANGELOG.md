@@ -504,7 +504,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 #### Fixed
 
-- `getWebAnimation()` skips `rangeStart`/`rangeEnd` on a view-progress animation whose `data-motion-part` element is missing, so Chrome no longer throws `InvalidStateError` (#414)
+- `getWebAnimation()` skips `rangeStart`/`rangeEnd` on a view-progress animation whose `data-motion-part` element is missing, no longer throws `InvalidStateError` (#414)
 
 ### [2.2.0] - 2026-11-02
 
