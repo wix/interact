@@ -119,6 +119,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.8.2] - 2026-11-16
+
+#### Fixed
+
+- Updated `@wix/motion` to 2.2.1: a scroll effect whose part element isn't rendered no longer throws `InvalidStateError` on `rangeStart` (#414)
+
 ### [2.8.1] - 2026-11-10
 
 #### Fixed
@@ -493,6 +499,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## @wix/motion
+
+### [2.2.1] - 2026-11-16
+
+#### Fixed
+
+- `getWebAnimation()` skips `rangeStart`/`rangeEnd` on a view-progress animation whose `data-motion-part` element is missing, no longer throws `InvalidStateError` (#414)
 
 ### [2.2.0] - 2026-11-02
 
