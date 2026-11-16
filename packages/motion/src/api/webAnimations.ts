@@ -160,11 +160,14 @@ function getWebAnimation(
       if (timeline) {
         // set the ranges for the animation after measurements and mutations
         fastdom.mutate(() => {
-          const { start, end } = getRanges(effect as AnimationDataForScrub);
-          // @ts-expect-error
-          animation.rangeStart = start;
-          // @ts-expect-error
-          animation.rangeEnd = end;
+          // An effect with a missing target throws on a CSS-text range, and there is nothing to animate anyway.
+          if (effectTarget) {
+            const { start, end } = getRanges(effect as AnimationDataForScrub);
+            // @ts-expect-error
+            animation.rangeStart = start;
+            // @ts-expect-error
+            animation.rangeEnd = end;
+          }
 
           animation.play();
         });
