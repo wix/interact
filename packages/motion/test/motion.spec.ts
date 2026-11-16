@@ -786,6 +786,64 @@ describe('motion.ts', () => {
         (AnimationGroup as Mock).mockRestore();
       });
 
+      test('should not set animation ranges for view-progress when the part element is missing', async () => {
+        mockElement.matches = vi.fn(() => false);
+        mockElement.querySelector = vi.fn(() => null);
+        (globalThis as any).KeyframeEffect = vi.fn(function (target: any) {
+          return { ...mockKeyframeEffect, target };
+        });
+        // Like Chrome: a CSS-text range can't be resolved without a target
+        (globalThis as any).Animation = vi.fn(function (keyframeEffect: any, timeline: any) {
+          const animation: Record<string, unknown> = {
+            play: vi.fn(),
+            effect: keyframeEffect,
+            timeline,
+          };
+          for (const range of ['rangeStart', 'rangeEnd']) {
+            Object.defineProperty(animation, range, {
+              set() {
+                if (!keyframeEffect.target) {
+                  throw new DOMException(
+                    `Failed to set the '${range}' property on 'Animation': Unable to parse TimelineOffset from CSS text with a null effect or target`,
+                    'InvalidStateError',
+                  );
+                }
+              },
+            });
+          }
+          return animation;
+        }) as any;
+
+        const animationOptions: AnimationOptions = {
+          namedEffect: { type: 'BgPan', id: 'bg-pan', direction: 'left' },
+          startOffset: {
+            name: 'cover',
+            offset: { value: 0, unit: 'percentage' },
+          },
+          endOffset: {
+            name: 'cover',
+            offset: { value: 100, unit: 'percentage' },
+          },
+        };
+
+        const { AnimationGroup } = await import('../src/AnimationGroup');
+        (AnimationGroup as Mock).mockImplementation(function (animations: any) {
+          mockAnimationGroup.animations = animations;
+          return mockAnimationGroup;
+        });
+
+        expect(() =>
+          getWebAnimation(mockElement.id, animationOptions, {
+            element: mockElement,
+            trigger: 'view-progress',
+          }),
+        ).not.toThrow();
+        expect(mockAnimationGroup.animations[0].effect.target).toBeNull();
+        expect(mockAnimationGroup.animations[0].play).toHaveBeenCalled();
+
+        (AnimationGroup as Mock).mockRestore();
+      });
+
       test('should handle animations with parts (data-motion-part)', async () => {
         const partElement = {
           ...mockElement,
