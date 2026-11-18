@@ -1032,8 +1032,6 @@ export function add(controller: IInteractionController): boolean {
   const instance = Interact.getInstance(key);
 
   if (!instance) {
-    console.warn(`No instance found for key: ${key}`);
-
     // even if we don't find a matching instance, we still want to cache the element
     Interact.setController(key, controller);
     return false;
