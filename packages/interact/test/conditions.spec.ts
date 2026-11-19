@@ -87,7 +87,7 @@ describe('Interaction-level conditions in addEffectsForTarget', () => {
 
   afterEach(() => {
     if (instance) {
-      instance.destroy();
+      instance.destroy({ clearCache: true });
     }
   });
 
@@ -451,7 +451,7 @@ describe('reducedMotionPolicy at runtime', () => {
   });
 
   afterEach(() => {
-    instance?.destroy();
+    instance?.destroy({ clearCache: true });
   });
 
   it('plays the effect as is when motion is not reduced', async () => {

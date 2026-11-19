@@ -1328,7 +1328,6 @@ describe('interact (mini)', () => {
 
         const li3 = document.createElement('li');
         ul.append(li3);
-        element.append(ul);
 
         const controller = Interact.getController(keyTarget);
         addListItems(controller!, '#logo-scroll-list', [li3]);

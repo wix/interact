@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 
-vi.mock('@wix/motion', () => ({
+vi.mock('@wix/motion', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@wix/motion')>()),
   getAnimation: vi.fn().mockReturnValue({
     play: vi.fn(),
     cancel: vi.fn(),
@@ -107,6 +108,52 @@ describe('viewEnter handler', () => {
       expect(IntersectionObserverMock).toHaveBeenCalled();
       expect(observeSpy).toHaveBeenCalledWith(element);
     });
+
+    it.each([0.2, 0.6])(
+      'preserves the other config observer when a shared source binding is removed (threshold %s)',
+      async (threshold) => {
+        const { Interact, add } = await import('../src');
+        const { getAnimation } = await import('@wix/motion');
+        const config = (name: string, threshold: number) => ({
+          interactions: [
+            {
+              key: 'source',
+              trigger: 'viewEnter' as const,
+              params: { threshold },
+              effects: [
+                {
+                  key: 'target',
+                  reducedMotionPolicy: 'ignore',
+                  duration: 1000,
+                  keyframeEffect: { name, keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+                },
+              ],
+            },
+          ],
+        });
+        const first = Interact.create(config('first', 0.2));
+        const later = Interact.create(config('later', threshold));
+        add(element, 'source');
+        add(target, 'target');
+
+        later.destroy({ clearCache: true });
+
+        const animation = vi.mocked(getAnimation).mock.results[0].value;
+        if (threshold === 0.2) {
+          expect(unobserveSpy).not.toHaveBeenCalled();
+        } else {
+          const removedObserver = IntersectionObserverMock.mock.instances[1];
+          expect(unobserveSpy).toHaveBeenCalledExactlyOnceWith(element);
+          expect(unobserveSpy.mock.contexts).toEqual([removedObserver]);
+
+          observerCallbacks[1]([createEntry()]);
+          expect(animation?.play).not.toHaveBeenCalled();
+        }
+        getMainObserverCallback()([createEntry()]);
+        expect(animation?.play).toHaveBeenCalledTimes(1);
+        first.destroy({ clearCache: true });
+      },
+    );
 
     it('should unobserve after first intersection if triggerType is "once"', () => {
       viewEnterHandler.add(

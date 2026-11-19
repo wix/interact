@@ -1,9 +1,15 @@
 import type { AnimationGroup } from '@wix/motion';
 import { getAnimation } from '@wix/motion';
-import type { TimeEffect, HandlerObjectMap, ViewEnterParams, InteractOptions } from '../types';
+import type {
+  TimeEffect,
+  HandlerObject,
+  HandlerObjectMap,
+  ViewEnterParams,
+  InteractOptions,
+} from '../types';
 import {
   effectToAnimationOptions,
-  addHandlerToMap,
+  registerHandler,
   removeElementFromHandlerMap,
 } from './utilities';
 import fastdom from 'fastdom';
@@ -50,10 +56,20 @@ function insetToRootMargin(inset: string): string {
   return `${negate(top)} 0px ${negate(bottom)}`;
 }
 
-const observers: Record<string, IntersectionObserver> = {};
-const handlerMap = new WeakMap() as HandlerObjectMap;
-const elementFirstRun = new WeakSet<HTMLElement>();
-const elementObserverMap = new WeakMap<HTMLElement, IntersectionObserver>();
+type ViewObserver = {
+  observer: IntersectionObserver;
+  sampled: WeakSet<HTMLElement>;
+};
+
+type ViewHandler = HandlerObject & {
+  handler: NonNullable<HandlerObject['handler']>;
+  entry: ViewObserver;
+  observeExit: boolean;
+  observing: boolean;
+};
+
+const observers: Record<string, ViewObserver> = {};
+const handlerMap: HandlerObjectMap<ViewHandler> = new WeakMap();
 let viewEnterOptions: Partial<ViewEnterParams> = {};
 let sharedExitObserver: IntersectionObserver | null = null;
 
@@ -61,13 +77,27 @@ function setOptions(options: Partial<ViewEnterParams>) {
   viewEnterOptions = options;
 }
 
-function invokeHandlers(target: HTMLElement, isIntersecting: boolean, isFullExit?: boolean) {
-  const handlers = handlerMap.get(target);
-  handlers?.forEach(({ source, handler }) => {
-    if (source === target) {
-      handler!(isIntersecting, isFullExit);
-    }
-  });
+function getObservingHandlers(source: HTMLElement): ViewHandler[] {
+  return [...(handlerMap.get(source) ?? [])].filter(
+    (registered) => registered.source === source && registered.observing,
+  );
+}
+
+function stopObserving(registered: ViewHandler) {
+  if (!registered.observing) {
+    return;
+  }
+
+  registered.observing = false;
+  const { source, entry, observeExit } = registered;
+  const remaining = getObservingHandlers(source);
+  if (!remaining.some((peer) => peer.entry === entry)) {
+    entry.observer.unobserve(source);
+    entry.sampled.delete(source);
+  }
+  if (observeExit && !remaining.some((peer) => peer.observeExit)) {
+    sharedExitObserver?.unobserve(source);
+  }
 }
 
 function getExitObserver() {
@@ -80,7 +110,11 @@ function getExitObserver() {
       const target = entry.target as HTMLElement;
 
       if (!entry.isIntersecting) {
-        invokeHandlers(target, false, true);
+        for (const registered of getObservingHandlers(target)) {
+          if (registered.observeExit) {
+            registered.handler(false, true);
+          }
+        }
       }
     });
   }, EXIT_OBSERVER_CONFIG);
@@ -105,13 +139,18 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
         threshold,
       };
 
+  const sampled = new WeakSet<HTMLElement>();
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       const target = entry.target as HTMLElement;
-      const isFirstRun = !elementFirstRun.has(target);
+      const registered = getObservingHandlers(target).filter((handler) => handler.entry === view);
+      if (!registered.length) {
+        return;
+      }
 
+      const isFirstRun = !sampled.has(target);
       if (isFirstRun) {
-        elementFirstRun.add(target);
+        sampled.add(target);
 
         if (options.useSafeViewEnter && !entry.isIntersecting) {
           fastdom.measure(() => {
@@ -130,10 +169,21 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
 
             if (needsSafeObserver) {
               fastdom.mutate(() => {
+                const active = getObservingHandlers(target).filter(
+                  (handler) => handler.entry === view,
+                );
+                if (!active.length) {
+                  return;
+                }
+
                 observer.unobserve(target);
-                const safeObserver = getObserver(options, true);
-                elementObserverMap.set(target, safeObserver);
-                safeObserver.observe(target);
+                sampled.delete(target);
+                const safe = getObserver(options, true);
+                for (const handler of active) {
+                  handler.entry = safe;
+                }
+                safe.sampled.add(target);
+                safe.observer.observe(target);
               });
             }
           });
@@ -142,14 +192,18 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
       }
 
       if (entry.isIntersecting || !isFirstRun) {
-        invokeHandlers(target, entry.isIntersecting);
+        for (const handler of registered) {
+          if (handler.observing) {
+            handler.handler(entry.isIntersecting);
+          }
+        }
       }
     });
   }, config);
 
-  observers[key] = observer;
-
-  return observer;
+  const view = { observer, sampled };
+  observers[key] = view;
+  return view;
 }
 
 function addViewEnterHandler(
@@ -169,7 +223,8 @@ function addViewEnterHandler(
     return;
   }
 
-  const observer = getObserver(mergedOptions);
+  const entry = getObserver(mergedOptions);
+  const observeExit = type === 'repeat' || type === 'state';
 
   // Persist animation for non-once types to prevent auto-cleanup
   if (type !== 'once') {
@@ -182,13 +237,7 @@ function addViewEnterHandler(
 
   let onceDone = false;
 
-  // Declared early so the handler closure can reference it for self-cleanup
-  let handlerObj: {
-    source: HTMLElement;
-    target: HTMLElement;
-    handler: typeof handler;
-    cleanup: () => void;
-  };
+  let handlerObj: ViewHandler;
 
   const handler = (isIntersecting?: boolean, isFullExit?: boolean) => {
     if (selectorCondition && !target.matches(selectorCondition)) return;
@@ -197,24 +246,11 @@ function addViewEnterHandler(
       if (isIntersecting && !onceDone) {
         onceDone = true;
 
-        // if no more handlers exist we unobserve but keep the handler on the map
-        const sourceHandlers = handlerMap.get(source);
-        if (
-          !sourceHandlers ||
-          sourceHandlers.size === 0 ||
-          (sourceHandlers.size === 1 && sourceHandlers.has(handlerObj))
-        ) {
-          const currentObserver = elementObserverMap.get(source) || observer;
-          currentObserver.unobserve(source);
-          elementFirstRun.delete(source);
-        }
+        stopObserving(handlerObj);
 
         // we delete the handlers only when there is no running animation to cancel
         // allowing remove to find the handler to cleanup ongoing animations
-        animation.onFinish(() => {
-          handlerMap.get(source)?.delete(handlerObj);
-          handlerMap.get(target)?.delete(handlerObj);
-        });
+        animation.onFinish(() => dispose(true));
 
         animation.play(() => {
           const setEnterStart = () => {
@@ -267,37 +303,22 @@ function addViewEnterHandler(
   };
 
   const cleanup = () => {
-    const currentObserver = elementObserverMap.get(source) || observer;
-    currentObserver.unobserve(source);
-
-    if (type === 'repeat' || type === 'state') {
-      const exitObserver = getExitObserver();
-      exitObserver.unobserve(source);
-    }
-
+    stopObserving(handlerObj);
     animation.cancel();
-    elementFirstRun.delete(source);
-    elementObserverMap.delete(source);
   };
 
-  handlerObj = { source, target, handler, cleanup };
-
-  addHandlerToMap(handlerMap, source, handlerObj);
-  addHandlerToMap(handlerMap, target, handlerObj);
-
-  elementObserverMap.set(source, observer);
-  observer.observe(source);
-
-  // For repeat and state types, set up a separate exit observer
-  // that watches when element is completely out of view
-  if (type === 'repeat' || type === 'state') {
-    const exitObserver = getExitObserver();
-    exitObserver.observe(source);
+  handlerObj = { source, target, handler, cleanup, entry, observeExit, observing: true };
+  const dispose = registerHandler(handlerMap, handlerObj);
+  entry.observer.observe(source);
+  if (observeExit) {
+    getExitObserver().observe(source);
   }
+
+  return dispose;
 }
 
-function removeViewEnterHandler(element: HTMLElement) {
-  removeElementFromHandlerMap(handlerMap, element);
+function removeViewEnterHandler(element: HTMLElement, untrackedOnly?: boolean) {
+  removeElementFromHandlerMap(handlerMap, element, untrackedOnly);
 }
 
 function reset() {

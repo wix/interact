@@ -4,7 +4,7 @@ import { Scroll } from 'fizban';
 import type { ViewEnterParams, ScrubEffect, HandlerObjectMap, InteractOptions } from '../types';
 import {
   effectToAnimationOptions,
-  addHandlerToMap,
+  registerHandler,
   removeElementFromHandlerMap,
 } from './utilities';
 
@@ -21,7 +21,7 @@ function addViewProgressHandler(
   effect: ScrubEffect,
   __: ViewEnterParams,
   { selectorCondition }: InteractOptions,
-): void {
+) {
   if (selectorCondition && !target.matches(selectorCondition)) return;
 
   const triggerParams = {
@@ -63,13 +63,17 @@ function addViewProgressHandler(
         ...scrollOptionsGetter(),
       });
 
+      let active = true;
       cleanup = () => {
+        active = false;
         scroll.destroy();
       };
 
       Promise.all((scenes as ScrubScrollScene[]).map((s) => s.ready || Promise.resolve())).then(
         () => {
-          scroll.start();
+          if (active) {
+            scroll.start();
+          }
         },
       );
     }
@@ -77,14 +81,11 @@ function addViewProgressHandler(
 
   if (!cleanup) return;
 
-  const handlerObj = { source, target, cleanup };
-
-  addHandlerToMap(scrollManagerMap, source, handlerObj);
-  addHandlerToMap(scrollManagerMap, target, handlerObj);
+  return registerHandler(scrollManagerMap, { source, target, cleanup });
 }
 
-function removeViewProgressHandler(element: HTMLElement): void {
-  removeElementFromHandlerMap(scrollManagerMap, element);
+function removeViewProgressHandler(element: HTMLElement, untrackedOnly?: boolean): void {
+  removeElementFromHandlerMap(scrollManagerMap, element, untrackedOnly);
 }
 
 export default {

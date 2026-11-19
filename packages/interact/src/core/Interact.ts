@@ -10,11 +10,18 @@ import {
   ViewEnterHandlerModule,
   IInteractionController,
   IInteractElement,
+  HandlerDisposer,
   InteractPlugin,
   ReducedMotionPolicy,
   InteractPluginOptions,
 } from '../types';
-import { getElementHash, getInterpolatedKey } from './utilities';
+import {
+  getElementHash,
+  getInterpolatedKey,
+  getKeyTemplate,
+  getRepeaterItems,
+  matchesRepeaterItems,
+} from './utilities';
 import { getFallbackId, getKeyframeSlots, getSlotKey } from './css';
 import { withReducedMotionConditions } from './reducedMotion';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
@@ -35,9 +42,32 @@ type InteractInitOptions = {
   reducedMotionPolicy?: ReducedMotionPolicy;
 };
 
-function _convertToKeyTemplate(key: string) {
-  return key.replace(/\[[^\]]+]/g, '[]');
-}
+type MountedController = {
+  controller: IInteractionController;
+  items: Map<string, string>;
+};
+
+type EffectRootObservation = {
+  controller: IInteractionController;
+  observer: MutationObserver;
+  references: number;
+};
+
+export type EffectBinding = {
+  source: HTMLElement;
+  target: HTMLElement;
+  sourceList: Element | null;
+  targetList: Element | null;
+  sourceObservation?: EffectRootObservation;
+  targetObservation?: EffectRootObservation;
+  dispose: HandlerDisposer;
+};
+
+type EffectPair = {
+  sourceKey: string;
+  targetKey: string;
+  bindings: Set<EffectBinding>;
+};
 
 export class Interact {
   static defineInteractElement?: () => boolean;
@@ -55,6 +85,9 @@ export class Interact {
     [listContainer: string]: { [interactionId: string]: boolean };
   };
   controllers: Set<IInteractionController>;
+  private readonly mountedControllers = new Map<string, Map<string, MountedController>>();
+  private readonly effectPairsByEndpoint = new Map<string, Map<string, EffectPair>>();
+  private readonly effectRootObservers = new Map<string, EffectRootObservation>();
   static forceReducedMotion: boolean = false;
   static reducedMotionPolicy: ReducedMotionPolicy = 'collapse';
   static allowA11yTriggers: boolean = true;
@@ -108,6 +141,10 @@ export class Interact {
   }
 
   destroy({ clearCache = false }: { clearCache?: boolean } = {}): void {
+    for (const key of this.effectPairsByEndpoint.keys()) {
+      this.clearEffectPairsForKey(key);
+    }
+
     for (const controller of this.controllers) {
       controller.disconnect({ removeFromCache: clearCache });
     }
@@ -122,18 +159,38 @@ export class Interact {
     this.addedInteractions = {};
     this.listInteractionsCache = {};
     this.controllers.clear();
+    this.mountedControllers.clear();
     this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
     Interact.instances.splice(Interact.instances.indexOf(this), 1);
   }
 
   setController(key: string, controller: IInteractionController) {
-    this.controllers.add(controller);
+    const previous = Interact.getController(key);
+    if (previous && previous !== controller) {
+      previous.disconnect({ removeFromCache: true });
+    }
 
+    const template = getKeyTemplate(key);
+    let mounted = this.mountedControllers.get(template);
+    if (!mounted) {
+      mounted = new Map();
+      this.mountedControllers.set(template, mounted);
+    }
+    if (!mounted.has(key)) {
+      mounted.set(key, { controller, items: getRepeaterItems(key) });
+    }
+    this.controllers.add(controller);
     Interact.setController(key, controller);
   }
 
   deleteController(key: string, removeFromCache: boolean = false) {
     const controller = Interact.controllerCache.get(key);
+    const template = getKeyTemplate(key);
+    const mounted = this.mountedControllers.get(template);
+    mounted?.delete(key);
+    if (mounted?.size === 0) {
+      this.mountedControllers.delete(template);
+    }
 
     this.clearInteractionStateForKey(key);
     this.clearMediaQueryListenersForKey(key);
@@ -144,12 +201,131 @@ export class Interact {
     }
   }
 
+  static *getMatchingControllers(
+    referenceKey: string,
+    peerTemplate: string,
+    onlyKey?: string,
+  ): IterableIterator<[key: string, controller: IInteractionController]> {
+    const reference = Interact.getMountedController(referenceKey);
+    const peers = Interact.getInstance(peerTemplate)?.mountedControllers.get(peerTemplate);
+    if (!reference || !peers) {
+      return;
+    }
+
+    if (onlyKey !== undefined) {
+      const peer = peers.get(onlyKey);
+      if (peer && matchesRepeaterItems(reference.items, peer.items)) {
+        yield [onlyKey, peer.controller];
+      }
+      return;
+    }
+
+    for (const [key, peer] of peers) {
+      if (matchesRepeaterItems(reference.items, peer.items)) {
+        yield [key, peer.controller];
+      }
+    }
+  }
+
+  hasEffectPair(key: string, pairId: string): boolean {
+    return this.effectPairsByEndpoint.get(key)?.has(pairId) ?? false;
+  }
+
+  markEffectPair(sourceKey: string, targetKey: string, pairId: string): Set<EffectBinding> {
+    const existing = this.effectPairsByEndpoint.get(sourceKey)?.get(pairId);
+    if (existing) {
+      return existing.bindings;
+    }
+
+    const bindings = new Set<EffectBinding>();
+    const pair = { sourceKey, targetKey, bindings };
+    for (const key of [sourceKey, targetKey]) {
+      let pairs = this.effectPairsByEndpoint.get(key);
+      if (!pairs) {
+        pairs = new Map();
+        this.effectPairsByEndpoint.set(key, pairs);
+      }
+      pairs.set(pairId, pair);
+    }
+    return bindings;
+  }
+
+  trackEffectBinding(
+    sourceKey: string,
+    targetKey: string,
+    bindings: Set<EffectBinding>,
+    binding: EffectBinding,
+  ): void {
+    const sourceObservation = this.observeEffectRoot(sourceKey, binding.source);
+    const targetObservation = this.observeEffectRoot(targetKey, binding.target);
+    binding.sourceObservation = sourceObservation;
+    binding.targetObservation = targetObservation;
+    bindings.add(binding);
+    binding.dispose.onDispose = () => {
+      bindings.delete(binding);
+      this.releaseEffectRoot(sourceKey, sourceObservation);
+      this.releaseEffectRoot(targetKey, targetObservation);
+    };
+  }
+
+  private observeEffectRoot(key: string, element: HTMLElement): EffectRootObservation | undefined {
+    const controller = Interact.getController(key);
+    if (!controller || element === controller.element || !controller.element.contains(element)) {
+      return;
+    }
+
+    const existing = this.effectRootObservers.get(key);
+    if (existing?.controller === controller) {
+      existing.references++;
+      return existing;
+    }
+
+    existing?.observer.disconnect();
+    const root = controller.element;
+    const observer = new MutationObserver((records) => {
+      if (
+        this.effectRootObservers.get(key) !== observation ||
+        Interact.getController(key) !== controller ||
+        !records.some(({ removedNodes }) => removedNodes.length > 0)
+      ) {
+        return;
+      }
+
+      for (const pair of this.effectPairsByEndpoint.get(key)?.values() ?? []) {
+        for (const binding of pair.bindings) {
+          if (
+            (binding.sourceObservation === observation && !root.contains(binding.source)) ||
+            (binding.targetObservation === observation && !root.contains(binding.target))
+          ) {
+            binding.dispose();
+          }
+        }
+      }
+    });
+    const observation = { controller, observer, references: 1 };
+    this.effectRootObservers.set(key, observation);
+    observer.observe(root, { childList: true, subtree: true });
+    return observation;
+  }
+
+  private releaseEffectRoot(key: string, observation?: EffectRootObservation): void {
+    if (!observation) {
+      return;
+    }
+
+    observation.references--;
+    if (observation.references === 0 && this.effectRootObservers.get(key) === observation) {
+      this.effectRootObservers.delete(key);
+      observation.observer.disconnect();
+    }
+  }
+
   has(key: string): boolean {
     return !!this.get(key);
   }
 
   get(key: string): InteractCache['interactions'][string] | undefined {
-    const processedKey = _convertToKeyTemplate(key);
+    const processedKey = getKeyTemplate(key);
     return this.dataCache.interactions[processedKey];
   }
 
@@ -162,7 +338,48 @@ export class Interact {
     }
   }
 
+  clearEffectPairsForKey(key: string): void {
+    const pairs = this.effectPairsByEndpoint.get(key);
+    this.effectPairsByEndpoint.delete(key);
+    for (const [pairId, { sourceKey, targetKey, bindings }] of pairs ?? []) {
+      const peer = key === sourceKey ? targetKey : sourceKey;
+      const peerPairs = this.effectPairsByEndpoint.get(peer);
+      peerPairs?.delete(pairId);
+      if (peerPairs?.size === 0) {
+        this.effectPairsByEndpoint.delete(peer);
+      }
+      for (const binding of bindings) {
+        binding.dispose();
+      }
+    }
+  }
+
+  removeListItemBindings(key: string, container: Element, roots: ReadonlySet<Element>): void {
+    const isRemoved = (element: HTMLElement): boolean => {
+      for (let node: Element | null = element; node; node = node.parentElement) {
+        if (roots.has(node)) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    for (const pair of this.effectPairsByEndpoint.get(key)?.values() ?? []) {
+      for (const binding of pair.bindings) {
+        if (
+          (pair.sourceKey === key &&
+            binding.sourceList === container &&
+            isRemoved(binding.source)) ||
+          (pair.targetKey === key && binding.targetList === container && isRemoved(binding.target))
+        ) {
+          binding.dispose();
+        }
+      }
+    }
+  }
+
   clearInteractionStateForKey(key: string): void {
+    this.clearEffectPairsForKey(key);
     const interactionIds = this.get(key)?.interactionIds || [];
 
     interactionIds.forEach((interactionId_) => {
@@ -254,6 +471,22 @@ export class Interact {
 
   static getInstance(key: string): Interact | undefined {
     return Interact.instances.find((instance) => instance.has(key));
+  }
+
+  static getInstancesForKey(key: string): Interact[] {
+    const template = getKeyTemplate(key);
+    return Interact.instances.filter((instance) => instance.dataCache.interactions[template]);
+  }
+
+  static isMountedController(key: string, controller: IInteractionController): boolean {
+    return (
+      Interact.getController(key) === controller &&
+      Interact.getMountedController(key)?.controller === controller
+    );
+  }
+
+  private static getMountedController(key: string): MountedController | undefined {
+    return Interact.getInstance(key)?.mountedControllers.get(getKeyTemplate(key))?.get(key);
   }
 
   static getController(key: string | undefined): IInteractionController | undefined {
@@ -578,7 +811,8 @@ function parseConfig(
       const targetHash = getElementHash({ ...referencedEffect, ...effect, key: target });
       const interactionId = `${source}::${targetHash}::${interactionIdx}`;
       effect.interactionId = interactionId;
-      interactions[source].interactionIds.add(interactionId);
+      const cachedEffect = { ...effect };
+      effects[effectIndex] = cachedEffect;
 
       if (target === source) {
         // if target is the source element, no need to add an interaction to `effects`
@@ -591,11 +825,12 @@ function parseConfig(
       const targetEntry = _ensureInteractionEntry(interactions, target);
       if (!targetEntry.effects[interactionId]) {
         targetEntry.effects[interactionId] = [];
-        targetEntry.interactionIds.add(interactionId);
       }
 
-      targetEntry.effects[interactionId].push({ ...rest, effect });
-      targetEntry.selectors.add(getSelector(effect, { useFirstChild: useCustomElement }));
+      targetEntry.effects[interactionId].push({ ...rest, effect: cachedEffect });
+      targetEntry.selectors.add(
+        getSelector({ ...referencedEffect, ...effect }, { useFirstChild: useCustomElement }),
+      );
     });
 
     // Process sequence effects for selector tracking and cross-element referencing

@@ -169,27 +169,28 @@ export class InteractionController {
 
   _childListChangeHandler(listContainer: string, entries: MutationRecord[]) {
     const key = this.key || this.element.dataset.interactKey;
-    const removedElements: HTMLElement[] = [];
-    const addedElements: HTMLElement[] = [];
+    const container = entries[0]?.target;
+    const removedElements = new Set<HTMLElement>();
+    const addedElements = new Set<HTMLElement>();
 
     entries.forEach((entry) => {
       entry.removedNodes.forEach((el) => {
         if (el instanceof HTMLElement) {
-          removedElements.push(el);
+          removedElements.add(el);
         }
       });
 
       entry.addedNodes.forEach((el) => {
         if (el instanceof HTMLElement) {
-          addedElements.push(el);
+          addedElements.add(el);
         }
       });
     });
 
-    removeListItems(removedElements);
-
-    if (key) {
-      addListItems(this, listContainer, addedElements);
+    if (key && container instanceof Element) {
+      removeListItems([...removedElements], { key, container });
+      const currentItems = [...addedElements].filter((item) => item.parentElement === container);
+      addListItems(this, listContainer, currentItems, container);
     }
   }
 }
