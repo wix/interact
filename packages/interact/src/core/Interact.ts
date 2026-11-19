@@ -298,7 +298,16 @@ export class Interact {
     Interact._released.add(key ? `${name}::${key}` : name);
 
     if (key) {
-      Interact.controllerCache.get(key)?.resume();
+      const keys = new Set([key]);
+
+      Interact.instances.forEach((instance) => {
+        const { effects = {}, sequences = {} } = instance.get(key) || {};
+        [...Object.values(effects), ...Object.values(sequences)].flat().forEach((interaction) => {
+          keys.add(getInterpolatedKey(interaction.key, key));
+        });
+      });
+
+      keys.forEach((resumedKey) => Interact.controllerCache.get(resumedKey)?.resume());
     } else {
       Interact.controllerCache.forEach((controller) => controller.resume());
     }
@@ -594,7 +603,7 @@ function parseConfig(
         targetEntry.interactionIds.add(interactionId);
       }
 
-      targetEntry.effects[interactionId].push({ ...rest, effect });
+      targetEntry.effects[interactionId].push({ ...rest, effect, origin: interaction });
       targetEntry.selectors.add(getSelector(effect, { useFirstChild: useCustomElement }));
     });
 
@@ -637,6 +646,7 @@ function parseConfig(
           targetEntry.sequences[seqInteractionId].push({
             ...rest,
             sequence: sequenceConfig,
+            origin: interaction,
           });
           targetEntry.selectors.add(effectSelector);
         }

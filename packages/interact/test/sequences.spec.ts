@@ -1088,6 +1088,7 @@ describe('interact sequences', () => {
       addElement(source.element, 'source-key');
 
       const seqKey = Object.keys(instance.dataCache.interactions['target-key'].sequences)[0];
+      const [{ origin }] = instance.dataCache.interactions['target-key'].sequences[seqKey];
       instance.dataCache.interactions['target-key'].sequences[seqKey] = [
         {
           key: 'source-key',
@@ -1097,6 +1098,7 @@ describe('interact sequences', () => {
             sequenceId: 'mql-fallback-seq',
             effects: [{ effectId: 'effect-target', key: 'target-key' }],
           },
+          origin,
         },
         {
           key: 'source-key',
@@ -1106,6 +1108,7 @@ describe('interact sequences', () => {
             sequenceId: 'mql-fallback-seq',
             effects: [{ effectId: 'effect-target', key: 'target-key' }],
           },
+          origin,
         },
       ];
 

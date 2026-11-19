@@ -322,7 +322,7 @@ describe('interact plugin bridge', () => {
       expect(hoverSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('defers only the effect that carries an effect-level deferred plugin', () => {
+    it('defers the whole interaction when one of its effects carries a deferred plugin', () => {
       const apply = useSpanPlugin('deferred', 'hydrated');
       const addSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
 
@@ -345,8 +345,7 @@ describe('interact plugin bridge', () => {
       add(document.createElement('div'), 'source');
 
       expect(apply).not.toHaveBeenCalled();
-      expect(hoverTargets(addSpy)).toContain(plain);
-      expect(hoverTargets(addSpy).some((el) => el.classList.contains('pt'))).toBe(false);
+      expect(addSpy).not.toHaveBeenCalled();
 
       Interact.ready('hydrated');
 
@@ -354,6 +353,44 @@ describe('interact plugin bridge', () => {
       expect(apply).toHaveBeenCalledWith(split);
       expect(hoverTargets(addSpy).filter((el) => el === plain)).toHaveLength(1);
       expect(hoverTargets(addSpy).some((el) => el.classList.contains('pt'))).toBe(true);
+    });
+
+    it('attaches a viewEnter trigger only after the plugins of its sequences are released', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+      const viewEnterSpy = vi
+        .spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.viewEnter, 'add')
+        .mockImplementation(() => {});
+      const getSequenceSpy = vi.spyOn(Interact, 'getSequence');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'section',
+            trigger: 'viewEnter',
+            effects: [{ key: 'section', ...fadeIn }],
+            sequences: [
+              { effects: [{ key: 'title', $deferred: {}, selector: '.pt', ...fadeIn }] },
+              { effects: [{ key: 'title', selector: '.pt', ...fadeIn }] },
+            ],
+          },
+        ],
+      });
+      const title = document.createElement('div');
+      add(title, 'title');
+      add(document.createElement('div'), 'section');
+
+      expect(viewEnterSpy).not.toHaveBeenCalled();
+      expect(getSequenceSpy).not.toHaveBeenCalled();
+
+      Interact.ready('hydrated', 'title');
+
+      expect(apply).toHaveBeenCalledWith(title);
+      expect(viewEnterSpy).toHaveBeenCalledTimes(3);
+      expect(getSequenceSpy).toHaveBeenCalledTimes(2);
+      getSequenceSpy.mock.calls.forEach(([, , animationGroupArgs]) => {
+        const [{ target }] = animationGroupArgs;
+        expect((target as HTMLElement[]).every((el) => el.classList.contains('pt'))).toBe(true);
+      });
     });
 
     it('defers a whole sequence when one of its effects is deferred', () => {

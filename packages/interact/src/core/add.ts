@@ -112,6 +112,41 @@ function _isDeferred(key: string, config: Record<string, unknown>): boolean {
   return false;
 }
 
+function _isEffectDeferred(
+  effect: Effect | EffectRef,
+  sourceKey: string,
+  instance: Interact,
+): boolean {
+  const { effects, conditions } = instance.dataCache;
+  const effectId = (effect as EffectRef).effectId;
+  const resolvedEffect = { ...(effectId ? effects[effectId] : {}), ...effect } as Effect;
+  const mql = getMediaQuery(resolvedEffect.conditions || [], conditions);
+
+  if (mql && !mql.matches) return false;
+
+  const target = resolvedEffect.key && getInterpolatedKey(resolvedEffect.key, sourceKey);
+  return _isDeferred(target || sourceKey, resolvedEffect);
+}
+
+function _isInteractionDeferred(
+  key: string,
+  interaction: Interaction,
+  instance: Interact,
+): boolean {
+  const sequenceEffects = (interaction.sequences || []).flatMap((sequence) =>
+    _isSequenceConfigRef(sequence)
+      ? instance.dataCache.sequences[sequence.sequenceId]?.effects || []
+      : sequence.effects,
+  );
+
+  return (
+    _isDeferred(key, interaction) ||
+    [...(interaction.effects || []), ...sequenceEffects].some((effect) =>
+      _isEffectDeferred(effect, key, instance),
+    )
+  );
+}
+
 function _getElementsFromData(
   data: Interaction | Effect,
   root: HTMLElement,
@@ -332,10 +367,6 @@ function _addInteraction(
         targetController = sourceController;
       }
 
-      if (_isDeferred(target || interaction.key, effectOptions)) {
-        return;
-      }
-
       // Effect-level plugins act on the effect's target element before it is resolved.
       _applyPlugins(
         targetController,
@@ -454,22 +485,6 @@ function _buildAnimationGroupArgsFromSequence(
     const resolvedEffect = effectId ? instance.dataCache.effects[effectId] || {} : {};
     return { ...resolvedEffect, ...effect } as Effect;
   };
-
-  // A sequence is built as a whole, so one deferred effect defers all of it — checked up front so
-  // no plugin of the sequence runs while it is deferred.
-  const isDeferred = seqEffects.some((effect) => {
-    const effectOptions = resolveEffect(effect);
-    const effectMql = getMediaQuery(effectOptions.conditions || [], instance.dataCache.conditions);
-
-    if (effectMql && !effectMql.matches) return false;
-
-    const target = effectOptions.key && getInterpolatedKey(effectOptions.key, sourceKey);
-    return _isDeferred(target || sourceKey, effectOptions);
-  });
-
-  if (isDeferred) {
-    return null;
-  }
 
   const animationGroupArgs: AnimationGroupArgs[] = [];
   const policy = _getSequencePolicy(sequenceConfig, interaction, instance);
@@ -727,7 +742,7 @@ function _processSequencesForTarget(
   seqInteractionIds.forEach((seqInteractionId_) => {
     const seqVariations = sequences[seqInteractionId_];
 
-    seqVariations.some(({ sequence: sequenceConfig, ...interaction }) => {
+    seqVariations.some(({ sequence: sequenceConfig, origin, ...interaction }) => {
       const interactionMql = getMediaQuery(
         interaction.conditions || [],
         instance.dataCache.conditions,
@@ -751,7 +766,7 @@ function _processSequencesForTarget(
         return true;
       }
 
-      if (_isDeferred(sourceKey!, interaction)) {
+      if (_isInteractionDeferred(sourceKey!, origin, instance)) {
         return true;
       }
 
@@ -839,7 +854,7 @@ function addEffectsForTarget(
     const effectVariations = effects[interactionId_];
 
     // use `some` to short-circuit after the first effect that matches the conditions
-    effectVariations.some(({ effect, ...interaction }, variationIndex) => {
+    effectVariations.some(({ effect, origin, ...interaction }, variationIndex) => {
       const interactionMql = getMediaQuery(
         interaction.conditions || [],
         instance!.dataCache.conditions,
@@ -886,7 +901,7 @@ function addEffectsForTarget(
           return true;
         }
 
-        if (_isDeferred(sourceKey!, interaction) || _isDeferred(targetKey, effectOptions)) {
+        if (_isInteractionDeferred(sourceKey!, origin, instance)) {
           return true;
         }
 
@@ -1053,7 +1068,7 @@ export function add(controller: IInteractionController): boolean {
     }
 
     if (!mql || mql.matches) {
-      if (_isDeferred(key, interaction)) {
+      if (_isInteractionDeferred(key, interaction, instance!)) {
         return;
       }
 
@@ -1104,7 +1119,7 @@ export function addListItems(
       }
 
       if (!mql || mql.matches) {
-        if (_isDeferred(key, interaction)) {
+        if (_isInteractionDeferred(key, interaction, instance!)) {
           return;
         }
 
