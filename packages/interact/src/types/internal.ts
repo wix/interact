@@ -23,8 +23,14 @@ export type InteractCache = {
   interactions: {
     [path: string]: {
       triggers: Interaction[];
-      effects: Record<string, (InteractionTrigger & { effect: Effect | EffectRef })[]>;
-      sequences: Record<string, (InteractionTrigger & { sequence: SequenceConfig })[]>;
+      effects: Record<
+        string,
+        (InteractionTrigger & { effect: Effect | EffectRef; origin: Interaction })[]
+      >;
+      sequences: Record<
+        string,
+        (InteractionTrigger & { sequence: SequenceConfig; origin: Interaction })[]
+      >;
       interactionIds: Set<string>;
       selectors: Set<string>;
     };
