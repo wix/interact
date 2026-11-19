@@ -1,8 +1,7 @@
-import type { IInteractElement, InteractPluginCleanup, StateAction } from '../types';
+import type { InteractPluginCleanup, StateAction } from '../types';
 import { add, addListItems } from './add';
+import { getActiveEffectIds, mutateEffectState } from './effectState';
 import { remove, removeListItems } from './remove';
-
-export const INTERACT_EFFECT_DATA_ATTR = 'interactEffect';
 
 export class InteractionController {
   element: HTMLElement;
@@ -138,37 +137,17 @@ export class InteractionController {
       return;
     }
 
-    if (!isLegacy && (this.element as IInteractElement).toggleEffect) {
-      (this.element as IInteractElement).toggleEffect(effectId, stateAction, item);
+    const { element, key } = this;
+    if (!isLegacy && 'toggleEffect' in element && typeof element.toggleEffect === 'function') {
+      element.toggleEffect(effectId, stateAction, item);
       return;
     }
 
-    const currentEffects = new Set(
-      this.element.dataset[INTERACT_EFFECT_DATA_ATTR]?.split(' ') || [],
-    );
-
-    if (stateAction === 'toggle') {
-      if (currentEffects.has(effectId)) {
-        currentEffects.delete(effectId);
-      } else {
-        currentEffects.add(effectId);
-      }
-    } else if (stateAction === 'add') {
-      currentEffects.add(effectId);
-    } else if (stateAction === 'remove') {
-      currentEffects.delete(effectId);
-    } else if (stateAction === 'clear') {
-      currentEffects.clear();
-    }
-
-    (item || this.element).dataset[INTERACT_EFFECT_DATA_ATTR] =
-      Array.from(currentEffects).join(' ');
+    mutateEffectState({ element: item ?? element, key, effectId, stateAction });
   }
 
   getActiveEffects(): string[] {
-    const raw = this.element.dataset[INTERACT_EFFECT_DATA_ATTR] || '';
-    const trimmed = raw.trim();
-    return trimmed ? trimmed.split(/\s+/) : [];
+    return getActiveEffectIds(this.element);
   }
 
   watchChildList(listContainer: string): void {

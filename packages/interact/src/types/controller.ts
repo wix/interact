@@ -42,3 +42,18 @@ export interface IInteractElement extends HTMLElement {
   toggleEffect(effectId: string, stateAction: StateAction, item?: HTMLElement | null): void;
   getActiveEffects(): string[];
 }
+
+/** A snapshot emitted after an element's active effect state changes. */
+export interface InteractStateChangeDetail {
+  /** The key of the state owner, when known. */
+  readonly key?: string;
+  readonly activeEffectIds: readonly string[];
+}
+
+export type InteractStateChangeEvent = CustomEvent<InteractStateChangeDetail>;
+
+declare global {
+  interface GlobalEventHandlersEventMap {
+    'interact-state-change': InteractStateChangeEvent;
+  }
+}
