@@ -1,4 +1,4 @@
-import { Interact } from './Interact';
+import { deleteMountedController, getMountedController, Interact } from './Interact';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import type { IInteractionController } from '../types';
 
@@ -10,10 +10,14 @@ export function remove(controller: IInteractionController, removeFromCache: bool
   if (!key || Interact.getController(key) !== controller) {
     return;
   }
+  const mounted = getMountedController(key);
+  const isCurrent = () =>
+    Interact.getController(key) === controller && getMountedController(key) === mounted;
 
   const instances = Interact.getInstancesForKey(key);
   const [instance, ...otherInstances] = instances;
   if (!instance) {
+    deleteMountedController(key, mounted, removeFromCache);
     if (removeFromCache) {
       Interact.deleteController(key);
     }
@@ -38,10 +42,17 @@ export function remove(controller: IInteractionController, removeFromCache: bool
 
   removeElements(elements as HTMLElement[]);
   for (const owner of otherInstances) {
+    if (!isCurrent()) {
+      return;
+    }
     owner.clearEffectPairsForKey(key);
     owner.clearMediaQueryListenersForKey(key);
   }
 
+  if (!isCurrent()) {
+    return;
+  }
+  deleteMountedController(key, mounted, removeFromCache);
   // React can't seem to recover in StrictMode since it doesn't invoke ref callback 2nd time
   instance.deleteController(key, removeFromCache);
 }

@@ -45,7 +45,34 @@ type InteractInitOptions = {
 type MountedController = {
   controller: IInteractionController;
   items: Map<string, string>;
+  sponsor: Interact;
 };
+
+const mountedControllers = new Map<string, Map<string, MountedController>>();
+
+export function getMountedController(key: string): MountedController | undefined {
+  return mountedControllers.get(getKeyTemplate(key))?.get(key);
+}
+
+export function deleteMountedController(
+  key: string,
+  record: MountedController | undefined,
+  removeFromCache: boolean,
+): void {
+  const template = getKeyTemplate(key);
+  const bucket = mountedControllers.get(template);
+  if (!record || !bucket || bucket.get(key) !== record) {
+    return;
+  }
+
+  bucket.delete(key);
+  if (bucket.size === 0) {
+    mountedControllers.delete(template);
+  }
+  if (removeFromCache) {
+    record.sponsor.controllers.delete(record.controller);
+  }
+}
 
 type EffectRootObservation = {
   controller: IInteractionController;
@@ -85,7 +112,6 @@ export class Interact {
     [listContainer: string]: { [interactionId: string]: boolean };
   };
   controllers: Set<IInteractionController>;
-  private readonly mountedControllers = new Map<string, Map<string, MountedController>>();
   private readonly effectPairsByEndpoint = new Map<string, Map<string, EffectPair>>();
   private readonly effectRootObservers = new Map<string, EffectRootObservation>();
   static forceReducedMotion: boolean = false;
@@ -159,7 +185,6 @@ export class Interact {
     this.addedInteractions = {};
     this.listInteractionsCache = {};
     this.controllers.clear();
-    this.mountedControllers.clear();
     this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
     Interact.instances.splice(Interact.instances.indexOf(this), 1);
   }
@@ -168,34 +193,42 @@ export class Interact {
     const previous = Interact.getController(key);
     if (previous && previous !== controller) {
       previous.disconnect({ removeFromCache: true });
+      const current = Interact.getController(key);
+      if (current && current !== controller) {
+        return;
+      }
     }
 
+    Interact.setController(key, controller);
     const template = getKeyTemplate(key);
-    let mounted = this.mountedControllers.get(template);
+    let mounted = mountedControllers.get(template);
     if (!mounted) {
       mounted = new Map();
-      this.mountedControllers.set(template, mounted);
+      mountedControllers.set(template, mounted);
     }
     if (!mounted.has(key)) {
-      mounted.set(key, { controller, items: getRepeaterItems(key) });
+      mounted.set(key, { controller, items: getRepeaterItems(key), sponsor: this });
+      this.controllers.add(controller);
     }
-    this.controllers.add(controller);
-    Interact.setController(key, controller);
   }
 
   deleteController(key: string, removeFromCache: boolean = false) {
-    const controller = Interact.controllerCache.get(key);
-    const template = getKeyTemplate(key);
-    const mounted = this.mountedControllers.get(template);
-    mounted?.delete(key);
-    if (mounted?.size === 0) {
-      this.mountedControllers.delete(template);
+    const controller = Interact.getController(key);
+    const mounted = getMountedController(key);
+    if (mounted?.sponsor === this) {
+      deleteMountedController(key, mounted, removeFromCache);
     }
+    const remainingMount = getMountedController(key);
 
     this.clearInteractionStateForKey(key);
     this.clearMediaQueryListenersForKey(key);
 
-    if (controller && removeFromCache) {
+    if (
+      controller &&
+      removeFromCache &&
+      Interact.getController(key) === controller &&
+      getMountedController(key) === remainingMount
+    ) {
       this.controllers.delete(controller);
       Interact.deleteController(key);
     }
@@ -207,7 +240,7 @@ export class Interact {
     onlyKey?: string,
   ): IterableIterator<[key: string, controller: IInteractionController]> {
     const reference = Interact.getMountedController(referenceKey);
-    const peers = Interact.getInstance(peerTemplate)?.mountedControllers.get(peerTemplate);
+    const peers = mountedControllers.get(peerTemplate);
     if (!reference || !peers) {
       return;
     }
@@ -424,6 +457,7 @@ export class Interact {
       controller.disconnect();
     });
     Interact.instances.length = 0;
+    mountedControllers.clear();
     Interact.controllerCache.clear();
     Interact.sequenceCache.clear();
     Interact.elementSequenceMap = new WeakMap();
@@ -485,19 +519,22 @@ export class Interact {
     );
   }
 
-  private static getMountedController(key: string): MountedController | undefined {
-    return Interact.getInstance(key)?.mountedControllers.get(getKeyTemplate(key))?.get(key);
-  }
+  private static getMountedController = getMountedController;
 
   static getController(key: string | undefined): IInteractionController | undefined {
     return key ? Interact.controllerCache.get(key) : undefined;
   }
 
   static setController(key: string, controller: IInteractionController): void {
+    const mounted = getMountedController(key);
+    if (mounted && mounted.controller !== controller) {
+      deleteMountedController(key, mounted, true);
+    }
     Interact.controllerCache.set(key, controller);
   }
 
   static deleteController(key: string): void {
+    deleteMountedController(key, getMountedController(key), true);
     Interact.controllerCache.delete(key);
   }
 

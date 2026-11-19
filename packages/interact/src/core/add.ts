@@ -1037,6 +1037,9 @@ export function add(controller: IInteractionController): boolean {
   }
 
   instance.setController(key, controller);
+  if (!Interact.isMountedController(key, controller)) {
+    return false;
+  }
   const hasTriggers = addEffectsForSource(key, controller, instance);
   const hasEffects = addEffectsForTarget(key);
   _processSequencesForTarget(key, controller, instance);
