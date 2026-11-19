@@ -1,6 +1,6 @@
-import type { IInteractionController, StateAction } from '../types';
+import type { IInteractionController, ScopedStateMutation, StateAction } from '../types';
 import { InteractionController } from '../core/InteractionController';
-import { getActiveEffectIds, mutateEffectState } from '../core/effectState';
+import { getActiveEffectIds, nativeEffectState, toggleEffectState } from '../core/effectState';
 
 export function getInteractElement() {
   let checkedForLegacyStateSyntax = false;
@@ -54,30 +54,32 @@ export function getInteractElement() {
       this.controller.disconnect(options);
     }
 
+    get [nativeEffectState]() {
+      return this._internals
+        ? { states: this._internals.states, legacySyntax: isLegacyStateSyntax }
+        : undefined;
+    }
+
+    applyState(mutation: ScopedStateMutation): void {
+      this.controller.applyState(mutation);
+    }
+
     toggleEffect(effectId: string, stateAction: StateAction, item?: HTMLElement | null) {
       if (item === null) {
         return;
       }
 
-      mutateEffectState({
+      toggleEffectState({
         element: item ?? this,
         key: this.controller.key,
         effectId,
         stateAction,
-        nativeState:
-          this._internals && !item
-            ? { states: this._internals.states, legacySyntax: isLegacyStateSyntax }
-            : undefined,
+        nativeState: item ? undefined : this[nativeEffectState],
       });
     }
 
     getActiveEffects(): string[] {
-      return getActiveEffectIds(
-        this,
-        this._internals
-          ? { states: this._internals.states, legacySyntax: isLegacyStateSyntax }
-          : undefined,
-      );
+      return getActiveEffectIds(this, this[nativeEffectState]);
     }
   };
 }

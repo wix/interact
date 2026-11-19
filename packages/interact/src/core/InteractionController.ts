@@ -1,6 +1,6 @@
-import type { InteractPluginCleanup, StateAction } from '../types';
+import type { InteractPluginCleanup, ScopedStateMutation, StateAction } from '../types';
 import { add, addListItems } from './add';
-import { getActiveEffectIds, mutateEffectState } from './effectState';
+import { applyScopedEffectState, getActiveEffectIds, toggleEffectState } from './effectState';
 import { remove, removeListItems } from './remove';
 
 export class InteractionController {
@@ -127,6 +127,10 @@ export class InteractionController {
     }
   }
 
+  applyState(mutation: ScopedStateMutation): void {
+    applyScopedEffectState(this.element, this.key, mutation);
+  }
+
   toggleEffect(
     effectId: string,
     stateAction: StateAction,
@@ -143,7 +147,7 @@ export class InteractionController {
       return;
     }
 
-    mutateEffectState({ element: item ?? element, key, effectId, stateAction });
+    toggleEffectState({ element: item ?? element, key, effectId, stateAction });
   }
 
   getActiveEffects(): string[] {

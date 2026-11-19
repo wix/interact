@@ -10,6 +10,149 @@ describe('state changes', () => {
     vi.unstubAllGlobals();
   });
 
+  it('applies scoped commands to the owner with one fallback write per change', () => {
+    const unrelatedApplyState = vi.fn();
+    const owner = Object.assign(document.createElement('div'), { applyState: unrelatedApplyState });
+    owner.classList.add('unrelated');
+    owner.dataset.interactEffect = 'foreign';
+    add(owner, 'owner');
+    const controller = Interact.getController('owner');
+    const changes: InteractStateChangeEvent[] = [];
+    owner.addEventListener('interact-state-change', (event) => changes.push(event));
+    const observer = new MutationObserver(() => {});
+    observer.observe(owner, { attributeFilter: ['data-interact-effect'] });
+    const stateId = 'open\u00a0menu';
+
+    controller?.applyState({ operation: 'add', stateId });
+    controller?.applyState({ operation: 'add', stateId });
+    controller?.applyState({ operation: 'toggle', stateId: 'second' });
+    controller?.applyState({ operation: 'toggle', stateId: 'second' });
+    controller?.applyState({ operation: 'remove', stateId: 'second' });
+    controller?.applyState({ operation: 'add', stateId: 'second' });
+    controller?.applyState({ operation: 'remove', stateId: 'second' });
+    controller?.applyState({ operation: 'add', stateId: 'second' });
+    controller?.applyState({
+      operation: 'clear',
+      stateIds: [stateId, 'second', stateId, 'unknown'],
+    });
+    controller?.applyState({ operation: 'clear', stateIds: [] });
+    controller?.applyState({ operation: 'clear', stateIds: [stateId, 'unknown'] });
+
+    expect(unrelatedApplyState).not.toHaveBeenCalled();
+    expect(observer.takeRecords()).toHaveLength(7);
+    expect(controller?.getActiveEffects()).toEqual(['foreign']);
+    expect(owner.classList.contains('unrelated')).toBe(true);
+    expect(changes.map((event) => event.target)).toEqual(Array(7).fill(owner));
+    expect(changes.map((event) => event.detail)).toEqual([
+      { key: 'owner', activeEffectIds: ['foreign', stateId] },
+      { key: 'owner', activeEffectIds: ['foreign', stateId, 'second'] },
+      { key: 'owner', activeEffectIds: ['foreign', stateId] },
+      { key: 'owner', activeEffectIds: ['foreign', stateId, 'second'] },
+      { key: 'owner', activeEffectIds: ['foreign', stateId] },
+      { key: 'owner', activeEffectIds: ['foreign', stateId, 'second'] },
+      { key: 'owner', activeEffectIds: ['foreign'] },
+    ]);
+    observer.disconnect();
+  });
+
+  it('rejects malformed scoped commands before changing any state', () => {
+    const owner = document.createElement('div');
+    add(owner, 'owner');
+    const controller = Interact.getController('owner');
+    if (!controller) throw new Error('Missing owner controller');
+    controller.applyState({ operation: 'add', stateId: 'foreign' });
+    const listener = vi.fn();
+    owner.addEventListener('interact-state-change', listener);
+
+    for (const mutation of [
+      undefined,
+      { operation: 'clear' },
+      { operation: 'clear', stateIds: 'foreign' },
+      { operation: 'clear', stateIds: ['foreign', 7] },
+      { operation: 'clear', stateIds: ['foreign other'] },
+      { operation: 'clearAll' },
+      { operation: 'add', stateId: '' },
+    ]) {
+      expect(() => Reflect.apply(controller.applyState, controller, [mutation])).toThrow(TypeError);
+    }
+
+    expect(controller.getActiveEffects()).toEqual(['foreign']);
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it('reads each scoped command field once before applying it', () => {
+    const owner = document.createElement('div');
+    owner.dataset.interactEffect = 'foreign';
+    add(owner, 'owner');
+    const controller = Interact.getController('owner');
+    if (!controller) throw new Error('Missing owner controller');
+    const changes: InteractStateChangeEvent['detail'][] = [];
+    owner.addEventListener('interact-state-change', (event) => changes.push(event.detail));
+    let operationReads = 0;
+    let idReads = 0;
+    const addition = {
+      get operation() {
+        return ++operationReads === 1 ? 'add' : 'clearAll';
+      },
+      get stateId() {
+        return ++idReads === 1 ? 'owned' : 'foreign';
+      },
+    };
+
+    Reflect.apply(controller.applyState, controller, [addition]);
+
+    expect(controller.getActiveEffects()).toEqual(['foreign', 'owned']);
+    expect(operationReads).toBe(1);
+    expect(idReads).toBe(1);
+
+    let idsReads = 0;
+    controller.applyState({
+      operation: 'clear',
+      get stateIds() {
+        return ++idsReads === 1 ? ['owned'] : ['foreign'];
+      },
+    });
+
+    expect(controller.getActiveEffects()).toEqual(['foreign']);
+    expect(idsReads).toBe(1);
+    expect(changes).toEqual([
+      { key: 'owner', activeEffectIds: ['foreign', 'owned'] },
+      { key: 'owner', activeEffectIds: ['foreign'] },
+    ]);
+  });
+
+  it('shares native owner membership between the wrapper and its controller', () => {
+    const attachInternals = HTMLElement.prototype.attachInternals;
+    vi.spyOn(HTMLElement.prototype, 'attachInternals').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return Object.assign(attachInternals.call(this), { states: new Set<string>() });
+    });
+    const Element = getInteractElement();
+    customElements.define('test-scoped-native-interact', Element);
+    const wrapper = new Element();
+    wrapper.dataset.interactKey = 'native-owner';
+    document.body.append(wrapper);
+    const changes: InteractStateChangeEvent['detail'][] = [];
+    wrapper.addEventListener('interact-state-change', (event) => changes.push(event.detail));
+    const controller = Interact.getController('native-owner');
+
+    wrapper.toggleEffect('foreign', 'add');
+    wrapper.applyState({ operation: 'add', stateId: 'active' });
+    controller?.applyState({ operation: 'clear', stateIds: ['active'] });
+    controller?.applyState({ operation: 'clear', stateIds: ['active', 'missing'] });
+    controller?.toggleEffect('attribute', 'add', undefined, true);
+
+    expect(wrapper.getActiveEffects()).toEqual(['foreign']);
+    expect(controller?.getActiveEffects()).toEqual(['attribute']);
+    expect(changes).toEqual([
+      { key: 'native-owner', activeEffectIds: ['foreign'] },
+      { key: 'native-owner', activeEffectIds: ['foreign', 'active'] },
+      { key: 'native-owner', activeEffectIds: ['foreign'] },
+      { key: 'native-owner', activeEffectIds: ['attribute'] },
+    ]);
+  });
+
   it('reads and writes only the selected list item and dispatches on that item', () => {
     const root = document.createElement('div');
     const first = document.createElement('div');
@@ -248,5 +391,16 @@ describe('state changes', () => {
     expect(wrapper.dataset.interactEffect).toBeUndefined();
     expect(item.dataset.interactEffect).toBe('pinned');
     expect(changes).toEqual([{ activeEffectIds: ['selected'] }, { activeEffectIds: ['pinned'] }]);
+
+    wrapper.applyState({ operation: 'add', stateId: 'foreign' });
+    wrapper.controller.applyState({ operation: 'clear', stateIds: ['selected', 'missing'] });
+
+    expect(wrapper.getActiveEffects()).toEqual(['foreign']);
+    expect(wrapper._internals?.states.has('--foreign')).toBe(true);
+    expect(item.dataset.interactEffect).toBe('pinned');
+    expect(changes.slice(2)).toEqual([
+      { activeEffectIds: ['selected', 'foreign'] },
+      { activeEffectIds: ['foreign'] },
+    ]);
   });
 });

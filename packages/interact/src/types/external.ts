@@ -39,6 +39,7 @@ export type {
 export type {
   IInteractionController,
   IInteractElement,
+  ScopedStateMutation,
   InteractStateChangeDetail,
   InteractStateChangeEvent,
 } from './controller';

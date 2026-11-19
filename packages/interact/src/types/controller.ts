@@ -1,6 +1,11 @@
 import type { StateAction } from './effects';
 import type { InteractPluginCleanup } from './plugins';
 
+/** State IDs are nonempty and contain no ASCII whitespace. Clear removes only the listed IDs. */
+export type ScopedStateMutation =
+  | { readonly operation: 'add' | 'remove' | 'toggle'; readonly stateId: string }
+  | { readonly operation: 'clear'; readonly stateIds: readonly string[] };
+
 export interface IInteractionController {
   element: HTMLElement;
   key: string | undefined;
@@ -20,6 +25,7 @@ export interface IInteractionController {
    * back. Called by `Interact.ready()`.
    */
   resume(): void;
+  applyState(mutation: ScopedStateMutation): void;
   toggleEffect(
     effectId: string,
     stateAction: StateAction,
@@ -39,6 +45,7 @@ export interface IInteractElement extends HTMLElement {
   disconnectedCallback(): void;
   connect(key?: string): void;
   disconnect(options?: { removeFromCache?: boolean }): void;
+  applyState(mutation: ScopedStateMutation): void;
   toggleEffect(effectId: string, stateAction: StateAction, item?: HTMLElement | null): void;
   getActiveEffects(): string[];
 }

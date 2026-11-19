@@ -1,9 +1,22 @@
-import type { InteractStateChangeDetail, StateAction } from '../types';
+import type { InteractStateChangeDetail, ScopedStateMutation, StateAction } from '../types';
+
+export const nativeEffectState = Symbol('Interact native effect state');
 
 type NativeEffectState = {
   states: Set<string>;
   legacySyntax: boolean;
 };
+
+type StateOwner = {
+  element: HTMLElement;
+  key?: string;
+  nativeState?: NativeEffectState;
+};
+
+type WriteOperation = Exclude<StateAction, 'clear'>;
+type MembershipMutation =
+  | { operation: 'clearAll' }
+  | { operation: WriteOperation; stateIds: Iterable<string> };
 
 function readEffectTokens(value: string | undefined): string[] {
   return value?.match(/[^ \t\n\f\r]+/g) ?? [];
@@ -22,35 +35,78 @@ export function getActiveEffectIds(
   return readEffectTokens(element.dataset.interactEffect);
 }
 
-export function mutateEffectState({
-  element,
-  key,
+function isWriteOperation(operation: unknown): operation is WriteOperation {
+  return operation === 'add' || operation === 'remove' || operation === 'toggle';
+}
+
+function isScopedStateId(stateId: unknown): stateId is string {
+  return typeof stateId === 'string' && stateId.length > 0 && !/[ \t\n\f\r]/.test(stateId);
+}
+
+export function applyScopedEffectState(
+  element: HTMLElement & { [nativeEffectState]?: NativeEffectState },
+  key: string | undefined,
+  mutation: ScopedStateMutation,
+): void {
+  const owner = { element, key, nativeState: element[nativeEffectState] };
+  const operation = mutation?.operation;
+
+  switch (operation) {
+    case 'clear': {
+      const ids = mutation.stateIds;
+      if (!Array.isArray(ids)) break;
+      const stateIds = Array.from(ids);
+      if (!stateIds.every(isScopedStateId)) break;
+      mutateEffectState(owner, { operation: 'remove', stateIds });
+      return;
+    }
+    case 'add':
+    case 'remove':
+    case 'toggle': {
+      const { stateId } = mutation;
+      if (!isScopedStateId(stateId)) break;
+      mutateEffectState(owner, { operation, stateIds: [stateId] });
+      return;
+    }
+  }
+
+  throw new TypeError('Invalid scoped state mutation');
+}
+
+export function toggleEffectState({
   effectId,
   stateAction,
-  nativeState,
-}: {
-  element: HTMLElement;
-  key?: string;
+  ...owner
+}: StateOwner & {
   effectId: string;
   stateAction: StateAction;
-  nativeState?: NativeEffectState;
 }): void {
+  if (stateAction === 'clear') {
+    mutateEffectState(owner, { operation: 'clearAll' });
+  } else if (isWriteOperation(stateAction)) {
+    const stateIds = owner.nativeState ? [effectId] : new Set(readEffectTokens(effectId));
+    mutateEffectState(owner, { operation: stateAction, stateIds });
+  }
+}
+
+function mutateEffectState(
+  { element, key, nativeState }: StateOwner,
+  mutation: MembershipMutation,
+): void {
   const states = nativeState?.states ?? new Set(readEffectTokens(element.dataset.interactEffect));
+  const { operation } = mutation;
   let changed = false;
 
-  if (stateAction === 'clear') {
+  if (operation === 'clearAll') {
     changed = states.size > 0;
     if (changed) {
       states.clear();
     }
-  } else if (stateAction === 'add' || stateAction === 'remove' || stateAction === 'toggle') {
-    const ids = nativeState
-      ? [nativeState.legacySyntax ? `--${effectId}` : effectId]
-      : new Set(readEffectTokens(effectId));
-
-    for (const id of ids) {
+  } else {
+    for (const stateId of mutation.stateIds) {
+      const id = nativeState?.legacySyntax ? `--${stateId}` : stateId;
       const isActive = states.has(id);
-      const shouldBeActive = stateAction === 'toggle' ? !isActive : stateAction === 'add';
+      const shouldBeActive = operation === 'toggle' ? !isActive : operation === 'add';
 
       if (isActive !== shouldBeActive) {
         changed = true;
