@@ -54,6 +54,7 @@ const observers: Record<string, IntersectionObserver> = {};
 const handlerMap = new WeakMap() as HandlerObjectMap;
 const elementFirstRun = new WeakSet<HTMLElement>();
 const elementObserverMap = new WeakMap<HTMLElement, IntersectionObserver>();
+const observerInView = new WeakMap<IntersectionObserver, WeakSet<HTMLElement>>();
 let viewEnterOptions: Partial<ViewEnterParams> = {};
 let sharedExitObserver: IntersectionObserver | null = null;
 
@@ -105,6 +106,7 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
         threshold,
       };
 
+  const inView = new WeakSet<HTMLElement>();
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       const target = entry.target as HTMLElement;
@@ -141,6 +143,12 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
         }
       }
 
+      if (entry.isIntersecting) {
+        inView.add(target);
+      } else {
+        inView.delete(target);
+      }
+
       if (entry.isIntersecting || !isFirstRun) {
         invokeHandlers(target, entry.isIntersecting);
       }
@@ -148,6 +156,7 @@ function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
   }, config);
 
   observers[key] = observer;
+  observerInView.set(observer, inView);
 
   return observer;
 }
@@ -206,6 +215,7 @@ function addViewEnterHandler(
         ) {
           const currentObserver = elementObserverMap.get(source) || observer;
           currentObserver.unobserve(source);
+          observerInView.get(currentObserver)?.delete(source);
           elementFirstRun.delete(source);
         }
 
@@ -269,6 +279,7 @@ function addViewEnterHandler(
   const cleanup = () => {
     const currentObserver = elementObserverMap.get(source) || observer;
     currentObserver.unobserve(source);
+    observerInView.get(currentObserver)?.delete(source);
 
     if (type === 'repeat' || type === 'state') {
       const exitObserver = getExitObserver();
@@ -287,6 +298,10 @@ function addViewEnterHandler(
 
   elementObserverMap.set(source, observer);
   observer.observe(source);
+
+  if (observerInView.get(observer)?.has(source)) {
+    handler(true);
+  }
 
   // For repeat and state types, set up a separate exit observer
   // that watches when element is completely out of view

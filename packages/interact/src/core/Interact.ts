@@ -14,6 +14,7 @@ import {
   ReducedMotionPolicy,
   InteractPluginOptions,
 } from '../types';
+import { PLUGIN_FIELD_PREFIX } from '../types';
 import { getElementHash, getInterpolatedKey } from './utilities';
 import { getFallbackId, getKeyframeSlots, getSlotKey } from './css';
 import { withReducedMotionConditions } from './reducedMotion';
@@ -448,10 +449,25 @@ function _ensureInteractionEntry(
       sequences: {},
       interactionIds: new Set(),
       selectors: new Set(),
+      plugins: [],
     };
   }
 
   return interactions[key];
+}
+
+function _addPlugins(
+  interactions: InteractCache['interactions'],
+  key: string,
+  config: Record<string, unknown>,
+  scope: 'interaction' | 'effect',
+  conditions: (string[] | undefined)[],
+): void {
+  const { plugins } = _ensureInteractionEntry(interactions, key);
+
+  if (Object.keys(config).some((field) => field.startsWith(PLUGIN_FIELD_PREFIX))) {
+    plugins.push({ config, scope, conditions: conditions.flatMap((names) => names || []) });
+  }
 }
 
 // the sequence's effects in their slots - copied, since a referenced sequence can be in different slots
@@ -533,6 +549,7 @@ function parseConfig(
     } as Interaction;
 
     interactions[source].triggers.push(interaction);
+    _addPlugins(interactions, source, interaction, 'interaction', [interaction.conditions]);
     interactions[source].selectors.add(
       getSelector(interaction, { useFirstChild: useCustomElement }),
     );
@@ -574,6 +591,12 @@ function parseConfig(
           return;
         }
       }
+
+      const mergedEffect = { ...referencedEffect, ...effect } as Effect;
+      _addPlugins(interactions, target, mergedEffect, 'effect', [
+        rest.conditions,
+        mergedEffect.conditions,
+      ]);
 
       const targetHash = getElementHash({ ...referencedEffect, ...effect, key: target });
       const interactionId = `${source}::${targetHash}::${interactionIdx}`;
@@ -619,6 +642,16 @@ function parseConfig(
           }
         }
         target = target || source;
+
+        const mergedEffect = {
+          ...effectMap[(effect as EffectRef).effectId],
+          ...effect,
+        } as Effect;
+        _addPlugins(interactions, target, mergedEffect, 'effect', [
+          rest.conditions,
+          sequenceConfig.conditions,
+          mergedEffect.conditions,
+        ]);
 
         const effectSelector = getSelector(effect, { useFirstChild: useCustomElement });
         if (effectSelector) {

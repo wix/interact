@@ -149,6 +149,69 @@ describe('viewEnter handler', () => {
     });
   });
 
+  describe('Handlers added after the source is in view', () => {
+    const createAnimation = () =>
+      ({
+        play: vi.fn(),
+        cancel: vi.fn(),
+        onFinish: vi.fn(),
+        onAbort: vi.fn(),
+        pause: vi.fn(),
+        reverse: vi.fn(),
+        progress: vi.fn(),
+        persist: vi.fn(),
+        isCSS: false,
+      }) as any;
+
+    const addOnce = (animation: any) =>
+      viewEnterHandler.add(
+        element,
+        target,
+        { duration: 1000, namedEffect: { type: 'FadeIn' }, triggerType: 'once' },
+        {},
+        { animation },
+      );
+
+    it('plays a handler added while its observed source is in view', () => {
+      addOnce(createAnimation());
+      addOnce(createAnimation());
+      getMainObserverCallback()([createEntry()]);
+
+      const late = createAnimation();
+      addOnce(late);
+
+      expect(late.play).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits for the next entry when the source left the view', () => {
+      addOnce(createAnimation());
+      addOnce(createAnimation());
+      getMainObserverCallback()([createEntry()]);
+      getMainObserverCallback()([createEntry({ isIntersecting: false })]);
+
+      const late = createAnimation();
+      addOnce(late);
+
+      expect(late.play).not.toHaveBeenCalled();
+
+      getMainObserverCallback()([createEntry()]);
+
+      expect(late.play).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits for the initial entry when the source was unobserved', () => {
+      addOnce(createAnimation());
+      getMainObserverCallback()([createEntry()]);
+
+      expect(unobserveSpy).toHaveBeenCalledWith(element);
+
+      const late = createAnimation();
+      addOnce(late);
+
+      expect(late.play).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Safe flow', () => {
     it('should check for safe mode conditions on first run when not intersecting', () => {
       viewEnterHandler.add(

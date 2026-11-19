@@ -49,10 +49,12 @@ Interact.create(config);
 useEffect(() => Interact.ready('hydrated'), []);
 ```
 
-- While deferred, the plugin does not run, and neither does what carries its
-  `$<name>` field: the whole interaction (interaction-level field), only that
-  effect (effect-level field), or the whole sequence (field on any sequence
-  effect). Everything else applies immediately.
+- While deferred, the plugin does not run, and neither does anything that
+  resolves against the element it runs on: interactions whose source is that
+  element, and effects and sequences that target it (a sequence waits as a
+  whole). Everything else applies immediately. On release, the element's
+  plugins run first, and a `viewEnter` whose source is already in view plays
+  what was released.
 - `Interact.ready(name, key)` releases one element; `Interact.ready(name)`
   releases all.
 - `defer` may list several names; all must be released, e.g.

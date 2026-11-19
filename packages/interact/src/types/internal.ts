@@ -27,6 +27,11 @@ export type InteractCache = {
       sequences: Record<string, (InteractionTrigger & { sequence: SequenceConfig })[]>;
       interactionIds: Set<string>;
       selectors: Set<string>;
+      plugins: {
+        config: Record<string, unknown>;
+        scope: 'interaction' | 'effect';
+        conditions: string[];
+      }[];
     };
   };
 };

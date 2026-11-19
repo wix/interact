@@ -103,13 +103,36 @@ function _applyPlugins(
  * option of `Interact.use()`). A deferred unit is skipped without being marked as added, so the
  * add pass that `Interact.ready()` re-runs for the released key (or every key) applies it.
  */
-function _isDeferred(key: string, config: Record<string, unknown>): boolean {
+function _isDeferred(instance: Interact, key: string, config: Record<string, unknown>): boolean {
+  const keyPlugins = instance.get(key)?.plugins || [];
+
   for (const name of Interact.getPluginsNames()) {
-    if (`${PLUGIN_FIELD_PREFIX}${name}` in config && !Interact._isPluginReleased(name, key)) {
+    const field = `${PLUGIN_FIELD_PREFIX}${name}`;
+    const hasField = field in config || keyPlugins.some((plugin) => field in plugin.config);
+
+    if (hasField && !Interact._isPluginReleased(name, key)) {
       return true;
     }
   }
   return false;
+}
+
+function _applyElementPlugins(
+  controller: IInteractionController,
+  instance: Interact,
+  key: string,
+): void {
+  if (_isDeferred(instance, key, {})) {
+    return;
+  }
+
+  instance.get(key)?.plugins.forEach(({ config, scope, conditions }) => {
+    const mql = getMediaQuery(conditions, instance.dataCache.conditions);
+
+    if (!mql || mql.matches) {
+      _applyPlugins(controller, controller.element, config, key, scope);
+    }
+  });
 }
 
 function _getElementsFromData(
@@ -332,7 +355,7 @@ function _addInteraction(
         targetController = sourceController;
       }
 
-      if (_isDeferred(target || interaction.key, effectOptions)) {
+      if (_isDeferred(instance, target || interaction.key, effectOptions)) {
         return;
       }
 
@@ -464,7 +487,7 @@ function _buildAnimationGroupArgsFromSequence(
     if (effectMql && !effectMql.matches) return false;
 
     const target = effectOptions.key && getInterpolatedKey(effectOptions.key, sourceKey);
-    return _isDeferred(target || sourceKey, effectOptions);
+    return _isDeferred(instance, target || sourceKey, effectOptions);
   });
 
   if (isDeferred) {
@@ -751,7 +774,7 @@ function _processSequencesForTarget(
         return true;
       }
 
-      if (_isDeferred(sourceKey!, interaction)) {
+      if (_isDeferred(instance, sourceKey!, interaction)) {
         return true;
       }
 
@@ -886,7 +909,10 @@ function addEffectsForTarget(
           return true;
         }
 
-        if (_isDeferred(sourceKey!, interaction) || _isDeferred(targetKey, effectOptions)) {
+        if (
+          _isDeferred(instance, sourceKey!, interaction) ||
+          _isDeferred(instance, targetKey, effectOptions)
+        ) {
           return true;
         }
 
@@ -1041,6 +1067,7 @@ export function add(controller: IInteractionController): boolean {
   const hasTriggers = triggers.length > 0;
 
   instance.setController(key, controller);
+  _applyElementPlugins(controller, instance, key);
 
   triggers.forEach((interaction, index) => {
     const mql = getMediaQuery(interaction.conditions, instance!.dataCache.conditions);
@@ -1053,7 +1080,7 @@ export function add(controller: IInteractionController): boolean {
     }
 
     if (!mql || mql.matches) {
-      if (_isDeferred(key, interaction)) {
+      if (_isDeferred(instance!, key, interaction)) {
         return;
       }
 
@@ -1104,7 +1131,7 @@ export function addListItems(
       }
 
       if (!mql || mql.matches) {
-        if (_isDeferred(key, interaction)) {
+        if (_isDeferred(instance!, key, interaction)) {
           return;
         }
 
