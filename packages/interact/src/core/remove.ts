@@ -14,6 +14,9 @@ export function remove(controller: IInteractionController, removeFromCache: bool
   const instances = Interact.getInstancesForKey(key);
   const [instance, ...otherInstances] = instances;
   if (!instance) {
+    if (removeFromCache) {
+      Interact.deleteController(key);
+    }
     return;
   }
 
