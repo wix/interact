@@ -1,5 +1,5 @@
 import type { InteractPluginCleanup, ScopedStateMutation, StateAction } from '../types';
-import { add, addListItems } from './add';
+import { add, addListItems, runPluginCleanup } from './add';
 import { applyScopedEffectState, getActiveEffectIds, toggleEffectState } from './effectState';
 import { getMountedController } from './Interact';
 import { remove, removeListItems } from './remove';
@@ -62,6 +62,7 @@ export class InteractionController {
   }
 
   disconnect({ removeFromCache = false }: { removeFromCache?: boolean } = {}) {
+    const pluginCleanups = this._pluginCleanups;
     const scope = this.runtimeSheet;
     const originalSheet = this.sheet;
     const opaqueAdoption =
@@ -78,16 +79,10 @@ export class InteractionController {
 
     // Run plugin cleanups after `remove()` has torn down animations on the (possibly
     // plugin-generated) elements, then revert the plugins' DOM mutations.
-    if (this._pluginCleanups.length) {
-      for (const cleanup of this._pluginCleanups) {
-        try {
-          cleanup();
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      this._pluginCleanups.length = 0;
+    for (const cleanup of pluginCleanups) {
+      runPluginCleanup(cleanup);
     }
+    pluginCleanups.length = 0;
     this._appliedPlugins = new WeakSet();
 
     if (scope) closeRuntimeSheet(scope);
