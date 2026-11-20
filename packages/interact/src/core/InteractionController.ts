@@ -1,13 +1,21 @@
 import type { InteractPluginCleanup, ScopedStateMutation, StateAction } from '../types';
 import { add, addListItems } from './add';
 import { applyScopedEffectState, getActiveEffectIds, toggleEffectState } from './effectState';
+import { getMountedController } from './Interact';
 import { remove, removeListItems } from './remove';
+import {
+  appendOwnedStyle,
+  closeRuntimeSheet,
+  makeStyleReceipt,
+  type StyleSheetScope,
+} from './runtimeStyle';
 
 export class InteractionController {
   element: HTMLElement;
   key: string | undefined;
   connected: boolean;
   sheet: CSSStyleSheet | null;
+  private runtimeSheet?: StyleSheetScope;
   useFirstChild: boolean;
   _observers: WeakMap<HTMLElement, MutationObserver>;
   _pluginCleanups: InteractPluginCleanup[];
@@ -54,7 +62,15 @@ export class InteractionController {
   }
 
   disconnect({ removeFromCache = false }: { removeFromCache?: boolean } = {}) {
+    const scope = this.runtimeSheet;
+    const originalSheet = this.sheet;
+    const opaqueAdoption =
+      originalSheet && originalSheet !== scope?.sheet ? this.getRuntimeStyleRoot() : undefined;
     const key = this.key || this.element.dataset.interactKey;
+    if (scope && !scope.closing) {
+      const mounted = key ? getMountedController(key) : undefined;
+      scope.closing = { connection: mounted?.controller === this ? mounted : undefined };
+    }
 
     if (key) {
       remove(this, removeFromCache);
@@ -74,21 +90,16 @@ export class InteractionController {
     }
     this._appliedPlugins = new WeakSet();
 
-    if (this.sheet) {
-      const rootNode = this.element?.getRootNode() as ShadowRoot | Document;
-      const adoptTarget: { adoptedStyleSheets: CSSStyleSheet[] } = ((rootNode as ShadowRoot).host
-        ? (rootNode as ShadowRoot)
-        : document) as unknown as { adoptedStyleSheets: CSSStyleSheet[] };
-      const index = adoptTarget.adoptedStyleSheets.indexOf(this.sheet);
-      if (index !== -1) {
-        adoptTarget.adoptedStyleSheets = adoptTarget.adoptedStyleSheets.filter(
-          (s) => s !== this.sheet,
-        );
-      }
+    if (scope) closeRuntimeSheet(scope);
+    if (originalSheet && opaqueAdoption?.adoptedStyleSheets.includes(originalSheet)) {
+      opaqueAdoption.adoptedStyleSheets = opaqueAdoption.adoptedStyleSheets.filter(
+        (sheet) => sheet !== originalSheet,
+      );
     }
+    if (this.runtimeSheet === scope) this.runtimeSheet = undefined;
+    if (this.sheet === originalSheet) this.sheet = null;
 
     this._observers = new WeakMap();
-    this.sheet = null;
     this.connected = false;
   }
 
@@ -103,28 +114,55 @@ export class InteractionController {
     }
   }
 
-  renderStyle(cssRules: string[]) {
-    const rootNode = this.element?.getRootNode() as ShadowRoot | Document;
-    const adoptTarget: { adoptedStyleSheets: CSSStyleSheet[] } = ((rootNode as ShadowRoot).host
-      ? (rootNode as ShadowRoot)
-      : document) as unknown as { adoptedStyleSheets: CSSStyleSheet[] };
-    if (!this.sheet) {
-      this.sheet = new CSSStyleSheet();
-      void this.sheet.replaceSync(cssRules.join('\n'));
+  renderStyle(cssRules: string[]): void {
+    this.appendRuntimeRules(cssRules);
+  }
 
-      adoptTarget.adoptedStyleSheets = [...(adoptTarget.adoptedStyleSheets || []), this.sheet];
-    } else {
-      let position = this.sheet.cssRules.length;
+  [appendOwnedStyle](rules: string[], canPublish: () => boolean) {
+    const renderStyle = this.renderStyle;
+    if (renderStyle !== defaultRenderStyle) {
+      renderStyle.call(this, rules);
+      return;
+    }
+    if (!canPublish()) return;
 
-      for (const cssRule of cssRules) {
-        try {
-          this.sheet.insertRule(cssRule, position);
-          position++;
-        } catch (e) {
-          console.error(e);
-        }
+    const { scope, inserted } = this.appendRuntimeRules(rules);
+    return scope && makeStyleReceipt(scope, inserted);
+  }
+
+  private getRuntimeStyleRoot(): Document | ShadowRoot {
+    const root = this.element.getRootNode();
+    const view = this.element.ownerDocument.defaultView;
+    return view && root instanceof view.ShadowRoot ? root : document;
+  }
+
+  private appendRuntimeRules(cssRules: string[]): { scope?: StyleSheetScope; inserted: CSSRule[] } {
+    const sheet = this.sheet;
+    const scope = this.runtimeSheet?.sheet === sheet ? this.runtimeSheet : undefined;
+    const closing = scope?.closing;
+    const mounted = closing && this.key ? getMountedController(this.key) : undefined;
+    const resumed = mounted?.controller === this && mounted !== closing?.connection;
+    if (!sheet || resumed) {
+      const adoptedInto = this.getRuntimeStyleRoot();
+      const nextSheet = new CSSStyleSheet();
+      this.sheet = nextSheet;
+      nextSheet.replaceSync(cssRules.join('\n'));
+      adoptedInto.adoptedStyleSheets = [...(adoptedInto.adoptedStyleSheets || []), nextSheet];
+      const nextScope: StyleSheetScope = { sheet: nextSheet, adoptedInto, receipts: new Set() };
+      this.runtimeSheet = nextScope;
+      return { scope: nextScope, inserted: Array.from(nextSheet.cssRules) };
+    }
+
+    const inserted: CSSRule[] = [];
+    for (const cssRule of cssRules) {
+      try {
+        const index = sheet.insertRule(cssRule, sheet.cssRules.length);
+        inserted.push(sheet.cssRules[index]);
+      } catch (error) {
+        console.error(error);
       }
     }
+    return { scope, inserted };
   }
 
   applyState(mutation: ScopedStateMutation): void {
@@ -198,3 +236,5 @@ export class InteractionController {
     }
   }
 }
+
+const defaultRenderStyle = InteractionController.prototype.renderStyle;

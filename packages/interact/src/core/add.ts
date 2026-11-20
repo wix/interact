@@ -29,9 +29,11 @@ import {
   REDUCED_MOTION_REDUCE,
   getReducedMotionPolicy,
   getReducedMotionVariants,
+  isReducedMotionVariant,
 } from './reducedMotion';
 import { effectToAnimationOptions } from '../handlers/utilities';
-import { Interact, getSelector } from './Interact';
+import { Interact, getMountedController, getSelector } from './Interact';
+import { writeOwnedStyle } from './runtimeStyle';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import type { AnimationGroupArgs } from '@wix/motion';
 
@@ -230,11 +232,13 @@ function _applyInteraction(
   {
     dataCache,
     pairId,
+    styleSlot,
     source: sourceEndpoint,
     target: targetEndpoint,
   }: {
     dataCache: Interact['dataCache'];
     pairId: string;
+    styleSlot: string;
     source: EffectEndpoint;
     target: EffectEndpoint;
   },
@@ -262,6 +266,7 @@ function _applyInteraction(
       instance,
       sourceKey,
       targetKey,
+      styleSlot,
       source,
       interaction.trigger,
       target,
@@ -353,6 +358,11 @@ function _addInteraction(
       continue;
     }
     interactionVariations.add(interactionId);
+    const styleSlot = JSON.stringify([
+      interactionId,
+      effectIndex,
+      isReducedMotionVariant(effectOptions),
+    ]);
 
     const matches = Interact.getMatchingControllers(sourceKey, targetTemplate, onlyTargetKey);
     for (const [targetKey, targetController] of matches) {
@@ -410,6 +420,7 @@ function _addInteraction(
           {
             dataCache,
             pairId,
+            styleSlot,
             source: { key: sourceKey, controller: sourceController, list: sourceList },
             target: { key: targetKey, controller: targetController, list: targetList },
           },
@@ -897,6 +908,7 @@ function addInteraction<T extends TriggerType>(
   instance: Interact,
   sourceKey: string,
   targetKey: string,
+  styleSlot: string,
   source: HTMLElement,
   trigger: T,
   target: HTMLElement,
@@ -905,7 +917,7 @@ function addInteraction<T extends TriggerType>(
   selectorCondition?: string,
   useFirstChild?: boolean,
 ): HandlerDisposer | void {
-  let targetController;
+  let targetController: IInteractionController | undefined;
 
   if (isTransitionEffect(effect)) {
     const args: CreateTransitionCSSParams = {
@@ -926,7 +938,18 @@ function addInteraction<T extends TriggerType>(
       return;
     }
 
-    targetController.renderStyle(createTransitionCSS(args));
+    const dataCache = instance.dataCache;
+    const targetMount = getMountedController(targetKey);
+    writeOwnedStyle(
+      instance,
+      targetController,
+      styleSlot,
+      createTransitionCSS(args),
+      () =>
+        instance.dataCache === dataCache &&
+        targetMount?.controller === targetController &&
+        getMountedController(targetKey) === targetMount,
+    );
   }
 
   let sourceAnimationOptions;

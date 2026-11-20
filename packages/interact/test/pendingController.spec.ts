@@ -32,6 +32,7 @@ describe('pending controllers', () => {
     vi.stubGlobal(
       'CSSStyleSheet',
       class {
+        cssRules = [];
         replaceSync() {}
       },
     );

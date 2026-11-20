@@ -378,7 +378,7 @@ describe('interact (mini)', () => {
     // Mock CSSStyleSheet
     (window as any).CSSStyleSheet = class CSSStyleSheet {
       constructor() {
-        return { replaceSync: vi.fn(), insertRule: vi.fn() };
+        return { cssRules: [], replaceSync: vi.fn(), insertRule: vi.fn() };
       }
     };
 

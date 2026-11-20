@@ -306,6 +306,7 @@ describe('state changes', () => {
     vi.stubGlobal(
       'CSSStyleSheet',
       class {
+        cssRules = [];
         replaceSync() {}
       },
     );

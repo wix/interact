@@ -33,6 +33,7 @@ import {
   Sequence,
 } from '@wix/motion';
 import type { SequenceOptions, AnimationGroupArgs, IndexedGroup } from '@wix/motion';
+import { retireOwnedStyles } from './runtimeStyle';
 
 type InteractInitOptions = {
   useCustomElement?: boolean;
@@ -185,6 +186,7 @@ export class Interact {
     this.addedInteractions = {};
     this.listInteractionsCache = {};
     this.controllers.clear();
+    retireOwnedStyles(this);
     this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
     Interact.instances.splice(Interact.instances.indexOf(this), 1);
   }
