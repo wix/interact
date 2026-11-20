@@ -1,7 +1,7 @@
 import type { InteractPluginCleanup, ScopedStateMutation, StateAction } from '../types';
 import { add, addListItems, runPluginCleanup } from './add';
 import { applyScopedEffectState, getActiveEffectIds, toggleEffectState } from './effectState';
-import { getMountedController } from './Interact';
+import { getMountedController, Interact } from './Interact';
 import { remove, removeListItems } from './remove';
 import {
   appendOwnedStyle,
@@ -10,12 +10,24 @@ import {
   type StyleSheetScope,
 } from './runtimeStyle';
 
+type ListOwner = {
+  root: HTMLElement;
+  key: string;
+  connection: ReturnType<typeof getMountedController>;
+};
+
+type ListObservation = ListOwner & {
+  removalObserver: MutationObserver;
+  lists: Map<HTMLElement, MutationObserver>;
+};
+
 export class InteractionController {
   element: HTMLElement;
   key: string | undefined;
   connected: boolean;
   sheet: CSSStyleSheet | null;
   private runtimeSheet?: StyleSheetScope;
+  private listObservation?: ListObservation;
   useFirstChild: boolean;
   _observers: WeakMap<HTMLElement, MutationObserver>;
   _pluginCleanups: InteractPluginCleanup[];
@@ -62,6 +74,8 @@ export class InteractionController {
   }
 
   disconnect({ removeFromCache = false }: { removeFromCache?: boolean } = {}) {
+    this.stopWatchingLists();
+    this._observers = new WeakMap();
     const pluginCleanups = this._pluginCleanups;
     const scope = this.runtimeSheet;
     const originalSheet = this.sheet;
@@ -94,7 +108,6 @@ export class InteractionController {
     if (this.runtimeSheet === scope) this.runtimeSheet = undefined;
     if (this.sheet === originalSheet) this.sheet = null;
 
-    this._observers = new WeakMap();
     this.connected = false;
   }
 
@@ -188,20 +201,98 @@ export class InteractionController {
   }
 
   watchChildList(listContainer: string): void {
-    const list = this.element.querySelector(listContainer);
+    const root = this.element;
+    const key = this.key || root.dataset.interactKey;
+    if (!key || Interact.getController(key) !== this) return;
 
-    if (list) {
-      // TODO: we can probably improve this and use less observers, this impl. uses one per container element
-      let observer = this._observers.get(list as HTMLElement);
+    const list = root.querySelector<HTMLElement>(listContainer);
+    if (!list) return;
 
-      if (!observer) {
-        observer = new MutationObserver(this._childListChangeHandler.bind(this, listContainer));
+    const current = this.listObservation;
+    if (current) this.ownsListObservation(current);
+    if (this._observers.has(list)) return;
 
-        this._observers.set(list as HTMLElement, observer);
-
-        observer.observe(list as HTMLElement, { childList: true });
-      }
+    const owner = { root, key, connection: getMountedController(key) };
+    const observers = this._observers;
+    const deliver = this._childListChangeHandler.bind(this, listContainer);
+    if (
+      this._observers !== observers ||
+      !this.isCurrentListOwner(owner) ||
+      !root.contains(list) ||
+      observers.has(list)
+    ) {
+      return;
     }
+
+    const observation = this.listObservation ?? this.observeListRemovals(owner);
+    const observer = new MutationObserver((records) => {
+      const target = records[0]?.target;
+      if (target && this.ownsListObservation(observation) && root.contains(target)) {
+        deliver(records);
+      }
+    });
+    observation.lists.set(list, observer);
+    observers.set(list, observer);
+    observer.observe(list, { childList: true });
+  }
+
+  private observeListRemovals(owner: ListOwner): ListObservation {
+    const removalObserver = new MutationObserver((records) => {
+      if (records.some((record) => record.removedNodes.length > 0)) {
+        this.pruneDetachedLists(observation);
+      }
+    });
+    const observation: ListObservation = {
+      ...owner,
+      removalObserver,
+      lists: new Map(),
+    };
+    this.listObservation = observation;
+    removalObserver.observe(owner.root, { childList: true, subtree: true });
+    return observation;
+  }
+
+  private isCurrentListOwner({ root, key, connection }: ListOwner): boolean {
+    return (
+      this.element === root &&
+      (this.key || root.dataset.interactKey) === key &&
+      Interact.getController(key) === this &&
+      (!connection || getMountedController(key) === connection)
+    );
+  }
+
+  private ownsListObservation(observation: ListObservation): boolean {
+    if (this.listObservation !== observation) return false;
+    if (!this.isCurrentListOwner(observation)) {
+      this.stopWatchingLists();
+      return false;
+    }
+    observation.connection ??= getMountedController(observation.key);
+    return true;
+  }
+
+  private stopWatchingLists(): void {
+    const observation = this.listObservation;
+    this.listObservation = undefined;
+    if (!observation) return;
+    observation.removalObserver.disconnect();
+    for (const list of observation.lists.keys()) this.stopWatchingList(observation, list);
+  }
+
+  private stopWatchingList(observation: ListObservation, list: HTMLElement): void {
+    const observer = observation.lists.get(list);
+    observation.lists.delete(list);
+    if (this._observers.get(list) === observer) this._observers.delete(list);
+    observer?.disconnect();
+  }
+
+  private pruneDetachedLists(observation: ListObservation): void {
+    if (!this.ownsListObservation(observation)) return;
+
+    for (const list of observation.lists.keys()) {
+      if (!observation.root.contains(list)) this.stopWatchingList(observation, list);
+    }
+    if (observation.lists.size === 0) this.stopWatchingLists();
   }
 
   _childListChangeHandler(listContainer: string, entries: MutationRecord[]) {

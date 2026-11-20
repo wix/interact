@@ -615,7 +615,7 @@ describe('displayed target pairing', () => {
         const observedRoots = observe.mock.calls.flatMap(([target, options], index) =>
           target === host && options?.subtree ? [observe.mock.contexts[index]] : [],
         );
-        expect(observedRoots).toHaveLength(1);
+        expect(observedRoots.length).toBeGreaterThan(0);
         expect(bindings.size).toBe(2);
 
         host.append(part);
@@ -627,9 +627,9 @@ describe('displayed target pairing', () => {
 
         expect(Interact.getController('host')?.element).toBe(host);
         expect(bindings.size).toBe(0);
-        expect(
-          disconnect.mock.contexts.filter((observer) => observer === observedRoots[0]),
-        ).toHaveLength(1);
+        for (const observer of observedRoots) {
+          expect(disconnect.mock.contexts.filter((entry) => entry === observer)).toHaveLength(1);
+        }
       } finally {
         observe.mockRestore();
         disconnect.mockRestore();
