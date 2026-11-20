@@ -47,6 +47,7 @@ type MountedController = {
   controller: IInteractionController;
   items: Map<string, string>;
   sponsor: Interact;
+  closing?: boolean;
 };
 
 const mountedControllers = new Map<string, Map<string, MountedController>>();
@@ -73,6 +74,30 @@ export function deleteMountedController(
   if (removeFromCache) {
     record.sponsor.controllers.delete(record.controller);
   }
+}
+
+function disconnectMountedController(record: MountedController): void {
+  if (record.closing) return;
+
+  record.closing = true;
+  try {
+    record.controller.disconnect({ removeFromCache: true });
+  } finally {
+    record.closing = false;
+  }
+}
+
+function closeMountedController(key: string, record: MountedController): boolean {
+  disconnectMountedController(record);
+
+  const active = getMountedController(key);
+  const cached = Interact.getController(key);
+  if ((active && active !== record) || (cached && cached !== record.controller)) {
+    return false;
+  }
+
+  deleteMountedController(key, record, true);
+  return true;
 }
 
 type EffectRootObservation = {
@@ -194,7 +219,9 @@ export class Interact {
   setController(key: string, controller: IInteractionController) {
     const previous = Interact.getController(key);
     if (previous && previous !== controller) {
-      previous.disconnect({ removeFromCache: true });
+      const mounted = getMountedController(key);
+      if (mounted?.controller === previous) disconnectMountedController(mounted);
+      else previous.disconnect({ removeFromCache: true });
       const current = Interact.getController(key);
       if (current && current !== controller) {
         return;
@@ -529,15 +556,17 @@ export class Interact {
 
   static setController(key: string, controller: IInteractionController): void {
     const mounted = getMountedController(key);
-    if (mounted && mounted.controller !== controller) {
-      deleteMountedController(key, mounted, true);
+    if (mounted && mounted.controller !== controller && !closeMountedController(key, mounted)) {
+      return;
     }
     Interact.controllerCache.set(key, controller);
   }
 
   static deleteController(key: string): void {
-    deleteMountedController(key, getMountedController(key), true);
-    Interact.controllerCache.delete(key);
+    const mounted = getMountedController(key);
+    if (!mounted || closeMountedController(key, mounted)) {
+      Interact.controllerCache.delete(key);
+    }
   }
 
   static registerEffects = registerEffects;
