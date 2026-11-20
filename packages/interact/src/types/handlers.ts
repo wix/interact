@@ -35,8 +35,8 @@ export type InteractionHandlerModule<T extends TriggerType> = {
     effect: Effect,
     options: InteractionParamsTypes[T],
     interactOptions: InteractOptions,
-  ) => void;
-  remove: (element: HTMLElement) => void;
+  ) => void | HandlerDisposer;
+  remove: (element: HTMLElement, untrackedOnly?: boolean) => void;
 };
 
 export type ViewEnterHandlerModule = InteractionHandlerModule<'viewEnter'> & {
@@ -47,14 +47,21 @@ export type TriggerHandlerMap<T extends TriggerType> = {
   [K in T]: InteractionHandlerModule<K>;
 };
 
+export type HandlerDisposer = ((finished?: boolean) => void) & {
+  onDispose?: () => void;
+};
+
 export type HandlerObject = {
   source: HTMLElement;
   target: HTMLElement;
-  cleanup: () => void;
+  cleanup: HandlerDisposer;
   handler?: (isIntersecting?: boolean, isFullExit?: boolean) => void;
 };
 
-export type HandlerObjectMap = WeakMap<HTMLElement, Set<HandlerObject>>;
+export type HandlerObjectMap<T extends HandlerObject = HandlerObject> = WeakMap<
+  HTMLElement,
+  Set<T>
+>;
 
 export type TimeEffectHandler = {
   handler: (event: Event) => void;

@@ -1,5 +1,37 @@
 import type { Interaction, ElementIdentifier, TimeAnimationTriggerType } from '../types';
 
+export function getKeyTemplate(key: string): string {
+  return key.replace(/\[[^\]]+]/g, '[]');
+}
+
+export function getRepeaterItems(key: string): Map<string, string> {
+  const items = new Map<string, string>();
+  let prefix = '';
+  let offset = 0;
+
+  for (const match of key.matchAll(/\[([^\]]+)]/g)) {
+    prefix += key.slice(offset, match.index);
+    items.set(prefix, match[1]);
+    prefix += '[]';
+    offset = match.index + match[0].length;
+  }
+
+  return items;
+}
+
+export function matchesRepeaterItems(
+  sourceItems: ReadonlyMap<string, string>,
+  targetItems: ReadonlyMap<string, string>,
+): boolean {
+  for (const [owner, itemId] of sourceItems) {
+    const targetItemId = targetItems.get(owner);
+    if (targetItemId !== undefined && targetItemId !== itemId) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export function _processKeysForInterpolation(key: string) {
   return [...key.matchAll(/\[([^\]]+)]/g)].map(([_, _instanceKey]) => _instanceKey);
 }

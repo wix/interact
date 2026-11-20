@@ -378,7 +378,7 @@ describe('interact (mini)', () => {
     // Mock CSSStyleSheet
     (window as any).CSSStyleSheet = class CSSStyleSheet {
       constructor() {
-        return { replaceSync: vi.fn(), insertRule: vi.fn() };
+        return { cssRules: [], replaceSync: vi.fn(), insertRule: vi.fn() };
       }
     };
 
@@ -1328,7 +1328,6 @@ describe('interact (mini)', () => {
 
         const li3 = document.createElement('li');
         ul.append(li3);
-        element.append(ul);
 
         const controller = Interact.getController(keyTarget);
         addListItems(controller!, '#logo-scroll-list', [li3]);

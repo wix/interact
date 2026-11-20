@@ -36,7 +36,13 @@ export type {
 } from './config';
 
 // Controller
-export type { IInteractionController, IInteractElement } from './controller';
+export type {
+  IInteractionController,
+  IInteractElement,
+  ScopedStateMutation,
+  InteractStateChangeDetail,
+  InteractStateChangeEvent,
+} from './controller';
 
 // CSS generation
 export type { GenerateOptions } from './css';

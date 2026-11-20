@@ -10,11 +10,18 @@ import {
   ViewEnterHandlerModule,
   IInteractionController,
   IInteractElement,
+  HandlerDisposer,
   InteractPlugin,
   ReducedMotionPolicy,
   InteractPluginOptions,
 } from '../types';
-import { getElementHash, getInterpolatedKey } from './utilities';
+import {
+  getElementHash,
+  getInterpolatedKey,
+  getKeyTemplate,
+  getRepeaterItems,
+  matchesRepeaterItems,
+} from './utilities';
 import { getFallbackId, getKeyframeSlots, getSlotKey } from './css';
 import { withReducedMotionConditions } from './reducedMotion';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
@@ -26,6 +33,7 @@ import {
   Sequence,
 } from '@wix/motion';
 import type { SequenceOptions, AnimationGroupArgs, IndexedGroup } from '@wix/motion';
+import { retireOwnedStyles } from './runtimeStyle';
 
 type InteractInitOptions = {
   useCustomElement?: boolean;
@@ -35,9 +43,84 @@ type InteractInitOptions = {
   reducedMotionPolicy?: ReducedMotionPolicy;
 };
 
-function _convertToKeyTemplate(key: string) {
-  return key.replace(/\[[^\]]+]/g, '[]');
+type MountedController = {
+  controller: IInteractionController;
+  items: Map<string, string>;
+  sponsor: Interact;
+  closing?: boolean;
+};
+
+const mountedControllers = new Map<string, Map<string, MountedController>>();
+
+export function getMountedController(key: string): MountedController | undefined {
+  return mountedControllers.get(getKeyTemplate(key))?.get(key);
 }
+
+export function deleteMountedController(
+  key: string,
+  record: MountedController | undefined,
+  removeFromCache: boolean,
+): void {
+  const template = getKeyTemplate(key);
+  const bucket = mountedControllers.get(template);
+  if (!record || !bucket || bucket.get(key) !== record) {
+    return;
+  }
+
+  bucket.delete(key);
+  if (bucket.size === 0) {
+    mountedControllers.delete(template);
+  }
+  if (removeFromCache) {
+    record.sponsor.controllers.delete(record.controller);
+  }
+}
+
+function disconnectMountedController(record: MountedController): void {
+  if (record.closing) return;
+
+  record.closing = true;
+  try {
+    record.controller.disconnect({ removeFromCache: true });
+  } finally {
+    record.closing = false;
+  }
+}
+
+function closeMountedController(key: string, record: MountedController): boolean {
+  disconnectMountedController(record);
+
+  const active = getMountedController(key);
+  const cached = Interact.getController(key);
+  if ((active && active !== record) || (cached && cached !== record.controller)) {
+    return false;
+  }
+
+  deleteMountedController(key, record, true);
+  return true;
+}
+
+type EffectRootObservation = {
+  controller: IInteractionController;
+  observer: MutationObserver;
+  references: number;
+};
+
+export type EffectBinding = {
+  source: HTMLElement;
+  target: HTMLElement;
+  sourceList: Element | null;
+  targetList: Element | null;
+  sourceObservation?: EffectRootObservation;
+  targetObservation?: EffectRootObservation;
+  dispose: HandlerDisposer;
+};
+
+type EffectPair = {
+  sourceKey: string;
+  targetKey: string;
+  bindings: Set<EffectBinding>;
+};
 
 export class Interact {
   static defineInteractElement?: () => boolean;
@@ -55,6 +138,8 @@ export class Interact {
     [listContainer: string]: { [interactionId: string]: boolean };
   };
   controllers: Set<IInteractionController>;
+  private readonly effectPairsByEndpoint = new Map<string, Map<string, EffectPair>>();
+  private readonly effectRootObservers = new Map<string, EffectRootObservation>();
   static forceReducedMotion: boolean = false;
   static reducedMotionPolicy: ReducedMotionPolicy = 'collapse';
   static allowA11yTriggers: boolean = true;
@@ -108,6 +193,10 @@ export class Interact {
   }
 
   destroy({ clearCache = false }: { clearCache?: boolean } = {}): void {
+    for (const key of this.effectPairsByEndpoint.keys()) {
+      this.clearEffectPairsForKey(key);
+    }
+
     for (const controller of this.controllers) {
       controller.disconnect({ removeFromCache: clearCache });
     }
@@ -122,25 +211,174 @@ export class Interact {
     this.addedInteractions = {};
     this.listInteractionsCache = {};
     this.controllers.clear();
+    retireOwnedStyles(this);
     this.dataCache = { effects: {}, sequences: {}, conditions: {}, interactions: {} };
     Interact.instances.splice(Interact.instances.indexOf(this), 1);
   }
 
   setController(key: string, controller: IInteractionController) {
-    this.controllers.add(controller);
+    const previous = Interact.getController(key);
+    if (previous && previous !== controller) {
+      const mounted = getMountedController(key);
+      if (mounted?.controller === previous) disconnectMountedController(mounted);
+      else previous.disconnect({ removeFromCache: true });
+      const current = Interact.getController(key);
+      if (current && current !== controller) {
+        return;
+      }
+    }
 
     Interact.setController(key, controller);
+    const template = getKeyTemplate(key);
+    let mounted = mountedControllers.get(template);
+    if (!mounted) {
+      mounted = new Map();
+      mountedControllers.set(template, mounted);
+    }
+    if (!mounted.has(key)) {
+      mounted.set(key, { controller, items: getRepeaterItems(key), sponsor: this });
+      this.controllers.add(controller);
+    }
   }
 
   deleteController(key: string, removeFromCache: boolean = false) {
-    const controller = Interact.controllerCache.get(key);
+    const controller = Interact.getController(key);
+    const mounted = getMountedController(key);
+    if (mounted?.sponsor === this) {
+      deleteMountedController(key, mounted, removeFromCache);
+    }
+    const remainingMount = getMountedController(key);
 
     this.clearInteractionStateForKey(key);
     this.clearMediaQueryListenersForKey(key);
 
-    if (controller && removeFromCache) {
+    if (
+      controller &&
+      removeFromCache &&
+      Interact.getController(key) === controller &&
+      getMountedController(key) === remainingMount
+    ) {
       this.controllers.delete(controller);
       Interact.deleteController(key);
+    }
+  }
+
+  static *getMatchingControllers(
+    referenceKey: string,
+    peerTemplate: string,
+    onlyKey?: string,
+  ): IterableIterator<[key: string, controller: IInteractionController]> {
+    const reference = Interact.getMountedController(referenceKey);
+    const peers = mountedControllers.get(peerTemplate);
+    if (!reference || !peers) {
+      return;
+    }
+
+    if (onlyKey !== undefined) {
+      const peer = peers.get(onlyKey);
+      if (peer && matchesRepeaterItems(reference.items, peer.items)) {
+        yield [onlyKey, peer.controller];
+      }
+      return;
+    }
+
+    for (const [key, peer] of peers) {
+      if (matchesRepeaterItems(reference.items, peer.items)) {
+        yield [key, peer.controller];
+      }
+    }
+  }
+
+  hasEffectPair(key: string, pairId: string): boolean {
+    return this.effectPairsByEndpoint.get(key)?.has(pairId) ?? false;
+  }
+
+  markEffectPair(sourceKey: string, targetKey: string, pairId: string): Set<EffectBinding> {
+    const existing = this.effectPairsByEndpoint.get(sourceKey)?.get(pairId);
+    if (existing) {
+      return existing.bindings;
+    }
+
+    const bindings = new Set<EffectBinding>();
+    const pair = { sourceKey, targetKey, bindings };
+    for (const key of [sourceKey, targetKey]) {
+      let pairs = this.effectPairsByEndpoint.get(key);
+      if (!pairs) {
+        pairs = new Map();
+        this.effectPairsByEndpoint.set(key, pairs);
+      }
+      pairs.set(pairId, pair);
+    }
+    return bindings;
+  }
+
+  trackEffectBinding(
+    sourceKey: string,
+    targetKey: string,
+    bindings: Set<EffectBinding>,
+    binding: EffectBinding,
+  ): void {
+    const sourceObservation = this.observeEffectRoot(sourceKey, binding.source);
+    const targetObservation = this.observeEffectRoot(targetKey, binding.target);
+    binding.sourceObservation = sourceObservation;
+    binding.targetObservation = targetObservation;
+    bindings.add(binding);
+    binding.dispose.onDispose = () => {
+      bindings.delete(binding);
+      this.releaseEffectRoot(sourceKey, sourceObservation);
+      this.releaseEffectRoot(targetKey, targetObservation);
+    };
+  }
+
+  private observeEffectRoot(key: string, element: HTMLElement): EffectRootObservation | undefined {
+    const controller = Interact.getController(key);
+    if (!controller || element === controller.element || !controller.element.contains(element)) {
+      return;
+    }
+
+    const existing = this.effectRootObservers.get(key);
+    if (existing?.controller === controller) {
+      existing.references++;
+      return existing;
+    }
+
+    existing?.observer.disconnect();
+    const root = controller.element;
+    const observer = new MutationObserver((records) => {
+      if (
+        this.effectRootObservers.get(key) !== observation ||
+        Interact.getController(key) !== controller ||
+        !records.some(({ removedNodes }) => removedNodes.length > 0)
+      ) {
+        return;
+      }
+
+      for (const pair of this.effectPairsByEndpoint.get(key)?.values() ?? []) {
+        for (const binding of pair.bindings) {
+          if (
+            (binding.sourceObservation === observation && !root.contains(binding.source)) ||
+            (binding.targetObservation === observation && !root.contains(binding.target))
+          ) {
+            binding.dispose();
+          }
+        }
+      }
+    });
+    const observation = { controller, observer, references: 1 };
+    this.effectRootObservers.set(key, observation);
+    observer.observe(root, { childList: true, subtree: true });
+    return observation;
+  }
+
+  private releaseEffectRoot(key: string, observation?: EffectRootObservation): void {
+    if (!observation) {
+      return;
+    }
+
+    observation.references--;
+    if (observation.references === 0 && this.effectRootObservers.get(key) === observation) {
+      this.effectRootObservers.delete(key);
+      observation.observer.disconnect();
     }
   }
 
@@ -149,7 +387,7 @@ export class Interact {
   }
 
   get(key: string): InteractCache['interactions'][string] | undefined {
-    const processedKey = _convertToKeyTemplate(key);
+    const processedKey = getKeyTemplate(key);
     return this.dataCache.interactions[processedKey];
   }
 
@@ -162,7 +400,48 @@ export class Interact {
     }
   }
 
+  clearEffectPairsForKey(key: string): void {
+    const pairs = this.effectPairsByEndpoint.get(key);
+    this.effectPairsByEndpoint.delete(key);
+    for (const [pairId, { sourceKey, targetKey, bindings }] of pairs ?? []) {
+      const peer = key === sourceKey ? targetKey : sourceKey;
+      const peerPairs = this.effectPairsByEndpoint.get(peer);
+      peerPairs?.delete(pairId);
+      if (peerPairs?.size === 0) {
+        this.effectPairsByEndpoint.delete(peer);
+      }
+      for (const binding of bindings) {
+        binding.dispose();
+      }
+    }
+  }
+
+  removeListItemBindings(key: string, container: Element, roots: ReadonlySet<Element>): void {
+    const isRemoved = (element: HTMLElement): boolean => {
+      for (let node: Element | null = element; node; node = node.parentElement) {
+        if (roots.has(node)) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    for (const pair of this.effectPairsByEndpoint.get(key)?.values() ?? []) {
+      for (const binding of pair.bindings) {
+        if (
+          (pair.sourceKey === key &&
+            binding.sourceList === container &&
+            isRemoved(binding.source)) ||
+          (pair.targetKey === key && binding.targetList === container && isRemoved(binding.target))
+        ) {
+          binding.dispose();
+        }
+      }
+    }
+  }
+
   clearInteractionStateForKey(key: string): void {
+    this.clearEffectPairsForKey(key);
     const interactionIds = this.get(key)?.interactionIds || [];
 
     interactionIds.forEach((interactionId_) => {
@@ -207,6 +486,7 @@ export class Interact {
       controller.disconnect();
     });
     Interact.instances.length = 0;
+    mountedControllers.clear();
     Interact.controllerCache.clear();
     Interact.sequenceCache.clear();
     Interact.elementSequenceMap = new WeakMap();
@@ -256,16 +536,37 @@ export class Interact {
     return Interact.instances.find((instance) => instance.has(key));
   }
 
+  static getInstancesForKey(key: string): Interact[] {
+    const template = getKeyTemplate(key);
+    return Interact.instances.filter((instance) => instance.dataCache.interactions[template]);
+  }
+
+  static isMountedController(key: string, controller: IInteractionController): boolean {
+    return (
+      Interact.getController(key) === controller &&
+      Interact.getMountedController(key)?.controller === controller
+    );
+  }
+
+  private static getMountedController = getMountedController;
+
   static getController(key: string | undefined): IInteractionController | undefined {
     return key ? Interact.controllerCache.get(key) : undefined;
   }
 
   static setController(key: string, controller: IInteractionController): void {
+    const mounted = getMountedController(key);
+    if (mounted && mounted.controller !== controller && !closeMountedController(key, mounted)) {
+      return;
+    }
     Interact.controllerCache.set(key, controller);
   }
 
   static deleteController(key: string): void {
-    Interact.controllerCache.delete(key);
+    const mounted = getMountedController(key);
+    if (!mounted || closeMountedController(key, mounted)) {
+      Interact.controllerCache.delete(key);
+    }
   }
 
   static registerEffects = registerEffects;
@@ -578,7 +879,8 @@ function parseConfig(
       const targetHash = getElementHash({ ...referencedEffect, ...effect, key: target });
       const interactionId = `${source}::${targetHash}::${interactionIdx}`;
       effect.interactionId = interactionId;
-      interactions[source].interactionIds.add(interactionId);
+      const cachedEffect = { ...effect };
+      effects[effectIndex] = cachedEffect;
 
       if (target === source) {
         // if target is the source element, no need to add an interaction to `effects`
@@ -591,11 +893,12 @@ function parseConfig(
       const targetEntry = _ensureInteractionEntry(interactions, target);
       if (!targetEntry.effects[interactionId]) {
         targetEntry.effects[interactionId] = [];
-        targetEntry.interactionIds.add(interactionId);
       }
 
-      targetEntry.effects[interactionId].push({ ...rest, effect });
-      targetEntry.selectors.add(getSelector(effect, { useFirstChild: useCustomElement }));
+      targetEntry.effects[interactionId].push({ ...rest, effect: cachedEffect });
+      targetEntry.selectors.add(
+        getSelector({ ...referencedEffect, ...effect }, { useFirstChild: useCustomElement }),
+      );
     });
 
     // Process sequence effects for selector tracking and cross-element referencing

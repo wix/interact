@@ -11,6 +11,8 @@ import type {
   SequenceConfigRef,
   CreateTransitionCSSParams,
   IInteractionController,
+  InteractPluginCleanup,
+  HandlerDisposer,
   AnimationEndParams,
   AnimationOptions,
   ReducedMotionPolicy,
@@ -23,35 +25,81 @@ import {
   generateId,
   isTransitionEffect,
 } from '../utils';
-import { getInterpolatedKey } from './utilities';
+import { getInterpolatedKey, getKeyTemplate } from './utilities';
 import {
   REDUCED_MOTION_REDUCE,
   getReducedMotionPolicy,
   getReducedMotionVariants,
+  isReducedMotionVariant,
 } from './reducedMotion';
 import { effectToAnimationOptions } from '../handlers/utilities';
-import { Interact, getSelector } from './Interact';
+import { Interact, getMountedController, getSelector } from './Interact';
+import { writeOwnedStyle } from './runtimeStyle';
+import { InteractionController } from './InteractionController';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../handlers';
 import type { AnimationGroupArgs } from '@wix/motion';
-
-type InteractionsToApply = Array<
-  [
-    string,
-    InteractionTrigger,
-    Effect,
-    HTMLElement | HTMLElement[],
-    HTMLElement | HTMLElement[],
-    string | undefined,
-    boolean,
-    string | undefined,
-  ]
->;
 
 type ListElements = {
   controllerKey: string;
   listContainer: string;
   elements: HTMLElement[];
 };
+
+type ListChange = ListElements & { container?: Element };
+
+function getListContainer(element: HTMLElement, selector?: string): Element | null {
+  return selector ? element.querySelector(selector) : null;
+}
+
+function matchesList(
+  element: HTMLElement,
+  selector: string | undefined,
+  list: ListChange,
+): boolean {
+  return list.container
+    ? getListContainer(element, selector) === list.container
+    : selector === list.listContainer;
+}
+
+type PluginScope = Readonly<{
+  key: string;
+  controller: IInteractionController;
+  root: HTMLElement;
+  connection?:
+    | { mounted: NonNullable<ReturnType<typeof getMountedController>> }
+    | { pending: WeakSet<object> };
+}>;
+
+type PluginAdmission = Readonly<{
+  instance: Interact;
+  dataCache: Interact['dataCache'];
+  source: PluginScope;
+  target?: PluginScope;
+}>;
+
+function capturePluginScope(key: string, controller: IInteractionController): PluginScope {
+  const root = controller.element;
+  if (!(controller instanceof InteractionController)) return { key, controller, root };
+
+  const mounted = getMountedController(key);
+  return {
+    key,
+    controller,
+    root,
+    connection: mounted ? { mounted } : { pending: controller._appliedPlugins },
+  };
+}
+
+function ownsPluginScope({ key, controller, root, connection }: PluginScope): boolean {
+  return (
+    !connection ||
+    (controller.element === root &&
+      ('mounted' in connection
+        ? getMountedController(key) === connection.mounted
+        : controller._appliedPlugins === connection.pending) &&
+      Interact.getController(key) === controller)
+  );
+}
 
 /**
  * Generic plugin bridge. For every `$`-prefixed field on an interaction or effect (e.g. `$splitText`
@@ -65,13 +113,21 @@ type ListElements = {
  * passes, so identity is a stable dedup key.
  */
 function _applyPlugins(
-  owner: IInteractionController,
-  root: HTMLElement,
+  { instance, dataCache, source, target }: PluginAdmission,
+  origin: PluginScope,
   config: Record<string, unknown>,
-  key: string,
   scope: 'interaction' | 'effect',
 ): void {
   const pluginNames = Interact.getPluginsNames();
+  if (pluginNames.size === 0) return;
+
+  const { controller: owner, key, root, connection } = origin;
+  const canApply = () =>
+    !connection ||
+    (instance.dataCache === dataCache &&
+      ownsPluginScope(source) &&
+      (!target || ownsPluginScope(target)) &&
+      ownsPluginScope(origin));
 
   for (const name of pluginNames) {
     const field = `${PLUGIN_FIELD_PREFIX}${name}`;
@@ -80,21 +136,75 @@ function _applyPlugins(
     }
 
     const value = config[field];
+    if (!canApply()) return;
 
-    if (value !== null && typeof value === 'object') {
-      if (owner._appliedPlugins.has(value)) {
-        continue;
-      }
-      owner._appliedPlugins.add(value);
-    }
+    const isObject = value !== null && typeof value === 'object';
+    if (isObject && owner._appliedPlugins.has(value)) continue;
+    if (isObject && !connection) owner._appliedPlugins.add(value);
 
     const plugin = Interact.getPlugin(name)!;
+    if (!canApply()) return;
 
+    if (isObject && connection) {
+      const applied = owner._appliedPlugins;
+      if (applied.has(value)) continue;
+      applied.add(value);
+    }
     const cleanup = plugin(value, { root, key, scope, config });
 
-    if (typeof cleanup === 'function') {
-      owner._pluginCleanups.push(cleanup);
+    if (typeof cleanup !== 'function') continue;
+
+    const cleanupController = ownsPluginScope(origin)
+      ? owner
+      : findPluginCleanupController(key, root, owner);
+    if (cleanupController) {
+      cleanupController._pluginCleanups.push(cleanup);
+    } else {
+      runPluginCleanup(cleanup);
     }
+  }
+}
+
+function getPluginCleanupController(
+  key: string,
+  root: HTMLElement,
+): IInteractionController | undefined {
+  const controller = Interact.getController(key);
+  const mounted = getMountedController(key);
+  if (controller?.element === root && (!mounted || mounted.controller === controller)) {
+    return controller;
+  }
+  return undefined;
+}
+
+function findPluginCleanupController(
+  key: string,
+  root: HTMLElement,
+  owner: IInteractionController,
+): IInteractionController | undefined {
+  const currentKey = root.dataset.interactKey;
+  const preferred =
+    (currentKey && currentKey !== key ? getPluginCleanupController(currentKey, root) : undefined) ??
+    getPluginCleanupController(key, root);
+  if (preferred) return preferred;
+
+  let unique: IInteractionController | undefined;
+  for (const [alias, controller] of Interact.controllerCache) {
+    if (controller.element !== root) continue;
+    const mounted = getMountedController(alias);
+    if ((unique && unique !== controller) || (mounted && mounted.controller !== controller)) {
+      return owner;
+    }
+    unique = controller;
+  }
+  return unique;
+}
+
+export function runPluginCleanup(cleanup: InteractPluginCleanup): void {
+  try {
+    cleanup();
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -215,135 +325,170 @@ function _getInteractionElements(
   ];
 }
 
+type EffectEndpoint = {
+  key: string;
+  controller: IInteractionController;
+  list: Element | null;
+};
+
 function _applyInteraction(
-  targetKey: string,
+  instance: Interact,
+  {
+    dataCache,
+    pairId,
+    styleSlot,
+    source: sourceEndpoint,
+    target: targetEndpoint,
+  }: {
+    dataCache: Interact['dataCache'];
+    pairId: string;
+    styleSlot: string;
+    source: EffectEndpoint;
+    target: EffectEndpoint;
+  },
   interaction: InteractionTrigger,
   effect: Effect,
   sourceElements: HTMLElement | HTMLElement[],
   targetElements: HTMLElement | HTMLElement[],
-  selectorCondition?: string,
-  useFirstChild?: boolean,
-  sourceKey?: string,
-) {
-  const isSourceArray = Array.isArray(sourceElements);
-  const isTargetArray = Array.isArray(targetElements);
+  selectorCondition: string | undefined,
+): void {
+  const sourceKey = sourceEndpoint.key;
+  const targetKey = targetEndpoint.key;
+  const ownsElement = ({ key, controller }: EffectEndpoint, element: HTMLElement) =>
+    Interact.isMountedController(key, controller) && controller.element.contains(element);
 
-  if (isSourceArray) {
-    sourceElements.forEach((sourceEl, index) => {
-      const targetEl = isTargetArray ? targetElements[index] : targetElements;
+  const attach = (source: HTMLElement, target: HTMLElement) => {
+    const isCurrent = () =>
+      instance.dataCache === dataCache &&
+      ownsElement(sourceEndpoint, source) &&
+      ownsElement(targetEndpoint, target);
+    if (!isCurrent()) {
+      return;
+    }
 
-      if (targetEl) {
-        addInteraction(
-          targetKey,
-          sourceEl,
-          interaction.trigger,
-          targetEl,
-          effect as Effect,
-          interaction.params!,
-          selectorCondition,
-          useFirstChild,
-          sourceKey,
-        );
+    const dispose = addInteraction(
+      instance,
+      sourceKey,
+      targetKey,
+      styleSlot,
+      source,
+      interaction.trigger,
+      target,
+      effect,
+      interaction.params!,
+      selectorCondition,
+      targetEndpoint.controller.useFirstChild,
+    );
+    if (!isCurrent()) {
+      dispose?.();
+      return;
+    }
+
+    const bindings = instance.markEffectPair(sourceKey, targetKey, pairId);
+    if (dispose) {
+      instance.trackEffectBinding(sourceKey, targetKey, bindings, {
+        source,
+        target,
+        sourceList: sourceEndpoint.list,
+        targetList: targetEndpoint.list,
+        dispose,
+      });
+    }
+  };
+
+  if (Array.isArray(sourceElements)) {
+    sourceElements.forEach((source, index) => {
+      const target = Array.isArray(targetElements) ? targetElements[index] : targetElements;
+      if (target) {
+        attach(source, target);
       }
     });
   } else {
-    const targets = isTargetArray ? targetElements : [targetElements];
-    targets.forEach((targetEl) => {
-      addInteraction(
-        targetKey,
-        sourceElements,
-        interaction.trigger,
-        targetEl,
-        effect as Effect,
-        interaction.params!,
-        selectorCondition,
-        useFirstChild,
-        sourceKey,
-      );
-    });
+    const targets = Array.isArray(targetElements) ? targetElements : [targetElements];
+    for (const target of targets) {
+      attach(sourceElements, target);
+    }
   }
 }
 
 function _addInteraction(
-  sourceKey: string,
-  sourceController: IInteractionController,
-  instance: Interact,
+  admission: PluginAdmission,
   interaction: Interaction,
-  elements?: HTMLElement[],
+  { onlyTargetKey, list }: { onlyTargetKey?: string; list?: ListChange } = {},
 ) {
-  const interactionVariations: Record<string, boolean> = {};
+  const { instance, dataCache, source } = admission;
+  const { key: sourceKey, controller: sourceController } = source;
+  const interactionVariations = new Set<string>();
+  const interactionsToApply: (() => void)[] = [];
+  const sourceItems =
+    list?.controllerKey === sourceKey &&
+    matchesList(sourceController.element, interaction.listContainer, list)
+      ? list.elements
+      : undefined;
+  const onlyTargetTemplate =
+    onlyTargetKey === undefined ? undefined : getKeyTemplate(onlyTargetKey);
 
-  const interactionsToApply: InteractionsToApply = [];
-
-  (interaction.effects || []).forEach((effect, effectIndex) => {
+  for (const [effectIndex, effect] of (interaction.effects || []).entries()) {
     const effectId = (effect as EffectRef).effectId;
-
     const mergedEffect = {
-      ...(instance.dataCache.effects[effectId] || {}),
+      ...instance.dataCache.effects[effectId],
       ...effect,
       effectId,
     } as Effect;
-    const targetKey_ = mergedEffect.key;
+    const targetTemplate = mergedEffect.key || interaction.key;
+    const interactionId = effect.interactionId;
 
-    const interactionId = getInterpolatedKey(effect.interactionId!, sourceKey);
-
-    if (interactionVariations[interactionId!]) {
-      // Skip this effect if it has already been added
-      return;
-    }
-
-    if (instance.addedInteractions[interactionId!] && !elements) {
-      // Skip this interaction if it has already been added
-      return;
+    if (
+      !interactionId ||
+      interactionVariations.has(interactionId) ||
+      (onlyTargetTemplate !== undefined && onlyTargetTemplate !== targetTemplate)
+    ) {
+      continue;
     }
 
     const effectOptions = _resolveVariant(
       mergedEffect,
       instance,
       {
-        id: `${interactionId}::${effectIndex}`,
+        id: JSON.stringify([interactionId, sourceKey, effectIndex]),
         key: sourceKey,
-        onUpdate: () => {
-          sourceController.update();
-        },
+        onUpdate: () => sourceController.update(),
       },
       { policy: interaction.reducedMotionPolicy },
     );
 
-    if (effectOptions) {
-      interactionVariations[interactionId!] = true;
+    if (!effectOptions) {
+      continue;
+    }
+    interactionVariations.add(interactionId);
+    const styleSlot = JSON.stringify([
+      interactionId,
+      effectIndex,
+      isReducedMotionVariant(effectOptions),
+    ]);
 
-      const target = targetKey_ && getInterpolatedKey(targetKey_, sourceKey);
+    const matches = Interact.getMatchingControllers(sourceKey, targetTemplate, onlyTargetKey);
+    for (const [targetKey, targetController] of matches) {
+      const targetItems =
+        list?.controllerKey === targetKey &&
+        matchesList(targetController.element, effectOptions.listContainer, list)
+          ? list.elements
+          : undefined;
+      const pairId = JSON.stringify([interactionId, sourceKey, targetKey]);
 
-      let targetController;
-      if (target) {
-        targetController = Interact.getController(target);
-
-        if (!targetController) {
-          // Bail out :: no target element in cache
-          return;
-        }
-
-        if (effectOptions.listContainer) {
-          targetController.watchChildList(effectOptions.listContainer);
-        }
-      } else {
-        // target is not specified - fallback to same as source
-        targetController = sourceController;
+      if (list ? !sourceItems && !targetItems : instance.hasEffectPair(sourceKey, pairId)) {
+        continue;
       }
+      const target = capturePluginScope(targetKey, targetController);
+      if (_isDeferred(targetKey, effectOptions)) continue;
 
-      if (_isDeferred(target || interaction.key, effectOptions)) {
+      _applyPlugins(admission, target, effectOptions, 'effect');
+      if (instance.dataCache !== dataCache) {
         return;
       }
-
-      // Effect-level plugins act on the effect's target element before it is resolved.
-      _applyPlugins(
-        targetController,
-        targetController.element,
-        effectOptions,
-        target || interaction.key,
-        'effect',
-      );
+      if (effectOptions.listContainer) {
+        targetController.watchChildList(effectOptions.listContainer);
+      }
 
       const [sourceElements, targetElements] = _getInteractionElements(
         interaction,
@@ -352,40 +497,48 @@ function _addInteraction(
         sourceController.useFirstChild,
         targetController.element,
         targetController.useFirstChild,
-        elements,
+        sourceItems,
+        targetItems,
       );
 
-      if (!sourceElements || !targetElements) {
-        return;
+      if (
+        !sourceElements ||
+        !targetElements ||
+        (Array.isArray(sourceElements) && !sourceElements.length) ||
+        (Array.isArray(targetElements) && !targetElements.length)
+      ) {
+        continue;
       }
 
-      instance.addedInteractions[interactionId!] = true;
-
-      const key = target || interaction.key;
       const selectorCondition = getSelectorCondition(
         effectOptions.conditions || [],
         instance.dataCache.conditions,
       );
 
-      interactionsToApply.push([
-        key,
-        interaction,
-        effectOptions,
-        sourceElements,
-        targetElements,
-        selectorCondition,
-        targetController.useFirstChild,
-        sourceKey,
-      ]);
+      const sourceList = getListContainer(sourceController.element, interaction.listContainer);
+      const targetList = getListContainer(targetController.element, effectOptions.listContainer);
+      interactionsToApply.push(() => {
+        _applyInteraction(
+          instance,
+          {
+            dataCache,
+            pairId,
+            styleSlot,
+            source: { key: sourceKey, controller: sourceController, list: sourceList },
+            target: { key: targetKey, controller: targetController, list: targetList },
+          },
+          interaction,
+          effectOptions,
+          sourceElements,
+          targetElements,
+          selectorCondition,
+        );
+      });
     }
-  });
+  }
 
-  // apply the effects in reverse to return to the order specified by the user to ensure order of composition is as defined
-  interactionsToApply.reverse().forEach((interaction) => {
-    _applyInteraction(...interaction);
-  });
-
-  _processSequences(sourceKey, sourceController, instance, interaction, elements);
+  // Variants are considered from last to first, but their effects run in authored order.
+  interactionsToApply.reverse().forEach((apply) => apply());
 }
 
 function _getSequencePolicy(
@@ -434,12 +587,33 @@ function _buildAnimationGroupArgsFromSequence(
   sequenceConfig: SequenceConfig,
   interaction: InteractionTrigger,
   cacheKey: string,
-  sourceKey: string,
-  sourceController: IInteractionController,
-  instance: Interact,
-  options: { updateKey: string; onUpdate: () => void },
+  admission: PluginAdmission,
+  options: { updateKey: string; onUpdate: () => void; checkSourceDefer?: boolean },
   listElements?: ListElements,
 ): AnimationGroupArgs[] | null {
+  const { instance, source } = admission;
+  const { key: sourceKey, controller: sourceController } = source;
+  const seqEffects: (Effect | EffectRef)[] = sequenceConfig.effects || [];
+  const resolveEffect = (effect: Effect | EffectRef) => {
+    const effectId = (effect as EffectRef).effectId;
+    const resolvedEffect = effectId ? instance.dataCache.effects[effectId] || {} : {};
+    return { ...resolvedEffect, ...effect } as Effect;
+  };
+  const preparedEffects = seqEffects.map((effect) => {
+    const effectOptions = resolveEffect(effect);
+    const key =
+      (effectOptions.key && getInterpolatedKey(effectOptions.key, sourceKey)) || sourceKey;
+    const controller = key === sourceKey ? sourceController : Interact.getController(key);
+    return {
+      effect,
+      effectOptions,
+      key,
+      origin: controller && capturePluginScope(key, controller),
+    };
+  });
+
+  if (options.checkSourceDefer && _isDeferred(sourceKey, interaction)) return null;
+
   const seqMql = getMediaQuery(sequenceConfig.conditions || [], instance.dataCache.conditions);
 
   if (seqMql) {
@@ -448,23 +622,14 @@ function _buildAnimationGroupArgsFromSequence(
 
   if (seqMql && !seqMql.matches) return null;
 
-  const seqEffects: (Effect | EffectRef)[] = sequenceConfig.effects || [];
-  const resolveEffect = (effect: Effect | EffectRef) => {
-    const effectId = (effect as EffectRef).effectId;
-    const resolvedEffect = effectId ? instance.dataCache.effects[effectId] || {} : {};
-    return { ...resolvedEffect, ...effect } as Effect;
-  };
-
   // A sequence is built as a whole, so one deferred effect defers all of it — checked up front so
   // no plugin of the sequence runs while it is deferred.
-  const isDeferred = seqEffects.some((effect) => {
-    const effectOptions = resolveEffect(effect);
+  const isDeferred = preparedEffects.some(({ effectOptions, key }) => {
     const effectMql = getMediaQuery(effectOptions.conditions || [], instance.dataCache.conditions);
 
     if (effectMql && !effectMql.matches) return false;
 
-    const target = effectOptions.key && getInterpolatedKey(effectOptions.key, sourceKey);
-    return _isDeferred(target || sourceKey, effectOptions);
+    return _isDeferred(key, effectOptions);
   });
 
   if (isDeferred) {
@@ -475,7 +640,7 @@ function _buildAnimationGroupArgsFromSequence(
   const policy = _getSequencePolicy(sequenceConfig, interaction, instance);
   let usedListElements = false;
 
-  for (const effect of seqEffects) {
+  for (const { effect, origin } of preparedEffects) {
     const effectId = (effect as EffectRef).effectId;
     const effectOptions = _resolveVariant(
       resolveEffect(effect),
@@ -504,13 +669,13 @@ function _buildAnimationGroupArgsFromSequence(
     const resolvedTargetKey = target || sourceKey;
 
     // Effect-level plugins act on the effect's target element before it is resolved.
-    _applyPlugins(
-      targetController,
-      targetController.element,
-      effectOptions,
-      resolvedTargetKey,
-      'effect',
-    );
+    const targetScope =
+      targetController instanceof InteractionController && origin
+        ? origin
+        : capturePluginScope(resolvedTargetKey, targetController);
+    if (targetScope.controller === targetController && targetScope.key === resolvedTargetKey) {
+      _applyPlugins(admission, targetScope, effectOptions, 'effect');
+    }
 
     let targetElement: HTMLElement | HTMLElement[] | null;
 
@@ -601,13 +766,17 @@ function _resolveListItemIndices(
   });
 }
 
+function createSequenceUpdate(controller: IInteractionController): () => void {
+  return () => controller.update();
+}
+
 function _processSequences(
-  sourceKey: string,
-  sourceController: IInteractionController,
-  instance: Interact,
+  admission: PluginAdmission,
   interaction: Interaction,
   elements?: HTMLElement[],
 ) {
+  const { instance, source } = admission;
+  const { key: sourceKey, controller: sourceController } = source;
   interaction.sequences?.forEach((seqOrRef) => {
     let sequenceConfig: SequenceConfig;
 
@@ -638,12 +807,10 @@ function _processSequences(
       sequenceConfig,
       interaction,
       cacheKey,
-      sourceKey,
-      sourceController,
-      instance,
+      admission,
       {
         updateKey: sourceKey,
-        onUpdate: () => sourceController.update(),
+        onUpdate: createSequenceUpdate(sourceController),
       },
       listElements,
     );
@@ -715,12 +882,13 @@ function _processSequences(
 }
 
 function _processSequencesForTarget(
-  targetKey: string,
-  targetController: IInteractionController,
+  target: PluginScope,
   instance: Interact,
   listContainer?: string,
   elements?: HTMLElement[],
 ) {
+  const { key: targetKey, controller: targetController } = target;
+  const dataCache = instance.dataCache;
   const sequences = instance.get(targetKey)?.sequences || {};
   const seqInteractionIds = Object.keys(sequences);
 
@@ -740,18 +908,14 @@ function _processSequencesForTarget(
       const sourceKey = interaction.key && getInterpolatedKey(interaction.key, targetKey);
       const sourceController = Interact.getController(sourceKey);
 
-      if (!sourceController) {
+      if (!sourceKey || !sourceController) {
         return true;
       }
 
       const sequenceId = sequenceConfig.sequenceId || generateId();
-      const cacheKey = getInterpolatedKey(`${sourceKey}::seq::${sequenceId}`, sourceKey!);
+      const cacheKey = getInterpolatedKey(`${sourceKey}::seq::${sequenceId}`, sourceKey);
 
       if (instance.addedInteractions[cacheKey] && !elements) {
-        return true;
-      }
-
-      if (_isDeferred(sourceKey!, interaction)) {
         return true;
       }
 
@@ -764,12 +928,11 @@ function _processSequencesForTarget(
         sequenceConfig,
         interaction,
         cacheKey,
-        sourceKey!,
-        sourceController,
-        instance,
+        { instance, dataCache, source: capturePluginScope(sourceKey, sourceController), target },
         {
           updateKey: targetKey,
-          onUpdate: () => targetController.update(),
+          onUpdate: createSequenceUpdate(targetController),
+          checkSourceDefer: true,
         },
         listElements,
       );
@@ -816,151 +979,56 @@ function _processSequencesForTarget(
   });
 }
 
-function addEffectsForTarget(
-  targetKey: string,
-  targetController: IInteractionController,
-  instance: Interact,
-  listContainer?: string,
-  elements?: HTMLElement[],
-) {
-  const targetData = instance.get(targetKey);
-  const effects = targetData?.effects || {};
-  const interactionIds = Object.keys(effects);
-  const interactionsToApply: InteractionsToApply = [];
+function addEffectsForTarget(target: PluginScope, list?: ListChange): boolean {
+  const { key: targetKey } = target;
+  let hasEffects = false;
 
-  interactionIds.forEach((interactionId_) => {
-    const interactionId = getInterpolatedKey(interactionId_, targetKey);
+  for (const instance of Interact.getInstancesForKey(targetKey)) {
+    const dataCache = instance.dataCache;
+    const targetData = instance.get(targetKey);
+    const sourceTemplates = new Set(
+      Object.values(targetData?.effects ?? {}).map(([variation]) => variation.key),
+    );
+    hasEffects ||= sourceTemplates.size > 0;
 
-    if (instance.addedInteractions[interactionId] && !elements) {
-      // Skip this interaction if it has already been added
-      return;
+    for (const sourceTemplate of sourceTemplates) {
+      for (const [sourceKey, sourceController] of Interact.getMatchingControllers(
+        targetKey,
+        sourceTemplate,
+      )) {
+        const admission = {
+          instance,
+          dataCache,
+          source: capturePluginScope(sourceKey, sourceController),
+          target,
+        };
+        for (const interaction of instance.get(sourceKey)?.triggers ?? []) {
+          if (instance.dataCache !== dataCache) {
+            break;
+          }
+          const mql = getMediaQuery(interaction.conditions, instance.dataCache.conditions);
+          if ((!mql || mql.matches) && !_isDeferred(sourceKey, interaction)) {
+            _addInteraction(admission, interaction, {
+              onlyTargetKey: targetKey,
+              list,
+            });
+          }
+        }
+      }
     }
+  }
 
-    const effectVariations = effects[interactionId_];
-
-    // use `some` to short-circuit after the first effect that matches the conditions
-    effectVariations.some(({ effect, ...interaction }, variationIndex) => {
-      const interactionMql = getMediaQuery(
-        interaction.conditions || [],
-        instance!.dataCache.conditions,
-      );
-
-      if (interactionMql && !interactionMql.matches) {
-        // skip this effect if the interaction's media conditions don't match
-        return false;
-      }
-
-      const effectId = (effect as EffectRef).effectId;
-
-      const mergedEffect = {
-        ...(instance!.dataCache.effects[effectId] || {}),
-        ...effect,
-        effectId,
-      } as Effect;
-
-      if (listContainer && mergedEffect.listContainer !== listContainer) {
-        // skip this effect if a listContainer was provided and it's not matching this effect.listContainer
-        return false;
-      }
-
-      const effectOptions = _resolveVariant(
-        mergedEffect,
-        instance,
-        {
-          id: `${interactionId}::${variationIndex}`,
-          key: targetKey,
-          onUpdate: () => {
-            // For effects on target, we reconcile the target element
-            targetController.update();
-          },
-        },
-        { policy: interaction.reducedMotionPolicy },
-      );
-
-      if (effectOptions) {
-        const sourceKey = interaction.key && getInterpolatedKey(interaction.key, targetKey);
-        const sourceController = Interact.getController(sourceKey);
-
-        if (!sourceController) {
-          // Bail out :: no source or target elements in cache
-          return true;
-        }
-
-        if (_isDeferred(sourceKey!, interaction) || _isDeferred(targetKey, effectOptions)) {
-          return true;
-        }
-
-        // Effect-level plugins act on the effect's target element before it is resolved.
-        _applyPlugins(
-          targetController,
-          targetController.element,
-          effectOptions,
-          targetKey,
-          'effect',
-        );
-
-        if (effectOptions.listContainer) {
-          targetController.watchChildList(effectOptions.listContainer);
-        }
-
-        const [sourceElements, targetElements] = _getInteractionElements(
-          interaction,
-          effectOptions,
-          sourceController.element,
-          sourceController.useFirstChild,
-          targetController.element,
-          targetController.useFirstChild,
-          undefined,
-          elements,
-        );
-
-        if (!sourceElements || !targetElements) {
-          // Bail out :: no source or target elements found in DOM
-          return true;
-        }
-
-        instance!.addedInteractions[interactionId] = true;
-
-        const selectorCondition = getSelectorCondition(
-          effectOptions.conditions || [],
-          instance!.dataCache.conditions,
-        );
-
-        interactionsToApply.push([
-          targetKey,
-          interaction,
-          effectOptions as Effect,
-          sourceElements,
-          targetElements,
-          selectorCondition,
-          targetController.useFirstChild,
-          sourceKey || undefined,
-        ]);
-
-        // short-circuit the loop since we have a match
-        return true;
-      }
-
-      return false;
-    });
-  });
-
-  // apply the effects in reverse to return to the order specified by the user to ensure order of composition is as defined
-  interactionsToApply.reverse().forEach((interaction) => {
-    _applyInteraction(...interaction);
-  });
-
-  _processSequencesForTarget(targetKey, targetController, instance, listContainer, elements);
-
-  const hasSequences = Object.keys(targetData?.sequences || {}).length > 0;
-  return interactionIds.length > 0 || hasSequences;
+  return hasEffects;
 }
 
 /**
  * Registers a handler to an event on a given element.
  */
 function addInteraction<T extends TriggerType>(
+  instance: Interact,
+  sourceKey: string,
   targetKey: string,
+  styleSlot: string,
   source: HTMLElement,
   trigger: T,
   target: HTMLElement,
@@ -968,9 +1036,8 @@ function addInteraction<T extends TriggerType>(
   options: InteractionParamsTypes[T],
   selectorCondition?: string,
   useFirstChild?: boolean,
-  sourceKey?: string,
-): void {
-  let targetController;
+): HandlerDisposer | void {
+  let targetController: IInteractionController | undefined;
 
   if (isTransitionEffect(effect)) {
     const args: CreateTransitionCSSParams = {
@@ -991,20 +1058,30 @@ function addInteraction<T extends TriggerType>(
       return;
     }
 
-    targetController.renderStyle(createTransitionCSS(args));
+    const dataCache = instance.dataCache;
+    const targetMount = getMountedController(targetKey);
+    writeOwnedStyle(
+      instance,
+      targetController,
+      styleSlot,
+      createTransitionCSS(args),
+      () =>
+        instance.dataCache === dataCache &&
+        targetMount?.controller === targetController &&
+        getMountedController(targetKey) === targetMount,
+    );
   }
 
   let sourceAnimationOptions;
   if (trigger === 'animationEnd') {
     const triggerEffectId = (options as AnimationEndParams).effectId;
-    const instance = sourceKey ? Interact.getInstance(sourceKey) : undefined;
-    const definition = instance?.dataCache.effects[triggerEffectId];
+    const definition = instance.dataCache.effects[triggerEffectId];
     // the source's use site is unknown, so its policy resolves from its definition and the config only
     const srcEffect =
       definition &&
-      _resolveVariant(definition, instance!, {
+      _resolveVariant(definition, instance, {
         id: `${sourceKey}::animationEnd::${triggerEffectId}`,
-        key: sourceKey!,
+        key: sourceKey,
         onUpdate: () => {
           Interact.getController(sourceKey)?.update();
         },
@@ -1016,12 +1093,68 @@ function addInteraction<T extends TriggerType>(
     }
   }
 
-  TRIGGER_TO_HANDLER_MODULE_MAP[trigger]?.add(source, target, effect, options, {
+  return TRIGGER_TO_HANDLER_MODULE_MAP[trigger]?.add(source, target, effect, options, {
     targetController,
     selectorCondition,
     allowA11yTriggers: Interact.allowA11yTriggers,
     sourceAnimationOptions,
   });
+}
+
+function addEffectsForSource(
+  source: PluginScope,
+  controllerOwner: Interact,
+  list?: ListChange,
+): boolean {
+  const { key, controller } = source;
+  let hasTriggers = false;
+
+  for (const instance of Interact.getInstancesForKey(key)) {
+    const dataCache = instance.dataCache;
+    const admission = { instance, dataCache, source };
+    const triggers = instance.get(key)?.triggers ?? [];
+    triggers.forEach((interaction, index) => {
+      if (
+        instance.dataCache !== dataCache ||
+        (list && !matchesList(controller.element, interaction.listContainer, list)) ||
+        (instance !== controllerOwner && !interaction.effects?.length)
+      ) {
+        return;
+      }
+      hasTriggers = true;
+      const mql = getMediaQuery(interaction.conditions, instance.dataCache.conditions);
+      if (mql) {
+        const listenerId = list
+          ? `${key}::listTrigger::${list.listContainer}::${index}`
+          : `${key}::trigger::${index}`;
+        instance.setupMediaQueryListener(listenerId, mql, key, () => controller.update());
+      }
+      if ((mql && !mql.matches) || _isDeferred(key, interaction)) {
+        return;
+      }
+
+      if (!list) {
+        _applyPlugins(admission, source, interaction, 'interaction');
+        if (instance.dataCache !== dataCache) {
+          return;
+        }
+        if (interaction.listContainer) {
+          controller.watchChildList(interaction.listContainer);
+        }
+      }
+
+      _addInteraction(admission, interaction, { list });
+      if (
+        instance.dataCache === dataCache &&
+        instance === controllerOwner &&
+        (!list || interaction.listContainer === list.listContainer)
+      ) {
+        _processSequences(admission, interaction, list?.elements);
+      }
+    });
+  }
+
+  return hasTriggers;
 }
 
 /**
@@ -1037,81 +1170,42 @@ export function add(controller: IInteractionController): boolean {
     return false;
   }
 
-  const { triggers = [] } = instance?.get(key) || {};
-  const hasTriggers = triggers.length > 0;
-
-  instance.setController(key, controller);
-
-  triggers.forEach((interaction, index) => {
-    const mql = getMediaQuery(interaction.conditions, instance!.dataCache.conditions);
-
-    if (mql) {
-      const interactionId = `${key}::trigger::${index}`;
-      instance.setupMediaQueryListener(interactionId, mql, key, () => {
-        controller.update();
-      });
-    }
-
-    if (!mql || mql.matches) {
-      if (_isDeferred(key, interaction)) {
-        return;
-      }
-
-      // Run interaction-level plugins before target resolution / list observation so any DOM they
-      // create is visible to the selectors and MutationObservers that follow.
-      _applyPlugins(controller, controller.element, interaction, key, 'interaction');
-
-      if (interaction.listContainer) {
-        controller.watchChildList(interaction.listContainer);
-      }
-
-      _addInteraction(key, controller, instance!, interaction);
-    }
-  });
-
-  let hasEffects = false;
-  if (instance) {
-    hasEffects = addEffectsForTarget(key, controller, instance);
+  const previous = Interact.getController(key);
+  if (
+    previous &&
+    previous !== controller &&
+    previous.element === controller.element &&
+    previous.connected
+  ) {
+    return false;
   }
 
-  return hasTriggers || hasEffects;
+  instance.setController(key, controller);
+  if (!Interact.isMountedController(key, controller)) {
+    return false;
+  }
+  const connection = capturePluginScope(key, controller);
+  const hasTriggers = addEffectsForSource(connection, instance);
+  const hasEffects = addEffectsForTarget(connection);
+  _processSequencesForTarget(connection, instance);
+
+  return hasTriggers || hasEffects || Object.keys(instance.get(key)?.sequences ?? {}).length > 0;
 }
 
 export function addListItems(
   controller: IInteractionController,
   listContainer: string,
   elements: HTMLElement[],
+  container?: Element,
 ) {
   const key = controller.key as string;
   const instance = Interact.getInstance(key);
 
   if (instance) {
-    const { triggers = [] } = instance?.get(key) || {};
-
-    triggers.forEach((interaction, index) => {
-      if (interaction.listContainer !== listContainer) {
-        return;
-      }
-
-      const mql = getMediaQuery(interaction.conditions, instance!.dataCache.conditions);
-
-      if (mql) {
-        const interactionId = `${key}::listTrigger::${listContainer}::${index}`;
-        instance.setupMediaQueryListener(interactionId, mql, key, () => {
-          // For list items, reconciling the root might be expensive but safe
-          controller.update();
-        });
-      }
-
-      if (!mql || mql.matches) {
-        if (_isDeferred(key, interaction)) {
-          return;
-        }
-
-        _addInteraction(key, controller, instance!, interaction, elements);
-      }
-    });
-
-    addEffectsForTarget(key, controller, instance, listContainer, elements);
+    const list = { controllerKey: key, listContainer, elements, container };
+    const connection = capturePluginScope(key, controller);
+    addEffectsForSource(connection, instance, list);
+    addEffectsForTarget(connection, list);
+    _processSequencesForTarget(connection, instance, listContainer, elements);
   }
 }

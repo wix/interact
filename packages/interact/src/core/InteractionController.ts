@@ -1,14 +1,33 @@
-import type { IInteractElement, InteractPluginCleanup, StateAction } from '../types';
-import { add, addListItems } from './add';
+import type { InteractPluginCleanup, ScopedStateMutation, StateAction } from '../types';
+import { add, addListItems, runPluginCleanup } from './add';
+import { applyScopedEffectState, getActiveEffectIds, toggleEffectState } from './effectState';
+import { getMountedController, Interact } from './Interact';
 import { remove, removeListItems } from './remove';
+import {
+  appendOwnedStyle,
+  closeRuntimeSheet,
+  makeStyleReceipt,
+  type StyleSheetScope,
+} from './runtimeStyle';
 
-export const INTERACT_EFFECT_DATA_ATTR = 'interactEffect';
+type ListOwner = {
+  root: HTMLElement;
+  key: string;
+  connection: ReturnType<typeof getMountedController>;
+};
+
+type ListObservation = ListOwner & {
+  removalObserver: MutationObserver;
+  lists: Map<HTMLElement, MutationObserver>;
+};
 
 export class InteractionController {
   element: HTMLElement;
   key: string | undefined;
   connected: boolean;
   sheet: CSSStyleSheet | null;
+  private runtimeSheet?: StyleSheetScope;
+  private listObservation?: ListObservation;
   useFirstChild: boolean;
   _observers: WeakMap<HTMLElement, MutationObserver>;
   _pluginCleanups: InteractPluginCleanup[];
@@ -55,7 +74,18 @@ export class InteractionController {
   }
 
   disconnect({ removeFromCache = false }: { removeFromCache?: boolean } = {}) {
+    this.stopWatchingLists();
+    this._observers = new WeakMap();
+    const pluginCleanups = this._pluginCleanups;
+    const scope = this.runtimeSheet;
+    const originalSheet = this.sheet;
+    const opaqueAdoption =
+      originalSheet && originalSheet !== scope?.sheet ? this.getRuntimeStyleRoot() : undefined;
     const key = this.key || this.element.dataset.interactKey;
+    if (scope && !scope.closing) {
+      const mounted = key ? getMountedController(key) : undefined;
+      scope.closing = { connection: mounted?.controller === this ? mounted : undefined };
+    }
 
     if (key) {
       remove(this, removeFromCache);
@@ -63,33 +93,21 @@ export class InteractionController {
 
     // Run plugin cleanups after `remove()` has torn down animations on the (possibly
     // plugin-generated) elements, then revert the plugins' DOM mutations.
-    if (this._pluginCleanups.length) {
-      for (const cleanup of this._pluginCleanups) {
-        try {
-          cleanup();
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      this._pluginCleanups.length = 0;
+    for (const cleanup of pluginCleanups) {
+      runPluginCleanup(cleanup);
     }
+    pluginCleanups.length = 0;
     this._appliedPlugins = new WeakSet();
 
-    if (this.sheet) {
-      const rootNode = this.element?.getRootNode() as ShadowRoot | Document;
-      const adoptTarget: { adoptedStyleSheets: CSSStyleSheet[] } = ((rootNode as ShadowRoot).host
-        ? (rootNode as ShadowRoot)
-        : document) as unknown as { adoptedStyleSheets: CSSStyleSheet[] };
-      const index = adoptTarget.adoptedStyleSheets.indexOf(this.sheet);
-      if (index !== -1) {
-        adoptTarget.adoptedStyleSheets = adoptTarget.adoptedStyleSheets.filter(
-          (s) => s !== this.sheet,
-        );
-      }
+    if (scope) closeRuntimeSheet(scope);
+    if (originalSheet && opaqueAdoption?.adoptedStyleSheets.includes(originalSheet)) {
+      opaqueAdoption.adoptedStyleSheets = opaqueAdoption.adoptedStyleSheets.filter(
+        (sheet) => sheet !== originalSheet,
+      );
     }
+    if (this.runtimeSheet === scope) this.runtimeSheet = undefined;
+    if (this.sheet === originalSheet) this.sheet = null;
 
-    this._observers = new WeakMap();
-    this.sheet = null;
     this.connected = false;
   }
 
@@ -104,28 +122,59 @@ export class InteractionController {
     }
   }
 
-  renderStyle(cssRules: string[]) {
-    const rootNode = this.element?.getRootNode() as ShadowRoot | Document;
-    const adoptTarget: { adoptedStyleSheets: CSSStyleSheet[] } = ((rootNode as ShadowRoot).host
-      ? (rootNode as ShadowRoot)
-      : document) as unknown as { adoptedStyleSheets: CSSStyleSheet[] };
-    if (!this.sheet) {
-      this.sheet = new CSSStyleSheet();
-      void this.sheet.replaceSync(cssRules.join('\n'));
+  renderStyle(cssRules: string[]): void {
+    this.appendRuntimeRules(cssRules);
+  }
 
-      adoptTarget.adoptedStyleSheets = [...(adoptTarget.adoptedStyleSheets || []), this.sheet];
-    } else {
-      let position = this.sheet.cssRules.length;
+  [appendOwnedStyle](rules: string[], canPublish: () => boolean) {
+    const renderStyle = this.renderStyle;
+    if (renderStyle !== defaultRenderStyle) {
+      renderStyle.call(this, rules);
+      return;
+    }
+    if (!canPublish()) return;
 
-      for (const cssRule of cssRules) {
-        try {
-          this.sheet.insertRule(cssRule, position);
-          position++;
-        } catch (e) {
-          console.error(e);
-        }
+    const { scope, inserted } = this.appendRuntimeRules(rules);
+    return scope && makeStyleReceipt(scope, inserted);
+  }
+
+  private getRuntimeStyleRoot(): Document | ShadowRoot {
+    const root = this.element.getRootNode();
+    const view = this.element.ownerDocument.defaultView;
+    return view && root instanceof view.ShadowRoot ? root : document;
+  }
+
+  private appendRuntimeRules(cssRules: string[]): { scope?: StyleSheetScope; inserted: CSSRule[] } {
+    const sheet = this.sheet;
+    const scope = this.runtimeSheet?.sheet === sheet ? this.runtimeSheet : undefined;
+    const closing = scope?.closing;
+    const mounted = closing && this.key ? getMountedController(this.key) : undefined;
+    const resumed = mounted?.controller === this && mounted !== closing?.connection;
+    if (!sheet || resumed) {
+      const adoptedInto = this.getRuntimeStyleRoot();
+      const nextSheet = new CSSStyleSheet();
+      this.sheet = nextSheet;
+      nextSheet.replaceSync(cssRules.join('\n'));
+      adoptedInto.adoptedStyleSheets = [...(adoptedInto.adoptedStyleSheets || []), nextSheet];
+      const nextScope: StyleSheetScope = { sheet: nextSheet, adoptedInto, receipts: new Set() };
+      this.runtimeSheet = nextScope;
+      return { scope: nextScope, inserted: Array.from(nextSheet.cssRules) };
+    }
+
+    const inserted: CSSRule[] = [];
+    for (const cssRule of cssRules) {
+      try {
+        const index = sheet.insertRule(cssRule, sheet.cssRules.length);
+        inserted.push(sheet.cssRules[index]);
+      } catch (error) {
+        console.error(error);
       }
     }
+    return { scope, inserted };
+  }
+
+  applyState(mutation: ScopedStateMutation): void {
+    applyScopedEffectState(this.element, this.key, mutation);
   }
 
   toggleEffect(
@@ -138,79 +187,140 @@ export class InteractionController {
       return;
     }
 
-    if (!isLegacy && (this.element as IInteractElement).toggleEffect) {
-      (this.element as IInteractElement).toggleEffect(effectId, stateAction, item);
+    const { element, key } = this;
+    if (!isLegacy && 'toggleEffect' in element && typeof element.toggleEffect === 'function') {
+      element.toggleEffect(effectId, stateAction, item);
       return;
     }
 
-    const currentEffects = new Set(
-      this.element.dataset[INTERACT_EFFECT_DATA_ATTR]?.split(' ') || [],
-    );
-
-    if (stateAction === 'toggle') {
-      if (currentEffects.has(effectId)) {
-        currentEffects.delete(effectId);
-      } else {
-        currentEffects.add(effectId);
-      }
-    } else if (stateAction === 'add') {
-      currentEffects.add(effectId);
-    } else if (stateAction === 'remove') {
-      currentEffects.delete(effectId);
-    } else if (stateAction === 'clear') {
-      currentEffects.clear();
-    }
-
-    (item || this.element).dataset[INTERACT_EFFECT_DATA_ATTR] =
-      Array.from(currentEffects).join(' ');
+    toggleEffectState({ element: item ?? element, key, effectId, stateAction });
   }
 
   getActiveEffects(): string[] {
-    const raw = this.element.dataset[INTERACT_EFFECT_DATA_ATTR] || '';
-    const trimmed = raw.trim();
-    return trimmed ? trimmed.split(/\s+/) : [];
+    return getActiveEffectIds(this.element);
   }
 
   watchChildList(listContainer: string): void {
-    const list = this.element.querySelector(listContainer);
+    const root = this.element;
+    const key = this.key || root.dataset.interactKey;
+    if (!key || Interact.getController(key) !== this) return;
 
-    if (list) {
-      // TODO: we can probably improve this and use less observers, this impl. uses one per container element
-      let observer = this._observers.get(list as HTMLElement);
+    const list = root.querySelector<HTMLElement>(listContainer);
+    if (!list) return;
 
-      if (!observer) {
-        observer = new MutationObserver(this._childListChangeHandler.bind(this, listContainer));
+    const current = this.listObservation;
+    if (current) this.ownsListObservation(current);
+    if (this._observers.has(list)) return;
 
-        this._observers.set(list as HTMLElement, observer);
-
-        observer.observe(list as HTMLElement, { childList: true });
-      }
+    const owner = { root, key, connection: getMountedController(key) };
+    const observers = this._observers;
+    const deliver = this._childListChangeHandler.bind(this, listContainer);
+    if (
+      this._observers !== observers ||
+      !this.isCurrentListOwner(owner) ||
+      !root.contains(list) ||
+      observers.has(list)
+    ) {
+      return;
     }
+
+    const observation = this.listObservation ?? this.observeListRemovals(owner);
+    const observer = new MutationObserver((records) => {
+      const target = records[0]?.target;
+      if (target && this.ownsListObservation(observation) && root.contains(target)) {
+        deliver(records);
+      }
+    });
+    observation.lists.set(list, observer);
+    observers.set(list, observer);
+    observer.observe(list, { childList: true });
+  }
+
+  private observeListRemovals(owner: ListOwner): ListObservation {
+    const removalObserver = new MutationObserver((records) => {
+      if (records.some((record) => record.removedNodes.length > 0)) {
+        this.pruneDetachedLists(observation);
+      }
+    });
+    const observation: ListObservation = {
+      ...owner,
+      removalObserver,
+      lists: new Map(),
+    };
+    this.listObservation = observation;
+    removalObserver.observe(owner.root, { childList: true, subtree: true });
+    return observation;
+  }
+
+  private isCurrentListOwner({ root, key, connection }: ListOwner): boolean {
+    return (
+      this.element === root &&
+      (this.key || root.dataset.interactKey) === key &&
+      Interact.getController(key) === this &&
+      (!connection || getMountedController(key) === connection)
+    );
+  }
+
+  private ownsListObservation(observation: ListObservation): boolean {
+    if (this.listObservation !== observation) return false;
+    if (!this.isCurrentListOwner(observation)) {
+      this.stopWatchingLists();
+      return false;
+    }
+    observation.connection ??= getMountedController(observation.key);
+    return true;
+  }
+
+  private stopWatchingLists(): void {
+    const observation = this.listObservation;
+    this.listObservation = undefined;
+    if (!observation) return;
+    observation.removalObserver.disconnect();
+    for (const list of observation.lists.keys()) this.stopWatchingList(observation, list);
+  }
+
+  private stopWatchingList(observation: ListObservation, list: HTMLElement): void {
+    const observer = observation.lists.get(list);
+    observation.lists.delete(list);
+    if (this._observers.get(list) === observer) this._observers.delete(list);
+    observer?.disconnect();
+  }
+
+  private pruneDetachedLists(observation: ListObservation): void {
+    if (!this.ownsListObservation(observation)) return;
+
+    for (const list of observation.lists.keys()) {
+      if (!observation.root.contains(list)) this.stopWatchingList(observation, list);
+    }
+    if (observation.lists.size === 0) this.stopWatchingLists();
   }
 
   _childListChangeHandler(listContainer: string, entries: MutationRecord[]) {
     const key = this.key || this.element.dataset.interactKey;
-    const removedElements: HTMLElement[] = [];
-    const addedElements: HTMLElement[] = [];
+    const container = entries[0]?.target;
+    const removedElements = new Set<HTMLElement>();
+    const addedElements = new Set<HTMLElement>();
 
     entries.forEach((entry) => {
       entry.removedNodes.forEach((el) => {
         if (el instanceof HTMLElement) {
-          removedElements.push(el);
+          removedElements.add(el);
         }
       });
 
       entry.addedNodes.forEach((el) => {
         if (el instanceof HTMLElement) {
-          addedElements.push(el);
+          addedElements.add(el);
         }
       });
     });
 
-    removeListItems(removedElements);
-
-    if (key) {
-      addListItems(this, listContainer, addedElements);
+    if (key && container instanceof Element) {
+      removeListItems([...removedElements], { key, container });
+      const currentItems = [...addedElements].filter((item) => item.parentElement === container);
+      addListItems(this, listContainer, currentItems, container);
     }
   }
 }
+
+const defaultRenderStyle = InteractionController.prototype.renderStyle;

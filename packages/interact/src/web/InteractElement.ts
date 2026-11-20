@@ -1,7 +1,6 @@
-import type { IInteractionController, StateAction } from '../types';
+import type { IInteractionController, ScopedStateMutation, StateAction } from '../types';
 import { InteractionController } from '../core/InteractionController';
-
-export const INTERACT_EFFECT_DATA_ATTR = 'interactEffect';
+import { getActiveEffectIds, nativeEffectState, toggleEffectState } from '../core/effectState';
 
 export function getInteractElement() {
   let checkedForLegacyStateSyntax = false;
@@ -17,14 +16,11 @@ export function getInteractElement() {
       this.controller = new InteractionController(this, undefined, { useFirstChild: true });
       this._internals = null;
 
-      const internals = this.attachInternals?.() as
-        | (ElementInternals & { states?: Set<string> })
-        | undefined;
+      const internals = this.attachInternals?.();
 
-      // Safari before 17.4 has ElementInternals without CustomStateSet: keep _internals null, so states fall back to
-      // the data-interact-effect attribute
+      // Safari before 17.4 exposes ElementInternals without CustomStateSet.
       if (internals?.states) {
-        this._internals = internals as ElementInternals & { states: Set<string> };
+        this._internals = internals;
 
         if (!checkedForLegacyStateSyntax) {
           checkedForLegacyStateSyntax = true;
@@ -58,41 +54,32 @@ export function getInteractElement() {
       this.controller.disconnect(options);
     }
 
+    get [nativeEffectState]() {
+      return this._internals
+        ? { states: this._internals.states, legacySyntax: isLegacyStateSyntax }
+        : undefined;
+    }
+
+    applyState(mutation: ScopedStateMutation): void {
+      this.controller.applyState(mutation);
+    }
+
     toggleEffect(effectId: string, stateAction: StateAction, item?: HTMLElement | null) {
       if (item === null) {
         return;
       }
 
-      if (isLegacyStateSyntax) {
-        effectId = `--${effectId}`;
-      }
-
-      if (this._internals && !item) {
-        if (stateAction === 'toggle') {
-          if (this._internals.states.has(effectId)) {
-            this._internals.states.delete(effectId);
-          } else {
-            this._internals.states.add(effectId);
-          }
-        } else if (stateAction === 'add') {
-          this._internals.states.add(effectId);
-        } else if (stateAction === 'remove') {
-          this._internals.states.delete(effectId);
-        } else if (stateAction === 'clear') {
-          this._internals.states.clear();
-        }
-      } else {
-        this.controller?.toggleEffect(effectId, stateAction, item, true);
-      }
+      toggleEffectState({
+        element: item ?? this,
+        key: this.controller.key,
+        effectId,
+        stateAction,
+        nativeState: item ? undefined : this[nativeEffectState],
+      });
     }
 
     getActiveEffects(): string[] {
-      if (this._internals) {
-        const effects = Array.from(this._internals.states);
-        return isLegacyStateSyntax ? effects.map((effect) => effect.replace(/^--/g, '')) : effects;
-      }
-
-      return this.controller?.getActiveEffects() || [];
+      return getActiveEffectIds(this, this[nativeEffectState]);
     }
   };
 }

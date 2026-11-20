@@ -24,7 +24,7 @@ function withEventTriggerConfig(presetKey: keyof typeof EVENT_TRIGGER_PRESETS) {
       interactOptions?.allowA11yTriggers && presetKey in a11yTriggerOverrides
         ? a11yTriggerOverrides[presetKey as keyof typeof a11yTriggerOverrides]
         : preset;
-    eventTrigger.add(source, target, effect, { eventConfig }, interactOptions ?? {});
+    return eventTrigger.add(source, target, effect, { eventConfig }, interactOptions ?? {});
   };
 }
 
