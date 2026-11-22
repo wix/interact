@@ -460,26 +460,11 @@ function _buildAnimationGroupArgsFromSequence(
     return { ...resolvedEffect, ...effect } as Effect;
   };
 
-  // A sequence is built as a whole, so one deferred effect defers all of it — checked up front so
-  // no plugin of the sequence runs while it is deferred.
-  const isDeferred = seqEffects.some((effect) => {
-    const effectOptions = resolveEffect(effect);
-    const effectMql = getMediaQuery(effectOptions.conditions || [], instance.dataCache.conditions);
-
-    if (effectMql && !effectMql.matches) return false;
-
-    const target = effectOptions.key && getInterpolatedKey(effectOptions.key, sourceKey);
-    return _isDeferred(target || sourceKey, effectOptions);
-  });
-
-  if (isDeferred) {
-    return null;
-  }
-
-  const animationGroupArgs: AnimationGroupArgs[] = [];
   const policy = _getSequencePolicy(sequenceConfig, interaction, instance);
-  let usedListElements = false;
+  const resolvedEffects: Array<{ effectOptions: Effect; target: string | undefined }> = [];
 
+  // Variants resolve first, so an effect cancelled by its media or reduced-motion policy neither
+  // holds back the sequence nor runs its plugins.
   for (const effect of seqEffects) {
     const effectId = (effect as EffectRef).effectId;
     const effectOptions = _resolveVariant(
@@ -495,9 +480,24 @@ function _buildAnimationGroupArgsFromSequence(
 
     if (!effectOptions) continue;
 
-    const targetKey_ = effectOptions.key;
-    const target = targetKey_ && getInterpolatedKey(targetKey_, sourceKey);
+    const target = effectOptions.key && getInterpolatedKey(effectOptions.key, sourceKey);
+    resolvedEffects.push({ effectOptions, target });
+  }
 
+  // A sequence is built as a whole, so one deferred effect defers all of it — checked up front so
+  // no plugin of the sequence runs while it is deferred.
+  const isDeferred = resolvedEffects.some(({ effectOptions, target }) =>
+    _isDeferred(target || sourceKey, effectOptions),
+  );
+
+  if (isDeferred) {
+    return null;
+  }
+
+  const animationGroupArgs: AnimationGroupArgs[] = [];
+  let usedListElements = false;
+
+  for (const { effectOptions, target } of resolvedEffects) {
     let targetController;
     if (target) {
       targetController = Interact.getController(target);

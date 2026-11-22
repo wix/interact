@@ -391,6 +391,39 @@ describe('interact plugin bridge', () => {
       expect(getSequenceSpy).toHaveBeenCalledTimes(1);
     });
 
+    it('does not defer a sequence on an effect its reduced-motion policy cancels', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+      const getSequenceSpy = vi.spyOn(Interact, 'getSequence');
+      Interact.forceReducedMotion = true;
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                effects: [
+                  { key: 'el', ...fadeIn },
+                  {
+                    key: 'el',
+                    $deferred: {},
+                    selector: '.pt',
+                    reducedMotionPolicy: 'cancel',
+                    ...fadeIn,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+
+      expect(apply).not.toHaveBeenCalled();
+      expect(getSequenceSpy).toHaveBeenCalledTimes(1);
+    });
+
     it('ready(name, key) releases only that key', () => {
       const apply = useSpanPlugin('deferred', 'hydrated');
 
