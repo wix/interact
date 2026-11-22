@@ -119,6 +119,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.8.4] - 2026-11-22
+
+#### Changed
+
+- `Interact.getInstance()`, `Interact.getController()`, and `add()` no longer log console warnings when a key has no instance or controller (#419)
+
 ### [2.8.2] - 2026-11-16
 
 #### Fixed
