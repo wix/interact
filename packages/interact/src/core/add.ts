@@ -14,8 +14,7 @@ import type {
   AnimationEndParams,
   AnimationOptions,
   ReducedMotionPolicy,
-  ViewEnterParams,
-  ViewEnterHandlerModule,
+  TriggerLatch,
 } from '../types';
 import { PLUGIN_FIELD_PREFIX } from '../types';
 import {
@@ -200,7 +199,8 @@ function _applyPlugins(
  * Handles a unit (interaction, effect, or sequence) held back by its plugins. It is skipped without
  * being marked as added, so a later add pass of `passController` applies it: the one
  * `Interact.ready()` runs for a deferred plugin, or the one re-run here once an async plugin
- * settles. Meanwhile, a `viewEnter` on the unit's sources is latched, so an entry is not lost.
+ * settles. Meanwhile, a `viewEnter` or `animationEnd` on the unit's sources is latched, so an
+ * entry or an animation end is not lost.
  *
  * `sourcePrepared` tells whether the source's own (interaction-level) plugins are applied — if
  * not, the sources may not exist yet, so only a source that is the root itself is latched.
@@ -217,7 +217,12 @@ function _hold(
     readiness.then(() => passController.resume());
   }
 
-  if (interaction.trigger !== 'viewEnter') {
+  const handlerModule = TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as
+    | { latch?: TriggerLatch<TriggerType> }
+    | undefined;
+  const latch = handlerModule?.latch;
+
+  if (!latch) {
     return;
   }
 
@@ -238,10 +243,7 @@ function _hold(
   }
 
   (Array.isArray(sources) ? sources : [sources]).forEach((source) => {
-    (TRIGGER_TO_HANDLER_MODULE_MAP.viewEnter as ViewEnterHandlerModule).latch(
-      source,
-      interaction.params as ViewEnterParams,
-    );
+    latch(source, interaction.params);
   });
 }
 

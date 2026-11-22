@@ -1048,4 +1048,133 @@ describe('interact plugin bridge', () => {
       expect(playSpy()).not.toHaveBeenCalled();
     });
   });
+
+  describe('animationEnd while held back', () => {
+    const fadeIn = { namedEffect: { type: 'FadeIn' } as any, duration: 100 };
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    function playSpy() {
+      return (getWebAnimation as unknown as ReturnType<typeof vi.fn>)().play as ReturnType<
+        typeof vi.fn
+      >;
+    }
+
+    function animationEnd(element: Element, animationName: string) {
+      const event = new Event('animationend');
+      Object.defineProperty(event, 'animationName', { value: animationName });
+      element.dispatchEvent(event);
+    }
+
+    function createDeferred() {
+      Interact.use('deferred', () => {}, { defer: 'hydrated' });
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'animationEnd',
+            params: { effectId: 'src' },
+            $deferred: {},
+            effects: [{ key: 'el', ...fadeIn }],
+          },
+        ],
+        effects: { src: { ...fadeIn } },
+      });
+      const element = document.createElement('div');
+      add(element, 'el');
+
+      return element;
+    }
+
+    it('replays an animation end that happened while deferred', () => {
+      const element = createDeferred();
+
+      animationEnd(element, 'motion-fadeIn');
+
+      expect(playSpy()).not.toHaveBeenCalled();
+
+      Interact.ready('hydrated');
+
+      expect(playSpy()).toHaveBeenCalledTimes(1);
+    });
+
+    it('replays an animation end that happened while an async effect plugin was in flight', async () => {
+      let resolve!: () => void;
+      Interact.use('async', () => new Promise<void>((res) => (resolve = res)));
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'animationEnd',
+            params: { effectId: 'src' },
+            effects: [{ key: 'el', $async: {}, ...fadeIn }],
+          },
+        ],
+        effects: { src: { ...fadeIn } },
+      });
+      const element = document.createElement('div');
+      add(element, 'el');
+
+      animationEnd(element, 'motion-fadeIn');
+
+      resolve();
+      await flush();
+
+      expect(playSpy()).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not play when no animation ended while held back', () => {
+      createDeferred();
+
+      Interact.ready('hydrated');
+
+      expect(playSpy()).not.toHaveBeenCalled();
+    });
+
+    it('does not replay an animation end the trigger would have ignored', async () => {
+      const { getElementCSSAnimation } = await import('@wix/motion');
+      (getElementCSSAnimation as ReturnType<typeof vi.fn>).mockReturnValue({
+        playState: 'finished',
+        hasAnimationName: (name: string) => name === 'motion-fadeIn',
+        hasAnimationId: () => false,
+      });
+
+      try {
+        const element = createDeferred();
+
+        animationEnd(element, 'motion-other');
+        Interact.ready('hydrated');
+
+        expect(playSpy()).not.toHaveBeenCalled();
+
+        animationEnd(element, 'motion-fadeIn');
+
+        expect(playSpy()).toHaveBeenCalledTimes(1);
+      } finally {
+        (getElementCSSAnimation as ReturnType<typeof vi.fn>).mockReturnValue(null);
+      }
+    });
+
+    it('plays once for several latched animation ends', () => {
+      const element = createDeferred();
+
+      animationEnd(element, 'motion-fadeIn');
+      animationEnd(element, 'motion-slideIn');
+      animationEnd(element, 'motion-fadeIn');
+      Interact.ready('hydrated');
+
+      expect(playSpy()).toHaveBeenCalledTimes(1);
+    });
+
+    it('forgets latched animation ends on disconnect', () => {
+      const element = createDeferred();
+
+      animationEnd(element, 'motion-fadeIn');
+      Interact.getController('el')!.update();
+      Interact.ready('hydrated');
+
+      expect(playSpy()).not.toHaveBeenCalled();
+    });
+  });
 });

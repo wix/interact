@@ -39,10 +39,24 @@ export type InteractionHandlerModule<T extends TriggerType> = {
   remove: (element: HTMLElement) => void;
 };
 
+/**
+ * Records the trigger's events on `source` while an interaction on it is held back by its plugins,
+ * so the trigger attached later can replay them.
+ */
+export type TriggerLatch<T extends TriggerType> = (
+  source: HTMLElement,
+  options?: InteractionParamsTypes[T],
+) => void;
+
 export type ViewEnterHandlerModule = InteractionHandlerModule<'viewEnter'> & {
   setOptions: (options: Partial<ViewEnterParams>) => void;
   /** Records an entry of `source` while its trigger is held back, replayed by a later `once` add. */
-  latch: (source: HTMLElement, options?: ViewEnterParams) => void;
+  latch: TriggerLatch<'viewEnter'>;
+};
+
+export type AnimationEndHandlerModule = InteractionHandlerModule<'animationEnd'> & {
+  /** Records the `animationend` events of `source` while its trigger is held back, replayed by a later add. */
+  latch: TriggerLatch<'animationEnd'>;
 };
 
 export type TriggerHandlerMap<T extends TriggerType> = {

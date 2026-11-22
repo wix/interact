@@ -66,10 +66,11 @@ useEffect(() => Interact.ready('hydrated'), []);
   `document.fonts.ready.then(() => Interact.ready('fonts'))`.
 - Elements connecting after a release are not deferred. `Interact.destroy()`
   resets released names.
-- A `viewEnter` `once` entry that happens while held back (deferred or async)
-  is replayed when the trigger attaches — except for an interaction-level field
+- A `viewEnter` `once` entry, or a source `animationend` matching an
+  `animationEnd` trigger, that happens while held back (deferred or async) is
+  replayed when the trigger attaches — except for an interaction-level field
   on an interaction with its own `selector` / `listContainer`. `click` /
-  `hover` / `animationEnd` events fired while held back are not replayed.
+  `hover` events fired while held back are not replayed.
 - Content hidden by `hideUntilReady` or entrance FOUC CSS stays hidden until the
   name is released — always call `ready()` for every name you defer on.
 
