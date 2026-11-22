@@ -1176,5 +1176,36 @@ describe('interact plugin bridge', () => {
 
       expect(playSpy()).not.toHaveBeenCalled();
     });
+
+    it('forgets latched animation ends of a selector source on disconnect', async () => {
+      const resolvers: Array<() => void> = [];
+      Interact.use('async', () => new Promise<void>((res) => resolvers.push(res)));
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'el',
+            selector: '.child',
+            trigger: 'animationEnd',
+            params: { effectId: 'src' },
+            effects: [{ key: 'el', selector: '.child', $async: {}, ...fadeIn }],
+          },
+        ],
+        effects: { src: { ...fadeIn } },
+      });
+      const element = document.createElement('div');
+      const child = document.createElement('span');
+      child.className = 'child';
+      element.appendChild(child);
+      add(element, 'el');
+
+      animationEnd(child, 'motion-fadeIn');
+      Interact.getController('el')!.update();
+      resolvers.forEach((resolve) => resolve());
+      await flush();
+
+      expect(resolvers.length).toBeGreaterThan(1);
+      expect(playSpy()).not.toHaveBeenCalled();
+    });
   });
 });
