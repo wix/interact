@@ -2121,6 +2121,41 @@ describe('interact (mini)', () => {
         );
       });
 
+      it('should not fall back to the root element when a selector matches nothing', () => {
+        const config: InteractConfig = {
+          interactions: [
+            {
+              key: 'no-match-source',
+              trigger: 'click',
+              effects: [
+                {
+                  selector: '.not-there-yet',
+                  keyframeEffect: { name: 'nm', keyframes: [{ opacity: '0' }, { opacity: '1' }] },
+                  duration: 300,
+                },
+              ],
+            },
+          ],
+        };
+
+        const element = document.createElement('div');
+        const clickSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.click, 'add');
+
+        Interact.create(config);
+        add(element, 'no-match-source');
+
+        expect(clickSpy).not.toHaveBeenCalled();
+
+        // the interaction was not marked added, so a later pass binds the now-present element
+        const late = document.createElement('span');
+        late.className = 'not-there-yet';
+        element.appendChild(late);
+        Interact.getController('no-match-source')!.resume();
+
+        expect(clickSpy).toHaveBeenCalledTimes(1);
+        expect(clickSpy.mock.calls[0][1]).toBe(late);
+      });
+
       it('should warn when listContainer selector does not match', () => {
         const config: InteractConfig = {
           effects: {

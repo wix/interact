@@ -138,9 +138,14 @@ function _getElementsFromData(
 
     if (elements.length > 0) {
       return Array.from(elements) as HTMLElement[];
-    } else {
-      console.warn(`Interact: No elements found for selector "${data.selector}"`);
     }
+
+    // An explicit selector never falls back to the root — binding there would attach the trigger
+    // or animation to the wrong element and mark the interaction added, so a later pass (e.g.
+    // after a plugin produced the matching DOM) could not retry it.
+    console.warn(`Interact: No elements found for selector "${data.selector}"`);
+
+    return null;
   }
 
   return useFirstChild
