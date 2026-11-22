@@ -42,7 +42,7 @@ useEffect(() => Interact.ready('hydrated'), []);
 
 - While deferred, the plugin does not run, and neither does what carries its `$<name>` field: the whole interaction (interaction-level field), only that effect (effect-level field), or the whole sequence (field on any sequence effect). Everything else applies immediately.
 - `Interact.ready(name, key)` releases a name for one element only; `Interact.ready(name)` releases it for all.
-- A `viewEnter` `once` entry that happens while held back (deferred or async) is replayed when the trigger attaches. `click` / `hover` / `animationEnd` events fired while held back are NOT replayed.
+- A `viewEnter` `once` entry that happens while held back (deferred or async) is replayed when the trigger attaches — except for an interaction-level field on an interaction with its own `selector` / `listContainer` (its sources may not exist yet, so they aren't observed). `click` / `hover` / `animationEnd` events fired while held back are NOT replayed.
 - `defer` may list several names (e.g. `['hydrated', 'fonts']`); all must be released. Release `'fonts'` with `document.fonts.ready.then(() => Interact.ready('fonts'))`.
 - Released names persist until `Interact.destroy()`.
 

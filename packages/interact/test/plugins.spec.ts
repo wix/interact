@@ -786,6 +786,29 @@ describe('interact plugin bridge', () => {
       expect(getSequenceSpy).toHaveBeenCalledTimes(1);
     });
 
+    it('holds a cross-element effect on an async source plugin and attaches it once', async () => {
+      const { plugin, calls } = useAsyncSpanPlugin('async');
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          { key: 'a', trigger: 'hover', $async: {}, effects: [{ key: 'b', ...fadeIn }] },
+        ],
+      });
+      // the target is cached first, so both its pass and the source's hit the in-flight plugin
+      add(document.createElement('div'), 'b');
+      add(document.createElement('div'), 'a');
+
+      expect(plugin).toHaveBeenCalledTimes(1);
+      expect(hoverSpy).not.toHaveBeenCalled();
+
+      calls[0].resolve();
+      await flush();
+
+      expect(plugin).toHaveBeenCalledTimes(1);
+      expect(hoverSpy).toHaveBeenCalledTimes(1);
+    });
+
     it('stores the resolved cleanup and runs it on disconnect', async () => {
       const { calls } = useAsyncSpanPlugin('async');
       const cleanup = vi.fn();

@@ -30,8 +30,14 @@ Interact.use('<plugin-name>', (value, context) => {
   // value:   the value of the `$<plugin-name>` field
   // context: { root, key, scope: 'interaction' | 'effect', config }
   // return:  optional cleanup () => void, run on disconnect/teardown
+  //          — or a promise of one (async plugin)
 });
 ```
+
+- An async plugin (returning a promise) holds back what carries its field —
+  same scope as deferring, below — until the promise settles. It runs once per
+  connect; if the element disconnects meanwhile, the resolved cleanup runs right
+  away. A rejection is logged and the held-back parts apply without the plugin.
 
 - `Interact.getPlugin(name)` / `Interact.getPluginsNames()` inspect the registry.
 
@@ -60,6 +66,10 @@ useEffect(() => Interact.ready('hydrated'), []);
   `document.fonts.ready.then(() => Interact.ready('fonts'))`.
 - Elements connecting after a release are not deferred. `Interact.destroy()`
   resets released names.
+- A `viewEnter` `once` entry that happens while held back (deferred or async)
+  is replayed when the trigger attaches — except for an interaction-level field
+  on an interaction with its own `selector` / `listContainer`. `click` /
+  `hover` / `animationEnd` events fired while held back are not replayed.
 - Content hidden by `hideUntilReady` or entrance FOUC CSS stays hidden until the
   name is released — always call `ready()` for every name you defer on.
 
@@ -91,7 +101,8 @@ Add a `$<plugin-name>` field on an **interaction** or an **effect**:
 - A returned cleanup runs on disconnect, on `Interact.destroy()`, and on
   media-query reconnect. Use it to fully undo the plugin's work.
 - Runtime dedupe applies only when the **same object reference** is reused on the
-  same controller. Separate inline objects and primitive values run separately.
+  same controller. Separate inline objects and primitive values run separately
+  (an async plugin with a primitive value runs once per connect for its field).
 - `root` is the keyed controller element, before `selector` / `listContainer`
   resolution. Interaction fields use the source controller; effect fields use
   the effect target's controller.
