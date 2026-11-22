@@ -14,6 +14,8 @@ import type {
   AnimationEndParams,
   AnimationOptions,
   ReducedMotionPolicy,
+  ViewEnterParams,
+  ViewEnterHandlerModule,
 } from '../types';
 import { PLUGIN_FIELD_PREFIX } from '../types';
 import {
@@ -54,6 +56,34 @@ type ListElements = {
 };
 
 /**
+ * A unit's plugin readiness: `true` once every plugin it carries is released and applied, `false`
+ * while one is deferred (see the `defer` option of `Interact.use()`), or a promise while an async
+ * plugin is in flight.
+ */
+type PluginsReadiness = boolean | Promise<void>;
+
+function _isThenable(value: unknown): value is PromiseLike<unknown> {
+  return (
+    value !== null &&
+    (typeof value === 'object' || typeof value === 'function') &&
+    typeof (value as PromiseLike<unknown>).then === 'function'
+  );
+}
+
+/**
+ * Whether `config` carries a field of a plugin that is still deferred for `key` (see the `defer`
+ * option of `Interact.use()`).
+ */
+function _isDeferred(key: string, config: Record<string, unknown>): boolean {
+  for (const name of Interact.getPluginsNames()) {
+    if (`${PLUGIN_FIELD_PREFIX}${name}` in config && !Interact._isPluginReleased(name, key)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Generic plugin bridge. For every `$`-prefixed field on an interaction or effect (e.g. `$splitText`
  * → the `splitText` plugin), look up the plugin registered via `Interact.use()` and invoke it with
  * the raw field value and a context. Any returned cleanup is stored on the owning controller and
@@ -63,6 +93,11 @@ type ListElements = {
  * split `<span>`s) is visible to the selectors that follow. Each distinct plugin value object is
  * applied at most once per connect — the field values are shared by reference across resolution
  * passes, so identity is a stable dedup key.
+ *
+ * Returns the unit's readiness. While one of its plugins is deferred, none of them runs. An async
+ * plugin's promise is recorded in the dedup guard, so other passes await it instead of running the
+ * plugin again; it settles into the current connect only, and otherwise just runs its cleanup.
+ * With `apply: false`, plugins not yet applied are not run (they were applied by an earlier pass).
  */
 function _applyPlugins(
   owner: IInteractionController,
@@ -70,46 +105,155 @@ function _applyPlugins(
   config: Record<string, unknown>,
   key: string,
   scope: 'interaction' | 'effect',
-): void {
-  const pluginNames = Interact.getPluginsNames();
+  apply: boolean = true,
+): PluginsReadiness {
+  if (_isDeferred(key, config)) {
+    return false;
+  }
 
-  for (const name of pluginNames) {
+  const pending: Promise<void>[] = [];
+
+  for (const name of Interact.getPluginsNames()) {
     const field = `${PLUGIN_FIELD_PREFIX}${name}`;
     if (!(field in config)) {
       continue;
     }
 
     const value = config[field];
-
-    if (value !== null && typeof value === 'object') {
-      if (owner._appliedPlugins.has(value)) {
-        continue;
+    const isObject = value !== null && typeof value === 'object';
+    // primitive values have no identity, so an async one is tracked by where it was found
+    const primitiveKey = `${name}::${scope}::${key}::${String(value)}`;
+    const setApplied = (state: true | Promise<void>) => {
+      if (isObject) {
+        owner._appliedPlugins.set(value, state);
+      } else {
+        owner._asyncPrimitivePlugins.set(primitiveKey, state);
       }
-      owner._appliedPlugins.add(value);
+    };
+
+    const applied = isObject
+      ? owner._appliedPlugins.get(value)
+      : owner._asyncPrimitivePlugins.get(primitiveKey);
+
+    if (applied === true) {
+      continue;
+    }
+
+    if (applied) {
+      pending.push(applied);
+      continue;
+    }
+
+    if (!apply) {
+      continue;
+    }
+
+    if (isObject) {
+      setApplied(true);
     }
 
     const plugin = Interact.getPlugin(name)!;
 
-    const cleanup = plugin(value, { root, key, scope, config });
+    const result = plugin(value, { root, key, scope, config });
 
-    if (typeof cleanup === 'function') {
-      owner._pluginCleanups.push(cleanup);
+    if (_isThenable(result)) {
+      const connectId = owner._connectId;
+      const promise = Promise.resolve(result).then(
+        (cleanup) => {
+          if (owner._connectId !== connectId) {
+            // disconnected while in flight — undo right away
+            try {
+              if (typeof cleanup === 'function') {
+                cleanup();
+              }
+            } catch (e) {
+              console.error(e);
+            }
+            return;
+          }
+
+          if (typeof cleanup === 'function') {
+            owner._pluginCleanups.push(cleanup);
+          }
+          setApplied(true);
+        },
+        (e) => {
+          console.error(e);
+
+          if (owner._connectId === connectId) {
+            setApplied(true);
+          }
+        },
+      );
+
+      setApplied(promise);
+      pending.push(promise);
+    } else if (typeof result === 'function') {
+      owner._pluginCleanups.push(result);
     }
   }
+
+  return pending.length ? Promise.all(pending).then(() => {}) : true;
 }
 
 /**
- * Whether `config` carries a field of a plugin that is still deferred for `key` (see the `defer`
- * option of `Interact.use()`). A deferred unit is skipped without being marked as added, so the
- * add pass that `Interact.ready()` re-runs for the released key (or every key) applies it.
+ * Handles a unit (interaction, effect, or sequence) held back by its plugins. It is skipped without
+ * being marked as added, so a later add pass of `passController` applies it: the one
+ * `Interact.ready()` runs for a deferred plugin, or the one re-run here once an async plugin
+ * settles. Meanwhile, a `viewEnter` on the unit's sources is latched, so an entry is not lost.
+ *
+ * `sourcePrepared` tells whether the source's own (interaction-level) plugins are applied — if
+ * not, the sources may not exist yet, so only a source that is the root itself is latched.
  */
-function _isDeferred(key: string, config: Record<string, unknown>): boolean {
-  for (const name of Interact.getPluginsNames()) {
-    if (`${PLUGIN_FIELD_PREFIX}${name}` in config && !Interact._isPluginReleased(name, key)) {
-      return true;
-    }
+function _hold(
+  readiness: PluginsReadiness,
+  passController: IInteractionController,
+  interaction: InteractionTrigger,
+  sourceController: IInteractionController,
+  sourcePrepared: boolean,
+  elements?: HTMLElement[],
+): void {
+  if (_isThenable(readiness)) {
+    readiness.then(() => passController.resume());
   }
-  return false;
+
+  if (interaction.trigger !== 'viewEnter') {
+    return;
+  }
+
+  let sources: HTMLElement | HTMLElement[] | null = null;
+
+  if (sourcePrepared) {
+    sources = _resolveSourceElements(interaction as Interaction, sourceController, elements);
+  } else if (!interaction.selector && !interaction.listContainer) {
+    sources = _getElementsFromData(
+      interaction,
+      sourceController.element,
+      sourceController.useFirstChild,
+    );
+  }
+
+  if (!sources) {
+    return;
+  }
+
+  (Array.isArray(sources) ? sources : [sources]).forEach((source) => {
+    (TRIGGER_TO_HANDLER_MODULE_MAP.viewEnter as ViewEnterHandlerModule).latch(
+      source,
+      interaction.params as ViewEnterParams,
+    );
+  });
+}
+
+/** Combines readinesses: a promise while any is in flight (its pass re-checks the rest). */
+function _combineReadiness(...readinesses: PluginsReadiness[]): PluginsReadiness {
+  const pending = readinesses.filter(_isThenable) as Promise<void>[];
+
+  if (pending.length) {
+    return Promise.all(pending).then(() => {});
+  }
+
+  return readinesses.every(Boolean);
 }
 
 function _getElementsFromData(
@@ -337,18 +481,19 @@ function _addInteraction(
         targetController = sourceController;
       }
 
-      if (_isDeferred(target || interaction.key, effectOptions)) {
-        return;
-      }
-
       // Effect-level plugins act on the effect's target element before it is resolved.
-      _applyPlugins(
+      const readiness = _applyPlugins(
         targetController,
         targetController.element,
         effectOptions,
         target || interaction.key,
         'effect',
       );
+
+      if (readiness !== true) {
+        _hold(readiness, sourceController, interaction, sourceController, true, elements);
+        return;
+      }
 
       const [sourceElements, targetElements] = _getInteractionElements(
         interaction,
@@ -434,6 +579,8 @@ function _isSequenceConfigRef(
  * When `listElements` is provided (from addListItems), effects matching the specified controller
  * and listContainer will resolve targets from the provided elements instead of querying the DOM.
  * Returns null if listElements was provided but no effects matched it (avoids duplicate sequences).
+ *
+ * When the sequence's plugins hold it back, `options.onHold` gets the readiness and null is returned.
  */
 function _buildAnimationGroupArgsFromSequence(
   sequenceConfig: SequenceConfig,
@@ -442,7 +589,11 @@ function _buildAnimationGroupArgsFromSequence(
   sourceKey: string,
   sourceController: IInteractionController,
   instance: Interact,
-  options: { updateKey: string; onUpdate: () => void },
+  options: {
+    updateKey: string;
+    onUpdate: () => void;
+    onHold: (readiness: PluginsReadiness) => void;
+  },
   listElements?: ListElements,
 ): AnimationGroupArgs[] | null {
   const seqMql = getMediaQuery(sequenceConfig.conditions || [], instance.dataCache.conditions);
@@ -491,11 +642,16 @@ function _buildAnimationGroupArgsFromSequence(
   );
 
   if (isDeferred) {
+    options.onHold(false);
     return null;
   }
 
-  const animationGroupArgs: AnimationGroupArgs[] = [];
-  let usedListElements = false;
+  const preparedEffects: Array<{
+    effectOptions: Effect;
+    targetController: IInteractionController;
+    resolvedTargetKey: string;
+    readiness: PluginsReadiness;
+  }> = [];
 
   for (const { effectOptions, target } of resolvedEffects) {
     let targetController;
@@ -508,8 +664,9 @@ function _buildAnimationGroupArgsFromSequence(
 
     const resolvedTargetKey = target || sourceKey;
 
-    // Effect-level plugins act on the effect's target element before it is resolved.
-    _applyPlugins(
+    // Effect-level plugins act on the effect's target element before it is resolved — all of the
+    // sequence's plugins start before any of its targets resolves, so async ones run concurrently.
+    const readiness = _applyPlugins(
       targetController,
       targetController.element,
       effectOptions,
@@ -517,6 +674,20 @@ function _buildAnimationGroupArgsFromSequence(
       'effect',
     );
 
+    preparedEffects.push({ effectOptions, targetController, resolvedTargetKey, readiness });
+  }
+
+  const readiness = _combineReadiness(...preparedEffects.map((prepared) => prepared.readiness));
+
+  if (readiness !== true) {
+    options.onHold(readiness);
+    return null;
+  }
+
+  const animationGroupArgs: AnimationGroupArgs[] = [];
+  let usedListElements = false;
+
+  for (const { effectOptions, targetController, resolvedTargetKey } of preparedEffects) {
     let targetElement: HTMLElement | HTMLElement[] | null;
 
     if (
@@ -649,6 +820,8 @@ function _processSequences(
       {
         updateKey: sourceKey,
         onUpdate: () => sourceController.update(),
+        onHold: (readiness) =>
+          _hold(readiness, sourceController, interaction, sourceController, true, elements),
       },
       listElements,
     );
@@ -756,19 +929,20 @@ function _processSequencesForTarget(
         return true;
       }
 
-      if (_isDeferred(sourceKey!, interaction)) {
-        return true;
-      }
-
       // The source may connect (or resume) after this target, so its interaction-level plugins are
       // applied here before its elements are resolved.
-      _applyPlugins(
+      const sourceReadiness = _applyPlugins(
         sourceController,
         sourceController.element,
         interaction,
         sourceKey!,
         'interaction',
       );
+
+      if (sourceReadiness !== true) {
+        _hold(sourceReadiness, targetController, interaction, sourceController, false);
+        return true;
+      }
 
       const listElements: ListElements | undefined =
         elements && listContainer
@@ -785,6 +959,8 @@ function _processSequencesForTarget(
         {
           updateKey: targetKey,
           onUpdate: () => targetController.update(),
+          onHold: (readiness) =>
+            _hold(readiness, targetController, interaction, sourceController, true),
         },
         listElements,
       );
@@ -901,13 +1077,9 @@ function addEffectsForTarget(
           return true;
         }
 
-        if (_isDeferred(sourceKey!, interaction) || _isDeferred(targetKey, effectOptions)) {
-          return true;
-        }
-
         // The source may connect (or resume) after this target, so its interaction-level plugins
         // are applied here before its elements are resolved.
-        _applyPlugins(
+        const sourceReadiness = _applyPlugins(
           sourceController,
           sourceController.element,
           interaction,
@@ -915,14 +1087,24 @@ function addEffectsForTarget(
           'interaction',
         );
 
+        if (sourceReadiness !== true) {
+          _hold(sourceReadiness, targetController, interaction, sourceController, false);
+          return true;
+        }
+
         // Effect-level plugins act on the effect's target element before it is resolved.
-        _applyPlugins(
+        const readiness = _applyPlugins(
           targetController,
           targetController.element,
           effectOptions,
           targetKey,
           'effect',
         );
+
+        if (readiness !== true) {
+          _hold(readiness, targetController, interaction, sourceController, true);
+          return true;
+        }
 
         if (effectOptions.listContainer) {
           targetController.watchChildList(effectOptions.listContainer);
@@ -1078,13 +1260,20 @@ export function add(controller: IInteractionController): boolean {
     }
 
     if (!mql || mql.matches) {
-      if (_isDeferred(key, interaction)) {
-        return;
-      }
-
       // Run interaction-level plugins before target resolution / list observation so any DOM they
       // create is visible to the selectors and MutationObservers that follow.
-      _applyPlugins(controller, controller.element, interaction, key, 'interaction');
+      const readiness = _applyPlugins(
+        controller,
+        controller.element,
+        interaction,
+        key,
+        'interaction',
+      );
+
+      if (readiness !== true) {
+        _hold(readiness, controller, interaction, controller, false);
+        return;
+      }
 
       if (interaction.listContainer) {
         controller.watchChildList(interaction.listContainer);
@@ -1129,7 +1318,18 @@ export function addListItems(
       }
 
       if (!mql || mql.matches) {
-        if (_isDeferred(key, interaction)) {
+        // applied by the add pass — only held back while deferred or in flight
+        const readiness = _applyPlugins(
+          controller,
+          controller.element,
+          interaction,
+          key,
+          'interaction',
+          false,
+        );
+
+        if (readiness !== true) {
+          _hold(readiness, controller, interaction, controller, false);
           return;
         }
 

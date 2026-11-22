@@ -1,6 +1,12 @@
 import type { AnimationGroup } from '@wix/motion';
 import { getAnimation } from '@wix/motion';
-import type { TimeEffect, HandlerObjectMap, ViewEnterParams, InteractOptions } from '../types';
+import type {
+  TimeEffect,
+  HandlerObject,
+  HandlerObjectMap,
+  ViewEnterParams,
+  InteractOptions,
+} from '../types';
 import {
   effectToAnimationOptions,
   addHandlerToMap,
@@ -54,6 +60,8 @@ const observers: Record<string, IntersectionObserver> = {};
 const handlerMap = new WeakMap() as HandlerObjectMap;
 const elementFirstRun = new WeakSet<HTMLElement>();
 const elementObserverMap = new WeakMap<HTMLElement, IntersectionObserver>();
+// per source, the observer keys it is latched on (see `latchViewEnter`) and whether it entered on each
+const latches = new WeakMap<HTMLElement, Map<string, boolean>>();
 let viewEnterOptions: Partial<ViewEnterParams> = {};
 let sharedExitObserver: IntersectionObserver | null = null;
 
@@ -88,8 +96,12 @@ function getExitObserver() {
   return sharedExitObserver;
 }
 
+function getObserverKey(options: ViewEnterParams, isSafeMode: boolean = false) {
+  return JSON.stringify({ ...options, isSafeMode });
+}
+
 function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
-  const key = JSON.stringify({ ...options, isSafeMode });
+  const key = getObserverKey(options, isSafeMode);
 
   if (observers[key]) {
     return observers[key];
@@ -294,10 +306,74 @@ function addViewEnterHandler(
     const exitObserver = getExitObserver();
     exitObserver.observe(source);
   }
+
+  // The source entered while this trigger was held back (see `latchViewEnter`) — the observer
+  // may never report that entry again, so play it now.
+  if (type === 'once' && latches.get(source)?.get(getObserverKey(mergedOptions))) {
+    handler(true);
+  }
+}
+
+/**
+ * Latches an entry of `source` while a `viewEnter` interaction on it is held back (e.g. by a
+ * deferred or async plugin), observing it with the same observer the trigger will use. A `once`
+ * trigger later attached with the same params replays a latched entry, so an element that entered
+ * and left the viewport while held back still plays its entrance.
+ */
+function latchViewEnter(source: HTMLElement, options: ViewEnterParams = {}) {
+  const mergedOptions = { ...viewEnterOptions, ...options };
+  const key = getObserverKey(mergedOptions);
+  let sourceLatches = latches.get(source);
+
+  if (!sourceLatches) {
+    sourceLatches = new Map();
+    latches.set(source, sourceLatches);
+  }
+
+  if (sourceLatches.has(key)) {
+    return;
+  }
+
+  sourceLatches.set(key, false);
+
+  const observer = getObserver(mergedOptions);
+
+  // Declared early so the handler closure can reference it for self-removal
+  let handlerObj: HandlerObject;
+
+  const handler = (isIntersecting?: boolean) => {
+    if (!isIntersecting) return;
+
+    sourceLatches.set(key, true);
+
+    const sourceHandlers = handlerMap.get(source);
+    sourceHandlers?.delete(handlerObj);
+
+    if (!sourceHandlers || sourceHandlers.size === 0) {
+      const currentObserver = elementObserverMap.get(source) || observer;
+      currentObserver.unobserve(source);
+      elementFirstRun.delete(source);
+    }
+  };
+
+  const cleanup = () => {
+    const currentObserver = elementObserverMap.get(source) || observer;
+    currentObserver.unobserve(source);
+    elementFirstRun.delete(source);
+    elementObserverMap.delete(source);
+  };
+
+  handlerObj = { source, target: source, handler, cleanup };
+
+  addHandlerToMap(handlerMap, source, handlerObj);
+
+  elementObserverMap.set(source, observer);
+  observer.observe(source);
 }
 
 function removeViewEnterHandler(element: HTMLElement) {
   removeElementFromHandlerMap(handlerMap, element);
+  latches.delete(element);
 }
 
 function reset() {
@@ -308,6 +384,7 @@ function reset() {
 export default {
   add: addViewEnterHandler,
   remove: removeViewEnterHandler,
+  latch: latchViewEnter,
   setOptions,
   reset,
 };

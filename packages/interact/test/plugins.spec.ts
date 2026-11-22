@@ -1,7 +1,8 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Interact, add, remove } from '../src/index';
 import type { InteractConfig, InteractPluginContext } from '../src/types';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../src/handlers';
+import { getWebAnimation } from '@wix/motion';
 
 // Mock @wix/motion so the trigger handlers can run without a real animation engine.
 vi.mock('@wix/motion', () => {
@@ -662,6 +663,366 @@ describe('interact plugin bridge', () => {
       add(document.createElement('div'), 'el');
 
       expect(apply).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('async plugins', () => {
+    const fadeIn = { namedEffect: { type: 'FadeIn' } as any, duration: 100 };
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    function deferred<T = void>() {
+      let resolve!: (value: T) => void;
+      let reject!: (reason: unknown) => void;
+      const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    }
+
+    /** An async plugin that appends a `.pt` span once its promise is resolved by the test. */
+    function useAsyncSpanPlugin(name: string) {
+      const calls: Array<{ root: HTMLElement; resolve: (cleanup?: () => void) => void }> = [];
+      const plugin = vi.fn((_value: unknown, ctx: InteractPluginContext) => {
+        const { promise, resolve } = deferred<void | (() => void)>();
+        calls.push({
+          root: ctx.root,
+          resolve: (cleanup) => {
+            const span = document.createElement('span');
+            span.className = 'pt';
+            ctx.root.appendChild(span);
+            resolve(cleanup);
+          },
+        });
+        return promise;
+      });
+      Interact.use(name, plugin);
+      return { plugin, calls };
+    }
+
+    it('holds the interaction until the plugin resolves, then targets the DOM it produced', async () => {
+      const { plugin, calls } = useAsyncSpanPlugin('async');
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'hover',
+            $async: {},
+            effects: [{ key: 'el', selector: '.pt', ...fadeIn }],
+          },
+        ],
+      });
+      const element = document.createElement('div');
+      add(element, 'el');
+
+      expect(plugin).toHaveBeenCalledTimes(1);
+      expect(hoverSpy).not.toHaveBeenCalled();
+
+      calls[0].resolve();
+      await flush();
+
+      expect(plugin).toHaveBeenCalledTimes(1);
+      expect(hoverSpy).toHaveBeenCalledTimes(1);
+      expect(hoverSpy.mock.calls[0][1]).toBe(element.querySelector('.pt'));
+    });
+
+    it('holds only the effect that carries an async effect-level plugin', async () => {
+      const { calls } = useAsyncSpanPlugin('async');
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'hover',
+            effects: [
+              { key: 'el', ...fadeIn },
+              { key: 'el', $async: {}, selector: '.pt', ...fadeIn },
+            ],
+          },
+        ],
+      });
+      const element = document.createElement('div');
+      add(element, 'el');
+
+      expect(hoverSpy).toHaveBeenCalledTimes(1);
+
+      calls[0].resolve();
+      await flush();
+
+      expect(hoverSpy).toHaveBeenCalledTimes(2);
+      expect(hoverSpy.mock.calls[1][1]).toBe(element.querySelector('.pt'));
+    });
+
+    it('holds a whole sequence while one of its effect plugins is in flight', async () => {
+      const { calls } = useAsyncSpanPlugin('async');
+      const getSequenceSpy = vi.spyOn(Interact, 'getSequence');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'click',
+            sequences: [
+              {
+                effects: [
+                  { key: 'el', ...fadeIn },
+                  { key: 'el', $async: {}, selector: '.pt', ...fadeIn },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+
+      expect(getSequenceSpy).not.toHaveBeenCalled();
+
+      calls[0].resolve();
+      await flush();
+
+      expect(getSequenceSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('stores the resolved cleanup and runs it on disconnect', async () => {
+      const { calls } = useAsyncSpanPlugin('async');
+      const cleanup = vi.fn();
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'hover', $async: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+
+      calls[0].resolve(cleanup);
+      await flush();
+      expect(cleanup).not.toHaveBeenCalled();
+
+      remove('el');
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    });
+
+    it('runs the cleanup right away and attaches nothing when disconnected while in flight', async () => {
+      const { calls } = useAsyncSpanPlugin('async');
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+      const cleanup = vi.fn();
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'hover', $async: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+      remove('el');
+
+      calls[0].resolve(cleanup);
+      await flush();
+
+      expect(cleanup).toHaveBeenCalledTimes(1);
+      expect(hoverSpy).not.toHaveBeenCalled();
+    });
+
+    it('re-runs for the new connect after update() while in flight and attaches once', async () => {
+      const { plugin, calls } = useAsyncSpanPlugin('async');
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+      const staleCleanup = vi.fn();
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'hover', $async: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+      Interact.getController('el')!.update();
+
+      expect(plugin).toHaveBeenCalledTimes(2);
+
+      calls[0].resolve(staleCleanup);
+      await flush();
+
+      expect(staleCleanup).toHaveBeenCalledTimes(1);
+      expect(hoverSpy).not.toHaveBeenCalled();
+
+      calls[1].resolve();
+      await flush();
+
+      expect(plugin).toHaveBeenCalledTimes(2);
+      expect(hoverSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('runs an async plugin with a primitive value once', async () => {
+      const plugin = vi.fn(() => Promise.resolve());
+      Interact.use('asyncFlag', plugin);
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'hover', $asyncFlag: true, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+      await flush();
+
+      expect(plugin).toHaveBeenCalledTimes(1);
+      expect(hoverSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs a rejected plugin and applies its unit without it', async () => {
+      const error = new Error('boom');
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const plugin = vi.fn(() => Promise.reject(error));
+      Interact.use('asyncFail', plugin);
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'hover', $asyncFail: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+      await flush();
+
+      expect(errorSpy).toHaveBeenCalledWith(error);
+      expect(plugin).toHaveBeenCalledTimes(1);
+      expect(hoverSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('viewEnter while held back', () => {
+    const fadeIn = { namedEffect: { type: 'FadeIn' } as any, duration: 100 };
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+    let observers: Array<{ cb: IntersectionObserverCallback; observed: Set<Element> }>;
+    let originalIO: typeof IntersectionObserver | undefined;
+
+    function intersect(element: Element, isIntersecting: boolean) {
+      observers.forEach(({ cb, observed }) => {
+        if (observed.has(element)) {
+          cb(
+            [
+              {
+                target: element,
+                isIntersecting,
+                boundingClientRect: { height: 100 },
+                rootBounds: { height: 100 },
+              } as unknown as IntersectionObserverEntry,
+            ],
+            {} as IntersectionObserver,
+          );
+        }
+      });
+    }
+
+    beforeEach(() => {
+      observers = [];
+      originalIO = (window as any).IntersectionObserver;
+      (window as any).IntersectionObserver = class {
+        observed = new Set<Element>();
+        constructor(cb: IntersectionObserverCallback) {
+          observers.push({ cb, observed: this.observed });
+        }
+        observe(element: Element) {
+          this.observed.add(element);
+        }
+        unobserve(element: Element) {
+          this.observed.delete(element);
+        }
+        disconnect() {}
+      };
+      (TRIGGER_TO_HANDLER_MODULE_MAP.viewEnter as any).reset();
+    });
+
+    afterEach(() => {
+      (window as any).IntersectionObserver = originalIO;
+    });
+
+    function playSpy() {
+      return (getWebAnimation as unknown as ReturnType<typeof vi.fn>)().play as ReturnType<
+        typeof vi.fn
+      >;
+    }
+
+    it('replays a once entry that happened while deferred', () => {
+      Interact.use('deferred', () => {}, { defer: 'hydrated' });
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'viewEnter', $deferred: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      const element = document.createElement('div');
+      add(element, 'el');
+
+      intersect(element, true);
+      intersect(element, false);
+
+      expect(playSpy()).not.toHaveBeenCalled();
+
+      Interact.ready('hydrated');
+
+      expect(playSpy()).toHaveBeenCalledTimes(1);
+    });
+
+    it('replays a once entry that happened while an async effect plugin was in flight', async () => {
+      let resolve!: () => void;
+      Interact.use('async', () => new Promise<void>((res) => (resolve = res)));
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'el',
+            trigger: 'viewEnter',
+            effects: [{ key: 'el', $async: {}, ...fadeIn }],
+          },
+        ],
+      });
+      const element = document.createElement('div');
+      add(element, 'el');
+
+      intersect(element, true);
+      intersect(element, false);
+
+      resolve();
+      await flush();
+
+      expect(playSpy()).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not play when the source did not enter while held back', () => {
+      Interact.use('deferred', () => {}, { defer: 'hydrated' });
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'viewEnter', $deferred: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      const element = document.createElement('div');
+      add(element, 'el');
+
+      intersect(element, false);
+      Interact.ready('hydrated');
+
+      expect(playSpy()).not.toHaveBeenCalled();
+    });
+
+    it('forgets a latched entry on disconnect', () => {
+      Interact.use('deferred', () => {}, { defer: 'hydrated' });
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'viewEnter', $deferred: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      const element = document.createElement('div');
+      add(element, 'el');
+
+      intersect(element, true);
+      Interact.getController('el')!.update();
+      Interact.ready('hydrated');
+
+      expect(playSpy()).not.toHaveBeenCalled();
     });
   });
 });

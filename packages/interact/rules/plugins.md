@@ -20,8 +20,11 @@ Interact.use('<plugin-name>', (value, context) => {
   // value:   the value of the `$<plugin-name>` field
   // context: { root, key, scope: 'interaction' | 'effect', config }
   // return:  optional cleanup () => void, run on disconnect/teardown
+  //          — or a promise of one (async plugin)
 });
 ```
+
+- An async plugin (returning a promise) holds back what carries its field — same scope as deferring, below — until the promise settles. It runs once per connect (also for primitive values); a stale resolution (element disconnected meanwhile) only runs its cleanup; a rejection is logged and the held-back parts apply without it.
 
 - `Interact.getPlugin(name) / Interact.getPluginsNames()` inspect the registry.
 
@@ -39,6 +42,7 @@ useEffect(() => Interact.ready('hydrated'), []);
 
 - While deferred, the plugin does not run, and neither does what carries its `$<name>` field: the whole interaction (interaction-level field), only that effect (effect-level field), or the whole sequence (field on any sequence effect). Everything else applies immediately.
 - `Interact.ready(name, key)` releases a name for one element only; `Interact.ready(name)` releases it for all.
+- A `viewEnter` `once` entry that happens while held back (deferred or async) is replayed when the trigger attaches. `click` / `hover` / `animationEnd` events fired while held back are NOT replayed.
 - `defer` may list several names (e.g. `['hydrated', 'fonts']`); all must be released. Release `'fonts'` with `document.fonts.ready.then(() => Interact.ready('fonts'))`.
 - Released names persist until `Interact.destroy()`.
 

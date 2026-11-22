@@ -41,6 +41,8 @@ export type InteractionHandlerModule<T extends TriggerType> = {
 
 export type ViewEnterHandlerModule = InteractionHandlerModule<'viewEnter'> & {
   setOptions: (options: Partial<ViewEnterParams>) => void;
+  /** Records an entry of `source` while its trigger is held back, replayed by a later `once` add. */
+  latch: (source: HTMLElement, options?: ViewEnterParams) => void;
 };
 
 export type TriggerHandlerMap<T extends TriggerType> = {

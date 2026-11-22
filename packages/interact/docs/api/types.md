@@ -967,8 +967,10 @@ A plugin callback registered via `Interact.use()`.
 type InteractPlugin = (
   value: unknown,
   context: InteractPluginContext,
-) => void | InteractPluginCleanup;
+) => void | InteractPluginCleanup | PromiseLike<void | InteractPluginCleanup>;
 ```
+
+A returned promise holds back the interaction, effect, or sequence carrying the field until it settles. See [Async plugins](../guides/plugins.md#async-plugins).
 
 ### `InteractPluginContext`
 

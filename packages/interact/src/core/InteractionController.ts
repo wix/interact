@@ -12,7 +12,9 @@ export class InteractionController {
   useFirstChild: boolean;
   _observers: WeakMap<HTMLElement, MutationObserver>;
   _pluginCleanups: InteractPluginCleanup[];
-  _appliedPlugins: WeakSet<object>;
+  _appliedPlugins: WeakMap<object, true | Promise<void>>;
+  _asyncPrimitivePlugins: Map<string, true | Promise<void>>;
+  _connectId: number;
 
   constructor(element: HTMLElement, key?: string, options?: { useFirstChild?: boolean }) {
     this.element = element;
@@ -21,7 +23,9 @@ export class InteractionController {
     this.sheet = null;
     this._observers = new WeakMap();
     this._pluginCleanups = [];
-    this._appliedPlugins = new WeakSet();
+    this._appliedPlugins = new WeakMap();
+    this._asyncPrimitivePlugins = new Map();
+    this._connectId = 0;
     this.useFirstChild = options?.useFirstChild ?? false;
   }
 
@@ -55,6 +59,10 @@ export class InteractionController {
   }
 
   disconnect({ removeFromCache = false }: { removeFromCache?: boolean } = {}) {
+    // Invalidates async plugins still in flight: they settle into a stale connection and only run
+    // their cleanup.
+    this._connectId++;
+
     const key = this.key || this.element.dataset.interactKey;
 
     if (key) {
@@ -73,7 +81,8 @@ export class InteractionController {
       }
       this._pluginCleanups.length = 0;
     }
-    this._appliedPlugins = new WeakSet();
+    this._appliedPlugins = new WeakMap();
+    this._asyncPrimitivePlugins = new Map();
 
     if (this.sheet) {
       const rootNode = this.element?.getRootNode() as ShadowRoot | Document;
