@@ -760,6 +760,16 @@ function _processSequencesForTarget(
         return true;
       }
 
+      // The source may connect (or resume) after this target, so its interaction-level plugins are
+      // applied here before its elements are resolved.
+      _applyPlugins(
+        sourceController,
+        sourceController.element,
+        interaction,
+        sourceKey!,
+        'interaction',
+      );
+
       const listElements: ListElements | undefined =
         elements && listContainer
           ? { controllerKey: targetKey, listContainer, elements }
@@ -894,6 +904,16 @@ function addEffectsForTarget(
         if (_isDeferred(sourceKey!, interaction) || _isDeferred(targetKey, effectOptions)) {
           return true;
         }
+
+        // The source may connect (or resume) after this target, so its interaction-level plugins
+        // are applied here before its elements are resolved.
+        _applyPlugins(
+          sourceController,
+          sourceController.element,
+          interaction,
+          sourceKey!,
+          'interaction',
+        );
 
         // Effect-level plugins act on the effect's target element before it is resolved.
         _applyPlugins(

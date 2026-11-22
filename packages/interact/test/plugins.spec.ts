@@ -451,6 +451,58 @@ describe('interact plugin bridge', () => {
       expect(apply).toHaveBeenLastCalledWith(b);
     });
 
+    it('applies a deferred source plugin before a cross-element target cached first resolves it', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          { key: 'a', trigger: 'hover', $deferred: {}, effects: [{ key: 'b', ...fadeIn }] },
+        ],
+      });
+      const a = document.createElement('div');
+      add(document.createElement('div'), 'b');
+      add(a, 'a');
+
+      expect(hoverSpy).not.toHaveBeenCalled();
+
+      // `b` was cached first, so it resumes — and resolves `a`'s side — before `a` does
+      Interact.ready('hydrated');
+
+      expect(apply).toHaveBeenCalledTimes(1);
+      expect(apply).toHaveBeenCalledWith(a);
+      expect(hoverSpy).toHaveBeenCalledTimes(1);
+      expect(apply.mock.invocationCallOrder[0]).toBeLessThan(hoverSpy.mock.invocationCallOrder[0]);
+    });
+
+    it('applies a deferred source plugin before a cross-element sequence target cached first resolves it', () => {
+      const apply = useSpanPlugin('deferred', 'hydrated');
+      const getSequenceSpy = vi.spyOn(Interact, 'getSequence');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'a',
+            trigger: 'click',
+            $deferred: {},
+            sequences: [{ effects: [{ key: 'b', ...fadeIn }] }],
+          },
+        ],
+      });
+      const a = document.createElement('div');
+      add(document.createElement('div'), 'b');
+      add(a, 'a');
+
+      Interact.ready('hydrated');
+
+      expect(apply).toHaveBeenCalledTimes(1);
+      expect(apply).toHaveBeenCalledWith(a);
+      expect(getSequenceSpy).toHaveBeenCalledTimes(1);
+      expect(apply.mock.invocationCallOrder[0]).toBeLessThan(
+        getSequenceSpy.mock.invocationCallOrder[0],
+      );
+    });
+
     it('ready(name, key) does not resume other controllers', () => {
       useSpanPlugin('deferred', 'hydrated');
 
