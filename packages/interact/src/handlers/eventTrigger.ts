@@ -8,7 +8,7 @@ import type {
   EventTriggerConfigEnterLeave,
   EventTriggerParams,
 } from '../types';
-import { addHandlerToMap, removeElementFromHandlerMap } from './utilities';
+import { registerHandler, removeElementFromHandlerMap } from './utilities';
 import { createTimeEffectHandler, createTransitionHandler } from './effectHandlers';
 
 const handlerMap = new WeakMap() as HandlerObjectMap;
@@ -161,10 +161,6 @@ function addEventTriggerHandler(
     effectCleanup?.();
   };
 
-  const handlerObj = { source, target, cleanup };
-  addHandlerToMap(handlerMap, source, handlerObj);
-  addHandlerToMap(handlerMap, target, handlerObj);
-
   if (enterLeave) {
     const enter = genericConfig.enter!;
     const leaveEvents = genericConfig.leave!;
@@ -199,10 +195,12 @@ function addEventTriggerHandler(
       addListener(source, eventType, opts);
     });
   }
+
+  return registerHandler(handlerMap, { source, target, cleanup });
 }
 
-function removeEventTriggerHandler(element: HTMLElement) {
-  removeElementFromHandlerMap(handlerMap, element);
+function removeEventTriggerHandler(element: HTMLElement, untrackedOnly?: boolean) {
+  removeElementFromHandlerMap(handlerMap, element, untrackedOnly);
 }
 
 export default {

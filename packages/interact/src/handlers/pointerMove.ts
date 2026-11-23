@@ -3,7 +3,7 @@ import { Pointer } from 'kuliso';
 import type { PointerMoveParams, ScrubEffect, HandlerObjectMap, InteractOptions } from '../types';
 import {
   effectToAnimationOptions,
-  addHandlerToMap,
+  registerHandler,
   removeElementFromHandlerMap,
 } from './utilities';
 
@@ -46,33 +46,34 @@ function addPointerMoveHandler(
 
   const scene = getScrubScene(target, effectToAnimationOptions(effect), triggerParams);
 
-  if (scene) {
-    const scenes = Array.isArray(scene) ? scene : [scene];
-    const pointer = new Pointer({
-      root: options.hitArea === 'self' ? source : undefined,
-      scenes,
-      ...pointerOptionsGetter(),
-      ...getTransitionOptions(effect),
-    });
-    const cleanup = () => {
-      pointer.destroy();
-    };
+  if (!scene) return;
 
-    const handlerObj = { source, target, cleanup };
+  const scenes = Array.isArray(scene) ? scene : [scene];
+  const pointer = new Pointer({
+    root: options.hitArea === 'self' ? source : undefined,
+    scenes,
+    ...pointerOptionsGetter(),
+    ...getTransitionOptions(effect),
+  });
+  let active = true;
+  const cleanup = () => {
+    active = false;
+    pointer.destroy();
+  };
 
-    addHandlerToMap(pointerManagerMap, source, handlerObj);
-    addHandlerToMap(pointerManagerMap, target, handlerObj);
+  Promise.all(scenes.map((s) => (s as { ready?: Promise<void> }).ready || Promise.resolve())).then(
+    () => {
+      if (active) {
+        pointer.start();
+      }
+    },
+  );
 
-    Promise.all(
-      scenes.map((s) => (s as { ready?: Promise<void> }).ready || Promise.resolve()),
-    ).then(() => {
-      pointer.start();
-    });
-  }
+  return registerHandler(pointerManagerMap, { source, target, cleanup });
 }
 
-function removePointerMoveHandler(element: HTMLElement) {
-  removeElementFromHandlerMap(pointerManagerMap, element);
+function removePointerMoveHandler(element: HTMLElement, untrackedOnly?: boolean) {
+  removeElementFromHandlerMap(pointerManagerMap, element, untrackedOnly);
 }
 
 export default {

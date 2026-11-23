@@ -3,7 +3,7 @@ import { getAnimation, getElementCSSAnimation } from '@wix/motion';
 import type { AnimationEndParams, TimeEffect, HandlerObjectMap, InteractOptions } from '../types';
 import {
   effectToAnimationOptions,
-  addHandlerToMap,
+  registerHandler,
   removeElementFromHandlerMap,
 } from './utilities';
 
@@ -15,7 +15,7 @@ function addAnimationEndHandler(
   effect: TimeEffect,
   params: AnimationEndParams,
   { selectorCondition, animation: preCreatedAnimation, sourceAnimationOptions }: InteractOptions,
-): void {
+) {
   const animation = (preCreatedAnimation ||
     getAnimation(target, effectToAnimationOptions(effect))) as AnimationGroup | null;
 
@@ -57,15 +57,12 @@ function addAnimationEndHandler(
     source.removeEventListener('animationend', handler);
   };
 
-  const handlerObj = { source, target, cleanup };
-  addHandlerToMap(handlerMap, source, handlerObj);
-  addHandlerToMap(handlerMap, target, handlerObj);
-
   source.addEventListener('animationend', handler);
+  return registerHandler(handlerMap, { source, target, cleanup });
 }
 
-function removeAnimationEndHandler(element: HTMLElement): void {
-  removeElementFromHandlerMap(handlerMap, element);
+function removeAnimationEndHandler(element: HTMLElement, untrackedOnly?: boolean): void {
+  removeElementFromHandlerMap(handlerMap, element, untrackedOnly);
 }
 
 export default {

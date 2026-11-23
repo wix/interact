@@ -241,6 +241,109 @@ describe('interact plugin bridge', () => {
       expect(roots).toContain(target);
       expect(roots).not.toContain(source);
     });
+
+    it('animates items appended to the list created by the effect plugin', async () => {
+      const { getWebAnimation } = await import('@wix/motion');
+      Interact.use('create-list', (_value, { root }) => {
+        root.innerHTML = '<ol><li>First</li></ol>';
+      });
+      Interact.create({
+        interactions: [
+          {
+            key: 'source',
+            trigger: 'click',
+            effects: [
+              {
+                key: 'target',
+                listContainer: 'ol',
+                '$create-list': {},
+                duration: 100,
+                keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+              },
+            ],
+          },
+        ],
+      });
+      const source = document.createElement('button');
+      const target = document.createElement('div');
+      add(source, 'source');
+      add(target, 'target');
+
+      const list = target.querySelector('ol');
+      const first = list?.firstElementChild;
+      const next = document.createElement('li');
+      list?.append(next);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      source.dispatchEvent(new MouseEvent('click', { detail: 1 }));
+
+      expect(vi.mocked(getWebAnimation).mock.calls.map(([element]) => element)).toEqual([
+        first,
+        next,
+      ]);
+      expect(vi.mocked(getWebAnimation).mock.results[0].value?.play).toHaveBeenCalledTimes(2);
+    });
+
+    it.each([false, true])(
+      'retires removed list-item handles while keeping the original item live (nested selector: %s)',
+      async (selectDescendant) => {
+        const { getWebAnimation } = await import('@wix/motion');
+        const source = document.createElement('button');
+        const target = document.createElement('div');
+        const makeItem = () => {
+          const item = document.createElement('li');
+          if (selectDescendant) {
+            const wrapper = document.createElement('div');
+            wrapper.append(document.createElement('button'));
+            item.append(wrapper);
+          }
+          return item;
+        };
+        const list = document.createElement('ol');
+        list.append(makeItem());
+        target.append(list);
+        const instance = Interact.create({
+          interactions: [
+            {
+              key: 'source',
+              trigger: 'click',
+              effects: [
+                {
+                  key: 'target',
+                  listContainer: 'ol',
+                  ...(selectDescendant && { selector: 'button' }),
+                  duration: 100,
+                  triggerType: 'repeat',
+                  keyframeEffect: { name: 'fade', keyframes: [{ opacity: 0 }, { opacity: 1 }] },
+                },
+              ],
+            },
+          ],
+        });
+        const pairs = vi.spyOn(instance, 'markEffectPair');
+        add(source, 'source');
+        add(target, 'target');
+        const liveHandlers = pairs.mock.results[0].value;
+        const playback = vi.mocked(getWebAnimation).mock.results[0].value;
+        const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(liveHandlers.size).toBe(1);
+        for (let cycle = 0; cycle < 3; cycle++) {
+          const item = makeItem();
+          list.append(item);
+          await tick();
+          expect(liveHandlers.size).toBe(2);
+
+          item.remove();
+          await tick();
+          expect(liveHandlers.size).toBe(1);
+          source.dispatchEvent(new MouseEvent('click', { detail: 1 }));
+        }
+        expect(playback?.play).toHaveBeenCalledTimes(3);
+
+        instance.destroy({ clearCache: true });
+        expect(liveHandlers.size).toBe(0);
+      },
+    );
   });
 
   describe('deferred plugins (use options.defer + ready)', () => {
