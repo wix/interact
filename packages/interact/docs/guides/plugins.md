@@ -72,7 +72,7 @@ Interact.use('myPlugin', async (value, { root }) => {
 
 Until the promise settles, Interact holds back what carries the field — exactly what [deferring](#deferring-plugins) holds back — and applies it once the plugin's DOM is in place, so selectors never resolve against unprepared markup. Other effects are applied immediately.
 
-- The plugin runs once per connect: other resolution passes wait for the same promise instead of calling it again. This also holds for primitive values (e.g. `$fonts: true`).
+- The plugin runs once per connect: other resolution passes wait for the same promise instead of calling it again. Like the dedup, this relies on the value's identity: a primitive value (e.g. `$fonts: true`) is not awaited, so it holds nothing back.
 - If the element disconnects (or re-connects after a media-query change) while the promise is pending, the resolved cleanup runs right away and nothing is applied for the stale connection.
 - A rejected promise is logged with `console.error`, and the held-back parts are applied without the plugin.
 

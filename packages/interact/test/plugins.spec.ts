@@ -876,8 +876,9 @@ describe('interact plugin bridge', () => {
       expect(hoverSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('runs an async plugin with a primitive value once', async () => {
-      const plugin = vi.fn(() => Promise.resolve());
+    it('does not hold back a unit for an async plugin with a primitive value', async () => {
+      let resolve!: () => void;
+      const plugin = vi.fn(() => new Promise<void>((r) => (resolve = r)));
       Interact.use('asyncFlag', plugin);
       const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
 
@@ -887,6 +888,10 @@ describe('interact plugin bridge', () => {
         ],
       });
       add(document.createElement('div'), 'el');
+
+      expect(hoverSpy).toHaveBeenCalledTimes(1);
+
+      resolve();
       await flush();
 
       expect(plugin).toHaveBeenCalledTimes(1);

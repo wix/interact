@@ -24,7 +24,7 @@ Interact.use('<plugin-name>', (value, context) => {
 });
 ```
 
-- An async plugin (returning a promise) holds back what carries its field — same scope as deferring, below — until the promise settles. It runs once per connect (also for primitive values); a stale resolution (element disconnected meanwhile) only runs its cleanup; a rejection is logged and the held-back parts apply without it.
+- An async plugin (returning a promise) holds back what carries its field — same scope as deferring, below — until the promise settles. It runs once per connect; a primitive value (no identity to dedup by) is not awaited; a stale resolution (element disconnected meanwhile) only runs its cleanup; a rejection is logged and the held-back parts apply without it.
 
 - `Interact.getPlugin(name) / Interact.getPluginsNames()` inspect the registry.
 

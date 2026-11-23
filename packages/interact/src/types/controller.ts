@@ -15,8 +15,6 @@ export interface IInteractionController {
    * the in-flight promise of an async plugin, so concurrent passes await it instead of re-running it.
    */
   _appliedPlugins: WeakMap<object, true | Promise<void>>;
-  /** Like `_appliedPlugins`, for async plugins whose config value is a primitive. */
-  _asyncPrimitivePlugins: Map<string, true | Promise<void>>;
   /** Incremented on every disconnect; async plugin continuations from an older connect are stale. */
   _connectId: number;
   connect(key?: string): void;

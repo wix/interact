@@ -120,19 +120,7 @@ function _applyPlugins(
 
     const value = config[field];
     const isObject = value !== null && typeof value === 'object';
-    // primitive values have no identity, so an async one is tracked by where it was found
-    const primitiveKey = `${name}::${scope}::${key}::${String(value)}`;
-    const setApplied = (state: true | Promise<void>) => {
-      if (isObject) {
-        owner._appliedPlugins.set(value, state);
-      } else {
-        owner._asyncPrimitivePlugins.set(primitiveKey, state);
-      }
-    };
-
-    const applied = isObject
-      ? owner._appliedPlugins.get(value)
-      : owner._asyncPrimitivePlugins.get(primitiveKey);
+    const applied = isObject ? owner._appliedPlugins.get(value) : undefined;
 
     if (applied === true) {
       continue;
@@ -148,7 +136,7 @@ function _applyPlugins(
     }
 
     if (isObject) {
-      setApplied(true);
+      owner._appliedPlugins.set(value, true);
     }
 
     const plugin = Interact.getPlugin(name)!;
@@ -174,19 +162,25 @@ function _applyPlugins(
           if (typeof cleanup === 'function') {
             owner._pluginCleanups.push(cleanup);
           }
-          setApplied(true);
+          if (isObject) {
+            owner._appliedPlugins.set(value, true);
+          }
         },
         (e) => {
           console.error(e);
 
-          if (owner._connectId === connectId) {
-            setApplied(true);
+          if (isObject && owner._connectId === connectId) {
+            owner._appliedPlugins.set(value, true);
           }
         },
       );
 
-      setApplied(promise);
-      pending.push(promise);
+      // a primitive value has no identity to dedup by, so its promise cannot hold the unit back
+      // (each pass would run the plugin again) — plugin values should be objects
+      if (isObject) {
+        owner._appliedPlugins.set(value, promise);
+        pending.push(promise);
+      }
     } else if (typeof result === 'function') {
       owner._pluginCleanups.push(result);
     }

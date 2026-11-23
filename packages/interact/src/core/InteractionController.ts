@@ -13,7 +13,6 @@ export class InteractionController {
   _observers: WeakMap<HTMLElement, MutationObserver>;
   _pluginCleanups: InteractPluginCleanup[];
   _appliedPlugins: WeakMap<object, true | Promise<void>>;
-  _asyncPrimitivePlugins: Map<string, true | Promise<void>>;
   _connectId: number;
 
   constructor(element: HTMLElement, key?: string, options?: { useFirstChild?: boolean }) {
@@ -24,7 +23,6 @@ export class InteractionController {
     this._observers = new WeakMap();
     this._pluginCleanups = [];
     this._appliedPlugins = new WeakMap();
-    this._asyncPrimitivePlugins = new Map();
     this._connectId = 0;
     this.useFirstChild = options?.useFirstChild ?? false;
   }
@@ -82,7 +80,6 @@ export class InteractionController {
       this._pluginCleanups.length = 0;
     }
     this._appliedPlugins = new WeakMap();
-    this._asyncPrimitivePlugins = new Map();
 
     if (this.sheet) {
       const rootNode = this.element?.getRootNode() as ShadowRoot | Document;
