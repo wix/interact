@@ -122,6 +122,12 @@ describe('css resolvers', () => {
             ?.triggerType,
         ).toBe('alternate');
       });
+      it('should default to alternate for scrollState trigger', () => {
+        expect(
+          resolveEffectForCSS({}, { ...BASE_INTERACTION, trigger: 'scrollState' }, EMPTY_CONFIG)
+            ?.triggerType,
+        ).toBe('alternate');
+      });
       it('should respect explicit triggerType regardless of trigger', () => {
         expect(
           resolveEffectForCSS(
@@ -322,6 +328,15 @@ describe('css resolvers', () => {
           resolveSequenceForCSS(
             BASE_SEQUENCE,
             { ...BASE_INTERACTION, trigger: 'click' },
+            EMPTY_CONFIG,
+          )?.triggerType,
+        ).toBe('alternate');
+      });
+      it('should default to alternate for scrollState trigger', () => {
+        expect(
+          resolveSequenceForCSS(
+            BASE_SEQUENCE,
+            { ...BASE_INTERACTION, trigger: 'scrollState' },
             EMPTY_CONFIG,
           )?.triggerType,
         ).toBe('alternate');

@@ -6,6 +6,8 @@ export type {
   ViewEnterParams,
   PointerMoveParams,
   AnimationEndParams,
+  ScrollDirection,
+  ScrollStateParams,
   TriggerParams,
   RangeOffset,
 } from './triggers';
