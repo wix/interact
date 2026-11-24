@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Interact, add, remove } from '../src/index';
 import type { InteractConfig, InteractPluginContext } from '../src/types';
 import TRIGGER_TO_HANDLER_MODULE_MAP from '../src/handlers';
+import { addListItems } from '../src/core/add';
 import { getWebAnimation } from '@wix/motion';
 
 // Mock @wix/motion so the trigger handlers can run without a real animation engine.
@@ -413,6 +414,84 @@ describe('interact plugin bridge', () => {
 
       expect(getSequenceSpy).toHaveBeenCalledTimes(1);
       expect(addSpy).toHaveBeenCalledTimes(2);
+    });
+
+    function listTarget(key: string) {
+      const element = document.createElement('div');
+      const list = document.createElement('ul');
+      list.className = 'items';
+      list.append(document.createElement('li'), document.createElement('li'));
+      element.append(list);
+      add(element, key);
+      const appendItem = () => {
+        const item = document.createElement('li');
+        list.append(item);
+        addListItems(Interact.getController(key)!, '.items', [item]);
+        return item;
+      };
+      return { list, appendItem };
+    }
+
+    it('holds a list effect added while a sibling is deferred, then attaches it to all items', () => {
+      useSpanPlugin('deferred', 'hydrated');
+      const addSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'source',
+            trigger: 'hover',
+            effects: [
+              { key: 'list', listContainer: '.items', ...fadeIn },
+              { key: 'split', $deferred: {}, selector: '.pt', ...fadeIn },
+            ],
+          },
+        ],
+      });
+      add(document.createElement('div'), 'source');
+      add(document.createElement('div'), 'split');
+      const { list, appendItem } = listTarget('list');
+      appendItem();
+
+      expect(addSpy).not.toHaveBeenCalled();
+
+      Interact.ready('hydrated');
+
+      const items = Array.from(list.children);
+      expect(hoverTargets(addSpy).filter((el) => items.includes(el))).toHaveLength(3);
+    });
+
+    it('holds a list sequence added while a sibling is deferred, then builds it for all items', () => {
+      useSpanPlugin('deferred', 'hydrated');
+      const getSequenceSpy = vi.spyOn(Interact, 'getSequence');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'source',
+            trigger: 'click',
+            effects: [{ key: 'split', $deferred: {}, selector: '.pt', ...fadeIn }],
+            sequences: [
+              {
+                sequenceId: 'list-seq',
+                effects: [{ key: 'list', listContainer: '.items', ...fadeIn }],
+              },
+            ],
+          },
+        ],
+      });
+      add(document.createElement('div'), 'source');
+      add(document.createElement('div'), 'split');
+      const { list, appendItem } = listTarget('list');
+      appendItem();
+
+      expect(getSequenceSpy).not.toHaveBeenCalled();
+
+      Interact.ready('hydrated');
+
+      expect(getSequenceSpy).toHaveBeenCalledTimes(1);
+      const groups = getSequenceSpy.mock.calls[0][2] as Array<{ target: HTMLElement[] }>;
+      expect(groups[0].target).toEqual(Array.from(list.children));
     });
 
     it('defers the sibling effects of a sequence with a deferred effect', () => {
@@ -875,6 +954,42 @@ describe('interact plugin bridge', () => {
       expect(hoverSpy.mock.calls.map((call) => call[1])).toEqual(
         expect.arrayContaining([plain, split.querySelector('.pt')]),
       );
+    });
+
+    it('does not hold siblings for an async plugin whose target connects after them', async () => {
+      const { calls } = useAsyncSpanPlugin('async');
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'source',
+            trigger: 'hover',
+            effects: [
+              { key: 'plain', ...fadeIn },
+              { key: 'split', $async: {}, selector: '.pt', ...fadeIn },
+            ],
+          },
+        ],
+      });
+      const plain = document.createElement('div');
+      const split = document.createElement('div');
+      add(document.createElement('div'), 'source');
+      add(plain, 'plain');
+
+      // the plugin has not started yet, so nothing tells the siblings to wait
+      expect(hoverSpy.mock.calls.map((call) => call[1])).toEqual([plain]);
+
+      add(split, 'split');
+      expect(hoverSpy).toHaveBeenCalledTimes(1);
+
+      calls[0].resolve();
+      await flush();
+
+      expect(hoverSpy.mock.calls.map((call) => call[1])).toEqual([
+        plain,
+        split.querySelector('.pt'),
+      ]);
     });
 
     it('holds a whole sequence while one of its effect plugins is in flight', async () => {

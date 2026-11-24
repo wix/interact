@@ -1071,9 +1071,10 @@ function _processSequencesForTarget(
         return true;
       }
 
-      // The sequence attaches with its siblings in the source interaction, waiting for them.
+      // Until attached, the sequence attaches with its siblings in the source interaction, waiting
+      // for them — to every list item at once, so the item pass below only extends it.
       if (
-        !elements &&
+        !instance.addedInteractions[cacheKey] &&
         (_addInteraction(
           sourceKey!,
           sourceController,
@@ -1244,10 +1245,12 @@ function addEffectsForTarget(
           return true;
         }
 
-        // The effect attaches with its siblings in the source interaction, waiting for them — this
-        // target may resume before the source does (e.g. a plugin released for this key only).
+        // Until attached, the effect attaches with its siblings in the source interaction, waiting
+        // for them — this target may resume before the source does (e.g. a plugin released for this
+        // key only). That attaches it to every list item at once, so the item pass below only
+        // extends it.
         if (
-          !elements &&
+          !instance.addedInteractions[interactionId] &&
           (_addInteraction(
             sourceKey!,
             sourceController,
