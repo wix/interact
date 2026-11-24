@@ -93,6 +93,10 @@ type PreparedSequence = Omit<ResolvedSequence, 'effects'> & { effects: PreparedS
  */
 type PluginsReadiness = boolean | Promise<void>;
 
+// per controller, the number of its full add passes — a pass holds back again whatever is still
+// waiting, so it supersedes the resumes that earlier passes are waiting to run (see `_hold`)
+const addPasses = new WeakMap<IInteractionController, number>();
+
 function _isThenable(value: unknown): value is PromiseLike<unknown> {
   return (
     value !== null &&
@@ -248,12 +252,15 @@ function _hold(
   if (_isThenable(readiness)) {
     const sourceConnectId = sourceController._connectId;
     const passConnectId = passController._connectId;
+    const addPass = addPasses.get(passController);
     readiness.then(() => {
-      // A target-owned pass must not revive a source that disconnected while waiting.
+      // A target-owned pass must not revive a source that disconnected while waiting. Units held
+      // back together resume once: the first one runs the pass again, for all of them.
       if (
         sourceController.connected &&
         sourceController._connectId === sourceConnectId &&
-        passController._connectId === passConnectId
+        passController._connectId === passConnectId &&
+        addPasses.get(passController) === addPass
       ) {
         passController.resume();
       }
@@ -1477,6 +1484,7 @@ export function add(controller: IInteractionController): boolean {
   const hasTriggers = triggers.length > 0;
 
   instance.setController(key, controller);
+  addPasses.set(controller, (addPasses.get(controller) || 0) + 1);
   _releaseDetachedLatches(controller);
 
   triggers.forEach((interaction, index) => {

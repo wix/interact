@@ -965,6 +965,29 @@ describe('interact plugin bridge', () => {
       expect(hoverSpy.mock.calls.map(([source]) => source)).toEqual([...items, added]);
     });
 
+    it('resumes once for all the interactions held back by one promise', async () => {
+      const pending = deferred();
+      Interact.use('async', () => pending.promise);
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [100, 200, 300].map((duration) => ({
+          key: 'el',
+          trigger: 'hover' as const,
+          $async: {},
+          effects: [{ key: 'el', ...fadeIn, duration }],
+        })),
+      });
+      add(document.createElement('div'), 'el');
+      const resumeSpy = vi.spyOn(Interact.getController('el')!, 'resume');
+
+      pending.resolve();
+      await flush();
+
+      expect(resumeSpy).toHaveBeenCalledTimes(1);
+      expect(hoverSpy).toHaveBeenCalledTimes(3);
+    });
+
     it('holds the sibling effects of an effect with an async plugin', async () => {
       const { calls } = useAsyncSpanPlugin('async');
       const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
