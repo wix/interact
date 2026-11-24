@@ -1780,6 +1780,34 @@ describe('interact plugin bridge', () => {
         expect(playSpy()).toHaveBeenCalledTimes(1);
       });
 
+      it.each(['.child', ':scope > .child'])(
+        'does not replay a %s subtree latch to an unrelated descendant trigger',
+        async (selector) => {
+          const { element, resolve } = createHeld({ selector });
+          const inner = child(element.querySelector('.child')!, 'inner');
+          Interact.create({
+            interactions: [
+              {
+                key: 'inner',
+                trigger: 'animationEnd',
+                params: { effectId: 'src' },
+                effects: [{ ...fadeIn }],
+              },
+            ],
+            effects: { src: { ...fadeIn } },
+          });
+          inner.dispatchEvent(
+            new CustomEvent('animationend', { bubbles: true, detail: { effectId: 'src' } }),
+          );
+          add(inner, 'inner');
+
+          expect(playSpy()).not.toHaveBeenCalled();
+          resolve();
+          await flush();
+          expect(playSpy()).toHaveBeenCalledTimes(1);
+        },
+      );
+
       it('does not replay an animation end of an element that is not a source', async () => {
         const { element, resolve } = createHeld({ selector: '.child' });
 

@@ -34,8 +34,12 @@ function getLatchedEvents(source: HTMLElement): Event[] {
 
   for (let element: HTMLElement | null = source; element; element = element.parentElement) {
     latches.get(element)?.forEach(({ sourceSelector, events }) => {
-      // a latch on a single source serves that source only
-      if (element !== source && !sourceSelector) {
+      // A subtree latch serves only its selected sources, not every descendant with a handler.
+      if (
+        sourceSelector
+          ? !Array.from(element!.querySelectorAll(sourceSelector)).includes(source)
+          : element !== source
+      ) {
         return;
       }
 
