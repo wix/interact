@@ -246,7 +246,18 @@ function _hold(
   elements?: HTMLElement[],
 ): void {
   if (_isThenable(readiness)) {
-    readiness.then(() => passController.resume());
+    const sourceConnectId = sourceController._connectId;
+    const passConnectId = passController._connectId;
+    readiness.then(() => {
+      // A target-owned pass must not revive a source that disconnected while waiting.
+      if (
+        sourceController.connected &&
+        sourceController._connectId === sourceConnectId &&
+        passController._connectId === passConnectId
+      ) {
+        passController.resume();
+      }
+    });
   }
 
   const handlerModule = TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as

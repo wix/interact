@@ -864,6 +864,46 @@ describe('interact plugin bridge', () => {
       return { plugin, calls };
     }
 
+    it.each(['effect', 'sequence'] as const)(
+      'does not resume a cross-element %s after its source disconnects',
+      async (kind) => {
+        const pending = deferred();
+        const cleanup = vi.fn();
+        const plugin = vi.fn(() => pending.promise.then(() => cleanup));
+        Interact.use('async-disconnect', plugin);
+        const addSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.click, 'add');
+        const effect = {
+          key: 'target',
+          keyframes: [{ opacity: 0 }, { opacity: 1 }],
+          duration: 100,
+        };
+        Interact.create({
+          interactions: [
+            {
+              key: 'source',
+              trigger: 'click',
+              '$async-disconnect': {},
+              ...(kind === 'effect'
+                ? { effects: [effect] }
+                : { sequences: [{ effects: [effect] }] }),
+            },
+          ],
+        });
+        add(document.createElement('div'), 'source');
+        add(document.createElement('div'), 'target');
+        const source = Interact.getController('source')!;
+        source.disconnect();
+
+        pending.resolve();
+        await flush();
+
+        expect(source.connected).toBe(false);
+        expect(plugin).toHaveBeenCalledTimes(1);
+        expect(cleanup).toHaveBeenCalledTimes(1);
+        expect(addSpy).not.toHaveBeenCalled();
+      },
+    );
+
     it('holds the interaction until the plugin resolves, then targets the DOM it produced', async () => {
       const { plugin, calls } = useAsyncSpanPlugin('async');
       const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
