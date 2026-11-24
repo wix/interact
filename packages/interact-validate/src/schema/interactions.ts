@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Condition, ReducedMotionPolicy } from './primitives';
+import { Condition, LengthPercentage, ReducedMotionPolicy } from './primitives';
 import {
   Effect,
   ViewProgressEffect,
@@ -28,6 +28,7 @@ export const TriggerType = z.enum([
   'viewProgress',
   'pointerMove',
   'animationEnd',
+  'scrollState',
 ]);
 
 export const ViewEnterParams = z
@@ -51,7 +52,21 @@ export const AnimationEndParams = z
   })
   .strict();
 
-export const TriggerParams = z.union([ViewEnterParams, PointerMoveParams, AnimationEndParams]);
+export const ScrollStateParams = z
+  .object({
+    offset: z.union([z.number(), LengthPercentage]).optional(),
+    direction: z.enum(['end', 'start']).optional(),
+    axis: z.enum(['y', 'x']).optional(),
+    scroller: z.enum(['root', 'self', 'nearest']).optional(),
+  })
+  .strict();
+
+export const TriggerParams = z.union([
+  ViewEnterParams,
+  PointerMoveParams,
+  AnimationEndParams,
+  ScrollStateParams,
+]);
 
 const InteractionBase = {
   key: z.string().min(1),
@@ -140,12 +155,31 @@ export const DiscreteInteraction = withPluginFields(
   }
 });
 
+export const ScrollStateInteraction = withPluginFields(
+  z.object({
+    ...InteractionBase,
+    trigger: z.literal('scrollState'),
+    params: ScrollStateParams.optional(),
+    effects: z.array(z.union([TimeEffect, TimeEffectRef, StateEffect, StateEffectRef])).optional(),
+    sequences: z.array(z.union([SequenceConfig, SequenceConfigRef])).optional(),
+  }),
+).superRefine((interaction, ctx) => {
+  if (!hasEffectsOrSequences(interaction)) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Interaction must have at least one effect or sequence',
+      params: { domainCode: 'INTERACTION_EMPTY' },
+    } as any);
+  }
+});
+
 export const Interaction = z.discriminatedUnion('trigger', [
   AnimationEndInteraction,
   ViewEnterInteraction,
   ViewProgressInteraction,
   PointerMoveInteraction,
   DiscreteInteraction,
+  ScrollStateInteraction,
 ]);
 
 function validateEffectSource(ctx: z.RefinementCtx, path: Path, effect: any): void {

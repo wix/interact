@@ -1,7 +1,11 @@
 import { describe, expectTypeOf, it } from 'vitest';
 import type { z } from 'zod';
-import type { InteractConfig, Condition as ConditionDef } from '@wix/interact';
-import { InteractConfigSchema, Condition } from '../src/schema';
+import type {
+  InteractConfig,
+  Condition as ConditionDef,
+  ScrollStateParams as ScrollStateParamsDef,
+} from '@wix/interact';
+import { InteractConfigSchema, Condition, ScrollStateParams } from '../src/schema';
 
 type InferredConfig = z.infer<typeof InteractConfigSchema>;
 type InferredCondition = z.infer<typeof Condition>;
@@ -19,6 +23,18 @@ describe('schema type parity (drift guard)', () => {
 
   it('Condition schema predicate field is identical to the hand-written ConditionDef predicate field', () => {
     expectTypeOf<InferredCondition['predicate']>().toEqualTypeOf<ConditionDef['predicate']>();
+  });
+
+  it('ScrollStateParams schema mirrors the hand-written ScrollStateParams type', () => {
+    type Inferred = z.infer<typeof ScrollStateParams>;
+    expectTypeOf<keyof Inferred>().toEqualTypeOf<keyof ScrollStateParamsDef>();
+    expectTypeOf<Inferred['direction']>().toEqualTypeOf<ScrollStateParamsDef['direction']>();
+    expectTypeOf<Inferred['axis']>().toEqualTypeOf<ScrollStateParamsDef['axis']>();
+    expectTypeOf<Inferred['scroller']>().toEqualTypeOf<ScrollStateParamsDef['scroller']>();
+    // LengthPercentage is one object with a unit union in the schema and a union of objects in
+    // @wix/motion, so compare offset by mutual assignability rather than identity
+    expectTypeOf<Inferred['offset']>().toMatchTypeOf<ScrollStateParamsDef['offset']>();
+    expectTypeOf<ScrollStateParamsDef['offset']>().toMatchTypeOf<Inferred['offset']>();
   });
 
   it('InteractConfigSchema has required interactions (mirrors InteractConfig)', () => {

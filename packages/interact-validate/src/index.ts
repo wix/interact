@@ -9,6 +9,7 @@ export {
   ViewEnterParams,
   PointerMoveParams,
   AnimationEndParams,
+  ScrollStateParams,
   TriggerParams,
   Effect,
   EffectRef,
