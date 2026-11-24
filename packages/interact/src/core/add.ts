@@ -697,8 +697,7 @@ function _prepareInteraction(
 
 /**
  * Attaches the interaction's effects and sequences once all of them are ready, or holds them back
- * together — re-running the pass of `passController` once they may be. Returns whether they were
- * held back.
+ * together — re-running the pass of `passController` once they may be.
  */
 function _addInteraction(
   sourceKey: string,
@@ -707,7 +706,7 @@ function _addInteraction(
   interaction: Interaction,
   elements?: HTMLElement[],
   passController: IInteractionController = sourceController,
-): boolean {
+): void {
   const prepared = _prepareInteraction(
     sourceKey,
     sourceController,
@@ -718,7 +717,7 @@ function _addInteraction(
 
   if (prepared.readiness !== true) {
     _hold(prepared.readiness, passController, interaction, sourceController, true, elements);
-    return true;
+    return;
   }
 
   const interactionsToApply: InteractionsToApply = [];
@@ -767,8 +766,6 @@ function _addInteraction(
   });
 
   _processSequences(sourceController, instance, interaction, prepared.sequences, elements);
-
-  return false;
 }
 
 function _getSequencePolicy(
@@ -1137,18 +1134,8 @@ function _processSequencesForTarget(
 
       // Until attached, the sequence attaches with its siblings in the source interaction, waiting
       // for them — to every list item at once, so the item pass below only extends it.
-      if (
-        !instance.addedInteractions[cacheKey] &&
-        (_addInteraction(
-          sourceKey!,
-          sourceController,
-          instance,
-          owner,
-          undefined,
-          targetController,
-        ) ||
-          instance.addedInteractions[cacheKey])
-      ) {
+      if (!instance.addedInteractions[cacheKey]) {
+        _addInteraction(sourceKey!, sourceController, instance, owner, undefined, targetController);
         return true;
       }
 
@@ -1175,49 +1162,18 @@ function _processSequencesForTarget(
         return true;
       }
 
-      const listElements: ListElements | undefined =
-        elements && listContainer
-          ? { controllerKey: targetKey, listContainer, elements }
-          : undefined;
+      // attached, so this is an item pass (see the guard above)
+      const animationGroupArgs = _buildAnimationGroupArgsFromSequence(prepared!, {
+        controllerKey: targetKey,
+        listContainer: listContainer!,
+        elements: elements!,
+      });
 
-      const animationGroupArgs = _buildAnimationGroupArgsFromSequence(prepared!, listElements);
-
-      if (!animationGroupArgs) return true;
-
-      if (elements && instance.addedInteractions[cacheKey]) {
-        const indices = _resolveListItemIndices(targetController, listContainer!, elements);
+      if (animationGroupArgs) {
+        const indices = _resolveListItemIndices(targetController, listContainer!, elements!);
 
         Interact.addToSequence(cacheKey, animationGroupArgs, indices);
-
-        return true;
       }
-
-      const sequence = Interact.getSequence(
-        cacheKey,
-        _getSequenceOptions(sequenceConfig, interaction, instance),
-        animationGroupArgs,
-      );
-
-      const selectorCondition = getSelectorCondition(
-        interaction.conditions || [],
-        instance.dataCache.conditions,
-      );
-
-      const sourceElements = _resolveSourceElements(interaction, sourceController);
-
-      if (!sourceElements) return true;
-
-      // Mark added only after the source resolves, so an unresolved element can be
-      // retried on a later pass instead of being permanently disabled by the guard above.
-      instance.addedInteractions[cacheKey] = true;
-
-      _attachSequenceTriggers(
-        interaction,
-        sequenceConfig,
-        sourceElements,
-        sequence,
-        selectorCondition,
-      );
 
       return true;
     });
@@ -1313,18 +1269,15 @@ function addEffectsForTarget(
         // for them — this target may resume before the source does (e.g. a plugin released for this
         // key only). That attaches it to every list item at once, so the item pass below only
         // extends it.
-        if (
-          !instance.addedInteractions[interactionId] &&
-          (_addInteraction(
+        if (!instance.addedInteractions[interactionId]) {
+          _addInteraction(
             sourceKey!,
             sourceController,
             instance,
             owner,
             undefined,
             targetController,
-          ) ||
-            instance.addedInteractions[interactionId])
-        ) {
+          );
           return true;
         }
 
@@ -1361,8 +1314,6 @@ function addEffectsForTarget(
           // Bail out :: no source or target elements found in DOM
           return true;
         }
-
-        instance!.addedInteractions[interactionId] = true;
 
         const selectorCondition = getSelectorCondition(
           effectOptions.conditions || [],
