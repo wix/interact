@@ -246,6 +246,34 @@ describe('interact plugin bridge', () => {
   });
 
   describe('deferred plugins (use options.defer + ready)', () => {
+    it('passes the whole interaction as config when the target pass applies the source plugin', () => {
+      const plugin = vi.fn();
+      Interact.use('whole', plugin, { defer: 'hydrated' });
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'source',
+            trigger: 'click',
+            $whole: {},
+            effects: [
+              { key: 'target', keyframes: [{ opacity: 0 }, { opacity: 1 }], duration: 100 },
+            ],
+          },
+        ],
+      });
+      // the target is cached first, so its pass is the one that resumes first
+      add(document.createElement('div'), 'target');
+      add(document.createElement('div'), 'source');
+
+      Interact.ready('hydrated');
+
+      expect(plugin).toHaveBeenCalledTimes(1);
+      expect(plugin.mock.calls[0][1].config).toBe(
+        Interact.getInstance('source')!.get('source')!.triggers[0],
+      );
+    });
+
     const fadeIn = { namedEffect: { type: 'FadeIn' } as any, duration: 100 };
 
     function hoverTargets(spy: ReturnType<typeof vi.spyOn>): HTMLElement[] {

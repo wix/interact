@@ -1125,7 +1125,7 @@ function _processSequencesForTarget(
       const sourceReadiness = _applyPlugins(
         sourceController,
         sourceController.element,
-        interaction,
+        owner,
         sourceKey!,
         'interaction',
       );
@@ -1299,7 +1299,7 @@ function addEffectsForTarget(
         const sourceReadiness = _applyPlugins(
           sourceController,
           sourceController.element,
-          interaction,
+          owner,
           sourceKey!,
           'interaction',
         );
