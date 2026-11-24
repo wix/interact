@@ -1728,6 +1728,22 @@ describe('interact plugin bridge', () => {
         expect(playSpy()).toHaveBeenCalledTimes(1);
       });
 
+      it.each([false, true])(
+        'replays a root-scoped source animation end (bubbles: %s)',
+        async (bubbles) => {
+          const { element, resolve } = createHeld({ selector: ':scope > .child' });
+          const source = element.querySelector('.child')!;
+          const target = bubbles ? child(source, 'char') : source;
+          target.dispatchEvent(
+            new CustomEvent('animationend', { bubbles, detail: { effectId: 'src' } }),
+          );
+          resolve();
+          await flush();
+
+          expect(playSpy()).toHaveBeenCalledTimes(1);
+        },
+      );
+
       it('replays a non-bubbling animation end of a WAAPI animation', async () => {
         const { element, resolve } = createHeld({ selector: '.child' });
 

@@ -158,9 +158,12 @@ function latchAnimationEnd(
 
     if (sourceSelector) {
       // an event of a matching element, or of its descendant (heard by the element if it bubbles)
-      const match = target.closest(sourceSelector);
+      // Resolve against the latch root, just like normal source resolution (including :scope).
+      const matchesSource = Array.from(source.querySelectorAll(sourceSelector)).some(
+        (match) => match === target || (event.bubbles && match.contains(target)),
+      );
 
-      if (!match || match === source || !source.contains(match)) {
+      if (!matchesSource) {
         return;
       }
     }
