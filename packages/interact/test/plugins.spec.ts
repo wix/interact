@@ -1288,6 +1288,168 @@ describe('interact plugin bridge', () => {
 
       expect(playSpy()).not.toHaveBeenCalled();
     });
+
+    describe('interaction-level plugin with its own selector / listContainer', () => {
+      function child(parent: Element, className = 'child') {
+        const element = document.createElement('span');
+        element.className = className;
+        parent.appendChild(element);
+        return element;
+      }
+
+      it('attaches to a source the plugin created once it settles', async () => {
+        let resolve!: () => void;
+        Interact.use(
+          'async',
+          (_value, { root }) =>
+            new Promise<void>((res) => {
+              resolve = () => {
+                child(root);
+                res();
+              };
+            }),
+        );
+
+        Interact.create({
+          interactions: [
+            {
+              key: 'el',
+              selector: '.child',
+              trigger: 'viewEnter',
+              $async: {},
+              effects: [{ key: 'el', selector: '.child', ...fadeIn }],
+            },
+          ],
+        });
+        const element = document.createElement('div');
+        add(element, 'el');
+
+        resolve();
+        await flush();
+        intersect(element.querySelector('.child')!, true);
+
+        expect(playSpy()).toHaveBeenCalledTimes(1);
+      });
+
+      it('replays a once entry of a source that existed before the plugin', async () => {
+        let resolve!: () => void;
+        Interact.use('async', () => new Promise<void>((res) => (resolve = res)));
+
+        Interact.create({
+          interactions: [
+            {
+              key: 'el',
+              selector: '.child',
+              trigger: 'viewEnter',
+              $async: {},
+              effects: [{ key: 'el', selector: '.child', ...fadeIn }],
+            },
+          ],
+        });
+        const element = document.createElement('div');
+        const source = child(element);
+        add(element, 'el');
+
+        intersect(source, true);
+        intersect(source, false);
+
+        resolve();
+        await flush();
+
+        expect(playSpy()).toHaveBeenCalledTimes(1);
+      });
+
+      it('replays a once entry of a list item that existed before the plugin', async () => {
+        let resolve!: () => void;
+        Interact.use('async', () => new Promise<void>((res) => (resolve = res)));
+
+        Interact.create({
+          interactions: [
+            {
+              key: 'el',
+              listContainer: '.list',
+              trigger: 'viewEnter',
+              $async: {},
+              effects: [{ key: 'el', listContainer: '.list', ...fadeIn }],
+            },
+          ],
+        });
+        const element = document.createElement('div');
+        const list = child(element, 'list');
+        const items = [child(list, 'item'), child(list, 'item')];
+        add(element, 'el');
+
+        intersect(items[1], true);
+        intersect(items[1], false);
+
+        resolve();
+        await flush();
+
+        expect(playSpy()).toHaveBeenCalledTimes(1);
+      });
+
+      it('stops observing a latched source the plugin replaced', async () => {
+        let resolve!: () => void;
+        Interact.use(
+          'async',
+          (_value, { root }) =>
+            new Promise<void>((res) => {
+              resolve = () => {
+                root.replaceChildren();
+                child(root);
+                res();
+              };
+            }),
+        );
+
+        Interact.create({
+          interactions: [
+            {
+              key: 'el',
+              selector: '.child',
+              trigger: 'viewEnter',
+              $async: {},
+              effects: [{ key: 'el', selector: '.child', ...fadeIn }],
+            },
+          ],
+        });
+        const element = document.createElement('div');
+        const replaced = child(element);
+        add(element, 'el');
+
+        expect(observers.some(({ observed }) => observed.has(replaced))).toBe(true);
+
+        resolve();
+        await flush();
+
+        expect(observers.some(({ observed }) => observed.has(replaced))).toBe(false);
+        expect(playSpy()).not.toHaveBeenCalled();
+      });
+
+      it('stops observing a latched source on disconnect', () => {
+        Interact.use('deferred', () => {}, { defer: 'hydrated' });
+
+        Interact.create({
+          interactions: [
+            {
+              key: 'el',
+              selector: '.child',
+              trigger: 'viewEnter',
+              $deferred: {},
+              effects: [{ key: 'el', selector: '.child', ...fadeIn }],
+            },
+          ],
+        });
+        const element = document.createElement('div');
+        const source = child(element);
+        add(element, 'el');
+
+        intersect(source, true);
+        Interact.getController('el')!.disconnect();
+
+        expect(observers.some(({ observed }) => observed.has(source))).toBe(false);
+      });
+    });
   });
 
   describe('animationEnd while held back', () => {
@@ -1418,6 +1580,38 @@ describe('interact plugin bridge', () => {
       expect(playSpy()).not.toHaveBeenCalled();
     });
 
+    it('does not replay a source latch to a trigger on its descendant', async () => {
+      Interact.use('deferred', () => {}, { defer: 'hydrated' });
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'outer',
+            trigger: 'animationEnd',
+            params: { effectId: 'src' },
+            $deferred: {},
+            effects: [{ key: 'outer', ...fadeIn }],
+          },
+          {
+            key: 'inner',
+            trigger: 'animationEnd',
+            params: { effectId: 'src' },
+            effects: [{ key: 'inner', ...fadeIn }],
+          },
+        ],
+        effects: { src: { ...fadeIn } },
+      });
+      const outer = document.createElement('div');
+      const inner = document.createElement('div');
+      outer.appendChild(inner);
+      add(outer, 'outer');
+
+      animationEnd(inner, 'motion-fadeIn');
+      add(inner, 'inner');
+
+      expect(playSpy()).not.toHaveBeenCalled();
+    });
+
     it('forgets latched animation ends of a selector source on disconnect', async () => {
       const resolvers: Array<() => void> = [];
       Interact.use('async', () => new Promise<void>((res) => resolvers.push(res)));
@@ -1447,6 +1641,110 @@ describe('interact plugin bridge', () => {
 
       expect(resolvers.length).toBeGreaterThan(1);
       expect(playSpy()).not.toHaveBeenCalled();
+    });
+
+    describe('interaction-level plugin with its own selector / listContainer', () => {
+      function child(parent: Element, className = 'child') {
+        const element = document.createElement('span');
+        element.className = className;
+        parent.appendChild(element);
+        return element;
+      }
+
+      // the plugin creates `.child` right away, but stays in flight until `resolve()`
+      function createHeld(interaction: Record<string, unknown>) {
+        let resolve!: () => void;
+        Interact.use('async', (_value, { root }) => {
+          child(root);
+          return new Promise<void>((res) => (resolve = res));
+        });
+
+        Interact.create({
+          interactions: [
+            {
+              key: 'el',
+              trigger: 'animationEnd',
+              params: { effectId: 'src' },
+              $async: {},
+              effects: [{ key: 'el', ...fadeIn }],
+              ...interaction,
+            } as any,
+          ],
+          effects: { src: { ...fadeIn } },
+        });
+        const element = document.createElement('div');
+        add(element, 'el');
+
+        return { element, resolve: () => resolve() };
+      }
+
+      it('replays an animation end of a source the plugin created', async () => {
+        const { element, resolve } = createHeld({ selector: '.child' });
+
+        animationEnd(element.querySelector('.child')!, 'motion-fadeIn');
+        resolve();
+        await flush();
+
+        expect(playSpy()).toHaveBeenCalledTimes(1);
+      });
+
+      it('replays a non-bubbling animation end of a WAAPI animation', async () => {
+        const { element, resolve } = createHeld({ selector: '.child' });
+
+        element
+          .querySelector('.child')!
+          .dispatchEvent(new CustomEvent('animationend', { detail: { effectId: 'src' } }));
+        resolve();
+        await flush();
+
+        expect(playSpy()).toHaveBeenCalledTimes(1);
+      });
+
+      it('replays an animation end of a list item', async () => {
+        const { element, resolve } = createHeld({ listContainer: '.list' });
+        const item = child(child(element, 'list'), 'item');
+
+        animationEnd(item, 'motion-fadeIn');
+        resolve();
+        await flush();
+
+        expect(playSpy()).toHaveBeenCalledTimes(1);
+      });
+
+      it('replays a bubbling animation end of a descendant of a source', async () => {
+        const { element, resolve } = createHeld({ selector: '.child' });
+
+        // a CSS animation's `animationend` bubbles
+        const event = new Event('animationend', { bubbles: true });
+        Object.defineProperty(event, 'animationName', { value: 'motion-fadeIn' });
+        child(element.querySelector('.child')!, 'char').dispatchEvent(event);
+        resolve();
+        await flush();
+
+        expect(playSpy()).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not replay an animation end of an element that is not a source', async () => {
+        const { element, resolve } = createHeld({ selector: '.child' });
+
+        animationEnd(element, 'motion-fadeIn');
+        animationEnd(child(element, 'other'), 'motion-fadeIn');
+        resolve();
+        await flush();
+
+        expect(playSpy()).not.toHaveBeenCalled();
+      });
+
+      it('forgets latched animation ends on disconnect', async () => {
+        const { element, resolve } = createHeld({ selector: '.child' });
+
+        animationEnd(element.querySelector('.child')!, 'motion-fadeIn');
+        Interact.getController('el')!.update();
+        resolve();
+        await flush();
+
+        expect(playSpy()).not.toHaveBeenCalled();
+      });
     });
   });
 });

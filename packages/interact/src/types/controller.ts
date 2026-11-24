@@ -17,6 +17,11 @@ export interface IInteractionController {
   _appliedPlugins: WeakMap<object, true | Promise<void>>;
   /** Incremented on every disconnect; async plugin continuations from an older connect are stale. */
   _connectId: number;
+  /**
+   * Trigger latches on this controller's elements while plugins hold their interactions back (see
+   * `TriggerLatch`), released on disconnect, or once their element leaves this controller's DOM.
+   */
+  _latches: { element: HTMLElement; release: () => void }[];
   connect(key?: string): void;
   disconnect(options?: { removeFromCache?: boolean }): void;
   update(): void;

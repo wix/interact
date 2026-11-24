@@ -229,7 +229,13 @@ function _applyPlugins(
  * entry or an animation end is not lost.
  *
  * `sourcePrepared` tells whether the source's own (interaction-level) plugins are applied — if
- * not, the sources may not exist yet, so only a source that is the root itself is latched.
+ * not, a source resolved by the interaction's `selector` / `listContainer` may not exist yet. A
+ * trigger whose latch covers a subtree (`animationEnd`) is then latched on the source controller's
+ * element, recording the sources' events whenever they appear; any other trigger only on the
+ * sources that already exist (a source the plugin creates or replaces is not latched).
+ *
+ * The latches are released when the source controller disconnects, or once their element leaves
+ * its DOM (see `_releaseDetachedLatches`).
  */
 function _hold(
   readiness: PluginsReadiness,
@@ -244,7 +250,7 @@ function _hold(
   }
 
   const handlerModule = TRIGGER_TO_HANDLER_MODULE_MAP[interaction.trigger] as
-    | { latch?: TriggerLatch<TriggerType> }
+    | { latch?: TriggerLatch<TriggerType>; latchesSubtree?: true }
     | undefined;
   const latch = handlerModule?.latch;
 
@@ -252,7 +258,8 @@ function _hold(
     return;
   }
 
-  let sources: HTMLElement | HTMLElement[] | null = null;
+  let sources: HTMLElement | HTMLElement[] | null;
+  let sourceSelector: string | undefined;
 
   if (sourcePrepared) {
     sources = _resolveSourceElements(interaction as Interaction, sourceController, elements);
@@ -262,6 +269,16 @@ function _hold(
       sourceController.element,
       sourceController.useFirstChild,
     );
+  } else if (handlerModule.latchesSubtree) {
+    sources = sourceController.element;
+    sourceSelector = getSelector(interaction as Interaction);
+  } else {
+    sources = _getElementsFromData(
+      interaction,
+      sourceController.element,
+      sourceController.useFirstChild,
+      false,
+    );
   }
 
   if (!sources) {
@@ -269,7 +286,25 @@ function _hold(
   }
 
   (Array.isArray(sources) ? sources : [sources]).forEach((source) => {
-    latch(source, interaction.params);
+    sourceController._latches.push({
+      element: source,
+      release: latch(source, interaction.params, sourceSelector),
+    });
+  });
+}
+
+/**
+ * Releases the controller's latches on elements no longer in its DOM — e.g. replaced by the plugin
+ * that held their trigger back — so they are not observed until the controller disconnects.
+ */
+function _releaseDetachedLatches(controller: IInteractionController): void {
+  controller._latches = controller._latches.filter(({ element, release }) => {
+    if (controller.element.contains(element)) {
+      return true;
+    }
+
+    release();
+    return false;
   });
 }
 
@@ -288,12 +323,15 @@ function _getElementsFromData(
   data: Interaction | Effect,
   root: HTMLElement,
   useFirstChild: boolean,
+  warn: boolean = true,
 ): HTMLElement | HTMLElement[] | null {
   if (data.listContainer) {
     const container = root.querySelector(data.listContainer);
 
     if (!container) {
-      console.warn(`Interact: No container found for list container "${data.listContainer}"`);
+      if (warn) {
+        console.warn(`Interact: No container found for list container "${data.listContainer}"`);
+      }
 
       return [];
     }
@@ -315,7 +353,9 @@ function _getElementsFromData(
     // An explicit selector never falls back to the root — binding there would attach the trigger
     // or animation to the wrong element and mark the interaction added, so a later pass (e.g.
     // after a plugin produced the matching DOM) could not retry it.
-    console.warn(`Interact: No elements found for selector "${data.selector}"`);
+    if (warn) {
+      console.warn(`Interact: No elements found for selector "${data.selector}"`);
+    }
 
     return null;
   }
@@ -1420,6 +1460,7 @@ export function add(controller: IInteractionController): boolean {
   const hasTriggers = triggers.length > 0;
 
   instance.setController(key, controller);
+  _releaseDetachedLatches(controller);
 
   triggers.forEach((interaction, index) => {
     const mql = getMediaQuery(interaction.conditions, instance!.dataCache.conditions);

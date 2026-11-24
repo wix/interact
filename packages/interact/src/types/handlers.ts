@@ -41,12 +41,15 @@ export type InteractionHandlerModule<T extends TriggerType> = {
 
 /**
  * Records the trigger's events on `source` while an interaction on it is held back by its plugins,
- * so the trigger attached later can replay them.
+ * so the trigger attached later can replay them. Returns a release that stops recording and forgets
+ * them. `sourceSelector` is only passed to a latch covering a subtree (see `latchesSubtree`),
+ * latched on an ancestor of the sources it matches.
  */
 export type TriggerLatch<T extends TriggerType> = (
   source: HTMLElement,
   options?: InteractionParamsTypes[T],
-) => void;
+  sourceSelector?: string,
+) => () => void;
 
 export type ViewEnterHandlerModule = InteractionHandlerModule<'viewEnter'> & {
   setOptions: (options: Partial<ViewEnterParams>) => void;
@@ -55,8 +58,13 @@ export type ViewEnterHandlerModule = InteractionHandlerModule<'viewEnter'> & {
 };
 
 export type AnimationEndHandlerModule = InteractionHandlerModule<'animationEnd'> & {
-  /** Records the `animationend` events of `source` while its trigger is held back, replayed by a later add. */
+  /**
+   * Records the `animationend` events of `source` and its descendants while their trigger is held
+   * back, replayed by a later add on any of them.
+   */
   latch: TriggerLatch<'animationEnd'>;
+  /** Set: a latch on an ancestor covers sources that do not exist yet. */
+  latchesSubtree: true;
 };
 
 export type TriggerHandlerMap<T extends TriggerType> = {

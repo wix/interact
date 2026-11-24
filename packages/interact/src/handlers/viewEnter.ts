@@ -320,7 +320,7 @@ function addViewEnterHandler(
  * trigger later attached with the same params replays a latched entry, so an element that entered
  * and left the viewport while held back still plays its entrance.
  */
-function latchViewEnter(source: HTMLElement, options: ViewEnterParams = {}) {
+function latchViewEnter(source: HTMLElement, options: ViewEnterParams = {}): () => void {
   const mergedOptions = { ...viewEnterOptions, ...options };
   const key = getObserverKey(mergedOptions);
   let sourceLatches = latches.get(source);
@@ -331,7 +331,7 @@ function latchViewEnter(source: HTMLElement, options: ViewEnterParams = {}) {
   }
 
   if (sourceLatches.has(key)) {
-    return;
+    return () => {};
   }
 
   sourceLatches.set(key, false);
@@ -369,6 +369,21 @@ function latchViewEnter(source: HTMLElement, options: ViewEnterParams = {}) {
 
   elementObserverMap.set(source, observer);
   observer.observe(source);
+
+  return () => {
+    sourceLatches.delete(key);
+
+    if (!sourceLatches.size && latches.get(source) === sourceLatches) {
+      latches.delete(source);
+    }
+
+    const sourceHandlers = handlerMap.get(source);
+
+    // still observing for this latch alone (it did not see an entry, and no trigger attached since)
+    if (sourceHandlers?.delete(handlerObj) && sourceHandlers.size === 0) {
+      cleanup();
+    }
+  };
 }
 
 function removeViewEnterHandler(element: HTMLElement) {

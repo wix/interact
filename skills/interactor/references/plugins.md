@@ -68,8 +68,9 @@ useEffect(() => Interact.ready('hydrated'), []);
   resets released names.
 - A `viewEnter` `once` entry, or a source `animationend` matching an
   `animationEnd` trigger, that happens while held back (deferred or async) is
-  replayed when the trigger attaches — except for an interaction-level field
-  on an interaction with its own `selector` / `listContainer`. `click` /
+  replayed when the trigger attaches — except a `viewEnter` entry of a source
+  the plugin itself creates or replaces (via the interaction's own `selector` /
+  `listContainer`), which plays when it next enters the viewport. `click` /
   `hover` events fired while held back are not replayed.
 - Content hidden by `hideUntilReady` or entrance FOUC CSS stays hidden until the
   name is released — always call `ready()` for every name you defer on.

@@ -14,6 +14,7 @@ export class InteractionController {
   _pluginCleanups: InteractPluginCleanup[];
   _appliedPlugins: WeakMap<object, true | Promise<void>>;
   _connectId: number;
+  _latches: { element: HTMLElement; release: () => void }[];
 
   constructor(element: HTMLElement, key?: string, options?: { useFirstChild?: boolean }) {
     this.element = element;
@@ -24,6 +25,7 @@ export class InteractionController {
     this._pluginCleanups = [];
     this._appliedPlugins = new WeakMap();
     this._connectId = 0;
+    this._latches = [];
     this.useFirstChild = options?.useFirstChild ?? false;
   }
 
@@ -66,6 +68,11 @@ export class InteractionController {
     if (key) {
       remove(this, removeFromCache);
     }
+
+    for (const { release } of this._latches) {
+      release();
+    }
+    this._latches.length = 0;
 
     // Run plugin cleanups after `remove()` has torn down animations on the (possibly
     // plugin-generated) elements, then revert the plugins' DOM mutations.
