@@ -610,8 +610,9 @@ function _resolveSequences(
 
     if (!effects) return;
 
+    // an item pass only extends an attached sequence — until then it is built from every item
     const listElements: ListElements | undefined =
-      elements && interaction.listContainer
+      elements && interaction.listContainer && instance.addedInteractions[cacheKey]
         ? { controllerKey: sourceKey, listContainer: interaction.listContainer, elements }
         : undefined;
 
@@ -721,7 +722,10 @@ function _addInteraction(
       sourceController.useFirstChild,
       targetController.element,
       targetController.useFirstChild,
-      elements,
+      // An item pass only extends an attached effect. Until then it attaches to every item at once —
+      // marking it added for the new items alone would make the full pass skip the others (e.g. the
+      // one about to resume once an async plugin settled).
+      instance.addedInteractions[interactionId] ? elements : undefined,
     );
 
     if (!sourceElements || !targetElements) {
@@ -1052,7 +1056,7 @@ function _processSequences(
       instance.dataCache.conditions,
     );
 
-    const sourceElements = _resolveSourceElements(interaction, sourceController, elements);
+    const sourceElements = _resolveSourceElements(interaction, sourceController);
 
     if (!sourceElements) return;
 

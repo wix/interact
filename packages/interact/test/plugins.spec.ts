@@ -932,6 +932,39 @@ describe('interact plugin bridge', () => {
       expect(hoverSpy.mock.calls[0][1]).toBe(element.querySelector('.pt'));
     });
 
+    it('attaches to every list item when an item is added right after the plugin settles', async () => {
+      let resolve!: () => void;
+      Interact.use('async', () => new Promise<void>((res) => (resolve = res)));
+      const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
+
+      Interact.create({
+        interactions: [
+          {
+            key: 'el',
+            listContainer: '.list',
+            trigger: 'hover',
+            effects: [{ key: 'el', listContainer: '.list', $async: {}, ...fadeIn }],
+          },
+        ],
+      });
+      const element = document.createElement('div');
+      const list = document.createElement('div');
+      list.className = 'list';
+      element.appendChild(list);
+      const items = [document.createElement('div'), document.createElement('div')];
+      list.append(...items);
+      add(element, 'el');
+
+      resolve();
+      // the plugin is applied, but the held pass has not resumed yet
+      await Promise.resolve();
+      const added = document.createElement('div');
+      list.appendChild(added);
+      await flush();
+
+      expect(hoverSpy.mock.calls.map(([source]) => source)).toEqual([...items, added]);
+    });
+
     it('holds the sibling effects of an effect with an async plugin', async () => {
       const { calls } = useAsyncSpanPlugin('async');
       const hoverSpy = vi.spyOn(TRIGGER_TO_HANDLER_MODULE_MAP.hover, 'add');
