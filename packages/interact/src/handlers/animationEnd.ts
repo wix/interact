@@ -20,6 +20,12 @@ type AnimationEndLatch = {
 // descendant while a trigger was held back (see `latchAnimationEnd`)
 const latches = new WeakMap<HTMLElement, AnimationEndLatch[]>();
 
+// the sources a subtree latch on `root` serves — resolved against it, just like normal source
+// resolution (including `:scope`)
+function getLatchedSources(root: HTMLElement, sourceSelector: string): Element[] {
+  return Array.from(root.querySelectorAll(sourceSelector));
+}
+
 function getAnimationEndKey(event: Event) {
   return (event as AnimationEvent).animationName || `#${(event as CustomEvent).detail?.effectId}`;
 }
@@ -37,7 +43,7 @@ function getLatchedEvents(source: HTMLElement): Event[] {
       // A subtree latch serves only its selected sources, not every descendant with a handler.
       if (
         sourceSelector
-          ? !Array.from(element!.querySelectorAll(sourceSelector)).includes(source)
+          ? !getLatchedSources(element!, sourceSelector).includes(source)
           : element !== source
       ) {
         return;
@@ -162,8 +168,7 @@ function latchAnimationEnd(
 
     if (sourceSelector) {
       // an event of a matching element, or of its descendant (heard by the element if it bubbles)
-      // Resolve against the latch root, just like normal source resolution (including :scope).
-      const matchesSource = Array.from(source.querySelectorAll(sourceSelector)).some(
+      const matchesSource = getLatchedSources(source, sourceSelector).some(
         (match) => match === target || (event.bubbles && match.contains(target)),
       );
 

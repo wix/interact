@@ -222,7 +222,7 @@ function _applyPlugins(
     }
   }
 
-  return pending.length ? Promise.all(pending).then(() => {}) : true;
+  return _combineReadiness(...pending);
 }
 
 /**
@@ -281,13 +281,7 @@ function _hold(
 
   if (sourcePrepared) {
     sources = _resolveSourceElements(interaction as Interaction, sourceController, elements);
-  } else if (!interaction.selector && !interaction.listContainer) {
-    sources = _getElementsFromData(
-      interaction,
-      sourceController.element,
-      sourceController.useFirstChild,
-    );
-  } else if (handlerModule.latchesSubtree) {
+  } else if (handlerModule.latchesSubtree && (interaction.selector || interaction.listContainer)) {
     sources = sourceController.element;
     sourceSelector = getSelector(interaction as Interaction);
   } else {
@@ -1016,39 +1010,13 @@ function _processSequences(
 
     if (!animationGroupArgs) return;
 
-    if (elements && instance.addedInteractions[cacheKey]) {
-      const indices = _resolveListItemIndices(
-        sourceController,
-        interaction.listContainer!,
-        elements,
-      );
+    // an item pass extends an attached sequence, and attaches its trigger to the new items only
+    const items = instance.addedInteractions[cacheKey] ? elements : undefined;
+
+    if (items) {
+      const indices = _resolveListItemIndices(sourceController, interaction.listContainer!, items);
 
       Interact.addToSequence(cacheKey, animationGroupArgs, indices);
-
-      const sequence = Interact.getSequence(
-        cacheKey,
-        _getSequenceOptions(sequenceConfig, interaction, instance),
-        animationGroupArgs,
-      );
-
-      const selectorCondition = getSelectorCondition(
-        interaction.conditions || [],
-        instance.dataCache.conditions,
-      );
-
-      const sourceElements = _resolveSourceElements(interaction, sourceController, elements);
-
-      if (sourceElements) {
-        _attachSequenceTriggers(
-          interaction,
-          sequenceConfig,
-          sourceElements,
-          sequence,
-          selectorCondition,
-        );
-      }
-
-      return;
     }
 
     const sequence = Interact.getSequence(
@@ -1062,7 +1030,7 @@ function _processSequences(
       instance.dataCache.conditions,
     );
 
-    const sourceElements = _resolveSourceElements(interaction, sourceController);
+    const sourceElements = _resolveSourceElements(interaction, sourceController, items);
 
     if (!sourceElements) return;
 
@@ -1078,6 +1046,43 @@ function _processSequences(
       selectorCondition,
     );
   });
+}
+
+/**
+ * What a cross-element target's pass runs before extending its unit `id` (an effect or a sequence
+ * of `owner`, the source interaction). The source may connect (or resume) after this target, so its
+ * interaction-level plugins are applied here before its elements are resolved. Then, until the
+ * unit is attached, it attaches with its siblings in `owner`, waiting for them — this target may
+ * resume before the source does (e.g. a plugin released for this key only) — to every list item at
+ * once. Returns whether the unit was already attached, leaving only an item pass to extend it.
+ */
+function _isAttachedWithOwner(
+  id: string,
+  owner: Interaction,
+  sourceKey: string,
+  sourceController: IInteractionController,
+  targetController: IInteractionController,
+  instance: Interact,
+): boolean {
+  const sourceReadiness = _applyPlugins(
+    sourceController,
+    sourceController.element,
+    owner,
+    sourceKey,
+    'interaction',
+  );
+
+  if (sourceReadiness !== true) {
+    _hold(sourceReadiness, targetController, owner, sourceController, false);
+    return false;
+  }
+
+  if (!instance.addedInteractions[id]) {
+    _addInteraction(sourceKey, sourceController, instance, owner, undefined, targetController);
+    return false;
+  }
+
+  return true;
 }
 
 function _processSequencesForTarget(
@@ -1117,25 +1122,16 @@ function _processSequencesForTarget(
         return true;
       }
 
-      // The source may connect (or resume) after this target, so its interaction-level plugins are
-      // applied here before its elements are resolved.
-      const sourceReadiness = _applyPlugins(
-        sourceController,
-        sourceController.element,
-        owner,
-        sourceKey!,
-        'interaction',
-      );
-
-      if (sourceReadiness !== true) {
-        _hold(sourceReadiness, targetController, interaction, sourceController, false);
-        return true;
-      }
-
-      // Until attached, the sequence attaches with its siblings in the source interaction, waiting
-      // for them — to every list item at once, so the item pass below only extends it.
-      if (!instance.addedInteractions[cacheKey]) {
-        _addInteraction(sourceKey!, sourceController, instance, owner, undefined, targetController);
+      if (
+        !_isAttachedWithOwner(
+          cacheKey,
+          owner,
+          sourceKey!,
+          sourceController,
+          targetController,
+          instance,
+        )
+      ) {
         return true;
       }
 
@@ -1162,7 +1158,7 @@ function _processSequencesForTarget(
         return true;
       }
 
-      // attached, so this is an item pass (see the guard above)
+      // attached, so this is an item pass (see the guard above), which extends it
       const animationGroupArgs = _buildAnimationGroupArgsFromSequence(prepared!, {
         controllerKey: targetKey,
         listContainer: listContainer!,
@@ -1250,34 +1246,16 @@ function addEffectsForTarget(
           return true;
         }
 
-        // The source may connect (or resume) after this target, so its interaction-level plugins
-        // are applied here before its elements are resolved.
-        const sourceReadiness = _applyPlugins(
-          sourceController,
-          sourceController.element,
-          owner,
-          sourceKey!,
-          'interaction',
-        );
-
-        if (sourceReadiness !== true) {
-          _hold(sourceReadiness, targetController, interaction, sourceController, false);
-          return true;
-        }
-
-        // Until attached, the effect attaches with its siblings in the source interaction, waiting
-        // for them — this target may resume before the source does (e.g. a plugin released for this
-        // key only). That attaches it to every list item at once, so the item pass below only
-        // extends it.
-        if (!instance.addedInteractions[interactionId]) {
-          _addInteraction(
+        if (
+          !_isAttachedWithOwner(
+            interactionId,
+            owner,
             sourceKey!,
             sourceController,
-            instance,
-            owner,
-            undefined,
             targetController,
-          );
+            instance,
+          )
+        ) {
           return true;
         }
 

@@ -65,6 +65,17 @@ const latches = new WeakMap<HTMLElement, Map<string, boolean>>();
 let viewEnterOptions: Partial<ViewEnterParams> = {};
 let sharedExitObserver: IntersectionObserver | null = null;
 
+// Stops observing `source` on the observer it is currently on (`observer`, unless it moved to the
+// safe one), so a later `observe()` reports its state anew.
+function unobserve(source: HTMLElement, observer: IntersectionObserver, forget?: boolean) {
+  (elementObserverMap.get(source) || observer).unobserve(source);
+  elementFirstRun.delete(source);
+
+  if (forget) {
+    elementObserverMap.delete(source);
+  }
+}
+
 function setOptions(options: Partial<ViewEnterParams>) {
   viewEnterOptions = options;
 }
@@ -216,9 +227,7 @@ function addViewEnterHandler(
           sourceHandlers.size === 0 ||
           (sourceHandlers.size === 1 && sourceHandlers.has(handlerObj))
         ) {
-          const currentObserver = elementObserverMap.get(source) || observer;
-          currentObserver.unobserve(source);
-          elementFirstRun.delete(source);
+          unobserve(source, observer);
         }
 
         // we delete the handlers only when there is no running animation to cancel
@@ -279,8 +288,7 @@ function addViewEnterHandler(
   };
 
   const cleanup = () => {
-    const currentObserver = elementObserverMap.get(source) || observer;
-    currentObserver.unobserve(source);
+    unobserve(source, observer, true);
 
     if (type === 'repeat' || type === 'state') {
       const exitObserver = getExitObserver();
@@ -288,8 +296,6 @@ function addViewEnterHandler(
     }
 
     animation.cancel();
-    elementFirstRun.delete(source);
-    elementObserverMap.delete(source);
   };
 
   handlerObj = { source, target, handler, cleanup };
@@ -350,18 +356,11 @@ function latchViewEnter(source: HTMLElement, options: ViewEnterParams = {}): (()
     sourceHandlers?.delete(handlerObj);
 
     if (!sourceHandlers || sourceHandlers.size === 0) {
-      const currentObserver = elementObserverMap.get(source) || observer;
-      currentObserver.unobserve(source);
-      elementFirstRun.delete(source);
+      unobserve(source, observer);
     }
   };
 
-  const cleanup = () => {
-    const currentObserver = elementObserverMap.get(source) || observer;
-    currentObserver.unobserve(source);
-    elementFirstRun.delete(source);
-    elementObserverMap.delete(source);
-  };
+  const cleanup = () => unobserve(source, observer, true);
 
   handlerObj = { source, target: source, handler, cleanup };
 
