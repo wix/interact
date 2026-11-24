@@ -1281,6 +1281,23 @@ describe('interact plugin bridge', () => {
       >;
     }
 
+    it('records a latch once, however many passes hold its source back', () => {
+      Interact.use('deferred', () => {}, { defer: 'hydrated' });
+
+      Interact.create({
+        interactions: [
+          { key: 'el', trigger: 'viewEnter', $deferred: {}, effects: [{ key: 'el', ...fadeIn }] },
+        ],
+      });
+      add(document.createElement('div'), 'el');
+      const controller = Interact.getController('el')!;
+
+      controller.resume();
+      controller.resume();
+
+      expect(controller._latches).toHaveLength(1);
+    });
+
     it('replays a once entry that happened while deferred', () => {
       Interact.use('deferred', () => {}, { defer: 'hydrated' });
 

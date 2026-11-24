@@ -144,11 +144,11 @@ function latchAnimationEnd(
   source: HTMLElement,
   _params?: AnimationEndParams,
   sourceSelector?: string,
-): () => void {
+): (() => void) | void {
   let sourceLatches = latches.get(source);
 
   if (sourceLatches?.some((latch) => latch.sourceSelector === sourceSelector)) {
-    return () => {};
+    return;
   }
 
   if (!sourceLatches) {

@@ -297,10 +297,12 @@ function _hold(
   }
 
   (Array.isArray(sources) ? sources : [sources]).forEach((source) => {
-    sourceController._latches.push({
-      element: source,
-      release: latch(source, interaction.params, sourceSelector),
-    });
+    const release = latch(source, interaction.params, sourceSelector);
+
+    // already latched by an earlier pass, which recorded its release
+    if (release) {
+      sourceController._latches.push({ element: source, release });
+    }
   });
 }
 
