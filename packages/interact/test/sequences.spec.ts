@@ -1088,25 +1088,17 @@ describe('interact sequences', () => {
       addElement(source.element, 'source-key');
 
       const seqKey = Object.keys(instance.dataCache.interactions['target-key'].sequences)[0];
+      const variation = (conditions: string[]) => {
+        const sequence = {
+          sequenceId: 'mql-fallback-seq',
+          effects: [{ effectId: 'effect-target', key: 'target-key' }],
+        };
+        const trigger = { key: 'source-key', trigger: 'click' as const, conditions };
+        return { ...trigger, sequence, owner: { ...trigger, sequences: [sequence] } };
+      };
       instance.dataCache.interactions['target-key'].sequences[seqKey] = [
-        {
-          key: 'source-key',
-          trigger: 'click',
-          conditions: ['never'],
-          sequence: {
-            sequenceId: 'mql-fallback-seq',
-            effects: [{ effectId: 'effect-target', key: 'target-key' }],
-          },
-        },
-        {
-          key: 'source-key',
-          trigger: 'click',
-          conditions: ['always'],
-          sequence: {
-            sequenceId: 'mql-fallback-seq',
-            effects: [{ effectId: 'effect-target', key: 'target-key' }],
-          },
-        },
+        variation(['never']),
+        variation(['always']),
       ];
 
       addElement(target.element, 'target-key');

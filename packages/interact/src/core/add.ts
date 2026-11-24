@@ -55,6 +55,38 @@ type ListElements = {
 };
 
 /**
+ * An effect of an interaction, resolved for this pass but not attached yet. `targetController` is
+ * missing while the effect's target is not connected.
+ */
+type ResolvedEffect = {
+  interactionId: string;
+  effectOptions: Effect;
+  target: string | undefined;
+  targetController?: IInteractionController;
+};
+
+type ConnectedEffect = Required<ResolvedEffect>;
+
+type ResolvedSequenceEffect = { effectOptions: Effect; target: string | undefined };
+
+type PreparedSequenceEffect = {
+  effectOptions: Effect;
+  targetController: IInteractionController;
+  resolvedTargetKey: string;
+  readiness: PluginsReadiness;
+};
+
+/** A sequence of an interaction, resolved for this pass but not attached yet. */
+type ResolvedSequence = {
+  sequenceConfig: SequenceConfig;
+  cacheKey: string;
+  listElements?: ListElements;
+  effects: ResolvedSequenceEffect[];
+};
+
+type PreparedSequence = Omit<ResolvedSequence, 'effects'> & { effects: PreparedSequenceEffect[] };
+
+/**
  * A unit's plugin readiness: `true` once every plugin it carries is released and applied, `false`
  * while one is deferred (see the `defer` option of `Interact.use()`), or a promise while an async
  * plugin is in flight.
@@ -409,16 +441,19 @@ function _applyInteraction(
   }
 }
 
-function _addInteraction(
+/**
+ * The interaction's effects to attach in this pass — the first matching variation per interaction
+ * id, including those whose target is not connected yet — without running their plugins.
+ */
+function _resolveEffects(
   sourceKey: string,
   sourceController: IInteractionController,
   instance: Interact,
   interaction: Interaction,
   elements?: HTMLElement[],
-) {
+): ResolvedEffect[] {
   const interactionVariations: Record<string, boolean> = {};
-
-  const interactionsToApply: InteractionsToApply = [];
+  const resolved: ResolvedEffect[] = [];
 
   (interaction.effects || []).forEach((effect, effectIndex) => {
     const effectId = (effect as EffectRef).effectId;
@@ -464,12 +499,7 @@ function _addInteraction(
       if (target) {
         targetController = Interact.getController(target);
 
-        if (!targetController) {
-          // Bail out :: no target element in cache
-          return;
-        }
-
-        if (effectOptions.listContainer) {
+        if (targetController && effectOptions.listContainer) {
           targetController.watchChildList(effectOptions.listContainer);
         }
       } else {
@@ -477,53 +507,194 @@ function _addInteraction(
         targetController = sourceController;
       }
 
-      // Effect-level plugins act on the effect's target element before it is resolved.
-      const readiness = _applyPlugins(
-        targetController,
-        targetController.element,
-        effectOptions,
-        target || interaction.key,
-        'effect',
-      );
-
-      if (readiness !== true) {
-        _hold(readiness, sourceController, interaction, sourceController, true, elements);
-        return;
-      }
-
-      const [sourceElements, targetElements] = _getInteractionElements(
-        interaction,
-        effectOptions,
-        sourceController.element,
-        sourceController.useFirstChild,
-        targetController.element,
-        targetController.useFirstChild,
-        elements,
-      );
-
-      if (!sourceElements || !targetElements) {
-        return;
-      }
-
-      instance.addedInteractions[interactionId!] = true;
-
-      const key = target || interaction.key;
-      const selectorCondition = getSelectorCondition(
-        effectOptions.conditions || [],
-        instance.dataCache.conditions,
-      );
-
-      interactionsToApply.push([
-        key,
-        interaction,
-        effectOptions,
-        sourceElements,
-        targetElements,
-        selectorCondition,
-        targetController.useFirstChild,
-        sourceKey,
-      ]);
+      resolved.push({ interactionId: interactionId!, effectOptions, target, targetController });
     }
+  });
+
+  return resolved;
+}
+
+/** The interaction's sequences to attach in this pass, without running their plugins. */
+function _resolveSequences(
+  sourceKey: string,
+  sourceController: IInteractionController,
+  instance: Interact,
+  interaction: Interaction,
+  elements?: HTMLElement[],
+): ResolvedSequence[] {
+  const resolved: ResolvedSequence[] = [];
+
+  interaction.sequences?.forEach((seqOrRef) => {
+    let sequenceConfig: SequenceConfig;
+
+    if (_isSequenceConfigRef(seqOrRef)) {
+      const resolvedConfig = instance.dataCache.sequences[seqOrRef.sequenceId];
+
+      if (!resolvedConfig) {
+        console.warn(`Interact: Sequence "${seqOrRef.sequenceId}" not found in cache`);
+        return;
+      }
+
+      sequenceConfig = { ...resolvedConfig, ...seqOrRef };
+    } else {
+      sequenceConfig = seqOrRef as SequenceConfig;
+    }
+
+    const sequenceId = sequenceConfig.sequenceId || generateId();
+    const cacheKey = getInterpolatedKey(`${sourceKey}::seq::${sequenceId}`, sourceKey);
+
+    if (instance.addedInteractions[cacheKey] && !elements) return;
+
+    const effects = _resolveSequenceEffects(
+      sequenceConfig,
+      interaction,
+      cacheKey,
+      sourceKey,
+      instance,
+      {
+        updateKey: sourceKey,
+        onUpdate: () => sourceController.update(),
+      },
+    );
+
+    if (!effects) return;
+
+    const listElements: ListElements | undefined =
+      elements && interaction.listContainer
+        ? { controllerKey: sourceKey, listContainer: interaction.listContainer, elements }
+        : undefined;
+
+    resolved.push({ sequenceConfig, cacheKey, listElements, effects });
+  });
+
+  return resolved;
+}
+
+/**
+ * Resolves the interaction's effects and sequences for this pass and starts their plugins — or none
+ * of them while one is deferred. They are held back together: the readiness is `true` only once
+ * every one of them is ready, so sibling effects of one trigger attach (and play) together.
+ *
+ * A unit whose target is not connected yet holds the others back while one of its plugins is
+ * deferred, since that is known without its target. Its async plugins only start once the target
+ * connects, so they are not waited for; the target's pass runs this interaction again (see
+ * `addEffectsForTarget`).
+ */
+function _prepareInteraction(
+  sourceKey: string,
+  sourceController: IInteractionController,
+  instance: Interact,
+  interaction: Interaction,
+  elements?: HTMLElement[],
+): { readiness: PluginsReadiness; effects: ConnectedEffect[]; sequences: PreparedSequence[] } {
+  const effects = _resolveEffects(sourceKey, sourceController, instance, interaction, elements);
+  const sequences = _resolveSequences(sourceKey, sourceController, instance, interaction, elements);
+
+  // checked up front, so no plugin of the interaction runs while one of them is deferred
+  const isDeferred =
+    effects.some(({ effectOptions, target }) =>
+      _isDeferred(target || interaction.key, effectOptions),
+    ) || sequences.some((sequence) => _isSequenceDeferred(sequence.effects, sourceKey));
+
+  if (isDeferred) {
+    return { readiness: false, effects: [], sequences: [] };
+  }
+
+  const connectedEffects = effects.filter(
+    (effect): effect is ConnectedEffect => !!effect.targetController,
+  );
+
+  // Effect-level plugins act on the effect's target element before it is resolved — all of them
+  // start before any target resolves, so async ones run concurrently.
+  const readinesses = connectedEffects.map(({ effectOptions, target, targetController }) =>
+    _applyPlugins(
+      targetController,
+      targetController.element,
+      effectOptions,
+      target || interaction.key,
+      'effect',
+    ),
+  );
+
+  const preparedSequences: PreparedSequence[] = [];
+
+  sequences.forEach((sequence) => {
+    const prepared = _prepareSequenceEffects(sequence.effects, sourceKey, sourceController);
+
+    if (prepared) {
+      preparedSequences.push({ ...sequence, effects: prepared });
+      readinesses.push(...prepared.map((effect) => effect.readiness));
+    }
+  });
+
+  return {
+    readiness: _combineReadiness(...readinesses),
+    effects: connectedEffects,
+    sequences: preparedSequences,
+  };
+}
+
+/**
+ * Attaches the interaction's effects and sequences once all of them are ready, or holds them back
+ * together — re-running the pass of `passController` once they may be. Returns whether they were
+ * held back.
+ */
+function _addInteraction(
+  sourceKey: string,
+  sourceController: IInteractionController,
+  instance: Interact,
+  interaction: Interaction,
+  elements?: HTMLElement[],
+  passController: IInteractionController = sourceController,
+): boolean {
+  const prepared = _prepareInteraction(
+    sourceKey,
+    sourceController,
+    instance,
+    interaction,
+    elements,
+  );
+
+  if (prepared.readiness !== true) {
+    _hold(prepared.readiness, passController, interaction, sourceController, true, elements);
+    return true;
+  }
+
+  const interactionsToApply: InteractionsToApply = [];
+
+  prepared.effects.forEach(({ interactionId, effectOptions, target, targetController }) => {
+    const [sourceElements, targetElements] = _getInteractionElements(
+      interaction,
+      effectOptions,
+      sourceController.element,
+      sourceController.useFirstChild,
+      targetController.element,
+      targetController.useFirstChild,
+      elements,
+    );
+
+    if (!sourceElements || !targetElements) {
+      return;
+    }
+
+    instance.addedInteractions[interactionId] = true;
+
+    const key = target || interaction.key;
+    const selectorCondition = getSelectorCondition(
+      effectOptions.conditions || [],
+      instance.dataCache.conditions,
+    );
+
+    interactionsToApply.push([
+      key,
+      interaction,
+      effectOptions,
+      sourceElements,
+      targetElements,
+      selectorCondition,
+      targetController.useFirstChild,
+      sourceKey,
+    ]);
   });
 
   // apply the effects in reverse to return to the order specified by the user to ensure order of composition is as defined
@@ -531,7 +702,9 @@ function _addInteraction(
     _applyInteraction(...interaction);
   });
 
-  _processSequences(sourceKey, sourceController, instance, interaction, elements);
+  _processSequences(sourceController, instance, interaction, prepared.sequences, elements);
+
+  return false;
 }
 
 function _getSequencePolicy(
@@ -568,30 +741,18 @@ function _isSequenceConfigRef(
 }
 
 /**
- * Shared logic for building animation group args from a sequence config.
- * Handles sequence-level and effect-level media conditions, target resolution, and element lookup.
- * Returns null when the sequence should be skipped (conditions not met, missing targets, etc.).
- *
- * When `listElements` is provided (from addListItems), effects matching the specified controller
- * and listContainer will resolve targets from the provided elements instead of querying the DOM.
- * Returns null if listElements was provided but no effects matched it (avoids duplicate sequences).
- *
- * When the sequence's plugins hold it back, `options.onHold` gets the readiness and null is returned.
+ * The sequence's effects, each with its reduced-motion variant resolved and its target key —
+ * effects cancelled by their media or policy are dropped, so they neither hold back the sequence
+ * nor run their plugins. Returns null when the sequence's own conditions do not match.
  */
-function _buildAnimationGroupArgsFromSequence(
+function _resolveSequenceEffects(
   sequenceConfig: SequenceConfig,
   interaction: InteractionTrigger,
   cacheKey: string,
   sourceKey: string,
-  sourceController: IInteractionController,
   instance: Interact,
-  options: {
-    updateKey: string;
-    onUpdate: () => void;
-    onHold: (readiness: PluginsReadiness) => void;
-  },
-  listElements?: ListElements,
-): AnimationGroupArgs[] | null {
+  options: { updateKey: string; onUpdate: () => void },
+): ResolvedSequenceEffect[] | null {
   const seqMql = getMediaQuery(sequenceConfig.conditions || [], instance.dataCache.conditions);
 
   if (seqMql) {
@@ -608,10 +769,8 @@ function _buildAnimationGroupArgsFromSequence(
   };
 
   const policy = _getSequencePolicy(sequenceConfig, interaction, instance);
-  const resolvedEffects: Array<{ effectOptions: Effect; target: string | undefined }> = [];
+  const resolvedEffects: ResolvedSequenceEffect[] = [];
 
-  // Variants resolve first, so an effect cancelled by its media or reduced-motion policy neither
-  // holds back the sequence nor runs its plugins.
   for (const effect of seqEffects) {
     const effectId = (effect as EffectRef).effectId;
     const effectOptions = _resolveVariant(
@@ -631,25 +790,28 @@ function _buildAnimationGroupArgsFromSequence(
     resolvedEffects.push({ effectOptions, target });
   }
 
-  // A sequence is built as a whole, so one deferred effect defers all of it — checked up front so
-  // no plugin of the sequence runs while it is deferred.
-  const isDeferred = resolvedEffects.some(({ effectOptions, target }) =>
+  return resolvedEffects;
+}
+
+/** A sequence is built as a whole, so one deferred effect defers all of it. */
+function _isSequenceDeferred(effects: ResolvedSequenceEffect[], sourceKey: string): boolean {
+  return effects.some(({ effectOptions, target }) =>
     _isDeferred(target || sourceKey, effectOptions),
   );
+}
 
-  if (isDeferred) {
-    options.onHold(false);
-    return null;
-  }
+/**
+ * Starts the plugins of the sequence's effects — all of them before any of its targets resolves,
+ * so async ones run concurrently. Returns null when a target is not connected.
+ */
+function _prepareSequenceEffects(
+  effects: ResolvedSequenceEffect[],
+  sourceKey: string,
+  sourceController: IInteractionController,
+): PreparedSequenceEffect[] | null {
+  const preparedEffects: PreparedSequenceEffect[] = [];
 
-  const preparedEffects: Array<{
-    effectOptions: Effect;
-    targetController: IInteractionController;
-    resolvedTargetKey: string;
-    readiness: PluginsReadiness;
-  }> = [];
-
-  for (const { effectOptions, target } of resolvedEffects) {
+  for (const { effectOptions, target } of effects) {
     let targetController;
     if (target) {
       targetController = Interact.getController(target);
@@ -660,8 +822,7 @@ function _buildAnimationGroupArgsFromSequence(
 
     const resolvedTargetKey = target || sourceKey;
 
-    // Effect-level plugins act on the effect's target element before it is resolved — all of the
-    // sequence's plugins start before any of its targets resolves, so async ones run concurrently.
+    // Effect-level plugins act on the effect's target element before it is resolved.
     const readiness = _applyPlugins(
       targetController,
       targetController.element,
@@ -673,13 +834,21 @@ function _buildAnimationGroupArgsFromSequence(
     preparedEffects.push({ effectOptions, targetController, resolvedTargetKey, readiness });
   }
 
-  const readiness = _combineReadiness(...preparedEffects.map((prepared) => prepared.readiness));
+  return preparedEffects;
+}
 
-  if (readiness !== true) {
-    options.onHold(readiness);
-    return null;
-  }
-
+/**
+ * Builds the animation group args of a sequence whose plugins are ready, resolving its targets.
+ * Returns null when the sequence should be skipped (missing targets, etc.).
+ *
+ * When `listElements` is provided (from addListItems), effects matching the specified controller
+ * and listContainer will resolve targets from the provided elements instead of querying the DOM.
+ * Returns null if listElements was provided but no effects matched it (avoids duplicate sequences).
+ */
+function _buildAnimationGroupArgsFromSequence(
+  preparedEffects: PreparedSequenceEffect[],
+  listElements?: ListElements,
+): AnimationGroupArgs[] | null {
   const animationGroupArgs: AnimationGroupArgs[] = [];
   let usedListElements = false;
 
@@ -773,54 +942,16 @@ function _resolveListItemIndices(
   });
 }
 
+/** Attaches the interaction's prepared sequences, whose plugins are all ready. */
 function _processSequences(
-  sourceKey: string,
   sourceController: IInteractionController,
   instance: Interact,
   interaction: Interaction,
+  sequences: PreparedSequence[],
   elements?: HTMLElement[],
 ) {
-  interaction.sequences?.forEach((seqOrRef) => {
-    let sequenceConfig: SequenceConfig;
-
-    if (_isSequenceConfigRef(seqOrRef)) {
-      const resolved = instance.dataCache.sequences[seqOrRef.sequenceId];
-
-      if (!resolved) {
-        console.warn(`Interact: Sequence "${seqOrRef.sequenceId}" not found in cache`);
-        return;
-      }
-
-      sequenceConfig = { ...resolved, ...seqOrRef };
-    } else {
-      sequenceConfig = seqOrRef as SequenceConfig;
-    }
-
-    const sequenceId = sequenceConfig.sequenceId || generateId();
-    const cacheKey = getInterpolatedKey(`${sourceKey}::seq::${sequenceId}`, sourceKey);
-
-    if (instance.addedInteractions[cacheKey] && !elements) return;
-
-    const listElements: ListElements | undefined =
-      elements && interaction.listContainer
-        ? { controllerKey: sourceKey, listContainer: interaction.listContainer, elements }
-        : undefined;
-
-    const animationGroupArgs = _buildAnimationGroupArgsFromSequence(
-      sequenceConfig,
-      interaction,
-      cacheKey,
-      sourceKey,
-      sourceController,
-      instance,
-      {
-        updateKey: sourceKey,
-        onUpdate: () => sourceController.update(),
-        onHold: (readiness) =>
-          _hold(readiness, sourceController, interaction, sourceController, true, elements),
-      },
-      listElements,
-    );
+  sequences.forEach(({ sequenceConfig, cacheKey, listElements, effects }) => {
+    const animationGroupArgs = _buildAnimationGroupArgsFromSequence(effects, listElements);
 
     if (!animationGroupArgs) return;
 
@@ -901,7 +1032,7 @@ function _processSequencesForTarget(
   seqInteractionIds.forEach((seqInteractionId_) => {
     const seqVariations = sequences[seqInteractionId_];
 
-    seqVariations.some(({ sequence: sequenceConfig, ...interaction }) => {
+    seqVariations.some(({ sequence: sequenceConfig, owner, ...interaction }) => {
       const interactionMql = getMediaQuery(
         interaction.conditions || [],
         instance.dataCache.conditions,
@@ -940,26 +1071,51 @@ function _processSequencesForTarget(
         return true;
       }
 
+      // The sequence attaches with its siblings in the source interaction, waiting for them.
+      if (
+        !elements &&
+        (_addInteraction(
+          sourceKey!,
+          sourceController,
+          instance,
+          owner,
+          undefined,
+          targetController,
+        ) ||
+          instance.addedInteractions[cacheKey])
+      ) {
+        return true;
+      }
+
+      const effects = _resolveSequenceEffects(
+        sequenceConfig,
+        interaction,
+        cacheKey,
+        sourceKey!,
+        instance,
+        { updateKey: targetKey, onUpdate: () => targetController.update() },
+      );
+
+      if (!effects) return true;
+
+      const prepared = _isSequenceDeferred(effects, sourceKey!)
+        ? null
+        : _prepareSequenceEffects(effects, sourceKey!, sourceController);
+      const readiness = prepared
+        ? _combineReadiness(...prepared.map((effect) => effect.readiness))
+        : false;
+
+      if (readiness !== true) {
+        _hold(readiness, targetController, interaction, sourceController, true);
+        return true;
+      }
+
       const listElements: ListElements | undefined =
         elements && listContainer
           ? { controllerKey: targetKey, listContainer, elements }
           : undefined;
 
-      const animationGroupArgs = _buildAnimationGroupArgsFromSequence(
-        sequenceConfig,
-        interaction,
-        cacheKey,
-        sourceKey!,
-        sourceController,
-        instance,
-        {
-          updateKey: targetKey,
-          onUpdate: () => targetController.update(),
-          onHold: (readiness) =>
-            _hold(readiness, targetController, interaction, sourceController, true),
-        },
-        listElements,
-      );
+      const animationGroupArgs = _buildAnimationGroupArgsFromSequence(prepared!, listElements);
 
       if (!animationGroupArgs) return true;
 
@@ -1026,7 +1182,7 @@ function addEffectsForTarget(
     const effectVariations = effects[interactionId_];
 
     // use `some` to short-circuit after the first effect that matches the conditions
-    effectVariations.some(({ effect, ...interaction }, variationIndex) => {
+    effectVariations.some(({ effect, owner, ...interaction }, variationIndex) => {
       const interactionMql = getMediaQuery(
         interaction.conditions || [],
         instance!.dataCache.conditions,
@@ -1085,6 +1241,23 @@ function addEffectsForTarget(
 
         if (sourceReadiness !== true) {
           _hold(sourceReadiness, targetController, interaction, sourceController, false);
+          return true;
+        }
+
+        // The effect attaches with its siblings in the source interaction, waiting for them — this
+        // target may resume before the source does (e.g. a plugin released for this key only).
+        if (
+          !elements &&
+          (_addInteraction(
+            sourceKey!,
+            sourceController,
+            instance,
+            owner,
+            undefined,
+            targetController,
+          ) ||
+            instance.addedInteractions[interactionId])
+        ) {
           return true;
         }
 

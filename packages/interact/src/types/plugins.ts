@@ -35,9 +35,9 @@ export type InteractPluginCleanup = () => void;
  * A plugin is a plain callback. It receives the value of its `$`-prefixed config field and a
  * context, and may return a cleanup function. Interact is agnostic to the shape of `value`.
  *
- * A plugin may also be async and return a promise (of an optional cleanup). The interaction,
- * effect, or sequence carrying its field is then held back — like a deferred plugin — until the
- * promise settles, so its targets resolve against the DOM the plugin produced. A `viewEnter` entry
+ * A plugin may also be async and return a promise (of an optional cleanup). The interaction
+ * carrying its field (on itself, an effect, or a sequence effect) is then held back — like a
+ * deferred plugin — until the promise settles, so its targets resolve against the DOM the plugin produced. A `viewEnter` entry
  * or a source `animationend` that happens meanwhile is replayed once the trigger attaches. A
  * rejected promise is logged and the unit proceeds without the plugin.
  */
@@ -50,8 +50,9 @@ export type InteractPlugin = (
 export type InteractPluginOptions = {
   /**
    * Name(s) this plugin is deferred until, released with `Interact.ready(name, key?)`. While
-   * deferred, the plugin does not run, and neither does the interaction, effect, or sequence that
-   * carries its `$`-prefixed field (they may resolve against the DOM the plugin creates). A plugin
+   * deferred, the plugin does not run, and neither does the interaction that carries its
+   * `$`-prefixed field — on itself, an effect, or a sequence effect — so its effects and sequences
+   * attach together (they may resolve against the DOM the plugin creates). A plugin
    * with several names stays deferred until all of them are released. A `viewEnter` entry or a
    * source `animationend` that happens while deferred is replayed once the trigger attaches.
    */

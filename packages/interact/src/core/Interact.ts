@@ -276,8 +276,8 @@ export class Interact {
    * (on an interaction or effect), Interact invokes the plugin with the field's value and a
    * context. Interact is agnostic to what the plugin does — see the `InteractPlugin` type.
    *
-   * With `options.defer`, the plugin — and every interaction, effect, or sequence carrying its
-   * field — is deferred until each named event is released via `Interact.ready()`.
+   * With `options.defer`, the plugin — and every interaction carrying its field, on itself or on
+   * one of its effects or sequences — is deferred until each named event is released via `Interact.ready()`.
    */
   static use(name: string, plugin: InteractPlugin, options?: InteractPluginOptions): void {
     Interact.plugins.set(name, plugin);
@@ -594,7 +594,7 @@ function parseConfig(
         targetEntry.interactionIds.add(interactionId);
       }
 
-      targetEntry.effects[interactionId].push({ ...rest, effect });
+      targetEntry.effects[interactionId].push({ ...rest, effect, owner: interaction });
       targetEntry.selectors.add(getSelector(effect, { useFirstChild: useCustomElement }));
     });
 
@@ -637,6 +637,7 @@ function parseConfig(
           targetEntry.sequences[seqInteractionId].push({
             ...rest,
             sequence: sequenceConfig,
+            owner: interaction,
           });
           targetEntry.selectors.add(effectSelector);
         }

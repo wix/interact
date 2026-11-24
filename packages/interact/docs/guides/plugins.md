@@ -70,7 +70,9 @@ Interact.use('myPlugin', async (value, { root }) => {
 });
 ```
 
-Until the promise settles, Interact holds back what carries the field — exactly what [deferring](#deferring-plugins) holds back — and applies it once the plugin's DOM is in place, so selectors never resolve against unprepared markup. Other effects are applied immediately.
+Until the promise settles, Interact holds back the interaction that carries the field — exactly what [deferring](#deferring-plugins) holds back — and applies it once the plugin's DOM is in place, so selectors never resolve against unprepared markup. Other interactions are applied immediately.
+
+- An async plugin starts only once its element is connected, so an effect whose target connects after its siblings were attached is held back on its own.
 
 - The plugin runs once per connect: other resolution passes wait for the same promise instead of calling it again. Like the dedup, this relies on the value's identity: a primitive value (e.g. `$fonts: true`) is not awaited, so it holds nothing back.
 - If the element disconnects (or re-connects after a media-query change) while the promise is pending, the resolved cleanup runs right away and nothing is applied for the stale connection.
@@ -177,8 +179,10 @@ While a plugin is deferred, Interact also defers everything that may resolve aga
 | Where the `$<name>` field sits                                                    | What is deferred                                 |
 | --------------------------------------------------------------------------------- | ------------------------------------------------ |
 | On an interaction                                                                 | The whole interaction: its effects and sequences |
-| On an effect in `effects` (or in its definition under the config's `effects` map) | Only that effect                                 |
-| On any effect of a sequence                                                       | The whole sequence                               |
+| On an effect in `effects` (or in its definition under the config's `effects` map) | The whole interaction: its effects and sequences |
+| On any effect of a sequence                                                       | The whole interaction: its effects and sequences |
+
+An interaction's effects and sequences wait for each other, so they attach (and play) together — whatever plugin holds one of them back, and even if its target is a different element, connected or not. Releasing only that element's key (`Interact.ready(name, key)`) attaches all of them.
 
 Everything else in the config is applied immediately, as usual. Once released, deferred parts are applied exactly as they would have been on connect.
 

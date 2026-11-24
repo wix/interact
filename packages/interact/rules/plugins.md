@@ -24,7 +24,7 @@ Interact.use('<plugin-name>', (value, context) => {
 });
 ```
 
-- An async plugin (returning a promise) holds back what carries its field — same scope as deferring, below — until the promise settles. It runs once per connect; a primitive value (no identity to dedup by) is not awaited; a stale resolution (element disconnected meanwhile) only runs its cleanup; a rejection is logged and the held-back parts apply without it.
+- An async plugin (returning a promise) holds back the interaction carrying its field — same scope as deferring, below — until the promise settles; it starts only once its element connects, so siblings already attached by then are not held. It runs once per connect; a primitive value (no identity to dedup by) is not awaited; a stale resolution (element disconnected meanwhile) only runs its cleanup; a rejection is logged and the held-back parts apply without it.
 
 - `Interact.getPlugin(name) / Interact.getPluginsNames()` inspect the registry.
 
@@ -40,7 +40,7 @@ Interact.create(config);
 useEffect(() => Interact.ready('hydrated'), []);
 ```
 
-- While deferred, the plugin does not run, and neither does what carries its `$<name>` field: the whole interaction (interaction-level field), only that effect (effect-level field), or the whole sequence (field on any sequence effect). Everything else applies immediately.
+- While deferred, the plugin does not run, and neither does what carries its `$<name>` field: the whole interaction — its effects and sequences wait for each other, wherever the field sits (interaction, effect, or sequence effect) and even when a sibling's target is another element, connected or not; releasing only that element's key attaches all of them. Everything else applies immediately.
 - `Interact.ready(name, key)` releases a name for one element only; `Interact.ready(name)` releases it for all.
 - A `viewEnter` `once` entry, or a source `animationend` matching an `animationEnd` trigger, that happens while held back (deferred or async) is replayed when the trigger attaches (it plays once) — except for an interaction-level field on an interaction with its own `selector` / `listContainer` (its sources may not exist yet, so they aren't observed). `click` / `hover` events fired while held back are NOT replayed.
 - `defer` may list several names (e.g. `['hydrated', 'fonts']`); all must be released. Release `'fonts'` with `document.fonts.ready.then(() => Interact.ready('fonts'))`.

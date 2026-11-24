@@ -23,8 +23,15 @@ export type InteractCache = {
   interactions: {
     [path: string]: {
       triggers: Interaction[];
-      effects: Record<string, (InteractionTrigger & { effect: Effect | EffectRef })[]>;
-      sequences: Record<string, (InteractionTrigger & { sequence: SequenceConfig })[]>;
+      // `owner` is the source interaction the effect or sequence belongs to, holding its siblings
+      effects: Record<
+        string,
+        (InteractionTrigger & { effect: Effect | EffectRef; owner: Interaction })[]
+      >;
+      sequences: Record<
+        string,
+        (InteractionTrigger & { sequence: SequenceConfig; owner: Interaction })[]
+      >;
       interactionIds: Set<string>;
       selectors: Set<string>;
     };
