@@ -19,3 +19,6 @@ tsconfig.tsbuildinfo
 llms.txt
 llms-full.txt
 packages/interact/llms.txt
+
+# dev-3.0 local config
+.dev3/config.json

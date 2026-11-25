@@ -119,6 +119,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.8.5] - 2026-11-25
+
+#### Fixed
+
+- Async plugins: `InteractPlugin` may return a promise, optionally resolving to a cleanup. Until it settles, the interaction, effect, or sequence carrying its `$`-prefixed field is held back (#428)
+- While a `viewEnter` or `animationEnd` unit is held back (deferred or async) (#428)
+- An interaction's effects and sequences wait for each other while any of them is held back by a plugin, so they attach and play together (#428)
+- An explicit `selector` / `listContainer` query that matches no elements no longer falls back to the root (or its first child) (#428)
+- An effect cancelled by its reduced-motion policy or media conditions no longer holds back the rest of its sequence while its plugin is deferred (#428)
+- Cross-element targets apply the source interaction's plugins on the source controller before resolving, so triggers are not attached before interaction-level plugins run (#428)
+- List-item and cross-element target passes attach a held unit to every item on the first pass that needs it, instead of marking it added for new items only (#428)
+
 ### [2.8.4] - 2026-11-22
 
 #### Changed
