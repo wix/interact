@@ -1,6 +1,12 @@
 import type { AnimationGroup } from '@wix/motion';
 import { getAnimation } from '@wix/motion';
-import type { TimeEffect, HandlerObjectMap, ViewEnterParams, InteractOptions } from '../types';
+import type {
+  TimeEffect,
+  HandlerObject,
+  HandlerObjectMap,
+  ViewEnterParams,
+  InteractOptions,
+} from '../types';
 import {
   effectToAnimationOptions,
   addHandlerToMap,
@@ -54,8 +60,21 @@ const observers: Record<string, IntersectionObserver> = {};
 const handlerMap = new WeakMap() as HandlerObjectMap;
 const elementFirstRun = new WeakSet<HTMLElement>();
 const elementObserverMap = new WeakMap<HTMLElement, IntersectionObserver>();
+// per source, the observer keys it is latched on (see `latchViewEnter`) and whether it entered on each
+const latches = new WeakMap<HTMLElement, Map<string, boolean>>();
 let viewEnterOptions: Partial<ViewEnterParams> = {};
 let sharedExitObserver: IntersectionObserver | null = null;
+
+// Stops observing `source` on the observer it is currently on (`observer`, unless it moved to the
+// safe one), so a later `observe()` reports its state anew.
+function unobserve(source: HTMLElement, observer: IntersectionObserver, forget?: boolean) {
+  (elementObserverMap.get(source) || observer).unobserve(source);
+  elementFirstRun.delete(source);
+
+  if (forget) {
+    elementObserverMap.delete(source);
+  }
+}
 
 function setOptions(options: Partial<ViewEnterParams>) {
   viewEnterOptions = options;
@@ -88,8 +107,12 @@ function getExitObserver() {
   return sharedExitObserver;
 }
 
+function getObserverKey(options: ViewEnterParams, isSafeMode: boolean = false) {
+  return JSON.stringify({ ...options, isSafeMode });
+}
+
 function getObserver(options: ViewEnterParams, isSafeMode: boolean = false) {
-  const key = JSON.stringify({ ...options, isSafeMode });
+  const key = getObserverKey(options, isSafeMode);
 
   if (observers[key]) {
     return observers[key];
@@ -204,9 +227,7 @@ function addViewEnterHandler(
           sourceHandlers.size === 0 ||
           (sourceHandlers.size === 1 && sourceHandlers.has(handlerObj))
         ) {
-          const currentObserver = elementObserverMap.get(source) || observer;
-          currentObserver.unobserve(source);
-          elementFirstRun.delete(source);
+          unobserve(source, observer);
         }
 
         // we delete the handlers only when there is no running animation to cancel
@@ -267,8 +288,7 @@ function addViewEnterHandler(
   };
 
   const cleanup = () => {
-    const currentObserver = elementObserverMap.get(source) || observer;
-    currentObserver.unobserve(source);
+    unobserve(source, observer, true);
 
     if (type === 'repeat' || type === 'state') {
       const exitObserver = getExitObserver();
@@ -276,8 +296,6 @@ function addViewEnterHandler(
     }
 
     animation.cancel();
-    elementFirstRun.delete(source);
-    elementObserverMap.delete(source);
   };
 
   handlerObj = { source, target, handler, cleanup };
@@ -294,10 +312,82 @@ function addViewEnterHandler(
     const exitObserver = getExitObserver();
     exitObserver.observe(source);
   }
+
+  // The source entered while this trigger was held back (see `latchViewEnter`) — the observer
+  // may never report that entry again, so play it now.
+  if (type === 'once' && latches.get(source)?.get(getObserverKey(mergedOptions))) {
+    handler(true);
+  }
+}
+
+/**
+ * Latches an entry of `source` while a `viewEnter` interaction on it is held back (e.g. by a
+ * deferred or async plugin), observing it with the same observer the trigger will use. A `once`
+ * trigger later attached with the same params replays a latched entry, so an element that entered
+ * and left the viewport while held back still plays its entrance.
+ */
+function latchViewEnter(source: HTMLElement, options: ViewEnterParams = {}): (() => void) | void {
+  const mergedOptions = { ...viewEnterOptions, ...options };
+  const key = getObserverKey(mergedOptions);
+  let sourceLatches = latches.get(source);
+
+  if (!sourceLatches) {
+    sourceLatches = new Map();
+    latches.set(source, sourceLatches);
+  }
+
+  if (sourceLatches.has(key)) {
+    return;
+  }
+
+  sourceLatches.set(key, false);
+
+  const observer = getObserver(mergedOptions);
+
+  // Declared early so the handler closure can reference it for self-removal
+  let handlerObj: HandlerObject;
+
+  const handler = (isIntersecting?: boolean) => {
+    if (!isIntersecting) return;
+
+    sourceLatches.set(key, true);
+
+    const sourceHandlers = handlerMap.get(source);
+    sourceHandlers?.delete(handlerObj);
+
+    if (!sourceHandlers || sourceHandlers.size === 0) {
+      unobserve(source, observer);
+    }
+  };
+
+  const cleanup = () => unobserve(source, observer, true);
+
+  handlerObj = { source, target: source, handler, cleanup };
+
+  addHandlerToMap(handlerMap, source, handlerObj);
+
+  elementObserverMap.set(source, observer);
+  observer.observe(source);
+
+  return () => {
+    sourceLatches.delete(key);
+
+    if (!sourceLatches.size && latches.get(source) === sourceLatches) {
+      latches.delete(source);
+    }
+
+    const sourceHandlers = handlerMap.get(source);
+
+    // still observing for this latch alone (it did not see an entry, and no trigger attached since)
+    if (sourceHandlers?.delete(handlerObj) && sourceHandlers.size === 0) {
+      cleanup();
+    }
+  };
 }
 
 function removeViewEnterHandler(element: HTMLElement) {
   removeElementFromHandlerMap(handlerMap, element);
+  latches.delete(element);
 }
 
 function reset() {
@@ -308,6 +398,7 @@ function reset() {
 export default {
   add: addViewEnterHandler,
   remove: removeViewEnterHandler,
+  latch: latchViewEnter,
   setOptions,
   reset,
 };

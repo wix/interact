@@ -10,8 +10,18 @@ export interface IInteractionController {
   _observers: WeakMap<HTMLElement, MutationObserver>;
   /** Cleanup callbacks returned by plugins applied to this controller's element. */
   _pluginCleanups: InteractPluginCleanup[];
-  /** Plugin config values already applied during the current connect (dedup guard). */
-  _appliedPlugins: WeakSet<object>;
+  /**
+   * Plugin config values applied during the current connect (dedup guard): `true` once applied, or
+   * the in-flight promise of an async plugin, so concurrent passes await it instead of re-running it.
+   */
+  _appliedPlugins: WeakMap<object, true | Promise<void>>;
+  /** Incremented on every disconnect; async plugin continuations from an older connect are stale. */
+  _connectId: number;
+  /**
+   * Trigger latches on this controller's elements while plugins hold their interactions back (see
+   * `TriggerLatch`), released on disconnect, or once their element leaves this controller's DOM.
+   */
+  _latches: { element: HTMLElement; release: () => void }[];
   connect(key?: string): void;
   disconnect(options?: { removeFromCache?: boolean }): void;
   update(): void;

@@ -50,12 +50,33 @@ type InteractPlugin = (
     scope: 'interaction' | 'effect';
     config: Record<string, unknown>; // the interaction/effect object the field was on
   },
-) => void | (() => void); // optionally return a cleanup function
+) => void | (() => void) | PromiseLike<void | (() => void)>; // optionally return a cleanup function, or a promise of one
 ```
 
 - Plugins run at **connect** time (when the element enters the DOM / is added).
+- A plugin may be **async** — see [Async plugins](#async-plugins).
 - A returned **cleanup** runs on disconnect, on teardown (`Interact.destroy()`), and when an interaction re-connects after a media-query change — so plugins can fully undo their work.
 - Each distinct plugin value is applied **once per connect**, even if referenced by multiple triggers on the same element. That dedup relies on the value's identity, so plugin values should be objects.
+
+### Async plugins
+
+A plugin that prepares the DOM asynchronously (e.g. after loading a font or a module) can return a promise, optionally resolving to its cleanup:
+
+```ts
+Interact.use('myPlugin', async (value, { root }) => {
+  await document.fonts.ready;
+  const undo = prepare(root, value);
+  return undo;
+});
+```
+
+Until the promise settles, Interact holds back the interaction that carries the field — exactly what [deferring](#deferring-plugins) holds back — and applies it once the plugin's DOM is in place, so selectors never resolve against unprepared markup. Other interactions are applied immediately.
+
+- An async plugin starts only once its element is connected, so an effect whose target connects after its siblings were attached is held back on its own.
+
+- The plugin runs once per connect: other resolution passes wait for the same promise instead of calling it again. Like the dedup, this relies on the value's identity: a primitive value (e.g. `$fonts: true`) is not awaited, so it holds nothing back.
+- If the element disconnects (or re-connects after a media-query change) while the promise is pending, the resolved cleanup runs right away and nothing is applied for the stale connection.
+- A rejected promise is logged with `console.error`, and the held-back parts are applied without the plugin.
 
 ### Type-safe config (optional)
 
@@ -158,10 +179,14 @@ While a plugin is deferred, Interact also defers everything that may resolve aga
 | Where the `$<name>` field sits                                                    | What is deferred                                 |
 | --------------------------------------------------------------------------------- | ------------------------------------------------ |
 | On an interaction                                                                 | The whole interaction: its effects and sequences |
-| On an effect in `effects` (or in its definition under the config's `effects` map) | Only that effect                                 |
-| On any effect of a sequence                                                       | The whole sequence                               |
+| On an effect in `effects` (or in its definition under the config's `effects` map) | The whole interaction: its effects and sequences |
+| On any effect of a sequence                                                       | The whole interaction: its effects and sequences |
+
+An interaction's effects and sequences wait for each other, so they attach (and play) together — whatever plugin holds one of them back, and even if its target is a different element, connected or not. Releasing only that element's key (`Interact.ready(name, key)`) attaches all of them.
 
 Everything else in the config is applied immediately, as usual. Once released, deferred parts are applied exactly as they would have been on connect.
+
+A `viewEnter` entrance is not lost while deferred (or while an [async plugin](#async-plugins) is pending): Interact keeps observing the source element, and if it entered the viewport meanwhile, a `once` entrance plays as soon as its trigger attaches — even if the element has already scrolled out of view. Likewise, an `animationEnd` chain is not broken: Interact records the source's `animationend` events meanwhile, and if one of them matches the trigger's `effectId`, its effect plays as soon as the trigger attaches (once, however many matched). This holds even for an interaction-level field on an interaction whose sources come from its own `selector` / `listContainer` — the interaction still attaches once the plugin is done, to the sources it finds then. Its `animationend` events are recorded for sources the plugin creates too; a `viewEnter` entry, though, only for sources that already existed before the plugin ran and that it kept — one it creates or replaces cannot be observed before it exists, so its entrance plays when it next enters the viewport. Other triggers (`click`, `hover`, …) are not replayed: events fired while held back are ignored. Repeating `viewEnter` types (`alternate`, `repeat`, `state`) pick up the element's current visibility when they attach.
 
 - `Interact.ready(name, key)` releases a name for a single element only — useful when parts of the page hydrate separately (e.g. Suspense boundaries).
 - `defer` accepts several names; the plugin stays deferred until all are released. A name can stand for any event, not just hydration — for example, `@wix/splittext`'s `lines` mode measures text, so it should wait for fonts:

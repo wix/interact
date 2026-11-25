@@ -263,7 +263,7 @@ Registers a plugin under a name. When an interaction or effect carries a `$<name
 **Parameters:**
 
 - `name: string` - The plugin name, matched against `$<name>` config fields
-- `plugin: InteractPlugin` - `(value, context) => void | (() => void)`; the returned cleanup runs on disconnect/teardown
+- `plugin: InteractPlugin` - `(value, context) => void | (() => void)`; the returned cleanup runs on disconnect/teardown. May return a promise (of an optional cleanup) — what carries its field is held back until it settles. See [Async plugins](../guides/plugins.md#async-plugins)
 - `options.defer?: string | string[]` - Name(s) to defer the plugin until. While deferred, neither the plugin nor the interaction, effect, or sequence carrying its `$<name>` field runs; each name is released with [`Interact.ready()`](#interactreadyname-key). See [Deferring plugins](../guides/plugins.md#deferring-plugins)
 
 **Example:**
