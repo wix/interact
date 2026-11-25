@@ -9,7 +9,7 @@
 
 ## Checklist
 
-- I have read the [Contributing Guide](../CONTRIBUTING.md)
+- I have read the [Contributing Guide](https://github.com/wix/interact/blob/master/CONTRIBUTING.md)
 - I have added/updated tests for my changes (if applicable)
 - I have updated documentation/rules/skills (if applicable)
 
