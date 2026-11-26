@@ -1,4 +1,4 @@
-import type { RangeOffset } from '@wix/motion';
+import type { LengthPercentage, RangeOffset } from '@wix/motion';
 
 export type { RangeOffset };
 
@@ -12,7 +12,8 @@ export type TriggerType =
   | 'viewProgress'
   | 'pointerMove'
   | 'activate'
-  | 'interest';
+  | 'interest'
+  | 'scrollState';
 
 export type EventTriggerKind = 'toggle' | 'enterLeave';
 export type EventTriggerConfigToggle = readonly string[] | string[];
@@ -42,4 +43,17 @@ export type AnimationEndParams = {
   effectId: string;
 };
 
-export type TriggerParams = ViewEnterParams | PointerMoveParams | AnimationEndParams;
+export type ScrollDirection = 'end' | 'start';
+
+export type ScrollStateParams = {
+  offset?: number | LengthPercentage;
+  direction?: ScrollDirection;
+  axis?: 'y' | 'x';
+  scroller?: 'root' | 'self' | 'nearest';
+};
+
+export type TriggerParams =
+  | ViewEnterParams
+  | PointerMoveParams
+  | AnimationEndParams
+  | ScrollStateParams;

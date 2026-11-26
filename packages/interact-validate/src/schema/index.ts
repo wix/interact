@@ -6,6 +6,7 @@ export {
   ViewEnterParams,
   PointerMoveParams,
   AnimationEndParams,
+  ScrollStateParams,
   TriggerParams,
 } from './interactions';
 

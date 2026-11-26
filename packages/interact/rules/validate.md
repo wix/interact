@@ -263,6 +263,7 @@ import {
   ViewEnterParams,
   PointerMoveParams,
   AnimationEndParams,
+  ScrollStateParams,
   TriggerParams,
   Effect,
   EffectRef,

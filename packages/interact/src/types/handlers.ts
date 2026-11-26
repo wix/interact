@@ -4,6 +4,7 @@ import type {
   ViewEnterParams,
   PointerMoveParams,
   AnimationEndParams,
+  ScrollStateParams,
 } from './triggers';
 import type { Effect, AnimationOptions } from './effects';
 import type { IInteractionController } from './controller';
@@ -17,6 +18,7 @@ export type InteractionParamsTypes = {
   pointerMove: PointerMoveParams;
   activate: Record<string, never>;
   interest: Record<string, never>;
+  scrollState: ScrollStateParams;
 };
 
 export type InteractOptions = {

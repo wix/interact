@@ -25,6 +25,7 @@ const TIME_TRIGGER_TO_DEFAULT_TYPE: Map<TriggerType, TimeAnimationTriggerType> =
   ['click', 'alternate'],
   ['activate', 'alternate'],
   ['interest', 'alternate'],
+  ['scrollState', 'alternate'],
 ]);
 
 // whether CSS has rules for the effect - a customEffect plays at runtime only, but falls back its list entries

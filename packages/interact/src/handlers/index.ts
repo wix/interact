@@ -3,6 +3,7 @@ import viewEnterHandler from './viewEnter';
 import viewProgressHandler from './viewProgress';
 import pointerMoveHandler from './pointerMove';
 import animationEndHandler from './animationEnd';
+import scrollStateHandler from './scrollState';
 import eventTrigger from './eventTrigger';
 import { EVENT_TRIGGER_PRESETS } from './constants';
 
@@ -49,4 +50,5 @@ export default {
     add: withEventTriggerConfig('interest'),
     remove: eventTrigger.remove,
   },
+  scrollState: scrollStateHandler,
 } as TriggerHandlerMap<TriggerType>;
