@@ -1055,6 +1055,10 @@ function _processSequences(
  * unit is attached, it attaches with its siblings in `owner`, waiting for them — this target may
  * resume before the source does (e.g. a plugin released for this key only) — to every list item at
  * once. Returns whether the unit was already attached, leaving only an item pass to extend it.
+ *
+ * With `attachedBySource: false` — the source cannot address this target, e.g. a single source
+ * whose effect targets every list item (`item[]`) — the source's pass never attaches the unit, so
+ * this target attaches it itself once the source is ready.
  */
 function _isAttachedWithOwner(
   id: string,
@@ -1063,6 +1067,7 @@ function _isAttachedWithOwner(
   sourceController: IInteractionController,
   targetController: IInteractionController,
   instance: Interact,
+  attachedBySource: boolean = true,
 ): boolean {
   const sourceReadiness = _applyPlugins(
     sourceController,
@@ -1077,7 +1082,7 @@ function _isAttachedWithOwner(
     return false;
   }
 
-  if (!instance.addedInteractions[id]) {
+  if (attachedBySource && !instance.addedInteractions[id]) {
     _addInteraction(sourceKey, sourceController, instance, owner, undefined, targetController);
     return false;
   }
@@ -1246,6 +1251,11 @@ function addEffectsForTarget(
           return true;
         }
 
+        // The source's pass resolves this unit under the source's key. When that names another
+        // unit — a source outside the target's list, whose effect targets every item (`item[]`) —
+        // the source cannot address this item, and the target attaches it.
+        const attachedBySource = getInterpolatedKey(interactionId_, sourceKey!) === interactionId;
+
         if (
           !_isAttachedWithOwner(
             interactionId,
@@ -1254,6 +1264,7 @@ function addEffectsForTarget(
             sourceController,
             targetController,
             instance,
+            attachedBySource,
           )
         ) {
           return true;
@@ -1291,6 +1302,10 @@ function addEffectsForTarget(
         if (!sourceElements || !targetElements) {
           // Bail out :: no source or target elements found in DOM
           return true;
+        }
+
+        if (!attachedBySource) {
+          instance!.addedInteractions[interactionId] = true;
         }
 
         const selectorCondition = getSelectorCondition(

@@ -1546,6 +1546,70 @@ describe('interact (web)', () => {
         expect(getWebAnimation.mock.calls[2][0]).toBe(divs[2]);
       });
     });
+
+    describe('single trigger to multiple template targets', () => {
+      const config: () => InteractConfig = () => ({
+        interactions: [
+          {
+            trigger: 'click',
+            key: 'button',
+            effects: [
+              {
+                key: 'card[]',
+                effectId: 'spin-effect',
+              },
+            ],
+          },
+        ],
+        effects: {
+          'spin-effect': {
+            namedEffect: {
+              type: 'Spin',
+              direction: 'cw',
+              power: 'medium',
+            } as NamedEffect,
+            duration: 300,
+          },
+        },
+      });
+
+      const createElement = () => {
+        const element = document.createElement('interact-element') as IInteractElement;
+        const div = document.createElement('div');
+        element.append(div);
+        return { element, div };
+      };
+
+      const addCards = () =>
+        [0, 1, 2].map((i) => {
+          const card = createElement();
+          add(card.element, `card[${i}]`);
+          return card;
+        });
+
+      it('should animate every template target when the source is added first', async () => {
+        const { getWebAnimation: getWebAnimationFn } = await import('@wix/motion');
+        const getWebAnimation = getWebAnimationFn as unknown as MockInstance;
+
+        Interact.create(config(), { useCustomElement: true });
+
+        const source = createElement();
+        const addEventListenerSpy = vi.spyOn(source.div, 'addEventListener');
+        add(source.element, 'button');
+
+        const cards = addCards();
+
+        expect(getWebAnimation).toHaveBeenCalledTimes(3);
+        expect(getWebAnimation.mock.calls.map((call: any[]) => call[0])).toEqual(
+          cards.map(({ div }) => div),
+        );
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          'click',
+          expect.any(Function),
+          expect.objectContaining({ passive: true }),
+        );
+      });
+    });
   });
 
   describe('remove interaction', () => {
