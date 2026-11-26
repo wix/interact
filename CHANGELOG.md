@@ -119,6 +119,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## @wix/interact
 
+### [2.8.7] - 2026-11-26
+
+#### Fixed
+
+- List-item targets again attach effects from a single source outside the list when the effect uses `key: 'item[]'`, after the source's interaction-level plugins are ready, instead of the source pass dropping them because it cannot resolve `item[]` (#434)
+
 ### [2.8.5] - 2026-11-25
 
 #### Fixed
